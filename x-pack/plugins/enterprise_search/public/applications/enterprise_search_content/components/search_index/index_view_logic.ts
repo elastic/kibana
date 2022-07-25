@@ -143,7 +143,7 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
     fetchIndexTimeoutId: [
       null,
       {
-        clearFetchIndexTimeoutId: () => null,
+        clearFetchIndexTimeout: () => null,
         setFetchIndexTimeoutId: (_, { timeoutId }) => timeoutId,
       },
     ],
