@@ -16,7 +16,7 @@ export const ACTIONS_EDIT_TAB = '[data-test-subj="edit-rule-actions-tab"]';
 export const ACTIONS_THROTTLE_INPUT =
   '[data-test-subj="stepRuleActions"] [data-test-subj="select"]';
 
-export const EMAIL_ACTION_BTN = '[data-test-subj=".email-ActionTypeSelectOption"]';
+export const EMAIL_ACTION_BTN = '[data-test-subj=".email-siem-ActionTypeSelectOption"]';
 
 export const CREATE_ACTION_CONNECTOR_BTN = '[data-test-subj="createActionConnectorButton-0"]';
 
@@ -218,8 +218,18 @@ export const TAGS_INPUT =
 export const TAGS_CLEAR_BUTTON =
   '[data-test-subj="detectionEngineStepAboutRuleTags"] [data-test-subj="comboBoxClearButton"]';
 
-export const THRESHOLD_FIELD_SELECTION = '.euiFilterSelectItem';
+export const EUI_FILTER_SELECT_ITEM = '.euiFilterSelectItem';
 
 export const THRESHOLD_INPUT_AREA = '[data-test-subj="thresholdInput"]';
 
 export const THRESHOLD_TYPE = '[data-test-subj="thresholdRuleType"]';
+
+export const NEW_TERMS_TYPE = '[data-test-subj="newTermsRuleType"]';
+
+export const NEW_TERMS_INPUT_AREA = '[data-test-subj="newTermsInput"]';
+
+export const NEW_TERMS_HISTORY_SIZE =
+  '[data-test-subj="detectionEngineStepDefineRuleHistoryWindowSize"] [data-test-subj="interval"]';
+
+export const NEW_TERMS_HISTORY_TIME_TYPE =
+  '[data-test-subj="detectionEngineStepDefineRuleHistoryWindowSize"] [data-test-subj="timeType"]';
