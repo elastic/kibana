@@ -6,8 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
-import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-
-export const [getThemeService, setThemeService] =
-  createGetterSetter<ChartsPluginSetup['theme']>('charts.theme');
+export { extractContainerType, extractVisualizationType } from './utils';

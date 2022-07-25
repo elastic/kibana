@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export type { StateContainer } from './common';
-export { createStateContainer, of } from './common';
+import { LayerTypes } from '../constants';
+import { DataLayerConfig, CommonXYLayerConfig } from '..';
+
+export const isDataLayer = (layer: CommonXYLayerConfig): layer is DataLayerConfig =>
+  layer.layerType === LayerTypes.DATA;

@@ -231,6 +231,7 @@ export const useDashboardAppState = ({
       /**
        * Build the dashboard container embeddable, and apply the incoming embeddable if it exists.
        */
+
       const dashboardContainer = await buildDashboardContainer({
         ...dashboardBuildContext,
         initialDashboardState,
@@ -238,9 +239,11 @@ export const useDashboardAppState = ({
         savedDashboard,
         data,
         executionContext: {
+          type: 'dashboard',
           description: savedDashboard.title,
         },
       });
+
       if (canceled || !dashboardContainer) {
         tryDestroyDashboardContainer(dashboardContainer);
         return;
