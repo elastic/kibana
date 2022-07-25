@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Datatable } from '@kbn/expressions-plugin';
+import { Datatable } from '@kbn/expressions-plugin/common';
 
 export const getDataBoundsForPalette = (
   accessors: { metric: string; max?: string; breakdownBy?: string },

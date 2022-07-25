@@ -7,7 +7,7 @@
 
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import { ExpressionAstExpression, ExpressionAstFunction } from '@kbn/expressions-plugin';
+import { ExpressionAstExpression, ExpressionAstFunction } from '@kbn/expressions-plugin/common';
 import { layerTypes } from '../..';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import {
