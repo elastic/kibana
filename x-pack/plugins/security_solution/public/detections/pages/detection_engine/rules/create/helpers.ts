@@ -9,6 +9,7 @@ import { has, isEmpty } from 'lodash/fp';
 import type { Unit } from '@kbn/datemath';
 import moment from 'moment';
 import deepmerge from 'deepmerge';
+import omit from 'lodash/omit';
 
 import type {
   ExceptionListType,
@@ -40,6 +41,7 @@ import type {
   RuleStep,
   AdvancedPreviewOptions,
 } from '../types';
+import { DataSourceType } from '../types';
 import type { FieldValueQueryBar } from '../../../../components/rules/query_bar';
 import type { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
 import { stepDefineDefaultValue } from '../../../../components/rules/step_define_rule';
@@ -337,9 +339,34 @@ export const filterEmptyThreats = (threats: Threats): Threats => {
     });
 };
 
+/**
+ * remove unused data source.
+ * Ex: rule is using a data view so we should not
+ * write an index property on the rule form.
+ * @param defineStepData
+ * @returns DefineStepRule
+ */
+export const getStepDataDataSource = (
+  defineStepData: DefineStepRule
+): Omit<DefineStepRule, 'dataViewId' | 'index' | 'dataSourceType'> & {
+  index?: string[];
+  dataViewId?: string;
+} => {
+  const copiedStepData = { ...defineStepData };
+  if (defineStepData.dataSourceType === DataSourceType.DataView) {
+    return omit(copiedStepData, ['index', 'dataSourceType']);
+  } else if (defineStepData.dataSourceType === DataSourceType.IndexPatterns) {
+    return omit(copiedStepData, ['dataViewId', 'dataSourceType']);
+  }
+  return copiedStepData;
+};
+
 export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
-  const ruleFields = filterRuleFieldsForType(defineStepData, defineStepData.ruleType);
+  const stepData = getStepDataDataSource(defineStepData);
+
+  const ruleFields = filterRuleFieldsForType(stepData, stepData.ruleType);
   const { ruleType, timeline } = ruleFields;
+
   const baseFields = {
     type: ruleType,
     ...(timeline.id != null &&

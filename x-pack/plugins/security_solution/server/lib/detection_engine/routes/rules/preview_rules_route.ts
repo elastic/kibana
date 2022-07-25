@@ -36,7 +36,8 @@ import {
 import { wrapScopedClusterClient } from './utils/wrap_scoped_cluster_client';
 import type { RulePreviewLogs } from '../../../../../common/detection_engine/schemas/request';
 import { previewRulesSchema } from '../../../../../common/detection_engine/schemas/request';
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common';
+import { RuleExecutionStatus } from '../../../../../common/detection_engine/rule_monitoring';
+import type { RuleExecutionContext, StatusChangeArgs } from '../../rule_monitoring';
 
 import type { ConfigType } from '../../../../config';
 import { alertInstanceFactoryStub } from '../../signals/preview/alert_instance_factory_stub';
