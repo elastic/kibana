@@ -38,7 +38,12 @@ const NotDeployed = () => {
       color="plain"
       iconType="fleetApp"
       title={<h2>{'No Agents Installed'}</h2>}
-      body={<p>To see findings, install an elastic agent on your cluster</p>}
+      body={
+        <p>
+          To see findings, please finish the setup process by installing an elastic agent on your
+          Kubernetes cluster.
+        </p>
+      }
       actions={[
         <EuiButton fill href={integrationPoliciesLink} isDisabled={!integrationPoliciesLink}>
           Install Agent
