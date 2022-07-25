@@ -240,3 +240,24 @@ export interface FileKind {
     };
   };
 }
+
+export interface FilesMetrics {
+  storage: {
+    [ES_FIXED_SIZE_INDEX_BLOB_STORE]: {
+      /**
+       * The total size in bytes that can be used in this storage medium
+       */
+      capacity: number;
+      /**
+       * Bytes currently used
+       */
+      used: number;
+      /**
+       * Bytes currently available
+       */
+      available: number;
+    };
+  };
+  countByStatus: Record<FileStatus, number>;
+  countByExtension: Record<string, number>;
+}

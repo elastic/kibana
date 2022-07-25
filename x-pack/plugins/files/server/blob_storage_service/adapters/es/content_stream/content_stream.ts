@@ -184,6 +184,7 @@ export class ContentStream extends Duplex {
     this.logger.debug(`Clearing existing chunks for ${bid}`);
     await this.client.deleteByQuery({
       index: this.index,
+      ignore_unavailable: true,
       query: {
         bool: {
           must: { match: { bid } },

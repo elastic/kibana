@@ -11,7 +11,7 @@ import type { FilesRouter } from './types';
 import { FindFilesHttpEndpoint, FILES_API_ROUTES } from '../../common/api_routes';
 import type { FilesRequestHandler } from './types';
 
-export const method = 'post' as const;
+const method = 'post' as const;
 
 const string64 = schema.string({ maxLength: 64 });
 const string256 = schema.string({ maxLength: 256 });
@@ -71,7 +71,7 @@ const handler: FilesRequestHandler<unknown, Query, Body> = async ({ files }, req
 // Alternatively, we can remove the access controls on the "file kind" endpoints
 // or remove them entirely.
 export function register(router: FilesRouter) {
-  router.post(
+  router[method](
     {
       path: FILES_API_ROUTES.find,
       validate: {

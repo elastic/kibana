@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { File, FileJSON } from '../../common';
-import { FileShareServiceStart } from '../file_share_service/types';
-import {
+import type { File, FileJSON, FilesMetrics } from '../../common';
+import type { FileShareServiceStart } from '../file_share_service/types';
+import type {
   CreateFileArgs,
   UpdateFileArgs,
   DeleteFileArgs,
@@ -61,4 +61,11 @@ export interface FileServiceStart {
    * Update an instance of a share object
    */
   updateShareObject: FileShareServiceStart['update'];
+
+  /**
+   * Get the current usage metrics for all storage media.
+   *
+   * Returns diagnostics or `undefined` if metrics could not be retrieved.
+   */
+  getUsageMetrics(): Promise<FilesMetrics>;
 }
