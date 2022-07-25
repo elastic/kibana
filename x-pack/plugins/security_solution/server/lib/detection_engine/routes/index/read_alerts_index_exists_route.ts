@@ -36,7 +36,6 @@ export const readAlertsIndexExistsRoute = (
           return siemResponse.error({ statusCode: 404 });
         }
 
-
         const index = siemClient.getSignalsIndex();
 
         const indexExists = await getIndexExists(core.elasticsearch.client.asInternalUser, index);
