@@ -14,10 +14,10 @@ Deletes one or more cases.
 
 === {api-prereq-title}
 
-You must have `all` privileges for the *Cases* feature in the *Management*,
-*{observability}*, or *Security* section of the
-<<kibana-feature-privileges,{kib} feature privileges>>, depending on the
-`owner` of the cases you're deleting.
+You must have `read` or `all` privileges and the `delete` sub-feature privilege
+for the *Cases* feature in the *Management*, *{observability}*, or *Security*
+section of the <<kibana-feature-privileges,{kib} feature privileges>>, depending
+on the `owner` of the cases you're deleting.
 
 === {api-path-parms-title}
 
