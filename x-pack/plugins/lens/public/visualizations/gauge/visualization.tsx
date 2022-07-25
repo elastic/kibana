@@ -10,7 +10,7 @@ import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { Ast } from '@kbn/interpreter';
-import { DatatableRow } from '@kbn/expressions-plugin';
+import { DatatableRow } from '@kbn/expressions-plugin/common';
 import { PaletteRegistry, CustomPaletteParams, CUSTOM_PALETTE } from '@kbn/coloring';
 import type { GaugeArguments } from '@kbn/expression-gauge-plugin/common';
 import { GaugeShapes, EXPRESSION_GAUGE_NAME } from '@kbn/expression-gauge-plugin/common';
