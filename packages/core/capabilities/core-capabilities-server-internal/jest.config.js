@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { IRouter } from '@kbn/core-http-server';
-import { CapabilitiesResolver } from '../resolve_capabilities';
-import { registerCapabilitiesRoutes } from './resolve_capabilities';
-
-export function registerRoutes(router: IRouter, resolver: CapabilitiesResolver) {
-  registerCapabilitiesRoutes(router, resolver);
-}
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/capabilities/core-capabilities-server-internal'],
+};

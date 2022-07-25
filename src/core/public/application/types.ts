@@ -5,14 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { ButtonColor } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import { History } from 'history';
 import { RecursiveReadonly } from '@kbn/utility-types';
 
 import type { CoreTheme } from '@kbn/core-theme-browser';
+import type { Capabilities } from '@kbn/core-capabilities-common';
 import { MountPoint } from '../types';
-import { Capabilities } from './capabilities';
 import { PluginOpaqueId } from '../plugins';
 import { AppCategory } from '../../types';
 import { ScopedHistory } from './scoped_history';

@@ -8,7 +8,7 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { Capabilities } from './types';
+import type { Capabilities } from '@kbn/core-capabilities-common';
 import { resolveCapabilities } from './resolve_capabilities';
 
 describe('resolveCapabilities', () => {

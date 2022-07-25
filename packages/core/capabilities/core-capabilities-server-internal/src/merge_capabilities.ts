@@ -7,7 +7,7 @@
  */
 
 import { mergeWith } from 'lodash';
-import { Capabilities } from './types';
+import type { Capabilities } from '@kbn/core-capabilities-common';
 
 export const mergeCapabilities = (...sources: Array<Partial<Capabilities>>): Capabilities =>
   mergeWith({}, ...sources, (a: any, b: any) => {

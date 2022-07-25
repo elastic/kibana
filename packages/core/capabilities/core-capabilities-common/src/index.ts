@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { CapabilitiesService } from './capabilities_service';
+export type { Capabilities } from './capabilities';

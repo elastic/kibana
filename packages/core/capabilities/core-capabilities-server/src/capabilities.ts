@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { Capabilities } from '../../types/capabilities';
-
-export type { Capabilities };
+import type { Capabilities } from '@kbn/core-capabilities-common';
 
 /**
  * See {@link CapabilitiesSetup}
@@ -25,4 +24,4 @@ export type CapabilitiesSwitcher = (
   request: KibanaRequest,
   uiCapabilities: Capabilities,
   useDefaultCapabilities: boolean
-) => Partial<Capabilities> | Promise<Partial<Capabilities>>;
+) => MaybePromise<Partial<Capabilities>>;

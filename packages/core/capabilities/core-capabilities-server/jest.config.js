@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { CapabilitiesService } from './capabilities_service';
-export type {
-  CapabilitiesSetup,
-  CapabilitiesStart,
-  ResolveCapabilitiesOptions,
-} from './capabilities_service';
-export type { Capabilities, CapabilitiesSwitcher, CapabilitiesProvider } from './types';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/capabilities/core-capabilities-server'],
+};
