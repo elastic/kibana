@@ -147,7 +147,10 @@ export const SearchIndex: React.FC = () => {
     <EnterpriseSearchContentPageTemplate
       pageChrome={[...baseBreadcrumbs, indexName]}
       pageViewTelemetry={tabId}
-      isLoading={indexApiStatus === Status.LOADING || indexApiStatus === Status.IDLE}
+      isLoading={
+        indexApiStatus === Status.IDLE ||
+        (typeof indexData === 'undefined' && indexApiStatus === Status.LOADING)
+      }
       pageHeader={{
         pageTitle: indexName,
         rightSideItems: getHeaderActions(indexData),
