@@ -6,7 +6,13 @@
  */
 
 import React, { FC, useCallback, useMemo, useState } from 'react';
-import { EuiBadge, EuiBasicTable, EuiBasicTableColumn, EuiTableSortingType, EuiToolTip } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiTableSortingType,
+  EuiToolTip,
+} from '@elastic/eui';
 import { sortBy } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
@@ -67,13 +73,19 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
     {
       field: 'pValue',
       name: (
-        <EuiToolTip position="top" content={i18n.translate(
-          'xpack.aiops.correlations.failedTransactions.correlationsTable.logRateColumnTooltip',
-          { defaultMessage: 'A visual representation of the amount of impact the given field name and value have on the message rate difference.' }
-        )}>
+        <EuiToolTip
+          position="top"
+          content={i18n.translate(
+            'xpack.aiops.correlations.failedTransactions.correlationsTable.logRateColumnTooltip',
+            {
+              defaultMessage:
+                'A visual representation of the amount of impact the given field name and value have on the message rate difference.',
+            }
+          )}
+        >
           <FormattedMessage
-            id='xpack.aiops.correlations.failedTransactions.correlationsTable.logRateLabel'
-            defaultMessage='Log rate'
+            id="xpack.aiops.correlations.failedTransactions.correlationsTable.logRateLabel"
+            defaultMessage="Log rate"
           />
         </EuiToolTip>
       ),
@@ -87,13 +99,19 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
     {
       field: 'pValue',
       name: (
-        <EuiToolTip position="top" content={i18n.translate(
-          'xpack.aiops.correlations.failedTransactions.correlationsTable.pValueColumnTooltip',
-          { defaultMessage: 'For statistically significant changes in the frequency of values, indicates how extreme the change is; lower values indicate greater change.' }
-        )}>
+        <EuiToolTip
+          position="top"
+          content={i18n.translate(
+            'xpack.aiops.correlations.failedTransactions.correlationsTable.pValueColumnTooltip',
+            {
+              defaultMessage:
+                'For statistically significant changes in the frequency of values, indicates how extreme the change is; lower values indicate greater change.',
+            }
+          )}
+        >
           <FormattedMessage
-            id='xpack.aiops.correlations.failedTransactions.correlationsTable.pValueLabel'
-            defaultMessage='p-value'
+            id="xpack.aiops.correlations.failedTransactions.correlationsTable.pValueLabel"
+            defaultMessage="p-value"
           />
         </EuiToolTip>
       ),
@@ -103,13 +121,19 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
     {
       field: 'pValue',
       name: (
-        <EuiToolTip position="top" content={i18n.translate(
-          'xpack.aiops.correlations.failedTransactions.correlationsTable.impactLabelColumnTooltip',
-          { defaultMessage: 'Indicates the level of impact of the given field name and value on the message rate difference.' }
-        )}>
+        <EuiToolTip
+          position="top"
+          content={i18n.translate(
+            'xpack.aiops.correlations.failedTransactions.correlationsTable.impactLabelColumnTooltip',
+            {
+              defaultMessage:
+                'Indicates the level of impact of the given field name and value on the message rate difference.',
+            }
+          )}
+        >
           <FormattedMessage
-            id='xpack.aiops.correlations.failedTransactions.correlationsTable.impactLabel'
-            defaultMessage='Impact'
+            id="xpack.aiops.correlations.failedTransactions.correlationsTable.impactLabel"
+            defaultMessage="Impact"
           />
         </EuiToolTip>
       ),
