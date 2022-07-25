@@ -12,12 +12,10 @@ import { render, screen } from '@testing-library/react';
 import { TestProvider } from '../../test/test_provider';
 import { ComplianceDashboard } from '.';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
-import { useCisKubernetesIntegration } from '../../common/api/use_cis_kubernetes_integration';
 import { useComplianceDashboardDataApi } from '../../common/api/use_compliance_dashboard_data_api';
 import { DASHBOARD_CONTAINER, MISSING_FINDINGS_NO_DATA_CONFIG } from './test_subjects';
 
 jest.mock('../../common/api/use_setup_status_api');
-jest.mock('../../common/api/use_cis_kubernetes_integration');
 jest.mock('../../common/api/use_compliance_dashboard_data_api');
 
 const mockDashboardData = {
@@ -167,10 +165,10 @@ const mockDashboardData = {
 describe('<ComplianceDashboard />', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
-      data: { item: { status: 'installed' } },
+      data: { status: 'indexed' },
     }));
   });
 

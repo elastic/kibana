@@ -27,7 +27,7 @@ export const ComplianceDashboardNoPageTemplate = () => {
     enabled: hasFindings,
   });
 
-  if (!hasFindings || true) return <NoFindingsStates />;
+  if (!hasFindings) return <NoFindingsStates />;
 
   return (
     <CloudPosturePage query={getDashboardData}>

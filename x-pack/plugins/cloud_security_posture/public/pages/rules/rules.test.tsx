@@ -14,14 +14,12 @@ import { useCspIntegrationInfo } from './use_csp_integration';
 import { type RouteComponentProps } from 'react-router-dom';
 import type { PageUrlParams } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
-import { useCisKubernetesIntegration } from '../../common/api/use_cis_kubernetes_integration';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { coreMock } from '@kbn/core/public/mocks';
 
 jest.mock('./use_csp_integration', () => ({
   useCspIntegrationInfo: jest.fn(),
 }));
-jest.mock('../../common/api/use_cis_kubernetes_integration');
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -58,10 +56,6 @@ describe('<Rules />', () => {
   beforeEach(() => {
     queryClient.clear();
     jest.clearAllMocks();
-
-    (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({
-      data: { item: { status: 'installed' } },
-    }));
   });
 
   it('calls API with URL params', async () => {
@@ -80,7 +74,7 @@ describe('<Rules />', () => {
 
   it('displays success state when result request is resolved', async () => {
     const Component = getTestComponent({ packagePolicyId: '21', policyId: '22' });
-    const request = createReactQueryResponse({
+    const response = createReactQueryResponse({
       status: 'success',
       data: [
         {
@@ -93,12 +87,12 @@ describe('<Rules />', () => {
       ],
     });
 
-    (useCspIntegrationInfo as jest.Mock).mockReturnValue(request);
+    (useCspIntegrationInfo as jest.Mock).mockReturnValue(response);
 
     render(<Component />);
 
     expect(
-      await screen.findByText(`${request.data?.[0]?.package?.title}, ${request.data?.[1].name}`)
+      await screen.findByText(`${response.data?.[0]?.package?.title}, ${response.data?.[1].name}`)
     ).toBeInTheDocument();
     expect(await screen.findByTestId(TEST_SUBJECTS.CSP_RULES_CONTAINER)).toBeInTheDocument();
   });

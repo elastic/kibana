@@ -18,15 +18,15 @@ import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks
 import { createStubDataView } from '@kbn/data-views-plugin/public/data_views/data_view.stub';
 import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../common/constants';
 import * as TEST_SUBJECTS from './test_subjects';
-import { useCisKubernetesIntegration } from '../../common/api/use_cis_kubernetes_integration';
 import type { DataView } from '@kbn/data-plugin/common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
+import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 
 jest.mock('../../common/api/use_latest_findings_data_view');
-jest.mock('../../common/api/use_cis_kubernetes_integration');
+jest.mock('../../common/api/use_setup_status_api');
 
 beforeEach(() => {
   jest.restoreAllMocks();
@@ -56,8 +56,8 @@ describe.skip('<Findings />', () => {
     const discover = discoverPluginMock.createStartContract();
     const source = await data.search.searchSource.create();
 
-    (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({
-      data: { item: { status: 'installed' } },
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() => ({
+      data: { status: 'indexed' },
     }));
     (source.fetch$ as jest.Mock).mockReturnValue(of({ rawResponse: { hits: { hits: [] } } }));
 
