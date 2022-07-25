@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { FieldFilter, Filter, getFilterParams } from '@kbn/es-query';
 import { DataViewField } from '@kbn/data-views-plugin/common';
@@ -81,6 +81,32 @@ export function FilterItem({
     setSelectedParams((prevState: any) => ({ params: [value, ...(prevState.params || [])] }));
   };
 
+  const onRemoveFilter = useCallback(() => {
+    dispatch({
+      type: 'removeFilter',
+      payload: {
+        path,
+      },
+    });
+  }, [dispatch, path]);
+
+  const onAddFilter = useCallback(
+    (conditionalType: ConditionTypes) => {
+      dispatch({
+        type: 'addFilter',
+        payload: {
+          path,
+          dataViewId: dataView.id,
+          conditionalType,
+        },
+      });
+    },
+    [dataView.id, dispatch, path]
+  );
+
+  const onAddButtonClick = useCallback(() => onAddFilter(ConditionTypes.AND), [onAddFilter]);
+  const onOrButtonClick = useCallback(() => onAddFilter(ConditionTypes.OR), [onAddFilter]);
+
   if (!dataView) {
     return null;
   }
@@ -135,16 +161,7 @@ export function FilterItem({
             <EuiFlexGroup responsive={false} justifyContent="center">
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
-                  onClick={() => {
-                    dispatch({
-                      type: 'addFilter',
-                      payload: {
-                        path,
-                        dataViewId: dataView.id,
-                        conditionalType: ConditionTypes.OR,
-                      },
-                    });
-                  }}
+                  onClick={onOrButtonClick}
                   iconType="returnKey"
                   size="s"
                   aria-label="Add filter group with OR"
@@ -154,16 +171,7 @@ export function FilterItem({
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
                   display="base"
-                  onClick={() => {
-                    dispatch({
-                      type: 'addFilter',
-                      payload: {
-                        path,
-                        dataViewId: dataView.id,
-                        conditionalType: ConditionTypes.AND,
-                      },
-                    });
-                  }}
+                  onClick={onAddButtonClick}
                   iconType="plus"
                   size="s"
                   aria-label="Add filter group with AND"
@@ -173,9 +181,7 @@ export function FilterItem({
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
                   display="base"
-                  onClick={() => {
-                    dispatch({ type: 'removeFilter', payload: { path } });
-                  }}
+                  onClick={onRemoveFilter}
                   iconType="trash"
                   size="s"
                   color="danger"

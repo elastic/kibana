@@ -70,14 +70,15 @@ export const filtersEditorReducer: Reducer<FiltersEditorState, FiltersEditorActi
     case 'updateFilter':
       return {
         ...state,
-        //todo:
+        // todo:
         filters: updateFilter(state.filters, action.payload),
       };
     case 'removeFilter':
       return {
         ...state,
-        filters: removeFilter(state.filters, action.payload),
+        filters: removeFilter(state.filters, action.payload.path),
       };
+    // todo: needs for D&D?
     case 'moveFilter':
       return state;
     default:
