@@ -55,7 +55,7 @@ export const RuleEventLogListStatusFilter = (props: RuleEventLogListStatusFilter
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.ruleDetails.eventLogStatusFilterLabel"
-              defaultMessage="Status"
+              defaultMessage="Response"
             />
           </EuiFilterButton>
         }
