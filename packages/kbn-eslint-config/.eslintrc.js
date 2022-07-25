@@ -113,6 +113,11 @@ module.exports = {
           to: '@kbn/inspector-plugin/common',
           exact: true,
         },
+        {
+          from: '@kbn/kibana-utils-plugin',
+          to: '@kbn/kibana-utils-plugin/common',
+          exact: true,
+        },
       ],
     ],
 
