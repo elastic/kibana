@@ -29,10 +29,12 @@ interface State {
 // between the two by returning a Mapbox safe RGBA_0000 for '' or invalid colors
 // while keeping invalid state local so EuiColorPicker's input properly handles text input.
 export class MbValidatedColorPicker extends Component<Props, State> {
+
   static getDerivedStateFromProps(nextProps: Props, prevState: State) {
     if (!prevState || nextProps.color !== prevState.prevPropscolor) {
       return {
         colorInputValue: nextProps.color === RGBA_0000 ? '' : nextProps.color,
+        prevPropscolor: nextProps.color,
       };
     }
 
