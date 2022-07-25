@@ -14,7 +14,7 @@ import { CustomRasterSource, CustomRasterSourceConfig } from './custom_raster_so
 import { CustomRasterEditor } from './custom_raster_editor';
 
 const defaultUrl =
-  'https://idpgis.ncep.noaa.gov/arcgis/rest/services/radar/radar_base_reflectivity_time/ImageServer/exportImage?bbox={bbox-epsg-3857}&bboxSR=3857&size=256%2C256&imageSR=3857&time={time}&format=jpgpng&f=image';
+  'https://new.nowcoast.noaa.gov/arcgis/rest/services/nowcoast/radar_meteo_imagery_nexrad_time/MapServer/export?dpi=96&transparent=true&format=png32&time={time}&layers=show%3A3&bbox=-{bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256%2C256&f=image';
 
 export const customRasterLayerWizard: LayerWizard = {
   id: PLUGIN_ID,
