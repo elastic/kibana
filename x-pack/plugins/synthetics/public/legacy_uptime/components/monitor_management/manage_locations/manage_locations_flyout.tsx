@@ -121,9 +121,7 @@ export const ManageLocationsFlyout = () => {
   return (
     <div>
       {isEnabled && (
-        <EuiButtonEmpty onClick={() => setIsOpen(true)} iconType="visMapCoordinate">
-          {MANAGE_PRIVATE_LOCATIONS}
-        </EuiButtonEmpty>
+        <EuiButtonEmpty onClick={() => setIsOpen(true)}>{MANAGE_PRIVATE_LOCATIONS}</EuiButtonEmpty>
       )}
       {isOpen && !isAddingNew ? flyout : null}
       {isAddingNew ? (
