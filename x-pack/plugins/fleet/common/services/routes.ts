@@ -198,6 +198,7 @@ export const agentRouteService = {
   getIncomingDataPath: () => AGENT_API_ROUTES.DATA_PATTERN,
   getCreateActionPath: (agentId: string) =>
     AGENT_API_ROUTES.ACTIONS_PATTERN.replace('{agentId}', agentId),
+  getListTagsPath: () => AGENT_API_ROUTES.LIST_TAGS_PATTERN,
 };
 
 export const outputRoutesService = {
