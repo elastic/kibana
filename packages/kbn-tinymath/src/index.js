@@ -35,7 +35,7 @@ function evaluate(expression, scope = {}, injectedFunctions = {}) {
 }
 
 function interpret(node, scope, injectedFunctions) {
-  const functions = Object.assign({}, includedFunctions, injectedFunctions); // eslint-disable-line
+  const functions = Object.assign({}, includedFunctions, injectedFunctions); // eslint-disable-line prefer-object-spread/prefer-object-spread
   return exec(node);
 
   function exec(node) {

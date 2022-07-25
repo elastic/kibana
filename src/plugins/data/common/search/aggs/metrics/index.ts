@@ -20,6 +20,8 @@ export * from './filtered_metric_fn';
 export * from './filtered_metric';
 export * from './cardinality_fn';
 export * from './cardinality';
+export * from './value_count_fn';
+export * from './value_count';
 export * from './count';
 export * from './count_fn';
 export * from './cumulative_sum_fn';

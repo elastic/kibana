@@ -12,10 +12,12 @@ import type { PolicyResponseActionFormatter } from './policy_response_friendly_n
 
 const StyledEuiCallout = styled(EuiCallOut)`
   padding: ${({ theme }) => theme.eui.euiSizeS};
-  .action-message {
-    white-space: break-spaces;
-    text-align: left;
-  }
+`;
+
+const StyledEuiText = styled(EuiText)`
+  white-space: break-spaces;
+  text-align: left;
+  line-height: inherit;
 `;
 
 interface PolicyResponseActionItemProps {
@@ -33,7 +35,7 @@ export const PolicyResponseActionItem = memo(
         iconType="alert"
         data-test-subj="endpointPolicyResponseErrorCallOut"
       >
-        <EuiText size="s" className="action-message" data-test-subj="endpointPolicyResponseMessage">
+        <StyledEuiText size="s" data-test-subj="endpointPolicyResponseMessage">
           {policyResponseActionFormatter.errorDescription}
           {policyResponseActionFormatter.linkText && policyResponseActionFormatter.linkUrl && (
             <EuiLink
@@ -44,12 +46,12 @@ export const PolicyResponseActionItem = memo(
               {policyResponseActionFormatter.linkText}
             </EuiLink>
           )}
-        </EuiText>
+        </StyledEuiText>
       </StyledEuiCallout>
     ) : (
-      <EuiText size="xs" data-test-subj="endpointPolicyResponseMessage">
+      <StyledEuiText size="xs" data-test-subj="endpointPolicyResponseMessage">
         {policyResponseActionFormatter.description || policyResponseActionFormatter.title}
-      </EuiText>
+      </StyledEuiText>
     );
   }
 );

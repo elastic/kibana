@@ -20,12 +20,12 @@ export const MonitorListHeader: React.FC = () => {
     <FlexGroupContainer alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiTitle size="xs">
-          <h5>
+          <h2>
             <FormattedMessage
               id="xpack.synthetics.monitorList.monitoringStatusTitle"
               defaultMessage="Monitors"
             />
-          </h5>
+          </h2>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

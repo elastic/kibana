@@ -110,7 +110,7 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
     const installResponse = await sendInstallPackage(integration.name, integration.version);
 
     if (installResponse.error) {
-      notifications.toasts.addError(installResponse.error, {
+      notifications.toasts.addError(new Error(installResponse.error.message), {
         title: i18n.translate('xpack.fleet.debug.integrationDebugger.reinstall.error', {
           defaultMessage: 'Error reinstalling {integrationTitle}',
           values: { integrationTitle: integration.title },

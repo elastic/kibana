@@ -14,6 +14,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import {
   DEFAULT_COLUMNS_SETTING,
   SAMPLE_SIZE_SETTING,
+  SAMPLE_ROWS_PER_PAGE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
   SEARCH_ON_PAGE_LOAD_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -30,6 +31,7 @@ import {
   SHOW_FIELD_STATISTICS,
   ROW_HEIGHT_OPTION,
 } from '../common';
+import { DEFAULT_ROWS_PER_PAGE, ROWS_PER_PAGE_OPTIONS } from '../common/constants';
 
 export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, UiSettingsParams> = (
   docLinks: DocLinksServiceSetup
@@ -59,11 +61,24 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
   },
   [SAMPLE_SIZE_SETTING]: {
     name: i18n.translate('discover.advancedSettings.sampleSizeTitle', {
-      defaultMessage: 'Number of rows',
+      defaultMessage: 'Maximum rows per table',
     }),
     value: 500,
     description: i18n.translate('discover.advancedSettings.sampleSizeText', {
-      defaultMessage: 'The number of rows to show in the table',
+      defaultMessage: 'Sets the maximum number of rows for the entire document table.',
+    }),
+    category: ['discover'],
+    schema: schema.number(),
+  },
+  [SAMPLE_ROWS_PER_PAGE_SETTING]: {
+    name: i18n.translate('discover.advancedSettings.sampleRowsPerPageTitle', {
+      defaultMessage: 'Rows per page',
+    }),
+    value: DEFAULT_ROWS_PER_PAGE,
+    options: ROWS_PER_PAGE_OPTIONS,
+    type: 'select',
+    description: i18n.translate('discover.advancedSettings.sampleRowsPerPageText', {
+      defaultMessage: 'Limits the number of rows per page in the document table.',
     }),
     category: ['discover'],
     schema: schema.number(),

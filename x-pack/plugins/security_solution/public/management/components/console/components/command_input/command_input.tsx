@@ -11,6 +11,7 @@ import type { CommonProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, useResizeObserver, EuiButtonIcon } from '@elastic/eui';
 import styled from 'styled-components';
 import classNames from 'classnames';
+import { useWithInputVisibleState } from '../../hooks/state_selectors/use_with_input_visible_state';
 import type { ConsoleDataState } from '../console_state/types';
 import { useInputHints } from './hooks/use_input_hints';
 import { InputPlaceholder } from './components/input_placeholder';
@@ -35,6 +36,10 @@ const CommandInputContainer = styled.div`
   &.active {
     border-bottom: ${({ theme: { eui } }) => eui.euiBorderThick};
     border-bottom-color: ${({ theme: { eui } }) => eui.euiColorPrimary};
+  }
+
+  &.error {
+    border-bottom-color: ${({ theme: { eui } }) => eui.euiColorDanger};
   }
 
   .textEntered {
@@ -78,6 +83,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
   useInputHints();
   const dispatch = useConsoleStateDispatch();
   const { rightOfCursor, textEntered } = useWithInputTextEntered();
+  const visibleState = useWithInputVisibleState();
   const [isKeyInputBeingCaptured, setIsKeyInputBeingCaptured] = useState(false);
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const [commandToExecute, setCommandToExecute] = useState('');
@@ -103,12 +109,13 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
     });
   }, [isKeyInputBeingCaptured]);
 
-  const focusClassName = useMemo(() => {
+  const inputContainerClassname = useMemo(() => {
     return classNames({
       cmdInput: true,
       active: isKeyInputBeingCaptured,
+      error: visibleState === 'error',
     });
-  }, [isKeyInputBeingCaptured]);
+  }, [isKeyInputBeingCaptured, visibleState]);
 
   const disableArrowButton = useMemo(
     () => textEntered.length === 0 && rightOfCursor.text.length === 0,
@@ -274,11 +281,12 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
     <InputAreaPopover width={popoverWidth}>
       <CommandInputContainer
         {...commonProps}
-        className={focusClassName}
+        className={inputContainerClassname}
         onClick={handleTypingAreaClick}
         ref={containerRef}
         tabIndex={0}
         onFocus={handleOnFocus}
+        data-test-subj={getTestId('cmdInput-container')}
       >
         <EuiFlexGroup
           wrap={true}

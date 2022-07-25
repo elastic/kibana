@@ -8,6 +8,9 @@
 
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 import { errors as EsErrors } from '@elastic/elasticsearch';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { fetchIndices } from './fetch_indices';
+
 // Create a mock powered by the actual implementation
 jest.mock('./catch_retryable_es_client_errors', () => ({
   catchRetryableEsClientErrors: jest
@@ -16,9 +19,6 @@ jest.mock('./catch_retryable_es_client_errors', () => ({
       jest.requireActual('./catch_retryable_es_client_errors').catchRetryableEsClientErrors
     ),
 }));
-
-import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
-import { fetchIndices } from './fetch_indices';
 
 describe('fetchIndices', () => {
   beforeEach(() => {

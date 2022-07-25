@@ -10,15 +10,7 @@ properties:
   created_by:
     type: object
     properties:
-      email:
-        type: string
-        example: null
-      full_name:
-        type: string
-        example: null
-      username: 
-        type: string
-        example: elastic
+      $ref: 'user_properties.yaml'
   id:
     type: string
     example: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
@@ -32,12 +24,7 @@ properties:
   pushed_by:
     type: object
     properties:
-      email:
-        type: string
-      full_name:
-        type: string
-      username: 
-        type: string
+      $ref: 'user_properties.yaml'
     nullable: true
     example: null 
   type: 
@@ -51,12 +38,7 @@ properties:
   updated_by:
     type: object
     properties:
-      email:
-        type: string
-      full_name:
-        type: string
-      username: 
-        type: string
+      $ref: 'user_properties.yaml'
     nullable: true
     example: null
   version:

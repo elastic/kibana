@@ -104,18 +104,6 @@ export interface HostAggEsItem {
   os?: HostOsHitsItem;
 }
 
-export interface HostEsData extends SearchHit {
-  sort: string[];
-  aggregations: {
-    host_count: {
-      value: number;
-    };
-    host_data: {
-      buckets: HostAggEsItem[];
-    };
-  };
-}
-
 export interface HostAggEsData extends SearchHit {
   sort: string[];
   aggregations: HostAggEsItem;

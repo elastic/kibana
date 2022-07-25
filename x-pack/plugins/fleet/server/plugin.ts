@@ -42,8 +42,12 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
-import type { FleetConfigType, FleetAuthz, ExperimentalFeatures } from '../common';
-import { INTEGRATIONS_PLUGIN_ID, parseExperimentalConfigValue } from '../common';
+import type { FleetConfigType } from '../common/types';
+import type { FleetAuthz } from '../common';
+import type { ExperimentalFeatures } from '../common/experimental_features';
+
+import { INTEGRATIONS_PLUGIN_ID } from '../common';
+import { parseExperimentalConfigValue } from '../common/experimental_features';
 
 import {
   PLUGIN_ID,
@@ -53,6 +57,7 @@ import {
   PACKAGES_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+  DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
 } from './constants';
 import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_objects';
 import {
@@ -141,6 +146,7 @@ const allSavedObjectTypes = [
   PACKAGES_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+  DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
 ];
 
 /**

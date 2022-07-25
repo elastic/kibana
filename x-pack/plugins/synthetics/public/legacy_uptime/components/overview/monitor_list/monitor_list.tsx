@@ -208,7 +208,11 @@ export const MonitorListComponent: ({
       name: TEST_NOW_COLUMN,
       width: '100px',
       render: (item: MonitorSummary) => (
-        <TestNowColumn monitorId={item.monitor_id} configId={item.configId} />
+        <TestNowColumn
+          monitorId={item.monitor_id}
+          configId={item.configId}
+          selectedMonitor={item.state.summaryPings[0]}
+        />
       ),
     },
     ...(!hideExtraColumns

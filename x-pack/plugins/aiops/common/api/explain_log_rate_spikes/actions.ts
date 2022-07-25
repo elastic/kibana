@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { ChangePoint } from '../../types';
+import type { ChangePoint, ChangePointHistogram } from '@kbn/ml-agg-utils';
 
 export const API_ACTION_NAME = {
   ADD_CHANGE_POINTS: 'add_change_points',
+  ADD_CHANGE_POINTS_HISTOGRAM: 'add_change_points_histogram',
   ERROR: 'error',
   RESET: 'reset',
   UPDATE_LOADING_STATE: 'update_loading_state',
@@ -25,6 +26,20 @@ export function addChangePointsAction(
 ): ApiActionAddChangePoints {
   return {
     type: API_ACTION_NAME.ADD_CHANGE_POINTS,
+    payload,
+  };
+}
+
+interface ApiActionAddChangePointsHistogram {
+  type: typeof API_ACTION_NAME.ADD_CHANGE_POINTS_HISTOGRAM;
+  payload: ChangePointHistogram[];
+}
+
+export function addChangePointsHistogramAction(
+  payload: ApiActionAddChangePointsHistogram['payload']
+): ApiActionAddChangePointsHistogram {
+  return {
+    type: API_ACTION_NAME.ADD_CHANGE_POINTS_HISTOGRAM,
     payload,
   };
 }
@@ -69,6 +84,7 @@ export function updateLoadingStateAction(
 
 export type AiopsExplainLogRateSpikesApiAction =
   | ApiActionAddChangePoints
+  | ApiActionAddChangePointsHistogram
   | ApiActionError
   | ApiActionReset
   | ApiActionUpdateLoadingState;

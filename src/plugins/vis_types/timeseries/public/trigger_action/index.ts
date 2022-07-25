@@ -141,6 +141,10 @@ export const triggerTSVBtoLensConfiguration = async (
       ...(layer.split_mode === 'terms' && {
         termsParams: {
           size: layer.terms_size ?? 10,
+          ...(layer.terms_include && { include: [layer.terms_include] }),
+          includeIsRegex: Boolean(layer.terms_include),
+          ...(layer.terms_exclude && { exclude: [layer.terms_exclude] }),
+          excludeIsRegex: Boolean(layer.terms_exclude),
           otherBucket: false,
           orderDirection: layer.terms_direction ?? 'desc',
           orderBy: layer.terms_order_by === '_key' ? { type: 'alphabetical' } : { type: 'column' },

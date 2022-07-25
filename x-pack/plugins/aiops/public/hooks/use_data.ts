@@ -5,25 +5,83 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react'; //  useCallback, useRef
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { useEffect, useMemo, useState } from 'react';
 import { merge } from 'rxjs';
+
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { useAiOpsKibana } from '../kibana_context';
-import { useTimefilter } from './use_time_filter';
-import { aiopsRefresh$ } from '../application/services/timefilter_refresh_service';
+import type { ChangePoint } from '@kbn/ml-agg-utils';
+
+import type { SavedSearch } from '@kbn/discover-plugin/public';
+
 import { TimeBuckets } from '../../common/time_buckets';
+
+import { useAiOpsKibana } from '../kibana_context';
+import { aiopsRefresh$ } from '../application/services/timefilter_refresh_service';
+import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
+import type { AiOpsIndexBasedAppState } from '../components/explain_log_rate_spikes/explain_log_rate_spikes_app_state';
+import {
+  getEsQueryFromSavedSearch,
+  SavedSearchSavedObject,
+} from '../application/utils/search_utils';
+
+import { useTimefilter } from './use_time_filter';
 import { useDocumentCountStats } from './use_document_count_stats';
-import { Dictionary } from './url_state';
-import { DocumentStatsSearchStrategyParams } from '../get_document_stats';
+import type { Dictionary } from './url_state';
 
 export const useData = (
-  currentDataView: DataView,
-  onUpdate: (params: Dictionary<unknown>) => void
+  {
+    currentDataView,
+    currentSavedSearch,
+  }: { currentDataView: DataView; currentSavedSearch: SavedSearch | SavedSearchSavedObject | null },
+  aiopsListState: AiOpsIndexBasedAppState,
+  onUpdate: (params: Dictionary<unknown>) => void,
+  selectedChangePoint?: ChangePoint
 ) => {
   const { services } = useAiOpsKibana();
-  const { uiSettings } = services;
+  const { uiSettings, data } = services;
   const [lastRefresh, setLastRefresh] = useState(0);
+  const [fieldStatsRequest, setFieldStatsRequest] = useState<
+    DocumentStatsSearchStrategyParams | undefined
+  >();
+
+  /** Prepare required params to pass to search strategy **/
+  const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
+    const searchData = getEsQueryFromSavedSearch({
+      dataView: currentDataView,
+      uiSettings,
+      savedSearch: currentSavedSearch,
+      filterManager: data.query.filterManager,
+    });
+
+    if (searchData === undefined || aiopsListState.searchString !== '') {
+      if (aiopsListState.filters) {
+        services.data.query.filterManager.setFilters(aiopsListState.filters);
+      }
+      return {
+        searchQuery: aiopsListState.searchQuery,
+        searchString: aiopsListState.searchString,
+        searchQueryLanguage: aiopsListState.searchQueryLanguage,
+      };
+    } else {
+      return {
+        searchQuery: searchData.searchQuery,
+        searchString: searchData.searchString,
+        searchQueryLanguage: searchData.queryLanguage,
+      };
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    currentSavedSearch?.id,
+    currentDataView.id,
+    aiopsListState.searchString,
+    aiopsListState.searchQueryLanguage,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify({
+      searchQuery: aiopsListState.searchQuery,
+    }),
+    lastRefresh,
+  ]);
 
   const _timeBuckets = useMemo(() => {
     return new TimeBuckets({
@@ -39,47 +97,48 @@ export const useData = (
     autoRefreshSelector: true,
   });
 
-  const fieldStatsRequest: DocumentStatsSearchStrategyParams | undefined = useMemo(
-    () => {
-      // Obtain the interval to use for date histogram aggregations
-      // (such as the document count chart). Aim for 75 bars.
-      const buckets = _timeBuckets;
-      const tf = timefilter;
-      if (!buckets || !tf || !currentDataView) return;
-      const activeBounds = tf.getActiveBounds();
-      let earliest: number | undefined;
-      let latest: number | undefined;
-      if (activeBounds !== undefined && currentDataView.timeFieldName !== undefined) {
-        earliest = activeBounds.min?.valueOf();
-        latest = activeBounds.max?.valueOf();
-      }
-      const bounds = tf.getActiveBounds();
-      const BAR_TARGET = 75;
-      buckets.setInterval('auto');
-      if (bounds) {
-        buckets.setBounds(bounds);
-        buckets.setBarTarget(BAR_TARGET);
-      }
-      const aggInterval = buckets.getInterval();
+  const overallStatsRequest = useMemo(() => {
+    return fieldStatsRequest
+      ? { ...fieldStatsRequest, selectedChangePoint, includeSelectedChangePoint: false }
+      : undefined;
+  }, [fieldStatsRequest, selectedChangePoint]);
 
-      return {
-        earliest,
-        latest,
-        intervalMs: aggInterval?.asMilliseconds(),
+  const selectedChangePointStatsRequest = useMemo(() => {
+    return fieldStatsRequest
+      ? { ...fieldStatsRequest, selectedChangePoint, includeSelectedChangePoint: true }
+      : undefined;
+  }, [fieldStatsRequest, selectedChangePoint]);
+
+  const { docStats: overallDocStats } = useDocumentCountStats(overallStatsRequest, lastRefresh);
+  const { docStats: selectedDocStats } = useDocumentCountStats(
+    selectedChangePointStatsRequest,
+    lastRefresh
+  );
+
+  function updateFieldStatsRequest() {
+    const timefilterActiveBounds = timefilter.getActiveBounds();
+    if (timefilterActiveBounds !== undefined) {
+      const BAR_TARGET = 75;
+      _timeBuckets.setInterval('auto');
+      _timeBuckets.setBounds(timefilterActiveBounds);
+      _timeBuckets.setBarTarget(BAR_TARGET);
+      setFieldStatsRequest({
+        earliest: timefilterActiveBounds.min?.valueOf(),
+        latest: timefilterActiveBounds.max?.valueOf(),
+        intervalMs: _timeBuckets.getInterval()?.asMilliseconds(),
         index: currentDataView.title,
+        searchQuery,
         timeFieldName: currentDataView.timeFieldName,
         runtimeFieldMap: currentDataView.getRuntimeMappings(),
-      };
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [_timeBuckets, timefilter, currentDataView.id, lastRefresh]
-  );
-  const { docStats } = useDocumentCountStats(fieldStatsRequest, lastRefresh);
+      });
+      setLastRefresh(Date.now());
+    }
+  }
 
   useEffect(() => {
     const timeUpdateSubscription = merge(
-      timefilter.getTimeUpdate$(),
       timefilter.getAutoRefreshFetch$(),
+      timefilter.getTimeUpdate$(),
       aiopsRefresh$
     ).subscribe(() => {
       if (onUpdate) {
@@ -88,15 +147,41 @@ export const useData = (
           refreshInterval: timefilter.getRefreshInterval(),
         });
       }
-      setLastRefresh(Date.now());
+      updateFieldStatsRequest();
     });
     return () => {
       timeUpdateSubscription.unsubscribe();
     };
   });
 
+  // This hook listens just for an initial update of the timefilter to be switched on.
+  useEffect(() => {
+    const timeUpdateSubscription = timefilter.getEnabledUpdated$().subscribe(() => {
+      if (fieldStatsRequest === undefined) {
+        updateFieldStatsRequest();
+      }
+    });
+    return () => {
+      timeUpdateSubscription.unsubscribe();
+    };
+  });
+
+  // Ensure request is updated when search changes
+  useEffect(() => {
+    updateFieldStatsRequest();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchString, JSON.stringify(searchQuery)]);
+
   return {
-    docStats,
+    overallDocStats,
+    selectedDocStats,
     timefilter,
+    /** Start timestamp filter */
+    earliest: fieldStatsRequest?.earliest,
+    /** End timestamp filter */
+    latest: fieldStatsRequest?.latest,
+    searchQueryLanguage,
+    searchString,
+    searchQuery,
   };
 };

@@ -33,7 +33,7 @@ export class SourceFiltersTable extends Component<
   SourceFiltersTableProps,
   SourceFiltersTableState
 > {
-  // Source filters do not have any unique ids, only the value is stored.
+  // Source filters do not have unique ids, only the value is stored.
   // To ensure we can create a consistent and expected UX when managing
   // source filters, we are assigning a unique id to each filter on the
   // client side only

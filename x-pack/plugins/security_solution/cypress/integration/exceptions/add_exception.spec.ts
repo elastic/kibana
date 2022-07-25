@@ -40,7 +40,11 @@ describe('Adds rule exception', () => {
   beforeEach(() => {
     deleteAlertsAndRules();
     createCustomRuleEnabled(
-      { ...getNewRule(), customQuery: 'agent.name:*', index: ['exceptions*'] },
+      {
+        ...getNewRule(),
+        customQuery: 'agent.name:*',
+        dataSource: { index: ['exceptions*'], type: 'indexPatterns' },
+      },
       'rule_testing',
       '1s'
     );

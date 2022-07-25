@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// TODO Consolidate with duplicate component `CorrelationsProgressControls` in
+// `x-pack/plugins/apm/public/components/app/correlations/progress_controls.tsx`
 import { cloneDeep } from 'lodash';
 import { IUiSettingsClient } from '@kbn/core/public';
 import {

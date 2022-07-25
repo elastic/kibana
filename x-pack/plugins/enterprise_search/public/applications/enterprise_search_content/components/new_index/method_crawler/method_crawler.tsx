@@ -32,23 +32,33 @@ export const MethodCrawler: React.FC = () => {
 
   return (
     <NewSearchIndexTemplate
-      title="Crawler"
-      description={i18n.translate(
-        'xpack.enterpriseSearch.content.newIndex.methodCrawler.description',
+      title={i18n.translate(
+        'xpack.enterpriseSearch.content.newIndex.steps.createIndex.crawler.title',
         {
-          defaultMessage:
-            'The Elastic Web Crawler allows you to easily and automatically index content from public-facing websites and knowledge bases.',
+          defaultMessage: 'Index using the web crawler',
         }
       )}
-      docsUrl="#"
       type="crawler"
       onSubmit={(indexName, language) => makeRequest({ indexName, language })}
-      formDisabled={status === Status.LOADING}
       buttonLoading={status === Status.LOADING}
     >
       <EuiSteps
         steps={[
           {
+            children: (
+              <EuiText size="s">
+                <p>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.newIndex.steps.createIndex.content',
+                    {
+                      defaultMessage:
+                        'Provide a unique name for your index and select an optional index language.',
+                    }
+                  )}
+                </p>
+              </EuiText>
+            ),
+            status: 'incomplete',
             title: i18n.translate(
               'xpack.enterpriseSearch.content.newIndex.steps.createIndex.title',
               {
@@ -57,29 +67,8 @@ export const MethodCrawler: React.FC = () => {
             ),
 
             titleSize: 'xs',
-            children: (
-              <EuiText size="s">
-                <p>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.steps.createIndex.content',
-                    {
-                      defaultMessage:
-                        'Provide a unique name for your index and select an optional language analyzer.',
-                    }
-                  )}
-                </p>
-              </EuiText>
-            ),
-            status: 'incomplete',
           },
           {
-            title: i18n.translate(
-              'xpack.enterpriseSearch.content.newIndex.steps.configureIngestion.title',
-              {
-                defaultMessage: 'Configure ingestion settings',
-              }
-            ),
-            titleSize: 'xs',
             children: (
               <EuiText size="s">
                 <p>
@@ -87,22 +76,22 @@ export const MethodCrawler: React.FC = () => {
                     'xpack.enterpriseSearch.content.newIndex.methodCrawler.steps.configureIngestion.content',
                     {
                       defaultMessage:
-                        'Enter the domains you’d like to crawl, configure crawl rules and entry points, set up a crawl schedule and let Enterprise Search do the rest.',
+                        'Configure the domains you’d like to crawl, and when ready trigger your first crawl. Let Enterprise Search do the rest.',
                     }
                   )}
                 </p>
               </EuiText>
             ),
             status: 'incomplete',
-          },
-          {
             title: i18n.translate(
-              'xpack.enterpriseSearch.content.newIndex.steps.buildSearchExperience.title',
+              'xpack.enterpriseSearch.content.newIndex.steps.configureIngestion.title',
               {
-                defaultMessage: 'Build a search experience',
+                defaultMessage: 'Configure ingestion settings',
               }
             ),
             titleSize: 'xs',
+          },
+          {
             children: (
               <EuiText size="s">
                 <p>
@@ -117,6 +106,13 @@ export const MethodCrawler: React.FC = () => {
               </EuiText>
             ),
             status: 'incomplete',
+            title: i18n.translate(
+              'xpack.enterpriseSearch.content.newIndex.steps.buildSearchExperience.title',
+              {
+                defaultMessage: 'Build a search experience',
+              }
+            ),
+            titleSize: 'xs',
           },
         ]}
       />

@@ -1,3 +1,4 @@
+TODO: needs to be updated for Fleet Server
 # Fleet <> Agent communication protocal
 
 1. Makes request to the [`agent/enroll` endpoint](/docs/api/fleet.asciidoc) using the [enrollment API key](api_keys.md) as a barrier token, the policy ID being enrolled to, and the type of the agent.

@@ -22,9 +22,13 @@ interface Labels {
   maxUsersCount: string;
 }
 
+export interface Headers {
+  readonly [key: string]: string[];
+}
+
 interface Request {
   method: string;
-  headers: string;
+  headers: Headers;
   body?: { original: string };
 }
 
@@ -44,6 +48,7 @@ export interface Document {
   character: string;
   quote: string;
   service: { version: string };
+  parent?: { id: string };
   processor: string;
   trace: { id: string };
   '@timestamp': string;

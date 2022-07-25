@@ -13,11 +13,12 @@ import {
 } from '../constants';
 
 import type { DownloadSource, DownloadSourceAttributes, DownloadSourceBase } from '../types';
-import { DownloadSourceError } from '../errors';
+import { DownloadSourceError, IngestManagerError } from '../errors';
 import { SO_SEARCH_LIMIT } from '../../common';
 
 import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
+import { escapeSearchQueryPhrase } from './saved_object';
 
 function savedObjectToDownloadSource(so: SavedObject<DownloadSourceAttributes>) {
   const { source_id: sourceId, ...attributes } = so.attributes;
@@ -66,6 +67,11 @@ class DownloadSourceService {
   ): Promise<DownloadSource> {
     const data: DownloadSourceAttributes = downloadSource;
 
+    await this.requireUniqueName(soClient, {
+      name: downloadSource.name,
+      id: options?.id,
+    });
+
     // default should be only one
     if (data.is_default) {
       const defaultDownloadSourceId = await this.getDefaultDownloadSourceId(soClient);
@@ -95,6 +101,13 @@ class DownloadSourceService {
     newData: Partial<DownloadSource>
   ) {
     const updateData: Partial<DownloadSourceAttributes> = newData;
+
+    if (newData.name) {
+      await this.requireUniqueName(soClient, {
+        name: newData.name,
+        id,
+      });
+    }
 
     if (updateData.is_default) {
       const defaultDownloadSourceId = await this.getDefaultDownloadSourceId(soClient);
@@ -162,6 +175,31 @@ class DownloadSourceService {
     }
 
     return defaultDS;
+  }
+
+  public async requireUniqueName(
+    soClient: SavedObjectsClientContract,
+    downloadSource: { name: string; id?: string }
+  ) {
+    const results = await soClient.find<DownloadSourceAttributes>({
+      type: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+      searchFields: ['name'],
+      search: escapeSearchQueryPhrase(downloadSource.name),
+    });
+    const idsWithName = results.total && results.saved_objects.map(({ id }) => id);
+
+    if (Array.isArray(idsWithName)) {
+      const isEditingSelf = downloadSource?.id && idsWithName.includes(downloadSource.id);
+      if (!downloadSource.id || !isEditingSelf) {
+        const isSingle = idsWithName.length === 1;
+
+        const existClause = isSingle
+          ? `Download Source '${idsWithName[0]}' already exists`
+          : `Download Sources '${idsWithName.join(',')}' already exist`;
+
+        throw new IngestManagerError(`${existClause} with name '${downloadSource.name}'`);
+      }
+    }
   }
 
   private async _getDefaultDownloadSourceSO(soClient: SavedObjectsClientContract) {

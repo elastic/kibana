@@ -60,6 +60,24 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllAlerts(supertest, log);
       });
 
+      describe('saved query', () => {
+        it('should create a saved query rule and query a data view', async () => {
+          const savedQueryRule = {
+            ...getSimpleRule(),
+            data_view_id: 'my-data-view',
+            type: 'saved_query',
+            saved_id: 'my-saved-query-id',
+          };
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .send(savedQueryRule)
+            .expect(200);
+
+          expect(body.data_view_id).to.eql('my-data-view');
+        });
+      });
+
       describe('elastic admin', () => {
         it('should create a single rule with a rule_id', async () => {
           const { body } = await supertest

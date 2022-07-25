@@ -60,19 +60,22 @@ export function ServiceNodeMetrics() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  useBreadcrumb({
-    title: getServiceNodeName(serviceNodeName),
-    href: apmRouter.link(
-      '/services/{serviceName}/nodes/{serviceNodeName}/metrics',
-      {
-        path: {
-          serviceName,
-          serviceNodeName,
-        },
-        query,
-      }
-    ),
-  });
+  useBreadcrumb(
+    () => ({
+      title: getServiceNodeName(serviceNodeName),
+      href: apmRouter.link(
+        '/services/{serviceName}/nodes/{serviceNodeName}/metrics',
+        {
+          path: {
+            serviceName,
+            serviceNodeName,
+          },
+          query,
+        }
+      ),
+    }),
+    [apmRouter, query, serviceName, serviceNodeName]
+  );
 
   const { data } = useServiceMetricChartsFetcher({
     serviceNodeName,

@@ -1,0 +1,16 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+/**
+ * 1. Fixes fullscreen mode for saved searches on Dashboard. Otherwise, sibling grids can obscure the grid in fullscreen mode.
+ * "euiDataGrid__restrictBody" is set to body element when a grid is in fullscreen
+ * https://github.com/elastic/kibana/issues/134032
+ */
+.euiDataGrid__restrictBody .embPanel .embPanel__content {
+  z-index: unset !important; /* 1 */
+}
