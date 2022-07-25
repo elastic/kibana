@@ -15,22 +15,22 @@ import {
   EuiFlyoutHeader,
   IconType,
   EuiBetaBadge,
-  EuiBetaBadgeProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { betaBadgeProps } from '../beta_badge_props';
 
 interface Props {
   icon?: IconType | null;
   actionTypeName?: string | null;
   actionTypeMessage?: string | null;
-  betaBadgeProps?: Partial<EuiBetaBadgeProps>;
+  isExperimental?: boolean;
 }
 
 const FlyoutHeaderComponent: React.FC<Props> = ({
   icon,
   actionTypeName,
   actionTypeMessage,
-  betaBadgeProps,
+  isExperimental,
 }) => {
   return (
     <EuiFlyoutHeader hasBorder data-test-subj="create-connector-flyout-header">
@@ -69,7 +69,7 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
             </EuiTitle>
           )}
         </EuiFlexItem>
-        {betaBadgeProps && (
+        {isExperimental && (
           <EuiFlexItem grow={false}>
             <EuiBetaBadge
               label={betaBadgeProps.label}

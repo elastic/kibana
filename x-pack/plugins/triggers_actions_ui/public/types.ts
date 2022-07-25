@@ -13,7 +13,7 @@ import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { IconType, EuiFlyoutSize, EuiBetaBadgeProps } from '@elastic/eui';
+import type { IconType, EuiFlyoutSize } from '@elastic/eui';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
 import {
   ActionType,
@@ -194,7 +194,7 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   > | null;
   actionParamsFields: React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>;
   customConnectorSelectItem?: CustomConnectorSelectionItem;
-  betaBadgeProps?: Partial<EuiBetaBadgeProps>;
+  isExperimental?: boolean;
 }
 
 export interface GenericValidationResult<T> {

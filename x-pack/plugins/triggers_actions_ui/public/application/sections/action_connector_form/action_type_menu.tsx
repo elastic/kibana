@@ -17,6 +17,7 @@ import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { useKibana } from '../../../common/lib/kibana';
 import { SectionLoading } from '../../components/section_loading';
+import { betaBadgeProps } from './beta_badge_props';
 
 interface Props {
   onActionTypeChange: (actionType: ActionType) => void;
@@ -94,7 +95,7 @@ export const ActionTypeMenu = ({
         selectMessage: actionTypeModel ? actionTypeModel.selectMessage : '',
         actionType,
         name: actionType.name,
-        betaBadgeProps: actionTypeModel.betaBadgeProps,
+        isExperimental: actionTypeModel.isExperimental,
       };
     });
 
@@ -104,7 +105,7 @@ export const ActionTypeMenu = ({
       const checkEnabledResult = checkActionTypeEnabled(item.actionType);
       const card = (
         <EuiCard
-          betaBadgeProps={item.betaBadgeProps}
+          betaBadgeProps={item.isExperimental ? betaBadgeProps : undefined}
           titleSize="xs"
           data-test-subj={`${item.actionType.id}-card`}
           icon={<EuiIcon size="xl" type={item.iconClass} />}
