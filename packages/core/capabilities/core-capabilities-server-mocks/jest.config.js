@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { CapabilitiesService } from './capabilities_service';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/capabilities/core-capabilities-server-mocks'],
+};

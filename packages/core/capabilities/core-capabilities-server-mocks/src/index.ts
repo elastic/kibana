@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { CapabilitiesService } from './capabilities_service';
+export { capabilitiesServiceMock } from './capabilities_service.mock';
+export type { CapabilitiesServiceContract } from './capabilities_service.mock';
