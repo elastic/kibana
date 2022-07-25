@@ -7,11 +7,9 @@
  */
 
 import React, { useContext, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiButtonIcon, EuiFormRow } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiButtonIcon } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
 import { FiltersEditorContextType } from '../filters_editor_context';
 import { FilterGroup } from '../filters_editor_filter_group';
 import { getConditionalOperationType } from '../filters_editor_utils';
@@ -19,14 +17,7 @@ import type { Path } from '../filter_editors_types';
 import { PhraseValueInput } from '../../../filter_bar/filter_editor/phrase_value_input';
 import { PhrasesValuesInput } from '../../../filter_bar/filter_editor/phrases_values_input';
 import { RangeValueInput } from '../../../filter_bar/filter_editor/range_value_input';
-import {
-  getOperatorFromFilter,
-  getOperatorOptions,
-} from '../../../filter_bar/filter_editor/lib/filter_editor_utils';
-import {
-  GenericComboBox,
-  GenericComboBoxProps,
-} from '../../../filter_bar/filter_editor/generic_combo_box';
+import { getOperatorFromFilter } from '../../../filter_bar/filter_editor/lib/filter_editor_utils';
 import { Operator } from '../../../filter_bar/filter_editor/lib/filter_operators';
 import { FieldInput } from './filters_editor_filter_item_field_input';
 import { OperatorInput } from './filters_editor_filter_item_operator_input';
@@ -65,48 +56,6 @@ export function FilterItem({
     setSelectedOperator(operator);
     setSelectedParams(params);
   };
-
-  function renderOperatorInput() {
-    const operators = selectedField ? getOperatorOptions(selectedField) : [];
-
-    function onOperatorChange([operator]: Operator[]) {
-      const params = get(operator, 'type') === get(operator, 'type') ? selectedParams : undefined;
-
-      setSelectedOperator(operator);
-      setSelectedParams(params);
-    }
-
-    return (
-      <EuiFormRow fullWidth>
-        <OperatorComboBox
-          fullWidth
-          compressed
-          isDisabled={!selectedField}
-          placeholder={
-            selectedField
-              ? i18n.translate(
-                  'unifiedSearch.filter.filterEditor.operatorSelectPlaceholderSelect',
-                  {
-                    defaultMessage: 'Select',
-                  }
-                )
-              : i18n.translate(
-                  'unifiedSearch.filter.filterEditor.operatorSelectPlaceholderWaiting',
-                  {
-                    defaultMessage: 'Waiting',
-                  }
-                )
-          }
-          options={operators}
-          selectedOptions={selectedOperator ? [selectedOperator] : []}
-          getLabel={({ message }) => message}
-          onChange={onOperatorChange}
-          singleSelection={{ asPlainText: true }}
-          isClearable={false}
-        />
-      </EuiFormRow>
-    );
-  }
 
   function renderParamsEditor() {
     if (!dataView) {
@@ -173,10 +122,6 @@ export function FilterItem({
           />
         );
     }
-  }
-
-  function OperatorComboBox(props: GenericComboBoxProps<Operator>) {
-    return GenericComboBox(props);
   }
 
   return (
