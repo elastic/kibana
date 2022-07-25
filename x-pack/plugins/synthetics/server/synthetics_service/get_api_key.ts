@@ -78,11 +78,6 @@ export const generateAPIKey = async ({
     throw new Error('User authorization is needed for api key generation');
   }
 
-  const { canEnable } = await getSyntheticsEnablement({ request, server });
-  if (!canEnable) {
-    throw new SyntheticsForbiddenError();
-  }
-
   if (uptimePrivileges) {
     return security.authc.apiKeys?.create(request, {
       name: 'uptime-api-key',
@@ -95,6 +90,8 @@ export const generateAPIKey = async ({
               spaces: [ALL_SPACES_ID],
               feature: {
                 uptime: ['all'],
+                fleet: ['all'],
+                fleetv2: ['all'],
               },
             },
           ],
@@ -105,6 +102,11 @@ export const generateAPIKey = async ({
           'Created for the Synthetics Agent to be able to communicate with Kibana for generating monitors for projects',
       },
     });
+  }
+
+  const { canEnable } = await getSyntheticsEnablement({ request, server });
+  if (!canEnable) {
+    throw new SyntheticsForbiddenError();
   }
 
   return security.authc.apiKeys?.create(request, {

@@ -240,6 +240,225 @@ export const testSyntheticsPolicy: PackagePolicy = {
   updated_by: 'system',
 };
 
+export const getTestProjectSyntheticsPolicy = (
+  {
+    name,
+    inputs = {},
+  }: {
+    name?: string;
+    inputs: Record<string, { value: string | boolean; type: string }>;
+  } = {
+    name: 'check if title is present-Test private location 0',
+    inputs: {},
+  }
+): PackagePolicy => ({
+  id: 'cccec568-e488-4049-a399-def8b6a31f34-test-suite-default-46034710-0ba6-11ed-ba04-5f123b9faa8b',
+  version: 'WzMwNTMsMV0=',
+  name: 'check if title is present-Test private location 0',
+  namespace: 'default',
+  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '0.9.5' },
+  enabled: true,
+  policy_id: '46034710-0ba6-11ed-ba04-5f123b9faa8b',
+  output_id: '',
+  inputs: [
+    {
+      type: 'synthetics/http',
+      policy_template: 'synthetics',
+      enabled: false,
+      streams: [
+        {
+          enabled: false,
+          data_stream: { type: 'synthetics', dataset: 'http' },
+          vars: {
+            __ui: { type: 'yaml' },
+            enabled: { value: true, type: 'bool' },
+            type: { value: 'http', type: 'text' },
+            name: { type: 'text' },
+            schedule: { value: '"@every 3m"', type: 'text' },
+            urls: { type: 'text' },
+            'service.name': { type: 'text' },
+            timeout: { type: 'text' },
+            max_redirects: { type: 'integer' },
+            proxy_url: { type: 'text' },
+            tags: { type: 'yaml' },
+            username: { type: 'text' },
+            password: { type: 'password' },
+            'response.include_headers': { type: 'bool' },
+            'response.include_body': { type: 'text' },
+            'check.request.method': { type: 'text' },
+            'check.request.headers': { type: 'yaml' },
+            'check.request.body': { type: 'yaml' },
+            'check.response.status': { type: 'yaml' },
+            'check.response.headers': { type: 'yaml' },
+            'check.response.body.positive': { type: 'yaml' },
+            'check.response.body.negative': { type: 'yaml' },
+            'ssl.certificate_authorities': { type: 'yaml' },
+            'ssl.certificate': { type: 'yaml' },
+            'ssl.key': { type: 'yaml' },
+            'ssl.key_passphrase': { type: 'text' },
+            'ssl.verification_mode': { type: 'text' },
+            'ssl.supported_protocols': { type: 'yaml' },
+          },
+          id: 'synthetics/http-http-cccec568-e488-4049-a399-def8b6a31f34-test-suite-default-46034710-0ba6-11ed-ba04-5f123b9faa8b',
+        },
+      ],
+    },
+    {
+      type: 'synthetics/tcp',
+      policy_template: 'synthetics',
+      enabled: false,
+      streams: [
+        {
+          enabled: false,
+          data_stream: { type: 'synthetics', dataset: 'tcp' },
+          vars: {
+            __ui: { type: 'yaml' },
+            enabled: { value: true, type: 'bool' },
+            type: { value: 'tcp', type: 'text' },
+            name: { type: 'text' },
+            schedule: { value: '"@every 3m"', type: 'text' },
+            hosts: { type: 'text' },
+            'service.name': { type: 'text' },
+            timeout: { type: 'text' },
+            proxy_url: { type: 'text' },
+            proxy_use_local_resolver: { value: false, type: 'bool' },
+            tags: { type: 'yaml' },
+            'check.send': { type: 'text' },
+            'check.receive': { type: 'text' },
+            'ssl.certificate_authorities': { type: 'yaml' },
+            'ssl.certificate': { type: 'yaml' },
+            'ssl.key': { type: 'yaml' },
+            'ssl.key_passphrase': { type: 'text' },
+            'ssl.verification_mode': { type: 'text' },
+            'ssl.supported_protocols': { type: 'yaml' },
+          },
+          id: 'synthetics/tcp-tcp-cccec568-e488-4049-a399-def8b6a31f34-test-suite-default-46034710-0ba6-11ed-ba04-5f123b9faa8b',
+        },
+      ],
+    },
+    {
+      type: 'synthetics/icmp',
+      policy_template: 'synthetics',
+      enabled: false,
+      streams: [
+        {
+          enabled: false,
+          data_stream: { type: 'synthetics', dataset: 'icmp' },
+          vars: {
+            __ui: { type: 'yaml' },
+            enabled: { value: true, type: 'bool' },
+            type: { value: 'icmp', type: 'text' },
+            name: { type: 'text' },
+            schedule: { value: '"@every 3m"', type: 'text' },
+            wait: { value: '1s', type: 'text' },
+            hosts: { type: 'text' },
+            'service.name': { type: 'text' },
+            timeout: { type: 'text' },
+            tags: { type: 'yaml' },
+          },
+          id: 'synthetics/icmp-icmp-cccec568-e488-4049-a399-def8b6a31f34-test-suite-default-46034710-0ba6-11ed-ba04-5f123b9faa8b',
+        },
+      ],
+    },
+    {
+      type: 'synthetics/browser',
+      policy_template: 'synthetics',
+      enabled: true,
+      streams: [
+        {
+          enabled: true,
+          data_stream: { type: 'synthetics', dataset: 'browser' },
+          vars: {
+            __ui: {
+              value:
+                '{"script_source":{"is_generated_script":false,"file_name":""},"is_zip_url_tls_enabled":false}',
+              type: 'yaml',
+            },
+            enabled: { value: true, type: 'bool' },
+            type: { value: 'browser', type: 'text' },
+            name: { value: 'check if title is present', type: 'text' },
+            schedule: { value: '"@every 10m"', type: 'text' },
+            'service.name': { value: '', type: 'text' },
+            timeout: { value: null, type: 'text' },
+            tags: { value: null, type: 'yaml' },
+            'source.zip_url.url': { value: '', type: 'text' },
+            'source.zip_url.username': { value: '', type: 'text' },
+            'source.zip_url.folder': { value: '', type: 'text' },
+            'source.zip_url.password': { value: '', type: 'password' },
+            'source.inline.script': { value: null, type: 'yaml' },
+            params: { value: '', type: 'yaml' },
+            screenshots: { value: 'on', type: 'text' },
+            synthetics_args: { value: null, type: 'text' },
+            ignore_https_errors: { value: false, type: 'bool' },
+            'throttling.config': { value: '5d/3u/20l', type: 'text' },
+            'filter_journeys.tags': { value: null, type: 'yaml' },
+            'filter_journeys.match': { value: '"check if title is present"', type: 'text' },
+            'source.zip_url.ssl.certificate_authorities': { value: null, type: 'yaml' },
+            'source.zip_url.ssl.certificate': { value: null, type: 'yaml' },
+            'source.zip_url.ssl.key': { value: null, type: 'yaml' },
+            'source.zip_url.ssl.key_passphrase': { value: null, type: 'text' },
+            'source.zip_url.ssl.verification_mode': { value: null, type: 'text' },
+            'source.zip_url.ssl.supported_protocols': { value: null, type: 'yaml' },
+            'source.zip_url.proxy_url': { value: '', type: 'text' },
+            ...inputs,
+          },
+          id: 'synthetics/browser-browser-cccec568-e488-4049-a399-def8b6a31f34-test-suite-default-46034710-0ba6-11ed-ba04-5f123b9faa8b',
+          compiled_stream: {
+            __ui: {
+              script_source: { is_generated_script: false, file_name: '' },
+              is_zip_url_tls_enabled: false,
+            },
+            type: 'browser',
+            name: 'check if title is present',
+            enabled: true,
+            schedule: '@every 10m',
+            timeout: null,
+            throttling: '5d/3u/20l',
+            screenshots: 'on',
+            'filter_journeys.match': 'check if title is present',
+            processors: [
+              { add_observer_metadata: { geo: { name: 'Fleet managed' } } },
+              { add_fields: { target: '', fields: { 'monitor.fleet_managed': true } } },
+            ],
+            ...Object.keys(inputs).reduce((acc: Record<string, unknown>, key) => {
+              acc[key] = inputs[key].value;
+              return acc;
+            }, {}),
+          },
+        },
+        {
+          enabled: true,
+          data_stream: { type: 'synthetics', dataset: 'browser.network' },
+          id: 'synthetics/browser-browser.network-cccec568-e488-4049-a399-def8b6a31f34-test-suite-default-46034710-0ba6-11ed-ba04-5f123b9faa8b',
+          compiled_stream: {
+            processors: [
+              { add_observer_metadata: { geo: { name: 'Fleet managed' } } },
+              { add_fields: { target: '', fields: { 'monitor.fleet_managed': true } } },
+            ],
+          },
+        },
+        {
+          enabled: true,
+          data_stream: { type: 'synthetics', dataset: 'browser.screenshot' },
+          id: 'synthetics/browser-browser.screenshot-cccec568-e488-4049-a399-def8b6a31f34-test-suite-default-46034710-0ba6-11ed-ba04-5f123b9faa8b',
+          compiled_stream: {
+            processors: [
+              { add_observer_metadata: { geo: { name: 'Fleet managed' } } },
+              { add_fields: { target: '', fields: { 'monitor.fleet_managed': true } } },
+            ],
+          },
+        },
+      ],
+    },
+  ],
+  is_managed: true,
+  revision: 1,
+  created_at: '2022-07-24T23:13:55.606Z',
+  created_by: 'system',
+  updated_at: '2022-07-24T23:13:55.606Z',
+  updated_by: 'system',
+});
+
 export const omitIds = (policy: PackagePolicy) => {
   policy.inputs = sortBy(policy.inputs, 'type');
 

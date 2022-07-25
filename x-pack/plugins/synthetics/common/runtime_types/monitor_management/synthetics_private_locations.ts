@@ -7,13 +7,15 @@
 
 import * as t from 'io-ts';
 
-export const PrivateLocationType = t.type({
-  name: t.string,
-  id: t.string,
-  policyHostId: t.string,
-  concurrentMonitors: t.number,
-  latLon: t.string,
-});
+export const PrivateLocationType = t.intersection([
+  t.interface({
+    name: t.string,
+    id: t.string,
+    policyHostId: t.string,
+    concurrentMonitors: t.number,
+  }),
+  t.partial({ geo: t.interface({ lat: t.number, lon: t.number }) }),
+]);
 
 export const SyntheticsPrivateLocationsType = t.type({
   locations: t.array(PrivateLocationType),

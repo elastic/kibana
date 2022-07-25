@@ -7,6 +7,7 @@
 
 import type { SavedObjectsClientContract, SavedObjectsFindOptions } from '@kbn/core/server';
 import semverGte from 'semver/functions/gte';
+import type { Logger } from '@kbn/core/server';
 
 import {
   isPackageLimited,
@@ -297,16 +298,19 @@ export async function getPackageFromSource(options: {
 export async function getInstallationObject(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
+  logger?: Logger;
 }) {
-  const { savedObjectsClient, pkgName } = options;
-  return savedObjectsClient
-    .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
-    .catch((e) => undefined);
+  const { savedObjectsClient, pkgName, logger } = options;
+  return savedObjectsClient.get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName).catch((e) => {
+    logger?.error(e);
+    return undefined;
+  });
 }
 
 export async function getInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
+  logger?: Logger;
 }) {
   const savedObject = await getInstallationObject(options);
   return savedObject?.attributes;
