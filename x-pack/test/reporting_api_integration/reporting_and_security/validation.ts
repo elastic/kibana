@@ -37,7 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('printablePdfV2', () => {
-      it.only('allows width and height to have decimal', async () => {
+      it('allows width and height to have decimal', async () => {
         const downloadReportPath = await reportingAPI.postJobJSON(
           '/api/reporting/generate/printablePdfV2',
           { jobParams: createPdfV2Params(1541.5999755859375) }
