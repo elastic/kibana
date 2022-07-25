@@ -121,11 +121,23 @@ describe('File kind HTTP API', () => {
     expect(files2).toHaveLength(5);
   });
 
+  const twoDaysFromNow = (): number => Date.now() + 2 * (1000 * 60 * 60 * 24);
+
   test('share', async () => {
     const { id } = await createFile();
+
+    const { body: error } = await request
+      .post(root, `/api/files/share/${fileKind}/${id}`)
+      .send({
+        validUntil: 1,
+      })
+      .expect(400);
+
+    expect(error.message).toContain('must be in the future');
+
     const { body: share } = await request
       .post(root, `/api/files/share/${fileKind}/${id}`)
-      .send({})
+      .send({ validUntil: twoDaysFromNow(), name: 'my share' })
       .expect(200);
 
     expect(share).toEqual(
