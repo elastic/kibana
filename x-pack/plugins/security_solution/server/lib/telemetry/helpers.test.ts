@@ -789,7 +789,7 @@ describe('test advanced policy config overlap ', () => {
       }
     };
     const stubPolicyConfigWithAdvancedSettingsResponse = cloneDeep(defaultStubPolicyConfigResponse);
-    set(stubPolicyConfigWithAdvancedSettingsResponse, 'linux.advanced.agent.connection_delay', 20)
+    set(stubPolicyConfigWithAdvancedSettingsResponse, 'linux.advanced.agent.connection_delay', 20);
     const endpointPolicyConfig = addDefaultAdvancedPolicyConfigSettings(stubPolicyConfigWithAdvancedSettings);
     expect(endpointPolicyConfig).toEqual(stubPolicyConfigWithAdvancedSettingsResponse);
   });
