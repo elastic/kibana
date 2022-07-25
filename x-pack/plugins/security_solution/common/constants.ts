@@ -45,7 +45,6 @@ export const DEFAULT_MAX_SIGNALS = 100 as const;
 export const DEFAULT_SEARCH_AFTER_PAGE_SIZE = 100 as const;
 export const DEFAULT_ANOMALY_SCORE = 'securitySolution:defaultAnomalyScore' as const;
 export const DEFAULT_MAX_TABLE_QUERY_SIZE = 10000 as const;
-export const DEFAULT_SCALE_DATE_FORMAT = 'dateFormat:scaled' as const;
 export const DEFAULT_FROM = 'now/d' as const;
 export const DEFAULT_TO = 'now/d' as const;
 export const DEFAULT_INTERVAL_PAUSE = true as const;
@@ -53,8 +52,6 @@ export const DEFAULT_INTERVAL_TYPE = 'manual' as const;
 export const DEFAULT_INTERVAL_VALUE = 300000 as const; // ms
 export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges' as const;
 export const SCROLLING_DISABLED_CLASS_NAME = 'scrolling-disabled' as const;
-export const GLOBAL_HEADER_HEIGHT = 96 as const; // px
-export const FILTERS_GLOBAL_HEIGHT = 109 as const; // px
 export const FULL_SCREEN_TOGGLED_CLASS_NAME = 'fullScreenToggled' as const;
 export const NO_ALERT_INDEX = 'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C51' as const;
 export const ENDPOINT_METADATA_INDEX = 'metrics-endpoint.metadata-*' as const;
@@ -164,8 +161,6 @@ export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}` as const;
 export const APP_LANDING_PATH = `${APP_PATH}${LANDING_PATH}` as const;
 export const APP_DETECTION_RESPONSE_PATH = `${APP_PATH}${DETECTION_RESPONSE_PATH}` as const;
 export const APP_MANAGEMENT_PATH = `${APP_PATH}${MANAGEMENT_PATH}` as const;
-export const APP_EXPLORE_PATH = `${APP_PATH}${EXPLORE_PATH}` as const;
-export const APP_DASHBOARDS_PATH = `${APP_PATH}${DASHBOARDS_PATH}` as const;
 
 export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}` as const;
 export const APP_RULES_PATH = `${APP_PATH}${RULES_PATH}` as const;
@@ -298,7 +293,6 @@ export const TIMELINE_PREPACKAGED_URL = `${TIMELINE_URL}/_prepackaged` as const;
 export const NOTE_URL = '/api/note' as const;
 export const PINNED_EVENT_URL = '/api/pinned_event' as const;
 export const SOURCERER_API_URL = '/internal/security_solution/sourcerer' as const;
-export const DETECTION_RESPONSE_METRICS_API_URL = '/api/detection_response_metrics' as const;
 
 /**
  * Default signals index key for kibana.dev.yml
@@ -335,24 +329,6 @@ export const MINIMUM_ML_LICENSE = 'platinum' as const;
 export const ML_GROUP_ID = 'security' as const;
 export const LEGACY_ML_GROUP_ID = 'siem' as const;
 export const ML_GROUP_IDS = [ML_GROUP_ID, LEGACY_ML_GROUP_ID] as const;
-
-/*
-  Rule notifications options
-*/
-export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
-  '.email',
-  '.index',
-  '.jira',
-  '.pagerduty',
-  '.resilient',
-  '.servicenow',
-  '.servicenow-sir',
-  '.servicenow-itom',
-  '.slack',
-  '.swimlane',
-  '.teams',
-  '.webhook',
-];
 
 export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions' as const;
 export const NOTIFICATION_THROTTLE_RULE = 'rule' as const;

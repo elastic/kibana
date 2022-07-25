@@ -31,8 +31,8 @@ import type {
   NewPackagePolicy,
   UpgradePackagePolicyDryRunResponse,
   UpgradePackagePolicyResponse,
-} from '../../../common';
-import { installationStatuses } from '../../../common';
+} from '../../../common/types';
+import { installationStatuses } from '../../../common/constants';
 import { defaultIngestErrorHandler } from '../../errors';
 import { getInstallations } from '../../services/epm/packages';
 import { PACKAGES_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
