@@ -69,7 +69,7 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
     }
     const filters = embeddable.getFilters();
     const dataViewList: DataView[] =
-      (embeddable.parent as DashboardContainer)?.getAllDataViews() ?? [];
+      (embeddable.getRoot() as DashboardContainer)?.getAllDataViews() ?? [];
 
     const session = this.overlays.openModal(
       toMountPoint(

@@ -30,10 +30,8 @@ export interface Props {
 const FilterItemsUI = React.memo(function FilterItemsUI(props: Props) {
   const groupRef = useRef<HTMLDivElement>(null);
   const kibana = useKibana<IDataPluginServices>();
-  const { appName, usageCollection, uiSettings } = kibana.services;
+  const { appName, usageCollection } = kibana.services;
   const { readOnly = false } = props;
-
-  // if (!uiSettings) return null;
 
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
 
@@ -59,7 +57,6 @@ const FilterItemsUI = React.memo(function FilterItemsUI(props: Props) {
           onUpdate={(newFilter) => onUpdate(i, newFilter)}
           onRemove={() => onRemove(i)}
           indexPatterns={props.indexPatterns}
-          uiSettings={uiSettings!}
           hiddenPanelOptions={props.hiddenPanelOptions}
           timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
           readOnly={readOnly}

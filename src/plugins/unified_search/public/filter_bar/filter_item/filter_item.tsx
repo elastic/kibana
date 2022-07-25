@@ -19,7 +19,6 @@ import {
 } from '@kbn/es-query';
 import classNames from 'classnames';
 import React, { MouseEvent, useState, useEffect, HTMLAttributes } from 'react';
-import { IUiSettingsClient } from '@kbn/core/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import {
   getIndexPatternFromFilter,
@@ -39,7 +38,6 @@ export interface FilterItemProps {
   onUpdate: (filter: Filter) => void;
   onRemove: () => void;
   intl: InjectedIntl;
-  uiSettings: IUiSettingsClient;
   hiddenPanelOptions?: FilterPanelOption[];
   timeRangeForSuggestionsOverride?: boolean;
   readOnly: boolean;
@@ -379,7 +377,9 @@ export function FilterItem(props: FilterItemProps) {
     panelPaddingSize: 'none',
   };
 
-  return (
+  return readOnly ? (
+    <FilterView {...filterViewProps} />
+  ) : (
     <EuiPopover anchorPosition="downLeft" {...popoverProps}>
       {renderedComponent === 'menu' ? (
         <EuiContextMenu initialPanelId={0} panels={getPanels()} />

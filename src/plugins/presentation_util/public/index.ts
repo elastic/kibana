@@ -29,7 +29,6 @@ export type {
 export { PluginServices, PluginServiceProvider, PluginServiceRegistry } from './services/create';
 
 export type { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './types';
-
 export type { SaveModalDashboardProps } from './components/types';
 export type { ProjectID, Project } from '../common/labs';
 export { projectIDs } from '../common/labs';

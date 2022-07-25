@@ -368,16 +368,13 @@ export class DashboardPlugin
   }
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
-    const { notifications, overlays, application, theme } = core;
+    const { notifications, overlays, application, theme, uiSettings } = core;
     const { uiActions, data, share, presentationUtil, embeddable } = plugins;
-
-    // console.log(dataViews);
-    // console.log(data.dataViews.get());
 
     const dashboardCapabilities: Readonly<DashboardCapabilities> = application.capabilities
       .dashboard as DashboardCapabilities;
 
-    const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, core.uiSettings);
+    const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, uiSettings);
 
     const expandPanelAction = new ExpandPanelAction();
     uiActions.registerAction(expandPanelAction);
