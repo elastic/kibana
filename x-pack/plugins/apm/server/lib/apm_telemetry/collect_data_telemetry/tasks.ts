@@ -25,6 +25,7 @@ import {
   CLOUD_REGION,
   CONTAINER_ID,
   ERROR_GROUP_ID,
+  FAAS_TRIGGER_TYPE,
   HOST_NAME,
   HOST_OS_PLATFORM,
   OBSERVER_HOSTNAME,
@@ -1231,6 +1232,12 @@ export const tasks: TelemetryTask[] = [
                         size: 5,
                       },
                     },
+                    [FAAS_TRIGGER_TYPE]: {
+                      terms: {
+                        field: FAAS_TRIGGER_TYPE,
+                        size: 5,
+                      },
+                    },
                   },
                 },
               },
@@ -1260,6 +1267,14 @@ export const tasks: TelemetryTask[] = [
                 serviceBucket[CLOUD_PROVIDER]?.buckets.map(
                   (inner) => inner.key as string
                 ) ?? [],
+            },
+            faas: {
+              trigger: {
+                type:
+                  serviceBucket[FAAS_TRIGGER_TYPE]?.buckets.map(
+                    (inner) => inner.key as string
+                  ) ?? [],
+              },
             },
             agent: {
               name: serviceBucket.top_metrics?.top[0].metrics[AGENT_NAME],

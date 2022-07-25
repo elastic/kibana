@@ -32,6 +32,11 @@ export type APMPerService = Record<
       regions: string[];
       providers: string[];
     };
+    faas: {
+      trigger: {
+        type: string[];
+      };
+    };
     agent: {
       name: string | number | null;
       version: string | number | null;
