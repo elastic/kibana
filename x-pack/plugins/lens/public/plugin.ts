@@ -231,8 +231,6 @@ export class LensPlugin {
   private hasDiscoverAccess: boolean = false;
   private dataViewsService: DataViewsPublicPluginStart | undefined;
 
-  private stopReportManager?: () => void;
-
   setup(
     core: CoreSetup<LensPluginStartDependencies, void>,
     {
@@ -253,7 +251,7 @@ export class LensPlugin {
     const startServices = createStartServicesGetter(core.getStartServices);
 
     const getStartServices = async (): Promise<LensEmbeddableStartServices> => {
-      const { getLensAttributeService } = await import('./async_services');
+      const { getLensAttributeService, setUsageCollectionStart } = await import('./async_services');
       const { core: coreStart, plugins } = startServices();
 
       await this.initParts(
@@ -267,6 +265,10 @@ export class LensPlugin {
       );
       const visualizationMap = await this.editorFrameService!.loadVisualizations();
       const datasourceMap = await this.editorFrameService!.loadDatasources();
+
+      if (plugins.usageCollection) {
+        setUsageCollectionStart(plugins.usageCollection);
+      }
 
       return {
         attributeService: getLensAttributeService(coreStart, plugins),
@@ -335,10 +337,13 @@ export class LensPlugin {
           eventAnnotation
         );
 
-        const { mountApp, stopReportManager, getLensAttributeService } = await import(
+        const { mountApp, getLensAttributeService, setUsageCollectionStart } = await import(
           './async_services'
         );
-        this.stopReportManager = stopReportManager;
+
+        if (deps.usageCollection) {
+          setUsageCollectionStart(deps.usageCollection);
+        }
 
         const frameStart = this.editorFrameService!.start(coreStart, deps);
         return mountApp(core, params, {
@@ -508,9 +513,5 @@ export class LensPlugin {
     };
   }
 
-  stop() {
-    if (this.stopReportManager) {
-      this.stopReportManager();
-    }
-  }
+  stop() {}
 }

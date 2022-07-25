@@ -2,10 +2,273 @@
   "id": "cloudSecurityPosture",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
+    "functions": [
+      {
+        "parentPluginId": "cloudSecurityPosture",
+        "id": "def-public.getSecuritySolutionDashboardLinks",
+        "type": "Function",
+        "tags": [],
+        "label": "getSecuritySolutionDashboardLinks",
+        "description": [
+          "\nGets the cloud security posture links for navigation in the security solution's \"Dashboards\" section."
+        ],
+        "signature": [
+          "<TLinkItem extends BaseLinkItem = BaseLinkItem>(extensions?: Partial<Record<",
+          {
+            "pluginId": "cloudSecurityPosture",
+            "scope": "public",
+            "docId": "kibCloudSecurityPosturePluginApi",
+            "section": "def-public.CloudSecurityPosturePageId",
+            "text": "CloudSecurityPosturePageId"
+          },
+          ", Partial<TLinkItem>>> | undefined) => TLinkItem"
+        ],
+        "path": "x-pack/plugins/cloud_security_posture/public/common/navigation/security_solution_links.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "cloudSecurityPosture",
+            "id": "def-public.getSecuritySolutionDashboardLinks.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "extensions",
+            "description": [
+              "extended configuration for the links."
+            ],
+            "signature": [
+              "Partial<Record<",
+              {
+                "pluginId": "cloudSecurityPosture",
+                "scope": "public",
+                "docId": "kibCloudSecurityPosturePluginApi",
+                "section": "def-public.CloudSecurityPosturePageId",
+                "text": "CloudSecurityPosturePageId"
+              },
+              ", Partial<TLinkItem>>> | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_security_posture/public/common/navigation/security_solution_links.ts",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cloudSecurityPosture",
+        "id": "def-public.getSecuritySolutionManageLinks",
+        "type": "Function",
+        "tags": [],
+        "label": "getSecuritySolutionManageLinks",
+        "description": [
+          "\nGets the cloud security posture links for navigation in the security solution's \"Manage\" section."
+        ],
+        "signature": [
+          "<TLinkItem extends BaseLinkItem = BaseLinkItem>(extensions?: Partial<Record<",
+          {
+            "pluginId": "cloudSecurityPosture",
+            "scope": "public",
+            "docId": "kibCloudSecurityPosturePluginApi",
+            "section": "def-public.CloudSecurityPosturePageId",
+            "text": "CloudSecurityPosturePageId"
+          },
+          ", Partial<TLinkItem>>> | undefined) => TLinkItem"
+        ],
+        "path": "x-pack/plugins/cloud_security_posture/public/common/navigation/security_solution_links.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "cloudSecurityPosture",
+            "id": "def-public.getSecuritySolutionManageLinks.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "extensions",
+            "description": [
+              "extended configuration for the links."
+            ],
+            "signature": [
+              "Partial<Record<",
+              {
+                "pluginId": "cloudSecurityPosture",
+                "scope": "public",
+                "docId": "kibCloudSecurityPosturePluginApi",
+                "section": "def-public.CloudSecurityPosturePageId",
+                "text": "CloudSecurityPosturePageId"
+              },
+              ", Partial<TLinkItem>>> | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_security_posture/public/common/navigation/security_solution_links.ts",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cloudSecurityPosture",
+        "id": "def-public.getSecuritySolutionRootLinks",
+        "type": "Function",
+        "tags": [],
+        "label": "getSecuritySolutionRootLinks",
+        "description": [
+          "\nGets the cloud security posture links for top-level navigation in the security solution."
+        ],
+        "signature": [
+          "<TLinkItem extends BaseLinkItem = BaseLinkItem>(extensions?: Partial<Record<",
+          {
+            "pluginId": "cloudSecurityPosture",
+            "scope": "public",
+            "docId": "kibCloudSecurityPosturePluginApi",
+            "section": "def-public.CloudSecurityPosturePageId",
+            "text": "CloudSecurityPosturePageId"
+          },
+          ", Partial<TLinkItem>>> | undefined) => TLinkItem"
+        ],
+        "path": "x-pack/plugins/cloud_security_posture/public/common/navigation/security_solution_links.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "cloudSecurityPosture",
+            "id": "def-public.getSecuritySolutionRootLinks.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "extensions",
+            "description": [
+              "extended configuration for the links."
+            ],
+            "signature": [
+              "Partial<Record<",
+              {
+                "pluginId": "cloudSecurityPosture",
+                "scope": "public",
+                "docId": "kibCloudSecurityPosturePluginApi",
+                "section": "def-public.CloudSecurityPosturePageId",
+                "text": "CloudSecurityPosturePageId"
+              },
+              ", Partial<TLinkItem>>> | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_security_posture/public/common/navigation/security_solution_links.ts",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "cloudSecurityPosture",
+        "id": "def-public.CspSecuritySolutionContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "CspSecuritySolutionContext",
+        "description": [
+          "\nMethods exposed from the security solution to the cloud security posture application."
+        ],
+        "path": "x-pack/plugins/cloud_security_posture/public/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "cloudSecurityPosture",
+            "id": "def-public.CspSecuritySolutionContext.getFiltersGlobalComponent",
+            "type": "Function",
+            "tags": [],
+            "label": "getFiltersGlobalComponent",
+            "description": [
+              "Gets the `FiltersGlobal` component for embedding a filter bar in the security solution application."
+            ],
+            "signature": [
+              "() => React.ComponentType<{ children: React.ReactNode; }>"
+            ],
+            "path": "x-pack/plugins/cloud_security_posture/public/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "cloudSecurityPosture",
+            "id": "def-public.CspSecuritySolutionContext.getSpyRouteComponent",
+            "type": "Function",
+            "tags": [],
+            "label": "getSpyRouteComponent",
+            "description": [
+              "Gets the `SpyRoute` component for navigation highlighting and breadcrumbs."
+            ],
+            "signature": [
+              "() => React.ComponentType<{ pageName?: ",
+              {
+                "pluginId": "cloudSecurityPosture",
+                "scope": "public",
+                "docId": "kibCloudSecurityPosturePluginApi",
+                "section": "def-public.CloudSecurityPosturePageId",
+                "text": "CloudSecurityPosturePageId"
+              },
+              " | undefined; }>"
+            ],
+            "path": "x-pack/plugins/cloud_security_posture/public/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "cloudSecurityPosture",
+            "id": "def-public.CspSecuritySolutionContext.getManageBreadcrumbEntry",
+            "type": "Function",
+            "tags": [],
+            "label": "getManageBreadcrumbEntry",
+            "description": [
+              "Gets the `Manage` breadcrumb entry."
+            ],
+            "signature": [
+              "() => ",
+              "BreadcrumbEntry"
+            ],
+            "path": "x-pack/plugins/cloud_security_posture/public/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "cloudSecurityPosture",
+        "id": "def-public.CLOUD_SECURITY_POSTURE_BASE_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "CLOUD_SECURITY_POSTURE_BASE_PATH",
+        "description": [
+          "The base path for all cloud security posture pages."
+        ],
+        "signature": [
+          "\"/cloud_security_posture\""
+        ],
+        "path": "x-pack/plugins/cloud_security_posture/public/common/navigation/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cloudSecurityPosture",
+        "id": "def-public.CloudSecurityPosturePageId",
+        "type": "Type",
+        "tags": [],
+        "label": "CloudSecurityPosturePageId",
+        "description": [
+          "\nAll the IDs for the cloud security posture pages.\nThis needs to match the cloud security posture page entries in `SecurityPageName` in `x-pack/plugins/security_solution/common/constants.ts`."
+        ],
+        "signature": [
+          "\"cloud_security_posture-dashboard\" | \"cloud_security_posture-findings\" | \"cloud_security_posture-benchmarks\" | \"cloud_security_posture-rules\""
+        ],
+        "path": "x-pack/plugins/cloud_security_posture/public/common/navigation/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [],
     "setup": {
       "parentPluginId": "cloudSecurityPosture",
@@ -13,7 +276,9 @@
       "type": "Interface",
       "tags": [],
       "label": "CspClientPluginSetup",
-      "description": [],
+      "description": [
+        "\nThe cloud security posture's public plugin setup interface."
+      ],
       "path": "x-pack/plugins/cloud_security_posture/public/types.ts",
       "deprecated": false,
       "children": [],
@@ -26,10 +291,38 @@
       "type": "Interface",
       "tags": [],
       "label": "CspClientPluginStart",
-      "description": [],
+      "description": [
+        "\nThe cloud security posture's public plugin start interface."
+      ],
       "path": "x-pack/plugins/cloud_security_posture/public/types.ts",
       "deprecated": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "cloudSecurityPosture",
+          "id": "def-public.CspClientPluginStart.getCloudSecurityPostureRouter",
+          "type": "Function",
+          "tags": [],
+          "label": "getCloudSecurityPostureRouter",
+          "description": [
+            "Gets the cloud security posture router component for embedding in the security solution."
+          ],
+          "signature": [
+            "() => React.ComponentType<{ securitySolutionContext: ",
+            {
+              "pluginId": "cloudSecurityPosture",
+              "scope": "public",
+              "docId": "kibCloudSecurityPosturePluginApi",
+              "section": "def-public.CspSecuritySolutionContext",
+              "text": "CspSecuritySolutionContext"
+            },
+            "; }>"
+          ],
+          "path": "x-pack/plugins/cloud_security_posture/public/types.ts",
+          "deprecated": false,
+          "children": [],
+          "returnComment": []
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -80,7 +373,9 @@
         "type": "string",
         "tags": [],
         "label": "PLUGIN_ID",
-        "description": [],
+        "description": [
+          "ID of the cloud security posture plugin."
+        ],
         "signature": [
           "\"csp\""
         ],
@@ -94,7 +389,9 @@
         "type": "string",
         "tags": [],
         "label": "PLUGIN_NAME",
-        "description": [],
+        "description": [
+          "Display name of the cloud security posture application."
+        ],
         "signature": [
           "\"Cloud Security\""
         ],

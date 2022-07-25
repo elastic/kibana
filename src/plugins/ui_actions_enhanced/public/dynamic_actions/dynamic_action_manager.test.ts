@@ -10,7 +10,7 @@ import { DynamicActionManager } from './dynamic_action_manager';
 import { ActionStorage, MemoryActionStorage } from './dynamic_action_storage';
 import { UiActionsService } from '@kbn/ui-actions-plugin/public';
 import { ActionRegistry } from '@kbn/ui-actions-plugin/public/types';
-import { of } from '@kbn/kibana-utils-plugin';
+import { of } from '@kbn/kibana-utils-plugin/common';
 import { UiActionsServiceEnhancements } from '../services';
 import { ActionFactoryDefinition } from './action_factory_definition';
 import { SerializedAction, SerializedEvent } from './types';
