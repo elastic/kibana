@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -24,9 +24,12 @@ export function FieldInput({
 }) {
   const fields = dataView ? getFilterableFields(dataView) : [];
 
-  function onFieldChange([selectedfield]: DataViewField[]) {
-    onHandleField(selectedfield);
-  }
+  const onFieldChange = useCallback(
+    ([selectedfield]: DataViewField[]) => {
+      onHandleField(selectedfield);
+    },
+    [onHandleField]
+  );
 
   return (
     <EuiFormRow fullWidth>

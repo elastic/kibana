@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { buildEmptyFilter, Filter } from '@kbn/es-query';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { buildEmptyFilter, buildFilter, Filter } from '@kbn/es-query';
+import { Operator } from '../../filter_bar/filter_editor/lib/filter_operators';
 import { ConditionTypes } from './filters_editor_condition_types';
 
 export const getConditionalOperationType = (filter: Filter): ConditionTypes | undefined => {
@@ -21,7 +23,6 @@ export const getConditionalOperationType = (filter: Filter): ConditionTypes | un
     }
   }
 };
-
 
 export const getFilterDepth = (path: string) => {
   return path.split('.').length || 0 + 1;
@@ -91,4 +92,45 @@ export const addFilterGroupWithEmptyFilter = (
 
 export const removeFilter = (filters: Filter[], payload: { path: string }) => {
   return goIntoFilersGroup(filters, orderInFilterGroup(payload.path), payload.path);
+};
+
+export const updateFilterItem = (
+  filters: Filter[],
+  payload: {
+    dataView: DataView;
+    field?: DataViewField | undefined;
+    operator?: Operator | undefined;
+    params?: any | undefined;
+    path: string;
+  }
+) => {
+  return filters.map((filter, i) => {
+    const { dataView, field, operator, params, path } = payload;
+    if (getFilterDepth(path) === 1) {
+      if (!params) {
+        return filter;
+      }
+      if (params?.conditionalType) {
+        return filter;
+      }
+      const { $state } = filter;
+      const { index, disabled = false, alias = '' } = filter.meta;
+      if (field && operator) {
+        return buildFilter(
+          dataView,
+          field,
+          operator.type,
+          operator.negate,
+          disabled,
+          params ?? '',
+          alias,
+          $state?.store
+        );
+      } else {
+        return buildEmptyFilter(false, index);
+      }
+    } else {
+      return filter;
+    }
+  });
 };
