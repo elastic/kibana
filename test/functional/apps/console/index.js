@@ -22,6 +22,7 @@ export default function ({ getService, loadTestFile }) {
       loadTestFile(require.resolve('./_vector_tile'));
       loadTestFile(require.resolve('./_comments'));
       loadTestFile(require.resolve('./_variables'));
+      loadTestFile(require.resolve('./_xjson'));
     }
   });
 }
