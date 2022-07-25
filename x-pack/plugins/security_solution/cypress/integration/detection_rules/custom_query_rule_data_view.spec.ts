@@ -68,10 +68,11 @@ describe('Custom query rules', () => {
   });
 
   describe('Custom detection rules creation with data views', () => {
-    const expectedUrls = getDataViewRule().referenceUrls.join('');
-    const expectedFalsePositives = getDataViewRule().falsePositivesExamples.join('');
-    const expectedTags = getDataViewRule().tags.join('');
-    const expectedMitre = formatMitreAttackDescription(getDataViewRule().mitre);
+    const rule = getDataViewRule();
+    const expectedUrls = rule.referenceUrls.join('');
+    const expectedFalsePositives = rule.falsePositivesExamples.join('');
+    const expectedTags = rule.tags.join('');
+    const expectedMitre = formatMitreAttackDescription(rule.mitre);
     const expectedNumberOfRules = 1;
 
     beforeEach(() => {
@@ -79,18 +80,19 @@ describe('Custom query rules', () => {
       are creating a data view we'll use after and cleanKibana does not delete all the data views created, esArchiverReseKibana does.
       We don't use esArchiverReseKibana in all the tests because is a time-consuming method and we don't need to perform an exhaustive 
       cleaning in all the other tests. */
-
       esArchiverResetKibana();
-      createTimeline(getDataViewRule().timeline).then((response) => {
+      createTimeline(rule.timeline).then((response) => {
         cy.wrap({
-          ...getDataViewRule(),
+          ...rule,
           timeline: {
-            ...getDataViewRule().timeline,
+            ...rule.timeline,
             id: response.body.data.persistTimeline.timeline.savedObjectId,
           },
         }).as('rule');
       });
-      postDataView(getDataViewRule().dataSource);
+      if (rule.dataSource.type === 'dataView') {
+        postDataView(rule.dataSource.dataView);
+      }
     });
 
     it('Creates and enables a new rule', function () {

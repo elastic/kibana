@@ -298,7 +298,9 @@ describe('Custom query rules', () => {
       const rule = getEditedRule();
       const expectedEditedtags = rule.tags.join('');
       const expectedEditedIndexPatterns =
-        rule.dataSource.type === 'indexPatterns' && rule.dataSource.index
+        rule.dataSource.type === 'indexPatterns' &&
+        rule.dataSource.index &&
+        rule.dataSource.index.length
           ? rule.dataSource.index
           : getIndexPatterns();
 
@@ -326,27 +328,32 @@ describe('Custom query rules', () => {
       });
 
       it('Allows a rule to be edited', () => {
+        const existingRule = getExistingRule();
+
         editFirstRule();
 
         // expect define step to populate
-        cy.get(CUSTOM_QUERY_INPUT).should('have.value', getExistingRule().customQuery);
-        if (rule.dataSource.type === 'indexPatterns' && rule.dataSource.index) {
-          cy.get(DEFINE_INDEX_INPUT).should('have.text', rule.dataSource.index?.join(''));
+        cy.get(CUSTOM_QUERY_INPUT).should('have.value', existingRule.customQuery);
+        if (
+          existingRule.dataSource.type === 'indexPatterns' &&
+          existingRule.dataSource.index.length > 0
+        ) {
+          cy.get(DEFINE_INDEX_INPUT).should('have.text', existingRule.dataSource.index.join(''));
         }
 
         goToAboutStepTab();
 
         // expect about step to populate
-        cy.get(RULE_NAME_INPUT).invoke('val').should('eql', getExistingRule().name);
-        cy.get(RULE_DESCRIPTION_INPUT).should('have.text', getExistingRule().description);
-        cy.get(TAGS_FIELD).should('have.text', getExistingRule().tags.join(''));
-        cy.get(SEVERITY_DROPDOWN).should('have.text', getExistingRule().severity);
-        cy.get(DEFAULT_RISK_SCORE_INPUT).invoke('val').should('eql', getExistingRule().riskScore);
+        cy.get(RULE_NAME_INPUT).invoke('val').should('eql', existingRule.name);
+        cy.get(RULE_DESCRIPTION_INPUT).should('have.text', existingRule.description);
+        cy.get(TAGS_FIELD).should('have.text', existingRule.tags.join(''));
+        cy.get(SEVERITY_DROPDOWN).should('have.text', existingRule.severity);
+        cy.get(DEFAULT_RISK_SCORE_INPUT).invoke('val').should('eql', existingRule.riskScore);
 
         goToScheduleStepTab();
 
         // expect schedule step to populate
-        const interval = getExistingRule().interval;
+        const interval = existingRule.interval;
         const intervalParts = interval != null && interval.match(/[0-9]+|[a-zA-Z]+/g);
         if (intervalParts) {
           const [amount, unit] = intervalParts;
@@ -382,7 +389,7 @@ describe('Custom query rules', () => {
         cy.wait('@getRule').then(({ response }) => {
           cy.wrap(response?.statusCode).should('eql', 200);
           // ensure that editing rule does not modify max_signals
-          cy.wrap(response?.body.max_signals).should('eql', getExistingRule().maxSignals);
+          cy.wrap(response?.body.max_signals).should('eql', existingRule.maxSignals);
         });
 
         cy.get(RULE_NAME_HEADER).should('contain', `${getEditedRule().name}`);
