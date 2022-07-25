@@ -87,14 +87,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(await desc.getVisibleText()).equal(`Testing upgrade! Let's see how it goes.`);
       });
 
-      it('shows the description correctly', async () => {
-        const desc = await find.byCssSelector(
-          '[data-test-subj="description-action"] [data-test-subj="user-action-markdown"]'
-        );
-
-        expect(await desc.getVisibleText()).equal(`Testing upgrade! Let's see how it goes.`);
-      });
-
       it('shows the edit title user action', async () => {
         await cases.singleCase.verifyUserAction(
           'title-update-action-',
