@@ -26,11 +26,8 @@ const TemplateComponent = ({ defPairs }: Props) => {
             {pair[0]}
             {!!pair[1] && ':'}
           </dt>
-          <dd
-            className="rowFormatter__value"
-            // eslint-disable-next-line react/no-danger
-            dangerouslySetInnerHTML={{ __html: pair[1] }}
-          />{' '}
+          <dd className="rowFormatter__value" />
+          {pair[1]}
         </Fragment>
       ))}
     </dl>
