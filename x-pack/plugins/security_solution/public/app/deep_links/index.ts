@@ -45,6 +45,7 @@ import {
   DASHBOARDS,
   CREATE_NEW_RULE,
   RESPONSE_ACTIONS,
+  THREAT_INTELLIGENCE,
 } from '../translations';
 import {
   OVERVIEW_PATH,
@@ -69,6 +70,7 @@ import {
   KUBERNETES_PATH,
   RULES_CREATE_PATH,
   RESPONSE_ACTIONS_PATH,
+  THREAT_INTELLIGENCE_PATH,
 } from '../../../common/constants';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { hasCapabilities, subscribeAppLinks } from '../../common/links';
@@ -361,6 +363,17 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
             }),
             path: `${USERS_PATH}/events`,
           },
+        ],
+      },
+      {
+        id: SecurityPageName.threatIntelligence,
+        title: THREAT_INTELLIGENCE,
+        path: THREAT_INTELLIGENCE_PATH,
+        navLinkStatus: AppNavLinkStatus.hidden,
+        keywords: [
+          i18n.translate('xpack.securitySolution.search.threatIntelligence', {
+            defaultMessage: 'Threat Intelligence',
+          }),
         ],
       },
       {
