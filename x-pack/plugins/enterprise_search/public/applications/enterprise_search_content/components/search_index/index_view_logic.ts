@@ -31,13 +31,14 @@ import {
   isConnectorIndex,
 } from '../../utils/indices';
 
-export type IndicesActions = Pick<
-  Actions<StartSyncArgs, {}>,
-  'makeRequest' | 'apiSuccess' | 'apiError'
-> & {
+export interface IndicesActions {
   fetchIndexSuccess: Actions<FetchIndexApiParams, FetchIndexApiResponse>['apiSuccess'];
+  makeStartSyncRequest: Actions<StartSyncArgs, {}>['makeRequest'];
   startSync(): void;
-};
+  startSyncApiError: Actions<StartSyncArgs, {}>['apiError'];
+  startSyncApiSuccess: Actions<StartSyncArgs, {}>['apiSuccess'];
+}
+
 export interface IndicesValues {
   data: typeof FetchIndexApiLogic.values.data;
   index: ElasticsearchViewIndex | undefined;
@@ -55,33 +56,42 @@ export const IndexViewLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>(
     startSync: true,
   },
   connect: {
-    actions: [StartSyncApiLogic, ['makeRequest', 'apiSuccess', 'apiError']],
+    actions: [
+      StartSyncApiLogic,
+      [
+        'makeRequest as makeStartSyncRequest',
+        'apiSuccess as startSyncApiSuccess',
+        'apiError as startSyncApiError',
+      ],
+      FetchIndexApiLogic,
+      ['apiSuccess as fetchIndexApiSuccess'],
+    ],
     values: [FetchIndexApiLogic, ['data']],
   },
   listeners: ({ actions, values }) => ({
-    apiError: (e) => flashAPIErrors(e),
-    apiSuccess: () => {
+    makeStartSyncRequest: () => clearFlashMessages(),
+    startSync: () => {
+      if (isConnectorIndex(values.data)) {
+        actions.makeStartSyncRequest({ connectorId: values.data?.connector?.id });
+      }
+    },
+    startSyncApiError: (e) => flashAPIErrors(e),
+    startSyncApiSuccess: () => {
       flashSuccessToast(
         i18n.translate('xpack.enterpriseSearch.content.searchIndex.index.syncSuccess.message', {
           defaultMessage: 'Successfully scheduled a sync, waiting for a connector to pick it up',
         })
       );
     },
-    makeRequest: () => clearFlashMessages(),
-    startSync: () => {
-      if (isConnectorIndex(values.data)) {
-        actions.makeRequest({ connectorId: values.data?.connector?.id });
-      }
-    },
   }),
-  path: ['enterprise_search', 'content', 'view_index_logic'],
+  path: ['enterprise_search', 'content', 'index_view_logic'],
   reducers: {
     localSyncNowValue: [
       false,
       {
-        apiSuccess: () => true,
         fetchIndexSuccess: (_, index) =>
           isConnectorIndex(index) ? index.connector.sync_now : false,
+        startSyncApiSuccess: () => true,
       },
     ],
   },
