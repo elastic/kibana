@@ -76,9 +76,8 @@ export const CustomizablePalette = ({
   const styles = useMemo(
     () => css`
       padding: ${euiTheme.size.base};
-      border-bottom: ${euiTheme.border.thin};
     `,
-    [euiTheme.size.base, euiTheme.border.thin]
+    [euiTheme.size.base]
   );
 
   return (

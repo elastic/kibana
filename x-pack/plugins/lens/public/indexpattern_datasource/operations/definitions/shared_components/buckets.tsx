@@ -37,6 +37,7 @@ export const NewBucketButton = ({
     iconType="plusInCircle"
     onClick={onClick}
     isDisabled={isDisabled}
+    flush="left"
   >
     {label}
   </EuiButtonEmpty>

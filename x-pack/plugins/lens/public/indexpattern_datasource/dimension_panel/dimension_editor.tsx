@@ -16,7 +16,7 @@ import {
   EuiListGroupItemProps,
   EuiToolTip,
   EuiText,
-  EuiIcon,
+  EuiIconTip,
   useEuiTheme,
   EuiFlexGroup,
   EuiFlexItem,
@@ -322,6 +322,10 @@ export function DimensionEditor(props: DimensionEditorProps) {
     [selectedColumn, currentIndexPattern]
   );
 
+  const shouldDisplayDots =
+    temporaryState === 'none' ||
+    (selectedColumn?.operationType != null && isQuickFunction(selectedColumn?.operationType));
+
   const sideNavItems: EuiListGroupItemProps[] = operationsWithCompatibility.map(
     ({ operationType, compatibleWithCurrentField, disabledStatus }) => {
       const isActive = Boolean(
@@ -344,27 +348,26 @@ export function DimensionEditor(props: DimensionEditorProps) {
             <span>{operationDisplay[operationType].displayName}</span>
           </EuiToolTip>
         );
-      } else if (isActive) {
-        label = (
-          <EuiText color={euiTheme.colors.primary} size="s" style={{ fontWeight: 'inherit' }}>
-            {operationDisplay[operationType].displayName}
-          </EuiText>
-        );
       } else if (!compatibleWithCurrentField) {
         label = (
           <EuiFlexGroup gutterSize="none" alignItems="center">
-            <EuiFlexItem grow={false}>{label}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip
-                content={i18n.translate('xpack.lens.indexPattern.helpIncompatibleFieldDotLabel', {
-                  defaultMessage: 'This function is not compatible with the current selected field',
-                })}
-                display="block"
-                position="left"
-              >
-                <EuiIcon type="dot" color="warning" />
-              </EuiToolTip>
+            <EuiFlexItem grow={false} style={{ marginRight: euiTheme.size.xs }}>
+              {label}
             </EuiFlexItem>
+            {shouldDisplayDots && (
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  content={i18n.translate('xpack.lens.indexPattern.helpIncompatibleFieldDotLabel', {
+                    defaultMessage:
+                      'This function is not compatible with the current selected field',
+                  })}
+                  position="left"
+                  size="s"
+                  type="dot"
+                  color="warning"
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         );
       }
@@ -569,7 +572,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     <>
       <EuiFormRow
         label={i18n.translate('xpack.lens.indexPattern.functionsLabel', {
-          defaultMessage: 'Functions',
+          defaultMessage: 'Function',
         })}
         fullWidth
       >
@@ -803,7 +806,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         }
       },
       label: i18n.translate('xpack.lens.indexPattern.quickFunctionsLabel', {
-        defaultMessage: 'Quick functions',
+        defaultMessage: 'Quick function',
       }),
     },
     {

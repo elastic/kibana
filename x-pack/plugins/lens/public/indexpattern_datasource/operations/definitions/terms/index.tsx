@@ -916,7 +916,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         </EuiFormRow>
         {!hasRestrictions && (
           <>
-            <EuiSpacer size="s" />
+            <EuiSpacer size="m" />
             <EuiAccordion
               id="lnsTermsAdvanced"
               arrowProps={{ color: 'primary' }}
@@ -957,7 +957,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                   )
                 }
               />
-              <EuiSpacer size="m" />
+              <EuiSpacer size="s" />
               <EuiSwitch
                 label={
                   <EuiText size="xs">
@@ -981,7 +981,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                   )
                 }
               />
-              <EuiSpacer size="m" />
+              <EuiSpacer size="s" />
               <EuiSwitch
                 label={
                   <EuiText size="xs">

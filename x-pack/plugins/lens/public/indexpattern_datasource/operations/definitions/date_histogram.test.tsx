@@ -429,6 +429,7 @@ describe('date_histogram', () => {
           paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={thirdLayer.columns.col1 as DateHistogramIndexPatternColumn}
+          indexPattern={{ ...indexPattern1, timeFieldName: '@timestamp' }}
         />
       );
       instance

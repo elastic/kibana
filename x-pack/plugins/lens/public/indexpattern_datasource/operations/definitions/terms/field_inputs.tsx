@@ -99,6 +99,9 @@ export function FieldInputs({
       <div
         style={{
           padding: euiTheme.size.s,
+          backgroundColor: euiTheme.colors.lightestShade,
+          borderRadius: euiTheme.size.xs,
+          marginBottom: euiTheme.size.xs,
         }}
       >
         <DragDropBuckets
@@ -144,7 +147,6 @@ export function FieldInputs({
             );
             return (
               <EuiDraggable
-                style={{ marginBottom: 4 }}
                 spacing="none"
                 index={index}
                 draggableId={value || 'newField'}
@@ -157,7 +159,7 @@ export function FieldInputs({
                     <EuiFlexItem grow={false}>
                       <EuiIcon
                         size="s"
-                        color="subdued"
+                        color="text"
                         type="grab"
                         title={i18n.translate('xpack.lens.indexPattern.terms.dragToReorder', {
                           defaultMessage: 'Drag to reorder',

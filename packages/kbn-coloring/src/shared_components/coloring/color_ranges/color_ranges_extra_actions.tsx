@@ -8,8 +8,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, Dispatch, useContext } from 'react';
-import { EuiFlexGroup, EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
+import React, { useCallback, Dispatch, useContext, useMemo } from 'react';
+import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiButtonEmpty, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 
 import { DistributeEquallyIcon } from '../assets/distribute_equally';
 import { TooltipWrapper } from '../tooltip_wrapper';
@@ -50,9 +51,18 @@ export function ColorRangesExtraActions({
     defaultMessage: `Requires more than one color`,
   });
 
+  const { euiTheme } = useEuiTheme();
+
+  const styles = useMemo(
+    () => css`
+      margin-right: ${euiTheme.size.base};
+    `,
+    [euiTheme.size.base]
+  );
+
   return (
     <EuiFlexGroup justifyContent="flexStart" gutterSize="none" wrap={true}>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} css={styles}>
         <TooltipWrapper
           tooltipContent={i18n.translate(
             'coloring.dynamicColoring.customPalette.maximumStepsApplied',
@@ -83,7 +93,7 @@ export function ColorRangesExtraActions({
           </EuiButtonEmpty>
         </TooltipWrapper>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} css={styles}>
         <TooltipWrapper
           tooltipContent={oneColorRangeWarn}
           condition={shouldDisableReverse}

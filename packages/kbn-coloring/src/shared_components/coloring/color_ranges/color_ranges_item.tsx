@@ -170,7 +170,11 @@ export function ColorRangeItem({
             onChange={onUpdateColor}
             button={
               isColorValid ? (
-                <EuiColorPickerSwatch color={colorRange.color} aria-label={selectNewColorText} />
+                <EuiColorPickerSwatch
+                  color={colorRange.color}
+                  aria-label={selectNewColorText}
+                  style={{ width: '32px', height: '32px' }}
+                />
               ) : (
                 <EuiButtonIcon
                   color="danger"
@@ -190,7 +194,7 @@ export function ColorRangeItem({
             isInvalid={!isColorValid}
           />
         ) : (
-          <EuiIcon type={RelatedIcon} size="l" />
+          <EuiIcon type={RelatedIcon} size="m" color="#ABB4C4" />
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
