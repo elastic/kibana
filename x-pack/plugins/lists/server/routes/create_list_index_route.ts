@@ -45,6 +45,8 @@ export const createListIndexRoute = (router: ListsPluginRouter): void => {
 
         const templateExists = await lists.getListTemplateExists();
         const templateListItemsExists = await lists.getListItemTemplateExists();
+        const legacyTemplateExists = await lists.getLegacyListTemplateExists();
+        const legacyTemplateListItemsExists = await lists.getLegacyListItemTemplateExists();
 
         if (!templateExists) {
           await lists.setListTemplate();
@@ -56,8 +58,12 @@ export const createListIndexRoute = (router: ListsPluginRouter): void => {
 
         try {
           // Check if the old legacy lists and items template exists and remove it
-          await lists.deleteLegacyListTemplate();
-          await lists.deleteLegacyListItemTemplate();
+          if (legacyTemplateExists) {
+            await lists.deleteLegacyListTemplate();
+          }
+          if (legacyTemplateListItemsExists) {
+            await lists.deleteLegacyListItemTemplate();
+          }
         } catch (err) {
           if (err.statusCode !== 404) {
             throw err;

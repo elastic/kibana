@@ -42,9 +42,13 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
       beforeEach(() => {
         // Index mapping outdated is forced to return true as being outdated so that we get the
         // need admin callouts being shown.
-        cy.intercept('GET', '/api/detection_engine/index', {
-          index_mapping_outdated: true,
-          name: '.alerts-security.alerts-default',
+        cy.intercept('GET', '/api/detection_engine/index', (req) => {
+          req.reply((res) => {
+            res.send(200, {
+              index_mapping_outdated: true,
+              name: '.alerts-security.alerts-default'
+            });
+          });
         });
       });
       context('On Detections home page', () => {
