@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { EuiText } from '@elastic/eui';
 import { JourneyStep } from '../../../../../../common/runtime_types';
-import { formatTestDuration } from '../../../utils/monitor_test_result/test_duration';
+import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 
 export const StepDurationText = ({ step }: { step: JourneyStep }) => {
   const stepDurationText = useMemo(() => {

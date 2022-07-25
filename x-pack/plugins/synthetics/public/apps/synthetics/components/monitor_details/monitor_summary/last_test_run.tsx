@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import React, { useMemo } from 'react';
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -23,12 +21,21 @@ import {
 } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import { useJourneySteps } from '../hooks/use_journey_steps';
-import { BrowserStepsList } from '../../common/monitor_test_result/browser_steps_list';
-import { DataStream, Ping } from '../../../../../../common/runtime_types';
+
+import {
+  DataStream,
+  EncryptedSyntheticsSavedMonitor,
+  Ping,
+} from '../../../../../../common/runtime_types';
+import { formatTestRunAt } from '../../../utils/monitor_test_result/test_time_formats';
+
+import { useSyntheticsSettingsContext } from '../../../contexts';
 import { selectLatestPing, selectPingsLoading } from '../../../state';
-import { FAILED_LABEL, COMPLETE_LABEL } from '../../common/monitor_test_result/status_badge';
+import { BrowserStepsList } from '../../common/monitor_test_result/browser_steps_list';
 import { SinglePingResult } from '../../common/monitor_test_result/single_ping_result';
+import { parseBadgeStatus, StatusBadge } from '../../common/monitor_test_result/status_badge';
+
+import { useJourneySteps } from '../hooks/use_journey_steps';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 
 export const LastTestRun = () => {
@@ -48,7 +55,7 @@ export const LastTestRun = () => {
 
   return (
     <EuiPanel css={{ minHeight: 356 }}>
-      <PanelHeader latestPing={latestPing} loading={loading} />
+      <PanelHeader monitor={monitor} latestPing={latestPing} loading={loading} />
       {!loading && latestPing?.error ? (
         <EuiCallOut
           style={{
@@ -84,10 +91,21 @@ export const LastTestRun = () => {
   );
 };
 
-const PanelHeader = ({ latestPing, loading }: { latestPing: Ping; loading: boolean }) => {
+const PanelHeader = ({
+  monitor,
+  latestPing,
+  loading,
+}: {
+  monitor: EncryptedSyntheticsSavedMonitor | null;
+  latestPing: Ping;
+  loading: boolean;
+}) => {
   const { euiTheme } = useEuiTheme();
+
+  const { basePath } = useSyntheticsSettingsContext();
+
   const lastRunTimestamp = useMemo(
-    () => (latestPing?.timestamp ? formatLastRunAt(latestPing?.timestamp) : ''),
+    () => (latestPing?.timestamp ? formatTestRunAt(latestPing?.timestamp) : ''),
     [latestPing?.timestamp]
   );
 
@@ -119,9 +137,9 @@ const PanelHeader = ({ latestPing, loading }: { latestPing: Ping; loading: boole
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>{TitleNode}</EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiBadge color={latestPing?.summary?.down! > 0 ? 'danger' : 'success'}>
-            {latestPing?.summary?.down! > 0 ? FAILED_LABEL : COMPLETE_LABEL}
-          </EuiBadge>
+          <StatusBadge
+            status={parseBadgeStatus(latestPing?.summary?.down! > 0 ? 'fail' : 'success')}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
           <EuiText size="xs" color={euiTheme.colors.darkShade}>
@@ -133,8 +151,8 @@ const PanelHeader = ({ latestPing, loading }: { latestPing: Ping; loading: boole
             size="xs"
             iconType="inspect"
             iconSide="left"
+            href={`${basePath}/app/uptime/journey/${monitor?.id ?? ''}/steps`}
             data-test-subj="monitorSummaryViewLastTestRun"
-            onClick={() => {}}
           >
             {i18n.translate('xpack.synthetics.monitorDetails.summary.viewTestRun', {
               defaultMessage: 'View test run',
@@ -152,28 +170,3 @@ const LAST_TEST_RUN_LABEL = i18n.translate(
     defaultMessage: 'Last test run',
   }
 );
-
-const TODAY_LABEL = i18n.translate('xpack.synthetics.monitorDetails.summary.today', {
-  defaultMessage: 'Today',
-});
-
-const YESTERDAY_LABEL = i18n.translate('xpack.synthetics.monitorDetails.summary.yesterday', {
-  defaultMessage: 'Yesterday',
-});
-
-function formatLastRunAt(timestamp: string) {
-  const stampedMoment = moment(timestamp);
-  const startOfToday = moment().startOf('day');
-  const startOfYesterday = moment().add(-1, 'day');
-
-  const dateStr =
-    stampedMoment > startOfToday
-      ? `${TODAY_LABEL}`
-      : stampedMoment > startOfYesterday
-      ? `${YESTERDAY_LABEL}`
-      : `${stampedMoment.format('ll')} `;
-
-  const timeStr = stampedMoment.format('HH:mm:ss');
-
-  return `${dateStr} @ ${timeStr}`;
-}

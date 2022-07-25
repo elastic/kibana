@@ -22,9 +22,11 @@ export const parseBadgeStatus = (status: string) => {
   switch (status) {
     case 'succeeded':
     case 'success':
+    case 'up':
       return 'succeeded';
     case 'fail':
     case 'failed':
+    case 'down':
       return 'failed';
     case 'skip':
     case 'skipped':

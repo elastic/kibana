@@ -7,7 +7,7 @@
 
 import { useDispatch, useSelector } from 'react-redux';
 import React from 'react';
-import { composeScreenshotRef } from '../utils/browser_journey/compose_screenshot_images';
+import { composeScreenshotRef } from '../utils/monitor_test_result/compose_screenshot_images';
 import {
   ScreenshotRefImageData,
   ScreenshotBlockCache,

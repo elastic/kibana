@@ -24,6 +24,7 @@ import { DurationPanel } from './duration_panel';
 import { MonitorDetailsPanel } from './monitor_details_panel';
 import { AvailabilitySparklines } from './availability_sparklines';
 import { LastTestRun } from './last_test_run';
+import { LastTenTestRuns } from './last_ten_test_runs';
 
 export const SummaryTabContent = () => {
   const { euiTheme } = useEuiTheme();
@@ -58,7 +59,7 @@ export const SummaryTabContent = () => {
               <EuiFlexItem>{/* TODO: Add error metric and sparkline*/}</EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
-          <EuiSpacer size="s" />
+          <EuiSpacer size="l" />
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiPanel>
@@ -80,9 +81,9 @@ export const SummaryTabContent = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="l" />
       <EuiPanel style={{ height: 100 }}>{/* TODO: Add status panel*/}</EuiPanel>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="l" />
       <EuiFlexGroup>
         <EuiFlexItem>
           <LastTestRun />
@@ -91,6 +92,8 @@ export const SummaryTabContent = () => {
           <StepDurationPanel />
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="l" />
+      <LastTenTestRuns />
     </>
   );
 };

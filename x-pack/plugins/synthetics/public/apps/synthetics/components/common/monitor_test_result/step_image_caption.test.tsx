@@ -9,7 +9,7 @@ import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import { render } from '../../../utils/testing';
 import { StepImageCaption, StepImageCaptionProps } from './step_image_caption';
-import { getShortTimeStamp } from '../../../utils/time/timestamp';
+import { getShortTimeStamp } from '../../../utils/monitor_test_result/timestamp';
 import moment from 'moment';
 import { mockRef } from '../../../utils/testing/__mocks__/screenshot_ref.mock';
 

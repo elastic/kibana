@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Ping } from '../../../../../../common/runtime_types';
-import { formatTestDuration } from '../../../utils/monitor_test_result/test_duration';
+import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 
 export const SinglePingResult = ({ ping, loading }: { ping: Ping; loading: boolean }) => {
   const ip = !loading ? ping?.resolve?.ip : undefined;
