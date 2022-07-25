@@ -42,20 +42,12 @@ import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
 
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
-import {
-  PLUGIN_ID,
-  INTEGRATIONS_PLUGIN_ID,
-  setupRouteService,
-  appRoutesService,
-  calculateAuthz,
-  parseExperimentalConfigValue,
-} from '../common';
-import type {
-  CheckPermissionsResponse,
-  PostFleetSetupResponse,
-  FleetAuthz,
-  ExperimentalFeatures,
-} from '../common';
+import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, setupRouteService, appRoutesService } from '../common';
+import { calculateAuthz } from '../common/authz';
+import { parseExperimentalConfigValue } from '../common/experimental_features';
+import type { CheckPermissionsResponse, PostFleetSetupResponse } from '../common/types';
+import type { FleetAuthz } from '../common';
+import type { ExperimentalFeatures } from '../common/experimental_features';
 
 import type { FleetConfigType } from '../common/types';
 
