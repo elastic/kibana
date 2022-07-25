@@ -20,6 +20,7 @@ import {
   DataViewFieldBase,
   DataViewBase,
 } from '@kbn/es-query';
+import type { Serializable } from '@kbn/utility-types';
 
 import { FilterManager } from '../filter_manager';
 
@@ -75,28 +76,16 @@ export function generateFilters(
   index: DataViewBase
 ): Filter[] {
   values = Array.isArray(values) ? _.uniq(values) : [values];
-  const fieldObj = (
-    _.isObject(field)
-      ? field
-      : {
-          name: field,
-        }
-  ) as DataViewFieldBase;
+
+  const fieldObj = (_.isObject(field) ? field : { name: field }) as DataViewFieldBase;
   const fieldName = fieldObj.name;
   const newFilters: Filter[] = [];
   const appFilters = filterManager.getAppFilters();
-
   const negate = operation === '-';
-  let filter;
 
-  _.each(values, function (value) {
-    const existing = getExistingFilter(appFilters, fieldName, value);
-
-    if (existing) {
-      updateExistingFilter(existing, negate);
-      filter = existing;
-    } else if (fieldObj.type?.includes('range') && value && typeof value === 'object') {
-      filter = buildFilter(
+  function generateFilter(value: Serializable) {
+    if (fieldObj.type?.includes('range') && value && typeof value === 'object') {
+      return buildFilter(
         index,
         fieldObj,
         FILTERS.RANGE_FROM_VALUE,
@@ -106,28 +95,35 @@ export function generateFilters(
         null,
         FilterStateStore.APP_STATE
       );
-    } else {
-      // exists filter special case:  fieldname = '_exists' and value = fieldname
-      const filterType = fieldName === '_exists_' ? FILTERS.EXISTS : FILTERS.PHRASE;
-      const actualFieldObj =
-        fieldName === '_exists_' ? ({ name: value } as DataViewFieldBase) : fieldObj;
-
-      // Fix for #7189 - if value is empty, phrase filters become exists filters.
-      const isNullFilter = value === null || value === undefined;
-
-      filter = buildFilter(
-        index,
-        actualFieldObj,
-        isNullFilter ? FILTERS.EXISTS : filterType,
-        isNullFilter ? !negate : negate,
-        false,
-        value,
-        null,
-        FilterStateStore.APP_STATE
-      );
     }
 
-    newFilters.push(filter);
+    // exists filter special case:  fieldname = '_exists' and value = fieldname
+    const filterType = fieldName === '_exists_' ? FILTERS.EXISTS : FILTERS.PHRASE;
+    const actualFieldObj =
+      fieldName === '_exists_' ? ({ name: value } as DataViewFieldBase) : fieldObj;
+
+    // Fix for #7189 - if value is empty, phrase filters become exists filters.
+    const isNullFilter = value === null || value === undefined;
+
+    return buildFilter(
+      index,
+      actualFieldObj,
+      isNullFilter ? FILTERS.EXISTS : filterType,
+      isNullFilter ? !negate : negate,
+      false,
+      value,
+      null,
+      FilterStateStore.APP_STATE
+    );
+  }
+
+  _.each(values, function (value) {
+    const existing = getExistingFilter(appFilters, fieldName, value);
+    if (existing) {
+      updateExistingFilter(existing, negate);
+    }
+
+    newFilters.push(existing ?? generateFilter(value));
   });
 
   return newFilters;
