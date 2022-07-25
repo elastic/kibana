@@ -171,10 +171,6 @@ export const prebuiltRuleAlertsResponse = {
           type: 'event',
         },
       ],
-      Memory_protection: {
-        feature: 'signature',
-        self_injection: true,
-      },
       'kibana.alert.original_event.dataset': 'endpoint',
       'kibana.alert.rule.exceptions_list': [
         {
@@ -834,10 +830,6 @@ export const prebuiltRuleAlertsResponse = {
           type: 'event',
         },
       ],
-      Memory_protection: {
-        feature: 'shellcode_thread',
-        self_injection: true,
-      },
       'kibana.alert.original_event.dataset': 'endpoint',
       'kibana.alert.rule.exceptions_list': [
         {
@@ -2230,10 +2222,6 @@ export const prebuiltRuleAlertsResponse = {
           type: 'event',
         },
       ],
-      Memory_protection: {
-        feature: 'signature',
-        self_injection: true,
-      },
       'kibana.alert.original_event.dataset': 'endpoint',
       'kibana.alert.rule.exceptions_list': [
         {
@@ -2549,10 +2537,6 @@ export const prebuiltRuleAlertsResponse = {
           type: 'event',
         },
       ],
-      Memory_protection: {
-        feature: 'signature',
-        self_injection: true,
-      },
       'kibana.alert.original_event.dataset': 'endpoint',
       'kibana.alert.rule.exceptions_list': [
         {
