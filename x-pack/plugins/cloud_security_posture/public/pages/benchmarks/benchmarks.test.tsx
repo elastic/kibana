@@ -13,12 +13,20 @@ import { TestProvider } from '../../test/test_provider';
 import { Benchmarks } from './benchmarks';
 import * as TEST_SUBJ from './test_subjects';
 import { useCspBenchmarkIntegrations } from './use_csp_benchmark_integrations';
+import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 
 jest.mock('./use_csp_benchmark_integrations');
+jest.mock('../../common/api/use_setup_status_api');
 
 describe('<Benchmarks />', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: { status: 'indexed' },
+      })
+    );
   });
 
   const renderBenchmarks = (

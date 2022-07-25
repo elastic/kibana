@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import Chance from 'chance';
 import { Rules } from '.';
 import { render, screen } from '@testing-library/react';
 import { QueryClient } from 'react-query';
@@ -16,10 +17,14 @@ import type { PageUrlParams } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { coreMock } from '@kbn/core/public/mocks';
+import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 
 jest.mock('./use_csp_integration', () => ({
   useCspIntegrationInfo: jest.fn(),
 }));
+jest.mock('../../common/api/use_setup_status_api');
+jest.mock('../../common/navigation/use_navigate_to_cis_integration');
+const chance = new Chance();
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -56,6 +61,12 @@ describe('<Rules />', () => {
   beforeEach(() => {
     queryClient.clear();
     jest.clearAllMocks();
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: { status: 'indexed' },
+      })
+    );
   });
 
   it('calls API with URL params', async () => {

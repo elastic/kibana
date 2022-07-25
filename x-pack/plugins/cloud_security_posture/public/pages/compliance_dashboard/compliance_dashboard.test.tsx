@@ -13,6 +13,7 @@ import { ComplianceDashboard } from '.';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { useComplianceDashboardDataApi } from '../../common/api/use_compliance_dashboard_data_api';
 import { DASHBOARD_CONTAINER, MISSING_FINDINGS_NO_DATA_CONFIG } from './test_subjects';
+import { createReactQueryResponse } from '../../test/fixtures/react_query';
 
 jest.mock('../../common/api/use_setup_status_api');
 jest.mock('../../common/api/use_compliance_dashboard_data_api');
@@ -164,11 +165,12 @@ const mockDashboardData = {
 describe('<ComplianceDashboard />', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() => ({
-      isSuccess: true,
-      isLoading: false,
-      data: { status: 'indexed' },
-    }));
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: { status: 'indexed' },
+      })
+    );
   });
 
   const renderComplianceDashboardPage = () => {

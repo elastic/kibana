@@ -31,11 +31,12 @@ jest.mock('../common/navigation/use_navigate_to_cis_integration');
 describe('<CloudPosturePage />', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() => ({
-      isSuccess: true,
-      isLoading: false,
-      data: { status: 'indexed' },
-    }));
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: { status: 'indexed' },
+      })
+    );
   });
 
   const renderCloudPosturePage = (
@@ -73,11 +74,12 @@ describe('<CloudPosturePage />', () => {
   });
 
   it('renders integrations installation prompt if integration is not installed', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() => ({
-      isSuccess: true,
-      isLoading: false,
-      data: { status: 'not-installed' },
-    }));
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: { status: 'not-installed' },
+      })
+    );
     (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
 
     const children = chance.sentence();
