@@ -22,6 +22,7 @@ import type {
   RuleStep,
   DefineStepRule,
 } from '../../../pages/detection_engine/rules/types';
+import { DataSourceType } from '../../../pages/detection_engine/rules/types';
 import { fillEmptySeverityMappings } from '../../../pages/detection_engine/rules/helpers';
 import { TestProviders } from '../../../../common/mock';
 
@@ -54,6 +55,7 @@ export const stepDefineStepMLRule: DefineStepRule = {
   threatMapping: [],
   timeline: { id: null, title: null },
   eqlOptions: {},
+  dataSourceType: DataSourceType.IndexPatterns,
   newTermsFields: ['host.ip'],
   historyWindowSize: '7d',
 };
