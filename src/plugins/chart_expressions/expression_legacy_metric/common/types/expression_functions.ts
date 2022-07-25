@@ -12,7 +12,7 @@ import {
   ExpressionFunctionDefinition,
   ExpressionValueRender,
   Style,
-} from '@kbn/expressions-plugin';
+} from '@kbn/expressions-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
 import { VisParams, visType, LabelPositionType } from './expression_renderers';
