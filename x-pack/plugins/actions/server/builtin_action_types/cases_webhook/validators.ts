@@ -78,11 +78,11 @@ export const assertURL = (url: string) => {
     const parsedUrl = new URL(url);
 
     if (!parsedUrl.hostname) {
-      throw new Error('URL must contain hostname');
+      throw new Error(`URL must contain hostname`);
     }
 
     if (!validProtocols.includes(parsedUrl.protocol)) {
-      throw new Error('Invalid protocol');
+      throw new Error(`Invalid protocol`);
     }
   } catch (error) {
     throw new Error(`${error.message}`);
@@ -95,7 +95,7 @@ export const ensureUriAllowed = (
   try {
     configurationUtilities.ensureUriAllowed(url);
   } catch (allowedListError) {
-    throw Error(i18n.ALLOWED_HOSTS_ERROR(allowedListError.message));
+    throw Error(`${i18n.ALLOWED_HOSTS_ERROR(allowedListError.message)}`);
   }
 };
 export const normalizeURL = (url: string) => {
@@ -114,7 +114,7 @@ export const validateAndNormalizeUrl = (
     ensureUriAllowed(url, configurationUtilities);
     return normalizeURL(url);
   } catch (e) {
-    throw Error(`${urlDesc} ${e}`);
+    throw Error(`Invalid ${urlDesc}: ${url}. ${e}`);
   }
 };
 
