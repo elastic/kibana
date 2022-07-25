@@ -63,7 +63,6 @@ TYPES_DEPS = [
   "@npm//rxjs",
   "@npm//react-use",
   "@npm//kibana-react-plugin/public",
-  "@kbn/core-theme-browser",
   "//packages/core/base/core-base-common-internal:npm_module_types",
   "//packages/kbn-ambient-ui-types",
   "//packages/kbn-shared-ux-utility:npm_module_types",
