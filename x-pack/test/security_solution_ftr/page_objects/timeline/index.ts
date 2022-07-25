@@ -52,7 +52,7 @@ export class TimelinePageObject extends FtrService {
   async closeTimeline(): Promise<void> {
     if (await this.testSubjects.exists(TIMELINE_CLOSE_BUTTON_TEST_SUBJ)) {
       await this.testSubjects.click(TIMELINE_CLOSE_BUTTON_TEST_SUBJ);
-      await this.testSubjects.missingOrFail(TIMELINE_MODAL_PAGE_TEST_SUBJ);
+      await this.testSubjects.waitForHidden(TIMELINE_MODAL_PAGE_TEST_SUBJ);
     }
   }
 }

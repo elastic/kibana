@@ -12,6 +12,7 @@ import { EndpointTelemetryTestResourcesProvider } from './endpoint_telemetry';
 import { EndpointTestResources } from './endpoint';
 import { EndpointArtifactsTestResources } from './endpoint_artifacts';
 import { TimelineTestService } from '../../security_solution_ftr/services/timeline';
+import { DetectionsTestService } from '../../security_solution_ftr/services/detections';
 
 export const services = {
   ...xPackFunctionalServices,
@@ -21,4 +22,5 @@ export const services = {
   telemetryTestResources: EndpointTelemetryTestResourcesProvider,
   ingestManager: IngestManagerProvider,
   timeline: TimelineTestService,
+  detections: DetectionsTestService,
 };
