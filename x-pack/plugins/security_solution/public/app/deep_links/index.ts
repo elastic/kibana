@@ -266,13 +266,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
             path: `${HOSTS_PATH}/events`,
           },
           {
-            id: SecurityPageName.hostsExternalAlerts,
-            title: i18n.translate('xpack.securitySolution.search.hosts.externalAlerts', {
-              defaultMessage: 'External Alerts',
-            }),
-            path: `${HOSTS_PATH}/externalAlerts`,
-          },
-          {
             id: SecurityPageName.hostsRisk,
             title: i18n.translate('xpack.securitySolution.search.hosts.risk', {
               defaultMessage: 'Host risk',
@@ -319,13 +312,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
               defaultMessage: 'TLS',
             }),
             path: `${NETWORK_PATH}/tls`,
-          },
-          {
-            id: SecurityPageName.networkExternalAlerts,
-            title: i18n.translate('xpack.securitySolution.search.network.externalAlerts', {
-              defaultMessage: 'External Alerts',
-            }),
-            path: `${NETWORK_PATH}/external-alerts`,
           },
           {
             id: SecurityPageName.networkAnomalies,
@@ -376,13 +362,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
               defaultMessage: 'Events',
             }),
             path: `${USERS_PATH}/events`,
-          },
-          {
-            id: SecurityPageName.usersExternalAlerts,
-            title: i18n.translate('xpack.securitySolution.search.users.externalAlerts', {
-              defaultMessage: 'External Alerts',
-            }),
-            path: `${USERS_PATH}/externalAlerts`,
           },
         ],
       },

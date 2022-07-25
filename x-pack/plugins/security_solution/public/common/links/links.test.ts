@@ -120,13 +120,6 @@ describe('Security app links', () => {
               // all its links should be filtered for all different criteria
               links: [
                 {
-                  id: SecurityPageName.networkExternalAlerts,
-                  title: 'external alerts',
-                  path: '/external_alerts',
-                  experimentalKey:
-                    'flagDisabled' as unknown as keyof typeof mockExperimentalDefaults,
-                },
-                {
                   id: SecurityPageName.networkDns,
                   title: 'dns',
                   path: '/dns',

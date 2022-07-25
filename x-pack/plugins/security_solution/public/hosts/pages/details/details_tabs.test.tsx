@@ -74,7 +74,6 @@ describe('body', () => {
     [HostsTableType.uncommonProcesses]: 'UncommonProcessQueryTabBody',
     [HostsTableType.anomalies]: 'AnomaliesQueryTabBody',
     [HostsTableType.events]: 'EventsQueryTabBody',
-    [HostsTableType.alerts]: 'HostAlertsQueryTabBody',
   };
 
   const mockHostDetailsPageFilters = getHostDetailsPageFilters('host-1');

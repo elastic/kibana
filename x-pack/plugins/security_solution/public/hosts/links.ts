@@ -47,13 +47,6 @@ export const links: LinkItem = {
       path: `${HOSTS_PATH}/events`,
     },
     {
-      id: SecurityPageName.hostsExternalAlerts,
-      title: i18n.translate('xpack.securitySolution.appLinks.hosts.externalAlerts', {
-        defaultMessage: 'External Alerts',
-      }),
-      path: `${HOSTS_PATH}/externalAlerts`,
-    },
-    {
       id: SecurityPageName.hostsRisk,
       title: i18n.translate('xpack.securitySolution.appLinks.hosts.risk', {
         defaultMessage: 'Host risk',

@@ -99,7 +99,6 @@ export enum SecurityPageName {
   hostIsolationExceptions = 'host_isolation_exceptions',
   hosts = 'hosts',
   hostsAnomalies = 'hosts-anomalies',
-  hostsExternalAlerts = 'hosts-external_alerts',
   hostsRisk = 'hosts-risk',
   hostsEvents = 'hosts-events',
   investigate = 'investigate',
@@ -124,11 +123,11 @@ export enum SecurityPageName {
   trustedApps = 'trusted_apps',
   uncommonProcesses = 'uncommon_processes',
   users = 'users',
-  usersAuthentications = 'users-authentications',
   usersAnomalies = 'users-anomalies',
-  usersRisk = 'users-risk',
+  usersAuthentications = 'users-authentications',
   usersEvents = 'users-events',
   usersExternalAlerts = 'users-external_alerts',
+  usersRisk = 'users-risk',
 }
 
 export const EXPLORE_PATH = '/explore' as const;

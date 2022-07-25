@@ -41,10 +41,7 @@ export const useLensAttributes = ({
   const [{ detailName, pageName, tabName }] = useRouteSpy();
 
   const tabsFilters = useMemo(() => {
-    if (
-      pageName === SecurityPageName.hosts &&
-      (tabName === HostsTableType.alerts || tabName === HostsTableType.events)
-    ) {
+    if (pageName === SecurityPageName.hosts && tabName === HostsTableType.events) {
       return hostNameExistsFilter;
     }
 
