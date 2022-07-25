@@ -322,17 +322,18 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   }
 
   _getCategoricalColorMbExpression() {
+    const otherCategoryColor = this._getOtherCategoryColor();
     if (
       this._options.useCustomColorPalette &&
       (!this._options.customColorPalette || !this._options.customColorPalette.length)
     ) {
-      return null;
+      return otherCategoryColor;
     }
 
     const stops = this._getColorPaletteStops();
     if (stops.length < 1) {
       // occurs when no data
-      return null;
+      return otherCategoryColor;
     }
 
     const mbStops = [];
@@ -344,7 +345,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       }
     }
 
-    mbStops.push(this._getOtherCategoryColor()); // color for unmatched values
+    mbStops.push(otherCategoryColor); // color for unmatched values
     return ['match', ['to-string', ['get', this.getMbFieldName()]], ...mbStops];
   }
 
