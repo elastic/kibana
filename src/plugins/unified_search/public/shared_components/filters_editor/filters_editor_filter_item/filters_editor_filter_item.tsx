@@ -46,7 +46,9 @@ export function FilterItem({
   const [selectedOperator, setSelectedOperator] = useState<Operator | undefined>(
     getSelectedOperator()
   );
-  const [selectedParams, setSelectedParams] = useState<any>(getFilterParams(filter));
+  const [selectedParams, setSelectedParams] = useState<Filter['meta']['params']>(
+    getFilterParams(filter)
+  );
 
   function getSelectedOperator() {
     return getOperatorFromFilter(filter);
@@ -63,7 +65,7 @@ export function FilterItem({
     setSelectedParams(undefined);
   };
 
-  const onHandleOperator = (operator: Operator, params: any) => {
+  const onHandleOperator = (operator: Operator, params: Filter['meta']['params']) => {
     dispatch({
       type: 'updateFilter',
       payload: { dataView, field: selectedField, operator, params, path },
@@ -73,12 +75,14 @@ export function FilterItem({
     setSelectedParams(params);
   };
 
-  const onHandleParamsChange = (params: any) => {
+  const onHandleParamsChange = (params: Filter['meta']['params']) => {
     setSelectedParams(params);
   };
 
   const onHandleParamsUpdate = (value: string) => {
-    setSelectedParams((prevState: any) => ({ params: [value, ...(prevState.params || [])] }));
+    setSelectedParams((prevState: Filter['meta']['params']) => ({
+      params: [value, ...(prevState.params || [])],
+    }));
   };
 
   const onRemoveFilter = useCallback(() => {

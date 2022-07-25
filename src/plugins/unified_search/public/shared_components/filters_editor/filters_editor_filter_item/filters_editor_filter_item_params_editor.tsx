@@ -8,6 +8,7 @@
 
 import React, { useCallback } from 'react';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { Filter } from '@kbn/es-query';
 import { Operator } from '../../../filter_bar/filter_editor/lib/filter_operators';
 import { PhraseValueInput } from '../../../filter_bar/filter_editor/phrase_value_input';
 import { PhrasesValuesInput } from '../../../filter_bar/filter_editor/phrases_values_input';
@@ -17,10 +18,9 @@ interface ParamsEditorProps {
   dataView: DataView;
   field: DataViewField | undefined;
   operator: Operator | undefined;
-  // @todo: remove any;
-  params: any;
+  params: Filter['meta']['params'];
   onHandleParamsChange: (params: string) => void;
-  onHandleParamsUpdate: (value: any) => void;
+  onHandleParamsUpdate: (value: Filter['meta']['params']) => void;
   timeRangeForSuggestionsOverride: boolean;
 }
 
@@ -34,7 +34,7 @@ export const ParamsEditor = ({
   timeRangeForSuggestionsOverride,
 }: ParamsEditorProps) => {
   const onParamsChange = useCallback(
-    (selectedParams: any) => {
+    (selectedParams: Filter['meta']['params']) => {
       onHandleParamsChange(selectedParams);
     },
     [onHandleParamsChange]

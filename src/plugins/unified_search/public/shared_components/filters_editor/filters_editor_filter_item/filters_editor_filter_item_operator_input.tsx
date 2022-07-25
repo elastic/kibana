@@ -9,6 +9,7 @@
 import React, { useCallback } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { DataViewField } from '@kbn/data-views-plugin/common';
+import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { getOperatorOptions } from '../../../filter_bar/filter_editor/lib/filter_editor_utils';
 import { Operator } from '../../../filter_bar/filter_editor/lib/filter_operators';
@@ -22,9 +23,8 @@ export function OperatorInput({
 }: {
   field: DataViewField | undefined;
   operator: Operator | undefined;
-  // todo: please don't use any
-  params: any;
-  onHandleOperator: (operator: Operator, params: any) => void;
+  params: Filter['meta']['params'];
+  onHandleOperator: (operator: Operator, params: Filter['meta']['params']) => void;
 }) {
   const operators = field ? getOperatorOptions(field) : [];
 
