@@ -191,6 +191,7 @@ export interface MetricVisComponentProps {
   renderComplete: IInterpreterRenderHandlers['done'];
   fireEvent: IInterpreterRenderHandlers['event'];
   renderMode: RenderMode;
+  filterable: boolean;
 }
 
 const MetricVisComponent = ({
@@ -199,6 +200,7 @@ const MetricVisComponent = ({
   renderComplete,
   fireEvent,
   renderMode,
+  filterable,
 }: MetricVisComponentProps) => {
   const primaryMetricColumn = getColumnByAccessor(config.dimensions.metric, data.columns)!;
   const formatPrimaryMetric = getMetricFormatter(config.dimensions.metric, data.columns);
@@ -322,16 +324,17 @@ const MetricVisComponent = ({
           theme={[{ background: { color: 'transparent' } }, chartTheme]}
           onRenderChange={onRenderChange}
           onElementClick={(events) => {
+            if (!filterable) {
+              return;
+            }
             events.forEach((event) => {
               if (isMetricElementEvent(event)) {
-                const breakdownByIdx = data.columns.findIndex((col) => col === breakdownByColumn);
+                const colIdx = breakdownByColumn
+                  ? data.columns.findIndex((col) => col === breakdownByColumn)
+                  : data.columns.findIndex((col) => col === primaryMetricColumn);
                 const rowLength = grid[0].length;
                 fireEvent(
-                  buildFilterEvent(
-                    event.rowIndex * rowLength + event.columnIndex,
-                    breakdownByIdx,
-                    data
-                  )
+                  buildFilterEvent(event.rowIndex * rowLength + event.columnIndex, colIdx, data)
                 );
               }
             });

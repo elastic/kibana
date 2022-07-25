@@ -14,9 +14,35 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
 import { css } from '@emotion/react';
-import { EXPRESSION_METRIC_NAME, MetricVisRenderConfig } from '../../common';
+import { Datatable } from '@kbn/expressions-plugin';
+import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
+import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { EXPRESSION_METRIC_NAME, MetricVisRenderConfig, VisParams } from '../../common';
 
 const MetricVis = lazy(() => import('../components/metric_vis'));
+
+async function metricFilterable(
+  dimensions: VisParams['dimensions'],
+  table: Datatable,
+  hasCompatibleActions?: IInterpreterRenderHandlers['hasCompatibleActions']
+) {
+  const column = getColumnByAccessor(dimensions.breakdownBy ?? dimensions.metric, table.columns);
+  const colIndex = table.columns.indexOf(column!);
+  return Boolean(
+    await hasCompatibleActions?.({
+      name: 'filter',
+      data: {
+        data: [
+          {
+            table,
+            column: colIndex,
+            row: 0,
+          },
+        ],
+      },
+    })
+  );
+}
 
 export const getMetricVisRenderer = (
   theme: ThemeServiceStart
@@ -29,6 +55,12 @@ export const getMetricVisRenderer = (
       handlers.onDestroy(() => {
         unmountComponentAtNode(domNode);
       });
+
+      const filterable = await metricFilterable(
+        visConfig.dimensions,
+        visData,
+        handlers.hasCompatibleActions?.bind(handlers)
+      );
 
       render(
         <KibanaThemeProvider theme$={theme.theme$}>
@@ -49,6 +81,7 @@ export const getMetricVisRenderer = (
               renderComplete={() => handlers.done()}
               fireEvent={handlers.event}
               renderMode={handlers.getRenderMode()}
+              filterable={filterable}
             />
           </VisualizationContainer>
         </KibanaThemeProvider>,

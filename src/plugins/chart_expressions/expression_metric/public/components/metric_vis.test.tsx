@@ -206,6 +206,13 @@ const table: Datatable = {
   ],
 };
 
+const defaultProps = {
+  renderComplete: () => {},
+  fireEvent: () => {},
+  filterable: true,
+  renderMode: 'view',
+} as Pick<MetricVisComponentProps, 'renderComplete' | 'fireEvent' | 'filterable' | 'renderMode'>;
+
 describe('MetricVisComponent', function () {
   afterEach(() => {
     mockDeserialize.mockClear();
@@ -223,15 +230,7 @@ describe('MetricVisComponent', function () {
     };
 
     it('should render a single metric value', () => {
-      const component = shallow(
-        <MetricVis
-          config={config}
-          data={table}
-          renderComplete={() => {}}
-          fireEvent={() => {}}
-          renderMode={'view'}
-        />
-      );
+      const component = shallow(<MetricVis config={config} data={table} {...defaultProps} />);
 
       const { data } = component.find(Metric).props();
 
@@ -259,9 +258,7 @@ describe('MetricVisComponent', function () {
             metric: { ...config.metric, subtitle: 'subtitle' },
           }}
           data={table}
-          renderComplete={() => {}}
-          fireEvent={() => {}}
-          renderMode={'view'}
+          {...defaultProps}
         />
       );
 
@@ -289,9 +286,7 @@ describe('MetricVisComponent', function () {
             dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
           }}
           data={table}
-          renderComplete={() => {}}
-          fireEvent={() => {}}
-          renderMode={'view'}
+          {...defaultProps}
         />
       );
 
@@ -335,9 +330,7 @@ describe('MetricVisComponent', function () {
               },
             }}
             data={table}
-            renderComplete={() => {}}
-            fireEvent={() => {}}
-            renderMode={'view'}
+            {...defaultProps}
           />
         )
           .find(Metric)
@@ -386,15 +379,7 @@ describe('MetricVisComponent', function () {
     };
 
     it('should render a grid if breakdownBy dimension supplied', () => {
-      const component = shallow(
-        <MetricVis
-          config={config}
-          data={table}
-          renderComplete={() => {}}
-          fireEvent={() => {}}
-          renderMode={'view'}
-        />
-      );
+      const component = shallow(<MetricVis config={config} data={table} {...defaultProps} />);
 
       const { data } = component.find(Metric).props();
 
@@ -459,9 +444,7 @@ describe('MetricVisComponent', function () {
             metric: { ...config.metric, secondaryPrefix: 'howdy' },
           }}
           data={table}
-          renderComplete={() => {}}
-          fireEvent={() => {}}
-          renderMode={'view'}
+          {...defaultProps}
         />
       );
 
@@ -502,9 +485,7 @@ describe('MetricVisComponent', function () {
             metric: { ...config.metric, secondaryPrefix: 'howdy' },
           }}
           data={table}
-          renderComplete={() => {}}
-          fireEvent={() => {}}
-          renderMode={'view'}
+          {...defaultProps}
         />
       );
 
@@ -547,9 +528,7 @@ describe('MetricVisComponent', function () {
               },
             }}
             data={table}
-            renderComplete={() => {}}
-            fireEvent={() => {}}
-            renderMode={'view'}
+            {...defaultProps}
           />
         )
           .find(Metric)
@@ -645,9 +624,7 @@ describe('MetricVisComponent', function () {
               },
             }}
             data={table}
-            renderComplete={() => {}}
-            fireEvent={() => {}}
-            renderMode={'view'}
+            {...defaultProps}
           />
         )
           .find(Metric)
@@ -727,9 +704,7 @@ describe('MetricVisComponent', function () {
         <MetricVis
           config={{ ...config, metric: { ...config.metric, minTiles: 6 } }}
           data={{ type: 'datatable', rows: [], columns: table.columns }}
-          renderComplete={() => {}}
-          fireEvent={() => {}}
-          renderMode={'view'}
+          {...defaultProps}
         />
       );
 
@@ -761,8 +736,6 @@ describe('MetricVisComponent', function () {
         shallow(
           <MetricVis
             data={table}
-            renderComplete={() => {}}
-            fireEvent={() => {}}
             config={{
               metric: {
                 progressDirection: 'vertical',
@@ -773,6 +746,7 @@ describe('MetricVisComponent', function () {
                 breakdownBy: multipleTiles ? dayOfWeekColumnId : undefined,
               },
             }}
+            {...defaultProps}
             renderMode={editMode ? 'edit' : 'view'}
           />
         )
@@ -822,9 +796,8 @@ describe('MetricVisComponent', function () {
           },
         }}
         data={table}
+        {...defaultProps}
         renderComplete={renderCompleteSpy}
-        fireEvent={() => {}}
-        renderMode={'view'}
       />
     );
     component.find(Settings).props().onRenderChange!(false);
@@ -836,48 +809,92 @@ describe('MetricVisComponent', function () {
     expect(renderCompleteSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('should fire a filter event', () => {
+  describe('filter events', () => {
     const fireEventSpy = jest.fn();
 
-    const component = shallow(
-      <MetricVis
-        config={{
-          metric: {
-            progressDirection: 'vertical',
-            maxCols: 5,
-          },
-          dimensions: {
-            metric: basePriceColumnId,
-            breakdownBy: dayOfWeekColumnId,
-          },
-        }}
-        data={table}
-        renderComplete={() => {}}
-        fireEvent={fireEventSpy}
-        renderMode={'view'}
-      />
-    );
+    afterEach(() => fireEventSpy.mockClear());
 
-    const event: MetricElementEvent = {
-      type: 'metricElementEvent',
-      rowIndex: 1,
-      columnIndex: 0,
+    const fireFilter = (event: MetricElementEvent, filterable: boolean, breakdown?: boolean) => {
+      const component = shallow(
+        <MetricVis
+          config={{
+            metric: {
+              progressDirection: 'vertical',
+              maxCols: 5,
+            },
+            dimensions: {
+              metric: basePriceColumnId,
+              breakdownBy: breakdown ? dayOfWeekColumnId : undefined,
+            },
+          }}
+          data={table}
+          {...defaultProps}
+          filterable={filterable}
+          fireEvent={fireEventSpy}
+        />
+      );
+
+      component.find(Settings).props().onElementClick!([event]);
     };
 
-    component.find(Settings).props().onElementClick!([event]);
+    test('without breakdown', () => {
+      const event: MetricElementEvent = {
+        type: 'metricElementEvent',
+        rowIndex: 0,
+        columnIndex: 0,
+      };
 
-    expect(fireEventSpy).toHaveBeenCalledTimes(1);
-    expect(fireEventSpy).toHaveBeenCalledWith({
-      name: 'filter',
-      data: {
-        data: [
-          {
-            table,
-            column: 0,
-            row: 5,
-          },
-        ],
-      },
+      fireFilter(event, true, false);
+
+      expect(fireEventSpy).toHaveBeenCalledTimes(1);
+      expect(fireEventSpy).toHaveBeenCalledWith({
+        name: 'filter',
+        data: {
+          data: [
+            {
+              table,
+              column: 1,
+              row: 0,
+            },
+          ],
+        },
+      });
+    });
+
+    test('with breakdown', () => {
+      const event: MetricElementEvent = {
+        type: 'metricElementEvent',
+        rowIndex: 1,
+        columnIndex: 0,
+      };
+
+      fireFilter(event, true, true);
+
+      expect(fireEventSpy).toHaveBeenCalledTimes(1);
+      expect(fireEventSpy).toHaveBeenCalledWith({
+        name: 'filter',
+        data: {
+          data: [
+            {
+              table,
+              column: 0,
+              row: 5,
+            },
+          ],
+        },
+      });
+    });
+
+    it('should do nothing if primary metric is not filterable', () => {
+      const event: MetricElementEvent = {
+        type: 'metricElementEvent',
+        rowIndex: 1,
+        columnIndex: 0,
+      };
+
+      fireFilter(event, false, true);
+
+      expect(fireEventSpy).not.toHaveBeenCalled();
     });
   });
 
@@ -911,9 +928,7 @@ describe('MetricVisComponent', function () {
               },
             }}
             data={table}
-            renderComplete={() => {}}
-            fireEvent={() => {}}
-            renderMode={'view'}
+            {...defaultProps}
           />
         );
 
@@ -957,9 +972,7 @@ describe('MetricVisComponent', function () {
                 },
               }}
               data={table}
-              renderComplete={() => {}}
-              fireEvent={() => {}}
-              renderMode={'view'}
+              {...defaultProps}
             />
           );
 
@@ -1024,9 +1037,7 @@ describe('MetricVisComponent', function () {
               },
             }}
             data={table}
-            renderComplete={() => {}}
-            fireEvent={() => {}}
-            renderMode={'view'}
+            {...defaultProps}
           />
         );
 
@@ -1051,9 +1062,7 @@ describe('MetricVisComponent', function () {
               },
             }}
             data={table}
-            renderComplete={() => {}}
-            fireEvent={() => {}}
-            renderMode={'view'}
+            {...defaultProps}
           />
         );
 
@@ -1101,9 +1110,7 @@ describe('MetricVisComponent', function () {
             ],
             rows: [{ '1': value, '2': secondaryValue }],
           }}
-          renderComplete={() => {}}
-          fireEvent={() => {}}
-          renderMode={'view'}
+          {...defaultProps}
         />
       );
 
