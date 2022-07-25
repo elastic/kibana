@@ -117,6 +117,95 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-io-ts-types",
+        "id": "def-common.LimitedSizeArray",
+        "type": "Function",
+        "tags": [],
+        "label": "LimitedSizeArray",
+        "description": [],
+        "signature": [
+          "<C extends ",
+          "Mixed",
+          ">({ codec, minSize, maxSize, name, }: { codec: C; minSize?: number | undefined; maxSize?: number | undefined; name?: string | undefined; }) => ",
+          "Type",
+          "<",
+          "TypeOf",
+          "<C>[], ",
+          "TypeOf",
+          "<C>[], unknown>"
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-types/src/limited_size_array/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-io-ts-types",
+            "id": "def-common.LimitedSizeArray.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  codec,\n  minSize,\n  maxSize,\n  name = `LimitedSizeArray<${codec.name}>`,\n}",
+            "description": [],
+            "path": "packages/kbn-securitysolution-io-ts-types/src/limited_size_array/index.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/securitysolution-io-ts-types",
+                "id": "def-common.LimitedSizeArray.$1.codec",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "codec",
+                "description": [],
+                "signature": [
+                  "C"
+                ],
+                "path": "packages/kbn-securitysolution-io-ts-types/src/limited_size_array/index.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@kbn/securitysolution-io-ts-types",
+                "id": "def-common.LimitedSizeArray.$1.minSize",
+                "type": "number",
+                "tags": [],
+                "label": "minSize",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "packages/kbn-securitysolution-io-ts-types/src/limited_size_array/index.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@kbn/securitysolution-io-ts-types",
+                "id": "def-common.LimitedSizeArray.$1.maxSize",
+                "type": "number",
+                "tags": [],
+                "label": "maxSize",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "packages/kbn-securitysolution-io-ts-types/src/limited_size_array/index.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@kbn/securitysolution-io-ts-types",
+                "id": "def-common.LimitedSizeArray.$1.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-securitysolution-io-ts-types/src/limited_size_array/index.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-types",
         "id": "def-common.NonEmptyArray",
         "type": "Function",
         "tags": [],
