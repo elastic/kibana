@@ -11,16 +11,14 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiButtonIcon } from '@elastic/eui'
 import type { Filter } from '@kbn/es-query';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { FiltersEditorContextType } from '../filters_editor_context';
+import { FieldInput } from './filters_editor_filter_item_field_input';
+import { OperatorInput } from './filters_editor_filter_item_operator_input';
+import { ParamsEditor } from './filters_editor_filter_item_params_editor';
 import { FilterGroup } from '../filters_editor_filter_group';
 import { getConditionalOperationType } from '../filters_editor_utils';
 import type { Path } from '../filter_editors_types';
-import { PhraseValueInput } from '../../../filter_bar/filter_editor/phrase_value_input';
-import { PhrasesValuesInput } from '../../../filter_bar/filter_editor/phrases_values_input';
-import { RangeValueInput } from '../../../filter_bar/filter_editor/range_value_input';
 import { getOperatorFromFilter } from '../../../filter_bar/filter_editor/lib/filter_editor_utils';
 import { Operator } from '../../../filter_bar/filter_editor/lib/filter_operators';
-import { FieldInput } from './filters_editor_filter_item_field_input';
-import { OperatorInput } from './filters_editor_filter_item_operator_input';
 
 export interface FilterItemProps {
   path: Path;
@@ -57,72 +55,13 @@ export function FilterItem({
     setSelectedParams(params);
   };
 
-  function renderParamsEditor() {
-    if (!dataView) {
-      return '';
-    }
+  const onHandleParamsChange = (params: any) => {
+    setSelectedParams(params);
+  };
 
-    function onParamsChange(params: any) {
-      setSelectedParams(params);
-    }
-
-    function onParamsUpdate(value: string) {
-      setSelectedParams((prevState: any) => ({ params: [value, ...(prevState.params || [])] }));
-    }
-
-    switch (selectedOperator?.type) {
-      case 'exists':
-        return '';
-      case 'phrase':
-        return (
-          <PhraseValueInput
-            compressed
-            indexPattern={dataView}
-            field={selectedField!}
-            value={selectedParams}
-            onChange={onParamsChange}
-            timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-            fullWidth
-          />
-        );
-      case 'phrases':
-        return (
-          <PhrasesValuesInput
-            compressed
-            indexPattern={dataView}
-            field={selectedField!}
-            values={selectedParams}
-            onChange={onParamsChange}
-            onParamsUpdate={onParamsUpdate}
-            timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-            fullWidth
-          />
-        );
-      case 'range':
-        return (
-          <RangeValueInput
-            compressed
-            field={selectedField!}
-            value={selectedParams}
-            onChange={onParamsChange}
-            fullWidth
-          />
-        );
-      default:
-        return (
-          <PhraseValueInput
-            disabled={!dataView || !selectedOperator}
-            indexPattern={dataView}
-            field={selectedField!}
-            value={selectedParams}
-            onChange={onParamsChange}
-            timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-            fullWidth
-            compressed
-          />
-        );
-    }
-  }
+  const onHandleParamsUpdate = (value: string) => {
+    setSelectedParams((prevState: any) => ({ params: [value, ...(prevState.params || [])] }));
+  };
 
   return (
     <EuiFlexItem>
@@ -156,7 +95,17 @@ export function FilterItem({
                   onHandleOperator={onHandleOperator}
                 />
               </EuiFlexItem>
-              <EuiFlexItem>{renderParamsEditor()}</EuiFlexItem>
+              <EuiFlexItem>
+                <ParamsEditor
+                  dataView={dataView}
+                  field={selectedField}
+                  operator={selectedOperator}
+                  params={selectedParams}
+                  onHandleParamsChange={onHandleParamsChange}
+                  onHandleParamsUpdate={onHandleParamsUpdate}
+                  timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+                />
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

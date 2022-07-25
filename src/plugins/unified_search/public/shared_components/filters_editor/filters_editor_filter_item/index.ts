@@ -7,4 +7,3 @@
  */
 
 export { FilterItem } from './filters_editor_filter_item';
-export { FieldInput } from './filters_editor_filter_item_field_input';
