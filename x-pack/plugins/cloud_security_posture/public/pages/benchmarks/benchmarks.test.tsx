@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import Chance from 'chance';
 import { render, screen } from '@testing-library/react';
 import type { UseQueryResult } from 'react-query/types/react/types';
 import { createCspBenchmarkIntegrationFixture } from '../../test/fixtures/csp_benchmark_integration';
