@@ -31,6 +31,7 @@ import {
   connectToQueryState,
   DataPublicPluginStart,
   FilterManager,
+  QueryState,
   SearchSessionInfoProvider,
   syncQueryStateWithUrl,
 } from '@kbn/data-plugin/public';
@@ -184,8 +185,14 @@ export interface GetStateReturn {
    * Reset AppState to default, discarding all changes
    */
   resetAppState: () => void;
+  /**
+   * Pause the auto refresh interval without pushing an entry to history
+   */
+  pauseAutoRefreshInterval: () => Promise<void>;
 }
+
 const APP_STATE_URL_KEY = '_a';
+const GLOBAL_STATE_URL_KEY = '_g';
 
 /**
  * Builds and returns appState and globalState containers and helper functions
@@ -240,6 +247,15 @@ export function getState({
     await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
   };
 
+  const pauseAutoRefreshInterval = async () => {
+    const state = stateStorage.get<QueryState>(GLOBAL_STATE_URL_KEY);
+    await stateStorage.set(
+      GLOBAL_STATE_URL_KEY,
+      { ...state, refreshInterval: { ...state?.refreshInterval, pause: true } },
+      { replace: true }
+    );
+  };
+
   return {
     kbnUrlStateStorage: stateStorage,
     appStateContainer: appStateContainerModified,
@@ -260,6 +276,7 @@ export function getState({
     getPreviousAppState: () => previousAppState,
     flushToUrl: () => stateStorage.kbnUrlControls.flush(),
     isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
+    pauseAutoRefreshInterval,
     initializeAndSync: (
       indexPattern: DataView,
       filterManager: FilterManager,

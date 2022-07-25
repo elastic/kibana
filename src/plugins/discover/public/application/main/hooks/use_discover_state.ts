@@ -33,6 +33,7 @@ import { FetchStatus } from '../../types';
 import { getSwitchIndexPatternAppState } from '../utils/get_switch_index_pattern_app_state';
 import { SortPairArr } from '../../../components/doc_table/utils/get_sort';
 import { DataTableRecord } from '../../../types';
+import { DataViewType } from '@kbn/data-views-plugin/public';
 
 const MAX_NUM_OF_COLUMNS = 50;
 
@@ -252,10 +253,18 @@ export function useDiscoverState({
   }, [state.query, prevQuery]);
 
   useEffect(() => {
-    if (indexPattern) {
+    const fetchDataView = async () => {
+      if (!indexPattern.isTimeBased() || indexPattern.type === DataViewType.ROLLUP) {
+        await stateContainer.pauseAutoRefreshInterval();
+      }
+
       refetch$.next(undefined);
+    };
+
+    if (indexPattern) {
+      fetchDataView();
     }
-  }, [initialFetchStatus, refetch$, indexPattern, savedSearch.id]);
+  }, [initialFetchStatus, refetch$, indexPattern, savedSearch.id, stateContainer]);
 
   const getResultColumns = useCallback(() => {
     if (documentState.result?.length && documentState.fetchStatus === FetchStatus.COMPLETE) {
