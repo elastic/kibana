@@ -159,6 +159,8 @@ export interface DefineStepRule {
   threatMapping: ThreatMapping;
   eqlOptions: EqlOptionsSelected;
   dataSourceType: DataSourceType;
+  newTermsFields: string[];
+  historyWindowSize: string;
 }
 
 export interface ScheduleStepRule {

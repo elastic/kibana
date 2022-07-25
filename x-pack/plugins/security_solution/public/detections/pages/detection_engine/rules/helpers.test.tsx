@@ -112,6 +112,8 @@ describe('rule helpers', () => {
           eventCategoryField: undefined,
           tiebreakerField: undefined,
         },
+        newTermsFields: ['host.name'],
+        historyWindowSize: '7d',
       };
 
       const aboutRuleStepData: AboutStepRule = {
@@ -252,6 +254,8 @@ describe('rule helpers', () => {
           eventCategoryField: undefined,
           tiebreakerField: undefined,
         },
+        newTermsFields: [],
+        historyWindowSize: '7d',
       };
 
       expect(result).toEqual(expected);
@@ -303,6 +307,8 @@ describe('rule helpers', () => {
           eventCategoryField: undefined,
           tiebreakerField: undefined,
         },
+        newTermsFields: [],
+        historyWindowSize: '7d',
       };
 
       expect(result).toEqual(expected);

@@ -41,7 +41,10 @@ export class PrivateLocationTestService {
           name: 'Test private location ' + index,
           policyHostId: id,
           id,
-          latLon: '',
+          geo: {
+            lat: '',
+            lon: '',
+          },
           concurrentMonitors: 1,
         })),
       },

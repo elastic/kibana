@@ -11,14 +11,19 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import nodemailerGetService from 'nodemailer/lib/well-known';
 import SMTPConnection from 'nodemailer/lib/smtp-connection';
 import { Logger } from '@kbn/core/server';
-import { withoutMustacheTemplate } from '../../common';
+import {
+  AlertingConnectorFeatureId,
+  AdditionalEmailServices,
+  withoutMustacheTemplate,
+  UptimeConnectorFeatureId,
+  SecurityConnectorFeatureId,
+} from '../../common';
 
 import { sendEmail, JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport } from './lib/send_email';
 import { portSchema } from './lib/schemas';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { renderMustacheString, renderMustacheObject } from '../lib/mustache_renderer';
-import { AdditionalEmailServices } from '../../common';
 
 export type EmailActionType = ActionType<
   ActionTypeConfigType,
@@ -213,6 +218,11 @@ export function getActionType(params: GetActionTypeParams): EmailActionType {
     name: i18n.translate('xpack.actions.builtin.emailTitle', {
       defaultMessage: 'Email',
     }),
+    supportedFeatureIds: [
+      AlertingConnectorFeatureId,
+      UptimeConnectorFeatureId,
+      SecurityConnectorFeatureId,
+    ],
     validate: {
       config: schema.object(ConfigSchemaProps, {
         validate: curry(validateConfig)(configurationUtilities),
