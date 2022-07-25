@@ -76,7 +76,9 @@ export const DownloadSourceTable: React.FunctionComponent<DownloadSourceTablePro
       },
       {
         render: (downloadSource: DownloadSource) =>
-          downloadSource.is_default ? <EuiIcon type="check" /> : null,
+          downloadSource.is_default ? (
+            <EuiIcon type="check" data-test-subj="editDownloadSourceTable.defaultIcon" />
+          ) : null,
         width: '200px',
         name: i18n.translate('xpack.fleet.settings.downloadSourcesTable.defaultColumnTitle', {
           defaultMessage: 'Default',
@@ -131,5 +133,11 @@ export const DownloadSourceTable: React.FunctionComponent<DownloadSourceTablePro
     ];
   }, [deleteDownloadSource, getHref]);
 
-  return <EuiBasicTable columns={columns} items={downloadSources} />;
+  return (
+    <EuiBasicTable
+      columns={columns}
+      items={downloadSources}
+      data-test-subj="AgentDownloadSourcesTable"
+    />
+  );
 };
