@@ -20,7 +20,6 @@ import type {
   ExecutionContextSetup,
 } from '@kbn/core/public';
 import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -53,11 +52,6 @@ export const [getDocLinks, setDocLinks] = createGetterSetter<DocLinksStart>('Doc
 export const [getTimeFilter, setTimeFilter] = createGetterSetter<TimefilterContract>('TimeFilter');
 
 export const [getSearch, setSearch] = createGetterSetter<DataPublicPluginStart['search']>('Search');
-
-export const [getUsageCollector, setUsageCollector] = createGetterSetter<UsageCollectionSetup>(
-  'UsageCollection',
-  false
-);
 
 export const [getExpressions, setExpressions] = createGetterSetter<ExpressionsStart>('Expressions');
 

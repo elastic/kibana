@@ -33,7 +33,6 @@ import type {
   ApplicationStart,
   SavedObjectsClientContract,
 } from '@kbn/core/public';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import type { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -50,7 +49,6 @@ import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/naviga
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -78,7 +76,6 @@ import {
   setHttp,
   setSearch,
   setSavedObjects,
-  setUsageCollector,
   setExpressions,
   setUiActions,
   setTimeFilter,
@@ -112,7 +109,6 @@ export interface VisualizationsSetupDeps {
   expressions: ExpressionsSetup;
   inspector: InspectorSetup;
   uiActions: UiActionsSetup;
-  usageCollection: UsageCollectionSetup;
   urlForwarding: UrlForwardingSetup;
   home?: HomePublicPluginSetup;
   share?: SharePluginSetup;
@@ -136,7 +132,6 @@ export interface VisualizationsStartDeps {
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   share?: SharePluginStart;
   urlForwarding: UrlForwardingStart;
-  usageCollection?: UsageCollectionStart;
   screenshotMode: ScreenshotModePluginStart;
   fieldFormats: FieldFormatsStart;
 }
@@ -171,7 +166,6 @@ export class VisualizationsPlugin
     {
       expressions,
       embeddable,
-      usageCollection,
       data,
       home,
       urlForwarding,
@@ -289,7 +283,6 @@ export class VisualizationsPlugin
           setHeaderActionMenu: params.setHeaderActionMenu,
           savedObjectsTagging: pluginsStart.savedObjectsTaggingOss?.getTaggingApi(),
           presentationUtil: pluginsStart.presentationUtil,
-          usageCollection: pluginsStart.usageCollection,
           getKibanaVersion: () => this.initializerContext.env.packageInfo.version,
           spaces: pluginsStart.spaces,
           visEditorsRegistry,
@@ -335,7 +328,6 @@ export class VisualizationsPlugin
     }
 
     setUISettings(core.uiSettings);
-    setUsageCollector(usageCollection);
     setTheme(core.theme);
 
     expressions.registerFunction(rangeExpressionFunction);
@@ -361,7 +353,6 @@ export class VisualizationsPlugin
       savedObjects,
       spaces,
       savedObjectsTaggingOss,
-      usageCollection,
       fieldFormats,
     }: VisualizationsStartDeps
   ): VisualizationsStart {

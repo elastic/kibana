@@ -16,7 +16,6 @@ import {
   getSavedObjects,
   getTypes,
   getUISettings,
-  getUsageCollector,
   getApplication,
   getEmbeddable,
   getDocLinks,
@@ -83,7 +82,6 @@ export function showNewVisModal({
             addBasePath={getHttp().basePath.prepend}
             uiSettings={getUISettings()}
             savedObjects={getSavedObjects()}
-            usageCollection={getUsageCollector()}
             application={getApplication()}
             docLinks={getDocLinks()}
             showAggsSelection={showAggsSelection}

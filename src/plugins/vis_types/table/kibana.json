@@ -14,7 +14,6 @@
     "share",
     "visDefaultEditor"
   ],
-  "optionalPlugins": ["usageCollection"],
   "owner": {
     "name": "Vis Editors",
     "githubTeam": "kibana-vis-editors"

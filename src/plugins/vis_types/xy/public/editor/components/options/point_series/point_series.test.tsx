@@ -16,7 +16,6 @@ import { ChartType } from '../../../../../common';
 import { getAggs, getVis, getStateParams } from './point_series.mocks';
 
 jest.mock('../../../../services', () => ({
-  getTrackUiMetric: jest.fn(() => null),
   getPalettesService: jest.fn(() => {
     return {
       getPalettes: jest.fn(),
