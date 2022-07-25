@@ -16,7 +16,8 @@ import {
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
 } from '../constants';
-import { decodeCloudId, normalizeHostsForAgents, SO_SEARCH_LIMIT, outputType } from '../../common';
+import { SO_SEARCH_LIMIT, outputType } from '../../common/constants';
+import { decodeCloudId, normalizeHostsForAgents } from '../../common/services';
 import {
   OutputUnauthorizedError,
   OutputInvalidError,

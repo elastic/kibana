@@ -6,6 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { sumBy } from 'lodash';
 import {
   SPAN_DURATION,
   TRANSACTION_DURATION,
@@ -33,7 +34,10 @@ export const fetchDurationRanges = async ({
   kuery: string;
   query: estypes.QueryDslQueryContainer;
   eventType: ProcessorEvent;
-}): Promise<Array<{ key: number; doc_count: number }>> => {
+}): Promise<{
+  totalDocCount: number;
+  durationRanges: Array<{ key: number; doc_count: number }>;
+}> => {
   const { apmEventClient } = setup;
 
   const ranges = rangeSteps.reduce(
@@ -75,7 +79,7 @@ export const fetchDurationRanges = async ({
     },
   });
 
-  return (
+  const durationRanges =
     resp.aggregations?.logspace_ranges.buckets
       .map((d) => ({
         key: d.from,
@@ -83,6 +87,10 @@ export const fetchDurationRanges = async ({
       }))
       .filter(
         (d): d is { key: number; doc_count: number } => d.key !== undefined
-      ) ?? []
-  );
+      ) ?? [];
+
+  return {
+    totalDocCount: sumBy(durationRanges, 'doc_count'),
+    durationRanges,
+  };
 };

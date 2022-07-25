@@ -107,7 +107,7 @@ const KubernetesSecurityRoutesComponent = ({
         </EuiFlexGroup>
         {!shouldHideCharts && (
           <>
-            <EuiFlexGroup>
+            <EuiFlexGroup css={styles.widgetsGroup}>
               <EuiFlexItem css={styles.leftWidgetsGroup}>
                 <EuiFlexGroup css={styles.countWidgetsGroup}>
                   <EuiFlexItem>
@@ -157,7 +157,7 @@ const KubernetesSecurityRoutesComponent = ({
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiFlexGroup css={styles.widgetsBottomSpacing}>
-                  <EuiFlexItem css={styles.noBottomSpacing}>
+                  <EuiFlexItem>
                     <PercentWidget
                       title={
                         <>
@@ -209,7 +209,7 @@ const KubernetesSecurityRoutesComponent = ({
                       onReduce={onReduceInteractiveAggs}
                     />
                   </EuiFlexItem>
-                  <EuiFlexItem css={styles.noBottomSpacing}>
+                  <EuiFlexItem>
                     <PercentWidget
                       title={
                         <>
