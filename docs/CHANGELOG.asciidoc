@@ -70,7 +70,7 @@ Elastic Security::
 For the Elastic Security 8.3.3 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 
 Fleet::
-* Pass start_time to actions when rolling upgrades maintenence window is set to immediately {kibana-pull}136384[#136384]
+* Pass start_time to actions when the maintenance window for rolling upgrades is set to immediately {kibana-pull}136384[#136384]
 * Allow agent bulk actions without specific licence restrictions {kibana-pull}136334[#136334]
 * Adds reinstall button to integration settings page {kibana-pull}135590[#135590]
 
