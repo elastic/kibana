@@ -68,8 +68,16 @@ export function createTelemetryTimelineTaskConfig() {
 
       const endpointAlerts = await receiver.fetchTimelineEndpointAlerts(3);
 
-      // No EP Alerts -> Nothing to do
+      const aggregations = endpointAlerts?.aggregations as unknown as {
+        endpoint_alert_count: { value: number };
+      };
+      sender.getTelemetryUsageCluster()?.incrementCounter({
+        counterName: 'telemetry_endpoint_alert',
+        counterType: 'endpoint_alert_count',
+        incrementBy: aggregations?.endpoint_alert_count.value,
+      });
 
+      // No EP Alerts -> Nothing to do
       if (
         endpointAlerts.hits.hits?.length === 0 ||
         endpointAlerts.hits.hits?.length === undefined

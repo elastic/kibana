@@ -142,7 +142,7 @@ export interface ITelemetryReceiver {
     type: string;
   };
 
-  fetchPrebuiltRuleAlerts(): Promise<TelemetryEvent[]>;
+  fetchPrebuiltRuleAlerts(): Promise<{ events: TelemetryEvent[]; count: number }>;
 
   fetchTimelineEndpointAlerts(
     interval: number
@@ -650,6 +650,13 @@ export class TelemetryReceiver implements ITelemetryReceiver {
             ],
           },
         },
+        aggs: {
+          prebuilt_rule_alert_count: {
+            cardinality: {
+              field: 'event.id',
+            },
+          },
+        },
       },
     };
 
@@ -660,7 +667,11 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       h._source != null ? ([h._source] as TelemetryEvent[]) : []
     );
 
-    return telemetryEvents;
+    const aggregations = response.body?.aggregations as unknown as {
+      prebuilt_rule_alert_count: { value: number };
+    };
+
+    return { events: telemetryEvents, count: aggregations?.prebuilt_rule_alert_count.value ?? 0 };
   }
 
   public async fetchTimelineEndpointAlerts(interval: number) {
@@ -708,6 +719,13 @@ export class TelemetryReceiver implements ITelemetryReceiver {
                 },
               },
             ],
+          },
+        },
+        aggs: {
+          endpoint_alert_count: {
+            cardinality: {
+              field: 'event.id',
+            },
           },
         },
       },
