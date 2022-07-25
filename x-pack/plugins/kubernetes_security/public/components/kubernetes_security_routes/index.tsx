@@ -157,7 +157,7 @@ const KubernetesSecurityRoutesComponent = ({
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiFlexGroup css={styles.widgetsBottomSpacing}>
-                  <EuiFlexItem css={styles.noBottomSpacing}>
+                  <EuiFlexItem>
                     <PercentWidget
                       title={
                         <>
@@ -209,7 +209,7 @@ const KubernetesSecurityRoutesComponent = ({
                       onReduce={onReduceInteractiveAggs}
                     />
                   </EuiFlexItem>
-                  <EuiFlexItem css={styles.noBottomSpacing}>
+                  <EuiFlexItem>
                     <PercentWidget
                       title={
                         <>
