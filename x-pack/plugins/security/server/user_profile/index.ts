@@ -13,5 +13,6 @@ export type {
   UserProfileSuggestParams,
   UserProfileBulkGetParams,
   UserProfileRequiredPrivileges,
+  UserProfileGetCurrentParams,
 } from './user_profile_service';
 export type { UserProfileGrant } from './user_profile_grant';

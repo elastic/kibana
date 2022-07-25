@@ -187,13 +187,13 @@ export function registerIndexRoutes({ router }: RouteDependencies) {
       path: '/internal/enterprise_search/indices',
       validate: {
         body: schema.object({
-          indexName: schema.string(),
-          language: schema.maybe(schema.string()),
+          index_name: schema.string(),
+          language: schema.maybe(schema.nullable(schema.string())),
         }),
       },
     },
     async (context, request, response) => {
-      const { indexName, language } = request.body;
+      const { ['index_name']: indexName, language } = request.body;
       const { client } = (await context.core).elasticsearch;
       try {
         const createIndexResponse = await createApiIndex(client, indexName, language);
