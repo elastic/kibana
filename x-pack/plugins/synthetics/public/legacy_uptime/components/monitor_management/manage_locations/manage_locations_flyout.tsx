@@ -101,18 +101,18 @@ export const ManageLocationsFlyout = () => {
               {CLOSE_LABEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
-          {privateLocations.length > 0 && (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                isLoading={loading}
-                disabled={!hasFleetPermissions || !canSave}
-                onClick={() => setIsAddingNew(true)}
-              >
-                {ADD_LABEL}
-              </EuiButton>
-            </EuiFlexItem>
-          )}
+
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              data-test-subj={'addPrivateLocationButton'}
+              isLoading={loading}
+              disabled={!hasFleetPermissions || !canSave}
+              onClick={() => setIsAddingNew(true)}
+            >
+              {ADD_LABEL}
+            </EuiButton>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>

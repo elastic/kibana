@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { journey, step, expect, before } from '@elastic/synthetics';
+import { byTestId, TIMEOUT_60_SEC } from '@kbn/observability-plugin/e2e/utils';
 import { monitorManagementPageProvider } from '../../page_objects/monitor_management';
 
 journey('ManagePrivateLocation', async ({ page, params: { kibanaUrl } }) => {
@@ -29,7 +30,7 @@ journey('ManagePrivateLocation', async ({ page, params: { kibanaUrl } }) => {
   });
 
   step('Open manage location', async () => {
-    await page.click('button:has-text("Manage private locations")');
+    await page.click('button:has-text("Private locations")');
   });
 
   step('Click text=Add two agent policies', async () => {
@@ -47,14 +48,13 @@ journey('ManagePrivateLocation', async ({ page, params: { kibanaUrl } }) => {
   step('Add new private location', async () => {
     await page.waitForTimeout(30 * 1000);
     await page.click('button:has-text("Close")');
-    await page.click('button:has-text("Manage private locations")');
-    await page.click('button:has-text("Add location")');
+    await page.click(byTestId('addPrivateLocationButton'));
 
     await addPrivateLocation('Test private location', 'Fleet test policy');
   });
 
   step('Add another location', async () => {
-    await page.click('button:has-text("Add location")');
+    await page.click(byTestId('addPrivateLocationButton'), TIMEOUT_60_SEC);
 
     await page.click('[aria-label="Select agent policy"]');
     await page.isDisabled(`button[role="option"]:has-text("Fleet test policyAgents: 0")`);
