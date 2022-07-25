@@ -8,9 +8,11 @@
 
 import type { Reducer } from 'react';
 import type { Filter } from '@kbn/es-query';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { Path } from './filter_editors_types';
+import { Operator } from '../../filter_bar/filter_editor/lib/filter_operators';
 import { ConditionTypes } from './filters_editor_condition_types';
-import { addFilter, removeFilter } from './filters_editor_utils';
+import { addFilter, removeFilter, updateFilterItem } from './filters_editor_utils';
 
 /** @internal **/
 export interface FiltersEditorState {
@@ -26,7 +28,11 @@ export interface AddFilterPayload {
 
 /** @internal **/
 export interface UpdateFiltersPayload {
-  filters: Filter[];
+  dataView: DataView;
+  field?: DataViewField | undefined;
+  operator?: Operator | undefined;
+  params?: any | undefined;
+  path: string;
 }
 
 /** @internal **/
@@ -64,7 +70,7 @@ export const filtersEditorReducer: Reducer<FiltersEditorState, FiltersEditorActi
     case 'updateFilters':
       return {
         ...state,
-        filters: action.payload.filters,
+        filters: updateFilterItem(state.filters, action.payload),
       };
     case 'removeFilter':
       return {

@@ -63,7 +63,7 @@ export const FilterGroup = ({
   filters,
   conditionType,
   path,
-  timeRangeForSuggestionsOverride,
+  timeRangeForSuggestionsOverride = false,
   reverseBackground = false,
 }: FilterGroupProps) => {
   const { euiTheme } = useEuiTheme();

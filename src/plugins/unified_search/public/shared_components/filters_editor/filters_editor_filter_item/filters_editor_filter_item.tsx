@@ -8,7 +8,7 @@
 
 import React, { useContext, useState } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import type { Filter } from '@kbn/es-query';
+import { FieldFilter, Filter, getFilterParams } from '@kbn/es-query';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { ConditionTypes } from '../filters_editor_condition_types';
 import { FiltersEditorContextType } from '../filters_editor_context';
@@ -18,7 +18,10 @@ import { ParamsEditor } from './filters_editor_filter_item_params_editor';
 import { FilterGroup } from '../filters_editor_filter_group';
 import { getConditionalOperationType } from '../filters_editor_utils';
 import type { Path } from '../filter_editors_types';
-import { getOperatorFromFilter } from '../../../filter_bar/filter_editor/lib/filter_editor_utils';
+import {
+  getFieldFromFilter,
+  getOperatorFromFilter,
+} from '../../../filter_bar/filter_editor/lib/filter_editor_utils';
 import { Operator } from '../../../filter_bar/filter_editor/lib/filter_operators';
 
 export interface FilterItemProps {
@@ -31,29 +34,41 @@ export interface FilterItemProps {
 export function FilterItem({
   filter,
   path,
-  timeRangeForSuggestionsOverride = false,
+  timeRangeForSuggestionsOverride,
   reverseBackground,
 }: FilterItemProps) {
-  const conditionalOperationType = getConditionalOperationType(filter);
   const { dispatch, dataView } = useContext(FiltersEditorContextType);
+  const conditionalOperationType = getConditionalOperationType(filter);
 
-  const [selectedField, setSelectedField] = useState<DataViewField | undefined>(undefined);
+  const [selectedField, setSelectedField] = useState<DataViewField | undefined>(
+    getFieldFromFilter(filter as FieldFilter, dataView)
+  );
   const [selectedOperator, setSelectedOperator] = useState<Operator | undefined>(
     getSelectedOperator()
   );
-  const [selectedParams, setSelectedParams] = useState<any>(undefined);
+  const [selectedParams, setSelectedParams] = useState<any>(getFilterParams(filter));
 
   function getSelectedOperator() {
     return getOperatorFromFilter(filter);
   }
 
   const onHandleField = (field: DataViewField) => {
+    dispatch({
+      type: 'updateFilters',
+      payload: { dataView, field, path },
+    });
+
     setSelectedField(field);
     setSelectedOperator(undefined);
     setSelectedParams(undefined);
   };
 
   const onHandleOperator = (operator: Operator, params: any) => {
+    dispatch({
+      type: 'updateFilters',
+      payload: { dataView, field: selectedField, operator, params, path },
+    });
+
     setSelectedOperator(operator);
     setSelectedParams(params);
   };

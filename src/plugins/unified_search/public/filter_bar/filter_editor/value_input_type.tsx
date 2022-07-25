@@ -101,6 +101,7 @@ class ValueInputTypeUI extends Component<Props> {
             isInvalid={!isEmpty(value) && !validateParams(value, this.props.field)}
             controlOnly={this.props.controlOnly}
             className={this.props.className}
+            compressed={this.props.compressed}
           />
         );
         break;
