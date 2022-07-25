@@ -40,7 +40,6 @@ import { EnrichmentRangePicker } from './cti_details/enrichment_range_picker';
 import { Reason } from './reason';
 import { InvestigationGuideView } from './investigation_guide_view';
 import { Overview } from './overview';
-import { useKibana } from '../../lib/kibana';
 import type { HostRisk } from '../../../risk_score/containers';
 import { Insights } from './insights/insights';
 
@@ -116,8 +115,6 @@ const EventDetailsComponent: React.FC<Props> = ({
   handleOnEventClosed,
   isReadOnly,
 }) => {
-  const { http } = useKibana().services;
-
   const [selectedTabId, setSelectedTabId] = useState<EventViewId>(EventsViewType.summaryView);
   const handleTabClick = useCallback(
     (tab: EuiTabbedContentTab) => setSelectedTabId(tab.id as EventViewId),
@@ -141,8 +138,6 @@ const EventDetailsComponent: React.FC<Props> = ({
     setRange,
     range,
   } = useInvestigationTimeEnrichment(eventFields);
-
-  const [alertIds, setAlertIds] = useState<string[]>([]);
 
   const allEnrichments = useMemo(() => {
     if (isEnrichmentsLoading || !enrichmentsResponse?.enrichments) {

@@ -40,7 +40,7 @@ export interface TreeOptions {
   includeHits?: boolean;
 }
 
-type TreeResponse = Promise<
+export type TreeResponse = Promise<
   | ResolverNode[]
   | {
       alertIds: string[] | undefined;
@@ -52,8 +52,8 @@ type TreeResponse = Promise<
  * Handles retrieving nodes of a resolver tree.
  */
 export class Fetcher {
-  private alertsClient: AlertsClient;
-  constructor(private readonly client: IScopedClusterClient, alertsClient: AlertsClient) {
+  private alertsClient?: AlertsClient;
+  constructor(private readonly client: IScopedClusterClient, alertsClient?: AlertsClient) {
     this.alertsClient = alertsClient;
   }
 

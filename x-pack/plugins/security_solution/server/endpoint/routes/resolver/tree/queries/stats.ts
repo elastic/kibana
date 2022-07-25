@@ -189,7 +189,7 @@ export class StatsQuery {
   async search(
     client: IScopedClusterClient,
     nodes: NodeID[],
-    alertsClient: AlertsClient,
+    alertsClient: AlertsClient | undefined,
     includeHits: boolean
   ): Promise<{ eventStats?: Record<string, EventStats>; alertIds?: string[] }> {
     if (nodes.length <= 0) {
@@ -205,7 +205,9 @@ export class StatsQuery {
         body: this.query(nodes),
         index: this.indexPatterns,
       }),
-      await alertsClient.find(this.alertStatsQuery(nodes, alertIndex, includeHits)),
+      alertsClient
+        ? await alertsClient.find(this.alertStatsQuery(nodes, alertIndex, includeHits))
+        : { hits: { hits: [] } },
     ]);
     // @ts-expect-error declare aggegations type explicitly
     const eventAggs: CategoriesAgg[] = body.aggregations?.ids?.buckets ?? [];
@@ -224,13 +226,14 @@ export class StatsQuery {
         },
       ])
     );
-    const alertIds = alertsBody.hits.hits
-      .map((hit) => {
-        return hit._source && hit._source['kibana.alert.uuid'];
-      })
-      .filter((hit) => hit !== undefined);
-    const eventStats = [...eventsWithAggs.values()].reduce(
-      (cummulative: Record<string, number>, id: string) => {
+    const alertIdsRaw: Array<string | undefined> = alertsBody.hits.hits.map((hit) => {
+      return hit._source && hit._source['kibana.alert.uuid'];
+    });
+    const alertIds = alertIdsRaw.flatMap((id) => (!id ? [] : [id]));
+
+    const eventAggStats = [...eventsWithAggs.values()];
+    const eventStats = eventAggStats.reduce(
+      (cummulative: Record<string, EventStats>, id: string) => {
         const alertCount = alertsAggsMap.get(id);
         const otherEvents = eventAggsMap.get(id);
         if (alertCount !== undefined) {
@@ -266,10 +269,7 @@ export class StatsQuery {
               },
             };
           } else {
-            return {
-              total: 0,
-              byCategory: {},
-            };
+            return {};
           }
         }
       },

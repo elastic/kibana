@@ -12,7 +12,7 @@ import { useHttp } from '../../lib/kibana';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { TimelineId } from '../../../../common/types/timeline';
 import {
-  isLoadingSelector,
+  // isLoadingSelector,
   startSelector,
   endSelector,
 } from '../../components/super_date_picker/selectors';
@@ -20,20 +20,7 @@ import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererDataView } from '../sourcerer';
 import { sourcererSelectors } from '../../store';
 
-// import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
-
-// import { useGlobalTime } from '../use_global_time';
-// import { TimelineId } from '../../../../common/types';
-// import { useDeepEqualSelector } from '../../hooks/use_selector';
-// import { inputsSelectors } from '../../store';
-
 export const DETECTIONS_ALERTS_COUNT_ID = 'detections-alerts-count';
-
-interface UseAlertPrevalenceOptions {
-  parentEntityId: string | string[] | undefined | null;
-  timelineId: string;
-  signalIndexName: string | null;
-}
 
 interface UserAlertPrevalenceFromProcessTreeResult {
   loading: boolean;
@@ -106,23 +93,23 @@ function useAlertDocumentAnalyzerSchema(processEntityId: string) {
 
 export function useAlertPrevalenceFromProcessTree(
   processEntityId: string,
-  timelineId: string
+  timelineId: string | undefined
 ): UserAlertPrevalenceFromProcessTreeResult {
   const http = useHttp();
   const getStartSelector = useMemo(() => startSelector(), []);
   const getEndSelector = useMemo(() => endSelector(), []);
-  const getIsLoadingSelector = useMemo(() => isLoadingSelector(), []);
+  // const getIsLoadingSelector = useMemo(() => isLoadingSelector(), []);
   const isActive = useMemo(() => timelineId === TimelineId.active, [timelineId]);
   const isInTimeline = timelineId === TimelineId.active;
 
   // TODO: probably use
-  const shouldUpdate = useDeepEqualSelector((state) => {
-    if (isActive) {
-      return getIsLoadingSelector(state.inputs.timeline);
-    } else {
-      return getIsLoadingSelector(state.inputs.global);
-    }
-  });
+  // const shouldUpdate = useDeepEqualSelector((state) => {
+  //   if (isActive) {
+  //     return getIsLoadingSelector(state.inputs.timeline);
+  //   } else {
+  //     return getIsLoadingSelector(state.inputs.global);
+  //   }
+  // });
   const from = useDeepEqualSelector((state) => {
     if (isActive) {
       return getStartSelector(state.inputs.timeline);
