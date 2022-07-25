@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { merge } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -72,10 +72,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
           }
         );
 
-      const editedMonitor = {
-        ...normalizeSecrets(decryptedPreviousMonitor).attributes,
-        ...monitor,
-      };
+      const editedMonitor = merge(normalizeSecrets(decryptedPreviousMonitor).attributes, monitor);
 
       const validationResult = validateMonitor(editedMonitor as MonitorFields);
 
