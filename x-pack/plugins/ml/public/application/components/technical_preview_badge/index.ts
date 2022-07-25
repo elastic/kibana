@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './factory';
+export { TechnicalPreviewBadge } from './technical_preview_badge';
