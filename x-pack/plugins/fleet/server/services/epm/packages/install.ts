@@ -35,7 +35,7 @@ import type {
   KibanaAssetType,
   PackageVerificationResult,
 } from '../../../types';
-import { AUTO_UPGRADE_POLICIES_PACKAGES } from '../../../../common';
+import { AUTO_UPGRADE_POLICIES_PACKAGES } from '../../../../common/constants';
 import { IngestManagerError, PackageOutdatedError } from '../../../errors';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import { licenseService } from '../..';

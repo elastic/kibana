@@ -20,7 +20,7 @@ import React, { memo, useCallback, useState, useEffect, useMemo } from 'react';
 
 import styled from 'styled-components';
 import { i18n as i18nCore } from '@kbn/i18n';
-import { isEqual, isEmpty } from 'lodash';
+import { isEqual, isEmpty, omit } from 'lodash';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import usePrevious from 'react-use/lib/usePrevious';
 
@@ -63,6 +63,7 @@ import { schema } from './schema';
 import * as i18n from './translations';
 import {
   isEqlRule,
+  isNewTermsRule,
   isThreatMatchRule,
   isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
@@ -73,6 +74,8 @@ import type { BrowserField, BrowserFields } from '../../../../common/containers/
 import { useFetchIndex } from '../../../../common/containers/source';
 import { RulePreview } from '../rule_preview';
 import { getIsRulePreviewDisabled } from '../rule_preview/helpers';
+import { NewTermsFields } from '../new_terms_fields';
+import { ScheduleItem } from '../schedule_item_form';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
 
 const DATA_VIEW_SELECT_ID = 'dataView';
@@ -80,17 +83,6 @@ const INDEX_PATTERN_SELECT_ID = 'indexPatterns';
 
 const CommonUseField = getUseField({ component: Field });
 
-const StyledButtonGroup = styled(EuiButtonGroup)`
-  display: flex;
-  justify-content: right;
-  .euiButtonGroupButton {
-    padding-right: ${(props) => props.theme.eui.euiSizeL};
-  }
-`;
-
-const StyledFlexGroup = styled(EuiFlexGroup)`
-  margin-bottom: -21px;
-`;
 interface StepDefineRuleProps extends RuleStepProps {
   defaultValues?: DefineStepRule;
 }
@@ -127,6 +119,8 @@ export const stepDefineDefaultValue: DefineStepRule = {
     title: DEFAULT_TIMELINE_TITLE,
   },
   eqlOptions: {},
+  newTermsFields: [],
+  historyWindowSize: '7d',
 };
 
 /**
@@ -208,6 +202,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       threatMapping: formThreatMapping,
       machineLearningJobId: formMachineLearningJobId,
       anomalyThreshold: formAnomalyThreshold,
+      newTermsFields: formNewTermsFields,
+      historyWindowSize: formHistoryWindowSize,
     },
   ] = useFormData<DefineStepRule>({
     form,
@@ -225,6 +221,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       'threatMapping',
       'machineLearningJobId',
       'anomalyThreshold',
+      'newTermsFields',
+      'historyWindowSize',
     ],
   });
 
@@ -235,6 +233,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const threatIndex = formThreatIndex || initialState.threatIndex;
   const machineLearningJobId = formMachineLearningJobId ?? initialState.machineLearningJobId;
   const anomalyThreshold = formAnomalyThreshold ?? initialState.anomalyThreshold;
+  const newTermsFields = formNewTermsFields ?? initialState.newTermsFields;
+  const historyWindowSize = formHistoryWindowSize ?? initialState.historyWindowSize;
   const ruleType = formRuleType || initialState.ruleType;
 
   // if 'index' is selected, use these browser fields
@@ -473,43 +473,42 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   }, [kibanaDataViews]);
   const DataSource = useMemo(() => {
     return (
-      <RuleTypeEuiFormRow $isVisible={true} fullWidth>
-        <EuiFlexGroup direction="column">
+      <RuleTypeEuiFormRow label={i18n.SOURCE} $isVisible={true} fullWidth>
+        <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
-            <StyledFlexGroup direction="row" alignItems="stretch">
-              <EuiFlexItem grow={1}>
-                <StyledButtonGroup
-                  legend="Rule index pattern or data view selector"
-                  data-test-subj="dataViewIndexPatternButtonGroup"
-                  idSelected={dataSourceRadioIdSelected}
-                  onChange={onChangeDataSource}
-                  options={dataViewIndexPatternToggleButtonOptions}
-                  color="primary"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={2}>
-                <EuiText size="s">
-                  <FormattedMessage
-                    id="xpack.securitySolution.dataViewSelectorText1"
-                    defaultMessage="Use Kibana "
-                  />
-                  <DocLink guidePath="kibana" docPath="data-views.html" linkText="Data Views" />
-                  <FormattedMessage
-                    id="xpack.securitySolution.dataViewSelectorText2"
-                    defaultMessage=" or specify individual "
-                  />
-                  <DocLink
-                    guidePath="kibana"
-                    docPath="index-patterns-api-create.html"
-                    linkText="index patterns"
-                  />
-                  <FormattedMessage
-                    id="xpack.securitySolution.dataViewSelectorText3"
-                    defaultMessage=" as your rule's data source to be searched."
-                  />
-                </EuiText>
-              </EuiFlexItem>
-            </StyledFlexGroup>
+            <EuiText size="xs">
+              <FormattedMessage
+                id="xpack.securitySolution.dataViewSelectorText1"
+                defaultMessage="Use Kibana "
+              />
+              <DocLink guidePath="kibana" docPath="data-views.html" linkText="Data Views" />
+              <FormattedMessage
+                id="xpack.securitySolution.dataViewSelectorText2"
+                defaultMessage=" or specify individual "
+              />
+              <DocLink
+                guidePath="kibana"
+                docPath="index-patterns-api-create.html"
+                linkText="index patterns"
+              />
+              <FormattedMessage
+                id="xpack.securitySolution.dataViewSelectorText3"
+                defaultMessage=" as your rule's data source to be searched."
+              />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <RuleTypeEuiFormRow $isVisible={true}>
+              <EuiButtonGroup
+                isFullWidth={true}
+                legend="Rule index pattern or data view selector"
+                data-test-subj="dataViewIndexPatternButtonGroup"
+                idSelected={dataSourceRadioIdSelected}
+                onChange={onChangeDataSource}
+                options={dataViewIndexPatternToggleButtonOptions}
+                color="primary"
+              />
+            </RuleTypeEuiFormRow>
           </EuiFlexItem>
 
           <EuiFlexItem>
@@ -519,7 +518,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               <CommonUseField
                 path="index"
                 config={{
-                  ...schema.index,
+                  ...omit(schema.index, 'label'),
                   labelAppend: indexModified ? (
                     <MyLabelButton onClick={handleResetIndices} iconType="refresh">
                       {i18n.RESET_DEFAULT_INDEX}
@@ -738,6 +737,30 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               </UseMultiFields>
             </>
           </RuleTypeEuiFormRow>
+          <RuleTypeEuiFormRow
+            $isVisible={isNewTermsRule(ruleType)}
+            data-test-subj="newTermsInput"
+            fullWidth
+          >
+            <>
+              <UseField
+                path="newTermsFields"
+                component={NewTermsFields}
+                componentProps={{
+                  browserFields,
+                }}
+              />
+              <UseField
+                path="historyWindowSize"
+                component={ScheduleItem}
+                componentProps={{
+                  idAria: 'detectionEngineStepDefineRuleHistoryWindowSize',
+                  dataTestSubj: 'detectionEngineStepDefineRuleHistoryWindowSize',
+                  timeTypes: ['m', 'h', 'd'],
+                }}
+              />
+            </>
+          </RuleTypeEuiFormRow>
           <UseField
             path="timeline"
             component={PickTimeline}
@@ -772,6 +795,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           machineLearningJobId={machineLearningJobId}
           anomalyThreshold={anomalyThreshold}
           eqlOptions={optionsSelected}
+          newTermsFields={newTermsFields}
+          historyWindowSize={historyWindowSize}
         />
       </StepContentWrapper>
 

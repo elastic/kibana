@@ -11,12 +11,20 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { SecurityUserProfile } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { IClusterClient, Logger } from '@kbn/core/server';
+import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { UserProfile, UserProfileData, UserProfileWithSecurity } from '../../common';
+import type {
+  UserProfile,
+  UserProfileData,
+  UserProfileLabels,
+  UserProfileWithSecurity,
+} from '../../common';
 import type { AuthorizationServiceSetupInternal } from '../authorization';
 import type { CheckUserProfilesPrivilegesResponse } from '../authorization/types';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
+import type { Session } from '../session_management';
+import { getPrintableSessionId } from '../session_management';
 import type { UserProfileGrant } from './user_profile_grant';
 
 const KIBANA_DATA_ROOT = 'kibana';
@@ -30,6 +38,18 @@ const MIN_SUGGESTIONS_FOR_PRIVILEGES_CHECK = 10;
  * A set of methods to work with Kibana user profiles.
  */
 export interface UserProfileServiceStart {
+  /**
+   * Retrieves a user profile for the current user extracted from the specified request. If the profile isn't available,
+   * e.g. for the anonymous users or users authenticated via authenticating proxies, the `null` value is returned.
+   * @param params Get current user profile operation parameters.
+   * @param params.request User request instance to get user profile for.
+   * @param params.dataPath By default Elasticsearch returns user information, but does not return any user data. The
+   * optional "dataPath" parameter can be used to return personal data for the requested user profiles.
+   */
+  getCurrent<D extends UserProfileData, L extends UserProfileLabels>(
+    params: UserProfileGetCurrentParams
+  ): Promise<UserProfileWithSecurity<D, L> | null>;
+
   /**
    * Retrieves multiple user profiles by their identifiers.
    * @param params Bulk get operation parameters.
@@ -62,17 +82,6 @@ export interface UserProfileServiceStartInternal extends UserProfileServiceStart
   activate(grant: UserProfileGrant): Promise<UserProfileWithSecurity>;
 
   /**
-   * Retrieves a single user profile by its identifier.
-   * @param uid User profile identifier.
-   * @param dataPath By default Elasticsearch returns user information, but does not return any user data. The optional
-   * "dataPath" parameter can be used to return personal data for the requested user profile.
-   */
-  get<D extends UserProfileData>(
-    uid: string,
-    dataPath?: string
-  ): Promise<UserProfileWithSecurity<D>>;
-
-  /**
    * Updates user preferences by identifier.
    * @param uid User ID
    * @param data Application data to be written (merged with existing data).
@@ -86,6 +95,7 @@ export interface UserProfileServiceSetupParams {
 
 export interface UserProfileServiceStartParams {
   clusterClient: IClusterClient;
+  session: PublicMethodsOf<Session>;
 }
 
 /**
@@ -101,6 +111,22 @@ export interface UserProfileRequiredPrivileges {
    * The set of the Kibana specific application privileges.
    */
   privileges: { kibana: string[] };
+}
+
+/**
+ * Parameters for the get user profile for the current user API.
+ */
+export interface UserProfileGetCurrentParams {
+  /**
+   * User request instance to get user profile for.
+   */
+  request: KibanaRequest;
+
+  /**
+   * By default, get API returns user information, but does not return any user data. The optional "dataPath"
+   * parameter can be used to return personal data for this user (within `kibana` namespace only).
+   */
+  dataPath?: string;
 }
 
 /**
@@ -194,10 +220,10 @@ export class UserProfileService {
     this.authz = authz;
   }
 
-  start({ clusterClient }: UserProfileServiceStartParams) {
+  start({ clusterClient, session }: UserProfileServiceStartParams) {
     return {
       activate: this.activate.bind(this, clusterClient),
-      get: this.get.bind(this, clusterClient),
+      getCurrent: this.getCurrent.bind(this, clusterClient, session),
       bulkGet: this.bulkGet.bind(this, clusterClient),
       update: this.update.bind(this, clusterClient),
       suggest: this.suggest.bind(this, clusterClient),
@@ -261,29 +287,52 @@ export class UserProfileService {
   }
 
   /**
-   * See {@link UserProfileServiceStartInternal} for documentation.
+   * See {@link UserProfileServiceStart} for documentation.
    */
-  private async get<D extends UserProfileData>(
+  private async getCurrent<D extends UserProfileData>(
     clusterClient: IClusterClient,
-    uid: string,
-    dataPath?: string
+    session: PublicMethodsOf<Session>,
+    { request, dataPath }: UserProfileGetCurrentParams
   ) {
+    let userSession;
+    try {
+      userSession = await session.get(request);
+    } catch (error) {
+      this.logger.error(`Failed to retrieve user session: ${getDetailedErrorMessage(error)}`);
+      throw error;
+    }
+
+    if (!userSession) {
+      return null;
+    }
+
+    if (!userSession.userProfileId) {
+      this.logger.debug(
+        `User profile missing from the current session [sid=${getPrintableSessionId(
+          userSession.sid
+        )}].`
+      );
+      return null;
+    }
+
     try {
       const body = await clusterClient.asInternalUser.security.getUserProfile({
-        uid,
+        uid: userSession.userProfileId,
         data: dataPath ? `${KIBANA_DATA_ROOT}.${dataPath}` : undefined,
       });
-      return parseUserProfileWithSecurity<D>(body[uid]!);
+      return parseUserProfileWithSecurity<D>(body[userSession.userProfileId]!);
     } catch (error) {
       this.logger.error(
-        `Failed to retrieve user profile [uid=${uid}]: ${getDetailedErrorMessage(error)}`
+        `Failed to retrieve user profile for the current user [sid=${getPrintableSessionId(
+          userSession.sid
+        )}]: ${getDetailedErrorMessage(error)}`
       );
       throw error;
     }
   }
 
   /**
-   * See {@link UserProfileServiceStartInternal} for documentation.
+   * See {@link UserProfileServiceStart} for documentation.
    */
   private async bulkGet<D extends UserProfileData>(
     clusterClient: IClusterClient,
@@ -308,14 +357,27 @@ export class UserProfileService {
           },
         });
 
-      return (
-        body.profiles
-          // "uids" is just a hint that allows to put user profiles with the requested uids on the top of the
-          // returned list, but if Elasticsearch cannot find user profiles for all requested uids it might include
-          // other "matched" user profiles as well.
-          .filter((rawProfile) => uids.has(rawProfile.uid))
-          .map((rawProfile) => parseUserProfile<D>(rawProfile))
+      // Using `_suggest` API to simulate `_bulk_get` API has two important shortcomings:
+      // 1. "uids" parameter is just a hint that asks Elasticsearch to put user profiles with the requested uids on the
+      // top of the returned list, but if Elasticsearch cannot find user profiles for all requested uids it might
+      // include other "matched" user profiles as well. We should filter those non-requested profiles out.
+      // 2. The `_suggest` API is supposed to sort results by relevance i.e. first by the search score (if `name`
+      // parameter is specified which isn't the case here) and then by the activation time. The `_bulk_get` API, on the
+      // contrary, should always return results in the order the consumer specified UIDs in (in our case, the insertion
+      // order for the `Set` we use as the UIDs parameter). That's why we're manually sorting profiles here.
+      const rawUserProfiles = new Map(
+        body.profiles.map((rawUserProfile) => [rawUserProfile.uid, rawUserProfile])
       );
+
+      const parsedUserProfiles = [];
+      for (const uid of uids) {
+        const rawUserProfile = rawUserProfiles.get(uid);
+        if (rawUserProfile) {
+          parsedUserProfiles.push(parseUserProfile<D>(rawUserProfile));
+        }
+      }
+
+      return parsedUserProfiles;
     } catch (error) {
       this.logger.error(`Failed to bulk get user profiles: ${getDetailedErrorMessage(error)}`);
       throw error;
@@ -344,7 +406,7 @@ export class UserProfileService {
   }
 
   /**
-   * See {@link UserProfileServiceStartInternal} for documentation.
+   * See {@link UserProfileServiceStart} for documentation.
    */
   private async suggest<D extends UserProfileData>(
     clusterClient: IClusterClient,

@@ -35,6 +35,7 @@ import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
 import { ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
+import { css } from '@emotion/react';
 import { SwimLanePagination } from './swimlane_pagination';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 import { ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../../../common';
@@ -215,7 +216,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
 
     return swimlaneData.points
       .map((v) => {
-        const formatted = { ...v, time: v.time * 1000 };
+        const formatted = { ...v, time: v.time * 1000, value: v.value === 0 ? null : v.value };
         if (showFilterContext) {
           formatted.laneLabel = i18n.translate('xpack.ml.explorer.overallSwimlaneUnfilteredLabel', {
             defaultMessage: '{label} (unfiltered)',
@@ -230,8 +231,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
         aIndex = aIndex > -1 ? aIndex : sortedLaneValues.length;
         bIndex = bIndex > -1 ? bIndex : sortedLaneValues.length;
         return aIndex - bIndex;
-      })
-      .filter((v) => v.value > 0);
+      });
   }, [swimlaneData?.points, filterActive, swimlaneType, swimlaneData?.laneLabels]);
 
   const showSwimlane = swimlaneData?.laneLabels?.length > 0 && swimLanePoints.length > 0;
@@ -406,22 +406,29 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
         <EuiFlexGroup
           gutterSize={'none'}
           direction={'column'}
-          style={{ width: '100%', height: '100%', overflow: 'hidden' }}
           ref={resizeRef}
           data-test-subj={dataTestSubj}
+          css={{
+            width: '100%',
+            height: '100%',
+            overflow: 'hidden',
+          }}
         >
           <EuiFlexItem
-            style={{
+            css={{
               width: '100%',
-              overflowY: 'auto',
-              overflowX: 'hidden',
+              'overflow-y': 'auto',
+              'overflow-x': 'hidden',
             }}
             grow={false}
           >
             <>
               <div>
                 <div
-                  style={{ height: `${containerHeight}px`, position: 'relative' }}
+                  style={{ height: `${containerHeight}px` }}
+                  css={css`
+                    position: relative;
+                  `}
                   hidden={noSwimLaneData}
                 >
                   {showSwimlane && !isLoading && (

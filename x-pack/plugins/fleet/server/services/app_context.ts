@@ -26,7 +26,8 @@ import type { SecurityPluginStart, SecurityPluginSetup } from '@kbn/security-plu
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
-import type { FleetConfigType, ExperimentalFeatures } from '../../common';
+import type { FleetConfigType } from '../../common/types';
+import type { ExperimentalFeatures } from '../../common/experimental_features';
 import type {
   ExternalCallback,
   ExternalCallbacksStorage,

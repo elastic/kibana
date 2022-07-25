@@ -70,6 +70,7 @@ describe('findAndCleanupTasks', () => {
         enabledInConfig: true,
         enabledInLicense: true,
         minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
       },
     ]);
     jest.requireMock('./cleanup_tasks').cleanupTasks.mockResolvedValue({
