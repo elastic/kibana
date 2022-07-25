@@ -98,7 +98,6 @@ enabled:
   - test/interactive_setup_functional/manual_configuration_without_tls.config.ts
   - test/interactive_setup_functional/manual_configuration.config.ts
   - test/interpreter_functional/config.ts
-  - test/new_visualize_flow/config.ts
   - test/node_roles_functional/all.config.ts
   - test/node_roles_functional/background_tasks.config.ts
   - test/node_roles_functional/ui.config.ts
