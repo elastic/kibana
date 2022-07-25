@@ -7,13 +7,28 @@
 
 import React from 'react';
 import { EuiLoadingLogo, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { useCspBenchmarkIntegrations } from '../pages/benchmarks/use_csp_benchmark_integrations';
 import { useCISIntegrationPoliciesLink } from '../common/navigation/use_navigate_to_cis_integration_policies';
 import { NO_FINDINGS_STATUS_TEST_SUBJ } from './test_subjects';
 import { CloudPosturePage } from './cloud_posture_page';
 import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
 
 const NotDeployed = () => {
-  const integrationLink = useCISIntegrationPoliciesLink();
+  // using an existing hook to get agent id and package policy id
+  const benchmarks = useCspBenchmarkIntegrations({
+    name: '',
+    page: 1,
+    perPage: 1,
+    sortField: 'package_policy.name',
+    sortOrder: 'asc',
+  });
+
+  // the ids are not a must, but as long as we have them we can open the add agent flyout
+  const firstBenchmark = benchmarks.data?.items?.[0];
+  const integrationPoliciesLink = useCISIntegrationPoliciesLink({
+    addAgentToPolicyId: firstBenchmark?.agent_policy.id || '',
+    integration: firstBenchmark?.package_policy.id || '',
+  });
 
   return (
     <EuiEmptyPrompt
@@ -23,7 +38,7 @@ const NotDeployed = () => {
       title={<h2>{'No Agents Installed'}</h2>}
       body={<p>To see findings, install an elastic agent on your cluster</p>}
       actions={[
-        <EuiButton fill href={integrationLink} isDisabled={!integrationLink}>
+        <EuiButton fill href={integrationPoliciesLink} isDisabled={!integrationPoliciesLink}>
           Install Agent
         </EuiButton>,
       ]}
@@ -62,9 +77,9 @@ export const NoFindingsStates = () => {
   const status = getSetupStatus.data?.status;
 
   const render = () => {
-    if (status === 'not-deployed' || true) return <NotDeployed />;
-    if (status === 'indexing') return <Indexing />;
-    if (status === 'index-timeout') return <IndexTimeout />;
+    if (status === 'not-deployed' || true) return <NotDeployed />; // integration installed, but no agents added
+    if (status === 'indexing') return <Indexing />; // agent added, index timeout hasn't passed since installation
+    if (status === 'index-timeout') return <IndexTimeout />; // agent added, index timeout has passed
   };
 
   return (
