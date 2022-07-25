@@ -10,9 +10,20 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Observable } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { CoreTheme } from '@kbn/core-theme-browser';
-import { MountPoint } from '@kbn/core/public/types';
 
+/**
+ * A function that will unmount the element previously mounted by
+ * the associated {@link MountPoint}
+ *
+ * @public
+ */
+export type UnmountCallback = () => void;
+
+export type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => UnmountCallback;
+
+export interface CoreTheme {
+  darkMode: boolean;
+}
 export interface ToMountPointOptions {
   theme$?: Observable<CoreTheme>;
 }
