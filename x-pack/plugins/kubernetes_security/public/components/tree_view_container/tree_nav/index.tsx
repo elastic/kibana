@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { EuiButtonGroup, useGeneratedHtmlId, EuiText, EuiSpacer } from '@elastic/eui';
 import {
   TREE_VIEW_INFRASTRUCTURE_VIEW,
@@ -12,31 +12,17 @@ import {
   TREE_VIEW_SWITCHER_LEGEND,
 } from '../../../../common/translations';
 import { useStyles } from './styles';
-import { IndexPattern, GlobalFilter, TreeNavSelection } from '../../../types';
 import { DynamicTreeView } from '../dynamic_tree_view';
-import { addTimerangeToQuery } from '../../../utils/add_timerange_to_query';
 import { INFRASTRUCTURE, LOGICAL, TREE_VIEW } from './constants';
 import { TreeViewKind, TreeViewOptionsGroup } from './types';
+import { useTreeViewContext } from '../contexts';
 
-interface TreeNavProps {
-  indexPattern?: IndexPattern;
-  globalFilter: GlobalFilter;
-  onSelect: (selection: TreeNavSelection) => void;
-  hasSelection: boolean;
-}
-
-export const TreeNav = ({ indexPattern, globalFilter, onSelect, hasSelection }: TreeNavProps) => {
+export const TreeNav = () => {
   const styles = useStyles();
   const [tree, setTree] = useState(TREE_VIEW.logical);
   const [selected, setSelected] = useState('');
 
-  const filterQueryWithTimeRange = useMemo(() => {
-    return addTimerangeToQuery(
-      globalFilter.filterQuery,
-      globalFilter.startDate,
-      globalFilter.endDate
-    );
-  }, [globalFilter.filterQuery, globalFilter.startDate, globalFilter.endDate]);
+  const { filterQueryWithTimeRange, onTreeNavSelect } = useTreeViewContext();
 
   const treeNavTypePrefix = useGeneratedHtmlId({
     prefix: 'treeNavType',
@@ -84,8 +70,7 @@ export const TreeNav = ({ indexPattern, globalFilter, onSelect, hasSelection }: 
       <EuiSpacer size="s" />
       <div css={styles.treeViewContainer} className="eui-scrollBar">
         <DynamicTreeView
-          query={JSON.parse(filterQueryWithTimeRange)}
-          indexPattern={indexPattern?.title}
+          query={filterQueryWithTimeRange}
           tree={tree}
           aria-label="Logical Tree View"
           selected={selected}
@@ -99,9 +84,8 @@ export const TreeNav = ({ indexPattern, globalFilter, onSelect, hasSelection }: 
                 .map(([k, v]) => `${k}.${v}`)
                 .join()
             );
-            onSelect(newSelectionDepth);
+            onTreeNavSelect(newSelectionDepth);
           }}
-          hasSelection={hasSelection}
         />
       </div>
     </>

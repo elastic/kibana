@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React from 'react';
 import { EuiSplitPanel, EuiText } from '@elastic/eui';
 import { useStyles } from './styles';
-import { IndexPattern, GlobalFilter, TreeNavSelection, KubernetesCollection } from '../../types';
+import { IndexPattern, GlobalFilter } from '../../types';
 import { TreeNav } from './tree_nav';
-import { addTreeNavSelectionToFilterQuery } from './helpers';
 import { Breadcrumb } from './breadcrumb';
+import { TreeViewContextProvider, useTreeViewContext } from './contexts';
+import { EmptyState } from './empty_state';
 
 export interface TreeViewContainerDeps {
   globalFilter: GlobalFilter;
@@ -24,37 +25,38 @@ export const TreeViewContainer = ({
   renderSessionsView,
   indexPattern,
 }: TreeViewContainerDeps) => {
-  const styles = useStyles();
-  const [treeNavSelection, setTreeNavSelection] = useState<TreeNavSelection>({});
-
-  const onTreeNavSelect = useCallback((selection: TreeNavSelection) => {
-    setTreeNavSelection(selection);
-  }, []);
-
-  const hasSelection = useMemo(
-    () => !!treeNavSelection[KubernetesCollection.cluster],
-    [treeNavSelection]
+  return (
+    <TreeViewContextProvider indexPattern={indexPattern} globalFilter={globalFilter}>
+      <TreeViewContainerComponent renderSessionsView={renderSessionsView} />
+    </TreeViewContextProvider>
   );
+};
+
+const TreeViewContainerComponent = ({
+  renderSessionsView,
+}: Pick<TreeViewContainerDeps, 'renderSessionsView'>) => {
+  const styles = useStyles();
+
+  const { hasSelection, treeNavSelection, sessionViewFilter, onTreeNavSelect, noResults } =
+    useTreeViewContext();
 
   return (
     <EuiSplitPanel.Outer direction="row" hasBorder borderRadius="m" css={styles.outerPanel}>
-      <EuiSplitPanel.Inner color="subdued" grow={false} css={styles.navPanel}>
-        <EuiText css={styles.treeViewNav}>
-          <TreeNav
-            indexPattern={indexPattern}
-            globalFilter={globalFilter}
-            onSelect={onTreeNavSelect}
-            hasSelection={hasSelection}
-          />
-        </EuiText>
-      </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner css={styles.sessionsPanel}>
-        <Breadcrumb treeNavSelection={treeNavSelection} onSelect={onTreeNavSelect} />
-        {hasSelection &&
-          renderSessionsView(
-            addTreeNavSelectionToFilterQuery(globalFilter.filterQuery, treeNavSelection)
-          )}
-      </EuiSplitPanel.Inner>
+      {noResults ? (
+        <EmptyState />
+      ) : (
+        <>
+          <EuiSplitPanel.Inner color="subdued" grow={false} css={styles.navPanel}>
+            <EuiText css={styles.treeViewNav}>
+              <TreeNav />
+            </EuiText>
+          </EuiSplitPanel.Inner>
+          <EuiSplitPanel.Inner css={styles.sessionsPanel}>
+            <Breadcrumb treeNavSelection={treeNavSelection} onSelect={onTreeNavSelect} />
+            {hasSelection && renderSessionsView(sessionViewFilter)}
+          </EuiSplitPanel.Inner>
+        </>
+      )}
     </EuiSplitPanel.Outer>
   );
 };

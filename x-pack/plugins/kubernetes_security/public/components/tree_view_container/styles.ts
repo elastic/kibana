@@ -16,7 +16,7 @@ export const useStyles = () => {
     const { border } = euiTheme;
 
     const outerPanel: CSSObject = {
-      minHeight: '500px',
+      minHeight: '262px',
     };
 
     const navPanel: CSSObject = {

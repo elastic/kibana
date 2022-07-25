@@ -8,6 +8,7 @@
 import React from 'react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../test';
 import { TreeNav } from '.';
+import { TreeViewContextProvider } from '../contexts';
 
 describe('TreeNav component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -23,18 +24,24 @@ describe('TreeNav component', () => {
     hasSelection: false,
   };
 
+  const TreeNavContainer = () => (
+    <TreeViewContextProvider {...defaultProps}>
+      <TreeNav />
+    </TreeViewContextProvider>
+  );
+
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
   });
 
   it('mount with Logical View selected by default', async () => {
-    renderResult = mockedContext.render(<TreeNav {...defaultProps} />);
+    renderResult = mockedContext.render(<TreeNavContainer />);
     const elemLabel = await renderResult.getByDisplayValue(/logical/i);
     expect(elemLabel).toBeChecked();
   });
 
   it('shows the tree path according with the selected view type', async () => {
-    renderResult = mockedContext.render(<TreeNav {...defaultProps} />);
+    renderResult = mockedContext.render(<TreeNavContainer />);
 
     const logicalViewPath = 'cluster / namespace / pod / container image';
     const logicViewRadio = await renderResult.getByDisplayValue(/logical/i);
