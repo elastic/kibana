@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('security APIs - User Profiles', function () {
     loadTestFile(require.resolve('./suggest'));
     loadTestFile(require.resolve('./bulk_get'));
+    loadTestFile(require.resolve('./get_current'));
   });
 }
