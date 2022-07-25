@@ -223,7 +223,9 @@ export const getMetricVisualization = ({
       groups: [
         {
           groupId: GROUP_ID.METRIC,
-          groupLabel: i18n.translate('xpack.lens.metric.label', { defaultMessage: 'Metric' }),
+          groupLabel: i18n.translate('xpack.lens.primaryMetric.label', {
+            defaultMessage: 'Primary metric',
+          }),
           layerId: props.state.layerId,
           accessors: props.state.metricAccessor
             ? [
@@ -261,7 +263,7 @@ export const getMetricVisualization = ({
         },
         {
           groupId: GROUP_ID.MAX,
-          groupLabel: i18n.translate('xpack.lens.metric.max', { defaultMessage: 'Maximum' }),
+          groupLabel: i18n.translate('xpack.lens.metric.max', { defaultMessage: 'Maximum value' }),
           layerId: props.state.layerId,
           accessors: props.state.maxAccessor
             ? [
