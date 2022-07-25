@@ -11,9 +11,9 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import {
   EuiListGroup,
+  EuiFormRow,
   EuiSpacer,
   EuiListGroupItemProps,
-  EuiFormLabel,
   EuiToolTip,
   EuiText,
   EuiIcon,
@@ -567,13 +567,12 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const quickFunctions = (
     <>
-      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--paddedLeftRight">
-        <EuiFormLabel>
-          {i18n.translate('xpack.lens.indexPattern.functionsLabel', {
-            defaultMessage: 'Functions',
-          })}
-        </EuiFormLabel>
-        <EuiSpacer size="s" />
+      <EuiFormRow
+        label={i18n.translate('xpack.lens.indexPattern.functionsLabel', {
+          defaultMessage: 'Functions',
+        })}
+        fullWidth
+      >
         <EuiListGroup
           className={sideNavItems.length > 3 ? 'lnsIndexPatternDimensionEditor__columns' : ''}
           gutterSize="none"
@@ -585,137 +584,133 @@ export function DimensionEditor(props: DimensionEditorProps) {
           }
           maxWidth={false}
         />
-      </div>
+      </EuiFormRow>
 
-      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--paddedLeftRight">
-        {shouldDisplayReferenceEditor ? (
-          <>
-            {selectedColumn.references.map((referenceId, index) => {
-              const validation = selectedOperationDefinition.requiredReferences[index];
-              const layer = state.layers[layerId];
-              return (
-                <ReferenceEditor
-                  operationDefinitionMap={operationDefinitionMap}
-                  key={index}
-                  layer={layer}
-                  layerId={layerId}
-                  activeData={props.activeData}
-                  columnId={referenceId}
-                  column={layer.columns[referenceId]}
-                  incompleteColumn={
-                    layer.incompleteColumns ? layer.incompleteColumns[referenceId] : undefined
+      {shouldDisplayReferenceEditor ? (
+        <>
+          {selectedColumn.references.map((referenceId, index) => {
+            const validation = selectedOperationDefinition.requiredReferences[index];
+            const layer = state.layers[layerId];
+            return (
+              <ReferenceEditor
+                operationDefinitionMap={operationDefinitionMap}
+                key={index}
+                layer={layer}
+                layerId={layerId}
+                activeData={props.activeData}
+                columnId={referenceId}
+                column={layer.columns[referenceId]}
+                incompleteColumn={
+                  layer.incompleteColumns ? layer.incompleteColumns[referenceId] : undefined
+                }
+                onDeleteColumn={() => {
+                  updateLayer(
+                    deleteColumn({
+                      layer,
+                      columnId: referenceId,
+                      indexPattern: currentIndexPattern,
+                    })
+                  );
+                }}
+                onChooseFunction={(operationType: string, field?: IndexPatternField) => {
+                  updateLayer(
+                    insertOrReplaceColumn({
+                      layer,
+                      columnId: referenceId,
+                      op: operationType,
+                      indexPattern: currentIndexPattern,
+                      field,
+                      visualizationGroups: dimensionGroups,
+                    })
+                  );
+                }}
+                onChooseField={(choice: FieldChoiceWithOperationType) => {
+                  trackUiEvent('indexpattern_dimension_field_changed');
+                  updateLayer(
+                    insertOrReplaceColumn({
+                      layer,
+                      columnId: referenceId,
+                      indexPattern: currentIndexPattern,
+                      op: choice.operationType,
+                      field: currentIndexPattern.getFieldByName(choice.field),
+                      visualizationGroups: dimensionGroups,
+                    })
+                  );
+                }}
+                paramEditorUpdater={(
+                  setter:
+                    | IndexPatternLayer
+                    | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
+                    | GenericIndexPatternColumn
+                ) => {
+                  let newLayer: IndexPatternLayer;
+                  if (typeof setter === 'function') {
+                    newLayer = setter(layer);
+                  } else if (isColumn(setter)) {
+                    newLayer = {
+                      ...layer,
+                      columns: {
+                        ...layer.columns,
+                        [referenceId]: setter,
+                      },
+                    };
+                  } else {
+                    newLayer = setter;
                   }
-                  onDeleteColumn={() => {
-                    updateLayer(
-                      deleteColumn({
-                        layer,
-                        columnId: referenceId,
-                        indexPattern: currentIndexPattern,
-                      })
-                    );
-                  }}
-                  onChooseFunction={(operationType: string, field?: IndexPatternField) => {
-                    updateLayer(
-                      insertOrReplaceColumn({
-                        layer,
-                        columnId: referenceId,
-                        op: operationType,
-                        indexPattern: currentIndexPattern,
-                        field,
-                        visualizationGroups: dimensionGroups,
-                      })
-                    );
-                  }}
-                  onChooseField={(choice: FieldChoiceWithOperationType) => {
-                    trackUiEvent('indexpattern_dimension_field_changed');
-                    updateLayer(
-                      insertOrReplaceColumn({
-                        layer,
-                        columnId: referenceId,
-                        indexPattern: currentIndexPattern,
-                        op: choice.operationType,
-                        field: currentIndexPattern.getFieldByName(choice.field),
-                        visualizationGroups: dimensionGroups,
-                      })
-                    );
-                  }}
-                  paramEditorUpdater={(
-                    setter:
-                      | IndexPatternLayer
-                      | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
-                      | GenericIndexPatternColumn
-                  ) => {
-                    let newLayer: IndexPatternLayer;
-                    if (typeof setter === 'function') {
-                      newLayer = setter(layer);
-                    } else if (isColumn(setter)) {
-                      newLayer = {
-                        ...layer,
-                        columns: {
-                          ...layer.columns,
-                          [referenceId]: setter,
-                        },
-                      };
-                    } else {
-                      newLayer = setter;
-                    }
-                    return updateLayer(
-                      adjustColumnReferencesForChangedColumn(newLayer, referenceId)
-                    );
-                  }}
-                  validation={validation}
-                  currentIndexPattern={currentIndexPattern}
-                  existingFields={state.existingFields}
-                  selectionStyle={selectedOperationDefinition.selectionStyle}
-                  dateRange={dateRange}
-                  labelAppend={selectedOperationDefinition?.getHelpMessage?.({
-                    data: props.data,
-                    uiSettings: props.uiSettings,
-                    currentColumn: layer.columns[columnId],
-                  })}
-                  isFullscreen={isFullscreen}
-                  toggleFullscreen={toggleFullscreen}
-                  setIsCloseable={setIsCloseable}
-                  paramEditorCustomProps={paramEditorCustomProps}
-                  {...services}
-                />
-              );
-            })}
-            {selectedOperationDefinition.selectionStyle !== 'field' ? <EuiSpacer size="s" /> : null}
-          </>
-        ) : null}
+                  return updateLayer(adjustColumnReferencesForChangedColumn(newLayer, referenceId));
+                }}
+                validation={validation}
+                currentIndexPattern={currentIndexPattern}
+                existingFields={state.existingFields}
+                selectionStyle={selectedOperationDefinition.selectionStyle}
+                dateRange={dateRange}
+                labelAppend={selectedOperationDefinition?.getHelpMessage?.({
+                  data: props.data,
+                  uiSettings: props.uiSettings,
+                  currentColumn: layer.columns[columnId],
+                })}
+                isFullscreen={isFullscreen}
+                toggleFullscreen={toggleFullscreen}
+                setIsCloseable={setIsCloseable}
+                paramEditorCustomProps={paramEditorCustomProps}
+                {...services}
+              />
+            );
+          })}
+          {selectedOperationDefinition.selectionStyle !== 'field' ? <EuiSpacer size="s" /> : null}
+        </>
+      ) : null}
 
-        {shouldDisplayFieldInput ? (
-          <FieldInputComponent
-            layer={state.layers[layerId]}
-            selectedColumn={selectedColumn as FieldBasedIndexPatternColumn}
-            columnId={columnId}
-            indexPattern={currentIndexPattern}
-            existingFields={state.existingFields}
-            operationSupportMatrix={operationSupportMatrix}
-            updateLayer={(newLayer) => {
-              if (temporaryQuickFunction) {
-                setTemporaryState('none');
-              }
-              setStateWrapper(newLayer, { forceRender: temporaryQuickFunction });
-            }}
-            incompleteField={incompleteField}
-            incompleteOperation={incompleteOperation}
-            incompleteParams={incompleteParams}
-            currentFieldIsInvalid={currentFieldIsInvalid}
-            helpMessage={selectedOperationDefinition?.getHelpMessage?.({
-              data: props.data,
-              uiSettings: props.uiSettings,
-              currentColumn: state.layers[layerId].columns[columnId],
-            })}
-            dimensionGroups={dimensionGroups}
-            groupId={props.groupId}
-            operationDefinitionMap={operationDefinitionMap}
-          />
-        ) : null}
+      {shouldDisplayFieldInput ? (
+        <FieldInputComponent
+          layer={state.layers[layerId]}
+          selectedColumn={selectedColumn as FieldBasedIndexPatternColumn}
+          columnId={columnId}
+          indexPattern={currentIndexPattern}
+          existingFields={state.existingFields}
+          operationSupportMatrix={operationSupportMatrix}
+          updateLayer={(newLayer) => {
+            if (temporaryQuickFunction) {
+              setTemporaryState('none');
+            }
+            setStateWrapper(newLayer, { forceRender: temporaryQuickFunction });
+          }}
+          incompleteField={incompleteField}
+          incompleteOperation={incompleteOperation}
+          incompleteParams={incompleteParams}
+          currentFieldIsInvalid={currentFieldIsInvalid}
+          helpMessage={selectedOperationDefinition?.getHelpMessage?.({
+            data: props.data,
+            uiSettings: props.uiSettings,
+            currentColumn: state.layers[layerId].columns[columnId],
+          })}
+          dimensionGroups={dimensionGroups}
+          groupId={props.groupId}
+          operationDefinitionMap={operationDefinitionMap}
+        />
+      ) : null}
 
-        {shouldDisplayExtraOptions && <ParamEditor {...paramEditorProps} />}
-      </div>
+      {shouldDisplayExtraOptions && <ParamEditor {...paramEditorProps} />}
     </>
   );
 
@@ -861,98 +856,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   return (
     <div id={columnId}>
-      <EuiText
-        size="s"
-        css={css`
-          margin: ${euiTheme.size.s} ${euiTheme.size.base} 0;
-        `}
-      >
-        <h4>
-          {paramEditorCustomProps?.headingLabel ??
-            i18n.translate('xpack.lens.indexPattern.dimensionEditor.headingData', {
-              defaultMessage: 'Data',
-            })}
-        </h4>
-      </EuiText>
-      {hasButtonGroups ? (
-        <DimensionEditorButtonGroups
-          options={options}
-          onMethodChange={(optionId: string) => {
-            setSelectedMethod(optionId);
-          }}
-          selectedMethod={selectedMethod}
-        />
-      ) : null}
-      <CalloutWarning
-        currentOperationType={selectedColumn?.operationType}
-        temporaryStateType={temporaryState}
-      />
-      {ButtonGroupContent}
-
-      {shouldDisplayAdvancedOptions && (
-        <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--paddedLeftRight">
-          <AdvancedOptions
-            options={[
-              {
-                dataTestSubj: 'indexPattern-time-scaling-enable',
-                inlineElement: selectedOperationDefinition.timeScalingMode ? (
-                  <TimeScaling
-                    selectedColumn={selectedColumn}
-                    columnId={columnId}
-                    layer={state.layers[layerId]}
-                    updateLayer={setStateWrapper}
-                  />
-                ) : null,
-              },
-              {
-                dataTestSubj: 'indexPattern-filter-by-enable',
-                inlineElement: selectedOperationDefinition.filterable ? (
-                  <Filtering
-                    indexPattern={currentIndexPattern}
-                    selectedColumn={selectedColumn}
-                    columnId={columnId}
-                    layer={state.layers[layerId]}
-                    updateLayer={setStateWrapper}
-                    helpMessage={
-                      selectedOperationDefinition.filterable &&
-                      typeof selectedOperationDefinition.filterable !== 'boolean'
-                        ? selectedOperationDefinition.filterable.helpMessage
-                        : null
-                    }
-                  />
-                ) : null,
-              },
-              {
-                dataTestSubj: 'indexPattern-time-shift-enable',
-                inlineElement: Boolean(
-                  selectedOperationDefinition.shiftable &&
-                    (currentIndexPattern.timeFieldName ||
-                      Object.values(state.layers[layerId].columns).some(
-                        (col) => col.operationType === 'date_histogram'
-                      ))
-                ) ? (
-                  <TimeShift
-                    datatableUtilities={services.data.datatableUtilities}
-                    indexPattern={currentIndexPattern}
-                    selectedColumn={selectedColumn}
-                    columnId={columnId}
-                    layer={state.layers[layerId]}
-                    updateLayer={setStateWrapper}
-                    activeData={props.activeData}
-                    layerId={layerId}
-                  />
-                ) : null,
-              },
-              ...(operationDefinitionMap[selectedColumn.operationType].getAdvancedOptions?.(
-                paramEditorProps
-              ) || []),
-            ]}
-          />
-        </div>
-      )}
-
-      {!isFullscreen && !currentFieldIsInvalid && (
-        <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded  lnsIndexPatternDimensionEditor__section--collapseNext">
+      <EuiFormRow
+        label={
           <EuiText
             size="s"
             css={css`
@@ -960,53 +865,157 @@ export function DimensionEditor(props: DimensionEditorProps) {
             `}
           >
             <h4>
-              {i18n.translate('xpack.lens.indexPattern.dimensionEditor.headingAppearance', {
-                defaultMessage: 'Appearance',
-              })}
+              {paramEditorCustomProps?.headingLabel ??
+                i18n.translate('xpack.lens.indexPattern.dimensionEditor.headingData', {
+                  defaultMessage: 'Data',
+                })}
             </h4>
           </EuiText>
-          {!incompleteInfo && selectedColumn && temporaryState === 'none' && (
-            <NameInput
-              // re-render the input from scratch to obtain new "initial value" if the underlying default label changes
-              key={defaultLabel}
-              value={selectedColumn.label}
-              defaultValue={defaultLabel}
-              onChange={(value) => {
-                updateLayer({
-                  columns: {
-                    ...state.layers[layerId].columns,
-                    [columnId]: {
-                      ...selectedColumn,
-                      label: value,
-                      customLabel:
-                        operationDefinitionMap[selectedColumn.operationType].getDefaultLabel(
-                          selectedColumn,
-                          state.indexPatterns[state.layers[layerId].indexPatternId],
-                          state.layers[layerId].columns
-                        ) !== value,
-                    },
-                  },
-                });
+        }
+        className="lnsIndexPatternDimensionEditor--padded"
+        fullWidth
+      >
+        <>
+          {hasButtonGroups ? (
+            <DimensionEditorButtonGroups
+              options={options}
+              onMethodChange={(optionId: string) => {
+                setSelectedMethod(optionId);
               }}
+              selectedMethod={selectedMethod}
             />
-          )}
-
-          {!isFullscreen && !incompleteInfo && !hideGrouping && temporaryState === 'none' && (
-            <BucketNestingEditor
-              layer={state.layers[props.layerId]}
-              columnId={props.columnId}
-              setColumns={(columnOrder) => updateLayer({ columnOrder })}
-              getFieldByName={currentIndexPattern.getFieldByName}
-            />
-          )}
-
-          {supportFieldFormat &&
-          !isFullscreen &&
-          selectedColumn &&
-          (selectedColumn.dataType === 'number' || selectedColumn.operationType === 'range') ? (
-            <FormatSelector selectedColumn={selectedColumn} onChange={onFormatChange} />
           ) : null}
-        </div>
+          <CalloutWarning
+            currentOperationType={selectedColumn?.operationType}
+            temporaryStateType={temporaryState}
+          />
+          {ButtonGroupContent}
+        </>
+      </EuiFormRow>
+
+      {shouldDisplayAdvancedOptions && (
+        <AdvancedOptions
+          options={[
+            {
+              dataTestSubj: 'indexPattern-time-scaling-enable',
+              inlineElement: selectedOperationDefinition.timeScalingMode ? (
+                <TimeScaling
+                  selectedColumn={selectedColumn}
+                  columnId={columnId}
+                  layer={state.layers[layerId]}
+                  updateLayer={setStateWrapper}
+                />
+              ) : null,
+            },
+            {
+              dataTestSubj: 'indexPattern-filter-by-enable',
+              inlineElement: selectedOperationDefinition.filterable ? (
+                <Filtering
+                  indexPattern={currentIndexPattern}
+                  selectedColumn={selectedColumn}
+                  columnId={columnId}
+                  layer={state.layers[layerId]}
+                  updateLayer={setStateWrapper}
+                  helpMessage={
+                    selectedOperationDefinition.filterable &&
+                    typeof selectedOperationDefinition.filterable !== 'boolean'
+                      ? selectedOperationDefinition.filterable.helpMessage
+                      : null
+                  }
+                />
+              ) : null,
+            },
+            {
+              dataTestSubj: 'indexPattern-time-shift-enable',
+              inlineElement: Boolean(
+                selectedOperationDefinition.shiftable &&
+                  (currentIndexPattern.timeFieldName ||
+                    Object.values(state.layers[layerId].columns).some(
+                      (col) => col.operationType === 'date_histogram'
+                    ))
+              ) ? (
+                <TimeShift
+                  datatableUtilities={services.data.datatableUtilities}
+                  indexPattern={currentIndexPattern}
+                  selectedColumn={selectedColumn}
+                  columnId={columnId}
+                  layer={state.layers[layerId]}
+                  updateLayer={setStateWrapper}
+                  activeData={props.activeData}
+                  layerId={layerId}
+                />
+              ) : null,
+            },
+            ...(operationDefinitionMap[selectedColumn.operationType].getAdvancedOptions?.(
+              paramEditorProps
+            ) || []),
+          ]}
+        />
+      )}
+
+      {!isFullscreen && !currentFieldIsInvalid && (
+        <EuiFormRow
+          label={
+            <EuiText
+              size="s"
+              css={css`
+                margin-bottom: ${euiTheme.size.base};
+              `}
+            >
+              <h4>
+                {i18n.translate('xpack.lens.indexPattern.dimensionEditor.headingAppearance', {
+                  defaultMessage: 'Appearance',
+                })}
+              </h4>
+            </EuiText>
+          }
+          className="lnsIndexPatternDimensionEditor--collapseNext lnsIndexPatternDimensionEditor--padded"
+          fullWidth
+        >
+          <>
+            {!incompleteInfo && selectedColumn && temporaryState === 'none' && (
+              <NameInput
+                // re-render the input from scratch to obtain new "initial value" if the underlying default label changes
+                key={defaultLabel}
+                value={selectedColumn.label}
+                defaultValue={defaultLabel}
+                onChange={(value) => {
+                  updateLayer({
+                    columns: {
+                      ...state.layers[layerId].columns,
+                      [columnId]: {
+                        ...selectedColumn,
+                        label: value,
+                        customLabel:
+                          operationDefinitionMap[selectedColumn.operationType].getDefaultLabel(
+                            selectedColumn,
+                            state.indexPatterns[state.layers[layerId].indexPatternId],
+                            state.layers[layerId].columns
+                          ) !== value,
+                      },
+                    },
+                  });
+                }}
+              />
+            )}
+
+            {!isFullscreen && !incompleteInfo && !hideGrouping && temporaryState === 'none' && (
+              <BucketNestingEditor
+                layer={state.layers[props.layerId]}
+                columnId={props.columnId}
+                setColumns={(columnOrder) => updateLayer({ columnOrder })}
+                getFieldByName={currentIndexPattern.getFieldByName}
+              />
+            )}
+
+            {supportFieldFormat &&
+            !isFullscreen &&
+            selectedColumn &&
+            (selectedColumn.dataType === 'number' || selectedColumn.operationType === 'range') ? (
+              <FormatSelector selectedColumn={selectedColumn} onChange={onFormatChange} />
+            ) : null}
+          </>
+        </EuiFormRow>
       )}
     </div>
   );

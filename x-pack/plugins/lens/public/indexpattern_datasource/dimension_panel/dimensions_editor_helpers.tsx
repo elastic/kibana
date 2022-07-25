@@ -16,7 +16,7 @@ import './dimension_editor.scss';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { EuiCallOut, EuiButtonGroup, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiCallOut, EuiButtonGroup, EuiFormRow, useEuiTheme } from '@elastic/eui';
 import { operationDefinitionMap } from '../operations';
 
 export const formulaOperationName = 'formula';
@@ -54,6 +54,7 @@ export const CalloutWarning = ({
   currentOperationType: keyof typeof operationDefinitionMap | undefined;
   temporaryStateType: TemporaryState;
 }) => {
+  const { euiTheme } = useEuiTheme();
   if (
     temporaryStateType === 'none' ||
     (currentOperationType != null && isQuickFunction(currentOperationType))
@@ -74,6 +75,9 @@ export const CalloutWarning = ({
           })}
           iconType="alert"
           color="warning"
+          css={css`
+            margin-bottom: ${euiTheme.size.base};
+          `}
         >
           <p>
             {i18n.translate('xpack.lens.indexPattern.staticValueWarningText', {
@@ -94,6 +98,9 @@ export const CalloutWarning = ({
         })}
         iconType="alert"
         color="warning"
+        css={css`
+          margin-bottom: ${euiTheme.size.base};
+        `}
       >
         {temporaryStateType !== 'quickFunctions' ? (
           <p>
@@ -130,7 +137,6 @@ export const DimensionEditorButtonGroups = ({
   onMethodChange: (id: string) => void;
   selectedMethod: string;
 }) => {
-  const { euiTheme } = useEuiTheme();
   const enabledGroups = options.filter(({ enabled }) => enabled);
   const groups = enabledGroups.map(({ id, label }) => {
     return {
@@ -147,31 +153,22 @@ export const DimensionEditorButtonGroups = ({
   };
 
   return (
-    <>
-      <EuiText
-        size="s"
-        css={css`
-          margin: ${euiTheme.size.base} ${euiTheme.size.base} 8px;
-        `}
-      >
-        <h5>
-          {i18n.translate('xpack.lens.indexPattern.dimensionEditor.headingMethod', {
-            defaultMessage: 'Method',
-          })}
-        </h5>
-      </EuiText>
+    <EuiFormRow
+      label={i18n.translate('xpack.lens.indexPattern.dimensionEditor.headingMethod', {
+        defaultMessage: 'Method',
+      })}
+      fullWidth
+    >
       <EuiButtonGroup
         legend={i18n.translate('xpack.lens.indexPattern.dimensionEditorModes', {
           defaultMessage: 'Dimension editor configuration modes',
         })}
+        buttonSize="compressed"
         isFullWidth
         options={groups}
         idSelected={selectedMethod}
         onChange={(id) => onChange(id)}
-        css={css`
-          padding: ${euiTheme.size.s} ${euiTheme.size.base};
-        `}
       />
-    </>
+    </EuiFormRow>
   );
 };

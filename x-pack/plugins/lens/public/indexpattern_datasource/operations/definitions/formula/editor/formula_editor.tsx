@@ -11,6 +11,7 @@ import { css } from '@emotion/react';
 import {
   EuiButtonIcon,
   EuiButtonEmpty,
+  EuiFormLabel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -654,28 +655,26 @@ export function FormulaEditor({
       className={classNames({
         lnsIndexPatternDimensionEditor: true,
         'lnsIndexPatternDimensionEditor-isFullscreen': isFullscreen,
-        'lnsIndexPatternDimensionEditor__section--paddedLeftRight': !isFullscreen,
       })}
     >
       {!isFullscreen && (
-        <EuiText
-          size="s"
+        <EuiFormLabel
           css={css`
-            margin-bottom: ${euiTheme.size.s};
+            margin-top: ${euiTheme.size.base};
+            margin-bottom: ${euiTheme.size.xs};
           `}
         >
-          <h5>
-            {i18n.translate('xpack.lens.indexPattern.dimensionEditor.headingFormula', {
-              defaultMessage: 'Formula',
-            })}
-          </h5>
-        </EuiText>
+          {i18n.translate('xpack.lens.indexPattern.dimensionEditor.headingFormula', {
+            defaultMessage: 'Formula',
+          })}
+        </EuiFormLabel>
       )}
       <div
-        className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded"
+        className="lnsIndexPatternDimensionEditor--shaded"
         css={css`
           border: ${!isFullscreen ? euiTheme.border.thin : 'none'};
           border-radius: 6px;
+          height: ${isFullscreen ? '100%' : 'auto'};
         `}
       >
         <div className="lnsFormula">

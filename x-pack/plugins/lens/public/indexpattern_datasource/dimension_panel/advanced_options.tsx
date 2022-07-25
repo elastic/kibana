@@ -8,6 +8,7 @@
 import { EuiSpacer, EuiAccordion, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { css } from '@emotion/react';
 import { AdvancedOption } from '../operations/definitions';
 
 export function AdvancedOptions(props: { options: AdvancedOption[] }) {
@@ -24,6 +25,9 @@ export function AdvancedOptions(props: { options: AdvancedOption[] }) {
           })}
         </EuiText>
       }
+      css={css`
+        padding: 0 ${euiTheme.size.base} ${euiTheme.size.base};
+      `}
     >
       {props.options.map(({ dataTestSubj, inlineElement }) => (
         <div key={dataTestSubj} data-test-subj={dataTestSubj}>
