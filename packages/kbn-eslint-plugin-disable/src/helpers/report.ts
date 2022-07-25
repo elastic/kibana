@@ -7,10 +7,9 @@
  */
 
 import type Eslint from 'eslint';
-import { ArrElement } from './types';
 
 export function getReportLocFromComment(
-  comment: ArrElement<Eslint.AST.Program['comments']>
+  comment: Eslint.AST.Program['comments'][0]
 ): Eslint.AST.SourceLocation | undefined {
   const cStart = comment?.loc?.start;
   const cEnd = comment?.loc?.end;
