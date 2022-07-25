@@ -81,14 +81,6 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
                         <EuiBadge color="default">{getConnectorFeatureName(featureId)}</EuiBadge>
                       </EuiFlexItem>
                     ))}
-                    {isExperimental && (
-                      <EuiFlexItem grow={false}>
-                        <EuiBetaBadge
-                          label={betaBadgeProps.label}
-                          tooltipContent={betaBadgeProps.tooltipContent}
-                        />
-                      </EuiFlexItem>
-                    )}
                   </EuiFlexGroup>
                 </>
               )}
@@ -104,6 +96,14 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
             </EuiTitle>
           )}
         </EuiFlexItem>
+        {actionTypeName && isExperimental && (
+          <EuiFlexItem grow={false}>
+            <EuiBetaBadge
+              label={betaBadgeProps.label}
+              tooltipContent={betaBadgeProps.tooltipContent}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiFlyoutHeader>
   );
