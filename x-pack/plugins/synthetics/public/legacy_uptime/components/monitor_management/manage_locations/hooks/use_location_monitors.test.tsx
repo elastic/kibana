@@ -14,7 +14,7 @@ describe('useLocationMonitors', () => {
   it('returns expected results', () => {
     const { result } = renderHook(() => useLocationMonitors(), { wrapper: WrappedHelper });
 
-    expect(result.current).toStrictEqual({ locations: [] });
+    expect(result.current).toStrictEqual({ locationMonitors: [] });
     expect(defaultCore.savedObjects.client.find).toHaveBeenCalledWith({
       aggs: {
         locations: {
@@ -42,12 +42,12 @@ describe('useLocationMonitors', () => {
       wrapper: WrappedHelper,
     });
 
-    expect(result.current).toStrictEqual({ locations: [] });
+    expect(result.current).toStrictEqual({ locationMonitors: [] });
 
     await waitForNextUpdate();
 
     expect(result.current).toStrictEqual({
-      locations: [
+      locationMonitors: [
         {
           id: 'Test',
           count: 5,
