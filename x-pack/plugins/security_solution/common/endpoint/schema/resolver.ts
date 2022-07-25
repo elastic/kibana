@@ -42,6 +42,7 @@ export const validateTree = {
       minSize: 1,
     }),
     indexPatterns: schema.arrayOf(schema.string(), { minSize: 1 }),
+    includeHits: schema.boolean({ defaultValue: false }),
   }),
 };
 
@@ -61,6 +62,8 @@ export const validateEvents = {
     }),
     indexPatterns: schema.arrayOf(schema.string()),
     filter: schema.maybe(schema.string()),
+    entityType: schema.maybe(schema.string()),
+    eventID: schema.maybe(schema.string()),
   }),
 };
 
