@@ -69,6 +69,7 @@ export interface RunOpts<TParams extends RuleParams> {
   ruleDataReader: IRuleDataReader;
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  mergeStrategy: ConfigType['alertMergeStrategy'];
   primaryTimestamp: string;
   secondaryTimestamp?: string;
 }

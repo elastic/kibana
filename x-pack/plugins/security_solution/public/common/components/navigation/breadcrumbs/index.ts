@@ -80,7 +80,13 @@ export const getBreadcrumbsForRoute = (
 ): ChromeBreadcrumb[] | null => {
   const spyState: RouteSpyState = omit('navTabs', object);
 
-  if (!spyState || !object.navTabs || !spyState.pageName || isCaseRoutes(spyState)) {
+  if (
+    !spyState ||
+    !object.navTabs ||
+    !spyState.pageName ||
+    isCaseRoutes(spyState) ||
+    isCloudSecurityPostureManagedRoutes(spyState)
+  ) {
     return null;
   }
 
@@ -163,6 +169,9 @@ const isAdminRoutes = (spyState: RouteSpyState): spyState is AdministrationRoute
 const isRulesRoutes = (spyState: RouteSpyState): spyState is AdministrationRouteSpyState =>
   spyState.pageName === SecurityPageName.rules ||
   spyState.pageName === SecurityPageName.rulesCreate;
+
+const isCloudSecurityPostureManagedRoutes = (spyState: RouteSpyState) =>
+  spyState.pageName === SecurityPageName.cloudSecurityPostureRules;
 
 const emptyLastBreadcrumbUrl = (breadcrumbs: ChromeBreadcrumb[]) => {
   const leadingBreadCrumbs = breadcrumbs.slice(0, -1);

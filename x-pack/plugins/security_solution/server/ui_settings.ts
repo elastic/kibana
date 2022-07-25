@@ -146,27 +146,23 @@ export const initUiSettings = (
       requiresPageReload: true,
       schema: schema.number(),
     },
-    ...(experimentalFeatures.groupedNavigation
-      ? {
-          [ENABLE_GROUPED_NAVIGATION]: {
-            name: i18n.translate('xpack.securitySolution.uiSettings.enableGroupedNavigation', {
-              defaultMessage: 'New streamlined navigation',
-            }),
-            value: false,
-            type: 'boolean',
-            description: i18n.translate(
-              'xpack.securitySolution.uiSettings.enableGroupedNavigationDescription',
-              {
-                defaultMessage:
-                  '<p>Improve your experience with the new navigation organized and optimized around the most important workflows.</p>',
-              }
-            ),
-            category: [APP_ID],
-            requiresPageReload: false,
-            schema: schema.boolean(),
-          },
+    [ENABLE_GROUPED_NAVIGATION]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.enableGroupedNavigation', {
+        defaultMessage: 'New streamlined navigation',
+      }),
+      value: true,
+      type: 'boolean',
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.enableGroupedNavigationDescription',
+        {
+          defaultMessage:
+            '<p>Improve your experience with the new navigation organized and optimized around the most important workflows.</p>',
         }
-      : {}),
+      ),
+      category: [APP_ID],
+      requiresPageReload: false,
+      schema: schema.boolean(),
+    },
     [ENABLE_NEWS_FEED_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableNewsFeedLabel', {
         defaultMessage: 'News feed',

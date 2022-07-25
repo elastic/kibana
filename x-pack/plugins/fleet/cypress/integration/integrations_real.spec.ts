@@ -27,7 +27,7 @@ import {
 import { ADD_PACKAGE_POLICY_BTN } from '../screens/fleet';
 import { cleanupAgentPolicies } from '../tasks/cleanup';
 
-describe('Add Integration - Real API', () => {
+describe.skip('Add Integration - Real API', () => {
   const integration = 'Apache';
 
   after(() => {

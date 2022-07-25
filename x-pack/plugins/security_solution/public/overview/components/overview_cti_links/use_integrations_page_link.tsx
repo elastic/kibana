@@ -8,4 +8,4 @@
 import { useBasePath } from '../../../common/lib/kibana';
 
 export const useIntegrationsPageLink = () =>
-  `${useBasePath()}/app/integrations/browse?q=threat%20intelligence`;
+  `${useBasePath()}/app/integrations/browse/threat_intel`;
