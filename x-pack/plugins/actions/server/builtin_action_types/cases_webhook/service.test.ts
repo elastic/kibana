@@ -167,7 +167,7 @@ describe('Cases webhook service', () => {
         throw error;
       });
       await expect(service.getIncident('1')).rejects.toThrow(
-        '[Action][Webhook - Case Management]: Unable to get case with id 1. Error: An error has occurred. Reason: Required field'
+        '[Action][Webhook - Case Management]: Unable to get case with id 1. Error: An error has occurred.  Reason: Required field'
       );
     });
 
@@ -276,7 +276,7 @@ describe('Cases webhook service', () => {
       });
 
       await expect(service.createIncident(incident)).rejects.toThrow(
-        '[Action][Webhook - Case Management]: Unable to create case. Error: An error has occurred. Reason: Required field'
+        '[Action][Webhook - Case Management]: Unable to create case. Error: An error has occurred.  Reason: Required field'
       );
     });
 
@@ -369,7 +369,7 @@ describe('Cases webhook service', () => {
       });
 
       await expect(service.updateIncident(incident)).rejects.toThrow(
-        '[Action][Webhook - Case Management]: Unable to update case with id 1. Error: An error has occurred. Reason: Required field'
+        '[Action][Webhook - Case Management]: Unable to update case with id 1. Error: An error has occurred.  Reason: Required field'
       );
     });
 
@@ -439,7 +439,7 @@ describe('Cases webhook service', () => {
       });
 
       await expect(service.createComment(commentReq)).rejects.toThrow(
-        '[Action][Webhook - Case Management]: Unable to create comment at case with id 1. Error: An error has occurred. Reason: Required field'
+        '[Action][Webhook - Case Management]: Unable to create comment at case with id 1. Error: An error has occurred.  Reason: Required field'
       );
     });
 

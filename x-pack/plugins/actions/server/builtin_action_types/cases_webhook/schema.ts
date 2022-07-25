@@ -38,8 +38,8 @@ export const ExternalIncidentServiceConfiguration = {
     }
   ),
   updateIncidentJson: schema.string(),
-  createCommentUrl: schema.maybe(schema.string()),
-  createCommentMethod: schema.maybe(
+  createCommentUrl: schema.nullable(schema.string()),
+  createCommentMethod: schema.nullable(
     schema.oneOf(
       [
         schema.literal(CasesWebhookMethods.POST),
@@ -51,7 +51,7 @@ export const ExternalIncidentServiceConfiguration = {
       }
     )
   ),
-  createCommentJson: schema.maybe(schema.string()),
+  createCommentJson: schema.nullable(schema.string()),
   headers: nullableType(HeadersSchema),
   hasAuth: schema.boolean({ defaultValue: true }),
 };
