@@ -56,12 +56,10 @@ journey('AddPrivateLocationMonitor', async ({ page, params: { kibanaUrl } }) => 
     ]);
     await page.click('text=Installed integrations');
     expect(page.url()).toBe(`${kibanaUrl}/app/integrations/installed`);
-    await page.click(`text=Elastic Synthetics`);
-    expect(page.url()).toBe(`${kibanaUrl}/app/integrations/detail/synthetics-0.9.5/overview`);
-    await page.click('text=Integration policies');
-    expect(page.url()).toBe(`${kibanaUrl}/app/integrations/detail/synthetics-0.9.5/policies`);
   });
   step('Click text=Edit Elastic Synthetics integration', async () => {
+    await page.click(`text=Elastic Synthetics`);
+    await page.click('text=Integration policies');
     await assertText({ page, text: 'This table contains 1 rows out of 1 rows; Page 1 of 1.' });
     await page.click('[data-test-subj="integrationNameLink"]');
     await page.click('text=Edit in uptime');
