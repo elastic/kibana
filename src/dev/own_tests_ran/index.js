@@ -30,10 +30,12 @@ export function runCheckOwnTestsRanCli() {
 
       console.log(`\n### flags: \n${JSON.stringify(flags, null, 2)}`);
 
+      // TODO-TRE: We may or may not use this test roots idea.
       yaml
         .load(readFileSync(resolveRoot('src/dev/own_tests_ran/test_roots.yml'), 'utf8'))
         .general.forEach((x) => console.log(`\n### x: \n\t${x}`));
 
+      // TODO-TRE: This gets the info I need about the pr (filenames, etc)
       const xs = await getPrChanges();
       console.log(`\n### xs: \n${JSON.stringify(xs, null, 2)}`);
 
