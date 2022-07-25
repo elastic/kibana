@@ -47,6 +47,7 @@ export const getMetricVisRenderer = (
               data={visData}
               config={visConfig}
               renderComplete={() => handlers.done()}
+              fireEvent={handlers.event}
               renderMode={handlers.getRenderMode()}
             />
           </VisualizationContainer>

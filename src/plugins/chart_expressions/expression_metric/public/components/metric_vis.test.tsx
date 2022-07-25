@@ -10,7 +10,13 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import MetricVis, { defaultColor, MetricVisComponentProps } from './metric_vis';
-import { LayoutDirection, Metric, MetricWProgress, Settings } from '@elastic/charts';
+import {
+  LayoutDirection,
+  Metric,
+  MetricElementEvent,
+  MetricWProgress,
+  Settings,
+} from '@elastic/charts';
 import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
 import numeral from '@elastic/numeral';
@@ -218,7 +224,13 @@ describe('MetricVisComponent', function () {
 
     it('should render a single metric value', () => {
       const component = shallow(
-        <MetricVis config={config} data={table} renderComplete={() => {}} renderMode={'view'} />
+        <MetricVis
+          config={config}
+          data={table}
+          renderComplete={() => {}}
+          fireEvent={() => {}}
+          renderMode={'view'}
+        />
       );
 
       const { data } = component.find(Metric).props();
@@ -248,6 +260,7 @@ describe('MetricVisComponent', function () {
           }}
           data={table}
           renderComplete={() => {}}
+          fireEvent={() => {}}
           renderMode={'view'}
         />
       );
@@ -277,6 +290,7 @@ describe('MetricVisComponent', function () {
           }}
           data={table}
           renderComplete={() => {}}
+          fireEvent={() => {}}
           renderMode={'view'}
         />
       );
@@ -322,6 +336,7 @@ describe('MetricVisComponent', function () {
             }}
             data={table}
             renderComplete={() => {}}
+            fireEvent={() => {}}
             renderMode={'view'}
           />
         )
@@ -372,7 +387,13 @@ describe('MetricVisComponent', function () {
 
     it('should render a grid if breakdownBy dimension supplied', () => {
       const component = shallow(
-        <MetricVis config={config} data={table} renderComplete={() => {}} renderMode={'view'} />
+        <MetricVis
+          config={config}
+          data={table}
+          renderComplete={() => {}}
+          fireEvent={() => {}}
+          renderMode={'view'}
+        />
       );
 
       const { data } = component.find(Metric).props();
@@ -439,6 +460,7 @@ describe('MetricVisComponent', function () {
           }}
           data={table}
           renderComplete={() => {}}
+          fireEvent={() => {}}
           renderMode={'view'}
         />
       );
@@ -481,6 +503,7 @@ describe('MetricVisComponent', function () {
           }}
           data={table}
           renderComplete={() => {}}
+          fireEvent={() => {}}
           renderMode={'view'}
         />
       );
@@ -525,6 +548,7 @@ describe('MetricVisComponent', function () {
             }}
             data={table}
             renderComplete={() => {}}
+            fireEvent={() => {}}
             renderMode={'view'}
           />
         )
@@ -622,6 +646,7 @@ describe('MetricVisComponent', function () {
             }}
             data={table}
             renderComplete={() => {}}
+            fireEvent={() => {}}
             renderMode={'view'}
           />
         )
@@ -703,6 +728,7 @@ describe('MetricVisComponent', function () {
           config={{ ...config, metric: { ...config.metric, minTiles: 6 } }}
           data={{ type: 'datatable', rows: [], columns: table.columns }}
           renderComplete={() => {}}
+          fireEvent={() => {}}
           renderMode={'view'}
         />
       );
@@ -736,6 +762,7 @@ describe('MetricVisComponent', function () {
           <MetricVis
             data={table}
             renderComplete={() => {}}
+            fireEvent={() => {}}
             config={{
               metric: {
                 progressDirection: 'vertical',
@@ -796,6 +823,7 @@ describe('MetricVisComponent', function () {
         }}
         data={table}
         renderComplete={renderCompleteSpy}
+        fireEvent={() => {}}
         renderMode={'view'}
       />
     );
@@ -806,6 +834,51 @@ describe('MetricVisComponent', function () {
     component.find(Settings).props().onRenderChange!(true);
 
     expect(renderCompleteSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('should fire a filter event', () => {
+    const fireEventSpy = jest.fn();
+
+    const component = shallow(
+      <MetricVis
+        config={{
+          metric: {
+            progressDirection: 'vertical',
+            maxCols: 5,
+          },
+          dimensions: {
+            metric: basePriceColumnId,
+            breakdownBy: dayOfWeekColumnId,
+          },
+        }}
+        data={table}
+        renderComplete={() => {}}
+        fireEvent={fireEventSpy}
+        renderMode={'view'}
+      />
+    );
+
+    const event: MetricElementEvent = {
+      type: 'metricElementEvent',
+      rowIndex: 1,
+      columnIndex: 0,
+    };
+
+    component.find(Settings).props().onElementClick!([event]);
+
+    expect(fireEventSpy).toHaveBeenCalledTimes(1);
+    expect(fireEventSpy).toHaveBeenCalledWith({
+      name: 'filter',
+      data: {
+        data: [
+          {
+            table,
+            column: 0,
+            row: 5,
+          },
+        ],
+      },
+    });
   });
 
   describe('coloring', () => {
@@ -839,6 +912,7 @@ describe('MetricVisComponent', function () {
             }}
             data={table}
             renderComplete={() => {}}
+            fireEvent={() => {}}
             renderMode={'view'}
           />
         );
@@ -884,6 +958,7 @@ describe('MetricVisComponent', function () {
               }}
               data={table}
               renderComplete={() => {}}
+              fireEvent={() => {}}
               renderMode={'view'}
             />
           );
@@ -950,6 +1025,7 @@ describe('MetricVisComponent', function () {
             }}
             data={table}
             renderComplete={() => {}}
+            fireEvent={() => {}}
             renderMode={'view'}
           />
         );
@@ -976,6 +1052,7 @@ describe('MetricVisComponent', function () {
             }}
             data={table}
             renderComplete={() => {}}
+            fireEvent={() => {}}
             renderMode={'view'}
           />
         );
@@ -1025,6 +1102,7 @@ describe('MetricVisComponent', function () {
             rows: [{ '1': value, '2': secondaryValue }],
           }}
           renderComplete={() => {}}
+          fireEvent={() => {}}
           renderMode={'view'}
         />
       );

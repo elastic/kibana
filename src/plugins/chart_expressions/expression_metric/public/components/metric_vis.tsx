@@ -15,12 +15,13 @@ import {
   Metric,
   MetricSpec,
   MetricWProgress,
+  isMetricElementEvent,
   RenderChangeListener,
   Settings,
 } from '@elastic/charts';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import {
+import type {
   Datatable,
   DatatableColumn,
   DatatableRow,
@@ -169,10 +170,26 @@ const getColor = (
   );
 };
 
+const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) => {
+  return {
+    name: 'filter',
+    data: {
+      data: [
+        {
+          table,
+          column: columnIdx,
+          row: rowIdx,
+        },
+      ],
+    },
+  };
+};
+
 export interface MetricVisComponentProps {
   data: Datatable;
   config: Pick<VisParams, 'metric' | 'dimensions'>;
   renderComplete: IInterpreterRenderHandlers['done'];
+  fireEvent: IInterpreterRenderHandlers['event'];
   renderMode: RenderMode;
 }
 
@@ -180,6 +197,7 @@ const MetricVisComponent = ({
   data,
   config,
   renderComplete,
+  fireEvent,
   renderMode,
 }: MetricVisComponentProps) => {
   const primaryMetricColumn = getColumnByAccessor(config.dimensions.metric, data.columns)!;
@@ -303,6 +321,21 @@ const MetricVisComponent = ({
         <Settings
           theme={[{ background: { color: 'transparent' } }, chartTheme]}
           onRenderChange={onRenderChange}
+          onElementClick={(events) => {
+            events.forEach((event) => {
+              if (isMetricElementEvent(event)) {
+                const breakdownByIdx = data.columns.findIndex((col) => col === breakdownByColumn);
+                const rowLength = grid[0].length;
+                fireEvent(
+                  buildFilterEvent(
+                    event.rowIndex * rowLength + event.columnIndex,
+                    breakdownByIdx,
+                    data
+                  )
+                );
+              }
+            });
+          }}
         />
         <Metric id="metric" data={grid} />
       </Chart>
