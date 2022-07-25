@@ -19,7 +19,7 @@ import { validateImmutable, validateIndexPatterns } from '../utils';
 export const createThresholdAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<ThresholdRuleParams, ThresholdAlertState, {}, 'default'> => {
-  const { experimentalFeatures, logger, version } = createOptions;
+  const { version } = createOptions;
   return {
     id: THRESHOLD_RULE_TYPE_ID,
     name: 'Threshold Rule',
@@ -65,7 +65,6 @@ export const createThresholdAlertType = (
     async executor(execOptions) {
       const {
         runOpts: {
-          buildRuleMessage,
           bulkCreate,
           exceptionItems,
           completeRule,
@@ -76,6 +75,7 @@ export const createThresholdAlertType = (
           runtimeMappings,
           primaryTimestamp,
           secondaryTimestamp,
+          ruleExecutionLogger,
         },
         services,
         startedAt,
@@ -83,17 +83,15 @@ export const createThresholdAlertType = (
       } = execOptions;
 
       const result = await thresholdExecutor({
-        buildRuleMessage,
-        bulkCreate,
-        exceptionItems,
-        experimentalFeatures,
-        logger,
         completeRule,
+        tuple,
+        exceptionItems,
+        ruleExecutionLogger,
         services,
+        version,
         startedAt,
         state,
-        tuple,
-        version,
+        bulkCreate,
         wrapHits,
         ruleDataReader,
         inputIndex,

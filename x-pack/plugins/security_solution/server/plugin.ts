@@ -72,10 +72,7 @@ import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
 import aadFieldConversion from './lib/detection_engine/routes/index/signal_aad_mapping.json';
 import previewPolicy from './lib/detection_engine/routes/index/preview_policy.json';
-import {
-  registerEventLogProvider,
-  ruleExecutionLogForExecutorsFactory,
-} from './lib/detection_engine/rule_execution_log';
+import { createRuleExecutionLogService } from './lib/detection_engine/rule_monitoring';
 import { getKibanaPrivilegesFeaturePrivileges, getCasesKibanaFeature } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
 import type { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
@@ -150,8 +147,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     initSavedObjects(core.savedObjects);
     initUiSettings(core.uiSettings, experimentalFeatures);
 
-    const eventLogService = plugins.eventLog;
-    registerEventLogProvider(eventLogService);
+    const ruleExecutionLogService = createRuleExecutionLogService(config, logger, core, plugins);
+    ruleExecutionLogService.registerEventLogProvider();
 
     const requestContextFactory = new RequestContextFactory({
       config,
@@ -159,6 +156,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       core,
       plugins,
       endpointAppContextService: this.endpointAppContextService,
+      ruleExecutionLogService,
     });
 
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
@@ -180,7 +178,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     initUsageCollectors({
       core,
-      eventLogIndex: eventLogService.getIndexPattern(),
+      eventLogIndex: plugins.eventLog.getIndexPattern(),
       signalsIndex: DEFAULT_ALERTS_INDEX,
       ml: plugins.ml,
       usageCollection: plugins.usageCollection,
@@ -242,8 +240,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       logger: this.logger,
       config: this.config,
       ruleDataClient,
-      eventLogService,
-      ruleExecutionLoggerFactory: ruleExecutionLogForExecutorsFactory,
+      ruleExecutionLoggerFactory: ruleExecutionLogService.createClientForExecutors,
       version: pluginContext.env.packageInfo.version,
     };
 
