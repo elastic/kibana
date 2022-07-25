@@ -31,16 +31,32 @@ import {
   isConnectorIndex,
 } from '../../utils/indices';
 
+import { IndexNameLogic } from './index_name_logic';
+
+const FETCH_INDEX_POLLING_DURATION = 5000; // 5 seconds
+const FETCH_INDEX_POLLING_DURATION_ON_FAILURE = 30000; // 30 seconds
+
+type FetchIndexApiValues = Actions<FetchIndexApiParams, FetchIndexApiResponse>;
+type StartSyncApiValues = Actions<StartSyncArgs, {}>;
+
 export interface IndicesActions {
-  fetchIndexSuccess: Actions<FetchIndexApiParams, FetchIndexApiResponse>['apiSuccess'];
-  makeStartSyncRequest: Actions<StartSyncArgs, {}>['makeRequest'];
+  clearFetchIndexTimeout(): void;
+  createNewFetchIndexTimeout(duration: number): { duration: number };
+  fetchIndexApiSuccess: FetchIndexApiValues['apiSuccess'];
+  makeFetchIndexRequest: FetchIndexApiValues['makeRequest'];
+  makeStartSyncRequest: StartSyncApiValues['makeRequest'];
+  resetFetchIndexApi: FetchIndexApiValues['apiReset'];
+  setFetchIndexTimeoutId(timeoutId: NodeJS.Timeout): { timeoutId: NodeJS.Timeout };
+  startFetchIndexPoll(): void;
   startSync(): void;
-  startSyncApiError: Actions<StartSyncArgs, {}>['apiError'];
-  startSyncApiSuccess: Actions<StartSyncArgs, {}>['apiSuccess'];
+  startSyncApiError: StartSyncApiValues['apiError'];
+  startSyncApiSuccess: StartSyncApiValues['apiSuccess'];
+  stopFetchIndexPoll(): void;
 }
 
 export interface IndicesValues {
   data: typeof FetchIndexApiLogic.values.data;
+  fetchIndexTimeoutId: NodeJS.Timeout | null;
   index: ElasticsearchViewIndex | undefined;
   ingestionMethod: IngestionMethod;
   ingestionStatus: IngestionStatus;
@@ -53,23 +69,54 @@ export interface IndicesValues {
 
 export const IndexViewLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
   actions: {
+    clearFetchIndexTimeout: true,
+    createNewFetchIndexTimeout: (duration) => ({ duration }),
+    setFetchIndexTimeoutId: (timeoutId) => ({ timeoutId }),
+    startFetchIndexPoll: true,
     startSync: true,
+    stopFetchIndexPoll: true,
   },
   connect: {
     actions: [
       StartSyncApiLogic,
       [
-        'makeRequest as makeStartSyncRequest',
-        'apiSuccess as startSyncApiSuccess',
         'apiError as startSyncApiError',
+        'apiSuccess as startSyncApiSuccess',
+        'makeRequest as makeStartSyncRequest',
       ],
       FetchIndexApiLogic,
-      ['apiSuccess as fetchIndexApiSuccess'],
+      [
+        'apiError as fetchIndexApiError',
+        'apiReset as resetFetchIndexApi',
+        'apiSuccess as fetchIndexApiSuccess',
+        'makeRequest as makeFetchIndexRequest',
+      ],
     ],
     values: [FetchIndexApiLogic, ['data']],
   },
   listeners: ({ actions, values }) => ({
+    createNewFetchIndexTimeout: ({ duration }) => {
+      if (values.fetchIndexTimeoutId) {
+        clearTimeout(values.fetchIndexTimeoutId);
+      }
+      const { indexName } = IndexNameLogic.values;
+      const timeoutId = setTimeout(() => {
+        actions.makeFetchIndexRequest({ indexName });
+      }, duration);
+      actions.setFetchIndexTimeoutId(timeoutId);
+    },
+    fetchIndexApiError: () => {
+      actions.createNewFetchIndexTimeout(FETCH_INDEX_POLLING_DURATION_ON_FAILURE);
+    },
+    fetchIndexApiSuccess: () => {
+      actions.createNewFetchIndexTimeout(FETCH_INDEX_POLLING_DURATION);
+    },
     makeStartSyncRequest: () => clearFlashMessages(),
+    startFetchIndexPoll: () => {
+      const { indexName } = IndexNameLogic.values;
+      // we rely on listeners for fetchIndexApiError and fetchIndexApiSuccess to handle reccuring polling
+      actions.makeFetchIndexRequest({ indexName });
+    },
     startSync: () => {
       if (isConnectorIndex(values.data)) {
         actions.makeStartSyncRequest({ connectorId: values.data?.connector?.id });
@@ -83,9 +130,23 @@ export const IndexViewLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>(
         })
       );
     },
+    stopFetchIndexPoll: () => {
+      if (values.fetchIndexTimeoutId) {
+        clearTimeout(values.fetchIndexTimeoutId);
+      }
+      actions.clearFetchIndexTimeout();
+      actions.resetFetchIndexApi();
+    },
   }),
   path: ['enterprise_search', 'content', 'index_view_logic'],
   reducers: {
+    fetchIndexTimeoutId: [
+      null,
+      {
+        clearFetchIndexTimeoutId: () => null,
+        setFetchIndexTimeoutId: (_, { timeoutId }) => timeoutId,
+      },
+    ],
     localSyncNowValue: [
       false,
       {
