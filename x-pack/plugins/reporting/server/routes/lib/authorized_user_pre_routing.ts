@@ -7,6 +7,7 @@
 
 import { RequestHandler, RouteMethod } from '@kbn/core/server';
 import { AuthenticatedUser } from '@kbn/security-plugin/server';
+import { i18n } from '@kbn/i18n';
 import { ReportingCore } from '../../core';
 import { getUser } from './get_user';
 import type { ReportingRequestHandlerContext } from '../../types';
@@ -31,7 +32,7 @@ export const authorizedUserPreRouting = <P, Q, B>(
   const { logger, security } = reporting.getPluginSetupDeps();
 
   return async (context, req, res) => {
-    const { security: securityStart } = await reporting.getPluginStartDeps();
+    const { security: securityStart, docLinks } = await reporting.getPluginStartDeps();
     try {
       let user: ReportingRequestUser = false;
       if (security && security.license.isEnabled()) {
@@ -50,8 +51,20 @@ export const authorizedUserPreRouting = <P, Q, B>(
         const authorizedRoles = [superuserRole, ...allowedRoles];
 
         if (!user.roles.find((role) => authorizedRoles.includes(role))) {
+          const body = i18n.translate('xpack.reporting.userAccessError.message', {
+            defaultMessage: `Sorry, you don't have access to Reporting. {grantUserAccessDocs} to grant user access.`,
+            values: {
+              grantUserAccessDocs:
+                `<a href=${docLinks.links.reporting.grantUserAccess} style="font-weight: 600;"
+                    target="_blank" rel="noopener">` +
+                i18n.translate('xpack.reporting.userAccessError.seeDetailsLink', {
+                  defaultMessage: 'See details',
+                }) +
+                '</a>',
+            },
+          });
           // user's roles do not allow
-          return res.forbidden({ body: `Sorry, you don't have access to Reporting` });
+          return res.forbidden({ body });
         }
       }
 

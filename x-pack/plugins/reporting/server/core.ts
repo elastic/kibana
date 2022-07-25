@@ -7,6 +7,7 @@
 
 import Hapi from '@hapi/hapi';
 import type {
+  DocLinksServiceSetup,
   IBasePath,
   IClusterClient,
   Logger,
@@ -71,6 +72,7 @@ export interface ReportingInternalStart {
   screenshotting: ScreenshottingStart;
   security?: SecurityPluginStart;
   taskManager: TaskManagerStartContract;
+  docLinks: DocLinksServiceSetup;
 }
 
 /**
