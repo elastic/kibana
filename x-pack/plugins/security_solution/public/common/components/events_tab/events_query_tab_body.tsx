@@ -61,7 +61,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
   filterQuery,
   indexNames,
   externalAlertPageFilters = [],
-  pageFilters: defaultPageFilters = [],
+  pageFilters = [],
   setQuery,
   startDate,
   timelineId,
@@ -74,7 +74,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
   const leadingControlColumns = useMemo(() => getDefaultControlColumn(ACTION_BUTTON_COUNT), []);
 
   const toggleExternalAlerts = useCallback(() => setShowExternalAlerts((s) => !s), []);
-  const getSubtitle = useMemo(
+  const getHistogramSubtitle = useMemo(
     () => getSubtitleFunction(defaultNumberFormat, showExternalAlerts),
     [defaultNumberFormat, showExternalAlerts]
   );
@@ -104,6 +104,37 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
     };
   }, [deleteQuery]);
 
+  const additionalFilters = useMemo(
+    () => (
+      <EuiCheckbox
+        id="showExternalAlertsCheckbox"
+        data-test-subj="showExternalAlertsCheckbox"
+        aria-label={i18n.SHOW_EXTERNAL_ALERTS}
+        checked={showExternalAlerts}
+        color="text"
+        label={i18n.SHOW_EXTERNAL_ALERTS}
+        onChange={toggleExternalAlerts}
+      />
+    ),
+    [showExternalAlerts, toggleExternalAlerts]
+  );
+
+  const defaultModel = useMemo(
+    () => ({
+      ...eventsDefaultModel,
+      excludedRowRendererIds: showExternalAlerts ? Object.values(RowRendererId) : [],
+    }),
+    [showExternalAlerts]
+  );
+
+  const composedPageFilters = useMemo(
+    () => [
+      ...pageFilters,
+      ...(showExternalAlerts ? [defaultAlertsFilters, ...externalAlertPageFilters] : []),
+    ],
+    [showExternalAlerts, externalAlertPageFilters, pageFilters]
+  );
+
   return (
     <>
       {!globalFullScreen && (
@@ -115,21 +146,11 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
           indexNames={indexNames}
           setQuery={setQuery}
           {...(showExternalAlerts ? alertsHistogramConfig : eventsHistogramConfig)}
-          subtitle={getSubtitle}
+          subtitle={getHistogramSubtitle}
         />
       )}
       <StatefulEventsViewer
-        additionalFilters={
-          <EuiCheckbox
-            id="showExternalAlertsCheckbox"
-            data-test-subj="showExternalAlertsCheckbox"
-            aria-label={i18n.SHOW_EXTERNAL_ALERTS}
-            checked={showExternalAlerts}
-            color="text"
-            label={i18n.SHOW_EXTERNAL_ALERTS}
-            onChange={toggleExternalAlerts}
-          />
-        }
+        additionalFilters={additionalFilters}
         defaultCellActions={defaultCellActions}
         start={startDate}
         end={endDate}
@@ -140,14 +161,8 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
         scopeId={SourcererScopeName.default}
         id={timelineId}
         unit={showExternalAlerts ? i18n.ALERTS_UNIT : i18n.EVENTS_UNIT}
-        defaultModel={{
-          ...eventsDefaultModel,
-          excludedRowRendererIds: showExternalAlerts ? Object.values(RowRendererId) : [],
-        }}
-        pageFilters={[
-          ...defaultPageFilters,
-          ...(showExternalAlerts ? [defaultAlertsFilters, ...externalAlertPageFilters] : []),
-        ]}
+        defaultModel={defaultModel}
+        pageFilters={composedPageFilters}
       />
     </>
   );
