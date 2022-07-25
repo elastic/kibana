@@ -161,6 +161,8 @@ export const mockRuleWithEverything = (id: string): Rule => ({
   timestamp_override_fallback_disabled: false,
   note: '# this is some markdown documentation',
   version: 1,
+  new_terms_fields: ['host.name'],
+  history_window_start: 'now-7d',
 });
 
 // TODO: update types mapping
@@ -214,6 +216,8 @@ export const mockDefineStepRule = (): DefineStepRule => ({
     },
   },
   eqlOptions: {},
+  newTermsFields: ['host.ip'],
+  historyWindowSize: '7d',
 });
 
 export const mockScheduleStepRule = (): ScheduleStepRule => ({
