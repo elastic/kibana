@@ -78,6 +78,13 @@ export const createMockPluginStart = async (
     },
     logger,
     screenshotting: createMockScreenshottingStart(),
+    docLinks: {
+      links: {
+        reporting: {
+          grantUserAccess: 'mock-link',
+        },
+      },
+    },
     ...startMock,
   };
 };

@@ -145,7 +145,10 @@ describe('authorized_user_pre_routing', function () {
           getMockRequest(),
           getMockResponseFactory()
         )
-      ).toMatchObject({ body: `Sorry, you don't have access to Reporting` });
+      ).toMatchObject({
+        body: `Sorry, you don't have access to Reporting. <a href=mock-link style="font-weight: 600;"
+                    target="_blank" rel="noopener">See details</a> to grant user access.`,
+      });
     });
 
     it('should return from handler when security is enabled and user has explicitly allowed role', async function () {
