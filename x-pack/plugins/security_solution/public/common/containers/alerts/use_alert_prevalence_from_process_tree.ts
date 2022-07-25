@@ -69,7 +69,7 @@ interface TreeResponse {
 
 function useAlertDocumentAnalyzerSchema(processEntityId: string) {
   const http = useHttp();
-  const query = useQuery<any>(['getAlertPrevalenceSchema', processEntityId], () => {
+  const query = useQuery<EntityResponse[]>(['getAlertPrevalenceSchema', processEntityId], () => {
     return http.get<EntityResponse[]>(`/api/endpoint/resolver/entity`, {
       query: {
         _id: processEntityId,
@@ -106,7 +106,7 @@ function useAlertDocumentAnalyzerSchema(processEntityId: string) {
 
 export function useAlertPrevalenceFromProcessTree(
   processEntityId: string,
-  timelineId: string,
+  timelineId: string
 ): UserAlertPrevalenceFromProcessTreeResult {
   const http = useHttp();
   const getStartSelector = useMemo(() => startSelector(), []);
@@ -165,7 +165,8 @@ export function useAlertPrevalenceFromProcessTree(
           includeHits: true,
         }),
       });
-    }
+    },
+    { enabled: schema !== null && id !== null }
   );
   if (query.isLoading || loading) {
     return {
@@ -187,42 +188,3 @@ export function useAlertPrevalenceFromProcessTree(
     };
   }
 }
-
-// export const useAlertPrevalenceFromProcessTree = ({
-//   parentEntityId,
-//   timelineId,
-//   signalIndexName,
-// }: UseAlertPrevalenceOptions): UserAlertPrevalenceFromProcessTreeResult => {
-//   // const timelineTime = useDeepEqualSelector((state) =>
-//   //   inputsSelectors.timelineTimeRangeSelector(state)
-//   // );
-//   // const globalTime = useGlobalTime();
-
-//   // const { to, from } = timelineId === TimelineId.active ? timelineTime : globalTime;
-//   const [{ loading, alertIds }, setResult] = useState<{ loading: boolean; alertIds?: string[] }>({
-//     loading: true,
-//     alertIds: undefined,
-//   });
-//   useEffect(() => {
-//     const t = setTimeout(() => {
-//       setResult({
-//         loading: false,
-//         alertIds: [
-//           '489ef2e50e7bb6366c5eaa1b17873e56fda738134685ca54b997a2546834f08c',
-//           '4b8e7111166034f94f62a009fa22ad42bfbb8edc86cda03055d14a9f2dd21f48',
-//           '0347030aa3593566a7fcd77769c798efaf02f84a3196fd586b4700c0c9ae5872',
-//         ],
-//       });
-//     }, Math.random() * 1500 + 500);
-//     return () => {
-//       clearTimeout(t);
-//     };
-//   }, []);
-
-//   return {
-//     loading,
-//     alertIds,
-//     count: alertIds ? alertIds.length : undefined,
-//     error: false,
-//   };
-// };
