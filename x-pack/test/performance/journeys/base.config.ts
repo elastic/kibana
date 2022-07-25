@@ -38,8 +38,15 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
-        `--telemetry.labels.testBuildId=${testBuildId}`,
+        `--telemetry.labels.branch=${process.env.BUILDKITE_BRANCH}`,
+        `--telemetry.labels.ciBuildId=${process.env.BUILDKITE_BUILD_ID}`,
+        `--telemetry.labels.ciBuildJobId=${process.env.BUILDKITE_JOB_ID}`,
+        `--telemetry.labels.ciBuildNumber=${process.env.BUILDKITE_BUILD_NUMBER}`,
+        `--telemetry.labels.git_rev=${process.env.BUILDKITE_COMMIT}`,
+        `--telemetry.labels.isPr=${process.env.CI}`,
+        `--telemetry.labels.prId=${process.env.BUILDKITE_PULL_REQUEST_BASE_BRANCH}`,
         `--telemetry.labels.testJobId=${testJobId}`,
+        `--telemetry.labels.testBuildId=${testBuildId}`,
       ],
       env: {
         ELASTIC_APM_ACTIVE: process.env.TEST_PERFORMANCE_PHASE ? 'true' : 'false',
