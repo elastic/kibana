@@ -6,19 +6,17 @@
  */
 
 import {
-  COLOR_MODES_STANDARD,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
   EuiEmptyPrompt,
   EuiImage,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import noResultsIllustrationDark from '../../../../assets/no_results_dark.svg';
 import noResultsIllustrationLight from '../../../../assets/no_results_light.svg';
+import { useTheme } from '../../../../hooks/use_theme';
 
 export function EmptyPrompt() {
   return (
@@ -26,16 +24,20 @@ export function EmptyPrompt() {
       body={
         <EuiDescriptionList compressed>
           <EuiDescriptionListTitle>
-            <FormattedMessage
-              id="xpack.apm.infraTabs.emptyMessagePromptTimeRangeTitle"
-              defaultMessage="Expand your time range"
-            />
+            {i18n.translate(
+              'xpack.apm.infraTabs.emptyMessagePromptTimeRangeTitle',
+              {
+                defaultMessage: 'Expand your time range',
+              }
+            )}
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
-            <FormattedMessage
-              id="xpack.apm.infraTabs.emptyMessagePromptDescription"
-              defaultMessage="Try searching over a longer period of time."
-            />
+            {i18n.translate(
+              'xpack.apm.infraTabs.emptyMessagePromptDescription',
+              {
+                defaultMessage: 'Try searching over a longer period of time.',
+              }
+            )}
           </EuiDescriptionListDescription>
         </EuiDescriptionList>
       }
@@ -45,10 +47,9 @@ export function EmptyPrompt() {
       layout="horizontal"
       title={
         <h2>
-          <FormattedMessage
-            id="xpack.apm.infraTabs.emptyMessagePromptTitle"
-            defaultMessage="No results match your search criteria"
-          />
+          {i18n.translate('xpack.apm.infraTabs.emptyMessagePromptTitle', {
+            defaultMessage: 'No results match your search criteria.',
+          })}
         </h2>
       }
       titleSize="m"
@@ -57,12 +58,11 @@ export function EmptyPrompt() {
 }
 
 function NoResultsIllustration() {
-  const { colorMode } = useEuiTheme();
+  const theme = useTheme();
 
-  const illustration =
-    colorMode === COLOR_MODES_STANDARD.dark
-      ? noResultsIllustrationDark
-      : noResultsIllustrationLight;
+  const illustration = theme.darkMode
+    ? noResultsIllustrationDark
+    : noResultsIllustrationLight;
 
   return (
     <EuiImage
