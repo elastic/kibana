@@ -9,7 +9,7 @@ import { IUiSettingsClient } from '@kbn/core/public';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { CustomPaletteState } from '@kbn/charts-plugin/public';
 import type { IAggType } from '@kbn/data-plugin/public';
-import type { Datatable, RenderMode } from '@kbn/expressions-plugin';
+import type { Datatable, RenderMode } from '@kbn/expressions-plugin/common';
 import type { ILensInterpreterRenderHandlers, LensEditEvent } from '../../types';
 import {
   LENS_EDIT_SORT_ACTION,

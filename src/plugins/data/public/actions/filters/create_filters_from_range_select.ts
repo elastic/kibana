@@ -8,7 +8,7 @@
 
 import { last } from 'lodash';
 import moment from 'moment';
-import { Datatable } from '@kbn/expressions-plugin';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { esFilters, IFieldType, RangeFilterParams } from '../..';
 import { getIndexPatterns, getSearchService } from '../../services';
 import { AggConfigSerialized } from '../../../common/search/aggs';

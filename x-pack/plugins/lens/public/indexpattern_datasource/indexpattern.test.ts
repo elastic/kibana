@@ -36,7 +36,7 @@ import {
 } from './operations';
 import { createMockedFullReference } from './operations/mocks';
 import { cloneDeep } from 'lodash';
-import { DatatableColumn } from '@kbn/expressions-plugin';
+import { DatatableColumn } from '@kbn/expressions-plugin/common';
 
 jest.mock('./loader');
 jest.mock('../id_generator');

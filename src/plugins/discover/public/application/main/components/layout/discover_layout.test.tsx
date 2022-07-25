@@ -29,7 +29,7 @@ import {
 } from '../../utils/use_saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
-import { RequestAdapter } from '@kbn/inspector-plugin';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { Chart } from '../chart/point_series';
 import { DiscoverSidebar } from '../sidebar/discover_sidebar';
 import { ElasticSearchHit } from '../../../../types';

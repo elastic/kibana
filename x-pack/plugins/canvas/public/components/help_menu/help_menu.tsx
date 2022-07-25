@@ -8,7 +8,7 @@
 import React, { FC, useState, lazy, Suspense } from 'react';
 import { EuiButtonEmpty, EuiPortal, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunction } from '@kbn/expressions-plugin';
+import { ExpressionFunction } from '@kbn/expressions-plugin/common';
 
 import { KeyboardShortcutsDoc } from '../keyboard_shortcuts_doc';
 import { CanvasPluginServices } from '../../services';

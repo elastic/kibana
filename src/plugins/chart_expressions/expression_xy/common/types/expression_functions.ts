@@ -9,7 +9,7 @@
 import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
 import { $Values } from '@kbn/utility-types';
 import type { PaletteOutput } from '@kbn/coloring';
-import { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin';
+import { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
 import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
