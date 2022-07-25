@@ -20,7 +20,7 @@ import React, { memo, useCallback, useState, useEffect, useMemo } from 'react';
 
 import styled from 'styled-components';
 import { i18n as i18nCore } from '@kbn/i18n';
-import { isEqual, isEmpty } from 'lodash';
+import { isEqual, isEmpty, omit } from 'lodash';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import usePrevious from 'react-use/lib/usePrevious';
 
@@ -83,17 +83,6 @@ const INDEX_PATTERN_SELECT_ID = 'indexPatterns';
 
 const CommonUseField = getUseField({ component: Field });
 
-const StyledButtonGroup = styled(EuiButtonGroup)`
-  display: flex;
-  justify-content: right;
-  .euiButtonGroupButton {
-    padding-right: ${(props) => props.theme.eui.euiSizeL};
-  }
-`;
-
-const StyledFlexGroup = styled(EuiFlexGroup)`
-  margin-bottom: -21px;
-`;
 interface StepDefineRuleProps extends RuleStepProps {
   defaultValues?: DefineStepRule;
 }
@@ -484,43 +473,42 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   }, [kibanaDataViews]);
   const DataSource = useMemo(() => {
     return (
-      <RuleTypeEuiFormRow $isVisible={true} fullWidth>
-        <EuiFlexGroup direction="column">
+      <RuleTypeEuiFormRow label={i18n.SOURCE} $isVisible={true} fullWidth>
+        <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
-            <StyledFlexGroup direction="row" alignItems="stretch">
-              <EuiFlexItem grow={1}>
-                <StyledButtonGroup
-                  legend="Rule index pattern or data view selector"
-                  data-test-subj="dataViewIndexPatternButtonGroup"
-                  idSelected={dataSourceRadioIdSelected}
-                  onChange={onChangeDataSource}
-                  options={dataViewIndexPatternToggleButtonOptions}
-                  color="primary"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={2}>
-                <EuiText size="s">
-                  <FormattedMessage
-                    id="xpack.securitySolution.dataViewSelectorText1"
-                    defaultMessage="Use Kibana "
-                  />
-                  <DocLink guidePath="kibana" docPath="data-views.html" linkText="Data Views" />
-                  <FormattedMessage
-                    id="xpack.securitySolution.dataViewSelectorText2"
-                    defaultMessage=" or specify individual "
-                  />
-                  <DocLink
-                    guidePath="kibana"
-                    docPath="index-patterns-api-create.html"
-                    linkText="index patterns"
-                  />
-                  <FormattedMessage
-                    id="xpack.securitySolution.dataViewSelectorText3"
-                    defaultMessage=" as your rule's data source to be searched."
-                  />
-                </EuiText>
-              </EuiFlexItem>
-            </StyledFlexGroup>
+            <EuiText size="xs">
+              <FormattedMessage
+                id="xpack.securitySolution.dataViewSelectorText1"
+                defaultMessage="Use Kibana "
+              />
+              <DocLink guidePath="kibana" docPath="data-views.html" linkText="Data Views" />
+              <FormattedMessage
+                id="xpack.securitySolution.dataViewSelectorText2"
+                defaultMessage=" or specify individual "
+              />
+              <DocLink
+                guidePath="kibana"
+                docPath="index-patterns-api-create.html"
+                linkText="index patterns"
+              />
+              <FormattedMessage
+                id="xpack.securitySolution.dataViewSelectorText3"
+                defaultMessage=" as your rule's data source to be searched."
+              />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <RuleTypeEuiFormRow $isVisible={true}>
+              <EuiButtonGroup
+                isFullWidth={true}
+                legend="Rule index pattern or data view selector"
+                data-test-subj="dataViewIndexPatternButtonGroup"
+                idSelected={dataSourceRadioIdSelected}
+                onChange={onChangeDataSource}
+                options={dataViewIndexPatternToggleButtonOptions}
+                color="primary"
+              />
+            </RuleTypeEuiFormRow>
           </EuiFlexItem>
 
           <EuiFlexItem>
@@ -530,7 +518,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               <CommonUseField
                 path="index"
                 config={{
-                  ...schema.index,
+                  ...omit(schema.index, 'label'),
                   labelAppend: indexModified ? (
                     <MyLabelButton onClick={handleResetIndices} iconType="refresh">
                       {i18n.RESET_DEFAULT_INDEX}
