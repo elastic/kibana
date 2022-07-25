@@ -12,12 +12,23 @@ export const getFiltersMock = () =>
   [
     {
       meta: {
-        index: '1234',
+        index: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+        alias: null,
+        negate: false,
+        disabled: false,
         type: 'phrase',
         key: 'category.keyword',
         params: {
-          query: 'Filter 1',
+          query: "Men's Accessories",
         },
+      },
+      query: {
+        match_phrase: {
+          'category.keyword': "Men's Accessories",
+        },
+      },
+      $state: {
+        store: 'appState',
       },
     },
     {
@@ -27,12 +38,23 @@ export const getFiltersMock = () =>
           filters: [
             {
               meta: {
-                index: '1234',
+                index: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+                alias: null,
+                negate: false,
+                disabled: false,
                 type: 'phrase',
                 key: 'category.keyword',
                 params: {
-                  query: 'Filter 2',
+                  query: "Men's Accessories",
                 },
+              },
+              query: {
+                match_phrase: {
+                  'category.keyword': "Men's Accessories",
+                },
+              },
+              $state: {
+                store: 'appState',
               },
             },
             {
@@ -42,22 +64,44 @@ export const getFiltersMock = () =>
                   filters: [
                     {
                       meta: {
-                        index: '1234',
+                        index: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+                        alias: null,
+                        negate: false,
+                        disabled: false,
                         type: 'phrase',
                         key: 'category.keyword',
                         params: {
-                          query: 'Filter 2-1',
+                          query: "Men's Accessories",
                         },
+                      },
+                      query: {
+                        match_phrase: {
+                          'category.keyword': "Men's Accessories",
+                        },
+                      },
+                      $state: {
+                        store: 'appState',
                       },
                     },
                     {
                       meta: {
-                        index: '1234',
+                        index: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+                        alias: null,
+                        negate: false,
+                        disabled: false,
                         type: 'phrase',
                         key: 'category.keyword',
                         params: {
-                          query: 'Filter 2-2',
+                          query: "Men's Accessories",
                         },
+                      },
+                      query: {
+                        match_phrase: {
+                          'category.keyword': "Men's Accessories",
+                        },
+                      },
+                      $state: {
+                        store: 'appState',
                       },
                     },
                   ],
@@ -66,12 +110,23 @@ export const getFiltersMock = () =>
             },
             {
               meta: {
-                index: '1234',
+                index: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+                alias: null,
+                negate: false,
+                disabled: false,
                 type: 'phrase',
                 key: 'category.keyword',
                 params: {
-                  query: 'Filter 3',
+                  query: "Men's Accessories",
                 },
+              },
+              query: {
+                match_phrase: {
+                  'category.keyword': "Men's Accessories",
+                },
+              },
+              $state: {
+                store: 'appState',
               },
             },
           ],
@@ -80,12 +135,23 @@ export const getFiltersMock = () =>
     },
     {
       meta: {
-        index: '1234',
+        index: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+        alias: null,
+        negate: false,
+        disabled: false,
         type: 'phrase',
         key: 'category.keyword',
         params: {
-          query: 'Filter 4',
+          query: "Men's Accessories",
         },
+      },
+      query: {
+        match_phrase: {
+          'category.keyword': "Men's Accessories",
+        },
+      },
+      $state: {
+        store: 'appState',
       },
     },
   ] as Filter[];

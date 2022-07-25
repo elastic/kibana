@@ -17,7 +17,7 @@ import { setIndexPatterns } from '../services';
 
 const mockIndexPatterns = [
   {
-    id: '1234',
+    id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
     title: 'logstash-*',
     fields: [
       {
@@ -124,7 +124,7 @@ const services = {
                   filters: [
                     {
                       meta: {
-                        index: '1234',
+                        index: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
                         alias: null,
                         negate: false,
                         disabled: false,
@@ -156,8 +156,8 @@ const services = {
     },
     dataViews: {
       getIdsWithTitle: () => [
-        { id: '1234', title: 'logstash-*' },
-        { id: '1235', title: 'test-*' },
+        { id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9', title: 'logstash-*' },
+        { id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f', title: 'test-*' },
       ],
     },
   },
@@ -201,7 +201,7 @@ storiesOf('SearchBar', module)
   .add('with dataviewPicker', () =>
     wrapSearchBarInContext({
       dataViewPickerComponentProps: {
-        currentDataViewId: '1234',
+        currentDataViewId: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
         trigger: {
           'data-test-subj': 'dataView-switch-link',
           label: 'logstash-*',
@@ -214,7 +214,7 @@ storiesOf('SearchBar', module)
   .add('with dataviewPicker enhanced', () =>
     wrapSearchBarInContext({
       dataViewPickerComponentProps: {
-        currentDataViewId: '1234',
+        currentDataViewId: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
         trigger: {
           'data-test-subj': 'dataView-switch-link',
           label: 'logstash-*',
@@ -261,7 +261,7 @@ storiesOf('SearchBar', module)
       filters: [
         {
           meta: {
-            index: '1234',
+            index: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
             alias: null,
             negate: false,
             disabled: false,
@@ -299,7 +299,7 @@ storiesOf('SearchBar', module)
       filters: [
         {
           meta: {
-            index: '1234',
+            index: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
             alias: null,
             negate: false,
             disabled: false,
@@ -335,7 +335,7 @@ storiesOf('SearchBar', module)
           filters: [
             {
               meta: {
-                index: '1234',
+                index: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
                 alias: null,
                 negate: false,
                 disabled: false,
@@ -360,7 +360,7 @@ storiesOf('SearchBar', module)
       filters: [
         {
           meta: {
-            index: '1234',
+            index: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
             alias: null,
             negate: false,
             disabled: false,
@@ -396,7 +396,7 @@ storiesOf('SearchBar', module)
           filters: [
             {
               meta: {
-                index: '1234',
+                index: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
                 alias: null,
                 negate: false,
                 disabled: false,
@@ -438,7 +438,7 @@ storiesOf('SearchBar', module)
       filters: [
         {
           meta: {
-            index: '1234',
+            index: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
             alias: null,
             negate: false,
             disabled: false,

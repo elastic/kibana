@@ -71,14 +71,14 @@ interface State {
 }
 
 const panelTitleAdd = i18n.translate('unifiedSearch.filter.filterEditor.addFilterPopupTitle', {
-  defaultMessage: 'Add filter',
+  defaultMessage: 'Add filter 3',
 });
 const panelTitleEdit = i18n.translate('unifiedSearch.filter.filterEditor.editFilterPopupTitle', {
   defaultMessage: 'Edit filter',
 });
 
 const addButtonLabel = i18n.translate('unifiedSearch.filter.filterEditor.addButtonLabel', {
-  defaultMessage: 'Add filter',
+  defaultMessage: 'Add filter 4',
 });
 const updateButtonLabel = i18n.translate('unifiedSearch.filter.filterEditor.updateButtonLabel', {
   defaultMessage: 'Update filter',
