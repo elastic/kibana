@@ -27,6 +27,7 @@ export interface AggregatedTransactionsCounts {
 export type APMPerService = Record<
   string,
   {
+    timed_out: boolean;
     cloud: {
       availability_zones: string[];
       regions: string[];

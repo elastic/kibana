@@ -1254,6 +1254,7 @@ export const tasks: TelemetryTask[] = [
           const name = serviceBucket.key;
           const fullServiceName = env + '~' + name;
           data[fullServiceName] = {
+            timed_out: response.timed_out,
             cloud: {
               availability_zones:
                 serviceBucket[CLOUD_AVAILABILITY_ZONE]?.buckets.map(
