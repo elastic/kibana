@@ -7,6 +7,7 @@
 
 jest.mock('axios', () => jest.fn());
 
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { SyntheticsService } from './synthetics_service';
 import { loggerMock } from '@kbn/logging-mocks';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
@@ -15,26 +16,33 @@ import times from 'lodash/times';
 import { LocationStatus } from '../../common/runtime_types';
 import { SyntheticsConfig } from './formatters/format_configs';
 
+const taskManagerSetup = taskManagerMock.createSetup();
+
 describe('SyntheticsService', () => {
   const mockEsClient = {
     search: jest.fn(),
   };
 
+  const logger = loggerMock.create();
+
   const serverMock: UptimeServerSetup = {
+    logger,
     uptimeEsClient: mockEsClient,
     authSavedObjectsClient: {
       bulkUpdate: jest.fn(),
     },
+    config: {
+      service: {
+        username: 'dev',
+        password: '12345',
+        manifestUrl: 'http://localhost:8080/api/manifest',
+      },
+    },
   } as unknown as UptimeServerSetup;
-
-  const logger = loggerMock.create();
 
   const getMockedService = (locationsNum: number = 1) => {
     serverMock.config = { service: { devUrl: 'http://localhost' } };
-    const service = new SyntheticsService(logger, serverMock, {
-      username: 'dev',
-      password: '12345',
-    });
+    const service = new SyntheticsService(serverMock);
 
     const locations = times(locationsNum).map((n) => {
       return {
@@ -84,34 +92,34 @@ describe('SyntheticsService', () => {
 
   afterEach(() => jest.restoreAllMocks());
 
-  it('inits properly', async () => {
-    const service = new SyntheticsService(logger, serverMock, {});
-    service.init();
+  it('setup properly', async () => {
+    const service = new SyntheticsService(serverMock);
+    service.setup(taskManagerSetup);
 
     expect(service.isAllowed).toEqual(false);
     expect(service.locations).toEqual([]);
     expect(service.signupUrl).toEqual(null);
   });
 
-  it('inits properly with basic auth', async () => {
-    const service = new SyntheticsService(logger, serverMock, {
-      username: 'dev',
-      password: '12345',
-    });
+  it('setup properly with basic auth', async () => {
+    const service = new SyntheticsService(serverMock);
 
-    await service.init();
+    await service.setup(taskManagerSetup);
 
     expect(service.isAllowed).toEqual(true);
   });
 
-  it('inits properly with locations with dev', async () => {
-    serverMock.config = { service: { devUrl: 'http://localhost' } };
-    const service = new SyntheticsService(logger, serverMock, {
-      username: 'dev',
-      password: '12345',
-    });
+  it('setup properly with locations with dev', async () => {
+    serverMock.config = {
+      service: {
+        devUrl: 'http://localhost',
+        username: 'dev',
+        password: '12345',
+      },
+    };
+    const service = new SyntheticsService(serverMock);
 
-    await service.init();
+    await service.setup(taskManagerSetup);
 
     expect(service.isAllowed).toEqual(true);
     expect(service.locations).toEqual([
@@ -121,6 +129,7 @@ describe('SyntheticsService', () => {
           lon: 0,
         },
         id: 'localhost',
+        isInvalid: false,
         label: 'Local Synthetics Service',
         url: 'http://localhost',
         isServiceManaged: true,
