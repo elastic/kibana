@@ -6,7 +6,9 @@
  */
 
 import React, { FC, useCallback, useMemo, useState } from 'react';
-import { EuiBadge, EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBadge, EuiBasicTable, EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
+import { sortBy } from 'lodash';
+
 import { i18n } from '@kbn/i18n';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
 
@@ -18,6 +20,8 @@ const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 const noDataText = i18n.translate('xpack.aiops.correlations.correlationsTable.noDataText', {
   defaultMessage: 'No data',
 });
+const DEFAULT_SORT_FIELD = 'pValue';
+const DEFAULT_SORT_DIRECTION = 'asc';
 
 interface SpikeAnalysisTableProps {
   changePoints: ChangePoint[];
@@ -38,6 +42,8 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
 }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+  const [sortField, setSortField] = useState(DEFAULT_SORT_FIELD);
+  const [sortDirection, setSortDirection] = useState(DEFAULT_SORT_DIRECTION);
 
   const columns: Array<EuiBasicTableColumn<ChangePoint>> = [
     {
@@ -98,36 +104,44 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
         const label = getFailedTransactionsCorrelationImpactLabel(pValue);
         return label ? <EuiBadge color={label.color}>{label.impact}</EuiBadge> : null;
       },
-      sortable: true,
+      sortable: false,
     },
   ];
 
   const onChange = useCallback((tableSettings) => {
     const { index, size } = tableSettings.page;
+    const { field, direction } = tableSettings.sort;
 
     setPageIndex(index);
     setPageSize(size);
+    setSortField(field);
+    setSortDirection(direction);
   }, []);
 
-  const { pagination, pageOfItems } = useMemo(() => {
+  const { pagination, pageOfItems, sorting } = useMemo(() => {
     const pageStart = pageIndex * pageSize;
-
     const itemCount = changePoints?.length ?? 0;
+
+    let items = changePoints ?? [];
+    items = sortBy(changePoints, (item: ChangePoint) => item[sortField as keyof ChangePoint]);
+    items = sortDirection === 'asc' ? items : items.reverse();
+
     return {
-      pageOfItems: changePoints
-        // Temporary default sorting by ascending pValue until we add native table sorting
-        ?.sort((a, b) => {
-          return (a?.pValue ?? 1) - (b?.pValue ?? 0);
-        })
-        .slice(pageStart, pageStart + pageSize),
+      pageOfItems: items.slice(pageStart, pageStart + pageSize),
       pagination: {
         pageIndex,
         pageSize,
         totalItemCount: itemCount,
         pageSizeOptions: PAGINATION_SIZE_OPTIONS,
       },
+      sorting: {
+        sort: {
+          field: sortField,
+          direction: sortDirection,
+        },
+      },
     };
-  }, [pageIndex, pageSize, changePoints]);
+  }, [pageIndex, pageSize, sortField, sortDirection, changePoints]);
 
   return (
     <EuiBasicTable
@@ -139,7 +153,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       pagination={pagination}
       loading={loading}
       error={error}
-      // sorting={sorting}
+      sorting={sorting as EuiTableSortingType<ChangePoint>}
       rowProps={(changePoint) => {
         return {
           onClick: () => {
