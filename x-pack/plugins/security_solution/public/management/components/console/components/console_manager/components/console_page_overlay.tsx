@@ -53,7 +53,7 @@ export const ConsolePageOverlay = memo<ConsolePageOverlayProps>(
         headerBackComponent: (
           <EuiButtonEmpty
             flush="left"
-            size="xs"
+            size="s"
             iconType="arrowLeft"
             onClick={handleCloseOverlayOnClick}
             data-test-subj={getTestId('header-back-link')}

@@ -13,7 +13,7 @@ import type { CommandDefinition } from '../types';
 export const HELP_GROUPS = Object.freeze({
   supporting: {
     label: i18n.translate('xpack.securitySolution.console.builtInCommands.groups.supporting', {
-      defaultMessage: 'Supporting commands & syntaxes',
+      defaultMessage: 'Supporting commands & parameters',
     }),
   },
 });
@@ -38,18 +38,20 @@ export const getBuiltinCommands = (): CommandDefinition[] => {
     {
       name: 'help',
       about: i18n.translate('xpack.securitySolution.console.builtInCommands.helpAbout', {
-        defaultMessage: 'View list of available commands',
+        defaultMessage: 'List all available commands',
       }),
       RenderComponent: HelpCommand,
       helpGroupLabel: HELP_GROUPS.supporting.label,
+      helpCommandPosition: 1,
     },
     {
       name: 'cls',
       about: i18n.translate('xpack.securitySolution.console.builtInCommands.clearAbout', {
-        defaultMessage: 'Clear the console buffer',
+        defaultMessage: 'Clear console screen',
       }),
       RenderComponent: ClearCommand,
       helpGroupLabel: HELP_GROUPS.supporting.label,
+      helpCommandPosition: 0,
     },
   ];
 };

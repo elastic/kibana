@@ -32,10 +32,7 @@ describe('When a Console command is entered by the user', () => {
     expect(renderResult.getByTestId('test-helpOutput')).toBeTruthy();
 
     await waitFor(() => {
-      expect(renderResult.getAllByTestId('test-commandList-command')).toHaveLength(
-        // `+2` to account for builtin generic args
-        commands.length + 2
-      );
+      expect(renderResult.getAllByTestId('test-commandList-command')).toHaveLength(commands.length);
     });
   });
 

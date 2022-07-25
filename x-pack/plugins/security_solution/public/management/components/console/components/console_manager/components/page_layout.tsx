@@ -95,6 +95,7 @@ export const PageLayout = memo<PageLayoutProps>(
           responsive={false}
         >
           {headerBackComponent && <EuiFlexItem grow={false}>{headerBackComponent}</EuiFlexItem>}
+          <EuiSpacer size="m" />
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
               <span data-test-subj={getTestId('titleHolder')}>{pageTitle}</span>
@@ -128,6 +129,7 @@ export const PageLayout = memo<PageLayoutProps>(
                 rightSideItems={headerRightSideItems}
                 rightSideGroupProps={headerRightSideGroupProps}
                 restrictWidth={restrictWidth}
+                alignItems="bottom"
                 data-test-subj={getTestId('header')}
               />
               <EuiSpacer size="l" />
