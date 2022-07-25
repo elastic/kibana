@@ -20,12 +20,13 @@ export const getOpenSignals = async (
   log: ToolingLog,
   es: Client,
   rule: FullResponseSchema,
-  status: RuleExecutionStatus = RuleExecutionStatus.succeeded
+  status: RuleExecutionStatus = RuleExecutionStatus.succeeded,
+  size?: number
 ) => {
   await waitForRuleSuccessOrStatus(supertest, log, rule.id, status);
   // Critically important that we wait for rule success AND refresh the write index in that order before we
   // assert that no signals were created. Otherwise, signals could be written but not available to query yet
   // when we search, causing tests that check that signals are NOT created to pass when they should fail.
   await refreshIndex(es, '.alerts-security.alerts-default*');
-  return getSignalsByIds(supertest, log, [rule.id]);
+  return getSignalsByIds(supertest, log, [rule.id], size);
 };

@@ -25,11 +25,12 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
       configuration: {},
       id: '2',
       index_name: 'connector',
+      language: 'en',
       last_seen: null,
       last_sync_error: null,
       last_sync_status: SyncStatus.COMPLETED,
       last_synced: null,
-
+      name: 'connector',
       scheduling: {
         enabled: false,
         interval: '',

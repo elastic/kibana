@@ -14,7 +14,11 @@ import type {
 import type { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ListResult, PackagePolicy } from '@kbn/fleet-plugin/common';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import {
+  AGENTS_INDEX,
+  AGENT_ACTIONS_INDEX,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '@kbn/fleet-plugin/common';
 import { getRouteMetric } from '../routes/usage';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import { METRICS_INDICES } from './constants';
@@ -67,7 +71,7 @@ export async function getPolicyLevelUsage(
         },
       },
     },
-    index: '.fleet-agents',
+    index: AGENTS_INDEX,
     ignore_unavailable: true,
   });
   const policied = agentResponse.aggregations?.policied;
@@ -139,7 +143,7 @@ export async function getLiveQueryUsage(
         },
       },
     },
-    index: '.fleet-actions',
+    index: AGENT_ACTIONS_INDEX,
     ignore_unavailable: true,
   });
   const result: LiveQueryUsage = {

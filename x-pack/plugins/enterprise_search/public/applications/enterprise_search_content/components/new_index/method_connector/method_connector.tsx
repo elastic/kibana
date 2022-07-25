@@ -68,7 +68,7 @@ export const MethodConnector: React.FC = () => {
   const { error, status } = useValues(AddConnectorPackageApiLogic);
   const { isModalVisible } = useValues(AddConnectorPackageLogic);
   const { setIsModalVisible } = useActions(AddConnectorPackageLogic);
-  const { fullIndexName } = useValues(NewSearchIndexLogic);
+  const { fullIndexName, language } = useValues(NewSearchIndexLogic);
 
   const confirmModal = isModalVisible && (
     <EuiConfirmModal
@@ -84,7 +84,7 @@ export const MethodConnector: React.FC = () => {
       }}
       onConfirm={(event) => {
         event.preventDefault();
-        makeRequest({ deleteExistingConnector: true, indexName: fullIndexName });
+        makeRequest({ deleteExistingConnector: true, indexName: fullIndexName, language });
       }}
       cancelButtonText={i18n.translate(
         'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.confirmModal.cancelButton.label',
@@ -123,7 +123,7 @@ export const MethodConnector: React.FC = () => {
       onNameChange={() => {
         apiReset();
       }}
-      onSubmit={(name) => makeRequest({ indexName: name })}
+      onSubmit={(name, lang) => makeRequest({ indexName: name, language: lang })}
       buttonLoading={status === Status.LOADING}
     >
       <EuiSteps
