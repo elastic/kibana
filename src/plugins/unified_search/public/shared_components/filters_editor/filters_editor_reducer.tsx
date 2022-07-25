@@ -10,13 +10,9 @@ import type { Reducer } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { Path } from './filter_editors_types';
-import {
-  addFilter,
-  addFilterGroupWithEmptyFilter,
-  removeFilter,
-  updateFilterItem,
-} from './filters_editor_utils';
 import { Operator } from '../../filter_bar/filter_editor/lib/filter_operators';
+import { ConditionTypes } from './filters_editor_condition_types';
+import { addFilter, removeFilter, updateFilterItem } from './filters_editor_utils';
 
 /** @internal **/
 export interface FiltersEditorState {
@@ -24,15 +20,10 @@ export interface FiltersEditorState {
 }
 
 /** @internal **/
-export interface AddFiltersPayload {
+export interface AddFilterPayload {
   path: Path;
   dataViewId: string | undefined;
-}
-
-/** @internal **/
-export interface AddFilterGroupWithFilterPayload {
-  path: Path;
-  dataViewId: string | undefined;
+  conditionalType: ConditionTypes;
 }
 
 /** @internal **/
@@ -57,8 +48,7 @@ export interface MoveFilterPayload {
 
 /** @internal **/
 export type FiltersEditorActions =
-  | { type: 'addFilter'; payload: AddFiltersPayload }
-  | { type: 'addFilterGroupWithFilter'; payload: AddFilterGroupWithFilterPayload }
+  | { type: 'addFilter'; payload: AddFilterPayload }
   | { type: 'updateFilters'; payload: UpdateFiltersPayload }
   | { type: 'removeFilter'; payload: RemoveFilterPayload }
   | { type: 'moveFilter'; payload: MoveFilterPayload };
@@ -71,11 +61,6 @@ export const filtersEditorReducer: Reducer<FiltersEditorState, FiltersEditorActi
     case 'addFilter':
       return {
         filters: addFilter(state.filters, action.payload),
-      };
-    case 'addFilterGroupWithFilter':
-      return {
-        ...state,
-        filters: addFilterGroupWithEmptyFilter(state.filters, action.payload),
       };
     case 'updateFilters':
       return {

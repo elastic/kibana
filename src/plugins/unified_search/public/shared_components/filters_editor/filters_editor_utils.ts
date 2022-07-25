@@ -11,6 +11,8 @@ import { buildEmptyFilter, buildFilter, Filter } from '@kbn/es-query';
 import { Operator } from '../../filter_bar/filter_editor/lib/filter_operators';
 import { ConditionTypes } from './filters_editor_condition_types';
 
+const PATH_SEPARATOR = '.';
+
 export const getConditionalOperationType = (filter: Filter): ConditionTypes | undefined => {
   const { conditionalType } = filter.meta?.params || {};
 
@@ -25,12 +27,33 @@ export const getConditionalOperationType = (filter: Filter): ConditionTypes | un
 };
 
 export const getFilterDepth = (path: string) => {
-  return path.split('.').length || 1;
+  return path.split(PATH_SEPARATOR).length || 1;
+};
+
+/** @internal **/
+const doForFilterByPath = (
+  filters: Filter[],
+  path: string,
+  action: (ref: Filter, parent: Filter[]) => void
+) => {
+  const pathArray = path.split(PATH_SEPARATOR);
+  let ref: Filter[] = filters;
+  for (let i = 0, depth = getFilterDepth(path); i < depth; i++) {
+    const conditionalOperationType = getConditionalOperationType(ref[+pathArray[i]]);
+    const f = ref[+pathArray[i]];
+    if (conditionalOperationType) {
+      if (i + 1 === depth) {
+        return action(f, ref);
+      }
+      ref = f.meta.params.filters;
+    } else {
+      return action(f, ref);
+    }
+  }
 };
 
 export const getFilterByPath = (filters: Filter[], path: string) => {
-  const depth = getFilterDepth(path);
-  return depth;
+  return doForFilterByPath(filters, path, (f) => f);
 };
 
 export const addFilter = (
@@ -78,21 +101,21 @@ const goIntoFilersGroup = (
   }
 };
 
-export const addFilterGroupWithEmptyFilter = (
-  filters: Filter[],
-  payload: { path: string; dataViewId: string | undefined }
-) => {
-  const newFilterGroup: Filter = {
-    meta: {
-      params: {
-        conditionalType: 'or',
-        filters: [buildEmptyFilter(true, payload.dataViewId)],
-      },
-    },
-  };
-
-  return goIntoFilersGroup(filters, orderInFilterGroup(payload.path), payload.path, newFilterGroup);
-};
+// export const addFilterGroupWithEmptyFilter = (
+//   filters: Filter[],
+//   payload: { path: string; dataViewId: string | undefined }
+// ) => {
+//   const newFilterGroup: Filter = {
+//     meta: {
+//       params: {
+//         conditionalType: 'or',
+//         filters: [buildEmptyFilter(true, payload.dataViewId)],
+//       },
+//     },
+//   };
+//
+//   return goIntoFilersGroup(filters, orderInFilterGroup(payload.path), payload.path, newFilterGroup);
+// };
 
 export const removeFilter = (filters: Filter[], payload: { path: string }) => {
   return goIntoFilersGroup(filters, orderInFilterGroup(payload.path), payload.path);

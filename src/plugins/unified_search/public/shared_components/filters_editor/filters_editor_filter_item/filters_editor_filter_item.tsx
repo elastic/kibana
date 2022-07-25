@@ -10,6 +10,7 @@ import React, { useContext, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiButtonIcon } from '@elastic/eui';
 import { FieldFilter, Filter, getFilterParams } from '@kbn/es-query';
 import { DataViewField } from '@kbn/data-views-plugin/common';
+import { ConditionTypes } from '../filters_editor_condition_types';
 import { FiltersEditorContextType } from '../filters_editor_context';
 import { FieldInput } from './filters_editor_filter_item_field_input';
 import { OperatorInput } from './filters_editor_filter_item_operator_input';
@@ -73,11 +74,6 @@ export function FilterItem({
   };
 
   const onHandleParamsChange = (params: any) => {
-    dispatch({
-      type: 'updateFilters',
-      payload: { dataView, field: selectedField, operator: selectedOperator, params, path },
-    });
-
     setSelectedParams(params);
   };
 
@@ -141,8 +137,12 @@ export function FilterItem({
                 <EuiButtonIcon
                   onClick={() => {
                     dispatch({
-                      type: 'addFilterGroupWithFilter',
-                      payload: { path, dataViewId: dataView.id },
+                      type: 'addFilter',
+                      payload: {
+                        path,
+                        dataViewId: dataView.id,
+                        conditionalType: ConditionTypes.OR,
+                      },
                     });
                   }}
                   iconType="returnKey"
@@ -155,7 +155,14 @@ export function FilterItem({
                 <EuiButtonIcon
                   display="base"
                   onClick={() => {
-                    dispatch({ type: 'addFilter', payload: { path, dataViewId: dataView.id } });
+                    dispatch({
+                      type: 'addFilter',
+                      payload: {
+                        path,
+                        dataViewId: dataView.id,
+                        conditionalType: ConditionTypes.AND,
+                      },
+                    });
                   }}
                   iconType="plus"
                   size="s"
