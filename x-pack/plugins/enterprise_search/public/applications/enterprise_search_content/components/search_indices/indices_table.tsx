@@ -24,8 +24,9 @@ import { Meta } from '../../../../../common/types';
 import { EuiLinkTo, EuiButtonIconTo } from '../../../shared/react_router_helpers';
 import { convertMetaToPagination } from '../../../shared/table_pagination';
 import { SEARCH_INDEX_PATH } from '../../routes';
-import { ElasticsearchViewIndex, IngestionMethod, IngestionStatus } from '../../types';
-import { ingestionMethodToText } from '../../utils/indices';
+import { ElasticsearchViewIndex, IngestionMethod } from '../../types';
+import { crawlerStatusToColor, crawlerStatusToText } from '../../utils/crawler_status_helpers';
+import { ingestionMethodToText, isCrawlerIndex } from '../../utils/indices';
 import {
   ingestionStatusToColor,
   ingestionStatusToText,
@@ -119,18 +120,22 @@ const columns: Array<EuiBasicTableColumn<ElasticsearchViewIndex>> = [
     truncateText: true,
   },
   {
-    field: 'ingestionStatus',
     name: i18n.translate(
       'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.columnTitle',
       {
         defaultMessage: 'Ingestion status',
       }
     ),
-    render: (ingestionStatus: IngestionStatus) => (
-      <EuiBadge color={ingestionStatusToColor(ingestionStatus)}>
-        {ingestionStatusToText(ingestionStatus)}
-      </EuiBadge>
-    ),
+    render: (index: ElasticsearchViewIndex) =>
+      isCrawlerIndex(index) ? (
+        <EuiBadge color={crawlerStatusToColor(index.crawler?.most_recent_crawl_request_status)}>
+          {crawlerStatusToText(index.crawler?.most_recent_crawl_request_status)}
+        </EuiBadge>
+      ) : (
+        <EuiBadge color={ingestionStatusToColor(index.ingestionStatus)}>
+          {ingestionStatusToText(index.ingestionStatus)}
+        </EuiBadge>
+      ),
 
     truncateText: true,
   },
