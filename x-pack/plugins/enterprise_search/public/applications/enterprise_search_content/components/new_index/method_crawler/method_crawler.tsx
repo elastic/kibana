@@ -40,7 +40,6 @@ export const MethodCrawler: React.FC = () => {
       )}
       type="crawler"
       onSubmit={(indexName, language) => makeRequest({ indexName, language })}
-      formDisabled={status === Status.LOADING}
       buttonLoading={status === Status.LOADING}
     >
       <EuiSteps

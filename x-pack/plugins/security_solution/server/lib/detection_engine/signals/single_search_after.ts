@@ -41,7 +41,9 @@ interface SingleSearchAfterParams {
 }
 
 // utilize search_after for paging results into bulk.
-export const singleSearchAfter = async ({
+export const singleSearchAfter = async <
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+>({
   aggregations,
   searchAfterSortIds,
   index,
@@ -58,7 +60,7 @@ export const singleSearchAfter = async ({
   buildRuleMessage,
   trackTotalHits,
 }: SingleSearchAfterParams): Promise<{
-  searchResult: SignalSearchResponse;
+  searchResult: SignalSearchResponse<TAggregations>;
   searchDuration: string;
   searchErrors: string[];
 }> => {
@@ -81,7 +83,7 @@ export const singleSearchAfter = async ({
 
       const start = performance.now();
       const { body: nextSearchAfterResult } =
-        await services.scopedClusterClient.asCurrentUser.search<SignalSource>(
+        await services.scopedClusterClient.asCurrentUser.search<SignalSource, TAggregations>(
           searchAfterQuery as estypes.SearchRequest,
           { meta: true }
         );
@@ -105,7 +107,7 @@ export const singleSearchAfter = async ({
       ) {
         logger.error(buildRuleMessage(`[-] failure reason: ${exc.message}`));
 
-        const searchRes: SignalSearchResponse = {
+        const searchRes: SignalSearchResponse<TAggregations> = {
           took: 0,
           timed_out: false,
           _shards: {

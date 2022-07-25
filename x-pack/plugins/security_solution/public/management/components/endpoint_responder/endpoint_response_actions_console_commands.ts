@@ -15,11 +15,26 @@ import { EndpointStatusActionResult } from './status_action';
 import { GetProcessesActionResult } from './get_processes_action';
 import type { ParsedArgData } from '../console/service/parsed_command_input';
 
-const emptyArgumentValidator = (argData: ParsedArgData) => {
+const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
   if (argData?.length > 0 && argData[0]?.trim().length > 0) {
     return true;
   } else {
-    return 'Argument cannot be empty';
+    return i18n.translate('xpack.securitySolution.endpointConsoleCommands.emptyArgumentMessage', {
+      defaultMessage: 'Argument cannot be empty',
+    });
+  }
+};
+
+const pidValidator = (argData: ParsedArgData): true | string => {
+  const emptyResult = emptyArgumentValidator(argData);
+  if (emptyResult !== true) {
+    return emptyResult;
+  } else if (Number.isInteger(Number(argData)) && Number(argData) > 0) {
+    return true;
+  } else {
+    return i18n.translate('xpack.securitySolution.endpointConsoleCommands.invalidPidMessage', {
+      defaultMessage: 'Argument must be a positive number representing the PID of a process',
+    });
   }
 };
 
@@ -120,7 +135,7 @@ export const getEndpointResponseActionsConsoleCommands = (
           about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.pid.arg.comment', {
             defaultMessage: 'A PID representing the process to kill',
           }),
-          validate: emptyArgumentValidator,
+          validate: pidValidator,
         },
         entityId: {
           required: false,
@@ -167,7 +182,7 @@ export const getEndpointResponseActionsConsoleCommands = (
               defaultMessage: 'A PID representing the process to suspend',
             }
           ),
-          validate: emptyArgumentValidator,
+          validate: pidValidator,
         },
         entityId: {
           required: false,
