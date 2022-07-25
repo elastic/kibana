@@ -24,8 +24,7 @@ import type { BulkCreate, BulkResponse, RuleRangeTuple, WrapHits } from './types
 import type { SearchListItemArraySchema } from '@kbn/securitysolution-io-ts-list-types';
 import { getSearchListItemResponseMock } from '@kbn/lists-plugin/common/schemas/response/search_list_item_schema.mock';
 import { getRuleRangeTuples } from './utils';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getCompleteRuleMock, getQueryRuleParams } from '../schemas/rule_schemas.mock';
 import { bulkCreateFactory } from '../rule_types/factories/bulk_create_factory';
 import { wrapHitsFactory } from '../rule_types/factories/wrap_hits_factory';
@@ -128,6 +127,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -145,6 +145,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -162,6 +163,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -179,6 +181,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -240,6 +243,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -257,6 +261,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -274,6 +279,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -350,6 +356,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -481,6 +488,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
     mockService.scopedClusterClient.asCurrentUser.search
       .mockResolvedValueOnce(
@@ -614,6 +622,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
 
     const exceptionItem = getExceptionListItemSchemaMock();
@@ -684,6 +693,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -862,6 +872,7 @@ describe('searchAfterAndBulkCreate', () => {
           statusCode: 500,
         },
       },
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce(bulkItem); // adds the response with errors we are testing
@@ -881,6 +892,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -898,6 +910,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -915,6 +928,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -965,6 +979,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -982,6 +997,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -999,6 +1015,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(

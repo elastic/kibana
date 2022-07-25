@@ -32,6 +32,7 @@ export function createMockDatasource(id: string): DatasourceMock {
       state: x,
       savedObjectReferences: [{ type: 'index-pattern', id: 'mockip', name: 'mockip' }],
     })),
+    getRenderEventCounters: jest.fn((_state) => []),
     getPublicAPI: jest.fn().mockReturnValue(publicAPIMock),
     initialize: jest.fn((_state?) => Promise.resolve()),
     renderDataPanel: jest.fn(),
@@ -56,6 +57,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     isTimeBased: jest.fn(),
     isValidColumn: jest.fn(),
     isEqual: jest.fn(),
+    getUsedDataView: jest.fn(),
   };
 }
 

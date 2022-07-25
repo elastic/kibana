@@ -7,9 +7,13 @@
 
 import React, { useMemo, memo } from 'react';
 import { EuiForm } from '@elastic/eui';
+import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import {
+  UPDATE_FILTER_REFERENCES_ACTION,
+  UPDATE_FILTER_REFERENCES_TRIGGER,
+} from '@kbn/unified-search-plugin/public';
 import { Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
-import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { generateId } from '../../../id_generator';
 import { ConfigPanelWrapperProps } from './types';
 import { useFocusUpdate } from './use_focus_update';
@@ -30,6 +34,7 @@ import { getRemoveOperation } from '../../../utils';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
   const visualization = useLensSelector(selectVisualization);
+
   const activeVisualization = visualization.activeId
     ? props.visualizationMap[visualization.activeId]
     : null;
@@ -45,7 +50,9 @@ export function LayerPanels(
   }
 ) {
   const { activeVisualization, datasourceMap } = props;
-  const { activeDatasourceId, visualization } = useLensSelector((state) => state.lens);
+  const { activeDatasourceId, visualization, datasourceStates } = useLensSelector(
+    (state) => state.lens
+  );
 
   const dispatchLens = useLensDispatch();
 
@@ -90,10 +97,12 @@ export function LayerPanels(
     },
     [updateDatasource]
   );
+
   const updateAll = useMemo(
     () => (datasourceId: string, newDatasourceState: unknown, newVisualizationState: unknown) => {
       // React will synchronously update if this is triggered from a third party component,
       // which we don't want. The timeout lets user interaction have priority, then React updates.
+
       setTimeout(() => {
         dispatchLens(
           updateState({
@@ -102,10 +111,12 @@ export function LayerPanels(
                 typeof newDatasourceState === 'function'
                   ? newDatasourceState(prevState.datasourceStates[datasourceId].state)
                   : newDatasourceState;
+
               const updatedVisualizationState =
                 typeof newVisualizationState === 'function'
                   ? newVisualizationState(prevState.visualization.state)
                   : newVisualizationState;
+
               return {
                 ...prevState,
                 datasourceStates: {
@@ -174,6 +185,23 @@ export function LayerPanels(
             }
           }}
           onRemoveLayer={() => {
+            const datasourcePublicAPI = props.framePublicAPI.datasourceLayers?.[layerId];
+            const datasourceId = datasourcePublicAPI?.datasourceId;
+            const layerDatasource = datasourceMap[datasourceId];
+            const layerDatasourceState = datasourceStates?.[datasourceId]?.state;
+
+            const trigger = props.uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
+            const action = props.uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
+
+            action?.execute({
+              trigger,
+              fromDataView: layerDatasource.getUsedDataView(layerDatasourceState, layerId),
+              usedDataViews: layerDatasource
+                .getLayers(layerDatasourceState)
+                .map((layer) => layerDatasource.getUsedDataView(layerDatasourceState, layer)),
+              defaultDataView: layerDatasource.getCurrentIndexPatternId(layerDatasourceState),
+            } as ActionExecutionContext);
+
             dispatchLens(
               removeOrClearLayer({
                 visualizationId: activeVisualization.id,
@@ -193,7 +221,6 @@ export function LayerPanels(
         onAddLayerClick={(layerType) => {
           const layerId = generateId();
           dispatchLens(addLayer({ layerId, layerType }));
-          trackUiEvent('layer_added');
           setNextFocusedLayerId(layerId);
         }}
       />
