@@ -9,6 +9,8 @@
 import { buildEmptyFilter, Filter } from '@kbn/es-query';
 import { ConditionTypes } from './filters_editor_condition_types';
 
+const PATH_SEPARATOR = '.';
+
 export const getConditionalOperationType = (filter: Filter): ConditionTypes | undefined => {
   const { conditionalType } = filter.meta?.params || {};
 
@@ -23,12 +25,28 @@ export const getConditionalOperationType = (filter: Filter): ConditionTypes | un
 };
 
 export const getFilterDepth = (path: string) => {
-  return path.split('.').length || 1;
+  return path.split(PATH_SEPARATOR).length || 1;
 };
 
 export const getFilterByPath = (filters: Filter[], path: string) => {
-  const depth = getFilterDepth(path);
-  return depth;
+  const pathArray = path.split(PATH_SEPARATOR);
+  let ref: Filter[] = filters;
+  for (let i = 0, depth = getFilterDepth(path); i < depth; i++) {
+    const conditionalOperationType = getConditionalOperationType(ref[+pathArray[i]]);
+    const f = ref[+pathArray[i]];
+    if (conditionalOperationType) {
+      if (i + 1 === depth) {
+        return f;
+      }
+      ref = f.meta.params.filters;
+    } else {
+      return f;
+    }
+  }
+};
+
+export const doForFiltersGroup = (filters: Filter[], path: string) => {
+  // todo:
 };
 
 export const addFilter = (
