@@ -231,8 +231,6 @@ export class LensPlugin {
   private hasDiscoverAccess: boolean = false;
   private dataViewsService: DataViewsPublicPluginStart | undefined;
 
-  private stopReportManager?: () => void;
-
   setup(
     core: CoreSetup<LensPluginStartDependencies, void>,
     {
@@ -335,10 +333,7 @@ export class LensPlugin {
           eventAnnotation
         );
 
-        const { mountApp, stopReportManager, getLensAttributeService } = await import(
-          './async_services'
-        );
-        this.stopReportManager = stopReportManager;
+        const { mountApp, getLensAttributeService } = await import('./async_services');
 
         const frameStart = this.editorFrameService!.start(coreStart, deps);
         return mountApp(core, params, {
@@ -508,9 +503,5 @@ export class LensPlugin {
     };
   }
 
-  stop() {
-    if (this.stopReportManager) {
-      this.stopReportManager();
-    }
-  }
+  stop() {}
 }
