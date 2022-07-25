@@ -64,6 +64,7 @@ export const securityNavKeys = [
   SecurityPageName.trustedApps,
   SecurityPageName.users,
   SecurityPageName.kubernetes,
+  SecurityPageName.threatIntelligence,
 ] as const;
 export type SecurityNavKey = typeof securityNavKeys[number];
 
