@@ -24,7 +24,6 @@ export interface AddFiltersPayload {
 
 /** @internal **/
 export interface AddFilterGroupWithFilterPayload {
-  filters: Filter[];
   path: Path;
   dataViewId: string | undefined;
 }

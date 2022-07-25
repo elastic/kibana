@@ -229,7 +229,12 @@ export function FilterItem({
             <EuiFlexGroup responsive={false} justifyContent="center">
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
-                  onClick={() => {}}
+                  onClick={() => {
+                    dispatch({
+                      type: 'addFilterGroupWithFilter',
+                      payload: { path, dataViewId: dataView.id },
+                    });
+                  }}
                   iconType="returnKey"
                   size="s"
                   aria-label="Add filter group with OR"

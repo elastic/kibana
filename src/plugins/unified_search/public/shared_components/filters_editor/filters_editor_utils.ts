@@ -72,7 +72,19 @@ export const addFilterGroupWithEmptyFilter = (
   filters: Filter[],
   payload: { path: string; dataViewId: string | undefined }
 ) => {
-  return filters;
+  const newFilterGroup: Filter = {
+    meta: {
+      params: {
+        conditionalType: 'or',
+        filters: [buildEmptyFilter(true, payload.dataViewId)],
+      },
+    },
+  };
+
+  const orderInFilterGroup =
+    payload.path.split('.').length > 0 ? Number(payload.path.split('.')[0]) : 0;
+
+  return goIntoFilersGroup(filters, orderInFilterGroup, payload.path, newFilterGroup);
 };
 
 export const removeFilter = (filters: Filter[], payload: { path: string }) => {
