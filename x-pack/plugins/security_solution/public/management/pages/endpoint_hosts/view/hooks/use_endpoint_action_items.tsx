@@ -264,5 +264,6 @@ export const useEndpointActionItems = (
     isResponseActionsConsoleEnabled,
     showEndpointResponseActionsConsole,
     options?.isEndpointList,
+    isResponderCapabilitiesEnabled,
   ]);
 };

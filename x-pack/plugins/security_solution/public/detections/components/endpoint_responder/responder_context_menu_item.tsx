@@ -73,7 +73,13 @@ export const ResponderContextMenuItem = memo<ResponderContextMenuItemProps>(
       }
 
       return [false, undefined];
-    }, [endpointHostInfo?.host_status, endpointId, error, isFetching]);
+    }, [
+      endpointHostInfo?.host_status,
+      endpointId,
+      error,
+      isFetching,
+      isResponderCapabilitiesEnabled,
+    ]);
 
     const handleResponseActionsClick = useCallback(() => {
       if (endpointHostInfo) showEndpointResponseActionsConsole(endpointHostInfo.metadata);
