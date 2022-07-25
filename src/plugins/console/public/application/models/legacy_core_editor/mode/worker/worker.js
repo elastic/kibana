@@ -39,7 +39,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* eslint-disable */
+/* eslint-disable prettier/prettier,prefer-const,eqeqeq,import/no-commonjs,no-undef,no-sequences,
+    block-scoped-var,no-use-before-define,no-var,one-var,guard-for-in,new-cap,no-nested-ternary,no-redeclare,
+    no-unused-vars,no-extend-native,no-empty,camelcase,no-proto,@kbn/imports/no_unresolvable_imports */
 /*
   This file is loaded up as a blob by Brace to hand to Ace to load as Jsonp
   (hence the redefining of everything).  It is based on the javascript
@@ -1948,8 +1950,8 @@ ace.define(
           uffff;
 
         if (ch === '"') {
-          let c = '""';
-          if (text.substring(at, c.length) === c) {
+          // If the current and the next characters are equal to "", empty string or start of triple quoted strings
+          if (peek(0) === '"' && peek(1) === '"') {
             // literal
             next('"');
             next('"');
