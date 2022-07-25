@@ -418,6 +418,7 @@ export interface AlertsTableProps {
   useFetchAlertsData: () => FetchAlertData;
   visibleColumns: string[];
   'data-test-subj': string;
+  updatedAt: number;
 }
 
 // TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table

@@ -11,8 +11,9 @@ import userEvent from '@testing-library/user-event';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 
 import { AlertsTable } from './alerts_table';
-import { AlertsField } from '../../../types';
+import { AlertsField, AlertsTableProps } from '../../../types';
 import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 jest.mock('@kbn/data-plugin/public');
 
@@ -88,11 +89,18 @@ describe('AlertsTable', () => {
     useFetchAlertsData,
     visibleColumns: columns.map((c) => c.id),
     'data-test-subj': 'testTable',
+    updatedAt: Date.now(),
   };
+
+  const AlertsTableWithLocale: React.FunctionComponent<AlertsTableProps> = (props) => (
+    <IntlProvider locale="en">
+      <AlertsTable {...props} />
+    </IntlProvider>
+  );
 
   describe('Alerts table UI', () => {
     it('should support sorting', async () => {
-      const renderResult = render(<AlertsTable {...tableProps} />);
+      const renderResult = render(<AlertsTableWithLocale {...tableProps} />);
       userEvent.click(renderResult.container.querySelector('.euiDataGridHeaderCell__button')!);
       userEvent.click(renderResult.getByTestId(`dataGridHeaderCellActionGroup-${columns[0].id}`));
       userEvent.click(renderResult.getByTitle('Sort A-Z'));
@@ -102,14 +110,19 @@ describe('AlertsTable', () => {
     });
 
     it('should support pagination', async () => {
-      const renderResult = render(<AlertsTable {...tableProps} />);
+      const renderResult = render(<AlertsTableWithLocale {...tableProps} />);
       userEvent.click(renderResult.getByTestId('pagination-button-1'));
       expect(fetchAlertsData.onPageChange).toHaveBeenCalledWith({ pageIndex: 1, pageSize: 1 });
     });
 
+    it('should show when it was updated', () => {
+      const { getByTestId } = render(<AlertsTableWithLocale {...tableProps} />);
+      expect(getByTestId('toolbar-updated-at')).not.toBe(null);
+    });
+
     describe('leading control columns', () => {
       it('should return at least the flyout action control', async () => {
-        const wrapper = render(<AlertsTable {...tableProps} />);
+        const wrapper = render(<AlertsTableWithLocale {...tableProps} />);
         expect(wrapper.getByTestId('expandColumnHeaderLabel').textContent).toBe('Actions');
       });
 
@@ -125,7 +138,7 @@ describe('AlertsTable', () => {
             },
           ],
         };
-        const wrapper = render(<AlertsTable {...customTableProps} />);
+        const wrapper = render(<AlertsTableWithLocale {...customTableProps} />);
         expect(wrapper.queryByTestId('testHeader')).not.toBe(null);
         expect(wrapper.queryByTestId('testCell')).not.toBe(null);
       });
@@ -168,7 +181,7 @@ describe('AlertsTable', () => {
           },
         };
 
-        const { queryByTestId } = render(<AlertsTable {...customTableProps} />);
+        const { queryByTestId } = render(<AlertsTableWithLocale {...customTableProps} />);
         expect(queryByTestId('testActionColumn')).not.toBe(null);
         expect(queryByTestId('testActionColumn2')).not.toBe(null);
         expect(queryByTestId('expandColumnCellOpenFlyoutButton-0')).not.toBe(null);
@@ -211,7 +224,7 @@ describe('AlertsTable', () => {
           },
         };
 
-        const { queryByTestId } = render(<AlertsTable {...customTableProps} />);
+        const { queryByTestId } = render(<AlertsTableWithLocale {...customTableProps} />);
         expect(queryByTestId('testActionColumn')).not.toBe(null);
         expect(queryByTestId('testActionColumn2')).not.toBe(null);
         expect(queryByTestId('expandColumnCellOpenFlyoutButton-0')).toBe(null);
@@ -223,7 +236,7 @@ describe('AlertsTable', () => {
           showExpandToDetails: false,
         };
 
-        const { queryByTestId } = render(<AlertsTable {...customTableProps} />);
+        const { queryByTestId } = render(<AlertsTableWithLocale {...customTableProps} />);
         expect(queryByTestId('expandColumnHeaderLabel')).toBe(null);
         expect(queryByTestId('expandColumnCellOpenFlyoutButton')).toBe(null);
       });

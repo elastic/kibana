@@ -19,9 +19,10 @@ import {
 } from '../../../types';
 import { PLUGIN_ID } from '../../../common/constants';
 import { TypeRegistry } from '../../type_registry';
-import AlertsTableState from './alerts_table_state';
+import AlertsTableState, { AlertsTableStateProps } from './alerts_table_state';
 import { useFetchAlerts } from './hooks/use_fetch_alerts';
 import { DefaultSort } from './hooks';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 jest.mock('./hooks/use_fetch_alerts');
 jest.mock('@kbn/kibana-utils-plugin/public');
@@ -103,6 +104,12 @@ hookUseFetchAlerts.mockImplementation(() => [
   },
 ]);
 
+const AlertsTableWithLocale: React.FunctionComponent<AlertsTableStateProps> = (props) => (
+  <IntlProvider locale="en">
+    <AlertsTableState {...props} />
+  </IntlProvider>
+);
+
 describe('AlertsTableState', () => {
   const tableProps = {
     alertsTableConfigurationRegistry: alertsTableConfigurationRegistryMock,
@@ -120,14 +127,14 @@ describe('AlertsTableState', () => {
 
   describe('Alerts table configuration registry', () => {
     it('should read the configuration from the registry', async () => {
-      render(<AlertsTableState {...tableProps} />);
+      render(<AlertsTableWithLocale {...tableProps} />);
       expect(hasMock).toHaveBeenCalledWith(PLUGIN_ID);
       expect(getMock).toHaveBeenCalledWith(PLUGIN_ID);
     });
 
     it('should render an empty error state when the plugin id owner is not registered', async () => {
       const props = { ...tableProps, configurationId: 'none' };
-      const result = render(<AlertsTableState {...props} />);
+      const result = render(<AlertsTableWithLocale {...props} />);
       expect(result.getByTestId('alertsTableNoConfiguration')).toBeTruthy();
     });
   });
@@ -137,7 +144,7 @@ describe('AlertsTableState', () => {
       hookUseFetchAlerts.mockClear();
     });
     it('should show a flyout when selecting an alert', async () => {
-      const wrapper = render(<AlertsTableState {...tableProps} />);
+      const wrapper = render(<AlertsTableWithLocale {...tableProps} />);
       userEvent.click(wrapper.queryByTestId('expandColumnCellOpenFlyoutButton-0')!);
 
       const result = await wrapper.findAllByTestId('alertsFlyout');
@@ -158,7 +165,7 @@ describe('AlertsTableState', () => {
 
     it('should refetch data if flyout pagination exceeds the current page', async () => {
       const wrapper = render(
-        <AlertsTableState
+        <AlertsTableWithLocale
           {...{
             ...tableProps,
             pageSize: 1,
@@ -210,7 +217,7 @@ describe('AlertsTableState', () => {
     });
 
     it('should render an empty screen if there are no alerts', async () => {
-      const result = render(<AlertsTableState {...tableProps} />);
+      const result = render(<AlertsTableWithLocale {...tableProps} />);
       expect(result.getByTestId('alertsStateTableEmptyState')).toBeTruthy();
     });
   });
