@@ -877,7 +877,6 @@ export class RulesClient {
     const rule = (await this.get({ id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
 
     try {
-      // Make sure user has access to this rule
       await this.authorization.ensureAuthorized({
         ruleTypeId: rule.alertTypeId,
         consumer: rule.consumer,
