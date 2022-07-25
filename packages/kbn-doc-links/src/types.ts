@@ -248,6 +248,7 @@ export interface DocLinks {
     readonly policyResponseTroubleshooting: {
       full_disk_access: string;
       macos_system_ext: string;
+      linux_deadlock: string;
     };
     readonly threatIntelInt: string;
   };
