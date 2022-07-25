@@ -10,6 +10,7 @@ import { AsApiContract } from '@kbn/actions-plugin/common';
 import { HttpSetup } from '@kbn/core/public';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
 import { useKibana } from '../../common/lib/kibana';
+import { AlertChartData } from '../sections/rule_details/components/alert_summary';
 
 interface UseLoadRuleAlertsAggs {
   features: string;
@@ -20,11 +21,7 @@ interface RuleAlertsAggs {
   recovered: number;
   error?: string;
 }
-export interface AlertChartData {
-  status: 'active' | 'recovered';
-  count: number;
-  date: string;
-}
+
 interface LoadRuleAlertsAggs {
   isLoadingRuleAlertsAggs: boolean;
   ruleAlertsAggs: {
