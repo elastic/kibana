@@ -38,8 +38,8 @@ export const getInventoryViewInAppUrl = (
 ): string => {
   let inventoryFields = fields;
 
-  /* Temporary Solution
-   * In the  alert table from timelines plugin (old table), we are using an API who is flattening all the response
+  /* Temporary Solution -> https://github.com/elastic/kibana/issues/137033
+   * In the alert table from timelines plugin (old table), we are using an API who is flattening all the response
    * from elasticsearch to Record<string, string[]>, The new alert table API from TriggersActionUI is not doing that
    * anymore, it is trusting and returning the way it has been done from the field API from elasticsearch. I think
    * it is better to trust elasticsearch and the mapping of the doc. When o11y will only use the new alert table from
