@@ -17,12 +17,8 @@ export const createServiceError = (error: AxiosError, message: string) => {
   return new Error(
     getErrorMessage(
       i18n.NAME,
-      `${message}. Error: ${error.message}. ${
-        serverResponse != null
-          ? serverResponse
-          : error.response?.statusText != null
-          ? `Reason: ${error.response?.statusText}`
-          : ''
+      `${message}. Error: ${error.message}. ${serverResponse != null ? serverResponse : ''} ${
+        error.response?.statusText != null ? `Reason: ${error.response?.statusText}` : ''
       }`
     )
   );
