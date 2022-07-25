@@ -17,6 +17,7 @@ export interface LatencyCorrelation extends FieldValuePair {
 
 export interface LatencyCorrelationsResponse {
   ccsWarning: boolean;
+  totalDocCount?: number;
   overallHistogram?: HistogramItem[];
   percentileThresholdValue?: number | null;
   latencyCorrelations?: LatencyCorrelation[];
