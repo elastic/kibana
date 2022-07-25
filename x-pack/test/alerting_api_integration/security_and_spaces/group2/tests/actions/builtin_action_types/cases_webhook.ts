@@ -25,7 +25,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
     createCommentJson: '{"body":{{{case.comment}}}}',
     createCommentMethod: 'post',
     createCommentUrl:
-      'https://siem-kibana.atlassian.net/rest/api/2/issue/{{{external.system.id}}}/comment',
+      'https://siem-kibana.atlassian.net/rest/api/2/issue/{{external.system.id}}/comment',
     createIncidentJson:
       '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"labels":{{{case.tags}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
     createIncidentMethod: 'post',
@@ -36,13 +36,12 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
     getIncidentResponseUpdatedDateKey: 'fields.updated',
     hasAuth: true,
     headers: { ['content-type']: 'application/json', ['kbn-xsrf']: 'abcd' },
-    incidentViewUrl: 'https://siem-kibana.atlassian.net/browse/{{{external.system.title}}}',
-    getIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue/{{{external.system.id}}}',
+    incidentViewUrl: 'https://siem-kibana.atlassian.net/browse/{{external.system.title}}',
+    getIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue/{{external.system.id}}',
     updateIncidentJson:
       '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"labels":{{{case.tags}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
     updateIncidentMethod: 'put',
-    updateIncidentUrl:
-      'https://siem-kibana.atlassian.net/rest/api/2/issue/{{{external.system.id}}}',
+    updateIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue/{{external.system.id}}',
   };
   const requiredFields = [
     'createIncidentJson',
@@ -92,11 +91,11 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
 
       simulatorConfig = {
         ...mockCasesWebhook.config,
-        createCommentUrl: `${casesWebhookSimulatorURL}/rest/api/2/issue/{{{external.system.id}}}/comment`,
+        createCommentUrl: `${casesWebhookSimulatorURL}/rest/api/2/issue/{{external.system.id}}/comment`,
         createIncidentUrl: `${casesWebhookSimulatorURL}/rest/api/2/issue`,
-        incidentViewUrl: `${casesWebhookSimulatorURL}/browse/{{{external.system.title}}}`,
-        getIncidentUrl: `${casesWebhookSimulatorURL}/rest/api/2/issue/{{{external.system.id}}}`,
-        updateIncidentUrl: `${casesWebhookSimulatorURL}/rest/api/2/issue/{{{external.system.id}}}`,
+        incidentViewUrl: `${casesWebhookSimulatorURL}/browse/{{external.system.title}}`,
+        getIncidentUrl: `${casesWebhookSimulatorURL}/rest/api/2/issue/{{external.system.id}}`,
+        updateIncidentUrl: `${casesWebhookSimulatorURL}/rest/api/2/issue/{{external.system.id}}`,
       };
     });
     describe('CasesWebhook - Action Creation', () => {
@@ -172,11 +171,11 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
             connector_type_id: '.cases-webhook',
             config: {
               ...mockCasesWebhook.config,
-              createCommentUrl: `${badUrl}/{{{external.system.id}}}/comments`,
+              createCommentUrl: `${badUrl}/{{external.system.id}}/comments`,
               createIncidentUrl: badUrl,
-              incidentViewUrl: `${badUrl}/{{{external.system.title}}}`,
-              getIncidentUrl: `${badUrl}/{{{external.system.id}}}`,
-              updateIncidentUrl: `${badUrl}/{{{external.system.id}}}`,
+              incidentViewUrl: `${badUrl}/{{external.system.title}}`,
+              getIncidentUrl: `${badUrl}/{{external.system.id}}`,
+              updateIncidentUrl: `${badUrl}/{{external.system.id}}`,
             },
             secrets,
           })
@@ -589,7 +588,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
               config: {
                 ...simulatorConfig,
                 createIncidentUrl: `https${casesWebhookSimulatorURL}`,
-                updateIncidentUrl: `${casesWebhookSimulatorURL}/rest/api/2/issue/{{{external.system.id}}}e\\\\whoathisisbad4{}\{\{`,
+                updateIncidentUrl: `${casesWebhookSimulatorURL}/rest/api/2/issue/{{external.system.id}}e\\\\whoathisisbad4{}\{\{`,
               },
               secrets,
             });
@@ -681,7 +680,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
               connector_type_id: '.cases-webhook',
               config: {
                 ...simulatorConfig,
-                createCommentUrl: `${casesWebhookSimulatorURL}/rest/api/2/issue/{{{external.system.id}}}e\\\\whoathisisbad4{}\{\{`,
+                createCommentUrl: `${casesWebhookSimulatorURL}/rest/api/2/issue/{{external.system.id}}e\\\\whoathisisbad4{}\{\{`,
               },
               secrets,
             });

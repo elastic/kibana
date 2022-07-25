@@ -21,7 +21,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
     createCommentJson: '{"body":{{{case.comment}}}}',
     createCommentMethod: 'post',
     createCommentUrl:
-      'https://siem-kibana.atlassian.net/rest/api/2/issue/{{{external.system.id}}}/comment',
+      'https://siem-kibana.atlassian.net/rest/api/2/issue/{{external.system.id}}/comment',
     createIncidentJson:
       '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"labels":{{{case.tags}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
     createIncidentMethod: 'post',
@@ -32,13 +32,12 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
     getIncidentResponseUpdatedDateKey: 'fields.updated',
     hasAuth: true,
     headers: { ['content-type']: 'application/json' },
-    incidentViewUrl: 'https://siem-kibana.atlassian.net/browse/{{{external.system.title}}}',
-    getIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue/{{{external.system.id}}}',
+    incidentViewUrl: 'https://siem-kibana.atlassian.net/browse/{{external.system.title}}',
+    getIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue/{{external.system.id}}',
     updateIncidentJson:
       '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"labels":{{{case.tags}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
     updateIncidentMethod: 'put',
-    updateIncidentUrl:
-      'https://siem-kibana.atlassian.net/rest/api/2/issue/{{{external.system.id}}}',
+    updateIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue/{{external.system.id}}',
   };
 
   const mockCasesWebhook = {
@@ -79,11 +78,11 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
           actionTypeId: '.cases-webhook',
           config: {
             ...config,
-            createCommentUrl: `${casesWebhookSimulatorURL}/{{{external.system.id}}}/comments`,
+            createCommentUrl: `${casesWebhookSimulatorURL}/{{external.system.id}}/comments`,
             createIncidentUrl: casesWebhookSimulatorURL,
-            incidentViewUrl: `${casesWebhookSimulatorURL}/{{{external.system.title}}}`,
-            getIncidentUrl: `${casesWebhookSimulatorURL}/{{{external.system.id}}}`,
-            updateIncidentUrl: `${casesWebhookSimulatorURL}/{{{external.system.id}}}`,
+            incidentViewUrl: `${casesWebhookSimulatorURL}/{{external.system.title}}`,
+            getIncidentUrl: `${casesWebhookSimulatorURL}/{{external.system.id}}`,
+            updateIncidentUrl: `${casesWebhookSimulatorURL}/{{external.system.id}}`,
           },
           secrets: mockCasesWebhook.secrets,
         })

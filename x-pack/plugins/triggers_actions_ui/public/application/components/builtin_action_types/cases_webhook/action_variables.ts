@@ -30,7 +30,7 @@ export const urlVars: ActionVariable[] = [
   {
     name: 'external.system.id',
     description: i18n.EXTERNAL_ID_DESC,
-    useWithTripleBracesInTemplates: true,
+    useWithTripleBracesInTemplates: false,
   },
 ];
 
@@ -39,6 +39,6 @@ export const urlVarsExt: ActionVariable[] = [
   {
     name: 'external.system.title',
     description: i18n.EXTERNAL_TITLE_DESC,
-    useWithTripleBracesInTemplates: true,
+    useWithTripleBracesInTemplates: false,
   },
 ];

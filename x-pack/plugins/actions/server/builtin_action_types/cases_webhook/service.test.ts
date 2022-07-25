@@ -31,7 +31,7 @@ const config: CasesWebhookPublicConfigurationType = {
   createCommentJson: '{"body":{{{case.comment}}}}',
   createCommentMethod: CasesWebhookMethods.POST,
   createCommentUrl:
-    'https://siem-kibana.atlassian.net/rest/api/2/issue/{{{external.system.id}}}/comment',
+    'https://siem-kibana.atlassian.net/rest/api/2/issue/{{external.system.id}}/comment',
   createIncidentJson:
     '{"fields":{"title":{{{case.title}}},"description":{{{case.description}}},"tags":{{{case.tags}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
   createIncidentMethod: CasesWebhookMethods.POST,
@@ -42,12 +42,12 @@ const config: CasesWebhookPublicConfigurationType = {
   getIncidentResponseUpdatedDateKey: 'fields.updated',
   hasAuth: true,
   headers: { ['content-type']: 'application/json' },
-  incidentViewUrl: 'https://siem-kibana.atlassian.net/browse/{{{external.system.title}}}',
-  getIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue/{{{external.system.id}}}',
+  incidentViewUrl: 'https://siem-kibana.atlassian.net/browse/{{external.system.title}}',
+  getIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue/{{external.system.id}}',
   updateIncidentJson:
     '{"fields":{"title":{{{case.title}}},"description":{{{case.description}}},"tags":{{{case.tags}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
   updateIncidentMethod: CasesWebhookMethods.PUT,
-  updateIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue/{{{external.system.id}}}',
+  updateIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue/{{external.system.id}}',
 };
 const secrets = {
   user: 'user',
@@ -627,6 +627,77 @@ describe('Cases webhook service', () => {
       };
       await expect(service.createComment(commentReq)).rejects.toThrow(
         '[Action][Webhook - Case Management]: Unable to create comment at case with id 1. Error: Invalid Create comment URL: Error: Invalid protocol.'
+      );
+    });
+  });
+
+  describe('escape urls', () => {
+    beforeAll(() => {
+      service = createExternalService(
+        actionId,
+        {
+          config,
+          secrets,
+        },
+        logger,
+        {
+          ...configurationUtilities,
+        }
+      );
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: {
+            id: '1',
+            key: 'CK-1',
+            fields: {
+              updated: '2020-04-27T10:59:46.202Z',
+              created: '2020-04-27T10:59:46.202Z',
+            },
+          },
+        })
+      );
+    });
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+    test('getIncident- escapes url', async () => {
+      await service.getIncident('../../malicious-app/malicious-endpoint/');
+      expect(requestMock.mock.calls[0][0].url).toEqual(
+        'https://siem-kibana.atlassian.net/rest/api/2/issue/..&#x2F;..&#x2F;malicious-app&#x2F;malicious-endpoint&#x2F;'
+      );
+    });
+
+    test('updateIncident- escapes url', async () => {
+      const incident = {
+        incidentId: '../../malicious-app/malicious-endpoint/',
+        incident: {
+          title: 'title',
+          description: 'desc',
+          tags: ['hello', 'world'],
+          issueType: '10006',
+          priority: 'High',
+          parent: 'RJ-107',
+        },
+      };
+
+      await service.updateIncident(incident);
+      expect(requestMock.mock.calls[0][0].url).toEqual(
+        'https://siem-kibana.atlassian.net/rest/api/2/issue/..&#x2F;..&#x2F;malicious-app&#x2F;malicious-endpoint&#x2F;'
+      );
+    });
+    test('createComment- escapes url', async () => {
+      const commentReq = {
+        incidentId: '../../malicious-app/malicious-endpoint/',
+        comment: {
+          comment: 'comment',
+          commentId: 'comment-1',
+        },
+      };
+
+      await service.createComment(commentReq);
+      expect(requestMock.mock.calls[0][0].url).toEqual(
+        'https://siem-kibana.atlassian.net/rest/api/2/issue/..&#x2F;..&#x2F;malicious-app&#x2F;malicious-endpoint&#x2F;/comment'
       );
     });
   });

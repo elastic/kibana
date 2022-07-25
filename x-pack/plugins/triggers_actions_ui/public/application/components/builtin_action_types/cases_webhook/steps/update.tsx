@@ -106,7 +106,10 @@ export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => (
               'data-test-subj': 'webhookUpdateIncidentJson',
               ['aria-label']: i18n.CODE_EDITOR,
             },
-            messageVariables: [...casesVars, ...urlVars],
+            messageVariables: [
+              ...casesVars,
+              ...urlVars.map((urlVar) => ({ ...urlVar, useWithTripleBracesInTemplates: true })),
+            ],
             paramsProperty: 'updateIncidentJson',
             buttonTitle: i18n.ADD_CASES_VARIABLE,
             showButtonTitle: true,
@@ -193,7 +196,10 @@ export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => (
               'data-test-subj': 'webhookCreateCommentJson',
               ['aria-label']: i18n.CODE_EDITOR,
             },
-            messageVariables: [...commentVars, ...urlVars],
+            messageVariables: [
+              ...commentVars,
+              ...urlVars.map((urlVar) => ({ ...urlVar, useWithTripleBracesInTemplates: true })),
+            ],
             paramsProperty: 'createCommentJson',
             buttonTitle: i18n.ADD_CASES_VARIABLE,
             showButtonTitle: true,
