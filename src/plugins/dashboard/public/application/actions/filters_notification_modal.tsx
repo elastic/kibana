@@ -41,7 +41,7 @@ export function FiltersNotificationModal({
         <>
           <EuiModalHeader>
             <EuiModalHeaderTitle>
-              <h2 id={`title-${id}`}>{displayName}</h2>
+              <h2>{displayName}</h2>
             </EuiModalHeaderTitle>
           </EuiModalHeader>
 

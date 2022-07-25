@@ -191,6 +191,13 @@ export const dashboardReplacePanelAction = {
     }),
 };
 
+export const dashboardFilterNotificationBadge = {
+  getDisplayName: () =>
+    i18n.translate('dashboard.panel.filters', {
+      defaultMessage: 'Custom filters',
+    }),
+};
+
 /*
   Dashboard Editor
 */

@@ -19,6 +19,8 @@ import {
 } from '@kbn/es-query';
 import classNames from 'classnames';
 import React, { MouseEvent, useState, useEffect, HTMLAttributes } from 'react';
+import { IUiSettingsClient } from '@kbn/core/public';
+
 import { DataView } from '@kbn/data-views-plugin/public';
 import {
   getIndexPatternFromFilter,
@@ -38,9 +40,10 @@ export interface FilterItemProps {
   onUpdate: (filter: Filter) => void;
   onRemove: () => void;
   intl: InjectedIntl;
+  uiSettings: IUiSettingsClient;
   hiddenPanelOptions?: FilterPanelOption[];
   timeRangeForSuggestionsOverride?: boolean;
-  readOnly: boolean;
+  readOnly?: boolean;
 }
 
 type FilterPopoverProps = HTMLAttributes<HTMLDivElement> & EuiPopoverProps;
@@ -66,7 +69,7 @@ export function FilterItem(props: FilterItemProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [indexPatternExists, setIndexPatternExists] = useState<boolean | undefined>(undefined);
   const [renderedComponent, setRenderedComponent] = useState('menu');
-  const { id, filter, indexPatterns, hiddenPanelOptions, readOnly } = props;
+  const { id, filter, indexPatterns, hiddenPanelOptions, readOnly = false } = props;
 
   useEffect(() => {
     if (isPopoverOpen) {

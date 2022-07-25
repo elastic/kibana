@@ -19,6 +19,7 @@ import { IEmbeddable, isErrorEmbeddable } from '../../services/embeddable';
 
 import { FiltersNotificationModal } from './filters_notification_modal';
 import { DashboardContainer } from '../embeddable';
+import { dashboardFilterNotificationBadge } from '../../dashboard_strings';
 
 export const BADGE_FILTERS_NOTIFICATION = 'ACTION_FILTERS_NOTIFICATION';
 
@@ -31,8 +32,7 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
   public readonly type = BADGE_FILTERS_NOTIFICATION;
   public readonly order = 1;
 
-  // private displayName = dashboardLibraryNotification.getDisplayName();
-  private displayName = 'Custom filters';
+  private displayName = dashboardFilterNotificationBadge.getDisplayName();
   private icon = 'filter';
 
   constructor(private theme: CoreStart['theme'], private overlays: OverlayStart) {}
