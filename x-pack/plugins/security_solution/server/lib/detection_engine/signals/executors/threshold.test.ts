@@ -7,8 +7,7 @@
 
 import dateMath from '@kbn/datemath';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { thresholdExecutor } from './threshold';
@@ -20,6 +19,7 @@ import { sampleEmptyDocSearchResults } from '../__mocks__/es_results';
 import { allowedExperimentalValues } from '../../../../../common/experimental_features';
 import type { ThresholdRuleParams } from '../../schemas/rule_schemas';
 import { createRuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_data_client/rule_data_client.mock';
+import { TIMESTAMP } from '@kbn/rule-data-utils';
 
 describe('threshold_executor', () => {
   const version = '8.0.0';
@@ -75,6 +75,7 @@ describe('threshold_executor', () => {
         ruleDataReader: ruleDataClientMock.getReader({ namespace: 'default' }),
         runtimeMappings: {},
         inputIndex: ['auditbeat-*'],
+        primaryTimestamp: TIMESTAMP,
       });
       expect(response.warningMessages.length).toEqual(1);
     });

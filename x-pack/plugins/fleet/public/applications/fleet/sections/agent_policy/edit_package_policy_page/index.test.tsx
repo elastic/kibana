@@ -131,6 +131,7 @@ jest.mock('../../../../integrations/hooks', () => {
   return {
     ...jest.requireActual('../../../../integrations/hooks'),
     useGetOnePackagePolicy: jest.fn(),
+    useConfirmForceInstall: jest.fn(),
   };
 });
 

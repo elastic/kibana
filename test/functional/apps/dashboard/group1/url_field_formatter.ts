@@ -11,18 +11,19 @@ import { WebElementWrapper } from '../../../services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, dashboard, settings, timePicker, visChart } = getPageObjects([
+  const { common, dashboard, settings, visChart, discover } = getPageObjects([
     'common',
     'dashboard',
     'settings',
-    'timePicker',
     'visChart',
+    'discover',
   ]);
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const fieldName = 'clientip';
   const deployment = getService('deployment');
+  const retry = getService('retry');
 
   const clickFieldAndCheckUrl = async (fieldLink: WebElementWrapper) => {
     const fieldValue = await fieldLink.getVisibleText();
@@ -35,8 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(currentUrl).to.equal(fieldUrl);
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/133973
-  describe.skip('Changing field formatter to Url', () => {
+  describe('Changing field formatter to Url', () => {
     before(async function () {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
@@ -68,12 +68,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('applied on discover', async () => {
+      const from = 'Sep 19, 2017 @ 06:31:44.000';
+      const to = 'Sep 23, 2018 @ 18:31:44.000';
+      await common.setTime({ from, to });
       await common.navigateToApp('discover');
-      await timePicker.setAbsoluteRange(
-        'Sep 19, 2017 @ 06:31:44.000',
-        'Sep 23, 2018 @ 18:31:44.000'
-      );
+      await discover.selectIndexPattern('logstash-*');
       await testSubjects.click('docTableExpandToggleColumn');
+      await retry.waitForWithTimeout(`${fieldName} is visible`, 30000, async () => {
+        return await testSubjects.isDisplayed(`tableDocViewRow-${fieldName}-value`);
+      });
       const fieldLink = await testSubjects.find(`tableDocViewRow-${fieldName}-value`);
       await clickFieldAndCheckUrl(fieldLink);
     });

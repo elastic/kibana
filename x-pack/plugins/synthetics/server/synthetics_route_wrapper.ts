@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { KibanaResponse } from '@kbn/core/server/http/router';
+import { KibanaResponse } from '@kbn/core-http-router-server-internal';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
 import { createUptimeESClient, inspectableEsQueriesMap } from './legacy_uptime/lib/lib';
 import { syntheticsServiceApiKey } from './legacy_uptime/lib/saved_objects/service_api_key';

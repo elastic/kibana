@@ -86,8 +86,8 @@ function DiscoverDocumentsComponent({
 
   const onResize = useCallback(
     (colSettings: { columnId: string; width: number }) => {
-      const grid = { ...state.grid } || {};
-      const newColumns = { ...grid.columns } || {};
+      const grid = { ...(state.grid || {}) };
+      const newColumns = { ...(grid.columns || {}) };
       newColumns[colSettings.columnId] = {
         width: colSettings.width,
       };
@@ -95,6 +95,13 @@ function DiscoverDocumentsComponent({
       stateContainer.setAppState({ grid: newGrid });
     },
     [stateContainer, state]
+  );
+
+  const onUpdateRowsPerPage = useCallback(
+    (rowsPerPage: number) => {
+      stateContainer.setAppState({ rowsPerPage });
+    },
+    [stateContainer]
   );
 
   const onSort = useCallback(
@@ -190,6 +197,8 @@ function DiscoverDocumentsComponent({
               useNewFieldsApi={useNewFieldsApi}
               rowHeightState={state.rowHeight}
               onUpdateRowHeight={onUpdateRowHeight}
+              rowsPerPageState={state.rowsPerPage}
+              onUpdateRowsPerPage={onUpdateRowsPerPage}
               onFieldEdited={onFieldEdited}
             />
           </div>

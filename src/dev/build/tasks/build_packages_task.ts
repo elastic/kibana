@@ -20,10 +20,7 @@ export const BuildBazelPackages: Task = {
     const packages = (await discoverBazelPackages()).filter((pkg) => !pkg.isDevOnly());
 
     log.info(`Preparing Bazel projects production build non-devOnly packages`);
-    await runBazel({
-      log,
-      bazelArgs: ['build', '//packages:build'],
-    });
+    await runBazel(['build', '//packages:build']);
 
     for (const pkg of packages) {
       log.info(`Copying build of`, pkg.pkg.name, 'into build');

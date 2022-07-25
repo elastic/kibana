@@ -16,7 +16,7 @@ import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { PageOverlay } from '../../../../page_overlay/page_overlay';
 
 const BACK_LABEL = i18n.translate('xpack.securitySolution.consolePageOverlay.backButtonLabel', {
-  defaultMessage: 'Return to page content',
+  defaultMessage: 'Back',
 });
 
 export interface ConsolePageOverlayProps {
@@ -46,6 +46,7 @@ export const ConsolePageOverlay = memo<ConsolePageOverlayProps>(
 
       return {
         pageTitle,
+        pageBody: body,
         headerHasBottomBorder: false,
         'data-test-subj': getTestId('layout'),
         headerBackComponent: (
@@ -74,7 +75,7 @@ export const ConsolePageOverlay = memo<ConsolePageOverlayProps>(
           ...(actions ?? []),
         ],
       };
-    }, [actions, getTestId, handleCloseOverlayOnClick, isHidden, pageTitle]);
+    }, [actions, getTestId, handleCloseOverlayOnClick, isHidden, pageTitle, body]);
 
     return (
       <PageOverlay
@@ -84,11 +85,7 @@ export const ConsolePageOverlay = memo<ConsolePageOverlayProps>(
         paddingSize="l"
         enableScrolling={false}
       >
-        <PageLayout {...layoutProps}>
-          {body}
-
-          {console}
-        </PageLayout>
+        <PageLayout {...layoutProps}>{console}</PageLayout>
       </PageOverlay>
     );
   }
