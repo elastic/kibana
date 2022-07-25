@@ -38,6 +38,7 @@ export interface SubActionConnectorType<Config, Secrets> {
   id: string;
   name: string;
   minimumLicenseRequired: LicenseType;
+  supportedFeatureIds: string[];
   schema: {
     config: Type<Config>;
     secrets: Type<Secrets>;

@@ -18,6 +18,7 @@ export const defaultHandlers: IInterpreterRenderHandlers = {
   isSyncColorsEnabled: () => false,
   isSyncTooltipsEnabled: () => false,
   isInteractive: () => true,
+  getExecutionContext: () => undefined,
   done: action('done'),
   onDestroy: action('onDestroy'),
   reload: action('reload'),

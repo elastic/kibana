@@ -24,9 +24,10 @@ import { Form } from '../shared_imports';
 import { useSavedQueryForm } from './form/use_saved_query_form';
 import { SavedQueryForm } from './form';
 import { useCreateSavedQuery } from './use_create_saved_query';
+import type { PackQueryFormData } from '../packs/queries/use_pack_query_form';
 
 interface AddQueryFlyoutProps {
-  defaultValue: unknown;
+  defaultValue: PackQueryFormData;
   onClose: () => void;
   isExternal?: boolean;
 }
@@ -41,7 +42,9 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
   const createSavedQueryMutation = useCreateSavedQuery({ withRedirect: false });
 
   const handleSubmit = useCallback(
-    (payload) => createSavedQueryMutation.mutateAsync(payload).then(() => onClose()),
+    async (payload) => {
+      await createSavedQueryMutation.mutateAsync(payload).then(() => onClose());
+    },
     [createSavedQueryMutation, onClose]
   );
 
