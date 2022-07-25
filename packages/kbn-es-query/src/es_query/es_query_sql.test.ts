@@ -74,6 +74,11 @@ describe('sql query helpers', () => {
         'SELECT woof, meow from logstash-1234! WHERE field > 100'
       );
       expect(idxPattern7).toBe('logstash-1234!');
+
+      const idxPattern8 = getIndexPatternFromSQLQuery(
+        'SELECT * FROM (SELECT woof, miaou FROM "logstash-1234!" GROUP BY woof)'
+      );
+      expect(idxPattern8).toBe('logstash-1234!');
     });
   });
 });
