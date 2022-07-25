@@ -73,7 +73,7 @@ export function LabelZoomRangeEditor(props: Props) {
       <EuiFormRow label={getVectorStyleLabel(props.styleProperty.getStyleName())}>
         <EuiSwitch
           label={i18n.translate('xpack.maps.styles.labelZoomRange.useLayerZoomLabel', {
-            defaultMessage: 'Use layer zoom range',
+            defaultMessage: 'Use layer visibility',
           })}
           checked={useLayerZoomRange}
           onChange={onSwitchChange}
