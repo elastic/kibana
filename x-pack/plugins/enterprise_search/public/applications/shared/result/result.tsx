@@ -45,7 +45,7 @@ export const Result: React.FC<ResultProps> = ({ metaData, fields }) => {
     <EuiPanel hasBorder paddingSize="s">
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
-          <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
             <EuiFlexItem grow={false}>
               <ResultHeader
                 title={i18n.translate('xpack.enterpriseSearch.shared.result.title.id', {

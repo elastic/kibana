@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiPanel,
+  EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -36,7 +37,8 @@ export const SearchIndexIndexMappings: React.FC = () => {
   }, [indexName]);
 
   return (
-    <EuiPanel>
+    <>
+      <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem grow={2}>
           <EuiCodeBlock language="json" isCopyable>
@@ -68,6 +70,6 @@ export const SearchIndexIndexMappings: React.FC = () => {
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPanel>
+    </>
   );
 };

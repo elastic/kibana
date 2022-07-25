@@ -27,6 +27,8 @@ import { Result } from '../../../shared/result/result';
 import { DocumentsLogic } from './documents_logic';
 import { IndexNameLogic } from './index_name_logic';
 
+import './documents.scss';
+
 export const SearchIndexDocuments: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);
   const { simplifiedMapping, results } = useValues(DocumentsLogic);
@@ -58,7 +60,7 @@ export const SearchIndexDocuments: React.FC = () => {
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
           <EuiFlexGroup direction="row" alignItems="center">
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem className="enterpriseSearchDocumentsHeader" grow={false}>
               <EuiTitle>
                 <h2>
                   {i18n.translate('xpack.enterpriseSearch.content.searchIndex.documents.title', {

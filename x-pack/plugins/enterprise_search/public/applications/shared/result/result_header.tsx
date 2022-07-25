@@ -12,7 +12,6 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
@@ -103,9 +102,7 @@ export const ResultHeader: React.FC<Props> = ({ title, metaData }) => {
       <EuiText size="s">
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem>
-            <EuiLink>
-              <strong>{title}</strong>
-            </EuiLink>
+            <strong>{title}</strong>
           </EuiFlexItem>
           {!!metaData && (
             <EuiFlexItem grow={false}>
