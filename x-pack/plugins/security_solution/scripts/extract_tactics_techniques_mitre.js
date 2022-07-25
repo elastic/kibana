@@ -11,7 +11,7 @@ const fs = require('fs');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const fetch = require('node-fetch');
 // eslint-disable-next-line import/no-extraneous-dependencies
-const { camelCase, startCase } = require('lodash');
+const { camelCase, sortBy } = require('lodash');
 const { resolve } = require('path');
 
 const OUTPUT_DIRECTORY = resolve('public', 'detections', 'mitre');
@@ -67,29 +67,110 @@ const getSubtechniquesOptions = (subtechniques) =>
 }`.replace(/(\r\n|\n|\r)/gm, ' ')
   );
 
-const getIdReference = (references) =>
-  references.reduce(
-    (obj, extRef) => {
-      if (extRef.source_name === 'mitre-attack') {
-        return {
-          id: extRef.external_id,
-          reference: extRef.url,
-        };
-      }
-      return obj;
-    },
-    { id: '', reference: '' }
-  );
+const getIdReference = (references) => {
+  const ref = references.find((r) => r.source_name === 'mitre-attack');
+  if (ref != null) {
+    return {
+      id: ref.external_id,
+      reference: ref.url,
+    };
+  } else {
+    return { id: '', reference: '' };
+  }
+};
 
-const buildMockThreatData = (tactics, techniques, subtechniques) => {
+const extractTacticsData = (mitreData) => {
+  const tactics = mitreData
+    .filter((obj) => obj.type === 'x-mitre-tactic')
+    .reduce((acc, item) => {
+      const { id, reference } = getIdReference(item.external_references);
+
+      return [
+        ...acc,
+        {
+          displayName: item.name,
+          shortName: item.x_mitre_shortname,
+          id,
+          reference,
+        },
+      ];
+    }, []);
+
+  return sortBy(tactics, 'displayName');
+};
+
+const normalizeTacticsData = (tacticsData) => {
+  return tacticsData.map((data) => {
+    const { displayName, id, reference } = data;
+    return { name: displayName, id, reference };
+  });
+};
+
+const extractTechniques = (mitreData) => {
+  const techniques = mitreData
+    .filter(
+      (obj) =>
+        obj.type === 'attack-pattern' &&
+        (obj.x_mitre_is_subtechnique === false || obj.x_mitre_is_subtechnique === undefined)
+    )
+    .reduce((acc, item) => {
+      let tactics = [];
+      const { id, reference } = getIdReference(item.external_references);
+      if (item.kill_chain_phases != null && item.kill_chain_phases.length > 0) {
+        item.kill_chain_phases.forEach((tactic) => {
+          tactics = [...tactics, tactic.phase_name];
+        });
+      }
+
+      return [
+        ...acc,
+        {
+          name: item.name,
+          id,
+          reference,
+          tactics,
+        },
+      ];
+    }, []);
+
+  return sortBy(techniques, 'name');
+};
+
+const extractSubtechniques = (mitreData) => {
+  const subtechniques = mitreData
+    .filter((obj) => obj.x_mitre_is_subtechnique === true)
+    .reduce((acc, item) => {
+      let tactics = [];
+      const { id, reference } = getIdReference(item.external_references);
+      if (item.kill_chain_phases != null && item.kill_chain_phases.length > 0) {
+        item.kill_chain_phases.forEach((tactic) => {
+          tactics = [...tactics, tactic.phase_name];
+        });
+      }
+      const techniqueId = id.split('.')[0];
+
+      return [
+        ...acc,
+        {
+          name: item.name,
+          id,
+          reference,
+          tactics,
+          techniqueId,
+        },
+      ];
+    }, []);
+
+  return sortBy(subtechniques, 'name');
+};
+
+const buildMockThreatData = (tacticsData, techniques, subtechniques) => {
   const subtechnique = subtechniques[0];
   const technique = techniques.find((technique) => technique.id === subtechnique.techniqueId);
-  const tactic = tactics.find(
-    (tactic) => tactic.name === startCase(camelCase(technique.tactics[0]))
-  );
+  const tactic = tacticsData.find((tactic) => tactic.shortName === technique.tactics[0]);
 
   return {
-    tactic,
+    tactic: normalizeTacticsData([tactic])[0],
     technique,
     subtechnique,
   };
@@ -100,65 +181,10 @@ async function main() {
     .then((res) => res.json())
     .then((json) => {
       const mitreData = json.objects;
-      const tactics = mitreData
-        .filter((obj) => obj.type === 'x-mitre-tactic')
-        .reduce((acc, item) => {
-          const { id, reference } = getIdReference(item.external_references);
-
-          return [
-            ...acc,
-            {
-              name: item.name,
-              id,
-              reference,
-            },
-          ];
-        }, []);
-      const techniques = mitreData
-        .filter((obj) => obj.type === 'attack-pattern' && obj.x_mitre_is_subtechnique === false)
-        .reduce((acc, item) => {
-          let tactics = [];
-          const { id, reference } = getIdReference(item.external_references);
-          if (item.kill_chain_phases != null && item.kill_chain_phases.length > 0) {
-            item.kill_chain_phases.forEach((tactic) => {
-              tactics = [...tactics, tactic.phase_name];
-            });
-          }
-
-          return [
-            ...acc,
-            {
-              name: item.name,
-              id,
-              reference,
-              tactics,
-            },
-          ];
-        }, []);
-
-      const subtechniques = mitreData
-        .filter((obj) => obj.x_mitre_is_subtechnique === true)
-        .reduce((acc, item) => {
-          let tactics = [];
-          const { id, reference } = getIdReference(item.external_references);
-          if (item.kill_chain_phases != null && item.kill_chain_phases.length > 0) {
-            item.kill_chain_phases.forEach((tactic) => {
-              tactics = [...tactics, tactic.phase_name];
-            });
-          }
-          const techniqueId = id.split('.')[0];
-
-          return [
-            ...acc,
-            {
-              name: item.name,
-              id,
-              reference,
-              tactics,
-              techniqueId,
-            },
-          ];
-        }, []);
+      const tacticsData = extractTacticsData(mitreData);
+      const tactics = normalizeTacticsData(tacticsData);
+      const techniques = extractTechniques(mitreData);
+      const subtechniques = extractSubtechniques(mitreData);
 
       const body = `/*
           * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
@@ -202,7 +228,7 @@ async function main() {
            * Is built alongside and sampled from the data in the file so to always be valid with the most up to date MITRE ATT&CK data
            */
           export const getMockThreatData = () => (${JSON.stringify(
-            buildMockThreatData(tactics, techniques, subtechniques),
+            buildMockThreatData(tacticsData, techniques, subtechniques),
             null,
             2
           )
