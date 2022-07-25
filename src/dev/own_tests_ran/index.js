@@ -9,8 +9,8 @@
 import { run } from '@kbn/dev-cli-runner';
 // import { createFlagError, createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/utils';
-// import yaml from 'js-yaml';
-// import { readFileSync } from "fs";
+import yaml from 'js-yaml';
+import { readFileSync } from "fs";
 import { resolve } from "path";
 
 const flags = {
@@ -27,10 +27,11 @@ export function runCheckOwnTestsRanCli() {
     ({ flags, log }) => {
       log.info('\n### Running runCheckOwnTestsRanCli()');
 
+      console.log(`\n### flags: \n${JSON.stringify(flags, null, 2)}`);
 
-      // yaml.load(readFileSync(resolveRoot('src/dev/own_tests_ran/test_roots.yml'), 'utf8'))
-      //   .general
-      //   .forEach(x => console.log(`\n### x: \n\t${x}`))
+      yaml.load(readFileSync(resolveRoot('src/dev/own_tests_ran/test_roots.yml'), 'utf8'))
+        .general
+        .forEach(x => console.log(`\n### x: \n\t${x}`))
     },
     {
       description: `
