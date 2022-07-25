@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { GetInfoResponse, InstalledRegistry } from '@kbn/fleet-plugin/common';
+import { GetInfoResponse, InstalledRegistry } from '@kbn/fleet-plugin/common/types';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
