@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useWithShowEndpointResponder } from '../../../../hooks';
@@ -28,12 +27,6 @@ import { UPGRADE_ENDPOINT_FOR_RESPONDER } from '../../../../../common/translatio
 interface Options {
   isEndpointList: boolean;
 }
-
-const launchResponderMenuText = i18n.translate('xpack.securitySolution.endpoint.actions.console', {
-  defaultMessage: 'Launch responder',
-});
-
-// const launchResponderMenuText = <FormattedMessage id="xpack.securitySolution.endpoint.actions.console" defaultMessage="Launch responder" />
 
 /**
  * Returns a list (array) of actions for an individual endpoint
