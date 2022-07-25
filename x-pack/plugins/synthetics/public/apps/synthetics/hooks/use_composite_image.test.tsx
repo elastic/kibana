@@ -8,6 +8,7 @@
 import * as redux from 'react-redux';
 import { renderHook } from '@testing-library/react-hooks';
 import { ScreenshotRefImageData, ScreenshotBlockCache } from '../../../../common/runtime_types';
+import { fetchBlocksAction } from '../state';
 import { shouldCompose, useCompositeImage } from './use_composite_image';
 import * as compose from '../utils/monitor_test_result/compose_screenshot_images';
 
@@ -174,10 +175,7 @@ describe('use composite image', () => {
       blocks = {};
       renderHook(() => useCompositeImage(imgRef, jest.fn(), imageData));
 
-      expect(useDispatchMock).toHaveBeenCalledWith({
-        payload: ['hash1', 'hash2'],
-        type: 'FETCH_BLOCKS',
-      });
+      expect(useDispatchMock).toHaveBeenCalledWith(fetchBlocksAction(['hash1', 'hash2']));
     });
 
     it('composes when all required blocks are loaded', async () => {
