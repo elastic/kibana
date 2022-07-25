@@ -121,7 +121,7 @@ describe('When using the release action from response actions console', () => {
     });
   });
 
-  it('should continue to check status when console is closed too soon on a slow network', async () => {
+  it('should create action request and store id even if console is closed prior to request api response', async () => {
     const deferrable = getDeferred();
     apiMocks.responseProvider.releaseHost.mockDelay.mockReturnValue(deferrable.promise);
     await render();
@@ -130,8 +130,12 @@ describe('When using the release action from response actions console', () => {
     enterConsoleCommand(renderResult, 'release');
     // hide console
     await consoleManagerMockAccess.hideOpenedConsole();
+
     // should have created action request
-    expect(apiMocks.responseProvider.releaseHost).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.releaseHost).toHaveBeenCalledTimes(1);
+    });
+
     deferrable.resolve();
 
     // open console

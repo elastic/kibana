@@ -13,9 +13,10 @@ import {
 } from '../console/components/console_manager/mocks';
 import React from 'react';
 import { getEndpointResponseActionsConsoleCommands } from './endpoint_response_actions_console_commands';
-import { responseActionsHttpMocks, getDeferred } from '../../mocks/response_actions_http_mocks';
+import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
 import { enterConsoleCommand } from '../console/mocks';
 import { waitFor } from '@testing-library/react';
+import { getDeferred } from '../mocks';
 
 describe('When using isolate action from response actions console', () => {
   let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
@@ -119,7 +120,7 @@ describe('When using isolate action from response actions console', () => {
     });
   });
 
-  it('should continue to check status when console is closed too soon on a slow network', async () => {
+  it('should create action request and store id even if console is closed prior to request api response', async () => {
     const deferrable = getDeferred();
     apiMocks.responseProvider.isolateHost.mockDelay.mockReturnValue(deferrable.promise);
     await render();
@@ -128,8 +129,12 @@ describe('When using isolate action from response actions console', () => {
     enterConsoleCommand(renderResult, 'isolate');
     // hide console
     await consoleManagerMockAccess.hideOpenedConsole();
+
     // should have created action request
-    expect(apiMocks.responseProvider.isolateHost).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.isolateHost).toHaveBeenCalledTimes(1);
+    });
+
     deferrable.resolve();
 
     // open console
