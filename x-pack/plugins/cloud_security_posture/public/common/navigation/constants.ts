@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { INTERNAL_FEATURE_FLAGS } from '../../../common/constants';
-import type { CspPage, CspNavigationItem } from './types';
+import type { CspPage, CspPageNavigationItem } from './types';
 
 const NAV_ITEMS_NAMES = {
   DASHBOARD: i18n.translate('xpack.csp.navigation.dashboardNavItemLabel', {
@@ -24,24 +24,46 @@ const NAV_ITEMS_NAMES = {
   }),
 };
 
-export const allNavigationItems: Record<CspPage, CspNavigationItem> = {
-  dashboard: { name: NAV_ITEMS_NAMES.DASHBOARD, path: '/dashboard' },
-  findings: { name: NAV_ITEMS_NAMES.FINDINGS, path: '/findings' },
+/** The base path for all cloud security posture pages. */
+export const CLOUD_SECURITY_POSTURE_BASE_PATH = '/cloud_security_posture';
+
+export const cloudPosturePages: Record<CspPage, CspPageNavigationItem> = {
+  dashboard: {
+    name: NAV_ITEMS_NAMES.DASHBOARD,
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/dashboard`,
+    id: 'cloud_security_posture-dashboard',
+  },
+  findings: {
+    name: NAV_ITEMS_NAMES.FINDINGS,
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings`,
+    id: 'cloud_security_posture-findings',
+  },
   rules: {
     name: NAV_ITEMS_NAMES.RULES,
-    path: '/benchmarks/:packagePolicyId/:policyId/rules',
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/benchmarks/:packagePolicyId/:policyId/rules`,
     disabled: !INTERNAL_FEATURE_FLAGS.showBenchmarks,
+    id: 'cloud_security_posture-rules',
   },
   benchmarks: {
     name: NAV_ITEMS_NAMES.BENCHMARKS,
-    path: '/benchmarks',
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/benchmarks`,
     exact: true,
     disabled: !INTERNAL_FEATURE_FLAGS.showBenchmarks,
+    id: 'cloud_security_posture-benchmarks',
   },
 };
 
 export const findingsNavigation = {
-  findings_default: { name: NAV_ITEMS_NAMES.FINDINGS, path: '/findings/default' },
-  findings_by_resource: { name: NAV_ITEMS_NAMES.FINDINGS, path: '/findings/resource' },
-  resource_findings: { name: NAV_ITEMS_NAMES.FINDINGS, path: '/findings/resource/:resourceId' },
+  findings_default: {
+    name: NAV_ITEMS_NAMES.FINDINGS,
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/default`,
+  },
+  findings_by_resource: {
+    name: NAV_ITEMS_NAMES.FINDINGS,
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/resource`,
+  },
+  resource_findings: {
+    name: NAV_ITEMS_NAMES.FINDINGS,
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/resource/:resourceId`,
+  },
 };

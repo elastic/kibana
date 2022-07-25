@@ -36,18 +36,9 @@ import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_sav
 import { pickSavedTimeline } from './pick_saved_timeline';
 import { timelineSavedObjectType } from '../../saved_object_mappings';
 import { draftTimelineDefaults } from '../../utils/default_timeline';
-import type { Maybe } from '../../../../../common/search_strategy';
 import { timelineFieldsMigrator } from './field_migrator';
 export { pickSavedTimeline } from './pick_saved_timeline';
 export { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
-
-export interface ResponseTemplateTimeline {
-  code?: Maybe<number>;
-
-  message?: Maybe<string>;
-
-  templateTimeline: TimelineResult;
-}
 
 export const getTimeline = async (
   request: FrameworkRequest,
