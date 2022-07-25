@@ -21,7 +21,7 @@ import { TopNFunctionsTable } from '../topn_functions';
 export function FunctionsView({ children }: { children: React.ReactElement }) {
   const {
     query,
-    query: { rangeFrom, rangeTo, n, kuery },
+    query: { rangeFrom, rangeTo, kuery },
   } = useProfilingParams('/functions/*');
 
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
@@ -57,7 +57,6 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
     <ProfilingAppPageTemplate tabs={tabs}>
       <FunctionContext.Provider value={topnFunctions}>
         <FunctionNavigation
-          n={n}
           timeRange={timeRange}
           kuery={kuery}
           getter={fetchTopNFunctions}

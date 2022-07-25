@@ -156,13 +156,11 @@ const routes = {
           query: t.type({
             rangeFrom: t.string,
             rangeTo: t.string,
-            n: toNumberRt,
             kuery: t.string,
           }),
         }),
         defaults: {
           query: {
-            n: '100',
             kuery: '',
           },
         },

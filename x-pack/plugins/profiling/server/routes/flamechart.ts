@@ -64,7 +64,6 @@ export function registerFlameChartElasticSearchRoute({ router, logger }: RouteRe
         query: schema.object({
           timeFrom: schema.string(),
           timeTo: schema.string(),
-          n: schema.number({ defaultValue: 200 }),
           kuery: schema.string(),
         }),
       },

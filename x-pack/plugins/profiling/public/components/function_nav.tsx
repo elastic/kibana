@@ -10,7 +10,6 @@ import { TopNFunctions } from '../../common/functions';
 import { TimeRange } from '../../common/types';
 
 interface Props {
-  n: number;
   timeRange: TimeRange;
   kuery: string;
   getter: (params: {
@@ -23,18 +22,18 @@ interface Props {
   setter: React.Dispatch<TopNFunctions>;
 }
 
-export const FunctionNavigation = ({ n, timeRange, getter, setter, kuery }: Props) => {
+export const FunctionNavigation = ({ timeRange, getter, setter, kuery }: Props) => {
   useEffect(() => {
     getter({
       timeFrom: new Date(timeRange.start).getTime() / 1000,
       timeTo: new Date(timeRange.end).getTime() / 1000,
       startIndex: 0,
-      endIndex: n,
+      endIndex: 100,
       kuery,
     }).then((response) => {
       setter(response);
     });
-  }, [n, timeRange.start, timeRange.end, getter, setter, kuery]);
+  }, [timeRange.start, timeRange.end, getter, setter, kuery]);
 
   return <></>;
 };

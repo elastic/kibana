@@ -10,29 +10,26 @@ import { ElasticFlameGraph } from '../../common/flamegraph';
 import { TimeRange } from '../../common/types';
 
 interface Props {
-  n: number;
   timeRange: TimeRange;
   kuery: string;
   getter: (params: {
     timeFrom: number;
     timeTo: number;
-    n: number;
     kuery: string;
   }) => Promise<ElasticFlameGraph>;
   setter: React.Dispatch<ElasticFlameGraph>;
 }
 
-export const FlameGraphNavigation = ({ n, timeRange, getter, setter, kuery }: Props) => {
+export const FlameGraphNavigation = ({ timeRange, getter, setter, kuery }: Props) => {
   useEffect(() => {
     getter({
       timeFrom: new Date(timeRange.start).getTime() / 1000,
       timeTo: new Date(timeRange.end).getTime() / 1000,
-      n,
       kuery,
     }).then((response) => {
       setter(response);
     });
-  }, [n, timeRange.start, timeRange.end, getter, setter, kuery]);
+  }, [timeRange.start, timeRange.end, getter, setter, kuery]);
 
   return <></>;
 };

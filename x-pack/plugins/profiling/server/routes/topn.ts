@@ -24,7 +24,6 @@ export async function topNElasticSearchQuery({
   logger,
   timeFrom,
   timeTo,
-  n,
   searchField,
   response,
   kuery,
@@ -33,7 +32,6 @@ export async function topNElasticSearchQuery({
   logger: Logger;
   timeFrom: string;
   timeTo: string;
-  n: number;
   searchField: string;
   response: KibanaResponseFactory;
   kuery: string;
@@ -54,7 +52,7 @@ export async function topNElasticSearchQuery({
     size: 0,
     query: filter,
     aggs: {
-      histogram: autoHistogramSumCountOnGroupByField(searchField, n),
+      histogram: autoHistogramSumCountOnGroupByField(searchField),
     },
     // Adrien and Dario found out this is a work-around for some bug in 8.1.
     // It reduces the query time by avoiding unneeded searches.
@@ -132,13 +130,12 @@ export function queryTopNCommon(
         query: schema.object({
           timeFrom: schema.string(),
           timeTo: schema.string(),
-          n: schema.number(),
           kuery: schema.string(),
         }),
       },
     },
     async (context, request, response) => {
-      const { timeFrom, timeTo, n, kuery } = request.query;
+      const { timeFrom, timeTo, kuery } = request.query;
       const client = await getClient(context);
 
       try {
@@ -147,7 +144,6 @@ export function queryTopNCommon(
           logger,
           timeFrom,
           timeTo,
-          n,
           searchField,
           response,
           kuery,
