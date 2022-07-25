@@ -323,8 +323,8 @@ spec:
             # FLEET_URL can be found in Kibana, go to Management > Fleet > Settings
             - name: FLEET_URL
               value: "https://fleet-server:8220"
+            # Elasticsearch API key used to enroll Elastic Agents in Fleet (https://www.elastic.co/guide/en/fleet/current/fleet-enrollment-tokens.html#fleet-enrollment-tokens)
             # If FLEET_ENROLLMENT_TOKEN is empty then KIBANA_HOST, KIBANA_FLEET_USERNAME, KIBANA_FLEET_PASSWORD are needed
-            # More detail on enrollment tokens - https://www.elastic.co/guide/en/fleet/current/fleet-enrollment-tokens.html
             - name: FLEET_ENROLLMENT_TOKEN
               value: "token-id"
             - name: KIBANA_HOST
