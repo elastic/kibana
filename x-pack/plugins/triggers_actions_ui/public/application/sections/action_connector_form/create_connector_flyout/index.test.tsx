@@ -467,8 +467,8 @@ describe('CreateConnectorFlyout', () => {
   });
 
   describe('Footer', () => {
-    it('shows the buttons', async () => {
-      const { getByTestId } = appMockRenderer.render(
+    it('shows the correct buttons without an action type selected', async () => {
+      const { getByTestId, queryByTestId } = appMockRenderer.render(
         <CreateConnectorFlyout
           actionTypeRegistry={actionTypeRegistry}
           onClose={onClose}
@@ -479,11 +479,11 @@ describe('CreateConnectorFlyout', () => {
       await act(() => Promise.resolve());
 
       expect(getByTestId('create-connector-flyout-cancel-btn')).toBeInTheDocument();
-      expect(getByTestId('create-connector-flyout-save-test-btn')).toBeInTheDocument();
-      expect(getByTestId('create-connector-flyout-save-btn')).toBeInTheDocument();
+      expect(queryByTestId('create-connector-flyout-save-test-btn')).toBe(null);
+      expect(queryByTestId('create-connector-flyout-save-btn')).toBe(null);
     });
 
-    it('shows the back button when selecting an action type', async () => {
+    it('shows the correct buttons when selecting an action type', async () => {
       const { getByTestId } = appMockRenderer.render(
         <CreateConnectorFlyout
           actionTypeRegistry={actionTypeRegistry}
@@ -500,6 +500,8 @@ describe('CreateConnectorFlyout', () => {
 
       await waitFor(() => {
         expect(getByTestId('create-connector-flyout-back-btn')).toBeInTheDocument();
+        expect(getByTestId('create-connector-flyout-save-test-btn')).toBeInTheDocument();
+        expect(getByTestId('create-connector-flyout-save-btn')).toBeInTheDocument();
       });
     });
 
@@ -580,8 +582,6 @@ describe('CreateConnectorFlyout', () => {
       await act(() => Promise.resolve());
 
       expect(getByTestId('create-connector-flyout-cancel-btn')).not.toBeDisabled();
-      expect(getByTestId('create-connector-flyout-save-test-btn')).toBeDisabled();
-      expect(getByTestId('create-connector-flyout-save-btn')).toBeDisabled();
     });
 
     it('disables the buttons when there are error on the form', async () => {
