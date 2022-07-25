@@ -92,7 +92,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
               <EuiText color="subdued" size="xs">
                 <FormattedMessage
                   id="xpack.securitySolution.console.commandList.footerText"
-                  defaultMessage="For more details on the commands above use the --help argument. Example: some-command --help"
+                  defaultMessage="For more help with the individual commands use the --help argument. Ex: processes --help"
                 />
               </EuiText>
             ),
