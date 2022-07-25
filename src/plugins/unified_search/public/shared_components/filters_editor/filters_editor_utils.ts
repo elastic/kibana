@@ -62,16 +62,17 @@ export const addFilter = (
   payload: { path: string; dataViewId: string | undefined }
 ) => {
   const newFilter = buildEmptyFilter(true, payload.dataViewId);
-  // const orderInFilterGroup = Number(payload.path.split('.').at(-1));
   const orderInFilterGroup =
     payload.path.split('.').length > 0 ? Number(payload.path.split('.')[0]) : 0;
-  const filterDepth = filterDepthCalculation(payload.path);
-
-  console.log('payload.path', payload.path);
-  console.log('filterDepth', filterDepth);
-  console.log('orderInFilterGroup', orderInFilterGroup);
 
   return goIntoFilersGroup(filters, orderInFilterGroup, payload.path, newFilter);
+};
+
+export const addFilterGroupWithEmptyFilter = (
+  filters: Filter[],
+  payload: { path: string; dataViewId: string | undefined }
+) => {
+  return filters;
 };
 
 export const removeFilter = (filters: Filter[], payload: { path: string }) => {
