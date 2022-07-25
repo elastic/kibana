@@ -7850,8 +7850,6 @@
     "xpack.apm.home.serviceMapTabLabel": "服务地图",
     "xpack.apm.infraTabs.failurePromptDescription": "加载基础架构选项卡和您的数据时出现问题。请联系您的管理员获取帮助。",
     "xpack.apm.infraTabs.failurePromptTitle": "无法加载基础架构数据",
-    "xpack.apm.infraTabs.noMetricsPromptDescription": "尝试调整时间范围，或检查是否设置了任何指标数据。",
-    "xpack.apm.infraTabs.noMetricsPromptTitle": "找不到任何基础架构数据",
     "xpack.apm.inspectButtonText": "检查",
     "xpack.apm.instancesLatencyDistributionChartLegend": "实例",
     "xpack.apm.instancesLatencyDistributionChartTitle": "实例延迟分布",
