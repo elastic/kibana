@@ -60,7 +60,7 @@ export const ReleaseActionResult = memo<
   }, [actionId, releaseHostApi?.data?.action, releaseHostApi.isSuccess, setStore]);
 
   useEffect(() => {
-    if (actionDetails?.data.isCompleted) {
+    if (actionDetails?.data.isCompleted && isPending) {
       setStatus('success');
       setStore((prevState) => {
         return {
@@ -69,7 +69,7 @@ export const ReleaseActionResult = memo<
         };
       });
     }
-  }, [actionDetails?.data, setStatus, setStore]);
+  }, [actionDetails?.data, setStatus, setStore, isPending]);
 
   // Show nothing if still pending
   if (isPending) {
