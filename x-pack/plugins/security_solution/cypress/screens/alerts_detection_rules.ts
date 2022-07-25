@@ -35,6 +35,8 @@ export const ELASTIC_RULES_BTN = '[data-test-subj="showElasticRulesFilterButton"
 
 export const EXPORT_ACTION_BTN = '[data-test-subj="exportRuleAction"]';
 
+export const BULK_EXPORT_ACTION_BTN = '[data-test-subj="exportRuleBulk"]';
+
 export const FIRST_RULE = 0;
 
 export const FOURTH_RULE = 3;

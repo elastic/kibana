@@ -10,9 +10,10 @@ import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
 
-import type { DryRunResult } from './use_bulk_actions_dry_run';
-import { BulkEditRuleErrorsList } from './bulk_edit_rule_errors_list';
+import { BulkActionRuleErrorsList } from './bulk_action_rule_errors_list';
 import { BulkActionsDryRunErrCode } from '../../../../../../../common/constants';
+import type { DryRunResult } from './types';
+import { BulkAction } from '../../../../../../../common/detection_engine/schemas/common/schemas';
 
 const Wrapper: FC = ({ children }) => {
   return (
@@ -24,7 +25,12 @@ const Wrapper: FC = ({ children }) => {
 
 describe('Component BulkEditRuleErrorsList', () => {
   test('should not render component if no errors present', () => {
-    const { container } = render(<BulkEditRuleErrorsList ruleErrors={[]} />, { wrapper: Wrapper });
+    const { container } = render(
+      <BulkActionRuleErrorsList bulkAction={BulkAction.edit} ruleErrors={[]} />,
+      {
+        wrapper: Wrapper,
+      }
+    );
 
     expect(container.childElementCount).toEqual(0);
   });
@@ -40,7 +46,9 @@ describe('Component BulkEditRuleErrorsList', () => {
         ruleIds: ['rule:1'],
       },
     ];
-    render(<BulkEditRuleErrorsList ruleErrors={ruleErrors} />, { wrapper: Wrapper });
+    render(<BulkActionRuleErrorsList bulkAction={BulkAction.edit} ruleErrors={ruleErrors} />, {
+      wrapper: Wrapper,
+    });
 
     expect(screen.getByText("2 rules can't be edited (test failure)")).toBeInTheDocument();
     expect(screen.getByText("1 rule can't be edited (another failure)")).toBeInTheDocument();
@@ -68,7 +76,9 @@ describe('Component BulkEditRuleErrorsList', () => {
         ruleIds: ['rule:1', 'rule:2'],
       },
     ];
-    render(<BulkEditRuleErrorsList ruleErrors={ruleErrors} />, { wrapper: Wrapper });
+    render(<BulkActionRuleErrorsList bulkAction={BulkAction.edit} ruleErrors={ruleErrors} />, {
+      wrapper: Wrapper,
+    });
 
     expect(screen.getByText(value)).toBeInTheDocument();
   });
