@@ -23,7 +23,7 @@ export const storybookAliases = {
   es_ui_shared: 'src/plugins/es_ui_shared/.storybook',
   expression_error: 'src/plugins/expression_error/.storybook',
   expression_image: 'src/plugins/expression_image/.storybook',
-  expression_metric_vis: 'src/plugins/chart_expressions/expression_metric/.storybook',
+  expression_metric_vis: 'src/plugins/chart_expressions/expression_legacy_metric/.storybook',
   expression_metric: 'src/plugins/expression_metric/.storybook',
   expression_partition_vis: 'src/plugins/chart_expressions/expression_partition_vis/.storybook',
   expression_repeat_image: 'src/plugins/expression_repeat_image/.storybook',
