@@ -4,21 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { useMemo } from 'react';
-
 import { useQuery } from 'react-query';
 import { useHttp } from '../../lib/kibana';
-import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { TimelineId } from '../../../../common/types/timeline';
-import {
-  // isLoadingSelector,
-  startSelector,
-  endSelector,
-} from '../../components/super_date_picker/selectors';
-import { SourcererScopeName } from '../../store/sourcerer/model';
-import { useSourcererDataView } from '../sourcerer';
-import { sourcererSelectors } from '../../store';
+import { useTimelineDataFilters } from '../../../timelines/containers/use_timeline_data_filters';
 
 export const DETECTIONS_ALERTS_COUNT_ID = 'detections-alerts-count';
 
@@ -96,46 +84,8 @@ export function useAlertPrevalenceFromProcessTree(
   timelineId: string | undefined
 ): UserAlertPrevalenceFromProcessTreeResult {
   const http = useHttp();
-  const getStartSelector = useMemo(() => startSelector(), []);
-  const getEndSelector = useMemo(() => endSelector(), []);
-  // const getIsLoadingSelector = useMemo(() => isLoadingSelector(), []);
-  const isActive = useMemo(() => timelineId === TimelineId.active, [timelineId]);
-  const isInTimeline = timelineId === TimelineId.active;
 
-  // TODO: probably use
-  // const shouldUpdate = useDeepEqualSelector((state) => {
-  //   if (isActive) {
-  //     return getIsLoadingSelector(state.inputs.timeline);
-  //   } else {
-  //     return getIsLoadingSelector(state.inputs.global);
-  //   }
-  // });
-  const from = useDeepEqualSelector((state) => {
-    if (isActive) {
-      return getStartSelector(state.inputs.timeline);
-    } else {
-      return getStartSelector(state.inputs.global);
-    }
-  });
-  const to = useDeepEqualSelector((state) => {
-    if (isActive) {
-      return getEndSelector(state.inputs.timeline);
-    } else {
-      return getEndSelector(state.inputs.global);
-    }
-  });
-  const getDefaultDataViewSelector = useMemo(
-    () => sourcererSelectors.defaultDataViewSelector(),
-    []
-  );
-  const defaultDataView = useDeepEqualSelector(getDefaultDataViewSelector);
-
-  const { selectedPatterns: timelinePatterns } = useSourcererDataView(SourcererScopeName.timeline);
-
-  const selectedPatterns = useMemo(
-    () => (isInTimeline ? timelinePatterns : defaultDataView.patternList),
-    [defaultDataView.patternList, isInTimeline, timelinePatterns]
-  );
+  const { selectedPatterns, to, from } = useTimelineDataFilters(timelineId);
 
   const { loading, id, schema } = useAlertDocumentAnalyzerSchema(processEntityId);
   const query = useQuery<ProcessTreeAlertPrevalenceResponse>(

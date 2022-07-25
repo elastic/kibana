@@ -62,10 +62,7 @@ export const validateEvents = {
     }),
     indexPatterns: schema.arrayOf(schema.string()),
     filter: schema.maybe(schema.string()),
-    entityType: schema.maybe(
-      // schema.string(schema.oneOf([schema.literal('alerts'), schema.literal('alertDetail')]))
-      schema.string()
-    ),
+    entityType: schema.maybe(schema.string()),
     eventID: schema.maybe(schema.string()),
   }),
 };
