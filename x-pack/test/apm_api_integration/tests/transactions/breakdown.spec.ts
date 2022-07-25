@@ -6,26 +6,34 @@
  */
 
 import expect from '@kbn/expect';
-import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
+import archives from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
-  const supertest = getService('legacySupertestAsApmReadUser');
+  const apmApiClient = getService('apmApiClient');
 
   const archiveName = 'apm_8.0.0';
-  const metadata = archives_metadata[archiveName];
-
-  const start = encodeURIComponent(metadata.start);
-  const end = encodeURIComponent(metadata.end);
+  const { start, end } = archives[archiveName];
   const transactionType = 'request';
   const transactionName = 'GET /api';
 
   registry.when('Breakdown when data is not loaded', { config: 'basic', archives: [] }, () => {
     it('handles the empty state', async () => {
-      const response = await supertest.get(
-        `/internal/apm/services/opbeans-node/transaction/charts/breakdown?start=${start}&end=${end}&transactionType=${transactionType}&environment=ENVIRONMENT_ALL&kuery=`
-      );
+      const response = await apmApiClient.readUser({
+        endpoint: 'GET /internal/apm/services/{serviceName}/transaction/charts/breakdown',
+        params: {
+          path: { serviceName: 'opbeans-node' },
+          query: {
+            start,
+            end,
+            transactionType,
+            environment: 'ENVIRONMENT_ALL',
+            kuery: '',
+          },
+        },
+      });
+
       expect(response.status).to.be(200);
       expect(response.body).to.eql({ timeseries: [] });
     });
@@ -36,17 +44,38 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: [archiveName] },
     () => {
       it('returns the transaction breakdown for a service', async () => {
-        const response = await supertest.get(
-          `/internal/apm/services/opbeans-node/transaction/charts/breakdown?start=${start}&end=${end}&transactionType=${transactionType}&environment=ENVIRONMENT_ALL&kuery=`
-        );
+        const response = await apmApiClient.readUser({
+          endpoint: 'GET /internal/apm/services/{serviceName}/transaction/charts/breakdown',
+          params: {
+            path: { serviceName: 'opbeans-node' },
+            query: {
+              start,
+              end,
+              transactionType,
+              environment: 'ENVIRONMENT_ALL',
+              kuery: '',
+            },
+          },
+        });
 
         expect(response.status).to.be(200);
         expectSnapshot(response.body).toMatch();
       });
       it('returns the transaction breakdown for a transaction group', async () => {
-        const response = await supertest.get(
-          `/internal/apm/services/opbeans-node/transaction/charts/breakdown?start=${start}&end=${end}&transactionType=${transactionType}&transactionName=${transactionName}&environment=ENVIRONMENT_ALL&kuery=`
-        );
+        const response = await apmApiClient.readUser({
+          endpoint: 'GET /internal/apm/services/{serviceName}/transaction/charts/breakdown',
+          params: {
+            path: { serviceName: 'opbeans-node' },
+            query: {
+              start,
+              end,
+              transactionType,
+              transactionName,
+              environment: 'ENVIRONMENT_ALL',
+              kuery: '',
+            },
+          },
+        });
 
         expect(response.status).to.be(200);
 
@@ -58,9 +87,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         const { title, color, type, data, hideLegend, legendValue } = timeseries[0];
 
-        const nonNullDataPoints = data.filter((y: number | null) => y !== null);
+        const nonNullDataPoints = data.filter(({ y }: { y: number | null }) => y !== null);
 
-        expectSnapshot(nonNullDataPoints.length).toMatchInline(`61`);
+        expectSnapshot(nonNullDataPoints.length).toMatchInline(`47`);
 
         expectSnapshot(
           data.slice(0, 5).map(({ x, y }: { x: number; y: number | null }) => {
@@ -103,9 +132,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expectSnapshot(data).toMatch();
       });
       it('returns the transaction breakdown sorted by name', async () => {
-        const response = await supertest.get(
-          `/internal/apm/services/opbeans-node/transaction/charts/breakdown?start=${start}&end=${end}&transactionType=${transactionType}&environment=ENVIRONMENT_ALL&kuery=`
-        );
+        const response = await apmApiClient.readUser({
+          endpoint: 'GET /internal/apm/services/{serviceName}/transaction/charts/breakdown',
+          params: {
+            path: { serviceName: 'opbeans-node' },
+            query: {
+              start,
+              end,
+              transactionType,
+              environment: 'ENVIRONMENT_ALL',
+              kuery: '',
+            },
+          },
+        });
 
         expect(response.status).to.be(200);
         expectSnapshot(response.body.timeseries.map((serie: { title: string }) => serie.title))

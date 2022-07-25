@@ -13,16 +13,19 @@ import {
   getAlertUserAction,
 } from '../../../containers/mock';
 import React from 'react';
-import { AppMockRenderer, createAppMockRenderer } from '../../../common/mock';
+import {
+  AppMockRenderer,
+  createAppMockRenderer,
+  noUpdateCasesPermissions,
+} from '../../../common/mock';
 import { CaseViewActivity } from './case_view_activity';
 import { ConnectorTypes } from '../../../../common/api/connectors';
 import { Case } from '../../../../common';
 import { CaseViewProps } from '../types';
 import { useGetCaseUserActions } from '../../../containers/use_get_case_user_actions';
 import { usePostPushToService } from '../../../containers/use_post_push_to_service';
-import { useGetTags } from '../../../containers/use_get_tags';
-import { useGetActionLicense } from '../../../containers/use_get_action_license';
 import { useGetConnectors } from '../../../containers/configure/use_connectors';
+import { useGetTags } from '../../../containers/use_get_tags';
 
 jest.mock('../../../containers/use_get_case_user_actions');
 jest.mock('../../../containers/configure/use_connectors');
@@ -32,11 +35,7 @@ jest.mock('../../../common/navigation/hooks');
 jest.mock('../../../containers/use_get_action_license');
 jest.mock('../../../containers/use_get_tags');
 
-(useGetTags as jest.Mock).mockReturnValue({ tags: ['coke', 'pepsi'], fetchTags: jest.fn() });
-(useGetActionLicense as jest.Mock).mockReturnValue({
-  data: null,
-  isLoading: false,
-});
+(useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
 
 const caseData: Case = {
   ...basicCase,
@@ -112,6 +111,30 @@ describe('Case View Page activity tab', () => {
     expect(result.getByTestId('case-tags')).toBeTruthy();
     expect(result.getByTestId('connector-edit-header')).toBeTruthy();
     expect(result.getByTestId('case-view-status-action-button')).toBeTruthy();
+    expect(useGetCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, caseData.connector.id);
+  });
+
+  it('should not render the case view status button when the user does not have update permissions', () => {
+    appMockRender = createAppMockRenderer({ permissions: noUpdateCasesPermissions() });
+
+    const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
+    expect(result.getByTestId('case-view-activity')).toBeTruthy();
+    expect(result.getByTestId('user-actions')).toBeTruthy();
+    expect(result.getByTestId('case-tags')).toBeTruthy();
+    expect(result.getByTestId('connector-edit-header')).toBeTruthy();
+    expect(result.queryByTestId('case-view-status-action-button')).not.toBeInTheDocument();
+    expect(useGetCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, caseData.connector.id);
+  });
+
+  it('should disable the severity selector when the user does not have update permissions', () => {
+    appMockRender = createAppMockRenderer({ permissions: noUpdateCasesPermissions() });
+
+    const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
+    expect(result.getByTestId('case-view-activity')).toBeTruthy();
+    expect(result.getByTestId('user-actions')).toBeTruthy();
+    expect(result.getByTestId('case-tags')).toBeTruthy();
+    expect(result.getByTestId('connector-edit-header')).toBeTruthy();
+    expect(result.getByTestId('case-severity-selection')).toBeDisabled();
     expect(useGetCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, caseData.connector.id);
   });
 

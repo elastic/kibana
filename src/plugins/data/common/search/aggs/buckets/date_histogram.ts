@@ -9,9 +9,9 @@
 import { get, noop, find, every, omitBy, isNil } from 'lodash';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
+import { DataViewFieldBase, TimeRange } from '@kbn/es-query';
 
-import { DataViewFieldBase } from '@kbn/es-query';
-import { KBN_FIELD_TYPES, TimeRange, TimeRangeBounds, UI_SETTINGS } from '../../..';
+import { AggTypesDependencies, KBN_FIELD_TYPES, TimeRangeBounds, UI_SETTINGS } from '../../..';
 
 import { ExtendedBounds, extendedBoundsToAst, timerangeToAst } from '../../expressions';
 import { intervalOptions, autoInterval, isAutoInterval } from './_interval_options';
@@ -44,12 +44,6 @@ const updateTimeBuckets = (
   buckets.setInterval(agg.params.interval);
 };
 
-export interface DateHistogramBucketAggDependencies {
-  calculateBounds: CalculateBoundsFn;
-  isDefaultTimezone: () => boolean;
-  getConfig: <T = any>(key: string) => T;
-}
-
 export interface IBucketDateHistogramAggConfig extends IBucketAggConfig {
   buckets: TimeBuckets;
 }
@@ -76,9 +70,9 @@ export interface AggParamsDateHistogram extends BaseAggParams {
 
 export const getDateHistogramBucketAgg = ({
   calculateBounds,
-  isDefaultTimezone,
+  aggExecutionContext,
   getConfig,
-}: DateHistogramBucketAggDependencies) =>
+}: AggTypesDependencies) =>
   new BucketAggType<IBucketDateHistogramAggConfig>({
     name: BUCKET_TYPES.DATE_HISTOGRAM,
     expressionName: aggDateHistogramFnName,
@@ -137,7 +131,15 @@ export const getDateHistogramBucketAgg = ({
       };
     },
     getShiftedKey(agg, key, timeShift) {
-      return moment(key).add(timeShift).valueOf();
+      const tz = inferTimeZone(
+        agg.params,
+        agg.getIndexPattern(),
+        'date_histogram',
+        getConfig,
+        aggExecutionContext
+      );
+
+      return moment.tz(key, tz).add(timeShift).valueOf();
     },
     splitForTimeShift(agg, aggs) {
       return aggs.hasTimeShifts() && Boolean(aggs.timeFields?.includes(agg.fieldName()));
@@ -263,7 +265,13 @@ export const getDateHistogramBucketAgg = ({
         // time_zones being persisted into saved_objects
         serialize: noop,
         write(agg, output) {
-          const tz = inferTimeZone(agg.params, agg.getIndexPattern(), isDefaultTimezone, getConfig);
+          const tz = inferTimeZone(
+            agg.params,
+            agg.getIndexPattern(),
+            'date_histogram',
+            getConfig,
+            aggExecutionContext
+          );
           output.params.time_zone = tz;
         },
       },
@@ -275,7 +283,13 @@ export const getDateHistogramBucketAgg = ({
         write: () => {},
         serialize(val, agg) {
           if (!agg) return undefined;
-          return inferTimeZone(agg.params, agg.getIndexPattern(), isDefaultTimezone, getConfig);
+          return inferTimeZone(
+            agg.params,
+            agg.getIndexPattern(),
+            'date_histogram',
+            getConfig,
+            aggExecutionContext
+          );
         },
         toExpressionAst: () => undefined,
       },
@@ -300,11 +314,18 @@ export const getDateHistogramBucketAgg = ({
         default: {},
         write(agg, output) {
           const val = agg.params.extended_bounds;
+          const tz = inferTimeZone(
+            agg.params,
+            agg.getIndexPattern(),
+            'date_histogram',
+            getConfig,
+            aggExecutionContext
+          );
 
           if (val.min != null || val.max != null) {
             output.params.extended_bounds = {
-              min: moment(val.min).valueOf(),
-              max: moment(val.max).valueOf(),
+              min: moment.tz(val.min, tz).valueOf(),
+              max: moment.tz(val.max, tz).valueOf(),
             };
 
             return;

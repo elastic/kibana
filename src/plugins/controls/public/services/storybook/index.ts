@@ -19,6 +19,7 @@ import { overlaysServiceFactory } from './overlays';
 import { dataViewsServiceFactory } from './data_views';
 import { httpServiceFactory } from '../stub/http';
 import { settingsServiceFactory } from './settings';
+import { themeServiceFactory } from './theme';
 
 import { optionsListServiceFactory } from './options_list';
 import { controlsServiceFactory } from '../stub/controls';
@@ -32,6 +33,7 @@ export const providers: PluginServiceProviders<ControlsServices> = {
   unifiedSearch: new PluginServiceProvider(unifiedSearchServiceFactory),
   overlays: new PluginServiceProvider(overlaysServiceFactory),
   settings: new PluginServiceProvider(settingsServiceFactory),
+  theme: new PluginServiceProvider(themeServiceFactory),
 
   controls: new PluginServiceProvider(controlsServiceFactory),
   optionsList: new PluginServiceProvider(optionsListServiceFactory),

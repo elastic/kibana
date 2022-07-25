@@ -8,14 +8,17 @@
 import React from 'react';
 import { action } from '@storybook/addon-actions';
 
-import { NoDataViewsPrompt as NoDataViewsPromptComponent, Props } from './no_data_views.component';
+import { NoDataViewsPrompt as NoDataViewsPromptComponent } from './no_data_views.component';
 import { NoDataViewsPrompt } from './no_data_views';
-import { NoDataViewsPromptProvider, NoDataViewsPromptServices } from './services';
+import { NoDataViewsPromptProvider } from './services';
 
 import mdx from '../README.mdx';
+import { Params, getStoryArgTypes, getStoryServices } from './mocks';
+
+const argTypes = getStoryArgTypes();
 
 export default {
-  title: 'No Data/No Data Views',
+  title: 'No Data/Prompt',
   description: 'A component to display when there are no user-created data views available.',
   parameters: {
     docs: {
@@ -24,45 +27,36 @@ export default {
   },
 };
 
-type ConnectedParams = Pick<NoDataViewsPromptServices, 'canCreateNewDataView' | 'dataViewsDocLink'>;
-
-const openDataViewEditor: NoDataViewsPromptServices['openDataViewEditor'] = (options) => {
-  action('openDataViewEditor')(options);
-  return () => {};
-};
-
-export const ConnectedComponent = (params: ConnectedParams) => {
+export const NoDataViews = (params: Params) => {
   return (
-    <NoDataViewsPromptProvider {...{ openDataViewEditor, ...params }}>
+    <NoDataViewsPromptProvider {...getStoryServices(params, action)}>
       <NoDataViewsPrompt onDataViewCreated={action('onDataViewCreated')} />
     </NoDataViewsPromptProvider>
   );
 };
 
-ConnectedComponent.argTypes = {
-  canCreateNewDataView: {
-    control: 'boolean',
-    defaultValue: true,
-  },
-  dataViewsDocLink: {
-    options: ['some/link', undefined],
-    control: { type: 'radio' },
+NoDataViews.argTypes = argTypes;
+
+const componentArgTypes = {
+  ...argTypes,
+  emptyPromptColor: {
+    options: [
+      'plain',
+      'transparent',
+      'subdued',
+      'accent',
+      'primary',
+      'success',
+      'warning',
+      'danger',
+    ],
+    control: { type: 'select' },
+    defaultValue: 'plain',
   },
 };
 
-type PureParams = Pick<Props, 'canCreateNewDataView' | 'dataViewsDocLink'>;
-
-export const PureComponent = (params: PureParams) => {
+export const NoDataViewsComponent = (params: Record<keyof typeof componentArgTypes, any>) => {
   return <NoDataViewsPromptComponent onClickCreate={action('onClick')} {...params} />;
 };
 
-PureComponent.argTypes = {
-  canCreateNewDataView: {
-    control: 'boolean',
-    defaultValue: true,
-  },
-  dataViewsDocLink: {
-    options: ['some/link', undefined],
-    control: { type: 'radio' },
-  },
-};
+NoDataViewsComponent.argTypes = componentArgTypes;

@@ -9,7 +9,8 @@ import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { ISearchSource, EsQuerySortValue } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { EsHitRecord } from '../../types';
+import { DataTableRecord } from '../../../types';
+import { buildDataTableRecord } from '../../../utils/build_data_record';
 
 export async function fetchAnchor(
   anchorId: string,
@@ -17,7 +18,7 @@ export async function fetchAnchor(
   searchSource: ISearchSource,
   sort: EsQuerySortValue[],
   useNewFieldsApi: boolean = false
-): Promise<EsHitRecord> {
+): Promise<DataTableRecord> {
   updateSearchSource(searchSource, anchorId, sort, useNewFieldsApi, indexPattern);
   const { rawResponse } = await lastValueFrom(await searchSource.fetch$());
   const doc = rawResponse.hits?.hits?.[0];
@@ -29,11 +30,7 @@ export async function fetchAnchor(
       })
     );
   }
-
-  return {
-    ...doc,
-    isAnchor: true,
-  } as EsHitRecord;
+  return buildDataTableRecord(doc, indexPattern, true);
 }
 
 export function updateSearchSource(

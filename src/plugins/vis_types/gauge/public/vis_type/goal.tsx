@@ -27,6 +27,7 @@ export const getGoalVisTypeDefinition = (
   description: i18n.translate('visTypeGauge.goal.goalDescription', {
     defaultMessage: 'Track how a metric progresses to a goal.',
   }),
+  fetchDatatable: true,
   toExpressionAst,
   visConfig: {
     defaults: {

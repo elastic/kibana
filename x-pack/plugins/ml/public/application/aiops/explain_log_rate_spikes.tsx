@@ -6,6 +6,7 @@
  */
 
 import React, { FC } from 'react';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ExplainLogRateSpikes } from '@kbn/aiops-plugin/public';
 
@@ -21,6 +22,8 @@ export const ExplainLogRateSpikesPage: FC = () => {
   } = useMlKibana();
 
   const context = useMlContext();
+  const dataView = context.currentDataView;
+  const savedSearch = context.currentSavedSearch;
 
   return (
     <>
@@ -30,7 +33,9 @@ export const ExplainLogRateSpikesPage: FC = () => {
           defaultMessage="Explain log rate spikes"
         />
       </MlPageHeader>
-      <ExplainLogRateSpikes dataView={context.currentDataView} />
+      {dataView.timeFieldName && (
+        <ExplainLogRateSpikes dataView={dataView} savedSearch={savedSearch} />
+      )}
       <HelpMenu docLink={docLinks.links.ml.guide} />
     </>
   );

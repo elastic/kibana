@@ -8,6 +8,7 @@
 import { parse } from '@kbn/tinymath';
 import { monaco } from '@kbn/monaco';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createMockedIndexPattern } from '../../../../mocks';
 import { GenericOperationDefinition } from '../..';
 import type { IndexPatternField } from '../../../../types';
@@ -218,6 +219,7 @@ describe('math completion', () => {
         indexPattern: createMockedIndexPattern(),
         operationDefinitionMap,
         unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+        dataViews: dataViewPluginMocks.createStartContract(),
       });
       expect(results.list).toHaveLength(4 + Object.keys(tinymathFunctions).length);
       ['sum', 'moving_average', 'cumulative_sum', 'last_value'].forEach((key) => {
@@ -239,6 +241,7 @@ describe('math completion', () => {
         indexPattern: createMockedIndexPattern(),
         operationDefinitionMap,
         unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+        dataViews: dataViewPluginMocks.createStartContract(),
       });
       expect(results.list).toHaveLength(2);
       ['sum', 'last_value'].forEach((key) => {
@@ -257,6 +260,7 @@ describe('math completion', () => {
         indexPattern: createMockedIndexPattern(),
         operationDefinitionMap,
         unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+        dataViews: dataViewPluginMocks.createStartContract(),
       });
       expect(results.list).toEqual(['window']);
     });
@@ -272,6 +276,7 @@ describe('math completion', () => {
         indexPattern: createMockedIndexPattern(),
         operationDefinitionMap,
         unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+        dataViews: dataViewPluginMocks.createStartContract(),
       });
       expect(results.list).toEqual([]);
     });
@@ -287,6 +292,7 @@ describe('math completion', () => {
         indexPattern: createMockedIndexPattern(),
         operationDefinitionMap,
         unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+        dataViews: dataViewPluginMocks.createStartContract(),
       });
       expect(results.list).toHaveLength(4 + Object.keys(tinymathFunctions).length);
       ['sum', 'moving_average', 'cumulative_sum', 'last_value'].forEach((key) => {
@@ -308,6 +314,7 @@ describe('math completion', () => {
         indexPattern: createMockedIndexPattern(),
         operationDefinitionMap,
         unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+        dataViews: dataViewPluginMocks.createStartContract(),
       });
       expect(results.list).toHaveLength(4 + Object.keys(tinymathFunctions).length);
       ['sum', 'moving_average', 'cumulative_sum', 'last_value'].forEach((key) => {
@@ -329,6 +336,7 @@ describe('math completion', () => {
         indexPattern: createMockedIndexPattern(),
         operationDefinitionMap,
         unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+        dataViews: dataViewPluginMocks.createStartContract(),
       });
       expect(results.list).toHaveLength(0);
     });
@@ -344,6 +352,7 @@ describe('math completion', () => {
         indexPattern: createMockedIndexPattern(),
         operationDefinitionMap,
         unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+        dataViews: dataViewPluginMocks.createStartContract(),
       });
       expect(results.list).toEqual(['bytes', 'memory']);
     });
@@ -359,6 +368,7 @@ describe('math completion', () => {
         indexPattern: createMockedIndexPattern(),
         operationDefinitionMap,
         unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+        dataViews: dataViewPluginMocks.createStartContract(),
       });
       expect(results.list).toEqual(['bytes', 'memory']);
     });

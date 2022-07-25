@@ -381,6 +381,7 @@ export function getIndexPatternDatasource({
                 http={core.http}
                 data={data}
                 unifiedSearch={unifiedSearch}
+                dataViews={dataViews}
                 uniqueLabel={columnLabelMap[props.columnId]}
                 {...props}
               />
@@ -408,6 +409,7 @@ export function getIndexPatternDatasource({
                 replaceIfPossible: true,
                 storage,
                 indexPatternsService,
+                uiActions,
               });
             }}
             {...props}
@@ -617,8 +619,14 @@ export function getIndexPatternDatasource({
     },
     getWarningMessages: (state, frame, setState) => {
       return [
-        ...(getStateTimeShiftWarningMessages(state, frame) || []),
-        ...getPrecisionErrorWarningMessages(state, frame, core.docLinks, setState),
+        ...(getStateTimeShiftWarningMessages(data.datatableUtilities, state, frame) || []),
+        ...getPrecisionErrorWarningMessages(
+          data.datatableUtilities,
+          state,
+          frame,
+          core.docLinks,
+          setState
+        ),
       ];
     },
     checkIntegrity: (state) => {
@@ -656,6 +664,9 @@ export function getIndexPatternDatasource({
         injectReferences(persistableState1, references1),
         injectReferences(persistableState2, references2)
       ),
+    getUsedDataView: (state: IndexPatternPrivateState, layerId: string) => {
+      return state.layers[layerId].indexPatternId;
+    },
   };
 
   return indexPatternDatasource;

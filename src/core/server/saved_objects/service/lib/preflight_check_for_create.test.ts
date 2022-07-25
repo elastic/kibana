@@ -11,10 +11,10 @@ import {
   mockRawDocExistsInNamespaces,
 } from './preflight_check_for_create.test.mock';
 
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
-import type { ElasticsearchClient } from '../../../elasticsearch';
-import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 import { SavedObjectsSerializer } from '../../serialization';

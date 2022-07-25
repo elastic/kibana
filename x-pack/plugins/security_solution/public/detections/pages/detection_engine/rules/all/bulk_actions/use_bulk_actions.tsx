@@ -7,23 +7,17 @@
 /* eslint-disable complexity */
 
 import React, { useCallback } from 'react';
-import { useQueryClient } from 'react-query';
-import {
-  EuiTextColor,
-  EuiContextMenuPanelDescriptor,
-  EuiFlexGroup,
-  EuiButton,
-  EuiFlexItem,
-} from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiTextColor, EuiFlexGroup, EuiButton, EuiFlexItem } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 
 import type { Toast } from '@kbn/core/public';
 import { mountReactNode } from '@kbn/core/public/utils';
+import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/schemas/common/schemas';
 import {
   BulkAction,
   BulkActionEditType,
-  BulkActionEditPayload,
 } from '../../../../../../../common/detection_engine/schemas/common/schemas';
 import { isMlRule } from '../../../../../../../common/machine_learning/helpers';
 import { canEditRuleWithActions } from '../../../../../../common/utils/privileges';
@@ -33,12 +27,18 @@ import * as i18n from '../../translations';
 import { executeRulesBulkAction } from '../actions';
 import { useHasActionsPrivileges } from '../use_has_actions_privileges';
 import { useHasMlPermissions } from '../use_has_ml_permissions';
-import { getCustomRulesCountFromCache } from './use_custom_rules_count';
+import type { ExecuteBulkActionsDryRun } from './use_bulk_actions_dry_run';
 import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { convertRulesFilterToKQL } from '../../../../../containers/detection_engine/rules/utils';
-
+import { prepareSearchParams } from './utils/prepare_search_params';
 import type { FilterOptions } from '../../../../../containers/detection_engine/rules/types';
-import { useInvalidateRules } from '../../../../../containers/detection_engine/rules/use_find_rules_query';
+import {
+  useInvalidateRules,
+  useUpdateRulesCache,
+} from '../../../../../containers/detection_engine/rules/use_find_rules_query';
+import { BULK_RULE_ACTIONS } from '../../../../../../common/lib/apm/user_actions';
+import { useStartTransaction } from '../../../../../../common/lib/apm/use_start_transaction';
+import { useInvalidatePrePackagedRulesStatus } from '../../../../../containers/detection_engine/rules/use_pre_packaged_rules_status';
 
 interface UseBulkActionsArgs {
   filterOptions: FilterOptions;
@@ -48,6 +48,7 @@ interface UseBulkActionsArgs {
     bulkActionEditType: BulkActionEditType
   ) => Promise<BulkActionEditPayload | null>;
   reFetchTags: () => void;
+  executeBulkActionsDryRun: ExecuteBulkActionsDryRun;
 }
 
 export const useBulkActions = ({
@@ -56,15 +57,18 @@ export const useBulkActions = ({
   confirmBulkEdit,
   completeBulkEditForm,
   reFetchTags,
+  executeBulkActionsDryRun,
 }: UseBulkActionsArgs) => {
-  const queryClient = useQueryClient();
   const hasMlPermissions = useHasMlPermissions();
   const rulesTableContext = useRulesTableContext();
   const invalidateRules = useInvalidateRules();
+  const updateRulesCache = useUpdateRulesCache();
+  const invalidatePrePackagedRulesStatus = useInvalidatePrePackagedRulesStatus();
   const hasActionsPrivileges = useHasActionsPrivileges();
   const toasts = useAppToasts();
   const getIsMounted = useIsMounted();
   const filterQuery = convertRulesFilterToKQL(filterOptions);
+  const { startTransaction } = useStartTransaction();
 
   // refetch tags if edit action is related to tags: add_tags/delete_tags/set_tags
   const resolveTagsRefetch = useCallback(
@@ -82,10 +86,10 @@ export const useBulkActions = ({
 
   const {
     state: { isAllSelected, rules, loadingRuleIds, selectedRuleIds },
-    actions: { setLoadingRules, setIsRefreshOn },
+    actions: { setLoadingRules, clearRulesSelection },
   } = rulesTableContext;
 
-  return useCallback(
+  const getBulkItemsPopoverContent = useCallback(
     (closePopover: () => void): EuiContextMenuPanelDescriptor[] => {
       const selectedRules = rules.filter(({ id }) => selectedRuleIds.includes(id));
 
@@ -99,7 +103,9 @@ export const useBulkActions = ({
         selectedRules.some((rule) => !canEditRuleWithActions(rule, hasActionsPrivileges));
 
       const handleEnableAction = async () => {
+        startTransaction({ name: BULK_RULE_ACTIONS.ENABLE });
         closePopover();
+
         const disabledRules = selectedRules.filter(({ enabled }) => !enabled);
         const disabledRulesNoML = disabledRules.filter(({ type }) => !isMlRule(type));
 
@@ -112,31 +118,36 @@ export const useBulkActions = ({
           ? disabledRules.map(({ id }) => id)
           : disabledRulesNoML.map(({ id }) => id);
 
-        await executeRulesBulkAction({
+        const res = await executeRulesBulkAction({
           visibleRuleIds: ruleIds,
           action: BulkAction.enable,
           setLoadingRules,
           toasts,
           search: isAllSelected ? { query: filterQuery } : { ids: ruleIds },
         });
-        invalidateRules();
+        updateRulesCache(res?.attributes?.results?.updated ?? []);
       };
 
       const handleDisableActions = async () => {
+        startTransaction({ name: BULK_RULE_ACTIONS.DISABLE });
         closePopover();
+
         const enabledIds = selectedRules.filter(({ enabled }) => enabled).map(({ id }) => id);
-        await executeRulesBulkAction({
+
+        const res = await executeRulesBulkAction({
           visibleRuleIds: enabledIds,
           action: BulkAction.disable,
           setLoadingRules,
           toasts,
           search: isAllSelected ? { query: filterQuery } : { ids: enabledIds },
         });
-        invalidateRules();
+        updateRulesCache(res?.attributes?.results?.updated ?? []);
       };
 
       const handleDuplicateAction = async () => {
+        startTransaction({ name: BULK_RULE_ACTIONS.DUPLICATE });
         closePopover();
+
         await executeRulesBulkAction({
           visibleRuleIds: selectedRuleIds,
           action: BulkAction.duplicate,
@@ -145,16 +156,24 @@ export const useBulkActions = ({
           search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
         });
         invalidateRules();
+        // We use prePackagedRulesStatus to display Prebuilt/Custom rules
+        // counters, so we need to invalidate it when the total number of rules
+        // changes.
+        invalidatePrePackagedRulesStatus();
+        clearRulesSelection();
       };
 
       const handleDeleteAction = async () => {
         closePopover();
+
         if (isAllSelected) {
+          // User has cancelled deletion
           if ((await confirmDeletion()) === false) {
-            // User has cancelled deletion
             return;
           }
         }
+
+        startTransaction({ name: BULK_RULE_ACTIONS.DELETE });
 
         await executeRulesBulkAction({
           visibleRuleIds: selectedRuleIds,
@@ -164,10 +183,15 @@ export const useBulkActions = ({
           search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
         });
         invalidateRules();
+        // We use prePackagedRulesStatus to display Prebuilt/Custom rules
+        // counters, so we need to invalidate it when the total number of rules
+        // changes.
+        invalidatePrePackagedRulesStatus();
       };
 
       const handleExportAction = async () => {
         closePopover();
+        startTransaction({ name: BULK_RULE_ACTIONS.EXPORT });
 
         await executeRulesBulkAction({
           visibleRuleIds: selectedRuleIds,
@@ -183,34 +207,36 @@ export const useBulkActions = ({
         let isBulkEditFinished = false;
 
         // disabling auto-refresh so user's selected rules won't disappear after table refresh
-        setIsRefreshOn(false);
         closePopover();
 
-        const customSelectedRuleIds = selectedRules
-          .filter((rule) => rule.immutable === false)
-          .map((rule) => rule.id);
+        const dryRunResult = await executeBulkActionsDryRun({
+          action: BulkAction.edit,
+          editAction: bulkEditActionType,
+          searchParams: isAllSelected
+            ? { query: convertRulesFilterToKQL(filterOptions) }
+            : { ids: selectedRuleIds },
+        });
 
-        // User has cancelled edit action or there are no custom rules to proceed
-        if ((await confirmBulkEdit()) === false) {
-          setIsRefreshOn(true);
+        // show bulk edit confirmation window only if there is at least one failed rule
+        const hasFailedRules = (dryRunResult?.failedRulesCount ?? 0) > 0;
+
+        if (hasFailedRules && (await confirmBulkEdit()) === false) {
+          // User has cancelled edit action or there are no custom rules to proceed
           return;
         }
 
         const editPayload = await completeBulkEditForm(bulkEditActionType);
         if (editPayload == null) {
-          setIsRefreshOn(true);
           return;
         }
+
+        startTransaction({ name: BULK_RULE_ACTIONS.EDIT });
 
         const hideWarningToast = () => {
           if (longTimeWarningToast) {
             toasts.api.remove(longTimeWarningToast);
           }
         };
-
-        const customRulesCount = isAllSelected
-          ? getCustomRulesCountFromCache(queryClient)
-          : customSelectedRuleIds.length;
 
         // show warning toast only if bulk edit action exceeds 5s
         // if bulkAction already finished, we won't show toast at all (hence flag "isBulkEditFinished")
@@ -223,7 +249,11 @@ export const useBulkActions = ({
               title: i18n.BULK_EDIT_WARNING_TOAST_TITLE,
               text: mountReactNode(
                 <>
-                  <p>{i18n.BULK_EDIT_WARNING_TOAST_DESCRIPTION(customRulesCount)}</p>
+                  <p>
+                    {i18n.BULK_EDIT_WARNING_TOAST_DESCRIPTION(
+                      dryRunResult?.succeededRulesCount ?? 0
+                    )}
+                  </p>
                   <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
                     <EuiFlexItem grow={false}>
                       <EuiButton color="warning" size="s" onClick={hideWarningToast}>
@@ -239,25 +269,21 @@ export const useBulkActions = ({
           );
         }, 5 * 1000);
 
-        await executeRulesBulkAction({
+        const res = await executeRulesBulkAction({
           visibleRuleIds: selectedRuleIds,
           action: BulkAction.edit,
           setLoadingRules,
           toasts,
           payload: { edit: [editPayload] },
           onFinish: () => hideWarningToast(),
-          search: isAllSelected
-            ? {
-                query: convertRulesFilterToKQL({
-                  ...filterOptions,
-                  showCustomRules: true, // only edit custom rules, as elastic rule are immutable
-                }),
-              }
-            : { ids: customSelectedRuleIds },
+          search: prepareSearchParams({
+            ...(isAllSelected ? { filterOptions } : { selectedRuleIds }),
+            dryRunResult,
+          }),
         });
 
         isBulkEditFinished = true;
-        invalidateRules();
+        updateRulesCache(res?.attributes?.results?.updated ?? []);
         if (getIsMounted()) {
           await resolveTagsRefetch(bulkEditActionType);
         }
@@ -415,19 +441,24 @@ export const useBulkActions = ({
       hasActionsPrivileges,
       isAllSelected,
       loadingRuleIds,
+      startTransaction,
       hasMlPermissions,
-      invalidateRules,
       setLoadingRules,
       toasts,
       filterQuery,
+      invalidateRules,
+      invalidatePrePackagedRulesStatus,
       confirmDeletion,
-      setIsRefreshOn,
       confirmBulkEdit,
       completeBulkEditForm,
-      queryClient,
-      getIsMounted,
       filterOptions,
+      getIsMounted,
       resolveTagsRefetch,
+      updateRulesCache,
+      clearRulesSelection,
+      executeBulkActionsDryRun,
     ]
   );
+
+  return getBulkItemsPopoverContent;
 };

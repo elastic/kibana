@@ -169,7 +169,7 @@ describe('Screenshot Observable Pipeline', () => {
       driverFactory.createPage.mockReturnValue(
         of({
           driver,
-          unexpectedExit$: throwError('Instant timeout has fired!'),
+          error$: throwError('Instant timeout has fired!'),
           close: () => of({}),
         })
       );

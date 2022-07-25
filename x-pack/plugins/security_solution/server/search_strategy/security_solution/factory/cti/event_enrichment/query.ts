@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
-import { CtiQueries } from '../../../../../../common/search_strategy/security_solution/cti';
+import type { CtiQueries } from '../../../../../../common/search_strategy/security_solution/cti';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
-import { SecuritySolutionFactory } from '../../types';
+import type { SecuritySolutionFactory } from '../../types';
 import { buildIndicatorShouldClauses } from './helpers';
 
 export const buildEventEnrichmentQuery: SecuritySolutionFactory<CtiQueries.eventEnrichment>['buildDsl'] =
-  ({ defaultIndex, docValueFields, eventFields, filterQuery, timerange: { from, to } }) => {
+  ({ defaultIndex, eventFields, filterQuery, timerange: { from, to } }) => {
     const filter = [
       ...createQueryFilterClauses(filterQuery),
       { term: { 'event.type': 'indicator' } },
@@ -33,8 +32,22 @@ export const buildEventEnrichmentQuery: SecuritySolutionFactory<CtiQueries.event
       index: defaultIndex,
       body: {
         _source: false,
-        ...(!isEmpty(docValueFields) && { docvalue_fields: docValueFields }),
-        fields: ['*'],
+        fields: [
+          { field: '*', include_unmapped: true },
+          {
+            field: '@timestamp',
+            format: 'strict_date_optional_time',
+          },
+          {
+            field: 'code_signature.timestamp',
+            format: 'strict_date_optional_time',
+          },
+          {
+            field: 'dll.code_signature.timestamp',
+            format: 'strict_date_optional_time',
+          },
+        ],
+        stored_fields: ['*'],
         query: {
           bool: {
             should: buildIndicatorShouldClauses(eventFields),

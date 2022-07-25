@@ -6,24 +6,21 @@
  */
 
 import React, { memo } from 'react';
-import styled from 'styled-components';
-import { PackagePolicyResponseExtensionComponentProps } from '@kbn/fleet-plugin/public';
+import type { PackagePolicyResponseExtensionComponentProps } from '@kbn/fleet-plugin/public';
 
 import { PolicyResponseWrapper } from '../../../../components/policy_response';
-
-const Container = styled.div`
-  padding: ${({ theme }) => theme.eui.paddingSizes.m};
-`;
 
 /**
  * Exports Endpoint-specific package policy response
  */
 export const EndpointPolicyResponseExtension = memo<PackagePolicyResponseExtensionComponentProps>(
-  ({ endpointId }) => {
+  ({ agent, onShowNeedsAttentionBadge }) => {
     return (
-      <Container>
-        <PolicyResponseWrapper endpointId={endpointId} />
-      </Container>
+      <PolicyResponseWrapper
+        endpointId={agent.id}
+        onShowNeedsAttentionBadge={onShowNeedsAttentionBadge}
+        showRevisionMessage={false}
+      />
     );
   }
 );

@@ -79,7 +79,13 @@ describe('fetchIndexPattern', () => {
     indexPatternsService = {
       getDefault: jest.fn(() => Promise.resolve({ id: 'default', title: 'index' })),
       get: jest.fn(() => Promise.resolve(mockedIndices[0])),
-      find: jest.fn(() => Promise.resolve(mockedIndices || [])),
+      find: jest.fn((search: string, size: number) => {
+        if (size !== 1) {
+          // shouldn't request more than one data view since there is a significant performance penalty
+          throw new Error('trying to fetch too many data views');
+        }
+        return Promise.resolve(mockedIndices || []);
+      }),
     } as unknown as DataViewsService;
   });
 

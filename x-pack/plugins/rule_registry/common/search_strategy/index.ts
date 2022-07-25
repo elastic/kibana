@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ValidFeatureId } from '@kbn/rule-data-utils';
+import { TechnicalRuleDataFieldName, ValidFeatureId } from '@kbn/rule-data-utils';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Ecs } from '@kbn/core/server';
 import { IEsSearchRequest, IEsSearchResponse } from '@kbn/data-plugin/common';
@@ -66,7 +66,15 @@ type DotNestedKeys<T, D extends number = 10> = [D] extends [never]
   : never;
 
 export type EcsFields = DotNestedKeys<Omit<Ecs, 'ecs'>>;
+
+export interface BasicFields {
+  _id: string;
+  _index: string;
+}
+
 export type EcsFieldsResponse = {
   [Property in EcsFields]: string[];
-};
+} & BasicFields & {
+    [Property in TechnicalRuleDataFieldName]?: string[];
+  };
 export type RuleRegistrySearchResponse = IEsSearchResponse<EcsFieldsResponse>;

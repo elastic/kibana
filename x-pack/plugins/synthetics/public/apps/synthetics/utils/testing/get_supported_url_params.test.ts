@@ -75,6 +75,9 @@ describe('getSupportedUrlParams', () => {
       search: SEARCH,
       statusFilter: STATUS_FILTER,
       query: '',
+      locations: [],
+      monitorType: [],
+      tags: [],
     });
   });
 

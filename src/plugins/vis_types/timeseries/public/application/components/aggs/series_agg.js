@@ -8,10 +8,6 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import { AggSelect } from './agg_select';
-import { AggRow } from './agg_row';
-import { createChangeHandler } from '../lib/create_change_handler';
-import { createSelectHandler } from '../lib/create_select_handler';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -21,8 +17,14 @@ import {
   EuiTitle,
   EuiFormRow,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
+import { AggSelect } from './agg_select';
+import { AggRow } from './agg_row';
+import { createChangeHandler } from '../lib/create_change_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { titleStyles } from '../../styles/common.styles';
 
 function SeriesAggUi(props) {
   const { panel, model, intl } = props;
@@ -31,6 +33,8 @@ function SeriesAggUi(props) {
   const handleSelectChange = createSelectHandler(handleChange);
 
   const htmlId = htmlIdGenerator();
+
+  const { euiTheme } = useEuiTheme();
 
   const functionOptions = [
     {
@@ -118,7 +122,7 @@ function SeriesAggUi(props) {
         siblings={props.siblings}
         dragHandleProps={props.dragHandleProps}
       >
-        <EuiTitle className="tvbAggRow__unavailable" size="xxxs">
+        <EuiTitle size="xxxs" css={titleStyles(euiTheme)}>
           <span>
             <FormattedMessage
               id="visTypeTimeseries.seriesAgg.seriesAggIsNotCompatibleLabel"

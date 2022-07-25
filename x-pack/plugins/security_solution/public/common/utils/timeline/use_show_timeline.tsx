@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { matchPath, useLocation } from 'react-router-dom';
 
 import { getLinksWithHiddenTimeline } from '../../links';
 import { useIsGroupedNavigationEnabled } from '../../components/navigation/helpers';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererDataView } from '../../containers/sourcerer';
+import { useKibana } from '../../lib/kibana';
 
 const DEPRECATED_HIDDEN_TIMELINE_ROUTES: readonly string[] = [
   `/cases/configure`,
@@ -23,33 +24,36 @@ const DEPRECATED_HIDDEN_TIMELINE_ROUTES: readonly string[] = [
   '/manage',
 ];
 
-const isTimelineHidden = (currentPath: string, isGroupedNavigationEnabled: boolean): boolean => {
+const isTimelinePathVisible = (
+  currentPath: string,
+  isGroupedNavigationEnabled: boolean
+): boolean => {
   const groupLinksWithHiddenTimelinePaths = getLinksWithHiddenTimeline().map((l) => l.path);
 
   const hiddenTimelineRoutes = isGroupedNavigationEnabled
     ? groupLinksWithHiddenTimelinePaths
     : DEPRECATED_HIDDEN_TIMELINE_ROUTES;
 
-  return !!hiddenTimelineRoutes.find((route) => matchPath(currentPath, route));
+  return !hiddenTimelineRoutes.find((route) => matchPath(currentPath, route));
 };
 
 export const useShowTimeline = () => {
   const isGroupedNavigationEnabled = useIsGroupedNavigationEnabled();
   const { pathname } = useLocation();
   const { indicesExist, dataViewId } = useSourcererDataView(SourcererScopeName.timeline);
+  const userHasSecuritySolutionVisible = useKibana().services.application.capabilities.siem.show;
 
-  const [isTimelinePath, setIsTimelinePath] = useState(
-    !isTimelineHidden(pathname, isGroupedNavigationEnabled)
+  const isTimelineAllowed = useMemo(
+    () => userHasSecuritySolutionVisible && (indicesExist || dataViewId === null),
+    [indicesExist, dataViewId, userHasSecuritySolutionVisible]
   );
 
-  useEffect(() => {
-    setIsTimelinePath(!isTimelineHidden(pathname, isGroupedNavigationEnabled));
-  }, [pathname, isGroupedNavigationEnabled]);
-
-  const showTimeline = useMemo(
-    () => isTimelinePath && (dataViewId === null || indicesExist),
-    [isTimelinePath, indicesExist, dataViewId]
-  );
+  const showTimeline = useMemo(() => {
+    if (!isTimelineAllowed) {
+      return false;
+    }
+    return isTimelinePathVisible(pathname, isGroupedNavigationEnabled);
+  }, [isTimelineAllowed, pathname, isGroupedNavigationEnabled]);
 
   return [showTimeline];
 };

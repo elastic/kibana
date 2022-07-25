@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { LogMeta } from '@kbn/core/server';
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common';
+import type { LogMeta } from '@kbn/core/server';
+import type { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common';
 
 /**
  * Custom extended log metadata that rule execution logger can attach to every log record.

@@ -19,7 +19,9 @@ import {
   enableServiceGroups,
   apmServiceInventoryOptimizedSorting,
   enableNewSyntheticsView,
+  apmServiceGroupMaxNumberOfServices,
   apmTraceExplorerTab,
+  apmOperationsTab,
 } from '../common/ui_settings_keys';
 
 const technicalPreviewLabel = i18n.translate(
@@ -87,7 +89,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     name: i18n.translate('xpack.observability.enableInfrastructureView', {
       defaultMessage: 'Infrastructure feature',
     }),
-    value: false,
+    value: true,
     description: i18n.translate('xpack.observability.enableInfrastructureViewDescription', {
       defaultMessage: 'Enable the Infrastructure view feature in APM app',
     }),
@@ -95,6 +97,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
   },
   [defaultApmServiceEnvironment]: {
     category: [observabilityFeatureId],
+    sensitive: true,
     name: i18n.translate('xpack.observability.defaultApmServiceEnvironment', {
       defaultMessage: 'Default service environment',
     }),
@@ -188,6 +191,17 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     requiresPageReload: false,
     type: 'boolean',
   },
+  [apmServiceGroupMaxNumberOfServices]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.serviceGroupMaxServicesUiSettingName', {
+      defaultMessage: 'Maximum services in a service group',
+    }),
+    value: 500,
+    description: i18n.translate('xpack.observability.serviceGroupMaxServicesUiSettingDescription', {
+      defaultMessage: 'Limit the number of services in a given service group',
+    }),
+    schema: schema.number({ min: 1 }),
+  },
   [apmTraceExplorerTab]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.apmTraceExplorerTab', {
@@ -196,6 +210,21 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     description: i18n.translate('xpack.observability.apmTraceExplorerTabDescription', {
       defaultMessage:
         '{technicalPreviewLabel} Enable the APM Trace Explorer feature, that allows you to search and inspect traces with KQL or EQL',
+      values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
+    }),
+    schema: schema.boolean(),
+    value: false,
+    requiresPageReload: true,
+    type: 'boolean',
+  },
+  [apmOperationsTab]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmOperationsBreakdown', {
+      defaultMessage: 'APM Operations Breakdown',
+    }),
+    description: i18n.translate('xpack.observability.apmOperationsBreakdownDescription', {
+      defaultMessage:
+        '{technicalPreviewLabel} Enable the APM Operations Breakdown feature, that displays aggregates for backend operations',
       values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
     }),
     schema: schema.boolean(),

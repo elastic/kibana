@@ -18,7 +18,9 @@ exports[`ML Integrations renders without errors 1`] = `
         class="euiButtonContent euiButton__content"
       >
         <span
-          class="euiLoadingSpinner euiLoadingSpinner--medium euiButtonContent__spinner"
+          aria-label="Loading"
+          class="euiLoadingSpinner euiButtonContent__spinner emotion-euiLoadingSpinner-m"
+          role="progressbar"
         />
         <span
           class="euiButton__text"

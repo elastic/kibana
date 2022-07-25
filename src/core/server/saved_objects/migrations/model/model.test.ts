@@ -60,6 +60,7 @@ describe('migrations v2 model', () => {
     batchSize: 1000,
     maxBatchSizeBytes: 1e8,
     discardUnknownObjects: false,
+    discardCorruptObjects: false,
     indexPrefix: '.kibana',
     outdatedDocumentsQuery: {},
     targetIndexMappings: {
@@ -96,7 +97,7 @@ describe('migrations v2 model', () => {
     knownTypes: ['dashboard', 'config'],
     excludeFromUpgradeFilterHooks: {},
     migrationDocLinks: {
-      resolveMigrationFailures: 'resolveMigrationFailures',
+      resolveMigrationFailures: 'https://someurl.co/',
       repeatedTimeoutRequests: 'repeatedTimeoutRequests',
       routingAllocationDisabled: 'routingAllocationDisabled',
       clusterShardLimitExceeded: 'clusterShardLimitExceeded',
@@ -321,6 +322,29 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('FATAL');
         expect(newState.reason).toMatchInlineSnapshot(
           `"The .kibana alias is pointing to a newer version of Kibana: v7.12.0"`
+        );
+      });
+      test('INIT -> FATAL when .kibana points to multiple indices', () => {
+        const res: ResponseType<'INIT'> = Either.right({
+          '.kibana_7.12.0_001': {
+            aliases: {
+              '.kibana': {},
+              '.kibana_7.12.0': {},
+            },
+            mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+            settings: {},
+          },
+          '.kibana_7.11.0_001': {
+            aliases: { '.kibana': {}, '.kibana_7.11.0': {} },
+            mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+            settings: {},
+          },
+        });
+        const newState = model(initState, res) as FatalState;
+
+        expect(newState.controlState).toEqual('FATAL');
+        expect(newState.reason).toMatchInlineSnapshot(
+          `"The .kibana alias is pointing to multiple indices: .kibana_7.12.0_001,.kibana_7.11.0_001."`
         );
       });
       test('INIT -> WAIT_FOR_YELLOW_SOURCE when .kibana points to an index with an invalid version', () => {
@@ -1138,24 +1162,56 @@ describe('migrations v2 model', () => {
         expect(newState.logs).toStrictEqual([]); // No logs because no hits
       });
 
-      it('REINDEX_SOURCE_TO_TEMP_READ -> FATAL if no outdated documents to reindex and transform failures seen with previous outdated documents', () => {
-        const testState: ReindexSourceToTempRead = {
-          ...state,
-          corruptDocumentIds: ['a:b'],
-          transformErrors: [],
-        };
-        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.right({
-          outdatedDocuments: [],
-          lastHitSortValue: undefined,
-          totalHits: undefined,
+      describe('when transform failures or corrupt documents are found', () => {
+        it('REINDEX_SOURCE_TO_TEMP_READ -> FATAL if no outdated documents to reindex and transform failures seen with previous outdated documents', () => {
+          const testState: ReindexSourceToTempRead = {
+            ...state,
+            corruptDocumentIds: ['a:b'],
+            transformErrors: [],
+          };
+          const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.right({
+            outdatedDocuments: [],
+            lastHitSortValue: undefined,
+            totalHits: undefined,
+          });
+          const newState = model(testState, res) as FatalState;
+          expect(newState.controlState).toBe('FATAL');
+          expect(newState.reason).toMatchInlineSnapshot(`
+            "Migrations failed. Reason: 1 corrupt saved object documents were found: a:b
+
+            To allow migrations to proceed, please delete or fix these documents.
+            Note that you can configure Kibana to automatically discard corrupt documents and transform errors for this migration.
+            Please refer to https://someurl.co/ for more information."
+          `);
+          expect(newState.logs).toStrictEqual([]); // No logs because no hits
         });
-        const newState = model(testState, res) as FatalState;
-        expect(newState.controlState).toBe('FATAL');
-        expect(newState.reason).toMatchInlineSnapshot(`
-          "Migrations failed. Reason: 1 corrupt saved object documents were found: a:b
-          To allow migrations to proceed, please delete or fix these documents."
-        `);
-        expect(newState.logs).toStrictEqual([]); // No logs because no hits
+
+        it('REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_CLOSE_PIT if discardCorruptObjects=true', () => {
+          const testState: ReindexSourceToTempRead = {
+            ...state,
+            discardCorruptObjects: true,
+            corruptDocumentIds: ['a:b'],
+            transformErrors: [{ rawId: 'c:d', err: new Error('Oops!') }],
+          };
+          const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.right({
+            outdatedDocuments: [],
+            lastHitSortValue: undefined,
+            totalHits: undefined,
+          });
+          const newState = model(testState, res) as ReindexSourceToTempClosePit;
+          expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_CLOSE_PIT');
+          expect(newState.logs.length).toEqual(1);
+          expect(newState.logs[0]).toMatchInlineSnapshot(`
+            Object {
+              "level": "warning",
+              "message": "Kibana has been configured to discard corrupt documents and documents that cause transform errors for this migration.
+            Therefore, the following documents will not be taken into account and they will not be available after the migration:
+            - \\"a:b\\" (corrupt)
+            - \\"c:d\\" (Oops!)
+            ",
+            }
+          `);
+        });
       });
     });
 
@@ -1250,6 +1306,7 @@ describe('migrations v2 model', () => {
           type: 'documents_transform_failed',
           corruptDocumentIds: ['a:b'],
           transformErrors: [],
+          processedDocs: [],
         });
         const newState = model(state, res) as ReindexSourceToTempRead;
         expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_READ');
@@ -1279,6 +1336,8 @@ describe('migrations v2 model', () => {
         sourceIndexPitId: 'pit_id',
         targetIndex: '.kibana_7.11.0_001',
         lastHitSortValue: undefined,
+        transformErrors: [],
+        corruptDocumentIds: [],
         progress: createInitialProgress(),
       };
       test('REINDEX_SOURCE_TO_TEMP_INDEX_BULK -> REINDEX_SOURCE_TO_TEMP_READ if action succeeded', () => {
@@ -1671,6 +1730,7 @@ describe('migrations v2 model', () => {
             type: 'documents_transform_failed',
             corruptDocumentIds,
             transformErrors: [],
+            processedDocs: [],
           });
           const newState = model(
             outdatedDocumentsTransformState,
@@ -1691,6 +1751,7 @@ describe('migrations v2 model', () => {
             type: 'documents_transform_failed',
             corruptDocumentIds: newFailedTransformDocumentIds,
             transformErrors: transformationErrors,
+            processedDocs: [],
           });
           const newState = model(
             outdatedDocumentsTransformStateWithFailedDocuments,
@@ -2030,6 +2091,30 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('FATAL');
         expect(newState.reason).toMatchInlineSnapshot(
           `"Multiple versions of Kibana are attempting a migration in parallel. Another Kibana instance on version 7.12.0 completed this migration (this instance is running 7.11.0). Ensure that all Kibana instances are running on same version and try again."`
+        );
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+      test('MARK_VERSION_INDEX_READY_CONFLICT -> FATAL if the current alias is pointing to a multiple indices', () => {
+        const res: ResponseType<'MARK_VERSION_INDEX_READY_CONFLICT'> = Either.right({
+          '.kibana_7.11.0_001': {
+            aliases: { '.kibana': {}, '.kibana_7.11.0': {} },
+            mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+            settings: {},
+          },
+          '.kibana_7.12.0_001': {
+            aliases: {
+              '.kibana': {},
+              '.kibana_7.12.0': {},
+            },
+            mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+            settings: {},
+          },
+        });
+        const newState = model(markVersionIndexConflictState, res) as FatalState;
+        expect(newState.controlState).toEqual('FATAL');
+        expect(newState.reason).toMatchInlineSnapshot(
+          `"The .kibana alias is pointing to multiple indices: .kibana_7.11.0_001,.kibana_7.12.0_001."`
         );
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);

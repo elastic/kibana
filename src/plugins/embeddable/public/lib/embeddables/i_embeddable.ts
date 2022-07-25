@@ -18,6 +18,8 @@ export type { EmbeddableInput };
 export interface EmbeddableOutput {
   // Whether the embeddable is actively loading.
   loading?: boolean;
+  // Whether the embeddable is rendered.
+  rendered?: boolean;
   // Whether the embeddable finished loading with an error.
   error?: EmbeddableError;
   editUrl?: string;
@@ -82,6 +84,14 @@ export interface IEmbeddable<
    * If this embeddable has encountered a fatal error, that error will be stored here
    **/
   fatalError?: Error;
+
+  /**
+   * This method returns false by default.
+   * It should be set to true for any embeddable type that utilizes the `loading` and `rendered`
+   * output variables to notify a container of their loading progress. If set to false, a container should assume
+   * the embeddable is loaded immediately.
+   */
+  reportsEmbeddableLoad(): boolean;
 
   /**
    * A functional representation of the isContainer variable, but helpful for typescript to
@@ -158,6 +168,13 @@ export interface IEmbeddable<
    * @param domNode
    */
   render(domNode: HTMLElement | Element): void;
+
+  /**
+   * Renders a custom embeddable error at the given node.
+   * @param domNode
+   * @returns A callback that will be called on error destroy.
+   */
+  renderError?(domNode: HTMLElement | Element, error: ErrorLike): () => void;
 
   /**
    * Reload the embeddable so output and rendering is up to date. Especially relevant

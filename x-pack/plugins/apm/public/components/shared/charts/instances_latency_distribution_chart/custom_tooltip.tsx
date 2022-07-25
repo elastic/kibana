@@ -156,7 +156,7 @@ function MultipleInstanceCustomTooltip({
               </div>
               <div
                 className="echTooltip__item--container"
-                style={{ paddingLeft: theme.eui.paddingSizes.s }}
+                style={{ paddingLeft: theme.eui.euiSizeS }}
               >
                 <span className="echTooltip__label">{latencyLabel}</span>
                 <span className="echTooltip__value">
@@ -176,7 +176,7 @@ function MultipleInstanceCustomTooltip({
               </div>
               <div
                 className="echTooltip__item--container"
-                style={{ paddingLeft: theme.eui.paddingSizes.s }}
+                style={{ paddingLeft: theme.eui.euiSizeS }}
               >
                 <span className="echTooltip__label">{throughputLabel}</span>
                 <span className="echTooltip__value">
@@ -211,7 +211,7 @@ export function CustomTooltip(
       ) : (
         <SingleInstanceCustomTooltip {...props} />
       )}
-      <div style={{ padding: theme.eui.paddingSizes.xs }}>
+      <div style={{ padding: theme.eui.euiSizeXS }}>
         <EuiIcon type="filter" /> {clickToFilterDescription}
       </div>
     </div>

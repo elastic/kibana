@@ -25,6 +25,12 @@ steps:
       queue: n2-2
     depends_on: tests
 
+  - label: ':chart_with_upwards_trend: Report performance metrics to ci-stats'
+    command: .buildkite/scripts/steps/functional/report_performance_metrics.sh
+    agents:
+      queue: n2-2
+    depends_on: tests
+
   - wait: ~
     continue_on_failure: true
 

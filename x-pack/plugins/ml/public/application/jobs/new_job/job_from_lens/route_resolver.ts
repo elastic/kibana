@@ -6,7 +6,7 @@
  */
 
 import rison from 'rison-node';
-import { Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 import { Filter } from '@kbn/es-query';
 import type { LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
 import { canCreateAndStashADJob } from './create_job';

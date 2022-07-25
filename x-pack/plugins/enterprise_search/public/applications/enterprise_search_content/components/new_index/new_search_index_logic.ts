@@ -7,49 +7,63 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { Status } from '../../../../../common/types/api';
 
-import { Engine } from '../../../app_search/components/engine/types';
-import { formatApiName } from '../../utils/format_api_name';
+import { Actions } from '../../../shared/api_logic/create_api_logic';
 
-import { SearchIndicesLogic, SearchIndicesValues } from '../search_indices/search_indices_logic';
+import {
+  IndexExistsApiLogic,
+  IndexExistsApiParams,
+  IndexExistsApiResponse,
+} from '../../api/index/index_exists_api_logic';
 
-import { DEFAULT_LANGUAGE } from './constants';
-import { ISearchEngineOption } from './new_search_index_template';
+import { isValidIndexName } from '../../utils/validate_index_name';
 
-export interface NewSearchIndexValues extends Pick<SearchIndicesValues, 'searchEngines'> {
-  searchEngineSelectOptions: ISearchEngineOption[];
+import { UNIVERSAL_LANGUAGE_VALUE } from './constants';
+import { LanguageForOptimization } from './types';
+import { getLanguageForOptimization } from './utils';
+
+export interface NewSearchIndexValues {
+  data: IndexExistsApiResponse;
+  fullIndexName: string;
+  fullIndexNameExists: boolean;
+  fullIndexNameIsValid: boolean;
+  isLoading: boolean;
+  language: LanguageForOptimization;
+  languageSelectValue: string;
   rawName: string;
-  name: string;
-  language: string;
-  selectedSearchEngines: Array<EuiComboBoxOptionOption<Engine>>;
+  status: Status;
 }
 
-export interface NewSearchIndexActions {
+export type NewSearchIndexActions = Pick<
+  Actions<IndexExistsApiParams, IndexExistsApiResponse>,
+  'makeRequest'
+> & {
+  setLanguageSelectValue(language: string): { language: string };
   setRawName(rawName: string): { rawName: string };
-  setLanguage(language: string): { language: string };
-  setSelectedSearchEngineOptions(selectedSearchEngines: Array<EuiComboBoxOptionOption<Engine>>): {
-    selectedSearchEngines: Array<EuiComboBoxOptionOption<Engine>>;
-  };
-}
+};
 
 export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSearchIndexActions>>({
-  path: ['enterprise_search', 'content', 'new_search_index'],
-  connect: {
-    values: [SearchIndicesLogic, ['searchEngines']],
-  },
   actions: {
+    setLanguageSelectValue: (language) => ({ language }),
     setRawName: (rawName) => ({ rawName }),
-    setLanguage: (language) => ({ language }),
-    setSelectedSearchEngineOptions: (selectedSearchEngines) => ({
-      selectedSearchEngines,
-    }),
   },
+  connect: {
+    actions: [IndexExistsApiLogic, ['makeRequest']],
+    values: [IndexExistsApiLogic, ['data', 'status']],
+  },
+  listeners: ({ actions, values }) => ({
+    setRawName: async (_, breakpoint) => {
+      await breakpoint(150);
+      actions.makeRequest({ indexName: values.fullIndexName });
+    },
+  }),
+  path: ['enterprise_search', 'content', 'new_search_index'],
   reducers: {
-    language: [
-      DEFAULT_LANGUAGE,
+    languageSelectValue: [
+      UNIVERSAL_LANGUAGE_VALUE,
       {
-        setLanguage: (_, { language }) => language,
+        setLanguageSelectValue: (_, { language }) => language ?? null,
       },
     ],
     rawName: [
@@ -58,22 +72,22 @@ export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSe
         setRawName: (_, { rawName }) => rawName,
       },
     ],
-    selectedSearchEngines: [
-      [],
-      {
-        setSelectedSearchEngineOptions: (_, { selectedSearchEngines }) => selectedSearchEngines,
-      },
-    ],
   },
   selectors: ({ selectors }) => ({
-    name: [() => [selectors.rawName], (rawName) => formatApiName(rawName)],
-    searchEngineSelectOptions: [
-      () => [selectors.searchEngines],
-      (searchEngines) =>
-        searchEngines.map((s: Engine) => ({
-          label: s.name,
-          value: s,
-        })),
+    fullIndexName: [() => [selectors.rawName], (name: string) => `search-${name}`],
+    fullIndexNameExists: [
+      () => [selectors.data, selectors.fullIndexName],
+      (data: IndexExistsApiResponse | undefined, fullIndexName: string) =>
+        data?.exists === true && data.indexName === fullIndexName,
+    ],
+    fullIndexNameIsValid: [
+      () => [selectors.fullIndexName],
+      (fullIndexName) => isValidIndexName(fullIndexName),
+    ],
+    isLoading: [() => [selectors.status], (status: Status) => status === Status.LOADING],
+    language: [
+      () => [selectors.languageSelectValue],
+      (languageSelectValue) => getLanguageForOptimization(languageSelectValue),
     ],
   }),
 });

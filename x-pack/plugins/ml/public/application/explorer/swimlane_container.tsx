@@ -29,10 +29,12 @@ import {
   Position,
   ScaleType,
   PartialTheme,
+  HeatmapStyle,
 } from '@elastic/charts';
 import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
+import { ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
 import { SwimLanePagination } from './swimlane_pagination';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 import { ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../../../common';
@@ -155,6 +157,8 @@ export interface SwimlaneProps {
    */
   showTimeline?: boolean;
   showYAxis?: boolean;
+  yAxisWidth?: HeatmapStyle['yAxisLabel']['width'];
+  chartsService: ChartsPluginStart;
 }
 
 /**
@@ -176,10 +180,12 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   selection,
   onCellsSelection,
   timeBuckets,
+  chartsService,
   showTimeline = true,
   showYAxis = true,
   showLegend = true,
   'data-test-subj': dataTestSubj,
+  yAxisWidth,
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
 
@@ -301,7 +307,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
         },
         yAxisLabel: {
           visible: showYAxis,
-          width: Y_AXIS_LABEL_WIDTH,
+          width: yAxisWidth,
           textColor: euiTheme.euiTextSubduedColor,
           padding: Y_AXIS_LABEL_PADDING,
           fontSize: parseInt(euiTheme.euiFontSizeXS, 10),
@@ -332,6 +338,12 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     timeBuckets,
     onCellsSelection,
   ]);
+
+  const chartRef = useRef(null);
+
+  const handleCursorUpdate = useActiveCursor(chartsService.activeCursor, chartRef, {
+    isDateHistogram: true,
+  });
 
   const onElementClick = useCallback(
     (e: HeatmapElementEvent[]) => {
@@ -413,11 +425,12 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                   hidden={noSwimLaneData}
                 >
                   {showSwimlane && !isLoading && (
-                    <Chart className={'mlSwimLaneContainer'}>
+                    <Chart className={'mlSwimLaneContainer'} ref={chartRef}>
                       <Settings
                         // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
                         theme={themeOverrides}
                         onElementClick={onElementClick}
+                        onPointerUpdate={handleCursorUpdate}
                         showLegend={showLegend}
                         legendPosition={Position.Top}
                         xDomain={xDomain}

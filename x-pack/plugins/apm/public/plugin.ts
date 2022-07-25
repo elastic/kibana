@@ -185,7 +185,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                   {
                     label: dependenciesTitle,
                     app: 'apm',
-                    path: '/backends',
+                    path: '/dependencies/inventory',
                     onClick: () => {
                       const { usageCollection } = pluginsStart as {
                         usageCollection?: UsageCollectionStart;
@@ -195,7 +195,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                         usageCollection.reportUiCounter(
                           'apm',
                           METRIC_TYPE.CLICK,
-                          'side_nav_backend'
+                          'side_nav_dependency'
                         );
                       }
                     },
@@ -305,7 +305,11 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         },
         { id: 'traces', title: tracesTitle, path: '/traces' },
         { id: 'service-map', title: serviceMapTitle, path: '/service-map' },
-        { id: 'backends', title: dependenciesTitle, path: '/backends' },
+        {
+          id: 'dependencies',
+          title: dependenciesTitle,
+          path: '/dependencies/inventory',
+        },
         { id: 'settings', title: apmSettingsTitle, path: '/settings' },
       ],
 

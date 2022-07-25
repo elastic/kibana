@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import moment from 'moment-timezone';
+import { AggTypesDependencies } from '..';
 import type { IKibanaSearchResponse } from './types';
 
 /**
@@ -27,4 +29,26 @@ export const isCompleteResponse = (response?: IKibanaSearchResponse) => {
  */
 export const isPartialResponse = (response?: IKibanaSearchResponse) => {
   return Boolean(response && response.isRunning && response.isPartial);
+};
+
+export const getUserTimeZone = (
+  getConfig: AggTypesDependencies['getConfig'],
+  shouldDetectTimezone: boolean = true
+) => {
+  const defaultTimeZone = 'UTC';
+  const userTimeZone = getConfig<string>('dateFormat:tz');
+
+  if (userTimeZone === 'Browser') {
+    if (!shouldDetectTimezone) {
+      return defaultTimeZone;
+    }
+
+    // If the typeMeta data index template does not have a timezone assigned to the selected field, use the configured tz
+    const detectedTimezone = moment.tz.guess();
+    const tzOffset = moment().format('Z');
+
+    return detectedTimezone || tzOffset;
+  }
+
+  return userTimeZone ?? defaultTimeZone;
 };

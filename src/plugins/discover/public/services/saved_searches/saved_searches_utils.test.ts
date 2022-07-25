@@ -42,8 +42,12 @@ describe('saved_searches_utils', () => {
           "hideChart": true,
           "id": "id",
           "rowHeight": undefined,
+          "rowsPerPage": undefined,
           "searchSource": SearchSource {
             "dependencies": Object {
+              "aggs": Object {
+                "createAggConfigs": [MockFunction],
+              },
               "getConfig": [MockFunction],
               "onResponse": [MockFunction],
               "search": [MockFunction],
@@ -116,6 +120,7 @@ describe('saved_searches_utils', () => {
             "searchSourceJSON": "{}",
           },
           "rowHeight": undefined,
+          "rowsPerPage": undefined,
           "sort": Array [
             Array [
               "a",

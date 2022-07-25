@@ -6,18 +6,19 @@
  */
 
 import { useEffect, useState, useCallback } from 'react';
-import { Unit } from '@kbn/datemath';
-import { Type, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
-import { FieldValueQueryBar } from '../query_bar';
+import type { Unit } from '@kbn/datemath';
+import type { Type, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { FieldValueQueryBar } from '../query_bar';
 import { usePreviewRule } from '../../../containers/detection_engine/rules/use_preview_rule';
 import { formatPreviewRule } from '../../../pages/detection_engine/rules/create/helpers';
-import { FieldValueThreshold } from '../threshold_input';
-import { RulePreviewLogs } from '../../../../../common/detection_engine/schemas/request';
-import { EqlOptionsSelected } from '../../../../../common/search_strategy';
+import type { FieldValueThreshold } from '../threshold_input';
+import type { RulePreviewLogs } from '../../../../../common/detection_engine/schemas/request';
+import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
 
 interface PreviewRouteParams {
   isDisabled: boolean;
   index: string[];
+  dataViewId?: string;
   threatIndex: string[];
   query: FieldValueQueryBar;
   threatQuery: FieldValueQueryBar;
@@ -28,10 +29,13 @@ interface PreviewRouteParams {
   machineLearningJobId: string[];
   anomalyThreshold: number;
   eqlOptions: EqlOptionsSelected;
+  newTermsFields: string[];
+  historyWindowSize: string;
 }
 
 export const usePreviewRoute = ({
   index,
+  dataViewId,
   isDisabled,
   query,
   threatIndex,
@@ -43,6 +47,8 @@ export const usePreviewRoute = ({
   machineLearningJobId,
   anomalyThreshold,
   eqlOptions,
+  newTermsFields,
+  historyWindowSize,
 }: PreviewRouteParams) => {
   const [isRequestTriggered, setIsRequestTriggered] = useState(false);
 
@@ -84,6 +90,8 @@ export const usePreviewRoute = ({
     machineLearningJobId,
     anomalyThreshold,
     eqlOptions,
+    newTermsFields,
+    historyWindowSize,
   ]);
 
   useEffect(() => {
@@ -91,6 +99,7 @@ export const usePreviewRoute = ({
       setRule(
         formatPreviewRule({
           index,
+          dataViewId,
           query,
           ruleType,
           threatIndex,
@@ -101,11 +110,14 @@ export const usePreviewRoute = ({
           machineLearningJobId,
           anomalyThreshold,
           eqlOptions,
+          newTermsFields,
+          historyWindowSize,
         })
       );
     }
   }, [
     index,
+    dataViewId,
     isRequestTriggered,
     query,
     rule,
@@ -119,6 +131,8 @@ export const usePreviewRoute = ({
     machineLearningJobId,
     anomalyThreshold,
     eqlOptions,
+    newTermsFields,
+    historyWindowSize,
   ]);
 
   return {

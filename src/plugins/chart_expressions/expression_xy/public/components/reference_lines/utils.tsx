@@ -11,13 +11,23 @@ import { Position } from '@elastic/charts';
 import { euiLightVars } from '@kbn/ui-theme';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { groupBy, orderBy } from 'lodash';
-import { IconPosition, ReferenceLineConfig, YAxisMode, FillStyle } from '../../../common/types';
+import {
+  IconPosition,
+  ReferenceLineConfig,
+  FillStyle,
+  ExtendedReferenceLineDecorationConfig,
+  ReferenceLineDecorationConfig,
+} from '../../../common/types';
 import { FillStyles } from '../../../common/constants';
 import {
+  GroupsConfiguration,
   LINES_MARKER_SIZE,
   mapVerticalToHorizontalPlacement,
   Marker,
   MarkerBody,
+  getAxisPosition,
+  getOriginalAxisPosition,
+  AxesMap,
 } from '../../helpers';
 import { ReferenceLineAnnotationConfig } from './reference_line_annotations';
 
@@ -26,17 +36,18 @@ import { ReferenceLineAnnotationConfig } from './reference_line_annotations';
 // this function assume the chart is vertical
 export function getBaseIconPlacement(
   iconPosition: IconPosition | undefined,
-  axesMap?: Record<string, unknown>,
-  axisMode?: YAxisMode
+  axesMap?: AxesMap,
+  position?: Position
 ) {
   if (iconPosition === 'auto') {
-    if (axisMode === 'bottom') {
+    if (position === Position.Bottom) {
       return Position.Top;
     }
     if (axesMap) {
-      if (axisMode === 'left') {
+      if (position === Position.Left) {
         return axesMap.right ? Position.Left : Position.Right;
       }
+
       return axesMap.left ? Position.Right : Position.Left;
     }
   }
@@ -67,22 +78,26 @@ export const getSharedStyle = (config: ReferenceLineAnnotationConfig) => ({
 export const getLineAnnotationProps = (
   config: ReferenceLineAnnotationConfig,
   labels: { markerLabel?: string; markerBodyLabel?: string },
-  axesMap: Record<'left' | 'right', boolean>,
+  axesMap: AxesMap,
   paddingMap: Partial<Record<Position, number>>,
-  groupId: 'left' | 'right' | undefined,
   isHorizontal: boolean
 ) => {
   // get the position for vertical chart
   const markerPositionVertical = getBaseIconPlacement(
     config.iconPosition,
     axesMap,
-    config.axisMode
+    getOriginalAxisPosition(config.axisGroup?.position ?? Position.Bottom, isHorizontal)
   );
+
   // the padding map is built for vertical chart
   const hasReducedPadding = paddingMap[markerPositionVertical] === LINES_MARKER_SIZE;
 
+  const markerPosition = isHorizontal
+    ? mapVerticalToHorizontalPlacement(markerPositionVertical)
+    : markerPositionVertical;
+
   return {
-    groupId,
+    groupId: config.axisGroup?.groupId || 'bottom',
     marker: (
       <Marker
         config={config}
@@ -94,21 +109,13 @@ export const getLineAnnotationProps = (
     markerBody: (
       <MarkerBody
         label={labels.markerBodyLabel}
-        isHorizontal={
-          (!isHorizontal && config.axisMode === 'bottom') ||
-          (isHorizontal && config.axisMode !== 'bottom')
-        }
+        isHorizontal={markerPosition === Position.Bottom || markerPosition === Position.Top}
       />
     ),
     // rotate the position if required
-    markerPosition: isHorizontal
-      ? mapVerticalToHorizontalPlacement(markerPositionVertical)
-      : markerPositionVertical,
+    markerPosition,
   };
 };
-
-export const getGroupId = (axisMode: YAxisMode | undefined) =>
-  axisMode === 'bottom' ? undefined : axisMode === 'right' ? 'right' : 'left';
 
 export const getBottomRect = (
   headerLabel: string | undefined,
@@ -147,13 +154,16 @@ export const getHorizontalRect = (
 const sortReferenceLinesByGroup = (referenceLines: ReferenceLineConfig[], group: FillStyle) => {
   if (group === FillStyles.ABOVE || group === FillStyles.BELOW) {
     const order = group === FillStyles.ABOVE ? 'asc' : 'desc';
-    return orderBy(referenceLines, ({ yConfig: [{ value }] }) => value, [order]);
+    return orderBy(referenceLines, ({ decorations: [{ value }] }) => value, [order]);
   }
   return referenceLines;
 };
 
 export const getNextValuesForReferenceLines = (referenceLines: ReferenceLineConfig[]) => {
-  const grouppedReferenceLines = groupBy(referenceLines, ({ yConfig: [yConfig] }) => yConfig.fill);
+  const grouppedReferenceLines = groupBy(
+    referenceLines,
+    ({ decorations: [decorationConfig] }) => decorationConfig.fill
+  );
   const groups = Object.keys(grouppedReferenceLines) as FillStyle[];
 
   return groups.reduce<Record<FillStyle, Record<string, number | undefined>>>(
@@ -164,8 +174,8 @@ export const getNextValuesForReferenceLines = (referenceLines: ReferenceLineConf
         (nextValues, referenceLine, index, lines) => {
           let nextValue: number | undefined;
           if (index < lines.length - 1) {
-            const [yConfig] = lines[index + 1].yConfig;
-            nextValue = yConfig.value;
+            const [decorationConfig] = lines[index + 1].decorations;
+            nextValue = decorationConfig.value;
           }
 
           return { ...nextValues, [referenceLine.layerId]: nextValue };
@@ -183,7 +193,7 @@ export const computeChartMargins = (
   referenceLinePaddings: Partial<Record<Position, number>>,
   labelVisibility: Partial<Record<'x' | 'yLeft' | 'yRight', boolean>>,
   titleVisibility: Partial<Record<'x' | 'yLeft' | 'yRight', boolean>>,
-  axesMap: Record<'left' | 'right', unknown>,
+  axesMap: AxesMap,
   isHorizontal: boolean
 ) => {
   const result: Partial<Record<Position, number>> = {};
@@ -210,5 +220,18 @@ export const computeChartMargins = (
     const placement = isHorizontal ? mapVerticalToHorizontalPlacement('top') : 'top';
     result[placement] = referenceLinePaddings.top;
   }
+
   return result;
 };
+
+export function getAxisGroupForReferenceLine(
+  axesConfiguration: GroupsConfiguration,
+  decorationConfig: ReferenceLineDecorationConfig | ExtendedReferenceLineDecorationConfig,
+  shouldRotate: boolean
+) {
+  return axesConfiguration.find(
+    (axis) =>
+      (decorationConfig.axisId && axis.groupId.includes(decorationConfig.axisId)) ||
+      getAxisPosition(decorationConfig.position ?? Position.Left, shouldRotate) === axis.position
+  );
+}

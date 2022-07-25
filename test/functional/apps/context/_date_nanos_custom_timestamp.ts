@@ -15,7 +15,7 @@ const TEST_STEP_SIZE = 3;
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
-  const docTable = getService('docTable');
+  const dataGrid = getService('dataGrid');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'context', 'timePicker', 'discover']);
   const esArchiver = getService('esArchiver');
@@ -32,13 +32,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.update({
         'context:defaultSize': `${TEST_DEFAULT_CONTEXT_SIZE}`,
         'context:step': `${TEST_STEP_SIZE}`,
-        'doc_table:legacy': true,
       });
     });
 
-    it('displays predessors - anchor - successors in right order ', async function () {
+    it('displays predecessors - anchor - successors in right order', async function () {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, '1');
-      const actualRowsText = await docTable.getRowsText();
+      const actualRowsText = await dataGrid.getRowsText();
+
       const expectedRowsText = [
         'Oct 21, 2019 @ 08:30:04.828733000',
         'Oct 21, 2019 @ 00:30:04.828740000',

@@ -11,10 +11,11 @@ import { TimelineTabs } from '../../../../../common/types/timeline';
 
 import { navTabsHostDetails } from '../../../../hosts/pages/details/nav_tabs';
 import { HostsTableType } from '../../../../hosts/store/model';
-import { RouteSpyState } from '../../../utils/route/types';
+import type { RouteSpyState } from '../../../utils/route/types';
 import { CONSTANTS } from '../../url_state/constants';
 import { TabNavigationComponent } from '.';
-import { TabNavigationProps } from './types';
+import type { TabNavigationProps } from './types';
+import { SecurityPageName } from '../../../../app/types';
 
 jest.mock('../../link_to');
 jest.mock('../../../lib/kibana/kibana_react', () => {
@@ -54,9 +55,9 @@ describe('Table Navigation', () => {
   const mockRiskyHostEnabled = true;
 
   const mockProps: TabNavigationProps & RouteSpyState = {
-    pageName: 'hosts',
+    pageName: SecurityPageName.hosts,
     pathName: '/hosts',
-    detailName: undefined,
+    detailName: hostName,
     search: '',
     tabName: HostsTableType.authentications,
     navTabs: navTabsHostDetails({
@@ -64,32 +65,6 @@ describe('Table Navigation', () => {
       hasMlUserPermissions: mockHasMlUserPermissions,
       isRiskyHostsEnabled: mockRiskyHostEnabled,
     }),
-
-    [CONSTANTS.timerange]: {
-      global: {
-        [CONSTANTS.timerange]: {
-          from: '2019-05-16T23:10:43.696Z',
-          fromStr: 'now-24h',
-          kind: 'relative',
-          to: '2019-05-17T23:10:43.697Z',
-          toStr: 'now',
-        },
-        linkTo: ['timeline'],
-      },
-      timeline: {
-        [CONSTANTS.timerange]: {
-          from: '2019-05-16T23:10:43.696Z',
-          fromStr: 'now-24h',
-          kind: 'relative',
-          to: '2019-05-17T23:10:43.697Z',
-          toStr: 'now',
-        },
-        linkTo: ['global'],
-      },
-    },
-    [CONSTANTS.appQuery]: { query: 'host.name:"siem-es"', language: 'kuery' },
-    [CONSTANTS.filters]: [],
-    [CONSTANTS.sourcerer]: {},
     [CONSTANTS.timeline]: {
       activeTab: TimelineTabs.query,
       id: '',

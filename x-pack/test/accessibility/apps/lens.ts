@@ -146,23 +146,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.createLayer();
 
       await PageObjects.lens.switchToVisualization('area');
-      await PageObjects.lens.configureDimension(
-        {
-          dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-          operation: 'date_histogram',
-          field: '@timestamp',
-        },
-        1
-      );
+      await PageObjects.lens.configureDimension({
+        dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
 
-      await PageObjects.lens.configureDimension(
-        {
-          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-          operation: 'median',
-          field: 'bytes',
-        },
-        1
-      );
+      await PageObjects.lens.configureDimension({
+        dimension: 'lns-layerPanel-1 > lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'median',
+        field: 'bytes',
+      });
       await a11y.testAppSnapshot();
     });
 

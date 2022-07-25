@@ -51,7 +51,8 @@ describe('Filters Agg', () => {
         ],
         {
           typesRegistry: mockAggTypesRegistry(aggTypesDependencies),
-        }
+        },
+        jest.fn()
       );
     };
 

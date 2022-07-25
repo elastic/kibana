@@ -25,7 +25,7 @@ describe('SourceSettings', () => {
   const updateContentSource = jest.fn();
   const removeContentSource = jest.fn();
   const getSourceConfigData = jest.fn();
-  const contentSource = fullContentSources[0];
+  const contentSource = fullContentSources[1];
   const buttonLoading = false;
   const isOrganization = true;
 
@@ -37,6 +37,7 @@ describe('SourceSettings', () => {
   };
 
   beforeEach(() => {
+    jest.clearAllMocks();
     setMockValues({ ...mockValues });
     setMockActions({
       updateContentSource,
@@ -63,7 +64,7 @@ describe('SourceSettings', () => {
     wrapper.find('form').simulate('submit', { preventDefault });
 
     expect(preventDefault).toHaveBeenCalled();
-    expect(updateContentSource).toHaveBeenCalledWith(fullContentSources[0].id, { name: TEXT });
+    expect(updateContentSource).toHaveBeenCalledWith(contentSource.id, { name: TEXT });
   });
 
   it('handles confirmModal submission', () => {
@@ -95,7 +96,7 @@ describe('SourceSettings', () => {
     setMockValues({
       ...mockValues,
       contentSource: {
-        ...fullContentSources[0],
+        ...contentSource,
         serviceType: 'confluence_server',
       },
     });
@@ -105,5 +106,60 @@ describe('SourceSettings', () => {
     expect(wrapper.find(SourceConfigFields).prop('publicKey')).toEqual(
       sourceConfigData.configuredFields.publicKey
     );
+  });
+
+  it('hides source config for github apps', () => {
+    setMockValues({
+      ...mockValues,
+      contentSource: {
+        ...contentSource,
+        serviceType: 'github_via_app',
+        secret: {},
+      },
+    });
+
+    const wrapper = shallow(<SourceSettings />);
+
+    expect(wrapper.find(SourceConfigFields)).toHaveLength(0);
+  });
+
+  it('hides source config for github enterprise apps', () => {
+    setMockValues({
+      ...mockValues,
+      contentSource: {
+        ...contentSource,
+        serviceType: 'github_enterprise_server_via_app',
+        secret: {},
+      },
+    });
+
+    const wrapper = shallow(<SourceSettings />);
+
+    expect(wrapper.find(SourceConfigFields)).toHaveLength(0);
+  });
+
+  it('hides source config for custom sources', () => {
+    setMockValues({
+      ...mockValues,
+      contentSource: {
+        ...contentSource,
+        serviceType: 'custom',
+      },
+    });
+
+    const wrapper = shallow(<SourceSettings />);
+
+    expect(wrapper.find(SourceConfigFields)).toHaveLength(0);
+  });
+
+  it('hides source config for non-organization sources', () => {
+    setMockValues({
+      ...mockValues,
+      isOrganization: false,
+    });
+
+    const wrapper = shallow(<SourceSettings />);
+
+    expect(wrapper.find(SourceConfigFields)).toHaveLength(0);
   });
 });
