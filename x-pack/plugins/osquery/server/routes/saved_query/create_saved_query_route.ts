@@ -18,7 +18,7 @@ import { convertECSMappingToArray } from '../utils';
 export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
     {
-      path: '/internal/osquery/saved_query',
+      path: '/api/osquery/saved_queries',
       validate: {
         body: buildRouteValidation<
           typeof createSavedQueryRequestSchema,
@@ -66,13 +66,15 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
       );
 
       return response.ok({
-        body: pickBy(
-          {
-            ...savedQuerySO,
-            ecs_mapping,
-          },
-          (value) => !isEmpty(value)
-        ),
+        body: {
+          data: pickBy(
+            {
+              ...savedQuerySO,
+              ecs_mapping,
+            },
+            (value) => !isEmpty(value)
+          ),
+        },
       });
     }
   );

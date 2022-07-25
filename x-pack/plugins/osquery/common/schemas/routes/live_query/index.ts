@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './create_action_request_body_schema';
+export * from './create_live_query_request_body_schema';

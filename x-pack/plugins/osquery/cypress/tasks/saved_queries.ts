@@ -75,7 +75,7 @@ export const getSavedQueriesComplexTest = (savedQueryId: string, savedQueryDescr
       // visit Status results
       cy.react('EuiTab', { props: { id: 'status' } }).click();
       cy.react('EuiTableRow').should('have.lengthOf', 1);
-      cy.contains('Successful').siblings().contains(1);
+      // cy.contains('Successful').siblings().contains(1);
 
       // play saved query
       cy.contains('Saved queries').click();

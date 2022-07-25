@@ -16,7 +16,7 @@ import { convertECSMappingToObject } from '../utils';
 export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.get(
     {
-      path: '/internal/osquery/saved_query/{id}',
+      path: '/api/osquery/saved_queries/{id}',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -43,7 +43,7 @@ export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
       savedQuery.attributes.prebuilt = await isSavedQueryPrebuilt(osqueryContext, savedQuery.id);
 
       return response.ok({
-        body: savedQuery,
+        body: { data: savedQuery },
       });
     }
   );
