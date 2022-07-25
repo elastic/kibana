@@ -20,16 +20,16 @@ describe('UserProfileAPIClient', () => {
   });
 
   it('should get user profile without retrieving any user data', async () => {
-    await apiClient.get();
+    await apiClient.getCurrent();
     expect(coreStart.http.get).toHaveBeenCalledWith('/internal/security/user_profile', {
-      query: { data: undefined },
+      query: { dataPath: undefined },
     });
   });
 
   it('should get user profile and user data', async () => {
-    await apiClient.get('*');
+    await apiClient.getCurrent({ dataPath: '*' });
     expect(coreStart.http.get).toHaveBeenCalledWith('/internal/security/user_profile', {
-      query: { data: '*' },
+      query: { dataPath: '*' },
     });
   });
 
