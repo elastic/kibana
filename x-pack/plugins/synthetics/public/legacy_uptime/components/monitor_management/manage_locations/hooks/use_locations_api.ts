@@ -60,7 +60,6 @@ export const useLocationsAPI = ({ isOpen }: { isOpen: boolean }) => {
   }, [deleteId, currentPrivateLocations]);
 
   return {
-    formData,
     onSubmit,
     onDelete,
     loading: fetchLoading || saveLoading || deleteLoading,
