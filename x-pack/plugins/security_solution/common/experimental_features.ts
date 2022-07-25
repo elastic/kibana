@@ -15,7 +15,7 @@ export const allowedExperimentalValues = Object.freeze({
   tGridEnabled: true,
   tGridEventRenderedViewEnabled: true,
   excludePoliciesInFilterEnabled: false,
-  kubernetesEnabled: false,
+  kubernetesEnabled: true,
   disableIsolationUIPendingStatuses: false,
   riskyHostsEnabled: false,
   riskyUsersEnabled: false,
@@ -37,6 +37,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Endpoint response actions console in various areas of the app
    */
   responseActionsConsoleEnabled: true,
+
   /**
    * Enables the cloud security posture navigation inside the security solution
    */
@@ -46,6 +47,15 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the insights module for related alerts by process ancestry
    */
   insightsRelatedAlertsByProcessAncestry: false,
+
+  /**
+   * Enables extended rule execution logging to Event Log. When this setting is enabled:
+   * - Rules write their console error, info, debug, and trace messages to Event Log,
+   *   in addition to other events they log there (status changes and execution metrics).
+   * - We add a Kibana Advanced Setting that controls this behavior (on/off and log level).
+   * - We show a table with plain execution logs on the Rule Details page.
+   */
+  extendedRuleExecutionLoggingEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

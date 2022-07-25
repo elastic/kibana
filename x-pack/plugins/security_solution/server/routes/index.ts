@@ -35,7 +35,7 @@ import { deleteRulesBulkRoute } from '../lib/detection_engine/routes/rules/delet
 import { performBulkActionRoute } from '../lib/detection_engine/routes/rules/perform_bulk_action_route';
 import { importRulesRoute } from '../lib/detection_engine/routes/rules/import_rules_route';
 import { exportRulesRoute } from '../lib/detection_engine/routes/rules/export_rules_route';
-import { getRuleExecutionEventsRoute } from '../lib/detection_engine/routes/rules/get_rule_execution_events_route';
+import { registerRuleMonitoringRoutes } from '../lib/detection_engine/rule_monitoring';
 import { getPrepackagedRulesStatusRoute } from '../lib/detection_engine/routes/rules/get_prepackaged_rules_status_route';
 import {
   createTimelinesRoute,
@@ -69,6 +69,9 @@ import { legacyCreateLegacyNotificationRoute } from '../lib/detection_engine/rou
 import { createSourcererDataViewRoute, getSourcererDataViewRoute } from '../lib/sourcerer/routes';
 import type { ITelemetryReceiver } from '../lib/telemetry/receiver';
 import { telemetryDetectionRulesPreviewRoute } from '../lib/detection_engine/routes/telemetry/telemetry_detection_rules_preview_route';
+import { readPrebuiltDevToolContentRoute } from '../lib/prebuilt_dev_tool_content/routes/read_prebuilt_dev_tool_content_route';
+import { createPrebuiltSavedObjectsRoute } from '../lib/prebuilt_saved_objects/routes/create_prebuilt_saved_objects';
+import { readAlertsIndexExistsRoute } from '../lib/detection_engine/routes/index/read_alerts_index_exists_route';
 import { getInstalledIntegrationsRoute } from '../lib/detection_engine/routes/fleet/get_installed_integrations/get_installed_integrations_route';
 
 export const initRoutes = (
@@ -117,7 +120,7 @@ export const initRoutes = (
   deleteRulesBulkRoute(router, logger);
   performBulkActionRoute(router, ml, logger);
 
-  getRuleExecutionEventsRoute(router);
+  registerRuleMonitoringRoutes(router);
 
   getInstalledIntegrationsRoute(router, logger);
 
@@ -155,8 +158,11 @@ export const initRoutes = (
   // All REST index creation, policy management for spaces
   createIndexRoute(router);
   readIndexRoute(router, ruleDataService);
+  readAlertsIndexExistsRoute(router);
   deleteIndexRoute(router);
 
+  readPrebuiltDevToolContentRoute(router);
+  createPrebuiltSavedObjectsRoute(router, security);
   // Detection Engine tags routes that have the REST endpoints of /api/detection_engine/tags
   readTagsRoute(router);
 
