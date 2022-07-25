@@ -70,6 +70,8 @@ export const convertSeriesToVars = (series, model, getConfig = null, fieldFormat
         set(variables, varName, data);
         // label might be not purely alphanumeric, wrap in brackets to map sure it's resolved correctly
         set(variables, `[${label}].label`, rowLabel);
+        // compatibility
+        set(variables, `[${label}].formatted`, rowLabel);
       });
   });
   return variables;
