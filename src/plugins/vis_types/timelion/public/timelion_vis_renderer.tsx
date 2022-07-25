@@ -13,12 +13,30 @@ import { ExpressionRenderDefinition } from '@kbn/expressions-plugin';
 import { RangeFilterParams } from '@kbn/es-query';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { KibanaExecutionContext } from '@kbn/core/public';
 import { TimelionVisDependencies } from './plugin';
 import { TimelionRenderValue } from './timelion_vis_fn';
+import { getUsageCollection } from './helpers/plugin_services';
 
 const LazyTimelionVisComponent = lazy(() =>
   import('./async_services').then(({ TimelionVisComponent }) => ({ default: TimelionVisComponent }))
 );
+
+/** @internal **/
+const extractContainerType = (context?: KibanaExecutionContext): string | undefined => {
+  if (context) {
+    const recursiveGet = (item: KibanaExecutionContext): KibanaExecutionContext | undefined => {
+      if (item.type) {
+        return item;
+      } else if (item.child) {
+        return recursiveGet(item.child);
+      }
+    };
+    return recursiveGet(context)?.type;
+  }
+};
+
 export const getTimelionVisRenderer: (
   deps: TimelionVisDependencies
 ) => ExpressionRenderDefinition<TimelionRenderValue> = (deps) => ({
@@ -51,8 +69,26 @@ export const getTimelionVisRenderer: (
       });
     };
 
+    const renderComplete = () => {
+      const usageCollection = getUsageCollection();
+      const containerType = extractContainerType(handlers.getExecutionContext());
+
+      if (usageCollection && containerType) {
+        usageCollection.reportUiCounter(
+          containerType,
+          METRIC_TYPE.COUNT,
+          `render_agg_based_timelion`
+        );
+      }
+      handlers.done();
+    };
+
     render(
-      <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
+      <VisualizationContainer
+        renderComplete={renderComplete}
+        handlers={handlers}
+        showNoResult={showNoResult}
+      >
         <KibanaThemeProvider theme$={deps.theme.theme$}>
           <KibanaContextProvider services={{ ...deps }}>
             {seriesList && (
@@ -60,7 +96,7 @@ export const getTimelionVisRenderer: (
                 interval={visParams.interval}
                 ariaLabel={visParams.ariaLabel}
                 seriesList={seriesList}
-                renderComplete={handlers.done}
+                renderComplete={renderComplete}
                 onBrushEvent={onBrushEvent}
                 syncTooltips={syncTooltips}
               />

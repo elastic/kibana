@@ -33,6 +33,7 @@ describe('TableVisualizationComponent', () => {
     },
     tables: [],
   };
+  const renderComplete = jest.fn();
   const visConfig = {} as unknown as TableVisConfig;
 
   it('should render the basic table', () => {
@@ -42,6 +43,7 @@ describe('TableVisualizationComponent', () => {
         handlers={handlers}
         visData={visData}
         visConfig={visConfig}
+        renderComplete={renderComplete}
       />
     );
     expect(useUiState).toHaveBeenLastCalledWith(handlers.uiState);
@@ -58,6 +60,7 @@ describe('TableVisualizationComponent', () => {
           tables: [],
         }}
         visConfig={visConfig}
+        renderComplete={renderComplete}
       />
     );
     expect(useUiState).toHaveBeenLastCalledWith(handlers.uiState);

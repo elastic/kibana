@@ -14,6 +14,7 @@ import type { IAggType } from '@kbn/data-plugin/public';
 import { IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { trackUiCounterEvents } from '../lens_ui_telemetry';
 import { DatatableComponent } from './components/table_basic';
 
 import type { ILensInterpreterRenderHandlers } from '../types';
@@ -39,8 +40,15 @@ export const getDatatableRenderer = (dependencies: {
     config: DatatableProps,
     handlers: ILensInterpreterRenderHandlers
   ) => {
+    handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+
     const resolvedGetType = await dependencies.getType;
     const { hasCompatibleActions, isInteractive } = handlers;
+
+    const renderComplete = () => {
+      trackUiCounterEvents('table', handlers.getExecutionContext());
+      handlers.done();
+    };
 
     // An entry for each table row, whether it has any actions attached to
     // ROW_CLICK_TRIGGER trigger.
@@ -81,12 +89,11 @@ export const getDatatableRenderer = (dependencies: {
             rowHasRowClickTriggerActions={rowHasRowClickTriggerActions}
             interactive={isInteractive()}
             uiSettings={dependencies.uiSettings}
-            renderComplete={() => handlers.done()}
+            renderComplete={renderComplete}
           />
         </I18nProvider>
       </KibanaThemeProvider>,
       domNode
     );
-    handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
   },
 });

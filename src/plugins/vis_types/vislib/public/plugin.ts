@@ -15,6 +15,8 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { LEGACY_PIE_CHARTS_LIBRARY } from '@kbn/vis-type-pie-plugin/common';
 import { LEGACY_HEATMAP_CHARTS_LIBRARY } from '@kbn/vis-type-heatmap-plugin/common';
 import { LEGACY_GAUGE_CHARTS_LIBRARY } from '@kbn/vis-type-gauge-plugin/common';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { setUsageCollectionStart } from './services';
 import { heatmapVisTypeDefinition } from './heatmap';
 
 import { createVisTypeVislibVisFn } from './vis_type_vislib_vis_fn';
@@ -35,6 +37,7 @@ export interface VisTypeVislibPluginSetupDependencies {
 /** @internal */
 export interface VisTypeVislibPluginStartDependencies {
   data: DataPublicPluginStart;
+  usageCollection?: UsageCollectionStart;
 }
 
 export type VisTypeVislibCoreSetup = CoreSetup<VisTypeVislibPluginStartDependencies, void>;
@@ -73,9 +76,12 @@ export class VisTypeVislibPlugin
     }
   }
 
-  public start(core: CoreStart, { data }: VisTypeVislibPluginStartDependencies) {
+  public start(core: CoreStart, { data, usageCollection }: VisTypeVislibPluginStartDependencies) {
     setFormatService(data.fieldFormats);
     setDataActions(data.actions);
     setTheme(core.theme);
+    if (usageCollection) {
+      setUsageCollectionStart(usageCollection);
+    }
   }
 }

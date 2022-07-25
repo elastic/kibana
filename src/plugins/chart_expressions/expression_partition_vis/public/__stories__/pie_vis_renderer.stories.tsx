@@ -11,7 +11,7 @@ import { ComponentStory } from '@storybook/react';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getPartitionVisRenderer } from '../expression_renderers';
 import { ChartTypes, RenderValue } from '../../common/types';
-import { palettes, theme, getStartDeps } from '../__mocks__';
+import { getStartDeps } from '../__mocks__';
 import { pieDonutArgTypes, pieConfig, data } from './shared';
 
 const containerSize = {
@@ -19,7 +19,7 @@ const containerSize = {
   height: '700px',
 };
 
-const PartitionVisRenderer = () => getPartitionVisRenderer({ palettes, theme, getStartDeps });
+const PartitionVisRenderer = () => getPartitionVisRenderer({ getStartDeps });
 
 type Props = {
   visType: RenderValue['visType'];

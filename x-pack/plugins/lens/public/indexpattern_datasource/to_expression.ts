@@ -208,7 +208,7 @@ function getExpressionForLayer(
     });
 
     /*
-      Update ID mappings with new agg array positions. 
+      Update ID mappings with new agg array positions.
 
       Given this esAggs-ID-to-original-column map after percentile (for example) optimization:
       col-0-0:    column1

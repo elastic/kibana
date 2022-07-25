@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { getFormatService, setFormatService } from './format_service';
-export { getPaletteService, setPaletteService } from './palette_service';
+import { LayerTypes } from '../constants';
+import { DataLayerConfig, CommonXYLayerConfig } from '..';
+
+export const isDataLayer = (layer: CommonXYLayerConfig): layer is DataLayerConfig =>
+  layer.layerType === LayerTypes.DATA;

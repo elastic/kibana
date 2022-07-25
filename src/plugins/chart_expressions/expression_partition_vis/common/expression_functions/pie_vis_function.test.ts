@@ -18,6 +18,7 @@ import { ExpressionValueVisDimension, LegendSize } from '@kbn/visualizations-plu
 import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { pieVisFunction } from './pie_vis_function';
 import { PARTITION_LABELS_VALUE } from '../constants';
+import { ExecutionContext } from '@kbn/expressions-plugin';
 
 describe('interpreter/functions#pieVis', () => {
   const fn = functionWrapper(pieVisFunction());
@@ -132,7 +133,9 @@ describe('interpreter/functions#pieVis', () => {
           reset: () => {},
         },
       },
-    };
+      getExecutionContext: jest.fn(),
+    } as unknown as ExecutionContext;
+
     await fn(context, visConfig, handlers as any);
 
     expect(loggedTable!).toMatchSnapshot();

@@ -17,6 +17,7 @@ import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { waffleVisFunction } from './waffle_vis_function';
 import { PARTITION_LABELS_VALUE } from '../constants';
+import { ExecutionContext } from '@kbn/expressions-plugin';
 
 describe('interpreter/functions#waffleVis', () => {
   const fn = functionWrapper(waffleVisFunction());
@@ -109,8 +110,10 @@ describe('interpreter/functions#waffleVis', () => {
           reset: () => {},
         },
       },
-    };
-    await fn(context, visConfig, handlers as any);
+      getExecutionContext: jest.fn(),
+    } as unknown as ExecutionContext;
+
+    await fn(context, visConfig, handlers);
 
     expect(loggedTable!).toMatchSnapshot();
   });
