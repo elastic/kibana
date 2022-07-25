@@ -73,7 +73,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should create shakespeare index pattern', async function () {
       await PageObjects.common.navigateToApp('settings');
       log.debug('Create shakespeare index pattern');
-      await PageObjects.settings.createIndexPattern('shakespeare', null);
+      await PageObjects.settings.createIndexPattern(
+        'shakespeare',
+        null,
+        undefined,
+        undefined,
+        'shakespeare'
+      );
       const patternName = await PageObjects.settings.getIndexPageHeading();
       expect(patternName).to.be('shakespeare');
     });

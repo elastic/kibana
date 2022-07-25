@@ -80,9 +80,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           .then((id) => (indexPatternId = id));
       });
 
-      it('should have index pattern in page header', async function () {
-        const patternName = await PageObjects.settings.getIndexPageHeading();
-        expect(patternName).to.be('logstash-*');
+      it('should have default data view name in page header', async function () {
+        const dataViewName = await PageObjects.settings.getIndexPageHeading();
+        expect(dataViewName).to.be('Data View');
       });
 
       it('should have index pattern in url', function url() {
