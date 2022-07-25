@@ -76,37 +76,37 @@ export default function (providerContext: FtrProviderContext) {
       it('should upgrade package policy on setup if keep policies up to date set to true', async () => {
         const oldVersion = '0.1.0';
         const latestVersion = '0.3.0';
-        const policyName = 'policy-1'
+        const policyName = 'policy-1';
         // first install old version of package
         await supertest
-        .post(`/api/fleet/epm/packages/multiple_versions/${oldVersion}`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({ force: true })
-        .expect(200);
+          .post(`/api/fleet/epm/packages/multiple_versions/${oldVersion}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
+          .expect(200);
 
         // now set the package to keep policies up to date
         await supertest
-        .put(`/api/fleet/epm/packages/multiple_versions/${oldVersion}`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({ keepPoliciesUpToDate: true})
-        .expect(200);
+          .put(`/api/fleet/epm/packages/multiple_versions/${oldVersion}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ keepPoliciesUpToDate: true })
+          .expect(200);
 
         // create a package policy with the old package version
         await supertest
-        .post('/api/fleet/package_policies')
-        .set('kbn-xsrf', 'xxxx')
-        .send({
-          name: policyName,
-          namespace: 'default',
-          policy_id: agentPolicyId,
-          package: { name: 'multiple_versions', version: oldVersion },
-          inputs: [],
-          force: true
-        })
-        .expect(200);
-        
+          .post('/api/fleet/package_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: policyName,
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            package: { name: 'multiple_versions', version: oldVersion },
+            inputs: [],
+            force: true,
+          })
+          .expect(200);
+
         // install the most recent version of the package
-         await supertest
+        await supertest
           .post(`/api/fleet/epm/packages/multiple_versions/${latestVersion}`)
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
