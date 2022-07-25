@@ -69,7 +69,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       name: (
         <EuiToolTip position="top" content={i18n.translate(
           'xpack.aiops.correlations.failedTransactions.correlationsTable.logRateColumnTooltip',
-          { defaultMessage: 'Visual representation of amount of impact given field name and value have on metric change point.' }
+          { defaultMessage: 'A visual representation of the amount of impact the given field name and value have on the message rate difference.' }
         )}>
           <FormattedMessage
             id='xpack.aiops.correlations.failedTransactions.correlationsTable.logRateLabel'
@@ -89,7 +89,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       name: (
         <EuiToolTip position="top" content={i18n.translate(
           'xpack.aiops.correlations.failedTransactions.correlationsTable.pValueColumnTooltip',
-          { defaultMessage: 'For statistically significant changes in the distribution of values, indicates how extreme the change is; lower values indicate greater change.' }
+          { defaultMessage: 'For statistically significant changes in the frequency of values, indicates how extreme the change is; lower values indicate greater change.' }
         )}>
           <FormattedMessage
             id='xpack.aiops.correlations.failedTransactions.correlationsTable.pValueLabel'
@@ -105,7 +105,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       name: (
         <EuiToolTip position="top" content={i18n.translate(
           'xpack.aiops.correlations.failedTransactions.correlationsTable.impactLabelColumnTooltip',
-          { defaultMessage: 'Indicates level of impact of given field name and value on metric change point.' }
+          { defaultMessage: 'Indicates the level of impact of the given field name and value on the message rate difference.' }
         )}>
           <FormattedMessage
             id='xpack.aiops.correlations.failedTransactions.correlationsTable.impactLabel'
