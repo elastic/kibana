@@ -6,19 +6,17 @@
  */
 
 import { transformError, getIndexExists } from '@kbn/securitysolution-es-utils';
-import type { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { DETECTION_ENGINE_SIGNAL_INDEX_URL } from '../../../../../common/constants';
+import { DETECTION_ENGINE_ALERTS_INDEX_URL } from '../../../../../common/constants';
 
 import { buildSiemResponse } from '../utils';
 
 export const readAlertsIndexExistsRoute = (
   router: SecuritySolutionPluginRouter,
-  ruleDataService: RuleDataPluginService
 ) => {
   router.get(
     {
-      path: DETECTION_ENGINE_SIGNAL_INDEX_URL,
+      path: DETECTION_ENGINE_ALERTS_INDEX_URL,
       validate: false,
       options: {
         tags: ['access:securitySolution'],

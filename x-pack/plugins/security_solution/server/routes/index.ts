@@ -158,7 +158,7 @@ export const initRoutes = (
   // All REST index creation, policy management for spaces
   createIndexRoute(router);
   readIndexRoute(router, ruleDataService);
-  readAlertsIndexExistsRoute(router, ruleDataService);
+  readAlertsIndexExistsRoute(router);
   deleteIndexRoute(router);
 
   readPrebuiltDevToolContentRoute(router);
