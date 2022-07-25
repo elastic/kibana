@@ -19,3 +19,5 @@ if [[ "${GITHUB_PR_NUMBER:-}" ]]; then
     buildkite-agent meta-data set pr_comment:docs_changes:head "* [Documentation Changes](${DOCS_CHANGES_URL})"
   fi
 fi
+
+.buildkite/scripts/steps/checks/own_tests_ran.sh
