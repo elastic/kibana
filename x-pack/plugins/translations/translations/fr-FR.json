@@ -7844,8 +7844,6 @@
     "xpack.apm.home.serviceMapTabLabel": "Carte des services",
     "xpack.apm.infraTabs.failurePromptDescription": "Un problème est survenu lors du chargement de l'onglet Infrastructure et de vos données. Vous pouvez contacter votre administrateur pour obtenir de l'aide.",
     "xpack.apm.infraTabs.failurePromptTitle": "Impossible de charger vos données d'infrastructure",
-    "xpack.apm.infraTabs.noMetricsPromptDescription": "Essayez d'ajuster votre plage temporelle ou vérifiez si des données d'indicateurs sont configurées.",
-    "xpack.apm.infraTabs.noMetricsPromptTitle": "Aucune donnée d'infrastructure trouvée",
     "xpack.apm.inspectButtonText": "Inspecter",
     "xpack.apm.instancesLatencyDistributionChartLegend": "Instances",
     "xpack.apm.instancesLatencyDistributionChartTitle": "Distribution de la latence des instances",
