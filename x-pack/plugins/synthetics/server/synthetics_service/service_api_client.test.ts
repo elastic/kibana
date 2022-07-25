@@ -12,7 +12,7 @@ import { ServiceAPIClient } from './service_api_client';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import { ServiceConfig } from '../../common/config';
 import { ServiceLocations } from '../../common/runtime_types';
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
 
 jest.mock('@kbn/server-http-tools', () => ({
   SslConfig: jest.fn().mockImplementation(({ certificate, key }) => ({ certificate, key })),
