@@ -18,6 +18,7 @@ export interface UsageStats {
   'xpackDashboardMode:roles': string;
   'securitySolution:ipReputationLinks': string;
   'banners:textContent': string;
+  'observability:apmDefaultServiceEnvironment': string;
   /**
    * non-sensitive settings
    */
@@ -73,6 +74,7 @@ export interface UsageStats {
   'discover:searchOnPageLoad': boolean;
   'doc_table:hideTimeColumn': boolean;
   'discover:sampleSize': number;
+  'discover:sampleRowsPerPage': number;
   defaultColumns: string[];
   'context:defaultSize': number;
   'context:tieBreakerFields': string[];
@@ -130,4 +132,17 @@ export interface UsageStats {
   'labs:dashboard:enable_ui': boolean;
   'labs:dashboard:deferBelowFold': boolean;
   'labs:dashboard:dashboardControls': boolean;
+  'discover:rowHeightOption': number;
+  hideAnnouncements: boolean;
+  isDefaultIndexMigrated: boolean;
+  'lens:useFieldExistenceSampling': boolean;
+  'metrics:allowCheckingForFailedShards': boolean;
+  'observability:apmOperationsTab': boolean;
+  'observability:apmProgressiveLoading': string;
+  'observability:apmServiceGroupMaxNumberOfServices': number;
+  'observability:apmServiceInventoryOptimizedSorting': boolean;
+  'observability:apmTraceExplorerTab': boolean;
+  'securitySolution:enableGroupedNav': boolean;
+  'securitySolution:showRelatedIntegrations': boolean;
+  'visualization:visualize:legacyGaugeChartsLibrary': boolean;
 }

@@ -17,5 +17,5 @@
     "presentationUtil"
   ],
   "requiredBundles": ["kibanaUtils", "kibanaReact"],
-  "optionalPlugins": []
+  "optionalPlugins": ["usageCollection"]
 }

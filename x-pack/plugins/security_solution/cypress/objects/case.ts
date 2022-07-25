@@ -94,8 +94,6 @@ export const getIbmResilientConnectorOptions = (): IbmResilientConnectorOptions 
   incidentTypes: ['Communication error (fax; email)', 'Denial of Service'],
 });
 
-export const TIMELINE_CASE_ID = '68248e00-f689-11ea-9ab2-59238b522856';
-
 export const getConnectorIds = () => ({
   jira: '000e5f86-08b0-4882-adfd-6df981d45c1b',
   sn: '93a69ba3-3c31-4b4c-bf86-cc79a090f437',

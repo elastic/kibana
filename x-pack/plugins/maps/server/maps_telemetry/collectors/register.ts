@@ -493,6 +493,11 @@ export function registerMapsUsageCollector(usageCollection?: UsageCollectionSetu
         emsVectorLayersCount: {
           DYNAMIC_KEY: { min: { type: 'long' }, max: { type: 'long' }, avg: { type: 'float' } },
         },
+        customIconsCount: {
+          min: { type: 'long' },
+          max: { type: 'long' },
+          avg: { type: 'float' },
+        },
       },
     },
   });
