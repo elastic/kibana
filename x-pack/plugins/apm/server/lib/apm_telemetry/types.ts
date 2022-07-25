@@ -55,6 +55,9 @@ export type APMPerService = Record<
         name: string | number | null;
       };
     };
+    container: {
+      id: string | number | null;
+    };
   }
 >;
 

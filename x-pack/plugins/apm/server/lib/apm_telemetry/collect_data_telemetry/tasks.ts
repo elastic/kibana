@@ -1207,6 +1207,9 @@ export const tasks: TelemetryTask[] = [
                           {
                             field: POD_NAME,
                           },
+                          {
+                            field: CONTAINER_ID,
+                          },
                         ],
                       },
                     },
@@ -1295,6 +1298,9 @@ export const tasks: TelemetryTask[] = [
               pod: {
                 name: serviceBucket.top_metrics?.top[0].metrics[POD_NAME],
               },
+            },
+            container: {
+              id: serviceBucket.top_metrics?.top[0].metrics[CONTAINER_ID],
             },
           };
         });
