@@ -16,12 +16,9 @@ import {
 export function crawlerStatusToText(crawlerStatus?: CrawlerStatus): string {
   return crawlerStatus
     ? readableCrawlerStatuses[crawlerStatus]
-    : i18n.translate(
-        'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.connected.label',
-        {
-          defaultMessage: 'Idle',
-        }
-      );
+    : i18n.translate('xpack.enterpriseSearch.content.searchIndices.ingestionStatus.idle.label', {
+        defaultMessage: 'Idle',
+      });
 }
 
 export function crawlerStatusToColor(
