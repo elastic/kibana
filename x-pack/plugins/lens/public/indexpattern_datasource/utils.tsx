@@ -504,7 +504,7 @@ export function getFiltersInLayer(
           return {
             error: i18n.translate('xpack.lens.indexPattern.nonDefaultTimeFieldError', {
               defaultMessage:
-                'Underlying data does not support date histograms on non-default time fields if time field is set on the data view',
+                '"Explore data in Discover" does not support date histograms on non-default time fields if time field is set on the data view',
             }),
           };
         }
