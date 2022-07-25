@@ -28,7 +28,7 @@ describe('Elasticsearch Index Mapping', () => {
     mockRouter = new MockRouter({
       context,
       method: 'get',
-      path: '/internal/enterprise_search/search/{index_name}/{query}',
+      path: '/internal/enterprise_search/indices/{index_name}/search/{query}',
     });
 
     registerSearchRoute({
@@ -37,7 +37,7 @@ describe('Elasticsearch Index Mapping', () => {
     });
   });
 
-  describe('GET /internal/enterprise_search/search/{index_name}/{query}', () => {
+  describe('GET /internal/enterprise_search/indices/{index_name}/search/{query}', () => {
     it('fails validation without index_name', () => {
       const request = { params: { query: 'banana' } };
       mockRouter.shouldThrow(request);

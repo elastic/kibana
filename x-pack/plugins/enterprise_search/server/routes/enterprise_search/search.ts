@@ -13,7 +13,7 @@ import { RouteDependencies } from '../../plugin';
 export function registerSearchRoute({ router }: RouteDependencies) {
   router.get(
     {
-      path: '/internal/enterprise_search/search/{index_name}',
+      path: '/internal/enterprise_search/indices/{index_name}/search',
       validate: {
         params: schema.object({
           index_name: schema.string(),
@@ -38,7 +38,7 @@ export function registerSearchRoute({ router }: RouteDependencies) {
   );
   router.get(
     {
-      path: '/internal/enterprise_search/search/{index_name}/{query}',
+      path: '/internal/enterprise_search/indices/{index_name}/search/{query}',
       validate: {
         params: schema.object({
           index_name: schema.string(),
