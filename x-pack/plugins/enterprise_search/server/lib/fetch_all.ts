@@ -10,6 +10,8 @@ import { isNotNullish } from '@opentelemetry/sdk-metrics-base/build/src/utils';
 import { QueryDslQueryContainer, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
+// TODO add safety to prevent an OOM error if the query results are too enough
+
 export const fetchAll = async <T>(
   client: IScopedClusterClient,
   index: string,

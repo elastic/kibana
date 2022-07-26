@@ -62,6 +62,8 @@ export const fetchCrawlerByIndexName = async (
       return crawler;
     }
   }
+
+  return undefined;
 };
 
 export const fetchCrawlers = async (
