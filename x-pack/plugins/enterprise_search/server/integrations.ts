@@ -171,10 +171,10 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
       'xpack.enterpriseSearch.workplaceSearch.integrations.networkDriveDescription',
       {
         defaultMessage:
-          'Search over your files and folders stored on network drives with Enterprise Search.',
+          'Search over your files and folders stored on network drives with Workplace Search.',
       }
     ),
-    categories: ['enterprise_search', 'file_storage'],
+    categories: ['file_storage'],
     uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/network_drive/custom',
   },
   {
@@ -247,7 +247,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your files stored on SharePoint Online with Workplace Search.',
       }
     ),
-    categories: ['file_storage'],
+    categories: ['file_storage', 'microsoft_365'],
     uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/share_point',
   },
   {
@@ -265,7 +265,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
           'Search over your files stored on Microsoft SharePoint Server with Workplace Search.',
       }
     ),
-    categories: ['enterprise_search', 'file_storage', 'microsoft_365'],
+    categories: ['file_storage', 'microsoft_365'],
     uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/share_point_server/custom',
   },
   {
