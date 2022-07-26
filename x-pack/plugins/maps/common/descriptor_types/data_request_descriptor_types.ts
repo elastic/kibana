@@ -100,6 +100,7 @@ type NumericalStyleFieldData = {
 
 type CategoricalStyleFieldData = {
   buckets: Array<{ key: string; doc_count: number }>;
+  sum_other_doc_count: number;
 };
 
 export type StyleMetaData = {
