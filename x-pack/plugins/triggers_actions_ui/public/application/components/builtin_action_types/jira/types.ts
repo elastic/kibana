@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { ExecutorSubActionPushParams } from '@kbn/actions-plugin/server/builtin_action_types/jira/types';
 import { UserConfiguredActionConnector } from '../../../../types';
 

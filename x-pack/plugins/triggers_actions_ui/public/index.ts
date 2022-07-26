@@ -7,7 +7,6 @@
 
 // TODO: https://github.com/elastic/kibana/issues/110895
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { PluginInitializerContext } from '@kbn/core/server';
 import { Plugin } from './plugin';
 

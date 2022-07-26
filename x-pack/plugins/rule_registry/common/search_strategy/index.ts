@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { TechnicalRuleDataFieldName, ValidFeatureId } from '@kbn/rule-data-utils';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { Ecs } from '@kbn/core/server';
 import { IEsSearchRequest, IEsSearchResponse } from '@kbn/data-plugin/common';
 import type {

@@ -15,7 +15,6 @@ import type {
   JiraActionParams,
   WebhookActionParams,
   EmailActionParams,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '@kbn/actions-plugin/server';
 import { NewAlertParams } from './alerts';
 import { ACTION_GROUP_DEFINITIONS } from '../../../../common/constants/alerts';

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/public';
 import { ExpressionValueFilter } from '../../types';
 import { getFunctionHelp } from '../../i18n';

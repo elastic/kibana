@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @kbn/eslint/no-restricted-paths */
-
 import type {
   ExecutorSubActionPushParams,
   MappingConfigType,

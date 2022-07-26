@@ -7,7 +7,6 @@
  */
 
 import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { ISearchOptions, ISearchSource } from '../../../../public';
 import { IAggConfigs } from '../agg_configs';
 import { IAggConfig } from '../agg_config';

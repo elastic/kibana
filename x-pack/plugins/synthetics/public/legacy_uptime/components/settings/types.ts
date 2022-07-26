@@ -15,7 +15,6 @@ import type {
   TeamsActionTypeId,
   WebhookActionTypeId,
   EmailActionTypeId,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '@kbn/actions-plugin/server/builtin_action_types';
 
 export type ActionTypeId =

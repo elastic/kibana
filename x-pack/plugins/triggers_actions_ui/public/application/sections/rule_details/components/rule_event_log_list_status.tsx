@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { EcsEventOutcome } from '@kbn/core/server';
 
 interface RuleEventLogListStatusProps {
