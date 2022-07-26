@@ -171,6 +171,9 @@ export const loadPrebuiltDetectionRules = () => {
     .should('be.disabled');
 };
 
+/**
+ * load prebuilt rules by clicking button on page header
+ */
 export const loadPrebuiltDetectionRulesFromHeaderBtn = () => {
   cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN)
     .pipe(($el) => $el.trigger('click'))

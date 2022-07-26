@@ -24,7 +24,13 @@ import {
   RULES_BULK_EDIT_INDEX_PATTERNS,
   RULES_BULK_EDIT_TAGS,
   RULES_BULK_EDIT_FORM_CONFIRM_BTN,
+  APPLY_TIMELINE_RULE_BULK_MENU_ITEM,
 } from '../screens/rules_bulk_edit';
+
+export const clickApplyTimelineTemplatesMenuItem = () => {
+  cy.get(BULK_ACTIONS_BTN).click();
+  cy.get(APPLY_TIMELINE_RULE_BULK_MENU_ITEM).click().should('not.exist');
+};
 
 export const clickAddIndexPatternsMenuItem = () => {
   cy.get(BULK_ACTIONS_BTN).click();
@@ -60,6 +66,10 @@ export const openBulkEditDeleteTagsForm = () => {
   cy.get(DELETE_TAGS_RULE_BULK_MENU_ITEM).click();
 
   cy.get(RULES_BULK_EDIT_FORM_TITLE).should('have.text', 'Delete tags');
+};
+
+export const openBulkActionsMenu = () => {
+  cy.get(BULK_ACTIONS_BTN).click();
 };
 
 export const typeIndexPatterns = (indices: string[]) => {

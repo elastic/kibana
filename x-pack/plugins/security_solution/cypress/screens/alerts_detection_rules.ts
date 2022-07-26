@@ -102,6 +102,8 @@ export const MODAL_CONFIRMATION_TITLE = '[data-test-subj="confirmModalTitleText"
 
 export const MODAL_CONFIRMATION_BODY = '[data-test-subj="confirmModalBodyText"]';
 
+export const MODAL_CONFIRMATION_CANCEL_BTN = '[data-test-subj="confirmModalCancelButton"]';
+
 export const RULE_DETAILS_DELETE_BTN = '[data-test-subj="rules-details-delete-rule"]';
 
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
