@@ -7,6 +7,9 @@
 
 import React from 'react';
 import { Story } from '@storybook/react';
+import { CoreStart } from '@kbn/core/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../../../common/constants';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
 import { OpenIndicatorFlyoutButton } from './open_indicator_flyout_button';
 
@@ -17,6 +20,25 @@ export default {
 
 const mockIndicator: Indicator = generateMockIndicator();
 
+const coreMock = {
+  uiSettings: {
+    get: (key: string) => {
+      const settings = {
+        [DEFAULT_DATE_FORMAT]: '',
+        [DEFAULT_DATE_FORMAT_TZ]: 'UTC',
+      };
+      // @ts-expect-error
+      return settings[key];
+    },
+  },
+} as unknown as CoreStart;
+
+const KibanaReactContext = createKibanaReactContext(coreMock);
+
 export const Default: Story<void> = () => {
-  return <OpenIndicatorFlyoutButton indicator={mockIndicator} />;
+  return (
+    <KibanaReactContext.Provider>
+      <OpenIndicatorFlyoutButton indicator={mockIndicator} />
+    </KibanaReactContext.Provider>
+  );
 };

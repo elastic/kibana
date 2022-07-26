@@ -13,7 +13,11 @@ import { IndicatorsFlyout } from '../indicators_flyout/indicators_flyout';
 
 export const BUTTON_TEST_ID = 'tiToggleIndicatorFlyoutButton';
 
-export const OpenIndicatorFlyoutButton: VFC<{ indicator: Indicator }> = ({ indicator }) => {
+export interface OpenIndicatorFlyoutButtonProps {
+  indicator: Indicator;
+}
+
+export const OpenIndicatorFlyoutButton: VFC<OpenIndicatorFlyoutButtonProps> = ({ indicator }) => {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
   const buttonLabel: string = i18n.translate(

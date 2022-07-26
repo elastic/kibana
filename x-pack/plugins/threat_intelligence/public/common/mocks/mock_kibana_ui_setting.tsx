@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { KibanaContextProvider, useKibana } from '@kbn/kibana-react-plugin/public';
-import { Services } from '../types';
-
-const useTypedKibana = () => useKibana<Services>();
-
-export { KibanaContextProvider, useTypedKibana as useKibana };
+export function mockUiSetting(key: string): string | undefined {
+  if (key === 'dateFormat') {
+    return 'MMM D, YYYY @ HH:mm:ss.SSS';
+  }
+  if (key === 'dateFormat:tz') {
+    return 'America/New_York';
+  }
+}
