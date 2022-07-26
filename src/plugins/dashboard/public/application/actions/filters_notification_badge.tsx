@@ -18,7 +18,6 @@ import { Action, IncompatibleActionError } from '../../services/ui_actions';
 import { toMountPoint } from '../../services/kibana_react';
 import { IEmbeddable, isErrorEmbeddable } from '../../services/embeddable';
 
-import { FiltersNotificationModal } from './filters_notification_modal';
 import { DashboardContainer } from '../embeddable';
 import { dashboardFilterNotificationBadge } from '../../dashboard_strings';
 
@@ -81,13 +80,16 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
       embeddable.getRoot() as DashboardContainer
     )?.getAllDataViews();
 
-    const session = this.overlays.openModal(
+    const FiltersNotificationModal = await import('./filters_notification_modal').then(
+      (m) => m.FiltersNotificationModal
+    );
+
+    this.overlays.openModal(
       toMountPoint(
         <KibanaReactContextProvider>
           <FiltersNotificationModal
             displayName={this.displayName}
             id={this.id}
-            closeModal={() => session.close()}
             filters={filters}
             dataViewList={dataViewList}
           />
@@ -95,8 +97,7 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
         { theme$: this.theme.theme$ }
       ),
       {
-        maxWidth: 400,
-        'data-test-subj': 'copyToDashboardPanel',
+        'data-test-subj': 'filtersNotificationModal',
       }
     );
   };
