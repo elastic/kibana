@@ -797,7 +797,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 path="newTermsFields"
                 component={NewTermsFields}
                 componentProps={{
-                  browserFields,
+                  browserFields: aggFields,
                 }}
               />
               <UseField
