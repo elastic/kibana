@@ -24,7 +24,7 @@ import {
   getPaginationTableParams,
   useBaseEsQuery,
   usePersistedQuery,
-} from '../../utils';
+} from '../../utils/utils';
 import { ResourceFindingsTable } from './resource_findings_table';
 import { FindingsSearchBar } from '../../layout/findings_search_bar';
 import { ErrorCallout } from '../../layout/error_callout';

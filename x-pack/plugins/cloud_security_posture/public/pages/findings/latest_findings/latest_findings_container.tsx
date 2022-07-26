@@ -23,11 +23,12 @@ import {
   getPaginationTableParams,
   useBaseEsQuery,
   usePersistedQuery,
-} from '../utils';
+} from '../utils/utils';
 import { PageWrapper, PageTitle, PageTitleText } from '../layout/findings_layout';
 import { FindingsGroupBySelector } from '../layout/findings_group_by_selector';
 import { useUrlQuery } from '../../../common/hooks/use_url_query';
 import { ErrorCallout } from '../layout/error_callout';
+import { getLimitProperties } from '../utils/get_limit_properties';
 
 export const getDefaultQuery = ({
   query,
@@ -41,21 +42,6 @@ export const getDefaultQuery = ({
 });
 
 const MAX_ITEMS = 500;
-
-const getLimitProperties = (
-  totalItems: number,
-  maxItems: number,
-  pageSize: number,
-  pageIndex: number
-): { isLastLimitedPage: boolean; limitedTotalItemCount: number } => {
-  const limitItems = totalItems > maxItems;
-  const limitedTotalItemCount = limitItems ? maxItems : totalItems;
-  const lastLimitedPage = Math.ceil(limitedTotalItemCount / pageSize);
-  const isLastPage = lastLimitedPage === pageIndex + 1;
-  const isLastLimitedPage = limitItems && isLastPage;
-
-  return { isLastLimitedPage, limitedTotalItemCount };
-};
 
 export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);

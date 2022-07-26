@@ -15,7 +15,7 @@ import { FINDINGS_REFETCH_INTERVAL_MS } from '../constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { showErrorToast } from '../latest_findings/use_latest_findings';
 import type { FindingsBaseEsQuery, Sort } from '../types';
-import { getAggregationCount, getFindingsCountAggQuery } from '../utils';
+import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
 
 interface UseFindingsByResourceOptions extends FindingsBaseEsQuery {
   from: NonNullable<estypes.SearchRequest['from']>;

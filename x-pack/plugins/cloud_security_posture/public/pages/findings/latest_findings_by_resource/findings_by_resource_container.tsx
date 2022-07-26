@@ -22,7 +22,7 @@ import {
   getPaginationTableParams,
   useBaseEsQuery,
   usePersistedQuery,
-} from '../utils';
+} from '../utils/utils';
 import { PageTitle, PageTitleText, PageWrapper } from '../layout/findings_layout';
 import { FindingsGroupBySelector } from '../layout/findings_group_by_selector';
 import { findingsNavigation } from '../../../common/navigation/constants';

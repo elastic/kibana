@@ -19,7 +19,7 @@ import type { CspFinding, Sort } from '../types';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import type { FindingsBaseEsQuery } from '../types';
 import { FINDINGS_REFETCH_INTERVAL_MS } from '../constants';
-import { getAggregationCount, getFindingsCountAggQuery, getSortKey } from '../utils';
+import { getAggregationCount, getFindingsCountAggQuery, getSortKey } from '../utils/utils';
 
 interface UseFindingsOptions extends FindingsBaseEsQuery {
   from: NonNullable<estypes.SearchRequest['from']>;

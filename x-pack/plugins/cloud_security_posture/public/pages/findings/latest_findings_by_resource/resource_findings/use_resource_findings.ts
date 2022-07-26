@@ -11,12 +11,12 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Pagination } from '@elastic/eui';
 import { useContext } from 'react';
 import { number } from 'io-ts';
+import { getAggregationCount, getFindingsCountAggQuery, getSortKey } from '../../utils/utils';
 import { FindingsEsPitContext } from '../../es_pit/findings_es_pit_context';
 import { FINDINGS_REFETCH_INTERVAL_MS } from '../../constants';
 import { useKibana } from '../../../../common/hooks/use_kibana';
 import { showErrorToast } from '../../latest_findings/use_latest_findings';
 import type { CspFinding, FindingsBaseEsQuery, Sort } from '../../types';
-import { getAggregationCount, getFindingsCountAggQuery, getSortKey } from '../../utils';
 
 interface UseResourceFindingsOptions extends FindingsBaseEsQuery {
   resourceId: string;
