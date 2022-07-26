@@ -80,13 +80,13 @@ describe('ExceptionItemCardConditions', () => {
               value: 'foo*',
             },
             {
-              field: "host.name",
+              field: 'host.name',
               list: {
-                id: "ips.txt",
-                type: "keyword",
+                id: 'ips.txt',
+                type: 'keyword',
               },
-              operator: "included",
-              type: "list"
+              operator: 'included',
+              type: 'list',
             },
             {
               field: 'threat.indicator.port',

@@ -125,13 +125,24 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
       [dataTestSubj]
     );
 
-    const getValue = useCallback((entry: EntryExists | EntryList | EntryMatch | EntryMatchAny | EntryMatchWildcard | EntryNested) => {
-      if (entry.type === 'list') {
-        return entry.list.id;
-      } else {
-        return 'value' in entry ? entry.value : '';
-      }
-    }, []);
+    const getValue = useCallback(
+      (
+        entry:
+          | EntryExists
+          | EntryList
+          | EntryMatch
+          | EntryMatchAny
+          | EntryMatchWildcard
+          | EntryNested
+      ) => {
+        if (entry.type === 'list') {
+          return entry.list.id;
+        } else {
+          return 'value' in entry ? entry.value : '';
+        }
+      },
+      []
+    );
 
     return (
       <div data-test-subj={dataTestSubj}>
