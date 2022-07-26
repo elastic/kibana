@@ -156,13 +156,14 @@ def functionalXpack(Map params = [:]) {
       }
     }
 
-    whenChanged([
-      'x-pack/plugins/synthetics/',
-    ]) {
-      if (githubPr.isPr()) {
-        task(kibanaPipeline.functionalTestProcess('xpack-UptimePlaywright', './test/scripts/jenkins_uptime_playwright.sh'))
-      }
-    }
+    // Skipped, process is hanging https://github.com/elastic/kibana/issues/137185
+    // whenChanged([
+    //   'x-pack/plugins/synthetics/',
+    // ]) {
+    //   if (githubPr.isPr()) {
+    //     task(kibanaPipeline.functionalTestProcess('xpack-UptimePlaywright', './test/scripts/jenkins_uptime_playwright.sh'))
+    //   }
+    // }
 
     whenChanged([
       'x-pack/plugins/ux/',
