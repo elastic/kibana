@@ -62,7 +62,7 @@ describe('TreeNav component', () => {
   });
 
   it('collapses / expands the tree nav when clicking on collapse button', async () => {
-    renderResult = mockedContext.render(<TreeNav {...defaultProps} />);
+    renderResult = mockedContext.render(<TreeNavContainer />);
 
     expect(renderResult.getByText(/cluster/i)).toBeVisible();
 

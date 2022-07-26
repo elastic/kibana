@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { KubernetesCollection, TreeNavSelection } from '../../types';
-import { addTimerangeToQuery } from '../../utils/add_timerange_to_query';
+import { addTimerangeAndDefaultFilterToQuery } from '../../utils/add_timerange_and_default_filter_to_query';
 import { addTreeNavSelectionToFilterQuery } from './helpers';
 import { IndexPattern, GlobalFilter } from '../../types';
 
@@ -22,7 +22,11 @@ export const useTreeView = ({ globalFilter, indexPattern }: UseTreeViewProps) =>
 
   const filterQueryWithTimeRange = useMemo(() => {
     return JSON.parse(
-      addTimerangeToQuery(globalFilter.filterQuery, globalFilter.startDate, globalFilter.endDate)
+      addTimerangeAndDefaultFilterToQuery(
+        globalFilter.filterQuery,
+        globalFilter.startDate,
+        globalFilter.endDate
+      )
     );
   }, [globalFilter.filterQuery, globalFilter.startDate, globalFilter.endDate]);
 
