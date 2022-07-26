@@ -6,10 +6,117 @@
  */
 
 import { testMonitorPolicy } from './test_policy';
+import { loggerMock } from '@kbn/logging-mocks';
+import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { formatSyntheticsPolicy } from '../../../common/formatters/format_synthetics_policy';
-import { DataStream, MonitorFields, ScheduleUnit, SourceType } from '../../../common/runtime_types';
+import {
+  DataStream,
+  MonitorFields,
+  ScheduleUnit,
+  SourceType,
+  HeartbeatConfig,
+} from '../../../common/runtime_types';
+import { SyntheticsPrivateLocation } from './synthetics_private_location';
 
 describe('SyntheticsPrivateLocation', () => {
+  const mockPrivateLocation = {
+    id: 'policyId',
+    name: 'Test Location',
+    isServiceManaged: false,
+  };
+  const testConfig = {
+    id: 'testId',
+    type: 'http',
+    enabled: true,
+    schedule: '@every 3m',
+    'service.name': '',
+    locations: [mockPrivateLocation],
+    tags: [],
+    timeout: '16',
+    name: 'Test Monitor',
+    urls: 'https://www.google.com',
+    max_redirects: '0',
+    password: '12345678',
+    proxy_url: '',
+    'check.response.body.negative': [],
+    'check.response.body.positive': [],
+    'response.include_body': 'on_error',
+    'check.response.headers': {},
+    'response.include_headers': true,
+    'check.response.status': [],
+    'check.request.body': { type: 'text', value: '' },
+    'check.request.headers': {},
+    'check.request.method': 'GET',
+    username: '',
+  } as unknown as HeartbeatConfig;
+
+  const serverMock: UptimeServerSetup = {
+    uptimeEsClient: { search: jest.fn() },
+    logger: loggerMock.create(),
+    authSavedObjectsClient: {
+      bulkUpdate: jest.fn(),
+      get: jest.fn().mockReturnValue({
+        attributes: {
+          locations: [mockPrivateLocation],
+        },
+      }),
+    },
+    config: {
+      service: {
+        username: 'dev',
+        password: '12345',
+        manifestUrl: 'http://localhost:8080/api/manifest',
+      },
+    },
+    fleet: {
+      packagePolicyService: {
+        get: jest.fn().mockReturnValue({}),
+      },
+    },
+  } as unknown as UptimeServerSetup;
+
+  it('throws errors for create monitor', async () => {
+    const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+
+    try {
+      await syntheticsPrivateLocation.createMonitor(testConfig);
+    } catch (e) {
+      expect(e).toEqual(
+        new Error(
+          'Unable to create Synthetics package policy for monitor Test Monitor with private location Test Location'
+        )
+      );
+    }
+  });
+
+  it('throws errors for edit monitor', async () => {
+    const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+
+    try {
+      await syntheticsPrivateLocation.editMonitor(testConfig);
+    } catch (e) {
+      expect(e).toEqual(
+        new Error(
+          'Unable to update Synthetics package policy for monitor Test Monitor with private location Test Location'
+        )
+      );
+    }
+  });
+
+  it('throws errors for delete monitor', async () => {
+    const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+
+    try {
+      await syntheticsPrivateLocation.deleteMonitor(testConfig);
+    } catch (e) {
+      expect(e).toEqual(
+        new Error(
+          'Unable to delete Synthetics package policy for monitor Test Monitor with private location Test Location'
+        )
+      );
+    }
+  });
+
   it('formats monitors stream properly', () => {
     const test = formatSyntheticsPolicy(testMonitorPolicy, DataStream.BROWSER, dummyBrowserConfig);
 
