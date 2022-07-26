@@ -17,6 +17,7 @@ import {
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
 } from '../../common';
+import { string } from 'joi';
 
 
 export type D3ActionType = ActionType<
@@ -30,10 +31,8 @@ export type D3ActionTypeExecutorOptions = ActionTypeExecutorOptions<
   ActionTypeSecretsType,
   ActionParamsType
 >;
-const tokenSchema =schema.string();
 const configSchemaProps = {
-  url: schema.string(),
-  headers: nullableType(schema.recordOf(schema.string({defaultValue: 'd3key' }), tokenSchema)),
+  url: schema.string()
 };
 const ConfigSchema = schema.object(configSchemaProps);
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
@@ -41,16 +40,14 @@ export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 // secrets definition
 export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
 const secretSchemaProps = {
-    url: schema.nullable(schema.string()),
     token: schema.nullable(schema.string()),
 };
 const SecretsSchema = schema.object(secretSchemaProps, {
   validate: (secrets) => {
-    // user and password must be set together (or not at all)
-    if (!secrets.token && !secrets.token) return;
-    if (secrets.token && secrets.token) return;
+    if (secrets.token ) return;
+    if (!secrets.token) 
     return i18n.translate('xpack.actions.builtin.d3security.invalidUrlToken', {
-      defaultMessage: 'both url and token must be specified',
+      defaultMessage: 'token must be specified',
     });
   },
 });
@@ -140,7 +137,8 @@ export async function executor(
   execOptions: D3ActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
-  const { url, headers = {} } = execOptions.config;
+  const { url } = execOptions.config;
+  const { token } = execOptions.secrets;
   const { body: data } = execOptions.params;
 
   const axiosInstance = axios.create();
@@ -151,7 +149,7 @@ export async function executor(
       method:'post',
       url,
       logger,
-      headers,
+      headers:{"d3key":token||""},
       data,
       configurationUtilities,
     })

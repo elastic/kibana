@@ -15,6 +15,7 @@ import { getSwimlaneActionType } from './swimlane';
 import { getCasesWebhookActionType } from './cases_webhook';
 import { getWebhookActionType } from './webhook';
 import { getXmattersActionType } from './xmatters';
+import { getD3ActionType } from './d3security';
 import { TypeRegistry } from '../../type_registry';
 import { ActionTypeModel } from '../../../types';
 import {
@@ -55,4 +56,5 @@ export function registerBuiltInActionTypes({
   actionTypeRegistry.register(getJiraActionType());
   actionTypeRegistry.register(getResilientActionType());
   actionTypeRegistry.register(getTeamsActionType());
+  actionTypeRegistry.register(getD3ActionType());
 }
