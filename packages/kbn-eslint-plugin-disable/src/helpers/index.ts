@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
+export * from './protected_rules';
 export * from './regex';
 export * from './report';

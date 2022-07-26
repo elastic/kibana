@@ -13,6 +13,17 @@ import {
   PROTECTED_DISABLE_MSG_ID,
 } from './no_protected_eslint_disable';
 
+jest.mock('../helpers/protected_rules', () => {
+  return {
+    getProtectedRules() {
+      return {
+        '@kbn/disable/no_protected_eslint_disable': '*',
+        'no-console': ['xFolder', 'src/foo.ts'],
+      };
+    },
+  };
+});
+
 const tsTester = [
   '@typescript-eslint/parser',
   new RuleTester({
@@ -42,62 +53,48 @@ const babelTester = [
   }),
 ] as const;
 
-const ruleOptions = [
-  [
-    '@kbn/disable/no_protected_eslint_disable',
-    ['no-console', { allowed: ['xFolder', 'src/foo.ts'] }],
-  ],
-];
-
 for (const [name, tester] of [tsTester, babelTester]) {
   describe(name, () => {
     tester.run('@kbn/disable/no_protected_eslint_disable', NoProtectedESLintDisableRule, {
       valid: [
         {
           filename: 'foo.ts',
-          options: ruleOptions,
           code: dedent`
             // eslint-disable no-var
           `,
         },
         {
           filename: 'foo.ts',
-          options: ruleOptions,
           code: dedent`
             // eslint-disable-next-line no-use-before-define
           `,
         },
         {
           filename: 'foo.ts',
-          options: ruleOptions,
           code: dedent`
             // eslint-disable-line no-use-before-define
           `,
         },
         {
           filename: 'foo.ts',
-          options: ruleOptions,
           code: dedent`
             /* eslint-disable no-var */
           `,
         },
         {
           filename: 'foo.ts',
-          options: ruleOptions,
           code: dedent`
             /* eslint-disable no-var, no-control-regex*/
           `,
         },
         {
           filename: 'foo.ts',
-          options: ruleOptions,
           code: dedent`
             alert('foo'); // eslint-disable-line no-alert
           `,
         },
         {
           filename: 'foo.ts',
-          options: ruleOptions,
           code: dedent`
             const foo = 'foo';
             let bar = 'ba';
@@ -109,7 +106,6 @@ for (const [name, tester] of [tsTester, babelTester]) {
         },
         {
           filename: 'foo.ts',
-          options: ruleOptions,
           code: dedent`
             const foo = 'foo';
             let bar = 'ba';
@@ -120,7 +116,6 @@ for (const [name, tester] of [tsTester, babelTester]) {
         },
         {
           filename: 'foo.ts',
-          options: ruleOptions,
           code: dedent`
             const foo = 'foo';
             let bar = 'ba';
@@ -130,14 +125,12 @@ for (const [name, tester] of [tsTester, babelTester]) {
         },
         {
           filename: 'src/foo.ts',
-          options: ruleOptions,
           code: dedent`
             // eslint-disable no-console
           `,
         },
         {
           filename: 'xFolder/foo.ts',
-          options: ruleOptions,
           code: dedent`
             // eslint-disable no-console
           `,
@@ -151,7 +144,6 @@ for (const [name, tester] of [tsTester, babelTester]) {
             /* eslint-disable no-var,no-console */
             const a = 1;
           `,
-          options: ruleOptions,
           errors: [
             {
               line: 1,
@@ -172,7 +164,6 @@ for (const [name, tester] of [tsTester, babelTester]) {
             /* eslint-disable no-var,no-console*/
             const a = 1;
           `,
-          options: ruleOptions,
           errors: [
             {
               line: 1,
@@ -193,7 +184,6 @@ for (const [name, tester] of [tsTester, babelTester]) {
             /*eslint-disable no-var,no-console*/
             const a = 1;
           `,
-          options: ruleOptions,
           errors: [
             {
               line: 1,
@@ -214,7 +204,6 @@ for (const [name, tester] of [tsTester, babelTester]) {
             // eslint-disable no-var,no-console
             const a = 1;
           `,
-          options: ruleOptions,
           errors: [
             {
               line: 1,
@@ -235,7 +224,6 @@ for (const [name, tester] of [tsTester, babelTester]) {
             //eslint-disable no-var,no-console
             const a = 1;
           `,
-          options: ruleOptions,
           errors: [
             {
               line: 1,
@@ -256,7 +244,6 @@ for (const [name, tester] of [tsTester, babelTester]) {
             /* eslint-disable no-var,@kbn/disable/no_protected_eslint_disable */
             const a = 1;
           `,
-          options: ruleOptions,
           errors: [
             {
               line: 1,
@@ -274,7 +261,6 @@ for (const [name, tester] of [tsTester, babelTester]) {
         // generic invalid tests for disable comments
         {
           filename: 'foo.ts',
-          options: ruleOptions,
           code: dedent`
             /* eslint-disable no-console */
             const a = 1;
@@ -292,7 +278,6 @@ for (const [name, tester] of [tsTester, babelTester]) {
         },
         {
           filename: 'foo.ts',
-          options: ruleOptions,
           code: dedent`
             // eslint-disable-next-line no-console
             const a = 1;
@@ -310,7 +295,6 @@ for (const [name, tester] of [tsTester, babelTester]) {
         },
         {
           filename: 'foo.ts',
-          options: ruleOptions,
           code: dedent`
             /* eslint-disable no-console*/
           `,
@@ -327,7 +311,6 @@ for (const [name, tester] of [tsTester, babelTester]) {
         },
         {
           filename: 'foo.ts',
-          options: ruleOptions,
           code: dedent`
             // eslint-disable-next-line no-console
           `,
@@ -344,7 +327,6 @@ for (const [name, tester] of [tsTester, babelTester]) {
         },
         {
           filename: 'foo.ts',
-          options: ruleOptions,
           code: dedent`
             alert('foo');// eslint-disable-line no-console
           `,
@@ -361,7 +343,6 @@ for (const [name, tester] of [tsTester, babelTester]) {
         },
         {
           filename: 'foo.ts',
-          options: ruleOptions,
           code: dedent`
             const foo = 'foo';
             let bar = 'ba';
@@ -390,7 +371,6 @@ for (const [name, tester] of [tsTester, babelTester]) {
         },
         {
           filename: 'foo.ts',
-          options: ruleOptions,
           code: dedent`
             const foo = 'foo';
             let bar = 'ba';
@@ -417,7 +397,6 @@ for (const [name, tester] of [tsTester, babelTester]) {
         },
         {
           filename: 'foo.ts',
-          options: ruleOptions,
           code: dedent`
             const foo = 'foo';
             let bar = 'ba';
@@ -444,7 +423,6 @@ for (const [name, tester] of [tsTester, babelTester]) {
         },
         {
           filename: 'foo.ts',
-          options: ruleOptions,
           code: dedent`
             const foo = 'foo';
             let bar = 'ba';

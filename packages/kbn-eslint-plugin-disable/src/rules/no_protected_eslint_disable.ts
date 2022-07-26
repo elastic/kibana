@@ -9,7 +9,7 @@
 import { REPO_ROOT } from '@kbn/utils';
 import { relative } from 'path';
 import Eslint from 'eslint';
-import { getReportLocFromComment, parseEslintDisableComment } from '../helpers';
+import { getProtectedRules, getReportLocFromComment, parseEslintDisableComment } from '../helpers';
 
 export const PROTECTED_DISABLE_MSG_ID = 'no-protected-eslint-disable';
 const messages = {
@@ -24,40 +24,6 @@ const meta: Eslint.Rule.RuleMetaData = {
     description: 'Prevents the disabling of protected rules within eslint-disable* comments.',
   },
   messages,
-  schema: {
-    type: 'array',
-    uniqueItems: true,
-    items: {
-      type: ['string', 'array'],
-      items: {
-        properties: {
-          allowed: {
-            type: 'array',
-            uniqueItems: true,
-            items: {
-              type: 'string',
-            },
-          },
-        },
-      },
-    },
-  },
-};
-
-const getProtectedRulesFromOptions = function (ruleOptions: any[]) {
-  const protectedRules: { [key: string]: string | string[] } = {};
-
-  for (const ruleOption of ruleOptions) {
-    if (typeof ruleOption === 'string') {
-      protectedRules[ruleOption] = '*';
-    }
-
-    if (Array.isArray(ruleOption)) {
-      protectedRules[ruleOption[0]] = ruleOption[1].allowed;
-    }
-  }
-
-  return protectedRules;
 };
 
 const getDisabledProtectedRule = function (
@@ -105,7 +71,7 @@ const create = (context: Eslint.Rule.RuleContext): Eslint.Rule.RuleListener => {
           return;
         }
 
-        const configuredProtectedRules = getProtectedRulesFromOptions(context.options[0]);
+        const configuredProtectedRules = getProtectedRules();
         const disabledRules = parsedEslintDisable.rules;
         const sourceFilename = context.getPhysicalFilename
           ? context.getPhysicalFilename()
