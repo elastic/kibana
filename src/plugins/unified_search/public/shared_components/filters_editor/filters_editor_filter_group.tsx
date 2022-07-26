@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -21,6 +21,8 @@ import { css } from '@emotion/css';
 import type { Path } from './filter_editors_types';
 import { ConditionTypes } from './filters_editor_condition_types';
 import { FilterItem } from './filters_editor_filter_item';
+import { FiltersEditorContextType } from './filters_editor_context';
+import { getPathInArray } from './filters_editor_utils';
 
 export interface FilterGroupProps {
   filters: Filter[];
@@ -65,6 +67,16 @@ export const FilterGroup = ({
   reverseBackground = false,
 }: FilterGroupProps) => {
   const { euiTheme } = useEuiTheme();
+  const {
+    globalParams: { maxDepth, disableOr, disableAnd },
+  } = useContext(FiltersEditorContextType);
+
+  const pathInArray = getPathInArray(path);
+
+  const isDepthReached = maxDepth === pathInArray.length;
+  const orDisabled = disableOr || (isDepthReached && conditionType === ConditionTypes.AND);
+  const andDisabled = disableAnd || (isDepthReached && conditionType === ConditionTypes.OR);
+  const removeDisabled = pathInArray.length <= 1 && filters.length === 1;
 
   return (
     <EuiPanel
@@ -87,6 +99,9 @@ export const FilterGroup = ({
               path={`${path}${path ? '.' : ''}${index}`}
               timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
               reverseBackground={reverseBackground}
+              disableOr={orDisabled}
+              disableAnd={andDisabled}
+              disableRemove={removeDisabled}
             />
           </EuiFlexGroup>
           {index + 1 < acc.length ? <Delimiter conditionType={conditionType} /> : null}

@@ -13,6 +13,11 @@ import type { FiltersEditorActions } from './filters_editor_reducer';
 interface FiltersEditorContextType {
   dataView: DataView;
   dispatch: Dispatch<FiltersEditorActions>;
+  globalParams: {
+    maxDepth: number;
+    disableOr: boolean;
+    disableAnd: boolean;
+  };
 }
 
 export const FiltersEditorContextType = React.createContext<FiltersEditorContextType>(

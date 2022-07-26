@@ -29,6 +29,9 @@ export interface FilterItemProps {
   filter: Filter;
   timeRangeForSuggestionsOverride: boolean;
   reverseBackground?: boolean;
+  disableOr: boolean;
+  disableAnd: boolean;
+  disableRemove: boolean;
 }
 
 export function FilterItem({
@@ -36,6 +39,9 @@ export function FilterItem({
   path,
   timeRangeForSuggestionsOverride,
   reverseBackground,
+  disableOr,
+  disableAnd,
+  disableRemove,
 }: FilterItemProps) {
   const { dispatch, dataView } = useContext(FiltersEditorContextType);
   const conditionalOperationType = getConditionalOperationType(filter);
@@ -160,6 +166,7 @@ export function FilterItem({
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
                   onClick={onOrButtonClick}
+                  isDisabled={disableOr}
                   iconType="returnKey"
                   size="s"
                   aria-label="Add filter group with OR"
@@ -170,6 +177,7 @@ export function FilterItem({
                 <EuiButtonIcon
                   display="base"
                   onClick={onAddButtonClick}
+                  isDisabled={disableAnd}
                   iconType="plus"
                   size="s"
                   aria-label="Add filter group with AND"
@@ -181,6 +189,7 @@ export function FilterItem({
                   display="base"
                   onClick={onRemoveFilter}
                   iconType="trash"
+                  isDisabled={disableRemove}
                   size="s"
                   color="danger"
                   aria-label="Delete filter group"

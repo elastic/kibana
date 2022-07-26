@@ -20,15 +20,22 @@ export interface FiltersEditorProps {
   dataView: DataView;
   onChange: (filters: Filter[]) => void;
   timeRangeForSuggestionsOverride: boolean;
+  maxDepth?: number;
+  disableOr?: boolean;
+  disableAnd?: boolean;
 }
 
 const rootLevelConditionType = ConditionTypes.AND;
+const DEFAULT_MAX_DEPTH = 10;
 
 export function FiltersEditor({
   onChange,
   dataView,
   filters,
   timeRangeForSuggestionsOverride,
+  maxDepth = DEFAULT_MAX_DEPTH,
+  disableOr = false,
+  disableAnd = false,
 }: FiltersEditorProps) {
   const [state, dispatch] = useReducer(filtersEditorReducer, { filters });
 
@@ -39,7 +46,13 @@ export function FiltersEditor({
   }, [filters, onChange, state.filters]);
 
   return (
-    <FiltersEditorContextType.Provider value={{ dataView, dispatch }}>
+    <FiltersEditorContextType.Provider
+      value={{
+        globalParams: { disableOr, disableAnd, maxDepth },
+        dataView,
+        dispatch,
+      }}
+    >
       <FilterGroup
         filters={state.filters}
         conditionType={rootLevelConditionType}
