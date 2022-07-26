@@ -189,8 +189,10 @@ describe('FileService', () => {
         expect.objectContaining({
           id: expect.any(String),
           name: 'test name',
-          valid_until: expect.any(Number),
-          created_at: expect.any(String),
+          validUntil: expect.any(Number),
+          created: expect.any(String),
+          token: expect.any(String),
+          fileId: file.id,
         })
       );
     });
