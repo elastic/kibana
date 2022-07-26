@@ -617,7 +617,10 @@ describe('Exception builder helpers', () => {
     });
 
     test('it does not return list operators if specified not to', () => {
-      const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
+      const payloadItem: FormattedBuilderEntry = {
+        ...getMockBuilderEntry(),
+        field: getField('@tags'),
+      };
       const output = getOperatorOptions(payloadItem, 'detection', false, false);
       expect(output).toEqual(EXCEPTION_OPERATORS_SANS_LISTS);
     });
@@ -629,9 +632,28 @@ describe('Exception builder helpers', () => {
     });
 
     test('it returns all operators supported by detection engine if list type is "detection"', () => {
-      const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
+      const payloadItem: FormattedBuilderEntry = {
+        ...getMockBuilderEntry(),
+        field: getField('@tags'),
+      };
       const output = getOperatorOptions(payloadItem, 'detection', false, true);
       expect(output).toEqual(DETECTION_ENGINE_EXCEPTION_OPERATORS);
+    });
+
+    test('it excludes wildcard operators if list type is "detection" and field is not a string', () => {
+      const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
+      const output = getOperatorOptions(payloadItem, 'detection', false, true);
+      const expected: OperatorOption[] = [
+        isOperator,
+        isNotOperator,
+        isOneOfOperator,
+        isNotOneOfOperator,
+        existsOperator,
+        doesNotExistOperator,
+        isInListOperator,
+        isNotInListOperator,
+      ];
+      expect(output).toEqual(expected);
     });
   });
 
