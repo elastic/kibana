@@ -12,6 +12,7 @@ import { getEmailActionType } from './email';
 import { getIndexActionType } from './es_index';
 import { getPagerDutyActionType } from './pagerduty';
 import { getSwimlaneActionType } from './swimlane';
+import { getCasesWebhookActionType } from './cases_webhook';
 import { getWebhookActionType } from './webhook';
 import { getXmattersActionType } from './xmatters';
 import { TypeRegistry } from '../../type_registry';
@@ -45,6 +46,7 @@ export function registerBuiltInActionTypes({
   actionTypeRegistry.register(getIndexActionType());
   actionTypeRegistry.register(getPagerDutyActionType());
   actionTypeRegistry.register(getSwimlaneActionType());
+  actionTypeRegistry.register(getCasesWebhookActionType());
   actionTypeRegistry.register(getWebhookActionType());
   actionTypeRegistry.register(getXmattersActionType());
   actionTypeRegistry.register(getServiceNowITSMActionType());
