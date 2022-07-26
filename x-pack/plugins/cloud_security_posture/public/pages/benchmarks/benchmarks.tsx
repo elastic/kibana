@@ -28,6 +28,7 @@ import {
 } from './use_csp_benchmark_integrations';
 import { extractErrorMessage } from '../../../common/utils/helpers';
 import * as TEST_SUBJ from './test_subjects';
+import { CloudPosturePage } from '../../components/cloud_posture_page';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -136,7 +137,7 @@ export const Benchmarks = () => {
   const totalItemCount = queryResult.data?.total || 0;
 
   return (
-    <>
+    <CloudPosturePage>
       <EuiPageHeader
         data-test-subj={TEST_SUBJ.BENCHMARKS_PAGE_HEADER}
         pageTitle={i18n.translate(
@@ -186,6 +187,6 @@ export const Benchmarks = () => {
           ) : undefined
         }
       />
-    </>
+    </CloudPosturePage>
   );
 };
