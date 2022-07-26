@@ -13,6 +13,7 @@ import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CoreSetup, CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { EventAnnotationPluginSetup } from '@kbn/event-annotation-plugin/public';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { ExpressionXyPluginSetup, ExpressionXyPluginStart, SetupDeps } from './types';
 import {
   xyVisFunction,
@@ -36,6 +37,7 @@ export interface XYPluginStartDependencies {
   fieldFormats: FieldFormatsStart;
   charts: ChartsPluginStart;
   eventAnnotation: EventAnnotationPluginSetup;
+  usageCollection?: UsageCollectionStart;
 }
 
 export function getTimeZone(uiSettings: IUiSettingsClient) {
@@ -70,6 +72,7 @@ export class ExpressionXyPlugin {
       const [coreStart, deps] = await core.getStartServices();
       const {
         data,
+        usageCollection,
         fieldFormats,
         eventAnnotation,
         charts: { activeCursor, theme, palettes },
@@ -86,6 +89,7 @@ export class ExpressionXyPlugin {
         formatFactory: fieldFormats.deserialize,
         kibanaTheme,
         theme,
+        usageCollection,
         activeCursor,
         paletteService,
         useLegacyTimeAxis,

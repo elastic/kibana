@@ -52,19 +52,19 @@ import type {
   HttpServiceStart,
 } from '@kbn/core-http-server';
 import type { PrebootServicePreboot } from '@kbn/core-preboot-server';
-import type {
+import type { MetricsServiceSetup, MetricsServiceStart } from '@kbn/core-metrics-server';
+import {
   ElasticsearchServiceSetup,
   ElasticsearchServiceStart,
   ElasticsearchServicePreboot,
 } from '@kbn/core-elasticsearch-server';
 import { configSchema as elasticsearchConfigSchema } from '@kbn/core-elasticsearch-server-internal';
-import { HttpResources } from './http_resources';
+import type { CapabilitiesSetup, CapabilitiesStart } from '@kbn/core-capabilities-server';
 
+import { HttpResources } from './http_resources';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { UiSettingsServiceSetup, UiSettingsServiceStart } from './ui_settings';
 import { SavedObjectsServiceSetup, SavedObjectsServiceStart } from './saved_objects';
-import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
-import { MetricsServiceSetup, MetricsServiceStart } from './metrics';
 import { StatusServiceSetup } from './status';
 import { CoreUsageDataStart, CoreUsageDataSetup } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
@@ -95,12 +95,12 @@ export type { KibanaExecutionContext } from '@kbn/core-execution-context-common'
 export type { IExecutionContextContainer } from '@kbn/core-execution-context-server';
 
 export { bootstrap } from './bootstrap';
+export type { Capabilities } from '@kbn/core-capabilities-common';
 export type {
-  Capabilities,
   CapabilitiesProvider,
   CapabilitiesSwitcher,
   ResolveCapabilitiesOptions,
-} from './capabilities';
+} from '@kbn/core-capabilities-server';
 export type {
   ConfigPath,
   ConfigService,
@@ -402,8 +402,9 @@ export type {
   MetricsServiceSetup,
   MetricsServiceStart,
   IntervalHistogram,
-} from './metrics';
-export { EventLoopDelaysMonitor } from './metrics';
+  IEventLoopDelaysMonitor,
+} from '@kbn/core-metrics-server';
+export { EventLoopDelaysMonitor } from '@kbn/core-metrics-collectors-server-internal';
 
 export type { I18nServiceSetup } from './i18n';
 export type {

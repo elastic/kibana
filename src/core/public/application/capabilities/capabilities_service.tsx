@@ -9,8 +9,7 @@
 import type { RecursiveReadonly } from '@kbn/utility-types';
 import { deepFreeze } from '@kbn/std';
 import type { HttpStart } from '@kbn/core-http-browser';
-
-import type { Capabilities } from '../../../types/capabilities';
+import type { Capabilities } from '@kbn/core-capabilities-common';
 
 interface StartDeps {
   appIds: string[];

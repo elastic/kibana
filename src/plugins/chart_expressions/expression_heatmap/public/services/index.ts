@@ -8,10 +8,5 @@
 
 export { getDatatableUtilities, setDatatableUtilities } from './datatable_utilities';
 export { getFormatService, setFormatService } from './format_service';
-export {
-  getPaletteService,
-  setPaletteService,
-  setThemeService,
-  getThemeService,
-} from './palette_service';
+export { getPaletteService, setPaletteService } from './palette_service';
 export { getUISettings, setUISettings } from './ui_settings';

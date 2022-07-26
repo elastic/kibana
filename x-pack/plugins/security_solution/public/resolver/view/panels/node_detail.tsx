@@ -103,6 +103,11 @@ const NodeDetailView = memo(function ({
       description: eventModel.userName(processEvent),
     };
 
+    const processEntityId = {
+      title: 'process.entity_id',
+      description: eventModel.entityId(processEvent),
+    };
+
     const domainEntry = {
       title: 'user.domain',
       description: eventModel.userDomain(processEvent),
@@ -132,6 +137,7 @@ const NodeDetailView = memo(function ({
       createdEntry,
       pathEntry,
       pidEntry,
+      processEntityId,
       userEntry,
       domainEntry,
       parentPidEntry,
