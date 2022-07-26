@@ -403,7 +403,12 @@ const createThresholdTimeline = async (
   ecsData: Ecs,
   createTimeline: ({ from, timeline, to }: CreateTimelineProps) => void,
   noteContent: string,
-  templateValues: { filters?: Filter[]; query?: string; dataProviders?: DataProvider[] },
+  templateValues: {
+    filters?: Filter[];
+    query?: string;
+    dataProviders?: DataProvider[];
+    columns?: TGridModel['columns'];
+  },
   getExceptions: (ecs: Ecs) => Promise<ExceptionListItemSchema[]>
 ) => {
   try {
@@ -457,6 +462,7 @@ const createThresholdTimeline = async (
       notes: null,
       timeline: {
         ...timelineDefaults,
+        columns: templateValues.columns ?? timelineDefaults.columns,
         description: `_id: ${alertDoc._id}`,
         filters: allFilters,
         dataProviders: templateValues.dataProviders ?? dataProviders,
@@ -742,6 +748,7 @@ export const sendAlertToTimelineAction = async ({
               filters,
               query,
               dataProviders,
+              columns: timeline.columns,
             },
             getExceptions
           );
