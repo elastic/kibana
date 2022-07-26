@@ -122,7 +122,7 @@ export const fetchIndices = async (
             ...indexData,
           });
         });
-      };
+      }
       return indicesAndAliases;
     })
     .filter(
