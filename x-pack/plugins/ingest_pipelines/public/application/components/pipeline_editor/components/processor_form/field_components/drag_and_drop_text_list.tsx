@@ -18,7 +18,6 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiFieldText,
-  EuiIconTip,
   EuiFormRow,
   EuiText,
 } from '@elastic/eui';
@@ -162,31 +161,22 @@ function DragAndDropTextListComponent({
                                 return (
                                   <EuiFlexGroup gutterSize="none" alignItems="center">
                                     <EuiFlexItem>
-                                      <EuiFieldText
-                                        data-test-subj={`input-${idx}`}
-                                        id={idx === 0 ? firstItemId : undefined}
+                                      <EuiFormRow
                                         isInvalid={isInvalid}
-                                        value={field.value}
-                                        onChange={field.onChange}
-                                        compressed
+                                        error={errorMessage}
                                         fullWidth
-                                      />
+                                      >
+                                        <EuiFieldText
+                                          data-test-subj={`input-${idx}`}
+                                          id={idx === 0 ? firstItemId : undefined}
+                                          isInvalid={isInvalid}
+                                          value={field.value}
+                                          onChange={field.onChange}
+                                          compressed
+                                          fullWidth
+                                        />
+                                      </EuiFormRow>
                                     </EuiFlexItem>
-                                    {typeof errorMessage === 'string' && (
-                                      <EuiFlexItem grow={false}>
-                                        <div
-                                          className="pipelineProcessorsEditor__form__dragAndDropList__errorIcon"
-                                          data-test-subj="errorIcon"
-                                        >
-                                          <EuiIconTip
-                                            aria-label={errorMessage}
-                                            content={errorMessage}
-                                            type="alert"
-                                            color="danger"
-                                          />
-                                        </div>
-                                      </EuiFlexItem>
-                                    )}
                                   </EuiFlexGroup>
                                 );
                               }}
