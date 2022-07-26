@@ -26,7 +26,7 @@ export class PrivateLocationTestService {
         name,
         description: '',
         namespace: 'default',
-        monitoring_enabled: ['logs', 'metrics'],
+        monitoring_enabled: [],
       })
       .expect(200);
   }
