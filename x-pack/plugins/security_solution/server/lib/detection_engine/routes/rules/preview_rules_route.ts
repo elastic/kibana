@@ -36,7 +36,8 @@ import {
 import { wrapScopedClusterClient } from './utils/wrap_scoped_cluster_client';
 import type { RulePreviewLogs } from '../../../../../common/detection_engine/schemas/request';
 import { previewRulesSchema } from '../../../../../common/detection_engine/schemas/request';
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common';
+import { RuleExecutionStatus } from '../../../../../common/detection_engine/rule_monitoring';
+import type { RuleExecutionContext, StatusChangeArgs } from '../../rule_monitoring';
 
 import type { ConfigType } from '../../../../config';
 import { alertInstanceFactoryStub } from '../../signals/preview/alert_instance_factory_stub';
@@ -52,7 +53,6 @@ import {
 } from '../../rule_types';
 import { createSecurityRuleTypeWrapper } from '../../rule_types/create_security_rule_type_wrapper';
 import { RULE_PREVIEW_INVOCATION_COUNT } from '../../../../../common/detection_engine/constants';
-import type { RuleExecutionContext, StatusChangeArgs } from '../../rule_execution_log';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import { wrapSearchSourceClient } from './utils/wrap_search_source_client';
 

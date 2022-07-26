@@ -484,7 +484,19 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
           throw new PackagePolicyRestrictionRelatedError(`Cannot delete package policy ${id}`);
         }
 
-        if (!options?.skipUnassignFromAgentPolicies) {
+        const agentPolicy = await agentPolicyService
+          .get(soClient, packagePolicy.policy_id)
+          .catch((err) => {
+            if (soClient.errors.isNotFoundError(err)) {
+              appContextService
+                .getLogger()
+                .warn(`Agent policy ${packagePolicy.policy_id} not found`);
+              return null;
+            }
+            throw err;
+          });
+
+        if (agentPolicy && !options?.skipUnassignFromAgentPolicies) {
           await agentPolicyService.unassignPackagePolicies(
             soClient,
             esClient,
