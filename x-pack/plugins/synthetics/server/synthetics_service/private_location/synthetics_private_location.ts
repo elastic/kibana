@@ -47,7 +47,7 @@ export class SyntheticsPrivateLocation {
       }
 
       newPolicy.is_managed = true;
-      newPolicy.policy_id = privateLocation.policyHostId;
+      newPolicy.policy_id = privateLocation.agentPolicyId;
       newPolicy.name =
         (config[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT
           ? config.id

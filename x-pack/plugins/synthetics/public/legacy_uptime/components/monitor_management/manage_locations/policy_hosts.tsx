@@ -35,7 +35,7 @@ export const PolicyHostsField = ({
   const { data } = useSelector(selectAgentPolicies);
 
   const policyHostsOptions = data?.items.map((item) => {
-    const hasLocation = privateLocations.find((location) => location.policyHostId === item.id);
+    const hasLocation = privateLocations.find((location) => location.agentPolicyId === item.id);
     return {
       disabled: Boolean(hasLocation),
       value: item.id,
@@ -91,12 +91,12 @@ export const PolicyHostsField = ({
     <EuiFormRow
       fullWidth
       label={POLICY_HOST_LABEL}
-      helpText={!errors?.policyHostId ? SELECT_POLICY_HOSTS : undefined}
-      isInvalid={!!errors?.policyHostId}
+      helpText={!errors?.agentPolicyId ? SELECT_POLICY_HOSTS : undefined}
+      isInvalid={!!errors?.agentPolicyId}
       error={SELECT_POLICY_HOSTS}
     >
       <Controller
-        name="policyHostId"
+        name="agentPolicyId"
         control={control}
         rules={{ required: true }}
         render={({ field }) => (
@@ -108,7 +108,7 @@ export const PolicyHostsField = ({
             itemLayoutAlign="top"
             popoverProps={{ repositionOnScroll: true }}
             hasDividers
-            isInvalid={!!errors?.policyHostId}
+            isInvalid={!!errors?.agentPolicyId}
             options={policyHostsOptions ?? []}
             {...field}
           />

@@ -20,7 +20,7 @@ export async function getPrivateLocations(
     privateLocations?.map((loc) => ({
       label: loc.name,
       isServiceManaged: false,
-      isInvalid: agentPolicies.find((policy) => policy.id === loc.policyHostId) === undefined,
+      isInvalid: agentPolicies.find((policy) => policy.id === loc.agentPolicyId) === undefined,
       ...loc,
     })) ?? [];
 

@@ -35,7 +35,7 @@ export const LocationForm = ({
     shouldFocusError: true,
     defaultValues: {
       name: '',
-      policyHostId: '',
+      agentPolicyId: '',
       id: '',
       geo: {
         lat: 0,
@@ -46,13 +46,13 @@ export const LocationForm = ({
   });
 
   const name = getValues('name');
-  const policyHostId = getValues('policyHostId');
+  const agentPolicyId = getValues('agentPolicyId');
 
   useEffect(() => {
-    if (name && policyHostId) {
-      setFormData({ name, policyHostId });
+    if (name && agentPolicyId) {
+      setFormData({ name, agentPolicyId });
     }
-  }, [name, policyHostId, setFormData]);
+  }, [name, agentPolicyId, setFormData]);
 
   return (
     <>

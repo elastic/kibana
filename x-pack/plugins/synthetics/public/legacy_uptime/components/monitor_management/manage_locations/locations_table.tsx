@@ -38,9 +38,9 @@ export const PrivateLocationsTable = ({
       align: 'right' as const,
     },
     {
-      field: 'policyHostId',
+      field: 'agentPolicyId',
       name: AGENT_POLICY_LABEL,
-      render: (policyHostId: string) => <PolicyName policyHostId={policyHostId} />,
+      render: (agentPolicyId: string) => <PolicyName agentPolicyId={agentPolicyId} />,
     },
 
     {

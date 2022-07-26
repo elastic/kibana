@@ -32,7 +32,7 @@ describe('useLocationsAPI', () => {
       locations: [
         {
           id: 'Test',
-          policyHostId: 'testPolicy',
+          agentPolicyId: 'testPolicy',
         },
       ],
     },
@@ -57,7 +57,7 @@ describe('useLocationsAPI', () => {
         privateLocations: [
           {
             id: 'Test',
-            policyHostId: 'testPolicy',
+            agentPolicyId: 'testPolicy',
           },
         ],
       })
@@ -73,7 +73,7 @@ describe('useLocationsAPI', () => {
 
     result.current.onSubmit({
       id: 'new',
-      policyHostId: 'newPolicy',
+      agentPolicyId: 'newPolicy',
       name: 'new',
       concurrentMonitors: 1,
       geo: {
@@ -88,7 +88,7 @@ describe('useLocationsAPI', () => {
       'synthetics-privates-locations',
       {
         locations: [
-          { id: 'Test', policyHostId: 'testPolicy' },
+          { id: 'Test', agentPolicyId: 'testPolicy' },
           {
             concurrentMonitors: 1,
             id: 'newPolicy',
@@ -97,7 +97,7 @@ describe('useLocationsAPI', () => {
               lon: 0,
             },
             name: 'new',
-            policyHostId: 'newPolicy',
+            agentPolicyId: 'newPolicy',
           },
         ],
       },
@@ -111,11 +111,11 @@ describe('useLocationsAPI', () => {
         locations: [
           {
             id: 'Test',
-            policyHostId: 'testPolicy',
+            agentPolicyId: 'testPolicy',
           },
           {
             id: 'Test1',
-            policyHostId: 'testPolicy1',
+            agentPolicyId: 'testPolicy1',
           },
         ],
       },
@@ -137,7 +137,7 @@ describe('useLocationsAPI', () => {
         locations: [
           {
             id: 'Test1',
-            policyHostId: 'testPolicy1',
+            agentPolicyId: 'testPolicy1',
           },
         ],
       },

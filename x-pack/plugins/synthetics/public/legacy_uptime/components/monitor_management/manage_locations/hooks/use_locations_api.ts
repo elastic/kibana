@@ -29,10 +29,10 @@ export const useLocationsAPI = ({ isOpen }: { isOpen: boolean }) => {
 
   const { loading: saveLoading } = useFetcher(async () => {
     if (privateLocations && formData) {
-      const existingLocations = privateLocations.filter((loc) => loc.id !== formData.policyHostId);
+      const existingLocations = privateLocations.filter((loc) => loc.id !== formData.agentPolicyId);
 
       const result = await setSyntheticsPrivateLocations(savedObjects?.client!, {
-        locations: [...(existingLocations ?? []), { ...formData, id: formData.policyHostId }],
+        locations: [...(existingLocations ?? []), { ...formData, id: formData.agentPolicyId }],
       });
       setPrivateLocations(result.locations);
       setFormData(undefined);

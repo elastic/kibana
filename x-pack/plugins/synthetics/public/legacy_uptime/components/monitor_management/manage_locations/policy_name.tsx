@@ -13,14 +13,14 @@ import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_cont
 import { usePrivateLocationPermissions } from '../hooks/use_private_location_permission';
 import { selectAgentPolicies } from '../../../state/private_locations';
 
-export const PolicyName = ({ policyHostId }: { policyHostId: string }) => {
+export const PolicyName = ({ agentPolicyId }: { agentPolicyId: string }) => {
   const { canReadAgentPolicies } = usePrivateLocationPermissions();
 
   const { basePath } = useUptimeSettingsContext();
 
   const { data: policies } = useSelector(selectAgentPolicies);
 
-  const policy = policies?.items.find((policyT) => policyT.id === policyHostId);
+  const policy = policies?.items.find((policyT) => policyT.id === agentPolicyId);
 
   return (
     <EuiText size="s">
@@ -28,7 +28,7 @@ export const PolicyName = ({ policyHostId }: { policyHostId: string }) => {
         {canReadAgentPolicies && (
           <EuiTextColor color="subdued">
             {policy ? (
-              <EuiLink href={`${basePath}/app/fleet/policies/${policyHostId}`}>
+              <EuiLink href={`${basePath}/app/fleet/policies/${agentPolicyId}`}>
                 {policy?.name}
               </EuiLink>
             ) : (
