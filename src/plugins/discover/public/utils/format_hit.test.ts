@@ -49,7 +49,6 @@ describe('formatHit', () => {
       ['message', 'formatted:foobar'],
       ['object.value', 'formatted:42,13'],
       ['_index', 'formatted:logs'],
-      ['_score', undefined],
     ]);
   });
 
@@ -74,7 +73,6 @@ describe('formatHit', () => {
       'extension',
       'object.value',
       '_index',
-      '_score',
     ]);
   });
 
@@ -89,7 +87,7 @@ describe('formatHit', () => {
     expect(formatted).toEqual([
       ['extension', 'formatted:png'],
       ['message', 'formatted:foobar'],
-      ['and 3 more fields', ''],
+      ['and 2 more fields', ''],
     ]);
   });
 
@@ -105,7 +103,6 @@ describe('formatHit', () => {
       ['message', 'formatted:foobar'],
       ['object.value', 'formatted:42,13'],
       ['_index', 'formatted:logs'],
-      ['_score', undefined],
     ]);
   });
 
@@ -120,7 +117,6 @@ describe('formatHit', () => {
     expect(formatted).toEqual([
       ['bytesDisplayName', 'formatted:123'],
       ['_index', 'formatted:logs'],
-      ['_score', undefined],
     ]);
   });
 });

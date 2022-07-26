@@ -453,6 +453,7 @@ describe('fields from job.searchSource.getFields() (7.12 generated)', () => {
               {
                 _id: 'my-cool-id',
                 _index: 'my-cool-index',
+                _score: 1,
                 _version: 4,
                 fields: {
                   date: ['2020-12-31T00:14:28.000Z'],
