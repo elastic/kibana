@@ -76,9 +76,7 @@ const create = (context: Eslint.Rule.RuleContext): Eslint.Rule.RuleListener => {
               return null;
             }
 
-            const remainingRules = disabledRules.filter(
-              (rule) => !rule.includes(disabledProtectedRule)
-            );
+            const remainingRules = disabledRules.filter((rule) => !PROTECTED_RULES.has(rule));
             const fixedComment = ` ${parsedEslintDisable.disableValueType} ${remainingRules.join(
               ', '
             )}${parsedEslintDisable.type === 'Block' ? ' ' : ''}`;
