@@ -30,7 +30,7 @@ export const FILES_API_ROUTES = {
     getListRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/list`,
     getByIdRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{id}`,
     getShareRoute: (fileKind: string) => `${FILES_SHARE_API_BASE_PATH}/${fileKind}/{fileId}`,
-    getUnshareRoute: (fileKind: string) => `${FILES_SHARE_API_BASE_PATH}/${fileKind}/{token}`,
+    getUnshareRoute: (fileKind: string) => `${FILES_SHARE_API_BASE_PATH}/${fileKind}/{id}`,
     getGetShareRoute: (fileKind: string) => `${FILES_SHARE_API_BASE_PATH}/${fileKind}/{id}`,
     getListShareRoute: (fileKind: string) => `${FILES_SHARE_API_BASE_PATH}/${fileKind}`,
   },

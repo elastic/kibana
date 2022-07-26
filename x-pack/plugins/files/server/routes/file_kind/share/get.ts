@@ -38,7 +38,7 @@ export const handler: FileKindsRequestHandler<Params, unknown, unknown> = async 
     });
   } catch (e) {
     if (e instanceof FileShareNotFoundError) {
-      return res.notFound({ body: e });
+      return res.notFound({ body: { message: `File share with id "${id}" not found` } });
     }
     throw e;
   }
