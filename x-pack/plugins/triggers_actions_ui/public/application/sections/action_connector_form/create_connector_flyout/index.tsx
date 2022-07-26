@@ -72,7 +72,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
   const hasErrors = isFormValid === false;
   const isSaving = isSavingConnector || isSubmitting;
-  const footerButtonType = actionType != null ? 'back' : 'cancel';
+  const hasConnectorTypeSelected = actionType != null;
   const actionTypeModel: ActionTypeModel | null =
     actionType != null ? actionTypeRegistry.get(actionType.id) : null;
 
@@ -157,6 +157,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         actionTypeName={actionType?.name}
         actionTypeMessage={actionTypeModel?.selectMessage}
         featureIds={actionType?.supportedFeatureIds}
+        isExperimental={actionTypeModel?.isExperimental}
       />
       <EuiFlyoutBody
         banner={!actionType && hasActionsUpgradeableByTrial ? <UpgradeLicenseCallOut /> : null}
@@ -182,7 +183,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         ) : null}
       </EuiFlyoutBody>
       <FlyoutFooter
-        buttonType={footerButtonType}
+        hasConnectorTypeSelected={hasConnectorTypeSelected}
         onBack={resetActionType}
         onCancel={onClose}
         disabled={hasErrors || !canSave}

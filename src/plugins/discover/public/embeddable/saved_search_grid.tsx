@@ -35,7 +35,11 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         </EuiFlexItem>
       )}
       <EuiFlexItem style={{ minHeight: 0 }}>
-        <DataGridMemoized {...props} setExpandedDoc={setExpandedDoc} expandedDoc={expandedDoc} />
+        <DataGridMemoized
+          {...props}
+          setExpandedDoc={!props.isPlainRecord ? setExpandedDoc : undefined}
+          expandedDoc={expandedDoc}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

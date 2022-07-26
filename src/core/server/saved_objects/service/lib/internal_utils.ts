@@ -7,9 +7,9 @@
  */
 
 import type { Payload } from '@hapi/boom';
+import type { SavedObject } from '@kbn/core-saved-objects-common';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type { SavedObjectsRawDoc, SavedObjectsRawDocSource } from '../../serialization';
-import type { SavedObject } from '../../types';
 import { decodeRequestVersion, encodeHitVersion } from '../../version';
 import { SavedObjectsErrorHelpers } from './errors';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from './utils';

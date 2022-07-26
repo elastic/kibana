@@ -13,6 +13,8 @@ import { ErrorCode } from '../../../common/types/error_codes';
 import { setupConnectorsIndices } from '../../index_management/setup_indices';
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 
+import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
+
 import { deleteConnectorById } from './delete_connector';
 
 import { fetchConnectorByIndexName } from './fetch_connectors';
@@ -39,6 +41,12 @@ const createConnector = async (
       throw new Error(ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS);
     }
   }
+  const crawler = await fetchCrawlerByIndexName(client, index);
+
+  if (crawler) {
+    throw new Error(ErrorCode.CRAWLER_ALREADY_EXISTS);
+  }
+
   const result = await client.asCurrentUser.index({
     document,
     index: CONNECTORS_INDEX,
@@ -62,6 +70,7 @@ export const addConnector = async (
     last_sync_error: null,
     last_sync_status: null,
     last_synced: null,
+    name: input.index_name.startsWith('search-') ? input.index_name.substring(7) : input.index_name,
     scheduling: { enabled: false, interval: '0 0 0 * * ?' },
     service_type: null,
     status: ConnectorStatus.CREATED,

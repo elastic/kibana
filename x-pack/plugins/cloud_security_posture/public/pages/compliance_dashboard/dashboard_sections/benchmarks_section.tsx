@@ -42,19 +42,19 @@ export const BenchmarksSection = ({
     const [layerValue] = element;
     const evaluation = layerValue[0].groupByRollup as Evaluation;
 
-    navToFindings({ 'cluster_id.keyword': clusterId, 'result.evaluation.keyword': evaluation });
+    navToFindings({ cluster_id: clusterId, 'result.evaluation': evaluation });
   };
 
   const handleCellClick = (clusterId: string, ruleSection: string) => {
     navToFindings({
-      'cluster_id.keyword': clusterId,
-      'rule.section.keyword': ruleSection,
-      'result.evaluation.keyword': RULE_FAILED,
+      cluster_id: clusterId,
+      'rule.section': ruleSection,
+      'result.evaluation': RULE_FAILED,
     });
   };
 
   const handleViewAllClick = (clusterId: string) => {
-    navToFindings({ 'cluster_id.keyword': clusterId, 'result.evaluation.keyword': RULE_FAILED });
+    navToFindings({ cluster_id: clusterId, 'result.evaluation': RULE_FAILED });
   };
 
   return (

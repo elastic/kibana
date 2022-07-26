@@ -16,7 +16,8 @@ import { PrivateLocationTestService } from './services/private_location_test_ser
 import { comparePolicies, getTestProjectSyntheticsPolicy } from './sample_data/test_policy';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('[PUT] /api/uptime/service/monitors', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/137124
+  describe.skip('[PUT] /api/uptime/service/monitors', function () {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
@@ -727,7 +728,7 @@ export default function ({ getService }: FtrProviderContext) {
               isServiceManaged: false,
               isInvalid: false,
               name: 'Test private location 0',
-              policyHostId: testPolicyId,
+              agentPolicyId: testPolicyId,
               id: testPolicyId,
               geo: {
                 lat: '',

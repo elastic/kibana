@@ -49,16 +49,6 @@ export const ConnectorConfiguration: React.FC = () => {
 
   const hasApiKey = !!(indexData.connector.api_key_id ?? apiKeyData);
 
-  const ConnectorConfig: React.FC = () => (
-    <ConnectorConfigurationConfig
-      apiKey={apiKeyData?.encoded}
-      configuration={indexData.connector.configuration}
-      connectorId={indexData.connector.id}
-      indexId={indexId}
-      indexName={indexName}
-    />
-  );
-
   const ScheduleStep: React.FC = () => (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
@@ -174,7 +164,15 @@ export const ConnectorConfiguration: React.FC = () => {
                   titleSize: 'xs',
                 },
                 {
-                  children: <ConnectorConfig />,
+                  children: (
+                    <ConnectorConfigurationConfig
+                      apiKey={apiKeyData?.encoded}
+                      configuration={indexData.connector.configuration}
+                      connectorId={indexData.connector.id}
+                      indexId={indexId}
+                      indexName={indexName}
+                    />
+                  ),
                   status:
                     indexData.connector.status === ConnectorStatus.CONNECTED
                       ? 'complete'

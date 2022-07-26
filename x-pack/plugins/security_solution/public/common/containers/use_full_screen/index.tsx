@@ -13,21 +13,6 @@ import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/actions';
 
-export const resetScroll = () => {
-  setTimeout(() => {
-    window.scrollTo(0, 0);
-
-    const kibanaBody = document.querySelector('#kibana-body');
-    if (kibanaBody != null) {
-      kibanaBody.scrollTop = 0;
-    }
-
-    const pageContainer = document.querySelector('[data-test-subj="pageContainer"]');
-    if (pageContainer != null) {
-      pageContainer.scrollTop = 0;
-    }
-  }, 0);
-};
 export interface GlobalFullScreen {
   globalFullScreen: boolean;
   setGlobalFullScreen: (fullScreen: boolean) => void;
@@ -47,10 +32,8 @@ export const useGlobalFullScreen = (): GlobalFullScreen => {
       const isDataGridFullScreen = document.querySelector('.euiDataGrid--fullScreen') !== null;
       if (fullScreen) {
         document.body.classList.add(SCROLLING_DISABLED_CLASS_NAME, 'euiDataGrid__restrictBody');
-        resetScroll();
       } else if (isDataGridFullScreen === false || fullScreen === false) {
         document.body.classList.remove(SCROLLING_DISABLED_CLASS_NAME, 'euiDataGrid__restrictBody');
-        resetScroll();
       }
 
       dispatch(inputsActions.setFullScreen({ id: 'global', fullScreen }));
