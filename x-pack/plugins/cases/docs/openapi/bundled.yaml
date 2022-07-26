@@ -145,12 +145,7 @@ paths:
                 owner:
                   $ref: '#/components/schemas/owners'
                 settings:
-                  description: An object that contains the case settings.
-                  type: object
-                  properties:
-                    syncAlerts:
-                      description: Turns alert syncing on or off.
-                      type: boolean
+                  $ref: '#/components/schemas/settings'
                 severity:
                   $ref: '#/components/schemas/severity_property'
                 tags:
@@ -191,10 +186,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   comments:
@@ -331,43 +329,14 @@ paths:
                       than half a second, the duration is rounded down to zero.
                     example: 120
                   external_service:
-                    type: object
-                    properties:
-                      connector_id:
-                        type: string
-                      connector_name:
-                        type: string
-                      external_id:
-                        type: string
-                      external_title:
-                        type: string
-                      external_url:
-                        type: string
-                      pushed_at:
-                        type: string
-                        format: date-time
-                      pushed_by:
-                        type: object
-                        properties:
-                          email:
-                            type: string
-                          full_name:
-                            type: string
-                          username:
-                            type: string
-                        nullable: true
-                        example: null
+                    $ref: '#/components/schemas/external_service'
                   id:
                     type: string
                     example: 66b9aa00-94fa-11ea-9f74-e7e108796192
                   owner:
                     $ref: '#/components/schemas/owners'
                   settings:
-                    type: object
-                    properties:
-                      syncAlerts:
-                        type: boolean
-                        example: true
+                    $ref: '#/components/schemas/settings'
                   severity:
                     $ref: '#/components/schemas/severity_property'
                   status:
@@ -397,10 +366,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   version:
@@ -415,9 +387,10 @@ paths:
       summary: Deletes one or more cases from the default space.
       operationId: deleteCaseDefaultSpace
       description: >
-        You must have `all` privileges for the **Cases** feature in the
-        **Management**, **Observability**, or **Security** section of the Kibana
-        feature privileges, depending on the owner of the cases you're deleting.
+        You must have `read` or `all` privileges and the `delete` sub-feature
+        privilege for the **Cases** feature in the **Management**,
+        **Observability**, or **Security** section of the Kibana feature
+        privileges, depending on the owner of the cases you're deleting.
       tags:
         - cases
         - kibana
@@ -573,12 +546,7 @@ paths:
                         description: The identifier for the case.
                         type: string
                       settings:
-                        description: An object that contains the case settings.
-                        type: object
-                        properties:
-                          syncAlerts:
-                            description: Turns alert syncing on or off.
-                            type: boolean
+                        $ref: '#/components/schemas/settings'
                       severity:
                         $ref: '#/components/schemas/severity_property'
                       status:
@@ -618,10 +586,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   comments:
@@ -758,43 +729,14 @@ paths:
                       than half a second, the duration is rounded down to zero.
                     example: 120
                   external_service:
-                    type: object
-                    properties:
-                      connector_id:
-                        type: string
-                      connector_name:
-                        type: string
-                      external_id:
-                        type: string
-                      external_title:
-                        type: string
-                      external_url:
-                        type: string
-                      pushed_at:
-                        type: string
-                        format: date-time
-                      pushed_by:
-                        type: object
-                        properties:
-                          email:
-                            type: string
-                          full_name:
-                            type: string
-                          username:
-                            type: string
-                        nullable: true
-                        example: null
+                    $ref: '#/components/schemas/external_service'
                   id:
                     type: string
                     example: 66b9aa00-94fa-11ea-9f74-e7e108796192
                   owner:
                     $ref: '#/components/schemas/owners'
                   settings:
-                    type: object
-                    properties:
-                      syncAlerts:
-                        type: boolean
-                        example: true
+                    $ref: '#/components/schemas/settings'
                   severity:
                     $ref: '#/components/schemas/severity_property'
                   status:
@@ -824,10 +766,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   version:
@@ -993,10 +938,13 @@ paths:
                           properties:
                             email:
                               type: string
+                              example: null
                             full_name:
                               type: string
+                              example: null
                             username:
                               type: string
+                              example: elastic
                           nullable: true
                           example: null
                         comments:
@@ -1138,43 +1086,14 @@ paths:
                             is rounded down to zero.
                           example: 120
                         external_service:
-                          type: object
-                          properties:
-                            connector_id:
-                              type: string
-                            connector_name:
-                              type: string
-                            external_id:
-                              type: string
-                            external_title:
-                              type: string
-                            external_url:
-                              type: string
-                            pushed_at:
-                              type: string
-                              format: date-time
-                            pushed_by:
-                              type: object
-                              properties:
-                                email:
-                                  type: string
-                                full_name:
-                                  type: string
-                                username:
-                                  type: string
-                              nullable: true
-                              example: null
+                          $ref: '#/components/schemas/external_service'
                         id:
                           type: string
                           example: 66b9aa00-94fa-11ea-9f74-e7e108796192
                         owner:
                           $ref: '#/components/schemas/owners'
                         settings:
-                          type: object
-                          properties:
-                            syncAlerts:
-                              type: boolean
-                              example: true
+                          $ref: '#/components/schemas/settings'
                         severity:
                           $ref: '#/components/schemas/severity_property'
                         status:
@@ -1204,10 +1123,13 @@ paths:
                           properties:
                             email:
                               type: string
+                              example: null
                             full_name:
                               type: string
+                              example: null
                             username:
                               type: string
+                              example: elastic
                           nullable: true
                           example: null
                         version:
@@ -2297,10 +2219,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   comments:
@@ -2437,43 +2362,14 @@ paths:
                       than half a second, the duration is rounded down to zero.
                     example: 120
                   external_service:
-                    type: object
-                    properties:
-                      connector_id:
-                        type: string
-                      connector_name:
-                        type: string
-                      external_id:
-                        type: string
-                      external_title:
-                        type: string
-                      external_url:
-                        type: string
-                      pushed_at:
-                        type: string
-                        format: date-time
-                      pushed_by:
-                        type: object
-                        properties:
-                          email:
-                            type: string
-                          full_name:
-                            type: string
-                          username:
-                            type: string
-                        nullable: true
-                        example: null
+                    $ref: '#/components/schemas/external_service'
                   id:
                     type: string
                     example: 66b9aa00-94fa-11ea-9f74-e7e108796192
                   owner:
                     $ref: '#/components/schemas/owners'
                   settings:
-                    type: object
-                    properties:
-                      syncAlerts:
-                        type: boolean
-                        example: true
+                    $ref: '#/components/schemas/settings'
                   severity:
                     $ref: '#/components/schemas/severity_property'
                   status:
@@ -2503,10 +2399,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   version:
@@ -2561,10 +2460,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   comments:
@@ -2701,43 +2603,14 @@ paths:
                       than half a second, the duration is rounded down to zero.
                     example: 120
                   external_service:
-                    type: object
-                    properties:
-                      connector_id:
-                        type: string
-                      connector_name:
-                        type: string
-                      external_id:
-                        type: string
-                      external_title:
-                        type: string
-                      external_url:
-                        type: string
-                      pushed_at:
-                        type: string
-                        format: date-time
-                      pushed_by:
-                        type: object
-                        properties:
-                          email:
-                            type: string
-                          full_name:
-                            type: string
-                          username:
-                            type: string
-                        nullable: true
-                        example: null
+                    $ref: '#/components/schemas/external_service'
                   id:
                     type: string
                     example: 66b9aa00-94fa-11ea-9f74-e7e108796192
                   owner:
                     $ref: '#/components/schemas/owners'
                   settings:
-                    type: object
-                    properties:
-                      syncAlerts:
-                        type: boolean
-                        example: true
+                    $ref: '#/components/schemas/settings'
                   severity:
                     $ref: '#/components/schemas/severity_property'
                   status:
@@ -2767,10 +2640,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   version:
@@ -2841,10 +2717,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   comments:
@@ -2981,43 +2860,14 @@ paths:
                       than half a second, the duration is rounded down to zero.
                     example: 120
                   external_service:
-                    type: object
-                    properties:
-                      connector_id:
-                        type: string
-                      connector_name:
-                        type: string
-                      external_id:
-                        type: string
-                      external_title:
-                        type: string
-                      external_url:
-                        type: string
-                      pushed_at:
-                        type: string
-                        format: date-time
-                      pushed_by:
-                        type: object
-                        properties:
-                          email:
-                            type: string
-                          full_name:
-                            type: string
-                          username:
-                            type: string
-                        nullable: true
-                        example: null
+                    $ref: '#/components/schemas/external_service'
                   id:
                     type: string
                     example: 66b9aa00-94fa-11ea-9f74-e7e108796192
                   owner:
                     $ref: '#/components/schemas/owners'
                   settings:
-                    type: object
-                    properties:
-                      syncAlerts:
-                        type: boolean
-                        example: true
+                    $ref: '#/components/schemas/settings'
                   severity:
                     $ref: '#/components/schemas/severity_property'
                   status:
@@ -3047,10 +2897,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   version:
@@ -3137,6 +2990,36 @@ paths:
               examples:
                 getCaseCommentResponse:
                   $ref: '#/components/examples/get_comment_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /api/cases/{caseId}/user_actions:
+    get:
+      summary: Returns all user activity for a case in the default space.
+      description: >
+        You must have `read` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the case you're seeking.
+      deprecated: true
+      operationId: getCaseActivityDefaultSpace
+      tags:
+        - cases
+        - kibana
+      parameters:
+        - $ref: '#/components/parameters/case_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/user_actions_response_properties'
+              examples:
+                getCaseActivityResponse:
+                  $ref: '#/components/examples/get_case_activity_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -3271,12 +3154,7 @@ paths:
                 owner:
                   $ref: '#/components/schemas/owners'
                 settings:
-                  description: An object that contains the case settings.
-                  type: object
-                  properties:
-                    syncAlerts:
-                      description: Turns alert syncing on or off.
-                      type: boolean
+                  $ref: '#/components/schemas/settings'
                 severity:
                   $ref: '#/components/schemas/severity_property'
                 tags:
@@ -3317,10 +3195,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   comments:
@@ -3457,43 +3338,14 @@ paths:
                       than half a second, the duration is rounded down to zero.
                     example: 120
                   external_service:
-                    type: object
-                    properties:
-                      connector_id:
-                        type: string
-                      connector_name:
-                        type: string
-                      external_id:
-                        type: string
-                      external_title:
-                        type: string
-                      external_url:
-                        type: string
-                      pushed_at:
-                        type: string
-                        format: date-time
-                      pushed_by:
-                        type: object
-                        properties:
-                          email:
-                            type: string
-                          full_name:
-                            type: string
-                          username:
-                            type: string
-                        nullable: true
-                        example: null
+                    $ref: '#/components/schemas/external_service'
                   id:
                     type: string
                     example: 66b9aa00-94fa-11ea-9f74-e7e108796192
                   owner:
                     $ref: '#/components/schemas/owners'
                   settings:
-                    type: object
-                    properties:
-                      syncAlerts:
-                        type: boolean
-                        example: true
+                    $ref: '#/components/schemas/settings'
                   severity:
                     $ref: '#/components/schemas/severity_property'
                   status:
@@ -3523,10 +3375,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   version:
@@ -3541,10 +3396,10 @@ paths:
       summary: Deletes one or more cases.
       operationId: deleteCase
       description: >
-        You must have `all` privileges for the **Cases** feature in the 
-        **Management**, **Observability**, or **Security** section of the
-        Kibana  feature privileges, depending on the owner of the cases you're
-        deleting.
+        You must have `read` or `all` privileges and the `delete` sub-feature
+        privilege for the **Cases** feature in the **Management**,
+        **Observability**, or **Security** section of the Kibana feature
+        privileges, depending on the owner of the cases you're deleting.
       tags:
         - cases
         - kibana
@@ -3703,12 +3558,7 @@ paths:
                         description: The identifier for the case.
                         type: string
                       settings:
-                        description: An object that contains the case settings.
-                        type: object
-                        properties:
-                          syncAlerts:
-                            description: Turns alert syncing on or off.
-                            type: boolean
+                        $ref: '#/components/schemas/settings'
                       severity:
                         $ref: '#/components/schemas/severity_property'
                       status:
@@ -3748,10 +3598,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   comments:
@@ -3888,43 +3741,14 @@ paths:
                       than half a second, the duration is rounded down to zero.
                     example: 120
                   external_service:
-                    type: object
-                    properties:
-                      connector_id:
-                        type: string
-                      connector_name:
-                        type: string
-                      external_id:
-                        type: string
-                      external_title:
-                        type: string
-                      external_url:
-                        type: string
-                      pushed_at:
-                        type: string
-                        format: date-time
-                      pushed_by:
-                        type: object
-                        properties:
-                          email:
-                            type: string
-                          full_name:
-                            type: string
-                          username:
-                            type: string
-                        nullable: true
-                        example: null
+                    $ref: '#/components/schemas/external_service'
                   id:
                     type: string
                     example: 66b9aa00-94fa-11ea-9f74-e7e108796192
                   owner:
                     $ref: '#/components/schemas/owners'
                   settings:
-                    type: object
-                    properties:
-                      syncAlerts:
-                        type: boolean
-                        example: true
+                    $ref: '#/components/schemas/settings'
                   severity:
                     $ref: '#/components/schemas/severity_property'
                   status:
@@ -3954,10 +3778,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   version:
@@ -4126,10 +3953,13 @@ paths:
                           properties:
                             email:
                               type: string
+                              example: null
                             full_name:
                               type: string
+                              example: null
                             username:
                               type: string
+                              example: elastic
                           nullable: true
                           example: null
                         comments:
@@ -4271,43 +4101,14 @@ paths:
                             is rounded down to zero.
                           example: 120
                         external_service:
-                          type: object
-                          properties:
-                            connector_id:
-                              type: string
-                            connector_name:
-                              type: string
-                            external_id:
-                              type: string
-                            external_title:
-                              type: string
-                            external_url:
-                              type: string
-                            pushed_at:
-                              type: string
-                              format: date-time
-                            pushed_by:
-                              type: object
-                              properties:
-                                email:
-                                  type: string
-                                full_name:
-                                  type: string
-                                username:
-                                  type: string
-                              nullable: true
-                              example: null
+                          $ref: '#/components/schemas/external_service'
                         id:
                           type: string
                           example: 66b9aa00-94fa-11ea-9f74-e7e108796192
                         owner:
                           $ref: '#/components/schemas/owners'
                         settings:
-                          type: object
-                          properties:
-                            syncAlerts:
-                              type: boolean
-                              example: true
+                          $ref: '#/components/schemas/settings'
                         severity:
                           $ref: '#/components/schemas/severity_property'
                         status:
@@ -4337,10 +4138,13 @@ paths:
                           properties:
                             email:
                               type: string
+                              example: null
                             full_name:
                               type: string
+                              example: null
                             username:
                               type: string
+                              example: elastic
                           nullable: true
                           example: null
                         version:
@@ -5438,10 +5242,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   comments:
@@ -5578,43 +5385,14 @@ paths:
                       than half a second, the duration is rounded down to zero.
                     example: 120
                   external_service:
-                    type: object
-                    properties:
-                      connector_id:
-                        type: string
-                      connector_name:
-                        type: string
-                      external_id:
-                        type: string
-                      external_title:
-                        type: string
-                      external_url:
-                        type: string
-                      pushed_at:
-                        type: string
-                        format: date-time
-                      pushed_by:
-                        type: object
-                        properties:
-                          email:
-                            type: string
-                          full_name:
-                            type: string
-                          username:
-                            type: string
-                        nullable: true
-                        example: null
+                    $ref: '#/components/schemas/external_service'
                   id:
                     type: string
                     example: 66b9aa00-94fa-11ea-9f74-e7e108796192
                   owner:
                     $ref: '#/components/schemas/owners'
                   settings:
-                    type: object
-                    properties:
-                      syncAlerts:
-                        type: boolean
-                        example: true
+                    $ref: '#/components/schemas/settings'
                   severity:
                     $ref: '#/components/schemas/severity_property'
                   status:
@@ -5644,10 +5422,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   version:
@@ -5703,10 +5484,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   comments:
@@ -5843,43 +5627,14 @@ paths:
                       than half a second, the duration is rounded down to zero.
                     example: 120
                   external_service:
-                    type: object
-                    properties:
-                      connector_id:
-                        type: string
-                      connector_name:
-                        type: string
-                      external_id:
-                        type: string
-                      external_title:
-                        type: string
-                      external_url:
-                        type: string
-                      pushed_at:
-                        type: string
-                        format: date-time
-                      pushed_by:
-                        type: object
-                        properties:
-                          email:
-                            type: string
-                          full_name:
-                            type: string
-                          username:
-                            type: string
-                        nullable: true
-                        example: null
+                    $ref: '#/components/schemas/external_service'
                   id:
                     type: string
                     example: 66b9aa00-94fa-11ea-9f74-e7e108796192
                   owner:
                     $ref: '#/components/schemas/owners'
                   settings:
-                    type: object
-                    properties:
-                      syncAlerts:
-                        type: boolean
-                        example: true
+                    $ref: '#/components/schemas/settings'
                   severity:
                     $ref: '#/components/schemas/severity_property'
                   status:
@@ -5909,10 +5664,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   version:
@@ -5985,10 +5743,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   comments:
@@ -6125,43 +5886,14 @@ paths:
                       than half a second, the duration is rounded down to zero.
                     example: 120
                   external_service:
-                    type: object
-                    properties:
-                      connector_id:
-                        type: string
-                      connector_name:
-                        type: string
-                      external_id:
-                        type: string
-                      external_title:
-                        type: string
-                      external_url:
-                        type: string
-                      pushed_at:
-                        type: string
-                        format: date-time
-                      pushed_by:
-                        type: object
-                        properties:
-                          email:
-                            type: string
-                          full_name:
-                            type: string
-                          username:
-                            type: string
-                        nullable: true
-                        example: null
+                    $ref: '#/components/schemas/external_service'
                   id:
                     type: string
                     example: 66b9aa00-94fa-11ea-9f74-e7e108796192
                   owner:
                     $ref: '#/components/schemas/owners'
                   settings:
-                    type: object
-                    properties:
-                      syncAlerts:
-                        type: boolean
-                        example: true
+                    $ref: '#/components/schemas/settings'
                   severity:
                     $ref: '#/components/schemas/severity_property'
                   status:
@@ -6191,10 +5923,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   version:
@@ -6284,6 +6019,37 @@ paths:
               examples:
                 getCaseCommentResponse:
                   $ref: '#/components/examples/get_comment_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/cases/{caseId}/user_actions:
+    get:
+      summary: Returns all user activity for a case.
+      description: >
+        You must have `read` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the case you're seeking.
+      deprecated: true
+      operationId: getCaseActivity
+      tags:
+        - cases
+        - kibana
+      parameters:
+        - $ref: '#/components/parameters/case_id'
+        - $ref: '#/components/parameters/space_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/user_actions_response_properties'
+              examples:
+                getCaseActivityResponse:
+                  $ref: '#/components/examples/get_case_activity_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -6395,6 +6161,14 @@ components:
         - observability
         - securitySolution
       example: cases
+    settings:
+      type: object
+      description: An object that contains the case settings.
+      properties:
+        syncAlerts:
+          description: Turns alert syncing on or off.
+          type: boolean
+          example: true
     severity_property:
       type: string
       description: The severity of the case.
@@ -6456,9 +6230,11 @@ components:
           type: object
           properties:
             id:
+              description: The rule identifier.
               type: string
               example: 94d80550-aaf4-11ec-985f-97e55adae8b9
             name:
+              description: The rule name.
               type: string
               example: security_rule
         type:
@@ -6520,10 +6296,13 @@ components:
           properties:
             email:
               type: string
+              example: null
             full_name:
               type: string
+              example: null
             username:
               type: string
+              example: elastic
           nullable: true
           example: null
         type:
@@ -6539,15 +6318,47 @@ components:
           properties:
             email:
               type: string
+              example: null
             full_name:
               type: string
+              example: null
             username:
               type: string
+              example: elastic
           nullable: true
           example: null
         version:
           type: string
           example: WzIwNDMxLDFd
+    external_service:
+      type: object
+      properties:
+        connector_id:
+          type: string
+        connector_name:
+          type: string
+        external_id:
+          type: string
+        external_title:
+          type: string
+        external_url:
+          type: string
+        pushed_at:
+          type: string
+          format: date-time
+        pushed_by:
+          type: object
+          properties:
+            email:
+              type: string
+              example: null
+            full_name:
+              type: string
+              example: null
+            username:
+              type: string
+              example: elastic
+          nullable: true
     status:
       type: string
       description: The status of the case.
@@ -6570,22 +6381,32 @@ components:
       properties:
         alertId:
           description: >
-            The alert identifier. It is required only when `type` is `alert`.
-            This functionality is in technical preview and may be changed or
-            removed in a future release. Elastic will apply best effort to fix
-            any issues, but features in technical preview are not subject to the
-            support SLA of official GA features.
-          type: string
+            The alert identifier. It is required only when `type` is `alert`. If
+            it is an array, `index` must also be an array. This functionality is
+            in technical preview and may be changed or removed in a future
+            release. Elastic will apply best effort to fix any issues, but
+            features in technical preview are not subject to the support SLA of
+            official GA features.
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
           x-technical-preview: true
           example: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
         index:
           description: >
-            The alert index. It is required only when `type` is `alert`. This
-            functionality is in technical preview and may be changed or removed
-            in a future release. Elastic will apply best effort to fix any
-            issues, but features in technical preview are not subject to the
-            support SLA of official GA features.
-          type: string
+            The alert index. It is required only when `type` is `alert`. If it
+            is an array, `alertId` must also be an array. This functionality is
+            in technical preview and may be changed or removed in a future
+            release. Elastic will apply best effort to fix any issues, but
+            features in technical preview are not subject to the support SLA of
+            official GA features.
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
           x-technical-preview: true
         owner:
           $ref: '#/components/schemas/owners'
@@ -6602,12 +6423,10 @@ components:
             id:
               description: The rule identifier.
               type: string
-              x-technical-preview: true
               example: 94d80550-aaf4-11ec-985f-97e55adae8b9
             name:
               description: The rule name.
               type: string
-              x-technical-preview: true
               example: security_rule
         type:
           description: The type of comment.
@@ -6645,12 +6464,17 @@ components:
       properties:
         alertId:
           description: >
-            The alert identifier. It is required only when `type` is `alert`.
-            This functionality is in technical preview and may be changed or
-            removed in a future release. Elastic will apply best effort to fix
-            any issues, but features in technical preview are not subject to the
-            support SLA of official GA features.
-          type: string
+            The alert identifier. It is required only when `type` is `alert`. If
+            it is an array, `index` must also be an array. This functionality is
+            in technical preview and may be changed or removed in a future
+            release. Elastic will apply best effort to fix any issues, but
+            features in technical preview are not subject to the support SLA of
+            official GA features.
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
           x-technical-preview: true
           example: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
         id:
@@ -6661,12 +6485,17 @@ components:
           example: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
         index:
           description: >
-            The alert index. It is required only when `type` is `alert`. This
-            functionality is in technical preview and may be changed or removed
-            in a future release. Elastic will apply best effort to fix any
-            issues, but features in technical preview are not subject to the
-            support SLA of official GA features.
-          type: string
+            The alert index. It is required only when `type` is `alert`. If it
+            is an array, `alertId` must also be an array. This functionality is
+            in technical preview and may be changed or removed in a future
+            release. Elastic will apply best effort to fix any issues, but
+            features in technical preview are not subject to the support SLA of
+            official GA features.
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
           x-technical-preview: true
         owner:
           $ref: '#/components/schemas/owners'
@@ -6683,12 +6512,10 @@ components:
             id:
               description: The rule identifier.
               type: string
-              x-technical-preview: true
               example: 94d80550-aaf4-11ec-985f-97e55adae8b9
             name:
               description: The rule name.
               type: string
-              x-technical-preview: true
               example: security_rule
         type:
           description: The type of comment.
@@ -6743,6 +6570,383 @@ components:
         - owner
         - type
         - version
+    actions:
+      type: string
+      enum:
+        - add
+        - create
+        - delete
+        - push_to_service
+        - update
+      example: create
+    payload_alert_comment:
+      type: object
+      properties:
+        comment:
+          type: object
+          properties:
+            alertId:
+              oneOf:
+                - type: string
+                  example: 1c0b056b-cc9f-4b61-b5c9-cb801abd5e1d
+                - type: array
+                  items:
+                    type: string
+            index:
+              oneOf:
+                - type: string
+                  example: .alerts-observability.logs.alerts-default
+                - type: array
+                  items:
+                    type: string
+            owner:
+              $ref: '#/components/schemas/owners'
+            rule:
+              type: object
+              properties:
+                id:
+                  description: The rule identifier.
+                  type: string
+                  example: 94d80550-aaf4-11ec-985f-97e55adae8b9
+                name:
+                  description: The rule name.
+                  type: string
+                  example: security_rule
+            type:
+              type: string
+              enum:
+                - alert
+    payload_connector:
+      type: object
+      properties:
+        connector:
+          type: object
+          properties:
+            fields:
+              description: >-
+                An object containing the connector fields. To create a case
+                without a connector, specify null. If you want to omit any
+                individual field, specify null as its value.
+              nullable: true
+              type: object
+              properties:
+                caseId:
+                  description: The case identifier for Swimlane connectors.
+                  type: string
+                category:
+                  description: >-
+                    The category of the incident for ServiceNow ITSM and
+                    ServiceNow SecOps connectors.
+                  type: string
+                destIp:
+                  description: >-
+                    A comma-separated list of destination IPs for ServiceNow
+                    SecOps connectors.
+                  type: string
+                impact:
+                  description: >-
+                    The effect an incident had on business for ServiceNow ITSM
+                    connectors.
+                  type: string
+                issueType:
+                  description: The type of issue for Jira connectors.
+                  type: string
+                issueTypes:
+                  description: The type of incident for IBM Resilient connectors.
+                  type: array
+                  items:
+                    type: number
+                malwareHash:
+                  description: >-
+                    A comma-separated list of malware hashes for ServiceNow
+                    SecOps connectors.
+                  type: string
+                malwareUrl:
+                  description: >-
+                    A comma-separated list of malware URLs for ServiceNow SecOps
+                    connectors.
+                  type: string
+                parent:
+                  description: >-
+                    The key of the parent issue, when the issue type is sub-task
+                    for Jira connectors.
+                  type: string
+                priority:
+                  description: >-
+                    The priority of the issue for Jira and ServiceNow SecOps
+                    connectors.
+                  type: string
+                severity:
+                  description: The severity of the incident for ServiceNow ITSM connectors.
+                  type: string
+                severityCode:
+                  description: >-
+                    The severity code of the incident for IBM Resilient
+                    connectors.
+                  type: number
+                sourceIp:
+                  description: >-
+                    A comma-separated list of source IPs for ServiceNow SecOps
+                    connectors.
+                  type: string
+                subcategory:
+                  description: >-
+                    The subcategory of the incident for ServiceNow ITSM
+                    connectors.
+                  type: string
+                urgency:
+                  description: >-
+                    The extent to which the incident resolution can be delayed
+                    for ServiceNow ITSM connectors.
+                  type: string
+              example: null
+            id:
+              description: >-
+                The identifier for the connector. To create a case without a
+                connector, use `none`.
+              type: string
+              example: none
+            name:
+              description: >-
+                The name of the connector. To create a case without a connector,
+                use `none`.
+              type: string
+              example: none
+            type:
+              $ref: '#/components/schemas/connector_types'
+    payload_create_case:
+      type: object
+      properties:
+        connector:
+          type: object
+          properties:
+            fields:
+              description: >-
+                An object containing the connector fields. To create a case
+                without a connector, specify null. If you want to omit any
+                individual field, specify null as its value.
+              nullable: true
+              type: object
+              properties:
+                caseId:
+                  description: The case identifier for Swimlane connectors.
+                  type: string
+                category:
+                  description: >-
+                    The category of the incident for ServiceNow ITSM and
+                    ServiceNow SecOps connectors.
+                  type: string
+                destIp:
+                  description: >-
+                    A comma-separated list of destination IPs for ServiceNow
+                    SecOps connectors.
+                  type: string
+                impact:
+                  description: >-
+                    The effect an incident had on business for ServiceNow ITSM
+                    connectors.
+                  type: string
+                issueType:
+                  description: The type of issue for Jira connectors.
+                  type: string
+                issueTypes:
+                  description: The type of incident for IBM Resilient connectors.
+                  type: array
+                  items:
+                    type: number
+                malwareHash:
+                  description: >-
+                    A comma-separated list of malware hashes for ServiceNow
+                    SecOps connectors.
+                  type: string
+                malwareUrl:
+                  description: >-
+                    A comma-separated list of malware URLs for ServiceNow SecOps
+                    connectors.
+                  type: string
+                parent:
+                  description: >-
+                    The key of the parent issue, when the issue type is sub-task
+                    for Jira connectors.
+                  type: string
+                priority:
+                  description: >-
+                    The priority of the issue for Jira and ServiceNow SecOps
+                    connectors.
+                  type: string
+                severity:
+                  description: The severity of the incident for ServiceNow ITSM connectors.
+                  type: string
+                severityCode:
+                  description: >-
+                    The severity code of the incident for IBM Resilient
+                    connectors.
+                  type: number
+                sourceIp:
+                  description: >-
+                    A comma-separated list of source IPs for ServiceNow SecOps
+                    connectors.
+                  type: string
+                subcategory:
+                  description: >-
+                    The subcategory of the incident for ServiceNow ITSM
+                    connectors.
+                  type: string
+                urgency:
+                  description: >-
+                    The extent to which the incident resolution can be delayed
+                    for ServiceNow ITSM connectors.
+                  type: string
+              example: null
+            id:
+              description: >-
+                The identifier for the connector. To create a case without a
+                connector, use `none`.
+              type: string
+              example: none
+            name:
+              description: >-
+                The name of the connector. To create a case without a connector,
+                use `none`.
+              type: string
+              example: none
+            type:
+              $ref: '#/components/schemas/connector_types'
+        description:
+          type: string
+        owner:
+          $ref: '#/components/schemas/owners'
+        settings:
+          $ref: '#/components/schemas/settings'
+        severity:
+          $ref: '#/components/schemas/severity_property'
+        status:
+          $ref: '#/components/schemas/status'
+        tags:
+          type: array
+          items:
+            type: string
+            example:
+              - tag-1
+        title:
+          type: string
+    payload_description:
+      type: object
+      properties:
+        description:
+          type: string
+    payload_pushed:
+      type: object
+      properties:
+        externalService:
+          $ref: '#/components/schemas/external_service'
+    payload_settings:
+      type: object
+      properties:
+        settings:
+          $ref: '#/components/schemas/settings'
+    payload_severity:
+      type: object
+      properties:
+        severity:
+          $ref: '#/components/schemas/severity_property'
+    payload_status:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/status'
+    payload_tags:
+      type: object
+      properties:
+        tags:
+          type: array
+          items:
+            type: string
+          example:
+            - tag-1
+    payload_title:
+      type: object
+      properties:
+        title:
+          type: string
+    payload_user_comment:
+      type: object
+      properties:
+        comment:
+          type: object
+          properties:
+            comment:
+              type: string
+            owner:
+              $ref: '#/components/schemas/owners'
+            type:
+              type: string
+              enum:
+                - user
+    action_types:
+      type: string
+      description: The type of action.
+      enum:
+        - create_case
+        - comment
+        - connector
+        - delete_case
+        - description
+        - pushed
+        - tags
+        - title
+        - status
+        - settings
+        - severity
+      example: create_case
+    user_actions_response_properties:
+      type: object
+      properties:
+        action:
+          $ref: '#/components/schemas/actions'
+        action_id:
+          type: string
+          example: 22fd3e30-03b1-11ed-920c-974bfa104448
+        case_id:
+          type: string
+          example: 22df07d0-03b1-11ed-920c-974bfa104448
+        comment_id:
+          type: string
+          example: 578608d0-03b1-11ed-920c-974bfa104448
+        created_at:
+          type: string
+          format: date-time
+          example: '2022-05-13T09:16:17.416Z'
+        created_by:
+          type: object
+          properties:
+            email:
+              type: string
+              example: null
+            full_name:
+              type: string
+              example: null
+            username:
+              type: string
+              example: elastic
+        owner:
+          $ref: '#/components/schemas/owners'
+        payload:
+          oneOf:
+            - $ref: '#/components/schemas/payload_alert_comment'
+            - $ref: '#/components/schemas/payload_connector'
+            - $ref: '#/components/schemas/payload_create_case'
+            - $ref: '#/components/schemas/payload_description'
+            - $ref: '#/components/schemas/payload_pushed'
+            - $ref: '#/components/schemas/payload_settings'
+            - $ref: '#/components/schemas/payload_severity'
+            - $ref: '#/components/schemas/payload_status'
+            - $ref: '#/components/schemas/payload_tags'
+            - $ref: '#/components/schemas/payload_title'
+            - $ref: '#/components/schemas/payload_user_comment'
+          nullable: true
+        type:
+          $ref: '#/components/schemas/action_types'
   examples:
     create_case_request:
       summary: Create a security case that uses a Jira connector.
@@ -7140,6 +7344,51 @@ components:
         pushed_by: null
         updated_at: null
         updated_by: null
+    get_case_activity_response:
+      summary: Retrieves all activity for a case
+      value:
+        - created_at: '2022-07-14T20:11:24.947Z'
+          created_by:
+            username: elastic
+            email: null
+            full_name: null
+          owner: cases
+          action: create
+          payload:
+            description: A case description
+            title: Case title 1
+            tags:
+              - tag 1
+            connector:
+              name: none
+              type: .none
+              fields: null
+              id: none
+            settings:
+              syncAlerts: true
+            owner: cases
+            severity: low
+            status: open
+          type: create_case
+          action_id: 22fd3e30-03b1-11ed-920c-974bfa104448
+          case_id: 22df07d0-03b1-11ed-920c-974bfa104448
+          comment_id: null
+        - created_at: '2022-07-14T20:12:53.354Z'
+          created_by:
+            username: elastic
+            email: null
+            full_name: null
+          owner: cases
+          action: create
+          payload:
+            comment:
+              type: user
+              owner: cases
+              comment: A new comment
+          type: comment
+          action_id: 57af14a0-03b1-11ed-920c-974bfa104448
+          case_id: 22df07d0-03b1-11ed-920c-974bfa104448
+          comment_id: 578608d0-03b1-11ed-920c-974bfa104448
 security:
   - basicAuth: []
   - apiKeyAuth: []

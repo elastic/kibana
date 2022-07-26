@@ -200,7 +200,6 @@ export const getTopNavLinks = ({
     openSearch,
     ...(!isPlainRecord ? [shareSearch] : []),
     ...(services.triggersActionsUi &&
-    !isPlainRecord &&
     services.capabilities.management?.insightsAndAlerting?.triggersActions &&
     !isPlainRecord
       ? [alerts]

@@ -8036,13 +8036,7 @@
                 "text": "SavedObjectsClientContract"
               },
               ", elasticsearchClient: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              },
+              "ElasticsearchClient",
               ", request?: ",
               "KibanaRequest",
               "<unknown, unknown, unknown, any> | undefined, byPassCapabilities?: boolean | undefined) => Promise<",
@@ -9348,13 +9342,7 @@
                 "label": "elasticsearchClient",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.ElasticsearchClient",
-                    "text": "ElasticsearchClient"
-                  }
+                  "ElasticsearchClient"
                 ],
                 "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
                 "deprecated": false,
@@ -9560,13 +9548,7 @@
             "text": "SavedObjectsClientContract"
           },
           ", elasticsearchClient: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           ", request?: ",
           "KibanaRequest",
           "<unknown, unknown, unknown, any> | undefined, byPassCapabilities?: boolean | undefined) => Promise<",
@@ -10782,13 +10764,7 @@
               "text": "SavedObjectsClientContract"
             },
             ", elasticsearchClient: ",
-            {
-              "pluginId": "core",
-              "scope": "server",
-              "docId": "kibCorePluginApi",
-              "section": "def-server.ElasticsearchClient",
-              "text": "ElasticsearchClient"
-            },
+            "ElasticsearchClient",
             ", request?: ",
             "KibanaRequest",
             "<unknown, unknown, unknown, any> | undefined, byPassCapabilities?: boolean | undefined) => Promise<",
@@ -11184,7 +11160,9 @@
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "SearchResponse",
-                "<TDocument, TAggregations>>; }; eql: ",
+                "<TDocument, TAggregations>>; }; cluster: ",
+                "default",
+                "; eql: ",
                 "default",
                 "; create: { <TDocument = unknown>(this: That, params: ",
                 "CreateRequest",
@@ -11416,9 +11394,7 @@
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "ClearScrollResponse",
-                ">; }; cluster: ",
-                "default",
-                "; count: { (this: That, params?: ",
+                ">; }; count: { (this: That, params?: ",
                 "CountRequest",
                 " | ",
                 "CountRequest",

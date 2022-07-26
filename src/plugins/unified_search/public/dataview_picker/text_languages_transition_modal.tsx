@@ -8,7 +8,6 @@
 
 import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 
 import {
   EuiModal,
@@ -46,7 +45,7 @@ export default function TextBasedLanguagesTransitionModal({
             {i18n.translate(
               'unifiedSearch.query.queryBar.indexPattern.textBasedLanguagesTransitionModalTitle',
               {
-                defaultMessage: 'Current text-based query will be cleared',
+                defaultMessage: 'Your query will be removed',
               }
             )}
           </h1>
@@ -59,17 +58,13 @@ export default function TextBasedLanguagesTransitionModal({
             'unifiedSearch.query.queryBar.indexPattern.textBasedLanguagesTransitionModalBody',
             {
               defaultMessage:
-                'The current text-based language query will be cleared when switching to a specific data view. To ensure that no work is inadvertently lost in the transition, it is recommended that you save this search before switching.',
+                "Switching data views removes the current SQL query. Save this search to ensure you don't lose work.",
             }
           )}
         </EuiText>
       </EuiModalBody>
 
-      <EuiModalFooter
-        css={css`
-          justify-content: space-between;
-        `}
-      >
+      <EuiModalFooter>
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiCheckbox
@@ -85,7 +80,7 @@ export default function TextBasedLanguagesTransitionModal({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="m">
+            <EuiFlexGroup gutterSize="m">
               <EuiFlexItem grow={false}>
                 <EuiButton
                   onClick={() => closeModal(dismissModalChecked)}

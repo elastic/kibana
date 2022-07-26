@@ -28,44 +28,6 @@ import { pinnedEventSavedObjectType } from '../../saved_object_mappings/pinned_e
 import { pinnedEventFieldsMigrator } from './field_migrator';
 import { timelineSavedObjectType } from '../../saved_object_mappings';
 
-export interface PinnedEvent {
-  deletePinnedEventOnTimeline: (
-    request: FrameworkRequest,
-    pinnedEventIds: string[]
-  ) => Promise<void>;
-
-  deleteAllPinnedEventsOnTimeline: (request: FrameworkRequest, timelineId: string) => Promise<void>;
-
-  getPinnedEvent: (
-    request: FrameworkRequest,
-    pinnedEventId: string
-  ) => Promise<PinnedEventSavedObject>;
-
-  getAllPinnedEventsByTimelineId: (
-    request: FrameworkRequest,
-    timelineId: string
-  ) => Promise<PinnedEventSavedObject[]>;
-
-  persistPinnedEventOnTimeline: (
-    request: FrameworkRequest,
-    pinnedEventId: string | null, // pinned event saved object id
-    eventId: string,
-    timelineId: string | null
-  ) => Promise<PinnedEventResponse | null>;
-
-  convertSavedObjectToSavedPinnedEvent: (
-    savedObject: unknown,
-    timelineVersion?: string | undefined | null
-  ) => PinnedEventSavedObject;
-
-  pickSavedPinnedEvent: (
-    pinnedEventId: string | null,
-    savedPinnedEvent: SavedPinnedEvent,
-    userInfo: AuthenticatedUser | null
-  ) => // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  any;
-}
-
 export const deletePinnedEventOnTimeline = async (
   request: FrameworkRequest,
   pinnedEventIds: string[]
@@ -95,13 +57,6 @@ export const deleteAllPinnedEventsOnTimeline = async (
       savedObjectsClient.delete(pinnedEventSavedObjectType, pinnedEvent.pinnedEventId)
     )
   );
-};
-
-export const getPinnedEvent = async (
-  request: FrameworkRequest,
-  pinnedEventId: string
-): Promise<PinnedEventSavedObject> => {
-  return getSavedPinnedEvent(request, pinnedEventId);
 };
 
 export const PINNED_EVENTS_PER_PAGE = 10000; // overrides the saved object client's FIND_DEFAULT_PER_PAGE (20)
@@ -249,18 +204,6 @@ const createPinnedEvent = async ({
 
   // create Pinned Event on Timeline
   return convertSavedObjectToSavedPinnedEvent(repopulatedSavedObject, timelineVersion);
-};
-
-const getSavedPinnedEvent = async (request: FrameworkRequest, pinnedEventId: string) => {
-  const savedObjectsClient = (await request.context.core).savedObjects.client;
-  const savedObject = await savedObjectsClient.get<PinnedEventWithoutExternalRefs>(
-    pinnedEventSavedObjectType,
-    pinnedEventId
-  );
-
-  const populatedPinnedEvent = pinnedEventFieldsMigrator.populateFieldsFromReferences(savedObject);
-
-  return convertSavedObjectToSavedPinnedEvent(populatedPinnedEvent);
 };
 
 const getAllSavedPinnedEvents = async (

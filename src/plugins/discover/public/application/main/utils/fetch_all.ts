@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { DataPublicPluginStart, ISearchSource } from '@kbn/data-plugin/public';
-import { Adapters } from '@kbn/inspector-plugin';
+import { Adapters } from '@kbn/inspector-plugin/common';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import { getRawRecordType } from './get_raw_record_type';

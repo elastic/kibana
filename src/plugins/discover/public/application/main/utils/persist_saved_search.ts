@@ -64,8 +64,9 @@ export async function persistSavedSearch(
 
   // add a flag here to identify text based language queries
   // these should be filtered out from the visualize editor
-  if (state.query && isOfAggregateQueryType(state.query)) {
-    savedSearch.isTextBasedQuery = true;
+  const isTextBasedQuery = state.query && isOfAggregateQueryType(state.query);
+  if (savedSearch.isTextBasedQuery || isTextBasedQuery) {
+    savedSearch.isTextBasedQuery = isTextBasedQuery;
   }
 
   try {

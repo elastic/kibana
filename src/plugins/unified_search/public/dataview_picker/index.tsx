@@ -23,6 +23,7 @@ export enum TextBasedLanguages {
 
 export interface OnSaveTextLanguageQueryProps {
   onSave: () => void;
+  onCancel: () => void;
 }
 
 /** @public */
@@ -70,7 +71,7 @@ export interface DataViewPickerProps {
   /**
    * Callback that is called when the user clicks the Save and switch transition modal button
    */
-  onSaveTextLanguageQuery?: ({ onSave }: OnSaveTextLanguageQueryProps) => void;
+  onSaveTextLanguageQuery?: ({ onSave, onCancel }: OnSaveTextLanguageQueryProps) => void;
 }
 
 export interface DataViewPickerPropsExtended extends DataViewPickerProps {

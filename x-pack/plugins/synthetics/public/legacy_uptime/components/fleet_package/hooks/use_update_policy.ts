@@ -6,8 +6,8 @@
  */
 import { useEffect, useRef, useState } from 'react';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/public';
+import { formatSyntheticsPolicy } from '../../../../../common/formatters/format_synthetics_policy';
 import { ConfigKey, DataStream, Validation, MonitorFields } from '../types';
-import { formatters } from '../helpers/formatters';
 
 interface Props {
   monitorType: DataStream;
@@ -41,32 +41,15 @@ export const useUpdatePolicy = ({
     const configDidUpdate = configKeys.some((key) => config[key] !== currentConfig.current[key]);
     const isValid =
       !!newPolicy.name && !validationKeys.find((key) => validate[monitorType]?.[key]?.(config));
-    const formattedPolicy = { ...newPolicy };
-    const currentInput = formattedPolicy.inputs.find(
-      (input) => input.type === `synthetics/${monitorType}`
+
+    const { formattedPolicy, dataStream, currentInput } = formatSyntheticsPolicy(
+      newPolicy,
+      monitorType,
+      config
     );
-    const dataStream = currentInput?.streams.find(
-      (stream) => stream.data_stream.dataset === monitorType
-    );
-    formattedPolicy.inputs.forEach((input) => (input.enabled = false));
-    if (currentInput && dataStream) {
-      // reset all data streams to enabled false
-      formattedPolicy.inputs.forEach((input) => (input.enabled = false));
-      // enable only the input type and data stream that matches the monitor type.
-      currentInput.enabled = true;
-      dataStream.enabled = true;
-    }
 
     // prevent an infinite loop of updating the policy
     if (currentInput && dataStream && configDidUpdate) {
-      configKeys.forEach((key) => {
-        const configItem = dataStream.vars?.[key];
-        if (configItem && formatters[key]) {
-          configItem.value = formatters[key]?.(config);
-        } else if (configItem) {
-          configItem.value = config[key] === undefined || config[key] === null ? null : config[key];
-        }
-      });
       currentConfig.current = config;
       setUpdatedPolicy(formattedPolicy);
       onChange({

@@ -22,10 +22,6 @@ export const FROM_ITS_ORIGINAL_PATH = i18n.translate(
   }
 );
 
-export const PROTOCOL = i18n.translate('xpack.securitySolution.timeline.protocol', {
-  defaultMessage: 'Protocol',
-});
-
 export const SOURCE = i18n.translate('xpack.securitySolution.timeline.source', {
   defaultMessage: 'Source',
 });

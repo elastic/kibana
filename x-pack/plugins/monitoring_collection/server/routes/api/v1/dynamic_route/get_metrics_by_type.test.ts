@@ -8,8 +8,7 @@
 import { registerDynamicRoute } from '.';
 import { KibanaRequest, KibanaResponseFactory, ServiceStatusLevels } from '@kbn/core/server';
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 beforeEach(() => {
   jest.resetAllMocks();

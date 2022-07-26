@@ -7,6 +7,7 @@
  */
 
 import React, { useRef, memo, useEffect, useState, useCallback } from 'react';
+import classNames from 'classnames';
 import { EsqlLang, monaco } from '@kbn/monaco';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getAggregateQueryMode } from '@kbn/es-query';
@@ -36,6 +37,8 @@ import {
 import { MemoizedDocumentation, DocumentationSections } from './documentation';
 import { useDebounceWithOptions, parseErrors, getDocumentationSections } from './helpers';
 import { EditorFooter } from './editor_footer';
+
+import './overwrite.scss';
 
 export interface TextBasedLanguagesEditorProps {
   query: AggregateQuery;
@@ -73,8 +76,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   errors,
 }: TextBasedLanguagesEditorProps) {
   const { euiTheme } = useEuiTheme();
-  const language = getAggregateQueryMode(query) as 'sql' | 'esql';
-  const queryString = query[language] ?? '';
+  const language = getAggregateQueryMode(query);
+  const queryString: string = query[language] ?? '';
   const [lines, setLines] = useState(1);
   const [code, setCode] = useState(queryString ?? '');
   const [codeOneLiner, setCodeOneLiner] = useState('');
@@ -83,6 +86,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   );
   const [showLineNumbers, setShowLineNumbers] = useState(isCodeEditorExpanded);
   const [isCompactFocused, setIsCompactFocused] = useState(isCodeEditorExpanded);
+  const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isWordWrapped, setIsWordWrapped] = useState(true);
   const [userDrags, setUserDrags] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
@@ -96,11 +100,18 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     isCompactFocused,
     editorHeight,
     isCodeEditorExpanded,
-    Boolean(errors?.length)
+    Boolean(errors?.length),
+    isCodeEditorExpandedFocused
   );
   const editorModel = useRef<monaco.editor.ITextModel>();
   const editor1 = useRef<monaco.editor.IStandaloneCodeEditor>();
   const containerRef = useRef<HTMLElement>(null);
+
+  const editorClassName = classNames('unifiedTextLangEditor', {
+    'unifiedTextLangEditor--expanded': isCodeEditorExpanded,
+    'unifiedTextLangEditor--compact': isCompactFocused,
+    'unifiedTextLangEditor--initial': !isCompactFocused,
+  });
 
   // When the editor is on full size mode, the user can resize the height of the editor.
   const onMouseDownResizeHandler = useCallback(
@@ -142,6 +153,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   };
 
   const restoreInitialMode = () => {
+    setIsCodeEditorExpandedFocused(false);
     if (isCodeEditorExpanded) return;
     setEditorHeight(EDITOR_INITIAL_HEIGHT);
     setIsCompactFocused(false);
@@ -169,6 +181,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       });
       editor1.current?.onDidFocusEditorText(() => {
         setIsCompactFocused(true);
+        setIsCodeEditorExpandedFocused(true);
         setShowLineNumbers(true);
         setCodeOneLiner('');
         clickedOutside = false;
@@ -215,7 +228,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         if (hasLines && !updateLinesFromModel) {
           setLines(queryString.split(/\r|\n/).length);
         }
-        const trimmedText = queryString.replace(/\r?\n|\r/g, ' ');
+        const trimmedText = queryString.replace(/\r?\n|\r/g, '');
         const text = hasLines ? trimmedText : queryString;
         const queryLength = text.length;
         const unusedSpace =
@@ -236,7 +249,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   );
 
   useEffect(() => {
-    if (editor1.current) {
+    if (editor1.current && !isCompactFocused) {
       const editorElement = editor1.current.getDomNode();
       if (editorElement) {
         const contentWidth = Number(editorElement?.style.width.replace('px', ''));
@@ -246,7 +259,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         }
       }
     }
-  }, [calculateVisibleCode, code, queryString]);
+  }, [calculateVisibleCode, code, isCompactFocused, queryString]);
 
   const onResize = ({ width }: { width: number }) => {
     calculateVisibleCode(width);
@@ -258,7 +271,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const onQueryUpdate = useCallback(
     (value: string) => {
       setCode(value);
-      onTextLangQueryChange({ [language]: value });
+      onTextLangQueryChange({ [language]: value } as AggregateQuery);
     },
     [language, onTextLangQueryChange]
   );
@@ -278,17 +291,23 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   const codeEditorOptions: CodeEditorProps['options'] = {
     automaticLayout: false,
+    accessibilitySupport: 'off',
     folding: false,
     fontSize: 14,
+    padding: {
+      top: 8,
+      bottom: 8,
+    },
     scrollBeyondLastLine: false,
     quickSuggestions: true,
     minimap: { enabled: false },
     wordWrap: isWordWrapped ? 'on' : 'off',
     lineNumbers: showLineNumbers ? 'on' : 'off',
+    theme: 'vs',
     lineDecorationsWidth: 12,
-    accessibilitySupport: 'off',
     autoIndent: 'none',
     wrappingIndent: 'none',
+    lineNumbersMinChars: 3,
     overviewRulerLanes: 0,
     hideCursorInOverviewRuler: true,
     scrollbar: {
@@ -363,7 +382,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup responsive={false} gutterSize="none" alignItems="center">
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={false} style={{ marginRight: '8px' }}>
                 <EuiToolTip
                   position="top"
                   content={i18n.translate(
@@ -405,7 +424,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         {
                           defaultMessage: '{lang} reference',
                           values: {
-                            lang: language.toUpperCase(),
+                            lang: String(language).toUpperCase(),
                           },
                         }
                       )}
@@ -441,7 +460,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               }}
             >
               <div ref={resizeRef} css={styles.resizableContainer}>
-                <EuiFlexItem data-test-subj="unifiedTextLangEditor">
+                <EuiFlexItem data-test-subj="unifiedTextLangEditor" className={editorClassName}>
                   <div css={styles.editorContainer}>
                     {!isCompactFocused && (
                       <EuiBadge
@@ -539,7 +558,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         {
                           defaultMessage: '{lang} reference',
                           values: {
-                            lang: language.toUpperCase(),
+                            lang: String(language).toUpperCase(),
                           },
                         }
                       )}
@@ -583,7 +602,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               css={styles.dragResizeButton}
             />
           )}
-          {userDrags && <div css={{ height: '5px', backgroundColor: euiTheme.colors.primary }} />}
         </div>
       )}
     </>

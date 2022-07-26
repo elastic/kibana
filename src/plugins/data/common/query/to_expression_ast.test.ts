@@ -21,43 +21,15 @@ describe('queryStateToExpressionAst', () => {
       dataViewsService,
     });
 
-    expect(actual).toMatchInlineSnapshot(`
-      Object {
-        "chain": Array [
-          Object {
-            "arguments": Object {},
-            "function": "kibana",
-            "type": "function",
-          },
-          Object {
-            "arguments": Object {
-              "timeRange": Array [
-                Object {
-                  "chain": Array [
-                    Object {
-                      "arguments": Object {
-                        "from": Array [
-                          "now",
-                        ],
-                        "to": Array [
-                          "now+7d",
-                        ],
-                      },
-                      "function": "timerange",
-                      "type": "function",
-                    },
-                  ],
-                  "type": "expression",
-                },
-              ],
-            },
-            "function": "kibana_context",
-            "type": "function",
-          },
-        ],
-        "type": "expression",
-      }
-    `);
+    expect(actual).toHaveProperty(
+      'chain.1.arguments.timeRange.0.chain.0.arguments',
+      expect.objectContaining({
+        from: ['now'],
+        to: ['now+7d'],
+      })
+    );
+
+    expect(actual).toHaveProperty('chain.1.arguments.filters', expect.arrayContaining([]));
   });
 
   it('returns an object with the correct structure for an SQL query', async () => {
@@ -88,54 +60,19 @@ describe('queryStateToExpressionAst', () => {
       dataViewsService,
     });
 
-    expect(actual).toMatchInlineSnapshot(`
-      Object {
-        "chain": Array [
-          Object {
-            "arguments": Object {},
-            "function": "kibana",
-            "type": "function",
-          },
-          Object {
-            "arguments": Object {
-              "timeRange": Array [
-                Object {
-                  "chain": Array [
-                    Object {
-                      "arguments": Object {
-                        "from": Array [
-                          "now",
-                        ],
-                        "to": Array [
-                          "now+7d",
-                        ],
-                      },
-                      "function": "timerange",
-                      "type": "function",
-                    },
-                  ],
-                  "type": "expression",
-                },
-              ],
-            },
-            "function": "kibana_context",
-            "type": "function",
-          },
-          Object {
-            "arguments": Object {
-              "query": Array [
-                "SELECT * FROM foo",
-              ],
-              "timeField": Array [
-                "baz",
-              ],
-            },
-            "function": "essql",
-            "type": "function",
-          },
-        ],
-        "type": "expression",
-      }
-    `);
+    expect(actual).toHaveProperty(
+      'chain.1.arguments.timeRange.0.chain.0.arguments',
+      expect.objectContaining({
+        from: ['now'],
+        to: ['now+7d'],
+      })
+    );
+
+    expect(actual).toHaveProperty(
+      'chain.2.arguments',
+      expect.objectContaining({
+        query: ['SELECT * FROM foo'],
+      })
+    );
   });
 });

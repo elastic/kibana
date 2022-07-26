@@ -24,10 +24,12 @@ interface OptionalMetricOptions {
   mbField?: string;
   type?: string;
   isNotSupportedInInternalCollection?: boolean;
+  technicalPreview?: boolean;
 }
 
 interface DefaultMetricOptions {
   derivative?: boolean;
+  derivativeNormalizedUnits?: boolean;
 }
 
 export type MetricOptions = RequiredMetricOptions & OptionalMetricOptions & DefaultMetricOptions;
@@ -44,6 +46,7 @@ export class Metric {
   public metricAgg?: string;
   public mbField?: string;
   public derivative: boolean = false;
+  public derivativeNormalizedUnits: boolean = true;
   public aggs?: object;
   public dateHistogramSubAggs?: object;
   public getDateHistogramSubAggs?: (options: any) => object;
@@ -58,10 +61,12 @@ export class Metric {
   public periodsField?: string;
   public quotaField?: string;
   public isNotSupportedInInternalCollection?: boolean;
+  public technicalPreview?: boolean;
 
   constructor(opts: MetricOptions) {
     const props: Required<DefaultMetricOptions> = {
       derivative: false,
+      derivativeNormalizedUnits: true,
     };
 
     const requireds = {
@@ -96,6 +101,7 @@ export class Metric {
       'description',
       'units',
       'format',
+      'technicalPreview',
     ];
 
     const metric = Object.create(this);

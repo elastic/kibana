@@ -7,10 +7,11 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { DeprecationsRegistry } from './deprecations_registry';
 import type { GetDeprecationsContext } from './types';
-import { elasticsearchClientMock } from '../elasticsearch/client/mocks';
 import { savedObjectsClientMock } from '../saved_objects/service/saved_objects_client.mock';
+
 type DeprecationsRegistryContract = PublicMethodsOf<DeprecationsRegistry>;
 
 const createDeprecationsRegistryMock = () => {

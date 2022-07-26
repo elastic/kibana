@@ -6,6 +6,7 @@
  */
 
 export const elasticAgentStandaloneManifest = `---
+# For more information refer to https://www.elastic.co/guide/en/fleet/current/running-on-kubernetes-standalone.html
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -22,6 +23,8 @@ spec:
       labels:
         app: elastic-agent
     spec:
+      # Tolerations are needed to run Elastic Agent on Kubernetes master nodes.
+      # Agents running on master nodes collect metrics from the control plane components (scheduler, controller manager) of Kubernetes
       tolerations:
         - key: node-role.kubernetes.io/master
           effect: NoSchedule
@@ -37,8 +40,11 @@ spec:
             "-d", "'*'",
           ]
           env:
+            # The basic authentication username used to connect to Elasticsearch
+            # This user needs the privileges required to publish events to Elasticsearch.
             - name: ES_USERNAME
               value: "elastic"
+            # The basic authentication password used to connect to Elasticsearch
             - name: ES_PASSWORD
               value: "changeme"
             - name: NODE_NAME
@@ -67,6 +73,7 @@ spec:
               readOnly: true
             - name: etc-kubernetes
               mountPath: /hostfs/etc/kubernetes
+              readOnly: true
             - name: var-lib
               mountPath: /hostfs/var/lib
               readOnly: true
@@ -85,7 +92,7 @@ spec:
             - name: group
               mountPath: /hostfs/etc/group
               readOnly: true
-            - name: systemd
+            - name: etcsysmd
               mountPath: /hostfs/etc/systemd
               readOnly: true
       volumes:
@@ -96,15 +103,19 @@ spec:
         - name: proc
           hostPath:
             path: /proc
+        # Needed for cloudbeat
         - name: etc-kubernetes
           hostPath:
             path: /etc/kubernetes
+        # Needed for cloudbeat
         - name: var-lib
           hostPath:
             path: /var/lib
+        # Needed for cloudbeat
         - name: passwd
           hostPath:
             path: /etc/passwd
+        # Needed for cloudbeat
         - name: group
           hostPath:
             path: /etc/group
@@ -117,7 +128,8 @@ spec:
         - name: varlog
           hostPath:
             path: /var/log
-        - name: systemd
+        # Needed for cloudbeat
+        - name: etcsysmd
           hostPath:
             path: /etc/systemd
 ---
@@ -177,6 +189,7 @@ rules:
       - pods
       - services
       - configmaps
+      # Needed for cloudbeat
       - serviceaccounts
       - persistentvolumes
       - persistentvolumeclaims
@@ -208,12 +221,12 @@ rules:
       - nodes/stats
     verbs:
       - get
-  # required for apiserver
+  # Needed for apiserver
   - nonResourceURLs:
       - "/metrics"
     verbs:
       - get
-  # required for cloudbeat
+  # Needed for cloudbeat
   - apiGroups: ["rbac.authorization.k8s.io"]
     resources:
       - clusterrolebindings
@@ -221,11 +234,7 @@ rules:
       - rolebindings
       - roles
     verbs: ["get", "list", "watch"]
-  - apiGroups: ["networking.k8s.io"]
-    resources:
-      - ingressclasses
-      - ingresses
-    verbs: ["get", "list", "watch"]
+    # Needed for cloudbeat
   - apiGroups: ["policy"]
     resources:
       - podsecuritypolicies
@@ -235,7 +244,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: elastic-agent
-  # should be the namespace where elastic-agent is running
+  # Should be the namespace where elastic-agent is running
   namespace: kube-system
   labels:
     k8s-app: elastic-agent
@@ -272,6 +281,7 @@ metadata:
 `;
 
 export const elasticAgentManagedManifest = `---
+# For more information refer to https://www.elastic.co/guide/en/fleet/current/running-on-kubernetes-managed-by-fleet.html
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -288,31 +298,41 @@ spec:
       labels:
         app: elastic-agent
     spec:
+      # Tolerations are needed to run Elastic Agent on Kubernetes master nodes.
+      # Agents running on master nodes collect metrics from the control plane components (scheduler, controller manager) of Kubernetes
       tolerations:
         - key: node-role.kubernetes.io/master
           effect: NoSchedule
       serviceAccountName: elastic-agent
       hostNetwork: true
+      # 'hostPID: true' enables the Elastic Security integration to observe all process exec events on the host.
+      # Sharing the host process ID namespace gives visibility of all processes running on the same host.
+      hostPID: true
       dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: elastic-agent
           image: docker.elastic.co/beats/elastic-agent:VERSION
           env:
+            # Set to 1 for enrollment into Fleet server. If not set, Elastic Agent is run in standalone mode
             - name: FLEET_ENROLL
               value: "1"
-            # Set to true in case of insecure or unverified HTTP
+            # Set to true to communicate with Fleet with either insecure HTTP or unverified HTTPS
             - name: FLEET_INSECURE
               value: "true"
-              # The ip:port pair of fleet server
+            # Fleet Server URL to enroll the Elastic Agent into
+            # FLEET_URL can be found in Kibana, go to Management > Fleet > Settings
             - name: FLEET_URL
               value: "https://fleet-server:8220"
-              # If left empty KIBANA_HOST, KIBANA_FLEET_USERNAME, KIBANA_FLEET_PASSWORD are needed
+            # Elasticsearch API key used to enroll Elastic Agents in Fleet (https://www.elastic.co/guide/en/fleet/current/fleet-enrollment-tokens.html#fleet-enrollment-tokens)
+            # If FLEET_ENROLLMENT_TOKEN is empty then KIBANA_HOST, KIBANA_FLEET_USERNAME, KIBANA_FLEET_PASSWORD are needed
             - name: FLEET_ENROLLMENT_TOKEN
               value: "token-id"
             - name: KIBANA_HOST
               value: "http://kibana:5601"
+            # The basic authentication username used to connect to Kibana and retrieve a service_token to enable Fleet
             - name: KIBANA_FLEET_USERNAME
               value: "elastic"
+            # The basic authentication password used to connect to Kibana and retrieve a service_token to enable Fleet
             - name: KIBANA_FLEET_PASSWORD
               value: "changeme"
             - name: NODE_NAME
@@ -337,6 +357,7 @@ spec:
               readOnly: true
             - name: etc-kubernetes
               mountPath: /hostfs/etc/kubernetes
+              readOnly: true
             - name: var-lib
               mountPath: /hostfs/var/lib
               readOnly: true
@@ -355,25 +376,16 @@ spec:
             - name: group
               mountPath: /hostfs/etc/group
               readOnly: true
-            - name: systemd
+            - name: etcsysmd
               mountPath: /hostfs/etc/systemd
+              readOnly: true
+            - name: etc-mid
+              mountPath: /etc/machine-id
               readOnly: true
       volumes:
         - name: proc
           hostPath:
             path: /proc
-        - name: etc-kubernetes
-          hostPath:
-            path: /etc/kubernetes
-        - name: var-lib
-          hostPath:
-            path: /var/lib
-        - name: passwd
-          hostPath:
-            path: /etc/passwd
-        - name: group
-          hostPath:
-            path: /etc/group
         - name: cgroup
           hostPath:
             path: /sys/fs/cgroup
@@ -383,9 +395,32 @@ spec:
         - name: varlog
           hostPath:
             path: /var/log
-        - name: systemd
+        # Needed for cloudbeat
+        - name: etc-kubernetes
+          hostPath:
+            path: /etc/kubernetes
+        # Needed for cloudbeat
+        - name: var-lib
+          hostPath:
+            path: /var/lib
+        # Needed for cloudbeat
+        - name: passwd
+          hostPath:
+            path: /etc/passwd
+        # Needed for cloudbeat
+        - name: group
+          hostPath:
+            path: /etc/group
+        # Needed for cloudbeat
+        - name: etcsysmd
           hostPath:
             path: /etc/systemd
+        # Mount /etc/machine-id from the host to determine host ID
+        # Needed for Elastic Security integration
+        - name: etc-mid
+          hostPath:
+            path: /etc/machine-id
+            type: File
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -443,6 +478,7 @@ rules:
       - pods
       - services
       - configmaps
+      # Needed for cloudbeat
       - serviceaccounts
       - persistentvolumes
       - persistentvolumeclaims
@@ -474,12 +510,12 @@ rules:
       - jobs
       - cronjobs
     verbs: [ "get", "list", "watch" ]
-  # required for apiserver
+  # Needed for apiserver
   - nonResourceURLs:
       - "/metrics"
     verbs:
       - get
-  # required for cloudbeat
+  # Needed for cloudbeat
   - apiGroups: ["rbac.authorization.k8s.io"]
     resources:
       - clusterrolebindings
@@ -487,11 +523,7 @@ rules:
       - rolebindings
       - roles
     verbs: ["get", "list", "watch"]
-  - apiGroups: ["networking.k8s.io"]
-    resources:
-      - ingressclasses
-      - ingresses
-    verbs: ["get", "list", "watch"]
+  # Needed for cloudbeat
   - apiGroups: ["policy"]
     resources:
       - podsecuritypolicies
@@ -501,7 +533,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: elastic-agent
-  # should be the namespace where elastic-agent is running
+  # Should be the namespace where elastic-agent is running
   namespace: kube-system
   labels:
     k8s-app: elastic-agent

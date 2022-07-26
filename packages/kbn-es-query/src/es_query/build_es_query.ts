@@ -17,6 +17,7 @@ import { BoolQuery, DataViewBase } from './types';
 import type { KueryQueryOptions } from '../kuery';
 import type { EsQueryFiltersConfig } from './from_filters';
 
+type AnyQuery = Query | AggregateQuery;
 /**
  * Configurations to be used while constructing an ES query.
  * @public
@@ -45,7 +46,7 @@ function removeMatchAll<T>(filters: T[]) {
  */
 export function buildEsQuery(
   indexPattern: DataViewBase | undefined,
-  queries: Query | AggregateQuery | Array<Query | AggregateQuery>,
+  queries: AnyQuery | AnyQuery[],
   filters: Filter | Filter[],
   config: EsQueryConfig = {
     allowLeadingWildcards: false,
@@ -56,8 +57,7 @@ export function buildEsQuery(
   queries = Array.isArray(queries) ? queries : [queries];
   filters = Array.isArray(filters) ? filters : [filters];
 
-  const isOfQueryTypeQueries = queries.filter(isOfQueryType);
-  const validQueries = isOfQueryTypeQueries.filter((query) => has(query, 'query'));
+  const validQueries = queries.filter(isOfQueryType).filter((query) => has(query, 'query'));
   const queriesByLanguage = groupBy(validQueries, 'language');
   const kueryQuery = buildQueryFromKuery(
     indexPattern,

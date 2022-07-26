@@ -17,7 +17,8 @@ export const textBasedLanguagedEditorStyles = (
   isCompactFocused: boolean,
   editorHeight: number,
   isCodeEditorExpanded: boolean,
-  hasErrors: boolean
+  hasErrors: boolean,
+  isCodeEditorExpandedFocused: boolean
 ) => {
   let position = isCompactFocused ? ('absolute' as 'absolute') : ('relative' as 'relative'); // cast string to type 'relative' | 'absolute'
   if (isCodeEditorExpanded) {
@@ -30,6 +31,7 @@ export const textBasedLanguagedEditorStyles = (
       zIndex: isCompactFocused ? 4 : 0,
       height: `${editorHeight}px`,
       border: isCompactFocused ? euiTheme.border.thin : 'none',
+      borderTopLeftRadius: isCodeEditorExpanded ? 0 : '6px',
       borderBottom: isCodeEditorExpanded
         ? 'none'
         : isCompactFocused
@@ -41,6 +43,9 @@ export const textBasedLanguagedEditorStyles = (
       width: isCodeEditorExpanded ? '100%' : 'calc(100% - 80px)',
       alignItems: isCompactFocused ? 'flex-start' : 'center',
       border: !isCompactFocused ? euiTheme.border.thin : 'none',
+      borderTopLeftRadius: '6px',
+      borderBottomLeftRadius: '6px',
+      borderBottomWidth: hasErrors ? '2px' : '1px',
       borderBottomColor: hasErrors ? euiTheme.colors.danger : euiTheme.colors.lightShade,
     },
     linesBadge: {
@@ -59,9 +64,12 @@ export const textBasedLanguagedEditorStyles = (
     },
     bottomContainer: {
       border: euiTheme.border.thin,
-      borderTop: isCodeEditorExpanded
-        ? euiTheme.border.thin
-        : `2px solid ${bottomContainerBorderColor}`,
+      borderTop:
+        isCodeEditorExpanded && !isCodeEditorExpandedFocused
+          ? hasErrors
+            ? `2px solid ${euiTheme.colors.danger}`
+            : euiTheme.border.thin
+          : `2px solid ${bottomContainerBorderColor}`,
       backgroundColor: euiTheme.colors.lightestShade,
       paddingLeft: euiTheme.size.base,
       paddingRight: euiTheme.size.base,
@@ -69,14 +77,20 @@ export const textBasedLanguagedEditorStyles = (
       paddingBottom: euiTheme.size.xs,
       width: 'calc(100% + 2px)',
       position: 'relative' as 'relative', // cast string to type 'relative',
-      marginTop: '1px',
+      marginTop: 0,
       marginLeft: 0,
+      borderBottomLeftRadius: '6px',
+      borderBottomRightRadius: '6px',
     },
     topContainer: {
       border: euiTheme.border.thin,
+      borderTopLeftRadius: '6px',
+      borderTopRightRadius: '6px',
       backgroundColor: euiTheme.colors.lightestShade,
-      paddingLeft: euiTheme.size.s,
-      paddingRight: euiTheme.size.s,
+      paddingLeft: euiTheme.size.base,
+      paddingRight: euiTheme.size.base,
+      paddingTop: euiTheme.size.xs,
+      paddingBottom: euiTheme.size.xs,
       width: 'calc(100% + 2px)',
       position: 'relative' as 'relative', // cast string to type 'relative',
       marginLeft: 0,

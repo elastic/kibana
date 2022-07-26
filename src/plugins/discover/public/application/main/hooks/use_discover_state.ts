@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import { useMemo, useEffect, useState, useCallback } from 'react';
+import usePrevious from 'react-use/lib/usePrevious';
 import { isEqual } from 'lodash';
 import { History } from 'history';
 import {
@@ -14,7 +15,6 @@ import {
   AggregateQuery,
   Query,
 } from '@kbn/es-query';
-import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { getState } from '../services/discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
@@ -83,6 +83,7 @@ export function useDiscoverState({
   const [state, setState] = useState(appStateContainer.getState());
   const [documentStateCols, setDocumentStateCols] = useState<string[]>([]);
   const [sqlQuery] = useState<AggregateQuery | Query | undefined>(state.query);
+  const prevQuery = usePrevious(state.query);
 
   /**
    * Search session logic
@@ -247,13 +248,19 @@ export function useDiscoverState({
    * Trigger data fetching on indexPattern or savedSearch changes
    */
   useEffect(() => {
+    if (!isEqual(state.query, prevQuery)) {
+      setDocumentStateCols([]);
+    }
+  }, [state.query, prevQuery]);
+
+  useEffect(() => {
     if (indexPattern) {
       refetch$.next(undefined);
     }
   }, [initialFetchStatus, refetch$, indexPattern, savedSearch.id]);
 
-  const fetchResults = useCallback(() => {
-    if (documentState.result?.length) {
+  const getResultColumns = useCallback(() => {
+    if (documentState.result?.length && documentState.fetchStatus === FetchStatus.COMPLETE) {
       const firstRow = documentState.result[0];
       const columns = Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
       if (!isEqual(columns, documentStateCols) && !isEqual(state.query, sqlQuery)) {
@@ -262,15 +269,15 @@ export function useDiscoverState({
       return [];
     }
     return [];
-  }, [documentState.result, documentStateCols, sqlQuery, state.query]);
+  }, [documentState, documentStateCols, sqlQuery, state.query]);
 
   useEffect(() => {
     async function fetchDataview() {
-      if (state.query && isOfAggregateQueryType(state.query)) {
-        const indexPatternFROMQuery = getIndexPatternFromSQLQuery(state.query.sql);
-        const dataViewObj = dataViewList.find(({ title }) => title === indexPatternFROMQuery);
+      if (state.query && isOfAggregateQueryType(state.query) && 'sql' in state.query) {
+        const indexPatternFromQuery = getIndexPatternFromSQLQuery(state.query.sql);
+        const dataViewObj = dataViewList.find(({ title }) => title === indexPatternFromQuery);
         if (dataViewObj) {
-          const columns = fetchResults();
+          const columns = getResultColumns();
           if (columns.length) {
             setDocumentStateCols(columns);
           }
@@ -278,13 +285,13 @@ export function useDiscoverState({
             index: dataViewObj.id,
             ...(columns.length && { columns }),
           };
-          stateContainer.setAppState(nextState);
+          stateContainer.replaceUrlAppState(nextState);
         }
       }
     }
     fetchDataview();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config, documentState, indexPatterns]);
+  }, [config, documentState, indexPatterns, dataViewList]);
 
   return {
     data$,

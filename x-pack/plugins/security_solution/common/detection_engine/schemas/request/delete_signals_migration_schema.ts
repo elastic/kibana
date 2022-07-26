@@ -12,5 +12,3 @@ export const deleteSignalsMigrationSchema = t.exact(
     migration_ids: t.array(t.string),
   })
 );
-
-export type DeleteSignalsMigrationSchema = t.TypeOf<typeof deleteSignalsMigrationSchema>;

@@ -7,7 +7,7 @@
  */
 import { pluck } from 'rxjs/operators';
 import { lastValueFrom } from 'rxjs';
-import { Query, AggregateQuery } from '@kbn/es-query';
+import { Query, AggregateQuery, Filter } from '@kbn/es-query';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
@@ -26,13 +26,17 @@ export function fetchSql(
   query: Query | AggregateQuery,
   dataViewsService: DataViewsContract,
   data: DataPublicPluginStart,
-  expressions: ExpressionsStart
+  expressions: ExpressionsStart,
+  filters?: Filter[],
+  inputQuery?: Query
 ) {
   const timeRange = data.query.timefilter.timefilter.getTime();
   return queryStateToExpressionAst({
+    filters,
     query,
     time: timeRange,
     dataViewsService,
+    inputQuery,
   })
     .then((ast) => {
       if (ast) {

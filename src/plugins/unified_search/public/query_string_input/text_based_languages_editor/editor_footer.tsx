@@ -47,7 +47,7 @@ export const EditorFooter = memo(function EditorFooter({
     >
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} style={{ marginRight: '16px' }}>
             <EuiText size="xs" color="subdued" data-test-subj="unifiedTextLangEditor-footer-lines">
               <p>
                 {i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.lineCount', {
@@ -105,20 +105,33 @@ export const EditorFooter = memo(function EditorFooter({
                         {errors.map((error, index) => {
                           return (
                             <EuiDescriptionListDescription key={index}>
-                              <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
+                              <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
                                 <EuiFlexItem grow={false}>
-                                  <EuiIcon type="crossInACircleFilled" color="danger" size="s" />
+                                  <EuiFlexGroup gutterSize="s" alignItems="center">
+                                    <EuiFlexItem grow={false}>
+                                      <EuiIcon
+                                        type="crossInACircleFilled"
+                                        color="danger"
+                                        size="s"
+                                      />
+                                    </EuiFlexItem>
+                                    <EuiFlexItem style={{ whiteSpace: 'nowrap' }}>
+                                      {i18n.translate(
+                                        'unifiedSearch.query.textBasedLanguagesEditor.lineNumber',
+                                        {
+                                          defaultMessage: 'Line {lineNumber}',
+                                          values: { lineNumber: error.startLineNumber },
+                                        }
+                                      )}
+                                    </EuiFlexItem>
+                                  </EuiFlexGroup>
                                 </EuiFlexItem>
-                                <EuiFlexItem grow={false}>
-                                  {i18n.translate(
-                                    'unifiedSearch.query.textBasedLanguagesEditor.lineNumber',
-                                    {
-                                      defaultMessage: 'Line {lineNumber}',
-                                      values: { lineNumber: error.startLineNumber },
-                                    }
-                                  )}
+                                <EuiFlexItem
+                                  grow={false}
+                                  className="unifiedTextLangEditor_errorMessage"
+                                >
+                                  {error.message}
                                 </EuiFlexItem>
-                                <EuiFlexItem grow={false}>{error.message}</EuiFlexItem>
                               </EuiFlexGroup>
                             </EuiDescriptionListDescription>
                           );
@@ -145,6 +158,7 @@ export const EditorFooter = memo(function EditorFooter({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiCode
+              transparentBackground
               css={css`
                 font-size: 12px;
               `}

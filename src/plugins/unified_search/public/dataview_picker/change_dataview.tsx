@@ -233,13 +233,14 @@ export function ChangeDataView({
             alignItems="center"
             gutterSize="none"
             justifyContent="spaceBetween"
+            responsive={false}
             css={css`
               margin: ${euiTheme.size.s};
               margin-bottom: 0;
             `}
           >
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="xs">
+              <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
                 <EuiFlexItem grow={false}>
                   {Boolean(isTextBasedLangSelected) ? (
                     <EuiToolTip
@@ -248,7 +249,7 @@ export function ChangeDataView({
                         'unifiedSearch.query.queryBar.indexPattern.textBasedLangSwitchWarning',
                         {
                           defaultMessage:
-                            'The current text-based query will be cleared when switching to a data view. Ensure that you have saved this search to avoid losing your work.',
+                            "Switching data views removes the current SQL query. Save this search to ensure you don't lose work.",
                         }
                       )}
                     >
@@ -299,6 +300,15 @@ export function ChangeDataView({
             setPopoverIsOpen(false);
             if (isTextBasedLangSelected && !isTextLangTransitionModalDismissed) {
               setIsTextLangTransitionModalVisible(true);
+            } else if (isTextBasedLangSelected && isTextLangTransitionModalDismissed) {
+              setIsTextBasedLangSelected(false);
+              // clean up the Text based language query
+              onTextLangQuerySubmit?.({
+                language: 'kql',
+                query: '',
+              });
+              onChangeDataView(newId);
+              setTriggerLabel(trigger.label);
             } else {
               onChangeDataView(newId);
             }
@@ -394,6 +404,9 @@ export function ChangeDataView({
         onSaveTextLanguageQuery?.({
           onSave: () => {
             cleanup(shouldDismissModal);
+          },
+          onCancel: () => {
+            setIsTextLangTransitionModalVisible(false);
           },
         });
       } else {

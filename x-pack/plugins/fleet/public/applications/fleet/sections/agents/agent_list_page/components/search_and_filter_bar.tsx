@@ -374,6 +374,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                 visibleAgents={visibleAgents}
                 refreshAgents={refreshAgents}
                 allTags={tags}
+                agentPolicies={agentPolicies}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
