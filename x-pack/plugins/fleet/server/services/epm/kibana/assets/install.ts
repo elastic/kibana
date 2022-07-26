@@ -176,6 +176,9 @@ export async function installKibanaAssetsAndReferences({
   return installedKibanaAssetsRefs;
 }
 
+const TAG_COLOR = '#FFFFFF';
+const MANAGED_TAG_NAME = 'Managed';
+
 export async function tagKibanaAssets({
   savedObjectTagAssignmentService,
   savedObjectTagClient,
@@ -199,15 +202,13 @@ export async function tagKibanaAssets({
     return assets;
   });
 
-  const managedTagName = 'Managed';
-  const tagColor = '#FFFFFF';
   const allTags = await savedObjectTagClient.getAll();
-  let managedTag = allTags.find((tag) => tag.name === managedTagName);
+  let managedTag = allTags.find((tag) => tag.name === MANAGED_TAG_NAME);
   if (!managedTag) {
     managedTag = await savedObjectTagClient.create({
-      name: managedTagName,
+      name: MANAGED_TAG_NAME,
       description: '',
-      color: tagColor,
+      color: TAG_COLOR,
     });
   }
 
@@ -216,7 +217,7 @@ export async function tagKibanaAssets({
     packageTag = await savedObjectTagClient.create({
       name: pkgTitle,
       description: '',
-      color: tagColor,
+      color: TAG_COLOR,
     });
   }
 
