@@ -9,9 +9,4 @@
 export type { MigrationResult } from './core';
 export { KibanaMigrator } from './kibana_migrator';
 export type { IKibanaMigrator, KibanaMigratorStatus } from './kibana_migrator';
-export type {
-  SavedObjectMigrationFn,
-  SavedObjectMigrationMap,
-  SavedObjectMigrationContext,
-} from './types';
 export { mergeSavedObjectMigrationMaps } from './utils';

@@ -274,15 +274,6 @@ export type {
   ExposedToBrowserDescriptor,
 } from './plugins';
 
-export {
-  SavedObjectsClient,
-  SavedObjectsErrorHelpers,
-  SavedObjectsSerializer,
-  SavedObjectTypeRegistry,
-  SavedObjectsUtils,
-  mergeSavedObjectMigrationMaps,
-} from './saved_objects';
-
 export type {
   SavedObject,
   SavedObjectAttribute,
@@ -351,6 +342,8 @@ export type {
   SavedObjectsPitParams,
 } from '@kbn/core-saved-objects-api-server';
 export type {
+  SavedObjectsServiceSetup,
+  SavedObjectsServiceStart,
   SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
@@ -368,10 +361,7 @@ export type {
   SavedObjectUnsanitizedDoc,
   SavedObjectsRepositoryFactory,
   SavedObjectsResolveImportErrorsOptions,
-  SavedObjectsServiceStart,
-  SavedObjectsServiceSetup,
   SavedObjectStatusMeta,
-  SavedObjectsRepository,
   SavedObjectsFieldMapping,
   SavedObjectsTypeMappingDefinition,
   SavedObjectsMappingProperties,
@@ -380,22 +370,36 @@ export type {
   SavedObjectsTypeManagementDefinition,
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
-  SavedObjectsExporter,
   ISavedObjectsExporter,
   SavedObjectExportBaseOptions,
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportByTypeOptions,
-  SavedObjectsExportError,
   SavedObjectsExportTransform,
   SavedObjectsExportTransformContext,
-  SavedObjectsImporter,
   ISavedObjectsImporter,
-  SavedObjectsImportError,
   SavedObjectsImportHook,
   SavedObjectsImportHookResult,
   SavedObjectsValidationMap,
   SavedObjectsValidationSpec,
+  ISavedObjectsSerializer,
+} from '@kbn/core-saved-objects-server';
+
+// TODO: see what could be removed once the TS check is green
+export type {
+  SavedObjectsRepository,
+  SavedObjectsExporter,
+  SavedObjectsExportError,
+  SavedObjectsImporter,
+  SavedObjectsImportError,
   SavedObjectsRequestHandlerContext,
+} from './saved_objects';
+export {
+  SavedObjectsClient,
+  SavedObjectsErrorHelpers,
+  SavedObjectsSerializer,
+  SavedObjectTypeRegistry,
+  SavedObjectsUtils,
+  mergeSavedObjectMigrationMaps,
 } from './saved_objects';
 
 export type {

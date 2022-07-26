@@ -10,74 +10,24 @@ export * from './service';
 
 export { SavedObjectsImporter } from './import';
 
-export type {
-  ISavedObjectsImporter,
-  SavedObjectsImportOptions,
-  SavedObjectsResolveImportErrorsOptions,
-  SavedObjectsImportError,
-  SavedObjectsImportHook,
-  SavedObjectsImportHookResult,
-} from './import';
+export type { SavedObjectsImportError } from './import';
 
-export type {
-  SavedObjectsExporter,
-  ISavedObjectsExporter,
-  SavedObjectExportBaseOptions,
-  SavedObjectsExportByTypeOptions,
-  SavedObjectsExportByObjectOptions,
-  SavedObjectsExportResultDetails,
-  SavedObjectsExportError,
-  SavedObjectsExportTransformContext,
-  SavedObjectsExportTransform,
-  SavedObjectsExportExcludedObject,
-} from './export';
+export type { SavedObjectsExporter, SavedObjectsExportError } from './export';
 
 export { SavedObjectsSerializer } from './serialization';
-
-export type {
-  SavedObjectsRawDoc,
-  SavedObjectsRawDocParseOptions,
-  SavedObjectSanitizedDoc,
-  SavedObjectUnsanitizedDoc,
-} from './serialization';
-
-export type { SavedObjectsMigrationLogger } from './migrations/core/migration_logger';
 
 export { SavedObjectsService } from './saved_objects_service';
 
 export type {
   InternalSavedObjectsServiceStart,
-  SavedObjectsServiceStart,
-  SavedObjectsServiceSetup,
   InternalSavedObjectsServiceSetup,
-  SavedObjectsRepositoryFactory,
 } from './saved_objects_service';
 
-export type {
-  SavedObjectsFieldMapping,
-  SavedObjectsMappingProperties,
-  SavedObjectsTypeMappingDefinition,
-  SavedObjectsTypeMappingDefinitions,
-} from './mappings';
+export type { SavedObjectsTypeMappingDefinitions } from './mappings';
 
-export type {
-  SavedObjectMigrationMap,
-  SavedObjectMigrationFn,
-  SavedObjectMigrationContext,
-} from './migrations';
 export { mergeSavedObjectMigrationMaps } from './migrations';
-
-export type {
-  SavedObjectStatusMeta,
-  SavedObjectsType,
-  SavedObjectsTypeManagementDefinition,
-  SavedObjectTypeExcludeFromUpgradeFilterHook,
-} from './types';
-
-export type { SavedObjectsValidationMap, SavedObjectsValidationSpec } from './validation';
 
 export { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects_config';
 export { SavedObjectTypeRegistry } from './saved_objects_type_registry';
-export type { ISavedObjectTypeRegistry } from './saved_objects_type_registry';
 export { CoreSavedObjectsRouteHandlerContext } from './saved_objects_route_handler_context';
 export type { SavedObjectsRequestHandlerContext } from './saved_objects_route_handler_context';
