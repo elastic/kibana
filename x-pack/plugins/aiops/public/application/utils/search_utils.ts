@@ -216,7 +216,7 @@ export function getEsQueryFromSavedSearch({
 
     const combinedQuery = createMergedEsQuery(
       currentQuery,
-      Array.isArray(filterManager?.getFilters()) ? filterManager?.getFilters() : [],
+      filterManager ? filterManager?.getFilters() : currentFilters,
       dataView,
       uiSettings
     );
