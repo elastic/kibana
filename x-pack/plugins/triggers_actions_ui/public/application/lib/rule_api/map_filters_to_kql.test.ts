@@ -66,7 +66,7 @@ describe('mapFiltersToKql', () => {
         ruleStatusesFilter: ['enabled', 'snoozed'],
       })
     ).toEqual([
-      'alert.attributes.enabled: true or (alert.attributes.muteAll:true OR alert.attributes.snoozeSchedule: { duration > 0 })',
+      'alert.attributes.enabled: true and (alert.attributes.muteAll:true OR alert.attributes.snoozeSchedule: { duration > 0 })',
     ]);
 
     expect(
@@ -74,7 +74,7 @@ describe('mapFiltersToKql', () => {
         ruleStatusesFilter: ['disabled', 'snoozed'],
       })
     ).toEqual([
-      'alert.attributes.enabled: false or (alert.attributes.muteAll:true OR alert.attributes.snoozeSchedule: { duration > 0 })',
+      'alert.attributes.enabled: false and (alert.attributes.muteAll:true OR alert.attributes.snoozeSchedule: { duration > 0 })',
     ]);
 
     expect(
@@ -82,7 +82,7 @@ describe('mapFiltersToKql', () => {
         ruleStatusesFilter: ['enabled', 'disabled', 'snoozed'],
       })
     ).toEqual([
-      'alert.attributes.enabled: true or alert.attributes.enabled: false or (alert.attributes.muteAll:true OR alert.attributes.snoozeSchedule: { duration > 0 })',
+      'alert.attributes.enabled: true and alert.attributes.enabled: false and (alert.attributes.muteAll:true OR alert.attributes.snoozeSchedule: { duration > 0 })',
     ]);
   });
 

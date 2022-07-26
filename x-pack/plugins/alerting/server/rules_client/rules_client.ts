@@ -625,10 +625,12 @@ export class RulesClient {
   public async get<Params extends RuleTypeParams = never>({
     id,
     includeLegacyId = false,
+    includeSnoozeData = false,
     excludeFromPublicApi = false,
   }: {
     id: string;
     includeLegacyId?: boolean;
+    includeSnoozeData?: boolean;
     excludeFromPublicApi?: boolean;
   }): Promise<SanitizedRule<Params> | SanitizedRuleWithLegacyId<Params>> {
     const result = await this.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
@@ -661,7 +663,8 @@ export class RulesClient {
       result.attributes,
       result.references,
       includeLegacyId,
-      excludeFromPublicApi
+      excludeFromPublicApi,
+      includeSnoozeData
     );
   }
 
@@ -2790,8 +2793,8 @@ export class RulesClient {
       schedule: schedule as IntervalSchedule,
       actions: actions ? this.injectReferencesIntoActions(id, actions, references || []) : [],
       params: this.injectReferencesIntoParams(id, ruleType, params, references || []) as Params,
-      ...(includeSnoozeSchedule ? { snoozeSchedule: snoozeScheduleDates } : {}),
-      ...(includeSnoozeData && includeSnoozeSchedule
+      ...(excludeFromPublicApi ? {} : { snoozeSchedule: snoozeScheduleDates ?? [] }),
+      ...(includeSnoozeData && !excludeFromPublicApi
         ? {
             activeSnoozes: getActiveScheduledSnoozes({
               snoozeSchedule,

@@ -61,7 +61,7 @@ export const mapFiltersToKql = ({
       result.push(`${snoozedFilter}`);
     }
 
-    filters.push(result.join(' or '));
+    filters.push(result.join(' and '));
   }
 
   if (tagsFilter && tagsFilter.length) {
