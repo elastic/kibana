@@ -28,10 +28,10 @@ export interface FindingsEvaluationsQueryResult {
 
 export const findingsEvaluationAggsQuery = {
   failed_findings: {
-    filter: { term: { 'result.evaluation.keyword': 'failed' } },
+    filter: { term: { 'result.evaluation': 'failed' } },
   },
   passed_findings: {
-    filter: { term: { 'result.evaluation.keyword': 'passed' } },
+    filter: { term: { 'result.evaluation': 'passed' } },
   },
 };
 

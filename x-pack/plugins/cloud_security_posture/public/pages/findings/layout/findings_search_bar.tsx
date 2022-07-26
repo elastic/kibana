@@ -53,7 +53,7 @@ export const FindingsSearchBar = ({
         // @ts-expect-error onFiltersUpdated is a valid prop on SearchBar
         onFiltersUpdated={(value: Filter[]) => setQuery({ filters: value })}
         placeholder={i18n.translate('xpack.csp.findings.searchBar.searchPlaceholder', {
-          defaultMessage: 'Search findings (eg. rule.section.keyword : "API Server" )',
+          defaultMessage: 'Search findings (eg. rule.section : "API Server" )',
         })}
       />
     </div>

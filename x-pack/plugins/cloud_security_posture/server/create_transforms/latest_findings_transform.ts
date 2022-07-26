@@ -5,10 +5,14 @@
  * 2.0.
  */
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { FINDINGS_INDEX_PATTERN, LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../common/constants';
+import {
+  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+  FINDINGS_INDEX_PATTERN,
+  LATEST_FINDINGS_INDEX_DEFAULT_NS,
+} from '../../common/constants';
 
 export const latestFindingsTransform: TransformPutTransformRequest = {
-  transform_id: 'cloud_security_posture.findings_latest-default-0.0.1',
+  transform_id: 'cloud_security_posture.findings_latest-default-8.4.0',
   description: 'Defines findings transformation to view only the latest finding per resource',
   source: {
     index: FINDINGS_INDEX_PATTERN,
@@ -31,9 +35,13 @@ export const latestFindingsTransform: TransformPutTransformRequest = {
   },
   latest: {
     sort: '@timestamp',
-    unique_key: ['resource.id.keyword', 'rule.id'],
+    unique_key: ['resource.id', 'rule.id'],
   },
   _meta: {
-    managed: 'true',
+    package: {
+      name: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+    },
+    managed_by: 'cloud_security_posture',
+    managed: true,
   },
 };
