@@ -15,6 +15,7 @@ export const initializeCspTransforms = async (
   esClient: ElasticsearchClient,
   logger: Logger
 ): Promise<void> => {
+  // Deletes old assets from previous versions as part of upgrade process
   const LATEST_TRANSFORM_V830 = 'cloud_security_posture.findings_latest-default-0.0.1';
   await deleteTransformSafe(esClient, logger, LATEST_TRANSFORM_V830);
   await initializeTransform(esClient, latestFindingsTransform, logger);

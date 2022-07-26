@@ -33,6 +33,7 @@ export const initializeCspIndices = async (esClient: ElasticsearchClient, logger
 
 const createBenchmarkScoreIndex = async (esClient: ElasticsearchClient, logger: Logger) => {
   try {
+    // Deletes old assets from previous versions as part of upgrade process
     const INDEX_TEMPLATE_V830 = 'cloud_security_posture.scores';
     await deleteIndexTemplateSafe(esClient, logger, INDEX_TEMPLATE_V830);
 
@@ -71,6 +72,7 @@ const createBenchmarkScoreIndex = async (esClient: ElasticsearchClient, logger: 
 
 const createLatestFindingsIndex = async (esClient: ElasticsearchClient, logger: Logger) => {
   try {
+    // Deletes old assets from previous versions as part of upgrade process
     const INDEX_TEMPLATE_V830 = 'cloud_security_posture.findings_latest';
     await deleteIndexTemplateSafe(esClient, logger, INDEX_TEMPLATE_V830);
 
