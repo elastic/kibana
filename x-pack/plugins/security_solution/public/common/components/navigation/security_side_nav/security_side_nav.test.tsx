@@ -24,9 +24,9 @@ const manageNavLink: NavLinkItem = {
       id: SecurityPageName.endpoints,
       title: 'title 2',
       description: 'description 2',
+      isBeta: true,
     },
   ],
-  isBeta: true,
 };
 const alertsNavLink: NavLinkItem = {
   id: SecurityPageName.alerts,
@@ -130,9 +130,9 @@ describe('SecuritySideNav', () => {
                 label: 'title 2',
                 description: 'description 2',
                 href: '/endpoints',
+                isBeta: true,
               },
             ],
-            isBeta: manageNavLink.isBeta,
           },
         ],
       })
@@ -150,6 +150,7 @@ describe('SecuritySideNav', () => {
             title: 'title 2',
             description: 'description 2',
             disabled: true,
+            isBeta: true,
           },
         ],
       },
