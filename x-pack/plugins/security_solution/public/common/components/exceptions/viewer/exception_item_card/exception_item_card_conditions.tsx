@@ -9,6 +9,12 @@ import React, { memo, useMemo, useCallback } from 'react';
 import { EuiExpression, EuiToken, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import styled from 'styled-components';
 import type {
+  EntryExists,
+  EntryList,
+  EntryMatch,
+  EntryMatchAny,
+  EntryMatchWildcard,
+  EntryNested,
   ExceptionListItemSchema,
   NonEmptyNestedEntriesArray,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -119,6 +125,14 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
       [dataTestSubj]
     );
 
+    const getValue = useCallback((entry: EntryExists | EntryList | EntryMatch | EntryMatchAny | EntryMatchWildcard | EntryNested) => {
+      if (entry.type === 'list') {
+        return entry.list.id;
+      } else {
+        return 'value' in entry ? entry.value : '';
+      }
+    }, []);
+
     return (
       <div data-test-subj={dataTestSubj}>
         {osLabel != null && (
@@ -131,7 +145,7 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
         )}
         {entries.map((entry, index) => {
           const { field, type } = entry;
-          const value = 'value' in entry ? entry.value : '';
+          const value = getValue(entry);
           const nestedEntries = 'entries' in entry ? entry.entries : [];
           const operator = 'operator' in entry ? entry.operator : '';
 
