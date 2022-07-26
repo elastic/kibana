@@ -45,6 +45,7 @@ export enum ReadOperations {
   GetCaseMetrics = 'getCaseMetrics',
   GetCasesMetrics = 'getCasesMetrics',
   GetUserActionMetrics = 'getUserActionMetrics',
+  FindUserProfiles = 'findUserProfiles',
 }
 
 /**
@@ -80,7 +81,7 @@ export interface OperationDetails {
    */
   name: CasesSupportedOperations;
   /**
-   * The ECS `event.action` field, should be in the form of <entity>_<operation> e.g comment_get, case_fined
+   * The ECS `event.action` field, should be in the form of <entity>_<operation> e.g comment_get, case_find
    */
   action: string;
   /**

@@ -9,6 +9,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { LensServerPluginSetup } from '@kbn/lens-plugin/server';
+import { UserProfileServiceStart } from '@kbn/security-plugin/server';
 import { User } from '../../common/api';
 import { Authorization } from '../authorization/authorization';
 import {
@@ -40,4 +41,5 @@ export interface CasesClientArgs {
   readonly actionsClient: PublicMethodsOf<ActionsClient>;
   readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   readonly externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+  readonly userProfiles?: UserProfileServiceStart;
 }

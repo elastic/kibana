@@ -87,14 +87,16 @@ export class Authorization {
   }
 
   /**
-   * Checks that the user making the request for the passed in owners and operation has the correct authorization. This
+   * Checks that the user making the request for the passed in owner, saved object, and operation has the correct authorization. This
    * function will throw if the user is not authorized for the requested operation and owners.
+   *
+   * This method should be used when a saved object ID is available.
    *
    * @param entities an array of entities describing the case owners in conjunction with the saved object ID attempting
    *  to be authorized
    * @param operation information describing the operation attempting to be authorized
    */
-  public async ensureAuthorized({
+  public async ensureAuthorizedSavedObject({
     entities,
     operation,
   }: {
@@ -118,6 +120,37 @@ export class Authorization {
     }
 
     logSavedObjects();
+  }
+
+  /**
+   * Checks that the user making the request for the pass in owner and operation has the correct authorization. This
+   * function will throw if the user is not authorized for the requested operation and owners.
+   *
+   * This method should only be used when a saved object ID is not available. This should only occur when
+   * the code is not accessing any cases saved objects.
+   *
+   * @param owners an array of owners that the user is attempting to be authorized as
+   * @param operation information describing the operation attempting to be authorized
+   */
+  public async ensureAuthorizedOwners({
+    owners,
+    operation,
+  }: {
+    owners: string[];
+    operation: OperationDetails;
+  }) {
+    const logSavedObjects = (error?: Error) => {
+      for (const owner of owners) {
+        this.auditLogger.log({ operation, error, entity: { owner } });
+      }
+    };
+
+    try {
+      await this._ensureAuthorized(owners, operation);
+    } catch (error) {
+      logSavedObjects(error);
+      throw error;
+    }
   }
 
   /**

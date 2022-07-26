@@ -58,7 +58,7 @@ const checkAuthorization = async (
     id: params.caseId,
   });
 
-  await authorization.ensureAuthorized({
+  await authorization.ensureAuthorizedSavedObject({
     operation: Operations.getCaseMetrics,
     entities: [{ owner: caseInfo.attributes.owner, id: caseInfo.id }],
   });

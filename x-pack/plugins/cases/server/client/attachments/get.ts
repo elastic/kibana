@@ -226,7 +226,7 @@ export async function get(
       attachmentId: attachmentID,
     });
 
-    await authorization.ensureAuthorized({
+    await authorization.ensureAuthorizedSavedObject({
       entities: [{ owner: comment.attributes.owner, id: comment.id }],
       operation: Operations.getComment,
     });

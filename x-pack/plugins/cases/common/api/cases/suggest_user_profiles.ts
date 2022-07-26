@@ -10,6 +10,7 @@ import * as rt from 'io-ts';
 export const SuggestUserProfilesRequestRt = rt.intersection([
   rt.type({
     name: rt.string,
+    owners: rt.array(rt.string),
   }),
   rt.partial({ size: rt.number }),
   // TODO: do we need owner here so we only suggest users that have access to cases?

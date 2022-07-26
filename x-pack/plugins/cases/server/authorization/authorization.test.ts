@@ -107,7 +107,7 @@ describe('authorization', () => {
       securityStart.authz.mode.useRbacForRequest.mockReturnValue(false);
 
       try {
-        await auth.ensureAuthorized({
+        await auth.ensureAuthorizedSavedObject({
           entities: [{ id: '1', owner: 'b' }],
           operation: Operations.createCase,
         });
@@ -128,7 +128,7 @@ describe('authorization', () => {
       });
 
       try {
-        await auth.ensureAuthorized({
+        await auth.ensureAuthorizedSavedObject({
           entities: [{ id: '1', owner: 'b' }],
           operation: Operations.createCase,
         });
@@ -141,7 +141,7 @@ describe('authorization', () => {
       expect.assertions(1);
 
       try {
-        await auth.ensureAuthorized({
+        await auth.ensureAuthorizedSavedObject({
           entities: [{ id: '1', owner: 'b' }],
           operation: Operations.createCase,
         });
@@ -154,7 +154,7 @@ describe('authorization', () => {
       expect.assertions(2);
 
       try {
-        await auth.ensureAuthorized({
+        await auth.ensureAuthorizedSavedObject({
           entities: [
             { id: '1', owner: 'b' },
             { id: '5', owner: 'z' },
@@ -228,7 +228,7 @@ describe('authorization', () => {
       );
 
       try {
-        await auth.ensureAuthorized({
+        await auth.ensureAuthorizedSavedObject({
           entities: [{ id: '1', owner: 'a' }],
           operation: Operations.createCase,
         });
@@ -250,7 +250,7 @@ describe('authorization', () => {
       });
 
       try {
-        await auth.ensureAuthorized({
+        await auth.ensureAuthorizedSavedObject({
           entities: [{ id: '100', owner: feature.cases[0] }],
           operation: Operations.createCase,
         });
@@ -279,7 +279,7 @@ describe('authorization', () => {
       });
 
       await expect(
-        auth.ensureAuthorized({
+        auth.ensureAuthorizedSavedObject({
           entities: [
             { id: '100', owner: feature.cases[0] },
             { id: '3', owner: 'other-owner' },
@@ -306,7 +306,7 @@ describe('authorization', () => {
       });
 
       await expect(
-        auth.ensureAuthorized({
+        auth.ensureAuthorizedSavedObject({
           entities: [
             { id: '100', owner: 'a' },
             { id: '3', owner: 'other-owner' },
@@ -333,7 +333,7 @@ describe('authorization', () => {
       });
 
       await expect(
-        auth.ensureAuthorized({
+        auth.ensureAuthorizedSavedObject({
           entities: [
             { id: '100', owner: 'a' },
             { id: '3', owner: 'other-owner' },

@@ -45,7 +45,7 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
       entities.set(theCase.id, { id: theCase.id, owner: theCase.attributes.owner });
     }
 
-    await authorization.ensureAuthorized({
+    await authorization.ensureAuthorizedSavedObject({
       operation: Operations.deleteCase,
       entities: Array.from(entities.values()),
     });

@@ -121,7 +121,7 @@ export const push = async (
       casesClient.userActions.getAll({ caseId }),
     ]);
 
-    await authorization.ensureAuthorized({
+    await authorization.ensureAuthorizedSavedObject({
       entities: [{ owner: theCase.owner, id: caseId }],
       operation: Operations.pushCase,
     });

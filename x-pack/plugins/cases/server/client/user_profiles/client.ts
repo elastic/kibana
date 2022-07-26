@@ -7,6 +7,7 @@
 
 import { UserProfile } from '@kbn/security-plugin/common';
 import { SuggestUserProfilesRequest } from '../../../common/api';
+import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { CasesClientArgs } from '../types';
 
@@ -27,11 +28,24 @@ const suggestUserProfiles = async (
   params: SuggestUserProfilesRequest,
   clientArgs: CasesClientArgs
 ): Promise<UserProfile[]> => {
-  const { logger, authorization } = clientArgs;
+  const { logger, userProfiles, authorization } = clientArgs;
 
   try {
-    // TODO: I don't think we need to check cases RBAC here because we're not retrieving cases data and we have no owner
-    // to compare against?
+    await authorization.ensureAuthorizedOwners({
+      owners: params.owners,
+      operation: Operations.findUserProfiles,
+    });
+
+    if (!userProfiles) {
+      return [];
+    }
+
+    return userProfiles.suggest({
+      name: params.name,
+      size: params.size,
+      dataPath: 'avatar',
+      requiredPrivileges,
+    });
   } catch (error) {
     throw createCaseError({
       logger,

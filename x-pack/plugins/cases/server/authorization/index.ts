@@ -317,4 +317,17 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     docType: 'user actions',
     savedObjectType: CASE_USER_ACTION_SAVED_OBJECT,
   },
+  [ReadOperations.FindUserProfiles]: {
+    ecsType: EVENT_TYPES.access,
+    // TODO: we're hijacking getCase here even though this has nothing to do with a case really
+    // users should be able to get a case if they want to find user profiles though
+    name: ACCESS_CASE_OPERATION,
+    action: 'case_find_user_profiles',
+    verbs: accessVerbs,
+    // TODO: this isn't a real doc type within cases, I think that's ok
+    docType: 'user profile',
+    // TODO: this isn't used if a saved object id isn't passed in, it'd be great if we could make this optional but required
+    // for when a saved object id was available
+    savedObjectType: '',
+  },
 };

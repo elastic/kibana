@@ -10,6 +10,7 @@ import {
   SavedObjectsServiceStart,
   Logger,
   ElasticsearchClient,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
@@ -41,6 +42,15 @@ interface CasesClientFactoryArgs {
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+}
+
+interface CasesServices {
+  alertsService: AlertService;
+  caseService: CasesService;
+  caseConfigureService: CaseConfigureService;
+  connectorMappingsService: ConnectorMappingsService;
+  userActionService: CaseUserActionService;
+  attachmentService: AttachmentService;
 }
 
 /**
@@ -116,10 +126,46 @@ export class CasesClientFactory {
     const userInfo = caseService.getUser({ request });
 
     return createCasesClient({
-      alertsService: new AlertService(scopedClusterClient, this.logger),
+      // TODO: move this into its own property called services
+      ...this.createServices({ unsecuredSavedObjectsClient, esClient: scopedClusterClient }),
       unsecuredSavedObjectsClient,
       // We only want these fields from the userInfo object
       user: { username: userInfo.username, email: userInfo.email, full_name: userInfo.full_name },
+      logger: this.logger,
+      lensEmbeddableFactory: this.options.lensEmbeddableFactory,
+      authorization: auth,
+      actionsClient: await this.options.actionsPluginStart.getActionsClientWithRequest(request),
+      persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
+      externalReferenceAttachmentTypeRegistry: this.options.externalReferenceAttachmentTypeRegistry,
+      userProfiles: this.options.securityPluginStart?.userProfiles,
+    });
+  }
+
+  private createServices({
+    unsecuredSavedObjectsClient,
+    esClient,
+  }: {
+    unsecuredSavedObjectsClient: SavedObjectsClientContract;
+    esClient: ElasticsearchClient;
+  }): CasesServices {
+    if (!this.isInitialized || !this.options) {
+      throw new Error('CasesClientFactory must be initialized before calling create');
+    }
+
+    const attachmentService = new AttachmentService(
+      this.logger,
+      this.options.persistableStateAttachmentTypeRegistry
+    );
+
+    const caseService = new CasesService({
+      log: this.logger,
+      authentication: this.options?.securityPluginStart?.authc,
+      unsecuredSavedObjectsClient,
+      attachmentService,
+    });
+
+    return {
+      alertsService: new AlertService(esClient, this.logger),
       caseService,
       caseConfigureService: new CaseConfigureService(this.logger),
       connectorMappingsService: new ConnectorMappingsService(this.logger),
@@ -128,12 +174,6 @@ export class CasesClientFactory {
         this.options.persistableStateAttachmentTypeRegistry
       ),
       attachmentService,
-      logger: this.logger,
-      lensEmbeddableFactory: this.options.lensEmbeddableFactory,
-      authorization: auth,
-      actionsClient: await this.options.actionsPluginStart.getActionsClientWithRequest(request),
-      persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
-      externalReferenceAttachmentTypeRegistry: this.options.externalReferenceAttachmentTypeRegistry,
-    });
+    };
   }
 }

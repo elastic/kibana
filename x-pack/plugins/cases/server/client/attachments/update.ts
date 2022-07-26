@@ -59,7 +59,7 @@ export async function update(
       throw Boom.notFound(`This comment ${queryCommentId} does not exist anymore.`);
     }
 
-    await authorization.ensureAuthorized({
+    await authorization.ensureAuthorizedSavedObject({
       entities: [{ owner: myComment.attributes.owner, id: myComment.id }],
       operation: Operations.updateComment,
     });

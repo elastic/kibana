@@ -162,7 +162,7 @@ export const get = async (
       id,
     });
 
-    await authorization.ensureAuthorized({
+    await authorization.ensureAuthorizedSavedObject({
       operation: Operations.getCase,
       entities: [{ owner: theCase.attributes.owner, id: theCase.id }],
     });
@@ -215,7 +215,7 @@ export const resolve = async (
       id,
     });
 
-    await authorization.ensureAuthorized({
+    await authorization.ensureAuthorizedSavedObject({
       operation: Operations.resolveCase,
       entities: [
         {

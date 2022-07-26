@@ -67,7 +67,7 @@ export async function deleteAll(
       throw Boom.notFound(`No comments found for ${caseID}.`);
     }
 
-    await authorization.ensureAuthorized({
+    await authorization.ensureAuthorizedSavedObject({
       operation: Operations.deleteAllComments,
       entities: comments.saved_objects.map((comment) => ({
         owner: comment.attributes.owner,
@@ -134,7 +134,7 @@ export async function deleteComment(
       throw Boom.notFound(`This comment ${attachmentID} does not exist anymore.`);
     }
 
-    await authorization.ensureAuthorized({
+    await authorization.ensureAuthorizedSavedObject({
       entities: [{ owner: myComment.attributes.owner, id: myComment.id }],
       operation: Operations.deleteComment,
     });

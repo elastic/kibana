@@ -12,6 +12,7 @@ import { UserActionsSubClient, createUserActionsSubClient } from './user_actions
 import { CasesClientInternal, createCasesClientInternal } from './client_internal';
 import { ConfigureSubClient, createConfigurationSubClient } from './configure/client';
 import { createMetricsSubClient, MetricsSubClient } from './metrics/client';
+import { createUserProfilesSubClient, UserProfilesSubClient } from './user_profiles/client';
 
 /**
  * Client wrapper that contains accessor methods for individual entities within the cases system.
@@ -23,6 +24,7 @@ export class CasesClient {
   private readonly _userActions: UserActionsSubClient;
   private readonly _configure: ConfigureSubClient;
   private readonly _metrics: MetricsSubClient;
+  private readonly _userProfiles: UserProfilesSubClient;
 
   constructor(args: CasesClientArgs) {
     this._casesClientInternal = createCasesClientInternal(args);
@@ -31,6 +33,7 @@ export class CasesClient {
     this._userActions = createUserActionsSubClient(args);
     this._configure = createConfigurationSubClient(args, this._casesClientInternal);
     this._metrics = createMetricsSubClient(args, this);
+    this._userProfiles = createUserProfilesSubClient(args);
   }
 
   /**
@@ -66,6 +69,13 @@ export class CasesClient {
    */
   public get metrics() {
     return this._metrics;
+  }
+
+  /**
+   * Retrieves an interface for interacting with the user profiles function from the security plugin.
+   */
+  public get userProfiles() {
+    return this._userProfiles;
   }
 }
 

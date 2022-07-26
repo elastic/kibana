@@ -261,7 +261,7 @@ async function update(
       configurationId,
     });
 
-    await authorization.ensureAuthorized({
+    await authorization.ensureAuthorizedSavedObject({
       operation: Operations.updateConfiguration,
       entities: [{ owner: configuration.attributes.owner, id: configuration.id }],
     });
@@ -391,7 +391,7 @@ async function create(
 
     const savedObjectID = SavedObjectsUtils.generateId();
 
-    await authorization.ensureAuthorized({
+    await authorization.ensureAuthorizedSavedObject({
       operation: Operations.createConfiguration,
       entities: [{ owner: configuration.owner, id: savedObjectID }],
     });

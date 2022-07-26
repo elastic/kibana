@@ -67,7 +67,7 @@ export const bulkCreate = async (
         [[], []]
       );
 
-    await authorization.ensureAuthorized({
+    await authorization.ensureAuthorizedSavedObject({
       operation: Operations.createComment,
       entities,
     });

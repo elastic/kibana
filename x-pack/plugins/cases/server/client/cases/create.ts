@@ -68,7 +68,7 @@ export const create = async (
   try {
     const savedObjectID = SavedObjectsUtils.generateId();
 
-    await auth.ensureAuthorized({
+    await auth.ensureAuthorizedSavedObject({
       operation: Operations.createCase,
       entities: [{ owner: query.owner, id: savedObjectID }],
     });

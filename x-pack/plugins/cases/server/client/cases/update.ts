@@ -263,7 +263,7 @@ export const update = async (
       query.cases
     );
 
-    await authorization.ensureAuthorized({
+    await authorization.ensureAuthorizedSavedObject({
       entities: casesToAuthorize,
       operation: Operations.updateCase,
     });
