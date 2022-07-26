@@ -142,7 +142,7 @@ export const LandingImageCards: React.FC<LandingImagesProps> = React.memo(({ ite
             <PrimaryEuiTitle size="xs">
               <div>
                 <TitleText>{title}</TitleText>
-                {isBeta && <BetaBadge label={Beta} size="s" />}
+                {isBeta && <BetaBadge label={BETA} size="s" />}
               </div>
             </PrimaryEuiTitle>
           }
