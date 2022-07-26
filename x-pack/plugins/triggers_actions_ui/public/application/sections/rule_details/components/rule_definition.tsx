@@ -29,6 +29,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
   actionTypeRegistry,
   ruleTypeRegistry,
   onEditRule,
+  hideEditButton = false,
   filteredRuleTypes,
 }) => {
   const {
@@ -68,13 +69,19 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
     hasAllPrivilege(rule, ruleType) &&
     // if the rule has actions, can the user save the rule's action params
     (canExecuteActions || (!canExecuteActions && rule.actions.length === 0));
-  const hasEditButton =
+  const hasEditButton = useMemo(() => {
+    if (hideEditButton) {
+      return false;
+    }
     // can the user save the rule
-    canSaveRule &&
-    // is this rule type editable from within Rules Management
-    (ruleTypeRegistry.has(rule.ruleTypeId)
-      ? !ruleTypeRegistry.get(rule.ruleTypeId).requiresAppContext
-      : false);
+    return (
+      canSaveRule &&
+      // is this rule type editable from within Rules Management
+      (ruleTypeRegistry.has(rule.ruleTypeId)
+        ? !ruleTypeRegistry.get(rule.ruleTypeId).requiresAppContext
+        : false)
+    );
+  }, [hideEditButton, canSaveRule, ruleTypeRegistry, rule]);
   return (
     <EuiFlexItem data-test-subj="ruleSummaryRuleDefinition" grow={3}>
       <EuiPanel color="subdued" hasBorder={false} paddingSize={'m'}>

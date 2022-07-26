@@ -20,6 +20,7 @@ import {
   getCaseConnectors,
   getActionsSpace,
   getEmailConnector,
+  getCasesWebhookConnector,
 } from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -70,12 +71,19 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: authSpace1,
       });
 
+      const casesWebhookConnector = await createConnector({
+        supertest: supertestWithoutAuth,
+        req: getCasesWebhookConnector(),
+        auth: authSpace1,
+      });
+
       actionsRemover.add(space, sir.id, 'action', 'actions');
       actionsRemover.add(space, snConnector.id, 'action', 'actions');
       actionsRemover.add(space, snOAuthConnector.id, 'action', 'actions');
       actionsRemover.add(space, emailConnector.id, 'action', 'actions');
       actionsRemover.add(space, jiraConnector.id, 'action', 'actions');
       actionsRemover.add(space, resilientConnector.id, 'action', 'actions');
+      actionsRemover.add(space, casesWebhookConnector.id, 'action', 'actions');
 
       const connectors = await getCaseConnectors({
         supertest: supertestWithoutAuth,
@@ -84,6 +92,36 @@ export default ({ getService }: FtrProviderContext): void => {
       const sortedConnectors = connectors.sort((a, b) => a.name.localeCompare(b.name));
 
       expect(sortedConnectors).to.eql([
+        {
+          id: casesWebhookConnector.id,
+          actionTypeId: '.cases-webhook',
+          name: 'Cases Webhook Connector',
+          config: {
+            createCommentJson: '{"body":{{{case.comment}}}}',
+            createCommentMethod: 'post',
+            createCommentUrl: 'http://some.non.existent.com/{{{external.system.id}}}/comment',
+            createIncidentJson:
+              '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
+            createIncidentMethod: 'post',
+            createIncidentResponseKey: 'id',
+            createIncidentUrl: 'http://some.non.existent.com/',
+            getIncidentResponseCreatedDateKey: 'fields.created',
+            getIncidentResponseExternalTitleKey: 'key',
+            getIncidentResponseUpdatedDateKey: 'fields.updated',
+            hasAuth: true,
+            headers: { [`content-type`]: 'application/json' },
+            incidentViewUrl: 'http://some.non.existent.com/browse/{{{external.system.title}}}',
+            getIncidentUrl: 'http://some.non.existent.com/{{{external.system.id}}}',
+            updateIncidentJson:
+              '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
+            updateIncidentMethod: 'put',
+            updateIncidentUrl: 'http://some.non.existent.com/{{{external.system.id}}}',
+          },
+          isPreconfigured: false,
+          isDeprecated: false,
+          isMissingSecrets: false,
+          referencedByCount: 0,
+        },
         {
           id: jiraConnector.id,
           actionTypeId: '.jira',

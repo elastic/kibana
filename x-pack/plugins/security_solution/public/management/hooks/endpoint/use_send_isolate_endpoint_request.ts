@@ -11,7 +11,7 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { isolateHost } from '../../../common/lib/endpoint_isolation';
 import type {
   HostIsolationRequestBody,
-  HostIsolationResponse,
+  ResponseActionApiResponse,
 } from '../../../../common/endpoint/types';
 
 /**
@@ -20,12 +20,12 @@ import type {
  */
 export const useSendIsolateEndpointRequest = (
   customOptions?: UseMutationOptions<
-    HostIsolationResponse,
+    ResponseActionApiResponse,
     IHttpFetchError,
     HostIsolationRequestBody
   >
-): UseMutationResult<HostIsolationResponse, IHttpFetchError, HostIsolationRequestBody> => {
-  return useMutation<HostIsolationResponse, IHttpFetchError, HostIsolationRequestBody>(
+): UseMutationResult<ResponseActionApiResponse, IHttpFetchError, HostIsolationRequestBody> => {
+  return useMutation<ResponseActionApiResponse, IHttpFetchError, HostIsolationRequestBody>(
     (isolateData: HostIsolationRequestBody) => {
       return isolateHost(isolateData);
     },
