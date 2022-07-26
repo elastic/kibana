@@ -174,7 +174,7 @@ export class File<M = unknown> implements IFile {
   }
 
   async unshare(opts: { shareId: string }): Promise<void> {
-    await this.fileShareService.delete({ tokenId: opts.shareId });
+    await this.fileShareService.delete({ id: opts.shareId });
     this.internalFileService.createAuditLog(
       createAuditEvent({
         action: 'delete',

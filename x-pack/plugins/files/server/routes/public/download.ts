@@ -38,11 +38,12 @@ const handler: FilesRequestHandler<unknown, Query> = async ({ files }, req, res)
       body,
     });
   } catch (e) {
-    if (e instanceof FileNotFoundError || e instanceof FileShareNotFoundError) {
-      return res.notFound({ body: e });
-    }
-    if (e instanceof FileShareTokenInvalidError) {
-      return res.badRequest({ body: e });
+    if (
+      e instanceof FileNotFoundError ||
+      e instanceof FileShareNotFoundError ||
+      e instanceof FileShareTokenInvalidError
+    ) {
+      return res.badRequest({ body: 'Invalid token' });
     }
 
     throw e;
