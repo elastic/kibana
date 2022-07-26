@@ -232,7 +232,7 @@ export class ExecuteReportTask implements ReportingTask {
       docOutput.error_code = output.error_code;
     } else {
       const defaultOutput = null;
-      docOutput.content = output.toString() || defaultOutput;
+      docOutput.content = output.humanFriendlyMessage?.() || output.toString() || defaultOutput;
       docOutput.content_type = unknownMime;
       docOutput.warnings = [output.toString()];
       docOutput.error_code = output.code;

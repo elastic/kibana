@@ -64,6 +64,7 @@ export function registerEnginesRoutes({
           search_index: schema.object({
             type: schema.string(),
             index_name: schema.string(),
+            alias_name: schema.maybe(schema.string()),
           }),
         }),
       },

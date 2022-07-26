@@ -13,7 +13,7 @@ import type { FleetAuthz } from '@kbn/fleet-plugin/common';
 import { DEFAULT_SPACE_ID } from '../common/constants';
 import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
-import { ruleExecutionLogForRoutesFactory } from './lib/detection_engine/rule_execution_log';
+import type { IRuleExecutionLogService } from './lib/detection_engine/rule_monitoring';
 import { buildFrameworkRequest } from './lib/timeline/utils/common';
 import type {
   SecuritySolutionPluginCoreSetupDependencies,
@@ -45,6 +45,7 @@ interface ConstructorOptions {
   core: SecuritySolutionPluginCoreSetupDependencies;
   plugins: SecuritySolutionPluginSetupDependencies;
   endpointAppContextService: EndpointAppContextService;
+  ruleExecutionLogService: IRuleExecutionLogService;
 }
 
 export class RequestContextFactory implements IRequestContextFactory {
@@ -59,7 +60,7 @@ export class RequestContextFactory implements IRequestContextFactory {
     request: KibanaRequest
   ): Promise<SecuritySolutionApiRequestHandlerContext> {
     const { options, appClientFactory } = this;
-    const { config, logger, core, plugins, endpointAppContextService } = options;
+    const { config, core, plugins, endpointAppContextService, ruleExecutionLogService } = options;
     const { lists, ruleRegistry, security } = plugins;
 
     const [, startPlugins] = await core.getStartServices();
@@ -109,11 +110,10 @@ export class RequestContextFactory implements IRequestContextFactory {
       getRuleDataService: () => ruleRegistry.ruleDataService,
 
       getRuleExecutionLog: memoize(() =>
-        ruleExecutionLogForRoutesFactory(
-          coreContext.savedObjects.client,
-          startPlugins.eventLog.getClient(request),
-          logger
-        )
+        ruleExecutionLogService.createClientForRoutes({
+          savedObjectsClient: coreContext.savedObjects.client,
+          eventLogClient: startPlugins.eventLog.getClient(request),
+        })
       ),
 
       getExceptionListClient: () => {

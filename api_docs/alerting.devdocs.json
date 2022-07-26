@@ -3002,8 +3002,18 @@
             "pluginId": "alerting",
             "scope": "common",
             "docId": "kibAlertingPluginApi",
-            "section": "def-common.IExecutionLogWithErrorsResult",
-            "text": "IExecutionLogWithErrorsResult"
+            "section": "def-common.IExecutionLogResult",
+            "text": "IExecutionLogResult"
+          },
+          ">; getActionErrorLog: ({ id, dateStart, dateEnd, filter, page, perPage, sort, }: ",
+          "GetActionErrorLogByIdParams",
+          ") => Promise<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.IExecutionErrorsResult",
+            "text": "IExecutionErrorsResult"
           },
           ">; bulkEdit: <Params extends ",
           {
@@ -5636,6 +5646,34 @@
     "misc": [
       {
         "parentPluginId": "alerting",
+        "id": "def-common.actionErrorLogSortableColumns",
+        "type": "Array",
+        "tags": [],
+        "label": "actionErrorLogSortableColumns",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.ActionErrorLogSortFields",
+        "type": "Type",
+        "tags": [],
+        "label": "ActionErrorLogSortFields",
+        "description": [],
+        "signature": [
+          "string"
+        ],
+        "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.ActionGroupIdsOf",
         "type": "Type",
         "tags": [],
@@ -5771,34 +5809,6 @@
         "description": [],
         "signature": [
           "\"timestamp\" | \"execution_duration\" | \"total_search_duration\" | \"es_search_duration\" | \"schedule_delay\" | \"num_triggered_actions\" | \"num_generated_actions\" | \"num_active_alerts\" | \"num_recovered_alerts\" | \"num_new_alerts\""
-        ],
-        "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
-        "id": "def-common.IExecutionLogWithErrorsResult",
-        "type": "Type",
-        "tags": [],
-        "label": "IExecutionLogWithErrorsResult",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.IExecutionLogResult",
-            "text": "IExecutionLogResult"
-          },
-          " & ",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.IExecutionErrorsResult",
-            "text": "IExecutionErrorsResult"
-          }
         ],
         "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
         "deprecated": false,

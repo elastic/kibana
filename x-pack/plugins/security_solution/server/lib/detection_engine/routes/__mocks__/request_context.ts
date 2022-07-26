@@ -24,7 +24,7 @@ import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 
 import { siemMock } from '../../../../mocks';
 import { createMockConfig } from '../../../../config.mock';
-import { ruleExecutionLogMock } from '../../rule_execution_log/__mocks__';
+import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import { requestMock } from './request';
 import { internalFrameworkRequest } from '../../../framework';
 

@@ -22,13 +22,6 @@ export const COMPLETE_WITH_ENABLING = i18n.translate(
   }
 );
 
-export const NO_CONNECTOR_SELECTED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepRuleActions.noConnectorSelectedErrorMessage',
-  {
-    defaultMessage: 'No connector selected',
-  }
-);
-
 export const NO_ACTIONS_READ_PERMISSIONS = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepRuleActions.noReadActionsPrivileges',
   {

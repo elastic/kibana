@@ -15,9 +15,6 @@ import { DurationEventStartEnd } from './duration_event_start_end';
 import type { NetflowColumnsProps } from './types';
 import { UserProcess } from './user_process';
 
-export const EVENT_START = 'event.start';
-export const EVENT_END = 'event.end';
-
 const EuiFlexItemMarginRight = styled(EuiFlexItem)`
   margin-right: 10px;
 `;
