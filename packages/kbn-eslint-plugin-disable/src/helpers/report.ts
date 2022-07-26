@@ -7,9 +7,10 @@
  */
 
 import type Eslint from 'eslint';
+import { ESLINT_DISABLE_VALUE, ParsedEslintDisableComment } from './regex';
 
 export function getReportLocFromComment(
-  comment: Eslint.AST.Program['comments'][0]
+  comment: ParsedEslintDisableComment
 ): Eslint.AST.SourceLocation | undefined {
   const cStart = comment?.loc?.start;
   const cEnd = comment?.loc?.end;
@@ -20,8 +21,9 @@ export function getReportLocFromComment(
     return;
   }
 
-  const disableStartsOnNextLine = comment.value.includes('disable-next-line');
-  const disableStartsInline = comment.value.includes('disable-line');
+  const disableStartsOnNextLine =
+    comment.disableValueType === ESLINT_DISABLE_VALUE.DISABLE_NEXT_LINE;
+  const disableStartsInline = comment.disableValueType === ESLINT_DISABLE_VALUE.DISABLE_LINE;
   const cStartColumn = comment?.loc?.start?.column ?? 0;
   return disableStartsOnNextLine
     ? { start: cStart, end: cEnd }

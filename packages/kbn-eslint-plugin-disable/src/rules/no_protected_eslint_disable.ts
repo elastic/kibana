@@ -9,7 +9,7 @@
 import { REPO_ROOT } from '@kbn/utils';
 import { relative } from 'path';
 import Eslint from 'eslint';
-import { getReportLocFromComment, getRulesBlockFromEslintDisableComment } from '../helpers';
+import { getReportLocFromComment, parseEslintDisableComment } from '../helpers';
 
 export const PROTECTED_DISABLE_MSG_ID = 'no-protected-eslint-disable';
 const messages = {
@@ -92,21 +92,21 @@ const create = (context: Eslint.Rule.RuleContext): Eslint.Rule.RuleListener => {
       const nodeComments = node.comments || [];
 
       nodeComments.forEach((comment) => {
-        // get rulesBlock from comment
-        const rulesBlock = getRulesBlockFromEslintDisableComment(comment);
+        // get parsedEslintDisable from comment
+        const parsedEslintDisable = parseEslintDisableComment(comment);
 
         // no regex match, exit early
-        if (rulesBlock === null) {
+        if (!parsedEslintDisable) {
           return;
         }
 
         // we do not have a rule block, exit early
-        if (!rulesBlock) {
+        if (parsedEslintDisable.rules.length === 0) {
           return;
         }
 
         const configuredProtectedRules = getProtectedRulesFromOptions(context.options[0]);
-        const disabledRules = rulesBlock.trim().split(',');
+        const disabledRules = parsedEslintDisable.rules;
         const sourceFilename = context.getPhysicalFilename
           ? context.getPhysicalFilename()
           : context.getFilename();
@@ -123,7 +123,7 @@ const create = (context: Eslint.Rule.RuleContext): Eslint.Rule.RuleListener => {
         }
 
         // at this point we'll collect the disabled rule position to report
-        const reportLoc = getReportLocFromComment(comment);
+        const reportLoc = getReportLocFromComment(parsedEslintDisable);
         if (!reportLoc) {
           return;
         }
@@ -139,11 +139,11 @@ const create = (context: Eslint.Rule.RuleContext): Eslint.Rule.RuleListener => {
           fix(fixer) {
             // if we only have a single disabled rule and that is protected, we can remove the entire comment
             if (disabledRules.length === 1) {
-              return fixer.removeRange(comment.range as Eslint.AST.Range);
+              return fixer.removeRange(parsedEslintDisable.range as Eslint.AST.Range);
             }
 
             // it's impossible to fix as we don't have a range
-            if (!comment.range) {
+            if (!parsedEslintDisable.range) {
               return null;
             }
 
@@ -152,11 +152,11 @@ const create = (context: Eslint.Rule.RuleContext): Eslint.Rule.RuleListener => {
             const textToRemove = isLastDisabledRule
               ? `,${disabledProtectedRule}`
               : `${disabledProtectedRule},`;
-            const fixedComment = comment.value.replace(textToRemove, '');
+            const fixedComment = parsedEslintDisable.value.replace(textToRemove, '');
             const rangeToFix: Eslint.AST.Range =
-              comment.type === 'Line'
-                ? [comment.range[0] + 2, comment.range[1]]
-                : [comment.range[0] + 2, comment.range[1] - 2];
+              parsedEslintDisable.type === 'Line'
+                ? [parsedEslintDisable.range[0] + 2, parsedEslintDisable.range[1]]
+                : [parsedEslintDisable.range[0] + 2, parsedEslintDisable.range[1] - 2];
 
             return fixer.replaceTextRange(rangeToFix, fixedComment);
           },

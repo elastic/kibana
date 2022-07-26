@@ -7,7 +7,7 @@
  */
 
 import Eslint from 'eslint';
-import { getReportLocFromComment, getRulesBlockFromEslintDisableComment } from '../helpers';
+import { getReportLocFromComment, parseEslintDisableComment } from '../helpers';
 
 export const NAKED_DISABLE_MSG_ID = 'no-naked-eslint-disable';
 const messages = {
@@ -31,21 +31,21 @@ const create = (context: Eslint.Rule.RuleContext): Eslint.Rule.RuleListener => {
       const nodeComments = node.comments || [];
 
       nodeComments.forEach((comment) => {
-        // get rulesBlock from comment
-        const rulesBlock = getRulesBlockFromEslintDisableComment(comment);
+        // get parsedEslintDisable from comment
+        const parsedEslintDisable = parseEslintDisableComment(comment);
 
         // no regex match, exit early
-        if (rulesBlock === null) {
+        if (!parsedEslintDisable) {
           return;
         }
 
         // we have a rule name so we can exit early
-        if (rulesBlock) {
+        if (parsedEslintDisable.rules.length > 0) {
           return;
         }
 
         // collect position to report
-        const reportLoc = getReportLocFromComment(comment);
+        const reportLoc = getReportLocFromComment(parsedEslintDisable);
         if (!reportLoc) {
           return;
         }
@@ -56,7 +56,7 @@ const create = (context: Eslint.Rule.RuleContext): Eslint.Rule.RuleListener => {
           loc: reportLoc,
           messageId: NAKED_DISABLE_MSG_ID,
           fix(fixer) {
-            return fixer.removeRange(comment.range as Eslint.AST.Range);
+            return fixer.removeRange(parsedEslintDisable.range as Eslint.AST.Range);
           },
         });
       });
