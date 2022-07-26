@@ -92,13 +92,13 @@ export const getFindingsByResourceAggQuery = ({
             terms: { field: 'resource.sub_type', size: 1 },
           },
           cis_sections: {
-            terms: { field: 'rule.section.keyword' },
+            terms: { field: 'rule.section' },
           },
           failed_findings: {
-            filter: { term: { 'result.evaluation.keyword': 'failed' } },
+            filter: { term: { 'result.evaluation': 'failed' } },
           },
           cluster_id: {
-            terms: { field: 'cluster_id.keyword', size: 1 },
+            terms: { field: 'cluster_id', size: 1 },
           },
           sort_failed_findings: {
             bucket_sort: {

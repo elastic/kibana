@@ -15,13 +15,18 @@ export const ES_PIT_ROUTE_PATH = '/internal/cloud_security_posture/es_pit';
 export const CLOUD_SECURITY_POSTURE_PACKAGE_NAME = 'cloud_security_posture';
 
 export const CSP_LATEST_FINDINGS_DATA_VIEW = 'logs-cloud_security_posture.findings_latest-*';
+
+export const FINDINGS_INDEX_NAME = 'logs-cloud_security_posture.findings';
 export const FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings-default*';
 
-export const LATEST_FINDINGS_INDEX_NAME = 'cloud_security_posture.findings_latest';
-export const LATEST_FINDINGS_INDEX_DEFAULT_NS = 'logs-' + LATEST_FINDINGS_INDEX_NAME + '-default';
+export const LATEST_FINDINGS_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.findings_latest';
+export const LATEST_FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings_latest-*';
+export const LATEST_FINDINGS_INDEX_DEFAULT_NS =
+  'logs-cloud_security_posture.findings_latest-default';
 
-export const BENCHMARK_SCORE_INDEX_NAME = 'cloud_security_posture.scores';
-export const BENCHMARK_SCORE_INDEX_DEFAULT_NS = 'logs-' + BENCHMARK_SCORE_INDEX_NAME + '-default';
+export const BENCHMARK_SCORE_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.scores';
+export const BENCHMARK_SCORE_INDEX_PATTERN = 'logs-cloud_security_posture.scores-*';
+export const BENCHMARK_SCORE_INDEX_DEFAULT_NS = 'logs-cloud_security_posture.scores-default';
 
 export const CSP_INGEST_TIMESTAMP_PIPELINE = 'cloud_security_posture_add_ingest_timestamp_pipeline';
 

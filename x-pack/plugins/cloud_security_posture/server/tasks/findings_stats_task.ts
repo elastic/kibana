@@ -69,10 +69,12 @@ export function setupFindingsStatsTask(
         createTaskRunner: taskRunner(coreStartServices, logger),
       },
     });
-    logger.info(`Task: ${CSPM_FINDINGS_STATS_TASK_TYPE} registered successfully`);
+    logger.info(`Registered task successfully [Task: ${CSPM_FINDINGS_STATS_TASK_TYPE}]`);
   } catch (errMsg) {
     const error = transformError(errMsg);
-    logger.error(`Failed to register task: ${CSPM_FINDINGS_STATS_TASK_TYPE}, ${error.message}`);
+    logger.error(
+      `Task registration failed [Task: ${CSPM_FINDINGS_STATS_TASK_TYPE}] ${error.message}`
+    );
   }
 }
 
@@ -123,9 +125,9 @@ const aggregateLatestFindings = async (
 
     const totalAggregationTime = performance.now() - startAggTime;
     logger.debug(
-      `Task ${CSPM_FINDINGS_STATS_TASK_TYPE}, ${Number(totalAggregationTime).toFixed(
-        2
-      )} milliseconds for aggregation`
+      `Executed aggregation query [Task: ${CSPM_FINDINGS_STATS_TASK_TYPE}] [Duration: ${Number(
+        totalAggregationTime
+      ).toFixed(2)}ms]`
     );
 
     const clustersStats = Object.fromEntries(
@@ -156,18 +158,21 @@ const aggregateLatestFindings = async (
 
     const totalIndexTime = Number(performance.now() - startIndexTime).toFixed(2);
     logger.debug(
-      `Task ${CSPM_FINDINGS_STATS_TASK_TYPE}, ${totalIndexTime} milliseconds for indexing`
+      `Finished saving results [Task: ${CSPM_FINDINGS_STATS_TASK_TYPE}] [Duration: ${totalIndexTime}ms]`
     );
 
     const totalTaskTime = Number(performance.now() - startAggTime).toFixed(2);
     logger.debug(
-      `Task ${CSPM_FINDINGS_STATS_TASK_TYPE}, took ${totalTaskTime} milliseconds to run`
+      `Finished run ended [Task: ${CSPM_FINDINGS_STATS_TASK_TYPE}] [Duration: ${totalTaskTime}ms]`
     );
 
     return 'ok';
   } catch (errMsg) {
     const error = transformError(errMsg);
-    logger.error(`failed to aggregate latest findings: ${error.message}`);
+    logger.error(
+      `Failure during task run [Task: ${CSPM_FINDINGS_STATS_TASK_TYPE}] ${error.message}`
+    );
+    logger.error(errMsg);
     return 'error';
   }
 };
@@ -181,44 +186,44 @@ const getScoreQuery = (): SearchRequest => ({
   aggs: {
     total_findings: {
       value_count: {
-        field: 'result.evaluation.keyword',
+        field: 'result.evaluation',
       },
     },
     passed_findings: {
       filter: {
         term: {
-          'result.evaluation.keyword': 'passed',
+          'result.evaluation': 'passed',
         },
       },
     },
     failed_findings: {
       filter: {
         term: {
-          'result.evaluation.keyword': 'failed',
+          'result.evaluation': 'failed',
         },
       },
     },
     score_by_cluster_id: {
       terms: {
-        field: 'cluster_id.keyword',
+        field: 'cluster_id',
       },
       aggregations: {
         total_findings: {
           value_count: {
-            field: 'result.evaluation.keyword',
+            field: 'result.evaluation',
           },
         },
         passed_findings: {
           filter: {
             term: {
-              'result.evaluation.keyword': 'passed',
+              'result.evaluation': 'passed',
             },
           },
         },
         failed_findings: {
           filter: {
             term: {
-              'result.evaluation.keyword': 'failed',
+              'result.evaluation': 'failed',
             },
           },
         },

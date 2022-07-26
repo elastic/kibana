@@ -32,18 +32,18 @@ export const SummarySection = ({ complianceData }: { complianceData: ComplianceD
     const [layerValue] = element;
     const evaluation = layerValue[0].groupByRollup as Evaluation;
 
-    navToFindings({ 'result.evaluation.keyword': evaluation });
+    navToFindings({ 'result.evaluation': evaluation });
   };
 
   const handleCellClick = (ruleSection: string) => {
     navToFindings({
-      'rule.section.keyword': ruleSection,
-      'result.evaluation.keyword': RULE_FAILED,
+      'rule.section': ruleSection,
+      'result.evaluation': RULE_FAILED,
     });
   };
 
   const handleViewAllClick = () => {
-    navToFindings({ 'result.evaluation.keyword': RULE_FAILED });
+    navToFindings({ 'result.evaluation': RULE_FAILED });
   };
 
   return (
