@@ -120,7 +120,9 @@ const IndexTimeout = () => (
  * since 'not-installed' is being checked globally by CloudPosturePage and 'indexed' is the pass condition, those states won't be handled here
  * */
 export const NoFindingsStates = () => {
-  const getSetupStatus = useCspSetupStatusApi({ options: { refetchInterval: REFETCH_INTERVAL } });
+  const getSetupStatus = useCspSetupStatusApi({
+    options: { refetchInterval: REFETCH_INTERVAL_MS },
+  });
   const status = getSetupStatus.data?.status;
 
   const render = () => {

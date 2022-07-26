@@ -29,7 +29,7 @@ export const useCISIntegrationPoliciesLink = ({
         version: cisIntegration.data.item.version,
       }),
     })
-    .join('/');
+    .join('');
 
   return http.basePath.prepend(path);
 };
