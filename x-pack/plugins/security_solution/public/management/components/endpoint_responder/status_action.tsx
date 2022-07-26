@@ -74,7 +74,7 @@ export const EndpointStatusActionResult = memo<
   }, [endpointPendingActions?.data]);
 
   useEffect(() => {
-    if (!isPending) {
+    if (!apiCalled) {
       setStore((prevState) => {
         return {
           ...prevState,
@@ -82,7 +82,7 @@ export const EndpointStatusActionResult = memo<
         };
       });
     }
-  }, [apiCalled, isPending, setStore]);
+  }, [apiCalled, setStore]);
 
   // update command store if endpoint details fetch api call completed
   useEffect(() => {
@@ -108,7 +108,7 @@ export const EndpointStatusActionResult = memo<
 
   // Update the store once we get back pending actions for this endpoint
   useEffect(() => {
-    if (fetchedPendingActionsSummary) {
+    if (fetchedPendingActionsSummary && !endpointPendingActions) {
       setStore((prevState) => {
         return {
           ...prevState,
@@ -116,7 +116,7 @@ export const EndpointStatusActionResult = memo<
         };
       });
     }
-  }, [fetchedPendingActionsSummary, setStore]);
+  }, [fetchedPendingActionsSummary, setStore, endpointPendingActions]);
 
   const getStatusDescriptionList = useCallback(() => {
     if (!endpointDetails) {

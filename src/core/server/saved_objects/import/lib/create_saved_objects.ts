@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject, SavedObjectsClientContract, SavedObjectsImportFailure } from '../../types';
+import type { SavedObject, SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { extractErrors } from './extract_errors';
 import { CreatedObject } from '../types';
 import type { ImportStateMap } from './types';
@@ -20,6 +21,7 @@ export interface CreateSavedObjectsParams<T> {
   overwrite?: boolean;
   refresh?: boolean | 'wait_for';
 }
+
 export interface CreateSavedObjectsResult<T> {
   createdObjects: Array<CreatedObject<T>>;
   errors: SavedObjectsImportFailure[];
