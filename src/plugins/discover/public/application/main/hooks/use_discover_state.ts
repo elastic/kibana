@@ -6,14 +6,21 @@
  * Side Public License, v 1.
  */
 import { useMemo, useEffect, useState, useCallback } from 'react';
+import usePrevious from 'react-use/lib/usePrevious';
 import { isEqual } from 'lodash';
 import { History } from 'history';
+import {
+  isOfAggregateQueryType,
+  getIndexPatternFromSQLQuery,
+  AggregateQuery,
+  Query,
+} from '@kbn/es-query';
 import { getState } from '../services/discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
 import { SavedSearch, getSavedSearch } from '../../../services/saved_searches';
 import { loadIndexPattern } from '../utils/resolve_index_pattern';
-import { useSavedSearch as useSavedSearchData } from './use_saved_search';
+import { useSavedSearch as useSavedSearchData, DataDocumentsMsg } from './use_saved_search';
 import {
   MODIFY_COLUMNS_ON_SWITCH,
   SEARCH_FIELDS_FROM_SOURCE,
@@ -21,10 +28,13 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../../common';
 import { useSearchSession } from './use_search_session';
+import { useDataState } from './use_data_state';
 import { FetchStatus } from '../../types';
 import { getSwitchIndexPatternAppState } from '../utils/get_switch_index_pattern_app_state';
 import { SortPairArr } from '../../../components/doc_table/utils/get_sort';
 import { DataTableRecord } from '../../../types';
+
+const MAX_NUM_OF_COLUMNS = 50;
 
 export function useDiscoverState({
   services,
@@ -69,6 +79,9 @@ export function useDiscoverState({
   const { appStateContainer } = stateContainer;
 
   const [state, setState] = useState(appStateContainer.getState());
+  const [documentStateCols, setDocumentStateCols] = useState<string[]>([]);
+  const [sqlQuery] = useState<AggregateQuery | Query | undefined>(state.query);
+  const prevQuery = usePrevious(state.query);
 
   /**
    * Search session logic
@@ -98,6 +111,8 @@ export function useDiscoverState({
     stateContainer,
     useNewFieldsApi,
   });
+
+  const documentState: DataDocumentsMsg = useDataState(data$.documents$);
 
   /**
    * Reset to display loading spinner when savedSearch is changing
@@ -196,13 +211,23 @@ export function useDiscoverState({
           state.columns || [],
           (state.sort || []) as SortPairArr[],
           config.get(MODIFY_COLUMNS_ON_SWITCH),
-          config.get(SORT_DEFAULT_ORDER_SETTING)
+          config.get(SORT_DEFAULT_ORDER_SETTING),
+          state.query
         );
         stateContainer.setAppState(nextAppState);
       }
       setExpandedDoc(undefined);
     },
-    [config, indexPattern, indexPatterns, setExpandedDoc, state.columns, state.sort, stateContainer]
+    [
+      config,
+      indexPattern,
+      indexPatterns,
+      setExpandedDoc,
+      state.columns,
+      state.query,
+      state.sort,
+      stateContainer,
+    ]
   );
   /**
    * Function triggered when the user changes the query in the search bar
@@ -221,10 +246,51 @@ export function useDiscoverState({
    * Trigger data fetching on indexPattern or savedSearch changes
    */
   useEffect(() => {
+    if (!isEqual(state.query, prevQuery)) {
+      setDocumentStateCols([]);
+    }
+  }, [state.query, prevQuery]);
+
+  useEffect(() => {
     if (indexPattern) {
       refetch$.next(undefined);
     }
   }, [initialFetchStatus, refetch$, indexPattern, savedSearch.id]);
+
+  const getResultColumns = useCallback(() => {
+    if (documentState.result?.length && documentState.fetchStatus === FetchStatus.COMPLETE) {
+      const firstRow = documentState.result[0];
+      const columns = Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
+      if (!isEqual(columns, documentStateCols) && !isEqual(state.query, sqlQuery)) {
+        return columns;
+      }
+      return [];
+    }
+    return [];
+  }, [documentState, documentStateCols, sqlQuery, state.query]);
+
+  useEffect(() => {
+    async function fetchDataview() {
+      if (state.query && isOfAggregateQueryType(state.query) && 'sql' in state.query) {
+        const indexPatternFromQuery = getIndexPatternFromSQLQuery(state.query.sql);
+        const idsTitles = await indexPatterns.getIdsWithTitle();
+        const dataViewObj = idsTitles.find(({ title }) => title === indexPatternFromQuery);
+        if (dataViewObj) {
+          const columns = getResultColumns();
+          if (columns.length) {
+            setDocumentStateCols(columns);
+          }
+          const nextState = {
+            index: dataViewObj.id,
+            ...(columns.length && { columns }),
+          };
+          stateContainer.replaceUrlAppState(nextState);
+        }
+      }
+    }
+    fetchDataview();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config, documentState, indexPatterns]);
 
   return {
     data$,
