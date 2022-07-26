@@ -85,10 +85,6 @@ export function migrateOtherCategoryColor({
           ] as unknown as ColorStylePropertyDescriptor
         ),
       };
-
-      /* (layerDescriptor.style as VectorStyleDescriptor)!.properties[styleName] = migrateColorProperty(
-        (layerDescriptor.style as VectorStyleDescriptor)!.properties[styleName] as unknown as ColorStylePropertyDescriptor
-      ) as typeof VectorStylePropertiesDescriptor[VECTOR_STYLES];*/
     });
   });
 
