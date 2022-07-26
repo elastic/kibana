@@ -16,7 +16,6 @@ import {
 
 import {
   RULES_BULK_EDIT_OVERWRITE_INDEX_PATTERNS_CHECKBOX,
-  RULES_BULK_EDIT_OVERWRITE_TAGS_CHECKBOX,
   RULES_BULK_EDIT_INDEX_PATTERNS_WARNING,
   RULES_BULK_EDIT_TAGS_WARNING,
   TAGS_RULE_BULK_MENU_ITEM,
@@ -96,8 +95,8 @@ const indexDataSource = { index: DEFAULT_INDEX_PATTERNS, type: 'indexPatterns' }
 
 const defaultRuleData = {
   dataSource: indexDataSource,
-  tags: defaultTags
-}
+  tags: defaultTags,
+};
 
 describe('Detection rules, bulk edit', () => {
   before(() => {
@@ -115,11 +114,11 @@ describe('Detection rules, bulk edit', () => {
       },
       '1'
     );
-    createEventCorrelationRule({...getEqlRule(), ...defaultRuleData }, '2');
-    createMachineLearningRule({...getMachineLearningRule(),  ...defaultRuleData}, '3');
-    createCustomIndicatorRule({...getNewThreatIndicatorRule(), ...defaultRuleData}, '4');
-    createThresholdRule({...getNewThresholdRule(),  ...defaultRuleData }, '5');
-    createNewTermsRule({...getNewTermsRule(),  ...defaultRuleData} , '6');
+    createEventCorrelationRule({ ...getEqlRule(), ...defaultRuleData }, '2');
+    createMachineLearningRule({ ...getMachineLearningRule(), ...defaultRuleData }, '3');
+    createCustomIndicatorRule({ ...getNewThreatIndicatorRule(), ...defaultRuleData }, '4');
+    createThresholdRule({ ...getNewThresholdRule(), ...defaultRuleData }, '5');
+    createNewTermsRule({ ...getNewTermsRule(), ...defaultRuleData }, '6');
 
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
 
@@ -214,7 +213,7 @@ describe('Detection rules, bulk edit', () => {
 
       // check that 2 new tags were added to tags filter
       cy.get(RULES_TAGS_FILTER_BTN).contains(/Tags4/);
-    }); 
+    });
 
     it('Overwrite tags in custom rules', () => {
       const tagsToOverwrite = ['overwrite-tag-1'];
@@ -230,7 +229,8 @@ describe('Detection rules, bulk edit', () => {
 
       cy.get(RULES_BULK_EDIT_TAGS_WARNING).should(
         'have.text',
-        `You’re about to overwrite tags for ${expectedNumberOfCustomRulesToBeEdited} selected rules, press Save to apply changes.`);
+        `You’re about to overwrite tags for ${expectedNumberOfCustomRulesToBeEdited} selected rules, press Save to apply changes.`
+      );
 
       typeTags(tagsToOverwrite);
       confirmBulkEditForm();
@@ -241,11 +241,11 @@ describe('Detection rules, bulk edit', () => {
 
       // check that only 1 new tag is in filters
       cy.get(RULES_TAGS_FILTER_BTN).contains(/Tags1/);
-    }); 
+    });
 
     it('Delete tags from custom rules', () => {
       const tagsToDelete = defaultTags.slice(0, 1);
-      const tagsLeftNotDeleted= defaultTags.slice(1);
+      const tagsLeftNotDeleted = defaultTags.slice(1);
 
       // check only 2 tags exist in tags filter
       cy.get(RULES_TAGS_FILTER_BTN).contains(/Tags2/);
@@ -263,9 +263,8 @@ describe('Detection rules, bulk edit', () => {
 
       // check that only 1 tag left in filters
       cy.get(RULES_TAGS_FILTER_BTN).contains(/Tags1/);
-    }); 
+    });
   });
-
 
   it('should add/delete/overwrite index patterns in rules', () => {
     cy.log('Adds index patterns');
