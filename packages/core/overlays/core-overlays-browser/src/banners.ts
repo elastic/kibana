@@ -8,8 +8,6 @@
 import type { Observable } from 'rxjs';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 
-// NOTE: the Public type doesn't include get$() or getComponent(). These methods are marked as internal.
-// As such, I created IOverlayBannersStart that extends from OVerlayBannersStart and adds these methods
 /** @public */
 export interface OverlayBannersStart {
   /**

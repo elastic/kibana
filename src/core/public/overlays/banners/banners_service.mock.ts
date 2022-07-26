@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { OverlayBannersStart } from '@kbn/core-overlays-browser';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { type IOverlayBannersStart, OverlayBannersService } from './banners_service';
+import { OverlayBannersService } from './banners_service';
 
 const createStartContractMock = () => {
-  const startContract: jest.Mocked<IOverlayBannersStart> = {
+  const startContract: jest.Mocked<OverlayBannersStart> = {
     add: jest.fn(),
     remove: jest.fn(),
     replace: jest.fn(),

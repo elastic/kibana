@@ -16,7 +16,7 @@ import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { HttpSetup, HttpStart } from '@kbn/core-http-browser';
 import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
-import type { OverlayStart } from '../overlays';
+import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { AppRouter } from './ui';
 import { CapabilitiesService } from './capabilities';
 import type {

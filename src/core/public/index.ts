@@ -45,6 +45,7 @@ import type {
 import type { UiSettingsState, IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { DeprecationsServiceStart } from '@kbn/core-deprecations-browser';
 import type { Capabilities } from '@kbn/core-capabilities-common';
+import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type {
   ChromeBadge,
   ChromeBreadcrumb,
@@ -68,7 +69,6 @@ import type {
   ChromeHelpMenuActions,
 } from './chrome';
 import type { NotificationsSetup, NotificationsStart } from './notifications';
-import type { OverlayStart } from './overlays';
 import type {
   Plugin,
   PluginInitializer,
@@ -199,7 +199,7 @@ export type {
   OverlayModalOpenOptions,
   OverlayModalConfirmOptions,
   OverlayModalStart,
-} from './overlays';
+} from '@kbn/core-overlays-browser';
 
 export type {
   Toast,

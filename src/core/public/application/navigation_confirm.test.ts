@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { OverlayStart } from '../overlays';
+import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { overlayServiceMock } from '../overlays/overlay_service.mock';
 import { getUserConfirmationHandler, ConfirmHandler } from './navigation_confirm';
 

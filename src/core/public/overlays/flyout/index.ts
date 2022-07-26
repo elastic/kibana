@@ -7,4 +7,3 @@
  */
 
 export { FlyoutService } from './flyout_service';
-export type { OverlayFlyoutStart, OverlayFlyoutOpenOptions } from './flyout_service';

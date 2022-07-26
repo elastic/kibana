@@ -12,7 +12,7 @@ import { mount } from 'enzyme';
 
 import { BannersList } from './banners_list';
 import { BehaviorSubject } from 'rxjs';
-import { OverlayBanner } from './banners_service';
+import { OverlayBanner } from '@kbn/core-overlays-browser';
 
 describe('BannersList', () => {
   test('renders null if no banners', () => {

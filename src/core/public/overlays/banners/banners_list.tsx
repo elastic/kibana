@@ -9,7 +9,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Observable } from 'rxjs';
 
-import { OverlayBanner } from './banners_service';
+import { OverlayBanner } from '@kbn/core-overlays-browser';
 
 interface Props {
   banners$: Observable<OverlayBanner[]>;

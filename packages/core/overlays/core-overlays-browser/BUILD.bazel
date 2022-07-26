@@ -53,6 +53,7 @@ TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
   "@npm//@elastic/eui",
+  "@npm//rxjs",
   "//packages/core/mount-utils/core-mount-utils-browser:npm_module_types"
 ]
 
