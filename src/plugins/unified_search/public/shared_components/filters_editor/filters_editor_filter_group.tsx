@@ -80,17 +80,17 @@ export const FilterGroup = ({
       `}
     >
       {filters.map((filter, index, acc) => (
-        <EuiFlexGroup direction="column" gutterSize="m">
-          <>
+        <>
+          <EuiFlexGroup direction="column" gutterSize="m">
             <FilterItem
               filter={filter}
               path={`${path}${path ? '.' : ''}${index}`}
               timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
               reverseBackground={reverseBackground}
             />
-            {index + 1 < acc.length ? <Delimiter conditionType={conditionType} /> : null}
-          </>
-        </EuiFlexGroup>
+          </EuiFlexGroup>
+          {index + 1 < acc.length ? <Delimiter conditionType={conditionType} /> : null}
+        </>
       ))}
     </EuiPanel>
   );
