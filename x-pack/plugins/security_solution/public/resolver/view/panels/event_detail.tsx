@@ -160,7 +160,7 @@ function EventDetailFields({ event }: { event: SafeResolverEvent }) {
     }> = [];
     for (const [key, value] of Object.entries(event)) {
       // ignore these keys
-      if (key === 'agent' || key === 'ecs' || key === 'process' || key === '@timestamp') {
+      if (key === 'agent' || key === 'ecs' || key === '@timestamp') {
         continue;
       }
 

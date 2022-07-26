@@ -91,7 +91,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   }
 
-  describe('field statistics in Discover', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/137062
+  describe.skip('field statistics in Discover', function () {
     before(async function () {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/module_sample_logs');

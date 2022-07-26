@@ -42,7 +42,11 @@ export function ApmHeaderActionMenu() {
 
   return (
     <EuiHeaderLinks gutterSize="xs">
-      <EuiHeaderLink color="text" href={apmHref('/settings')}>
+      <EuiHeaderLink
+        color="text"
+        href={apmHref('/settings')}
+        data-test-subj="apmSettingsHeaderLink"
+      >
         {i18n.translate('xpack.apm.settingsLinkLabel', {
           defaultMessage: 'Settings',
         })}
@@ -61,6 +65,7 @@ export function ApmHeaderActionMenu() {
         color="primary"
         href={kibanaHref('/app/home#/tutorial/apm')}
         iconType="indexOpen"
+        data-test-subj="apmAddDataHeaderLink"
       >
         {i18n.translate('xpack.apm.addDataButtonLabel', {
           defaultMessage: 'Add data',

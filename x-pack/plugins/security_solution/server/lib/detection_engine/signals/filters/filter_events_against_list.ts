@@ -32,15 +32,14 @@ import { createFieldAndSetTuples } from './create_field_and_set_tuples';
  *
  * @param listClient The list client to use for queries
  * @param exceptionsList The exception list
- * @param logger Logger for messages
- * @param eventSearchResult The current events from the search
+ * @param ruleExecutionLogger Logger for messages
+ * @param events The current events from the search
  */
 export const filterEventsAgainstList = async <T>({
   listClient,
   exceptionsList,
-  logger,
+  ruleExecutionLogger,
   events,
-  buildRuleMessage,
 }: FilterEventsAgainstListOptions<T>): Promise<FilterEventsAgainstListReturn<T>> => {
   try {
     const atLeastOneLargeValueList = exceptionsList.some(({ entries }) =>
@@ -48,8 +47,8 @@ export const filterEventsAgainstList = async <T>({
     );
 
     if (!atLeastOneLargeValueList) {
-      logger.debug(
-        buildRuleMessage('no exception items of type list found - returning original search result')
+      ruleExecutionLogger.debug(
+        'no exception items of type list found - returning original search result'
       );
       return [events, []];
     }
@@ -70,17 +69,14 @@ export const filterEventsAgainstList = async <T>({
           events: includedEvents,
           exceptionItem,
           listClient,
-          logger,
-          buildRuleMessage,
+          ruleExecutionLogger,
         });
         const [nextIncludedEvents, nextExcludedEvents] = partitionEvents({
           events: includedEvents,
           fieldAndSetTuples,
         });
-        logger.debug(
-          buildRuleMessage(
-            `Exception with id ${exceptionItem.id} filtered out ${nextExcludedEvents.length} events`
-          )
+        ruleExecutionLogger.debug(
+          `Exception with id ${exceptionItem.id} filtered out ${nextExcludedEvents.length} events`
         );
         return [nextIncludedEvents, [...excludedEvents, ...nextExcludedEvents]];
       },

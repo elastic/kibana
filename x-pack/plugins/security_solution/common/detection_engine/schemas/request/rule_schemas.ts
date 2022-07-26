@@ -29,6 +29,7 @@ import {
 import { listArray } from '@kbn/securitysolution-io-ts-list-types';
 import { version } from '@kbn/securitysolution-io-ts-types';
 
+import { RuleExecutionSummary } from '../../rule_monitoring';
 import {
   id,
   index,
@@ -70,10 +71,11 @@ import {
   created_at,
   created_by,
   namespace,
-  ruleExecutionSummary,
   RelatedIntegrationArray,
   RequiredFieldArray,
   SetupGuide,
+  newTermsFields,
+  historyWindowStart,
 } from '../common';
 
 export const createSchema = <
@@ -358,6 +360,30 @@ const {
 } = buildAPISchemas(machineLearningRuleParams);
 
 export { machineLearningCreateParams };
+
+const newTermsRuleParams = {
+  required: {
+    type: t.literal('new_terms'),
+    query,
+    new_terms_fields: newTermsFields,
+    history_window_start: historyWindowStart,
+  },
+  optional: {
+    index,
+    data_view_id,
+    filters,
+  },
+  defaultable: {
+    language: t.keyof({ kuery: null, lucene: null }),
+  },
+};
+const {
+  create: newTermsCreateParams,
+  patch: newTermsPatchParams,
+  response: newTermsResponseParams,
+} = buildAPISchemas(newTermsRuleParams);
+
+export { newTermsCreateParams };
 // ---------------------------------------
 // END type specific parameter definitions
 
@@ -368,6 +394,7 @@ export const createTypeSpecific = t.union([
   savedQueryCreateParams,
   thresholdCreateParams,
   machineLearningCreateParams,
+  newTermsCreateParams,
 ]);
 export type CreateTypeSpecific = t.TypeOf<typeof createTypeSpecific>;
 
@@ -381,6 +408,7 @@ export type ThresholdCreateSchema = CreateSchema<t.TypeOf<typeof thresholdCreate
 export type MachineLearningCreateSchema = CreateSchema<
   t.TypeOf<typeof machineLearningCreateParams>
 >;
+export type NewTermsCreateSchema = CreateSchema<t.TypeOf<typeof newTermsCreateParams>>;
 
 export const createRulesSchema = t.intersection([sharedCreateSchema, createTypeSpecific]);
 export type CreateRulesSchema = t.TypeOf<typeof createRulesSchema>;
@@ -396,6 +424,7 @@ export type QueryUpdateSchema = UpdateSchema<t.TypeOf<typeof queryCreateParams>>
 export type MachineLearningUpdateSchema = UpdateSchema<
   t.TypeOf<typeof machineLearningCreateParams>
 >;
+export type NewTermsUpdateSchema = UpdateSchema<t.TypeOf<typeof newTermsCreateParams>>;
 
 export const patchTypeSpecific = t.union([
   eqlPatchParams,
@@ -404,6 +433,7 @@ export const patchTypeSpecific = t.union([
   savedQueryPatchParams,
   thresholdPatchParams,
   machineLearningPatchParams,
+  newTermsPatchParams,
 ]);
 export {
   eqlPatchParams,
@@ -412,6 +442,7 @@ export {
   savedQueryPatchParams,
   thresholdPatchParams,
   machineLearningPatchParams,
+  newTermsPatchParams,
 };
 
 export type EqlPatchParams = t.TypeOf<typeof eqlPatchParams>;
@@ -420,6 +451,7 @@ export type QueryPatchParams = t.TypeOf<typeof queryPatchParams>;
 export type SavedQueryPatchParams = t.TypeOf<typeof savedQueryPatchParams>;
 export type ThresholdPatchParams = t.TypeOf<typeof thresholdPatchParams>;
 export type MachineLearningPatchParams = t.TypeOf<typeof machineLearningPatchParams>;
+export type NewTermsPatchParams = t.TypeOf<typeof newTermsPatchParams>;
 
 const responseTypeSpecific = t.union([
   eqlResponseParams,
@@ -428,6 +460,7 @@ const responseTypeSpecific = t.union([
   savedQueryResponseParams,
   thresholdResponseParams,
   machineLearningResponseParams,
+  newTermsResponseParams,
 ]);
 export type ResponseTypeSpecific = t.TypeOf<typeof responseTypeSpecific>;
 
@@ -453,7 +486,7 @@ const responseRequiredFields = {
 };
 
 const responseOptionalFields = {
-  execution_summary: ruleExecutionSummary,
+  execution_summary: RuleExecutionSummary,
 };
 
 export const fullResponseSchema = t.intersection([

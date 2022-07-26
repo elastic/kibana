@@ -32,6 +32,7 @@ const getSeriesIdentifier = ({
   seriesSplitAccessors: Map<number | string, number | string>;
 }): XYChartSeriesIdentifier => ({
   specId: generateSeriesId({ layerId, xAccessor }, splitAccessors, yAccessor),
+  xAccessor: xAccessor ?? 'x',
   yAccessor: yAccessor ?? 'a',
   splitAccessors: seriesSplitAccessors,
   seriesKeys: [],
