@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiBottomBar, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { FindingsBaseProps } from '../types';
 import { FindingsTable } from './latest_findings_table';
@@ -40,6 +40,8 @@ export const getDefaultQuery = ({
   pageSize: 10,
 });
 
+const MAX_ITEMS = 30;
+
 export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
@@ -65,6 +67,13 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
 
   const error = findingsGroupByNone.error || baseEsQuery.error;
 
+  const ITEMS = findingsGroupByNone.data?.total || 0;
+
+  const totalItemCount = ITEMS > MAX_ITEMS ? MAX_ITEMS : ITEMS;
+
+  const lastPage = Math.ceil(totalItemCount / urlQuery.pageSize);
+  console.log(lastPage);
+
   return (
     <div data-test-subj={TEST_SUBJECTS.FINDINGS_CONTAINER}>
       <FindingsSearchBar
@@ -74,7 +83,11 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
         }}
         loading={findingsGroupByNone.isFetching}
       />
-      <PageWrapper>
+      <PageWrapper
+        css={`
+          padding-bottom: 500px;
+        `}
+      >
         <LatestFindingsPageTitle />
         {error && <ErrorCallout error={error} />}
         {!error && (
@@ -104,7 +117,8 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
               pagination={getPaginationTableParams({
                 pageSize: urlQuery.pageSize,
                 pageIndex: urlQuery.pageIndex,
-                totalItemCount: findingsGroupByNone.data?.total || 0,
+                // totalItemCount: findingsGroupByNone.data?.total || 0,
+                totalItemCount,
               })}
               sorting={{
                 sort: { field: urlQuery.sort.field, direction: urlQuery.sort.direction },
@@ -132,6 +146,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
           </>
         )}
       </PageWrapper>
+      <EuiBottomBar>{'!--Content goes here --'}</EuiBottomBar>
     </div>
   );
 };
