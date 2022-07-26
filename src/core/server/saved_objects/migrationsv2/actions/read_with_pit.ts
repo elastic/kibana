@@ -49,6 +49,7 @@ export const readWithPit =
   () => {
     return client
       .search<SavedObjectsRawDoc>({
+        allow_partial_search_results: false,
         seq_no_primary_term: seqNoPrimaryTerm,
         body: {
           // Sort fields are required to use searchAfter
