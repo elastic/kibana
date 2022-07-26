@@ -117,8 +117,11 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
         }
       }
 
-      // If there are different types of action pending, then show a summary with tooltip
-      if (hasMultipleActionTypesPending) {
+      // If there are different types of action pending
+      //    --OR--
+      // the only type of actions pending is NOT isolate/release,
+      // then show a summary with tooltip
+      if (hasMultipleActionTypesPending || (!pendingIsolate && !pendingUnIsolate)) {
         return (
           <AgentPendingActionStatusBadge
             data-test-subj={dataTestSubj}
@@ -151,9 +154,10 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
       isPendingStatusDisabled,
       totalPending,
       hasMultipleActionTypesPending,
+      pendingIsolate,
+      pendingUnIsolate,
       dataTestSubj,
       getTestId,
-      pendingIsolate,
       isIsolated,
       pendingActions,
     ]);
