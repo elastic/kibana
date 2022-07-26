@@ -75,7 +75,8 @@ export const FieldTypesHelpPopover: FC<{
         name: i18n.translate('xpack.dataVisualizer.fieldTypesPopover.descriptionColumnTitle', {
           defaultMessage: 'Description',
         }),
-        render: (description: string) => <>{description}</>,
+        // eslint-disable-next-line react/no-danger
+        render: (description: string) => <div dangerouslySetInnerHTML={{ __html: description }} />,
       },
     ];
 
