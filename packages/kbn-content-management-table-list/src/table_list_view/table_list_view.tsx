@@ -92,6 +92,7 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
 export interface UserContentCommonSchema {
   id: string;
   updatedAt: string;
+  references: SavedObjectsFindOptionsReference[];
   attributes: {
     title: string;
     description?: string;

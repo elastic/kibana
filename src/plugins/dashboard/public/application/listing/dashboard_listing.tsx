@@ -59,10 +59,10 @@ const toTableListViewSavedObject = (
   return {
     id: savedObject.id,
     updatedAt: savedObject.updatedAt!,
+    references: savedObject.references,
     attributes: {
-      ...savedObject,
       title: savedObject.title ?? '',
-      description: savedObject.description,
+      timeRestore: savedObject.timeRestore,
     },
   };
 };

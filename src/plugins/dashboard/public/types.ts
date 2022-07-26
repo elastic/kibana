@@ -43,7 +43,6 @@ import { IKbnUrlStateStorage } from './services/kibana_utils';
 import type { DashboardContainer, DashboardSavedObject } from '.';
 import { DashboardAppLocatorParams } from './locator';
 import { SpacesPluginStart } from './services/spaces';
-import type { DashboardAttributes } from './saved_dashboards';
 
 export type { SavedDashboardPanel };
 
@@ -225,9 +224,9 @@ export interface DashboardAppServices {
 }
 
 /** Those are the **required** attributes for UserContent and that TableListView depend on */
-export interface DashboardAttributesUserContent extends DashboardAttributes {
+export interface DashboardAttributesUserContent {
   title: string;
-  description?: string;
+  timeRestore: boolean;
 }
 
 export interface DashboardSavedObjectUserContent extends UserContentCommonSchema {
