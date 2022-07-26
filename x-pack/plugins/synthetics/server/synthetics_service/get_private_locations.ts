@@ -8,17 +8,19 @@
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import { SyntheticsMonitorClient } from './synthetics_monitor/synthetics_monitor_client';
 import { getSyntheticsPrivateLocations } from '../legacy_uptime/lib/saved_objects/private_locations';
+import { PrivateLocation } from '../../common/runtime_types';
 
 export async function getPrivateLocations(
   syntheticsMonitorClient: SyntheticsMonitorClient,
   savedObjectsClient: SavedObjectsClientContract
 ) {
-  const privateLocations = await getSyntheticsPrivateLocations(savedObjectsClient);
+  const privateLocations: PrivateLocation[] = await getSyntheticsPrivateLocations(
+    savedObjectsClient
+  );
   const agentPolicies = await syntheticsMonitorClient.privateLocationAPI.getAgentPolicies();
 
   const privateLocs =
     privateLocations?.map((loc) => ({
-      label: loc.name,
       isServiceManaged: false,
       isInvalid: agentPolicies.find((policy) => policy.id === loc.agentPolicyId) === undefined,
       ...loc,

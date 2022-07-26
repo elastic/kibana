@@ -34,7 +34,7 @@ export const LocationForm = ({
     reValidateMode: 'onChange',
     shouldFocusError: true,
     defaultValues: {
-      name: '',
+      label: '',
       agentPolicyId: '',
       id: '',
       geo: {
@@ -45,14 +45,14 @@ export const LocationForm = ({
     },
   });
 
-  const name = getValues('name');
+  const label = getValues('label');
   const agentPolicyId = getValues('agentPolicyId');
 
   useEffect(() => {
-    if (name && agentPolicyId) {
-      setFormData({ name, agentPolicyId });
+    if (label && agentPolicyId) {
+      setFormData({ label, agentPolicyId });
     }
-  }, [name, agentPolicyId, setFormData]);
+  }, [label, agentPolicyId, setFormData]);
 
   return (
     <>
@@ -61,8 +61,8 @@ export const LocationForm = ({
         <EuiFormRow
           fullWidth
           label={LOCATION_NAME_LABEL}
-          isInvalid={Boolean(errors?.name)}
-          error={errors?.name?.message}
+          isInvalid={Boolean(errors?.label)}
+          error={errors?.label?.message}
         >
           <EuiFieldText
             fullWidth
@@ -73,7 +73,7 @@ export const LocationForm = ({
                 message: NAME_REQUIRED,
               },
               validate: (val: string) => {
-                return privateLocations.some((loc) => loc.name === val)
+                return privateLocations.some((loc) => loc.label === val)
                   ? NAME_ALREADY_EXISTS
                   : undefined;
               },
