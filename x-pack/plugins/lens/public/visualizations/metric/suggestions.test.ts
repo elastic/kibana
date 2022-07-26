@@ -188,6 +188,38 @@ describe('metric suggestions', () => {
         ]);
       });
 
+      test('drops mapped columns that do not exist anymore on the table', () => {
+        expect(
+          getSuggestions({
+            table: {
+              layerId: 'first',
+              isMultiRow: true,
+              columns: [bucketColumn],
+              changeType: 'initial',
+            },
+            state: {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              metricAccessor: 'non_existent',
+            } as MetricVisualizationState,
+            keptLayerIds: ['first'],
+          })
+        ).toEqual([
+          {
+            state: {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              metricAccessor: undefined,
+              breakdownByAccessor: bucketColumn.columnId,
+            },
+            title: 'Metric',
+            hide: true,
+            previewIcon: LensIconChartMetric,
+            score: 0.51,
+          },
+        ]);
+      });
+
       test('no suggestions for tables with both metric and bucket', () => {
         expect(
           getSuggestions({

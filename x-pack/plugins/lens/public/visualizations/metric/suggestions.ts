@@ -67,8 +67,8 @@ export const getSuggestions: Visualization<MetricVisualizationState>['getSuggest
 
   const accessorMappings: Pick<MetricVisualizationState, 'metricAccessor' | 'breakdownByAccessor'> =
     {
-      metricAccessor: state?.metricAccessor ?? metricColumns[0]?.columnId,
-      breakdownByAccessor: state?.breakdownByAccessor ?? bucketedColumns[0]?.columnId,
+      metricAccessor: metricColumns[0]?.columnId,
+      breakdownByAccessor: bucketedColumns[0]?.columnId,
     };
 
   baseSuggestion.score += 0.01 * Object.values(accessorMappings).filter(Boolean).length;
