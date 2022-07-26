@@ -79,7 +79,6 @@ export const ModelsList: FC<Props> = ({
   const {
     services: {
       application: { capabilities },
-      docLinks,
     },
   } = useMlKibana();
 
