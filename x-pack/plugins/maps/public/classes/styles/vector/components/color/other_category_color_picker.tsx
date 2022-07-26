@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { EuiFormRow, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { MbValidatedColorPicker } from './mb_validated_color_picker';
 import { OTHER_CATEGORY_LABEL, OTHER_CATEGORY_DEFAULT_COLOR } from '../../style_util';
 
@@ -25,11 +27,21 @@ interface Props {
 
 export function OtherCategoryColorPicker(props: Props) {
   return (
-    <MbValidatedColorPicker
-      swatches={OTHER_CATEGORY_SWATCHES}
-      prepend={OTHER_CATEGORY_LABEL}
-      onChange={props.onChange}
-      color={props.color ? props.color : OTHER_CATEGORY_DEFAULT_COLOR}
-    />
+    <EuiFormRow>
+      <EuiToolTip
+        position="top"
+        content={i18n.translate('xpack.maps.colorStops.otherCategoryColorPickerTooltip', {
+          defaultMessage:
+            'When the selected field has more terms than colors in the palette, the rest of the terms are grouped under "Other" category. Select a palette with more colors to increase the number of terms colored in your map',
+        })}
+      >
+        <MbValidatedColorPicker
+          swatches={OTHER_CATEGORY_SWATCHES}
+          prepend={OTHER_CATEGORY_LABEL}
+          onChange={props.onChange}
+          color={props.color ? props.color : OTHER_CATEGORY_DEFAULT_COLOR}
+        />
+      </EuiToolTip>
+    </EuiFormRow>
   );
 }
