@@ -60,7 +60,7 @@ class AppContextService {
   private httpSetup?: HttpServiceSetup;
   private externalCallbacks: ExternalCallbacksStorage = new Map();
   private telemetryEventsSender: TelemetryEventsSender | undefined;
-  private savedObjectTaggingStart: SavedObjectTaggingStart | undefined;
+  private savedObjectsTagging: SavedObjectTaggingStart | undefined;
 
   public start(appContext: FleetAppContext) {
     this.data = appContext.data;
@@ -78,7 +78,7 @@ class AppContextService {
     this.kibanaBranch = appContext.kibanaBranch;
     this.httpSetup = appContext.httpSetup;
     this.telemetryEventsSender = appContext.telemetryEventsSender;
-    this.savedObjectTaggingStart = appContext.savedObjectTaggingStart;
+    this.savedObjectsTagging = appContext.savedObjectsTagging;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -147,11 +147,11 @@ class AppContextService {
     return this.savedObjects;
   }
 
-  public getSavedObjectTaggingStart() {
-    if (!this.savedObjectTaggingStart) {
+  public getSavedObjectsTagging() {
+    if (!this.savedObjectsTagging) {
       throw new Error('Saved object tagging start service not set.');
     }
-    return this.savedObjectTaggingStart;
+    return this.savedObjectsTagging;
   }
 
   public getInternalUserSOClient(request: KibanaRequest) {

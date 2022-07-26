@@ -363,7 +363,7 @@ async function installPackageFromRegistry({
       .createImporter(savedObjectsClient);
 
     const savedObjectTagAssignmentService = appContextService
-      .getSavedObjectTaggingStart()
+      .getSavedObjectsTagging()
       .createInternalAssignmentService({ client: savedObjectsClient });
 
     // try installing the package, if there was an error, call error handler and rethrow

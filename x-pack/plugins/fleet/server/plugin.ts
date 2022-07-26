@@ -117,7 +117,7 @@ export interface FleetStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   security: SecurityPluginStart;
   telemetry?: TelemetryPluginStart;
-  savedObjectTaggingStart: SavedObjectTaggingStart;
+  savedObjectsTagging: SavedObjectTaggingStart;
 }
 
 export interface FleetAppContext {
@@ -131,7 +131,7 @@ export interface FleetAppContext {
   configInitialValue: FleetConfigType;
   experimentalFeatures: ExperimentalFeatures;
   savedObjects: SavedObjectsServiceStart;
-  savedObjectTaggingStart?: SavedObjectTaggingStart;
+  savedObjectsTagging?: SavedObjectTaggingStart;
   isProductionMode: PluginInitializerContext['env']['mode']['prod'];
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   kibanaBranch: PluginInitializerContext['env']['packageInfo']['branch'];
@@ -391,7 +391,6 @@ export class FleetPlugin
   }
 
   public start(core: CoreStart, plugins: FleetStartDeps): FleetStartContract {
-    // console.log(plugins.savedObjectTaggingStart);
     appContextService.start({
       elasticsearch: core.elasticsearch,
       data: plugins.data,
@@ -405,7 +404,7 @@ export class FleetPlugin
         this.configInitialValue.enableExperimental || []
       ),
       savedObjects: core.savedObjects,
-      savedObjectTaggingStart: plugins.savedObjectTaggingStart,
+      savedObjectsTagging: plugins.savedObjectsTagging,
       isProductionMode: this.isProductionMode,
       kibanaVersion: this.kibanaVersion,
       kibanaBranch: this.kibanaBranch,
