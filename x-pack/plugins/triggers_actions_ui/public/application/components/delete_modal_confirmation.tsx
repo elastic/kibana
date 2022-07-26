@@ -62,12 +62,6 @@ export const DeleteModalConfirmation = ({
       values: { numIdsToDelete, singleTitle, multipleTitle },
     }
   );
-  const warningModalText = i18n.translate(
-    'xpack.triggersActionsUI.deleteSelectedIdsConfirmModal.warningText',
-    {
-      defaultMessage: warningText || '',
-    }
-  );
   const confirmButtonText = i18n.translate(
     'xpack.triggersActionsUI.deleteSelectedIdsConfirmModal.deleteButtonLabel',
     {
@@ -135,7 +129,7 @@ export const DeleteModalConfirmation = ({
           <EuiFlexItem grow={false}>
             <EuiIcon type="alert" color="warning" />
           </EuiFlexItem>
-          <p>{warningModalText}</p>
+          <p>{warningText}</p>
         </EuiFlexGroup>
       )}
       <p>{confirmModalText}</p>
