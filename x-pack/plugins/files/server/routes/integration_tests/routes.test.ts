@@ -195,4 +195,46 @@ describe('File HTTP API', () => {
       }
     });
   });
+
+  describe('public download', () => {
+    afterEach(async () => {
+      await testHarness.cleanupAfterEach();
+    });
+    test('it returns 400 for an invalid token', async () => {
+      await request.get(root, `/api/files/public/blob/myfilename.pdf`).expect(400);
+      const { body: response } = await request
+        .get(root, `/api/files/public/blob/myfilename.pdf?token=notavalidtoken`)
+        .expect(400);
+
+      expect(response.message).toMatch('Invalid token');
+    });
+
+    test('it downloads a publicly shared file', async () => {
+      const { id } = await createFile();
+
+      const {
+        body: { token },
+      } = await request.post(root, `/api/files/share/${fileKind}/${id}`).send({}).expect(200);
+
+      await request
+        .get(root, `/api/files/public/blob/myfilename.pdf?token=${token}`)
+        .buffer()
+        .expect(400);
+
+      await request
+        .put(root, `/api/files/files/${fileKind}/${id}/blob`)
+        .set('Content-Type', 'application/octet-stream')
+        .send('test')
+        .expect(200);
+
+      const { body: buffer, header } = await request
+        .get(root, `/api/files/public/blob/myfilename.pdf?token=${token}`)
+        .buffer()
+        .expect(200);
+
+      expect(header['content-type']).toEqual('image/png');
+      expect(header['content-disposition']).toEqual('attachment; filename="myfilename.pdf"');
+      expect(buffer.toString('utf8')).toEqual('test');
+    });
+  });
 });
