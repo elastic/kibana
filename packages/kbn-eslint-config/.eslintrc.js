@@ -257,5 +257,6 @@ module.exports = {
     '@kbn/imports/no_unresolvable_imports': 'error',
     '@kbn/imports/uniform_imports': 'error',
     '@kbn/imports/no_unused_imports': 'error',
+    '@kbn/imports/no_boundary_crossing': 'error',
   },
 };
