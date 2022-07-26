@@ -17,7 +17,7 @@ import {
   EuiSpacer,
   EuiTitle,
   SearchFilterConfig,
-  EuiButtonEmpty,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -451,9 +451,27 @@ export const ModelsList: FC<Props> = ({
       },
     },
     {
-      name: i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
-        defaultMessage: 'Delete model',
-      }),
+      name: (model) => {
+        const enabled = !isPopulatedObject(model.pipelines);
+        return (
+          <EuiToolTip
+            position="left"
+            content={
+              enabled
+                ? null
+                : i18n.translate('xpack.ml.trainedModels.modelsList.deleteDisabledTooltip', {
+                    defaultMessage: 'Model has associated pipelines',
+                  })
+            }
+          >
+            <>
+              {i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
+                defaultMessage: 'Delete model',
+              })}
+            </>
+          </EuiToolTip>
+        );
+      },
       description: i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
         defaultMessage: 'Delete model',
       }),
@@ -754,23 +772,5 @@ export const ModelsList: FC<Props> = ({
         />
       )}
     </>
-  );
-};
-
-export const RefreshModelsListButton: FC<{ refresh: () => Promise<void>; isLoading: boolean }> = ({
-  refresh,
-  isLoading,
-}) => {
-  return (
-    <EuiButtonEmpty
-      data-test-subj={`mlTrainedModelsRefreshListButton${isLoading ? ' loading' : ' loaded'}`}
-      onClick={refresh}
-      isLoading={isLoading}
-    >
-      <FormattedMessage
-        id="xpack.ml.trainedModels.modelsList.refreshManagementList"
-        defaultMessage="Refresh"
-      />
-    </EuiButtonEmpty>
   );
 };
