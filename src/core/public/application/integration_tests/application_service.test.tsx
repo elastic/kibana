@@ -18,7 +18,7 @@ import { ApplicationService } from '../application_service';
 import type { MockLifecycle } from '../test_types';
 import { overlayServiceMock } from '../../overlays/overlay_service.mock';
 import type { AppMountParameters, AppUpdater } from '../types';
-import type { MountPoint } from '../..';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 

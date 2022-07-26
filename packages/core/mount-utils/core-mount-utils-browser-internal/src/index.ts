@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export type { MountPoint, UnmountCallback } from './mount_point';
-export type { MountWrapperComponentProps, MountWrapperComponent, MountWrapperComponentProps } from './mount-wrapper';
-export type { OverlayRef } from './overlay_ref';
+export { MountWrapper, mountReactNode } from './mount';
+export { KBN_LOAD_MARKS } from './consts';

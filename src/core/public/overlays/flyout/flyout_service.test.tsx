@@ -12,7 +12,7 @@ import { mount } from 'enzyme';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { FlyoutService, OverlayFlyoutStart } from './flyout_service';
-import { OverlayRef } from '../types';
+import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 
 const i18nMock = i18nServiceMock.createStartContract();
 const themeMock = themeServiceMock.createStartContract();

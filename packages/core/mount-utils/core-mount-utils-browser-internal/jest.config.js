@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-export type { MountPoint, UnmountCallback } from './mount_point';
-export type { MountWrapperComponentProps, MountWrapperComponent, MountWrapperComponentProps } from './mount-wrapper';
-export type { OverlayRef } from './overlay_ref';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/mount-utils/core-mount-utils-browser-internal'],
+};

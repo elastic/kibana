@@ -194,7 +194,6 @@ export type { IHttpFetchError } from '@kbn/core-http-browser';
 export type {
   OverlayStart,
   OverlayBannersStart,
-  OverlayRef,
   OverlayFlyoutStart,
   OverlayFlyoutOpenOptions,
   OverlayModalOpenOptions,
@@ -221,7 +220,15 @@ export type {
   ResolveDeprecationResponse,
 } from '@kbn/core-deprecations-browser';
 
-export type { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
+export type { PublicUiSettingsParams } from '@kbn/core-ui-settings-common';
+
+export type {
+  MountPoint,
+  MountWrapperComponent,
+  MountWrapperComponentProps,
+  UnmountCallback,
+  OverlayRef,
+} from '@kbn/core-mount-utils-browser';
 
 export { URL_MAX_LENGTH } from './core_app';
 

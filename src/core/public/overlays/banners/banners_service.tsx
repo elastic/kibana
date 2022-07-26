@@ -12,9 +12,9 @@ import { map } from 'rxjs/operators';
 
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { PriorityMap } from './priority_map';
 import { BannersList } from './banners_list';
-import { MountPoint } from '../../types';
 import { UserBannerService } from './user_banner_service';
 
 /** @public */

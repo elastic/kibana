@@ -3319,6 +3319,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-mount-utils-browser-internal@link:bazel-bin/packages/core/mount-utils/core-mount-utils-browser-internal":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-mount-utils-browser@link:bazel-bin/packages/core/mount-utils/core-mount-utils-browser":
   version "0.0.0"
   uid ""
@@ -7092,6 +7096,10 @@
   uid ""
 
 "@types/kbn__core-metrics-server@link:bazel-bin/packages/core/metrics/core-metrics-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-mount-utils-browser-internal@link:bazel-bin/packages/core/mount-utils/core-mount-utils-browser-internal/npm_module_types":
   version "0.0.0"
   uid ""
 
