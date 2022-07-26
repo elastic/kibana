@@ -19,12 +19,12 @@ export const getFiltersMock = () =>
         type: 'phrase',
         key: 'category.keyword',
         params: {
-          query: "Men's Accessories",
+          query: "Men's Accessories 1",
         },
       },
       query: {
         match_phrase: {
-          'category.keyword': "Men's Accessories",
+          'category.keyword': "Men's Accessories 1",
         },
       },
       $state: {
@@ -45,12 +45,12 @@ export const getFiltersMock = () =>
                 type: 'phrase',
                 key: 'category.keyword',
                 params: {
-                  query: "Men's Accessories",
+                  query: "Men's Accessories 2",
                 },
               },
               query: {
                 match_phrase: {
-                  'category.keyword': "Men's Accessories",
+                  'category.keyword': "Men's Accessories 2",
                 },
               },
               $state: {
@@ -71,12 +71,12 @@ export const getFiltersMock = () =>
                         type: 'phrase',
                         key: 'category.keyword',
                         params: {
-                          query: "Men's Accessories",
+                          query: "Men's Accessories 3",
                         },
                       },
                       query: {
                         match_phrase: {
-                          'category.keyword': "Men's Accessories",
+                          'category.keyword': "Men's Accessories 3",
                         },
                       },
                       $state: {
@@ -92,12 +92,12 @@ export const getFiltersMock = () =>
                         type: 'phrase',
                         key: 'category.keyword',
                         params: {
-                          query: "Men's Accessories",
+                          query: "Men's Accessories 4",
                         },
                       },
                       query: {
                         match_phrase: {
-                          'category.keyword': "Men's Accessories",
+                          'category.keyword': "Men's Accessories 4",
                         },
                       },
                       $state: {
@@ -117,12 +117,12 @@ export const getFiltersMock = () =>
                 type: 'phrase',
                 key: 'category.keyword',
                 params: {
-                  query: "Men's Accessories",
+                  query: "Men's Accessories 5",
                 },
               },
               query: {
                 match_phrase: {
-                  'category.keyword': "Men's Accessories",
+                  'category.keyword': "Men's Accessories 5",
                 },
               },
               $state: {
@@ -142,12 +142,12 @@ export const getFiltersMock = () =>
         type: 'phrase',
         key: 'category.keyword',
         params: {
-          query: "Men's Accessories",
+          query: "Men's Accessories 6",
         },
       },
       query: {
         match_phrase: {
-          'category.keyword': "Men's Accessories",
+          'category.keyword': "Men's Accessories 6",
         },
       },
       $state: {

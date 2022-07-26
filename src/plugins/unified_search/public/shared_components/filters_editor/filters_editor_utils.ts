@@ -131,7 +131,7 @@ export const addFilter = (
       ])
     );
   } else {
-    targetArray.splice(selector, 0, newFilter);
+    targetArray.splice(selector + 1, 0, newFilter);
   }
 
   return newFilters;
