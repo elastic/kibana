@@ -132,12 +132,14 @@ describe('Adds rule exception', () => {
 
     editException();
 
+    // check that the existing item's field is being populated
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(0)
       .find(FIELD_INPUT)
       .eq(0)
       .should('have.text', 'agent.name');
 
+      // check that you can select a different field
     addExceptionEntryFieldValueOfItemX('user.name{downarrow}{enter}', 0, 0);
     addExceptionEntryFieldValueValue('test', 0);
     
