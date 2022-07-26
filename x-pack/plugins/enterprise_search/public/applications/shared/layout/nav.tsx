@@ -51,7 +51,7 @@ export const useEnterpriseSearchNav = () => {
       }),
     },
     {
-      id: 'search_experiences',
+      id: 'search',
       items: [
         {
           id: 'elasticsearch',
@@ -85,7 +85,7 @@ export const useEnterpriseSearchNav = () => {
         },
       ],
       name: i18n.translate('xpack.enterpriseSearch.nav.searchExperiencesTitle', {
-        defaultMessage: 'Search experiences',
+        defaultMessage: 'Search',
       }),
     },
   ];
