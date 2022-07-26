@@ -14,12 +14,8 @@ import { useInterpret, useActor } from '@xstate/react';
 import { ignoreElements, timer } from 'rxjs';
 import { assign } from 'xstate';
 import { dataAccessStateMachine } from '../../state_machines';
-import { loadAround } from '../../state_machines/services/load_around';
-
-const createDummyService =
-  (delay: number = 3000) =>
-  () =>
-    timer(delay).pipe(ignoreElements());
+import { loadAround, updateChunks } from '../../state_machines/services/load_around';
+import { useSubscription } from '../use_observable';
 
 export const useStateMachineService = ({
   children,
@@ -62,6 +58,18 @@ export const useStateMachineService = ({
             status: 'uninitialized' as const,
           },
         })),
+        updateChunks,
+      },
+      guards: {
+        succeededTop: constantGuard(true),
+        succeededBottom: constantGuard(true),
+        isNearStart: constantGuard(false),
+        isNearEnd: constantGuard(false),
+        isWithinLoadedChunks: constantGuard(false),
+        startTimestampExtendsLoadedTop: constantGuard(false),
+        startTimestampReducesLoadedTop: constantGuard(false),
+        endTimestampExtendsLoadedBottom: constantGuard(false),
+        endTimestampReducesLoadedBottom: constantGuard(false),
       },
       services: {
         loadAround: loadAround({ dataView, query, searchSource }),
@@ -69,6 +77,16 @@ export const useStateMachineService = ({
       devTools: true,
     }
   );
+
+  // react to time filter changes
+  useSubscription(query.timefilter.timefilter.getFetch$(), {
+    next: () => {
+      dataAccessService.send({
+        type: 'timeRangeChanged',
+        timeRange: query.timefilter.timefilter.getAbsoluteTime(),
+      });
+    },
+  });
 
   return dataAccessService;
 };
@@ -81,3 +99,13 @@ export const useStateMachineContextState = () => {
   const [state] = useActor(dataAccessService);
   return state;
 };
+
+const createDummyService =
+  (delay: number = 3000) =>
+  () =>
+    timer(delay).pipe(ignoreElements());
+
+const constantGuard =
+  <Value extends unknown>(value: Value) =>
+  () =>
+    value;
