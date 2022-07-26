@@ -498,7 +498,7 @@ export function getFunctionSignatureLabel(
     }
     if (def.windowable) {
       extraArgs += i18n.translate('xpack.lens.formula.windowExtraArguments', {
-        defaultMessage: '[window]?: string',
+        defaultMessage: '[timeWindow]?: string',
       });
     }
     return `${name}(${def.documentation?.signature}${extraArgs})`;
