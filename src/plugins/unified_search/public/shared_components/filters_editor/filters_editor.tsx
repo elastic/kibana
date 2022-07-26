@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useReducer } from 'react';
-
+import React, { useEffect, useReducer, useCallback } from 'react';
+import { EuiDragDropContext, DragDropContextProps } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { FiltersEditorContextType } from './filters_editor_context';
@@ -45,6 +45,10 @@ export function FiltersEditor({
     }
   }, [filters, onChange, state.filters]);
 
+  const onDragEnd: DragDropContextProps['onDragEnd'] = useCallback((a, b) => {
+    console.log(a, b);
+  }, []);
+
   return (
     <FiltersEditorContextType.Provider
       value={{
@@ -53,12 +57,14 @@ export function FiltersEditor({
         dispatch,
       }}
     >
-      <FilterGroup
-        filters={state.filters}
-        conditionType={rootLevelConditionType}
-        path={''}
-        timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-      />
+      <EuiDragDropContext onDragEnd={onDragEnd}>
+        <FilterGroup
+          filters={state.filters}
+          conditionType={rootLevelConditionType}
+          path={''}
+          timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+        />
+      </EuiDragDropContext>
     </FiltersEditorContextType.Provider>
   );
 }

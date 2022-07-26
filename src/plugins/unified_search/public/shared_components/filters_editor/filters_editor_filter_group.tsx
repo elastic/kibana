@@ -12,8 +12,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiPanel,
   EuiText,
+  EuiDroppable,
+  EuiDraggable,
   useEuiTheme,
 } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
@@ -79,9 +80,10 @@ export const FilterGroup = ({
   const removeDisabled = pathInArray.length <= 1 && filters.length === 1;
 
   return (
-    <EuiPanel
-      color="subdued"
-      paddingSize="s"
+    <EuiDroppable
+      droppableId={'droppableId'}
+      withPanel={true}
+      spacing={'s'}
       className={css`
         border-radius: $euiBorderRadius;
         box-shadow: inset 0 0 0 1px rgba(17, 43, 134, 0.1);
@@ -93,20 +95,36 @@ export const FilterGroup = ({
     >
       {filters.map((filter, index, acc) => (
         <>
-          <EuiFlexGroup direction="column" gutterSize="m">
-            <FilterItem
-              filter={filter}
-              path={`${path}${path ? '.' : ''}${index}`}
-              timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-              reverseBackground={reverseBackground}
-              disableOr={orDisabled}
-              disableAnd={andDisabled}
-              disableRemove={removeDisabled}
-            />
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiDraggable
+              spacing="m"
+              key={path}
+              index={index}
+              draggableId={`${path}|${index}`}
+              customDragHandle={true}
+              hasInteractiveChildren={true}
+            >
+              {(provided) => (
+                <FilterItem
+                  filter={filter}
+                  path={`${path}${path ? '.' : ''}${index}`}
+                  timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+                  reverseBackground={reverseBackground}
+                  disableOr={orDisabled}
+                  disableAnd={andDisabled}
+                  disableRemove={removeDisabled}
+                  dragHandleProps={provided.dragHandleProps}
+                />
+              )}
+            </EuiDraggable>
+            {index + 1 < acc.length ? (
+              <EuiFlexItem>
+                <Delimiter conditionType={conditionType} />
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
-          {index + 1 < acc.length ? <Delimiter conditionType={conditionType} /> : null}
         </>
       ))}
-    </EuiPanel>
+    </EuiDroppable>
   );
 };

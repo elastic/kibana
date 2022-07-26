@@ -32,6 +32,8 @@ export interface FilterItemProps {
   disableOr: boolean;
   disableAnd: boolean;
   disableRemove: boolean;
+  // todo: check for correct type
+  dragHandleProps: unknown;
 }
 
 export function FilterItem({
@@ -42,6 +44,7 @@ export function FilterItem({
   disableOr,
   disableAnd,
   disableRemove,
+  dragHandleProps,
 }: FilterItemProps) {
   const { dispatch, dataView } = useContext(FiltersEditorContextType);
   const conditionalOperationType = getConditionalOperationType(filter);
@@ -127,7 +130,7 @@ export function FilterItem({
         />
       ) : (
         <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} {...dragHandleProps}>
             <EuiIcon type="grab" size="s" />
           </EuiFlexItem>
 
