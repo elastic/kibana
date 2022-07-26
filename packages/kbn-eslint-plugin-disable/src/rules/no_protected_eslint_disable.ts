@@ -24,23 +24,6 @@ const meta: Eslint.Rule.RuleMetaData = {
   messages,
 };
 
-const getDisabledProtectedRule = function (
-  sourceFilename: string,
-  disabledRules: string[],
-  protectedRules: { [key: string]: string }
-) {
-  for (const disabledRule of disabledRules) {
-    if (!protectedRules[disabledRule]) {
-      continue;
-    }
-
-    if (protectedRules[disabledRule] === '*') {
-      return disabledRule;
-    }
-  }
-  return false;
-};
-
 const create = (context: Eslint.Rule.RuleContext): Eslint.Rule.RuleListener => {
   return {
     Program(node) {
@@ -60,17 +43,8 @@ const create = (context: Eslint.Rule.RuleContext): Eslint.Rule.RuleListener => {
           return;
         }
 
-        const configuredProtectedRules = PROTECTED_RULES;
         const disabledRules = parsedEslintDisable.rules;
-        const sourceFilename = context.getPhysicalFilename
-          ? context.getPhysicalFilename()
-          : context.getFilename();
-
-        const disabledProtectedRule = getDisabledProtectedRule(
-          sourceFilename,
-          disabledRules,
-          configuredProtectedRules
-        );
+        const disabledProtectedRule = disabledRules.find((r) => PROTECTED_RULES.has(r));
 
         // no protected rule was disabled, exit early
         if (!disabledProtectedRule) {
@@ -102,12 +76,12 @@ const create = (context: Eslint.Rule.RuleContext): Eslint.Rule.RuleListener => {
               return null;
             }
 
-            const isLastDisabledRule =
-              disabledRules[disabledRules.length - 1] === disabledProtectedRule;
-            const textToRemove = isLastDisabledRule
-              ? `,${disabledProtectedRule}`
-              : `${disabledProtectedRule},`;
-            const fixedComment = parsedEslintDisable.value.replace(textToRemove, '');
+            const remainingRules = disabledRules.filter(
+              (rule) => !rule.includes(disabledProtectedRule)
+            );
+            const fixedComment = ` ${parsedEslintDisable.disableValueType} ${remainingRules.join(
+              ','
+            )}${parsedEslintDisable.type === 'Block' ? ' ' : ''}`;
             const rangeToFix: Eslint.AST.Range =
               parsedEslintDisable.type === 'Line'
                 ? [parsedEslintDisable.range[0] + 2, parsedEslintDisable.range[1]]

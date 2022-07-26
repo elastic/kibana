@@ -15,10 +15,7 @@ import {
 
 jest.mock('../helpers/protected_rules', () => {
   return {
-    PROTECTED_RULES: {
-      '@kbn/disable/no_protected_eslint_disable': '*',
-      'no-console': '*',
-    },
+    PROTECTED_RULES: new Set(['@kbn/disable/no_protected_eslint_disable', 'no-console']),
   };
 });
 
@@ -160,7 +157,7 @@ for (const [name, tester] of [tsTester, babelTester]) {
             },
           ],
           output: dedent`
-            /* eslint-disable no-var*/
+            /* eslint-disable no-var */
             const a = 1;
           `,
         },
@@ -180,7 +177,7 @@ for (const [name, tester] of [tsTester, babelTester]) {
             },
           ],
           output: dedent`
-            /*eslint-disable no-var*/
+            /* eslint-disable no-var */
             const a = 1;
           `,
         },
@@ -220,7 +217,7 @@ for (const [name, tester] of [tsTester, babelTester]) {
             },
           ],
           output: dedent`
-            //eslint-disable no-var
+            // eslint-disable no-var
             const a = 1;
           `,
         },
@@ -228,6 +225,26 @@ for (const [name, tester] of [tsTester, babelTester]) {
           filename: 'foo.ts',
           code: dedent`
             /* eslint-disable no-var,@kbn/disable/no_protected_eslint_disable */
+            const a = 1;
+          `,
+          errors: [
+            {
+              line: 1,
+              messageId: PROTECTED_DISABLE_MSG_ID,
+              data: {
+                disabledRuleName: '@kbn/disable/no_protected_eslint_disable',
+              },
+            },
+          ],
+          output: dedent`
+            /* eslint-disable no-var */
+            const a = 1;
+          `,
+        },
+        {
+          filename: 'foo.ts',
+          code: dedent`
+            /* eslint-disable no-var, @kbn/disable/no_protected_eslint_disable */
             const a = 1;
           `,
           errors: [
