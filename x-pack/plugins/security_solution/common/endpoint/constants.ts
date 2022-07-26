@@ -73,3 +73,4 @@ export const failedFleetActionErrorCode = '424';
 
 export const ENDPOINT_DEFAULT_PAGE = 0;
 export const ENDPOINT_DEFAULT_PAGE_SIZE = 10;
+export const RESPONDER_CAPABILITIES = ['kill_process', 'suspend_process', 'running_processes'];
