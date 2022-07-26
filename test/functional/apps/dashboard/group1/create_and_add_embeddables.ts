@@ -202,10 +202,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         after(async () => {
-          // await kibanaServer.importExport.unload(
-          // 'test/functional/fixtures/kbn_archiver/visualize_flow.json'
-          // );
-          // await kibanaServer.savedObjects.cleanStandardList();
+          await kibanaServer.savedObjects.cleanStandardList();
         });
 
         it('adding a metric visualization', async function () {
