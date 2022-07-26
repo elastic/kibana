@@ -34,6 +34,7 @@ import {
   TIMESTAMP_RUNTIME_FIELD,
 } from './build_timestamp_runtime_mapping';
 import type { SignalSource } from '../../signals/types';
+import { validateImmutable, validateIndexPatterns } from '../utils';
 
 interface BulkCreateResults {
   bulkCreateTimes: string[];
@@ -82,6 +83,18 @@ export const createNewTermsAlertType = (
           }
           return validated;
         },
+        /**
+         * validate rule params when rule is bulk edited (update and created in future as well)
+         * returned params can be modified (useful in case of version increment)
+         * @param mutatedRuleParams
+         * @returns mutatedRuleParams
+         */
+        validateMutatedParams: (mutatedRuleParams) => {
+          validateImmutable(mutatedRuleParams.immutable);
+          validateIndexPatterns(mutatedRuleParams.index);
+
+          return mutatedRuleParams;
+        },
       },
     },
     actionGroups: [
@@ -100,7 +113,7 @@ export const createNewTermsAlertType = (
     async executor(execOptions) {
       const {
         runOpts: {
-          buildRuleMessage,
+          ruleExecutionLogger,
           bulkCreate,
           completeRule,
           exceptionItems,
@@ -185,12 +198,11 @@ export const createNewTermsAlertType = (
           from: tuple.from.toISOString(),
           to: tuple.to.toISOString(),
           services,
+          ruleExecutionLogger,
           filter,
-          logger,
           pageSize: 0,
           primaryTimestamp,
           secondaryTimestamp,
-          buildRuleMessage,
           runtimeMappings,
         });
         const searchResultWithAggs = searchResult as RecentTermsAggResult;
@@ -239,12 +251,11 @@ export const createNewTermsAlertType = (
           from: parsedHistoryWindowSize.toISOString(),
           to: tuple.to.toISOString(),
           services,
+          ruleExecutionLogger,
           filter,
-          logger,
           pageSize: 0,
           primaryTimestamp,
           secondaryTimestamp,
-          buildRuleMessage,
         });
         searchAfterResults.searchDurations.push(pageSearchDuration);
         searchAfterResults.searchErrors.push(...pageSearchErrors);
@@ -285,12 +296,11 @@ export const createNewTermsAlertType = (
             from: tuple.from.toISOString(),
             to: tuple.to.toISOString(),
             services,
+            ruleExecutionLogger,
             filter,
-            logger,
             pageSize: 0,
             primaryTimestamp,
             secondaryTimestamp,
-            buildRuleMessage,
           });
           searchAfterResults.searchDurations.push(docFetchSearchDuration);
           searchAfterResults.searchErrors.push(...docFetchSearchErrors);

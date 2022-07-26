@@ -7,7 +7,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { SavedObject } from '../../types';
+import type { SavedObject } from '@kbn/core-saved-objects-common';
 import type { ImportStateMap } from './types';
 
 /**

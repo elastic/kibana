@@ -17,13 +17,7 @@ describe('skipQueryForDetectionsPage', () => {
       skipQueryForDetectionsPage(TimelineId.hostsPageEvents, ['auditbeat-*', 'filebeat-*'])
     ).toBe(false);
     expect(
-      skipQueryForDetectionsPage(TimelineId.hostsPageExternalAlerts, ['auditbeat-*', 'filebeat-*'])
-    ).toBe(false);
-    expect(
-      skipQueryForDetectionsPage(TimelineId.networkPageExternalAlerts, [
-        'auditbeat-*',
-        'filebeat-*',
-      ])
+      skipQueryForDetectionsPage(TimelineId.networkPageEvents, ['auditbeat-*', 'filebeat-*'])
     ).toBe(false);
   });
 
