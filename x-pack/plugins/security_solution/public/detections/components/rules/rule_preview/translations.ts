@@ -30,6 +30,20 @@ export const QUERY_PREVIEW_BUTTON = i18n.translate(
   }
 );
 
+export const QUICK_PREVIEW_TOGGLE_BUTTON = i18n.translate(
+  'xpack.securitySolution.stepDefineRule.quickPreviewToggleButton',
+  {
+    defaultMessage: 'Quick query preview',
+  }
+);
+
+export const ADVANCED_PREVIEW_TOGGLE_BUTTON = i18n.translate(
+  'xpack.securitySolution.stepDefineRule.advancedPreviewToggleButton',
+  {
+    defaultMessage: 'Advanced query preview',
+  }
+);
+
 export const PREVIEW_TIMEOUT_WARNING = i18n.translate(
   'xpack.securitySolution.stepDefineRule.previewTimeoutWarning',
   {
@@ -47,7 +61,7 @@ export const QUERY_PREVIEW_SELECT_ARIA = i18n.translate(
 export const QUERY_PREVIEW_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewLabel',
   {
-    defaultMessage: 'Quick query preview',
+    defaultMessage: 'Timeframe',
   }
 );
 
@@ -55,6 +69,20 @@ export const QUERY_PREVIEW_HELP_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewHelpText',
   {
     defaultMessage: 'Select a timeframe of data to preview query results.',
+  }
+);
+
+export const QUERY_PREVIEW_INVOCATION_COUNT_WARNING_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewInvocationCountWarningTitle',
+  {
+    defaultMessage: 'Rule preview timeframe might cause timeout',
+  }
+);
+
+export const QUERY_PREVIEW_INVOCATION_COUNT_WARNING_MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewInvocationCountWarningMessage',
+  {
+    defaultMessage: `The timeframe and rule interval that you selected for previewing this rule might cause timeout or take long time to execute. Try to decrease the timeframe and/or increase the interval if preview has timed out (this won't affect the actual rule run).`,
   }
 );
 

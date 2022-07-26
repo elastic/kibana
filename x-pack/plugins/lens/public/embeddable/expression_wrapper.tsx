@@ -46,6 +46,7 @@ export interface ExpressionWrapperProps {
   onRuntimeError: () => void;
   executionContext?: KibanaExecutionContext;
   lensInspector: LensInspector;
+  noPadding?: boolean;
 }
 
 interface VisualizationErrorProps {
@@ -120,6 +121,7 @@ export function ExpressionWrapper({
   onRuntimeError,
   executionContext,
   lensInspector,
+  noPadding,
 }: ExpressionWrapperProps) {
   return (
     <I18nProvider>
@@ -129,7 +131,7 @@ export function ExpressionWrapper({
         <div className={classNames('lnsExpressionRenderer', className)} style={style}>
           <ExpressionRendererComponent
             className="lnsExpressionRenderer__component"
-            padding="s"
+            padding={noPadding ? undefined : 's'}
             variables={variables}
             expression={expression}
             interactive={interactive}
