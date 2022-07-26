@@ -6,21 +6,16 @@
  * Side Public License, v 1.
  */
 
-import {
+import type {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkResolveObject,
   SavedObjectsCheckConflictsObject,
-  SavedObjectsClient,
   SavedObjectsClosePointInTimeOptions,
   SavedObjectsCreateOptions,
   SavedObjectsDeleteOptions,
   SavedObjectsOpenPointInTimeOptions,
   SavedObjectsUpdateOptions,
-} from './saved_objects_client';
-import { savedObjectsRepositoryMock } from './lib/repository.mock';
-import { savedObjectsClientMock } from './saved_objects_client.mock';
-import {
   SavedObjectsBaseOptions,
   SavedObjectsCollectMultiNamespaceReferencesObject,
   SavedObjectsCollectMultiNamespaceReferencesOptions,
@@ -28,7 +23,10 @@ import {
   SavedObjectsFindOptions,
   SavedObjectsUpdateObjectsSpacesObject,
   SavedObjectsUpdateObjectsSpacesOptions,
-} from '../..';
+} from '@kbn/core-saved-objects-api-server';
+import { SavedObjectsClient } from './saved_objects_client';
+import { savedObjectsRepositoryMock } from './lib/repository.mock';
+import { savedObjectsClientMock } from './saved_objects_client.mock';
 
 describe('', () => {
   let mockRepository: ReturnType<typeof savedObjectsRepositoryMock.create>;

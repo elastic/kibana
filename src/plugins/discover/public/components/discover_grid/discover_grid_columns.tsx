@@ -10,6 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiDataGridColumn, EuiIcon, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { ExpandButton } from './discover_grid_expand_button';
 import { DiscoverGridSettings } from './types';
 import type { ValueToStringConverter } from '../../types';
@@ -19,39 +20,44 @@ import { SelectButton } from './discover_grid_document_selection';
 import { defaultTimeColumnWidth } from './constants';
 import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_copy_column_button';
 import { DiscoverServices } from '../../build_services';
+import { DataTableRecord } from '../../types';
 import { buildEditFieldButton } from './build_edit_field_button';
 
-export function getLeadControlColumns() {
-  return [
-    {
-      id: 'openDetails',
-      width: 24,
-      headerCellRender: () => (
-        <EuiScreenReaderOnly>
-          <span>
-            {i18n.translate('discover.controlColumnHeader', {
-              defaultMessage: 'Control column',
-            })}
-          </span>
-        </EuiScreenReaderOnly>
-      ),
-      rowCellRender: ExpandButton,
-    },
-    {
-      id: 'select',
-      width: 24,
-      rowCellRender: SelectButton,
-      headerCellRender: () => (
-        <EuiScreenReaderOnly>
-          <span>
-            {i18n.translate('discover.selectColumnHeader', {
-              defaultMessage: 'Select column',
-            })}
-          </span>
-        </EuiScreenReaderOnly>
-      ),
-    },
-  ];
+const openDetails = {
+  id: 'openDetails',
+  width: 24,
+  headerCellRender: () => (
+    <EuiScreenReaderOnly>
+      <span>
+        {i18n.translate('discover.controlColumnHeader', {
+          defaultMessage: 'Control column',
+        })}
+      </span>
+    </EuiScreenReaderOnly>
+  ),
+  rowCellRender: ExpandButton,
+};
+
+const select = {
+  id: 'select',
+  width: 24,
+  rowCellRender: SelectButton,
+  headerCellRender: () => (
+    <EuiScreenReaderOnly>
+      <span>
+        {i18n.translate('discover.selectColumnHeader', {
+          defaultMessage: 'Select column',
+        })}
+      </span>
+    </EuiScreenReaderOnly>
+  ),
+};
+
+export function getLeadControlColumns(setExpandedDoc?: (doc?: DataTableRecord) => void) {
+  if (!setExpandedDoc) {
+    return [select];
+  }
+  return [openDetails, select];
 }
 
 function buildEuiGridColumn({
@@ -63,6 +69,7 @@ function buildEuiGridColumn({
   services,
   valueToStringConverter,
   rowsCount,
+  onFilter,
   editField,
 }: {
   columnName: string;
@@ -73,6 +80,7 @@ function buildEuiGridColumn({
   services: DiscoverServices;
   valueToStringConverter: ValueToStringConverter;
   rowsCount: number;
+  onFilter?: DocViewFilterFn;
   editField?: (fieldName: string) => void;
 }) {
   const indexPatternField = indexPattern.getFieldByName(columnName);
@@ -115,7 +123,7 @@ function buildEuiGridColumn({
         ...(editFieldButton ? [editFieldButton] : []),
       ],
     },
-    cellActions: indexPatternField ? buildCellActions(indexPatternField) : [],
+    cellActions: indexPatternField ? buildCellActions(indexPatternField, onFilter) : [],
   };
 
   if (column.id === indexPattern.timeFieldName) {
@@ -161,6 +169,7 @@ export function getEuiGridColumns({
   isSortEnabled,
   services,
   valueToStringConverter,
+  onFilter,
   editField,
 }: {
   columns: string[];
@@ -172,6 +181,7 @@ export function getEuiGridColumns({
   isSortEnabled: boolean;
   services: DiscoverServices;
   valueToStringConverter: ValueToStringConverter;
+  onFilter: DocViewFilterFn;
   editField?: (fieldName: string) => void;
 }) {
   const timeFieldName = indexPattern.timeFieldName;
@@ -192,6 +202,7 @@ export function getEuiGridColumns({
       services,
       valueToStringConverter,
       rowsCount,
+      onFilter,
       editField,
     })
   );
