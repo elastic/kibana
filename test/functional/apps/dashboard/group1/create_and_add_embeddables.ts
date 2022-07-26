@@ -201,10 +201,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.dashboard.clickNewDashboard();
         });
 
-        after(async () => {
-          await kibanaServer.savedObjects.cleanStandardList();
-        });
-
         it('adding a metric visualization', async function () {
           const originalPanelCount = await PageObjects.dashboard.getPanelCount();
           expect(originalPanelCount).to.eql(0);
