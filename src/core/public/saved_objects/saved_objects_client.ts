@@ -8,113 +8,33 @@
 
 import { pick, throttle, cloneDeep } from 'lodash';
 import type { HttpSetup, HttpFetchOptions } from '@kbn/core-http-browser';
-
+import type { SavedObject, SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
 import type {
-  SavedObject,
-  SavedObjectReference,
   SavedObjectsBulkResolveResponse as SavedObjectsBulkResolveResponseServer,
   SavedObjectsClientContract as SavedObjectsApi,
-  SavedObjectsFindOptions as SavedObjectFindOptionsServer,
-  SavedObjectsMigrationVersion,
+  SavedObjectsFindResponse as SavedObjectsFindResponseServer,
   SavedObjectsResolveResponse,
-} from '../../server';
+} from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectsClientContract,
+  SavedObjectsCreateOptions,
+  SavedObjectsDeleteOptions,
+  SavedObjectsBatchResponse,
+  SavedObjectsFindOptions,
+  SavedObjectsUpdateOptions,
+  ResolvedSimpleSavedObject,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsFindResponse,
+  SavedObjectsBulkCreateOptions,
+  SavedObjectsBulkCreateObject,
+  SimpleSavedObject,
+} from '@kbn/core-saved-objects-api-browser';
 
-import { SimpleSavedObject } from './simple_saved_object';
-import type { ResolvedSimpleSavedObject } from './types';
+import { SimpleSavedObjectImpl } from './simple_saved_object';
 
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
 
-type SavedObjectsFindOptions = Omit<
-  SavedObjectFindOptionsServer,
-  'pit' | 'rootSearchFields' | 'searchAfter' | 'sortOrder' | 'typeToNamespacesMap'
->;
-
-type SavedObjectsFindResponse = Omit<PromiseType<ReturnType<SavedObjectsApi['find']>>, 'pit_id'>;
-
-/** @public */
-export interface SavedObjectsCreateOptions {
-  /**
-   * (Not recommended) Specify an id instead of having the saved objects service generate one for you.
-   */
-  id?: string;
-  /** If a document with the given `id` already exists, overwrite it's contents (default=false). */
-  overwrite?: boolean;
-  /** {@inheritDoc SavedObjectsMigrationVersion} */
-  migrationVersion?: SavedObjectsMigrationVersion;
-  /** A semver value that is used when upgrading objects between Kibana versions. */
-  coreMigrationVersion?: string;
-  references?: SavedObjectReference[];
-}
-
-/**
- * @param type - Create a SavedObject of the given type
- * @param attributes - Create a SavedObject with the given attributes
- *
- * @public
- */
-export interface SavedObjectsBulkCreateObject<T = unknown> extends SavedObjectsCreateOptions {
-  type: string;
-  attributes: T;
-}
-
-/** @public */
-export interface SavedObjectsBulkCreateOptions {
-  /** If a document with the given `id` already exists, overwrite it's contents (default=false). */
-  overwrite?: boolean;
-}
-
-/** @public */
-export interface SavedObjectsBulkUpdateObject<T = unknown> {
-  type: string;
-  id: string;
-  attributes: T;
-  version?: string;
-  references?: SavedObjectReference[];
-}
-
-/** @public */
-export interface SavedObjectsBulkUpdateOptions {
-  namespace?: string;
-}
-
-/** @public */
-export interface SavedObjectsUpdateOptions<Attributes = unknown> {
-  version?: string;
-  upsert?: Attributes;
-  references?: SavedObjectReference[];
-}
-
-/** @public */
-export interface SavedObjectsBatchResponse<T = unknown> {
-  savedObjects: Array<SimpleSavedObject<T>>;
-}
-
-/** @public */
-export interface SavedObjectsDeleteOptions {
-  /** Force deletion of an object that exists in multiple namespaces */
-  force?: boolean;
-}
-
-/** @public */
-export interface SavedObjectsBulkResolveResponse<T = unknown> {
-  resolved_objects: Array<ResolvedSimpleSavedObject<T>>;
-}
-
-/**
- * Return type of the Saved Objects `find()` method.
- *
- * *Note*: this type is different between the Public and Server Saved Objects
- * clients.
- *
- * @public
- */
-export interface SavedObjectsFindResponsePublic<T = unknown, A = unknown>
-  extends SavedObjectsBatchResponse<T> {
-  aggregations?: A;
-  total: number;
-  perPage: number;
-  page: number;
-}
+type SavedObjectsFindResponseInternal = Omit<SavedObjectsFindResponseServer, 'pit_id'>;
 
 interface BatchGetQueueEntry {
   type: string;
@@ -144,149 +64,8 @@ const BATCH_INTERVAL = 100;
 
 const API_BASE_URL = '/api/saved_objects/';
 
-/**
- * The client-side SavedObjectsClient is a thin convenience library around the SavedObjects
- * HTTP API for interacting with Saved Objects.
- *
- * @public
- */
-export interface SavedObjectsClientContract {
-  /**
-   * Persists an object
-   */
-  create<T = unknown>(
-    type: string,
-    attributes: T,
-    options?: SavedObjectsCreateOptions
-  ): Promise<SimpleSavedObject<T>>;
-
-  /**
-   * Creates multiple documents at once
-   * @returns The result of the create operation containing created saved objects.
-   */
-  bulkCreate(
-    objects: SavedObjectsBulkCreateObject[],
-    options?: SavedObjectsBulkCreateOptions
-  ): Promise<SavedObjectsBatchResponse<unknown>>;
-
-  /**
-   * Deletes an object
-   */
-  delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
-
-  /**
-   * Search for objects
-   *
-   * @param {object} [options={}]
-   * @property {string} options.type
-   * @property {string} options.search
-   * @property {string} options.searchFields - see Elasticsearch Simple Query String
-   *                                        Query field argument for more information
-   * @property {integer} [options.page=1]
-   * @property {integer} [options.perPage=20]
-   * @property {array} options.fields
-   * @property {object} [options.hasReference] - { type, id }
-   * @returns A find result with objects matching the specified search.
-   */
-  find<T = unknown, A = unknown>(
-    options: SavedObjectsFindOptions
-  ): Promise<SavedObjectsFindResponsePublic<T>>;
-
-  /**
-   * Fetches a single object
-   *
-   * @param {string} type
-   * @param {string} id
-   * @returns The saved object for the given type and id.
-   */
-  get<T = unknown>(type: string, id: string): Promise<SimpleSavedObject<T>>;
-
-  /**
-   * Returns an array of objects by id
-   *
-   * @param {array} objects - an array ids, or an array of objects containing id and optionally type
-   * @returns The saved objects with the given type and ids requested
-   * @example
-   *
-   * bulkGet([
-   *   { id: 'one', type: 'config' },
-   *   { id: 'foo', type: 'index-pattern' }
-   * ])
-   */
-  bulkGet(
-    objects: Array<{ id: string; type: string }>
-  ): Promise<SavedObjectsBatchResponse<unknown>>;
-
-  /**
-   * Resolves a single object
-   *
-   * @param {string} type
-   * @param {string} id
-   * @returns The resolve result for the saved object for the given type and id.
-   *
-   * @note Saved objects that Kibana fails to find are replaced with an error object and an "exactMatch" outcome. The rationale behind the
-   * outcome is that "exactMatch" is the default outcome, and the outcome only changes if an alias is found. This behavior for the `resolve`
-   * API is unique to the public client, which batches individual calls with `bulkResolve` under the hood. We don't throw an error in that
-   * case for legacy compatibility reasons.
-   */
-  resolve<T = unknown>(type: string, id: string): Promise<ResolvedSimpleSavedObject<T>>;
-
-  /**
-   * Resolves an array of objects by id, using any legacy URL aliases if they exist
-   *
-   * @param objects - an array of objects containing id, type
-   * @returns The bulk resolve result for the saved objects for the given types and ids.
-   * @example
-   *
-   * bulkResolve([
-   *   { id: 'one', type: 'config' },
-   *   { id: 'foo', type: 'index-pattern' }
-   * ])
-   *
-   * @note Saved objects that Kibana fails to find are replaced with an error object and an "exactMatch" outcome. The rationale behind the
-   * outcome is that "exactMatch" is the default outcome, and the outcome only changes if an alias is found. The `resolve` method in the
-   * public client uses `bulkResolve` under the hood, so it behaves the same way.
-   */
-  bulkResolve<T = unknown>(
-    objects: Array<{ id: string; type: string }>
-  ): Promise<SavedObjectsBulkResolveResponse<T>>;
-
-  /**
-   * Updates an object
-   *
-   * @param {string} type
-   * @param {string} id
-   * @param {object} attributes
-   * @param {object} options
-   * @prop {integer} options.version - ensures version matches that of persisted object
-   * @prop {object} options.migrationVersion - The optional migrationVersion of this document
-   * @returns
-   */
-  update<T = unknown>(
-    type: string,
-    id: string,
-    attributes: T,
-    options?: SavedObjectsUpdateOptions
-  ): Promise<SimpleSavedObject<T>>;
-
-  /**
-   * Update multiple documents at once
-   *
-   * @param {array} objects - [{ type, id, attributes, options: { version, references } }]
-   * @returns The result of the update operation containing both failed and updated saved objects.
-   */
-  bulkUpdate<T = unknown>(
-    objects: SavedObjectsBulkUpdateObject[]
-  ): Promise<SavedObjectsBatchResponse<T>>;
-}
-
-interface ObjectTypeAndId {
-  id: string;
-  type: string;
-}
-
-const getObjectsToFetch = (queue: BatchGetQueueEntry[]): ObjectTypeAndId[] => {
-  const objects: ObjectTypeAndId[] = [];
+const getObjectsToFetch = (queue: BatchGetQueueEntry[]): SavedObjectTypeIdTuple[] => {
+  const objects: SavedObjectTypeIdTuple[] = [];
   const inserted = new Set<string>();
   queue.forEach(({ id, type }) => {
     if (!inserted.has(`${type}|${id}`)) {
@@ -299,7 +78,7 @@ const getObjectsToFetch = (queue: BatchGetQueueEntry[]): ObjectTypeAndId[] => {
 
 const getObjectsToResolve = (queue: BatchResolveQueueEntry[]) => {
   const responseIndices: number[] = [];
-  const objectsToResolve: ObjectTypeAndId[] = [];
+  const objectsToResolve: SavedObjectTypeIdTuple[] = [];
   const inserted = new Map<string, number>();
   queue.forEach(({ id, type }) => {
     const key = `${type}|${id}`;
@@ -478,7 +257,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
 
   public find = <T = unknown, A = unknown>(
     options: SavedObjectsFindOptions
-  ): Promise<SavedObjectsFindResponsePublic<T>> => {
+  ): Promise<SavedObjectsFindResponse<T>> => {
     const path = this.getPath(['_find']);
     const renameMap = {
       defaultSearchOperator: 'default_search_operator',
@@ -520,7 +299,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
       query,
     });
     return request.then((resp) => {
-      return renameKeys<SavedObjectsFindResponse, SavedObjectsFindResponsePublic>(
+      return renameKeys<SavedObjectsFindResponseInternal, SavedObjectsFindResponse>(
         {
           aggregations: 'aggregations',
           saved_objects: 'savedObjects',
@@ -532,7 +311,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
           ...resp,
           saved_objects: resp.saved_objects.map((d) => this.createSavedObject(d)),
         }
-      ) as SavedObjectsFindResponsePublic<T>;
+      ) as SavedObjectsFindResponse<T>;
     });
   };
 
@@ -558,7 +337,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     });
   };
 
-  private async performBulkGet(objects: ObjectTypeAndId[]) {
+  private async performBulkGet(objects: SavedObjectTypeIdTuple[]) {
     const path = this.getPath(['_bulk_get']);
     const request: ReturnType<SavedObjectsApi['bulkGet']> = this.savedObjectsFetch(path, {
       method: 'POST',
@@ -591,7 +370,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     };
   };
 
-  private async performBulkResolve<T>(objects: ObjectTypeAndId[]) {
+  private async performBulkResolve<T>(objects: SavedObjectTypeIdTuple[]) {
     const path = this.getPath(['_bulk_resolve']);
     const request: Promise<SavedObjectsBulkResolveResponseServer<T>> = this.savedObjectsFetch(
       path,
@@ -645,13 +424,13 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
   }
 
   private createSavedObject<T = unknown>(options: SavedObject<T>): SimpleSavedObject<T> {
-    return new SimpleSavedObject(this, options);
+    return new SimpleSavedObjectImpl(this, options);
   }
 
   private createResolvedSavedObject<T = unknown>(
     resolveResponse: SavedObjectsResolveResponse<T>
   ): ResolvedSimpleSavedObject<T> {
-    const simpleSavedObject = new SimpleSavedObject<T>(this, resolveResponse.saved_object);
+    const simpleSavedObject = new SimpleSavedObjectImpl<T>(this, resolveResponse.saved_object);
     return {
       saved_object: simpleSavedObject,
       outcome: resolveResponse.outcome,
