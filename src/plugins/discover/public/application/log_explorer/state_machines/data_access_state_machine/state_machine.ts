@@ -9,8 +9,8 @@
 import { DataView } from '@kbn/data-views-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { createMachine, InterpreterFrom } from 'xstate';
-import { LogExplorerChunk, LogExplorerPosition } from '../types';
-import { LoadAroundEvent } from './services/load_around';
+import { LogExplorerChunk, LogExplorerPosition } from '../../types';
+import { LoadAroundEvent } from './load_around_service';
 
 export interface LogExplorerContext {
   dataView: DataView;
@@ -103,13 +103,10 @@ export const dataAccessStateMachine = createMachine({
       },
       on: {
         loadAroundSucceeded: {
-          actions: ['updateTopChunk', 'updateBottomChunk'],
+          actions: 'updateChunksFromLoadAround',
           target: 'loaded',
         },
-        positionChanged: {
-          target: 'loadingAround',
-          internal: false,
-        },
+        positionChanged: {},
         loadAroundFailed: {
           target: 'failedNoData',
         },
