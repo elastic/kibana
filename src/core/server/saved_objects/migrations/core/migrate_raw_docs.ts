@@ -11,12 +11,12 @@
  */
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Either from 'fp-ts/lib/Either';
-import {
+import type {
   SavedObjectSanitizedDoc,
   SavedObjectsRawDoc,
-  SavedObjectsSerializer,
   SavedObjectUnsanitizedDoc,
-} from '../../serialization';
+} from '@kbn/core-saved-objects-server';
+import { SavedObjectsSerializer } from '../../serialization';
 import { MigrateAndConvertFn } from './document_migrator';
 import { TransformSavedObjectDocumentError } from '.';
 

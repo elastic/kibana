@@ -8,8 +8,11 @@
 
 import type { Payload } from '@hapi/boom';
 import type { SavedObject } from '@kbn/core-saved-objects-common';
-import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import type { SavedObjectsRawDoc, SavedObjectsRawDocSource } from '../../serialization';
+import type {
+  ISavedObjectTypeRegistry,
+  SavedObjectsRawDoc,
+  SavedObjectsRawDocSource,
+} from '@kbn/core-saved-objects-server';
 import { decodeRequestVersion, encodeHitVersion } from '../../version';
 import { SavedObjectsErrorHelpers } from './errors';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from './utils';
@@ -19,6 +22,7 @@ import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from './utils';
  * @internal
  */
 export type Either<L = unknown, R = L> = Left<L> | Right<R>;
+
 /**
  * Left part of discriminated union ({@link Either}).
  * @internal
@@ -27,6 +31,7 @@ export interface Left<L> {
   tag: 'Left';
   value: L;
 }
+
 /**
  * Right part of discriminated union ({@link Either}).
  * @internal
@@ -35,6 +40,7 @@ export interface Right<R> {
   tag: 'Right';
   value: R;
 }
+
 /**
  * Type guard for left part of discriminated union ({@link Left}, {@link Either}).
  * @internal

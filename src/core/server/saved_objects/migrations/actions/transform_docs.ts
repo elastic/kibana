@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import * as TaskEither from 'fp-ts/lib/TaskEither';
+import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type { TransformRawDocs } from '../types';
-import type { SavedObjectsRawDoc } from '../../serialization';
 import { DocumentsTransformFailed, DocumentsTransformSuccess } from '../core/migrate_raw_docs';
 
 /** @internal */

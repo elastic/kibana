@@ -18,9 +18,12 @@ import type {
   SavedObjectsUpdateObjectsSpacesResponse,
   SavedObjectsUpdateObjectsSpacesResponseObject,
 } from '@kbn/core-saved-objects-api-server';
+import type {
+  ISavedObjectTypeRegistry,
+  SavedObjectsRawDocSource,
+} from '@kbn/core-saved-objects-server';
 import type { IndexMapping } from '../../mappings';
-import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import type { SavedObjectsRawDocSource, SavedObjectsSerializer } from '../../serialization';
+import type { SavedObjectsSerializer } from '../../serialization';
 import type { DecoratedError } from './errors';
 import { SavedObjectsErrorHelpers } from './errors';
 import {

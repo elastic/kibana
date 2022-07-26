@@ -17,17 +17,17 @@ import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
-import { IndexMapping, SavedObjectsTypeMappingDefinitions } from '../mappings';
-import {
+import type {
   SavedObjectUnsanitizedDoc,
-  SavedObjectsSerializer,
   SavedObjectsRawDoc,
-} from '../serialization';
+  ISavedObjectTypeRegistry,
+} from '@kbn/core-saved-objects-server';
+import { IndexMapping, SavedObjectsTypeMappingDefinitions } from '../mappings';
+import { SavedObjectsSerializer } from '../serialization';
 import { buildActiveMappings, MigrationResult, MigrationStatus } from './core';
 import { DocumentMigrator, VersionedTransformer } from './core/document_migrator';
 import { createIndexMap } from './core/build_index_map';
 import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
-import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { runResilientMigrator } from './run_resilient_migrator';
 import { migrateRawDocsSafely } from './core/migrate_raw_docs';
 

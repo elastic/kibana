@@ -54,6 +54,12 @@ import type {
   SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsFindOptions,
 } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectSanitizedDoc,
+  SavedObjectsRawDoc,
+  SavedObjectsRawDocSource,
+  ISavedObjectTypeRegistry,
+} from '@kbn/core-saved-objects-server';
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
 import { PointInTimeFinder } from './point_in_time_finder';
 import { createRepositoryEsClient, RepositoryEsClient } from './repository_es_client';
@@ -62,15 +68,9 @@ import { includedFields } from './included_fields';
 import { SavedObjectsErrorHelpers, DecoratedError } from './errors';
 import { decodeRequestVersion, encodeVersion, encodeHitVersion } from '../../version';
 import { IKibanaMigrator } from '../../migrations';
-import {
-  SavedObjectsSerializer,
-  SavedObjectSanitizedDoc,
-  SavedObjectsRawDoc,
-  SavedObjectsRawDocSource,
-} from '../../serialization';
+import { SavedObjectsSerializer } from '../../serialization';
 import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import { SavedObjectsTypeValidator } from '../../validation';
-import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { internalBulkResolve, InternalBulkResolveError } from './internal_bulk_resolve';
 import { validateConvertFilterToKueryNode } from './filter_utils';
 import { validateAndConvertAggregations } from './aggregations';

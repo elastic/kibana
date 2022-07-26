@@ -16,7 +16,7 @@ import type {
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { SavedObjectsRawDocSource } from '../../serialization';
+import type { SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
 import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,

@@ -7,7 +7,7 @@
  */
 
 import * as TaskEither from 'fp-ts/TaskEither';
-import { SavedObjectsRawDoc } from '../serialization';
+import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import { DocumentsTransformFailed, DocumentsTransformSuccess } from './core';
 
 /** @internal */

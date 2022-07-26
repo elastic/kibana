@@ -14,14 +14,15 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
-import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import { sortObjects } from './sort_objects';
-import {
+import type {
+  ISavedObjectsExporter,
+  ISavedObjectTypeRegistry,
   SavedObjectsExportResultDetails,
   SavedObjectExportBaseOptions,
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportByTypeOptions,
-} from './types';
+} from '@kbn/core-saved-objects-server';
+import { sortObjects } from './sort_objects';
 import { SavedObjectsExportError } from './errors';
 import { collectExportedObjects } from './collect_exported_objects';
 import { byIdAscComparator, getPreservedOrderComparator, SavedObjectComparator } from './utils';
