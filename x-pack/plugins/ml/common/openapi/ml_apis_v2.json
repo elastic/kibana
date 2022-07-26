@@ -35,7 +35,7 @@
         "parameters" : [ {
           "name" : "spaceId",
           "in" : "path",
-          "description" : "An identifier for the space. If you omit `/s/{spaceId}`, the default space is used.",
+          "description" : "An identifier for the space. If you omit `/s/` and this identifier from the path, the default space is used.",
           "required" : true,
           "type" : "string"
         }, {
