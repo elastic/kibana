@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import type { ReactElement } from 'react';
+import type { LazyExoticComponent, ReactElement } from 'react';
+import { lazy } from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
 
 import type { ChangePasswordProps } from './change_password';
 import { getComponents } from './components';
 import type { PersonalInfoProps } from './personal_info';
+import type { UserProfilesSelectable } from './user_profiles_selectable/user_profiles_selectable';
 
 export type { ChangePasswordProps, PersonalInfoProps };
 
@@ -26,6 +28,7 @@ export interface UiApi {
     getPersonalInfo: LazyComponentFn<PersonalInfoProps>;
     getChangePassword: LazyComponentFn<ChangePasswordProps>;
   };
+  UserProfilesSelectable: LazyExoticComponent<typeof UserProfilesSelectable>;
 }
 
 export const getUiApi = ({ core }: GetUiApiOptions): UiApi => {
@@ -33,5 +36,6 @@ export const getUiApi = ({ core }: GetUiApiOptions): UiApi => {
 
   return {
     components,
+    UserProfilesSelectable: lazy(() => import('./user_profiles_selectable')),
   };
 };
