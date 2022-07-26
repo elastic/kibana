@@ -16,10 +16,10 @@ import { useDiscoverTourContext } from './discover_tour_context';
 import { DISCOVER_TOUR_STEP_ANCHORS } from './discover_tour_anchors';
 
 describe('Discover tour', () => {
-  const mountComponent = (innerContent?: JSX.Element) => {
+  const mountComponent = (innerContent: JSX.Element) => {
     return mountWithIntl(
       <KibanaContextProvider services={discoverServiceMock}>
-        <DiscoverTourProvider>{innerContent}</DiscoverTourProvider>
+        <DiscoverTourProvider isPlainRecord={false}>{innerContent}</DiscoverTourProvider>
       </KibanaContextProvider>
     );
   };

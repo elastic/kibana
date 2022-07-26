@@ -7,7 +7,7 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { Filter, TimeRange, Query } from '@kbn/es-query';
+import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
 import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
@@ -44,7 +44,7 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
   /**
    * Optionally set a query.
    */
-  query?: Query;
+  query?: Query | AggregateQuery;
 
   /**
    * If not given, will use the uiSettings configuration for `storeInSessionStorage`. useHash determines
@@ -116,7 +116,7 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
     } = params;
     const savedSearchPath = savedSearchId ? `view/${encodeURIComponent(savedSearchId)}` : '';
     const appState: {
-      query?: Query;
+      query?: Query | AggregateQuery;
       filters?: Filter[];
       index?: string;
       columns?: string[];

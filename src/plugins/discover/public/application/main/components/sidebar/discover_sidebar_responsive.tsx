@@ -6,33 +6,34 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UiCounterMetricType } from '@kbn/analytics';
 import {
-  EuiTitle,
-  EuiHideFor,
-  EuiShowFor,
-  EuiButton,
   EuiBadge,
-  EuiFlyoutHeader,
+  EuiButton,
   EuiFlyout,
+  EuiFlyoutHeader,
+  EuiHideFor,
   EuiIcon,
   EuiLink,
   EuiPortal,
+  EuiShowFor,
+  EuiTitle,
 } from '@elastic/eui';
-import type { DataViewField, DataView, DataViewAttributes } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewAttributes, DataViewField } from '@kbn/data-views-plugin/public';
 import { SavedObject } from '@kbn/core/types';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
 import { AppState } from '../../services/discover_state';
-import { AvailableFields$, DataDocuments$ } from '../../hooks/use_saved_search';
+import { AvailableFields$, DataDocuments$, RecordRawType } from '../../hooks/use_saved_search';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { FetchStatus } from '../../../types';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
+import { getRawRecordType } from '../../utils/get_raw_record_type';
 
 export interface DiscoverSidebarResponsiveProps {
   /**
@@ -62,7 +63,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * Callback function when adding a filter from sidebar
    */
-  onAddFilter: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
   /**
    * Callback function when changing an index pattern
    */
@@ -115,6 +116,10 @@ export interface DiscoverSidebarResponsiveProps {
  */
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
   const services = useDiscoverServices();
+  const isPlainRecord = useMemo(
+    () => getRawRecordType(props.state.query) === RecordRawType.PLAIN,
+    [props.state.query]
+  );
   const { selectedIndexPattern, onFieldEdited, onDataViewCreated } = props;
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
@@ -210,7 +215,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
 
   const editField = useMemo(
     () =>
-      canEditDataView && selectedIndexPattern
+      !isPlainRecord && canEditDataView && selectedIndexPattern
         ? (fieldName?: string) => {
             const ref = dataViewFieldEditor.openEditor({
               ctx: {
@@ -230,11 +235,12 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           }
         : undefined,
     [
+      isPlainRecord,
       canEditDataView,
-      closeFlyout,
-      dataViewFieldEditor,
       selectedIndexPattern,
+      dataViewFieldEditor,
       setFieldEditorRef,
+      closeFlyout,
       onFieldEdited,
     ]
   );

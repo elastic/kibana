@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import type { History } from 'history';
 import type { ChromeStart, DocLinksStart } from '@kbn/core/public';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
 import { redirectWhenMissing } from '@kbn/kibana-utils-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { VisualizeConstants } from '../../../common/constants';
@@ -56,7 +56,7 @@ export const visStateToEditorState = (
   return {
     uiState:
       savedVis && savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : vis.uiState.toJSON(),
-    query: vis.data.searchSource?.getOwnField('query') || getDefaultQuery(services),
+    query: (vis.data.searchSource?.getOwnField('query') || getDefaultQuery(services)) as Query,
     filters: (vis.data.searchSource?.getOwnField('filter') as Filter[]) || [],
     vis: { ...savedVisState.visState, title: vis.title },
     linked: savedVis && savedVis.id ? !!savedVis.savedSearchId : !!savedVisState.savedSearchId,

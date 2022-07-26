@@ -27,6 +27,7 @@ import {
   DataViewsContract,
   DataPublicPluginStart,
 } from '@kbn/data-plugin/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -81,6 +82,7 @@ export interface DiscoverServices {
   spaces?: SpacesApi;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   locator: DiscoverAppLocator;
+  expressions: ExpressionsStart;
 }
 
 export const buildServices = memoize(function (
@@ -125,5 +127,6 @@ export const buildServices = memoize(function (
     dataViewEditor: plugins.dataViewEditor,
     triggersActionsUi: plugins.triggersActionsUi,
     locator,
+    expressions: plugins.expressions,
   };
 });
