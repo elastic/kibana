@@ -145,7 +145,7 @@ export type FileShareSavedObjectAttributes = {
   name?: string;
 
   /**
-   * The unix timestamp (in seconds) this file share will expire.
+   * The unix timestamp (in milliseconds) this file share will expire.
    *
    * TODO: in future we could add a special value like "forever", but this should
    * not be the default.

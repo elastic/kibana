@@ -102,7 +102,7 @@ export class InternalFileShareService implements FileShareServiceStart {
       {
         created: new Date().toISOString(),
         name,
-        valid_until: validUntil ? validUntil : moment().add(30, 'days').unix(),
+        valid_until: validUntil ? validUntil : Number(moment().add(30, 'days')),
         token: generateShareToken(),
       },
       {

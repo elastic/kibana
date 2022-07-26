@@ -133,11 +133,11 @@ describe('File kind HTTP API', () => {
       .send({ validUntil, name: 'my-share' })
       .expect(200);
 
-    const { body } = await request
-      .get(root, `/api/files/shares/${fileKind}/${shareId}`)
-      .expect(200);
+    const {
+      body: { share },
+    } = await request.get(root, `/api/files/shares/${fileKind}/${shareId}`).expect(200);
 
-    expect(body).toEqual(
+    expect(share).toEqual(
       expect.objectContaining({
         id: shareId,
         name: 'my-share',
