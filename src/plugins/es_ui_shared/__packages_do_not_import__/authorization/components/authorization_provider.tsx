@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import React, { createContext, useContext } from 'react';
 
 import { useRequest } from '../../../public/request';

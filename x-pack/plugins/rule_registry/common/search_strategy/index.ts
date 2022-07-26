@@ -6,7 +6,7 @@
  */
 import { TechnicalRuleDataFieldName, ValidFeatureId } from '@kbn/rule-data-utils';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Ecs } from '@kbn/core/server';
+import type { Ecs } from '@kbn/core/server';
 import { IEsSearchRequest, IEsSearchResponse } from '@kbn/data-plugin/common';
 import type {
   QueryDslFieldAndFormat,

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { RuleAction as RuleActionOrig } from '@kbn/triggers-actions-ui-plugin/public';
-import {
+import type {
   IndexActionParams,
   PagerDutyActionParams,
   ServerLogActionParams,

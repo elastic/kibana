@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { demodata } from '../../../canvas_plugin_src/functions/server/demodata';
+import type { demodata } from '../../../canvas_plugin_src/functions/server/demodata';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { DemoRows } from '../../../canvas_plugin_src/functions/server/demodata/demo_rows_types';

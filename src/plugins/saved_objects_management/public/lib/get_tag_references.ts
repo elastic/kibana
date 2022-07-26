@@ -7,7 +7,7 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedObjectsFindOptionsReference } from '@kbn/core/server';
+import type { SavedObjectsFindOptionsReference } from '@kbn/core/server';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 
 export const getTagFindReferences = ({

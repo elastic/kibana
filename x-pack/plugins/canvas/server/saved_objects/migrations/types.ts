@@ -5,7 +5,7 @@
  * 2.0.
  */
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ExpressionsServiceSetup } from '@kbn/expressions-plugin/public';
+import type { ExpressionsServiceSetup } from '@kbn/expressions-plugin/public';
 
 export interface CanvasSavedObjectTypeMigrationsDeps {
   expressions: ExpressionsServiceSetup;

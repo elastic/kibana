@@ -24,7 +24,7 @@ import { Layout as AwsRDSLayout } from './aws_rds/layout';
 import { Layout as AwsSQSLayout } from './aws_sqs/layout';
 import { InventoryItemType } from './types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LayoutProps } from '../../public/pages/metrics/metric_detail/types';
+import type { LayoutProps } from '../../public/pages/metrics/metric_detail/types';
 
 interface Layouts {
   [type: string]: ReactNode;
