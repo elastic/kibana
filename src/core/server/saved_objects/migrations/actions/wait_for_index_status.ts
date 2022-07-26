@@ -91,15 +91,10 @@ export function waitForIndexStatus({
       )
       .then((res) => {
         if (res.timed_out === true) {
-          if (status === 'green') {
+          if (status === 'green' || status === 'yellow') {
             return Either.left({
-              type: 'index_not_green_timeout' as const,
-              message: `[index_not_green_timeout] Timeout waiting for the status of the [${index}] index to become '${status}'`,
-            });
-          } else if (status === 'yellow') {
-            return Either.left({
-              type: 'index_not_yellow_timeout' as const,
-              message: `[index_not_yellow_timeout] Timeout waiting for the status of the [${index}] index to become '${status}'`,
+              type: `index_not_${status}_timeout` as const,
+              message: `[index_not_${status}_timeout] Timeout waiting for the status of the [${index}] index to become '${status}'`,
             });
           }
         }

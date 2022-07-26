@@ -37,8 +37,8 @@ export { cloneIndex } from './clone_index';
 
 export type { WaitForIndexStatusParams, IndexNotYellowTimeout } from './wait_for_index_status';
 import {
-  IndexNotGreenTimeout,
-  IndexNotYellowTimeout,
+  type IndexNotGreenTimeout,
+  type IndexNotYellowTimeout,
   waitForIndexStatus,
 } from './wait_for_index_status';
 

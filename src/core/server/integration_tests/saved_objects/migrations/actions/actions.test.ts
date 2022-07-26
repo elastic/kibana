@@ -1598,6 +1598,20 @@ describe('migration actions', () => {
     afterAll(async () => {
       await client.indices.delete({ index: 'red_then_yellow_index' }).catch();
       await client.indices.delete({ index: 'yellow_then_green_index' }).catch();
+      await client.indices.delete({ index: 'create_new_index' }).catch();
+    });
+    it('resolves right after waiting for an index status to become green when cluster state is not propagated within the timeout', async () => {
+      // By specifying a very short timeout Elasticsearch will respond before the shard is allocated
+      const createIndexPromise = createIndex({
+        client,
+        indexName: 'create_new_index',
+        mappings: undefined as any,
+        timeout: '1nanos',
+      })();
+      await expect(createIndexPromise).resolves.toEqual({
+        _tag: 'Right',
+        right: 'create_index_succeeded',
+      });
     });
     it('resolves left if an existing index status does not become green', async () => {
       expect.assertions(2);
@@ -1658,22 +1672,19 @@ describe('migration actions', () => {
     });
     it('resolves right after waiting for an existing index status to become green', async () => {
       expect.assertions(2);
-      // Create a red index
+      // Create a yellow index
       await client.indices
-        .create(
-          {
-            index: 'yellow_then_green_index',
-            timeout: '5s',
-            body: {
-              mappings: { properties: {} },
-              settings: {
-                // Allocate 1 replica so that this index stays yellow
-                number_of_replicas: '1',
-              },
+        .create({
+          index: 'yellow_then_green_index',
+          timeout: '5s',
+          body: {
+            mappings: { properties: {} },
+            settings: {
+              // Allocate 1 replica so that this index stays yellow
+              number_of_replicas: '1',
             },
           },
-          { maxRetries: 0 /** handle retry ourselves for now */ }
-        )
+        })
         .catch((e) => {
           /** ignore */
         });
@@ -1713,7 +1724,7 @@ describe('migration actions', () => {
       await client.cluster.putSettings({ persistent: { cluster: { max_shards_per_node: 1 } } });
       const createIndexPromise = createIndex({
         client,
-        indexName: 'red_then_yellow_index_1',
+        indexName: 'create_index_1',
         mappings: undefined as any,
       })();
       await expect(createIndexPromise).resolves.toMatchInlineSnapshot(`

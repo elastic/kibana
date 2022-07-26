@@ -15,7 +15,7 @@ import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
-import { PIT_KEEP_ALIVE_10MINS } from './open_pit';
+import { DEFAULT_PIT_KEEP_ALIVE } from './open_pit';
 
 /** @internal */
 export interface ReadWithPit {
@@ -60,7 +60,7 @@ export const readWithPit =
         // natural order of the index which is the most efficient option
         // as order is not important for the migration
         sort: '_shard_doc:asc',
-        pit: { id: pitId, keep_alive: PIT_KEEP_ALIVE_10MINS },
+        pit: { id: pitId, keep_alive: DEFAULT_PIT_KEEP_ALIVE },
         size: batchSize,
         search_after: searchAfter,
         /**

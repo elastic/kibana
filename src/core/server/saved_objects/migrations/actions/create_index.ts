@@ -22,7 +22,7 @@ import {
   INDEX_AUTO_EXPAND_REPLICAS,
   WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
 } from './constants';
-import { IndexNotGreenTimeout, waitForIndexStatus } from './wait_for_index_status';
+import { type IndexNotGreenTimeout, waitForIndexStatus } from './wait_for_index_status';
 import { isClusterShardLimitExceeded } from './es_errors';
 
 function aliasArrayToRecord(aliases: string[]): Record<string, estypes.IndicesAlias> {
@@ -44,6 +44,7 @@ export interface CreateIndexParams {
   indexName: string;
   mappings: IndexMapping;
   aliases?: string[];
+  timeout?: string;
 }
 /**
  * Creates an index with the given mappings
@@ -60,6 +61,7 @@ export const createIndex = ({
   indexName,
   mappings,
   aliases = [],
+  timeout = DEFAULT_TIMEOUT,
 }: CreateIndexParams): TaskEither.TaskEither<
   RetryableEsClientError | IndexNotGreenTimeout | ClusterShardLimitExceeded,
   'create_index_succeeded'
@@ -79,7 +81,7 @@ export const createIndex = ({
         // Timeout for the cluster state to update and all shards to become
         // available. If the request doesn't complete within timeout,
         // acknowledged or shards_acknowledged would be false.
-        timeout: DEFAULT_TIMEOUT,
+        timeout,
         body: {
           mappings,
           aliases: aliasesObject,

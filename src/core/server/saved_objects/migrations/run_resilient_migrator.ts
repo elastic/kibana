@@ -32,7 +32,7 @@ import type { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
  * retries. This way we get exponential back-off and logging for failed
  * actions.
  */
-export const MIGRATION_CLIENT_OPTIONS = { maxRetries: 0, requestTimeout: '120s' };
+export const MIGRATION_CLIENT_OPTIONS = { maxRetries: 0, requestTimeout: 120_000 };
 
 /**
  * Migrates the provided indexPrefix index using a resilient algorithm that is

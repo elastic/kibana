@@ -25,7 +25,7 @@ export interface OpenPitParams {
   index: string;
 }
 // how long ES should keep PIT alive
-export const PIT_KEEP_ALIVE_10MINS = '10m';
+export const DEFAULT_PIT_KEEP_ALIVE = '10m';
 /*
  * Creates a lightweight view of data when the request has been initiated.
  * See https://www.elastic.co/guide/en/elasticsearch/reference/current/point-in-time-api.html
@@ -39,7 +39,7 @@ export const openPit =
     return client
       .openPointInTime({
         index,
-        keep_alive: PIT_KEEP_ALIVE_10MINS,
+        keep_alive: DEFAULT_PIT_KEEP_ALIVE,
       })
       .then((response) => Either.right({ pitId: response.id }))
       .catch(catchRetryableEsClientErrors);

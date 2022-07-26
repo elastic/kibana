@@ -41,7 +41,7 @@ export const fetchIndices =
         ignore_unavailable: true, // Don't return an error for missing indices. Note this *will* include closed indices, the docs are misleading https://github.com/elastic/elasticsearch/issues/63607
       })
       .then((body) => {
-        return Either.right(body);
+        return Either.right(body as FetchIndexResponse);
       })
       .catch(catchRetryableEsClientErrors);
   };
