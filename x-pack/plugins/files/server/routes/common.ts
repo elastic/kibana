@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/config-schema';
 import type { ResponseHeaders } from '@kbn/core/server';
 import type { File } from '../../common/types';
 
@@ -24,11 +23,3 @@ export function getDownloadedFileName(file: File): string {
   }
   return file.name;
 }
-
-const fileNameRegex = /^["]+$/;
-export const fileNameSchema = schema.string({
-  maxLength: 256,
-  validate: (v) => {
-    return fileNameRegex.test(v) ? `File name must not contain any double quotes` : undefined;
-  },
-});

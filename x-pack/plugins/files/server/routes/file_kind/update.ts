@@ -11,7 +11,7 @@ import type { UpdateFileKindHttpEndpoint } from '../../../common/api_routes';
 import type { FileKindsRequestHandler } from './types';
 import { getById } from './helpers';
 
-import * as commonSchemas from './common_schemas';
+import * as commonSchemas from '../common_schemas';
 
 export const method = 'patch' as const;
 
