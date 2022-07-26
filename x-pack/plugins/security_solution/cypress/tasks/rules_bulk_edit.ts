@@ -25,6 +25,7 @@ import {
   RULES_BULK_EDIT_TAGS,
   RULES_BULK_EDIT_FORM_CONFIRM_BTN,
   APPLY_TIMELINE_RULE_BULK_MENU_ITEM,
+  RULES_BULK_EDIT_OVERWRITE_TAGS_CHECKBOX,
 } from '../screens/rules_bulk_edit';
 
 export const clickApplyTimelineTemplatesMenuItem = () => {
@@ -105,3 +106,11 @@ export const waitForMixedRulesBulkEditModal = (customRulesCount: number) => {
     `The action will only be applied to ${customRulesCount} Custom rules you've selected`
   );
 };
+
+export const checkOverwriteTagsCheckbox = () => {
+  cy.get(RULES_BULK_EDIT_OVERWRITE_TAGS_CHECKBOX)
+  .should('have.text', "Overwrite all selected rules' tags")
+  .click()
+  .get('input')
+  .should('be.checked');
+}
