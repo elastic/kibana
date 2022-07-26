@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { ErrorCode } from '../../../common/types/error_codes';
 
 import { fetchConnectorByIndexName, fetchConnectors } from '../../lib/connectors/fetch_connectors';
-import { fetchCrawler } from '../../lib/crawlers/fetch_crawler';
 
 import { createApiIndex } from '../../lib/indices/create_index';
 import { fetchIndex } from '../../lib/indices/fetch_index';
