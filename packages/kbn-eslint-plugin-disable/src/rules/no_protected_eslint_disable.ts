@@ -80,7 +80,7 @@ const create = (context: Eslint.Rule.RuleContext): Eslint.Rule.RuleListener => {
               (rule) => !rule.includes(disabledProtectedRule)
             );
             const fixedComment = ` ${parsedEslintDisable.disableValueType} ${remainingRules.join(
-              ','
+              ', '
             )}${parsedEslintDisable.type === 'Block' ? ' ' : ''}`;
             const rangeToFix: Eslint.AST.Range =
               parsedEslintDisable.type === 'Line'

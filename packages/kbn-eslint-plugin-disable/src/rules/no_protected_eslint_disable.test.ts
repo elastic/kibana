@@ -261,6 +261,66 @@ for (const [name, tester] of [tsTester, babelTester]) {
             const a = 1;
           `,
         },
+        {
+          filename: 'foo.ts',
+          code: dedent`
+            /* eslint-disable @kbn/disable/no_protected_eslint_disable, no-var */
+            const a = 1;
+          `,
+          errors: [
+            {
+              line: 1,
+              messageId: PROTECTED_DISABLE_MSG_ID,
+              data: {
+                disabledRuleName: '@kbn/disable/no_protected_eslint_disable',
+              },
+            },
+          ],
+          output: dedent`
+            /* eslint-disable no-var */
+            const a = 1;
+          `,
+        },
+        {
+          filename: 'foo.ts',
+          code: dedent`
+            /* eslint-disable prefer-const, @kbn/disable/no_protected_eslint_disable, no-var */
+            const a = 1;
+          `,
+          errors: [
+            {
+              line: 1,
+              messageId: PROTECTED_DISABLE_MSG_ID,
+              data: {
+                disabledRuleName: '@kbn/disable/no_protected_eslint_disable',
+              },
+            },
+          ],
+          output: dedent`
+            /* eslint-disable prefer-const, no-var */
+            const a = 1;
+          `,
+        },
+        {
+          filename: 'foo.ts',
+          code: dedent`
+            /* eslint-disable no-var, @kbn/disable/no_protected_eslint_disable, prefer-const */
+            const a = 1;
+          `,
+          errors: [
+            {
+              line: 1,
+              messageId: PROTECTED_DISABLE_MSG_ID,
+              data: {
+                disabledRuleName: '@kbn/disable/no_protected_eslint_disable',
+              },
+            },
+          ],
+          output: dedent`
+            /* eslint-disable no-var, prefer-const */
+            const a = 1;
+          `,
+        },
         // generic invalid tests for disable comments
         {
           filename: 'foo.ts',
