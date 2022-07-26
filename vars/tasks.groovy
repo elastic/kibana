@@ -156,6 +156,7 @@ def functionalXpack(Map params = [:]) {
       }
     }
 
+    // Skipped, process is hanging https://github.com/elastic/kibana/issues/137185
     // whenChanged([
     //   'x-pack/plugins/synthetics/',
     // ]) {
