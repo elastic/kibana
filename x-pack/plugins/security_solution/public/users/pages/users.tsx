@@ -90,7 +90,7 @@ const UsersComponent = () => {
 
   const { tabName } = useParams<{ tabName: string }>();
   const tabsFilters: Filter[] = React.useMemo(() => {
-    if (tabName === UsersTableType.alerts || tabName === UsersTableType.events) {
+    if (tabName === UsersTableType.events) {
       return filters.length > 0 ? [...filters, ...userNameExistsFilter] : userNameExistsFilter;
     }
 

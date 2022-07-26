@@ -19,8 +19,8 @@ export const useDashboardButtonHref = ({
   from,
   title,
 }: {
-  to: string;
-  from: string;
+  to?: string;
+  from?: string;
   title: string;
 }) => {
   const {
@@ -39,7 +39,7 @@ export const useDashboardButtonHref = ({
             id?: string;
           }>;
         }) => {
-          if (DashboardsSO?.savedObjects?.length) {
+          if (DashboardsSO?.savedObjects?.length && to && from) {
             const dashboardUrl = await dashboard?.locator?.getUrl({
               dashboardId: DashboardsSO.savedObjects[0].id,
               timeRange: {

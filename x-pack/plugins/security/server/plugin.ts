@@ -399,7 +399,7 @@ export class SecurityPlugin
     });
     this.session = session;
 
-    this.userProfileStart = this.userProfileService.start({ clusterClient });
+    this.userProfileStart = this.userProfileService.start({ clusterClient, session });
 
     const config = this.getConfig();
     this.authenticationStart = this.authenticationService.start({
@@ -444,6 +444,7 @@ export class SecurityPlugin
         mode: this.authorizationSetup!.mode,
       },
       userProfiles: {
+        getCurrent: this.userProfileStart.getCurrent,
         bulkGet: this.userProfileStart.bulkGet,
         suggest: this.userProfileStart.suggest,
       },
