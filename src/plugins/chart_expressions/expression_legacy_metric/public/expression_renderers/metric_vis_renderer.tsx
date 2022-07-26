@@ -8,8 +8,7 @@
 
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-
-import { ThemeServiceStart } from '@kbn/core/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   ExpressionValueVisDimension,
@@ -20,8 +19,11 @@ import {
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common/expression_renderers';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { Datatable } from '@kbn/expressions-plugin';
+import { Datatable } from '@kbn/expressions-plugin/common';
+import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { ExpressionLegacyMetricPluginStart } from '../plugin';
 import { EXPRESSION_METRIC_NAME, MetricVisRenderConfig, VisParams } from '../../common';
+import { extractContainerType, extractVisualizationType } from '../../../common';
 
 // @ts-ignore
 const MetricVisComponent = lazy(() => import('../components/metric_component'));
@@ -53,39 +55,59 @@ async function metricFilterable(
   );
 }
 
-export const getMetricVisRenderer = (
-  theme: ThemeServiceStart
-): (() => ExpressionRenderDefinition<MetricVisRenderConfig>) => {
-  return () => ({
-    name: EXPRESSION_METRIC_NAME,
-    displayName: 'metric visualization',
-    reuseDomNode: true,
-    render: async (domNode, { visData, visConfig }, handlers) => {
-      handlers.onDestroy(() => {
-        unmountComponentAtNode(domNode);
-      });
+/** @internal **/
+export interface ExpressionMetricVisRendererDependencies {
+  getStartDeps: StartServicesGetter<ExpressionLegacyMetricPluginStart>;
+}
 
-      const filterable = await metricFilterable(visConfig.dimensions, visData, handlers);
+export const getMetricVisRenderer: (
+  deps: ExpressionMetricVisRendererDependencies
+) => ExpressionRenderDefinition<MetricVisRenderConfig> = ({ getStartDeps }) => ({
+  name: EXPRESSION_METRIC_NAME,
+  displayName: 'metric visualization',
+  reuseDomNode: true,
+  render: async (domNode, { visData, visConfig }, handlers) => {
+    const { core, plugins } = getStartDeps();
 
-      render(
-        <KibanaThemeProvider theme$={theme.theme$}>
-          <VisualizationContainer
-            data-test-subj="legacyMtrVis"
-            className="legacyMtrVis"
-            showNoResult={!visData.rows?.length}
-            handlers={handlers}
-          >
-            <MetricVisComponent
-              visData={visData}
-              visParams={visConfig}
-              renderComplete={() => handlers.done()}
-              fireEvent={handlers.event}
-              filterable={filterable}
-            />
-          </VisualizationContainer>
-        </KibanaThemeProvider>,
-        domNode
-      );
-    },
-  });
-};
+    handlers.onDestroy(() => {
+      unmountComponentAtNode(domNode);
+    });
+
+    const filterable = await metricFilterable(visConfig.dimensions, visData, handlers);
+
+    const renderComplete = () => {
+      const executionContext = handlers.getExecutionContext();
+      const containerType = extractContainerType(executionContext);
+      const visualizationType = extractVisualizationType(executionContext);
+
+      if (containerType && visualizationType) {
+        plugins.usageCollection?.reportUiCounter(containerType, METRIC_TYPE.COUNT, [
+          `render_${visualizationType}_legacy_metric`,
+        ]);
+      }
+
+      handlers.done();
+    };
+
+    render(
+      <KibanaThemeProvider theme$={core.theme.theme$}>
+        <VisualizationContainer
+          data-test-subj="legacyMtrVis"
+          className="legacyMtrVis"
+          showNoResult={!visData.rows?.length}
+          renderComplete={renderComplete}
+          handlers={handlers}
+        >
+          <MetricVisComponent
+            visData={visData}
+            visParams={visConfig}
+            renderComplete={renderComplete}
+            fireEvent={handlers.event}
+            filterable={filterable}
+          />
+        </VisualizationContainer>
+      </KibanaThemeProvider>,
+      domNode
+    );
+  },
+});

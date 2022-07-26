@@ -11,9 +11,8 @@ import type { BuildThreatEnrichmentOptions, GetMatchedThreats } from './types';
 import { getThreatList } from './get_threat_list';
 
 export const buildThreatEnrichment = ({
-  buildRuleMessage,
   exceptionItems,
-  logger,
+  ruleExecutionLogger,
   services,
   threatFilters,
   threatIndex,
@@ -37,14 +36,13 @@ export const buildThreatEnrichment = ({
     const threatResponse = await getThreatList({
       esClient: services.scopedClusterClient.asCurrentUser,
       exceptionItems,
-      threatFilters: [...threatFilters, matchedThreatsFilter],
-      query: threatQuery,
-      language: threatLanguage,
       index: threatIndex,
-      searchAfter: undefined,
-      logger,
-      buildRuleMessage,
+      language: threatLanguage,
       perPage: undefined,
+      query: threatQuery,
+      ruleExecutionLogger,
+      searchAfter: undefined,
+      threatFilters: [...threatFilters, matchedThreatsFilter],
       threatListConfig: {
         _source: [`${threatIndicatorPath}.*`, 'threat.feed.*'],
         fields: undefined,

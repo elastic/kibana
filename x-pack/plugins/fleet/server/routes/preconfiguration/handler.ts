@@ -7,7 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
-import type { PreconfiguredAgentPolicy } from '../../../common';
+import type { PreconfiguredAgentPolicy } from '../../../common/types';
 
 import type { FleetRequestHandler } from '../../types';
 import type {

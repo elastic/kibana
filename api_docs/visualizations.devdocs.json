@@ -1464,7 +1464,7 @@
         "label": "VisualizationContainer",
         "description": [],
         "signature": [
-          "({ \"data-test-subj\": dataTestSubj, className, children, handlers, showNoResult, error, }: ",
+          "({ \"data-test-subj\": dataTestSubj, className, children, handlers, showNoResult, error, renderComplete, }: ",
           "VisualizationContainerProps",
           ") => JSX.Element"
         ],
@@ -1476,7 +1476,7 @@
             "id": "def-public.VisualizationContainer.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  'data-test-subj': dataTestSubj = '',\n  className,\n  children,\n  handlers,\n  showNoResult = false,\n  error,\n}",
+            "label": "{\n  'data-test-subj': dataTestSubj = '',\n  className,\n  children,\n  handlers,\n  showNoResult = false,\n  error,\n  renderComplete,\n}",
             "description": [],
             "signature": [
               "VisualizationContainerProps"
