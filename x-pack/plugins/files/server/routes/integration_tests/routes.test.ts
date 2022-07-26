@@ -214,7 +214,7 @@ describe('File HTTP API', () => {
 
       const {
         body: { token },
-      } = await request.post(root, `/api/files/share/${fileKind}/${id}`).send({}).expect(200);
+      } = await request.post(root, `/api/files/shares/${fileKind}/${id}`).send({}).expect(200);
 
       await request
         .get(root, `/api/files/public/blob/myfilename.pdf?token=${token}`)

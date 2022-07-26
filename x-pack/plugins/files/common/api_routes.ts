@@ -12,7 +12,7 @@ export const API_BASE_PATH = `/api/${PLUGIN_ID}`;
 
 export const FILES_API_BASE_PATH = `${API_BASE_PATH}/files`;
 
-export const FILES_SHARE_API_BASE_PATH = `${API_BASE_PATH}/share`;
+export const FILES_SHARE_API_BASE_PATH = `${API_BASE_PATH}/shares`;
 
 export const FILES_PUBLIC_API_BASE_PATH = `${API_BASE_PATH}/public`;
 
