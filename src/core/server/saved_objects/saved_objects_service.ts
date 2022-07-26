@@ -23,6 +23,7 @@ import type {
   ISavedObjectsRepository,
   SavedObjectsClientContract,
 } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsRepositoryFactory } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsClient,
   SavedObjectsClientProvider,
@@ -239,33 +240,6 @@ export interface SavedObjectsServiceStart {
 }
 
 export type InternalSavedObjectsServiceStart = SavedObjectsServiceStart;
-
-/**
- * Factory provided when invoking a {@link SavedObjectsClientFactoryProvider | client factory provider}
- * See {@link SavedObjectsServiceSetup.setClientFactoryProvider}
- *
- * @public
- */
-export interface SavedObjectsRepositoryFactory {
-  /**
-   * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
-   * uses the credentials from the passed in request to authenticate with
-   * Elasticsearch.
-   *
-   * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
-   */
-  createScopedRepository: (
-    req: KibanaRequest,
-    includedHiddenTypes?: string[]
-  ) => ISavedObjectsRepository;
-  /**
-   * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
-   * uses the internal Kibana user for authenticating with Elasticsearch.
-   *
-   * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
-   */
-  createInternalRepository: (includedHiddenTypes?: string[]) => ISavedObjectsRepository;
-}
 
 /** @internal */
 export interface SavedObjectsSetupDeps {

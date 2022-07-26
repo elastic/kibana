@@ -12,52 +12,7 @@ import { PriorityCollection } from './priority_collection';
 import { SavedObjectsRepositoryFactory } from '../../saved_objects_service';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 
-/**
- * Options passed to each SavedObjectsClientWrapperFactory to aid in creating the wrapper instance.
- * @public
- */
-export interface SavedObjectsClientWrapperOptions {
-  client: SavedObjectsClientContract;
-  typeRegistry: ISavedObjectTypeRegistry;
-  request: KibanaRequest;
-}
 
-/**
- * Describes the factory used to create instances of Saved Objects Client Wrappers.
- * @public
- */
-export type SavedObjectsClientWrapperFactory = (
-  options: SavedObjectsClientWrapperOptions
-) => SavedObjectsClientContract;
-
-/**
- * Describes the factory used to create instances of the Saved Objects Client.
- * @public
- */
-export type SavedObjectsClientFactory = ({
-  request,
-  includedHiddenTypes,
-}: {
-  request: KibanaRequest;
-  includedHiddenTypes?: string[];
-}) => SavedObjectsClientContract;
-
-/**
- * Provider to invoke to retrieve a {@link SavedObjectsClientFactory}.
- * @public
- */
-export type SavedObjectsClientFactoryProvider = (
-  repositoryFactory: SavedObjectsRepositoryFactory
-) => SavedObjectsClientFactory;
-
-/**
- * Options to control the creation of the Saved Objects Client.
- * @public
- */
-export interface SavedObjectsClientProviderOptions {
-  excludedWrappers?: string[];
-  includedHiddenTypes?: string[];
-}
 
 /**
  * @internal

@@ -7,6 +7,14 @@
  */
 
 export type {
+  SavedObjectsClientFactory,
+  SavedObjectsClientFactoryProvider,
+  SavedObjectsClientWrapperFactory,
+  SavedObjectsRepositoryFactory,
+  SavedObjectsClientProviderOptions,
+  SavedObjectsClientWrapperOptions,
+} from './client_factory';
+export type {
   SavedObjectsExportTransform,
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportByTypeOptions,
