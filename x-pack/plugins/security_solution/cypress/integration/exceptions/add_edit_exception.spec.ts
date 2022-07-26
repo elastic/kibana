@@ -19,6 +19,7 @@ import { login, visitWithoutDateRange } from '../../tasks/login';
 import {
   addsException,
   addsExceptionFromRuleSettings,
+  editException,
   goToAlertsTab,
   goToExceptionsTab,
   removeException,
@@ -27,6 +28,8 @@ import {
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 import { deleteAlertsAndRules } from '../../tasks/common';
+import { EXCEPTION_EDIT_FLYOUT_SAVE_BTN, EXCEPTION_ITEM_CONTAINER, FIELD_INPUT } from '../../screens/exceptions';
+import { addExceptionEntryFieldValueOfItemX, addExceptionEntryFieldValueValue } from '../../tasks/exceptions';
 
 describe('Adds rule exception', () => {
   const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1 alert';
@@ -121,5 +124,25 @@ describe('Adds rule exception', () => {
 
     cy.get(ALERTS_COUNT).should('exist');
     cy.get(NUMBER_OF_ALERTS).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS}`);
+  });
+
+  it('Edits an exception', () => {
+    goToExceptionsTab();
+    addsExceptionFromRuleSettings(getException());
+
+    editException();
+
+    cy.get(EXCEPTION_ITEM_CONTAINER)
+      .eq(0)
+      .find(FIELD_INPUT)
+      .eq(0)
+      .should('have.text', 'agent.name');
+
+    addExceptionEntryFieldValueOfItemX('user.name{downarrow}{enter}', 0, 0);
+    addExceptionEntryFieldValueValue('test', 0);
+    
+    cy.get(EXCEPTION_EDIT_FLYOUT_SAVE_BTN).click();
+    cy.get(EXCEPTION_EDIT_FLYOUT_SAVE_BTN).should('have.attr', 'disabled');
+    cy.get(EXCEPTION_EDIT_FLYOUT_SAVE_BTN).should('not.exist');
   });
 });

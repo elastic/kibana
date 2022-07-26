@@ -147,6 +147,12 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
   const [indexPattern, setIndexPattern] = useState<DataViewBase>(indexIndexPatterns);
 
   useEffect(() => {
+    if (!isIndexPatternLoading && !dataViewId) {
+      setIndexPattern(indexIndexPatterns);
+    }
+  }, [isIndexPatternLoading, indexIndexPatterns]);
+
+  useEffect(() => {
     const fetchSingleDataView = async () => {
       if (dataViewId != null && dataViewId !== '') {
         const dv = await data.dataViews.get(dataViewId);

@@ -170,6 +170,12 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   const [indexPattern, setIndexPattern] = useState<DataViewBase>(indexIndexPatterns);
 
   useEffect(() => {
+    if (!isIndexPatternLoading && !dataViewId) {
+      setIndexPattern(indexIndexPatterns);
+    }
+  }, [isIndexPatternLoading, indexIndexPatterns]);
+
+  useEffect(() => {
     const fetchSingleDataView = async () => {
       const hasDataViewId = dataViewId || maybeRule?.data_view_id || null;
       if (hasDataViewId) {
@@ -180,9 +186,6 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
 
     fetchSingleDataView();
   }, [data.dataViews, dataViewId, maybeRule?.data_view_id, setIndexPattern]);
-
-  const selectedIndexPattern =
-    dataViewId || maybeRule?.data_view_id ? indexPattern : indexIndexPatterns;
 
   const handleBuilderOnChange = useCallback(
     ({
@@ -529,7 +532,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
                 listNamespaceType: ruleExceptionList.namespace_type,
                 listTypeSpecificIndexPatternFilter: filterIndexPatterns,
                 ruleName,
-                indexPatterns: selectedIndexPattern,
+                indexPatterns: indexPattern,
                 isOrDisabled: isExceptionBuilderFormDisabled,
                 isAndDisabled: isExceptionBuilderFormDisabled,
                 isNestedDisabled: isExceptionBuilderFormDisabled,
