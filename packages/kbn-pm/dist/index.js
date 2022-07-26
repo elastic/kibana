@@ -1731,6 +1731,7 @@ class CiStatsReporter {
       body: {
         buildId,
         defaultMeta: options === null || options === void 0 ? void 0 : options.defaultMeta,
+        buildkiteJobId: process.env.BUILDKITE_JOB_ID,
         metrics
       },
       bodyDesc: `metrics: ${metrics.map(({
