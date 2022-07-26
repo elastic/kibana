@@ -39,7 +39,12 @@ export async function update(
   { caseID, updateRequest: queryParams }: UpdateArgs,
   clientArgs: CasesClientArgs
 ): Promise<CaseResponse> {
-  const { attachmentService, unsecuredSavedObjectsClient, logger, authorization } = clientArgs;
+  const {
+    services: { attachmentService },
+    unsecuredSavedObjectsClient,
+    logger,
+    authorization,
+  } = clientArgs;
 
   try {
     const {
@@ -59,7 +64,7 @@ export async function update(
       throw Boom.notFound(`This comment ${queryCommentId} does not exist anymore.`);
     }
 
-    await authorization.ensureAuthorizedSavedObject({
+    await authorization.ensureAuthorized({
       entities: [{ owner: myComment.attributes.owner, id: myComment.id }],
       operation: Operations.updateComment,
     });

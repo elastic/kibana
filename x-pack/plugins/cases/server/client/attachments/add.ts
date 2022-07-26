@@ -65,7 +65,7 @@ export const addComment = async (
   try {
     const savedObjectID = SavedObjectsUtils.generateId();
 
-    await authorization.ensureAuthorizedSavedObject({
+    await authorization.ensureAuthorized({
       operation: Operations.createComment,
       entities: [{ owner: comment.owner, id: savedObjectID }],
     });

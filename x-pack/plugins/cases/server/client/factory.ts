@@ -16,9 +16,9 @@ import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/s
 import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { LensServerPluginSetup } from '@kbn/lens-plugin/server';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { SAVED_OBJECT_TYPES } from '../../common/constants';
 import { Authorization } from '../authorization/authorization';
-import { GetSpaceFn } from '../authorization/types';
 import {
   CaseConfigureService,
   CasesService,
@@ -32,25 +32,19 @@ import { AuthorizationAuditLogger } from '../authorization';
 import { CasesClient, createCasesClient } from '.';
 import { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 import { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
+import { CasesServices } from './types';
+import { UserProfileService } from '../services/user_profiles';
 
+// TODO: refactor this structure into more sections
 interface CasesClientFactoryArgs {
   securityPluginSetup?: SecurityPluginSetup;
   securityPluginStart?: SecurityPluginStart;
-  getSpace: GetSpaceFn;
+  spacesPluginStart: SpacesPluginStart;
   featuresPluginStart: FeaturesPluginStart;
   actionsPluginStart: ActionsPluginStart;
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
-}
-
-interface CasesServices {
-  alertsService: AlertService;
-  caseService: CasesService;
-  caseConfigureService: CaseConfigureService;
-  connectorMappingsService: ConnectorMappingsService;
-  userActionService: CaseUserActionService;
-  attachmentService: AttachmentService;
 }
 
 /**
@@ -99,7 +93,7 @@ export class CasesClientFactory {
     const auth = await Authorization.create({
       request,
       securityAuth: this.options.securityPluginStart?.authz,
-      getSpace: this.options.getSpace,
+      spaces: this.options.spacesPluginStart,
       features: this.options.featuresPluginStart,
       auditLogger: new AuthorizationAuditLogger(auditLogger),
       logger: this.logger,
@@ -112,22 +106,16 @@ export class CasesClientFactory {
       excludedWrappers: ['security'],
     });
 
-    const attachmentService = new AttachmentService(
-      this.logger,
-      this.options.persistableStateAttachmentTypeRegistry
-    );
-
-    const caseService = new CasesService({
-      log: this.logger,
-      authentication: this.options?.securityPluginStart?.authc,
+    const services = this.createServices({
       unsecuredSavedObjectsClient,
-      attachmentService,
+      esClient: scopedClusterClient,
+      request,
     });
-    const userInfo = caseService.getUser({ request });
+
+    const userInfo = services.caseService.getUser({ request });
 
     return createCasesClient({
-      // TODO: move this into its own property called services
-      ...this.createServices({ unsecuredSavedObjectsClient, esClient: scopedClusterClient }),
+      services,
       unsecuredSavedObjectsClient,
       // We only want these fields from the userInfo object
       user: { username: userInfo.username, email: userInfo.email, full_name: userInfo.full_name },
@@ -137,16 +125,17 @@ export class CasesClientFactory {
       actionsClient: await this.options.actionsPluginStart.getActionsClientWithRequest(request),
       persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
       externalReferenceAttachmentTypeRegistry: this.options.externalReferenceAttachmentTypeRegistry,
-      userProfiles: this.options.securityPluginStart?.userProfiles,
     });
   }
 
   private createServices({
     unsecuredSavedObjectsClient,
     esClient,
+    request,
   }: {
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
     esClient: ElasticsearchClient;
+    request: KibanaRequest;
   }): CasesServices {
     if (!this.isInitialized || !this.options) {
       throw new Error('CasesClientFactory must be initialized before calling create');
@@ -174,6 +163,12 @@ export class CasesClientFactory {
         this.options.persistableStateAttachmentTypeRegistry
       ),
       attachmentService,
+      userProfileService: new UserProfileService({
+        log: this.logger,
+        request,
+        spaces: this.options.spacesPluginStart,
+        security: this.options.securityPluginStart,
+      }),
     };
   }
 }

@@ -50,8 +50,8 @@ function shouldCloseByPush(
 
 const changeAlertsStatusToClose = async (
   caseId: string,
-  caseService: CasesClientArgs['caseService'],
-  alertsService: CasesClientArgs['alertsService']
+  caseService: CasesClientArgs['services']['caseService'],
+  alertsService: CasesClientArgs['services']['alertsService']
 ) => {
   const alertAttachments = (await caseService.getAllCaseComments({
     id: [caseId],
@@ -99,11 +99,13 @@ export const push = async (
 ): Promise<CaseResponse> => {
   const {
     unsecuredSavedObjectsClient,
-    attachmentService,
-    caseService,
-    caseConfigureService,
-    userActionService,
-    alertsService,
+    services: {
+      attachmentService,
+      caseService,
+      caseConfigureService,
+      userActionService,
+      alertsService,
+    },
     actionsClient,
     user,
     logger,
@@ -121,7 +123,7 @@ export const push = async (
       casesClient.userActions.getAll({ caseId }),
     ]);
 
-    await authorization.ensureAuthorizedSavedObject({
+    await authorization.ensureAuthorized({
       entities: [{ owner: theCase.owner, id: caseId }],
       operation: Operations.pushCase,
     });

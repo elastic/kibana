@@ -236,12 +236,10 @@ export const update = async (
 ): Promise<CasesResponse> => {
   const {
     unsecuredSavedObjectsClient,
-    caseService,
-    userActionService,
+    services: { caseService, userActionService, alertsService },
     user,
     logger,
     authorization,
-    alertsService,
   } = clientArgs;
   const query = pipe(
     excess(CasesPatchRequestRt).decode(cases),
@@ -263,7 +261,7 @@ export const update = async (
       query.cases
     );
 
-    await authorization.ensureAuthorizedSavedObject({
+    await authorization.ensureAuthorized({
       entities: casesToAuthorize,
       operation: Operations.updateCase,
     });

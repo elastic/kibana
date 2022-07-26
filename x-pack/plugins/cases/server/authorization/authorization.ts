@@ -9,7 +9,8 @@ import { KibanaRequest, Logger } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
-import { AuthFilterHelpers, GetSpaceFn, OwnerEntity } from './types';
+import { Space, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { AuthFilterHelpers, OwnerEntity } from './types';
 import { getOwnersFilter } from './utils';
 import { AuthorizationAuditLogger, OperationDetails } from '.';
 import { createCaseError } from '../common/error';
@@ -47,22 +48,26 @@ export class Authorization {
   static async create({
     request,
     securityAuth,
-    getSpace,
+    spaces,
     features,
     auditLogger,
     logger,
   }: {
     request: KibanaRequest;
     securityAuth?: SecurityPluginStart['authz'];
-    getSpace: GetSpaceFn;
+    spaces: SpacesPluginStart;
     features: FeaturesPluginStart;
     auditLogger: AuthorizationAuditLogger;
     logger: Logger;
   }): Promise<Authorization> {
+    const getSpace = async (): Promise<Space> => {
+      return spaces.spacesService.getActiveSpace(request);
+    };
+
     // Since we need to do async operations, this static method handles that before creating the Auth class
     let caseOwners: Set<string>;
     try {
-      const disabledFeatures = new Set((await getSpace(request))?.disabledFeatures ?? []);
+      const disabledFeatures = new Set((await getSpace()).disabledFeatures ?? []);
 
       caseOwners = new Set(
         features
@@ -96,7 +101,7 @@ export class Authorization {
    *  to be authorized
    * @param operation information describing the operation attempting to be authorized
    */
-  public async ensureAuthorizedSavedObject({
+  public async ensureAuthorized({
     entities,
     operation,
   }: {
@@ -132,26 +137,26 @@ export class Authorization {
    * @param owners an array of owners that the user is attempting to be authorized as
    * @param operation information describing the operation attempting to be authorized
    */
-  public async ensureAuthorizedOwners({
-    owners,
-    operation,
-  }: {
-    owners: string[];
-    operation: OperationDetails;
-  }) {
-    const logSavedObjects = (error?: Error) => {
-      for (const owner of owners) {
-        this.auditLogger.log({ operation, error, entity: { owner } });
-      }
-    };
+  // public async ensureAuthorizedOwners({
+  //   owners,
+  //   operation,
+  // }: {
+  //   owners: string[];
+  //   operation: OperationDetails;
+  // }) {
+  //   const logSavedObjects = (error?: Error) => {
+  //     for (const owner of owners) {
+  //       this.auditLogger.log({ operation, error, entity: { owner } });
+  //     }
+  //   };
 
-    try {
-      await this._ensureAuthorized(owners, operation);
-    } catch (error) {
-      logSavedObjects(error);
-      throw error;
-    }
-  }
+  //   try {
+  //     await this._ensureAuthorized(owners, operation);
+  //   } catch (error) {
+  //     logSavedObjects(error);
+  //     throw error;
+  //   }
+  // }
 
   /**
    * Returns an object to filter the saved object find request to the authorized owners of an entity.

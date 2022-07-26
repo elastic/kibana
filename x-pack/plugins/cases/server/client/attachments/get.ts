@@ -102,7 +102,12 @@ export const getAllAlertsAttachToCase = async (
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
 ): Promise<AlertResponse> => {
-  const { unsecuredSavedObjectsClient, authorization, attachmentService, logger } = clientArgs;
+  const {
+    unsecuredSavedObjectsClient,
+    authorization,
+    services: { attachmentService },
+    logger,
+  } = clientArgs;
 
   try {
     // This will perform an authorization check to ensure the user has access to the parent case
@@ -146,7 +151,12 @@ export async function find(
   { caseID, queryParams }: FindArgs,
   clientArgs: CasesClientArgs
 ): Promise<CommentsResponse> {
-  const { unsecuredSavedObjectsClient, caseService, logger, authorization } = clientArgs;
+  const {
+    unsecuredSavedObjectsClient,
+    services: { caseService },
+    logger,
+    authorization,
+  } = clientArgs;
 
   try {
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
@@ -218,7 +228,12 @@ export async function get(
   { attachmentID, caseID }: GetArgs,
   clientArgs: CasesClientArgs
 ): Promise<CommentResponse> {
-  const { attachmentService, unsecuredSavedObjectsClient, logger, authorization } = clientArgs;
+  const {
+    services: { attachmentService },
+    unsecuredSavedObjectsClient,
+    logger,
+    authorization,
+  } = clientArgs;
 
   try {
     const comment = await attachmentService.get({
@@ -226,7 +241,7 @@ export async function get(
       attachmentId: attachmentID,
     });
 
-    await authorization.ensureAuthorizedSavedObject({
+    await authorization.ensureAuthorized({
       entities: [{ owner: comment.attributes.owner, id: comment.id }],
       operation: Operations.getComment,
     });
@@ -250,7 +265,11 @@ export async function getAll(
   { caseID }: GetAllArgs,
   clientArgs: CasesClientArgs
 ): Promise<AllCommentsResponse> {
-  const { caseService, logger, authorization } = clientArgs;
+  const {
+    services: { caseService },
+    logger,
+    authorization,
+  } = clientArgs;
 
   try {
     const { filter, ensureSavedObjectsAreAuthorized } = await authorization.getAuthorizationFilter(

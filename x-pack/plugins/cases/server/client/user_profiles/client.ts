@@ -7,7 +7,6 @@
 
 import { UserProfile } from '@kbn/security-plugin/common';
 import { SuggestUserProfilesRequest } from '../../../common/api';
-import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { CasesClientArgs } from '../types';
 
@@ -28,24 +27,13 @@ const suggestUserProfiles = async (
   params: SuggestUserProfilesRequest,
   clientArgs: CasesClientArgs
 ): Promise<UserProfile[]> => {
-  const { logger, userProfiles, authorization } = clientArgs;
+  const {
+    logger,
+    services: { userProfileService },
+  } = clientArgs;
 
   try {
-    await authorization.ensureAuthorizedOwners({
-      owners: params.owners,
-      operation: Operations.findUserProfiles,
-    });
-
-    if (!userProfiles) {
-      return [];
-    }
-
-    return userProfiles.suggest({
-      name: params.name,
-      size: params.size,
-      dataPath: 'avatar',
-      requiredPrivileges,
-    });
+    return userProfileService.suggest(params);
   } catch (error) {
     throw createCaseError({
       logger,

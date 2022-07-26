@@ -51,9 +51,7 @@ export async function deleteAll(
   const {
     user,
     unsecuredSavedObjectsClient,
-    caseService,
-    attachmentService,
-    userActionService,
+    services: { caseService, attachmentService, userActionService },
     logger,
     authorization,
   } = clientArgs;
@@ -67,7 +65,7 @@ export async function deleteAll(
       throw Boom.notFound(`No comments found for ${caseID}.`);
     }
 
-    await authorization.ensureAuthorizedSavedObject({
+    await authorization.ensureAuthorized({
       operation: Operations.deleteAllComments,
       entities: comments.saved_objects.map((comment) => ({
         owner: comment.attributes.owner,
@@ -118,8 +116,7 @@ export async function deleteComment(
   const {
     user,
     unsecuredSavedObjectsClient,
-    attachmentService,
-    userActionService,
+    services: { attachmentService, userActionService },
     logger,
     authorization,
   } = clientArgs;
@@ -134,7 +131,7 @@ export async function deleteComment(
       throw Boom.notFound(`This comment ${attachmentID} does not exist anymore.`);
     }
 
-    await authorization.ensureAuthorizedSavedObject({
+    await authorization.ensureAuthorized({
       entities: [{ owner: myComment.attributes.owner, id: myComment.id }],
       operation: Operations.deleteComment,
     });

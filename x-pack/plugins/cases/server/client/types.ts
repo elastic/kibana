@@ -9,7 +9,6 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { LensServerPluginSetup } from '@kbn/lens-plugin/server';
-import { UserProfileServiceStart } from '@kbn/security-plugin/server';
 import { User } from '../../common/api';
 import { Authorization } from '../authorization/authorization';
 import {
@@ -22,24 +21,29 @@ import {
 } from '../services';
 import { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 import { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
+import { UserProfileService } from '../services/user_profiles';
+
+export interface CasesServices {
+  alertsService: AlertService;
+  caseService: CasesService;
+  caseConfigureService: CaseConfigureService;
+  connectorMappingsService: ConnectorMappingsService;
+  userActionService: CaseUserActionService;
+  attachmentService: AttachmentService;
+  userProfileService: UserProfileService;
+}
 
 /**
  * Parameters for initializing a cases client
  */
 export interface CasesClientArgs {
-  readonly caseConfigureService: CaseConfigureService;
-  readonly caseService: CasesService;
-  readonly connectorMappingsService: ConnectorMappingsService;
+  readonly services: CasesServices;
   readonly user: User;
   readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
-  readonly userActionService: CaseUserActionService;
-  readonly alertsService: AlertService;
-  readonly attachmentService: AttachmentService;
   readonly logger: Logger;
   readonly lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
   readonly authorization: PublicMethodsOf<Authorization>;
   readonly actionsClient: PublicMethodsOf<ActionsClient>;
   readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   readonly externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
-  readonly userProfiles?: UserProfileServiceStart;
 }

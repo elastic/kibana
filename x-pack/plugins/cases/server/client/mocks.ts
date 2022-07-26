@@ -14,6 +14,7 @@ import { ConfigureSubClient } from './configure/client';
 import { CasesClientFactory } from './factory';
 import { MetricsSubClient } from './metrics/client';
 import { UserActionsSubClient } from './user_actions/client';
+import { UserProfilesSubClient } from './user_profiles/client';
 
 type CasesSubClientMock = jest.Mocked<CasesSubClient>;
 
@@ -77,6 +78,14 @@ const createConfigureSubClientMock = (): ConfigureSubClientMock => {
   };
 };
 
+type UserProfilesSubClientMock = jest.Mocked<UserProfilesSubClient>;
+
+const createUserProfilesSubClientMock = (): UserProfilesSubClientMock => {
+  return {
+    suggestUserProfiles: jest.fn(),
+  };
+};
+
 export interface CasesClientMock extends CasesClient {
   cases: CasesSubClientMock;
   attachments: AttachmentsSubClientMock;
@@ -90,6 +99,7 @@ export const createCasesClientMock = (): CasesClientMock => {
     userActions: createUserActionsSubClientMock(),
     configure: createConfigureSubClientMock(),
     metrics: createMetricsSubClientMock(),
+    userProfiles: createUserProfilesSubClientMock(),
   };
   return client as unknown as CasesClientMock;
 };

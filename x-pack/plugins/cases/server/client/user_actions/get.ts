@@ -28,7 +28,7 @@ export const get = async (
       caseId,
     });
 
-    await authorization.ensureAuthorizedSavedObject({
+    await authorization.ensureAuthorized({
       entities: userActions.saved_objects.map((userAction) => ({
         owner: userAction.attributes.owner,
         id: userAction.id,

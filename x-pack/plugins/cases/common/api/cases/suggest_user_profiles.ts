@@ -13,7 +13,6 @@ export const SuggestUserProfilesRequestRt = rt.intersection([
     owners: rt.array(rt.string),
   }),
   rt.partial({ size: rt.number }),
-  // TODO: do we need owner here so we only suggest users that have access to cases?
 ]);
 
 export type SuggestUserProfilesRequest = rt.TypeOf<typeof SuggestUserProfilesRequestRt>;

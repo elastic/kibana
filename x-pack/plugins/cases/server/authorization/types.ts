@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { EcsEventType, KibanaRequest } from '@kbn/core/server';
+import { EcsEventType } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
-import { Space } from '@kbn/spaces-plugin/server';
 import { CasesSupportedOperations } from '@kbn/security-plugin/server';
 
 /**
@@ -18,8 +17,6 @@ export interface Verbs {
   progressive: string;
   past: string;
 }
-
-export type GetSpaceFn = (request: KibanaRequest) => Promise<Space | undefined>;
 
 /**
  * Read operations for the cases APIs.
@@ -45,7 +42,6 @@ export enum ReadOperations {
   GetCaseMetrics = 'getCaseMetrics',
   GetCasesMetrics = 'getCasesMetrics',
   GetUserActionMetrics = 'getUserActionMetrics',
-  FindUserProfiles = 'findUserProfiles',
 }
 
 /**

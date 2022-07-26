@@ -11,24 +11,25 @@ import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { escapeHatch } from '../utils';
 
-export const bulkCreateAttachmentsRoute = createCasesRoute({
+export const suggestUserProfilesRoute = createCasesRoute({
   method: 'post',
   path: INTERNAL_SUGGEST_USER_PROFILES_URL,
   params: {
     body: escapeHatch,
   },
   handler: async ({ context, request, response }) => {
+    const params = request.body as SuggestUserProfilesRequest;
+
     try {
       const casesContext = await context.cases;
       const casesClient = await casesContext.getCasesClient();
-      const attachments = request.body as SuggestUserProfilesRequest;
 
       return response.ok({
-        body: await casesClient.attachments.bulkCreate({ caseId, attachments }),
+        body: await casesClient.userProfiles.suggestUserProfiles(params),
       });
     } catch (error) {
       throw createCaseError({
-        message: `Failed to bulk create attachments in route case id: ${request.params.case_id}: ${error}`,
+        message: `Failed to find user profiles for name: ${params.name}: ${error}`,
         error,
       });
     }

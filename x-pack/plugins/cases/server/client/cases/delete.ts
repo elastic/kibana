@@ -22,10 +22,8 @@ import { Operations, OwnerEntity } from '../../authorization';
 export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): Promise<void> {
   const {
     unsecuredSavedObjectsClient,
-    caseService,
-    attachmentService,
     user,
-    userActionService,
+    services: { caseService, attachmentService, userActionService },
     logger,
     authorization,
   } = clientArgs;
@@ -45,7 +43,7 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
       entities.set(theCase.id, { id: theCase.id, owner: theCase.attributes.owner });
     }
 
-    await authorization.ensureAuthorizedSavedObject({
+    await authorization.ensureAuthorized({
       operation: Operations.deleteCase,
       entities: Array.from(entities.values()),
     });

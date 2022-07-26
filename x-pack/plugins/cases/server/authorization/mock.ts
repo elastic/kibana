@@ -13,7 +13,7 @@ export type AuthorizationMock = jest.Mocked<Schema>;
 
 export const createAuthorizationMock = () => {
   const mocked: AuthorizationMock = {
-    ensureAuthorizedSavedObject: jest.fn(),
+    ensureAuthorized: jest.fn(),
     getAuthorizationFilter: jest.fn(),
   };
   return mocked;

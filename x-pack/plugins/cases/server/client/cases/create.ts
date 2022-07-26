@@ -41,8 +41,7 @@ export const create = async (
 ): Promise<CaseResponse> => {
   const {
     unsecuredSavedObjectsClient,
-    caseService,
-    userActionService,
+    services: { caseService, userActionService },
     user,
     logger,
     authorization: auth,
@@ -68,7 +67,7 @@ export const create = async (
   try {
     const savedObjectID = SavedObjectsUtils.generateId();
 
-    await auth.ensureAuthorizedSavedObject({
+    await auth.ensureAuthorized({
       operation: Operations.createCase,
       entities: [{ owner: query.owner, id: savedObjectID }],
     });

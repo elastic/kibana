@@ -132,7 +132,12 @@ async function get(
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): Promise<CasesConfigurationsResponse> {
-  const { unsecuredSavedObjectsClient, caseConfigureService, logger, authorization } = clientArgs;
+  const {
+    unsecuredSavedObjectsClient,
+    services: { caseConfigureService },
+    logger,
+    authorization,
+  } = clientArgs;
   try {
     const queryParams = pipe(
       excess(GetConfigureFindRequestRt).decode(params),
@@ -233,8 +238,13 @@ async function update(
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): Promise<CasesConfigureResponse> {
-  const { caseConfigureService, logger, unsecuredSavedObjectsClient, user, authorization } =
-    clientArgs;
+  const {
+    services: { caseConfigureService },
+    logger,
+    unsecuredSavedObjectsClient,
+    user,
+    authorization,
+  } = clientArgs;
 
   try {
     const request = pipe(
@@ -261,7 +271,7 @@ async function update(
       configurationId,
     });
 
-    await authorization.ensureAuthorizedSavedObject({
+    await authorization.ensureAuthorized({
       operation: Operations.updateConfiguration,
       entities: [{ owner: configuration.attributes.owner, id: configuration.id }],
     });
@@ -342,8 +352,13 @@ async function create(
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): Promise<CasesConfigureResponse> {
-  const { unsecuredSavedObjectsClient, caseConfigureService, logger, user, authorization } =
-    clientArgs;
+  const {
+    unsecuredSavedObjectsClient,
+    services: { caseConfigureService },
+    logger,
+    user,
+    authorization,
+  } = clientArgs;
   try {
     let error = null;
 
@@ -391,7 +406,7 @@ async function create(
 
     const savedObjectID = SavedObjectsUtils.generateId();
 
-    await authorization.ensureAuthorizedSavedObject({
+    await authorization.ensureAuthorized({
       operation: Operations.createConfiguration,
       entities: [{ owner: configuration.owner, id: savedObjectID }],
     });
