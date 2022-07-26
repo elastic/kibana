@@ -61,18 +61,20 @@ export async function setupIntegrationEnvironment() {
   /**
    * Register a test file type
    */
+  const testHttpConfig = { tags: ['access:myapp'] };
   fileKindsRegistry.register({
     id: fileKind,
     blobStoreSettings: {
       esFixedSizeIndex: { index: testIndex },
     },
     http: {
-      create: { tags: ['access:myapp'] },
-      delete: { tags: ['access:myapp'] },
-      update: { tags: ['access:myapp'] },
-      download: { tags: ['access:myapp'] },
-      getById: { tags: ['access:myapp'] },
-      list: { tags: ['access:myapp'] },
+      create: testHttpConfig,
+      delete: testHttpConfig,
+      update: testHttpConfig,
+      download: testHttpConfig,
+      getById: testHttpConfig,
+      list: testHttpConfig,
+      share: testHttpConfig,
     },
   });
 

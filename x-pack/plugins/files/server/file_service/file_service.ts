@@ -58,9 +58,19 @@ export interface FileServiceStart {
   getShareObject: FileShareServiceStart['get'];
 
   /**
+   * List share objects
+   */
+  listShareObjects: FileShareServiceStart['list'];
+
+  /**
    * Update an instance of a share object
    */
   updateShareObject: FileShareServiceStart['update'];
+
+  /**
+   * Delete a share instance
+   */
+  deleteShareObject: FileShareServiceStart['delete'];
 
   /**
    * Get the current usage metrics for all storage media.
@@ -68,4 +78,9 @@ export interface FileServiceStart {
    * Returns diagnostics or `undefined` if metrics could not be retrieved.
    */
   getUsageMetrics(): Promise<FilesMetrics>;
+
+  /**
+   * Get a file by a shareable token.
+   */
+  getByToken<M>(token: string): Promise<File<M>>;
 }

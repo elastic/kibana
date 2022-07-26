@@ -6,7 +6,7 @@
  */
 
 import type { CreateFileKindHttpEndpoint } from '../../../common/api_routes';
-import { setupIntegrationEnvironment, TestEnvironmentUtils } from '../tests';
+import { setupIntegrationEnvironment, TestEnvironmentUtils } from '../test_utils';
 
 describe('File HTTP API', () => {
   let testHarness: TestEnvironmentUtils;
@@ -68,13 +68,13 @@ describe('File HTTP API', () => {
     });
 
     test('without filters', async () => {
-      const result = await request.post(root, '/api/files/files/find').send({}).expect(200);
+      const result = await request.post(root, '/api/files/find').send({}).expect(200);
       expect(result.body.files).toHaveLength(3);
     });
 
     test('names', async () => {
       const result = await request
-        .post(root, '/api/files/files/find')
+        .post(root, '/api/files/find')
         .send({ name: ['firstFile', 'secondFile'] })
         .expect(200);
       expect(result.body.files).toHaveLength(2);
@@ -83,7 +83,7 @@ describe('File HTTP API', () => {
     test('file kind', async () => {
       {
         const result = await request
-          .post(root, `/api/files/files/find`)
+          .post(root, `/api/files/find`)
           .send({ kind: 'non-existent' })
           .expect(200);
         expect(result.body.files).toHaveLength(0);
@@ -91,7 +91,7 @@ describe('File HTTP API', () => {
 
       {
         const result = await request
-          .post(root, '/api/files/files/find')
+          .post(root, '/api/files/find')
           .send({ kind: testHarness.fileKind })
           .expect(200);
         expect(result.body.files).toHaveLength(3);
@@ -100,7 +100,7 @@ describe('File HTTP API', () => {
 
     test('status', async () => {
       const result = await request
-        .post(root, '/api/files/files/find')
+        .post(root, '/api/files/find')
         .send({
           status: 'READY',
         })
@@ -110,7 +110,7 @@ describe('File HTTP API', () => {
 
     test('combination', async () => {
       const result = await request
-        .post(root, '/api/files/files/find')
+        .post(root, '/api/files/find')
         .send({
           kind: testHarness.fileKind,
           name: ['firstFile', 'secondFile'],
@@ -128,7 +128,7 @@ describe('File HTTP API', () => {
     });
     test('returns usage metrics', async () => {
       {
-        const { body: metrics } = await request.get(root, '/api/files/files/metrics').expect(200);
+        const { body: metrics } = await request.get(root, '/api/files/metrics').expect(200);
         expect(metrics).toEqual({
           countByExtension: {},
           countByStatus: {},
@@ -145,7 +145,7 @@ describe('File HTTP API', () => {
       const [file1, file2] = await Promise.all([createFile(), createFile(), createFile()]);
 
       {
-        const { body: metrics } = await request.get(root, '/api/files/files/metrics').expect(200);
+        const { body: metrics } = await request.get(root, '/api/files/metrics').expect(200);
         expect(metrics).toEqual({
           countByExtension: {
             png: 3,
@@ -175,7 +175,7 @@ describe('File HTTP API', () => {
         .expect(200);
 
       {
-        const { body: metrics } = await request.get(root, '/api/files/files/metrics').expect(200);
+        const { body: metrics } = await request.get(root, '/api/files/metrics').expect(200);
         expect(metrics).toEqual({
           countByExtension: {
             png: 3,
@@ -193,6 +193,48 @@ describe('File HTTP API', () => {
           },
         });
       }
+    });
+  });
+
+  describe('public download', () => {
+    afterEach(async () => {
+      await testHarness.cleanupAfterEach();
+    });
+    test('it returns 400 for an invalid token', async () => {
+      await request.get(root, `/api/files/public/blob/myfilename.pdf`).expect(400);
+      const { body: response } = await request
+        .get(root, `/api/files/public/blob/myfilename.pdf?token=notavalidtoken`)
+        .expect(400);
+
+      expect(response.message).toMatch('Invalid token');
+    });
+
+    test('it downloads a publicly shared file', async () => {
+      const { id } = await createFile();
+
+      const {
+        body: { token },
+      } = await request.post(root, `/api/files/shares/${fileKind}/${id}`).send({}).expect(200);
+
+      await request
+        .get(root, `/api/files/public/blob/myfilename.pdf?token=${token}`)
+        .buffer()
+        .expect(400);
+
+      await request
+        .put(root, `/api/files/files/${fileKind}/${id}/blob`)
+        .set('Content-Type', 'application/octet-stream')
+        .send('test')
+        .expect(200);
+
+      const { body: buffer, header } = await request
+        .get(root, `/api/files/public/blob/myfilename.pdf?token=${token}`)
+        .buffer()
+        .expect(200);
+
+      expect(header['content-type']).toEqual('image/png');
+      expect(header['content-disposition']).toEqual('attachment; filename="myfilename.pdf"');
+      expect(buffer.toString('utf8')).toEqual('test');
     });
   });
 });

@@ -9,10 +9,9 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { Ensure } from '@kbn/utility-types';
 import { Readable } from 'stream';
 
-import type { File } from '../../../common';
 import type { DownloadFileKindHttpEndpoint } from '../../../common/api_routes';
 import { fileErrors } from '../../file';
-
+import { getDownloadHeadersForFile, fileNameSchema } from '../common';
 import { getById } from './helpers';
 import type { FileKindsRequestHandler } from './types';
 
@@ -20,21 +19,12 @@ export const method = 'get' as const;
 
 export const paramsSchema = schema.object({
   id: schema.string(),
-  fileName: schema.maybe(schema.string()),
+  fileName: schema.maybe(fileNameSchema),
 });
 
 type Params = Ensure<DownloadFileKindHttpEndpoint['inputs']['params'], TypeOf<typeof paramsSchema>>;
 
 type Response = Readable;
-
-function getDownloadedFileName(file: File): string {
-  // When creating a file we also calculate the extension so the `file.extension`
-  // check is not really necessary except for type checking.
-  if (file.mimeType && file.extension) {
-    return `${file.name}.${file.extension}`;
-  }
-  return file.name;
-}
 
 export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
   { files, fileKind },
@@ -51,19 +41,12 @@ export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
     const body: Response = await file.downloadContent();
     return res.ok({
       body,
-      headers: {
-        'content-type': file.mimeType ?? 'application/octet-stream',
-        // note, this name can be overridden by the client if set via a "download" attribute.
-        'content-disposition': `attachment; filename="${fileName || getDownloadedFileName(file)}"`,
-      },
+      headers: getDownloadHeadersForFile(file, fileName),
     });
   } catch (e) {
     if (e instanceof fileErrors.NoDownloadAvailableError) {
-      return res.notFound({ body: e.message });
+      return res.notFound({ body: { message: e.message } });
     }
-    return res.customError({
-      statusCode: 500,
-      body: e,
-    });
+    throw e;
   }
 };

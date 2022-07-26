@@ -44,7 +44,7 @@ export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
       e instanceof fileErrors.ContentAlreadyUploadedError ||
       e instanceof fileErrors.UploadInProgressError
     ) {
-      return res.badRequest({ body: e });
+      return res.badRequest({ body: { message: e.message } });
     }
     throw e;
   }

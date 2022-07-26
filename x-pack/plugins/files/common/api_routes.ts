@@ -5,43 +5,21 @@
  * 2.0.
  */
 
-import * as qs from 'query-string';
 import { PLUGIN_ID } from './constants';
-import type { FileJSON, FilesMetrics } from './types';
+import type { FileJSON, FileShareJSON, FileShareJSONWithToken, FilesMetrics } from './types';
 
-const API_BASE_PATH = `/api/${PLUGIN_ID}`;
+export const API_BASE_PATH = `/api/${PLUGIN_ID}`;
 
-const FILES_API_BASE_PATH = `${API_BASE_PATH}/files`;
+export const FILES_API_BASE_PATH = `${API_BASE_PATH}/files`;
 
-export const FILE_KIND_API_ROUTES_SERVER = {
-  getCreateFileRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}`,
-  getUploadRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{id}/blob`,
-  getDownloadRoute: (fileKind: string) =>
-    `${FILES_API_BASE_PATH}/${fileKind}/{id}/blob/{fileName?}`,
-  getUpdateRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{id}`,
-  getDeleteRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{id}`,
-  getListRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/list`,
-  getByIdRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{id}`,
-};
+export const FILES_SHARE_API_BASE_PATH = `${API_BASE_PATH}/shares`;
 
-export const FILE_KIND_API_ROUTES_CLIENT = {
-  getCreateFileRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}`,
-  getUploadRoute: (fileKind: string, id: string) => `${FILES_API_BASE_PATH}/${fileKind}/${id}/blob`,
-  getDownloadRoute: (fileKind: string, id: string, fileName?: string) =>
-    `${FILES_API_BASE_PATH}/${fileKind}/${id}/blob/${fileName ? fileName : ''}`,
-  getUpdateRoute: (fileKind: string, id: string) => `${FILES_API_BASE_PATH}/${fileKind}/${id}`,
-  getDeleteRoute: (fileKind: string, id: string) => `${FILES_API_BASE_PATH}/${fileKind}/${id}`,
-  getListRoute: (fileKind: string, page?: number, perPage?: number) => {
-    const qParams = qs.stringify({ page, perPage });
-    return `${FILES_API_BASE_PATH}/${fileKind}/list${qParams ? `?${qParams}` : ''}`;
-  },
-  getByIdRoute: (fileKind: string, id: string) => `${FILES_API_BASE_PATH}/${fileKind}/${id}`,
-};
+export const FILES_PUBLIC_API_BASE_PATH = `${API_BASE_PATH}/public`;
 
-export const FILES_API_ROUTES = {
-  find: `${FILES_API_BASE_PATH}/find`,
-  metrics: `${FILES_API_BASE_PATH}/metrics`,
-};
+interface Pagination {
+  page?: number;
+  perPage?: number;
+}
 
 export interface HttpApiInterfaceEntryDefinition<
   P = unknown,
@@ -100,7 +78,7 @@ export type GetByIdFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
 
 export type ListFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
   unknown,
-  { page?: number; perPage?: number },
+  Pagination,
   unknown,
   { files: FileJSON[] }
 >;
@@ -121,7 +99,7 @@ export type UploadFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
 
 export type FindFilesHttpEndpoint = HttpApiInterfaceEntryDefinition<
   unknown,
-  { perPage?: number; page?: number },
+  Pagination,
   {
     /**
      * Filter for set of file-kinds
@@ -161,4 +139,67 @@ export type FilesMetricsHttpEndpoint = HttpApiInterfaceEntryDefinition<
   unknown,
   unknown,
   FilesMetrics
+>;
+
+export type FileShareHttpEndpoint = HttpApiInterfaceEntryDefinition<
+  {
+    fileId: string;
+  },
+  unknown,
+  {
+    /**
+     * Unix timestamp of when the share will expire.
+     */
+    validUntil?: number;
+    /**
+     * Optional name to uniquely identify this share instance.
+     */
+    name?: string;
+  },
+  FileShareJSONWithToken
+>;
+
+export type FileUnshareHttpEndpoint = HttpApiInterfaceEntryDefinition<
+  {
+    /**
+     * Share token id
+     */
+    id: string;
+  },
+  unknown,
+  unknown,
+  {
+    ok: true;
+  }
+>;
+
+export type FileGetShareHttpEndpoint = HttpApiInterfaceEntryDefinition<
+  {
+    /**
+     * ID of the share object
+     */
+    id: string;
+  },
+  unknown,
+  unknown,
+  {
+    share: FileShareJSON;
+  }
+>;
+
+export type FileListSharesHttpEndpoint = HttpApiInterfaceEntryDefinition<
+  unknown,
+  Pagination & { forFileId?: string },
+  unknown,
+  {
+    shares: FileShareJSON[];
+  }
+>;
+
+export type FilePublicDownloadHttpEndpoint = HttpApiInterfaceEntryDefinition<
+  { fileName?: string },
+  { token: string },
+  unknown,
+  // Should be a readable stream
+  any
 >;

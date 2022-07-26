@@ -6,7 +6,7 @@
  */
 
 import type { FileShareJSON, FileShareSavedObjectAttributes } from '../../common/types';
-import type { GetArgs, UpdateArgs } from './internal_file_share_service';
+import type { GetArgs, UpdateArgs, DeleteArgs, ListArgs } from './internal_file_share_service';
 
 /**
  * We only expose functionality here that do not require you to have a {@link File}
@@ -19,7 +19,17 @@ export interface FileShareServiceStart {
   get(arg: GetArgs): Promise<FileShareJSON>;
 
   /**
+   * List share objects
+   */
+  list(arg: ListArgs): Promise<{ shares: FileShareJSON[] }>;
+
+  /**
    * Update a share instance.
    */
   update(args: UpdateArgs): Promise<FileShareSavedObjectAttributes & { id: string }>;
+
+  /**
+   * Delete a share instance.
+   */
+  delete(args: DeleteArgs): Promise<void>;
 }

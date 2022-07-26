@@ -6,7 +6,7 @@
  */
 import type { FilesRouter } from './types';
 
-import { FilesMetricsHttpEndpoint, FILES_API_ROUTES } from '../../common/api_routes';
+import { FilesMetricsHttpEndpoint, FILES_API_ROUTES } from './api_routes';
 import type { FilesRequestHandler } from './types';
 
 const method = 'get' as const;

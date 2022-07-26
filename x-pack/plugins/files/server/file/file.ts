@@ -9,7 +9,7 @@ import { Logger } from '@kbn/core/server';
 import cuid from 'cuid';
 import mimeType from 'mime';
 import { Readable } from 'stream';
-import type { FileCompression, FileShareJSON } from '../../common/types';
+import type { FileCompression, FileShareJSON, FileShareJSONWithToken } from '../../common/types';
 import type {
   File as IFile,
   FileKind,
@@ -157,7 +157,7 @@ export class File<M = unknown> implements IFile {
   }: {
     name?: string;
     validUntil?: number;
-  }): Promise<FileShareJSON> {
+  }): Promise<FileShareJSONWithToken> {
     const shareObject = await this.fileShareService.share({ file: this, name, validUntil });
     this.internalFileService.createAuditLog(
       createAuditEvent({
@@ -169,11 +169,12 @@ export class File<M = unknown> implements IFile {
   }
 
   async listShares(): Promise<FileShareJSON[]> {
-    return await this.fileShareService.list({ file: this });
+    const { shares } = await this.fileShareService.list({ fileId: this.id });
+    return shares;
   }
 
   async unshare(opts: { shareId: string }): Promise<void> {
-    await this.fileShareService.delete({ tokenId: opts.shareId });
+    await this.fileShareService.delete({ id: opts.shareId });
     this.internalFileService.createAuditLog(
       createAuditEvent({
         action: 'delete',

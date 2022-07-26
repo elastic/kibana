@@ -132,7 +132,12 @@ export type UpdatableFileAttributes<Meta = unknown> = Pick<FileJSON<Meta>, 'meta
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type FileShareSavedObjectAttributes = {
-  created_at: string;
+  created: string;
+
+  /**
+   * Secret token used to access the associated file.
+   */
+  token: string;
 
   /**
    * Human friendly name for this share token.
@@ -140,20 +145,26 @@ export type FileShareSavedObjectAttributes = {
   name?: string;
 
   /**
-   * The date-time this file share will expire.
-   *
-   * @note default date-time is determined by this application
+   * The unix timestamp (in milliseconds) this file share will expire.
    *
    * TODO: in future we could add a special value like "forever", but this should
    * not be the default.
    */
-  valid_until?: number;
+  valid_until: number;
 };
 
 /**
  * Attributes of a file that represent a serialised version of the file.
  */
-export type FileShareJSON = FileShareSavedObjectAttributes & { id: string; fileId: string };
+export interface FileShareJSON {
+  id: string;
+  created: FileShareSavedObjectAttributes['created'];
+  validUntil: FileShareSavedObjectAttributes['valid_until'];
+  name?: FileShareSavedObjectAttributes['name'];
+  fileId: string;
+}
+
+export type FileShareJSONWithToken = FileShareJSON & { token: string };
 
 export type UpdatableFileShareAttributes = Pick<FileSavedObjectAttributes, 'name'>;
 
@@ -170,7 +181,7 @@ export interface File<Meta = unknown> extends FileJSON<Meta> {
 
   delete(): Promise<void>;
 
-  share(opts?: { name?: string; validUntil?: number }): Promise<FileShareJSON>;
+  share(opts?: { name?: string; validUntil?: number }): Promise<FileShareJSONWithToken>;
 
   listShares(): Promise<FileShareJSON[]>;
 
@@ -200,6 +211,18 @@ export interface BlobStorageSettings {
   // Other blob store settings will go here once available
 }
 
+interface HttpEndpointDefinition {
+  /**
+   * Specify the tags for this endpoint.
+   *
+   * @example
+   * // This will enable access control to this endpoint for users that can access "myApp" only.
+   * { tags: ['access:myApp'] }
+   *
+   */
+  tags: string[];
+}
+
 export interface FileKind {
   /**
    * Unique file kind ID
@@ -217,27 +240,37 @@ export interface FileKind {
   blobStoreSettings?: BlobStorageSettings;
 
   /**
-   * Optionally specify which routes to create for the file kind
+   * Optionally specify which HTTP routes to create for the file kind
    */
   http: {
-    create?: {
-      tags: string[];
-    };
-    update?: {
-      tags: string[];
-    };
-    delete?: {
-      tags: string[];
-    };
-    getById?: {
-      tags: string[];
-    };
-    list?: {
-      tags: string[];
-    };
-    download?: {
-      tags: string[];
-    };
+    /**
+     * Enable creating this file type
+     */
+    create?: HttpEndpointDefinition;
+    /**
+     * Enable the file metadata to updated
+     */
+    update?: HttpEndpointDefinition;
+    /**
+     * Enable the file to be deleted (metadata and contents)
+     */
+    delete?: HttpEndpointDefinition;
+    /**
+     * Enable file to be retrieved by ID.
+     */
+    getById?: HttpEndpointDefinition;
+    /**
+     * Enable file to be listed
+     */
+    list?: HttpEndpointDefinition;
+    /**
+     * Enable the file to be downloaded
+     */
+    download?: HttpEndpointDefinition;
+    /**
+     * Enable the file to be shared publicly
+     */
+    share?: HttpEndpointDefinition;
   };
 }
 

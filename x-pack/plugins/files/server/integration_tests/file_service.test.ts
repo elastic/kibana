@@ -189,23 +189,26 @@ describe('FileService', () => {
         expect.objectContaining({
           id: expect.any(String),
           name: 'test name',
-          valid_until: expect.any(Number),
-          created_at: expect.any(String),
+          validUntil: expect.any(Number),
+          created: expect.any(String),
+          token: expect.any(String),
+          fileId: file.id,
         })
       );
     });
 
     it('retrieves a a file share object', async () => {
       const file = await createDisposableFile({ fileKind, name: 'test' });
-      const { id } = await file.share({ name: 'my file share' });
+      const { id } = await file.share({ name: 'my-file-share' });
       // Check if a file share exists without using an {@link File} object
-      const result = await fileService.getShareObject({ tokenId: id });
+      const result = await fileService.getShareObject({ id });
       expect(result).toEqual(
         expect.objectContaining({
           id: expect.any(String),
-          name: 'my file share',
-          valid_until: expect.any(Number),
-          created_at: expect.any(String),
+          name: 'my-file-share',
+          validUntil: expect.any(Number),
+          created: expect.any(String),
+          fileId: file.id,
         })
       );
     });
@@ -215,13 +218,14 @@ describe('FileService', () => {
       const { id } = await file.share({ name: 'my file share 1' });
       // Check if a file share exists without using an {@link File} object
       await fileService.updateShareObject({ id, attributes: { name: 'my file share 2' } });
-      const result = await fileService.getShareObject({ tokenId: id });
+      const result = await fileService.getShareObject({ id });
       expect(result).toEqual(
         expect.objectContaining({
           id: expect.any(String),
           name: 'my file share 2',
-          valid_until: expect.any(Number),
-          created_at: expect.any(String),
+          validUntil: expect.any(Number),
+          created: expect.any(String),
+          fileId: file.id,
         })
       );
     });
@@ -233,19 +237,19 @@ describe('FileService', () => {
       ]);
 
       const [share1] = await Promise.all([
-        file.share({ name: 'my file share 1' }),
-        file.share({ name: 'my file share 2' }),
-        file.share({ name: 'my file share 3' }),
+        file.share({ name: 'my-file-share-1' }),
+        file.share({ name: 'my-file-share-2' }),
+        file.share({ name: 'my-file-share-3' }),
 
-        file2.share({ name: 'my file share 1' }),
-        file2.share({ name: 'my file share 2' }),
-        file2.share({ name: 'my file share 3' }),
+        file2.share({ name: 'my-file-share-1' }),
+        file2.share({ name: 'my-file-share-2' }),
+        file2.share({ name: 'my-file-share-3' }),
       ]);
 
       // Check whether updating file attributes interferes with SO references.
       await fileService.updateShareObject({
         id: share1.id,
-        attributes: { name: 'my file share X' },
+        attributes: { name: 'my-file-share-X' },
       });
 
       const shares1 = await file.listShares();

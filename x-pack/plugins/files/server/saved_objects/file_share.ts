@@ -19,11 +19,14 @@ import { FILE_SHARE_SO_TYPE } from '../../common/constants';
 type Properties = Record<keyof FileShareSavedObjectAttributes, SavedObjectsFieldMapping>;
 
 const properties: Properties = {
-  created_at: {
+  created: {
     type: 'date',
   },
   valid_until: {
     type: 'long',
+  },
+  token: {
+    type: 'keyword',
   },
   name: {
     type: 'keyword',
