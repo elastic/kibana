@@ -10,6 +10,7 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
+  EuiIcon,
   EuiTableSortingType,
   EuiToolTip,
 } from '@elastic/eui';
@@ -49,8 +50,8 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
 }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [sortField, setSortField] = useState(DEFAULT_SORT_FIELD);
-  const [sortDirection, setSortDirection] = useState(DEFAULT_SORT_DIRECTION);
+  const [sortField, setSortField] = useState<keyof ChangePoint>(DEFAULT_SORT_FIELD);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
 
   const columns: Array<EuiBasicTableColumn<ChangePoint>> = [
     {
@@ -79,14 +80,17 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
             'xpack.aiops.correlations.failedTransactions.correlationsTable.logRateColumnTooltip',
             {
               defaultMessage:
-                'A visual representation of the amount of impact the given field name and value have on the message rate difference.',
+                'A visual representation of the impact of the field on the message rate difference',
             }
           )}
         >
-          <FormattedMessage
-            id="xpack.aiops.correlations.failedTransactions.correlationsTable.logRateLabel"
-            defaultMessage="Log rate"
-          />
+          <>
+            <FormattedMessage
+              id="xpack.aiops.correlations.failedTransactions.correlationsTable.logRateLabel"
+              defaultMessage="Log rate"
+            />
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </>
         </EuiToolTip>
       ),
       render: (_, { histogram, fieldName, fieldValue }) => {
@@ -105,14 +109,17 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
             'xpack.aiops.correlations.failedTransactions.correlationsTable.pValueColumnTooltip',
             {
               defaultMessage:
-                'For statistically significant changes in the frequency of values, indicates how extreme the change is; lower values indicate greater change.',
+                'The significance of changes in the frequency of values; lower values indicate greater change',
             }
           )}
         >
-          <FormattedMessage
-            id="xpack.aiops.correlations.failedTransactions.correlationsTable.pValueLabel"
-            defaultMessage="p-value"
-          />
+          <>
+            <FormattedMessage
+              id="xpack.aiops.correlations.failedTransactions.correlationsTable.pValueLabel"
+              defaultMessage="p-value"
+            />
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </>
         </EuiToolTip>
       ),
       render: (pValue: number) => pValue.toPrecision(3),
@@ -126,22 +133,24 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
           content={i18n.translate(
             'xpack.aiops.correlations.failedTransactions.correlationsTable.impactLabelColumnTooltip',
             {
-              defaultMessage:
-                'Indicates the level of impact of the given field name and value on the message rate difference.',
+              defaultMessage: 'The level of impact of the field on the message rate difference',
             }
           )}
         >
-          <FormattedMessage
-            id="xpack.aiops.correlations.failedTransactions.correlationsTable.impactLabel"
-            defaultMessage="Impact"
-          />
+          <>
+            <FormattedMessage
+              id="xpack.aiops.correlations.failedTransactions.correlationsTable.impactLabel"
+              defaultMessage="Impact"
+            />
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </>
         </EuiToolTip>
       ),
       render: (_, { pValue }) => {
         const label = getFailedTransactionsCorrelationImpactLabel(pValue);
         return label ? <EuiBadge color={label.color}>{label.impact}</EuiBadge> : null;
       },
-      sortable: false,
+      sortable: true,
     },
   ];
 
@@ -159,8 +168,8 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
     const pageStart = pageIndex * pageSize;
     const itemCount = changePoints?.length ?? 0;
 
-    let items = changePoints ?? [];
-    items = sortBy(changePoints, (item: ChangePoint) => item[sortField as keyof ChangePoint]);
+    let items: ChangePoint[] = changePoints ?? [];
+    items = sortBy(changePoints, (item) => item[sortField]);
     items = sortDirection === 'asc' ? items : items.reverse();
 
     return {
