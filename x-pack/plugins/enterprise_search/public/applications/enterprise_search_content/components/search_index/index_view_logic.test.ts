@@ -6,8 +6,8 @@
  */
 
 import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__/kea_logic';
-
 import { apiIndex, connectorIndex } from '../../__mocks__/view_index.mock';
+import './_mocks_/index_name_logic.mock';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
@@ -21,10 +21,11 @@ import { IngestionMethod, IngestionStatus } from '../../types';
 
 import { indexToViewIndex } from '../../utils/indices';
 
-import { IndexViewLogic } from './index_view_logic';
+import { IndexViewLogic, IndexViewValues } from './index_view_logic';
 
-const DEFAULT_VALUES = {
+const DEFAULT_VALUES: IndexViewValues = {
   data: undefined,
+  fetchIndexTimeoutId: null,
   index: undefined,
   ingestionMethod: IngestionMethod.API,
   ingestionStatus: IngestionStatus.CONNECTED,
@@ -32,7 +33,7 @@ const DEFAULT_VALUES = {
   isWaitingForSync: false,
   lastUpdated: null,
   localSyncNowValue: false,
-  syncStatus: undefined,
+  syncStatus: null,
 };
 
 const CONNECTOR_VALUES = {
@@ -62,12 +63,17 @@ describe('IndexViewLogic', () => {
   });
 
   describe('actions', () => {
-    describe('fetchIndex.apiSuccess', () => {
+    describe('FetchIndexApiLogic.apiSuccess', () => {
+      beforeEach(() => {
+        IndexViewLogic.actions.createNewFetchIndexTimeout = jest.fn();
+      });
+
       it('should update values', () => {
         FetchIndexApiLogic.actions.apiSuccess({
           ...connectorIndex,
           connector: { ...connectorIndex.connector!, sync_now: true },
         });
+
         expect(IndexViewLogic.values).toEqual({
           ...CONNECTOR_VALUES,
           data: {
@@ -79,54 +85,77 @@ describe('IndexViewLogic', () => {
             connector: { ...CONNECTOR_VALUES.index.connector, sync_now: true },
           },
           isWaitingForSync: true,
+          localSyncNowValue: true,
           syncStatus: SyncStatus.COMPLETED,
         });
       });
+
       it('should update values with no connector', () => {
         FetchIndexApiLogic.actions.apiSuccess(apiIndex);
+
         expect(IndexViewLogic.values).toEqual({
           ...DEFAULT_VALUES,
           data: apiIndex,
           index: apiIndex,
         });
       });
+
+      it('should call createNewFetchIndexTimeout', () => {
+        FetchIndexApiLogic.actions.apiSuccess(apiIndex);
+
+        expect(IndexViewLogic.actions.createNewFetchIndexTimeout).toHaveBeenCalled();
+      });
     });
+
+    describe('fetchIndex.apiError', () => {
+      beforeEach(() => {
+        IndexViewLogic.actions.createNewFetchIndexTimeout = jest.fn();
+      });
+
+      it('should call createNewFetchIndexTimeout', () => {
+        FetchIndexApiLogic.actions.apiError({} as HttpError);
+
+        expect(IndexViewLogic.actions.createNewFetchIndexTimeout).toHaveBeenCalled();
+      });
+    });
+
     describe('startSync', () => {
-      it('should call makeRequest', async () => {
+      it('should call makeStartSyncRequest', async () => {
+        // TODO: replace with mounting connectorIndex to FetchIndexApiDirectly to avoid
+        // needing to mock out actions unrelated to test called by listeners
+        IndexViewLogic.actions.createNewFetchIndexTimeout = jest.fn();
         FetchIndexApiLogic.actions.apiSuccess(connectorIndex);
-        IndexViewLogic.actions.makeRequest = jest.fn();
+        IndexViewLogic.actions.makeStartSyncRequest = jest.fn();
+
         IndexViewLogic.actions.startSync();
         await nextTick();
-        expect(IndexViewLogic.actions.makeRequest).toHaveBeenCalledWith({
+
+        expect(IndexViewLogic.actions.makeStartSyncRequest).toHaveBeenCalledWith({
           connectorId: '2',
-        });
-        expect(IndexViewLogic.values).toEqual({
-          ...CONNECTOR_VALUES,
-          syncStatus: SyncStatus.COMPLETED,
         });
       });
     });
-    describe('apiSuccess', () => {
+
+    describe('StartSyncApiLogic.apiSuccess', () => {
       it('should set localSyncNow to true', async () => {
-        FetchIndexApiLogic.actions.apiSuccess(connectorIndex);
-        StartSyncApiLogic.actions.apiSuccess({});
-        expect(IndexViewLogic.values).toEqual({
-          ...CONNECTOR_VALUES,
-          isWaitingForSync: true,
-          localSyncNowValue: true,
-          syncStatus: SyncStatus.COMPLETED,
+        mount({
+          localSyncNowValue: false,
         });
+        StartSyncApiLogic.actions.apiSuccess({});
+
+        expect(IndexViewLogic.values.localSyncNowValue).toEqual(true);
       });
     });
   });
 
   describe('listeners', () => {
-    it('calls clearFlashMessages on makeRequest', () => {
-      IndexViewLogic.actions.makeRequest({ connectorId: 'connectorId' });
+    it('calls clearFlashMessages on makeStartSyncRequest', () => {
+      IndexViewLogic.actions.makeStartSyncRequest({ connectorId: 'connectorId' });
       expect(mockFlashMessageHelpers.clearFlashMessages).toHaveBeenCalledTimes(1);
     });
+
     it('calls flashAPIErrors on apiError', () => {
-      IndexViewLogic.actions.apiError({} as HttpError);
+      IndexViewLogic.actions.startSyncApiError({} as HttpError);
       expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledTimes(1);
       expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledWith({});
     });

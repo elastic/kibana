@@ -22,9 +22,10 @@ interface TotalStatsProps {
 }
 
 export const TotalStats: React.FC<TotalStatsProps> = ({ ingestionType, additionalItems = [] }) => {
-  const { indexData, isSuccess } = useValues(OverviewLogic);
+  const { indexData, isError, isLoading } = useValues(OverviewLogic);
   const documentCount = indexData?.total.docs.count ?? 0;
-  const isLoading = !isSuccess;
+  const hideStats = isLoading || isError;
+
   const stats: EuiStatProps[] = [
     {
       description: i18n.translate(
@@ -33,7 +34,7 @@ export const TotalStats: React.FC<TotalStatsProps> = ({ ingestionType, additiona
           defaultMessage: 'Ingestion type',
         }
       ),
-      isLoading,
+      isLoading: hideStats,
       title: ingestionType,
     },
     {
@@ -43,7 +44,7 @@ export const TotalStats: React.FC<TotalStatsProps> = ({ ingestionType, additiona
           defaultMessage: 'Document count',
         }
       ),
-      isLoading,
+      isLoading: hideStats,
       title: documentCount,
     },
     ...additionalItems,
