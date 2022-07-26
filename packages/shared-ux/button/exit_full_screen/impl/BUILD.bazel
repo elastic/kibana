@@ -2,8 +2,8 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "kbn-shared-ux-components"
-PKG_REQUIRE_NAME = "@kbn/shared-ux-components"
+PKG_DIRNAME = "kbn-shared-ux-button-exit-full-screen"
+PKG_REQUIRE_NAME = "@kbn/shared-ux-button-exit-full-screen"
 
 SOURCE_FILES = glob(
   [
@@ -15,6 +15,7 @@ SOURCE_FILES = glob(
   ],
   exclude = [
     "**/*.test.*",
+    "**/*.stories.*",
   ],
 )
 
@@ -44,20 +45,13 @@ RUNTIME_DEPS = [
   "@npm//@emotion/css",
   "@npm//@emotion/react",
   "@npm//classnames",
+  "@npm//enzyme",
   "@npm//react-use",
   "@npm//react",
-  "@npm//rxjs",
   "@npm//url-loader",
   "//packages/kbn-i18n-react",
   "//packages/kbn-i18n",
-  "//packages/kbn-shared-ux-services",
-  "//packages/kbn-shared-ux-storybook",
   "//packages/kbn-shared-ux-utility",
-  "//packages/shared-ux/avatar/solution",
-  "//packages/shared-ux/card/no_data/impl",
-  "//packages/shared-ux/link/redirect_app/impl",
-  "//packages/shared-ux/page/solution_nav",
-  "//packages/shared-ux/prompt/no_data_views/impl",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -74,22 +68,16 @@ TYPES_DEPS = [
   "@npm//@emotion/css",
   "@npm//@emotion/react",
   "@npm//@types/classnames",
+  "@npm//@types/enzyme",
   "@npm//@types/jest",
   "@npm//@types/node",
   "@npm//@types/react",
   "@npm//react-use",
-  "@npm//rxjs",
   "//packages/kbn-ambient-ui-types",
   "//packages/kbn-i18n-react:npm_module_types",
   "//packages/kbn-i18n:npm_module_types",
-  "//packages/kbn-shared-ux-services:npm_module_types",
-  "//packages/kbn-shared-ux-storybook:npm_module_types",
   "//packages/kbn-shared-ux-utility:npm_module_types",
-  "//packages/shared-ux/avatar/solution:npm_module_types",
-  "//packages/shared-ux/card/no_data/impl:npm_module_types",
-  "//packages/shared-ux/link/redirect_app/impl:npm_module_types",
-  "//packages/shared-ux/page/solution_nav:npm_module_types",
-  "//packages/shared-ux/prompt/no_data_views/impl:npm_module_types",
+  "//packages/shared-ux/button/exit_full_screen/types:npm_module_types",
 ]
 
 jsts_transpiler(

@@ -2,19 +2,16 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "kbn-shared-ux-components"
-PKG_REQUIRE_NAME = "@kbn/shared-ux-components"
+PKG_DIRNAME = "mocks"
+PKG_REQUIRE_NAME = "@kbn/shared-ux-page-analytics-no-data-mocks"
 
 SOURCE_FILES = glob(
   [
     "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.scss",
-    "src/**/*.mdx",
-    "src/**/*.svg",
   ],
   exclude = [
     "**/*.test.*",
+    "**/*.stories.*",
   ],
 )
 
@@ -40,24 +37,7 @@ NPM_MODULE_EXTRA_FILES = [
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
-  "@npm//@elastic/eui",
-  "@npm//@emotion/css",
-  "@npm//@emotion/react",
-  "@npm//classnames",
-  "@npm//react-use",
-  "@npm//react",
-  "@npm//rxjs",
-  "@npm//url-loader",
-  "//packages/kbn-i18n-react",
-  "//packages/kbn-i18n",
-  "//packages/kbn-shared-ux-services",
-  "//packages/kbn-shared-ux-storybook",
-  "//packages/kbn-shared-ux-utility",
-  "//packages/shared-ux/avatar/solution",
-  "//packages/shared-ux/card/no_data/impl",
-  "//packages/shared-ux/link/redirect_app/impl",
-  "//packages/shared-ux/page/solution_nav",
-  "//packages/shared-ux/prompt/no_data_views/impl",
+  "//packages/shared-ux/page/kibana_no_data/mocks",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -70,43 +50,16 @@ RUNTIME_DEPS = [
 #
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
-  "@npm//@elastic/eui",
-  "@npm//@emotion/css",
-  "@npm//@emotion/react",
-  "@npm//@types/classnames",
-  "@npm//@types/jest",
   "@npm//@types/node",
-  "@npm//@types/react",
-  "@npm//react-use",
-  "@npm//rxjs",
-  "//packages/kbn-ambient-ui-types",
-  "//packages/kbn-i18n-react:npm_module_types",
-  "//packages/kbn-i18n:npm_module_types",
-  "//packages/kbn-shared-ux-services:npm_module_types",
-  "//packages/kbn-shared-ux-storybook:npm_module_types",
-  "//packages/kbn-shared-ux-utility:npm_module_types",
-  "//packages/shared-ux/avatar/solution:npm_module_types",
-  "//packages/shared-ux/card/no_data/impl:npm_module_types",
-  "//packages/shared-ux/link/redirect_app/impl:npm_module_types",
-  "//packages/shared-ux/page/solution_nav:npm_module_types",
-  "//packages/shared-ux/prompt/no_data_views/impl:npm_module_types",
+  "@npm//@types/jest",
+  "//packages/shared-ux/page/analytics_no_data/types:npm_module_types",
+  "//packages/shared-ux/page/kibana_no_data/mocks:npm_module_types",
 ]
 
 jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
-)
-
-jsts_transpiler(
-  name = "target_web",
-  srcs = SRCS,
-  build_pkg_name = package_name(),
-  web = True,
-  additional_args = [
-    "--copy-files",
-    "--quiet"
-  ],
 )
 
 ts_config(
@@ -134,7 +87,7 @@ ts_project(
 js_library(
   name = PKG_DIRNAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":target_web"],
+  deps = RUNTIME_DEPS + [":target_node"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
