@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { ErrorCode } from '../../../common/types/error_codes';
 
 import { fetchConnectorByIndexName, fetchConnectors } from '../../lib/connectors/fetch_connectors';
+import { fetchCrawlerByIndexName, fetchCrawlers } from '../../lib/crawler/fetch_crawlers';
 
 import { createApiIndex } from '../../lib/indices/create_index';
 import { fetchIndex } from '../../lib/indices/fetch_index';
@@ -215,7 +216,7 @@ export function registerIndexRoutes({ router }: RouteDependencies) {
             statusCode: 409,
           });
         }
-        const crawler = await fetchCrawler(client, request.body.index_name);
+        const crawler = await fetchCrawlerByIndexName(client, request.body.index_name);
         if (crawler) {
           return createError({
             errorCode: ErrorCode.CRAWLER_ALREADY_EXISTS,
