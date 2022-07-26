@@ -20,7 +20,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
   const kibanaServer = getService('kibanaServer');
 
-  describe('Kibana Spaces Accessibility', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/137136
+  describe.skip('Kibana Spaces Accessibility', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.common.navigateToApp('home');
