@@ -198,6 +198,7 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   > | null;
   actionParamsFields: React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>;
   customConnectorSelectItem?: CustomConnectorSelectionItem;
+  isExperimental?: boolean;
 }
 
 export interface GenericValidationResult<T> {

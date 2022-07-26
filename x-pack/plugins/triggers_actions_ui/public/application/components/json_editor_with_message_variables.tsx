@@ -34,6 +34,7 @@ const NO_EDITOR_ERROR_MESSAGE = i18n.translate(
 );
 
 interface Props {
+  buttonTitle?: string;
   messageVariables?: ActionVariable[];
   paramsProperty: string;
   inputTargetValue?: string;
@@ -43,6 +44,8 @@ interface Props {
   onDocumentsChange: (data: string) => void;
   helpText?: JSX.Element;
   onBlur?: () => void;
+  showButtonTitle?: boolean;
+  euiCodeEditorProps?: { [key: string]: any };
 }
 
 const { useXJsonMode } = XJson;
@@ -53,6 +56,7 @@ const { useXJsonMode } = XJson;
 const EDITOR_SOURCE = 'json-editor-with-message-variables';
 
 export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
+  buttonTitle,
   messageVariables,
   paramsProperty,
   inputTargetValue,
@@ -62,6 +66,8 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
   onDocumentsChange,
   helpText,
   onBlur,
+  showButtonTitle,
+  euiCodeEditorProps = {},
 }) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
   const editorDisposables = useRef<monaco.IDisposable[]>([]);
@@ -148,9 +154,11 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
       label={label}
       labelAppend={
         <AddMessageVariables
+          buttonTitle={buttonTitle}
           messageVariables={messageVariables}
           onSelectEventHandler={onSelectMessageVariable}
           paramsProperty={paramsProperty}
+          showButtonTitle={showButtonTitle}
         />
       }
       helpText={helpText}
@@ -177,6 +185,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
           height="200px"
           data-test-subj={`${paramsProperty}JsonEditor`}
           aria-label={areaLabel}
+          {...euiCodeEditorProps}
           editorDidMount={onEditorMount}
           onChange={(xjson: string) => {
             setXJson(xjson);
