@@ -182,10 +182,9 @@ export function getEsQueryFromSavedSearch({
     };
   }
 
-  // TODO: support saved search
   // If saved search is an json object with the original query and filter
   // retrieve the parsed query and filter
-  const savedSearchData = undefined; // getQueryFromSavedSearchObject(savedSearch);
+  const savedSearchData = getQueryFromSavedSearchObject(savedSearch);
 
   // If no saved search available, use user's query and filters
   if (!savedSearchData && userQuery) {

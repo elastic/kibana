@@ -21,12 +21,13 @@ import {
   EuiEmptyPrompt,
   Criteria,
   EuiButtonEmpty,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { omit, sumBy } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
-import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../common/constants';
+import { getConnectorFeatureName } from '@kbn/actions-plugin/common';
 import { loadAllActions, loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
 import {
   hasDeleteActionsCapability,
@@ -139,23 +140,21 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
   }, []);
 
   const actionConnectorTableItems: ActionConnectorTableItem[] = actionTypesIndex
-    ? actions
-        // TODO: Remove when cases connector is available across Kibana. Issue: https://github.com/elastic/kibana/issues/82502.
-        .filter((action) => !DEFAULT_HIDDEN_ACTION_TYPES.includes(action.actionTypeId))
-        .map((action) => {
-          return {
-            ...action,
-            actionType: actionTypesIndex[action.actionTypeId]
-              ? actionTypesIndex[action.actionTypeId].name
-              : action.actionTypeId,
-          };
-        })
+    ? actions.map((action) => {
+        return {
+          ...action,
+          actionType: actionTypesIndex[action.actionTypeId]
+            ? actionTypesIndex[action.actionTypeId].name
+            : action.actionTypeId,
+          featureIds: actionTypesIndex[action.actionTypeId]
+            ? actionTypesIndex[action.actionTypeId].supportedFeatureIds
+            : [],
+        };
+      })
     : [];
 
   const actionTypesList: Array<{ value: string; name: string }> = actionTypesIndex
     ? Object.values(actionTypesIndex)
-        // TODO: Remove when cases connector is available across Kibana. Issue: https://github.com/elastic/kibana/issues/82502.
-        .filter((actionType) => !DEFAULT_HIDDEN_ACTION_TYPES.includes(actionType.id))
         .map((actionType) => ({
           value: actionType.id,
           name: `${actionType.name} (${getActionsCountByActionType(actions, actionType.id)})`,
@@ -274,6 +273,30 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
       ),
       sortable: false,
       truncateText: true,
+    },
+    {
+      field: 'featureIds',
+      name: i18n.translate(
+        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.featureIdsTitle',
+        {
+          defaultMessage: 'Availability',
+        }
+      ),
+      sortable: false,
+      truncateText: true,
+      render: (availability: string[]) => {
+        return (
+          <EuiFlexGroup wrap responsive={false} gutterSize="xs">
+            {(availability ?? []).map((featureId: string) => (
+              <EuiFlexItem grow={false} key={featureId}>
+                <EuiBadge data-test-subj="connectorsTableCell-featureIds" color="default">
+                  {getConnectorFeatureName(featureId)}
+                </EuiBadge>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        );
+      },
     },
     {
       name: '',

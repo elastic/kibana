@@ -126,6 +126,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    describe('with query params', () => {
+      it('should issue a successful request', async () => {
+        await PageObjects.console.clearTextArea();
+        await PageObjects.console.enterRequest(
+          '\n GET _cat/aliases?format=json&v=true&pretty=true'
+        );
+        await PageObjects.console.clickPlay();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await retry.try(async () => {
+          const status = await PageObjects.console.getResponseStatus();
+          expect(status).to.eql(200);
+        });
+      });
+    });
+
     describe('multiple requests output', () => {
       const sendMultipleRequests = async (requests: string[]) => {
         await asyncForEach(requests, async (request) => {
@@ -158,31 +174,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('with folded/unfolded lines in request body', () => {
-      const enterRequestWithBody = async () => {
-        await PageObjects.console.enterRequest();
-        await PageObjects.console.pressEnter();
-        await PageObjects.console.enterText('{\n\t\t"_source": []');
+      const enterRequest = async () => {
+        await PageObjects.console.enterRequest('\nGET test/doc/1 \n{\n\t\t"_source": []');
+        await PageObjects.console.clickPlay();
       };
 
-      it('should restore the state of folding/unfolding when navigating back to Console', async () => {
+      beforeEach(async () => {
         await PageObjects.console.clearTextArea();
-        await enterRequestWithBody();
+      });
+
+      it('should restore the state of folding/unfolding when navigating back to Console', async () => {
+        await enterRequest();
         await PageObjects.console.clickFoldWidget();
         await PageObjects.common.navigateToApp('home');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.common.navigateToApp('console');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.console.dismissTutorial();
+        await PageObjects.console.closeHelpIfExists();
         expect(await PageObjects.console.hasFolds()).to.be(true);
       });
 
       it('should restore the state of folding/unfolding when the page reloads', async () => {
-        await PageObjects.console.clearTextArea();
-        await enterRequestWithBody();
+        await enterRequest();
         await PageObjects.console.clickFoldWidget();
         await browser.refresh();
         await PageObjects.header.waitUntilLoadingHasFinished();
         expect(await PageObjects.console.hasFolds()).to.be(true);
+      });
+
+      it('should not have folds by default', async () => {
+        await enterRequest();
+        await browser.refresh();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        expect(await PageObjects.console.hasFolds()).to.be(false);
       });
     });
   });

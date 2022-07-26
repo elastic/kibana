@@ -18,7 +18,7 @@ import {
 } from '../../types';
 import type { FleetAuthzRouter } from '../security';
 
-import { K8S_API_ROUTES } from '../../../common';
+import { K8S_API_ROUTES } from '../../../common/constants';
 
 import {
   getAgentPoliciesHandler,

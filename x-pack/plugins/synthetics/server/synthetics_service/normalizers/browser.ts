@@ -44,11 +44,13 @@ type NormalizedPublicFields = Omit<
 
 export const normalizeProjectMonitor = ({
   locations = [],
+  privateLocations = [],
   monitor,
   projectId,
   namespace,
 }: {
   locations: Locations;
+  privateLocations: Locations;
   monitor: ProjectBrowserMonitor;
   projectId: string;
   namespace: string;
@@ -66,11 +68,11 @@ export const normalizeProjectMonitor = ({
     [ConfigKey.JOURNEY_ID]: monitor.id || defaultFields[ConfigKey.JOURNEY_ID],
     [ConfigKey.SOURCE_PROJECT_CONTENT]:
       monitor.content || defaultFields[ConfigKey.SOURCE_PROJECT_CONTENT],
-    [ConfigKey.LOCATIONS]: monitor.locations
-      ?.map((key) => {
-        return locations.find((location) => location.id === key);
-      })
-      .filter((location) => location !== undefined) as BrowserFields[ConfigKey.LOCATIONS],
+    [ConfigKey.LOCATIONS]: getMonitorLocations({
+      monitor,
+      privateLocations,
+      publicLocations: locations,
+    }),
     [ConfigKey.THROTTLING_CONFIG]: monitor.throttling
       ? `${monitor.throttling.download}d/${monitor.throttling.upload}u/${monitor.throttling.latency}l`
       : defaultFields[ConfigKey.THROTTLING_CONFIG],
@@ -111,16 +113,42 @@ export const normalizeProjectMonitor = ({
 
 export const normalizeProjectMonitors = ({
   locations = [],
+  privateLocations = [],
   monitors = [],
   projectId,
   namespace,
 }: {
   locations: Locations;
+  privateLocations: Locations;
   monitors: ProjectBrowserMonitor[];
   projectId: string;
   namespace: string;
 }) => {
   return monitors.map((monitor) => {
-    return normalizeProjectMonitor({ monitor, locations, projectId, namespace });
+    return normalizeProjectMonitor({ monitor, locations, privateLocations, projectId, namespace });
   });
+};
+
+export const getMonitorLocations = ({
+  privateLocations,
+  publicLocations,
+  monitor,
+}: {
+  monitor: ProjectBrowserMonitor;
+  privateLocations: Locations;
+  publicLocations: Locations;
+}) => {
+  const publicLocs =
+    monitor.locations?.map((id) => {
+      return publicLocations.find((location) => location.id === id);
+    }) || [];
+  const privateLocs =
+    monitor.privateLocations?.map((locationName) => {
+      return privateLocations.find(
+        (location) => location.label.toLowerCase() === locationName.toLowerCase()
+      );
+    }) || [];
+  return [...publicLocs, ...privateLocs].filter(
+    (location) => location !== undefined
+  ) as BrowserFields[ConfigKey.LOCATIONS];
 };

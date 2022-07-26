@@ -12,6 +12,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useGetEndpointDetails, useWithShowEndpointResponder } from '../../../management/hooks';
 import { HostStatus } from '../../../../common/endpoint/types';
+import { useDoesEndpointSupportResponder } from '../../../common/hooks/endpoint/use_does_endpoint_support_responder';
+import { UPGRADE_ENDPOINT_FOR_RESPONDER } from '../../../common/translations';
 
 export const NOT_FROM_ENDPOINT_HOST_TOOLTIP = i18n.translate(
   'xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.notSupportedTooltip',
@@ -43,9 +45,16 @@ export const ResponderContextMenuItem = memo<ResponderContextMenuItemProps>(
       error,
     } = useGetEndpointDetails(endpointId, { enabled: Boolean(endpointId) });
 
+    const isResponderCapabilitiesEnabled = useDoesEndpointSupportResponder(
+      endpointHostInfo?.metadata
+    );
     const [isDisabled, tooltip]: [disabled: boolean, tooltip: ReactNode] = useMemo(() => {
       if (!endpointId) {
         return [true, NOT_FROM_ENDPOINT_HOST_TOOLTIP];
+      }
+
+      if (!isResponderCapabilitiesEnabled) {
+        return [true, UPGRADE_ENDPOINT_FOR_RESPONDER];
       }
 
       // Still loading Endpoint host info
@@ -64,7 +73,13 @@ export const ResponderContextMenuItem = memo<ResponderContextMenuItemProps>(
       }
 
       return [false, undefined];
-    }, [endpointHostInfo?.host_status, endpointId, error, isFetching]);
+    }, [
+      endpointHostInfo?.host_status,
+      endpointId,
+      error,
+      isFetching,
+      isResponderCapabilitiesEnabled,
+    ]);
 
     const handleResponseActionsClick = useCallback(() => {
       if (endpointHostInfo) showEndpointResponseActionsConsole(endpointHostInfo.metadata);

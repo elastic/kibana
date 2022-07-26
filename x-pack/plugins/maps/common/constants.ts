@@ -241,6 +241,7 @@ export enum VECTOR_STYLES {
   ICON_SIZE = 'iconSize',
   ICON_ORIENTATION = 'iconOrientation',
   LABEL_TEXT = 'labelText',
+  LABEL_ZOOM_RANGE = 'labelZoomRange',
   LABEL_COLOR = 'labelColor',
   LABEL_SIZE = 'labelSize',
   LABEL_BORDER_COLOR = 'labelBorderColor',
