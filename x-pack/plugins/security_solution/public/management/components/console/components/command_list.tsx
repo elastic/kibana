@@ -219,7 +219,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
   const getFilteredCommands = useCallback(
     (commandsByGroup): CommandDefinition[] =>
       commandsByGroup.filter(
-        (current: CommandDefinition) => current.name !== 'help' && current.name !== 'cls'
+        (current: CommandDefinition) => current.name !== 'help' && current.name !== 'clear'
       ),
     []
   );
