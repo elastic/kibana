@@ -25,18 +25,18 @@ import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { baseBreadcrumbs } from '../search_indices';
 
-import { headerActions } from './components/header_actions/header_actions';
+import { getHeaderActions } from './components/header_actions/header_actions';
 import { IndexCreatedCallout } from './components/index_created_callout/callout';
 import { IndexCreatedCalloutLogic } from './components/index_created_callout/callout_logic';
 import { ConnectorConfiguration } from './connector/connector_configuration';
 import { ConnectorSchedulingComponent } from './connector/connector_scheduling';
 import { AutomaticCrawlScheduler } from './crawler/automatic_crawl_scheduler/automatic_crawl_scheduler';
 import { CrawlCustomSettingsFlyout } from './crawler/crawl_custom_settings_flyout/crawl_custom_settings_flyout';
-import { CrawlerStatusIndicator } from './crawler/crawler_status_indicator/crawler_status_indicator';
 import { SearchIndexDomainManagement } from './crawler/domain_management/domain_management';
 import { SearchIndexDocuments } from './documents';
 import { SearchIndexIndexMappings } from './index_mappings';
 import { IndexNameLogic } from './index_name_logic';
+import { IndexViewLogic } from './index_view_logic';
 import { SearchIndexOverview } from './overview';
 
 export enum SearchIndexTabId {
@@ -52,8 +52,8 @@ export enum SearchIndexTabId {
 }
 
 export const SearchIndex: React.FC = () => {
-  const { makeRequest, apiReset } = useActions(FetchIndexApiLogic);
   const { data: indexData, status: indexApiStatus } = useValues(FetchIndexApiLogic);
+  const { startFetchIndexPoll, stopFetchIndexPoll } = useActions(IndexViewLogic);
   const { isCalloutVisible } = useValues(IndexCreatedCalloutLogic);
   const { tabId = SearchIndexTabId.OVERVIEW } = useParams<{
     tabId?: string;
@@ -62,8 +62,8 @@ export const SearchIndex: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);
 
   useEffect(() => {
-    makeRequest({ indexName });
-    return apiReset;
+    startFetchIndexPoll();
+    return stopFetchIndexPoll;
   }, [indexName]);
 
   const ALL_INDICES_TABS: EuiTabbedContentTab[] = [
@@ -147,13 +147,13 @@ export const SearchIndex: React.FC = () => {
     <EnterpriseSearchContentPageTemplate
       pageChrome={[...baseBreadcrumbs, indexName]}
       pageViewTelemetry={tabId}
-      isLoading={indexApiStatus === Status.LOADING || indexApiStatus === Status.IDLE}
+      isLoading={
+        indexApiStatus === Status.IDLE ||
+        (typeof indexData === 'undefined' && indexApiStatus === Status.LOADING)
+      }
       pageHeader={{
         pageTitle: indexName,
-        rightSideItems: [
-          ...headerActions,
-          ...(isCrawlerIndex(indexData) ? [<CrawlerStatusIndicator />] : []),
-        ],
+        rightSideItems: getHeaderActions(indexData),
       }}
     >
       <>

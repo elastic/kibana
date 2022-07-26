@@ -65,6 +65,7 @@ export const securityNavKeys = [
   SecurityPageName.trustedApps,
   SecurityPageName.users,
   SecurityPageName.kubernetes,
+  SecurityPageName.threatIntelligence,
   SecurityPageName.cloudSecurityPostureDashboard,
   SecurityPageName.cloudSecurityPostureFindings,
   SecurityPageName.cloudSecurityPostureBenchmarks,

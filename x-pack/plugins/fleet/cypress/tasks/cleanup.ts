@@ -34,3 +34,17 @@ export function unenrollAgent() {
     }
   );
 }
+
+export function cleanupDownloadSources() {
+  cy.request('/api/fleet/agent_download_sources').then((response: any) => {
+    response.body.items
+      .filter((ds: any) => !ds.is_default)
+      .forEach((ds: any) => {
+        cy.request({
+          method: 'DELETE',
+          url: `/api/fleet/agent_download_sources/${ds.id}`,
+          headers: { 'kbn-xsrf': 'kibana' },
+        });
+      });
+  });
+}

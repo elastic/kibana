@@ -69,6 +69,7 @@ export function useFailedTransactionsCorrelations() {
       failedTransactionsCorrelations: undefined,
       percentileThresholdValue: undefined,
       overallHistogram: undefined,
+      totalDocCount: undefined,
       errorHistogram: undefined,
       fieldStats: undefined,
     });
@@ -118,12 +119,13 @@ export function useFailedTransactionsCorrelations() {
           ),
         ]);
 
-      const { overallHistogram, percentileThresholdValue } =
+      const { overallHistogram, totalDocCount, percentileThresholdValue } =
         overallHistogramResponse;
       const { overallHistogram: errorHistogram } = errorHistogramRespone;
 
       responseUpdate.errorHistogram = errorHistogram;
       responseUpdate.overallHistogram = overallHistogram;
+      responseUpdate.totalDocCount = totalDocCount;
       responseUpdate.percentileThresholdValue = percentileThresholdValue;
 
       if (abortCtrl.current.signal.aborted) {

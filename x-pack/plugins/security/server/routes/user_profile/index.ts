@@ -7,11 +7,11 @@
 
 import type { RouteDefinitionParams } from '..';
 import { defineBulkGetUserProfilesRoute } from './bulk_get';
-import { defineGetUserProfileRoute } from './get';
+import { defineGetCurrentUserProfileRoute } from './get_current';
 import { defineUpdateUserProfileDataRoute } from './update';
 
 export function defineUserProfileRoutes(params: RouteDefinitionParams) {
   defineUpdateUserProfileDataRoute(params);
-  defineGetUserProfileRoute(params);
+  defineGetCurrentUserProfileRoute(params);
   defineBulkGetUserProfilesRoute(params);
 }

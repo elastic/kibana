@@ -43,5 +43,6 @@ export type UrlStateType =
   | 'timeline'
   | 'explore'
   | 'dashboards'
+  | 'threat_intelligence'
   | 'cloud_posture'
   | 'findings';

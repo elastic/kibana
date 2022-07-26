@@ -13,8 +13,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import axios, { AxiosResponse } from 'axios';
 import times from 'lodash/times';
-import { LocationStatus } from '../../common/runtime_types';
-import { SyntheticsConfig } from './formatters/format_configs';
+import { LocationStatus, HeartbeatConfig } from '../../common/runtime_types';
 
 const taskManagerSetup = taskManagerMock.createSetup();
 
@@ -66,7 +65,7 @@ describe('SyntheticsService', () => {
     return { service, locations };
   };
 
-  const getFakePayload = (locations: SyntheticsConfig['locations']) => {
+  const getFakePayload = (locations: HeartbeatConfig['locations']) => {
     return {
       type: 'http',
       enabled: true,
@@ -146,7 +145,7 @@ describe('SyntheticsService', () => {
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
-      await service.addConfig(payload as SyntheticsConfig);
+      await service.addConfig(payload as HeartbeatConfig);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
@@ -165,7 +164,7 @@ describe('SyntheticsService', () => {
 
       const payload = getFakePayload([locations[0]]);
 
-      await service.pushConfigs([payload] as SyntheticsConfig[]);
+      await service.pushConfigs([payload] as HeartbeatConfig[]);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
@@ -182,7 +181,7 @@ describe('SyntheticsService', () => {
 
       const payload = getFakePayload([locations[0]]);
 
-      await service.pushConfigs([payload] as SyntheticsConfig[], true);
+      await service.pushConfigs([payload] as HeartbeatConfig[], true);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
