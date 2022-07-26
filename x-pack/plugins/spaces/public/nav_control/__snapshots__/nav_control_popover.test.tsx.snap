@@ -46,6 +46,7 @@ exports[`NavControlPopover renders without crashing 1`] = `
       }
     }
     id="headerSpacesMenuContent"
+    isLoading={false}
     navigateToApp={[MockFunction]}
     toggleSpaceSelector={[Function]}
   />
