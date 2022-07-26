@@ -216,8 +216,12 @@ export const getMetricVisualization = ({
   getConfiguration(props) {
     const hasColoring = props.state.palette != null;
     const stops = props.state.palette?.params?.stops || [];
-    const isSupportedMetricOperation = (op: OperationMetadata) =>
+    const isSupportedMetric = (op: OperationMetadata) =>
       !op.isBucketed && supportedDataTypes.has(op.dataType);
+
+    const isSupportedDynamicMetric = (op: OperationMetadata) =>
+      !op.isBucketed && supportedDataTypes.has(op.dataType) && !op.isStaticValue;
+
     const isBucketed = (op: OperationMetadata) => op.isBucketed;
     return {
       groups: [
@@ -237,7 +241,7 @@ export const getMetricVisualization = ({
               ]
             : [],
           supportsMoreColumns: !props.state.metricAccessor,
-          filterOperations: isSupportedMetricOperation,
+          filterOperations: isSupportedDynamicMetric,
           enableDimensionEditor: true,
           supportFieldFormat: false,
           required: true,
@@ -256,7 +260,7 @@ export const getMetricVisualization = ({
               ]
             : [],
           supportsMoreColumns: !props.state.secondaryMetricAccessor,
-          filterOperations: isSupportedMetricOperation,
+          filterOperations: isSupportedDynamicMetric,
           enableDimensionEditor: true,
           supportFieldFormat: false,
           required: false,
@@ -273,7 +277,7 @@ export const getMetricVisualization = ({
               ]
             : [],
           supportsMoreColumns: !props.state.maxAccessor,
-          filterOperations: isSupportedMetricOperation,
+          filterOperations: isSupportedMetric,
           enableDimensionEditor: true,
           supportFieldFormat: false,
           supportStaticValue: true,
