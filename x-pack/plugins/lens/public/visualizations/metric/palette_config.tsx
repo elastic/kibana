@@ -25,11 +25,9 @@ export const defaultNumberPaletteParams: RequiredPaletteParamTypes = {
   ...sharedDefaultParams,
   name: 'status',
   rangeType: 'number',
-  rangeMin: -Infinity,
-  rangeMax: Infinity,
   steps: 3,
   maxSteps: 5,
-  continuity: 'all',
+  continuity: 'none',
   colorStops: [],
   stops: [],
 };
