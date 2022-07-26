@@ -22,7 +22,13 @@ export default function ({
         'test/functional/fixtures/es_archiver/getting_started/shakespeare'
       );
       await PageObjects.common.navigateToApp('settings');
-      await PageObjects.settings.createIndexPattern('shakespeare', '');
+      await PageObjects.settings.createIndexPattern(
+        'shakespeare',
+        '',
+        undefined,
+        undefined,
+        'shakespeare'
+      );
     });
 
     loadTestFile(require.resolve('./search'));

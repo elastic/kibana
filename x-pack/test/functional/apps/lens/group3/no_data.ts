@@ -21,6 +21,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       clearWithKeyboard: true,
       typeCharByChar: true,
     });
+    await testSubjects.setValue('createIndexPatternNameInput', dataViewName, {
+      clearWithKeyboard: true,
+      typeCharByChar: true,
+    });
     await testSubjects.click('saveIndexPatternButton');
   };
 

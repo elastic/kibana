@@ -179,7 +179,7 @@ export class SettingsPageObject extends FtrService {
 
   async setNameField(dataViewName: string) {
     const field = await this.getNameField();
-    await field.clearValue();
+    await field.clearValueWithKeyboard();
     await field.type(dataViewName);
   }
 
