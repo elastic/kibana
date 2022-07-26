@@ -5979,10 +5979,10 @@
     "@types/node" "*"
     form-data "^2.3.3"
 
-"@types/node-forge@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@types/node-forge/-/node-forge-1.0.2.tgz#454299d3eaa846a38f8d88872a895b40a02e86dd"
-  integrity sha512-J1OkeZGaW0y9Y7xD49Ja8O82B9l5nZDeoYuGWqIOYPAf9LR+xF23k9ILdzv8dH+2H033fx3D5oiA0GlmicI+sg==
+"@types/node-forge@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@types/node-forge/-/node-forge-1.0.4.tgz#82df44938848e111463080286876e4cbe2b297a0"
+  integrity sha512-UpX8LTRrarEZPQvQqF5/6KQAqZolOVckH7txWdlsWIJrhBFFtwEUTcqeDouhrJl6t0F7Wg5cyUOAqqF8a6hheg==
   dependencies:
     "@types/node" "*"
 
@@ -9163,17 +9163,17 @@ cacheable-request@^6.0.0:
     normalize-url "^4.1.0"
     responselike "^1.0.2"
 
-cacheable-request@^7.0.1:
-  version "7.0.1"
-  resolved "https://registry.yarnpkg.com/cacheable-request/-/cacheable-request-7.0.1.tgz#062031c2856232782ed694a257fa35da93942a58"
-  integrity sha512-lt0mJ6YAnsrBErpTMWeu5kl/tg9xMAWjavYTN6VQXM1A/teBITuNcccXsCxF0tDQQJf9DfAaX5O4e0zp0KlfZw==
+cacheable-request@^7.0.2:
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/cacheable-request/-/cacheable-request-7.0.2.tgz#ea0d0b889364a25854757301ca12b2da77f91d27"
+  integrity sha512-pouW8/FmiPQbuGpkXQ9BAPv/Mo5xDGANgSNXzTzJ8DrKGuXOssM4wIQRjfanNRh3Yu5cfYPvcorqbhg2KIJtew==
   dependencies:
     clone-response "^1.0.2"
     get-stream "^5.1.0"
     http-cache-semantics "^4.0.0"
     keyv "^4.0.0"
     lowercase-keys "^2.0.0"
-    normalize-url "^4.1.0"
+    normalize-url "^6.0.1"
     responselike "^2.0.0"
 
 cached-path-relative@^1.0.0, cached-path-relative@^1.0.2:
@@ -14451,14 +14451,14 @@ gaze@^1.0.0:
   dependencies:
     globule "^1.0.0"
 
-geckodriver@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-3.0.1.tgz#ded3512f3c6ddc490139b9d5e8fd6925d41c5631"
-  integrity sha512-cHmbNFqt4eelymsuVt7B5nh+qYGpPCltM7rd+k+CBaTvxGGr4j6STeOYahXMNdSeUbCVhqP345OuqWnvHYAz4Q==
+geckodriver@^3.0.2:
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-3.0.2.tgz#6bd69166a24859c5edbc6ece9868339378b6c97b"
+  integrity sha512-GHOQzQnTeZOJdcdEXLuzmcRwkbHuei1VivXkn2BLyleKiT6lTvl0T7vm+d0wvr/EZC7jr0m1u1pBHSfqtuFuNQ==
   dependencies:
     adm-zip "0.5.9"
     bluebird "3.7.2"
-    got "11.8.2"
+    got "11.8.5"
     https-proxy-agent "5.0.0"
     tar "6.1.11"
 
@@ -14962,17 +14962,17 @@ gonzales-pe@^4.3.0:
   dependencies:
     minimist "^1.2.5"
 
-got@11.8.2, got@^11.8.2:
-  version "11.8.2"
-  resolved "https://registry.yarnpkg.com/got/-/got-11.8.2.tgz#7abb3959ea28c31f3576f1576c1effce23f33599"
-  integrity sha512-D0QywKgIe30ODs+fm8wMZiAcZjypcCodPNuMz5H9Mny7RJ+IjJ10BdmGW7OM7fHXP+O7r6ZwapQ/YQmMSvB0UQ==
+got@11.8.5, got@^11.8.2:
+  version "11.8.5"
+  resolved "https://registry.yarnpkg.com/got/-/got-11.8.5.tgz#ce77d045136de56e8f024bebb82ea349bc730046"
+  integrity sha512-o0Je4NvQObAuZPHLFoRSkdG2lTgtcynqymzg2Vupdx6PorhaT5MCbIyXG6d4D94kk8ZG57QeosgdiqfJWhEhlQ==
   dependencies:
     "@sindresorhus/is" "^4.0.0"
     "@szmarczak/http-timer" "^4.0.5"
     "@types/cacheable-request" "^6.0.1"
     "@types/responselike" "^1.0.0"
     cacheable-lookup "^5.0.3"
-    cacheable-request "^7.0.1"
+    cacheable-request "^7.0.2"
     decompress-response "^6.0.0"
     http2-wrapper "^1.0.0-beta.5.2"
     lowercase-keys "^2.0.0"
@@ -20560,6 +20560,11 @@ normalize-url@^4.1.0:
   resolved "https://registry.yarnpkg.com/normalize-url/-/normalize-url-4.5.1.tgz#0dd90cf1288ee1d1313b87081c9a5932ee48518a"
   integrity sha512-9UZCFRHQdNrfTpGg8+1INIg93B6zE0aXMVFkw1WFwvO4SlZywU6aLg5Of0Ap/PgcbSw4LNxvMWXMeugwMCX0AA==
 
+normalize-url@^6.0.1:
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/normalize-url/-/normalize-url-6.1.0.tgz#40d0885b535deffe3f3147bec877d05fe4c5668a"
+  integrity sha512-DlL+XwOy3NxAQ8xuC0okPgK46iuVNAK01YN7RueYBqqFeGsBjV9XmCAzAdgt+667bCl5kPh9EqKKDwnaPG1I7A==
+
 now-and-later@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/now-and-later/-/now-and-later-2.0.0.tgz#bc61cbb456d79cb32207ce47ca05136ff2e7d6ee"
@@ -25086,10 +25091,10 @@ select-hose@^2.0.0:
   resolved "https://registry.yarnpkg.com/select-hose/-/select-hose-2.0.0.tgz#625d8658f865af43ec962bfc376a37359a4994ca"
   integrity sha1-Yl2GWPhlr0Psliv8N2o3NZpJlMo=
 
-selenium-webdriver@^4.3.0:
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.3.0.tgz#00526ddeca3c187c8d889cd3f790926b95d5f044"
-  integrity sha512-9XFr8w95BO7jageR61AtiB83fJNem3fdtOQcUpqIIDHWSxihomyG/yBlL1H4y/shi/dO/Ai3PJMAOG+OW3+JHw==
+selenium-webdriver@^4.3.1:
+  version "4.3.1"
+  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.3.1.tgz#5e9c6c4adee65e57776b5bd4c07c59b65b8f056d"
+  integrity sha512-TjH/ls1WKRQoFEHcqtn6UtwcLnA3yvx08v9cSSFYvyhp8hJWRtbe9ae2I8uXPisEZ2EaGKKoxBZ4EHv0BJM15g==
   dependencies:
     jszip "^3.10.0"
     tmp "^0.2.1"
@@ -29659,10 +29664,10 @@ xhr@^2.0.1:
     parse-headers "^2.0.0"
     xtend "^4.0.0"
 
-xml-crypto@^2.1.3:
-  version "2.1.3"
-  resolved "https://registry.yarnpkg.com/xml-crypto/-/xml-crypto-2.1.3.tgz#6a7272b610ea3e4ea7f13e9e4876f1b20cbc32c8"
-  integrity sha512-MpXZwnn9JK0mNPZ5mnFIbNnQa+8lMGK4NtnX2FlJMfMWR60sJdFO9X72yO6ji068pxixzk53O7x0/iSKh6IhyQ==
+xml-crypto@^2.1.4:
+  version "2.1.4"
+  resolved "https://registry.yarnpkg.com/xml-crypto/-/xml-crypto-2.1.4.tgz#85b3c62fa0debc4956ee72cb2dfee65651e865b5"
+  integrity sha512-ModFeGOy67L/XXHcuepnYGF7DASEDw7fhvy+qIs1ORoH55G1IIr+fN0kaMtttwvmNFFMskD9AHro8wx352/mUg==
   dependencies:
     "@xmldom/xmldom" "^0.7.0"
     xpath "0.0.32"

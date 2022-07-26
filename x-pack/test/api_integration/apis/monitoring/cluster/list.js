@@ -12,7 +12,10 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('list', () => {
+  describe('list', function () {
+    // Archive contains non-cgroup data which collides with the in-cgroup services present by default on cloud deployments
+    this.tags(['skipCloud']);
+
     describe('with trial license clusters', () => {
       const archive = 'x-pack/test/functional/es_archives/monitoring/multicluster';
       const timeRange = {
