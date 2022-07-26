@@ -278,6 +278,10 @@ export const getMetricVisualization = ({
           supportFieldFormat: false,
           supportStaticValue: true,
           required: false,
+          groupTooltip: i18n.translate('xpack.lens.metric.maxTooltip', {
+            defaultMessage:
+              'If the maximum value is specified, the minimum value is fixed at zero.',
+          }),
         },
         {
           groupId: GROUP_ID.BREAKDOWN_BY,
