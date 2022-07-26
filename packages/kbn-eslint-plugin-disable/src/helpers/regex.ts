@@ -43,7 +43,12 @@ export function parseEslintDisableComment(
     ? ESLINT_DISABLE_VALUE.DISABLE_LINE
     : ESLINT_DISABLE_VALUE.DISABLE;
 
-  const rules = rulesBlock ? rulesBlock.trim().split(',').map(r => r.trim()) : [];
+  const rules = rulesBlock
+    ? rulesBlock
+        .trim()
+        .split(',')
+        .map((r) => r.trim())
+    : [];
 
   return {
     type: comment.type,
