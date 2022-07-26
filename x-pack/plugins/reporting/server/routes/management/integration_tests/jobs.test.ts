@@ -358,7 +358,10 @@ describe('GET /api/reporting/jobs/download', () => {
         .get('/api/reporting/jobs/download/dope')
         .expect(403)
         .then(({ body }) =>
-          expect(body.message).toMatchInlineSnapshot(`"Sorry, you don't have access to Reporting"`)
+          expect(body.message).toMatchInlineSnapshot(`
+            "Sorry, you don't have access to Reporting. <a href=mock-link style=\\"font-weight: 600;\\"
+                                target=\\"_blank\\" rel=\\"noopener\\">See details</a> to grant user access."
+          `)
         );
     });
   });
