@@ -8,7 +8,7 @@
 
 import type { PaletteOutput, PaletteDefinition } from '@kbn/coloring';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { Datatable } from '@kbn/expressions-plugin';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { byDataColorPaletteMap } from './get_color';
 
 describe('#byDataColorPaletteMap', () => {

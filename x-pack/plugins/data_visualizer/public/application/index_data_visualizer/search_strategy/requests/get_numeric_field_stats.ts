@@ -86,14 +86,12 @@ export const getNumericFieldsStatsRequest = (
     // If cardinality >= SAMPLE_TOP_TERMS_THRESHOLD, run the top terms aggregation
     // in a sampler aggregation, even if no sampling has been specified (samplerShardSize < 1).
     if (samplerShardSize < 1 && field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD) {
-      aggs[`${safeFieldName}_top`] = {
-        sampler: {
-          shard_size: SAMPLER_TOP_TERMS_SHARD_SIZE,
-        },
-        aggs: {
+      aggs[`${safeFieldName}_top`] = buildSamplerAggregation(
+        {
           top,
         },
-      };
+        0.05
+      );
     } else {
       aggs[`${safeFieldName}_top`] = top;
     }

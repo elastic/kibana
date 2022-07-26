@@ -41,7 +41,6 @@ import {
 } from './math_completion';
 import { LANGUAGE_ID } from './math_tokenization';
 import { MemoizedFormulaHelp } from './formula_help';
-import { trackUiEvent } from '../../../../../lens_ui_telemetry';
 
 import './formula.scss';
 import { FormulaIndexPatternColumn } from '../formula';
@@ -700,7 +699,6 @@ export function FormulaEditor({
                       toggleFullscreen();
                       // Help text opens when entering full screen, and closes when leaving full screen
                       setIsHelpOpen(!isFullscreen);
-                      trackUiEvent('toggle_formula_fullscreen');
                     }}
                     iconType={isFullscreen ? 'fullScreenExit' : 'fullScreen'}
                     size="xs"
@@ -823,9 +821,6 @@ export function FormulaEditor({
                           <EuiButtonIcon
                             className="lnsFormula__editorHelp lnsFormula__editorHelp--overlay"
                             onClick={() => {
-                              if (!isHelpOpen) {
-                                trackUiEvent('open_formula_popover');
-                              }
                               setIsHelpOpen(!isHelpOpen);
                             }}
                             iconType="documentation"

@@ -590,7 +590,7 @@ Objects client:
 ```typescript
 // src/plugins/myplugin/server/lib/short_url_lookup.ts
 import crypto from 'crypto';
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 
 export const shortUrlLookup = {
   generateUrlId(url: string, savedObjectsClient: SavedObjectsClientContract) {
@@ -1025,7 +1025,7 @@ data.
 ```typescript
 // src/plugins/myplugin/public/plugin.ts
 import { METRIC_TYPE } from '@kbn/analytics';
-import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { SuggestionsService } from './suggestions';

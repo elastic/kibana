@@ -7,7 +7,7 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { Filter, Query } from '@kbn/es-query';
+import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -26,7 +26,7 @@ import { AvailableFields$, DataRefetch$ } from '../../hooks/use_saved_search';
 export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   dataView: DataView;
   savedSearch?: SavedSearch;
-  query?: Query;
+  query?: Query | AggregateQuery;
   visibleFieldNames?: string[];
   filters?: Filter[];
   showPreviewByDefault?: boolean;
@@ -65,7 +65,7 @@ export interface FieldStatisticsTableProps {
   /**
    * Optional query to update the table content
    */
-  query?: Query;
+  query?: Query | AggregateQuery;
   /**
    * Filters query to update the table content
    */
