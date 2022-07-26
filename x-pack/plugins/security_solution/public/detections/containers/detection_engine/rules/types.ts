@@ -77,7 +77,7 @@ export interface CreateRulesProps {
 }
 
 export interface PreviewRulesProps {
-  rule: CreateRulesSchema & { invocationCount: number };
+  rule: CreateRulesSchema & { invocationCount: number; timeframeEnd: string };
   signal: AbortSignal;
 }
 
