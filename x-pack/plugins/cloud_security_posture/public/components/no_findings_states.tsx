@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiLoadingLogo, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useCspBenchmarkIntegrations } from '../pages/benchmarks/use_csp_benchmark_integrations';
 import { useCISIntegrationPoliciesLink } from '../common/navigation/use_navigate_to_cis_integration_policies';
 import { NO_FINDINGS_STATUS_TEST_SUBJ } from './test_subjects';
@@ -37,16 +38,29 @@ const NotDeployed = () => {
       data-test-subj={NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED}
       color="plain"
       iconType="fleetApp"
-      title={<h2>{'No Agents Installed'}</h2>}
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.csp.noFindingsStates.noAgentsDeployed.noAgentsDeployedTitle"
+            defaultMessage="No Agents Installed"
+          />
+        </h2>
+      }
       body={
         <p>
-          To see findings, please finish the setup process by installing an elastic agent on your
-          Kubernetes cluster.
+          <FormattedMessage
+            id="xpack.csp.noFindingsStates.noAgentsDeployed.noAgentsDeployedDescription"
+            defaultMessage="To see findings, please finish the setup process by installing an elastic agent on your
+          Kubernetes cluster."
+          />
         </p>
       }
       actions={[
         <EuiButton fill href={integrationPoliciesLink} isDisabled={!integrationPoliciesLink}>
-          Install Agent
+          <FormattedMessage
+            id="xpack.csp.noFindingsStates.noAgentsDeployed.noAgentsDeployedButtonTitle"
+            defaultMessage="Install Agent"
+          />
         </EuiButton>,
       ]}
     />
@@ -58,9 +72,21 @@ const Indexing = () => (
     data-test-subj={NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING}
     color="plain"
     icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
-    title={<h2>{'No Findings Yet'}</h2>}
+    title={
+      <h2>
+        <FormattedMessage
+          id="xpack.csp.noFindingsStates.indexing.indexingButtonTitle"
+          defaultMessage="No Findings Yet"
+        />
+      </h2>
+    }
     body={
-      <p>Waiting for data to be collected and indexed. Check back later to see your findings</p>
+      <p>
+        <FormattedMessage
+          id="xpack.csp.noFindingsStates.indexing.indexingDescription"
+          defaultMessage="Waiting for data to be collected and indexed. Check back later to see your findings"
+        />
+      </p>
     }
   />
 );
@@ -70,8 +96,22 @@ const IndexTimeout = () => (
     data-test-subj={NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT}
     color="plain"
     icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
-    title={<h2>{'Findings Delayed'}</h2>}
-    body={<p>Collecting findings is taking longer than expected, check back again soon</p>}
+    title={
+      <h2>
+        <FormattedMessage
+          id="xpack.csp.noFindingsStates.indexTimeout.indexTimeoutTitle"
+          defaultMessage="Findings Delayed"
+        />
+      </h2>
+    }
+    body={
+      <p>
+        <FormattedMessage
+          id="xpack.csp.noFindingsStates.indexTimeout.indexTimeoutDescription"
+          defaultMessage="Collecting findings is taking longer than expected, check back again soon"
+        />
+      </p>
+    }
   />
 );
 
