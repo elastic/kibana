@@ -97,7 +97,6 @@ const cmd = [
   ...(inspect ? ['--inspect-brk'] : []),
   `../../../../../scripts/${ftrScript}`,
   ...(grep ? [`--grep "${grep}"`] : []),
-  ...(grepFiles ? [`--grep-files "${grepFiles}"`] : []),
   ...(updateSnapshots ? [`--updateSnapshots`] : []),
   `--config ../../../../test/apm_api_integration/${license}/config.ts`,
 ].join(' ');
@@ -105,7 +104,11 @@ const cmd = [
 console.log(`Running: "${cmd}"`);
 
 function runTests() {
-  childProcess.execSync(cmd, { cwd: path.join(__dirname), stdio: 'inherit' });
+  childProcess.execSync(cmd, {
+    cwd: path.join(__dirname),
+    stdio: 'inherit',
+    env: { ...process.env, APM_TEST_GREP_FILES: grepFiles },
+  });
 }
 
 if (argv.times) {
