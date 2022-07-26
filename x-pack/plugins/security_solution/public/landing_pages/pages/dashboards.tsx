@@ -13,19 +13,21 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React from 'react';
+import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
+import { DashboardConstants } from '@kbn/dashboard-plugin/public';
 import { SecurityPageName } from '../../app/types';
 import { DashboardsTable } from '../../common/components/dashboards/dashboards_table';
 import { Title } from '../../common/components/header_page/title';
 import { useAppRootNavLink } from '../../common/components/navigation/nav_links';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useCreateSecurityDashboardLink } from '../../common/containers/dashboards/use_create_security_dashboard_link';
-import { useNavigateTo } from '../../common/lib/kibana';
+import { useCapabilities, useNavigateTo } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { LandingImageCards } from '../components/landing_links_images';
 import * as i18n from './translations';
 
 /* eslint-disable @elastic/eui/href-or-on-click */
-const Header = () => {
+const Header: React.FC<{ canCreateDashboard: boolean }> = ({ canCreateDashboard }) => {
   const { isLoading, url } = useCreateSecurityDashboardLink();
   const { navigateTo } = useNavigateTo();
   return (
@@ -33,32 +35,36 @@ const Header = () => {
       <EuiFlexItem>
         <Title title={i18n.DASHBOARDS_PAGE_TITLE} />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          isDisabled={isLoading}
-          color="primary"
-          fill
-          iconType="plusInCircle"
-          href={url}
-          onClick={(ev) => {
-            ev.preventDefault();
-            navigateTo({ url });
-          }}
-          data-test-subj="createDashboardButton"
-        >
-          {i18n.DASHBOARDS_PAGE_CREATE_BUTTON}
-        </EuiButton>
-      </EuiFlexItem>
+      {canCreateDashboard && (
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            isDisabled={isLoading}
+            color="primary"
+            fill
+            iconType="plusInCircle"
+            href={url}
+            onClick={(ev) => {
+              ev.preventDefault();
+              navigateTo({ url });
+            }}
+            data-test-subj="createDashboardButton"
+          >
+            {i18n.DASHBOARDS_PAGE_CREATE_BUTTON}
+          </EuiButton>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };
 
 export const DashboardsLandingPage = () => {
   const dashboardLinks = useAppRootNavLink(SecurityPageName.dashboardsLanding)?.links ?? [];
+  const { show: canReadDashboard, createNew: canCreateDashboard } =
+    useCapabilities<DashboardCapabilities>(DashboardConstants.DASHBOARD_ID);
 
   return (
     <SecuritySolutionPageWrapper>
-      <Header />
+      <Header canCreateDashboard={canCreateDashboard} />
       <EuiSpacer size="xl" />
 
       <EuiTitle size="xxxs">
@@ -68,12 +74,16 @@ export const DashboardsLandingPage = () => {
       <LandingImageCards items={dashboardLinks} />
       <EuiSpacer size="xxl" />
 
-      <EuiTitle size="xxxs">
-        <h2>{i18n.DASHBOARDS_PAGE_SECTION_CUSTOM}</h2>
-      </EuiTitle>
-      <EuiHorizontalRule margin="s" />
-      <EuiSpacer size="m" />
-      <DashboardsTable />
+      {canReadDashboard && (
+        <>
+          <EuiTitle size="xxxs">
+            <h2>{i18n.DASHBOARDS_PAGE_SECTION_CUSTOM}</h2>
+          </EuiTitle>
+          <EuiHorizontalRule margin="s" />
+          <EuiSpacer size="m" />
+          <DashboardsTable />
+        </>
+      )}
 
       <SpyRoute pageName={SecurityPageName.dashboardsLanding} />
     </SecuritySolutionPageWrapper>
