@@ -8,6 +8,12 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createTelemetryPrebuiltRuleAlertsTaskConfig } from './prebuilt_rule_alerts';
 import { createMockTelemetryEventsSender, createMockTelemetryReceiver } from '../__mocks__';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
+
+const usageCountersServiceSetup = usageCountersServiceMock.createSetupContract();
+const telemetryUsageCounter = usageCountersServiceSetup.createUsageCounter(
+  'testTelemetryUsageCounter'
+);
 
 describe('security telemetry - detection rule alerts task test', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -22,6 +28,9 @@ describe('security telemetry - detection rule alerts task test', () => {
       current: new Date().toISOString(),
     };
     const mockTelemetryEventsSender = createMockTelemetryEventsSender();
+    mockTelemetryEventsSender.getTelemetryUsageCluster = jest
+      .fn()
+      .mockReturnValue(telemetryUsageCounter);
     const mockTelemetryReceiver = createMockTelemetryReceiver();
     const telemetryDetectionRuleAlertsTaskConfig = createTelemetryPrebuiltRuleAlertsTaskConfig(1);
 
@@ -32,5 +41,11 @@ describe('security telemetry - detection rule alerts task test', () => {
       mockTelemetryEventsSender,
       testTaskExecutionPeriod
     );
+    expect(mockTelemetryReceiver.fetchPrebuiltRuleAlerts).toHaveBeenCalled();
+    expect(mockTelemetryEventsSender.getTelemetryUsageCluster).toHaveBeenCalled();
+    expect(mockTelemetryEventsSender.getTelemetryUsageCluster()?.incrementCounter).toBeCalledTimes(
+      1
+    );
+    expect(mockTelemetryEventsSender.sendOnDemand).toHaveBeenCalled();
   });
 });

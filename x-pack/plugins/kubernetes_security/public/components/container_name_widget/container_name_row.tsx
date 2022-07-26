@@ -13,6 +13,7 @@ export interface ContainerNameRowDeps {
   name: string;
   filterButtonIn?: ReactNode;
   filterButtonOut?: ReactNode;
+  copyToClipboardButton?: ReactNode;
 }
 
 export const ROW_TEST_ID = 'kubernetesSecurity:containerNameSessionRow';
@@ -21,6 +22,7 @@ export const ContainerNameRow = ({
   name,
   filterButtonIn,
   filterButtonOut,
+  copyToClipboardButton,
 }: ContainerNameRowDeps) => {
   const [isHover, setIsHover] = useState<boolean>(false);
 
@@ -31,13 +33,15 @@ export const ContainerNameRow = ({
       onMouseEnter={() => setIsHover(true)}
       onMouseLeave={() => setIsHover(false)}
       data-test-subj={ROW_TEST_ID}
+      css={styles.flexWidth}
     >
       <EuiText size="xs" css={styles.dataInfo}>
-        {name}
+        <div css={styles.truncate}>{name}</div>
         {isHover && (
           <div css={styles.filters}>
             {filterButtonIn}
             {filterButtonOut}
+            {copyToClipboardButton}
           </div>
         )}
       </EuiText>
