@@ -19,9 +19,11 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiFlexGroup,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import './connector_add_modal.scss';
+import { betaBadgeProps } from './beta_badge_props';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { ActionType, ActionConnector, ActionTypeRegistryContract } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
@@ -153,6 +155,14 @@ const ConnectorAddModal = ({
                 </h3>
               </EuiTitle>
             </EuiFlexItem>
+            {actionTypeModel && actionTypeModel.isExperimental && (
+              <EuiFlexItem grow={false}>
+                <EuiBetaBadge
+                  label={betaBadgeProps.label}
+                  tooltipContent={betaBadgeProps.tooltipContent}
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiModalHeaderTitle>
       </EuiModalHeader>

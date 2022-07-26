@@ -605,4 +605,129 @@ describe('action_form', () => {
       ).toHaveLength(2);
     });
   });
+
+  describe('beta badge (action_type_form)', () => {
+    async function setup(isExperimental: boolean) {
+      const actionTypeRegistry = actionTypeRegistryMock.create();
+
+      const { loadAllActions } = jest.requireMock('../../lib/action_connector_api');
+      loadAllActions.mockResolvedValueOnce(allActions);
+      const mocks = coreMock.createSetup();
+      const [
+        {
+          application: { capabilities },
+        },
+      ] = await mocks.getStartServices();
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      useKibanaMock().services.application.capabilities = {
+        ...capabilities,
+        actions: {
+          show: true,
+          save: true,
+          delete: true,
+        },
+      };
+      const newActionType = {
+        ...actionType,
+        isExperimental,
+      };
+      actionTypeRegistry.list.mockReturnValue([newActionType]);
+      actionTypeRegistry.has.mockReturnValue(true);
+      actionTypeRegistry.get.mockReturnValue(newActionType);
+      const initialAlert = {
+        name: 'test',
+        params: {},
+        consumer: 'alerts',
+        alertTypeId: alertType.id,
+        schedule: {
+          interval: '1m',
+        },
+        actions: [
+          {
+            group: 'default',
+            id: 'test',
+            actionTypeId: actionType.id,
+            params: {
+              message: '',
+            },
+          },
+        ],
+        tags: [],
+        muteAll: false,
+        enabled: false,
+        mutedInstanceIds: [],
+      } as unknown as Rule;
+
+      loadActionTypes.mockResolvedValue([
+        {
+          id: actionType.id,
+          name: 'Test',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+        },
+      ]);
+
+      const defaultActionMessage = 'Alert [{{context.metadata.name}}] has exceeded the threshold';
+      const wrapper = mountWithIntl(
+        <ActionForm
+          actions={initialAlert.actions}
+          messageVariables={{
+            params: [
+              { name: 'testVar1', description: 'test var1' },
+              { name: 'testVar2', description: 'test var2' },
+            ],
+            state: [],
+            context: [{ name: 'contextVar', description: 'context var1' }],
+          }}
+          featureId="alerting"
+          defaultActionGroupId={'default'}
+          isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) => {
+            const recoveryActionGroupId = 'recovered';
+            return isActionGroupDisabledForActionTypeId(
+              actionGroupId === recoveryActionGroupId ? RecoveredActionGroup.id : actionGroupId,
+              actionTypeId
+            );
+          }}
+          setActionIdByIndex={(id: string, index: number) => {
+            initialAlert.actions[index].id = id;
+          }}
+          actionGroups={[
+            { id: 'default', name: 'Default', defaultActionMessage },
+            {
+              id: 'recovered',
+              name: 'Recovered',
+            },
+          ]}
+          setActionGroupIdByIndex={(group: string, index: number) => {
+            initialAlert.actions[index].group = group;
+          }}
+          setActions={(_updatedActions: RuleAction[]) => {}}
+          setActionParamsProperty={(key: string, value: any, index: number) =>
+            (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
+          }
+          actionTypeRegistry={actionTypeRegistry}
+          setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
+        />
+      );
+
+      // Wait for active space to resolve before requesting the component to update
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      return wrapper;
+    }
+    it(`does not render beta badge when isExperimental=false`, async () => {
+      const wrapper = await setup(false);
+      expect(wrapper.find('EuiBetaBadge').exists()).toBeFalsy();
+    });
+    it(`renders beta badge when isExperimental=tru`, async () => {
+      const wrapper = await setup(true);
+      expect(wrapper.find('EuiBetaBadge').exists()).toBeTruthy();
+    });
+  });
 });

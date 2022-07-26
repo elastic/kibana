@@ -22,16 +22,26 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { betaBadgeProps } from '../beta_badge_props';
 import { EditConnectorTabs } from '../../../../types';
 
 const FlyoutHeaderComponent: React.FC<{
+  isExperimental?: boolean;
   isPreconfigured: boolean;
   connectorName: string;
   connectorTypeDesc: string;
   selectedTab: EditConnectorTabs;
   setTab: () => void;
   icon?: IconType | null;
-}> = ({ icon, isPreconfigured, connectorName, connectorTypeDesc, selectedTab, setTab }) => {
+}> = ({
+  icon,
+  isExperimental = false,
+  isPreconfigured,
+  connectorName,
+  connectorTypeDesc,
+  selectedTab,
+  setTab,
+}) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -84,6 +94,14 @@ const FlyoutHeaderComponent: React.FC<{
             </EuiTitle>
           )}
         </EuiFlexItem>
+        {isExperimental && (
+          <EuiFlexItem grow={false}>
+            <EuiBetaBadge
+              label={betaBadgeProps.label}
+              tooltipContent={betaBadgeProps.tooltipContent}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <EuiTabs
         className="connectorEditFlyoutTabs"

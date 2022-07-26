@@ -24,9 +24,11 @@ import {
   EuiBadge,
   EuiErrorBoundary,
   EuiToolTip,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { isEmpty, partition, some } from 'lodash';
 import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
+import { betaBadgeProps } from './beta_badge_props';
 import {
   IErrorObject,
   RuleAction,
@@ -341,6 +343,14 @@ export const ActionTypeForm = ({
               </div>
             </EuiText>
           </EuiFlexItem>
+          {actionTypeRegistered && actionTypeRegistered.isExperimental && (
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge
+                label={betaBadgeProps.label}
+                tooltipContent={betaBadgeProps.tooltipContent}
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       }
       extraAction={
