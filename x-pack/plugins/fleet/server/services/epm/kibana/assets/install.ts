@@ -18,6 +18,10 @@ import type { SavedObjectsImportSuccess, SavedObjectsImportFailure } from '@kbn/
 import { createListStream } from '@kbn/utils';
 import { partition } from 'lodash';
 
+import type { IAssignmentService } from '@kbn/saved-objects-tagging-plugin/server';
+
+import { taggableTypes } from '@kbn/saved-objects-tagging-plugin/common/constants';
+
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 import { getAsset, getPathParts } from '../../archive';
 import { KibanaAssetType, KibanaSavedObjectType } from '../../../../types';
@@ -128,6 +132,7 @@ export async function installKibanaAssets(options: {
 export async function installKibanaAssetsAndReferences({
   savedObjectsClient,
   savedObjectsImporter,
+  savedObjectTagAssignmentService,
   logger,
   pkgName,
   paths,
@@ -135,6 +140,7 @@ export async function installKibanaAssetsAndReferences({
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: Pick<SavedObjectsImporter, 'import' | 'resolveImportErrors'>;
+  savedObjectTagAssignmentService: IAssignmentService;
   logger: Logger;
   pkgName: string;
   paths: string[];
@@ -156,7 +162,43 @@ export async function installKibanaAssetsAndReferences({
     kibanaAssets,
   });
 
+  // console.log(pkgName);
+  // console.log(installedPkg);
+
+  await tagKibanaAssets({ savedObjectTagAssignmentService, kibanaAssets, pkgName });
+
   return installedKibanaAssetsRefs;
+}
+
+export async function tagKibanaAssets({
+  savedObjectTagAssignmentService,
+  kibanaAssets,
+  pkgName,
+}: {
+  savedObjectTagAssignmentService: IAssignmentService;
+  kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>;
+  pkgName: string;
+}) {
+  const taggableAssets = Object.entries(kibanaAssets).flatMap(([assetType, assets]) => {
+    if (!taggableTypes.includes(assetType as KibanaAssetType)) {
+      return [];
+    }
+
+    if (!assets.length) {
+      return [];
+    }
+
+    return assets;
+  });
+
+  // console.log(taggableAssets);
+
+  // TODO use readable name for pkg name tag
+  savedObjectTagAssignmentService.updateTagAssignments({
+    tags: ['Managed', pkgName],
+    assign: taggableAssets,
+    unassign: [],
+  });
 }
 
 export const deleteKibanaInstalledRefs = async (

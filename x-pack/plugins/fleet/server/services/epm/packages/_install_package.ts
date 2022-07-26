@@ -14,6 +14,8 @@ import type {
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
+import type { IAssignmentService } from '@kbn/saved-objects-tagging-plugin/server';
+
 import {
   MAX_TIME_COMPLETE_INSTALL,
   ASSETS_SAVED_OBJECT_TYPE,
@@ -56,6 +58,7 @@ import { withPackageSpan } from './utils';
 export async function _installPackage({
   savedObjectsClient,
   savedObjectsImporter,
+  savedObjectTagAssignmentService,
   esClient,
   logger,
   installedPkg,
@@ -68,6 +71,7 @@ export async function _installPackage({
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: Pick<SavedObjectsImporter, 'import' | 'resolveImportErrors'>;
+  savedObjectTagAssignmentService: IAssignmentService;
   esClient: ElasticsearchClient;
   logger: Logger;
   installedPkg?: SavedObject<Installation>;
@@ -120,6 +124,7 @@ export async function _installPackage({
       installKibanaAssetsAndReferences({
         savedObjectsClient,
         savedObjectsImporter,
+        savedObjectTagAssignmentService,
         pkgName,
         paths,
         installedPkg,

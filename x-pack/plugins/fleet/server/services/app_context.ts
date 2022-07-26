@@ -26,6 +26,8 @@ import type { SecurityPluginStart, SecurityPluginSetup } from '@kbn/security-plu
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
+import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+
 import type { FleetConfigType } from '../../common/types';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 import type {
@@ -58,6 +60,7 @@ class AppContextService {
   private httpSetup?: HttpServiceSetup;
   private externalCallbacks: ExternalCallbacksStorage = new Map();
   private telemetryEventsSender: TelemetryEventsSender | undefined;
+  private savedObjectTaggingStart: SavedObjectTaggingStart | undefined;
 
   public start(appContext: FleetAppContext) {
     this.data = appContext.data;
@@ -75,6 +78,7 @@ class AppContextService {
     this.kibanaBranch = appContext.kibanaBranch;
     this.httpSetup = appContext.httpSetup;
     this.telemetryEventsSender = appContext.telemetryEventsSender;
+    this.savedObjectTaggingStart = appContext.savedObjectTaggingStart;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -141,6 +145,13 @@ class AppContextService {
       throw new Error('Saved objects start service not set.');
     }
     return this.savedObjects;
+  }
+
+  public getSavedObjectTaggingStart() {
+    if (!this.savedObjectTaggingStart) {
+      throw new Error('Saved object tagging start service not set.');
+    }
+    return this.savedObjectTaggingStart;
   }
 
   public getInternalUserSOClient(request: KibanaRequest) {

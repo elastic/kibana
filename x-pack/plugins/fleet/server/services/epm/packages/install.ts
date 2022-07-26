@@ -362,11 +362,16 @@ async function installPackageFromRegistry({
       .getSavedObjects()
       .createImporter(savedObjectsClient);
 
+    const savedObjectTagAssignmentService = appContextService
+      .getSavedObjectTaggingStart()
+      .createInternalAssignmentService({ client: savedObjectsClient });
+
     // try installing the package, if there was an error, call error handler and rethrow
     // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
     return await _installPackage({
       savedObjectsClient,
       savedObjectsImporter,
+      savedObjectTagAssignmentService,
       esClient,
       logger,
       installedPkg,

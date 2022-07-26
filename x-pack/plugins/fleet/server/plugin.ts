@@ -42,6 +42,8 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
+import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+
 import type { FleetConfigType } from '../common/types';
 import type { FleetAuthz } from '../common';
 import type { ExperimentalFeatures } from '../common/experimental_features';
@@ -115,6 +117,7 @@ export interface FleetStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   security: SecurityPluginStart;
   telemetry?: TelemetryPluginStart;
+  savedObjectTaggingStart: SavedObjectTaggingStart;
 }
 
 export interface FleetAppContext {
@@ -128,6 +131,7 @@ export interface FleetAppContext {
   configInitialValue: FleetConfigType;
   experimentalFeatures: ExperimentalFeatures;
   savedObjects: SavedObjectsServiceStart;
+  savedObjectTaggingStart?: SavedObjectTaggingStart;
   isProductionMode: PluginInitializerContext['env']['mode']['prod'];
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   kibanaBranch: PluginInitializerContext['env']['packageInfo']['branch'];
@@ -387,6 +391,7 @@ export class FleetPlugin
   }
 
   public start(core: CoreStart, plugins: FleetStartDeps): FleetStartContract {
+    // console.log(plugins.savedObjectTaggingStart);
     appContextService.start({
       elasticsearch: core.elasticsearch,
       data: plugins.data,
@@ -400,6 +405,7 @@ export class FleetPlugin
         this.configInitialValue.enableExperimental || []
       ),
       savedObjects: core.savedObjects,
+      savedObjectTaggingStart: plugins.savedObjectTaggingStart,
       isProductionMode: this.isProductionMode,
       kibanaVersion: this.kibanaVersion,
       kibanaBranch: this.kibanaBranch,
