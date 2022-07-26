@@ -26,12 +26,6 @@ describe('crawler routes', () => {
       });
     });
 
-    it('creates a request to enterprise search', () => {
-      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/ent/v1/internal/indices',
-      });
-    });
-
     it('validates correctly with name and language', () => {
       const request = { body: { index_name: 'index-name', language: 'en' } };
       mockRouter.shouldValidate(request);
@@ -109,7 +103,7 @@ describe('crawler routes', () => {
     });
 
     it('validates correctly with name and id', () => {
-      const request = { params: { indexName: 'index-name', crawlRequestId: '12345' } };
+      const request = { params: { crawlRequestId: '12345', indexName: 'index-name' } };
       mockRouter.shouldValidate(request);
     });
 
@@ -153,46 +147,46 @@ describe('crawler routes', () => {
 
     it('validates correctly with domain urls', () => {
       const request = {
-        params: { indexName: 'index-name' },
         body: { overrides: { domain_allowlist: ['https://www.elastic.co'] } },
+        params: { indexName: 'index-name' },
       };
       mockRouter.shouldValidate(request);
     });
 
     it('validates correctly with max crawl depth', () => {
       const request = {
-        params: { indexName: 'index-name' },
         body: { overrides: { max_crawl_depth: 10 } },
+        params: { indexName: 'index-name' },
       };
       mockRouter.shouldValidate(request);
     });
 
     it('validates correctly with seed urls', () => {
       const request = {
-        params: { indexName: 'index-name' },
         body: { overrides: { seed_urls: ['https://www.elastic.co/guide'] } },
+        params: { indexName: 'index-name' },
       };
       mockRouter.shouldValidate(request);
     });
 
     it('validates correctly with sitemap urls', () => {
       const request = {
-        params: { indexName: 'index-name' },
         body: { overrides: { sitemap_urls: ['https://www.elastic.co/sitemap1.xml'] } },
+        params: { indexName: 'index-name' },
       };
       mockRouter.shouldValidate(request);
     });
 
     it('validates correctly when we set sitemap discovery', () => {
       const request = {
-        params: { indexName: 'index-name' },
         body: { overrides: { sitemap_discovery_disabled: true } },
+        params: { indexName: 'index-name' },
       };
       mockRouter.shouldValidate(request);
     });
 
     it('validates correctly with empty overrides', () => {
-      const request = { params: { indexName: 'index-name' }, body: { overrides: {} } };
+      const request = { body: { overrides: {} }, params: { indexName: 'index-name' } };
       mockRouter.shouldValidate(request);
     });
 
@@ -298,24 +292,24 @@ describe('crawler routes', () => {
 
     it('validates correctly with params and body', () => {
       const request = {
+        body: { entry_points: [{ value: '/guide' }], name: 'https://elastic.co/guide' },
         params: { indexName: 'index-name' },
-        body: { name: 'https://elastic.co/guide', entry_points: [{ value: '/guide' }] },
       };
       mockRouter.shouldValidate(request);
     });
 
     it('fails validation without a name param', () => {
       const request = {
+        body: { entry_points: [{ value: '/guide' }], name: 'https://elastic.co/guide' },
         params: {},
-        body: { name: 'https://elastic.co/guide', entry_points: [{ value: '/guide' }] },
       };
       mockRouter.shouldThrow(request);
     });
 
     it('fails validation without a body', () => {
       const request = {
-        params: { indexName: 'index-name' },
         body: {},
+        params: { indexName: 'index-name' },
       };
       mockRouter.shouldThrow(request);
     });
@@ -344,7 +338,7 @@ describe('crawler routes', () => {
     });
 
     it('validates correctly with name and id', () => {
-      const request = { params: { indexName: 'index-name', domainId: '1234' } };
+      const request = { params: { domainId: '1234', indexName: 'index-name' } };
       mockRouter.shouldValidate(request);
     });
 
@@ -383,35 +377,35 @@ describe('crawler routes', () => {
 
     it('validates correctly with crawl rules', () => {
       const request = {
-        params: { indexName: 'index-name', domainId: '1234' },
         body: {
           crawl_rules: [
             {
-              order: 1,
               id: '5678',
+              order: 1,
             },
           ],
         },
+        params: { domainId: '1234', indexName: 'index-name' },
       };
       mockRouter.shouldValidate(request);
     });
 
     it('validates correctly with deduplication enabled', () => {
       const request = {
-        params: { indexName: 'index-name', domainId: '1234' },
         body: {
           deduplication_enabled: true,
         },
+        params: { domainId: '1234', indexName: 'index-name' },
       };
       mockRouter.shouldValidate(request);
     });
 
     it('validates correctly with deduplication fields', () => {
       const request = {
-        params: { indexName: 'index-name', domainId: '1234' },
         body: {
           deduplication_fields: ['title', 'description'],
         },
+        params: { domainId: '1234', indexName: 'index-name' },
       };
       mockRouter.shouldValidate(request);
     });
@@ -440,7 +434,7 @@ describe('crawler routes', () => {
     });
 
     it('validates correctly with name and id', () => {
-      const request = { params: { indexName: 'index-name', domainId: '1234' } };
+      const request = { params: { domainId: '1234', indexName: 'index-name' } };
       mockRouter.shouldValidate(request);
     });
 
@@ -479,7 +473,7 @@ describe('crawler routes', () => {
 
     it('validates correctly with body', () => {
       const request = {
-        body: { url: 'elastic.co', checks: ['tcp', 'url_request'] },
+        body: { checks: ['tcp', 'url_request'], url: 'elastic.co' },
       };
       mockRouter.shouldValidate(request);
     });
@@ -516,24 +510,24 @@ describe('crawler routes', () => {
 
     it('validates correctly', () => {
       const request = {
-        params: { indexName: 'index-name' },
         body: { domains: ['https://elastic.co', 'https://swiftype.com'] },
+        params: { indexName: 'index-name' },
       };
       mockRouter.shouldValidate(request);
     });
 
     it('validates correctly without body', () => {
       const request = {
-        params: { indexName: 'index-name' },
         body: {},
+        params: { indexName: 'index-name' },
       };
       mockRouter.shouldValidate(request);
     });
 
     it('fails validation without a name param', () => {
       const request = {
-        params: {},
         body: { domains: ['https://elastic.co', 'https://swiftype.com'] },
+        params: {},
       };
       mockRouter.shouldThrow(request);
     });
@@ -600,32 +594,32 @@ describe('crawler routes', () => {
 
     it('validates correctly', () => {
       const request = {
+        body: { frequency: 7, unit: 'day' },
         params: { indexName: 'index-name' },
-        body: { unit: 'day', frequency: 7 },
       };
       mockRouter.shouldValidate(request);
     });
 
     it('fails validation without a name param', () => {
       const request = {
+        body: { frequency: 7, unit: 'day' },
         params: {},
-        body: { unit: 'day', frequency: 7 },
       };
       mockRouter.shouldThrow(request);
     });
 
     it('fails validation without a unit property in body', () => {
       const request = {
-        params: { indexName: 'index-name' },
         body: { frequency: 7 },
+        params: { indexName: 'index-name' },
       };
       mockRouter.shouldThrow(request);
     });
 
     it('fails validation without a frequency property in body', () => {
       const request = {
-        params: { indexName: 'index-name' },
         body: { unit: 'day' },
+        params: { indexName: 'index-name' },
       };
       mockRouter.shouldThrow(request);
     });

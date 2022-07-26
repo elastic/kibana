@@ -13,6 +13,8 @@ import { ErrorCode } from '../../../common/types/error_codes';
 
 import { setupConnectorsIndices } from '../../index_management/setup_indices';
 
+import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
+
 import { addConnector } from './add_connector';
 import { fetchConnectorByIndexName } from './fetch_connectors';
 
@@ -21,6 +23,7 @@ jest.mock('../../index_management/setup_indices', () => ({
 }));
 
 jest.mock('./fetch_connectors', () => ({ fetchConnectorByIndexName: jest.fn() }));
+jest.mock('../crawler/fetch_crawlers', () => ({ fetchCrawlerByIndexName: jest.fn() }));
 
 describe('addConnector lib function', () => {
   const mockClient = {
@@ -44,19 +47,25 @@ describe('addConnector lib function', () => {
     mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
     mockClient.asCurrentUser.indices.exists.mockImplementation(() => false);
     (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => undefined);
+    (fetchCrawlerByIndexName as jest.Mock).mockImplementation(() => undefined);
 
     await expect(
-      addConnector(mockClient as unknown as IScopedClusterClient, { index_name: 'index_name' })
+      addConnector(mockClient as unknown as IScopedClusterClient, {
+        index_name: 'index_name',
+        language: 'en',
+      })
     ).resolves.toEqual({ id: 'fakeId', index_name: 'index_name' });
     expect(mockClient.asCurrentUser.index).toHaveBeenCalledWith({
       document: {
         api_key_id: null,
         configuration: {},
         index_name: 'index_name',
+        language: 'en',
         last_seen: null,
         last_sync_error: null,
         last_sync_status: null,
         last_synced: null,
+        name: 'index_name',
         scheduling: { enabled: false, interval: '0 0 0 * * ?' },
         service_type: null,
         status: ConnectorStatus.CREATED,
@@ -71,9 +80,13 @@ describe('addConnector lib function', () => {
     mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
     mockClient.asCurrentUser.indices.exists.mockImplementation(() => true);
     (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => undefined);
+    (fetchCrawlerByIndexName as jest.Mock).mockImplementation(() => undefined);
 
     await expect(
-      addConnector(mockClient as unknown as IScopedClusterClient, { index_name: 'index_name' })
+      addConnector(mockClient as unknown as IScopedClusterClient, {
+        index_name: 'index_name',
+        language: 'en',
+      })
     ).rejects.toEqual(new Error(ErrorCode.INDEX_ALREADY_EXISTS));
     expect(mockClient.asCurrentUser.indices.create).not.toHaveBeenCalled();
   });
@@ -82,9 +95,13 @@ describe('addConnector lib function', () => {
     mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
     mockClient.asCurrentUser.indices.exists.mockImplementation(() => false);
     (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => true);
+    (fetchCrawlerByIndexName as jest.Mock).mockImplementation(() => undefined);
 
     await expect(
-      addConnector(mockClient as unknown as IScopedClusterClient, { index_name: 'index_name' })
+      addConnector(mockClient as unknown as IScopedClusterClient, {
+        index_name: 'index_name',
+        language: 'en',
+      })
     ).rejects.toEqual(new Error(ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS));
     expect(mockClient.asCurrentUser.indices.create).not.toHaveBeenCalled();
   });
@@ -93,9 +110,13 @@ describe('addConnector lib function', () => {
     mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
     mockClient.asCurrentUser.indices.exists.mockImplementation(() => true);
     (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => true);
+    (fetchCrawlerByIndexName as jest.Mock).mockImplementation(() => undefined);
 
     await expect(
-      addConnector(mockClient as unknown as IScopedClusterClient, { index_name: 'index_name' })
+      addConnector(mockClient as unknown as IScopedClusterClient, {
+        index_name: 'index_name',
+        language: 'en',
+      })
     ).rejects.toEqual(new Error(ErrorCode.INDEX_ALREADY_EXISTS));
     expect(mockClient.asCurrentUser.indices.create).not.toHaveBeenCalled();
   });
@@ -104,11 +125,13 @@ describe('addConnector lib function', () => {
     mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
     mockClient.asCurrentUser.indices.exists.mockImplementation(() => false);
     (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => ({ id: 'connectorId' }));
+    (fetchCrawlerByIndexName as jest.Mock).mockImplementation(() => undefined);
 
     await expect(
       addConnector(mockClient as unknown as IScopedClusterClient, {
         delete_existing_connector: true,
         index_name: 'index_name',
+        language: null,
       })
     ).resolves.toEqual({ id: 'fakeId', index_name: 'index_name' });
     expect(mockClient.asCurrentUser.delete).toHaveBeenCalledWith({
@@ -120,10 +143,12 @@ describe('addConnector lib function', () => {
         api_key_id: null,
         configuration: {},
         index_name: 'index_name',
+        language: null,
         last_seen: null,
         last_sync_error: null,
         last_sync_status: null,
         last_synced: null,
+        name: 'index_name',
         scheduling: { enabled: false, interval: '0 0 0 * * ?' },
         service_type: null,
         status: ConnectorStatus.CREATED,
@@ -143,19 +168,25 @@ describe('addConnector lib function', () => {
     });
     mockClient.asCurrentUser.indices.exists.mockImplementation(() => false);
     (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => false);
+    (fetchCrawlerByIndexName as jest.Mock).mockImplementation(() => undefined);
     await expect(
-      addConnector(mockClient as unknown as IScopedClusterClient, { index_name: 'index_name' })
-    ).resolves.toEqual({ id: 'fakeId', index_name: 'index_name' });
+      addConnector(mockClient as unknown as IScopedClusterClient, {
+        index_name: 'search-index_name',
+        language: 'en',
+      })
+    ).resolves.toEqual({ id: 'fakeId', index_name: 'search-index_name' });
     expect(setupConnectorsIndices as jest.Mock).toHaveBeenCalledWith(mockClient.asCurrentUser);
     expect(mockClient.asCurrentUser.index).toHaveBeenCalledWith({
       document: {
         api_key_id: null,
         configuration: {},
-        index_name: 'index_name',
+        index_name: 'search-index_name',
+        language: 'en',
         last_seen: null,
         last_sync_error: null,
         last_sync_status: null,
         last_synced: null,
+        name: 'index_name',
         scheduling: { enabled: false, interval: '0 0 0 * * ?' },
         service_type: null,
         status: ConnectorStatus.CREATED,
@@ -163,7 +194,9 @@ describe('addConnector lib function', () => {
       },
       index: CONNECTORS_INDEX,
     });
-    expect(mockClient.asCurrentUser.index).toHaveBeenCalledTimes(2);
+    expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
+      index: 'search-index_name',
+    });
   });
   it('should not create index if status code is not 404', async () => {
     mockClient.asCurrentUser.index.mockImplementationOnce(() => {
@@ -171,10 +204,30 @@ describe('addConnector lib function', () => {
     });
     mockClient.asCurrentUser.indices.exists.mockImplementation(() => false);
     (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => false);
+    (fetchCrawlerByIndexName as jest.Mock).mockImplementation(() => undefined);
     await expect(
-      addConnector(mockClient as unknown as IScopedClusterClient, { index_name: 'index_name' })
+      addConnector(mockClient as unknown as IScopedClusterClient, {
+        index_name: 'index_name',
+        language: 'en',
+      })
     ).rejects.toEqual({ statusCode: 500 });
     expect(setupConnectorsIndices).not.toHaveBeenCalled();
     expect(mockClient.asCurrentUser.index).toHaveBeenCalledTimes(1);
+  });
+  it('should not create index if crawler exists', async () => {
+    mockClient.asCurrentUser.index.mockImplementationOnce(() => {
+      return 'connector ';
+    });
+    mockClient.asCurrentUser.indices.exists.mockImplementation(() => false);
+    (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => false);
+    (fetchCrawlerByIndexName as jest.Mock).mockImplementation(() => 'crawler');
+    await expect(
+      addConnector(mockClient as unknown as IScopedClusterClient, {
+        index_name: 'index_name',
+        language: 'en',
+      })
+    ).rejects.toEqual(new Error(ErrorCode.CRAWLER_ALREADY_EXISTS));
+    expect(setupConnectorsIndices).not.toHaveBeenCalled();
+    expect(mockClient.asCurrentUser.index).not.toHaveBeenCalled();
   });
 });

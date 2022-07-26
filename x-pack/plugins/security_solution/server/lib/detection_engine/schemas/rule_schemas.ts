@@ -35,6 +35,7 @@ import {
   QUERY_RULE_TYPE_ID,
   THRESHOLD_RULE_TYPE_ID,
   SAVED_QUERY_RULE_TYPE_ID,
+  NEW_TERMS_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
 
 import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
@@ -71,13 +72,11 @@ import {
   saved_id,
   thresholdNormalized,
   anomaly_threshold,
-  createdByOrNull,
-  updatedByOrNull,
-  created_at,
-  updated_at,
   RelatedIntegrationArray,
   RequiredFieldArray,
   SetupGuide,
+  newTermsFields,
+  historyWindowStart,
   timestampOverrideFallbackDisabledOrUndefined,
 } from '../../../../common/detection_engine/schemas/common';
 import { SERVER_APP_ID } from '../../../../common/constants';
@@ -213,6 +212,20 @@ export const machineLearningRuleParams = t.intersection([
 export type MachineLearningSpecificRuleParams = t.TypeOf<typeof machineLearningSpecificRuleParams>;
 export type MachineLearningRuleParams = t.TypeOf<typeof machineLearningRuleParams>;
 
+const newTermsSpecificRuleParams = t.type({
+  type: t.literal('new_terms'),
+  query,
+  newTermsFields,
+  historyWindowStart,
+  index: indexOrUndefined,
+  filters: filtersOrUndefined,
+  language: nonEqlLanguages,
+  dataViewId: dataViewIdOrUndefined,
+});
+export const newTermsRuleParams = t.intersection([baseRuleParams, newTermsSpecificRuleParams]);
+export type NewTermsSpecificRuleParams = t.TypeOf<typeof newTermsSpecificRuleParams>;
+export type NewTermsRuleParams = t.TypeOf<typeof newTermsRuleParams>;
+
 export const typeSpecificRuleParams = t.union([
   eqlSpecificRuleParams,
   threatSpecificRuleParams,
@@ -220,6 +233,7 @@ export const typeSpecificRuleParams = t.union([
   savedQuerySpecificRuleParams,
   thresholdSpecificRuleParams,
   machineLearningSpecificRuleParams,
+  newTermsSpecificRuleParams,
 ]);
 export type TypeSpecificRuleParams = t.TypeOf<typeof typeSpecificRuleParams>;
 
@@ -247,8 +261,8 @@ export const allRuleTypes = t.union([
   t.literal(QUERY_RULE_TYPE_ID),
   t.literal(SAVED_QUERY_RULE_TYPE_ID),
   t.literal(THRESHOLD_RULE_TYPE_ID),
+  t.literal(NEW_TERMS_RULE_TYPE_ID),
 ]);
-export type AllRuleTypes = t.TypeOf<typeof allRuleTypes>;
 
 export const internalRuleCreate = t.type({
   name,
@@ -278,15 +292,3 @@ export const internalRuleUpdate = t.type({
   notifyWhen,
 });
 export type InternalRuleUpdate = t.TypeOf<typeof internalRuleUpdate>;
-
-export const internalRuleResponse = t.intersection([
-  internalRuleCreate,
-  t.type({
-    id: t.string,
-    createdBy: createdByOrNull,
-    updatedBy: updatedByOrNull,
-    createdAt: created_at,
-    updatedAt: updated_at,
-  }),
-]);
-export type InternalRuleResponse = t.TypeOf<typeof internalRuleResponse>;

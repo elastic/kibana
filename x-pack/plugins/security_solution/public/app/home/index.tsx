@@ -13,8 +13,6 @@ import { DragDropContextWrapper } from '../../common/components/drag_and_drop/dr
 import { SecuritySolutionAppWrapper } from '../../common/components/page';
 
 import { HelpMenu } from '../../common/components/help_menu';
-import { UseUrlState } from '../../common/components/url_state';
-import { navTabs } from './home_navigations';
 import {
   useInitSourcerer,
   getScopeFromPath,
@@ -24,7 +22,11 @@ import { useUpgradeSecurityPackages } from '../../common/hooks/use_upgrade_secur
 import { GlobalHeader } from './global_header';
 import { SecuritySolutionTemplateWrapper } from './template_wrapper';
 import { ConsoleManager } from '../../management/components/console/components/console_manager';
+
+import { TourContextProvider } from '../../common/components/guided_onboarding';
+
 import { useUrlState } from '../../common/hooks/use_url_state';
+import { useUpdateBrowserTitle } from '../../common/hooks/use_update_browser_title';
 
 interface HomePageProps {
   children: React.ReactNode;
@@ -40,8 +42,9 @@ const HomePageComponent: React.FC<HomePageProps> = ({
   const { pathname } = useLocation();
   useInitSourcerer(getScopeFromPath(pathname));
   useUrlState();
+  useUpdateBrowserTitle();
 
-  const { browserFields, indexPattern } = useSourcererDataView(getScopeFromPath(pathname));
+  const { browserFields } = useSourcererDataView(getScopeFromPath(pathname));
   // side effect: this will attempt to upgrade the endpoint package if it is not up to date
   // this will run when a user navigates to the Security Solution app and when they navigate between
   // tabs in the app. This is useful for keeping the endpoint package as up to date as possible until
@@ -54,10 +57,11 @@ const HomePageComponent: React.FC<HomePageProps> = ({
       <ConsoleManager>
         <GlobalHeader setHeaderActionMenu={setHeaderActionMenu} />
         <DragDropContextWrapper browserFields={browserFields}>
-          <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
-          <SecuritySolutionTemplateWrapper onAppLeave={onAppLeave}>
-            {children}
-          </SecuritySolutionTemplateWrapper>
+          <TourContextProvider>
+            <SecuritySolutionTemplateWrapper onAppLeave={onAppLeave}>
+              {children}
+            </SecuritySolutionTemplateWrapper>
+          </TourContextProvider>
         </DragDropContextWrapper>
         <HelpMenu />
       </ConsoleManager>

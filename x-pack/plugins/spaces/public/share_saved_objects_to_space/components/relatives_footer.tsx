@@ -8,7 +8,7 @@
 import { EuiHorizontalRule, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import type { SavedObjectReferenceWithContext } from '@kbn/core/public';
+import type { SavedObjectReferenceWithContext } from '@kbn/core-saved-objects-api-server';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { ShareToSpaceSavedObjectTarget } from '../types';

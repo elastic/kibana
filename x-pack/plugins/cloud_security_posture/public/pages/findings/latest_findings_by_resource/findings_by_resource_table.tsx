@@ -13,6 +13,7 @@ import {
   type CriteriaWithPagination,
   type Pagination,
   EuiToolTip,
+  EuiBasicTableProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,10 +28,15 @@ import { createColumnWithFilters, type OnAddFilter } from '../layout/findings_la
 export const formatNumber = (value: number) =>
   value < 1000 ? value : numeral(value).format('0.0a');
 
+type Sorting = Required<
+  EuiBasicTableProps<Pick<FindingsByResourcePage, 'failed_findings'>>
+>['sorting'];
+
 interface Props {
   items: FindingsByResourcePage[];
   loading: boolean;
   pagination: Pagination;
+  sorting: Sorting;
   setTableOptions(options: CriteriaWithPagination<FindingsByResourcePage>): void;
   onAddFilter: OnAddFilter;
 }
@@ -43,6 +49,7 @@ const FindingsByResourceTableComponent = ({
   items,
   loading,
   pagination,
+  sorting,
   setTableOptions,
   onAddFilter,
 }: Props) => {
@@ -85,6 +92,7 @@ const FindingsByResourceTableComponent = ({
       columns={columns}
       rowProps={getRowProps}
       pagination={pagination}
+      sorting={sorting}
       onChange={setTableOptions}
     />
   );
@@ -162,6 +170,7 @@ const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = 
     field: 'failed_findings',
     width: '150px',
     truncateText: true,
+    sortable: true,
     name: (
       <FormattedMessage
         id="xpack.csp.findings.findingsByResourceTable.failedFindingsColumnLabel"

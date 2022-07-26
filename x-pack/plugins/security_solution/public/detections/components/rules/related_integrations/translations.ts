@@ -85,10 +85,3 @@ export const INTEGRATIONS_INSTALLED_VERSION_TOOLTIP = (
         'Version mismatch -- please resolve! Installed version `{installedVersion}` when required version `{requiredVersion}`',
     }
   );
-
-export const INTEGRATIONS_FETCH_FAILURE = i18n.translate(
-  'xpack.securitySolution.containers.detectionEngine.relatedIntegrations.fetchFailDescription',
-  {
-    defaultMessage: 'Failed to fetch installed integrations',
-  }
-);

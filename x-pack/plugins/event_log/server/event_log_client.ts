@@ -32,6 +32,7 @@ const optionalDateFieldSchema = schema.maybe(
 const sortSchema = schema.object({
   sort_field: schema.oneOf([
     schema.literal('@timestamp'),
+    schema.literal('event.sequence'), // can be used as a tiebreaker for @timestamp
     schema.literal('event.start'),
     schema.literal('event.end'),
     schema.literal('event.provider'),

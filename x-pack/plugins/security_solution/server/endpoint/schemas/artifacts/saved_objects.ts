@@ -30,7 +30,6 @@ export const internalArtifactRecordSchema = t.exact(
     encodedSize: size,
   })
 );
-export type InternalArtifactRecordSchema = t.TypeOf<typeof internalArtifactRecordSchema>;
 
 export const internalArtifactAdditionalFields = {
   body,
@@ -47,16 +46,6 @@ export const internalArtifactCompleteSchema = t.intersection([
   t.exact(t.type(internalArtifactAdditionalFields)),
 ]);
 export type InternalArtifactCompleteSchema = t.TypeOf<typeof internalArtifactCompleteSchema>;
-
-export const internalArtifactCreateSchema = t.intersection([
-  internalArtifactCompleteSchema,
-  t.exact(
-    t.type({
-      created,
-    })
-  ),
-]);
-export type InternalArtifactCreateSchema = t.TypeOf<typeof internalArtifactCreateSchema>;
 
 export const internalManifestEntrySchema = t.exact(
   t.type({

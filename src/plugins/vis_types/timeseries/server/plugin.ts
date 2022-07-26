@@ -18,7 +18,6 @@ import {
 import { firstValueFrom, Observable } from 'rxjs';
 import { Server } from '@hapi/hapi';
 import { map } from 'rxjs/operators';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { PluginStart } from '@kbn/data-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
@@ -41,14 +40,11 @@ import {
 } from './lib/search_strategies';
 import type { TimeseriesVisData, VisPayload } from '../common/types';
 
-import { registerTimeseriesUsageCollector } from './usage_collector';
-
 export interface LegacySetup {
   server: Server;
 }
 
 interface VisTypeTimeseriesPluginSetupDependencies {
-  usageCollection?: UsageCollectionSetup;
   home?: HomeServerPluginSetup;
 }
 
@@ -127,10 +123,6 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
 
     visDataRoutes(router, framework);
     fieldsRoutes(router, framework);
-
-    if (plugins.usageCollection) {
-      registerTimeseriesUsageCollector(plugins.usageCollection, plugins.home);
-    }
 
     return {
       getVisData: async (

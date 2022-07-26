@@ -216,7 +216,7 @@ describe('Field editor Preview panel', () => {
     test('should **not** display an empty prompt editing a document with a script', async () => {
       const field = {
         name: 'foo',
-        type: 'ip',
+        type: 'ip' as const,
         script: {
           source: 'emit("hello world")',
         },
@@ -225,7 +225,7 @@ describe('Field editor Preview panel', () => {
       // We open the editor with a field to edit the empty prompt should not be there
       // as we have a script and we'll load the preview.
       await act(async () => {
-        testBed = await setup({ field });
+        testBed = await setup({ fieldToEdit: field });
       });
 
       const { exists, component } = testBed;
@@ -237,7 +237,7 @@ describe('Field editor Preview panel', () => {
     test('should **not** display an empty prompt editing a document with format defined', async () => {
       const field = {
         name: 'foo',
-        type: 'ip',
+        type: 'ip' as const,
         format: {
           id: 'upper',
           params: {},
@@ -245,7 +245,7 @@ describe('Field editor Preview panel', () => {
       };
 
       await act(async () => {
-        testBed = await setup({ field });
+        testBed = await setup({ fieldToEdit: field });
       });
 
       const { exists, component } = testBed;

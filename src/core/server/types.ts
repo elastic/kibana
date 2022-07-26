@@ -8,7 +8,7 @@
 
 /** This module is intended for consumption by public to avoid import issues with server-side code */
 export type { EnvironmentMode, PackageInfo } from '@kbn/config';
-export type { PluginOpaqueId } from './plugins/types';
+export type { PluginOpaqueId } from '@kbn/core-base-common';
 export type {
   SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
@@ -26,25 +26,25 @@ export type {
   SavedObjectAttribute,
   SavedObjectAttributeSingle,
   SavedObject,
+  SavedObjectsNamespaceType,
   SavedObjectError,
   SavedObjectReference,
   SavedObjectsMigrationVersion,
-  SavedObjectStatusMeta,
+} from '@kbn/core-saved-objects-common';
+export type {
   SavedObjectsFindOptionsReference,
   SavedObjectsFindOptions,
   SavedObjectsPitParams,
   SavedObjectsBaseOptions,
   MutatingOperationRefreshSetting,
   SavedObjectsClientContract,
-  SavedObjectsNamespaceType,
-} from './saved_objects/types';
-export type {
   SavedObjectReferenceWithContext,
   SavedObjectsCollectMultiNamespaceReferencesResponse,
-} from './saved_objects/service';
+} from '@kbn/core-saved-objects-api-server';
 export type {
   DomainDeprecationDetails,
   DeprecationsGetResponse,
 } from '@kbn/core-deprecations-common';
-export * from './ui_settings/types';
 export type { ExternalUrlConfig } from '@kbn/core-http-server-internal';
+export * from './ui_settings/types';
+export type { SavedObjectStatusMeta } from './saved_objects/types';

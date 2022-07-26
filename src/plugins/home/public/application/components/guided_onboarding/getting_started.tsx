@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-components';
 
 import { getServices } from '../../kibana_services';
+import { KEY_ENABLE_WELCOME } from '../home';
 import { UseCaseCard } from './use_case_card';
 
 const homeBreadcrumb = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
@@ -62,6 +63,8 @@ export const GettingStarted = () => {
 
   const onSkip = () => {
     trackUiMetric(METRIC_TYPE.CLICK, 'guided_onboarding__skipped');
+    // disable welcome screen on the home page
+    localStorage.setItem(KEY_ENABLE_WELCOME, JSON.stringify(false));
     application.navigateToApp('home');
   };
   const { euiTheme } = useEuiTheme();

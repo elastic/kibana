@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function actionsTests({ loadTestFile }: FtrProviderContext) {
   describe('Actions', () => {
+    loadTestFile(require.resolve('./builtin_action_types/cases_webhook'));
     loadTestFile(require.resolve('./builtin_action_types/email'));
     loadTestFile(require.resolve('./builtin_action_types/es_index'));
     loadTestFile(require.resolve('./builtin_action_types/jira'));

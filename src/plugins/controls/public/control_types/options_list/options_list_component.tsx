@@ -86,6 +86,10 @@ export const OptionsListComponent = ({
     [typeaheadSubject]
   );
 
+  useEffect(() => {
+    updateSearchString('');
+  }, [field?.spec?.name, updateSearchString]);
+
   const { hasSelections, selectionDisplayNode, validSelectionsCount } = useMemo(() => {
     return {
       hasSelections: !isEmpty(validSelections) || !isEmpty(invalidSelections),
