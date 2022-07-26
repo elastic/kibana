@@ -6,8 +6,18 @@
  */
 
 import React, { FC, useCallback, useMemo, useState } from 'react';
-import { EuiBadge, EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiIcon,
+  EuiTableSortingType,
+  EuiToolTip,
+} from '@elastic/eui';
+import { sortBy } from 'lodash';
+
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
 
 import { MiniHistogram } from '../mini_histogram';
@@ -18,6 +28,8 @@ const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 const noDataText = i18n.translate('xpack.aiops.correlations.correlationsTable.noDataText', {
   defaultMessage: 'No data',
 });
+const DEFAULT_SORT_FIELD = 'pValue';
+const DEFAULT_SORT_DIRECTION = 'asc';
 
 interface SpikeAnalysisTableProps {
   changePoints: ChangePoint[];
@@ -38,6 +50,8 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
 }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+  const [sortField, setSortField] = useState<keyof ChangePoint>(DEFAULT_SORT_FIELD);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
 
   const columns: Array<EuiBasicTableColumn<ChangePoint>> = [
     {
@@ -60,14 +74,24 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
     {
       field: 'pValue',
       name: (
-        <>
-          {i18n.translate(
-            'xpack.aiops.correlations.failedTransactions.correlationsTable.logRateLabel',
+        <EuiToolTip
+          position="top"
+          content={i18n.translate(
+            'xpack.aiops.correlations.failedTransactions.correlationsTable.logRateColumnTooltip',
             {
-              defaultMessage: 'Log rate',
+              defaultMessage:
+                'A visual representation of the impact of the field on the message rate difference',
             }
           )}
-        </>
+        >
+          <>
+            <FormattedMessage
+              id="xpack.aiops.correlations.failedTransactions.correlationsTable.logRateLabel"
+              defaultMessage="Log rate"
+            />
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </>
+        </EuiToolTip>
       ),
       render: (_, { histogram, fieldName, fieldValue }) => {
         return histogram ? (
@@ -78,21 +102,49 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
     },
     {
       field: 'pValue',
-      name: 'p-value',
+      name: (
+        <EuiToolTip
+          position="top"
+          content={i18n.translate(
+            'xpack.aiops.correlations.failedTransactions.correlationsTable.pValueColumnTooltip',
+            {
+              defaultMessage:
+                'The significance of changes in the frequency of values; lower values indicate greater change',
+            }
+          )}
+        >
+          <>
+            <FormattedMessage
+              id="xpack.aiops.correlations.failedTransactions.correlationsTable.pValueLabel"
+              defaultMessage="p-value"
+            />
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </>
+        </EuiToolTip>
+      ),
       render: (pValue: number) => pValue.toPrecision(3),
       sortable: true,
     },
     {
       field: 'pValue',
       name: (
-        <>
-          {i18n.translate(
-            'xpack.aiops.correlations.failedTransactions.correlationsTable.impactLabel',
+        <EuiToolTip
+          position="top"
+          content={i18n.translate(
+            'xpack.aiops.correlations.failedTransactions.correlationsTable.impactLabelColumnTooltip',
             {
-              defaultMessage: 'Impact',
+              defaultMessage: 'The level of impact of the field on the message rate difference',
             }
           )}
-        </>
+        >
+          <>
+            <FormattedMessage
+              id="xpack.aiops.correlations.failedTransactions.correlationsTable.impactLabel"
+              defaultMessage="Impact"
+            />
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </>
+        </EuiToolTip>
       ),
       render: (_, { pValue }) => {
         const label = getFailedTransactionsCorrelationImpactLabel(pValue);
@@ -104,30 +156,44 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
 
   const onChange = useCallback((tableSettings) => {
     const { index, size } = tableSettings.page;
+    const { field, direction } = tableSettings.sort;
 
     setPageIndex(index);
     setPageSize(size);
+    setSortField(field);
+    setSortDirection(direction);
   }, []);
 
-  const { pagination, pageOfItems } = useMemo(() => {
+  const { pagination, pageOfItems, sorting } = useMemo(() => {
     const pageStart = pageIndex * pageSize;
-
     const itemCount = changePoints?.length ?? 0;
+
+    let items: ChangePoint[] = changePoints ?? [];
+    items = sortBy(changePoints, (item) => {
+      if (item && typeof item[sortField] === 'string') {
+        // @ts-ignore Object is possibly null or undefined
+        return item[sortField].toLowerCase();
+      }
+      return item[sortField];
+    });
+    items = sortDirection === 'asc' ? items : items.reverse();
+
     return {
-      pageOfItems: changePoints
-        // Temporary default sorting by ascending pValue until we add native table sorting
-        ?.sort((a, b) => {
-          return (a?.pValue ?? 1) - (b?.pValue ?? 0);
-        })
-        .slice(pageStart, pageStart + pageSize),
+      pageOfItems: items.slice(pageStart, pageStart + pageSize),
       pagination: {
         pageIndex,
         pageSize,
         totalItemCount: itemCount,
         pageSizeOptions: PAGINATION_SIZE_OPTIONS,
       },
+      sorting: {
+        sort: {
+          field: sortField,
+          direction: sortDirection,
+        },
+      },
     };
-  }, [pageIndex, pageSize, changePoints]);
+  }, [pageIndex, pageSize, sortField, sortDirection, changePoints]);
 
   return (
     <EuiBasicTable
@@ -139,7 +205,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       pagination={pagination}
       loading={loading}
       error={error}
-      // sorting={sorting}
+      sorting={sorting as EuiTableSortingType<ChangePoint>}
       rowProps={(changePoint) => {
         return {
           onClick: () => {
