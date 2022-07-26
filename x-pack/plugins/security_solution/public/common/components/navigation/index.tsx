@@ -6,14 +6,12 @@
  */
 
 import React, { useEffect } from 'react';
-import { connect } from 'react-redux';
-import { compose } from 'redux';
+
 import deepEqual from 'fast-deep-equal';
 
 import { useKibana } from '../../lib/kibana';
 import type { RouteSpyState } from '../../utils/route/types';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
-import { makeMapStateToProps } from '../url_state/helpers';
 import { useSetBreadcrumbs } from './breadcrumbs';
 import { TabNavigation } from './tab_navigation';
 import type { TabNavigationComponentProps, SecuritySolutionTabNavigationProps } from './types';
@@ -25,18 +23,7 @@ import type { TabNavigationComponentProps, SecuritySolutionTabNavigationProps } 
 export const TabNavigationComponent: React.FC<
   RouteSpyState & SecuritySolutionTabNavigationProps & TabNavigationComponentProps
 > = React.memo(
-  ({
-    detailName,
-    display,
-    flowTarget,
-    navTabs,
-    pageName,
-    pathName,
-    search,
-    state,
-    tabName,
-    urlState,
-  }) => {
+  ({ detailName, display, flowTarget, navTabs, pageName, pathName, search, state, tabName }) => {
     const {
       chrome,
       application: { getUrlForApp, navigateToUrl },
@@ -83,25 +70,19 @@ export const TabNavigationComponent: React.FC<
         pageName={pageName}
         pathName={pathName}
         tabName={tabName}
-        timeline={urlState.timeline}
       />
     );
   }
 );
 TabNavigationComponent.displayName = 'TabNavigationComponent';
 
-export const SecuritySolutionTabNavigationRedux = compose<
-  React.ComponentClass<SecuritySolutionTabNavigationProps & RouteSpyState>
->(connect(makeMapStateToProps))(
-  React.memo(
-    TabNavigationComponent,
-    (prevProps, nextProps) =>
-      prevProps.pathName === nextProps.pathName &&
-      prevProps.search === nextProps.search &&
-      deepEqual(prevProps.navTabs, nextProps.navTabs) &&
-      deepEqual(prevProps.urlState, nextProps.urlState) &&
-      deepEqual(prevProps.state, nextProps.state)
-  )
+export const SecuritySolutionTabNavigationRedux = React.memo(
+  TabNavigationComponent,
+  (prevProps, nextProps) =>
+    prevProps.pathName === nextProps.pathName &&
+    prevProps.search === nextProps.search &&
+    deepEqual(prevProps.navTabs, nextProps.navTabs) &&
+    deepEqual(prevProps.state, nextProps.state)
 );
 
 export const SecuritySolutionTabNavigation: React.FC<SecuritySolutionTabNavigationProps> =
