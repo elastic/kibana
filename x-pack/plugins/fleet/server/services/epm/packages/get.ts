@@ -10,11 +10,11 @@ import semverGte from 'semver/functions/gte';
 import type { Logger } from '@kbn/core/server';
 
 import {
-  isPackageLimited,
   installationStatuses,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-} from '../../../../common';
-import type { PackageUsageStats, PackagePolicySOAttributes } from '../../../../common';
+} from '../../../../common/constants';
+import { isPackageLimited } from '../../../../common/services';
+import type { PackageUsageStats, PackagePolicySOAttributes } from '../../../../common/types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type {
   ArchivePackage,
