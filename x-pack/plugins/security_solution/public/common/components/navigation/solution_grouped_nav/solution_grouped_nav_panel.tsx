@@ -161,7 +161,7 @@ const FlexLink = styled.a`
   align-items: center;
 `;
 
-const BetaBadge = styled(EuiBetaBadge)<{ label: string; size: 's' | 'm' }>`
+const BetaBadge = styled(EuiBetaBadge)<{ label: string; size?: 's' | 'm' }>`
   margin-left: ${({ theme }) => theme.eui.euiSizeS};
   color: ${(props) => props.theme.eui.euiTextColor};
 `;
