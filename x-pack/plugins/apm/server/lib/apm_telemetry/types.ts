@@ -24,48 +24,46 @@ export interface AggregatedTransactionsCounts {
   transaction_count: number;
 }
 
-export type APMPerService = Record<
-  string,
-  {
-    timed_out: boolean;
-    cloud: {
-      availability_zones: string[];
-      regions: string[];
-      providers: string[];
+export interface APMPerService {
+  service_id: string;
+  timed_out: boolean;
+  cloud: {
+    availability_zones: string[];
+    regions: string[];
+    providers: string[];
+  };
+  faas: {
+    trigger: {
+      type: string[];
     };
-    faas: {
-      trigger: {
-        type: string[];
-      };
-    };
-    agent: {
+  };
+  agent: {
+    name: string | number | null;
+    version: string | number | null;
+  };
+  service: {
+    language: {
       name: string | number | null;
       version: string | number | null;
     };
-    service: {
-      language: {
-        name: string | number | null;
-        version: string | number | null;
-      };
-      framework: {
-        name: string | number | null;
-        version: string | number | null;
-      };
-      runtime: {
-        name: string | number | null;
-        version: string | number | null;
-      };
+    framework: {
+      name: string | number | null;
+      version: string | number | null;
     };
-    kubernetes: {
-      pod: {
-        name: string | number | null;
-      };
+    runtime: {
+      name: string | number | null;
+      version: string | number | null;
     };
-    container: {
-      id: string | number | null;
+  };
+  kubernetes: {
+    pod: {
+      name: string | number | null;
     };
-  }
->;
+  };
+  container: {
+    id: string | number | null;
+  };
+}
 
 export interface APMUsage {
   has_any_services: boolean;
@@ -176,7 +174,7 @@ export interface APMUsage {
   service_groups: {
     kuery_fields: string[];
   };
-  per_service: APMPerService;
+  per_service: APMPerService[];
   tasks: Record<
     | 'aggregated_transactions'
     | 'cloud'
