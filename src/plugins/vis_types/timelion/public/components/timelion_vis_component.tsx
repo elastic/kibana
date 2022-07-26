@@ -24,7 +24,7 @@ import { RangeFilterParams } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 
-import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
+import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { AreaSeriesComponent, BarSeriesComponent } from './series';
 
 import {

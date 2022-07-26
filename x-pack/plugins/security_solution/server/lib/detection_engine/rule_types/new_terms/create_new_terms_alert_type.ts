@@ -100,7 +100,7 @@ export const createNewTermsAlertType = (
     async executor(execOptions) {
       const {
         runOpts: {
-          buildRuleMessage,
+          ruleExecutionLogger,
           bulkCreate,
           completeRule,
           exceptionItems,
@@ -185,12 +185,11 @@ export const createNewTermsAlertType = (
           from: tuple.from.toISOString(),
           to: tuple.to.toISOString(),
           services,
+          ruleExecutionLogger,
           filter,
-          logger,
           pageSize: 0,
           primaryTimestamp,
           secondaryTimestamp,
-          buildRuleMessage,
           runtimeMappings,
         });
         const searchResultWithAggs = searchResult as RecentTermsAggResult;
@@ -239,12 +238,11 @@ export const createNewTermsAlertType = (
           from: parsedHistoryWindowSize.toISOString(),
           to: tuple.to.toISOString(),
           services,
+          ruleExecutionLogger,
           filter,
-          logger,
           pageSize: 0,
           primaryTimestamp,
           secondaryTimestamp,
-          buildRuleMessage,
         });
         searchAfterResults.searchDurations.push(pageSearchDuration);
         searchAfterResults.searchErrors.push(...pageSearchErrors);
@@ -285,12 +283,11 @@ export const createNewTermsAlertType = (
             from: tuple.from.toISOString(),
             to: tuple.to.toISOString(),
             services,
+            ruleExecutionLogger,
             filter,
-            logger,
             pageSize: 0,
             primaryTimestamp,
             secondaryTimestamp,
-            buildRuleMessage,
           });
           searchAfterResults.searchDurations.push(docFetchSearchDuration);
           searchAfterResults.searchErrors.push(...docFetchSearchErrors);

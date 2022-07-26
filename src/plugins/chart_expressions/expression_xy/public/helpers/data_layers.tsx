@@ -19,8 +19,8 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { IFieldFormat } from '@kbn/field-formats-plugin/common';
-import { Datatable } from '@kbn/expressions-plugin';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
 import { PaletteRegistry, SeriesLayer } from '@kbn/coloring';

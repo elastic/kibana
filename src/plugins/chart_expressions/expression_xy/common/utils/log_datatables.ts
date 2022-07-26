@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Datatable, ExecutionContext } from '@kbn/expressions-plugin';
+import { Datatable, ExecutionContext } from '@kbn/expressions-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { Dimension, prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
 import { LayerTypes, REFERENCE_LINE } from '../constants';

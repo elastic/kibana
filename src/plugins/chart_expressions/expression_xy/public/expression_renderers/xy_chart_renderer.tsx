@@ -12,16 +12,21 @@ import { ThemeServiceStart } from '@kbn/core/public';
 import { css } from '@emotion/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { METRIC_TYPE } from '@kbn/analytics';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { ExpressionRenderDefinition } from '@kbn/expressions-plugin';
+import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import type { XYChartProps } from '../../common';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { isDataLayer } from '../../common/utils/layer_types_guards';
+import { LayerTypes, SeriesTypes } from '../../common/constants';
+import type { CommonXYLayerConfig, XYChartProps } from '../../common';
 import type { BrushEvent, FilterEvent } from '../types';
+import { extractContainerType, extractVisualizationType } from '../../../common';
 
 export type GetStartDepsFn = () => Promise<{
   data: DataPublicPluginStart;
@@ -33,11 +38,59 @@ export type GetStartDepsFn = () => Promise<{
   useLegacyTimeAxis: boolean;
   kibanaTheme: ThemeServiceStart;
   eventAnnotationService: EventAnnotationServiceType;
+  usageCollection?: UsageCollectionStart;
 }>;
 
 interface XyChartRendererDeps {
   getStartDeps: GetStartDepsFn;
 }
+
+const extractCounterEvents = (originatingApp: string, layers: CommonXYLayerConfig[]) => {
+  const dataLayer = layers.find(isDataLayer);
+  if (dataLayer) {
+    const type =
+      dataLayer.seriesType === SeriesTypes.BAR
+        ? `${dataLayer.isHorizontal ? 'horizontal_bar' : 'vertical_bar'}`
+        : dataLayer.seriesType;
+
+    const byTypes = layers.reduce(
+      (acc, item) => {
+        if (
+          !acc.mixedXY &&
+          item.layerType === LayerTypes.DATA &&
+          item.seriesType !== dataLayer.seriesType
+        ) {
+          acc.mixedXY = true;
+        }
+
+        acc[item.layerType] += 1;
+        return acc;
+      },
+      {
+        mixedXY: false,
+        [LayerTypes.REFERENCELINE]: 0,
+        [LayerTypes.ANNOTATIONS]: 0,
+        [LayerTypes.DATA]: 0,
+      }
+    );
+
+    return [
+      [
+        type,
+        dataLayer.isPercentage ? 'percentage' : undefined,
+        dataLayer.isStacked ? 'stacked' : undefined,
+      ]
+        .filter(Boolean)
+        .join('_'),
+      byTypes[LayerTypes.REFERENCELINE] ? 'reference_layer' : undefined,
+      byTypes[LayerTypes.ANNOTATIONS] ? 'annotation_layer' : undefined,
+      byTypes[LayerTypes.DATA] > 1 ? 'multiple_data_layers' : undefined,
+      byTypes.mixedXY ? 'mixed_xy' : undefined,
+    ]
+      .filter(Boolean)
+      .map((item) => `render_${originatingApp}_${item}`);
+  }
+};
 
 export const getXyChartRenderer = ({
   getStartDeps,
@@ -50,6 +103,8 @@ export const getXyChartRenderer = ({
   validate: () => undefined,
   reuseDomNode: true,
   render: async (domNode: Element, config: XYChartProps, handlers) => {
+    const deps = await getStartDeps();
+
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
     const onClickValue = (data: FilterEvent['data']) => {
       handlers.event({ name: 'filter', data });
@@ -57,7 +112,22 @@ export const getXyChartRenderer = ({
     const onSelectRange = (data: BrushEvent['data']) => {
       handlers.event({ name: 'brush', data });
     };
-    const deps = await getStartDeps();
+
+    const renderComplete = () => {
+      const executionContext = handlers.getExecutionContext();
+      const containerType = extractContainerType(executionContext);
+      const visualizationType = extractVisualizationType(executionContext);
+
+      if (deps.usageCollection && containerType && visualizationType) {
+        const uiEvents = extractCounterEvents(visualizationType, config.args.layers);
+
+        if (uiEvents) {
+          deps.usageCollection.reportUiCounter(containerType, METRIC_TYPE.COUNT, uiEvents);
+        }
+      }
+
+      handlers.done();
+    };
 
     const [{ XYChartReportable }, { calculateMinInterval }] = await Promise.all([
       import('../components/xy_chart'),
@@ -91,8 +161,8 @@ export const getXyChartRenderer = ({
               renderMode={handlers.getRenderMode()}
               syncColors={handlers.isSyncColorsEnabled()}
               syncTooltips={handlers.isSyncTooltipsEnabled()}
-              renderComplete={() => handlers.done()}
               uiState={handlers.uiState as PersistedState}
+              renderComplete={renderComplete}
             />
           </div>{' '}
         </I18nProvider>

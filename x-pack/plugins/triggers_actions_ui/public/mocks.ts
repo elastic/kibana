@@ -40,6 +40,7 @@ import { EditConnectorFlyoutProps } from './application/sections/action_connecto
 import { getActionFormLazy } from './common/get_action_form';
 import { ActionAccordionFormProps } from './application/sections/action_connector_form/action_form';
 import { getFieldBrowserLazy } from './common/get_field_browser';
+import { getRuleAlertsSummaryLazy } from './common/get_rule_alerts_summary';
 import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { getRuleStatusPanelLazy } from './common/get_rule_status_panel';
 
@@ -113,6 +114,9 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
         connectorServices,
         rulesListProps: {},
       });
+    },
+    getRuleAlertsSummary: (props) => {
+      return getRuleAlertsSummaryLazy(props);
     },
     getRuleDefinition: (props) => {
       return getRuleDefinitionLazy({ ...props, actionTypeRegistry, ruleTypeRegistry });
