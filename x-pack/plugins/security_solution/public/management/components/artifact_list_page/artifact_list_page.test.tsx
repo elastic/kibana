@@ -11,7 +11,8 @@ import type { ArtifactListPageProps } from './artifact_list_page';
 import { act, fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ArtifactListPageRenderingSetup } from './mocks';
-import { getArtifactListPageRenderingSetup, getDeferred } from './mocks';
+import { getArtifactListPageRenderingSetup } from './mocks';
+import { getDeferred } from '../mocks';
 
 jest.mock('../../../common/components/user_privileges');
 

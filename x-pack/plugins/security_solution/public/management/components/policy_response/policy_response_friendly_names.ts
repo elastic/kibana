@@ -113,7 +113,7 @@ type PolicyResponseAction =
   | 'workflow'
   | 'full_disk_access';
 
-const policyResponseTitles = Object.freeze(
+export const policyResponseTitles = Object.freeze(
   new Map<PolicyResponseAction | string, string>([
     [
       'configure_dns_events',
@@ -327,6 +327,12 @@ const policyResponseTitles = Object.freeze(
         defaultMessage: 'Permissions required',
       }),
     ],
+    [
+      'linux_deadlock',
+      i18n.translate('xpack.securitySolution.endpoint.details.policyResponse.linux_deadlock', {
+        defaultMessage: 'Disabled to avoid potential system deadlock',
+      }),
+    ],
   ])
 );
 
@@ -361,7 +367,7 @@ const policyResponseStatuses = Object.freeze(
   ])
 );
 
-const descriptions = Object.freeze(
+export const descriptions = Object.freeze(
   new Map<Partial<PolicyResponseAction> | string, string>([
     [
       'full_disk_access',
@@ -381,6 +387,11 @@ const descriptions = Object.freeze(
             'You must enable the Mac system extension for Elastic Endpoint on your machine.',
         }
       ),
+    ],
+    [
+      'linux_deadlock',
+      // intentionally blank for now: https://github.com/elastic/security-team/issues/4264#issuecomment-1194136633
+      '',
     ],
   ])
 );
@@ -405,8 +416,23 @@ const linkTexts = Object.freeze(
         }
       ),
     ],
+    [
+      'linux_deadlock',
+      i18n.translate(
+        'xpack.securitySolution.endpoint.details.policyResponse.link.text.linux_deadlock',
+        {
+          defaultMessage: ' Learn more.',
+        }
+      ),
+    ],
   ])
 );
+
+export const LINUX_DEADLOCK_MESSAGE = 'Disabled due to potential system deadlock';
+const LINUX_DEADLOCK_ACTION_ERRORS: Set<string> = new Set([
+  'load_malware_model',
+  'configure_malware',
+]);
 
 function isMacosFullDiskAccessError(os: string, policyAction: HostPolicyResponseAppliedAction) {
   return os === 'macos' && policyAction.name === 'full_disk_access';
@@ -417,6 +443,14 @@ function isMacosSystemExtensionError(os: string, policyAction: HostPolicyRespons
     os === 'macos' &&
     policyAction.name === 'connect_kernel' &&
     policyAction.status === HostPolicyResponseActionStatus.failure
+  );
+}
+
+function isLinuxDeadlockError(os: string, policyAction: HostPolicyResponseAppliedAction) {
+  return (
+    os === 'linux' &&
+    LINUX_DEADLOCK_ACTION_ERRORS.has(policyAction.name) &&
+    policyAction.message === LINUX_DEADLOCK_MESSAGE
   );
 }
 
@@ -455,11 +489,11 @@ export class PolicyResponseActionFormatter {
   }
 
   public get isGeneric(): boolean {
-    if (isMacosFullDiskAccessError(this.os, this.policyResponseAppliedAction)) {
-      return true;
-    }
-
-    if (isMacosSystemExtensionError(this.os, this.policyResponseAppliedAction)) {
+    if (
+      isMacosFullDiskAccessError(this.os, this.policyResponseAppliedAction) ||
+      isMacosSystemExtensionError(this.os, this.policyResponseAppliedAction) ||
+      isLinuxDeadlockError(this.os, this.policyResponseAppliedAction)
+    ) {
       return true;
     }
 
@@ -469,6 +503,10 @@ export class PolicyResponseActionFormatter {
   private get errorKey(): keyof DocLinks['securitySolution']['policyResponseTroubleshooting'] {
     if (isMacosSystemExtensionError(this.os, this.policyResponseAppliedAction)) {
       return 'macos_system_ext';
+    }
+
+    if (isLinuxDeadlockError(this.os, this.policyResponseAppliedAction)) {
+      return 'linux_deadlock';
     }
 
     return this.policyResponseAppliedAction

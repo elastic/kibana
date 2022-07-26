@@ -55,7 +55,10 @@ import type {
   RuleTagBadgeProps,
   RuleTagBadgeOptions,
 } from './application/sections/rules_list/components/rule_tag_badge';
-import type { RuleEventLogListProps } from './application/sections/rule_details/components/rule_event_log_list';
+import type {
+  RuleEventLogListProps,
+  RuleEventLogListOptions,
+} from './application/sections/rule_details/components/rule_event_log_list';
 import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
 import type { RulesListNotifyBadgeProps } from './application/sections/rules_list/components/rules_list_notify_badge';
@@ -105,6 +108,7 @@ export type {
   RuleTagBadgeProps,
   RuleTagBadgeOptions,
   RuleEventLogListProps,
+  RuleEventLogListOptions,
   RulesListProps,
   CreateConnectorFlyoutProps,
   EditConnectorFlyoutProps,
@@ -241,6 +245,7 @@ export type ActionConnectorWithoutId<
 
 export type ActionConnectorTableItem = ActionConnector & {
   actionType: ActionType['name'];
+  featureIds: ActionType['supportedFeatureIds'];
 };
 
 type AsActionVariables<Keys extends string> = {
@@ -366,6 +371,7 @@ export interface RuleDefinitionProps {
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   onEditRule: () => Promise<void>;
+  hideEditButton?: boolean;
   filteredRuleTypes?: string[];
 }
 

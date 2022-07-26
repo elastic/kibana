@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RequestHandler } from '@kbn/core/server';
+import { type RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import type {
@@ -19,7 +19,7 @@ import type {
   GetOneEnrollmentAPIKeyResponse,
   DeleteEnrollmentAPIKeyResponse,
   PostEnrollmentAPIKeyResponse,
-} from '../../../common';
+} from '../../../common/types';
 import * as APIKeyService from '../../services/api_keys';
 import { agentPolicyService } from '../../services/agent_policy';
 import { defaultIngestErrorHandler, AgentPolicyNotFoundError } from '../../errors';
@@ -61,7 +61,7 @@ export const postEnrollmentApiKeyHandler: RequestHandler<
   try {
     // validate policy id
     await agentPolicyService.get(soClient, request.body.policy_id).catch((err) => {
-      if (soClient.errors.isNotFoundError(err)) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
         throw new AgentPolicyNotFoundError(`Agent policy "${request.body.policy_id}" not found`);
       }
 

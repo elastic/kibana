@@ -27,10 +27,12 @@ function getComponent({
   selected = false,
   showDetails = false,
   field,
+  onAddFilterExists = true,
 }: {
   selected?: boolean;
   showDetails?: boolean;
   field?: DataViewField;
+  onAddFilterExists?: boolean;
 }) {
   const finalField =
     field ??
@@ -49,7 +51,7 @@ function getComponent({
     indexPattern: stubDataView,
     field: finalField,
     getDetails: jest.fn(() => ({ buckets: [], error: '', exists: 1, total: 2, columns: [] })),
-    onAddFilter: jest.fn(),
+    ...(onAddFilterExists && { onAddFilter: jest.fn() }),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
     showDetails,
@@ -138,5 +140,22 @@ describe('discover sidebar field', function () {
     const { props, comp } = getComponent({});
     findTestSubject(comp, 'field-bytes-showDetails').simulate('click');
     expect(props.getDetails.mock.calls.length).toEqual(1);
+  });
+  it('should not return the popover if onAddFilter is not provided', function () {
+    const field = new DataViewField({
+      name: '_source',
+      type: '_source',
+      esTypes: ['_source'],
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+    });
+    const { comp } = getComponent({
+      selected: true,
+      field,
+      onAddFilterExists: false,
+    });
+    const popover = findTestSubject(comp, 'discoverFieldListPanelPopover');
+    expect(popover.length).toBe(0);
   });
 });

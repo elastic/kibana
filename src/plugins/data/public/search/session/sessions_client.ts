@@ -7,11 +7,12 @@
  */
 
 import { PublicContract } from '@kbn/utility-types';
-import { HttpSetup, SavedObjectsFindOptions } from '@kbn/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import type {
   SavedObject,
   SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
+  SavedObjectsFindOptions,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '@kbn/core/server';
 import type {

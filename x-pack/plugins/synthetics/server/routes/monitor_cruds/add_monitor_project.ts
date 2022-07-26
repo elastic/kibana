@@ -6,11 +6,11 @@
  */
 import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../legacy_uptime/lib/lib';
-import { ProjectBrowserMonitor, Locations } from '../../../common/runtime_types';
+import { ProjectBrowserMonitor } from '../../../common/runtime_types';
 
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
-import { getServiceLocations } from '../../synthetics_service/get_service_locations';
+import { getAllLocations } from '../../synthetics_service/get_all_locations';
 import { ProjectMonitorFormatter } from '../../synthetics_service/project_monitor_formatter';
 
 export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
@@ -35,19 +35,25 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
     const monitors = (request.body?.monitors as ProjectBrowserMonitor[]) || [];
     const spaceId = server.spaces.spacesService.getSpaceId(request);
     const { keep_stale: keepStale, project: projectId } = request.body || {};
-    const locations: Locations = (await getServiceLocations(server)).locations;
+    const { publicLocations, privateLocations } = await getAllLocations(
+      server,
+      syntheticsMonitorClient,
+      savedObjectsClient
+    );
     const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
 
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId,
       spaceId,
       keepStale,
-      locations,
+      locations: publicLocations,
+      privateLocations,
       encryptedSavedObjectsClient,
       savedObjectsClient,
       monitors,
       server,
       syntheticsMonitorClient,
+      request,
     });
 
     await pushMonitorFormatter.configureAllProjectMonitors();
