@@ -15,6 +15,9 @@ export interface PackageSpecManifest {
   description: string;
   version: string;
   license?: 'basic';
+  source?: {
+    license: string;
+  };
   type?: 'integration';
   release?: 'experimental' | 'beta' | 'ga';
   categories?: Array<PackageSpecCategory | undefined>;
@@ -52,12 +55,14 @@ export type PackageSpecCategory =
   | 'version_control'
   | 'web';
 
-export type PackageSpecConditions = Record<
-  'kibana',
-  {
+export interface PackageSpecConditions {
+  kibana: {
     version: string;
-  }
->;
+  };
+  elastic?: {
+    subscription: string;
+  };
+}
 
 export interface PackageSpecIcon {
   src: string;
