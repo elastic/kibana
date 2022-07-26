@@ -103,7 +103,7 @@ export function telemetryTaskRunner(
           getExecutionsPerDayCount(esClient, eventLogIndex, logger),
         ]).then(([totalAggegations, totalInUse, totalExecutionsPerDay]) => {
           const hasErrors =
-            totalAggegations.hasErrors && totalInUse.hasErrors && totalExecutionsPerDay.hasErrors;
+            totalAggegations.hasErrors || totalInUse.hasErrors || totalExecutionsPerDay.hasErrors;
 
           const errorMessages = [
             totalAggegations.errorMessage,
