@@ -111,7 +111,7 @@ export function FilterItem({
   }
 
   return (
-    <EuiFlexItem>
+    <>
       {conditionalOperationType ? (
         <FilterGroup
           path={path}
@@ -194,6 +194,6 @@ export function FilterItem({
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-    </EuiFlexItem>
+    </>
   );
 }
