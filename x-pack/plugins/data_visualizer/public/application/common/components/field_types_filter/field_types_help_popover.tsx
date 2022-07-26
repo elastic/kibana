@@ -44,13 +44,15 @@ export const FieldTypesHelpPopover: FC<{
     const onHelpClick = () => setIsHelpOpen((prevIsHelpOpen) => !prevIsHelpOpen);
     const closeHelp = () => setIsHelpOpen(false);
 
-    const items: FieldTypeTableItem[] = useMemo(() => {
-      return fieldTypes.map((type, index) => ({
-        id: index,
-        dataType: type,
-        description: getFieldTypeDescription(type, docLinks),
-      }));
-    }, [fieldTypes, docLinks]);
+    const items: FieldTypeTableItem[] = useMemo(
+      () =>
+        fieldTypes.map((type, index) => ({
+          id: index,
+          dataType: type,
+          description: getFieldTypeDescription(type, docLinks),
+        })),
+      [fieldTypes, docLinks]
+    );
 
     const columnsSidebar = [
       {
@@ -73,8 +75,7 @@ export const FieldTypesHelpPopover: FC<{
         name: i18n.translate('xpack.dataVisualizer.fieldTypesPopover.descriptionColumnTitle', {
           defaultMessage: 'Description',
         }),
-        // eslint-disable-next-line react/no-danger
-        render: (description: string) => <div dangerouslySetInnerHTML={{ __html: description }} />,
+        render: (description: string) => <>{description}</>,
       },
     ];
 

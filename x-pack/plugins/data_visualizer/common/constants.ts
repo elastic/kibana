@@ -75,7 +75,7 @@ export function getFieldTypeDescription(type: string, docLinks: DocLinksStart) {
   switch (type) {
     case SUPPORTED_FIELD_TYPES.BOOLEAN:
       return i18n.translate('xpack.dataVisualizer.index.fieldNameDescription.booleanField', {
-        defaultMessage: 'True and false values.',
+        defaultMessage: 'True and false values',
       });
     case SUPPORTED_FIELD_TYPES.CONFLICT:
       return i18n.translate('xpack.dataVisualizer.index.fieldNameDescription.conflictField', {
@@ -83,7 +83,7 @@ export function getFieldTypeDescription(type: string, docLinks: DocLinksStart) {
       });
     case SUPPORTED_FIELD_TYPES.DATE:
       return i18n.translate('xpack.dataVisualizer.index.fieldNameDescription.dateField', {
-        defaultMessage: 'A date string or the number of seconds or milliseconds since 1/1/1970.',
+        defaultMessage: 'A date string or the number of seconds or milliseconds since 1/1/1970',
       });
     case SUPPORTED_FIELD_TYPES.DATE_RANGE:
       return i18n.translate('xpack.dataVisualizer.index.fieldNameDescription.dateRangeField', {
@@ -113,52 +113,52 @@ export function getFieldTypeDescription(type: string, docLinks: DocLinksStart) {
       });
     case SUPPORTED_FIELD_TYPES.GEO_POINT:
       return i18n.translate('xpack.dataVisualizer.index.fieldNameDescription.geoPointField', {
-        defaultMessage: 'Latitude and longitude points.',
+        defaultMessage: 'Latitude and longitude points',
       });
     case SUPPORTED_FIELD_TYPES.GEO_SHAPE:
       return i18n.translate('xpack.dataVisualizer.index.fieldNameDescription.geoShapeField', {
-        defaultMessage: 'Complex shapes, such as polygons.',
+        defaultMessage: 'Complex shapes such as polygons',
       });
     case SUPPORTED_FIELD_TYPES.HISTOGRAM:
       return i18n.translate('xpack.dataVisualizer.index.fieldNameDescription.histogramField', {
-        defaultMessage: 'Pre-aggregated numerical values in the form of a histogram.',
+        defaultMessage: 'Pre-aggregated numerical values in the form of a histogram',
       });
     case SUPPORTED_FIELD_TYPES.IP:
       return i18n.translate('xpack.dataVisualizer.index.fieldNameDescription.ipAddressField', {
-        defaultMessage: 'IPv4 and IPv6 addresses.',
+        defaultMessage: 'IPv4 and IPv6 addresses',
       });
     case SUPPORTED_FIELD_TYPES.IP_RANGE:
       return i18n.translate('xpack.dataVisualizer.index.fieldNameDescription.ipAddressRangeField', {
-        defaultMessage: 'Range of ip values supporting either IPv4 or IPv6 (or mixed) addresses.',
+        defaultMessage: 'Range of IP values supporting either IPv4 or IPv6 (or mixed) addresses',
       });
     case SUPPORTED_FIELD_TYPES.MURMUR3:
       return i18n.translate('xpack.dataVisualizer.index.fieldNameDescription.murmur3Field', {
-        defaultMessage: 'Field that computes and stores hashes of values.',
+        defaultMessage: 'Field that computes and stores hashes of values',
       });
     case SUPPORTED_FIELD_TYPES.NESTED:
       return i18n.translate('xpack.dataVisualizer.index.fieldNameDescription.nestedField', {
-        defaultMessage: 'JSON object that preserves the relationship between its subfields.',
+        defaultMessage: 'JSON object that preserves the relationship between its subfields',
       });
     case SUPPORTED_FIELD_TYPES.NUMBER:
       return i18n.translate('xpack.dataVisualizer.index.fieldNameDescription.numberField', {
-        defaultMessage: 'Long, integer, short, byte, double, and float values.',
+        defaultMessage: 'Long, integer, short, byte, double, and float values',
       });
     case SUPPORTED_FIELD_TYPES.STRING:
       return i18n.translate('xpack.dataVisualizer.index.fieldNameDescription.stringField', {
-        defaultMessage: 'Full text such as the body of an email or a product description.',
+        defaultMessage: 'Full text such as the body of an email or a product description',
       });
     case SUPPORTED_FIELD_TYPES.TEXT:
       return i18n.translate('xpack.dataVisualizer.index.fieldNameDescription.textField', {
-        defaultMessage: 'Full text such as the body of an email or a product description.',
+        defaultMessage: 'Full text such as the body of an email or a product description',
       });
     case SUPPORTED_FIELD_TYPES.KEYWORD:
       return i18n.translate('xpack.dataVisualizer.index.fieldNameDescription.keywordField', {
         defaultMessage:
-          'Structured content such as an ID, email address, hostname, status code, or tag.',
+          'Structured content such as an ID, email address, hostname, status code, or tag',
       });
     case SUPPORTED_FIELD_TYPES.VERSION:
       return i18n.translate('xpack.dataVisualizer.index.fieldNameDescription.versionField', {
-        defaultMessage: 'Software versions. Supports {SemanticVersioningLink} precedence rules.',
+        defaultMessage: 'Software versions. Supports {SemanticVersioningLink} precedence rules',
         values: {
           SemanticVersioningLink:
             `<a href="https://semver.org/"
