@@ -48,14 +48,14 @@ describe('When a Console command is entered by the user', () => {
     });
   });
 
-  it('should clear the command output history when `cls` is entered', async () => {
+  it('should clear the command output history when `clear` is entered', async () => {
     render();
     enterCommand('help');
     enterCommand('help');
 
     expect(renderResult.getByTestId('test-historyOutput').childElementCount).toBe(2);
 
-    enterCommand('cls');
+    enterCommand('clear');
 
     expect(renderResult.getByTestId('test-historyOutput').childElementCount).toBe(0);
   });
