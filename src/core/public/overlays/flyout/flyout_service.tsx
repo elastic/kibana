@@ -8,7 +8,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { EuiFlyout, EuiFlyoutSize, EuiOverlayMaskProps } from '@elastic/eui';
+import { EuiFlyout } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
@@ -17,6 +17,7 @@ import type { I18nStart } from '@kbn/core-i18n-browser';
 import { CoreContextProvider } from '@kbn/core-theme-browser-internal';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 import { MountWrapper } from '@kbn/core-mount-utils-browser-internal';
+import type { OverlayFlyoutOpenOptions, OverlayFlyoutStart } from '@kbn/core-overlays-browser';
 
 /**
  * A FlyoutRef is a reference to an opened flyout panel. It offers methods to
@@ -56,44 +57,6 @@ class FlyoutRef implements OverlayRef {
     }
     return this.onClose;
   }
-}
-
-/**
- * APIs to open and manage fly-out dialogs.
- *
- * @public
- */
-export interface OverlayFlyoutStart {
-  /**
-   * Opens a flyout panel with the given mount point inside. You can use
-   * `close()` on the returned FlyoutRef to close the flyout.
-   *
-   * @param mount {@link MountPoint} - Mounts the children inside a flyout panel
-   * @param options {@link OverlayFlyoutOpenOptions} - options for the flyout
-   * @return {@link OverlayRef} A reference to the opened flyout panel.
-   */
-  open(mount: MountPoint, options?: OverlayFlyoutOpenOptions): OverlayRef;
-}
-
-/**
- * @public
- */
-export interface OverlayFlyoutOpenOptions {
-  className?: string;
-  closeButtonAriaLabel?: string;
-  ownFocus?: boolean;
-  'data-test-subj'?: string;
-  'aria-label'?: string;
-  size?: EuiFlyoutSize;
-  maxWidth?: boolean | number | string;
-  hideCloseButton?: boolean;
-  outsideClickCloses?: boolean;
-  maskProps?: EuiOverlayMaskProps;
-  /**
-   * EuiFlyout onClose handler.
-   * If provided the consumer is responsible for calling flyout.close() to close the flyout;
-   */
-  onClose?: (flyout: OverlayRef) => void;
 }
 
 interface StartDeps {

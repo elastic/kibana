@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { OverlayBannersService, OverlayBannersStart } from './banners_service';
+import { OverlayBannersService } from './banners_service';
 import { take } from 'rxjs/operators';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import type { OverlayBannersStart } from '@kbn/core-overlays-browser';
 
 describe('OverlayBannersService', () => {
   let service: OverlayBannersStart;

@@ -16,7 +16,7 @@ import { EuiCallOut, EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { OverlayBannersStart } from './banners_service';
+import type { OverlayBannersStart } from '@kbn/core-overlays-browser';
 
 interface StartDeps {
   banners: OverlayBannersStart;

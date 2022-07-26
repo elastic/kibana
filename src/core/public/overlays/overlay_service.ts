@@ -9,9 +9,10 @@
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { OverlayBannersStart, OverlayBannersService } from './banners';
-import { FlyoutService, OverlayFlyoutStart } from './flyout';
-import { ModalService, OverlayModalStart } from './modal';
+import type { OverlayStart } from '@kbn/core-overlays-browser';
+import { OverlayBannersService } from './banners';
+import { FlyoutService } from './flyout';
+import { ModalService } from './modal';
 
 interface StartDeps {
   i18n: I18nStart;
@@ -44,16 +45,4 @@ export class OverlayService {
       openConfirm: modals.openConfirm.bind(modals),
     };
   }
-}
-
-/** @public */
-export interface OverlayStart {
-  /** {@link OverlayBannersStart} */
-  banners: OverlayBannersStart;
-  /** {@link OverlayFlyoutStart#open} */
-  openFlyout: OverlayFlyoutStart['open'];
-  /** {@link OverlayModalStart#open} */
-  openModal: OverlayModalStart['open'];
-  /** {@link OverlayModalStart#openConfirm} */
-  openConfirm: OverlayModalStart['openConfirm'];
 }

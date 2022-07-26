@@ -3339,6 +3339,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-overlays-browser@link:bazel-bin/packages/core/overlays/core-overlays-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-preboot-server-internal@link:bazel-bin/packages/core/preboot/core-preboot-server-internal":
   version "0.0.0"
   uid ""
@@ -7116,6 +7120,10 @@
   uid ""
 
 "@types/kbn__core-node-server@link:bazel-bin/packages/core/node/core-node-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-overlays-browser@link:bazel-bin/packages/core/overlays/core-overlays-browser/npm_module_types":
   version "0.0.0"
   uid ""
 

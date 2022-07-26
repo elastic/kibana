@@ -1,0 +1,53 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+import type { Observable } from 'rxjs';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
+
+// NOTE: the Public type doesn't include get$() or getComponent(). These methods are marked as internal.
+// As such, I created IOverlayBannersStart that extends from OVerlayBannersStart and adds these methods
+/** @public */
+export interface OverlayBannersStart {
+  /**
+   * Add a new banner
+   *
+   * @param mount {@link MountPoint}
+   * @param priority optional priority order to display this banner. Higher priority values are shown first.
+   * @returns a unique identifier for the given banner to be used with {@link OverlayBannersStart.remove} and
+   *          {@link OverlayBannersStart.replace}
+   */
+  add(mount: MountPoint, priority?: number): string;
+
+  /**
+   * Remove a banner
+   *
+   * @param id the unique identifier for the banner returned by {@link OverlayBannersStart.add}
+   * @returns if the banner was found or not
+   */
+  remove(id: string): boolean;
+
+  /**
+   * Replace a banner in place
+   *
+   * @param id the unique identifier for the banner returned by {@link OverlayBannersStart.add}
+   * @param mount {@link MountPoint}
+   * @param priority optional priority order to display this banner. Higher priority values are shown first.
+   * @returns a new identifier for the given banner to be used with {@link OverlayBannersStart.remove} and
+   *          {@link OverlayBannersStart.replace}
+   */
+  replace(id: string | undefined, mount: MountPoint, priority?: number): string;
+  /** @internal */
+  get$(): Observable<OverlayBanner[]>;
+  getComponent(): JSX.Element;
+}
+
+/** @internal */
+export interface OverlayBanner {
+  readonly id: string;
+  readonly mount: MountPoint;
+  readonly priority: number;
+}

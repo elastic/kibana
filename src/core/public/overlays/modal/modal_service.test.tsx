@@ -12,7 +12,8 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
-import { ModalService, OverlayModalStart } from './modal_service';
+import { ModalService } from './modal_service';
+import type { OverlayModalStart } from '@kbn/core-overlays-browser';
 import { mountReactNode } from '../../utils';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 

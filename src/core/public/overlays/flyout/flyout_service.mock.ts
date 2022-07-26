@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { OverlayFlyoutStart } from '@kbn/core-overlays-browser';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { FlyoutService, OverlayFlyoutStart } from './flyout_service';
+import type { FlyoutService } from './flyout_service';
 
 const createStartContractMock = () => {
   const startContract: jest.Mocked<OverlayFlyoutStart> = {

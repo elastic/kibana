@@ -7,58 +7,16 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
+import type { OverlayBannersStart, OverlayBanner } from '@kbn/core-overlays-browser';
 import { PriorityMap } from './priority_map';
 import { BannersList } from './banners_list';
 import { UserBannerService } from './user_banner_service';
-
-/** @public */
-export interface OverlayBannersStart {
-  /**
-   * Add a new banner
-   *
-   * @param mount {@link MountPoint}
-   * @param priority optional priority order to display this banner. Higher priority values are shown first.
-   * @returns a unique identifier for the given banner to be used with {@link OverlayBannersStart.remove} and
-   *          {@link OverlayBannersStart.replace}
-   */
-  add(mount: MountPoint, priority?: number): string;
-
-  /**
-   * Remove a banner
-   *
-   * @param id the unique identifier for the banner returned by {@link OverlayBannersStart.add}
-   * @returns if the banner was found or not
-   */
-  remove(id: string): boolean;
-
-  /**
-   * Replace a banner in place
-   *
-   * @param id the unique identifier for the banner returned by {@link OverlayBannersStart.add}
-   * @param mount {@link MountPoint}
-   * @param priority optional priority order to display this banner. Higher priority values are shown first.
-   * @returns a new identifier for the given banner to be used with {@link OverlayBannersStart.remove} and
-   *          {@link OverlayBannersStart.replace}
-   */
-  replace(id: string | undefined, mount: MountPoint, priority?: number): string;
-
-  /** @internal */
-  get$(): Observable<OverlayBanner[]>;
-  getComponent(): JSX.Element;
-}
-
-/** @internal */
-export interface OverlayBanner {
-  readonly id: string;
-  readonly mount: MountPoint;
-  readonly priority: number;
-}
 
 interface StartDeps {
   i18n: I18nStart;

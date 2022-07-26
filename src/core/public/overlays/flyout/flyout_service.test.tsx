@@ -11,8 +11,9 @@ import { mockReactDomRender, mockReactDomUnmount } from '../overlay.test.mocks';
 import { mount } from 'enzyme';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
-import { FlyoutService, OverlayFlyoutStart } from './flyout_service';
+import { FlyoutService } from './flyout_service';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
+import type { OverlayFlyoutStart } from '@kbn/core-overlays-browser';
 
 const i18nMock = i18nServiceMock.createStartContract();
 const themeMock = themeServiceMock.createStartContract();

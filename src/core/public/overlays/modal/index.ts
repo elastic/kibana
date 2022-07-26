@@ -7,9 +7,3 @@
  */
 
 export { ModalService } from './modal_service';
-
-export type {
-  OverlayModalStart,
-  OverlayModalOpenOptions,
-  OverlayModalConfirmOptions,
-} from './modal_service';

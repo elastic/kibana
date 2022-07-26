@@ -6,4 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { OverlayBannersService } from './banners_service';
+export type { OverlayStart } from './overlays';
+export type { OverlayBannersStart, OverlayBanner } from './banners';
+export type { OverlayFlyoutStart, OverlayFlyoutOpenOptions } from './flyout';
+export type {
+  OverlayModalStart,
+  OverlayModalOpenOptions,
+  OverlayModalConfirmOptions,
+} from './modal';

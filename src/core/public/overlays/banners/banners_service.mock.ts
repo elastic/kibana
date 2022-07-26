@@ -7,10 +7,10 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { OverlayBannersStart, OverlayBannersService } from './banners_service';
+import { type IOverlayBannersStart, OverlayBannersService } from './banners_service';
 
 const createStartContractMock = () => {
-  const startContract: jest.Mocked<OverlayBannersStart> = {
+  const startContract: jest.Mocked<IOverlayBannersStart> = {
     add: jest.fn(),
     remove: jest.fn(),
     replace: jest.fn(),

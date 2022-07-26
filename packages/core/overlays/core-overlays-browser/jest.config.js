@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { OverlayBannersService } from './banners_service';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/overlays/core-overlays-browser'],
+};
