@@ -25,7 +25,7 @@ export default function (providerContext: FtrProviderContext) {
         await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       });
       setupFleetAndAgents(providerContext);
-      const packagePoliciesToDeleteIds: string[] = [];
+      let packagePoliciesToDeleteIds: string[] = [];
       after(async () => {
         if (packagePoliciesToDeleteIds.length > 0) {
           await kibanaServer.savedObjects.bulkDelete({
@@ -173,20 +173,32 @@ export default function (providerContext: FtrProviderContext) {
 
       it('should allow to create policy with the system integration policy and increment correctly the name if there is more than 10 package policy', async () => {
         // load a bunch of fake system integration policy
-        for (let i = 0; i < 10; i++) {
-          await kibanaServer.savedObjects.create({
-            id: `package-policy-test-${i}`,
-            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-            overwrite: true,
-            attributes: {
-              name: `system-${i + 1}`,
-              package: {
-                name: 'system',
+        const policyIds = new Array(10).fill(null).map((_, i) => `package-policy-test-${i}`);
+        packagePoliciesToDeleteIds = packagePoliciesToDeleteIds.concat(policyIds);
+
+        // we must first force install the system package to override package verification error on policy create
+        const installPromise = supertest
+          .post(`/api/fleet/epm/packages/system-1.19.0`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
+          .expect(200);
+
+        await Promise.all([
+          installPromise,
+          ...policyIds.map((policyId, i) =>
+            kibanaServer.savedObjects.create({
+              id: policyId,
+              type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+              overwrite: true,
+              attributes: {
+                name: `system-${i + 1}`,
+                package: {
+                  name: 'system',
+                },
               },
-            },
-          });
-          packagePoliciesToDeleteIds.push(`package-policy-test-${i}`);
-        }
+            })
+          ),
+        ]);
 
         // first one succeeds
         const res = await supertest
