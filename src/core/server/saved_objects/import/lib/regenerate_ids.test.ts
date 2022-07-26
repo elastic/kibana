@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { SavedObject } from '@kbn/core-saved-objects-common';
 import { regenerateIds } from './regenerate_ids';
-import { SavedObject } from '../../types';
 
 jest.mock('uuid', () => ({
   v4: jest

@@ -22,43 +22,72 @@ import {
   PostConnectorConfigurationArgs,
   PostConnectorConfigurationResponse,
 } from '../../../api/connector_package/update_connector_configuration_api_logic';
+import {
+  FetchIndexApiLogic,
+  FetchIndexApiParams,
+  FetchIndexApiResponse,
+} from '../../../api/index/fetch_index_api_logic';
+import { isConnectorIndex } from '../../../utils/indices';
 
 type ConnectorConfigurationActions = Pick<
   Actions<PostConnectorConfigurationArgs, PostConnectorConfigurationResponse>,
   'apiError' | 'apiSuccess' | 'makeRequest'
 > & {
+  fetchIndexApiSuccess: Actions<FetchIndexApiParams, FetchIndexApiResponse>['apiSuccess'];
+  saveConfig: () => void;
   setConfigState(configState: ConnectorConfiguration): {
     configState: ConnectorConfiguration;
   };
   setIsEditing(isEditing: boolean): { isEditing: boolean };
+  setLocalConfigEntry(configEntry: ConfigEntry): ConfigEntry;
+  setLocalConfigState(configState: ConnectorConfiguration): {
+    configState: ConnectorConfiguration;
+  };
 };
 
 interface ConnectorConfigurationValues {
   configState: ConnectorConfiguration;
+  configView: ConfigEntry[];
+  index: FetchIndexApiResponse;
   isEditing: boolean;
+  localConfigState: ConnectorConfiguration;
+  localConfigView: ConfigEntry[];
 }
 
-interface ConnectorConfigurationProps {
-  configuration: ConnectorConfiguration;
+interface ConfigEntry {
+  key: string;
+  label: string;
+  value: string;
 }
 
 export const ConnectorConfigurationLogic = kea<
-  MakeLogicType<
-    ConnectorConfigurationValues,
-    ConnectorConfigurationActions,
-    ConnectorConfigurationProps
-  >
+  MakeLogicType<ConnectorConfigurationValues, ConnectorConfigurationActions>
 >({
   actions: {
+    saveConfig: true,
     setConfigState: (configState: ConnectorConfiguration) => ({ configState }),
     setIsEditing: (isEditing: boolean) => ({
       isEditing,
     }),
+    setLocalConfigEntry: (configEntry: ConfigEntry) => ({ ...configEntry }),
+    setLocalConfigState: (configState: ConnectorConfiguration) => ({ configState }),
   },
   connect: {
-    actions: [ConnectorConfigurationApiLogic, ['apiError', 'apiSuccess', 'makeRequest']],
+    actions: [
+      ConnectorConfigurationApiLogic,
+      ['apiError', 'apiSuccess', 'makeRequest'],
+      FetchIndexApiLogic,
+      ['apiSuccess as fetchIndexApiSuccess'],
+    ],
+    values: [FetchIndexApiLogic, ['data as index']],
   },
-  listeners: {
+  events: ({ actions, values }) => ({
+    afterMount: () =>
+      actions.setConfigState(
+        isConnectorIndex(values.index) ? values.index.connector.configuration : {}
+      ),
+  }),
+  listeners: ({ actions, values }) => ({
     apiError: (error) => flashAPIErrors(error),
     apiSuccess: () =>
       flashSuccessToast(
@@ -67,11 +96,31 @@ export const ConnectorConfigurationLogic = kea<
           { defaultMessage: 'Configuration successfully updated' }
         )
       ),
+    fetchIndexApiSuccess: (index) => {
+      if (!values.isEditing && isConnectorIndex(index)) {
+        actions.setConfigState(index.connector.configuration);
+      }
+    },
     makeRequest: () => clearFlashMessages(),
-  },
-  reducers: ({ props }) => ({
+    saveConfig: () => {
+      if (isConnectorIndex(values.index)) {
+        actions.makeRequest({
+          configuration: values.localConfigState,
+          connectorId: values.index.connector.id,
+          indexName: values.index.connector.index_name,
+        });
+      }
+    },
+    setIsEditing: (isEditing) => {
+      if (isEditing) {
+        actions.setLocalConfigState(values.configState);
+      }
+    },
+  }),
+  path: ['enterprise_search', 'content', 'connector_configuration'],
+  reducers: () => ({
     configState: [
-      props.configuration,
+      {},
       {
         apiSuccess: (_, { configuration }) => configuration,
         setConfigState: (_, { configState }) => configState,
@@ -83,6 +132,40 @@ export const ConnectorConfigurationLogic = kea<
         apiSuccess: () => false,
         setIsEditing: (_, { isEditing }) => isEditing,
       },
+    ],
+    localConfigState: [
+      {},
+      {
+        setLocalConfigEntry: (configState, { key, label, value }) => ({
+          ...configState,
+          [key]: { label, value },
+        }),
+        setLocalConfigState: (_, { configState }) => configState,
+      },
+    ],
+  }),
+  selectors: ({ selectors }) => ({
+    configView: [
+      () => [selectors.configState],
+      (configState) =>
+        Object.keys(configState)
+          .map((key) => ({
+            key,
+            label: configState[key].label,
+            value: configState[key].value,
+          }))
+          .sort((a, b) => a.key.localeCompare(b.key)),
+    ],
+    localConfigView: [
+      () => [selectors.localConfigState],
+      (configState) =>
+        Object.keys(configState)
+          .map((key) => ({
+            key,
+            label: configState[key].label,
+            value: configState[key].value,
+          }))
+          .sort((a, b) => a.key.localeCompare(b.key)),
     ],
   }),
 });

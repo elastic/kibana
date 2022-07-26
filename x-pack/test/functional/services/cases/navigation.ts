@@ -17,9 +17,13 @@ export function CasesNavigationProvider({ getPageObject, getService }: FtrProvid
       await testSubjects.existOrFail(appSelector, { timeout: 2000 });
     },
 
-    async navigateToConfigurationPage() {
-      await this.navigateToApp();
+    async navigateToConfigurationPage(app: string = 'cases', appSelector: string = 'cases-app') {
+      await this.navigateToApp(app, appSelector);
       await common.clickAndValidate('configure-case-button', 'case-configure-title');
+    },
+
+    async navigateToSingleCase(app: string = 'cases', caseId: string) {
+      await common.navigateToUrlWithBrowserHistory(app, caseId);
     },
   };
 }
