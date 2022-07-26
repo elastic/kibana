@@ -2085,6 +2085,19 @@
           },
           {
             "parentPluginId": "observability",
+            "id": "def-public.ExploratoryEmbeddableProps.hideTicks",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideTicks",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "observability",
             "id": "def-public.ExploratoryEmbeddableProps.onBrushEnd",
             "type": "Function",
             "tags": [],
