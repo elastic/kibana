@@ -127,30 +127,6 @@ export const createNewTermsRule = (rule: NewTermsRule, ruleId = 'rule_testing') 
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
   });
-=======
-export const createEventCorrelationRule = (rule: CustomRule, ruleId = 'rule_testing') => {
-  if (rule.dataSource.type === 'indexPatterns') {
-    cy.request({
-      method: 'POST',
-      url: 'api/detection_engine/rules',
-      body: {
-        rule_id: ruleId,
-        risk_score: parseInt(rule.riskScore, 10),
-        description: rule.description,
-        interval: `${rule.runsEvery.interval}${rule.runsEvery.type}`,
-        from: `now-${rule.lookBack.interval}${rule.lookBack.type}`,
-        name: rule.name,
-        severity: rule.severity.toLocaleLowerCase(),
-        type: 'eql',
-        index: rule.dataSource.index,
-        query: rule.customQuery,
-        language: 'eql',
-        enabled: true,
-      },
-      headers: { 'kbn-xsrf': 'cypress-creds' },
-    });
-  }
-};
 
 export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'rule_testing') => {
   if (rule.dataSource.type === 'indexPatterns') {
