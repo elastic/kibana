@@ -125,9 +125,7 @@ export const useNavigationProps = ({
       event?.preventDefault?.();
 
       history.push({
-        pathname: `/context/${encodeURIComponent(dataViewId)}/${encodeURIComponent(
-          String(rowId)
-        )}`,
+        pathname: `/context/${encodeURIComponent(dataViewId)}/${encodeURIComponent(String(rowId))}`,
         search: `?${contextSearchHash}&breadcrumb=${currentBreadcrumb}`,
       });
     };

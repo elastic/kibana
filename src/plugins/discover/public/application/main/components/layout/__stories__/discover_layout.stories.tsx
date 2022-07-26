@@ -9,7 +9,6 @@
 import React, { useState } from 'react';
 import { storiesOf } from '@storybook/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { getDataViewMock } from './get_data_view_mock';
 import { withDiscoverServices } from '../../../../../__mocks__/__storybook_mocks__/with_discover_services';
 import { getDocumentsLayoutProps, getPlainRecordLayoutProps } from './get_layout_props';
 import { DiscoverLayout } from '../discover_layout';
