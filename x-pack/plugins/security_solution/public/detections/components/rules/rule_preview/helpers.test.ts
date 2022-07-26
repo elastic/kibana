@@ -77,6 +77,7 @@ describe('query_preview/helpers', () => {
         ],
         machineLearningJobId: ['test-ml-job-id'],
         queryBar: { filters: [], query: { query: '', language: 'testlang' }, saved_id: null },
+        newTermsFields: [],
       });
       expect(isDisabled).toEqual(true);
     });
@@ -94,6 +95,7 @@ describe('query_preview/helpers', () => {
         ],
         machineLearningJobId: ['test-ml-job-id'],
         queryBar: { filters: [], query: { query: '', language: 'testlang' }, saved_id: null },
+        newTermsFields: [],
       });
       expect(isDisabled).toEqual(true);
     });
@@ -111,6 +113,7 @@ describe('query_preview/helpers', () => {
         ],
         machineLearningJobId: ['test-ml-job-id'],
         queryBar: { filters: [], query: { query: '', language: 'testlang' }, saved_id: null },
+        newTermsFields: [],
       });
       expect(isDisabled).toEqual(true);
     });
@@ -128,6 +131,7 @@ describe('query_preview/helpers', () => {
         ],
         machineLearningJobId: ['test-ml-job-id'],
         queryBar: { filters: [], query: { query: '', language: 'testlang' }, saved_id: null },
+        newTermsFields: [],
       });
       expect(isDisabled).toEqual(true);
     });
@@ -143,6 +147,7 @@ describe('query_preview/helpers', () => {
         threatMapping: [],
         machineLearningJobId: ['test-ml-job-id'],
         queryBar: { filters: [], query: { query: '', language: 'testlang' }, saved_id: null },
+        newTermsFields: [],
       });
       expect(isDisabled).toEqual(true);
     });
@@ -158,6 +163,7 @@ describe('query_preview/helpers', () => {
         threatMapping: [],
         machineLearningJobId: [],
         queryBar: { filters: [], query: { query: '', language: 'testlang' }, saved_id: null },
+        newTermsFields: [],
       });
       expect(isDisabled).toEqual(true);
     });
@@ -173,6 +179,23 @@ describe('query_preview/helpers', () => {
         threatMapping: [],
         machineLearningJobId: [],
         queryBar: { filters: [], query: { query: '', language: 'testlang' }, saved_id: null },
+        newTermsFields: [],
+      });
+      expect(isDisabled).toEqual(true);
+    });
+
+    test('disabled when new_terms rule with no fields', () => {
+      const isDisabled = getIsRulePreviewDisabled({
+        ruleType: 'new_terms',
+        isQueryBarValid: true,
+        isThreatQueryBarValid: true,
+        index: ['test-*'],
+        dataViewId: undefined,
+        threatIndex: [],
+        threatMapping: [],
+        machineLearningJobId: [],
+        queryBar: { filters: [], query: { query: '', language: 'testlang' }, saved_id: null },
+        newTermsFields: [],
       });
       expect(isDisabled).toEqual(true);
     });
@@ -190,6 +213,7 @@ describe('query_preview/helpers', () => {
         ],
         machineLearningJobId: ['test-ml-job-id'],
         queryBar: { filters: [], query: { query: '', language: 'testlang' }, saved_id: null },
+        newTermsFields: [],
       });
       expect(isDisabled).toEqual(false);
     });
@@ -209,6 +233,7 @@ describe('query_preview/helpers', () => {
           query: { query: 'any where true', language: 'testlang' },
           saved_id: null,
         },
+        newTermsFields: [],
       });
       expect(isDisabled).toEqual(false);
     });
