@@ -27,31 +27,6 @@ import { collectExportedObjects } from './collect_exported_objects';
 import { byIdAscComparator, getPreservedOrderComparator, SavedObjectComparator } from './utils';
 
 /**
- * Utility class used to export savedObjects.
- *
- * @public
- */
-export interface ISavedObjectsExporter {
-  /**
-   * Generates an export stream for given types.
-   *
-   * See the {@link SavedObjectsExportByTypeOptions | options} for more detailed information.
-   *
-   * @throws SavedObjectsExportError
-   */
-  exportByTypes(options: SavedObjectsExportByTypeOptions): Promise<Readable>;
-
-  /**
-   * Generates an export stream for given object references.
-   *
-   * See the {@link SavedObjectsExportByObjectOptions | options} for more detailed information.
-   *
-   * @throws SavedObjectsExportError
-   */
-  exportByObjects(options: SavedObjectsExportByObjectOptions): Promise<Readable>;
-}
-
-/**
  * @internal
  */
 export class SavedObjectsExporter implements ISavedObjectsExporter {

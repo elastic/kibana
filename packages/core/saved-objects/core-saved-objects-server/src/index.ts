@@ -14,7 +14,9 @@ export type {
   SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperOptions,
 } from './client_factory';
+export type { SavedObjectsServiceSetup, SavedObjectsServiceStart } from './contracts';
 export type {
+  ISavedObjectsExporter,
   SavedObjectsExportTransform,
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportByTypeOptions,
@@ -24,6 +26,7 @@ export type {
   SavedObjectsExportResultDetails,
 } from './export';
 export type {
+  ISavedObjectsImporter,
   SavedObjectsImportHook,
   SavedObjectsImportHookResult,
   SavedObjectsImportOptions,
@@ -51,6 +54,7 @@ export type {
   SavedObjectTypeExcludeFromUpgradeFilterHook,
 } from './saved_objects_type';
 export type {
+  ISavedObjectsSerializer,
   SavedObjectsRawDocSource,
   SavedObjectsRawDoc,
   SavedObjectSanitizedDoc,

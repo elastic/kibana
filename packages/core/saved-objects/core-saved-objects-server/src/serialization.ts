@@ -12,6 +12,58 @@ import type {
 } from '@kbn/core-saved-objects-common';
 
 /**
+ * A serializer that can be used to manually convert {@link SavedObjectsRawDoc | raw} or
+ * {@link SavedObjectSanitizedDoc | sanitized} documents to the other kind.
+ *
+ * @public
+ */
+export interface ISavedObjectsSerializer {
+  /**
+   * Determines whether the raw document can be converted to a saved object.
+   *
+   * @param {SavedObjectsRawDoc} doc - The raw ES document to be tested
+   * @param {SavedObjectsRawDocParseOptions} options - Options for parsing the raw document.
+   */
+  isRawSavedObject(doc: SavedObjectsRawDoc, options?: SavedObjectsRawDocParseOptions): boolean;
+
+  /**
+   * Converts a document from the format that is stored in elasticsearch to the saved object client format.
+   *
+   * @param {SavedObjectsRawDoc} doc - The raw ES document to be converted to saved object format.
+   * @param {SavedObjectsRawDocParseOptions} options - Options for parsing the raw document.
+   */
+  rawToSavedObject<T = unknown>(
+    doc: SavedObjectsRawDoc,
+    options?: SavedObjectsRawDocParseOptions
+  ): SavedObjectSanitizedDoc<T>;
+
+  /**
+   * Converts a document from the saved object client format to the format that is stored in elasticsearch.
+   *
+   * @param {SavedObjectSanitizedDoc} savedObj - The saved object to be converted to raw ES format.
+   */
+  savedObjectToRaw(savedObj: SavedObjectSanitizedDoc): SavedObjectsRawDoc;
+
+  /**
+   * Given a saved object type and id, generates the compound id that is stored in the raw document.
+   *
+   * @param {string} namespace - The namespace of the saved object
+   * @param {string} type - The saved object type
+   * @param {string} id - The id of the saved object
+   */
+  generateRawId(namespace: string | undefined, type: string, id: string): string;
+
+  /**
+   * Given a saved object type and id, generates the compound id that is stored in the raw document for its legacy URL alias.
+   *
+   * @param {string} namespace - The namespace of the saved object
+   * @param {string} type - The saved object type
+   * @param {string} id - The id of the saved object
+   */
+  generateRawLegacyUrlAliasId(namespace: string | undefined, type: string, id: string): string;
+}
+
+/**
  * A raw document as represented directly in the saved object index.
  *
  * @public

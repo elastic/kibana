@@ -11,7 +11,33 @@ import {
   SavedObject,
   SavedObjectsImportRetry,
   SavedObjectsImportWarning,
+  SavedObjectsImportResponse,
 } from '@kbn/core-saved-objects-common';
+
+/**
+ * Utility class used to import savedObjects.
+ *
+ * @public
+ */
+export interface ISavedObjectsImporter {
+  /**
+   * Import saved objects from given stream. See the {@link SavedObjectsImportOptions | options} for more
+   * detailed information.
+   *
+   * @throws SavedObjectsImportError
+   */
+  import(options: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
+
+  /**
+   * Resolve and return saved object import errors.
+   * See the {@link SavedObjectsResolveImportErrorsOptions | options} for more detailed information.
+   *
+   * @throws SavedObjectsImportError
+   */
+  resolveImportErrors(
+    options: SavedObjectsResolveImportErrorsOptions
+  ): Promise<SavedObjectsImportResponse>;
+}
 
 /**
  * Options to control the import operation.

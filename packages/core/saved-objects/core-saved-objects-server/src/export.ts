@@ -6,9 +6,35 @@
  * Side Public License, v 1.
  */
 
+import type { Readable } from 'stream';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObject, SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-server';
+
+/**
+ * Utility class used to export savedObjects.
+ *
+ * @public
+ */
+export interface ISavedObjectsExporter {
+  /**
+   * Generates an export stream for given types.
+   *
+   * See the {@link SavedObjectsExportByTypeOptions | options} for more detailed information.
+   *
+   * @throws SavedObjectsExportError
+   */
+  exportByTypes(options: SavedObjectsExportByTypeOptions): Promise<Readable>;
+
+  /**
+   * Generates an export stream for given object references.
+   *
+   * See the {@link SavedObjectsExportByObjectOptions | options} for more detailed information.
+   *
+   * @throws SavedObjectsExportError
+   */
+  exportByObjects(options: SavedObjectsExportByObjectOptions): Promise<Readable>;
+}
 
 /** @public */
 export interface SavedObjectExportBaseOptions {

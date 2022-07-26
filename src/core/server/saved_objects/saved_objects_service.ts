@@ -18,16 +18,10 @@ import type {
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
 } from '@kbn/core-elasticsearch-server-internal';
-import type { SavedObjectAttributes } from '@kbn/core-saved-objects-common';
-import type {
-  ISavedObjectsRepository,
-  SavedObjectsClientContract,
-} from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectsRepositoryFactory } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsClient,
   SavedObjectsClientProvider,
-  SavedObjectsClientProviderOptions,
 } from '.';
 import { KibanaMigrator, IKibanaMigrator } from './migrations';
 import { InternalCoreUsageDataSetup } from '../core_usage_data';
@@ -37,7 +31,7 @@ import {
   SavedObjectsMigrationConfigType,
   SavedObjectConfig,
 } from './saved_objects_config';
-import { SavedObjectsType, SavedObjectStatusMeta } from './types';
+import { SavedObjectStatusMeta } from './types';
 import { SavedObjectsRepository } from './service/lib/repository';
 import {
   SavedObjectsClientFactoryProvider,
@@ -45,8 +39,8 @@ import {
 } from './service/lib/scoped_client_provider';
 import { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objects_type_registry';
 import { SavedObjectsSerializer } from './serialization';
-import { SavedObjectsExporter, ISavedObjectsExporter } from './export';
-import { SavedObjectsImporter, ISavedObjectsImporter } from './import';
+import { SavedObjectsExporter } from './export';
+import { SavedObjectsImporter } from './import';
 import { registerRoutes } from './routes';
 import { ServiceStatus } from '../status';
 import { calculateStatus$ } from './status';
@@ -56,186 +50,11 @@ import { getSavedObjectsDeprecationsProvider } from './deprecations';
 const kibanaIndex = '.kibana';
 
 /**
- * Saved Objects is Kibana's data persistence mechanism allowing plugins to
- * use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods
- * for registering Saved Object types, creating and registering Saved Object client wrappers and factories.
- *
- * @remarks
- * When plugins access the Saved Objects client, a new client is created using
- * the factory provided to `setClientFactory` and wrapped by all wrappers
- * registered through `addClientWrapper`.
- *
- * @example
- * ```ts
- * import { SavedObjectsClient, CoreSetup } from 'src/core/server';
- *
- * export class Plugin() {
- *   setup: (core: CoreSetup) => {
- *     core.savedObjects.setClientFactory(({ request: KibanaRequest }) => {
- *       return new SavedObjectsClient(core.savedObjects.scopedRepository(request));
- *     })
- *   }
- * }
- * ```
- *
- * @example
- * ```ts
- * import { SavedObjectsClient, CoreSetup } from 'src/core/server';
- * import { mySoType } from './saved_objects'
- *
- * export class Plugin() {
- *   setup: (core: CoreSetup) => {
- *     core.savedObjects.registerType(mySoType);
- *   }
- * }
- * ```
- *
- * @public
- */
-export interface SavedObjectsServiceSetup {
-  /**
-   * Set the default {@link SavedObjectsClientFactoryProvider | factory provider} for creating Saved Objects clients.
-   * Only one provider can be set, subsequent calls to this method will fail.
-   */
-  setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider) => void;
-
-  /**
-   * Add a {@link SavedObjectsClientWrapperFactory | client wrapper factory} with the given priority.
-   */
-  addClientWrapper: (
-    priority: number,
-    id: string,
-    factory: SavedObjectsClientWrapperFactory
-  ) => void;
-
-  /**
-   * Register a {@link SavedObjectsType | savedObjects type} definition.
-   *
-   * See the {@link SavedObjectsTypeMappingDefinition | mappings format} and
-   * {@link SavedObjectMigrationMap | migration format} for more details about these.
-   *
-   * @example
-   * ```ts
-   * // src/plugins/my_plugin/server/saved_objects/my_type.ts
-   * import { SavedObjectsType } from 'src/core/server';
-   * import * as migrations from './migrations';
-   * import * as schemas from './schemas';
-   *
-   * export const myType: SavedObjectsType = {
-   *   name: 'MyType',
-   *   hidden: false,
-   *   namespaceType: 'multiple',
-   *   mappings: {
-   *     properties: {
-   *       textField: {
-   *         type: 'text',
-   *       },
-   *       boolField: {
-   *         type: 'boolean',
-   *       },
-   *     },
-   *   },
-   *   migrations: {
-   *     '2.0.0': migrations.migrateToV2,
-   *     '2.1.0': migrations.migrateToV2_1
-   *   },
-   *   schemas: {
-   *     '2.0.0': schemas.v2,
-   *     '2.1.0': schemas.v2_1,
-   *   },
-   * };
-   *
-   * // src/plugins/my_plugin/server/plugin.ts
-   * import { SavedObjectsClient, CoreSetup } from 'src/core/server';
-   * import { myType } from './saved_objects';
-   *
-   * export class Plugin() {
-   *   setup: (core: CoreSetup) => {
-   *     core.savedObjects.registerType(myType);
-   *   }
-   * }
-   * ```
-   */
-  registerType: <Attributes extends SavedObjectAttributes = any>(
-    type: SavedObjectsType<Attributes>
-  ) => void;
-
-  /**
-   * Returns the default index used for saved objects.
-   */
-  getKibanaIndex: () => string;
-}
-
-/**
  * @internal
  */
 export interface InternalSavedObjectsServiceSetup extends SavedObjectsServiceSetup {
   status$: Observable<ServiceStatus<SavedObjectStatusMeta>>;
   /** Note: this must be called after server.setup to get all plugin SO types */
-  getTypeRegistry: () => ISavedObjectTypeRegistry;
-}
-
-/**
- * Saved Objects is Kibana's data persisentence mechanism allowing plugins to
- * use Elasticsearch for storing and querying state. The
- * SavedObjectsServiceStart API provides a scoped Saved Objects client for
- * interacting with Saved Objects.
- *
- * @public
- */
-export interface SavedObjectsServiceStart {
-  /**
-   * Creates a {@link SavedObjectsClientContract | Saved Objects client} that
-   * uses the credentials from the passed in request to authenticate with
-   * Elasticsearch. If other plugins have registered Saved Objects client
-   * wrappers, these will be applied to extend the functionality of the client.
-   *
-   * A client that is already scoped to the incoming request is also exposed
-   * from the route handler context see {@link RequestHandlerContext}.
-   */
-  getScopedClient: (
-    req: KibanaRequest,
-    options?: SavedObjectsClientProviderOptions
-  ) => SavedObjectsClientContract;
-  /**
-   * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
-   * uses the credentials from the passed in request to authenticate with
-   * Elasticsearch.
-   *
-   * @param req - The request to create the scoped repository from.
-   * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
-   *
-   * @remarks
-   * Prefer using `getScopedClient`. This should only be used when using methods
-   * not exposed on {@link SavedObjectsClientContract}
-   */
-  createScopedRepository: (
-    req: KibanaRequest,
-    includedHiddenTypes?: string[]
-  ) => ISavedObjectsRepository;
-  /**
-   * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
-   * uses the internal Kibana user for authenticating with Elasticsearch.
-   *
-   * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
-   */
-  createInternalRepository: (includedHiddenTypes?: string[]) => ISavedObjectsRepository;
-  /**
-   * Creates a {@link SavedObjectsSerializer | serializer} that is aware of all registered types.
-   */
-  createSerializer: () => SavedObjectsSerializer;
-  /**
-   * Creates an {@link ISavedObjectsExporter | exporter} bound to given client.
-   */
-  createExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;
-  /**
-   * Creates an {@link ISavedObjectsImporter | importer} bound to given client.
-   */
-  createImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
-  /**
-   * Returns the {@link ISavedObjectTypeRegistry | registry} containing all registered
-   * {@link SavedObjectsType | saved object types}
-   */
   getTypeRegistry: () => ISavedObjectTypeRegistry;
 }
 
