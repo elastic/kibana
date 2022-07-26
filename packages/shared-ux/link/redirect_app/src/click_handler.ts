@@ -8,7 +8,7 @@
 
 import { MouseEvent } from 'react';
 import { getClosestLink, hasActiveModifierKey } from '@kbn/shared-ux-utility';
-import { NavigateToUrl } from './types';
+import { NavigateToUrl } from '@kbn/shared-ux-link-redirect-app-types';
 
 interface CreateCrossAppClickHandlerOptions {
   event: MouseEvent<HTMLElement>;

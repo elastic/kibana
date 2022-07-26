@@ -63,6 +63,7 @@ TYPES_DEPS = [
   "@npm//rxjs",
   "@npm//react-use",
   "//packages/kbn-ambient-ui-types",
+  "//packages/shared-ux/link/redirect_app_types",
   "//packages/kbn-shared-ux-utility:npm_module_types",
 ]
 

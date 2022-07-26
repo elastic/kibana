@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export type NavigateToUrl = (url: string) => Promise<void> | void;
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/shared-ux/link/redirect_app_storybook'],
+};

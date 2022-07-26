@@ -10,27 +10,17 @@ export { RedirectAppLinks as RedirectAppLinksContainer } from './redirect_app_li
 export { RedirectAppLinks as RedirectAppLinksComponent } from './redirect_app_links.component';
 export { RedirectAppLinksKibanaProvider, RedirectAppLinksProvider } from './services';
 
-export type {
-  Services as RedirectAppLinksServices,
-  KibanaDependencies as RedirectAppLinksKibanaDependencies,
-} from './services';
-
-export {
-  getMockServices as getRedirectAppLinksMockServices,
-  getStoryArgTypes as getRedirectAppLinksStoryArgTypes,
-  getStoryServices as getRedirectAppLinksStoryServices,
-} from './mocks';
-
 import React, { FC } from 'react';
-import { RedirectAppLinks as RedirectAppLinksContainer } from './redirect_app_links';
-import {
-  Services,
-  KibanaDependencies,
-  RedirectAppLinksKibanaProvider,
-  RedirectAppLinksProvider,
-} from './services';
 
-const isKibanaContract = (services: any): services is KibanaDependencies => {
+import type {
+  RedirectAppLinksServices,
+  RedirectAppLinksKibanaDependencies,
+} from '@kbn/shared-ux-link-redirect-app-types';
+
+import { RedirectAppLinks as RedirectAppLinksContainer } from './redirect_app_links';
+import { RedirectAppLinksKibanaProvider, RedirectAppLinksProvider } from './services';
+
+const isKibanaContract = (services: any): services is RedirectAppLinksKibanaDependencies => {
   return typeof services.coreStart !== 'undefined';
 };
 
@@ -39,7 +29,9 @@ const isKibanaContract = (services: any): services is KibanaDependencies => {
  * `RedirectAppLinksKibanaProvider` based on the services provided, creating a single component
  * with which consumers can wrap their components or solutions.
  */
-export const RedirectAppLinks: FC<Services | KibanaDependencies> = ({ children, ...services }) => {
+export const RedirectAppLinks: FC<
+  RedirectAppLinksServices | RedirectAppLinksKibanaDependencies
+> = ({ children, ...services }) => {
   const container = <RedirectAppLinksContainer>{children}</RedirectAppLinksContainer>;
 
   if (isKibanaContract(services)) {

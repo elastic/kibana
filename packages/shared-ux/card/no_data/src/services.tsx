@@ -8,11 +8,14 @@
 
 import React, { FC, useContext } from 'react';
 import {
-  RedirectAppLinksServices,
-  RedirectAppLinksKibanaDependencies,
   RedirectAppLinksProvider,
   RedirectAppLinksKibanaProvider,
 } from '@kbn/shared-ux-link-redirect-app';
+
+import type {
+  RedirectAppLinksServices,
+  RedirectAppLinksKibanaDependencies,
+} from '@kbn/shared-ux-link-redirect-app-types';
 
 /**
  * A list of services that are consumed by this component.

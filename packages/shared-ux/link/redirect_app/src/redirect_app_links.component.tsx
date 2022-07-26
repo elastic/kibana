@@ -8,9 +8,9 @@
 
 import React, { useRef, MouseEventHandler, useCallback } from 'react';
 import type { HTMLAttributes, DetailedHTMLProps, FC } from 'react';
+import type { NavigateToUrl } from '@kbn/shared-ux-link-redirect-app-types';
 
 import { navigateToUrlClickHandler } from './click_handler';
-import { NavigateToUrl } from './types';
 
 export interface Props extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
   navigateToUrl: NavigateToUrl;

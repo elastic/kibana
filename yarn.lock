@@ -3683,6 +3683,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-link-redirect-app-jest@link:bazel-bin/packages/shared-ux/link/redirect_app_jest":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-link-redirect-app-storybook@link:bazel-bin/packages/shared-ux/link/redirect_app_storybook":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-link-redirect-app-types@link:bazel-bin/packages/shared-ux/link/redirect_app_types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-link-redirect-app@link:bazel-bin/packages/shared-ux/link/redirect_app":
   version "0.0.0"
   uid ""
@@ -3704,6 +3716,10 @@
   uid ""
 
 "@kbn/shared-ux-services@link:bazel-bin/packages/kbn-shared-ux-services":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-storybook-mocks@link:bazel-bin/packages/shared-ux/storybook/mocks":
   version "0.0.0"
   uid ""
 
@@ -7447,6 +7463,18 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__shared-ux-link-redirect-app-jest@link:bazel-bin/packages/shared-ux/link/redirect_app_jest/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-link-redirect-app-storybook@link:bazel-bin/packages/shared-ux/link/redirect_app_storybook/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-link-redirect-app-types@link:bazel-bin/packages/shared-ux/link/redirect_app_types/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__shared-ux-link-redirect-app@link:bazel-bin/packages/shared-ux/link/redirect_app/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7468,6 +7496,10 @@
   uid ""
 
 "@types/kbn__shared-ux-services@link:bazel-bin/packages/kbn-shared-ux-services/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-storybook-mocks@link:bazel-bin/packages/shared-ux/storybook/mocks/npm_module_types":
   version "0.0.0"
   uid ""
 
