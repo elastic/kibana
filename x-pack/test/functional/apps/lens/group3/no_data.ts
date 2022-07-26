@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return await (await find.byClassName('indexPatternEditor__form')).isDisplayed();
       });
 
-      const dataViewToCreate = 'logstash';
+      const dataViewToCreate = 'logstash-*';
       await createDataView(dataViewToCreate);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitForWithTimeout(
