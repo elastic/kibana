@@ -70,6 +70,7 @@ export const useSearchIndicesNav = () => {
       }),
       'data-test-subj': 'IndexIndexMappingsLink',
     },
+    // TODO Conditionally display links for connector/crawler
   ];
 
   return navItems;

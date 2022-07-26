@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+/**
+ * TODO:
+ * - Need to add documentation URLs (search for `#`s)
+ * - Port over existing Crawler view from App Search to the panel below.
+ */
+
 import React from 'react';
 
 import { useValues, useActions } from 'kea';
