@@ -109,8 +109,8 @@ export const waitForMixedRulesBulkEditModal = (customRulesCount: number) => {
 
 export const checkOverwriteTagsCheckbox = () => {
   cy.get(RULES_BULK_EDIT_OVERWRITE_TAGS_CHECKBOX)
-  .should('have.text', "Overwrite all selected rules' tags")
-  .click()
-  .get('input')
-  .should('be.checked');
-}
+    .should('have.text', "Overwrite all selected rules' tags")
+    .click()
+    .get('input')
+    .should('be.checked');
+};

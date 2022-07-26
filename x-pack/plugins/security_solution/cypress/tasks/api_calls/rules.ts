@@ -111,7 +111,7 @@ export const createThresholdRule = (rule: ThresholdRule, ruleId = 'rule_testing'
       headers: { 'kbn-xsrf': 'cypress-creds' },
     });
   }
-}
+};
 
 export const createNewTermsRule = (rule: NewTermsRule, ruleId = 'rule_testing') => {
   if (rule.dataSource.type === 'indexPatterns') {
@@ -137,7 +137,7 @@ export const createNewTermsRule = (rule: NewTermsRule, ruleId = 'rule_testing') 
       headers: { 'kbn-xsrf': 'cypress-creds' },
     });
   }
-}
+};
 
 export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'rule_testing') => {
   if (rule.dataSource.type === 'indexPatterns') {
