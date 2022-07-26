@@ -39,7 +39,7 @@ import { RuleStatusBadge } from '../../../../components/rules/rule_execution_sta
 import type {
   DurationMetric,
   RuleExecutionSummary,
-} from '../../../../../../common/detection_engine/schemas/common';
+} from '../../../../../../common/detection_engine/rule_monitoring';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
 import { useInvalidateRules } from '../../../../containers/detection_engine/rules/use_find_rules_query';

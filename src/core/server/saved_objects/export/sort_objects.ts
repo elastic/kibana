@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject } from '../types';
+import type { SavedObject } from '@kbn/core-saved-objects-common';
 
 export function sortObjects(savedObjects: SavedObject[]): SavedObject[] {
   const path = new Set<SavedObject>();

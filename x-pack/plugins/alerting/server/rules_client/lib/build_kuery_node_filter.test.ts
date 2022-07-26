@@ -12,9 +12,8 @@ describe('buildKueryNodeFilter', () => {
   test('should convert KQL string into Kuery', () => {
     expect(buildKueryNodeFilter('foo: "bar"')).toEqual({
       arguments: [
-        { type: 'literal', value: 'foo' },
-        { type: 'literal', value: 'bar' },
-        { type: 'literal', value: true },
+        { type: 'literal', value: 'foo', isQuoted: false },
+        { type: 'literal', value: 'bar', isQuoted: true },
       ],
       function: 'is',
       type: 'function',

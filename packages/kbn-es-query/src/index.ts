@@ -29,6 +29,7 @@ export type {
   PhraseFilter,
   PhrasesFilter,
   Query,
+  AggregateQuery,
   QueryStringFilter,
   RangeFilter,
   RangeFilterMeta,
@@ -52,6 +53,10 @@ export {
   decorateQuery,
   luceneStringToDsl,
   migrateFilter,
+  isOfQueryType,
+  isOfAggregateQueryType,
+  getAggregateQueryMode,
+  getIndexPatternFromSQLQuery,
 } from './es_query';
 
 export {

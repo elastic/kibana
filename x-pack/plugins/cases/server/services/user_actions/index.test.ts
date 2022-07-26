@@ -1256,16 +1256,14 @@ describe('CaseUserActionService', () => {
                   Object {
                     "arguments": Array [
                       Object {
+                        "isQuoted": false,
                         "type": "literal",
                         "value": "cases-user-actions.attributes.type",
                       },
                       Object {
+                        "isQuoted": false,
                         "type": "literal",
                         "value": "connector",
-                      },
-                      Object {
-                        "type": "literal",
-                        "value": false,
                       },
                     ],
                     "function": "is",
@@ -1274,16 +1272,14 @@ describe('CaseUserActionService', () => {
                   Object {
                     "arguments": Array [
                       Object {
+                        "isQuoted": false,
                         "type": "literal",
                         "value": "cases-user-actions.attributes.type",
                       },
                       Object {
+                        "isQuoted": false,
                         "type": "literal",
                         "value": "create_case",
-                      },
-                      Object {
-                        "type": "literal",
-                        "value": false,
                       },
                     ],
                     "function": "is",

@@ -35,10 +35,10 @@ export const DualBrushAnnotation: FC<BrushAnnotationProps> = ({ id, min, max }) 
       ]}
       id={`rect_brush_annotation_${id}`}
       style={{
-        strokeWidth: 1,
+        strokeWidth: 0,
         stroke: colors.lightShade,
         fill: colors.lightShade,
-        opacity: 1,
+        opacity: 0.5,
       }}
       hideTooltips={true}
     />

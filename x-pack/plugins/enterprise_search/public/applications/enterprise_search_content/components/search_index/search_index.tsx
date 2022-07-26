@@ -36,6 +36,7 @@ import { SearchIndexDomainManagement } from './crawler/domain_management/domain_
 import { SearchIndexDocuments } from './documents';
 import { SearchIndexIndexMappings } from './index_mappings';
 import { IndexNameLogic } from './index_name_logic';
+import { IndexViewLogic } from './index_view_logic';
 import { SearchIndexOverview } from './overview';
 
 export enum SearchIndexTabId {
@@ -51,8 +52,8 @@ export enum SearchIndexTabId {
 }
 
 export const SearchIndex: React.FC = () => {
-  const { makeRequest, apiReset } = useActions(FetchIndexApiLogic);
   const { data: indexData, status: indexApiStatus } = useValues(FetchIndexApiLogic);
+  const { startFetchIndexPoll, stopFetchIndexPoll } = useActions(IndexViewLogic);
   const { isCalloutVisible } = useValues(IndexCreatedCalloutLogic);
   const { tabId = SearchIndexTabId.OVERVIEW } = useParams<{
     tabId?: string;
@@ -61,8 +62,8 @@ export const SearchIndex: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);
 
   useEffect(() => {
-    makeRequest({ indexName });
-    return apiReset;
+    startFetchIndexPoll();
+    return stopFetchIndexPoll;
   }, [indexName]);
 
   const ALL_INDICES_TABS: EuiTabbedContentTab[] = [
@@ -146,7 +147,10 @@ export const SearchIndex: React.FC = () => {
     <EnterpriseSearchContentPageTemplate
       pageChrome={[...baseBreadcrumbs, indexName]}
       pageViewTelemetry={tabId}
-      isLoading={indexApiStatus === Status.LOADING || indexApiStatus === Status.IDLE}
+      isLoading={
+        indexApiStatus === Status.IDLE ||
+        (typeof indexData === 'undefined' && indexApiStatus === Status.LOADING)
+      }
       pageHeader={{
         pageTitle: indexName,
         rightSideItems: getHeaderActions(indexData),

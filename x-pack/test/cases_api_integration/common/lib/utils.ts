@@ -250,6 +250,36 @@ export const getJiraConnector = () => ({
   },
 });
 
+export const getCasesWebhookConnector = () => ({
+  name: 'Cases Webhook Connector',
+  connector_type_id: '.cases-webhook',
+  secrets: {
+    user: 'user',
+    password: 'pass',
+  },
+  config: {
+    createCommentJson: '{"body":{{{case.comment}}}}',
+    createCommentMethod: 'post',
+    createCommentUrl: 'http://some.non.existent.com/{{{external.system.id}}}/comment',
+    createIncidentJson:
+      '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
+    createIncidentMethod: 'post',
+    createIncidentResponseKey: 'id',
+    createIncidentUrl: 'http://some.non.existent.com/',
+    getIncidentResponseCreatedDateKey: 'fields.created',
+    getIncidentResponseExternalTitleKey: 'key',
+    getIncidentResponseUpdatedDateKey: 'fields.updated',
+    hasAuth: true,
+    headers: { [`content-type`]: 'application/json' },
+    incidentViewUrl: 'http://some.non.existent.com/browse/{{{external.system.title}}}',
+    getIncidentUrl: 'http://some.non.existent.com/{{{external.system.id}}}',
+    updateIncidentJson:
+      '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
+    updateIncidentMethod: 'put',
+    updateIncidentUrl: 'http://some.non.existent.com/{{{external.system.id}}}',
+  },
+});
+
 export const getMappings = () => [
   {
     source: 'title',

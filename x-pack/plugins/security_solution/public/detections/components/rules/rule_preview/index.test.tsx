@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { TestProviders } from '../../../../common/mock';
 import type { RulePreviewProps } from '.';
@@ -130,5 +131,52 @@ describe('PreviewQuery', () => {
     );
 
     expect(await wrapper.queryByTestId('[data-test-subj="preview-histogram-panel"]')).toBeNull();
+  });
+
+  test('it renders quick/advanced query toggle button', async () => {
+    const wrapper = render(
+      <TestProviders>
+        <RulePreview {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(await wrapper.findByTestId('quickAdvancedToggleButtonGroup')).toBeTruthy();
+  });
+
+  test('it renders timeframe, interval and look-back buttons when advanced query is selected', async () => {
+    const wrapper = render(
+      <TestProviders>
+        <RulePreview {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(await wrapper.findByTestId('quickAdvancedToggleButtonGroup')).toBeTruthy();
+    const advancedQueryButton = await wrapper.findByTestId('advancedQuery');
+    userEvent.click(advancedQueryButton);
+    expect(await wrapper.findByTestId('detectionEnginePreviewRuleInterval')).toBeTruthy();
+    expect(await wrapper.findByTestId('detectionEnginePreviewRuleLookback')).toBeTruthy();
+  });
+
+  test('it renders invocation count warning when advanced query is selected and warning flag is set to true', async () => {
+    (usePreviewRoute as jest.Mock).mockReturnValue({
+      hasNoiseWarning: false,
+      addNoiseWarning: jest.fn(),
+      createPreview: jest.fn(),
+      clearPreview: jest.fn(),
+      logs: [],
+      isPreviewRequestInProgress: false,
+      previewId: undefined,
+      showInvocationCountWarning: true,
+    });
+
+    const wrapper = render(
+      <TestProviders>
+        <RulePreview {...defaultProps} />
+      </TestProviders>
+    );
+
+    const advancedQueryButton = await wrapper.findByTestId('advancedQuery');
+    userEvent.click(advancedQueryButton);
+    expect(await wrapper.findByTestId('previewInvocationCountWarning')).toBeTruthy();
   });
 });

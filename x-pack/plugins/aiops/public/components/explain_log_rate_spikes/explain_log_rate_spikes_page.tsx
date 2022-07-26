@@ -7,13 +7,15 @@
 
 import React, { useCallback, useEffect, useMemo, useState, FC } from 'react';
 import {
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiPageBody,
   EuiPageContentBody,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
-  EuiSpacer,
+  EuiPanel,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -21,6 +23,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
 import { Filter, Query } from '@kbn/es-query';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedSearch } from '@kbn/discover-plugin/public';
 
 import { useAiOpsKibana } from '../../kibana_context';
@@ -34,6 +37,9 @@ import { SearchPanel } from '../search_panel';
 
 import { restorableDefaults } from './explain_log_rate_spikes_app_state';
 import { ExplainLogRateSpikesAnalysis } from './explain_log_rate_spikes_analysis';
+
+// TODO port to `@emotion/react` once `useEuiBreakpoint` is available https://github.com/elastic/eui/pull/6057
+import './explain_log_rate_spikes_page.scss';
 
 /**
  * ExplainLogRateSpikes props require a data view.
@@ -155,15 +161,21 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
     });
   }, [dataService, searchQueryLanguage, searchString]);
 
+  function clearSelection() {
+    setWindowParameters(undefined);
+    setPinnedChangePoint(null);
+    setSelectedChangePoint(null);
+  }
+
   return (
-    <>
-      <EuiFlexGroup gutterSize="m">
+    <EuiPageBody data-test-subj="aiopsIndexPage" paddingSize="none" panelled={false}>
+      <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
           <EuiPageContentHeader className="aiopsPageHeader">
             <EuiPageContentHeaderSection>
-              <div className="aiopsTitleHeader">
+              <div className="dataViewTitleHeader">
                 <EuiTitle size={'s'}>
-                  <h2>{dataView.title}</h2>
+                  <h2>{dataView.getName()}</h2>
                 </EuiTitle>
               </div>
             </EuiPageContentHeaderSection>
@@ -205,34 +217,60 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
           </EuiFlexItem>
           {overallDocStats?.totalCount !== undefined && (
             <EuiFlexItem>
-              <DocumentCountContent
-                brushSelectionUpdateHandler={setWindowParameters}
-                documentCountStats={overallDocStats.documentCountStats}
-                documentCountStatsSplit={
-                  currentSelectedChangePoint ? selectedDocStats.documentCountStats : undefined
-                }
-                totalCount={totalCount}
-                changePoint={currentSelectedChangePoint}
-              />
+              <EuiPanel paddingSize="m">
+                <DocumentCountContent
+                  brushSelectionUpdateHandler={setWindowParameters}
+                  clearSelectionHandler={clearSelection}
+                  documentCountStats={overallDocStats.documentCountStats}
+                  documentCountStatsSplit={
+                    currentSelectedChangePoint ? selectedDocStats.documentCountStats : undefined
+                  }
+                  totalCount={totalCount}
+                  changePoint={currentSelectedChangePoint}
+                  windowParameters={windowParameters}
+                />
+              </EuiPanel>
             </EuiFlexItem>
           )}
-          <EuiSpacer size="m" />
-          {earliest !== undefined && latest !== undefined && windowParameters !== undefined && (
-            <EuiFlexItem>
-              <ExplainLogRateSpikesAnalysis
-                dataView={dataView}
-                earliest={earliest}
-                latest={latest}
-                windowParameters={windowParameters}
-                searchQuery={searchQuery}
-                onPinnedChangePoint={setPinnedChangePoint}
-                onSelectedChangePoint={setSelectedChangePoint}
-                selectedChangePoint={currentSelectedChangePoint}
-              />
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem>
+            <EuiPanel paddingSize="m">
+              {earliest !== undefined && latest !== undefined && windowParameters !== undefined && (
+                <ExplainLogRateSpikesAnalysis
+                  dataView={dataView}
+                  earliest={earliest}
+                  latest={latest}
+                  windowParameters={windowParameters}
+                  searchQuery={searchQuery}
+                  onPinnedChangePoint={setPinnedChangePoint}
+                  onSelectedChangePoint={setSelectedChangePoint}
+                  selectedChangePoint={currentSelectedChangePoint}
+                />
+              )}
+              {windowParameters === undefined && (
+                <EuiEmptyPrompt
+                  title={
+                    <h2>
+                      <FormattedMessage
+                        id="xpack.aiops.explainLogRateSpikesPage.emptyPromptTitle"
+                        defaultMessage="Click a spike in the histogram chart to start the analysis."
+                      />
+                    </h2>
+                  }
+                  titleSize="xs"
+                  body={
+                    <p>
+                      <FormattedMessage
+                        id="xpack.aiops.explainLogRateSpikesPage.emptyPromptBody"
+                        defaultMessage="The explain log rate spikes feature identifies statistically significant field/value combinations that contribute to a log rate spike."
+                      />
+                    </p>
+                  }
+                />
+              )}
+            </EuiPanel>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageContentBody>
-    </>
+    </EuiPageBody>
   );
 };

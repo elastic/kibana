@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+jest.mock('axios', () => jest.fn());
+
 import { Logger } from '@kbn/core/server';
 import { ServiceAPIClient } from './service_api_client';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import { ServiceConfig } from '../../common/config';
+import axios from 'axios';
 
 jest.mock('@kbn/server-http-tools', () => ({
   SslConfig: jest.fn().mockImplementation(({ certificate, key }) => ({ certificate, key })),
@@ -57,5 +60,46 @@ describe('getHttpsAgent', () => {
 
     const { options: result } = apiClient.getHttpsAgent('https://localhost:10001');
     expect(result).toEqual(expect.objectContaining({ cert: 'crt', key: 'k' }));
+  });
+});
+
+describe('checkAccountAccessStatus', () => {
+  beforeEach(() => {
+    (axios as jest.MockedFunction<typeof axios>).mockReset();
+  });
+
+  afterEach(() => jest.restoreAllMocks());
+
+  it('includes a header with the kibana version', async () => {
+    const apiClient = new ServiceAPIClient(
+      jest.fn() as unknown as Logger,
+      { tls: { certificate: 'crt', key: 'k' } } as ServiceConfig,
+      { isDev: false, kibanaVersion: '8.4' } as UptimeServerSetup
+    );
+
+    apiClient.locations = [
+      {
+        id: 'test-location',
+        url: 'http://localhost',
+        label: 'Test location',
+        isServiceManaged: true,
+      },
+    ];
+
+    (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({
+      status: 200,
+      statusText: 'ok',
+      headers: {},
+      config: {},
+      data: { allowed: true, signupUrl: 'http://localhost:666/example' },
+    });
+
+    const result = await apiClient.checkAccountAccessStatus();
+
+    expect(axios).toHaveBeenCalledWith(
+      expect.objectContaining({ headers: { 'x-kibana-version': '8.4' } })
+    );
+
+    expect(result).toEqual({ allowed: true, signupUrl: 'http://localhost:666/example' });
   });
 });
