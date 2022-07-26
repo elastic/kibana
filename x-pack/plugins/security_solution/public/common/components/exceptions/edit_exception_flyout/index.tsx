@@ -147,21 +147,17 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
   const [indexPattern, setIndexPattern] = useState<DataViewBase>(indexIndexPatterns);
 
   useEffect(() => {
-    if (!isIndexPatternLoading && !dataViewId) {
-      setIndexPattern(indexIndexPatterns);
-    }
-  }, [isIndexPatternLoading, indexIndexPatterns]);
-
-  useEffect(() => {
-    const fetchSingleDataView = async () => {
+    const fetchAppropriateIndexPatterns = async () => {
       if (dataViewId != null && dataViewId !== '') {
         const dv = await data.dataViews.get(dataViewId);
         setIndexPattern(dv);
+      } else {
+        setIndexPattern(indexIndexPatterns);
       }
     };
 
-    fetchSingleDataView();
-  }, [data.dataViews, dataViewId, setIndexPattern]);
+    fetchAppropriateIndexPatterns();
+  }, [data.dataViews, dataViewId, setIndexPattern, indexIndexPatterns]);
 
   const handleExceptionUpdateError = useCallback(
     (error: Error, statusCode: number | null, message: string | null) => {

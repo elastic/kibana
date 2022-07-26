@@ -170,22 +170,18 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   const [indexPattern, setIndexPattern] = useState<DataViewBase>(indexIndexPatterns);
 
   useEffect(() => {
-    if (!isIndexPatternLoading && !dataViewId) {
-      setIndexPattern(indexIndexPatterns);
-    }
-  }, [isIndexPatternLoading, indexIndexPatterns]);
-
-  useEffect(() => {
-    const fetchSingleDataView = async () => {
+    const fetchAppropriateIndexPatterns = async () => {
       const hasDataViewId = dataViewId || maybeRule?.data_view_id || null;
       if (hasDataViewId) {
         const dv = await data.dataViews.get(hasDataViewId);
         setIndexPattern(dv);
+      } else {
+        setIndexPattern(indexIndexPatterns);
       }
     };
 
-    fetchSingleDataView();
-  }, [data.dataViews, dataViewId, maybeRule?.data_view_id, setIndexPattern]);
+    fetchAppropriateIndexPatterns();
+  }, [data.dataViews, dataViewId, maybeRule?.data_view_id, setIndexPattern, indexIndexPatterns]);
 
   const handleBuilderOnChange = useCallback(
     ({
