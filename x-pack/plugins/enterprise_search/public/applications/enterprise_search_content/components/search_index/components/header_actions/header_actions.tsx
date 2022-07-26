@@ -7,101 +7,16 @@
 
 import React from 'react';
 
-import { useActions, useValues } from 'kea';
+import { ElasticsearchIndexWithIngestion } from '../../../../../../../common/types/indices';
+import { isCrawlerIndex, isConnectorIndex } from '../../../../utils/indices';
+import { CrawlerStatusIndicator } from '../../../shared/crawler_status_indicator/crawler_status_indicator';
 
-import {
-  EuiButton,
-  EuiPopover,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
-
-import { i18n } from '@kbn/i18n';
-
-import { APP_SEARCH_PLUGIN } from '../../../../../../../common/constants';
-import { ENGINE_CREATION_PATH } from '../../../../../app_search/routes';
-import { KibanaLogic } from '../../../../../shared/kibana';
-
-import { IngestionMethod } from '../../../../types';
-import { IndexViewLogic } from '../../index_view_logic';
-
-import { HeaderActionsLogic } from './header_actions.logic';
+import { SearchEnginesPopover } from './search_engines_popover';
 import { SyncButton } from './sync_button';
 
-const SearchEnginesPopover: React.FC = () => {
-  const { isSearchEnginesPopoverOpen } = useValues(HeaderActionsLogic);
-  const { toggleSearchEnginesPopover } = useActions(HeaderActionsLogic);
-  const { ingestionMethod } = useValues(IndexViewLogic);
-
-  return (
-    <EuiFlexGroup gutterSize="s">
-      <EuiFlexItem>
-        <EuiPopover
-          isOpen={isSearchEnginesPopoverOpen}
-          closePopover={toggleSearchEnginesPopover}
-          button={
-            <EuiButton iconSide="right" iconType="arrowDown" onClick={toggleSearchEnginesPopover}>
-              {i18n.translate('xpack.enterpriseSearch.content.index.searchEngines.label', {
-                defaultMessage: 'Search Engines',
-              })}
-            </EuiButton>
-          }
-        >
-          <EuiContextMenuPanel
-            size="s"
-            items={[
-              <EuiContextMenuItem
-                icon="eye"
-                onClick={() => {
-                  KibanaLogic.values.navigateToUrl(APP_SEARCH_PLUGIN.URL, {
-                    shouldNotCreateHref: true,
-                  });
-                }}
-              >
-                <EuiText>
-                  <p>
-                    {i18n.translate(
-                      'xpack.enterpriseSearch.content.index.searchEngines.viewEngines',
-                      {
-                        defaultMessage: 'View App Search engines',
-                      }
-                    )}
-                  </p>
-                </EuiText>
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                icon="plusInCircle"
-                onClick={() => {
-                  KibanaLogic.values.navigateToUrl(APP_SEARCH_PLUGIN.URL + ENGINE_CREATION_PATH, {
-                    shouldNotCreateHref: true,
-                  });
-                }}
-              >
-                <EuiText>
-                  <p>
-                    {i18n.translate(
-                      'xpack.enterpriseSearch.content.index.searchEngines.createEngine',
-                      {
-                        defaultMessage: 'Create a new App Search engine',
-                      }
-                    )}
-                  </p>
-                </EuiText>
-              </EuiContextMenuItem>,
-            ]}
-          />
-        </EuiPopover>
-      </EuiFlexItem>
-      {ingestionMethod === IngestionMethod.CONNECTOR && (
-        <EuiFlexItem>
-          <SyncButton />
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
-  );
-};
-
-export const headerActions = [<SearchEnginesPopover />];
+// Used to populate rightSideItems of an EuiPageTemplate, which is rendered right-to-left
+export const getHeaderActions = (indexData?: ElasticsearchIndexWithIngestion) => [
+  ...(isCrawlerIndex(indexData) ? [<CrawlerStatusIndicator />] : []),
+  ...(isConnectorIndex(indexData) ? [<SyncButton />] : []),
+  <SearchEnginesPopover />,
+];

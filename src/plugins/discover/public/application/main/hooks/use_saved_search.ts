@@ -10,6 +10,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import { ISearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
+import { getRawRecordType } from '../utils/get_raw_record_type';
 import { DiscoverServices } from '../../../build_services';
 import { DiscoverSearchSessionManager } from '../services/discover_search_session';
 import { GetStateReturn } from '../services/discover_state';
@@ -53,11 +54,23 @@ export interface UseSavedSearch {
   inspectorAdapters: { requests: RequestAdapter };
 }
 
+export enum RecordRawType {
+  /**
+   * Documents returned Elasticsearch, nested structure
+   */
+  DOCUMENT = 'document',
+  /**
+   * Data returned e.g. SQL queries, flat structure
+   * */
+  PLAIN = 'plain',
+}
+
 export type DataRefetchMsg = 'reset' | undefined;
 
 export interface DataMsg {
   fetchStatus: FetchStatus;
   error?: Error;
+  recordRawType?: RecordRawType;
 }
 
 export interface DataMainMsg extends DataMsg {
@@ -106,6 +119,9 @@ export const useSavedSearch = ({
 }) => {
   const { data, filterManager } = services;
   const timefilter = data.query.timefilter.timefilter;
+  const { query } = stateContainer.appStateContainer.getState();
+
+  const recordRawType = useMemo(() => getRawRecordType(query), [query]);
 
   const inspectorAdapters = useMemo(() => ({ requests: new RequestAdapter() }), []);
 
@@ -113,17 +129,12 @@ export const useSavedSearch = ({
    * The observables the UI (aka React component) subscribes to get notified about
    * the changes in the data fetching process (high level: fetching started, data was received)
    */
-  const main$: DataMain$ = useBehaviorSubject({ fetchStatus: initialFetchStatus });
-
-  const documents$: DataDocuments$ = useBehaviorSubject({ fetchStatus: initialFetchStatus });
-
-  const totalHits$: DataTotalHits$ = useBehaviorSubject({ fetchStatus: initialFetchStatus });
-
-  const charts$: DataCharts$ = useBehaviorSubject({ fetchStatus: initialFetchStatus });
-
-  const availableFields$: AvailableFields$ = useBehaviorSubject({
-    fetchStatus: initialFetchStatus,
-  });
+  const initialState = { fetchStatus: initialFetchStatus, recordRawType };
+  const main$: DataMain$ = useBehaviorSubject(initialState) as DataMain$;
+  const documents$: DataDocuments$ = useBehaviorSubject(initialState) as DataDocuments$;
+  const totalHits$: DataTotalHits$ = useBehaviorSubject(initialState) as DataTotalHits$;
+  const charts$: DataCharts$ = useBehaviorSubject(initialState) as DataCharts$;
+  const availableFields$: AvailableFields$ = useBehaviorSubject(initialState) as AvailableFields$;
 
   const dataSubjects = useMemo(() => {
     return {
