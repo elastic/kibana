@@ -91,7 +91,7 @@ describe('checkAccountAccessStatus', () => {
     const result = await apiClient.checkAccountAccessStatus();
 
     expect(axios).toHaveBeenCalledWith(
-      expect.objectContaining({ headers: { 'X-kibana-version': '8.4' } })
+      expect.objectContaining({ headers: { 'x-kibana-version': '8.4' } })
     );
 
     expect(result).toEqual({ allowed: true, signupUrl: 'http://localhost:666/example' });
