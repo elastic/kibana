@@ -155,30 +155,29 @@ export const Details: React.FC<Props> = memo(({ packageInfo }) => {
     }
 
     // License details
-    if (packageInfo.license || packageInfo.notice) {
-      items.push({
-        title: (
-          <EuiTextColor color="subdued">
-            <FormattedMessage id="xpack.fleet.epm.licenseLabel" defaultMessage="License" />
-          </EuiTextColor>
-        ),
-        description: (
-          <>
-            <p>{packageInfo.license}</p>
-            {packageInfo.notice && (
-              <p>
-                <EuiLink onClick={toggleNoticeModal}>NOTICE.txt</EuiLink>
-              </p>
-            )}
-          </>
-        ),
-      });
-    }
+    items.push({
+      title: (
+        <EuiTextColor color="subdued">
+          <FormattedMessage id="xpack.fleet.epm.licenseLabel" defaultMessage="License" />
+        </EuiTextColor>
+      ),
+      description: (
+        <>
+          <p>{packageInfo.conditions?.elastic?.subscription || packageInfo.license || '-'}</p>
+          {packageInfo.notice && (
+            <p>
+              <EuiLink onClick={toggleNoticeModal}>NOTICE.txt</EuiLink>
+            </p>
+          )}
+        </>
+      ),
+    });
 
     return items;
   }, [
     packageCategories,
     packageInfo.assets,
+    packageInfo.conditions?.elastic?.subscription,
     packageInfo.data_streams,
     packageInfo.license,
     packageInfo.notice,
