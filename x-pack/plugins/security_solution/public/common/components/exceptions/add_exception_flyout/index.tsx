@@ -40,6 +40,7 @@ import { useRuleIndices } from '../../../../detections/containers/detection_engi
 import {
   hasEqlSequenceQuery,
   isEqlRule,
+  isNewTermsRule,
   isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
 import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
@@ -519,7 +520,9 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
               )}
               {getExceptionBuilderComponentLazy({
                 allowLargeValueLists:
-                  !isEqlRule(maybeRule?.type) && !isThresholdRule(maybeRule?.type),
+                  !isEqlRule(maybeRule?.type) &&
+                  !isThresholdRule(maybeRule?.type) &&
+                  !isNewTermsRule(maybeRule?.type),
                 httpService: http,
                 autocompleteService: unifiedSearch.autocomplete,
                 exceptionListItems: initialExceptionItems,
