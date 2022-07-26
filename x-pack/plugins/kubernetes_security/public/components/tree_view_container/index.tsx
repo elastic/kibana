@@ -47,7 +47,7 @@ const TreeViewContainerComponent = ({
       ) : (
         <>
           <EuiSplitPanel.Inner color="subdued" grow={false} css={styles.navPanel}>
-            <EuiText css={styles.treeViewNav}>
+            <EuiText>
               <TreeNav />
             </EuiText>
           </EuiSplitPanel.Inner>
