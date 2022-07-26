@@ -166,7 +166,6 @@ export const getDocumentCountStats = async (
   const numSampled = firstResp.rawResponse.aggregations?.sampler?.doc_count;
   const numDocs = minimumRandomSamplerDocCount ?? MINIMUM_RANDOM_SAMPLER_DOC_COUNT;
   if (firstResp !== undefined && numSampled < numDocs) {
-    console.log('numSampled', numSampled, numSampled / initialDefaultProbability);
     const newProbability =
       (initialDefaultProbability * numDocs) / (numSampled - 2 * Math.sqrt(numSampled));
 
