@@ -37,7 +37,7 @@ import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/
 import { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
 import { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../../types/combined_query';
-import { JobFieldType, SavedSearchSavedObject } from '../../../../../common/types';
+import { SupportedFieldType, SavedSearchSavedObject } from '../../../../../common/types';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { FieldCountPanel } from '../../../common/components/field_count_panel';
 import { DocumentCountContent } from '../../../common/components/document_count_content';
@@ -181,10 +181,10 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
 
   const fieldTypes = useMemo(() => {
     // Obtain the list of non metric field types which appear in the index pattern.
-    const indexedFieldTypes: JobFieldType[] = [];
+    const indexedFieldTypes: SupportedFieldType[] = [];
     dataViewFields.forEach((field) => {
       if (!OMIT_FIELDS.includes(field.name) && field.scripted !== true) {
-        const dataVisualizerType: JobFieldType | undefined = kbnTypeToJobType(field);
+        const dataVisualizerType: SupportedFieldType | undefined = kbnTypeToJobType(field);
         if (dataVisualizerType !== undefined && !indexedFieldTypes.includes(dataVisualizerType)) {
           indexedFieldTypes.push(dataVisualizerType);
         }
