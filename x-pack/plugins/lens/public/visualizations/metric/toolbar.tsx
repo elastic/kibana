@@ -39,7 +39,7 @@ export function Toolbar(props: VisualizationToolbarProps<MetricVisualizationStat
             defaultMessage: 'Labels',
           })}
           type="labels"
-          groupPosition="left"
+          groupPosition="none"
           buttonDataTestSubj="lnsLabelsButton"
         >
           <EuiFormRow
