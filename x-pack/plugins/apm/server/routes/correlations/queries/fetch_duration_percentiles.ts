@@ -31,6 +31,13 @@ export const fetchDurationPercentiles = async ({
   totalDocs: number;
   percentiles: Record<string, number>;
 }> => {
+  const durationField = getDurationField(chartType, searchMetrics);
+
+  // when using metrics data, ensure we filter by docs with the appropriate duration field
+  const filteredQuery = searchMetrics
+    ? { bool: { filter: [query, { exists: { field: durationField } }] } }
+    : query;
+
   const params = {
     apm: { events: [getEventType(chartType, searchMetrics)] },
     body: {
@@ -40,7 +47,7 @@ export const fetchDurationPercentiles = async ({
         end,
         environment,
         kuery,
-        query,
+        query: filteredQuery,
       }),
       size: 0,
       aggs: {

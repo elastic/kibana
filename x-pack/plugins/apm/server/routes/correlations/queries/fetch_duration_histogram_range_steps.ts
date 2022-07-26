@@ -40,8 +40,12 @@ export const fetchDurationHistogramRangeSteps = async ({
   const { apmEventClient } = setup;
 
   const steps = 100;
-
   const durationField = getDurationField(chartType, searchMetrics);
+
+  // when using metrics data, ensure we filter by docs with the appropriate duration field
+  const filteredQuery = searchMetrics
+    ? { bool: { filter: [query, { exists: { field: durationField } }] } }
+    : query;
 
   const resp = await apmEventClient.search(
     'get_duration_histogram_range_steps',
@@ -56,7 +60,7 @@ export const fetchDurationHistogramRangeSteps = async ({
           end,
           environment,
           kuery,
-          query,
+          query: filteredQuery,
         }),
         aggs: {
           duration_min: { min: { field: durationField } },

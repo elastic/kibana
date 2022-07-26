@@ -38,6 +38,12 @@ export const fetchDurationRanges = async ({
   durationRanges: Array<{ key: number; doc_count: number }>;
 }> => {
   const { apmEventClient } = setup;
+  const durationField = getDurationField(chartType, searchMetrics);
+
+  // when using metrics data, ensure we filter by docs with the appropriate duration field
+  const filteredQuery = searchMetrics
+    ? { bool: { filter: [query, { exists: { field: durationField } }] } }
+    : query;
 
   const ranges = rangeSteps.reduce(
     (p, to) => {
@@ -62,7 +68,7 @@ export const fetchDurationRanges = async ({
         end,
         environment,
         kuery,
-        query,
+        query: filteredQuery,
       }),
       aggs: {
         logspace_ranges: {
