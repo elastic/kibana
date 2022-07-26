@@ -131,9 +131,5 @@ export const NoFindingsStates = () => {
     if (status === 'index-timeout') return <IndexTimeout />; // agent added, index timeout has passed
   };
 
-  return (
-    <CloudPosturePage query={getSetupStatus}>
-      <div style={{ margin: '50px auto' }}>{render()}</div>
-    </CloudPosturePage>
-  );
+  return <CloudPosturePage query={getSetupStatus}>{render()}</CloudPosturePage>;
 };
