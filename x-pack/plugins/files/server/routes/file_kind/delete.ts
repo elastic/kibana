@@ -37,7 +37,7 @@ export const handler: FileKindsRequestHandler<Params> = async ({ files, fileKind
       e instanceof fileErrors.AlreadyDeletedError ||
       e instanceof fileErrors.UploadInProgressError
     ) {
-      return res.badRequest({ body: e.message });
+      return res.badRequest({ body: { message: e.message } });
     }
     return res.customError({
       statusCode: 500,

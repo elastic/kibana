@@ -45,11 +45,8 @@ export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
     });
   } catch (e) {
     if (e instanceof fileErrors.NoDownloadAvailableError) {
-      return res.notFound({ body: e.message });
+      return res.notFound({ body: { message: e.message } });
     }
-    return res.customError({
-      statusCode: 500,
-      body: e,
-    });
+    throw e;
   }
 };

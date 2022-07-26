@@ -35,7 +35,7 @@ export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
     await fileService.asCurrentUser().deleteShareObject({ id });
   } catch (e) {
     if (e instanceof FileShareNotFoundError) {
-      return res.notFound({ body: e });
+      return res.notFound({ body: { message: e.message } });
     }
     throw e;
   }
