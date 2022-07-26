@@ -6,14 +6,14 @@
  */
 
 import { normalizeTimeRange } from './normalize_time_range';
-import type { URLTimeRange, AbsoluteTimeRange, RelativeTimeRange } from '../../store/inputs/model';
-import { isAbsoluteTimeRange, isRelativeTimeRange } from '../../store/inputs/model';
+import type { URLTimeRange, AbsoluteTimeRange, RelativeTimeRange } from '../store/inputs/model';
+import { isAbsoluteTimeRange, isRelativeTimeRange } from '../store/inputs/model';
 import DateMath from '@kbn/datemath';
-import { getTimeRangeSettings } from '../../utils/default_date_settings';
+import { getTimeRangeSettings } from './default_date_settings';
 
 const getTimeRangeSettingsMock = getTimeRangeSettings as jest.Mock;
 
-jest.mock('../../utils/default_date_settings');
+jest.mock('./default_date_settings');
 
 getTimeRangeSettingsMock.mockImplementation(() => ({
   from: '2020-07-04T08:20:18.966Z',

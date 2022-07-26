@@ -12,7 +12,7 @@ import { useKibana } from '../../lib/kibana';
 import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/inputs';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
-import { CONSTANTS } from '../../components/url_state/constants';
+import { URL_PARAM_KEY } from '../use_url_state';
 
 export const useInitSearchBarFromUrlParams = () => {
   const dispatch = useDispatch();
@@ -91,7 +91,7 @@ export const useInitSearchBarFromUrlParams = () => {
     [dispatch, filterManager, savedQueries]
   );
 
-  useInitializeUrlParam(CONSTANTS.appQuery, onInitializeAppQueryFromUrlParam);
-  useInitializeUrlParam(CONSTANTS.filters, onInitializeFiltersFromUrlParam);
-  useInitializeUrlParam(CONSTANTS.savedQuery, onInitializeSavedQueryFromUrlParam);
+  useInitializeUrlParam(URL_PARAM_KEY.appQuery, onInitializeAppQueryFromUrlParam);
+  useInitializeUrlParam(URL_PARAM_KEY.filters, onInitializeFiltersFromUrlParam);
+  useInitializeUrlParam(URL_PARAM_KEY.savedQuery, onInitializeSavedQueryFromUrlParam);
 };

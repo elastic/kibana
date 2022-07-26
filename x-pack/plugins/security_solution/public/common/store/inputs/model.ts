@@ -9,7 +9,7 @@ import type { Dispatch } from 'redux';
 import type { Filter, Query } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { InputsModelId } from './constants';
-import type { CONSTANTS } from '../../components/url_state/constants';
+import type { URL_PARAM_KEY } from '../../hooks/use_url_state';
 
 export interface AbsoluteTimeRange {
   kind: 'absolute';
@@ -96,7 +96,7 @@ export interface InputsModel {
 }
 export interface UrlInputsModelInputs {
   linkTo: InputsModelId[];
-  [CONSTANTS.timerange]: TimeRange;
+  [URL_PARAM_KEY.timerange]: TimeRange;
 }
 export interface UrlInputsModel {
   global: UrlInputsModelInputs;

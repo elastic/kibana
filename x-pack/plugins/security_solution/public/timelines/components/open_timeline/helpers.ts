@@ -61,7 +61,7 @@ import type {
 } from './types';
 import { createNote } from '../notes/helpers';
 import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
-import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
+import { normalizeTimeRange } from '../../../common/utils/normalize_time_range';
 import { sourcererActions } from '../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import {

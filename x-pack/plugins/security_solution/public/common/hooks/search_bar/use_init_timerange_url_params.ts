@@ -16,11 +16,11 @@ import type {
   RelativeTimeRange,
   UrlInputsModel,
 } from '../../store/inputs/model';
-import { normalizeTimeRange } from '../../components/url_state/normalize_time_range';
+import { normalizeTimeRange } from '../../utils/normalize_time_range';
 import { inputsActions } from '../../store/inputs';
 import { formatDate } from '../../components/super_date_picker';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
-import { CONSTANTS } from '../../components/url_state/constants';
+import { URL_PARAM_KEY } from '../use_url_state';
 
 export const useInitTimerangeFromUrlParam = () => {
   const dispatch = useDispatch();
@@ -31,7 +31,7 @@ export const useInitTimerangeFromUrlParam = () => {
     [dispatch]
   );
 
-  useInitializeUrlParam(CONSTANTS.timerange, onInitialize);
+  useInitializeUrlParam(URL_PARAM_KEY.timerange, onInitialize);
 };
 
 const initializeTimerangeFromUrlParam = (
