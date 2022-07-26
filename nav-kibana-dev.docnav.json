@@ -489,6 +489,9 @@
               "id": "kibDevDocsOpsEslintPluginImports"
             },
             {
+              "id": "kibDevDocsOpsEslintPluginDisable"
+            },
+            {
               "id": "kibDevDocsOpsKbnYarnLockValidator"
             }
           ]
@@ -528,6 +531,12 @@
             },
             {
               "id": "kibDevDocsOpsDevCliRunner"
+            },
+            {
+              "id": "kibDevDocsOpsGetRepoFiles"
+            },
+            {
+              "id": "kibDevDocsOpsRepoSourceClassifier"
             }
           ]
         }

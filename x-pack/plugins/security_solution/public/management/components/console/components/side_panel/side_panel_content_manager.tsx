@@ -25,8 +25,9 @@ import { SidePanelContentLayout } from './side_panel_content_layout';
 import { useWithSidePanel } from '../../hooks/state_selectors/use_with_side_panel';
 import { useConsoleStateDispatch } from '../../hooks/state_selectors/use_console_state_dispatch';
 
-const StyledEuiTitle = styled(EuiTitle)`
-  color: ${({ theme: { eui } }) => eui.euiTextSubduedColor};
+const StyledEuiFlexGroup = styled(EuiFlexGroup)`
+  padding-top: ${({ theme: { eui } }) => eui.euiPanelPaddingModifiers.paddingSmall};
+  padding-right: ${({ theme: { eui } }) => eui.euiPanelPaddingModifiers.paddingSmall};
 `;
 
 export const SidePanelContentManager = memo(() => {
@@ -45,16 +46,16 @@ export const SidePanelContentManager = memo(() => {
     if (show === 'help') {
       return (
         <>
-          <EuiFlexGroup>
+          <StyledEuiFlexGroup>
             <EuiFlexItem>
-              <StyledEuiTitle size="s">
+              <EuiTitle size="s">
                 <h3>
                   <FormattedMessage
                     id="xpack.securitySolution.console.sidePanel.helpTitle"
                     defaultMessage="Help"
                   />
                 </h3>
-              </StyledEuiTitle>
+              </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
@@ -64,13 +65,23 @@ export const SidePanelContentManager = memo(() => {
                 onClick={closeHelpPanel}
               />
             </EuiFlexItem>
-          </EuiFlexGroup>
+          </StyledEuiFlexGroup>
           <EuiSpacer size="m" />
           <EuiText size="s">
             <FormattedMessage
               id="xpack.securitySolution.console.sidePanel.helpDescription"
-              defaultMessage="To execute response actions add to main text bar ({icon}) use a comment or a parameter if necessary."
-              values={{ icon: <EuiIcon type="plusInCircle" /> }}
+              defaultMessage="To execute response actions {addText} ({icon}) use a comment or a parameter if necessary."
+              values={{
+                icon: <EuiIcon type="plusInCircle" />,
+                addText: (
+                  <strong>
+                    <FormattedMessage
+                      id="xpack.securitySolution.console.sidePanel.helpDescription.addText"
+                      defaultMessage="add to main text bar"
+                    />
+                  </strong>
+                ),
+              }}
             />
           </EuiText>
         </>

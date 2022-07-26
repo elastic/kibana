@@ -9,6 +9,7 @@ module.exports = {
   ],
 
   plugins: [
+    '@kbn/eslint-plugin-disable',
     '@kbn/eslint-plugin-eslint',
     '@kbn/eslint-plugin-imports',
     'prettier',
@@ -106,6 +107,21 @@ module.exports = {
           from: '@kbn/utility-types/jest',
           to: '@kbn/utility-types-jest',
           disallowedMessage: `import from @kbn/utility-types-jest instead`
+        },
+        {
+          from: '@kbn/inspector-plugin',
+          to: '@kbn/inspector-plugin/common',
+          exact: true,
+        },
+        {
+          from: '@kbn/expressions-plugin',
+          to: '@kbn/expressions-plugin/common',
+          exact: true,
+        },
+        {
+          from: '@kbn/kibana-utils-plugin',
+          to: '@kbn/kibana-utils-plugin/common',
+          exact: true,
         },
       ],
     ],
@@ -232,6 +248,7 @@ module.exports = {
       },
     ]],
 
+    '@kbn/disable/no_naked_eslint_disable': 'error',
     '@kbn/eslint/no_async_promise_body': 'error',
     '@kbn/eslint/no_async_foreach': 'error',
     '@kbn/eslint/no_trailing_import_slash': 'error',

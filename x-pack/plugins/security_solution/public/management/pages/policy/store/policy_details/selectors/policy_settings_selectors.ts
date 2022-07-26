@@ -164,6 +164,7 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         behavior_protection: windows.behavior_protection,
         popup: windows.popup,
         antivirus_registration: windows.antivirus_registration,
+        attack_surface_reduction: windows.attack_surface_reduction,
       },
       mac: {
         advanced: mac.advanced,
@@ -189,65 +190,9 @@ export const isAntivirusRegistrationEnabled = createSelector(policyConfig, (uiPo
   return uiPolicyConfig.windows.antivirus_registration.enabled;
 });
 
-/** Returns the total number of possible windows eventing configurations */
-export const totalWindowsEvents = (state: PolicyDetailsState): number => {
-  const config = policyConfig(state);
-  if (config) {
-    return Object.keys(config.windows.events).length;
-  }
-  return 0;
-};
-
-/** Returns the number of selected windows eventing configurations */
-export const selectedWindowsEvents = (state: PolicyDetailsState): number => {
-  const config = policyConfig(state);
-  if (config) {
-    return Object.values(config.windows.events).reduce((count, event) => {
-      return event === true ? count + 1 : count;
-    }, 0);
-  }
-  return 0;
-};
-
-/** Returns the total number of possible mac eventing configurations */
-export const totalMacEvents = (state: PolicyDetailsState): number => {
-  const config = policyConfig(state);
-  if (config) {
-    return Object.keys(config.mac.events).length;
-  }
-  return 0;
-};
-
-/** Returns the number of selected mac eventing configurations */
-export const selectedMacEvents = (state: PolicyDetailsState): number => {
-  const config = policyConfig(state);
-  if (config) {
-    return Object.values(config.mac.events).reduce((count, event) => {
-      return event === true ? count + 1 : count;
-    }, 0);
-  }
-  return 0;
-};
-
-/** Returns the total number of possible linux eventing configurations */
-export const totalLinuxEvents = (state: PolicyDetailsState): number => {
-  const config = policyConfig(state);
-  if (config) {
-    return Object.keys(config.linux.events).length;
-  }
-  return 0;
-};
-
-/** Returns the number of selected linux eventing configurations */
-export const selectedLinuxEvents = (state: PolicyDetailsState): number => {
-  const config = policyConfig(state);
-  if (config) {
-    return Object.values(config.linux.events).reduce((count, event) => {
-      return event === true ? count + 1 : count;
-    }, 0);
-  }
-  return 0;
-};
+export const isCredentialHardeningEnabled = createSelector(policyConfig, (uiPolicyConfig) => {
+  return uiPolicyConfig.windows.attack_surface_reduction.credential_hardening.enabled;
+});
 
 /** is there an api call in flight */
 export const isLoading = (state: PolicyDetailsState) => state.isLoading;

@@ -348,5 +348,9 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     async clickTourSkipButton() {
       await testSubjects.click('onboarding--observTourSkipButton');
     },
+
+    async clickGuidedSetupButton() {
+      await testSubjects.click('guidedSetupButton');
+    },
   };
 }

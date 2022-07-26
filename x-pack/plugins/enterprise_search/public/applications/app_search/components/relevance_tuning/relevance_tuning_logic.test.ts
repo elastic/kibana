@@ -365,9 +365,11 @@ describe('RelevanceTuningLogic', () => {
               weight: 1,
             },
           },
+          precision: 7,
+          precision_enabled: true,
         };
 
-        const searchSettingsWithoutNewBoostProp = {
+        const { ['precision_enabled']: precisionEnabled, ...searchSettingsWithoutNewBoostProp } = {
           ...searchSettingsWithNewBoostProp,
           boosts: {
             foo: [
@@ -378,6 +380,7 @@ describe('RelevanceTuningLogic', () => {
               },
             ],
           },
+          precision: 7,
         };
 
         mount({
@@ -413,6 +416,38 @@ describe('RelevanceTuningLogic', () => {
           searchSettings: {
             searchField: {},
             boosts: {},
+            precision: 7,
+            precision_enabled: true,
+          },
+        });
+        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchResults');
+        http.post.mockReturnValueOnce(
+          Promise.resolve({
+            results: searchResults,
+          })
+        );
+
+        RelevanceTuningLogic.actions.getSearchResults();
+
+        jest.runAllTimers();
+        await nextTick();
+
+        expect(http.post).toHaveBeenCalledWith('/internal/app_search/engines/test-engine/search', {
+          body: JSON.stringify({ precision: 7 }),
+          query: {
+            query: 'foo',
+          },
+        });
+      });
+
+      it("won't send precision on the API call if it is not enabled", async () => {
+        mount({
+          query: 'foo',
+          searchSettings: {
+            searchField: {},
+            boosts: {},
+            precision: 7,
+            precision_enabled: false,
           },
         });
         jest.spyOn(RelevanceTuningLogic.actions, 'setSearchResults');

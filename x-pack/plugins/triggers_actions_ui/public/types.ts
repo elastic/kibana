@@ -67,6 +67,7 @@ import type {
   BrowserFieldItem,
 } from './application/sections/field_browser/types';
 import { RulesListVisibleColumns } from './application/sections/rules_list/components/rules_list_column_selector';
+import { TimelineItem } from './application/sections/alerts_table/bulk_actions/components/toolbar';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
@@ -240,6 +241,7 @@ export type ActionConnectorWithoutId<
 
 export type ActionConnectorTableItem = ActionConnector & {
   actionType: ActionType['name'];
+  featureIds: ActionType['supportedFeatureIds'];
 };
 
 type AsActionVariables<Keys extends string> = {
@@ -283,6 +285,7 @@ export interface RuleTableItem extends Rule {
   isEditable: boolean;
   enabledInLicense: boolean;
   showIntervalWarning?: boolean;
+  activeSnoozes?: string[];
 }
 
 export interface RuleTypeParamsExpressionProps<
@@ -384,6 +387,7 @@ export interface TriggersActionsUiConfig {
 export enum AlertsField {
   name = 'kibana.alert.rule.name',
   reason = 'kibana.alert.reason',
+  uuid = 'kibana.alert.rule.uuid',
 }
 
 export interface FetchAlertData {
@@ -400,16 +404,9 @@ export interface FetchAlertData {
   sort: SortCombinations[];
 }
 
-export interface BulkActionsObjectProp {
-  alertStatusActions?: boolean;
-  onAlertStatusActionSuccess?: void;
-  onAlertStatusActionFailure?: void;
-}
-
 export interface AlertsTableProps {
   alertsTableConfiguration: AlertsTableConfigurationRegistry;
   columns: EuiDataGridColumn[];
-  bulkActions: BulkActionsObjectProp;
   // defaultCellActions: TGridCellAction[];
   deletedEventIds: string[];
   disabledCellActions: string[];
@@ -417,12 +414,12 @@ export interface AlertsTableProps {
   pageSize: number;
   pageSizeOptions: number[];
   leadingControlColumns: EuiDataGridControlColumn[];
-  showCheckboxes: boolean;
   showExpandToDetails: boolean;
   trailingControlColumns: EuiDataGridControlColumn[];
   useFetchAlertsData: () => FetchAlertData;
   visibleColumns: string[];
   'data-test-subj': string;
+  updatedAt: number;
 }
 
 // TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table
@@ -437,6 +434,22 @@ export type AlertTableFlyoutComponent =
   | React.LazyExoticComponent<ComponentType<AlertsTableFlyoutBaseProps>>
   | null;
 
+export interface AlertsTableFlyoutBaseProps {
+  alert: EcsFieldsResponse;
+  isLoading: boolean;
+}
+
+export interface BulkActionsConfig {
+  label: string;
+  key: string;
+  'data-test-subj'?: string;
+  disableOnQuery: boolean;
+  disabledLabel?: string;
+  onClick: (selectedIds: TimelineItem[], isAllSelected: boolean) => void;
+}
+
+export type UseBulkActionsRegistry = () => BulkActionsConfig[];
+
 export interface AlertsTableConfigurationRegistry {
   id: string;
   columns: EuiDataGridColumn[];
@@ -448,14 +461,35 @@ export interface AlertsTableConfigurationRegistry {
   sort?: SortCombinations[];
   getRenderCellValue?: GetRenderCellValue;
   useActionsColumn?: () => {
-    renderCustomActionsRow: (alert?: EcsFieldsResponse) => JSX.Element;
+    renderCustomActionsRow: (
+      alert: EcsFieldsResponse,
+      setFlyoutAlert: (data: unknown) => void
+    ) => JSX.Element;
     width?: number;
   };
+  useBulkActions?: UseBulkActionsRegistry;
 }
 
-export interface AlertsTableFlyoutBaseProps {
-  alert: EcsFieldsResponse;
-  isLoading: boolean;
+export enum BulkActionsVerbs {
+  add = 'add',
+  delete = 'delete',
+  clear = 'clear',
+  selectCurrentPage = 'selectCurrentPage',
+  selectAll = 'selectAll',
+  rowCountUpdate = 'rowCountUpdate',
+}
+
+export interface BulkActionsReducerAction {
+  action: BulkActionsVerbs;
+  rowIndex?: number;
+  rowCount?: number;
+}
+
+export interface BulkActionsState {
+  rowSelection: Set<number>;
+  isAllSelected: boolean;
+  areAllVisibleRowsSelected: boolean;
+  rowCount: number;
 }
 
 export type RuleStatus = 'enabled' | 'disabled' | 'snoozed';

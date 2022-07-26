@@ -32,11 +32,6 @@ export function isValidField(arg: unknown): arg is Field {
   return isPopulatedObject(arg, ['fieldName', 'type']) && typeof arg.fieldName === 'string';
 }
 
-export interface HistogramField {
-  fieldName: string;
-  type: string;
-}
-
 export interface Distribution {
   percentiles: Array<{ value?: number; percent: number; minValue: number; maxValue: number }>;
   minPercentile: number;
@@ -100,19 +95,15 @@ export interface DocumentCountStats {
   timeRangeEarliest?: number;
   timeRangeLatest?: number;
   totalCount: number;
+  probability?: number | null;
+  took?: number;
+  randomlySampled?: boolean;
 }
 
 export interface FieldExamples {
   fieldName: string;
   examples: unknown[];
 }
-
-export interface NumericColumnStats {
-  interval: number;
-  min: number;
-  max: number;
-}
-export type NumericColumnStatsMap = Record<string, NumericColumnStats>;
 
 export interface AggHistogram {
   histogram: estypes.AggregationsHistogramAggregation;

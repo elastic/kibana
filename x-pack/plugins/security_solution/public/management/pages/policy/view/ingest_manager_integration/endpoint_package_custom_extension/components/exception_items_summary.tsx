@@ -39,12 +39,6 @@ const SUMMARY_LABELS: Readonly<{ [key in keyof GetExceptionSummaryResponse]: str
   ),
 };
 
-export const StyledEuiFlexGridGroup = styled(EuiFlexGroup)`
-  display: grid;
-  min-width: 240px;
-  grid-template-columns: 50% 50%;
-`;
-
 const StyledEuiFlexGroup = styled(EuiFlexGroup)<{
   isSmall: boolean;
 }>`

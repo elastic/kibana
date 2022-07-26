@@ -7,12 +7,13 @@
  */
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Either from 'fp-ts/lib/Either';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { IndexMapping } from '../../mappings';
-import { ElasticsearchClient } from '../../../elasticsearch';
 import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
+
 export type FetchIndexResponse = Record<
   string,
   { aliases: Record<string, unknown>; mappings: IndexMapping; settings: unknown }

@@ -22,8 +22,8 @@ export interface AutomaticCrawlSchedulerLogicValues {
 }
 
 const DEFAULT_VALUES: Pick<AutomaticCrawlSchedulerLogicValues, 'crawlFrequency' | 'crawlUnit'> = {
-  crawlFrequency: 7,
-  crawlUnit: CrawlUnits.days,
+  crawlFrequency: 24,
+  crawlUnit: CrawlUnits.hours,
 };
 
 export interface AutomaticCrawlSchedulerLogicActions {

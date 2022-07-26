@@ -3802,13 +3802,7 @@
             "label": "esClient",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.IScopedClusterClient",
-                "text": "IScopedClusterClient"
-              }
+              "IScopedClusterClient"
             ],
             "path": "src/plugins/data/server/search/types.ts",
             "deprecated": false
@@ -9808,16 +9802,16 @@
             "deprecated": true,
             "references": [
               {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
+              },
+              {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -11366,6 +11360,22 @@
           "() => FunctionDefinition"
         ],
         "path": "src/plugins/data/common/search/aggs/metrics/top_metrics_fn.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.aggValueCount",
+        "type": "Function",
+        "tags": [],
+        "label": "aggValueCount",
+        "description": [],
+        "signature": [
+          "() => FunctionDefinition"
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/value_count_fn.ts",
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -14290,6 +14300,38 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.getValueCountMetricAgg",
+        "type": "Function",
+        "tags": [],
+        "label": "getValueCountMetricAgg",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.MetricAggType",
+            "text": "MetricAggType"
+          },
+          "<",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IMetricAggConfig",
+            "text": "IMetricAggConfig"
+          },
+          ">"
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/value_count.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.handleRequest",
         "type": "Function",
         "tags": [],
@@ -16945,6 +16987,52 @@
                 "text": "ExpressionFunctionDefinition"
               },
               "<\"aggCardinality\", any, AggArgs, ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggExpressionType",
+                "text": "AggExpressionType"
+              },
+              ", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExecutionContext",
+                "text": "ExecutionContext"
+              },
+              "<",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              },
+              ", ",
+              "SerializableRecord",
+              ">>"
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggFunctionsMapping.aggValueCount",
+            "type": "Object",
+            "tags": [],
+            "label": "aggValueCount",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunctionDefinition",
+                "text": "ExpressionFunctionDefinition"
+              },
+              "<\"aggValueCount\", any, AggArgs, ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -20681,12 +20769,12 @@
           {
             "parentPluginId": "data",
             "id": "def-common.AggParamsTerms.exclude",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "exclude",
             "description": [],
             "signature": [
-              "string | undefined"
+              "number[] | string[] | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
             "deprecated": false
@@ -20694,12 +20782,38 @@
           {
             "parentPluginId": "data",
             "id": "def-common.AggParamsTerms.include",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "include",
             "description": [],
             "signature": [
-              "string | undefined"
+              "number[] | string[] | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsTerms.includeIsRegex",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "includeIsRegex",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsTerms.excludeIsRegex",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "excludeIsRegex",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
             "deprecated": false
@@ -20873,6 +20987,59 @@
               "number | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/top_metrics.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.AggParamsValueCount",
+        "type": "Interface",
+        "tags": [],
+        "label": "AggParamsValueCount",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.AggParamsValueCount",
+            "text": "AggParamsValueCount"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BaseAggParams",
+            "text": "BaseAggParams"
+          }
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/value_count.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsValueCount.field",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "path": "src/plugins/data/common/search/aggs/metrics/value_count.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsValueCount.emptyAsNull",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "emptyAsNull",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/value_count.ts",
             "deprecated": false
           }
         ],
@@ -27063,6 +27230,20 @@
           "<any>[]; }; }"
         ],
         "path": "src/plugins/data/common/search/aggs/agg_types_registry.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.aggValueCountFnName",
+        "type": "string",
+        "tags": [],
+        "label": "aggValueCountFnName",
+        "description": [],
+        "signature": [
+          "\"aggValueCount\""
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/value_count_fn.ts",
         "deprecated": false,
         "initialIsOpen": false
       },

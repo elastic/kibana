@@ -13,14 +13,13 @@ export {
 } from '@kbn/alerting-plugin/common';
 export { BASE_ACTION_API_PATH, INTERNAL_BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
 
-export type Section = 'connectors' | 'rules' | 'alerts' | '__components_sandbox';
+export type Section = 'connectors' | 'rules' | 'alerts';
 
 export const routeToHome = `/`;
 export const routeToConnectors = `/connectors`;
 export const routeToRules = `/rules`;
 export const routeToRuleDetails = `/rule/:ruleId`;
 export const routeToInternalAlerts = `/alerts`;
-export const routeToInternalShareableComponentsSandbox = '/__components_sandbox';
 export const legacyRouteToRules = `/alerts`;
 export const legacyRouteToRuleDetails = `/alert/:alertId`;
 
@@ -73,9 +72,13 @@ export const RULE_EXECUTION_LOG_ALERT_COUNT_COLUMNS = [
   'num_recovered_alerts',
 ];
 
-export const RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = [
+export const LOCKED_COLUMNS = [
   'timestamp',
   'execution_duration',
   'status',
   'message',
+  'num_active_alerts',
+  'num_errored_actions',
 ];
+
+export const RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = [...LOCKED_COLUMNS];

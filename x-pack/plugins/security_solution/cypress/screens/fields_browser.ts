@@ -40,7 +40,6 @@ export const FIELDS_BROWSER_MESSAGE_HEADER =
 export const FIELDS_BROWSER_RESET_FIELDS = `${FIELDS_BROWSER_CONTAINER} [data-test-subj="reset-fields"]`;
 
 export const FIELDS_BROWSER_CATEGORIES_FILTER_BUTTON = `${FIELDS_BROWSER_CONTAINER} [data-test-subj="categories-filter-button"]`;
-export const FIELDS_BROWSER_SELECTED_CATEGORY_COUNT = `${FIELDS_BROWSER_CATEGORIES_FILTER_BUTTON} span.euiNotificationBadge`;
 export const FIELDS_BROWSER_CATEGORIES_COUNT = `${FIELDS_BROWSER_CATEGORIES_FILTER_BUTTON} span.euiNotificationBadge`;
 
 export const FIELDS_BROWSER_SELECTED_CATEGORIES_BADGES = `${FIELDS_BROWSER_CONTAINER} [data-test-subj="category-badges"]`;
@@ -56,5 +55,3 @@ export const FIELDS_BROWSER_CATEGORY_FILTER_OPTION = (id: string) => {
   const idAttr = id.replace(/\s/g, '');
   return `${FIELDS_BROWSER_CATEGORIES_FILTER_CONTAINER} [data-test-subj="categories-selector-option-${idAttr}"]`;
 };
-
-export const FIELDS_BROWSER_SYSTEM_CATEGORIES_COUNT = `${FIELDS_BROWSER_CONTAINER} [data-test-subj="system-category-count"]`;

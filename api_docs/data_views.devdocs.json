@@ -62,7 +62,17 @@
               "\nMap of field formats by field name"
             ],
             "signature": [
-              "{ [x: string]: any; }"
+              "{ [x: string]: ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.SerializedFieldFormat",
+                "text": "SerializedFieldFormat"
+              },
+              "<{}, ",
+              "SerializableRecord",
+              ">; }"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false
@@ -159,7 +169,7 @@
             "label": "flattenHit",
             "description": [],
             "signature": [
-              "(hit: Record<string, any>, deep?: boolean | undefined) => Record<string, any>"
+              "(hit: Record<string, unknown[]>, deep?: boolean | undefined) => Record<string, unknown>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": true,
@@ -183,7 +193,7 @@
                 "label": "hit",
                 "description": [],
                 "signature": [
-                  "{ [x: string]: any; }"
+                  "{ [x: string]: unknown[]; }"
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_view.ts",
                 "deprecated": false
@@ -2268,7 +2278,15 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              ") => Promise<any>"
+              ") => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
+              },
+              "[]>"
             ],
             "path": "src/plugins/data_views/public/data_views/data_views_api_client.ts",
             "deprecated": false,
@@ -2947,7 +2965,13 @@
               "() => Promise<",
               "SavedObject",
               "<",
-              "DataViewSavedObjectAttrs",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSavedObjectAttrs",
+                "text": "DataViewSavedObjectAttrs"
+              },
               ">[] | null | undefined>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -4101,7 +4125,23 @@
             "label": "update",
             "description": [],
             "signature": [
-              "(type: string, id: string, attributes: Record<string, any>, options: Record<string, any>) => Promise<",
+              "(type: string, id: string, attributes: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewAttributes",
+                "text": "DataViewAttributes"
+              },
+              ", options: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-public.SavedObjectsUpdateOptions",
+                "text": "SavedObjectsUpdateOptions"
+              },
+              "<unknown>) => Promise<",
               "SavedObject",
               "<unknown>>"
             ],
@@ -4144,7 +4184,13 @@
                 "label": "attributes",
                 "description": [],
                 "signature": [
-                  "Record<string, any>"
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewAttributes",
+                    "text": "DataViewAttributes"
+                  }
                 ],
                 "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts",
                 "deprecated": false,
@@ -4158,7 +4204,14 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "Record<string, any>"
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-public.SavedObjectsUpdateOptions",
+                    "text": "SavedObjectsUpdateOptions"
+                  },
+                  "<unknown>"
                 ],
                 "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts",
                 "deprecated": false,
@@ -4175,7 +4228,23 @@
             "label": "create",
             "description": [],
             "signature": [
-              "(type: string, attributes: Record<string, any>, options: Record<string, any>) => Promise<",
+              "(type: string, attributes: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewAttributes",
+                "text": "DataViewAttributes"
+              },
+              ", options?: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-public.SavedObjectsCreateOptions",
+                "text": "SavedObjectsCreateOptions"
+              },
+              " | undefined) => Promise<",
               "SavedObject",
               "<unknown>>"
             ],
@@ -4204,7 +4273,13 @@
                 "label": "attributes",
                 "description": [],
                 "signature": [
-                  "Record<string, any>"
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewAttributes",
+                    "text": "DataViewAttributes"
+                  }
                 ],
                 "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts",
                 "deprecated": false,
@@ -4218,11 +4293,18 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "Record<string, any>"
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-public.SavedObjectsCreateOptions",
+                    "text": "SavedObjectsCreateOptions"
+                  },
+                  " | undefined"
                 ],
                 "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts",
                 "deprecated": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -4339,7 +4421,7 @@
             "label": "get",
             "description": [],
             "signature": [
-              "<T = any>(key: string) => Promise<T>"
+              "<T = unknown>(key: string) => Promise<T | undefined>"
             ],
             "path": "src/plugins/data_views/public/ui_settings_wrapper.ts",
             "deprecated": false,
@@ -4369,11 +4451,11 @@
             "label": "getAll",
             "description": [],
             "signature": [
-              "<T = any>() => Promise<Record<string, ",
+              "<T = unknown>() => Promise<Record<string, (",
               "PublicUiSettingsParams",
               " & ",
               "UserProvidedValues",
-              "<T>>>"
+              "<T>) | undefined>>"
             ],
             "path": "src/plugins/data_views/public/ui_settings_wrapper.ts",
             "deprecated": false,
@@ -4388,7 +4470,7 @@
             "label": "set",
             "description": [],
             "signature": [
-              "(key: string, value: any) => Promise<void>"
+              "(key: string, value: unknown) => Promise<void>"
             ],
             "path": "src/plugins/data_views/public/ui_settings_wrapper.ts",
             "deprecated": false,
@@ -4410,12 +4492,12 @@
               {
                 "parentPluginId": "dataViews",
                 "id": "def-public.UiSettingsPublicToCommon.set.$2",
-                "type": "Any",
+                "type": "Unknown",
                 "tags": [],
                 "label": "value",
                 "description": [],
                 "signature": [
-                  "any"
+                  "unknown"
                 ],
                 "path": "src/plugins/data_views/public/ui_settings_wrapper.ts",
                 "deprecated": false,
@@ -5625,7 +5707,23 @@
               "\nUpdate a saved object by id"
             ],
             "signature": [
-              "(type: string, id: string, attributes: Record<string, any>, options: Record<string, any>) => Promise<",
+              "(type: string, id: string, attributes: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewAttributes",
+                "text": "DataViewAttributes"
+              },
+              ", options: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-public.SavedObjectsUpdateOptions",
+                "text": "SavedObjectsUpdateOptions"
+              },
+              "<unknown>) => Promise<",
               "SavedObject",
               "<unknown>>"
             ],
@@ -5674,7 +5772,13 @@
                   "- attributes to update"
                 ],
                 "signature": [
-                  "Record<string, any>"
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewAttributes",
+                    "text": "DataViewAttributes"
+                  }
                 ],
                 "path": "src/plugins/data_views/common/types.ts",
                 "deprecated": false,
@@ -5690,7 +5794,14 @@
                   "- client options"
                 ],
                 "signature": [
-                  "Record<string, any>"
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-public.SavedObjectsUpdateOptions",
+                    "text": "SavedObjectsUpdateOptions"
+                  },
+                  "<unknown>"
                 ],
                 "path": "src/plugins/data_views/common/types.ts",
                 "deprecated": false,
@@ -5709,7 +5820,23 @@
               "\nCreate a saved object"
             ],
             "signature": [
-              "(type: string, attributes: Record<string, any>, options: Record<string, any>) => Promise<",
+              "(type: string, attributes: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewAttributes",
+                "text": "DataViewAttributes"
+              },
+              ", options: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-public.SavedObjectsCreateOptions",
+                "text": "SavedObjectsCreateOptions"
+              },
+              ") => Promise<",
               "SavedObject",
               "<unknown>>"
             ],
@@ -5742,7 +5869,13 @@
                   "- attributes to set"
                 ],
                 "signature": [
-                  "Record<string, any>"
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewAttributes",
+                    "text": "DataViewAttributes"
+                  }
                 ],
                 "path": "src/plugins/data_views/common/types.ts",
                 "deprecated": false,
@@ -5758,7 +5891,13 @@
                   "- client options"
                 ],
                 "signature": [
-                  "Record<string, any>"
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-public.SavedObjectsCreateOptions",
+                    "text": "SavedObjectsCreateOptions"
+                  }
                 ],
                 "path": "src/plugins/data_views/common/types.ts",
                 "deprecated": false,
@@ -6175,7 +6314,17 @@
               "\nMap of field formats by field name"
             ],
             "signature": [
-              "{ [x: string]: any; }"
+              "{ [x: string]: ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.SerializedFieldFormat",
+                "text": "SerializedFieldFormat"
+              },
+              "<{}, ",
+              "SerializableRecord",
+              ">; }"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false
@@ -6272,7 +6421,7 @@
             "label": "flattenHit",
             "description": [],
             "signature": [
-              "(hit: Record<string, any>, deep?: boolean | undefined) => Record<string, any>"
+              "(hit: Record<string, unknown[]>, deep?: boolean | undefined) => Record<string, unknown>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": true,
@@ -6296,7 +6445,7 @@
                 "label": "hit",
                 "description": [],
                 "signature": [
-                  "{ [x: string]: any; }"
+                  "{ [x: string]: unknown[]; }"
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_view.ts",
                 "deprecated": false
@@ -7887,13 +8036,7 @@
                 "text": "SavedObjectsClientContract"
               },
               ", elasticsearchClient: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              },
+              "ElasticsearchClient",
               ", request?: ",
               "KibanaRequest",
               "<unknown, unknown, unknown, any> | undefined, byPassCapabilities?: boolean | undefined) => Promise<",
@@ -8271,7 +8414,13 @@
               "() => Promise<",
               "SavedObject",
               "<",
-              "DataViewSavedObjectAttrs",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSavedObjectAttrs",
+                "text": "DataViewSavedObjectAttrs"
+              },
               ">[] | null | undefined>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -9193,13 +9342,7 @@
                 "label": "elasticsearchClient",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.ElasticsearchClient",
-                    "text": "ElasticsearchClient"
-                  }
+                  "ElasticsearchClient"
                 ],
                 "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
                 "deprecated": false,
@@ -9405,13 +9548,7 @@
             "text": "SavedObjectsClientContract"
           },
           ", elasticsearchClient: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           ", request?: ",
           "KibanaRequest",
           "<unknown, unknown, unknown, any> | undefined, byPassCapabilities?: boolean | undefined) => Promise<",
@@ -9546,7 +9683,16 @@
           "\nGet rollup job capabilities"
         ],
         "signature": [
-          "(indices: Record<string, { rollup_jobs: any; }>) => { [key: string]: any; }"
+          "(indices: ",
+          "RollupGetRollupIndexCapsResponse",
+          ") => ",
+          {
+            "pluginId": "dataViews",
+            "scope": "server",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-server.RollupIndexCapability",
+            "text": "RollupIndexCapability"
+          }
         ],
         "path": "src/plugins/data_views/server/fetcher/lib/map_capabilities.ts",
         "deprecated": false,
@@ -9561,7 +9707,7 @@
               "rollup job index capabilites"
             ],
             "signature": [
-              "Record<string, { rollup_jobs: any; }>"
+              "RollupGetRollupIndexCapsResponse"
             ],
             "path": "src/plugins/data_views/server/fetcher/lib/map_capabilities.ts",
             "deprecated": false,
@@ -9899,6 +10045,44 @@
       },
       {
         "parentPluginId": "dataViews",
+        "id": "def-server.RollupIndexCapability",
+        "type": "Interface",
+        "tags": [],
+        "label": "RollupIndexCapability",
+        "description": [
+          "\nA record of capabilities (aggregations) for index rollup jobs"
+        ],
+        "path": "src/plugins/data_views/server/fetcher/lib/map_capabilities.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-server.RollupIndexCapability.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[index: string]: { aggs?: Dictionary<AggregationRestrictions> | undefined; error?: string | undefined; }",
+            "description": [
+              "\nA record of capabilities (aggregations) for an index rollup job"
+            ],
+            "signature": [
+              "[index: string]:  { aggs?: _.Dictionary<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.AggregationRestrictions",
+                "text": "AggregationRestrictions"
+              },
+              "> | undefined; error?: string | undefined; }"
+            ],
+            "path": "src/plugins/data_views/server/fetcher/lib/map_capabilities.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
         "id": "def-server.SavedObjectsClientCommon",
         "type": "Interface",
         "tags": [],
@@ -10021,7 +10205,23 @@
               "\nUpdate a saved object by id"
             ],
             "signature": [
-              "(type: string, id: string, attributes: Record<string, any>, options: Record<string, any>) => Promise<",
+              "(type: string, id: string, attributes: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewAttributes",
+                "text": "DataViewAttributes"
+              },
+              ", options: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-public.SavedObjectsUpdateOptions",
+                "text": "SavedObjectsUpdateOptions"
+              },
+              "<unknown>) => Promise<",
               "SavedObject",
               "<unknown>>"
             ],
@@ -10070,7 +10270,13 @@
                   "- attributes to update"
                 ],
                 "signature": [
-                  "Record<string, any>"
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewAttributes",
+                    "text": "DataViewAttributes"
+                  }
                 ],
                 "path": "src/plugins/data_views/common/types.ts",
                 "deprecated": false,
@@ -10086,7 +10292,14 @@
                   "- client options"
                 ],
                 "signature": [
-                  "Record<string, any>"
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-public.SavedObjectsUpdateOptions",
+                    "text": "SavedObjectsUpdateOptions"
+                  },
+                  "<unknown>"
                 ],
                 "path": "src/plugins/data_views/common/types.ts",
                 "deprecated": false,
@@ -10105,7 +10318,23 @@
               "\nCreate a saved object"
             ],
             "signature": [
-              "(type: string, attributes: Record<string, any>, options: Record<string, any>) => Promise<",
+              "(type: string, attributes: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewAttributes",
+                "text": "DataViewAttributes"
+              },
+              ", options: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-public.SavedObjectsCreateOptions",
+                "text": "SavedObjectsCreateOptions"
+              },
+              ") => Promise<",
               "SavedObject",
               "<unknown>>"
             ],
@@ -10138,7 +10367,13 @@
                   "- attributes to set"
                 ],
                 "signature": [
-                  "Record<string, any>"
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewAttributes",
+                    "text": "DataViewAttributes"
+                  }
                 ],
                 "path": "src/plugins/data_views/common/types.ts",
                 "deprecated": false,
@@ -10154,7 +10389,13 @@
                   "- client options"
                 ],
                 "signature": [
-                  "Record<string, any>"
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-public.SavedObjectsCreateOptions",
+                    "text": "SavedObjectsCreateOptions"
+                  }
                 ],
                 "path": "src/plugins/data_views/common/types.ts",
                 "deprecated": false,
@@ -10523,13 +10764,7 @@
               "text": "SavedObjectsClientContract"
             },
             ", elasticsearchClient: ",
-            {
-              "pluginId": "core",
-              "scope": "server",
-              "docId": "kibCorePluginApi",
-              "section": "def-server.ElasticsearchClient",
-              "text": "ElasticsearchClient"
-            },
+            "ElasticsearchClient",
             ", request?: ",
             "KibanaRequest",
             "<unknown, unknown, unknown, any> | undefined, byPassCapabilities?: boolean | undefined) => Promise<",
@@ -10925,7 +11160,9 @@
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "SearchResponse",
-                "<TDocument, TAggregations>>; }; eql: ",
+                "<TDocument, TAggregations>>; }; cluster: ",
+                "default",
+                "; eql: ",
                 "default",
                 "; create: { <TDocument = unknown>(this: That, params: ",
                 "CreateRequest",
@@ -11157,9 +11394,7 @@
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "ClearScrollResponse",
-                ">; }; cluster: ",
-                "default",
-                "; count: { (this: That, params?: ",
+                ">; }; count: { (this: That, params?: ",
                 "CountRequest",
                 " | ",
                 "CountRequest",
@@ -12195,7 +12430,17 @@
               "\nMap of field formats by field name"
             ],
             "signature": [
-              "{ [x: string]: any; }"
+              "{ [x: string]: ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.SerializedFieldFormat",
+                "text": "SerializedFieldFormat"
+              },
+              "<{}, ",
+              "SerializableRecord",
+              ">; }"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false
@@ -12292,7 +12537,7 @@
             "label": "flattenHit",
             "description": [],
             "signature": [
-              "(hit: Record<string, any>, deep?: boolean | undefined) => Record<string, any>"
+              "(hit: Record<string, unknown[]>, deep?: boolean | undefined) => Record<string, unknown>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": true,
@@ -12316,7 +12561,7 @@
                 "label": "hit",
                 "description": [],
                 "signature": [
-                  "{ [x: string]: any; }"
+                  "{ [x: string]: unknown[]; }"
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_view.ts",
                 "deprecated": false
@@ -14739,7 +14984,13 @@
               "() => Promise<",
               "SavedObject",
               "<",
-              "DataViewSavedObjectAttrs",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSavedObjectAttrs",
+                "text": "DataViewSavedObjectAttrs"
+              },
               ">[] | null | undefined>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -17165,7 +17416,13 @@
               "() => Promise<",
               "SavedObject",
               "<",
-              "DataViewSavedObjectAttrs",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSavedObjectAttrs",
+                "text": "DataViewSavedObjectAttrs"
+              },
               ">[] | null | undefined>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -18047,7 +18304,15 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              ") => Promise<any>"
+              ") => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
+              },
+              "[]>"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
@@ -19025,7 +19290,23 @@
               "\nUpdate a saved object by id"
             ],
             "signature": [
-              "(type: string, id: string, attributes: Record<string, any>, options: Record<string, any>) => Promise<",
+              "(type: string, id: string, attributes: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewAttributes",
+                "text": "DataViewAttributes"
+              },
+              ", options: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-public.SavedObjectsUpdateOptions",
+                "text": "SavedObjectsUpdateOptions"
+              },
+              "<unknown>) => Promise<",
               "SavedObject",
               "<unknown>>"
             ],
@@ -19074,7 +19355,13 @@
                   "- attributes to update"
                 ],
                 "signature": [
-                  "Record<string, any>"
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewAttributes",
+                    "text": "DataViewAttributes"
+                  }
                 ],
                 "path": "src/plugins/data_views/common/types.ts",
                 "deprecated": false,
@@ -19090,7 +19377,14 @@
                   "- client options"
                 ],
                 "signature": [
-                  "Record<string, any>"
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-public.SavedObjectsUpdateOptions",
+                    "text": "SavedObjectsUpdateOptions"
+                  },
+                  "<unknown>"
                 ],
                 "path": "src/plugins/data_views/common/types.ts",
                 "deprecated": false,
@@ -19109,7 +19403,23 @@
               "\nCreate a saved object"
             ],
             "signature": [
-              "(type: string, attributes: Record<string, any>, options: Record<string, any>) => Promise<",
+              "(type: string, attributes: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewAttributes",
+                "text": "DataViewAttributes"
+              },
+              ", options: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-public.SavedObjectsCreateOptions",
+                "text": "SavedObjectsCreateOptions"
+              },
+              ") => Promise<",
               "SavedObject",
               "<unknown>>"
             ],
@@ -19142,7 +19452,13 @@
                   "- attributes to set"
                 ],
                 "signature": [
-                  "Record<string, any>"
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewAttributes",
+                    "text": "DataViewAttributes"
+                  }
                 ],
                 "path": "src/plugins/data_views/common/types.ts",
                 "deprecated": false,
@@ -19158,7 +19474,13 @@
                   "- client options"
                 ],
                 "signature": [
-                  "Record<string, any>"
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-public.SavedObjectsCreateOptions",
+                    "text": "SavedObjectsCreateOptions"
+                  }
                 ],
                 "path": "src/plugins/data_views/common/types.ts",
                 "deprecated": false,
@@ -19454,7 +19776,7 @@
               "\nGet a setting value"
             ],
             "signature": [
-              "<T = any>(key: string) => Promise<T>"
+              "<T = unknown>(key: string) => Promise<T | undefined>"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
@@ -19505,7 +19827,7 @@
               "\nSet a setting value"
             ],
             "signature": [
-              "<T = any>(key: string, value: T) => Promise<void>"
+              "<T = unknown>(key: string, value: T) => Promise<void>"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
@@ -19653,6 +19975,20 @@
       },
       {
         "parentPluginId": "dataViews",
+        "id": "def-common.DataViewSavedObjectAttrs",
+        "type": "Type",
+        "tags": [],
+        "label": "DataViewSavedObjectAttrs",
+        "description": [],
+        "signature": [
+          "{ type?: string | undefined; name?: string | undefined; title: string; typeMeta?: string | undefined; }"
+        ],
+        "path": "src/plugins/data_views/common/data_views/data_views.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
         "id": "def-common.DataViewsContract",
         "type": "Type",
         "tags": [],
@@ -19704,7 +20040,13 @@
           "[]>; clearCache: () => void; clearInstanceCache: (id?: string | undefined) => void; getCache: () => Promise<",
           "SavedObject",
           "<",
-          "DataViewSavedObjectAttrs",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSavedObjectAttrs",
+            "text": "DataViewSavedObjectAttrs"
+          },
           ">[] | null | undefined>; getDefault: () => Promise<",
           {
             "pluginId": "dataViews",
@@ -20611,7 +20953,7 @@
         "tags": [],
         "label": "DEFAULT_ASSETS_TO_IGNORE",
         "description": [
-          "\nUsed to determine if the instance has any user created index patterns by filtering index patterns\nthat are created and backed only by Fleet server data\nShould be revised after https://github.com/elastic/kibana/issues/82851 is fixed\nFor more background see: https://github.com/elastic/kibana/issues/107020"
+          "\nUsed to determine if the instance has some user created index patterns by filtering index patterns\nthat are created and backed only by Fleet server data\nShould be revised after https://github.com/elastic/kibana/issues/82851 is fixed\nFor more background see: https://github.com/elastic/kibana/issues/107020"
         ],
         "path": "src/plugins/data_views/common/constants.ts",
         "deprecated": false,

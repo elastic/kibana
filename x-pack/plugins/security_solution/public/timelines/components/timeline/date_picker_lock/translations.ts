@@ -23,20 +23,6 @@ export const UNLOCK_SYNC_MAIN_DATE_PICKER_TOOL_TIP = i18n.translate(
   }
 );
 
-export const LOCK_SYNC_MAIN_DATE_PICKER_LABEL = i18n.translate(
-  'xpack.securitySolution.timeline.properties.lockedDatePickerLabel',
-  {
-    defaultMessage: 'Global date picker is locked to timeline date picker',
-  }
-);
-
-export const UNLOCK_SYNC_MAIN_DATE_PICKER_LABEL = i18n.translate(
-  'xpack.securitySolution.timeline.properties.unlockedDatePickerLabel',
-  {
-    defaultMessage: 'Global date picker NOT locked to timeline date picker',
-  }
-);
-
 export const LOCK_SYNC_MAIN_DATE_PICKER_ARIA = i18n.translate(
   'xpack.securitySolution.timeline.properties.lockDatePickerDescription',
   {

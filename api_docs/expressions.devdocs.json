@@ -3532,7 +3532,7 @@
                 "id": "def-public.ExpressionRenderHandler.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n      onRenderError,\n      renderMode,\n      syncColors,\n      syncTooltips,\n      interactive,\n      hasCompatibleActions = async () => false,\n    }",
+                "label": "{\n      onRenderError,\n      renderMode,\n      syncColors,\n      syncTooltips,\n      interactive,\n      hasCompatibleActions = async () => false,\n      executionContext,\n    }",
                 "description": [],
                 "signature": [
                   "ExpressionRenderHandlerParams"
@@ -7953,7 +7953,7 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
               },
               {
                 "plugin": "canvas",
@@ -7961,11 +7961,11 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/neq.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/neq.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
               },
               {
                 "plugin": "visTypeXy",
@@ -10465,6 +10465,23 @@
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.IInterpreterRenderHandlers.getExecutionContext",
+            "type": "Function",
+            "tags": [],
+            "label": "getExecutionContext",
+            "description": [],
+            "signature": [
+              "() => ",
+              "KibanaExecutionContext",
+              " | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -11874,10 +11891,6 @@
           "path": "src/plugins/expressions/common/service/expressions_services.ts",
           "deprecated": true,
           "references": [
-            {
-              "plugin": "canvas",
-              "path": "x-pack/plugins/canvas/public/application.tsx"
-            },
             {
               "plugin": "canvas",
               "path": "x-pack/plugins/canvas/server/routes/functions/functions.ts"
@@ -18378,7 +18391,7 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
               },
               {
                 "plugin": "canvas",
@@ -18386,11 +18399,11 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/neq.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/neq.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
               },
               {
                 "plugin": "visTypeXy",
@@ -19681,6 +19694,23 @@
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-server.IInterpreterRenderHandlers.getExecutionContext",
+            "type": "Function",
+            "tags": [],
+            "label": "getExecutionContext",
+            "description": [],
+            "signature": [
+              "() => ",
+              "KibanaExecutionContext",
+              " | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -30181,7 +30211,7 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
               },
               {
                 "plugin": "canvas",
@@ -30189,11 +30219,11 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/neq.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/neq.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
               },
               {
                 "plugin": "visTypeXy",
@@ -31066,10 +31096,6 @@
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": true,
             "references": [
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/public/application.tsx"
-              },
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/routes/functions/functions.ts"
@@ -32806,6 +32832,23 @@
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.IInterpreterRenderHandlers.getExecutionContext",
+            "type": "Function",
+            "tags": [],
+            "label": "getExecutionContext",
+            "description": [],
+            "signature": [
+              "() => ",
+              "KibanaExecutionContext",
+              " | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -34827,19 +34870,19 @@
         "references": [
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/types/state.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/types/state.ts"
-          },
-          {
-            "plugin": "canvas",
             "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/markdown.ts"
           },
           {
             "plugin": "canvas",
             "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/markdown.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/types/state.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/types/state.ts"
           },
           {
             "plugin": "canvas",

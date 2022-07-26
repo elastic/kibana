@@ -28,11 +28,11 @@ import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 
 import { SavedObjectsService } from './saved_objects_service';
 import { configServiceMock } from '../mocks';
-import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { coreUsageDataServiceMock } from '../core_usage_data/core_usage_data_service.mock';
 import { deprecationsServiceMock } from '../deprecations/deprecations_service.mock';
 import { SavedObjectsClientFactoryProvider } from './service/lib';
-import { NodesVersionCompatibility } from '../elasticsearch/version_check/ensure_es_version';
+import type { NodesVersionCompatibility } from '@kbn/core-elasticsearch-server-internal';
 import { SavedObjectsRepository } from './service/lib/repository';
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';

@@ -651,23 +651,23 @@ function runFullASTValidation(
       }
     } else {
       if (nodeOperation.input === 'field') {
-        if (shouldHaveFieldArgument(node)) {
-          if (!isArgumentValidType(firstArg, 'variable')) {
-            if (isMathNode(firstArg)) {
-              errors.push(
-                getMessageFromId({
-                  messageId: 'wrongFirstArgument',
-                  values: {
-                    operation: node.name,
-                    type: i18n.translate('xpack.lens.indexPattern.formulaFieldValue', {
-                      defaultMessage: 'field',
-                    }),
-                    argument: `math operation`,
-                  },
-                  locations: node.location ? [node.location] : [],
-                })
-              );
-            } else {
+        if (!isArgumentValidType(firstArg, 'variable')) {
+          if (isMathNode(firstArg)) {
+            errors.push(
+              getMessageFromId({
+                messageId: 'wrongFirstArgument',
+                values: {
+                  operation: node.name,
+                  type: i18n.translate('xpack.lens.indexPattern.formulaFieldValue', {
+                    defaultMessage: 'field',
+                  }),
+                  argument: `math operation`,
+                },
+                locations: node.location ? [node.location] : [],
+              })
+            );
+          } else {
+            if (shouldHaveFieldArgument(node)) {
               errors.push(
                 getMessageFromId({
                   messageId: 'wrongFirstArgument',
@@ -686,40 +686,27 @@ function runFullASTValidation(
                 })
               );
             }
-          } else {
-            // If the first argument is valid proceed with the other arguments validation
-            const fieldErrors = validateFieldArguments(node, variables, {
-              isFieldOperation: true,
-              firstArg,
-              returnedType: getReturnedType(nodeOperation, indexPattern, firstArg),
-            });
-            if (fieldErrors.length) {
-              errors.push(...fieldErrors);
-            }
-          }
-          const functionErrors = validateFunctionArguments(node, functions, 0, {
-            isFieldOperation: true,
-            type: i18n.translate('xpack.lens.indexPattern.formulaFieldValue', {
-              defaultMessage: 'field',
-            }),
-            firstArgValidation: false,
-          });
-          if (functionErrors.length) {
-            errors.push(...functionErrors);
           }
         } else {
-          // Named arguments only
-          if (functions?.length || variables?.length) {
-            errors.push(
-              getMessageFromId({
-                messageId: 'shouldNotHaveField',
-                values: {
-                  operation: node.name,
-                },
-                locations: node.location ? [node.location] : [],
-              })
-            );
+          // If the first argument is valid proceed with the other arguments validation
+          const fieldErrors = validateFieldArguments(node, variables, {
+            isFieldOperation: true,
+            firstArg,
+            returnedType: getReturnedType(nodeOperation, indexPattern, firstArg),
+          });
+          if (fieldErrors.length) {
+            errors.push(...fieldErrors);
           }
+        }
+        const functionErrors = validateFunctionArguments(node, functions, 0, {
+          isFieldOperation: true,
+          type: i18n.translate('xpack.lens.indexPattern.formulaFieldValue', {
+            defaultMessage: 'field',
+          }),
+          firstArgValidation: false,
+        });
+        if (functionErrors.length) {
+          errors.push(...functionErrors);
         }
         if (!canHaveParams(nodeOperation) && namedArguments.length) {
           errors.push(

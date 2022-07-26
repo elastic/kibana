@@ -6,6 +6,8 @@
  */
 
 import React, { memo, useEffect } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ActionDetails } from '../../../../common/endpoint/types';
 import { useGetActionDetails } from '../../hooks/endpoint/use_get_action_details';
 import type { EndpointCommandDefinitionMeta } from './types';
@@ -13,6 +15,7 @@ import { useSendSuspendProcessRequest } from '../../hooks/endpoint/use_send_susp
 import type { CommandExecutionComponentProps } from '../console/types';
 import { parsedPidOrEntityIdParameter } from '../console/service/parsed_command_input';
 import { ActionError } from './action_error';
+import { ACTION_DETAILS_REFRESH_INTERVAL } from './constants';
 
 export const SuspendProcessActionResult = memo<
   CommandExecutionComponentProps<
@@ -21,20 +24,22 @@ export const SuspendProcessActionResult = memo<
       actionId?: string;
       actionRequestSent?: boolean;
       completedActionDetails?: ActionDetails;
+      apiError?: IHttpFetchError;
     },
     EndpointCommandDefinitionMeta
   >
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
   const endpointId = command.commandDefinition?.meta?.endpointId;
-  const { actionId, completedActionDetails } = store;
+  const { actionId, completedActionDetails, apiError } = store;
   const isPending = status === 'pending';
+  const isError = status === 'error';
   const actionRequestSent = Boolean(store.actionRequestSent);
 
   const { mutate, data, isSuccess, error } = useSendSuspendProcessRequest();
 
   const { data: actionDetails } = useGetActionDetails(actionId ?? '-', {
     enabled: Boolean(actionId) && isPending,
-    refetchInterval: isPending ? 3000 : false,
+    refetchInterval: isPending ? ACTION_DETAILS_REFRESH_INTERVAL : false,
   });
 
   // Send Suspend request if not yet done
@@ -59,8 +64,13 @@ export const SuspendProcessActionResult = memo<
       setStore((prevState) => {
         return { ...prevState, actionId: data.data.id };
       });
+    } else if (error) {
+      setStatus('error');
+      setStore((prevState) => {
+        return { ...prevState, apiError: error };
+      });
     }
-  }, [actionId, data?.data.id, isSuccess, error, setStore]);
+  }, [actionId, data?.data.id, isSuccess, error, setStore, setStatus]);
 
   useEffect(() => {
     if (actionDetails?.data.isCompleted) {
@@ -73,6 +83,19 @@ export const SuspendProcessActionResult = memo<
       });
     }
   }, [actionDetails?.data, setStatus, setStore]);
+
+  // Show API errors if perform action fails
+  if (isError && apiError) {
+    return (
+      <ResultComponent showAs="failure" data-test-subj="suspendProcessAPIErrorCallout">
+        <FormattedMessage
+          id="xpack.securitySolution.endpointResponseActions.suspendProcess.performApiErrorMessage"
+          defaultMessage="The following error was encountered: {error}"
+          values={{ error: apiError.message }}
+        />
+      </ResultComponent>
+    );
+  }
 
   // Show nothing if still pending
   if (isPending) {

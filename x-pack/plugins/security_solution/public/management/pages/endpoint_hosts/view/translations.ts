@@ -121,10 +121,3 @@ export const ACTIVITY_LOG = {
     },
   },
 };
-
-export const SEARCH_ACTIVITY_LOG = i18n.translate(
-  'xpack.securitySolution.endpointDetails.activityLog.search',
-  {
-    defaultMessage: 'Search activity log',
-  }
-);

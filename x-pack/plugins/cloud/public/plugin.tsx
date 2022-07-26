@@ -212,10 +212,12 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     }
     // Security plugin is disabled
     if (!security) return true;
-    // Otherwise check roles. If user is not defined due to an unexpected error, then fail *open*.
+
+    // Otherwise check if user is a cloud user.
+    // If user is not defined due to an unexpected error, then fail *open*.
     // Cloud admin console will always perform the actual authorization checks.
     const user = await security.authc.getCurrentUser().catch(() => null);
-    return user?.roles.includes('superuser') ?? true;
+    return user?.elastic_cloud_user ?? true;
   }
 
   /**

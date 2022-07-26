@@ -34,17 +34,20 @@ import type {
   MachineLearningRuleParams,
   MachineLearningSpecificRuleParams,
   InternalRuleUpdate,
+  NewTermsRuleParams,
+  NewTermsSpecificRuleParams,
 } from './rule_schemas';
 import { assertUnreachable } from '../../../../common/utility_types';
 import type {
   RelatedIntegrationArray,
   RequiredFieldArray,
-  RuleExecutionSummary,
   SetupGuide,
 } from '../../../../common/detection_engine/schemas/common';
+import type { RuleExecutionSummary } from '../../../../common/detection_engine/rule_monitoring';
 import {
   eqlPatchParams,
   machineLearningPatchParams,
+  newTermsPatchParams,
   queryPatchParams,
   savedQueryPatchParams,
   threatMatchPatchParams,
@@ -56,6 +59,7 @@ import type {
   EqlPatchParams,
   FullResponseSchema,
   MachineLearningPatchParams,
+  NewTermsPatchParams,
   QueryPatchParams,
   ResponseTypeSpecific,
   SavedQueryPatchParams,
@@ -77,7 +81,7 @@ import {
 } from '../rules/utils';
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRuleActions } from '../rule_actions/legacy_types';
-import { mergeRuleExecutionSummary } from '../rule_execution_log';
+import { mergeRuleExecutionSummary } from '../rule_monitoring';
 
 // These functions provide conversions from the request API schema to the internal rule schema and from the internal rule schema
 // to the response API schema. This provides static type-check assurances that the internal schema is in sync with the API schema for
@@ -160,6 +164,18 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
         type: params.type,
         anomalyThreshold: params.anomaly_threshold,
         machineLearningJobId: normalizeMachineLearningJobIds(params.machine_learning_job_id),
+      };
+    }
+    case 'new_terms': {
+      return {
+        type: params.type,
+        query: params.query,
+        newTermsFields: params.new_terms_fields,
+        historyWindowStart: params.history_window_start,
+        index: params.index,
+        filters: params.filters,
+        language: params.language ?? 'kuery',
+        dataViewId: params.data_view_id,
       };
     }
     default: {
@@ -269,6 +285,22 @@ const patchMachineLearningParams = (
   };
 };
 
+const patchNewTermsParams = (
+  params: NewTermsPatchParams,
+  existingRule: NewTermsRuleParams
+): NewTermsSpecificRuleParams => {
+  return {
+    type: existingRule.type,
+    language: params.language ?? existingRule.language,
+    index: params.index ?? existingRule.index,
+    dataViewId: params.data_view_id ?? existingRule.dataViewId,
+    query: params.query ?? existingRule.query,
+    filters: params.filters ?? existingRule.filters,
+    newTermsFields: params.new_terms_fields ?? existingRule.newTermsFields,
+    historyWindowStart: params.history_window_start ?? existingRule.historyWindowStart,
+  };
+};
+
 const parseValidationError = (error: string | null): BadRequestError => {
   if (error != null) {
     return new BadRequestError(error);
@@ -328,6 +360,13 @@ export const patchTypeSpecificSnakeToCamel = (
         throw parseValidationError(error);
       }
       return patchMachineLearningParams(validated, existingRule);
+    }
+    case 'new_terms': {
+      const [validated, error] = validateNonExact(params, newTermsPatchParams);
+      if (validated == null) {
+        throw parseValidationError(error);
+      }
+      return patchNewTermsParams(validated, existingRule);
     }
     default: {
       return assertUnreachable(existingRule);
@@ -408,6 +447,7 @@ export const convertPatchAPIToInternalSchema = (
   };
 };
 
+// eslint-disable-next-line complexity
 export const convertCreateAPIToInternalSchema = (
   input: CreateRulesSchema & {
     related_integrations?: RelatedIntegrationArray;
@@ -519,6 +559,7 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): Respon
         query: params.query,
         filters: params.filters,
         saved_id: params.savedId,
+        data_view_id: params.dataViewId,
       };
     }
     case 'threshold': {
@@ -538,6 +579,18 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): Respon
         type: params.type,
         anomaly_threshold: params.anomalyThreshold,
         machine_learning_job_id: params.machineLearningJobId,
+      };
+    }
+    case 'new_terms': {
+      return {
+        type: params.type,
+        query: params.query,
+        new_terms_fields: params.newTermsFields,
+        history_window_start: params.historyWindowStart,
+        index: params.index,
+        filters: params.filters,
+        language: params.language,
+        data_view_id: params.dataViewId,
       };
     }
     default: {

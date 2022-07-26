@@ -6,10 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
+import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
+import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type {
+  SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesOptions,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
+  SavedObjectReferenceWithContext,
+} from '@kbn/core-saved-objects-api-server';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type { SavedObjectsSerializer } from '../../serialization';
-import type { SavedObject, SavedObjectsBaseOptions } from '../../types';
 import { SavedObjectsErrorHelpers } from './errors';
 import { findLegacyUrlAliases } from './legacy_url_aliases';
 import { getRootFields } from './included_fields';
@@ -36,74 +42,6 @@ const MAX_REFERENCE_GRAPH_DEPTH = 20;
  * @internal
  */
 export const ALIAS_OR_SHARED_ORIGIN_SEARCH_PER_PAGE = 100;
-
-/**
- * An object to collect references for. It must be a multi-namespace type (in other words, the object type must be registered with the
- * `namespaceType: 'multiple'` or `namespaceType: 'multiple-isolated'` option).
- *
- * Note: if options.purpose is 'updateObjectsSpaces', it must be a shareable type (in other words, the object type must be registered with
- * the `namespaceType: 'multiple'`).
- *
- * @public
- */
-export interface SavedObjectsCollectMultiNamespaceReferencesObject {
-  id: string;
-  type: string;
-}
-
-/**
- * Options for collecting references.
- *
- * @public
- */
-export interface SavedObjectsCollectMultiNamespaceReferencesOptions
-  extends SavedObjectsBaseOptions {
-  /** Optional purpose used to determine filtering and authorization checks; default is 'collectMultiNamespaceReferences' */
-  purpose?: 'collectMultiNamespaceReferences' | 'updateObjectsSpaces';
-}
-
-/**
- * A returned input object or one of its references, with additional context.
- *
- * @public
- */
-export interface SavedObjectReferenceWithContext {
-  /** The type of the referenced object */
-  type: string;
-  /** The ID of the referenced object */
-  id: string;
-  /** The origin ID of the referenced object (if it has one) */
-  originId?: string;
-  /** The space(s) that the referenced object exists in */
-  spaces: string[];
-  /**
-   * References to this object; note that this does not contain _all inbound references everywhere for this object_, it only contains
-   * inbound references for the scope of this operation
-   */
-  inboundReferences: Array<{
-    /** The type of the object that has the inbound reference */
-    type: string;
-    /** The ID of the object that has the inbound reference */
-    id: string;
-    /** The name of the inbound reference */
-    name: string;
-  }>;
-  /** Whether or not this object or reference is missing */
-  isMissing?: boolean;
-  /** The space(s) that legacy URL aliases matching this type/id exist in */
-  spacesWithMatchingAliases?: string[];
-  /** The space(s) that objects matching this origin exist in (including this one) */
-  spacesWithMatchingOrigins?: string[];
-}
-
-/**
- * The response when object references are collected.
- *
- * @public
- */
-export interface SavedObjectsCollectMultiNamespaceReferencesResponse {
-  objects: SavedObjectReferenceWithContext[];
-}
 
 /**
  * Parameters for the collectMultiNamespaceReferences function.

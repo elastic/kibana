@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageHeaderProps,
@@ -36,6 +35,8 @@ import { ServiceIcons } from '../../../shared/service_icons';
 import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from './analyze_data_button';
 import { getAlertingCapabilities } from '../../../alerting/get_alerting_capabilities';
+import { BetaBadge } from '../../../shared/beta_badge';
+import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -86,13 +87,16 @@ function TemplateWithContext({
 
   const tabs = useTabs({ selectedTab });
 
-  useBreadcrumb({
-    title,
-    href: router.link(`/services/{serviceName}/${selectedTab}` as const, {
-      path: { serviceName },
-      query,
+  useBreadcrumb(
+    () => ({
+      title,
+      href: router.link(`/services/{serviceName}/${selectedTab}` as const, {
+        path: { serviceName },
+        query,
+      }),
     }),
-  });
+    [query, router, selectedTab, serviceName, title]
+  );
 
   return (
     <ApmMainTemplate
@@ -261,9 +265,11 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         path: { serviceName },
         query,
       }),
+      append: <BetaBadge icon="beaker" />,
       label: i18n.translate('xpack.apm.home.infraTabLabel', {
         defaultMessage: 'Infrastructure',
       }),
+
       hidden: !showInfraTab,
     },
     {
@@ -297,32 +303,10 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         query,
       }),
       hidden: !config.profilingEnabled,
-      label: (
-        <EuiFlexGroup direction="row" gutterSize="s">
-          <EuiFlexItem>
-            {i18n.translate('xpack.apm.serviceDetails.profilingTabLabel', {
-              defaultMessage: 'Profiling',
-            })}
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiBetaBadge
-              label={i18n.translate(
-                'xpack.apm.serviceDetails.profilingTabExperimentalLabel',
-                {
-                  defaultMessage: 'Technical preview',
-                }
-              )}
-              tooltipContent={i18n.translate(
-                'xpack.apm.serviceDetails.profilingTabExperimentalDescription',
-                {
-                  defaultMessage:
-                    'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-                }
-              )}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
+      append: <TechnicalPreviewBadge icon="beaker" />,
+      label: i18n.translate('xpack.apm.serviceDetails.profilingTabLabel', {
+        defaultMessage: 'Profiling',
+      }),
     },
     {
       key: 'alerts',
@@ -330,6 +314,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         path: { serviceName },
         query,
       }),
+      append: <TechnicalPreviewBadge icon="beaker" />,
       label: i18n.translate('xpack.apm.home.alertsTabLabel', {
         defaultMessage: 'Alerts',
       }),
@@ -339,9 +324,10 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
 
   return tabs
     .filter((t) => !t.hidden)
-    .map(({ href, key, label }) => ({
+    .map(({ href, key, label, append }) => ({
       href,
       label,
+      append,
       isSelected: key === selectedTab,
     }));
 }

@@ -43,8 +43,7 @@ export const startBasicLicense =
       const first = i18n.translate(
         'xpack.licenseMgmt.replacingCurrentLicenseWithBasicLicenseWarningMessage',
         {
-          //eslint-disable-next-line
-        defaultMessage:
+          defaultMessage:
             'Some functionality will be lost if you replace your {currentLicenseType} license with a BASIC license. Review the list of features below.',
           values: {
             currentLicenseType: currentLicenseType.toUpperCase(),

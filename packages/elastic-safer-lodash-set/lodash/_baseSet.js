@@ -5,7 +5,7 @@
  * See `packages/elastic-safer-lodash-set/LICENSE` for more information.
  */
 
-/* eslint-disable */
+/* eslint-disable one-var,prettier/prettier,no-var,eqeqeq,no-nested-ternary */
 
 var assignValue = require('lodash/_assignValue'),
     castPath = require('lodash/_castPath'),
