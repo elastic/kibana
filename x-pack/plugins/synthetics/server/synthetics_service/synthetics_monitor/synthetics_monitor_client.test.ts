@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { loggerMock } from '@kbn/logging-mocks';
+import { KibanaRequest } from '@kbn/core/server';
 import { SyntheticsMonitorClient } from './synthetics_monitor_client';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { SyntheticsService } from '../synthetics_service';
-import { loggerMock } from '@kbn/logging-mocks';
 import times from 'lodash/times';
 import {
   LocationStatus,
@@ -20,6 +20,7 @@ describe('SyntheticsMonitorClient', () => {
   const mockEsClient = {
     search: jest.fn(),
   };
+  const mockRequest = {} as unknown as KibanaRequest;
 
   const logger = loggerMock.create();
 
@@ -84,7 +85,7 @@ describe('SyntheticsMonitorClient', () => {
     const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
     client.privateLocationAPI.createMonitor = jest.fn();
 
-    await client.addMonitor(monitor, id);
+    await client.addMonitor(monitor, id, mockRequest);
 
     expect(syntheticsService.addConfig).toHaveBeenCalledTimes(1);
     expect(client.privateLocationAPI.createMonitor).toHaveBeenCalledTimes(1);
@@ -97,7 +98,7 @@ describe('SyntheticsMonitorClient', () => {
     const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
     client.privateLocationAPI.editMonitor = jest.fn();
 
-    await client.editMonitor(monitor, id);
+    await client.editMonitor(monitor, id, mockRequest);
 
     expect(syntheticsService.editConfig).toHaveBeenCalledTimes(1);
     expect(client.privateLocationAPI.editMonitor).toHaveBeenCalledTimes(1);
@@ -109,7 +110,7 @@ describe('SyntheticsMonitorClient', () => {
     const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
     client.privateLocationAPI.deleteMonitor = jest.fn();
 
-    await client.deleteMonitor(monitor as unknown as SyntheticsMonitorWithId);
+    await client.deleteMonitor(monitor as unknown as SyntheticsMonitorWithId, mockRequest);
 
     expect(syntheticsService.deleteConfigs).toHaveBeenCalledTimes(1);
     expect(client.privateLocationAPI.deleteMonitor).toHaveBeenCalledTimes(1);
