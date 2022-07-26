@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiBottomBar, EuiSpacer } from '@elastic/eui';
+import { EuiBottomBar, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { FindingsBaseProps } from '../types';
 import { FindingsTable } from './latest_findings_table';
@@ -40,7 +40,22 @@ export const getDefaultQuery = ({
   pageSize: 10,
 });
 
-const MAX_ITEMS = 30;
+const MAX_ITEMS = 100;
+
+const getLimitItems = (
+  totalItems: number,
+  maxItems: number,
+  pageSize: number,
+  pageIndex: number
+): { isLastLimitedPage: boolean; limitedTotalItemCount: number } => {
+  const limitItems = totalItems > maxItems;
+  const limitedTotalItemCount = limitItems ? maxItems : totalItems;
+  const lastLimitedPage = Math.ceil(limitedTotalItemCount / pageSize);
+  const isLastPage = lastLimitedPage === pageIndex + 1;
+  const isLastLimitedPage = limitItems && isLastPage;
+
+  return { isLastLimitedPage, limitedTotalItemCount };
+};
 
 export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
@@ -67,12 +82,16 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
 
   const error = findingsGroupByNone.error || baseEsQuery.error;
 
-  const ITEMS = findingsGroupByNone.data?.total || 0;
-
-  const totalItemCount = ITEMS > MAX_ITEMS ? MAX_ITEMS : ITEMS;
-
-  const lastPage = Math.ceil(totalItemCount / urlQuery.pageSize);
-  console.log(lastPage);
+  const { isLastLimitedPage, limitedTotalItemCount } = useMemo(
+    () =>
+      getLimitItems(
+        findingsGroupByNone.data?.total || 0,
+        MAX_ITEMS,
+        urlQuery.pageSize,
+        urlQuery.pageIndex
+      ),
+    [findingsGroupByNone.data?.total, urlQuery.pageIndex, urlQuery.pageSize]
+  );
 
   return (
     <div data-test-subj={TEST_SUBJECTS.FINDINGS_CONTAINER}>
@@ -83,11 +102,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
         }}
         loading={findingsGroupByNone.isFetching}
       />
-      <PageWrapper
-        css={`
-          padding-bottom: 500px;
-        `}
-      >
+      <PageWrapper>
         <LatestFindingsPageTitle />
         {error && <ErrorCallout error={error} />}
         {!error && (
@@ -117,8 +132,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
               pagination={getPaginationTableParams({
                 pageSize: urlQuery.pageSize,
                 pageIndex: urlQuery.pageIndex,
-                // totalItemCount: findingsGroupByNone.data?.total || 0,
-                totalItemCount,
+                totalItemCount: limitedTotalItemCount,
               })}
               sorting={{
                 sort: { field: urlQuery.sort.field, direction: urlQuery.sort.direction },
@@ -143,10 +157,25 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
                 })
               }
             />
+            {isLastLimitedPage && (
+              <>
+                <EuiSpacer size="xxl" />
+                <EuiBottomBar position="fixed">
+                  <EuiText textAlign="center">
+                    <FormattedMessage
+                      id="xpack.csp.findings.latestFindings.bottomBarLabel"
+                      defaultMessage="These are the first {maxItems} findings matching your search, refine your search to see others."
+                      values={{
+                        maxItems: MAX_ITEMS,
+                      }}
+                    />
+                  </EuiText>
+                </EuiBottomBar>
+              </>
+            )}
           </>
         )}
       </PageWrapper>
-      <EuiBottomBar>{'!--Content goes here --'}</EuiBottomBar>
     </div>
   );
 };
