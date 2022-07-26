@@ -44,7 +44,7 @@ import {
 import { getCurrencyCode } from './currency_codes';
 import { getDataBoundsForPalette } from '../utils';
 
-export const defaultColor = euiThemeVars.euiColorEmptyShade;
+export const defaultColor = euiThemeVars.euiColorLightestShade;
 const getBytesUnit = (value: number) => {
   const units = ['byte', 'kilobyte', 'megabyte', 'gigabyte', 'terabyte', 'petabyte'];
   const abs = Math.abs(value);
@@ -322,7 +322,7 @@ export const MetricVis = ({
               background: { color: 'transparent' },
               metric: {
                 background: defaultColor,
-                barBackground: euiThemeVars.euiColorLightestShade,
+                barBackground: euiThemeVars.euiColorLightShade,
               },
             },
             chartTheme,
