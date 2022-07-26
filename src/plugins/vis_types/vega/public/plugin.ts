@@ -14,6 +14,7 @@ import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { Setup as InspectorSetup } from '@kbn/inspector-plugin/public';
 
 import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import {
   setNotifications,
   setData,
@@ -22,6 +23,7 @@ import {
   setUISettings,
   setDocLinks,
   setMapsEms,
+  setUsageCollectionStart,
 } from './services';
 
 import { createVegaFn } from './vega_fn';
@@ -56,6 +58,7 @@ export interface VegaPluginStartDependencies {
   data: DataPublicPluginStart;
   mapsEms: MapsEmsPluginPublicStart;
   dataViews: DataViewsPublicPluginStart;
+  usageCollection?: UsageCollectionStart;
 }
 
 /** @internal */
@@ -92,11 +95,18 @@ export class VegaPlugin implements Plugin<void, void> {
     visualizations.createBaseVisualization(createVegaTypeDefinition());
   }
 
-  public start(core: CoreStart, { data, mapsEms, dataViews }: VegaPluginStartDependencies) {
+  public start(
+    core: CoreStart,
+    { data, mapsEms, dataViews, usageCollection }: VegaPluginStartDependencies
+  ) {
     setNotifications(core.notifications);
     setData(data);
     setDataViews(dataViews);
     setDocLinks(core.docLinks);
     setMapsEms(mapsEms);
+
+    if (usageCollection) {
+      setUsageCollectionStart(usageCollection);
+    }
   }
 }

@@ -42,8 +42,8 @@ import type {
   NewPackagePolicy,
   NewPackagePolicyInput,
   PackagePolicyPackage,
-} from '../../common';
-import { packageToPackagePolicy } from '../../common';
+} from '../../common/types';
+import { packageToPackagePolicy } from '../../common/services';
 
 import { IngestManagerError, PackagePolicyIneligibleForUpgradeError } from '../errors';
 
@@ -130,8 +130,8 @@ jest.mock('./epm/packages', () => {
   };
 });
 
-jest.mock('../../common', () => ({
-  ...jest.requireActual('../../common'),
+jest.mock('../../common/services/package_to_package_policy', () => ({
+  ...jest.requireActual('../../common/services/package_to_package_policy'),
   packageToPackagePolicy: jest.fn(),
 }));
 
