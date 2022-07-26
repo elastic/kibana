@@ -6,6 +6,7 @@
  */
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import { isEphemeralTaskRejectedDueToCapacityError } from '@kbn/task-manager-plugin/server';
+import moment from 'moment';
 import { transformActionParams } from './transform_action_params';
 import { injectActionParams } from './inject_action_params';
 import {
@@ -68,6 +69,8 @@ export function createExecutionHandler<
     state,
     ruleRunMetricsStore,
     alertId,
+    updatedAt,
+    allAlerts,
   }: ExecutionHandlerOptions<ActionGroupIds | RecoveryActionGroupId>) => {
     if (!ruleTypeActionGroups.has(actionGroup)) {
       logger.error(`Invalid action group "${actionGroup}" for rule "${ruleType.id}".`);
@@ -110,15 +113,40 @@ export function createExecutionHandler<
         }),
       }));
 
-    // console.log('actions', actions);
-
     ruleRunMetricsStore.incrementNumberOfGeneratedActions(actions.length);
 
     const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
     let ephemeralActionsToSchedule = maxEphemeralActionsPerRule;
 
     for (const action of actions) {
-      const { actionTypeId } = action;
+      const {
+        actionTypeId,
+        params: { isSummary, notifyWhen, actionThrottle, actionThrottleUnit },
+      } = action;
+
+      const unitMap = {
+        s: 'seconds',
+        m: 'minutes',
+        h: 'hours',
+        d: 'days',
+      };
+
+      if (isSummary) {
+        if (notifyWhen === 'interval') {
+          const shouldRun = moment(updatedAt)
+            // @ts-ignore
+            .add(actionThrottle as number, unitMap[actionThrottleUnit])
+            .isSameOrBefore(new Date());
+
+          if (shouldRun) {
+            // collate historical alerts
+          } else {
+            continue;
+          }
+        } else {
+          // collate alerts
+        }
+      }
 
       ruleRunMetricsStore.incrementNumberOfGeneratedActionsByConnectorType(actionTypeId);
 

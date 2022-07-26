@@ -228,7 +228,9 @@ export class TaskRunner<
     alertId: string,
     alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>,
     executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>,
-    ruleRunMetricsStore: RuleRunMetricsStore
+    ruleRunMetricsStore: RuleRunMetricsStore,
+    updatedAt: Date,
+    allAlerts: Alert[]
   ) {
     const {
       actionGroup,
@@ -245,6 +247,8 @@ export class TaskRunner<
       state,
       alertId,
       ruleRunMetricsStore,
+      updatedAt,
+      allAlerts,
     });
   }
 
@@ -477,10 +481,22 @@ export class TaskRunner<
         }
       );
 
+      const allAlerts = [
+        ...alertsWithExecutableActions,
+        ...Object.entries(recoveredAlerts),
+      ] as unknown as Alert[];
+
       await Promise.all(
         alertsWithExecutableActions.map(
           ([alertId, alert]: [string, Alert<State, Context, ActionGroupIds>]) =>
-            this.executeAlert(alertId, alert, executionHandler, ruleRunMetricsStore)
+            this.executeAlert(
+              alertId,
+              alert,
+              executionHandler,
+              ruleRunMetricsStore,
+              updatedAt,
+              allAlerts
+            )
         )
       );
 
@@ -492,6 +508,8 @@ export class TaskRunner<
         logger: this.logger,
         ruleLabel,
         ruleRunMetricsStore,
+        updatedAt,
+        allAlerts,
       });
     } else {
       if (ruleIsSnoozed) {
@@ -894,6 +912,8 @@ async function scheduleActionsForRecoveredAlerts<
     mutedAlertIdsSet,
     ruleLabel,
     ruleRunMetricsStore,
+    updatedAt,
+    allAlerts,
   } = params;
   const recoveredIds = Object.keys(recoveredAlerts);
 
@@ -912,6 +932,8 @@ async function scheduleActionsForRecoveredAlerts<
         state: {},
         alertId: id,
         ruleRunMetricsStore,
+        updatedAt,
+        allAlerts,
       });
       alert.scheduleActions(recoveryActionGroup.id);
     }

@@ -74,6 +74,8 @@ export interface ScheduleActionsForRecoveredAlertsParams<
   mutedAlertIdsSet: Set<string>;
   ruleLabel: string;
   ruleRunMetricsStore: RuleRunMetricsStore;
+  updatedAt: Date;
+  allAlerts: Alert[];
 }
 
 export interface LogActiveAndRecoveredAlertsParams<
@@ -135,4 +137,6 @@ export interface ExecutionHandlerOptions<ActionGroupIds extends string> {
   context: AlertInstanceContext;
   state: AlertInstanceState;
   ruleRunMetricsStore: RuleRunMetricsStore;
+  updatedAt: Date;
+  allAlerts: Alert[];
 }
