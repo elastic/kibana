@@ -36,21 +36,21 @@ import type {
   ListWithKuery,
   NewPackagePolicy,
 } from '../types';
+import { packageToPackagePolicy } from '../../common/services';
 import {
   agentPolicyStatuses,
-  packageToPackagePolicy,
   AGENT_POLICY_INDEX,
   UUID_V5_NAMESPACE,
   FLEET_APM_PACKAGE,
   FLEET_ELASTIC_AGENT_PACKAGE,
-} from '../../common';
+} from '../../common/constants';
 import type {
   DeleteAgentPolicyResponse,
   FleetServerPolicy,
   Installation,
   Output,
   DeletePackagePoliciesResponse,
-} from '../../common';
+} from '../../common/types';
 import { AgentPolicyNameExistsError, HostedAgentPolicyRestrictionRelatedError } from '../errors';
 
 import type { FullAgentConfigMap } from '../../common/types/models/agent_cm';
@@ -613,7 +613,7 @@ class AgentPolicyService {
     id: string,
     packagePolicyIds: string[],
     options?: { user?: AuthenticatedUser; force?: boolean }
-  ): Promise<AgentPolicy> {
+  ) {
     const oldAgentPolicy = await this.get(soClient, id, false);
 
     if (!oldAgentPolicy) {

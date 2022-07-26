@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useContext } from 'react';
 import { css } from '@emotion/react';
 import { EuiThemeComputed, useEuiTheme } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { SecuritySolutionContext } from '../../../application/security_solution_context';
 import * as TEST_SUBJECTS from '../test_subjects';
 import type { FindingsBaseURLQuery } from '../types';
 import type { CspClientPluginStartDeps } from '../../../types';
@@ -34,7 +35,9 @@ export const FindingsSearchBar = ({
     },
   } = useKibana<CspClientPluginStartDeps>().services;
 
-  return (
+  const securitySolutionContext = useContext(SecuritySolutionContext);
+
+  let searchBarNode = (
     <div css={getContainerStyle(euiTheme)}>
       <SearchBar
         appName={PLUGIN_NAME}
@@ -55,6 +58,13 @@ export const FindingsSearchBar = ({
       />
     </div>
   );
+
+  if (securitySolutionContext) {
+    const FiltersGlobal = securitySolutionContext.getFiltersGlobalComponent();
+    searchBarNode = <FiltersGlobal>{searchBarNode}</FiltersGlobal>;
+  }
+
+  return <>{searchBarNode}</>;
 };
 
 const getContainerStyle = (theme: EuiThemeComputed) => css`

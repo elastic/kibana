@@ -28,6 +28,7 @@ import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 import { GenerateConnectorApiKeyApiLogic } from '../../../api/connector_package/generate_connector_api_key_api_logic';
 import { FetchIndexApiLogic } from '../../../api/index/fetch_index_api_logic';
 import { SEARCH_INDEX_TAB_PATH } from '../../../routes';
+import { isConnectorIndex } from '../../../utils/indices';
 import { ApiKey } from '../../api_key/api_key';
 
 import { IndexNameLogic } from '../index_name_logic';
@@ -41,22 +42,12 @@ export const ConnectorConfiguration: React.FC = () => {
   const { data: apiKeyData } = useValues(GenerateConnectorApiKeyApiLogic);
   const { data: indexData } = useValues(FetchIndexApiLogic);
   const { indexName } = useValues(IndexNameLogic);
-  const indexId = indexData?.connector?.id ?? '';
+  if (!isConnectorIndex(indexData)) {
+    return <></>;
+  }
+  const indexId = indexData.connector.id ?? '';
 
-  const hasApiKey = !!(indexData?.connector?.api_key_id ?? apiKeyData);
-
-  const ConnectorConfig: React.FC = () =>
-    indexData?.connector ? (
-      <ConnectorConfigurationConfig
-        apiKey={apiKeyData?.encoded}
-        configuration={indexData.connector.configuration}
-        connectorId={indexData.connector.id}
-        indexId={indexId}
-        indexName={indexName}
-      />
-    ) : (
-      <></>
-    );
+  const hasApiKey = !!(indexData.connector.api_key_id ?? apiKeyData);
 
   const ScheduleStep: React.FC = () => (
     <EuiFlexGroup direction="column">
@@ -145,7 +136,7 @@ export const ConnectorConfiguration: React.FC = () => {
                   children: (
                     <ApiKeyConfig
                       indexName={indexName}
-                      hasApiKey={!!indexData?.connector?.api_key_id}
+                      hasApiKey={!!indexData.connector.api_key_id}
                     />
                   ),
                   status: hasApiKey ? 'complete' : 'incomplete',
@@ -160,7 +151,7 @@ export const ConnectorConfiguration: React.FC = () => {
                 {
                   children: <ConnectorPackage />,
                   status:
-                    !indexData?.connector?.status ||
+                    !indexData.connector.status ||
                     indexData.connector.status === ConnectorStatus.CREATED
                       ? 'incomplete'
                       : 'complete',
@@ -173,9 +164,16 @@ export const ConnectorConfiguration: React.FC = () => {
                   titleSize: 'xs',
                 },
                 {
-                  children: <ConnectorConfig />,
+                  children: (
+                    <ConnectorConfigurationConfig
+                      apiKey={apiKeyData?.encoded}
+                      configuration={indexData.connector.configuration}
+                      connectorId={indexData.connector.id}
+                      indexId={indexId}
+                      indexName={indexName}
+                    />
+                  ),
                   status:
-                    indexData?.connector?.status &&
                     indexData.connector.status === ConnectorStatus.CONNECTED
                       ? 'complete'
                       : 'incomplete',
@@ -189,7 +187,7 @@ export const ConnectorConfiguration: React.FC = () => {
                 },
                 {
                   children: <ScheduleStep />,
-                  status: indexData?.connector?.scheduling.enabled ? 'complete' : 'incomplete',
+                  status: indexData.connector.scheduling.enabled ? 'complete' : 'incomplete',
                   title: i18n.translate(
                     'xpack.enterpriseSearch.content.indices.configurationConnector.steps.schedule.title',
                     {

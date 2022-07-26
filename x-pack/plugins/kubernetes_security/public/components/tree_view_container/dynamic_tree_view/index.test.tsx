@@ -9,7 +9,7 @@ import React from 'react';
 import { waitFor } from '@testing-library/react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../test';
 import { DynamicTreeView } from '.';
-import { clusterResponseMock, nodeResponseMock } from './mocks';
+import { clusterResponseMock, nodeResponseMock } from '../mocks';
 
 describe('DynamicTreeView component', () => {
   let render: (props?: any) => ReturnType<AppContextTestRender['render']>;

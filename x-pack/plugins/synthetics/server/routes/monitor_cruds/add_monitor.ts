@@ -6,23 +6,23 @@
  */
 import { schema } from '@kbn/config-schema';
 import { SavedObject, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import {
   ConfigKey,
   MonitorFields,
   SyntheticsMonitor,
   EncryptedSyntheticsMonitor,
 } from '../../../common/runtime_types';
-import { UMRestApiRouteFactory } from '../../legacy_uptime/routes/types';
+import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { validateMonitor } from './monitor_validation';
 import { sendTelemetryEvents, formatTelemetryEvent } from '../telemetry/monitor_upgrade_sender';
-import { formatHeartbeatRequest } from '../../synthetics_service/formatters/format_configs';
 import { formatSecrets } from '../../synthetics_service/utils/secrets';
 import type { UptimeServerSetup } from '../../legacy_uptime/lib/adapters/framework';
 
-export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
+export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
   path: API_URLS.SYNTHETICS_MONITORS,
   validate: {
@@ -31,7 +31,13 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       id: schema.maybe(schema.string()),
     }),
   },
-  handler: async ({ request, response, savedObjectsClient, server }): Promise<any> => {
+  handler: async ({
+    request,
+    response,
+    savedObjectsClient,
+    server,
+    syntheticsMonitorClient,
+  }): Promise<any> => {
     // usually id is auto generated, but this is useful for testing
     const { id } = request.query;
 
@@ -78,7 +84,12 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       });
     }
 
-    const errors = await syncNewMonitor({ monitor, monitorSavedObject: newMonitor, server });
+    const errors = await syncNewMonitor({
+      monitor,
+      monitorSavedObject: newMonitor,
+      server,
+      syntheticsMonitorClient,
+    });
 
     if (errors && errors.length > 0) {
       return response.ok({
@@ -98,17 +109,16 @@ export const syncNewMonitor = async ({
   monitor,
   monitorSavedObject,
   server,
+  syntheticsMonitorClient,
 }: {
   monitor: SyntheticsMonitor;
   monitorSavedObject: SavedObject<EncryptedSyntheticsMonitor>;
   server: UptimeServerSetup;
+  syntheticsMonitorClient: SyntheticsMonitorClient;
 }) => {
-  const errors = await server.syntheticsService.addConfig(
-    formatHeartbeatRequest({
-      monitor,
-      monitorId: monitorSavedObject.id,
-      customHeartbeatId: (monitor as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID],
-    })
+  const errors = await syntheticsMonitorClient.addMonitor(
+    monitor as MonitorFields,
+    monitorSavedObject.id
   );
 
   sendTelemetryEvents(

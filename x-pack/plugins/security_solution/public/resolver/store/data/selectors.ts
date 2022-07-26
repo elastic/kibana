@@ -228,23 +228,6 @@ export function currentRelatedEventData(state: DataState): SafeResolverEvent | n
   return state.currentRelatedEvent.data;
 }
 
-export const relatedEventCountByCategory: (
-  state: DataState
-) => (nodeID: string, eventCategory: string) => number | undefined = createSelector(
-  nodeStats,
-  (getNodeStats) => {
-    return (nodeID: string, eventCategory: string): number | undefined => {
-      const stats = getNodeStats(nodeID);
-      if (stats) {
-        const value = Object.prototype.hasOwnProperty.call(stats.byCategory, eventCategory);
-        if (typeof value === 'number' && Number.isFinite(value)) {
-          return value;
-        }
-      }
-    };
-  }
-);
-
 /**
  * Returns true if there might be more generations in the graph that we didn't get because we reached
  * the requested generations limit.

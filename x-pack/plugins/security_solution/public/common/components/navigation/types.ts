@@ -64,6 +64,7 @@ export const securityNavKeys = [
   SecurityPageName.trustedApps,
   SecurityPageName.users,
   SecurityPageName.kubernetes,
+  SecurityPageName.threatIntelligence,
 ] as const;
 export type SecurityNavKey = typeof securityNavKeys[number];
 
@@ -75,10 +76,6 @@ export interface SecuritySolutionTabNavigationProps {
   display?: 'default' | 'condensed';
   navTabs: GenericNavRecord;
 }
-export type GetUrlForApp = (
-  appId: string,
-  options?: { deepLinkId?: string; path?: string; absolute?: boolean }
-) => string;
 
 export type NavigateToUrl = (url: string) => void;
 export interface NavLinkItem {

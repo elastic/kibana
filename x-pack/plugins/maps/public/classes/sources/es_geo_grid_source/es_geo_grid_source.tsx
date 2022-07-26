@@ -27,7 +27,9 @@ import {
   MVT_GETGRIDTILE_API_PATH,
   RENDER_AS,
   SOURCE_TYPES,
+  STYLE_TYPE,
   VECTOR_SHAPE_TYPE,
+  VECTOR_STYLES,
 } from '../../../../common/constants';
 import { encodeMvtResponseBody } from '../../../../common/mvt_request_body';
 import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
@@ -42,13 +44,16 @@ import { GetFeatureActionsArgs, GeoJsonWithMeta, IMvtVectorSource } from '../vec
 import {
   ESGeoGridSourceDescriptor,
   MapExtent,
+  SizeDynamicOptions,
   TooltipFeatureAction,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
-import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
+import { ImmutableSourceProperty, OnSourceChangeArgs, SourceEditorArgs } from '../source';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { makePublicExecutionContext } from '../../../util';
 import { isMvt } from './is_mvt';
+import { VectorStyle } from '../../styles/vector/vector_style';
+import { getIconSize } from './get_icon_size';
 
 type ESGeoGridSourceSyncMeta = Pick<ESGeoGridSourceDescriptor, 'requestType' | 'resolution'>;
 
@@ -88,12 +93,40 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
   }
 
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> {
+    async function onChange(...sourceChanges: OnSourceChangeArgs[]) {
+      sourceEditorArgs.onChange(...sourceChanges);
+      const resolutionPropChange = sourceChanges.find((sourceChange) => {
+        return sourceChange.propName === 'resolution';
+      });
+      if (resolutionPropChange) {
+        const propertiesDescriptor = (
+          sourceEditorArgs.style as VectorStyle
+        ).getPropertiesDescriptor();
+        if (propertiesDescriptor[VECTOR_STYLES.ICON_SIZE].type === STYLE_TYPE.DYNAMIC) {
+          propertiesDescriptor[VECTOR_STYLES.ICON_SIZE] = {
+            ...propertiesDescriptor[VECTOR_STYLES.ICON_SIZE],
+            options: {
+              ...propertiesDescriptor[VECTOR_STYLES.ICON_SIZE].options,
+              ...getIconSize(resolutionPropChange.value as GRID_RESOLUTION),
+            },
+          } as {
+            type: STYLE_TYPE.DYNAMIC;
+            options: SizeDynamicOptions;
+          };
+          const vectorStyleDescriptor = VectorStyle.createDescriptor(
+            propertiesDescriptor,
+            (sourceEditorArgs.style as VectorStyle).isTimeAware()
+          );
+          sourceEditorArgs.onStyleDescriptorChange(vectorStyleDescriptor);
+        }
+      }
+    }
     return (
       <UpdateSourceEditor
         currentLayerType={sourceEditorArgs.currentLayerType}
         geoFieldName={this.getGeoFieldName()}
         indexPatternId={this.getIndexPatternId()}
-        onChange={sourceEditorArgs.onChange}
+        onChange={onChange}
         metrics={this._descriptor.metrics}
         renderAs={this._descriptor.requestType}
         resolution={this._descriptor.resolution}

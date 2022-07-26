@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { isOfAggregateQueryType, Query, AggregateQuery } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { getSortArray, SortPairArr } from '../../../components/doc_table/utils/get_sort';
 
@@ -19,7 +19,8 @@ export function getDataViewAppState(
   currentColumns: string[],
   currentSort: SortPairArr[],
   modifyColumns: boolean = true,
-  sortDirection: string = 'desc'
+  sortDirection: string = 'desc',
+  query?: Query | AggregateQuery
 ) {
   const nextColumns = modifyColumns
     ? currentColumns.filter(
@@ -27,7 +28,11 @@ export function getDataViewAppState(
           nextDataView.fields.getByName(column) || !currentDataView.fields.getByName(column)
       )
     : currentColumns;
-  const columns = nextColumns.length ? nextColumns : [];
+
+  let columns = nextColumns.length ? nextColumns : [];
+  if (query && isOfAggregateQueryType(query)) {
+    columns = [];
+  }
 
   // when switching from an data view with timeField to an data view without timeField
   // filter out sorting by timeField in case it is set. data views without timeField don't

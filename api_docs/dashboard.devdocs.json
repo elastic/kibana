@@ -2080,7 +2080,7 @@
             "section": "def-common.SavedDashboardPanel730ToLatest",
             "text": "SavedDashboardPanel730ToLatest"
           },
-          "[] | undefined; savedQuery?: string | undefined; options?: ",
+          "[] | undefined; savedQuery?: string | undefined; tags?: string[] | undefined; options?: ",
           "DashboardOptions",
           " | undefined; controlGroupInput?: ",
           {

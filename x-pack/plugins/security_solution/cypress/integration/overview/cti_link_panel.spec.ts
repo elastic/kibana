@@ -28,7 +28,7 @@ describe('CTI Link Panel', () => {
     cy.get(`${OVERVIEW_CTI_ENABLE_MODULE_BUTTON}`).should('exist');
     cy.get(`${OVERVIEW_CTI_ENABLE_MODULE_BUTTON}`)
       .should('have.attr', 'href')
-      .and('match', /app\/integrations\/browse\?q=threat%20intelligence/);
+      .and('match', /app\/integrations\/browse\/threat_intel/);
   });
 
   describe('enabled threat intel module', () => {

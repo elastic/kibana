@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { updateSearchSource } from './update_search_source';
@@ -14,7 +14,6 @@ import { AppState } from '../services/discover_state';
 import type { SortOrder } from '../../../services/saved_searches';
 import { DiscoverServices } from '../../../build_services';
 import { saveSavedSearch } from '../../../services/saved_searches';
-
 /**
  * Helper function to update and persist the given savedSearch
  */
@@ -61,6 +60,13 @@ export async function persistSavedSearch(
 
   if (state.hideAggregatedPreview) {
     savedSearch.hideAggregatedPreview = state.hideAggregatedPreview;
+  }
+
+  // add a flag here to identify text based language queries
+  // these should be filtered out from the visualize editor
+  const isTextBasedQuery = state.query && isOfAggregateQueryType(state.query);
+  if (savedSearch.isTextBasedQuery || isTextBasedQuery) {
+    savedSearch.isTextBasedQuery = isTextBasedQuery;
   }
 
   try {

@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiSplitPanel, EuiText } from '@elastic/eui';
+import { EuiSplitPanel } from '@elastic/eui';
 import { useStyles } from './styles';
 import { IndexPattern, GlobalFilter, TreeNavSelection, KubernetesCollection } from '../../types';
 import { TreeNav } from './tree_nav';
@@ -39,14 +39,12 @@ export const TreeViewContainer = ({
   return (
     <EuiSplitPanel.Outer direction="row" hasBorder borderRadius="m" css={styles.outerPanel}>
       <EuiSplitPanel.Inner color="subdued" grow={false} css={styles.navPanel}>
-        <EuiText css={styles.treeViewNav}>
-          <TreeNav
-            indexPattern={indexPattern}
-            globalFilter={globalFilter}
-            onSelect={onTreeNavSelect}
-            hasSelection={hasSelection}
-          />
-        </EuiText>
+        <TreeNav
+          indexPattern={indexPattern}
+          globalFilter={globalFilter}
+          onSelect={onTreeNavSelect}
+          hasSelection={hasSelection}
+        />
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner css={styles.sessionsPanel}>
         <Breadcrumb treeNavSelection={treeNavSelection} onSelect={onTreeNavSelect} />

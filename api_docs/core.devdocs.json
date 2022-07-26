@@ -1050,7 +1050,10 @@
         "description": [
           "\nThe read-only set of capabilities available for the current UI session.\nCapabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID,\nand the boolean is a flag indicating if the capability is enabled or disabled.\n"
         ],
-        "path": "src/core/types/capabilities.ts",
+        "signature": [
+          "Capabilities"
+        ],
+        "path": "node_modules/@types/kbn__core-capabilities-common/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -1065,7 +1068,7 @@
             "signature": [
               "{ [x: string]: boolean; }"
             ],
-            "path": "src/core/types/capabilities.ts",
+            "path": "node_modules/@types/kbn__core-capabilities-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -1080,7 +1083,7 @@
             "signature": [
               "{ [sectionId: string]: Record<string, boolean>; }"
             ],
-            "path": "src/core/types/capabilities.ts",
+            "path": "node_modules/@types/kbn__core-capabilities-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -1095,7 +1098,7 @@
             "signature": [
               "{ [x: string]: boolean; }"
             ],
-            "path": "src/core/types/capabilities.ts",
+            "path": "node_modules/@types/kbn__core-capabilities-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -1110,7 +1113,7 @@
             "signature": [
               "[key: string]:  Record<string, boolean | Record<string, boolean>>"
             ],
-            "path": "src/core/types/capabilities.ts",
+            "path": "node_modules/@types/kbn__core-capabilities-common/index.d.ts",
             "deprecated": false
           }
         ],
@@ -9492,7 +9495,7 @@
         "label": "KibanaExecutionContext",
         "description": [],
         "signature": [
-          "{ readonly type?: string | undefined; readonly name?: string | undefined; readonly page?: string | undefined; readonly id?: string | undefined; readonly description?: string | undefined; readonly url?: string | undefined; child?: ",
+          "{ readonly type?: string | undefined; readonly name?: string | undefined; readonly page?: string | undefined; readonly id?: string | undefined; readonly description?: string | undefined; readonly url?: string | undefined; readonly meta?: { [key: string]: string | number | boolean | undefined; } | undefined; child?: ",
           "KibanaExecutionContext",
           " | undefined; }"
         ],
@@ -10329,309 +10332,20 @@
       },
       {
         "parentPluginId": "core",
-        "id": "def-server.ElasticsearchConfig",
-        "type": "Class",
-        "tags": [],
-        "label": "ElasticsearchConfig",
-        "description": [
-          "\nWrapper of config schema."
-        ],
-        "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ElasticsearchConfig.healthCheckDelay",
-            "type": "Object",
-            "tags": [],
-            "label": "healthCheckDelay",
-            "description": [
-              "\nThe interval between health check requests Kibana sends to the Elasticsearch."
-            ],
-            "signature": [
-              "moment.Duration"
-            ],
-            "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ElasticsearchConfig.ignoreVersionMismatch",
-            "type": "boolean",
-            "tags": [],
-            "label": "ignoreVersionMismatch",
-            "description": [
-              "\nWhether to allow kibana to connect to a non-compatible elasticsearch node."
-            ],
-            "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ElasticsearchConfig.apiVersion",
-            "type": "string",
-            "tags": [],
-            "label": "apiVersion",
-            "description": [
-              "\nVersion of the Elasticsearch (6.7, 7.1 or `master`) client will be connecting to."
-            ],
-            "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ElasticsearchConfig.maxSockets",
-            "type": "number",
-            "tags": [],
-            "label": "maxSockets",
-            "description": [
-              "\nThe maximum number of sockets that can be used for communications with elasticsearch."
-            ],
-            "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ElasticsearchConfig.compression",
-            "type": "boolean",
-            "tags": [],
-            "label": "compression",
-            "description": [
-              "\nWhether to use compression for communications with elasticsearch."
-            ],
-            "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ElasticsearchConfig.hosts",
-            "type": "Array",
-            "tags": [],
-            "label": "hosts",
-            "description": [
-              "\nHosts that the client will connect to. If sniffing is enabled, this list will\nbe used as seeds to discover the rest of your cluster."
-            ],
-            "signature": [
-              "string[]"
-            ],
-            "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ElasticsearchConfig.requestHeadersWhitelist",
-            "type": "Array",
-            "tags": [],
-            "label": "requestHeadersWhitelist",
-            "description": [
-              "\nList of Kibana client-side headers to send to Elasticsearch when request\nscoped cluster client is used. If this is an empty array then *no* client-side\nwill be sent."
-            ],
-            "signature": [
-              "string[]"
-            ],
-            "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ElasticsearchConfig.pingTimeout",
-            "type": "Object",
-            "tags": [],
-            "label": "pingTimeout",
-            "description": [
-              "\nTimeout after which PING HTTP request will be aborted and retried."
-            ],
-            "signature": [
-              "moment.Duration"
-            ],
-            "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ElasticsearchConfig.requestTimeout",
-            "type": "Object",
-            "tags": [],
-            "label": "requestTimeout",
-            "description": [
-              "\nTimeout after which HTTP request will be aborted and retried."
-            ],
-            "signature": [
-              "moment.Duration"
-            ],
-            "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ElasticsearchConfig.shardTimeout",
-            "type": "Object",
-            "tags": [],
-            "label": "shardTimeout",
-            "description": [
-              "\nTimeout for Elasticsearch to wait for responses from shards. Set to 0 to disable."
-            ],
-            "signature": [
-              "moment.Duration"
-            ],
-            "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ElasticsearchConfig.sniffOnStart",
-            "type": "boolean",
-            "tags": [],
-            "label": "sniffOnStart",
-            "description": [
-              "\nSpecifies whether the client should attempt to detect the rest of the cluster\nwhen it is first instantiated."
-            ],
-            "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ElasticsearchConfig.sniffInterval",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "sniffInterval",
-            "description": [
-              "\nInterval to perform a sniff operation and make sure the list of nodes is complete.\nIf `false` then sniffing is disabled."
-            ],
-            "signature": [
-              "false | moment.Duration"
-            ],
-            "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ElasticsearchConfig.sniffOnConnectionFault",
-            "type": "boolean",
-            "tags": [],
-            "label": "sniffOnConnectionFault",
-            "description": [
-              "\nSpecifies whether the client should immediately sniff for a more current list\nof nodes when a connection dies."
-            ],
-            "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ElasticsearchConfig.username",
-            "type": "string",
-            "tags": [],
-            "label": "username",
-            "description": [
-              "\nIf Elasticsearch is protected with basic authentication, this setting provides\nthe username that the Kibana server uses to perform its administrative functions.\nCannot be used in conjunction with serviceAccountToken."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ElasticsearchConfig.password",
-            "type": "string",
-            "tags": [],
-            "label": "password",
-            "description": [
-              "\nIf Elasticsearch is protected with basic authentication, this setting provides\nthe password that the Kibana server uses to perform its administrative functions."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ElasticsearchConfig.serviceAccountToken",
-            "type": "string",
-            "tags": [],
-            "label": "serviceAccountToken",
-            "description": [
-              "\nIf Elasticsearch security features are enabled, this setting provides the service account\ntoken that the Kibana server users to perform its administrative functions.\n\nThis is an alternative to specifying a username and password."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ElasticsearchConfig.ssl",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "ssl",
-            "description": [
-              "\nSet of settings configure SSL connection between Kibana and Elasticsearch that\nare required when `xpack.ssl.verification_mode` in Elasticsearch is set to\neither `certificate` or `full`."
-            ],
-            "signature": [
-              "Pick<Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>, \"key\" | \"verificationMode\" | \"certificate\" | \"keyPassphrase\" | \"alwaysPresentCertificate\"> & { certificateAuthorities?: string[] | undefined; }"
-            ],
-            "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ElasticsearchConfig.customHeaders",
-            "type": "Object",
-            "tags": [],
-            "label": "customHeaders",
-            "description": [
-              "\nHeader names and values to send to Elasticsearch with every request. These\nheaders cannot be overwritten by client-side headers and aren't affected by\n`requestHeadersWhitelist` configuration."
-            ],
-            "signature": [
-              "{ [x: string]: string; }"
-            ],
-            "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ElasticsearchConfig.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "core",
-                "id": "def-server.ElasticsearchConfig.Unnamed.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "rawConfig",
-                "description": [],
-                "signature": [
-                  "Readonly<{ username?: string | undefined; password?: string | undefined; serviceAccountToken?: string | undefined; } & { ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>; healthCheck: Readonly<{} & { delay: moment.Duration; }>; customHeaders: Record<string, string>; hosts: string | string[]; sniffOnStart: boolean; sniffInterval: false | moment.Duration; sniffOnConnectionFault: boolean; maxSockets: number; compression: boolean; requestHeadersWhitelist: string | string[]; shardTimeout: moment.Duration; requestTimeout: moment.Duration; pingTimeout: moment.Duration; logQueries: boolean; apiVersion: string; ignoreVersionMismatch: boolean; skipStartupConnectionCheck: boolean; }>"
-                ],
-                "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
         "id": "def-server.EventLoopDelaysMonitor",
         "type": "Class",
         "tags": [],
         "label": "EventLoopDelaysMonitor",
         "description": [],
-        "path": "src/core/server/metrics/event_loop_delays/event_loop_delays_monitor.ts",
+        "signature": [
+          "EventLoopDelaysMonitor",
+          " implements ",
+          "IEventLoopDelaysMonitor",
+          "<",
+          "IntervalHistogram",
+          ">"
+        ],
+        "path": "node_modules/@types/kbn__core-metrics-collectors-server-internal/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -10646,7 +10360,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/core/server/metrics/event_loop_delays/event_loop_delays_monitor.ts",
+            "path": "node_modules/@types/kbn__core-metrics-collectors-server-internal/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -10658,19 +10372,13 @@
             "tags": [],
             "label": "collect",
             "description": [
-              "\nCollect gathers event loop delays metrics from nodejs perf_hooks.monitorEventLoopDelay\nthe histogram calculations start from the last time `reset` was called or this\nEventLoopDelaysMonitor instance was created.\n\nReturns metrics in milliseconds."
+              "\nCollect gathers event loop delays metrics from nodejs perf_hooks.monitorEventLoopDelay\nthe histogram calculations start from the last time `reset` was called or this\nEventLoopDelaysMonitor instance was created.\n\nReturns metrics in milliseconds.\n  "
             ],
             "signature": [
               "() => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.IntervalHistogram",
-                "text": "IntervalHistogram"
-              }
+              "IntervalHistogram"
             ],
-            "path": "src/core/server/metrics/event_loop_delays/event_loop_delays_monitor.ts",
+            "path": "node_modules/@types/kbn__core-metrics-collectors-server-internal/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -10687,7 +10395,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/core/server/metrics/event_loop_delays/event_loop_delays_monitor.ts",
+            "path": "node_modules/@types/kbn__core-metrics-collectors-server-internal/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -10704,7 +10412,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/core/server/metrics/event_loop_delays/event_loop_delays_monitor.ts",
+            "path": "node_modules/@types/kbn__core-metrics-collectors-server-internal/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -10787,50 +10495,31 @@
         "description": [],
         "signature": [
           "({ internalClient, log, kibanaVersion, ignoreVersionMismatch, esVersionCheckInterval: healthCheckInterval, }: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.PollEsNodesVersionOptions",
-            "text": "PollEsNodesVersionOptions"
-          },
+          "PollEsNodesVersionOptions",
           ") => ",
           "Observable",
           "<",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.NodesVersionCompatibility",
-            "text": "NodesVersionCompatibility"
-          },
+          "NodesVersionCompatibility",
           ">"
         ],
-        "path": "src/core/server/elasticsearch/version_check/ensure_es_version.ts",
+        "path": "node_modules/@types/kbn__core-elasticsearch-server-internal/index.d.ts",
         "deprecated": false,
+        "returnComment": [],
         "children": [
           {
             "parentPluginId": "core",
             "id": "def-server.pollEsNodesVersion.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  internalClient,\n  log,\n  kibanaVersion,\n  ignoreVersionMismatch,\n  esVersionCheckInterval: healthCheckInterval,\n}",
+            "label": "__0",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.PollEsNodesVersionOptions",
-                "text": "PollEsNodesVersionOptions"
-              }
+              "PollEsNodesVersionOptions"
             ],
-            "path": "src/core/server/elasticsearch/version_check/ensure_es_version.ts",
-            "deprecated": false,
-            "isRequired": true
+            "path": "node_modules/@types/kbn__core-elasticsearch-server-internal/index.d.ts",
+            "deprecated": false
           }
         ],
-        "returnComment": [],
         "initialIsOpen": false
       }
     ],
@@ -11709,7 +11398,10 @@
         "description": [
           "\nThe read-only set of capabilities available for the current UI session.\nCapabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID,\nand the boolean is a flag indicating if the capability is enabled or disabled.\n"
         ],
-        "path": "src/core/types/capabilities.ts",
+        "signature": [
+          "Capabilities"
+        ],
+        "path": "node_modules/@types/kbn__core-capabilities-common/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -11724,7 +11416,7 @@
             "signature": [
               "{ [x: string]: boolean; }"
             ],
-            "path": "src/core/types/capabilities.ts",
+            "path": "node_modules/@types/kbn__core-capabilities-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -11739,7 +11431,7 @@
             "signature": [
               "{ [sectionId: string]: Record<string, boolean>; }"
             ],
-            "path": "src/core/types/capabilities.ts",
+            "path": "node_modules/@types/kbn__core-capabilities-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -11754,7 +11446,7 @@
             "signature": [
               "{ [x: string]: boolean; }"
             ],
-            "path": "src/core/types/capabilities.ts",
+            "path": "node_modules/@types/kbn__core-capabilities-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -11769,7 +11461,7 @@
             "signature": [
               "[key: string]:  Record<string, boolean | Record<string, boolean>>"
             ],
-            "path": "src/core/types/capabilities.ts",
+            "path": "node_modules/@types/kbn__core-capabilities-common/index.d.ts",
             "deprecated": false
           }
         ],
@@ -11784,7 +11476,10 @@
         "description": [
           "\nAPIs to manage the {@link Capabilities} that will be used by the application.\n\nPlugins relying on capabilities to toggle some of their features should register them during the setup phase\nusing the `registerProvider` method.\n\nPlugins having the responsibility to restrict capabilities depending on a given context should register\ntheir capabilities switcher using the `registerSwitcher` method.\n\nRefers to the methods documentation for complete description and examples.\n"
         ],
-        "path": "src/core/server/capabilities/capabilities_service.ts",
+        "signature": [
+          "CapabilitiesSetup"
+        ],
+        "path": "node_modules/@types/kbn__core-capabilities-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -11798,16 +11493,10 @@
             ],
             "signature": [
               "(provider: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CapabilitiesProvider",
-                "text": "CapabilitiesProvider"
-              },
+              "CapabilitiesProvider",
               ") => void"
             ],
-            "path": "src/core/server/capabilities/capabilities_service.ts",
+            "path": "node_modules/@types/kbn__core-capabilities-server/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -11818,15 +11507,9 @@
                 "label": "provider",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.CapabilitiesProvider",
-                    "text": "CapabilitiesProvider"
-                  }
+                  "CapabilitiesProvider"
                 ],
-                "path": "src/core/server/capabilities/capabilities_service.ts",
+                "path": "node_modules/@types/kbn__core-capabilities-server/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -11844,16 +11527,10 @@
             ],
             "signature": [
               "(switcher: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CapabilitiesSwitcher",
-                "text": "CapabilitiesSwitcher"
-              },
+              "CapabilitiesSwitcher",
               ") => void"
             ],
-            "path": "src/core/server/capabilities/capabilities_service.ts",
+            "path": "node_modules/@types/kbn__core-capabilities-server/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -11864,15 +11541,9 @@
                 "label": "switcher",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.CapabilitiesSwitcher",
-                    "text": "CapabilitiesSwitcher"
-                  }
+                  "CapabilitiesSwitcher"
                 ],
-                "path": "src/core/server/capabilities/capabilities_service.ts",
+                "path": "node_modules/@types/kbn__core-capabilities-server/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -11891,7 +11562,10 @@
         "description": [
           "\nAPIs to access the application {@link Capabilities}.\n"
         ],
-        "path": "src/core/server/capabilities/capabilities_service.ts",
+        "signature": [
+          "CapabilitiesStart"
+        ],
+        "path": "node_modules/@types/kbn__core-capabilities-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -11907,18 +11581,12 @@
               "(request: ",
               "KibanaRequest",
               "<unknown, unknown, unknown, any>, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ResolveCapabilitiesOptions",
-                "text": "ResolveCapabilitiesOptions"
-              },
+              "ResolveCapabilitiesOptions",
               " | undefined) => Promise<",
               "Capabilities",
               ">"
             ],
-            "path": "src/core/server/capabilities/capabilities_service.ts",
+            "path": "node_modules/@types/kbn__core-capabilities-server/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -11932,7 +11600,7 @@
                   "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
-                "path": "src/core/server/capabilities/capabilities_service.ts",
+                "path": "node_modules/@types/kbn__core-capabilities-server/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -11944,16 +11612,10 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.ResolveCapabilitiesOptions",
-                    "text": "ResolveCapabilitiesOptions"
-                  },
+                  "ResolveCapabilitiesOptions",
                   " | undefined"
                 ],
-                "path": "src/core/server/capabilities/capabilities_service.ts",
+                "path": "node_modules/@types/kbn__core-capabilities-server/index.d.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -12505,13 +12167,7 @@
               "{@link ElasticsearchServicePreboot}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ElasticsearchServicePreboot",
-                "text": "ElasticsearchServicePreboot"
-              }
+              "ElasticsearchServicePreboot"
             ],
             "path": "src/core/server/index.ts",
             "deprecated": false
@@ -12597,13 +12253,7 @@
             "label": "elasticsearch",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ElasticsearchRequestHandlerContext",
-                "text": "ElasticsearchRequestHandlerContext"
-              }
+              "ElasticsearchRequestHandlerContext"
             ],
             "path": "src/core/server/core_route_handler_context.ts",
             "deprecated": false
@@ -12712,13 +12362,7 @@
               "{@link CapabilitiesSetup}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CapabilitiesSetup",
-                "text": "CapabilitiesSetup"
-              }
+              "CapabilitiesSetup"
             ],
             "path": "src/core/server/index.ts",
             "deprecated": false
@@ -12748,13 +12392,7 @@
               "{@link ElasticsearchServiceSetup}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ElasticsearchServiceSetup",
-                "text": "ElasticsearchServiceSetup"
-              }
+              "ElasticsearchServiceSetup"
             ],
             "path": "src/core/server/index.ts",
             "deprecated": false
@@ -12852,13 +12490,7 @@
               "{@link MetricsServiceSetup}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.MetricsServiceSetup",
-                "text": "MetricsServiceSetup"
-              }
+              "MetricsServiceSetup"
             ],
             "path": "src/core/server/index.ts",
             "deprecated": false
@@ -13018,13 +12650,7 @@
               "{@link CapabilitiesStart}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CapabilitiesStart",
-                "text": "CapabilitiesStart"
-              }
+              "CapabilitiesStart"
             ],
             "path": "src/core/server/index.ts",
             "deprecated": false
@@ -13054,13 +12680,7 @@
               "{@link ElasticsearchServiceStart}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ElasticsearchServiceStart",
-                "text": "ElasticsearchServiceStart"
-              }
+              "ElasticsearchServiceStart"
             ],
             "path": "src/core/server/index.ts",
             "deprecated": false
@@ -13105,13 +12725,7 @@
               "{@link MetricsServiceStart}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.MetricsServiceSetup",
-                "text": "MetricsServiceSetup"
-              }
+              "MetricsServiceSetup"
             ],
             "path": "src/core/server/index.ts",
             "deprecated": false
@@ -13181,13 +12795,7 @@
             "label": "elasticsearch",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ServiceStatus",
-                "text": "ServiceStatus"
-              },
+              "ServiceStatus",
               "<unknown>"
             ],
             "path": "src/core/server/status/types.ts",
@@ -13201,13 +12809,7 @@
             "label": "savedObjects",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ServiceStatus",
-                "text": "ServiceStatus"
-              },
+              "ServiceStatus",
               "<unknown>"
             ],
             "path": "src/core/server/status/types.ts",
@@ -13635,6 +13237,315 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-server.ElasticsearchClientConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "ElasticsearchClientConfig",
+        "description": [
+          "\nConfiguration options to be used to create a {@link IClusterClient | cluster client}\n"
+        ],
+        "signature": [
+          "ElasticsearchClientConfig"
+        ],
+        "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ElasticsearchClientConfig.customHeaders",
+            "type": "Object",
+            "tags": [],
+            "label": "customHeaders",
+            "description": [],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ElasticsearchClientConfig.requestHeadersWhitelist",
+            "type": "Array",
+            "tags": [],
+            "label": "requestHeadersWhitelist",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ElasticsearchClientConfig.maxSockets",
+            "type": "number",
+            "tags": [],
+            "label": "maxSockets",
+            "description": [],
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ElasticsearchClientConfig.compression",
+            "type": "boolean",
+            "tags": [],
+            "label": "compression",
+            "description": [],
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ElasticsearchClientConfig.sniffOnStart",
+            "type": "boolean",
+            "tags": [],
+            "label": "sniffOnStart",
+            "description": [],
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ElasticsearchClientConfig.sniffOnConnectionFault",
+            "type": "boolean",
+            "tags": [],
+            "label": "sniffOnConnectionFault",
+            "description": [],
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ElasticsearchClientConfig.sniffInterval",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sniffInterval",
+            "description": [],
+            "signature": [
+              "false | moment.Duration"
+            ],
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ElasticsearchClientConfig.username",
+            "type": "string",
+            "tags": [],
+            "label": "username",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ElasticsearchClientConfig.password",
+            "type": "string",
+            "tags": [],
+            "label": "password",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ElasticsearchClientConfig.serviceAccountToken",
+            "type": "string",
+            "tags": [],
+            "label": "serviceAccountToken",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ElasticsearchClientConfig.hosts",
+            "type": "Array",
+            "tags": [],
+            "label": "hosts",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ElasticsearchClientConfig.keepAlive",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "keepAlive",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ElasticsearchClientConfig.pingTimeout",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "pingTimeout",
+            "description": [],
+            "signature": [
+              "number | moment.Duration | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ElasticsearchClientConfig.requestTimeout",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "requestTimeout",
+            "description": [],
+            "signature": [
+              "number | moment.Duration | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ElasticsearchClientConfig.caFingerprint",
+            "type": "string",
+            "tags": [],
+            "label": "caFingerprint",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ElasticsearchClientConfig.ssl",
+            "type": "Object",
+            "tags": [],
+            "label": "ssl",
+            "description": [],
+            "signature": [
+              "ElasticsearchClientSslConfig",
+              " | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.ElasticsearchClientSslConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "ElasticsearchClientSslConfig",
+        "description": [],
+        "signature": [
+          "ElasticsearchClientSslConfig"
+        ],
+        "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ElasticsearchClientSslConfig.verificationMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "verificationMode",
+            "description": [],
+            "signature": [
+              "\"none\" | \"full\" | \"certificate\" | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ElasticsearchClientSslConfig.certificate",
+            "type": "string",
+            "tags": [],
+            "label": "certificate",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ElasticsearchClientSslConfig.certificateAuthorities",
+            "type": "Array",
+            "tags": [],
+            "label": "certificateAuthorities",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ElasticsearchClientSslConfig.key",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ElasticsearchClientSslConfig.keyPassphrase",
+            "type": "string",
+            "tags": [],
+            "label": "keyPassphrase",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ElasticsearchClientSslConfig.alwaysPresentCertificate",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "alwaysPresentCertificate",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-server.ElasticsearchConfigPreboot",
         "type": "Interface",
         "tags": [],
@@ -13642,7 +13553,10 @@
         "description": [
           "\nA limited set of Elasticsearch configuration entries exposed to the `preboot` plugins at `setup`.\n"
         ],
-        "path": "src/core/server/elasticsearch/types.ts",
+        "signature": [
+          "ElasticsearchConfigPreboot"
+        ],
+        "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -13657,7 +13571,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "src/core/server/elasticsearch/types.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -13669,7 +13583,7 @@
             "description": [
               "\nIndicates whether Elasticsearch configuration includes credentials (`username`, `password` or `serviceAccountToken`)."
             ],
-            "path": "src/core/server/elasticsearch/types.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
             "deprecated": false
           }
         ],
@@ -13684,7 +13598,10 @@
         "description": [
           "\nCore's `elasticsearch` request handler context."
         ],
-        "path": "src/core/server/elasticsearch/elasticsearch_route_handler_context.ts",
+        "signature": [
+          "ElasticsearchRequestHandlerContext"
+        ],
+        "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -13695,15 +13612,9 @@
             "label": "client",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.IScopedClusterClient",
-                "text": "IScopedClusterClient"
-              }
+              "IScopedClusterClient"
             ],
-            "path": "src/core/server/elasticsearch/elasticsearch_route_handler_context.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
             "deprecated": false
           }
         ],
@@ -13716,7 +13627,10 @@
         "tags": [],
         "label": "ElasticsearchServicePreboot",
         "description": [],
-        "path": "src/core/server/elasticsearch/types.ts",
+        "signature": [
+          "ElasticsearchServicePreboot"
+        ],
+        "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -13731,7 +13645,7 @@
             "signature": [
               "{ readonly hosts: string[]; readonly credentialsSpecified: boolean; }"
             ],
-            "path": "src/core/server/elasticsearch/types.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -13745,23 +13659,11 @@
             ],
             "signature": [
               "(type: string, clientConfig?: Partial<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ElasticsearchClientConfig",
-                "text": "ElasticsearchClientConfig"
-              },
+              "ElasticsearchClientConfig",
               "> | undefined) => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ICustomClusterClient",
-                "text": "ICustomClusterClient"
-              }
+              "ICustomClusterClient"
             ],
-            "path": "src/core/server/elasticsearch/types.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -13776,7 +13678,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/core/server/elasticsearch/types.ts",
+                "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -13791,16 +13693,10 @@
                 ],
                 "signature": [
                   "Partial<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.ElasticsearchClientConfig",
-                    "text": "ElasticsearchClientConfig"
-                  },
+                  "ElasticsearchClientConfig",
                   "> | undefined"
                 ],
-                "path": "src/core/server/elasticsearch/types.ts",
+                "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -13817,7 +13713,10 @@
         "tags": [],
         "label": "ElasticsearchServiceSetup",
         "description": [],
-        "path": "src/core/server/elasticsearch/types.ts",
+        "signature": [
+          "ElasticsearchServiceSetup"
+        ],
+        "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -13831,16 +13730,10 @@
             ],
             "signature": [
               "(handler: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.UnauthorizedErrorHandler",
-                "text": "UnauthorizedErrorHandler"
-              },
+              "UnauthorizedErrorHandler",
               ") => void"
             ],
-            "path": "src/core/server/elasticsearch/types.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -13851,15 +13744,9 @@
                 "label": "handler",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.UnauthorizedErrorHandler",
-                    "text": "UnauthorizedErrorHandler"
-                  }
+                  "UnauthorizedErrorHandler"
                 ],
-                "path": "src/core/server/elasticsearch/types.ts",
+                "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -13879,21 +13766,23 @@
               "{ readonly config$: ",
               "Observable",
               "<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ElasticsearchConfig",
-                "text": "ElasticsearchConfig"
-              },
+              "IElasticsearchConfig",
               ">; }"
             ],
-            "path": "src/core/server/elasticsearch/types.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
             "deprecated": true,
             "references": [
               {
                 "plugin": "console",
                 "path": "src/plugins/console/server/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/core-elasticsearch-server-internal",
+                "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/elasticsearch_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-elasticsearch-server-internal",
+                "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/elasticsearch_service.test.ts"
               }
             ]
           }
@@ -13907,7 +13796,10 @@
         "tags": [],
         "label": "ElasticsearchServiceStart",
         "description": [],
-        "path": "src/core/server/elasticsearch/types.ts",
+        "signature": [
+          "ElasticsearchServiceStart"
+        ],
+        "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -13920,15 +13812,9 @@
               "\nA pre-configured {@link IClusterClient | Elasticsearch client}\n"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.IClusterClient",
-                "text": "IClusterClient"
-              }
+              "IClusterClient"
             ],
-            "path": "src/core/server/elasticsearch/types.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -13942,23 +13828,11 @@
             ],
             "signature": [
               "(type: string, clientConfig?: Partial<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ElasticsearchClientConfig",
-                "text": "ElasticsearchClientConfig"
-              },
+              "ElasticsearchClientConfig",
               "> | undefined) => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ICustomClusterClient",
-                "text": "ICustomClusterClient"
-              }
+              "ICustomClusterClient"
             ],
-            "path": "src/core/server/elasticsearch/types.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -13973,7 +13847,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/core/server/elasticsearch/types.ts",
+                "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -13988,73 +13862,15 @@
                 ],
                 "signature": [
                   "Partial<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.ElasticsearchClientConfig",
-                    "text": "ElasticsearchClientConfig"
-                  },
+                  "ElasticsearchClientConfig",
                   "> | undefined"
                 ],
-                "path": "src/core/server/elasticsearch/types.ts",
+                "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
                 "deprecated": false,
                 "isRequired": false
               }
             ],
             "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.ElasticsearchStatusMeta",
-        "type": "Interface",
-        "tags": [],
-        "label": "ElasticsearchStatusMeta",
-        "description": [],
-        "path": "src/core/server/elasticsearch/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ElasticsearchStatusMeta.warningNodes",
-            "type": "Array",
-            "tags": [],
-            "label": "warningNodes",
-            "description": [],
-            "signature": [
-              "NodeInfo[]"
-            ],
-            "path": "src/core/server/elasticsearch/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ElasticsearchStatusMeta.incompatibleNodes",
-            "type": "Array",
-            "tags": [],
-            "label": "incompatibleNodes",
-            "description": [],
-            "signature": [
-              "NodeInfo[]"
-            ],
-            "path": "src/core/server/elasticsearch/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ElasticsearchStatusMeta.nodesInfoRequestError",
-            "type": "Object",
-            "tags": [],
-            "label": "nodesInfoRequestError",
-            "description": [],
-            "signature": [
-              "Error | undefined"
-            ],
-            "path": "src/core/server/elasticsearch/types.ts",
-            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -14551,7 +14367,10 @@
         "description": [
           "\nFake request object created manually by Kibana plugins."
         ],
-        "path": "src/core/server/elasticsearch/types.ts",
+        "signature": [
+          "FakeRequest"
+        ],
+        "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -14564,9 +14383,9 @@
               "Headers used for authentication against Elasticsearch"
             ],
             "signature": [
-              "{ from?: string | string[] | undefined; origin?: string | string[] | undefined; warning?: string | string[] | undefined; location?: string | string[] | undefined; date?: string | string[] | undefined; expires?: string | string[] | undefined; range?: string | string[] | undefined; allow?: string | string[] | undefined; accept?: string | string[] | undefined; host?: string | string[] | undefined; etag?: string | string[] | undefined; authorization?: string | string[] | undefined; connection?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; forwarded?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
+              "{ from?: string | string[] | undefined; origin?: string | string[] | undefined; warning?: string | string[] | undefined; location?: string | string[] | undefined; date?: string | string[] | undefined; expires?: string | string[] | undefined; range?: string | string[] | undefined; allow?: string | string[] | undefined; accept?: string | string[] | undefined; host?: string | string[] | undefined; etag?: string | string[] | undefined; connection?: string | string[] | undefined; authorization?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; forwarded?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
             ],
-            "path": "src/core/server/elasticsearch/types.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
             "deprecated": false
           }
         ],
@@ -14590,13 +14409,7 @@
             "label": "esClient",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.IScopedClusterClient",
-                "text": "IScopedClusterClient"
-              }
+              "IScopedClusterClient"
             ],
             "path": "src/core/server/deprecations/types.ts",
             "deprecated": false
@@ -16243,7 +16056,10 @@
         "description": [
           "\nRepresents an Elasticsearch cluster API client created by the platform.\nIt allows to call API on behalf of the internal Kibana user and\nthe actual user that is derived from the request headers (via `asScoped(...)`).\n"
         ],
-        "path": "src/core/server/elasticsearch/client/cluster_client.ts",
+        "signature": [
+          "IClusterClient"
+        ],
+        "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -16290,7 +16106,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; eql: ",
+              "<TDocument, TAggregations>>; }; cluster: ",
+              "default",
+              "; eql: ",
               "default",
               "; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
@@ -16522,9 +16340,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ClearScrollResponse",
-              ">; }; cluster: ",
-              "default",
-              "; count: { (this: That, params?: ",
+              ">; }; count: { (this: That, params?: ",
               "CountRequest",
               " | ",
               "CountRequest",
@@ -17446,7 +17262,7 @@
               "default",
               "; }"
             ],
-            "path": "src/core/server/elasticsearch/client/cluster_client.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -17460,23 +17276,11 @@
             ],
             "signature": [
               "(request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ScopeableRequest",
-                "text": "ScopeableRequest"
-              },
+              "ScopeableRequest",
               ") => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.IScopedClusterClient",
-                "text": "IScopedClusterClient"
-              }
+              "IScopedClusterClient"
             ],
-            "path": "src/core/server/elasticsearch/client/cluster_client.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -17487,15 +17291,9 @@
                 "label": "request",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.ScopeableRequest",
-                    "text": "ScopeableRequest"
-                  }
+                  "ScopeableRequest"
                 ],
-                "path": "src/core/server/elasticsearch/client/cluster_client.ts",
+                "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -17741,23 +17539,11 @@
           "\nSee {@link IClusterClient}\n"
         ],
         "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.ICustomClusterClient",
-            "text": "ICustomClusterClient"
-          },
+          "ICustomClusterClient",
           " extends ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.IClusterClient",
-            "text": "IClusterClient"
-          }
+          "IClusterClient"
         ],
-        "path": "src/core/server/elasticsearch/client/cluster_client.ts",
+        "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -17772,7 +17558,77 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "src/core/server/elasticsearch/client/cluster_client.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.IEventLoopDelaysMonitor",
+        "type": "Interface",
+        "tags": [],
+        "label": "IEventLoopDelaysMonitor",
+        "description": [
+          "\nCreating a new instance from EventLoopDelaysMonitor will\nautomatically start tracking event loop delays.\nSee {@link IntervalHistogram}"
+        ],
+        "signature": [
+          "IEventLoopDelaysMonitor",
+          "<T>"
+        ],
+        "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.IEventLoopDelaysMonitor.collect",
+            "type": "Function",
+            "tags": [],
+            "label": "collect",
+            "description": [
+              "\nCollect gathers event loop delays metrics from nodejs perf_hooks.monitorEventLoopDelay\nthe histogram calculations start from the last time `reset` was called or this\nEventLoopDelaysMonitor instance was created.\n\nReturns metrics in milliseconds.\n  "
+            ],
+            "signature": [
+              "() => T"
+            ],
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.IEventLoopDelaysMonitor.reset",
+            "type": "Function",
+            "tags": [],
+            "label": "reset",
+            "description": [
+              "\nResets the collected histogram data."
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.IEventLoopDelaysMonitor.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [
+              "\nDisables updating the interval timer for collecting new data points."
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -18229,7 +18085,10 @@
         "description": [
           "\nan IntervalHistogram object that samples and reports the event loop delay over time.\nThe delays will be reported in milliseconds.\n"
         ],
-        "path": "src/core/server/metrics/types.ts",
+        "signature": [
+          "IntervalHistogram"
+        ],
+        "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -18239,7 +18098,7 @@
             "tags": [],
             "label": "fromTimestamp",
             "description": [],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -18249,7 +18108,7 @@
             "tags": [],
             "label": "lastUpdatedAt",
             "description": [],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -18259,7 +18118,7 @@
             "tags": [],
             "label": "min",
             "description": [],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -18269,7 +18128,7 @@
             "tags": [],
             "label": "max",
             "description": [],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -18279,7 +18138,7 @@
             "tags": [],
             "label": "mean",
             "description": [],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -18289,7 +18148,7 @@
             "tags": [],
             "label": "exceeds",
             "description": [],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -18299,7 +18158,7 @@
             "tags": [],
             "label": "stddev",
             "description": [],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -18312,7 +18171,7 @@
             "signature": [
               "{ 50: number; 75: number; 95: number; 99: number; }"
             ],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           }
         ],
@@ -19012,7 +18871,10 @@
         "description": [
           "\nServes the same purpose as the normal {@link IClusterClient | cluster client} but exposes\nan additional `asCurrentUser` method that doesn't use credentials of the Kibana internal\nuser (as `asInternalUser` does) to request Elasticsearch API, but rather passes HTTP headers\nextracted from the current user request to the API instead.\n"
         ],
-        "path": "src/core/server/elasticsearch/client/scoped_cluster_client.ts",
+        "signature": [
+          "IScopedClusterClient"
+        ],
+        "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -19059,7 +18921,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; eql: ",
+              "<TDocument, TAggregations>>; }; cluster: ",
+              "default",
+              "; eql: ",
               "default",
               "; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
@@ -19291,9 +19155,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ClearScrollResponse",
-              ">; }; cluster: ",
-              "default",
-              "; count: { (this: That, params?: ",
+              ">; }; count: { (this: That, params?: ",
               "CountRequest",
               " | ",
               "CountRequest",
@@ -20215,7 +20077,7 @@
               "default",
               "; }"
             ],
-            "path": "src/core/server/elasticsearch/client/scoped_cluster_client.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -20262,7 +20124,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; eql: ",
+              "<TDocument, TAggregations>>; }; cluster: ",
+              "default",
+              "; eql: ",
               "default",
               "; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
@@ -20494,9 +20358,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ClearScrollResponse",
-              ">; }; cluster: ",
-              "default",
-              "; count: { (this: That, params?: ",
+              ">; }; count: { (this: That, params?: ",
               "CountRequest",
               " | ",
               "CountRequest",
@@ -21418,7 +21280,7 @@
               "default",
               "; }"
             ],
-            "path": "src/core/server/elasticsearch/client/scoped_cluster_client.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
             "deprecated": false
           }
         ],
@@ -21978,7 +21840,7 @@
               "\nReadonly copy of incoming request headers."
             ],
             "signature": [
-              "{ from?: string | string[] | undefined; origin?: string | string[] | undefined; warning?: string | string[] | undefined; location?: string | string[] | undefined; date?: string | string[] | undefined; expires?: string | string[] | undefined; range?: string | string[] | undefined; allow?: string | string[] | undefined; accept?: string | string[] | undefined; host?: string | string[] | undefined; etag?: string | string[] | undefined; authorization?: string | string[] | undefined; connection?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; forwarded?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
+              "{ from?: string | string[] | undefined; origin?: string | string[] | undefined; warning?: string | string[] | undefined; location?: string | string[] | undefined; date?: string | string[] | undefined; expires?: string | string[] | undefined; range?: string | string[] | undefined; allow?: string | string[] | undefined; accept?: string | string[] | undefined; host?: string | string[] | undefined; etag?: string | string[] | undefined; connection?: string | string[] | undefined; authorization?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; forwarded?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
             ],
             "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
             "deprecated": false
@@ -22810,7 +22672,10 @@
         "description": [
           "\nAPIs to retrieves metrics gathered and exposed by the core platform.\n"
         ],
-        "path": "src/core/server/metrics/types.ts",
+        "signature": [
+          "MetricsServiceSetup"
+        ],
+        "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -22822,7 +22687,7 @@
             "description": [
               "Interval metrics are collected in milliseconds"
             ],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -22838,16 +22703,10 @@
               "() => ",
               "Observable",
               "<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.OpsMetrics",
-                "text": "OpsMetrics"
-              },
+              "OpsMetrics",
               ">"
             ],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -22937,7 +22796,10 @@
         "tags": [],
         "label": "NodesVersionCompatibility",
         "description": [],
-        "path": "src/core/server/elasticsearch/version_check/ensure_es_version.ts",
+        "signature": [
+          "NodesVersionCompatibility"
+        ],
+        "path": "node_modules/@types/kbn__core-elasticsearch-server-internal/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -22947,7 +22809,7 @@
             "tags": [],
             "label": "isCompatible",
             "description": [],
-            "path": "src/core/server/elasticsearch/version_check/ensure_es_version.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server-internal/index.d.ts",
             "deprecated": false
           },
           {
@@ -22960,7 +22822,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/server/elasticsearch/version_check/ensure_es_version.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server-internal/index.d.ts",
             "deprecated": false
           },
           {
@@ -22971,9 +22833,10 @@
             "label": "incompatibleNodes",
             "description": [],
             "signature": [
-              "NodeInfo[]"
+              "NodeInfo",
+              "[]"
             ],
-            "path": "src/core/server/elasticsearch/version_check/ensure_es_version.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server-internal/index.d.ts",
             "deprecated": false
           },
           {
@@ -22984,9 +22847,10 @@
             "label": "warningNodes",
             "description": [],
             "signature": [
-              "NodeInfo[]"
+              "NodeInfo",
+              "[]"
             ],
-            "path": "src/core/server/elasticsearch/version_check/ensure_es_version.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server-internal/index.d.ts",
             "deprecated": false
           },
           {
@@ -22996,7 +22860,7 @@
             "tags": [],
             "label": "kibanaVersion",
             "description": [],
-            "path": "src/core/server/elasticsearch/version_check/ensure_es_version.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server-internal/index.d.ts",
             "deprecated": false
           },
           {
@@ -23009,7 +22873,7 @@
             "signature": [
               "Error | undefined"
             ],
-            "path": "src/core/server/elasticsearch/version_check/ensure_es_version.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server-internal/index.d.ts",
             "deprecated": false
           }
         ],
@@ -23356,7 +23220,10 @@
         "description": [
           "\nRegroups metrics gathered by all the collectors.\nThis contains metrics about the os/runtime, the kibana process and the http server.\n"
         ],
-        "path": "src/core/server/metrics/types.ts",
+        "signature": [
+          "OpsMetrics"
+        ],
+        "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -23371,7 +23238,7 @@
             "signature": [
               "Date"
             ],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23386,15 +23253,9 @@
               "\nProcess related metrics."
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.OpsProcessMetrics",
-                "text": "OpsProcessMetrics"
-              }
+              "OpsProcessMetrics"
             ],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": true,
             "removeBy": "8.8.0",
             "references": [
@@ -23405,6 +23266,18 @@
               {
                 "plugin": "kibanaUsageCollection",
                 "path": "src/plugins/kibana_usage_collection/server/collectors/ops_stats/ops_stats_collector.ts"
+              },
+              {
+                "plugin": "@kbn/core-metrics-server-internal",
+                "path": "packages/core/metrics/core-metrics-server-internal/src/ops_metrics_collector.ts"
+              },
+              {
+                "plugin": "@kbn/core-metrics-server-internal",
+                "path": "packages/core/metrics/core-metrics-server-internal/src/logging/get_ops_metrics_log.ts"
+              },
+              {
+                "plugin": "@kbn/core-metrics-server-internal",
+                "path": "packages/core/metrics/core-metrics-server-internal/src/logging/get_ops_metrics_log.test.ts"
               }
             ]
           },
@@ -23418,16 +23291,10 @@
               "Process related metrics. Reports an array of objects for each kibana pid."
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.OpsProcessMetrics",
-                "text": "OpsProcessMetrics"
-              },
+              "OpsProcessMetrics",
               "[]"
             ],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23440,15 +23307,9 @@
               "OS related metrics"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.OpsOsMetrics",
-                "text": "OpsOsMetrics"
-              }
+              "OpsOsMetrics"
             ],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23463,7 +23324,7 @@
             "signature": [
               "{ avg_in_millis: number; max_in_millis: number; }"
             ],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23478,7 +23339,7 @@
             "signature": [
               "{ disconnects: number; total: number; statusCodes: Record<number, number>; }"
             ],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23490,7 +23351,7 @@
             "description": [
               "number of current concurrent connections to the server"
             ],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           }
         ],
@@ -23505,7 +23366,10 @@
         "description": [
           "\nOS related metrics"
         ],
-        "path": "src/core/server/metrics/collectors/types.ts",
+        "signature": [
+          "OpsOsMetrics"
+        ],
+        "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -23520,7 +23384,7 @@
             "signature": [
               "\"linux\" | \"aix\" | \"android\" | \"darwin\" | \"freebsd\" | \"haiku\" | \"openbsd\" | \"sunos\" | \"win32\" | \"cygwin\" | \"netbsd\""
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23532,7 +23396,7 @@
             "description": [
               "The os platform release, prefixed by the platform name"
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23547,7 +23411,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23562,7 +23426,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23577,7 +23441,7 @@
             "signature": [
               "{ '1m': number; '5m': number; '15m': number; }"
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23592,7 +23456,7 @@
             "signature": [
               "{ total_in_bytes: number; free_in_bytes: number; used_in_bytes: number; }"
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23604,7 +23468,7 @@
             "description": [
               "the OS uptime"
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23619,7 +23483,7 @@
             "signature": [
               "{ control_group: string; usage_nanos: number; } | undefined"
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23634,7 +23498,7 @@
             "signature": [
               "{ control_group: string; cfs_period_micros: number; cfs_quota_micros: number; stat: { number_of_elapsed_periods: number; number_of_times_throttled: number; time_throttled_nanos: number; }; } | undefined"
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           }
         ],
@@ -23649,7 +23513,10 @@
         "description": [
           "\nProcess related metrics"
         ],
-        "path": "src/core/server/metrics/collectors/types.ts",
+        "signature": [
+          "OpsProcessMetrics"
+        ],
+        "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -23661,7 +23528,7 @@
             "description": [
               "pid of the kibana process"
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23676,7 +23543,7 @@
             "signature": [
               "{ heap: { total_in_bytes: number; used_in_bytes: number; size_limit: number; }; resident_set_size_in_bytes: number; }"
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23688,7 +23555,7 @@
             "description": [
               "mean event loop delay since last collection"
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23701,15 +23568,9 @@
               "node event loop delay histogram since last collection"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.IntervalHistogram",
-                "text": "IntervalHistogram"
-              }
+              "IntervalHistogram"
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23721,7 +23582,7 @@
             "description": [
               "uptime of the kibana process"
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           }
         ],
@@ -23736,7 +23597,10 @@
         "description": [
           "\nserver related metrics"
         ],
-        "path": "src/core/server/metrics/collectors/types.ts",
+        "signature": [
+          "OpsServerMetrics"
+        ],
+        "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -23751,7 +23615,7 @@
             "signature": [
               "{ avg_in_millis: number; max_in_millis: number; }"
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23766,7 +23630,7 @@
             "signature": [
               "{ disconnects: number; total: number; statusCodes: Record<number, number>; }"
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23778,7 +23642,7 @@
             "description": [
               "number of current concurrent connections to the server"
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           }
         ],
@@ -24507,7 +24371,10 @@
         "tags": [],
         "label": "PollEsNodesVersionOptions",
         "description": [],
-        "path": "src/core/server/elasticsearch/version_check/ensure_es_version.ts",
+        "signature": [
+          "PollEsNodesVersionOptions"
+        ],
+        "path": "node_modules/@types/kbn__core-elasticsearch-server-internal/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -24552,7 +24419,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; eql: ",
+              "<TDocument, TAggregations>>; }; cluster: ",
+              "default",
+              "; eql: ",
               "default",
               "; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
@@ -24784,9 +24653,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ClearScrollResponse",
-              ">; }; cluster: ",
-              "default",
-              "; count: { (this: That, params?: ",
+              ">; }; count: { (this: That, params?: ",
               "CountRequest",
               " | ",
               "CountRequest",
@@ -25708,7 +25575,7 @@
               "default",
               "; }"
             ],
-            "path": "src/core/server/elasticsearch/version_check/ensure_es_version.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server-internal/index.d.ts",
             "deprecated": false
           },
           {
@@ -25721,7 +25588,7 @@
             "signature": [
               "Logger"
             ],
-            "path": "src/core/server/elasticsearch/version_check/ensure_es_version.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server-internal/index.d.ts",
             "deprecated": false
           },
           {
@@ -25731,7 +25598,7 @@
             "tags": [],
             "label": "kibanaVersion",
             "description": [],
-            "path": "src/core/server/elasticsearch/version_check/ensure_es_version.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server-internal/index.d.ts",
             "deprecated": false
           },
           {
@@ -25741,7 +25608,7 @@
             "tags": [],
             "label": "ignoreVersionMismatch",
             "description": [],
-            "path": "src/core/server/elasticsearch/version_check/ensure_es_version.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server-internal/index.d.ts",
             "deprecated": false
           },
           {
@@ -25751,7 +25618,7 @@
             "tags": [],
             "label": "esVersionCheckInterval",
             "description": [],
-            "path": "src/core/server/elasticsearch/version_check/ensure_es_version.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server-internal/index.d.ts",
             "deprecated": false
           }
         ],
@@ -25972,7 +25839,10 @@
         "description": [
           "\nDefines a set of additional options for the `resolveCapabilities` method of {@link CapabilitiesStart}.\n"
         ],
-        "path": "src/core/server/capabilities/capabilities_service.ts",
+        "signature": [
+          "ResolveCapabilitiesOptions"
+        ],
+        "path": "node_modules/@types/kbn__core-capabilities-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -25984,7 +25854,7 @@
             "description": [
               "\nIndicates if capability switchers are supposed to return a default set of capabilities."
             ],
-            "path": "src/core/server/capabilities/capabilities_service.ts",
+            "path": "node_modules/@types/kbn__core-capabilities-server/index.d.ts",
             "deprecated": false
           }
         ],
@@ -26713,16 +26583,10 @@
           "\nThe current status of a service at a point in time.\n"
         ],
         "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.ServiceStatus",
-            "text": "ServiceStatus"
-          },
+          "ServiceStatus",
           "<Meta>"
         ],
-        "path": "src/core/server/status/types.ts",
+        "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -26737,7 +26601,7 @@
             "signature": [
               "Readonly<{ toString: () => \"available\"; valueOf: () => 0; toJSON: () => \"available\"; }> | Readonly<{ toString: () => \"degraded\"; valueOf: () => 1; toJSON: () => \"degraded\"; }> | Readonly<{ toString: () => \"unavailable\"; valueOf: () => 2; toJSON: () => \"unavailable\"; }> | Readonly<{ toString: () => \"critical\"; valueOf: () => 3; toJSON: () => \"critical\"; }>"
             ],
-            "path": "src/core/server/status/types.ts",
+            "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -26749,7 +26613,7 @@
             "description": [
               "\nA high-level summary of the service status."
             ],
-            "path": "src/core/server/status/types.ts",
+            "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -26764,7 +26628,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/server/status/types.ts",
+            "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -26779,7 +26643,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/server/status/types.ts",
+            "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -26794,7 +26658,7 @@
             "signature": [
               "Meta | undefined"
             ],
-            "path": "src/core/server/status/types.ts",
+            "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
             "deprecated": false
           }
         ],
@@ -27218,13 +27082,7 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ServiceStatus",
-                "text": "ServiceStatus"
-              },
+              "ServiceStatus",
               "<unknown>>"
             ],
             "path": "src/core/server/status/types.ts",
@@ -27243,13 +27101,7 @@
               "(status$: ",
               "Observable",
               "<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ServiceStatus",
-                "text": "ServiceStatus"
-              },
+              "ServiceStatus",
               "<unknown>>) => void"
             ],
             "path": "src/core/server/status/types.ts",
@@ -27265,13 +27117,7 @@
                 "signature": [
                   "Observable",
                   "<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.ServiceStatus",
-                    "text": "ServiceStatus"
-                  },
+                  "ServiceStatus",
                   "<unknown>>"
                 ],
                 "path": "src/core/server/status/types.ts",
@@ -27293,13 +27139,7 @@
             "signature": [
               "Observable",
               "<Record<string, ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ServiceStatus",
-                "text": "ServiceStatus"
-              },
+              "ServiceStatus",
               "<unknown>>>"
             ],
             "path": "src/core/server/status/types.ts",
@@ -27317,13 +27157,7 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ServiceStatus",
-                "text": "ServiceStatus"
-              },
+              "ServiceStatus",
               "<unknown>>"
             ],
             "path": "src/core/server/status/types.ts",
@@ -27836,7 +27670,10 @@
         "tags": [],
         "label": "UnauthorizedErrorHandlerNotHandledResult",
         "description": [],
-        "path": "src/core/server/elasticsearch/client/retry_unauthorized.ts",
+        "signature": [
+          "UnauthorizedErrorHandlerNotHandledResult"
+        ],
+        "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -27849,7 +27686,7 @@
             "signature": [
               "\"notHandled\""
             ],
-            "path": "src/core/server/elasticsearch/client/retry_unauthorized.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
             "deprecated": false
           }
         ],
@@ -27862,7 +27699,10 @@
         "tags": [],
         "label": "UnauthorizedErrorHandlerOptions",
         "description": [],
-        "path": "src/core/server/elasticsearch/client/retry_unauthorized.ts",
+        "signature": [
+          "UnauthorizedErrorHandlerOptions"
+        ],
+        "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -27876,7 +27716,7 @@
               "ResponseError",
               " & { statusCode: 401; }"
             ],
-            "path": "src/core/server/elasticsearch/client/retry_unauthorized.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -27890,7 +27730,7 @@
               "KibanaRequest",
               "<unknown, unknown, unknown, any>"
             ],
-            "path": "src/core/server/elasticsearch/client/retry_unauthorized.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
             "deprecated": false
           }
         ],
@@ -27903,7 +27743,10 @@
         "tags": [],
         "label": "UnauthorizedErrorHandlerResultRetryParams",
         "description": [],
-        "path": "src/core/server/elasticsearch/client/retry_unauthorized.ts",
+        "signature": [
+          "UnauthorizedErrorHandlerResultRetryParams"
+        ],
+        "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -27916,7 +27759,7 @@
             "signature": [
               "{ [x: string]: string | string[]; }"
             ],
-            "path": "src/core/server/elasticsearch/client/retry_unauthorized.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
             "deprecated": false
           }
         ],
@@ -27930,23 +27773,11 @@
         "label": "UnauthorizedErrorHandlerRetryResult",
         "description": [],
         "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.UnauthorizedErrorHandlerRetryResult",
-            "text": "UnauthorizedErrorHandlerRetryResult"
-          },
+          "UnauthorizedErrorHandlerRetryResult",
           " extends ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.UnauthorizedErrorHandlerResultRetryParams",
-            "text": "UnauthorizedErrorHandlerResultRetryParams"
-          }
+          "UnauthorizedErrorHandlerResultRetryParams"
         ],
-        "path": "src/core/server/elasticsearch/client/retry_unauthorized.ts",
+        "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -27959,7 +27790,7 @@
             "signature": [
               "\"retry\""
             ],
-            "path": "src/core/server/elasticsearch/client/retry_unauthorized.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
             "deprecated": false
           }
         ],
@@ -27974,7 +27805,10 @@
         "description": [
           "\nToolkit passed to a {@link UnauthorizedErrorHandler} used to generate responses from the handler"
         ],
-        "path": "src/core/server/elasticsearch/client/retry_unauthorized.ts",
+        "signature": [
+          "UnauthorizedErrorHandlerToolkit"
+        ],
+        "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -27988,15 +27822,9 @@
             ],
             "signature": [
               "() => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.UnauthorizedErrorHandlerNotHandledResult",
-                "text": "UnauthorizedErrorHandlerNotHandledResult"
-              }
+              "UnauthorizedErrorHandlerNotHandledResult"
             ],
-            "path": "src/core/server/elasticsearch/client/retry_unauthorized.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -28012,23 +27840,11 @@
             ],
             "signature": [
               "(params: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.UnauthorizedErrorHandlerResultRetryParams",
-                "text": "UnauthorizedErrorHandlerResultRetryParams"
-              },
+              "UnauthorizedErrorHandlerResultRetryParams",
               ") => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.UnauthorizedErrorHandlerRetryResult",
-                "text": "UnauthorizedErrorHandlerRetryResult"
-              }
+              "UnauthorizedErrorHandlerRetryResult"
             ],
-            "path": "src/core/server/elasticsearch/client/retry_unauthorized.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -28039,15 +27855,9 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.UnauthorizedErrorHandlerResultRetryParams",
-                    "text": "UnauthorizedErrorHandlerResultRetryParams"
-                  }
+                  "UnauthorizedErrorHandlerResultRetryParams"
                 ],
-                "path": "src/core/server/elasticsearch/client/retry_unauthorized.ts",
+                "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -28427,7 +28237,7 @@
           "Capabilities",
           ">"
         ],
-        "path": "src/core/server/capabilities/types.ts",
+        "path": "node_modules/@types/kbn__core-capabilities-server/index.d.ts",
         "deprecated": false,
         "returnComment": [],
         "children": [],
@@ -28447,13 +28257,13 @@
           "KibanaRequest",
           "<unknown, unknown, unknown, any>, uiCapabilities: ",
           "Capabilities",
-          ", useDefaultCapabilities: boolean) => Partial<",
-          "Capabilities",
-          "> | Promise<Partial<",
+          ", useDefaultCapabilities: boolean) => ",
+          "MaybePromise",
+          "<Partial<",
           "Capabilities",
           ">>"
         ],
-        "path": "src/core/server/capabilities/types.ts",
+        "path": "node_modules/@types/kbn__core-capabilities-server/index.d.ts",
         "deprecated": false,
         "returnComment": [],
         "children": [
@@ -28468,7 +28278,7 @@
               "KibanaRequest",
               "<unknown, unknown, unknown, any>"
             ],
-            "path": "src/core/server/capabilities/types.ts",
+            "path": "node_modules/@types/kbn__core-capabilities-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -28481,7 +28291,7 @@
             "signature": [
               "Capabilities"
             ],
-            "path": "src/core/server/capabilities/types.ts",
+            "path": "node_modules/@types/kbn__core-capabilities-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -28491,7 +28301,7 @@
             "tags": [],
             "label": "useDefaultCapabilities",
             "description": [],
-            "path": "src/core/server/capabilities/types.ts",
+            "path": "node_modules/@types/kbn__core-capabilities-server/index.d.ts",
             "deprecated": false
           }
         ],
@@ -28898,7 +28708,9 @@
           "TransportRequestOptions",
           " | undefined): Promise<",
           "SearchResponse",
-          "<TDocument, TAggregations>>; }; eql: ",
+          "<TDocument, TAggregations>>; }; cluster: ",
+          "default",
+          "; eql: ",
           "default",
           "; create: { <TDocument = unknown>(this: That, params: ",
           "CreateRequest",
@@ -29130,9 +28942,7 @@
           "TransportRequestOptions",
           " | undefined): Promise<",
           "ClearScrollResponse",
-          ">; }; cluster: ",
-          "default",
-          "; count: { (this: That, params?: ",
+          ">; }; count: { (this: That, params?: ",
           "CountRequest",
           " | ",
           "CountRequest",
@@ -30054,31 +29864,7 @@
           "default",
           "; }"
         ],
-        "path": "src/core/server/elasticsearch/client/types.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.ElasticsearchClientConfig",
-        "type": "Type",
-        "tags": [],
-        "label": "ElasticsearchClientConfig",
-        "description": [
-          "\nConfiguration options to be used to create a {@link IClusterClient | cluster client} using the\n{@link ElasticsearchServiceStart.createClient | createClient API}\n"
-        ],
-        "signature": [
-          "Pick<",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.ElasticsearchConfig",
-            "text": "ElasticsearchConfig"
-          },
-          ", \"username\" | \"password\" | \"customHeaders\" | \"hosts\" | \"sniffOnStart\" | \"sniffInterval\" | \"sniffOnConnectionFault\" | \"maxSockets\" | \"compression\" | \"serviceAccountToken\" | \"requestHeadersWhitelist\"> & { pingTimeout?: number | moment.Duration | undefined; requestTimeout?: number | moment.Duration | undefined; ssl?: Partial<Pick<Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>, \"key\" | \"verificationMode\" | \"certificate\" | \"keyPassphrase\" | \"alwaysPresentCertificate\"> & { certificateAuthorities?: string[] | undefined; }> | undefined; keepAlive?: boolean | undefined; caFingerprint?: string | undefined; }"
-        ],
-        "path": "src/core/server/elasticsearch/client/client_config.ts",
+        "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -30307,7 +30093,7 @@
           "\nHttp request headers to read."
         ],
         "signature": [
-          "{ from?: string | string[] | undefined; origin?: string | string[] | undefined; warning?: string | string[] | undefined; location?: string | string[] | undefined; date?: string | string[] | undefined; expires?: string | string[] | undefined; range?: string | string[] | undefined; allow?: string | string[] | undefined; accept?: string | string[] | undefined; host?: string | string[] | undefined; etag?: string | string[] | undefined; authorization?: string | string[] | undefined; connection?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; forwarded?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
+          "{ from?: string | string[] | undefined; origin?: string | string[] | undefined; warning?: string | string[] | undefined; location?: string | string[] | undefined; date?: string | string[] | undefined; expires?: string | string[] | undefined; range?: string | string[] | undefined; allow?: string | string[] | undefined; accept?: string | string[] | undefined; host?: string | string[] | undefined; etag?: string | string[] | undefined; connection?: string | string[] | undefined; authorization?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; forwarded?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
         ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
@@ -30546,7 +30332,7 @@
         "label": "KibanaExecutionContext",
         "description": [],
         "signature": [
-          "{ readonly type?: string | undefined; readonly name?: string | undefined; readonly page?: string | undefined; readonly id?: string | undefined; readonly description?: string | undefined; readonly url?: string | undefined; child?: ",
+          "{ readonly type?: string | undefined; readonly name?: string | undefined; readonly page?: string | undefined; readonly id?: string | undefined; readonly description?: string | undefined; readonly url?: string | undefined; readonly meta?: { [key: string]: string | number | boolean | undefined; } | undefined; child?: ",
           "KibanaExecutionContext",
           " | undefined; }"
         ],
@@ -30640,7 +30426,7 @@
           "\nSet of well-known HTTP headers."
         ],
         "signature": [
-          "\"from\" | \"origin\" | \"warning\" | \"location\" | \"date\" | \"expires\" | \"range\" | \"allow\" | \"accept\" | \"host\" | \"etag\" | \"authorization\" | \"connection\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"alt-svc\" | \"cache-control\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"expect\" | \"forwarded\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\""
+          "\"from\" | \"origin\" | \"warning\" | \"location\" | \"date\" | \"expires\" | \"range\" | \"allow\" | \"accept\" | \"host\" | \"etag\" | \"connection\" | \"authorization\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"alt-svc\" | \"cache-control\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"expect\" | \"forwarded\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\""
         ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
@@ -30780,15 +30566,9 @@
           "\n{@inheritdoc MetricsServiceSetup}\n"
         ],
         "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.MetricsServiceSetup",
-            "text": "MetricsServiceSetup"
-          }
+          "MetricsServiceSetup"
         ],
-        "path": "src/core/server/metrics/types.ts",
+        "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -31550,7 +31330,7 @@
           "\nHttp response headers to set."
         ],
         "signature": [
-          "Record<\"from\" | \"origin\" | \"warning\" | \"location\" | \"date\" | \"expires\" | \"range\" | \"allow\" | \"accept\" | \"host\" | \"etag\" | \"authorization\" | \"connection\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"alt-svc\" | \"cache-control\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"expect\" | \"forwarded\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\", string | string[]> | Record<string, string | string[]>"
+          "Record<\"from\" | \"origin\" | \"warning\" | \"location\" | \"date\" | \"expires\" | \"range\" | \"allow\" | \"accept\" | \"host\" | \"etag\" | \"connection\" | \"authorization\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"alt-svc\" | \"cache-control\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"expect\" | \"forwarded\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\", string | string[]> | Record<string, string | string[]>"
         ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
@@ -31844,18 +31624,12 @@
           "\n A user credentials container.\nIt accommodates the necessary auth credentials to impersonate the current user.\n"
         ],
         "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.FakeRequest",
-            "text": "FakeRequest"
-          },
+          "FakeRequest",
           " | ",
           "KibanaRequest",
           "<unknown, unknown, unknown, any>"
         ],
-        "path": "src/core/server/elasticsearch/types.ts",
+        "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -31871,7 +31645,7 @@
         "signature": [
           "Readonly<{ toString: () => \"available\"; valueOf: () => 0; toJSON: () => \"available\"; }> | Readonly<{ toString: () => \"degraded\"; valueOf: () => 1; toJSON: () => \"degraded\"; }> | Readonly<{ toString: () => \"unavailable\"; valueOf: () => 2; toJSON: () => \"unavailable\"; }> | Readonly<{ toString: () => \"critical\"; valueOf: () => 3; toJSON: () => \"critical\"; }>"
         ],
-        "path": "src/core/server/status/types.ts",
+        "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -31964,34 +31738,16 @@
         ],
         "signature": [
           "(options: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.UnauthorizedErrorHandlerOptions",
-            "text": "UnauthorizedErrorHandlerOptions"
-          },
+          "UnauthorizedErrorHandlerOptions",
           ", toolkit: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.UnauthorizedErrorHandlerToolkit",
-            "text": "UnauthorizedErrorHandlerToolkit"
-          },
+          "UnauthorizedErrorHandlerToolkit",
           ") => ",
           "MaybePromise",
           "<",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.UnauthorizedErrorHandlerResult",
-            "text": "UnauthorizedErrorHandlerResult"
-          },
+          "UnauthorizedErrorHandlerResult",
           ">"
         ],
-        "path": "src/core/server/elasticsearch/client/retry_unauthorized.ts",
+        "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
         "deprecated": false,
         "returnComment": [],
         "children": [
@@ -32003,15 +31759,9 @@
             "label": "options",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.UnauthorizedErrorHandlerOptions",
-                "text": "UnauthorizedErrorHandlerOptions"
-              }
+              "UnauthorizedErrorHandlerOptions"
             ],
-            "path": "src/core/server/elasticsearch/client/retry_unauthorized.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -32022,15 +31772,9 @@
             "label": "toolkit",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.UnauthorizedErrorHandlerToolkit",
-                "text": "UnauthorizedErrorHandlerToolkit"
-              }
+              "UnauthorizedErrorHandlerToolkit"
             ],
-            "path": "src/core/server/elasticsearch/client/retry_unauthorized.ts",
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
             "deprecated": false
           }
         ],
@@ -32044,23 +31788,11 @@
         "label": "UnauthorizedErrorHandlerResult",
         "description": [],
         "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.UnauthorizedErrorHandlerRetryResult",
-            "text": "UnauthorizedErrorHandlerRetryResult"
-          },
+          "UnauthorizedErrorHandlerRetryResult",
           " | ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.UnauthorizedErrorHandlerNotHandledResult",
-            "text": "UnauthorizedErrorHandlerNotHandledResult"
-          }
+          "UnauthorizedErrorHandlerNotHandledResult"
         ],
-        "path": "src/core/server/elasticsearch/client/retry_unauthorized.ts",
+        "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -32078,7 +31810,7 @@
         "signature": [
           "{ readonly available: Readonly<{ toString: () => \"available\"; valueOf: () => 0; toJSON: () => \"available\"; }>; readonly degraded: Readonly<{ toString: () => \"degraded\"; valueOf: () => 1; toJSON: () => \"degraded\"; }>; readonly unavailable: Readonly<{ toString: () => \"unavailable\"; valueOf: () => 2; toJSON: () => \"unavailable\"; }>; readonly critical: Readonly<{ toString: () => \"critical\"; valueOf: () => 3; toJSON: () => \"critical\"; }>; }"
         ],
-        "path": "src/core/server/status/types.ts",
+        "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },

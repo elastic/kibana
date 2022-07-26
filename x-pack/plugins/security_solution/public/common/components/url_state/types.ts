@@ -52,11 +52,6 @@ export interface UrlStateStateToPropsType {
   urlState: UrlState;
 }
 
-export interface UpdateTimelineIsLoading {
-  id: string;
-  isLoading: boolean;
-}
-
 export interface PreviousLocationUrlState {
   pathName: string | undefined;
   pageName: string | undefined;

@@ -17,7 +17,7 @@ interface DiscoverFieldDetailsProps {
   field: DataViewField;
   dataView: DataView;
   details: FieldDetails;
-  onAddFilter: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
 }
 
 export function DiscoverFieldDetails({
@@ -43,7 +43,7 @@ export function DiscoverFieldDetails({
           </div>
           <EuiSpacer size="xs" />
           <EuiText size="xs">
-            {!dataView.metaFields.includes(field.name) && !field.scripted ? (
+            {onAddFilter && !dataView.metaFields.includes(field.name) && !field.scripted ? (
               <EuiLink
                 onClick={() => onAddFilter('_exists_', field.name, '+')}
                 data-test-subj="onAddFilterButton"

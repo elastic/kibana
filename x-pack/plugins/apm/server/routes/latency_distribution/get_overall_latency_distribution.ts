@@ -76,7 +76,7 @@ export async function getOverallLatencyDistribution({
 
     // #3: get histogram chart data
 
-    const durationRanges = await fetchDurationRanges({
+    const { totalDocCount, durationRanges } = await fetchDurationRanges({
       eventType,
       setup,
       start,
@@ -87,6 +87,7 @@ export async function getOverallLatencyDistribution({
       rangeSteps,
     });
 
+    overallLatencyDistribution.totalDocCount = totalDocCount;
     overallLatencyDistribution.overallHistogram = durationRanges;
 
     return overallLatencyDistribution;

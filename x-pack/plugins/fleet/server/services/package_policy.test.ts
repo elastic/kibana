@@ -13,11 +13,12 @@ import {
 } from '@kbn/core/server/mocks';
 import { produce } from 'immer';
 import type {
+  KibanaRequest,
   SavedObjectsClient,
   SavedObjectsClientContract,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
-import type { KibanaRequest } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import type {
   PackageInfo,
@@ -41,8 +42,8 @@ import type {
   NewPackagePolicy,
   NewPackagePolicyInput,
   PackagePolicyPackage,
-} from '../../common';
-import { packageToPackagePolicy } from '../../common';
+} from '../../common/types';
+import { packageToPackagePolicy } from '../../common/services';
 
 import { IngestManagerError, PackagePolicyIneligibleForUpgradeError } from '../errors';
 
@@ -129,8 +130,8 @@ jest.mock('./epm/packages', () => {
   };
 });
 
-jest.mock('../../common', () => ({
-  ...jest.requireActual('../../common'),
+jest.mock('../../common/services/package_to_package_policy', () => ({
+  ...jest.requireActual('../../common/services/package_to_package_policy'),
   packageToPackagePolicy: jest.fn(),
 }));
 
@@ -620,7 +621,7 @@ describe('Package policy service', () => {
           _type: string,
           _id: string
         ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
-          throw savedObjectsClient.errors.createConflictError('abc', '123');
+          throw SavedObjectsErrorHelpers.createConflictError('abc', '123');
         }
       );
       const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;

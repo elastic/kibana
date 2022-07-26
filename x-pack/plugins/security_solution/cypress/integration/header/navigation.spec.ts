@@ -17,6 +17,8 @@ import {
   TIMELINES,
   RULES,
   EXCEPTIONS,
+  USERS,
+  DETECTION_RESPONSE,
 } from '../../screens/security_header';
 
 import { login, visit } from '../../tasks/login';
@@ -35,6 +37,11 @@ import {
   TIMELINES_URL,
   EXCEPTIONS_URL,
   DETECTIONS_RULE_MANAGEMENT_URL,
+  USERS_URL,
+  DASHBOARDS_URL,
+  DETECTION_RESPONSE_URL,
+  EXPLORE_URL,
+  MANAGE_URL,
 } from '../../urls/navigation';
 import {
   openKibanaNavigation,
@@ -63,6 +70,11 @@ describe('top-level navigation common to all pages in the Security app', () => {
     cy.url().should('include', OVERVIEW_URL);
   });
 
+  it('navigates to the Detection & Response page', () => {
+    navigateFromHeaderTo(DETECTION_RESPONSE);
+    cy.url().should('include', DETECTION_RESPONSE_URL);
+  });
+
   it('navigates to the Alerts page', () => {
     navigateFromHeaderTo(ALERTS);
     cy.url().should('include', ALERTS_URL);
@@ -76,6 +88,11 @@ describe('top-level navigation common to all pages in the Security app', () => {
   it('navigates to the Network page', () => {
     navigateFromHeaderTo(NETWORK);
     cy.url().should('include', NETWORK_URL);
+  });
+
+  it('navigates to the Users page', () => {
+    navigateFromHeaderTo(USERS);
+    cy.url().should('include', USERS_URL);
   });
 
   it('navigates to the Rules page', () => {
@@ -121,7 +138,7 @@ describe('Kibana navigation to all pages in the Security app ', () => {
   });
   it('navigates to the Dashboards page', () => {
     navigateFromKibanaCollapsibleTo(DASHBOARDS_PAGE);
-    cy.url().should('include', OVERVIEW_URL);
+    cy.url().should('include', DASHBOARDS_URL);
   });
 
   it('navigates to the Alerts page', () => {
@@ -141,11 +158,11 @@ describe('Kibana navigation to all pages in the Security app ', () => {
 
   it('navigates to the Explore page', () => {
     navigateFromKibanaCollapsibleTo(EXPLORE_PAGE);
-    cy.url().should('include', HOSTS_URL);
+    cy.url().should('include', EXPLORE_URL);
   });
 
   it('navigates to the Manage page', () => {
     navigateFromKibanaCollapsibleTo(MANAGE_PAGE);
-    cy.url().should('include', ENDPOINTS_URL);
+    cy.url().should('include', MANAGE_URL);
   });
 });

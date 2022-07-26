@@ -13,6 +13,7 @@ import type {
   CompleteRule,
   EqlRuleParams,
   MachineLearningRuleParams,
+  NewTermsRuleParams,
   QueryRuleParams,
   RuleParams,
   SavedQueryRuleParams,
@@ -145,6 +146,28 @@ export const getSavedQueryRuleParams = (): SavedQueryRuleParams => {
       },
     ],
     savedId: 'some-id',
+  };
+};
+
+export const getNewTermsRuleParams = (): NewTermsRuleParams => {
+  return {
+    ...getBaseRuleParams(),
+    type: 'new_terms',
+    language: 'kuery',
+    query: 'user.name: root or user.name: admin',
+    index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+    dataViewId: undefined,
+    filters: [
+      {
+        query: {
+          match_phrase: {
+            'host.name': 'some-host',
+          },
+        },
+      },
+    ],
+    newTermsFields: ['host.name'],
+    historyWindowStart: 'now-30d',
   };
 };
 

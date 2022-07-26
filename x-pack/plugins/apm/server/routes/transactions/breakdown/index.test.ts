@@ -35,7 +35,6 @@ function getMockSetup(esResponse: any) {
         get: () => 'myIndex',
       }
     ) as APMConfig,
-    uiFilters: {},
     indices: mockIndices,
   };
 }

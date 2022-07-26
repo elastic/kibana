@@ -133,6 +133,11 @@ export interface AboutStepRiskScore {
   isMappingChecked: boolean;
 }
 
+export enum DataSourceType {
+  IndexPatterns = 'indexPatterns',
+  DataView = 'dataView',
+}
+
 /**
  * add / update data source types to show XOR relationship between 'index' and 'dataViewId' fields
  * Maybe something with io-ts?
@@ -153,6 +158,9 @@ export interface DefineStepRule {
   threatQueryBar: FieldValueQueryBar;
   threatMapping: ThreatMapping;
   eqlOptions: EqlOptionsSelected;
+  dataSourceType: DataSourceType;
+  newTermsFields: string[];
+  historyWindowSize: string;
 }
 
 export interface ScheduleStepRule {

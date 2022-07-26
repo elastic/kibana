@@ -92,7 +92,7 @@ export function flattenHit(hit: Hit, indexPattern?: DataView, params?: TabifyDoc
         continue;
       }
 
-      const hasValidMapping = field?.type !== 'conflict';
+      const hasValidMapping = field && field.type !== 'conflict';
       const isValue = !isPlainObject(val);
 
       if (hasValidMapping || isValue) {

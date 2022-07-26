@@ -5,45 +5,61 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { generatePath, Link, RouteComponentProps } from 'react-router-dom';
-import { EuiTextColor, EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
-import type { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
+import React, { useContext, useMemo } from 'react';
+import { generatePath, Link, type RouteComponentProps } from 'react-router-dom';
+import { EuiTextColor, EuiButtonEmpty, EuiFlexGroup, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import type { BreadcrumbEntry } from '../../common/navigation/types';
 import { RulesContainer, type PageUrlParams } from './rules_container';
-import { allNavigationItems } from '../../common/navigation/constants';
+import { cloudPosturePages } from '../../common/navigation/constants';
 import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
-import { CspNavigationItem } from '../../common/navigation/types';
 import { useCspIntegrationInfo } from './use_csp_integration';
 import { CspPageTemplate } from '../../components/csp_page_template';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
+import { SecuritySolutionContext } from '../../application/security_solution_context';
 
-const getRulesBreadcrumbs = (name?: string): CspNavigationItem[] =>
-  [allNavigationItems.benchmarks, { ...allNavigationItems.rules, name }].filter(
-    (breadcrumb): breadcrumb is CspNavigationItem => !!breadcrumb.name
-  );
+const getRulesBreadcrumbs = (
+  name?: string,
+  manageBreadcrumb?: BreadcrumbEntry
+): BreadcrumbEntry[] => {
+  const breadCrumbs: BreadcrumbEntry[] = [];
+  if (manageBreadcrumb) {
+    breadCrumbs.push(manageBreadcrumb);
+  }
 
-export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>) => {
+  breadCrumbs.push(cloudPosturePages.benchmarks);
+
+  if (name) {
+    breadCrumbs.push({ ...cloudPosturePages.rules, name });
+  } else {
+    breadCrumbs.push(cloudPosturePages.rules);
+  }
+
+  return breadCrumbs;
+};
+
+export const RulesNoPageTemplate = ({ match: { params } }: RouteComponentProps<PageUrlParams>) => {
   const { http } = useKibana().services;
   const integrationInfo = useCspIntegrationInfo(params);
+  const securitySolutionContext = useContext(SecuritySolutionContext);
 
   const [packageInfo, agentInfo] = integrationInfo.data || [];
 
   const breadcrumbs = useMemo(
-    // TODO: make benchmark breadcrumb navigable
-    () => getRulesBreadcrumbs(packageInfo?.name),
-    [packageInfo?.name]
+    () =>
+      getRulesBreadcrumbs(packageInfo?.name, securitySolutionContext?.getManageBreadcrumbEntry()),
+    [packageInfo?.name, securitySolutionContext]
   );
 
   useCspBreadcrumbs(breadcrumbs);
 
-  const pageProps: KibanaPageTemplateProps = useMemo(
-    () => ({
-      pageHeader: {
-        alignItems: 'bottom',
-        rightSideItems: [
+  return (
+    <CloudPosturePage query={integrationInfo}>
+      <EuiPageHeader
+        alignItems={'bottom'}
+        rightSideItems={[
           <EuiButtonEmpty
             iconType="gear"
             size="xs"
@@ -54,10 +70,10 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
               defaultMessage="Manage Integration"
             />
           </EuiButtonEmpty>,
-        ],
-        pageTitle: (
+        ]}
+        pageTitle={
           <EuiFlexGroup direction="column" gutterSize="none">
-            <Link to={generatePath(allNavigationItems.benchmarks.path)}>
+            <Link to={generatePath(cloudPosturePages.benchmarks.path)}>
               <EuiButtonEmpty iconType="arrowLeft" contentProps={{ style: { padding: 0 } }}>
                 <FormattedMessage
                   id="xpack.csp.rules.rulesPageHeader.benchmarkIntegrationsButtonLabel"
@@ -73,29 +89,34 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
               }}
             />
           </EuiFlexGroup>
-        ),
-        description: packageInfo?.package && agentInfo?.name && (
-          <EuiTextColor color="subdued">
-            <FormattedMessage
-              id="xpack.csp.rules.rulePageHeader.pageDescriptionTitle"
-              defaultMessage="{integrationType}, {agentPolicyName}"
-              values={{
-                integrationType: packageInfo.package.title,
-                agentPolicyName: agentInfo.name,
-              }}
-            />
-          </EuiTextColor>
-        ),
-      },
-    }),
-    [agentInfo?.name, http.basePath, packageInfo?.name, packageInfo?.package, params]
+        }
+        description={
+          packageInfo?.package &&
+          agentInfo?.name && (
+            <EuiTextColor color="subdued">
+              <FormattedMessage
+                id="xpack.csp.rules.rulePageHeader.pageDescriptionTitle"
+                defaultMessage="{integrationType}, {agentPolicyName}"
+                values={{
+                  integrationType: packageInfo.package.title,
+                  agentPolicyName: agentInfo.name,
+                }}
+              />
+            </EuiTextColor>
+          )
+        }
+        bottomBorder
+      />
+      <EuiSpacer />
+      <RulesContainer />
+    </CloudPosturePage>
   );
+};
 
+export const Rules = (props: RouteComponentProps<PageUrlParams>) => {
   return (
-    <CspPageTemplate {...pageProps}>
-      <CloudPosturePage query={integrationInfo}>
-        <RulesContainer />
-      </CloudPosturePage>
+    <CspPageTemplate>
+      <RulesNoPageTemplate {...props} />
     </CspPageTemplate>
   );
 };

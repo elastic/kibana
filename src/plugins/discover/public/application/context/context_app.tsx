@@ -135,7 +135,7 @@ export const ContextApp = ({ dataView, anchorId }: ContextAppProps) => {
     [filterManager, dataViews, dataView, capabilities]
   );
 
-  const TopNavMenu = navigation.ui.TopNavMenu;
+  const TopNavMenu = navigation.ui.AggregateQueryTopNavMenu;
   const getNavBarProps = () => {
     return {
       appName: 'context',

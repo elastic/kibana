@@ -20,6 +20,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental
 import { TestProviders } from '../../../mock';
 import { CASES_FEATURE_ID } from '../../../../../common/constants';
 import { useCanSeeHostIsolationExceptionsMenu } from '../../../../management/pages/host_isolation_exceptions/view/hooks';
+import { useTourContext } from '../../guided_onboarding';
 import {
   noCasesPermissions,
   readCasesCapabilities,
@@ -40,6 +41,7 @@ jest.mock('../../../hooks/use_selector');
 jest.mock('../../../hooks/use_experimental_features');
 jest.mock('../../../utils/route/use_route_spy');
 jest.mock('../../../../management/pages/host_isolation_exceptions/view/hooks');
+jest.mock('../../guided_onboarding');
 
 describe('useSecuritySolutionNavigation', () => {
   const mockUrlState = {
@@ -90,6 +92,7 @@ describe('useSecuritySolutionNavigation', () => {
     (useDeepEqualSelector as jest.Mock).mockReturnValue({ urlState: mockUrlState });
     (useRouteSpy as jest.Mock).mockReturnValue(mockRouteSpy);
     (useCanSeeHostIsolationExceptionsMenu as jest.Mock).mockReturnValue(true);
+    (useTourContext as jest.Mock).mockReturnValue({ isTourShown: false });
 
     const cases = mockCasesContract();
     cases.helpers.getUICapabilities.mockReturnValue(readCasesPermissions());
@@ -201,6 +204,27 @@ describe('useSecuritySolutionNavigation', () => {
         );
         expect(caseNavItem).toBeFalsy();
       });
+    });
+  });
+
+  describe('Guided onboarding tour', () => {
+    it('nav can be collapsed if tour is not shown', () => {
+      const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
+        () => useSecuritySolutionNavigation(),
+        { wrapper: TestProviders }
+      );
+
+      expect(result.current?.canBeCollapsed).toBe(true);
+    });
+    it(`nav can't be collapsed if tour is shown`, () => {
+      (useTourContext as jest.Mock).mockReturnValue({ isTourShown: true });
+
+      const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
+        () => useSecuritySolutionNavigation(),
+        { wrapper: TestProviders }
+      );
+
+      expect(result.current?.canBeCollapsed).toBe(false);
     });
   });
 });

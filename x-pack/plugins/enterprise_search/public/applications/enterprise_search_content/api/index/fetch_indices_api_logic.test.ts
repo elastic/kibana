@@ -28,7 +28,7 @@ describe('FetchIndicesApiLogic', () => {
       expect(http.get).toHaveBeenCalledWith('/internal/enterprise_search/indices', {
         query: { page: 1, return_hidden_indices: false, search_query: null, size: 20 },
       });
-      expect(result).resolves.toEqual({ isInitialRequest: true, result: 'result' });
+      await expect(result).resolves.toEqual({ isInitialRequest: true, result: 'result' });
     });
     it('sets initialRequest to false if page is not the first page', async () => {
       const promise = Promise.resolve({ result: 'result' });
@@ -41,7 +41,7 @@ describe('FetchIndicesApiLogic', () => {
       expect(http.get).toHaveBeenCalledWith('/internal/enterprise_search/indices', {
         query: { page: 2, return_hidden_indices: false, search_query: null, size: 20 },
       });
-      expect(result).resolves.toEqual({ isInitialRequest: false, result: 'result' });
+      await expect(result).resolves.toEqual({ isInitialRequest: false, result: 'result' });
     });
     it('sets initialRequest to false if searchQuery is not empty', async () => {
       const promise = Promise.resolve({ result: 'result' });
@@ -55,7 +55,7 @@ describe('FetchIndicesApiLogic', () => {
       expect(http.get).toHaveBeenCalledWith('/internal/enterprise_search/indices', {
         query: { page: 1, return_hidden_indices: false, search_query: 'a', size: 20 },
       });
-      expect(result).resolves.toEqual({ isInitialRequest: false, result: 'result' });
+      await expect(result).resolves.toEqual({ isInitialRequest: false, result: 'result' });
     });
   });
 });

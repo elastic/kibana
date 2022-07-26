@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { of, throwError as throwErrorRx } from 'rxjs';
-import { RequestAdapter } from '@kbn/inspector-plugin';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
 import { fetchChart, updateSearchSource } from './fetch_chart';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';

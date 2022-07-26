@@ -29,6 +29,8 @@ interface PreviewRouteParams {
   machineLearningJobId: string[];
   anomalyThreshold: number;
   eqlOptions: EqlOptionsSelected;
+  newTermsFields: string[];
+  historyWindowSize: string;
 }
 
 export const usePreviewRoute = ({
@@ -45,6 +47,8 @@ export const usePreviewRoute = ({
   machineLearningJobId,
   anomalyThreshold,
   eqlOptions,
+  newTermsFields,
+  historyWindowSize,
 }: PreviewRouteParams) => {
   const [isRequestTriggered, setIsRequestTriggered] = useState(false);
 
@@ -86,6 +90,8 @@ export const usePreviewRoute = ({
     machineLearningJobId,
     anomalyThreshold,
     eqlOptions,
+    newTermsFields,
+    historyWindowSize,
   ]);
 
   useEffect(() => {
@@ -104,6 +110,8 @@ export const usePreviewRoute = ({
           machineLearningJobId,
           anomalyThreshold,
           eqlOptions,
+          newTermsFields,
+          historyWindowSize,
         })
       );
     }
@@ -123,6 +131,8 @@ export const usePreviewRoute = ({
     machineLearningJobId,
     anomalyThreshold,
     eqlOptions,
+    newTermsFields,
+    historyWindowSize,
   ]);
 
   return {

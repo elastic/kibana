@@ -220,12 +220,12 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiTitle size="s">
-            <h3>
+            <h2>
               <FormattedMessage
                 id="xpack.synthetics.snapshot.pingsOverTimeTitle"
                 defaultMessage="Pings over time"
               />
-            </h3>
+            </h2>
           </EuiTitle>
         </EuiFlexItem>
         {showAnalyzeButton && (

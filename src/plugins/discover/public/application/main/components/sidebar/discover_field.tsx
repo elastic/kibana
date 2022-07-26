@@ -167,10 +167,11 @@ interface MultiFieldsProps {
   multiFields: NonNullable<DiscoverFieldProps['multiFields']>;
   toggleDisplay: (field: DataViewField) => void;
   alwaysShowActionButton: boolean;
+  isDocumentRecord: boolean;
 }
 
 const MultiFields: React.FC<MultiFieldsProps> = memo(
-  ({ multiFields, toggleDisplay, alwaysShowActionButton }) => (
+  ({ multiFields, toggleDisplay, alwaysShowActionButton, isDocumentRecord }) => (
     <React.Fragment>
       <EuiTitle size="xxxs">
         <h5>
@@ -186,7 +187,7 @@ const MultiFields: React.FC<MultiFieldsProps> = memo(
           className="dscSidebarItem dscSidebarItem--multi"
           isActive={false}
           dataTestSubj={`field-${entry.field.name}-showDetails`}
-          fieldIcon={<DiscoverFieldTypeIcon field={entry.field} />}
+          fieldIcon={isDocumentRecord && <DiscoverFieldTypeIcon field={entry.field} />}
           fieldAction={
             <ActionButton
               field={entry.field}
@@ -223,7 +224,7 @@ export interface DiscoverFieldProps {
   /**
    * Callback to add a filter to filter bar
    */
-  onAddFilter: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
   /**
    * Callback to remove/deselect a the field
    * @param fieldName
@@ -280,6 +281,7 @@ function DiscoverFieldComponent({
   showFieldStats,
 }: DiscoverFieldProps) {
   const [infoIsOpen, setOpen] = useState(false);
+  const isDocumentRecord = !!onAddFilter;
 
   const toggleDisplay = useCallback(
     (f: DataViewField) => {
@@ -304,7 +306,7 @@ function DiscoverFieldComponent({
         size="s"
         className="dscSidebarItem"
         dataTestSubj={`field-${field.name}-showDetails`}
-        fieldIcon={<DiscoverFieldTypeIcon field={field} />}
+        fieldIcon={isDocumentRecord && <DiscoverFieldTypeIcon field={field} />}
         fieldAction={
           <ActionButton
             field={field}
@@ -369,6 +371,30 @@ function DiscoverFieldComponent({
     </EuiPopoverTitle>
   );
 
+  const button = (
+    <FieldButton
+      size="s"
+      className="dscSidebarItem"
+      isActive={infoIsOpen}
+      onClick={togglePopover}
+      dataTestSubj={`field-${field.name}-showDetails`}
+      fieldIcon={isDocumentRecord && <DiscoverFieldTypeIcon field={field} />}
+      fieldAction={
+        <ActionButton
+          field={field}
+          isSelected={selected}
+          alwaysShow={alwaysShowActionButton}
+          toggleDisplay={toggleDisplay}
+        />
+      }
+      fieldName={<FieldName field={field} />}
+      fieldInfoIcon={field.type === 'conflict' && <FieldInfoIcon />}
+    />
+  );
+  if (!isDocumentRecord) {
+    return button;
+  }
+
   const renderPopover = () => {
     const details = getDetails(field);
     return (
@@ -398,6 +424,7 @@ function DiscoverFieldComponent({
               multiFields={multiFields}
               alwaysShowActionButton={alwaysShowActionButton}
               toggleDisplay={toggleDisplay}
+              isDocumentRecord={isDocumentRecord}
             />
           </>
         )}
@@ -415,28 +442,10 @@ function DiscoverFieldComponent({
   return (
     <EuiPopover
       display="block"
-      button={
-        <FieldButton
-          size="s"
-          className="dscSidebarItem"
-          isActive={infoIsOpen}
-          onClick={togglePopover}
-          dataTestSubj={`field-${field.name}-showDetails`}
-          fieldIcon={<DiscoverFieldTypeIcon field={field} />}
-          fieldAction={
-            <ActionButton
-              field={field}
-              isSelected={selected}
-              alwaysShow={alwaysShowActionButton}
-              toggleDisplay={toggleDisplay}
-            />
-          }
-          fieldName={<FieldName field={field} />}
-          fieldInfoIcon={field.type === 'conflict' && <FieldInfoIcon />}
-        />
-      }
+      button={button}
       isOpen={infoIsOpen}
       closePopover={() => setOpen(false)}
+      data-test-subj="discoverFieldListPanelPopover"
       anchorPosition="rightUp"
       panelClassName="dscSidebarItem__fieldPopoverPanel"
     >

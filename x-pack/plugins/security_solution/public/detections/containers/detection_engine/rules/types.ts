@@ -22,6 +22,9 @@ import {
   severity_mapping,
   severity,
 } from '@kbn/securitysolution-io-ts-alerting-types';
+
+import { RuleExecutionSummary } from '../../../../../common/detection_engine/rule_monitoring';
+
 import type {
   SortOrder,
   BulkAction,
@@ -41,7 +44,6 @@ import {
   event_category_override,
   tiebreaker_field,
   threshold,
-  ruleExecutionSummary,
   RelatedIntegrationArray,
   RequiredFieldArray,
   SetupGuide,
@@ -145,6 +147,8 @@ export const RuleSchema = t.intersection([
     license,
     meta: MetaRule,
     machine_learning_job_id: t.array(t.string),
+    new_terms_fields: t.array(t.string),
+    history_window_start: t.string,
     output_index: t.string,
     query: t.string,
     rule_name_override,
@@ -167,7 +171,7 @@ export const RuleSchema = t.intersection([
     exceptions_list: listArray,
     uuid: t.string,
     version: t.number,
-    execution_summary: ruleExecutionSummary,
+    execution_summary: RuleExecutionSummary,
   }),
 ]);
 
@@ -175,19 +179,6 @@ export const RulesSchema = t.array(RuleSchema);
 
 export type Rule = t.TypeOf<typeof RuleSchema>;
 export type Rules = t.TypeOf<typeof RulesSchema>;
-
-export interface RuleError {
-  id?: string;
-  rule_id?: string;
-  error: { status_code: number; message: string };
-}
-
-export type BulkRuleResponse = Array<Rule | RuleError>;
-
-export interface RuleResponseBuckets {
-  rules: Rule[];
-  errors: RuleError[];
-}
 
 export interface PaginationOptions {
   page: number;
