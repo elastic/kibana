@@ -129,10 +129,6 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.splitRowAccessor.help', {
       defaultMessage: 'Specifies split row of the xy chart',
     }),
-  getUseAdjustedIntervalHelp: () =>
-    i18n.translate('expressionXY.xyVis.useAdjustedInterval.help', {
-      defaultMessage: 'Use adjusted interval fox x domain',
-    }),
   getLayersHelp: () =>
     i18n.translate('expressionXY.layeredXyVis.layers.help', {
       defaultMessage: 'Layers of visual series',

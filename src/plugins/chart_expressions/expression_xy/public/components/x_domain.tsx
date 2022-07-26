@@ -50,7 +50,6 @@ export const getXDomain = (
   isHistogram: boolean,
   hasBars: boolean,
   timeZone: string,
-  useAdjustedInterval?: boolean,
   xExtent?: AxisExtentConfigResult
 ) => {
   const appliedTimeRange = getAppliedTimeRange(datatableUtilitites, layers)?.timeRange;
@@ -104,9 +103,12 @@ export const getXDomain = (
       extendedDomain: {
         min: domainMin,
         max: domainMax,
-        minInterval: useAdjustedInterval
-          ? getAdjustedInterval(xValues, duration.as(selectedUnit), selectedUnit, timeZone)
-          : baseDomain.minInterval,
+        minInterval: getAdjustedInterval(
+          xValues,
+          duration.as(selectedUnit),
+          selectedUnit,
+          timeZone
+        ),
       },
       baseDomain,
     };

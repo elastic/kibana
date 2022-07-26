@@ -230,7 +230,6 @@ export interface XYArgs extends DataLayerArgs {
   detailedTooltip?: boolean;
   orderBucketsBySum?: boolean;
   showTooltip: boolean;
-  useAdjustedInterval?: boolean;
 }
 
 export interface LayeredXYArgs {
@@ -254,7 +253,6 @@ export interface LayeredXYArgs {
   showTooltip: boolean;
   splitRowAccessor?: ExpressionValueVisDimension | string;
   splitColumnAccessor?: ExpressionValueVisDimension | string;
-  useAdjustedInterval?: boolean;
 }
 
 export interface XYProps {
@@ -278,7 +276,6 @@ export interface XYProps {
   detailedTooltip?: boolean;
   orderBucketsBySum?: boolean;
   showTooltip: boolean;
-  useAdjustedInterval?: boolean;
 }
 
 export interface AnnotationLayerArgs {

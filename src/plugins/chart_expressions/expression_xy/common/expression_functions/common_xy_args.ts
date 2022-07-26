@@ -103,9 +103,4 @@ export const commonXYArgs: CommonXYFn['args'] = {
     types: ['string'],
     help: strings.getMinTimeBarIntervalHelp(),
   },
-  useAdjustedInterval: {
-    types: ['boolean'],
-    default: false,
-    help: strings.getUseAdjustedIntervalHelp(),
-  },
 };

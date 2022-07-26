@@ -466,7 +466,6 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     splitColumnAccessor: dimensions.splitColumn?.map(prepareVisDimension),
     splitRowAccessor: dimensions.splitRow?.map(prepareVisDimension),
     valueLabels: vis.params.labels.show ? 'show' : 'hide',
-    useAdjustedInterval: true,
   });
 
   const ast = buildExpression(mapColumn ? [mapColumn, visTypeXy] : [visTypeXy]);

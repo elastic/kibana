@@ -195,7 +195,6 @@ export function XYChart({
     xAxisConfig,
     splitColumnAccessor,
     splitRowAccessor,
-    useAdjustedInterval,
   } = args;
   const chartRef = useRef<Chart>(null);
   const chartTheme = chartsThemeService.useChartsTheme();
@@ -356,7 +355,6 @@ export function XYChart({
     isHistogramViz,
     hasBars,
     timeZone,
-    useAdjustedInterval,
     xAxisConfig?.extent
   );
 

@@ -20,9 +20,6 @@ Object {
     "showTooltip": Array [
       true,
     ],
-    "useAdjustedInterval": Array [
-      true,
-    ],
     "valueLabels": Array [
       "hide",
     ],
