@@ -14,7 +14,7 @@ import {
   getAddPrepackagedRulesSchemaMock,
   getAddPrepackagedThreatMatchRulesSchemaMock,
 } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema.mock';
-import { ruleExecutionLogMock } from '../rule_execution_log/__mocks__';
+import { ruleExecutionLogMock } from '../rule_monitoring/mocks';
 import { legacyMigrate } from './utils';
 import { getQueryRuleParams, getThreatRuleParams } from '../schemas/rule_schemas.mock';
 

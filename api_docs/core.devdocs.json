@@ -1050,7 +1050,10 @@
         "description": [
           "\nThe read-only set of capabilities available for the current UI session.\nCapabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID,\nand the boolean is a flag indicating if the capability is enabled or disabled.\n"
         ],
-        "path": "src/core/types/capabilities.ts",
+        "signature": [
+          "Capabilities"
+        ],
+        "path": "node_modules/@types/kbn__core-capabilities-common/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -1065,7 +1068,7 @@
             "signature": [
               "{ [x: string]: boolean; }"
             ],
-            "path": "src/core/types/capabilities.ts",
+            "path": "node_modules/@types/kbn__core-capabilities-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -1080,7 +1083,7 @@
             "signature": [
               "{ [sectionId: string]: Record<string, boolean>; }"
             ],
-            "path": "src/core/types/capabilities.ts",
+            "path": "node_modules/@types/kbn__core-capabilities-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -1095,7 +1098,7 @@
             "signature": [
               "{ [x: string]: boolean; }"
             ],
-            "path": "src/core/types/capabilities.ts",
+            "path": "node_modules/@types/kbn__core-capabilities-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -1110,7 +1113,7 @@
             "signature": [
               "[key: string]:  Record<string, boolean | Record<string, boolean>>"
             ],
-            "path": "src/core/types/capabilities.ts",
+            "path": "node_modules/@types/kbn__core-capabilities-common/index.d.ts",
             "deprecated": false
           }
         ],
@@ -9492,7 +9495,7 @@
         "label": "KibanaExecutionContext",
         "description": [],
         "signature": [
-          "{ readonly type?: string | undefined; readonly name?: string | undefined; readonly page?: string | undefined; readonly id?: string | undefined; readonly description?: string | undefined; readonly url?: string | undefined; child?: ",
+          "{ readonly type?: string | undefined; readonly name?: string | undefined; readonly page?: string | undefined; readonly id?: string | undefined; readonly description?: string | undefined; readonly url?: string | undefined; readonly meta?: { [key: string]: string | number | boolean | undefined; } | undefined; child?: ",
           "KibanaExecutionContext",
           " | undefined; }"
         ],
@@ -10334,7 +10337,15 @@
         "tags": [],
         "label": "EventLoopDelaysMonitor",
         "description": [],
-        "path": "src/core/server/metrics/event_loop_delays/event_loop_delays_monitor.ts",
+        "signature": [
+          "EventLoopDelaysMonitor",
+          " implements ",
+          "IEventLoopDelaysMonitor",
+          "<",
+          "IntervalHistogram",
+          ">"
+        ],
+        "path": "node_modules/@types/kbn__core-metrics-collectors-server-internal/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -10349,7 +10360,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/core/server/metrics/event_loop_delays/event_loop_delays_monitor.ts",
+            "path": "node_modules/@types/kbn__core-metrics-collectors-server-internal/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -10361,19 +10372,13 @@
             "tags": [],
             "label": "collect",
             "description": [
-              "\nCollect gathers event loop delays metrics from nodejs perf_hooks.monitorEventLoopDelay\nthe histogram calculations start from the last time `reset` was called or this\nEventLoopDelaysMonitor instance was created.\n\nReturns metrics in milliseconds."
+              "\nCollect gathers event loop delays metrics from nodejs perf_hooks.monitorEventLoopDelay\nthe histogram calculations start from the last time `reset` was called or this\nEventLoopDelaysMonitor instance was created.\n\nReturns metrics in milliseconds.\n  "
             ],
             "signature": [
               "() => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.IntervalHistogram",
-                "text": "IntervalHistogram"
-              }
+              "IntervalHistogram"
             ],
-            "path": "src/core/server/metrics/event_loop_delays/event_loop_delays_monitor.ts",
+            "path": "node_modules/@types/kbn__core-metrics-collectors-server-internal/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -10390,7 +10395,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/core/server/metrics/event_loop_delays/event_loop_delays_monitor.ts",
+            "path": "node_modules/@types/kbn__core-metrics-collectors-server-internal/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -10407,7 +10412,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/core/server/metrics/event_loop_delays/event_loop_delays_monitor.ts",
+            "path": "node_modules/@types/kbn__core-metrics-collectors-server-internal/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -11393,7 +11398,10 @@
         "description": [
           "\nThe read-only set of capabilities available for the current UI session.\nCapabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID,\nand the boolean is a flag indicating if the capability is enabled or disabled.\n"
         ],
-        "path": "src/core/types/capabilities.ts",
+        "signature": [
+          "Capabilities"
+        ],
+        "path": "node_modules/@types/kbn__core-capabilities-common/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -11408,7 +11416,7 @@
             "signature": [
               "{ [x: string]: boolean; }"
             ],
-            "path": "src/core/types/capabilities.ts",
+            "path": "node_modules/@types/kbn__core-capabilities-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -11423,7 +11431,7 @@
             "signature": [
               "{ [sectionId: string]: Record<string, boolean>; }"
             ],
-            "path": "src/core/types/capabilities.ts",
+            "path": "node_modules/@types/kbn__core-capabilities-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -11438,7 +11446,7 @@
             "signature": [
               "{ [x: string]: boolean; }"
             ],
-            "path": "src/core/types/capabilities.ts",
+            "path": "node_modules/@types/kbn__core-capabilities-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -11453,7 +11461,7 @@
             "signature": [
               "[key: string]:  Record<string, boolean | Record<string, boolean>>"
             ],
-            "path": "src/core/types/capabilities.ts",
+            "path": "node_modules/@types/kbn__core-capabilities-common/index.d.ts",
             "deprecated": false
           }
         ],
@@ -11468,7 +11476,10 @@
         "description": [
           "\nAPIs to manage the {@link Capabilities} that will be used by the application.\n\nPlugins relying on capabilities to toggle some of their features should register them during the setup phase\nusing the `registerProvider` method.\n\nPlugins having the responsibility to restrict capabilities depending on a given context should register\ntheir capabilities switcher using the `registerSwitcher` method.\n\nRefers to the methods documentation for complete description and examples.\n"
         ],
-        "path": "src/core/server/capabilities/capabilities_service.ts",
+        "signature": [
+          "CapabilitiesSetup"
+        ],
+        "path": "node_modules/@types/kbn__core-capabilities-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -11482,16 +11493,10 @@
             ],
             "signature": [
               "(provider: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CapabilitiesProvider",
-                "text": "CapabilitiesProvider"
-              },
+              "CapabilitiesProvider",
               ") => void"
             ],
-            "path": "src/core/server/capabilities/capabilities_service.ts",
+            "path": "node_modules/@types/kbn__core-capabilities-server/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -11502,15 +11507,9 @@
                 "label": "provider",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.CapabilitiesProvider",
-                    "text": "CapabilitiesProvider"
-                  }
+                  "CapabilitiesProvider"
                 ],
-                "path": "src/core/server/capabilities/capabilities_service.ts",
+                "path": "node_modules/@types/kbn__core-capabilities-server/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -11528,16 +11527,10 @@
             ],
             "signature": [
               "(switcher: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CapabilitiesSwitcher",
-                "text": "CapabilitiesSwitcher"
-              },
+              "CapabilitiesSwitcher",
               ") => void"
             ],
-            "path": "src/core/server/capabilities/capabilities_service.ts",
+            "path": "node_modules/@types/kbn__core-capabilities-server/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -11548,15 +11541,9 @@
                 "label": "switcher",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.CapabilitiesSwitcher",
-                    "text": "CapabilitiesSwitcher"
-                  }
+                  "CapabilitiesSwitcher"
                 ],
-                "path": "src/core/server/capabilities/capabilities_service.ts",
+                "path": "node_modules/@types/kbn__core-capabilities-server/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -11575,7 +11562,10 @@
         "description": [
           "\nAPIs to access the application {@link Capabilities}.\n"
         ],
-        "path": "src/core/server/capabilities/capabilities_service.ts",
+        "signature": [
+          "CapabilitiesStart"
+        ],
+        "path": "node_modules/@types/kbn__core-capabilities-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -11591,18 +11581,12 @@
               "(request: ",
               "KibanaRequest",
               "<unknown, unknown, unknown, any>, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ResolveCapabilitiesOptions",
-                "text": "ResolveCapabilitiesOptions"
-              },
+              "ResolveCapabilitiesOptions",
               " | undefined) => Promise<",
               "Capabilities",
               ">"
             ],
-            "path": "src/core/server/capabilities/capabilities_service.ts",
+            "path": "node_modules/@types/kbn__core-capabilities-server/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -11616,7 +11600,7 @@
                   "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
-                "path": "src/core/server/capabilities/capabilities_service.ts",
+                "path": "node_modules/@types/kbn__core-capabilities-server/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -11628,16 +11612,10 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.ResolveCapabilitiesOptions",
-                    "text": "ResolveCapabilitiesOptions"
-                  },
+                  "ResolveCapabilitiesOptions",
                   " | undefined"
                 ],
-                "path": "src/core/server/capabilities/capabilities_service.ts",
+                "path": "node_modules/@types/kbn__core-capabilities-server/index.d.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -12384,13 +12362,7 @@
               "{@link CapabilitiesSetup}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CapabilitiesSetup",
-                "text": "CapabilitiesSetup"
-              }
+              "CapabilitiesSetup"
             ],
             "path": "src/core/server/index.ts",
             "deprecated": false
@@ -12518,13 +12490,7 @@
               "{@link MetricsServiceSetup}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.MetricsServiceSetup",
-                "text": "MetricsServiceSetup"
-              }
+              "MetricsServiceSetup"
             ],
             "path": "src/core/server/index.ts",
             "deprecated": false
@@ -12684,13 +12650,7 @@
               "{@link CapabilitiesStart}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CapabilitiesStart",
-                "text": "CapabilitiesStart"
-              }
+              "CapabilitiesStart"
             ],
             "path": "src/core/server/index.ts",
             "deprecated": false
@@ -12765,13 +12725,7 @@
               "{@link MetricsServiceStart}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.MetricsServiceSetup",
-                "text": "MetricsServiceSetup"
-              }
+              "MetricsServiceSetup"
             ],
             "path": "src/core/server/index.ts",
             "deprecated": false
@@ -16152,7 +16106,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; eql: ",
+              "<TDocument, TAggregations>>; }; cluster: ",
+              "default",
+              "; eql: ",
               "default",
               "; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
@@ -16384,9 +16340,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ClearScrollResponse",
-              ">; }; cluster: ",
-              "default",
-              "; count: { (this: That, params?: ",
+              ">; }; count: { (this: That, params?: ",
               "CountRequest",
               " | ",
               "CountRequest",
@@ -17614,6 +17568,76 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-server.IEventLoopDelaysMonitor",
+        "type": "Interface",
+        "tags": [],
+        "label": "IEventLoopDelaysMonitor",
+        "description": [
+          "\nCreating a new instance from EventLoopDelaysMonitor will\nautomatically start tracking event loop delays.\nSee {@link IntervalHistogram}"
+        ],
+        "signature": [
+          "IEventLoopDelaysMonitor",
+          "<T>"
+        ],
+        "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.IEventLoopDelaysMonitor.collect",
+            "type": "Function",
+            "tags": [],
+            "label": "collect",
+            "description": [
+              "\nCollect gathers event loop delays metrics from nodejs perf_hooks.monitorEventLoopDelay\nthe histogram calculations start from the last time `reset` was called or this\nEventLoopDelaysMonitor instance was created.\n\nReturns metrics in milliseconds.\n  "
+            ],
+            "signature": [
+              "() => T"
+            ],
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.IEventLoopDelaysMonitor.reset",
+            "type": "Function",
+            "tags": [],
+            "label": "reset",
+            "description": [
+              "\nResets the collected histogram data."
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.IEventLoopDelaysMonitor.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [
+              "\nDisables updating the interval timer for collecting new data points."
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-server.IExecutionContextContainer",
         "type": "Interface",
         "tags": [],
@@ -18061,7 +18085,10 @@
         "description": [
           "\nan IntervalHistogram object that samples and reports the event loop delay over time.\nThe delays will be reported in milliseconds.\n"
         ],
-        "path": "src/core/server/metrics/types.ts",
+        "signature": [
+          "IntervalHistogram"
+        ],
+        "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -18071,7 +18098,7 @@
             "tags": [],
             "label": "fromTimestamp",
             "description": [],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -18081,7 +18108,7 @@
             "tags": [],
             "label": "lastUpdatedAt",
             "description": [],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -18091,7 +18118,7 @@
             "tags": [],
             "label": "min",
             "description": [],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -18101,7 +18128,7 @@
             "tags": [],
             "label": "max",
             "description": [],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -18111,7 +18138,7 @@
             "tags": [],
             "label": "mean",
             "description": [],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -18121,7 +18148,7 @@
             "tags": [],
             "label": "exceeds",
             "description": [],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -18131,7 +18158,7 @@
             "tags": [],
             "label": "stddev",
             "description": [],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -18144,7 +18171,7 @@
             "signature": [
               "{ 50: number; 75: number; 95: number; 99: number; }"
             ],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           }
         ],
@@ -18894,7 +18921,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; eql: ",
+              "<TDocument, TAggregations>>; }; cluster: ",
+              "default",
+              "; eql: ",
               "default",
               "; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
@@ -19126,9 +19155,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ClearScrollResponse",
-              ">; }; cluster: ",
-              "default",
-              "; count: { (this: That, params?: ",
+              ">; }; count: { (this: That, params?: ",
               "CountRequest",
               " | ",
               "CountRequest",
@@ -20097,7 +20124,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; eql: ",
+              "<TDocument, TAggregations>>; }; cluster: ",
+              "default",
+              "; eql: ",
               "default",
               "; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
@@ -20329,9 +20358,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ClearScrollResponse",
-              ">; }; cluster: ",
-              "default",
-              "; count: { (this: That, params?: ",
+              ">; }; count: { (this: That, params?: ",
               "CountRequest",
               " | ",
               "CountRequest",
@@ -22645,7 +22672,10 @@
         "description": [
           "\nAPIs to retrieves metrics gathered and exposed by the core platform.\n"
         ],
-        "path": "src/core/server/metrics/types.ts",
+        "signature": [
+          "MetricsServiceSetup"
+        ],
+        "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -22657,7 +22687,7 @@
             "description": [
               "Interval metrics are collected in milliseconds"
             ],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -22673,16 +22703,10 @@
               "() => ",
               "Observable",
               "<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.OpsMetrics",
-                "text": "OpsMetrics"
-              },
+              "OpsMetrics",
               ">"
             ],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -23196,7 +23220,10 @@
         "description": [
           "\nRegroups metrics gathered by all the collectors.\nThis contains metrics about the os/runtime, the kibana process and the http server.\n"
         ],
-        "path": "src/core/server/metrics/types.ts",
+        "signature": [
+          "OpsMetrics"
+        ],
+        "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -23211,7 +23238,7 @@
             "signature": [
               "Date"
             ],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23226,15 +23253,9 @@
               "\nProcess related metrics."
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.OpsProcessMetrics",
-                "text": "OpsProcessMetrics"
-              }
+              "OpsProcessMetrics"
             ],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": true,
             "removeBy": "8.8.0",
             "references": [
@@ -23245,6 +23266,18 @@
               {
                 "plugin": "kibanaUsageCollection",
                 "path": "src/plugins/kibana_usage_collection/server/collectors/ops_stats/ops_stats_collector.ts"
+              },
+              {
+                "plugin": "@kbn/core-metrics-server-internal",
+                "path": "packages/core/metrics/core-metrics-server-internal/src/ops_metrics_collector.ts"
+              },
+              {
+                "plugin": "@kbn/core-metrics-server-internal",
+                "path": "packages/core/metrics/core-metrics-server-internal/src/logging/get_ops_metrics_log.ts"
+              },
+              {
+                "plugin": "@kbn/core-metrics-server-internal",
+                "path": "packages/core/metrics/core-metrics-server-internal/src/logging/get_ops_metrics_log.test.ts"
               }
             ]
           },
@@ -23258,16 +23291,10 @@
               "Process related metrics. Reports an array of objects for each kibana pid."
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.OpsProcessMetrics",
-                "text": "OpsProcessMetrics"
-              },
+              "OpsProcessMetrics",
               "[]"
             ],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23280,15 +23307,9 @@
               "OS related metrics"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.OpsOsMetrics",
-                "text": "OpsOsMetrics"
-              }
+              "OpsOsMetrics"
             ],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23303,7 +23324,7 @@
             "signature": [
               "{ avg_in_millis: number; max_in_millis: number; }"
             ],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23318,7 +23339,7 @@
             "signature": [
               "{ disconnects: number; total: number; statusCodes: Record<number, number>; }"
             ],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23330,7 +23351,7 @@
             "description": [
               "number of current concurrent connections to the server"
             ],
-            "path": "src/core/server/metrics/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           }
         ],
@@ -23345,7 +23366,10 @@
         "description": [
           "\nOS related metrics"
         ],
-        "path": "src/core/server/metrics/collectors/types.ts",
+        "signature": [
+          "OpsOsMetrics"
+        ],
+        "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -23360,7 +23384,7 @@
             "signature": [
               "\"linux\" | \"aix\" | \"android\" | \"darwin\" | \"freebsd\" | \"haiku\" | \"openbsd\" | \"sunos\" | \"win32\" | \"cygwin\" | \"netbsd\""
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23372,7 +23396,7 @@
             "description": [
               "The os platform release, prefixed by the platform name"
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23387,7 +23411,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23402,7 +23426,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23417,7 +23441,7 @@
             "signature": [
               "{ '1m': number; '5m': number; '15m': number; }"
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23432,7 +23456,7 @@
             "signature": [
               "{ total_in_bytes: number; free_in_bytes: number; used_in_bytes: number; }"
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23444,7 +23468,7 @@
             "description": [
               "the OS uptime"
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23459,7 +23483,7 @@
             "signature": [
               "{ control_group: string; usage_nanos: number; } | undefined"
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23474,7 +23498,7 @@
             "signature": [
               "{ control_group: string; cfs_period_micros: number; cfs_quota_micros: number; stat: { number_of_elapsed_periods: number; number_of_times_throttled: number; time_throttled_nanos: number; }; } | undefined"
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           }
         ],
@@ -23489,7 +23513,10 @@
         "description": [
           "\nProcess related metrics"
         ],
-        "path": "src/core/server/metrics/collectors/types.ts",
+        "signature": [
+          "OpsProcessMetrics"
+        ],
+        "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -23501,7 +23528,7 @@
             "description": [
               "pid of the kibana process"
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23516,7 +23543,7 @@
             "signature": [
               "{ heap: { total_in_bytes: number; used_in_bytes: number; size_limit: number; }; resident_set_size_in_bytes: number; }"
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23528,7 +23555,7 @@
             "description": [
               "mean event loop delay since last collection"
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23541,15 +23568,9 @@
               "node event loop delay histogram since last collection"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.IntervalHistogram",
-                "text": "IntervalHistogram"
-              }
+              "IntervalHistogram"
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23561,7 +23582,7 @@
             "description": [
               "uptime of the kibana process"
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           }
         ],
@@ -23576,7 +23597,10 @@
         "description": [
           "\nserver related metrics"
         ],
-        "path": "src/core/server/metrics/collectors/types.ts",
+        "signature": [
+          "OpsServerMetrics"
+        ],
+        "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -23591,7 +23615,7 @@
             "signature": [
               "{ avg_in_millis: number; max_in_millis: number; }"
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23606,7 +23630,7 @@
             "signature": [
               "{ disconnects: number; total: number; statusCodes: Record<number, number>; }"
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -23618,7 +23642,7 @@
             "description": [
               "number of current concurrent connections to the server"
             ],
-            "path": "src/core/server/metrics/collectors/types.ts",
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
             "deprecated": false
           }
         ],
@@ -24395,7 +24419,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; eql: ",
+              "<TDocument, TAggregations>>; }; cluster: ",
+              "default",
+              "; eql: ",
               "default",
               "; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
@@ -24627,9 +24653,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ClearScrollResponse",
-              ">; }; cluster: ",
-              "default",
-              "; count: { (this: That, params?: ",
+              ">; }; count: { (this: That, params?: ",
               "CountRequest",
               " | ",
               "CountRequest",
@@ -25815,7 +25839,10 @@
         "description": [
           "\nDefines a set of additional options for the `resolveCapabilities` method of {@link CapabilitiesStart}.\n"
         ],
-        "path": "src/core/server/capabilities/capabilities_service.ts",
+        "signature": [
+          "ResolveCapabilitiesOptions"
+        ],
+        "path": "node_modules/@types/kbn__core-capabilities-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -25827,7 +25854,7 @@
             "description": [
               "\nIndicates if capability switchers are supposed to return a default set of capabilities."
             ],
-            "path": "src/core/server/capabilities/capabilities_service.ts",
+            "path": "node_modules/@types/kbn__core-capabilities-server/index.d.ts",
             "deprecated": false
           }
         ],
@@ -28210,7 +28237,7 @@
           "Capabilities",
           ">"
         ],
-        "path": "src/core/server/capabilities/types.ts",
+        "path": "node_modules/@types/kbn__core-capabilities-server/index.d.ts",
         "deprecated": false,
         "returnComment": [],
         "children": [],
@@ -28230,13 +28257,13 @@
           "KibanaRequest",
           "<unknown, unknown, unknown, any>, uiCapabilities: ",
           "Capabilities",
-          ", useDefaultCapabilities: boolean) => Partial<",
-          "Capabilities",
-          "> | Promise<Partial<",
+          ", useDefaultCapabilities: boolean) => ",
+          "MaybePromise",
+          "<Partial<",
           "Capabilities",
           ">>"
         ],
-        "path": "src/core/server/capabilities/types.ts",
+        "path": "node_modules/@types/kbn__core-capabilities-server/index.d.ts",
         "deprecated": false,
         "returnComment": [],
         "children": [
@@ -28251,7 +28278,7 @@
               "KibanaRequest",
               "<unknown, unknown, unknown, any>"
             ],
-            "path": "src/core/server/capabilities/types.ts",
+            "path": "node_modules/@types/kbn__core-capabilities-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -28264,7 +28291,7 @@
             "signature": [
               "Capabilities"
             ],
-            "path": "src/core/server/capabilities/types.ts",
+            "path": "node_modules/@types/kbn__core-capabilities-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -28274,7 +28301,7 @@
             "tags": [],
             "label": "useDefaultCapabilities",
             "description": [],
-            "path": "src/core/server/capabilities/types.ts",
+            "path": "node_modules/@types/kbn__core-capabilities-server/index.d.ts",
             "deprecated": false
           }
         ],
@@ -28681,7 +28708,9 @@
           "TransportRequestOptions",
           " | undefined): Promise<",
           "SearchResponse",
-          "<TDocument, TAggregations>>; }; eql: ",
+          "<TDocument, TAggregations>>; }; cluster: ",
+          "default",
+          "; eql: ",
           "default",
           "; create: { <TDocument = unknown>(this: That, params: ",
           "CreateRequest",
@@ -28913,9 +28942,7 @@
           "TransportRequestOptions",
           " | undefined): Promise<",
           "ClearScrollResponse",
-          ">; }; cluster: ",
-          "default",
-          "; count: { (this: That, params?: ",
+          ">; }; count: { (this: That, params?: ",
           "CountRequest",
           " | ",
           "CountRequest",
@@ -30305,7 +30332,7 @@
         "label": "KibanaExecutionContext",
         "description": [],
         "signature": [
-          "{ readonly type?: string | undefined; readonly name?: string | undefined; readonly page?: string | undefined; readonly id?: string | undefined; readonly description?: string | undefined; readonly url?: string | undefined; child?: ",
+          "{ readonly type?: string | undefined; readonly name?: string | undefined; readonly page?: string | undefined; readonly id?: string | undefined; readonly description?: string | undefined; readonly url?: string | undefined; readonly meta?: { [key: string]: string | number | boolean | undefined; } | undefined; child?: ",
           "KibanaExecutionContext",
           " | undefined; }"
         ],
@@ -30539,15 +30566,9 @@
           "\n{@inheritdoc MetricsServiceSetup}\n"
         ],
         "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.MetricsServiceSetup",
-            "text": "MetricsServiceSetup"
-          }
+          "MetricsServiceSetup"
         ],
-        "path": "src/core/server/metrics/types.ts",
+        "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },

@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildTimestampRuntimeMapping builds a correct timestamp fallback runtime mapping 1`] = `
+Object {
+  "kibana.combined_timestamp": Object {
+    "script": Object {
+      "params": Object {
+        "timestampOverride": "event.ingested",
+      },
+      "source": "
+              if (doc.containsKey(params.timestampOverride) && doc[params.timestampOverride].size()!=0) {
+                emit(doc[params.timestampOverride].value.millis);
+              } else {
+                emit(doc['@timestamp'].value.millis);
+              }
+            ",
+    },
+    "type": "date",
+  },
+}
+`;

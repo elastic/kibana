@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { Agent } from '../../types';
 
-import { errorsToResults, getAgentsByKuery, processAgentsInBatches } from './crud';
+import { errorsToResults, getAgentsByKuery, getAgentTags, processAgentsInBatches } from './crud';
 
-jest.mock('../../../common', () => ({
-  ...jest.requireActual('../../../common'),
+jest.mock('../../../common/services/is_agent_upgradeable', () => ({
   isAgentUpgradeable: jest.fn().mockImplementation((agent: Agent) => agent.id.includes('up')),
 }));
 
@@ -40,6 +39,82 @@ describe('Agents CRUD test', () => {
       },
     };
   }
+
+  describe('getAgentTags', () => {
+    it('should return tags from aggs', async () => {
+      searchMock.mockResolvedValueOnce({
+        aggregations: {
+          tags: { buckets: [{ key: 'tag1' }, { key: 'tag2' }] },
+        },
+      });
+
+      const result = await getAgentTags(esClientMock, { showInactive: false });
+
+      expect(result).toEqual(['tag1', 'tag2']);
+      expect(searchMock).toHaveBeenCalledWith({
+        aggs: { tags: { terms: { field: 'tags', size: 10000 } } },
+        body: {
+          query: { bool: { minimum_should_match: 1, should: [{ match: { active: true } }] } },
+        },
+        index: '.fleet-agents',
+        size: 0,
+      });
+    });
+
+    it('should return empty list if no agent tags', async () => {
+      searchMock.mockResolvedValueOnce({
+        aggregations: {
+          tags: {},
+        },
+      });
+
+      const result = await getAgentTags(esClientMock, { showInactive: false });
+
+      expect(result).toEqual([]);
+    });
+
+    it('should return empty list if no agent index', async () => {
+      searchMock.mockRejectedValueOnce(new errors.ResponseError({ statusCode: 404 } as any));
+
+      const result = await getAgentTags(esClientMock, { showInactive: false });
+
+      expect(result).toEqual([]);
+    });
+
+    it('should pass query when called with kuery', async () => {
+      searchMock.mockResolvedValueOnce({
+        aggregations: {
+          tags: { buckets: [{ key: 'tag1' }, { key: 'tag2' }] },
+        },
+      });
+
+      await getAgentTags(esClientMock, {
+        showInactive: true,
+        kuery: 'fleet-agents.policy_id: 123',
+      });
+
+      expect(searchMock).toHaveBeenCalledWith({
+        aggs: { tags: { terms: { field: 'tags', size: 10000 } } },
+        body: {
+          query: {
+            bool: {
+              minimum_should_match: 1,
+              should: [
+                {
+                  match: {
+                    policy_id: '123',
+                  },
+                },
+              ],
+            },
+          },
+        },
+        index: '.fleet-agents',
+        size: 0,
+      });
+    });
+  });
+
   describe('getAgentsByKuery', () => {
     it('should return upgradeable on first page', async () => {
       searchMock

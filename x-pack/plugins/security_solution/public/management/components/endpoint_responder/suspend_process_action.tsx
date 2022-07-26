@@ -15,6 +15,7 @@ import { useSendSuspendProcessRequest } from '../../hooks/endpoint/use_send_susp
 import type { CommandExecutionComponentProps } from '../console/types';
 import { parsedPidOrEntityIdParameter } from '../console/service/parsed_command_input';
 import { ActionError } from './action_error';
+import { ACTION_DETAILS_REFRESH_INTERVAL } from './constants';
 
 export const SuspendProcessActionResult = memo<
   CommandExecutionComponentProps<
@@ -38,7 +39,7 @@ export const SuspendProcessActionResult = memo<
 
   const { data: actionDetails } = useGetActionDetails(actionId ?? '-', {
     enabled: Boolean(actionId) && isPending,
-    refetchInterval: isPending ? 3000 : false,
+    refetchInterval: isPending ? ACTION_DETAILS_REFRESH_INTERVAL : false,
   });
 
   // Send Suspend request if not yet done
@@ -59,20 +60,22 @@ export const SuspendProcessActionResult = memo<
 
   // If suspend-process request was created, store the action id if necessary
   useEffect(() => {
-    if (isSuccess && actionId !== data.data.id) {
-      setStore((prevState) => {
-        return { ...prevState, actionId: data.data.id };
-      });
-    } else if (error) {
-      setStatus('error');
-      setStore((prevState) => {
-        return { ...prevState, apiError: error };
-      });
+    if (isPending) {
+      if (isSuccess && actionId !== data.data.id) {
+        setStore((prevState) => {
+          return { ...prevState, actionId: data.data.id };
+        });
+      } else if (error) {
+        setStatus('error');
+        setStore((prevState) => {
+          return { ...prevState, apiError: error };
+        });
+      }
     }
-  }, [actionId, data?.data.id, isSuccess, error, setStore, setStatus]);
+  }, [actionId, data?.data.id, isSuccess, error, setStore, setStatus, isPending]);
 
   useEffect(() => {
-    if (actionDetails?.data.isCompleted) {
+    if (actionDetails?.data.isCompleted && isPending) {
       setStatus('success');
       setStore((prevState) => {
         return {
@@ -81,7 +84,7 @@ export const SuspendProcessActionResult = memo<
         };
       });
     }
-  }, [actionDetails?.data, setStatus, setStore]);
+  }, [actionDetails?.data, setStatus, setStore, isPending]);
 
   // Show API errors if perform action fails
   if (isError && apiError) {

@@ -986,26 +986,16 @@ describe('IndexPatternDimensionEditorPanel', () => {
       });
     });
 
-    it('should select the Records field when count is selected', () => {
+    it('should select the Records field when count is selected on non-existing column', () => {
       wrapper = mount(
         <IndexPatternDimensionEditorComponent
           {...defaultProps}
-          state={getStateWithColumns({
-            col2: {
-              dataType: 'number',
-              isBucketed: false,
-              label: '',
-              operationType: 'average',
-              sourceField: 'bytes',
-            },
-          })}
+          state={getStateWithColumns({})}
           columnId="col2"
         />
       );
 
-      wrapper
-        .find('button[data-test-subj="lns-indexPatternDimension-count incompatible"]')
-        .simulate('click');
+      wrapper.find('button[data-test-subj="lns-indexPatternDimension-count"]').simulate('click');
 
       const newColumnState = setState.mock.calls[0][0](state).layers.first.columns.col2;
       expect(newColumnState.operationType).toEqual('count');
@@ -1175,9 +1165,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         label: 'Sum of bytes per hour',
       });
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
-      wrapper
-        .find('button[data-test-subj="lns-indexPatternDimension-count incompatible"]')
-        .simulate('click');
+      wrapper.find('button[data-test-subj="lns-indexPatternDimension-count"]').simulate('click');
       expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
@@ -1188,7 +1176,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
               ...props.state.layers.first.columns,
               col2: expect.objectContaining({
                 timeScale: 'h',
-                label: 'Count of records per hour',
+                label: 'Value count of bytes per hour',
               }),
             },
           },
@@ -1385,9 +1373,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         label: 'Sum of bytes per hour',
       });
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
-      wrapper
-        .find('button[data-test-subj="lns-indexPatternDimension-count incompatible"]')
-        .simulate('click');
+      wrapper.find('button[data-test-subj="lns-indexPatternDimension-count"]').simulate('click');
       expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
         ...props.state,
         layers: {
@@ -1523,9 +1509,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         label: 'Sum of bytes per hour',
       });
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
-      wrapper
-        .find('button[data-test-subj="lns-indexPatternDimension-count incompatible"]')
-        .simulate('click');
+      wrapper.find('button[data-test-subj="lns-indexPatternDimension-count"]').simulate('click');
       expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
@@ -1764,10 +1748,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
       .prop('options');
 
     expect(options![0]['data-test-subj']).not.toContain('Incompatible');
-
-    options![1].options!.map((operation) =>
-      expect(operation['data-test-subj']).toContain('Incompatible')
-    );
   });
 
   it('should not update when selecting the current field again', () => {

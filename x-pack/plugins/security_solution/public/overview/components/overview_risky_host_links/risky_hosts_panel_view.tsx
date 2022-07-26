@@ -5,19 +5,23 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
-import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { SavedObject, SavedObjectAttributes } from '@kbn/core/types';
 import type { LinkPanelListItem } from '../link_panel';
 import { InnerLinkPanel, LinkPanel } from '../link_panel';
 import type { LinkPanelViewProps } from '../link_panel/types';
 import { Link } from '../link_panel/link';
 import * as i18n from './translations';
-import { VIEW_DASHBOARD } from '../overview_cti_links/translations';
 import { NavigateToHost } from './navigate_to_host';
 import { HostRiskScoreQueryId } from '../../../risk_score/containers';
+import { useKibana } from '../../../common/lib/kibana';
+import { RISKY_HOSTS_DASHBOARD_TITLE } from '../../../hosts/pages/navigation/constants';
+import { useDashboardButtonHref } from '../../../common/hooks/use_dashboard_button_href';
+import { ImportSavedObjectsButton } from '../../../common/components/create_prebuilt_saved_objects/components/bulk_create_button';
+import { VIEW_DASHBOARD } from '../overview_cti_links/translations';
 
 const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
   {
@@ -63,12 +67,13 @@ const warningPanel = (
   />
 );
 
-export const RiskyHostsPanelView: React.FC<LinkPanelViewProps> = ({
-  buttonHref = '',
+const RiskyHostsPanelViewComponent: React.FC<LinkPanelViewProps> = ({
   isInspectEnabled,
   listItems,
   splitPanel,
   totalCount = 0,
+  to,
+  from,
 }) => {
   const splitPanelElement =
     typeof splitPanel === 'undefined'
@@ -76,21 +81,54 @@ export const RiskyHostsPanelView: React.FC<LinkPanelViewProps> = ({
         ? warningPanel
         : undefined
       : splitPanel;
+
+  const [dashboardUrl, setDashboardUrl] = useState<string>();
+  const { buttonHref } = useDashboardButtonHref({
+    to,
+    from,
+    title: RISKY_HOSTS_DASHBOARD_TITLE,
+  });
+  const {
+    services: { dashboard },
+  } = useKibana();
+
+  const onImportDashboardSuccessCallback = useCallback(
+    (response: Array<SavedObject<SavedObjectAttributes>>) => {
+      const targetDashboard = response.find(
+        (obj) => obj.type === 'dashboard' && obj?.attributes?.title === RISKY_HOSTS_DASHBOARD_TITLE
+      );
+
+      const fetchDashboardUrl = (targetDashboardId: string | null | undefined) => {
+        if (to && from && targetDashboardId) {
+          const targetUrl = dashboard?.locator?.getRedirectUrl({
+            dashboardId: targetDashboardId,
+            timeRange: {
+              to,
+              from,
+            },
+          });
+
+          setDashboardUrl(targetUrl);
+        }
+      };
+
+      fetchDashboardUrl(targetDashboard?.id);
+    },
+    [dashboard?.locator, from, to]
+  );
+
   return (
     <LinkPanel
       {...{
-        button: useMemo(
-          () => (
-            <EuiButton
-              href={buttonHref}
-              isDisabled={!buttonHref}
-              data-test-subj="risky-hosts-view-dashboard-button"
-              target="_blank"
-            >
-              {VIEW_DASHBOARD}
-            </EuiButton>
-          ),
-          [buttonHref]
+        button: (
+          <ImportSavedObjectsButton
+            hide={listItems == null || listItems.length === 0}
+            onSuccessCallback={onImportDashboardSuccessCallback}
+            successLink={buttonHref || dashboardUrl}
+            successTitle={VIEW_DASHBOARD}
+            templateName="hostRiskScoreDashboards"
+            title={i18n.IMPORT_DASHBOARD}
+          />
         ),
         columns,
         dataTestSubj: 'risky-hosts-dashboard-links',
@@ -115,3 +153,5 @@ export const RiskyHostsPanelView: React.FC<LinkPanelViewProps> = ({
     />
   );
 };
+
+export const RiskyHostsPanelView = React.memo(RiskyHostsPanelViewComponent);
