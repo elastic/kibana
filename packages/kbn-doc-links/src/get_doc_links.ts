@@ -618,6 +618,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       learnMoreBlog: `${ELASTIC_WEBSITE_URL}blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic`,
       apiKeysLearnMore: `${KIBANA_DOCS}api-keys.html`,
       onPremRegistry: `${FLEET_DOCS}air-gapped.html`,
+      packageSignatures: `${FLEET_DOCS}package-signatures.html`,
       secureLogstash: `${FLEET_DOCS}secure-logstash-connections.html`,
       agentPolicy: `${FLEET_DOCS}agent-policy.html`,
     },
