@@ -8,7 +8,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
 
 import {
   EuiBasicTable,
@@ -18,8 +17,8 @@ import {
   EuiIconTip,
   EuiSwitch,
   EuiSwitchEvent,
+  EuiSpacer,
   EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
 import {
   AggFunctionsMapping,
@@ -265,17 +264,10 @@ export const dateHistogramOperation: OperationDefinition<
     const bindToGlobalTimePickerValue =
       indexPattern.timeFieldName === field?.name || !currentColumn.params.ignoreTimeRange;
 
-    const { euiTheme } = useEuiTheme();
-
     return (
       <>
-        <EuiFormRow
-          display="rowCompressed"
-          hasChildLabel={false}
-          css={css`
-            margin-top: ${euiTheme.size.s} !important;
-          `}
-        >
+        <EuiSpacer size="s" />
+        <EuiFormRow display="rowCompressed" hasChildLabel={false}>
           <EuiSwitch
             label={
               <EuiText size="xs">
@@ -300,68 +292,68 @@ export const dateHistogramOperation: OperationDefinition<
           />
         </EuiFormRow>
         {indexPattern.timeFieldName !== field?.name && (
-          <EuiFormRow
-            display="rowCompressed"
-            hasChildLabel={false}
-            css={css`
-              margin-top: ${euiTheme.size.s} !important;
-            `}
-          >
-            <EuiSwitch
-              label={
-                <EuiText size="xs">
-                  {i18n.translate('xpack.lens.indexPattern.dateHistogram.bindToGlobalTimePicker', {
-                    defaultMessage: 'Bind to global time picker',
-                  })}{' '}
-                  <EuiIconTip
-                    color="subdued"
-                    content={i18n.translate(
-                      'xpack.lens.indexPattern.dateHistogram.globalTimePickerHelp',
+          <>
+            <EuiSpacer size="s" />
+            <EuiFormRow display="rowCompressed" hasChildLabel={false}>
+              <EuiSwitch
+                label={
+                  <EuiText size="xs">
+                    {i18n.translate(
+                      'xpack.lens.indexPattern.dateHistogram.bindToGlobalTimePicker',
                       {
-                        defaultMessage:
-                          "Filter the selected field by the global time picker in the top right. This setting can't be turned off for the default time field of the current data view.",
+                        defaultMessage: 'Bind to global time picker',
                       }
-                    )}
-                    iconProps={{
-                      className: 'eui-alignTop',
-                    }}
-                    position="top"
-                    size="s"
-                    type="questionInCircle"
-                  />
-                </EuiText>
-              }
-              disabled={indexPattern.timeFieldName === field?.name}
-              checked={bindToGlobalTimePickerValue}
-              onChange={() => {
-                let newLayer = updateColumnParam({
-                  layer,
-                  columnId,
-                  paramName: 'ignoreTimeRange',
-                  value: !currentColumn.params.ignoreTimeRange,
-                });
-                if (
-                  !currentColumn.params.ignoreTimeRange &&
-                  currentColumn.params.interval === autoInterval
-                ) {
-                  const newFixedInterval =
-                    data.search.aggs.calculateAutoTimeExpression({
-                      from: dateRange.fromDate,
-                      to: dateRange.toDate,
-                    }) || '1h';
-                  newLayer = updateColumnParam({
-                    layer: newLayer,
-                    columnId,
-                    paramName: 'interval',
-                    value: newFixedInterval,
-                  });
-                  setIntervalInput(newFixedInterval);
+                    )}{' '}
+                    <EuiIconTip
+                      color="subdued"
+                      content={i18n.translate(
+                        'xpack.lens.indexPattern.dateHistogram.globalTimePickerHelp',
+                        {
+                          defaultMessage:
+                            "Filter the selected field by the global time picker in the top right. This setting can't be turned off for the default time field of the current data view.",
+                        }
+                      )}
+                      iconProps={{
+                        className: 'eui-alignTop',
+                      }}
+                      position="top"
+                      size="s"
+                      type="questionInCircle"
+                    />
+                  </EuiText>
                 }
-                paramEditorUpdater(newLayer);
-              }}
-              compressed
-            />
-          </EuiFormRow>
+                disabled={indexPattern.timeFieldName === field?.name}
+                checked={bindToGlobalTimePickerValue}
+                onChange={() => {
+                  let newLayer = updateColumnParam({
+                    layer,
+                    columnId,
+                    paramName: 'ignoreTimeRange',
+                    value: !currentColumn.params.ignoreTimeRange,
+                  });
+                  if (
+                    !currentColumn.params.ignoreTimeRange &&
+                    currentColumn.params.interval === autoInterval
+                  ) {
+                    const newFixedInterval =
+                      data.search.aggs.calculateAutoTimeExpression({
+                        from: dateRange.fromDate,
+                        to: dateRange.toDate,
+                      }) || '1h';
+                    newLayer = updateColumnParam({
+                      layer: newLayer,
+                      columnId,
+                      paramName: 'interval',
+                      value: newFixedInterval,
+                    });
+                    setIntervalInput(newFixedInterval);
+                  }
+                  paramEditorUpdater(newLayer);
+                }}
+                compressed
+              />
+            </EuiFormRow>
+          </>
         )}
         <EuiFormRow
           label={i18n.translate('xpack.lens.indexPattern.dateHistogram.minimumInterval', {
@@ -437,13 +429,8 @@ export const dateHistogramOperation: OperationDefinition<
             />
           )}
         </EuiFormRow>
-        <EuiFormRow
-          display="rowCompressed"
-          hasChildLabel={false}
-          css={css`
-            margin-top: ${euiTheme.size.s} !important;
-          `}
-        >
+        <EuiSpacer size="s" />
+        <EuiFormRow display="rowCompressed" hasChildLabel={false}>
           <TooltipWrapper
             tooltipContent={i18n.translate(
               'xpack.lens.indexPattern.dateHistogram.dropPartialBucketsHelp',

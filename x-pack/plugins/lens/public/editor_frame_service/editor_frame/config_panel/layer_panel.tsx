@@ -611,18 +611,32 @@ export function LayerPanel(
               !activeDimension.isNew &&
               activeVisualization.renderDimensionEditor &&
               activeGroup?.enableDimensionEditor && (
-                <div className="lnsLayerPanel__styleEditor">
-                  <NativeRenderer
-                    render={activeVisualization.renderDimensionEditor}
-                    nativeProps={{
-                      ...layerVisualizationConfigProps,
-                      groupId: activeGroup.groupId,
-                      accessor: activeId,
-                      setState: props.updateVisualization,
-                      panelRef,
-                    }}
-                  />
-                </div>
+                <>
+                  <div className="lnsLayerPanel__styleEditor">
+                    <NativeRenderer
+                      render={activeVisualization.renderDimensionEditor}
+                      nativeProps={{
+                        ...layerVisualizationConfigProps,
+                        groupId: activeGroup.groupId,
+                        accessor: activeId,
+                        setState: props.updateVisualization,
+                        panelRef,
+                      }}
+                    />
+                  </div>
+                  {activeVisualization.renderDimensionEditorAdditionalSection && (
+                    <NativeRenderer
+                      render={activeVisualization.renderDimensionEditorAdditionalSection}
+                      nativeProps={{
+                        ...layerVisualizationConfigProps,
+                        groupId: activeGroup.groupId,
+                        accessor: activeId,
+                        setState: props.updateVisualization,
+                        panelRef,
+                      }}
+                    />
+                  )}
+                </>
               )}
           </>
         }

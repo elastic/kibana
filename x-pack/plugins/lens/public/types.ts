@@ -900,6 +900,14 @@ export interface Visualization<T = unknown> {
     props: VisualizationDimensionEditorProps<T>
   ) => ((cleanupElement: Element) => void) | void;
   /**
+   * Additional editor that gets rendered inside the dimension popover.
+   * This can be used to configure dimension-specific options
+   */
+  renderDimensionEditorAdditionalSection?: (
+    domElement: Element,
+    props: VisualizationDimensionEditorProps<T>
+  ) => ((cleanupElement: Element) => void) | void;
+  /**
    * Renders dimension trigger. Used only for noDatasource layers
    */
   renderDimensionTrigger?: (props: {

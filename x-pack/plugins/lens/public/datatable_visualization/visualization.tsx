@@ -22,6 +22,7 @@ import type {
 } from '../types';
 import { LensIconChartDatatable } from '../assets/chart_datatable';
 import { TableDimensionEditor } from './components/dimension_editor';
+import { TableDimensionEditorAdditionalSection } from './components/dimension_editor_addtional_section';
 import { LayerType, layerTypes } from '../../common';
 import { getDefaultSummaryLabel, PagingState } from '../../common/expressions';
 import type { ColumnState, SortingState } from '../../common/expressions';
@@ -321,6 +322,17 @@ export const getDatatableVisualization = ({
       <KibanaThemeProvider theme$={theme.theme$}>
         <I18nProvider>
           <TableDimensionEditor {...props} paletteService={paletteService} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
+      domElement
+    );
+  },
+
+  renderDimensionEditorAdditionalSection(domElement, props) {
+    render(
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <I18nProvider>
+          <TableDimensionEditorAdditionalSection {...props} paletteService={paletteService} />
         </I18nProvider>
       </KibanaThemeProvider>,
       domElement

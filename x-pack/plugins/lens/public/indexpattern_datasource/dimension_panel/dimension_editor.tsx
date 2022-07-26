@@ -953,18 +953,21 @@ export function DimensionEditor(props: DimensionEditorProps) {
       {!isFullscreen && !currentFieldIsInvalid && (
         <EuiFormRow
           label={
-            <EuiText
-              size="s"
-              css={css`
-                margin-bottom: ${euiTheme.size.base};
-              `}
-            >
-              <h4>
-                {i18n.translate('xpack.lens.indexPattern.dimensionEditor.headingAppearance', {
-                  defaultMessage: 'Appearance',
-                })}
-              </h4>
-            </EuiText>
+            !incompleteInfo &&
+            temporaryState === 'none' && (
+              <EuiText
+                size="s"
+                css={css`
+                  margin-bottom: ${euiTheme.size.base};
+                `}
+              >
+                <h4>
+                  {i18n.translate('xpack.lens.indexPattern.dimensionEditor.headingAppearance', {
+                    defaultMessage: 'Appearance',
+                  })}
+                </h4>
+              </EuiText>
+            )
           }
           className="lnsIndexPatternDimensionEditor--collapseNext lnsIndexPatternDimensionEditor--padded"
           fullWidth
