@@ -17,7 +17,6 @@ import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
 
 interface RasterTileSourceData extends DataFilters {
   url: string;
-  applyGlobalTime: boolean;
 }
 
 export class RasterTileLayer extends AbstractLayer {
@@ -60,9 +59,8 @@ export class RasterTileLayer extends AbstractLayer {
 
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters }: DataRequestContext) {
     const source = this.getSource();
-    const nextMeta: RasterTileSourceData = {
+    const nextMeta = {
       ...dataFilters,
-      url: await source.getUrlTemplate(dataFilters),
       applyGlobalTime: source.getApplyGlobalTime(),
     };
     const prevDataRequest = this.getSourceDataRequest();
@@ -81,9 +79,12 @@ export class RasterTileLayer extends AbstractLayer {
       if (canSkip) return;
     }
     const requestToken = Symbol(`layer-source-refresh:${this.getId()} - source`);
-    startLoading(SOURCE_DATA_REQUEST_ID, requestToken, nextMeta);
     try {
-      stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, nextMeta, {});
+      startLoading(SOURCE_DATA_REQUEST_ID, requestToken, nextMeta);
+      const data = {
+        url: await source.getUrlTemplate(dataFilters),
+      };
+      stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, data, {});
     } catch (error) {
       onLoadError(SOURCE_DATA_REQUEST_ID, requestToken, error.message);
     }
