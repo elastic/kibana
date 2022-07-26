@@ -75,7 +75,6 @@ export default function ({ getService }: FtrProviderContext) {
             lat: '',
             lon: '',
           },
-          name: 'Test private location 0',
           agentPolicyId: testFleetPolicyID,
         },
       ]);

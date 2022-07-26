@@ -74,7 +74,7 @@ describe('useLocationsAPI', () => {
     result.current.onSubmit({
       id: 'new',
       agentPolicyId: 'newPolicy',
-      name: 'new',
+      label: 'new',
       concurrentMonitors: 1,
       geo: {
         lat: 0,
@@ -96,7 +96,7 @@ describe('useLocationsAPI', () => {
               lat: 0,
               lon: 0,
             },
-            name: 'new',
+            label: 'new',
             agentPolicyId: 'newPolicy',
           },
         ],

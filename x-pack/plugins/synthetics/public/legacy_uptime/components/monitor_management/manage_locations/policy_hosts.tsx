@@ -51,11 +51,11 @@ export const PolicyHostsField = ({
       dropdownDisplay: (
         <EuiToolTip
           content={
-            hasLocation?.name
+            hasLocation?.label
               ? i18n.translate('xpack.synthetics.monitorManagement.anotherPrivateLocation', {
                   defaultMessage:
                     'This agent policy is already attached to location: {locationName}.',
-                  values: { locationName: hasLocation?.name },
+                  values: { locationName: hasLocation?.label },
                 })
               : undefined
           }

@@ -38,7 +38,7 @@ export class PrivateLocationTestService {
       id: privateLocationsSavedObjectId,
       attributes: {
         locations: testFleetPolicyIds.map((id, index) => ({
-          name: 'Test private location ' + index,
+          label: 'Test private location ' + index,
           agentPolicyId: id,
           id,
           geo: {

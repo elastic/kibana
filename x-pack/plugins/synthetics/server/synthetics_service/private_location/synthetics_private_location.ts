@@ -47,7 +47,7 @@ export class SyntheticsPrivateLocation {
       throw new Error('Could not find authSavedObjectsClient');
     }
 
-    const { name: locName } = privateLocation;
+    const { label: locName } = privateLocation;
     const spaceId = this.getSpaceId();
 
     try {
@@ -75,7 +75,7 @@ export class SyntheticsPrivateLocation {
       const { formattedPolicy } = formatSyntheticsPolicy(newPolicy, config.type, {
         ...(config as Partial<MonitorFields>),
         config_id: config.fields?.config_id,
-        location_name: privateLocation.name,
+        location_name: privateLocation.label,
         'monitor.project.id': config.fields?.['monitor.project.name'],
         'monitor.project.name': config.fields?.['monitor.project.name'],
       });
@@ -91,7 +91,7 @@ export class SyntheticsPrivateLocation {
     try {
       const { locations } = config;
 
-      const privateLocations = await getSyntheticsPrivateLocations(
+      const privateLocations: PrivateLocation[] = await getSyntheticsPrivateLocations(
         this.server.authSavedObjectsClient!
       );
 
@@ -230,7 +230,7 @@ export class SyntheticsPrivateLocation {
     if (soClient && esClient) {
       const { locations } = config;
 
-      const allPrivateLocations = await getSyntheticsPrivateLocations(soClient);
+      const allPrivateLocations: PrivateLocation[] = await getSyntheticsPrivateLocations(soClient);
 
       const monitorPrivateLocations = locations.filter((loc) => !loc.isServiceManaged);
 
