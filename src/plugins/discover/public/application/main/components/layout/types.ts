@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { Query, TimeRange } from '@kbn/es-query';
+import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import type { SavedObject } from '@kbn/data-plugin/public';
 import type { DataView, DataViewAttributes } from '@kbn/data-views-plugin/public';
 import { ISearchSource } from '@kbn/data-plugin/public';
-import { RequestAdapter } from '@kbn/inspector-plugin';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { DataTableRecord } from '../../../../types';
 import { AppState, GetStateReturn } from '../../services/discover_state';
 import { DataRefetch$, SavedSearchData } from '../../hooks/use_saved_search';
@@ -22,7 +22,10 @@ export interface DiscoverLayoutProps {
   inspectorAdapters: { requests: RequestAdapter };
   navigateTo: (url: string) => void;
   onChangeIndexPattern: (id: string) => void;
-  onUpdateQuery: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
+  onUpdateQuery: (
+    payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
+    isUpdate?: boolean
+  ) => void;
   resetSavedSearch: () => void;
   expandedDoc?: DataTableRecord;
   setExpandedDoc: (doc?: DataTableRecord) => void;

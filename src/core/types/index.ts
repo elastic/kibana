@@ -10,9 +10,9 @@
  * Use * syntax so that these exports do not break when internal
  * types are stripped.
  */
-export * from './capabilities';
 export * from './app_category';
 export * from './saved_objects';
+export type { Capabilities } from '@kbn/core-capabilities-common';
 export type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 export type {
   UiSettingsType,

@@ -20,8 +20,13 @@ import { clampToLatBounds, clampToLonBounds } from '../../../common/elasticsearc
 import { getInitialView } from './get_initial_view';
 import { getPreserveDrawingBuffer, isScreenshotMode } from '../../kibana_services';
 import { ILayer } from '../../classes/layers/layer';
-import { MapSettings } from '../../reducers/map';
-import { CustomIcon, Goto, MapCenterAndZoom, Timeslice } from '../../../common/descriptor_types';
+import {
+  CustomIcon,
+  Goto,
+  MapCenterAndZoom,
+  MapSettings,
+  Timeslice,
+} from '../../../common/descriptor_types';
 import {
   CUSTOM_ICON_SIZE,
   DECIMAL_DEGREES_PRECISION,

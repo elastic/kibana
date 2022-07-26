@@ -24,6 +24,7 @@ test('should validate when there are no validators', () => {
     id: 'foo',
     name: 'bar',
     minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
     executor,
   };
   const testValue = { any: ['old', 'thing'] };
@@ -37,6 +38,7 @@ test('should validate when there are no individual validators', () => {
     id: 'foo',
     name: 'bar',
     minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
     executor,
     validate: {},
   };
@@ -63,6 +65,7 @@ test('should validate when validators return incoming value', () => {
     id: 'foo',
     name: 'bar',
     minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
     executor,
     validate: {
       params: selfValidator,
@@ -95,6 +98,7 @@ test('should validate when validators return different values', () => {
     id: 'foo',
     name: 'bar',
     minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
     executor,
     validate: {
       params: selfValidator,
@@ -130,6 +134,7 @@ test('should throw with expected error when validators fail', () => {
     id: 'foo',
     name: 'bar',
     minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
     executor,
     validate: {
       params: erroringValidator,
@@ -164,6 +169,7 @@ test('should work with @kbn/config-schema', () => {
     id: 'foo',
     name: 'bar',
     minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
     executor,
     validate: {
       params: testSchema,
@@ -188,6 +194,7 @@ describe('validateConnectors', () => {
     id: 'foo',
     name: 'bar',
     minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
     executor,
     validate: {
       params: selfValidator,
