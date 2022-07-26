@@ -173,6 +173,20 @@ export type FileUnshareHttpEndpoint = HttpApiInterfaceEntryDefinition<
   }
 >;
 
+export type FileGetShareHttpEndpoint = HttpApiInterfaceEntryDefinition<
+  {
+    /**
+     * ID of the share object
+     */
+    id: string;
+  },
+  unknown,
+  unknown,
+  {
+    share: FileShareJSON;
+  }
+>;
+
 export type FileListSharesHttpEndpoint = HttpApiInterfaceEntryDefinition<
   unknown,
   Pagination & { forFileId?: string },

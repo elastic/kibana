@@ -28,7 +28,7 @@ describe('File kind HTTP API', () => {
     await testHarness.cleanupAfterEach();
   });
 
-  test('create', async () => {
+  test('create a file and return the expected payload', async () => {
     expect(await createFile()).toEqual({
       id: expect.any(String),
       created: expect.any(String),
@@ -43,7 +43,7 @@ describe('File kind HTTP API', () => {
     });
   });
 
-  test('upload', async () => {
+  test('upload a file', async () => {
     const { id } = await createFile();
     const result = await request
       .put(root, `/api/files/files/${fileKind}/${id}/blob`)
@@ -53,7 +53,7 @@ describe('File kind HTTP API', () => {
     expect(result.body).toEqual({ ok: true });
   });
 
-  test('download', async () => {
+  test('download a file with the expected header values', async () => {
     const { id } = await createFile({ name: 'test' });
     await request
       .put(root, `/api/files/files/${fileKind}/${id}/blob`)
@@ -72,7 +72,7 @@ describe('File kind HTTP API', () => {
     expect(buffer.toString('utf8')).toEqual('what have you');
   });
 
-  test('update', async () => {
+  test('update a file', async () => {
     const { id } = await createFile({ name: 'acoolfilename' });
 
     const {
@@ -104,7 +104,7 @@ describe('File kind HTTP API', () => {
     expect(file2).toEqual(expect.objectContaining(updatedFileAttrs));
   });
 
-  test('list', async () => {
+  test('list current files', async () => {
     const nrOfFiles = 10;
     await Promise.all([...Array(nrOfFiles).keys()].map(() => createFile({ name: 'test' })));
 
@@ -123,7 +123,32 @@ describe('File kind HTTP API', () => {
 
   const twoDaysFromNow = (): number => Date.now() + 2 * (1000 * 60 * 60 * 24);
 
-  test('share', async () => {
+  test('gets a single share object', async () => {
+    const { id } = await createFile();
+    const validUntil = twoDaysFromNow();
+    const {
+      body: { id: shareId },
+    } = await request
+      .post(root, `/api/files/shares/${fileKind}/${id}`)
+      .send({ validUntil, name: 'my-share' })
+      .expect(200);
+
+    const { body } = await request
+      .get(root, `/api/files/shares/${fileKind}/${shareId}`)
+      .expect(200);
+
+    expect(body).toEqual(
+      expect.objectContaining({
+        id: shareId,
+        name: 'my-share',
+        validUntil,
+        created: expect.any(String),
+        fileId: id,
+      })
+    );
+  });
+
+  test('return a share token after sharing a file', async () => {
     const { id } = await createFile();
 
     const { body: error } = await request
@@ -147,7 +172,7 @@ describe('File kind HTTP API', () => {
     );
   });
 
-  test('unshare', async () => {
+  test('delete a file share after it was created', async () => {
     await request.delete(root, `/api/files/shares/${fileKind}/bogus`).expect(404);
 
     const { id } = await createFile();
@@ -159,6 +184,7 @@ describe('File kind HTTP API', () => {
       .expect(200);
 
     await request.delete(root, `/api/files/shares/${fileKind}/${shareId}`).expect(200);
+    await request.get(root, `/api/files/shares/${fileKind}/${shareId}`).expect(404);
   });
 
   test('list shares', async () => {
