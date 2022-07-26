@@ -4,13 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import mime from 'mime';
 import type { ResponseHeaders } from '@kbn/core/server';
 import type { File } from '../../common/types';
 
 export function getDownloadHeadersForFile(file: File, fileName?: string): ResponseHeaders {
   return {
-    'content-type': file.mimeType ?? 'application/octet-stream',
-    // note, this name can be overridden by the client if set via a "download" attribute on the HTML tag.
+    'content-type':
+      (fileName && mime.getType(fileName)) ?? file.mimeType ?? 'application/octet-stream',
+    // Note, this name can be overridden by the client if set via a "download" attribute on the HTML tag.
     'content-disposition': `attachment; filename="${fileName || getDownloadedFileName(file)}"`,
   };
 }
