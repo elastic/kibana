@@ -1,3 +1,5 @@
+/* TODO Consolidate with code from `index_data_visualizer_view.tsx/scss`. */
+
 .dataViewTitleHeader {
   min-width: 300px;
   padding: $euiSizeS 0;
@@ -7,7 +9,7 @@
 }
 
 @include euiBreakpoint('xs', 's', 'm', 'l') {
-  .dataVisualizerPageHeader {
+  .aiopsPageHeader {
     flex-direction: column;
     align-items: flex-start;
   }

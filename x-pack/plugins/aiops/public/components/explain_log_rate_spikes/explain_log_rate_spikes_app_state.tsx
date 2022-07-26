@@ -14,8 +14,6 @@ import { encode } from 'rison-node';
 import { useHistory, useLocation } from 'react-router-dom';
 import { SavedSearch } from '@kbn/discover-plugin/public';
 
-import { EuiPageBody } from '@elastic/eui';
-
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 import {
@@ -160,9 +158,7 @@ export const ExplainLogRateSpikesAppState: FC<ExplainLogRateSpikesAppStateProps>
 
   return (
     <UrlStateContextProvider value={{ searchString: urlSearchString, setUrlState }}>
-      <EuiPageBody data-test-subj="aiopsIndexPage" paddingSize="none" panelled={false}>
-        <ExplainLogRateSpikesPage dataView={dataView} savedSearch={savedSearch} />
-      </EuiPageBody>
+      <ExplainLogRateSpikesPage dataView={dataView} savedSearch={savedSearch} />
     </UrlStateContextProvider>
   );
 };
