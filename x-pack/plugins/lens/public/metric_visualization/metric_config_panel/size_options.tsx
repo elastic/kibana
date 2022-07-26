@@ -20,37 +20,37 @@ export const DEFAULT_TITLE_SIZE = 'm';
 const titleSizes = [
   {
     id: 'xs',
-    label: i18n.translate('xpack.lens.metricChart.metricSize.extraSmall', {
+    label: i18n.translate('xpack.lens.legacyMetric.metricSize.extraSmall', {
       defaultMessage: 'XS',
     }),
   },
   {
     id: 's',
-    label: i18n.translate('xpack.lens.metricChart.metricSize.small', {
+    label: i18n.translate('xpack.lens.legacyMetric.metricSize.small', {
       defaultMessage: 'S',
     }),
   },
   {
     id: 'm',
-    label: i18n.translate('xpack.lens.metricChart.metricSize.medium', {
+    label: i18n.translate('xpack.lens.legacyMetric.metricSize.medium', {
       defaultMessage: 'M',
     }),
   },
   {
     id: 'l',
-    label: i18n.translate('xpack.lens.metricChart.metricSize.large', {
+    label: i18n.translate('xpack.lens.legacyMetric.metricSize.large', {
       defaultMessage: 'L',
     }),
   },
   {
     id: 'xl',
-    label: i18n.translate('xpack.lens.metricChart.metricSize.extraLarge', {
+    label: i18n.translate('xpack.lens.legacyMetric.metricSize.extraLarge', {
       defaultMessage: 'XL',
     }),
   },
   {
     id: 'xxl',
-    label: i18n.translate('xpack.lens.metricChart.metricSize.xxl', {
+    label: i18n.translate('xpack.lens.legacyMetric.metricSize.xxl', {
       defaultMessage: 'XXL',
     }),
   },
