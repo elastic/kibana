@@ -40,9 +40,9 @@ type Output = Observable<Datatable>;
 
 interface Arguments {
   query: string;
-  parameter: Array<string | number | boolean>;
-  count: number;
-  timezone: string;
+  parameter?: Array<string | number | boolean>;
+  count?: number;
+  timezone?: string;
   timeField?: string;
 }
 
