@@ -21,6 +21,8 @@ export interface Services {
   fetchTopNFunctions: (params: {
     timeFrom: number;
     timeTo: number;
+    startIndex: number;
+    endIndex: number;
     kuery: string;
   }) => Promise<TopNFunctions>;
   fetchElasticFlamechart: (params: {
@@ -50,16 +52,22 @@ export function getServices(core: CoreStart): Services {
     fetchTopNFunctions: async ({
       timeFrom,
       timeTo,
+      startIndex,
+      endIndex,
       kuery,
     }: {
       timeFrom: number;
       timeTo: number;
+      startIndex: number;
+      endIndex: number;
       kuery: string;
     }) => {
       try {
         const query: HttpFetchQuery = {
           timeFrom,
           timeTo,
+          startIndex,
+          endIndex,
           kuery,
         };
         return await core.http.get(paths.TopNFunctions, { query });

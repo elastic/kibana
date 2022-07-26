@@ -20,11 +20,15 @@ async function queryTopNFunctions({
   logger,
   client,
   filter,
+  startIndex,
+  endIndex,
   sampleSize,
 }: {
   logger: Logger;
   client: ProfilingESClient;
   filter: ProjectTimeQuery;
+  startIndex: number;
+  endIndex: number;
   sampleSize: number;
 }) {
   return withProfilingSpan('query_topn_functions', async () => {
@@ -34,7 +38,14 @@ async function queryTopNFunctions({
       logger,
       sampleSize,
     }).then(({ stackFrames, stackTraceEvents, stackTraces, executables }) => {
-      return createTopNFunctions(stackTraceEvents, stackTraces, stackFrames, executables);
+      return createTopNFunctions(
+        stackTraceEvents,
+        stackTraces,
+        stackFrames,
+        executables,
+        startIndex,
+        endIndex
+      );
     });
   });
 }
@@ -42,6 +53,8 @@ async function queryTopNFunctions({
 const querySchema = schema.object({
   timeFrom: schema.string(),
   timeTo: schema.string(),
+  startIndex: schema.number(),
+  endIndex: schema.number(),
   kuery: schema.string(),
 });
 
@@ -58,7 +71,7 @@ export function registerTopNFunctionsSearchRoute({ router, logger }: RouteRegist
     },
     async (context, request, response) => {
       try {
-        const { timeFrom, timeTo, kuery }: QuerySchemaType = request.query;
+        const { timeFrom, timeTo, startIndex, endIndex, kuery }: QuerySchemaType = request.query;
 
         const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
         const esClient = await getClient(context);
@@ -72,6 +85,8 @@ export function registerTopNFunctionsSearchRoute({ router, logger }: RouteRegist
           logger,
           client: createProfilingEsClient({ request, esClient }),
           filter,
+          startIndex,
+          endIndex,
           sampleSize: targetSampleSize,
         });
         logger.info('returning payload response to client');

@@ -39,7 +39,9 @@ export function createTopNFunctions(
   events: Map<StackTraceID, number>,
   stackTraces: Map<StackTraceID, StackTrace>,
   stackFrames: Map<StackFrameID, StackFrame>,
-  executables: Map<FileID, Executable>
+  executables: Map<FileID, Executable>,
+  startIndex: number,
+  endIndex: number
 ): TopNFunctions {
   const metadata = groupStackFrameMetadataByStackTrace(stackTraces, stackFrames, executables);
 
@@ -102,7 +104,14 @@ export function createTopNFunctions(
     })
     .reverse();
 
-  const framesAndCounts = topN.map((frameAndCount) => ({
+  if (startIndex > topN.length) {
+    startIndex = topN.length;
+  }
+  if (endIndex > topN.length) {
+    endIndex = topN.length;
+  }
+
+  const framesAndCounts = topN.slice(startIndex, endIndex).map((frameAndCount) => ({
     Frame: frameAndCount.Frame,
     CountExclusive: frameAndCount.CountExclusive,
     CountInclusive: frameAndCount.CountInclusive,

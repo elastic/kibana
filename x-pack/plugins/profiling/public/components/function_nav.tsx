@@ -12,7 +12,13 @@ import { TimeRange } from '../../common/types';
 interface Props {
   timeRange: TimeRange;
   kuery: string;
-  getter: (params: { timeFrom: number; timeTo: number; kuery: string }) => Promise<TopNFunctions>;
+  getter: (params: {
+    timeFrom: number;
+    timeTo: number;
+    startIndex: number;
+    endIndex: number;
+    kuery: string;
+  }) => Promise<TopNFunctions>;
   setter: React.Dispatch<TopNFunctions>;
 }
 
@@ -21,6 +27,8 @@ export const FunctionNavigation = ({ timeRange, getter, setter, kuery }: Props) 
     getter({
       timeFrom: new Date(timeRange.start).getTime() / 1000,
       timeTo: new Date(timeRange.end).getTime() / 1000,
+      startIndex: 0,
+      endIndex: 100,
       kuery,
     }).then((response) => {
       setter(response);
