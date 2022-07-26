@@ -51,11 +51,35 @@ export const metricsRequestHandler = async ({
     const parsedTimeRange = data.query.timefilter.timefilter.calculateBounds(input?.timeRange!);
 
     if (visParams && visParams.id && !visParams.isModelInvalid && !expressionAbortSignal.aborted) {
-      // const untrackSearch =
-      //   dataSearch.session.isCurrentSession(searchSessionId) &&
-      //   dataSearch.session.trackSearch({
-      //     abort: () => abortController.abort(),
-      //   });
+      const searchTracker = dataSearch.session.isCurrentSession(searchSessionId)
+        ? dataSearch.session.trackSearch({
+            abort: () => abortController.abort(),
+            poll: async () => {
+              // don't use, keep this empty, onSavingSession is used instead
+            },
+            onSavingSession: async () => {
+              // restart the search with new params
+              const newSearchSessionOptions = dataSearch.session.getSearchOptions(searchSessionId);
+              await getCoreStart().http.post(ROUTES.VIS_DATA, {
+                body: JSON.stringify({
+                  timerange: {
+                    timezone,
+                    ...parsedTimeRange,
+                  },
+                  query: input?.query,
+                  filters: input?.filters,
+                  panels: [visParams],
+                  state: uiStateObj,
+                  ...(newSearchSessionOptions && {
+                    searchSession: newSearchSessionOptions,
+                  }),
+                }),
+                context: executionContext,
+                signal: abortController.signal,
+              });
+            },
+          })
+        : undefined;
 
       try {
         const searchSessionOptions = dataSearch.session.getSearchOptions(searchSessionId);
@@ -93,10 +117,7 @@ export const metricsRequestHandler = async ({
 
         return visData;
       } finally {
-        // if (untrackSearch && dataSearch.session.isCurrentSession(searchSessionId)) {
-        //   // untrack if this search still belongs to current session
-        //   untrackSearch();
-        // }
+        searchTracker?.complete(); // TODO: searchTracker?.error() needs to be called in case of an error;
         expressionAbortSignal.removeEventListener('abort', expressionAbortHandler);
       }
     }

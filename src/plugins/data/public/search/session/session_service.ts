@@ -73,6 +73,12 @@ interface TrackSearchDescriptor {
    * Keep polling the search to keep it alive
    */
   poll: () => Promise<void>;
+
+  /**
+   * Notify search that session is being saved, could be used to restart the search with different params
+   * @deprecated - this is used as an escape hatch for TSVB/Timelion to restart a search with different params
+   */
+  onSavingSession?: () => Promise<void>;
 }
 
 interface TrackSearchMeta {
@@ -556,15 +562,16 @@ export class SessionService {
     });
 
     // if we are still interested in this result
-    if (this.getSessionId() === sessionId) {
+    if (this.isCurrentSession(sessionId)) {
       this.state.transitions.store(searchSessionSavedObject);
+
+      // trigger new poll for all completed searches that are not stored to propogate them into newly creates search session saved object and extend their keepAlive
       const completedSearches = this.state
         .get()
         .trackedSearches.filter(
           (s) => s.state === TrackedSearchState.Completed && !s.searchMeta.isStored
         );
-
-      await Promise.all(
+      const pollCompletedSearchesPromise = Promise.all(
         completedSearches.map((s) =>
           s.searchDescriptor.poll().catch((e) => {
             // eslint-disable-next-line no-console
@@ -572,6 +579,20 @@ export class SessionService {
           })
         )
       );
+
+      // notify all the searches with onSavingSession that session has been saved and saved object has been created
+      // don't wait for the result
+      const searchesWithSavingHandler = this.state
+        .get()
+        .trackedSearches.filter((s) => s.searchDescriptor.onSavingSession);
+      searchesWithSavingHandler.forEach((s) =>
+        s.searchDescriptor.onSavingSession!().catch((e) => {
+          // eslint-disable-next-line no-console
+          console.warn('Failed to execute "onSavingSession" handler after session was saved', e);
+        })
+      );
+
+      await pollCompletedSearchesPromise;
     }
   }
 
