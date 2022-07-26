@@ -11,7 +11,6 @@ import { Logger } from '@kbn/core/server';
 import { ServiceAPIClient } from './service_api_client';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import { ServiceConfig } from '../../common/config';
-import { ServiceLocations } from '../../common/runtime_types';
 import axios from 'axios';
 
 jest.mock('@kbn/server-http-tools', () => ({
@@ -78,7 +77,14 @@ describe('checkAccountAccessStatus', () => {
       { isDev: false, kibanaVersion: '8.4' } as UptimeServerSetup
     );
 
-    apiClient.locations = [{ id: 'test-location', url: 'http://localhost' }] as ServiceLocations;
+    apiClient.locations = [
+      {
+        id: 'test-location',
+        url: 'http://localhost',
+        label: 'Test location',
+        isServiceManaged: true,
+      },
+    ];
 
     (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({
       status: 200,
