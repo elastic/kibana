@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildEsQuery } from '@kbn/es-query';
+import { buildEsQuery, type Query } from '@kbn/es-query';
 import { EuiBasicTableProps, Pagination } from '@elastic/eui';
 import { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -50,7 +50,7 @@ export const usePersistedQuery = <T>(getter: ({ filters, query }: FindingsBaseUR
     () =>
       getter({
         filters: filterManager.getAppFilters(),
-        query: queryString.getQuery(),
+        query: queryString.getQuery() as Query,
       }),
     [getter, filterManager, queryString]
   );

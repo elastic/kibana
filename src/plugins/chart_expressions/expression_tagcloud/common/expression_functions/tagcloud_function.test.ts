@@ -12,7 +12,7 @@ import { functionWrapper } from '@kbn/expressions-plugin/common/expression_funct
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
 import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { ScaleOptions, Orientation } from '../constants';
-import { ExecutionContext } from '@kbn/expressions-plugin';
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
 
 type Arguments = Parameters<ReturnType<typeof tagcloudFunction>['fn']>[1];
 
