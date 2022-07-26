@@ -863,9 +863,9 @@
         "label": "loadActionTypes",
         "description": [],
         "signature": [
-          "({ http }: { http: ",
+          "({\n  http,\n  featureId,\n}: { http: ",
           "HttpSetup",
-          "; }) => Promise<",
+          "; featureId?: string | undefined; }) => Promise<",
           {
             "pluginId": "actions",
             "scope": "common",
@@ -883,7 +883,7 @@
             "id": "def-public.loadActionTypes.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ http }",
+            "label": "{\n  http,\n  featureId,\n}",
             "description": [],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/connector_types.ts",
             "deprecated": false,
@@ -897,6 +897,19 @@
                 "description": [],
                 "signature": [
                   "HttpSetup"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/connector_types.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.loadActionTypes.$1.featureId",
+                "type": "string",
+                "tags": [],
+                "label": "featureId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/connector_types.ts",
                 "deprecated": false
@@ -1864,6 +1877,19 @@
             ],
             "path": "x-pack/plugins/actions/common/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ActionType.supportedFeatureIds",
+            "type": "Array",
+            "tags": [],
+            "label": "supportedFeatureIds",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/actions/common/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -2134,6 +2160,16 @@
             "type": "string",
             "tags": [],
             "label": "'data-test-subj'",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertsTableProps.updatedAt",
+            "type": "number",
+            "tags": [],
+            "label": "updatedAt",
             "description": [],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false
@@ -6071,6 +6107,40 @@
               "description": [],
               "signature": [
                 "RuleStatusPanelProps"
+              ],
+              "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "triggersActionsUi",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getRuleAlertsSummary",
+          "type": "Function",
+          "tags": [],
+          "label": "getRuleAlertsSummary",
+          "description": [],
+          "signature": [
+            "(props: ",
+            "RuleAlertsSummaryProps",
+            ") => React.ReactElement<",
+            "RuleAlertsSummaryProps",
+            ", string | React.JSXElementConstructor<any>>"
+          ],
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "triggersActionsUi",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getRuleAlertsSummary.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "RuleAlertsSummaryProps"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,

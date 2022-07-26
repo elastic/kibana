@@ -132,11 +132,13 @@ export class CiStatsClient {
     });
   };
 
-  getPrReport = async (buildId: string) => {
+  getPrReport = async (buildId: string, backfillJobIds: string[] = []) => {
     const resp = await this.request<CiStatsPrReport>({
-      path: `v2/pr_report`,
-      params: {
+      path: `v3/pr_report`,
+      method: 'post',
+      body: {
         buildId,
+        backfillJobIds,
       },
     });
 
