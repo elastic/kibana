@@ -73,4 +73,13 @@ export const failedFleetActionErrorCode = '424';
 
 export const ENDPOINT_DEFAULT_PAGE = 0;
 export const ENDPOINT_DEFAULT_PAGE_SIZE = 10;
-export const RESPONDER_CAPABILITIES = ['kill_process', 'suspend_process', 'running_processes'];
+
+/**
+ * The list of capabilities, reported by the endpoint in the metadata document, that are
+ * needed in order for the Responder UI to be accessible
+ */
+export const RESPONDER_CAPABILITIES = [
+  'kill_process',
+  'suspend_process',
+  'running_processes',
+] as const;

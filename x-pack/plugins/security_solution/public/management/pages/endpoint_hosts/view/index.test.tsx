@@ -50,7 +50,11 @@ import {
   HOST_METADATA_LIST_ROUTE,
   metadataTransformPrefix,
   METADATA_UNITED_TRANSFORM,
+  RESPONDER_CAPABILITIES,
 } from '../../../../../common/endpoint/constants';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../../common/components/user_privileges/user_privileges_context';
+import { getUserPrivilegesMockDefaultValue } from '../../../../common/components/user_privileges/__mocks__';
 
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
 // but sure enough it needs to be inline in this one file
@@ -63,6 +67,7 @@ jest.mock('@kbn/i18n-react', () => {
     FormattedRelative,
   };
 });
+jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../../../common/components/link_to');
 jest.mock('../../../services/policies/ingest', () => {
   const originalModule = jest.requireActual('../../../services/policies/ingest');
@@ -998,37 +1003,66 @@ describe('when on the endpoint list page', () => {
 
   describe('when the more actions column is opened', () => {
     const generator = new EndpointDocGenerator('seed');
-    let hostInfo: HostInfo;
+    let hostInfo: HostInfo[];
     let agentId: string;
     let agentPolicyId: string;
     let renderResult: ReturnType<AppContextTestRender['render']>;
 
+    // 2nd endpoint only has isolation capabilities
     const mockEndpointListApi = () => {
-      const { data: hosts } = mockEndpointResultList();
-      hostInfo = {
-        host_status: hosts[0].host_status,
-        metadata: {
-          ...hosts[0].metadata,
-          Endpoint: {
-            ...hosts[0].metadata.Endpoint,
-            state: {
-              ...hosts[0].metadata.Endpoint.state,
-              isolation: false,
+      const { data: hosts } = mockEndpointResultList({ total: 2 });
+      hostInfo = [
+        {
+          host_status: hosts[0].host_status,
+          metadata: {
+            ...hosts[0].metadata,
+            Endpoint: {
+              ...hosts[0].metadata.Endpoint,
+              capabilities: RESPONDER_CAPABILITIES,
+              state: {
+                ...hosts[0].metadata.Endpoint.state,
+                isolation: false,
+              },
             },
-          },
-          host: {
-            ...hosts[0].metadata.host,
-            os: {
-              ...hosts[0].metadata.host.os,
-              name: 'Windows',
+            host: {
+              ...hosts[0].metadata.host,
+              os: {
+                ...hosts[0].metadata.host.os,
+                name: 'Windows',
+              },
             },
-          },
-          agent: {
-            ...hosts[0].metadata.agent,
-            version: '7.14.0',
+            agent: {
+              ...hosts[0].metadata.agent,
+              version: '7.14.0',
+            },
           },
         },
-      };
+        {
+          host_status: hosts[1].host_status,
+          metadata: {
+            ...hosts[1].metadata,
+            Endpoint: {
+              ...hosts[1].metadata.Endpoint,
+              capabilities: ['isolation'],
+              state: {
+                ...hosts[1].metadata.Endpoint.state,
+                isolation: false,
+              },
+            },
+            host: {
+              ...hosts[1].metadata.host,
+              os: {
+                ...hosts[1].metadata.host.os,
+                name: 'Windows',
+              },
+            },
+            agent: {
+              ...hosts[1].metadata.agent,
+              version: '8.4.0',
+            },
+          },
+        },
+      ];
 
       const packagePolicy = docGenerator.generatePolicyPackagePolicy();
       packagePolicy.id = hosts[0].metadata.Endpoint.policy.applied.id;
@@ -1037,7 +1071,7 @@ describe('when on the endpoint list page', () => {
       agentId = hosts[0].metadata.elastic.agent.id;
 
       setEndpointListApiMockImplementation(coreStart.http, {
-        endpointsResults: [hostInfo],
+        endpointsResults: hostInfo,
         endpointPackagePolicies: [packagePolicy],
         agentPolicy,
       });
@@ -1045,6 +1079,10 @@ describe('when on the endpoint list page', () => {
 
     beforeEach(async () => {
       mockEndpointListApi();
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        ...mockInitialUserPrivilegesState(),
+        endpointPrivileges: { canAccessResponseConsole: true },
+      });
 
       reactTestingLibrary.act(() => {
         history.push(`${MANAGEMENT_PATH}/endpoints`);
@@ -1054,7 +1092,9 @@ describe('when on the endpoint list page', () => {
       await middlewareSpy.waitForAction('serverReturnedEndpointList');
       await middlewareSpy.waitForAction('serverReturnedEndpointAgentPolicies');
 
-      const endpointActionsButton = await renderResult.findByTestId('endpointTableRowActions');
+      const endpointActionsButton = (
+        await renderResult.findAllByTestId('endpointTableRowActions')
+      )[0];
 
       reactTestingLibrary.act(() => {
         reactTestingLibrary.fireEvent.click(endpointActionsButton);
@@ -1063,6 +1103,25 @@ describe('when on the endpoint list page', () => {
 
     afterEach(() => {
       jest.clearAllMocks();
+      (useUserPrivileges as jest.Mock).mockReturnValue(getUserPrivilegesMockDefaultValue());
+    });
+
+    it('shows the Responder option when all 3 processes capabilities are present in the endpoint', async () => {
+      const responderButton = await renderResult.findByTestId('console');
+      expect(responderButton).not.toHaveAttribute('disabled');
+    });
+
+    it('disables the Responder option and shows a tooltip when no processes capabilities are present in the endpoint', async () => {
+      const firstActionButton = (await renderResult.findAllByTestId('endpointTableRowActions'))[0];
+      const secondActionButton = (await renderResult.findAllByTestId('endpointTableRowActions'))[1];
+
+      reactTestingLibrary.act(() => {
+        // close any open action menus
+        reactTestingLibrary.fireEvent.click(firstActionButton);
+        reactTestingLibrary.fireEvent.click(secondActionButton);
+      });
+      const responderButton = await renderResult.findByTestId('console');
+      expect(responderButton).toHaveAttribute('disabled');
     });
 
     it('navigates to the Actions log flyout', async () => {
@@ -1073,7 +1132,7 @@ describe('when on the endpoint list page', () => {
           name: 'endpointActivityLog',
           page_index: '0',
           page_size: '10',
-          selected_endpoint: hostInfo.metadata.agent.id,
+          selected_endpoint: hostInfo[0].metadata.agent.id,
         })}`
       );
     });
@@ -1085,7 +1144,7 @@ describe('when on the endpoint list page', () => {
           name: 'endpointIsolate',
           page_index: '0',
           page_size: '10',
-          selected_endpoint: hostInfo.metadata.agent.id,
+          selected_endpoint: hostInfo[0].metadata.agent.id,
         })}`
       );
     });
@@ -1093,7 +1152,7 @@ describe('when on the endpoint list page', () => {
     it('navigates to the Security Solution Host Details page', async () => {
       const hostLink = await renderResult.findByTestId('hostLink');
       expect(hostLink.getAttribute('href')).toEqual(
-        `${APP_PATH}/hosts/${hostInfo.metadata.host.hostname}`
+        `${APP_PATH}/hosts/${hostInfo[0].metadata.host.hostname}`
       );
     });
     it('navigates to the Ingest Agent Policy page', async () => {
