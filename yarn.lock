@@ -3475,7 +3475,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/home-sample-data-cards@link:bazel-bin/packages/home/sample_data_cards":
+"@kbn/home-sample-data-card@link:bazel-bin/packages/home/sample_data_card":
+  version "0.0.0"
+  uid ""
+
+"@kbn/home-sample-data-tab@link:bazel-bin/packages/home/sample_data_tab":
+  version "0.0.0"
+  uid ""
+
+"@kbn/home-sample-data-types@link:bazel-bin/packages/home/sample_data_types":
   version "0.0.0"
   uid ""
 
@@ -7215,7 +7223,15 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__home-sample-data-cards@link:bazel-bin/packages/home/sample_data_cards/npm_module_types":
+"@types/kbn__home-sample-data-card@link:bazel-bin/packages/home/sample_data_card/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__home-sample-data-tab@link:bazel-bin/packages/home/sample_data_tab/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__home-sample-data-types@link:bazel-bin/packages/home/sample_data_types/npm_module_types":
   version "0.0.0"
   uid ""
 
