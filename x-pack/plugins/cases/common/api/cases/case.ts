@@ -53,8 +53,6 @@ export const CaseSeverityRt = rt.union([
   rt.literal(CaseSeverity.CRITICAL),
 ]);
 
-export const CaseUserProfile = rt.type({ uid: rt.string });
-
 const CaseBasicRt = rt.type({
   /**
    * The description of the case
@@ -88,10 +86,6 @@ const CaseBasicRt = rt.type({
    * The severity of the case
    */
   severity: CaseSeverityRt,
-  /**
-   *
-   */
-  assignees: rt.array(CaseUserProfile),
 });
 
 /**
