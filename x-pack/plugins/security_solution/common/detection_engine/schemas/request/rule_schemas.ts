@@ -415,7 +415,7 @@ export type CreateRulesSchema = t.TypeOf<typeof createRulesSchema>;
 export const previewRulesSchema = t.intersection([
   sharedCreateSchema,
   createTypeSpecific,
-  t.type({ invocationCount: t.number }),
+  t.type({ invocationCount: t.number, timeframeEnd: t.string }),
 ]);
 export type PreviewRulesSchema = t.TypeOf<typeof previewRulesSchema>;
 

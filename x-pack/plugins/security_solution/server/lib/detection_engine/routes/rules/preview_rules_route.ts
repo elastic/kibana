@@ -90,6 +90,7 @@ export const previewRulesRoute = async (
         const savedObjectsClient = coreContext.savedObjects.client;
         const siemClient = (await context.securitySolution).getAppClient();
 
+        const timeframeEnd = request.body.timeframeEnd;
         let invocationCount = request.body.invocationCount;
         if (invocationCount < 1) {
           return response.ok({
@@ -196,7 +197,7 @@ export const previewRulesRoute = async (
             isAborted = true;
           }, PREVIEW_TIMEOUT_SECONDS * 1000);
 
-          const startedAt = moment();
+          const startedAt = moment(timeframeEnd);
           const parsedDuration = parseDuration(internalRule.schedule.interval) ?? 0;
           startedAt.subtract(moment.duration(parsedDuration * (invocationCount - 1)));
 

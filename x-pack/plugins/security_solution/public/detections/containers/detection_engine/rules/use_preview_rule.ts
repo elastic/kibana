@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
 
 import type { Unit } from '@kbn/datemath';
@@ -66,6 +66,10 @@ export const usePreviewRule = ({
       from = RULE_PREVIEW_FROM.MONTH;
       break;
   }
+  const timeframeEnd = useMemo(
+    () => (advancedOptions ? advancedOptions.timeframeEnd.toISOString() : moment().toISOString()),
+    [advancedOptions]
+  );
 
   if (advancedOptions) {
     const timeframeDuration =
@@ -108,6 +112,7 @@ export const usePreviewRule = ({
                 from,
               }),
               invocationCount,
+              timeframeEnd,
             },
             signal: abortCtrl.signal,
           });
@@ -130,7 +135,7 @@ export const usePreviewRule = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [rule, addError, invocationCount, from, interval]);
+  }, [rule, addError, invocationCount, from, interval, timeframeEnd]);
 
   return { isLoading, showInvocationCountWarning, response, rule, setRule };
 };
