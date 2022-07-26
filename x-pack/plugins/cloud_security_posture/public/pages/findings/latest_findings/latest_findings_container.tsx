@@ -40,9 +40,9 @@ export const getDefaultQuery = ({
   pageSize: 10,
 });
 
-const MAX_ITEMS = 100;
+const MAX_ITEMS = 500;
 
-const getLimitItems = (
+const getLimitProperties = (
   totalItems: number,
   maxItems: number,
   pageSize: number,
@@ -84,7 +84,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
 
   const { isLastLimitedPage, limitedTotalItemCount } = useMemo(
     () =>
-      getLimitItems(
+      getLimitProperties(
         findingsGroupByNone.data?.total || 0,
         MAX_ITEMS,
         urlQuery.pageSize,
@@ -160,7 +160,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
             {isLastLimitedPage && (
               <>
                 <EuiSpacer size="xxl" />
-                <EuiBottomBar position="fixed">
+                <EuiBottomBar>
                   <EuiText textAlign="center">
                     <FormattedMessage
                       id="xpack.csp.findings.latestFindings.bottomBarLabel"
