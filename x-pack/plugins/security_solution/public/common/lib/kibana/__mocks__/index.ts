@@ -90,3 +90,9 @@ export const useNavigateTo = jest.fn().mockReturnValue({
     }
   }),
 });
+
+export const useCapabilities = jest.fn((featureId?: string) =>
+  featureId
+    ? mockStartServicesMock.application.capabilities[featureId]
+    : mockStartServicesMock.application.capabilities
+);
