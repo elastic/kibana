@@ -26,9 +26,7 @@ export function getActiveSnoozes(rule: RuleSnoozeProps): ActiveSnoozes | null {
   );
 }
 
-export function getActiveScheduledSnoozes(
-  rule: Pick<RuleSnoozeProps, 'snoozeSchedule'>
-): ActiveSnoozes | null {
+export function getActiveScheduledSnoozes(rule: RuleSnoozeProps): ActiveSnoozes | null {
   return getActiveSnoozes(rule)?.filter((r) => Boolean(r.id)) ?? null;
 }
 

@@ -2793,7 +2793,10 @@ export class RulesClient {
       ...(includeSnoozeSchedule ? { snoozeSchedule: snoozeScheduleDates } : {}),
       ...(includeSnoozeData && includeSnoozeSchedule
         ? {
-            activeSnoozes: getActiveScheduledSnoozes({ snoozeSchedule })?.map((s) => s.id),
+            activeSnoozes: getActiveScheduledSnoozes({
+              snoozeSchedule,
+              muteAll: partialRawRule.muteAll ?? false,
+            })?.map((s) => s.id),
             isSnoozedUntil,
           }
         : {}),
