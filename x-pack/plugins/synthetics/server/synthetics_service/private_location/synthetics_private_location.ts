@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { KibanaRequest } from '@kbn/core/server';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { formatSyntheticsPolicy } from '../../../common/formatters/format_synthetics_policy';
 import { getSyntheticsPrivateLocations } from '../../legacy_uptime/lib/saved_objects/private_locations';
@@ -74,8 +74,25 @@ export class SyntheticsPrivateLocation {
     }
   }
 
-  async createMonitor(config: HeartbeatConfig) {
+  async checkPermissions(request: KibanaRequest, error: string) {
+    const {
+      integrations: { writeIntegrationPolicies },
+    } = await this.server.fleet.authz.fromRequest(request);
+
+    if (!writeIntegrationPolicies) {
+      throw new Error(error);
+    }
+  }
+
+  async createMonitor(config: HeartbeatConfig, request: KibanaRequest) {
     const { locations } = config;
+
+    await this.checkPermissions(
+      request,
+      `Unable to create Synthetics package policy for monitor ${
+        config[ConfigKey.NAME]
+      }. Fleet write permissions are needed to use Synthetics private locations.`
+    );
 
     const privateLocations = await getSyntheticsPrivateLocations(
       this.server.authSavedObjectsClient!
@@ -84,12 +101,21 @@ export class SyntheticsPrivateLocation {
     const fleetManagedLocations = locations.filter((loc) => !loc.isServiceManaged);
 
     for (const privateLocation of fleetManagedLocations) {
-      const location = privateLocations?.find((loc) => loc.id === privateLocation.id)!;
+      const location = privateLocations?.find((loc) => loc.id === privateLocation.id);
+
+      if (!location) {
+        throw new Error(
+          `Unable to find Synthetics private location for agentId ${privateLocation.id}`
+        );
+      }
+
       const newPolicy = await this.generateNewPolicy(config, location);
 
       if (!newPolicy) {
         throw new Error(
-          `Unable to create Synthetics package policy for private location ${location.name}`
+          `Unable to create Synthetics package policy for monitor ${
+            config[ConfigKey.NAME]
+          } with private location ${location.name}`
         );
       }
 
@@ -106,7 +132,14 @@ export class SyntheticsPrivateLocation {
     }
   }
 
-  async editMonitor(config: HeartbeatConfig) {
+  async editMonitor(config: HeartbeatConfig, request: KibanaRequest) {
+    await this.checkPermissions(
+      request,
+      `Unable to update Synthetics package policy for monitor ${
+        config[ConfigKey.NAME]
+      }. Fleet write permissions are needed to use Synthetics private locations.`
+    );
+
     const { locations } = config;
 
     const allPrivateLocations = await getSyntheticsPrivateLocations(
@@ -125,7 +158,9 @@ export class SyntheticsPrivateLocation {
 
           if (!newPolicy) {
             throw new Error(
-              `Unable to create Synthetics package policy for private location ${privateLocation.name}`
+              `Unable to ${
+                hasPolicy ? 'update' : 'create'
+              } Synthetics package policy for private location ${privateLocation.name}`
             );
           }
 
@@ -198,7 +233,7 @@ export class SyntheticsPrivateLocation {
     }
   }
 
-  async deleteMonitor(config: HeartbeatConfig) {
+  async deleteMonitor(config: HeartbeatConfig, request: KibanaRequest) {
     const soClient = this.server.authSavedObjectsClient;
     const esClient = this.server.uptimeEsClient.baseESClient;
 
@@ -212,6 +247,13 @@ export class SyntheticsPrivateLocation {
       for (const privateLocation of monitorPrivateLocations) {
         const location = allPrivateLocations?.find((loc) => loc.id === privateLocation.id);
         if (location) {
+          await this.checkPermissions(
+            request,
+            `Unable to delete Synthetics package policy for monitor ${
+              config[ConfigKey.NAME]
+            }. Fleet write permissions are needed to use Synthetics private locations.`
+          );
+
           try {
             await this.server.fleet.packagePolicyService.delete(
               soClient,

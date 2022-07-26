@@ -9,6 +9,7 @@ import {
   SavedObject,
   SavedObjectsErrorHelpers,
   SavedObjectsClientContract,
+  KibanaRequest,
 } from '@kbn/core/server';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import {
@@ -95,6 +96,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       server,
       syntheticsMonitorClient,
       savedObjectsClient,
+      request,
     });
 
     if (errors && errors.length > 0) {
@@ -117,17 +119,20 @@ export const syncNewMonitor = async ({
   server,
   syntheticsMonitorClient,
   savedObjectsClient,
+  request,
 }: {
   monitor: SyntheticsMonitor;
   monitorSavedObject: SavedObject<EncryptedSyntheticsMonitor>;
   server: UptimeServerSetup;
   syntheticsMonitorClient: SyntheticsMonitorClient;
   savedObjectsClient: SavedObjectsClientContract;
+  request: KibanaRequest;
 }) => {
   try {
     const errors = await syntheticsMonitorClient.addMonitor(
       monitor as MonitorFields,
-      monitorSavedObject.id
+      monitorSavedObject.id,
+      request
     );
 
     sendTelemetryEvents(
@@ -148,6 +153,7 @@ export const syncNewMonitor = async ({
       server,
       monitorId: monitorSavedObject.id,
       syntheticsMonitorClient,
+      request,
     });
     throw e;
   }

@@ -10,6 +10,7 @@ import {
   SavedObjectsUpdateResponse,
   SavedObject,
   SavedObjectsClientContract,
+  KibanaRequest,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
@@ -109,6 +110,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         decryptedPreviousMonitor,
         syntheticsMonitorClient,
         savedObjectsClient,
+        request,
       });
 
       // Return service sync errors in OK response
@@ -138,6 +140,7 @@ export const syncEditedMonitor = async ({
   server,
   syntheticsMonitorClient,
   savedObjectsClient,
+  request,
 }: {
   editedMonitor: SyntheticsMonitor;
   editedMonitorSavedObject: SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor>;
@@ -146,11 +149,13 @@ export const syncEditedMonitor = async ({
   server: UptimeServerSetup;
   syntheticsMonitorClient: SyntheticsMonitorClient;
   savedObjectsClient: SavedObjectsClientContract;
+  request: KibanaRequest;
 }) => {
   try {
     const errors = await syntheticsMonitorClient.editMonitor(
       editedMonitor as MonitorFields,
-      editedMonitorSavedObject.id
+      editedMonitorSavedObject.id,
+      request
     );
 
     sendTelemetryEvents(

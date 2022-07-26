@@ -172,6 +172,7 @@ export class ProjectMonitorFormatter {
           monitorSavedObject: newMonitor,
           syntheticsMonitorClient: this.syntheticsMonitorClient,
           savedObjectsClient: this.savedObjectsClient,
+          request: this.request,
         });
         this.createdMonitors.push(monitor.id);
       }
@@ -279,6 +280,7 @@ export class ProjectMonitorFormatter {
         server: this.server,
         syntheticsMonitorClient: this.syntheticsMonitorClient,
         savedObjectsClient: this.savedObjectsClient,
+        request: this.request,
       });
     }
 
@@ -320,6 +322,7 @@ export class ProjectMonitorFormatter {
         server: this.server,
         monitorId,
         syntheticsMonitorClient: this.syntheticsMonitorClient,
+        request: this.request,
       });
       this.deletedMonitors.push(journeyId);
     } catch (e) {
