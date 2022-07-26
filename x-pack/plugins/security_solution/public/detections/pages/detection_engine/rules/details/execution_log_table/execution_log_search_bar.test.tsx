@@ -23,7 +23,12 @@ describe('ExecutionLogSearchBar', () => {
   describe('snapshots', () => {
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
-        <ExecutionLogSearchBar onlyShowFilters={true} onSearch={noop} onStatusFilterChange={noop} />
+        <ExecutionLogSearchBar
+          onlyShowFilters={true}
+          selectedStatuses={[]}
+          onStatusFilterChange={noop}
+          onSearch={noop}
+        />
       );
       expect(wrapper).toMatchSnapshot();
     });
