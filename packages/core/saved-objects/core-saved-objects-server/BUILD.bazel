@@ -32,6 +32,14 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
+  "@npm//@elastic/elasticsearch",
+  "//packages/kbn-utility-types:npm_module_types",
+  "//packages/kbn-config-schema:npm_module_types",
+  "//packages/kbn-logging:npm_module_types",
+  "//packages/core/http/core-http-server:npm_module_types",
+  "//packages/core/elasticsearch/core-elasticsearch-server:npm_module_types",
+  "//packages/core/saved-objects/core-saved-objects-common:npm_module_types",
+  "//packages/core/saved-objects/core-saved-objects-api-server:npm_module_types",
 ]
 
 jsts_transpiler(

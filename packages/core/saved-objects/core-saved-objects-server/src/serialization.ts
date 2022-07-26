@@ -38,6 +38,8 @@ export interface SavedObjectsRawDocSource {
 
 /**
  * Saved Object base document
+ *
+ * @public
  */
 interface SavedObjectDoc<T = unknown> {
   attributes: T;
@@ -52,10 +54,6 @@ interface SavedObjectDoc<T = unknown> {
   originId?: string;
 }
 
-interface Referencable {
-  references: SavedObjectReference[];
-}
-
 /**
  * Describes Saved Object documents from Kibana < 7.0.0 which don't have a
  * `references` root property defined. This type should only be used in
@@ -63,7 +61,9 @@ interface Referencable {
  *
  * @public
  */
-export type SavedObjectUnsanitizedDoc<T = unknown> = SavedObjectDoc<T> & Partial<Referencable>;
+export type SavedObjectUnsanitizedDoc<T = unknown> = SavedObjectDoc<T> & {
+  references?: SavedObjectReference[];
+};
 
 /**
  * Describes Saved Object documents that have passed through the migration
@@ -71,7 +71,9 @@ export type SavedObjectUnsanitizedDoc<T = unknown> = SavedObjectDoc<T> & Partial
  *
  * @public
  */
-export type SavedObjectSanitizedDoc<T = unknown> = SavedObjectDoc<T> & Referencable;
+export type SavedObjectSanitizedDoc<T = unknown> = SavedObjectDoc<T> & {
+  references: SavedObjectReference[];
+};
 
 /**
  * Options that can be specified when using the saved objects serializer to parse a raw document.

@@ -7,7 +7,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject, SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-server';
 
 /** @public */
@@ -49,12 +49,7 @@ export interface SavedObjectsExportByTypeOptions extends SavedObjectExportBaseOp
  */
 export interface SavedObjectsExportByObjectOptions extends SavedObjectExportBaseOptions {
   /** optional array of objects to export. */
-  objects: Array<{
-    /** the saved object id. */
-    id: string;
-    /** the saved object type. */
-    type: string;
-  }>;
+  objects: SavedObjectTypeIdTuple[];
 }
 
 /**
@@ -67,12 +62,7 @@ export interface SavedObjectsExportResultDetails {
   /** number of missing references */
   missingRefCount: number;
   /** missing references details */
-  missingReferences: Array<{
-    /** the missing reference id. */
-    id: string;
-    /** the missing reference type. */
-    type: string;
-  }>;
+  missingReferences: SavedObjectTypeIdTuple[];
   /** number of objects that were excluded from the export */
   excludedObjectsCount: number;
   /** excluded objects details */

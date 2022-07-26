@@ -7,6 +7,7 @@
  */
 
 import type { Logger, LogMeta } from '@kbn/logging';
+import type { SavedObjectsMigrationLogger } from '@kbn/core-saved-objects-server'
 
 /*
  * This file provides a helper class for ensuring that all logging
@@ -14,19 +15,6 @@ import type { Logger, LogMeta } from '@kbn/logging';
  */
 
 export type LogFn = (path: string[], message: string) => void;
-
-/** @public */
-export interface SavedObjectsMigrationLogger {
-  debug: (msg: string) => void;
-  info: (msg: string) => void;
-  /**
-   * @deprecated Use `warn` instead.
-   * @removeBy 8.8.0
-   */
-  warning: (msg: string) => void;
-  warn: (msg: string) => void;
-  error: <Meta extends LogMeta = LogMeta>(msg: string, meta: Meta) => void;
-}
 
 export class MigrationLogger implements SavedObjectsMigrationLogger {
   private logger: Logger;
