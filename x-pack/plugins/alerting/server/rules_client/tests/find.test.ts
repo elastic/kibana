@@ -162,6 +162,7 @@ describe('find()', () => {
             "schedule": Object {
               "interval": "10s",
             },
+            "snoozeSchedule": Array [],
             "updatedAt": 2019-02-12T21:01:22.479Z,
           },
         ],
@@ -262,6 +263,7 @@ describe('find()', () => {
             "schedule": Object {
               "interval": "10s",
             },
+            "snoozeSchedule": Array [],
             "updatedAt": 2019-02-12T21:01:22.479Z,
           },
         ],
@@ -482,6 +484,7 @@ describe('find()', () => {
             "schedule": Object {
               "interval": "10s",
             },
+            "snoozeSchedule": Array [],
             "updatedAt": 2019-02-12T21:01:22.479Z,
           },
           Object {
@@ -505,6 +508,7 @@ describe('find()', () => {
             "schedule": Object {
               "interval": "20s",
             },
+            "snoozeSchedule": Array [],
             "updatedAt": 2019-02-12T21:01:22.479Z,
           },
         ],
@@ -712,6 +716,7 @@ describe('find()', () => {
               "notifyWhen": undefined,
               "params": undefined,
               "schedule": undefined,
+              "snoozeSchedule": Array [],
               "tags": Array [
                 "myTag",
               ],
