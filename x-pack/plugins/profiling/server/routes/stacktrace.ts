@@ -154,13 +154,7 @@ export function decodeStackTrace(input: EncodedStackTrace): StackTrace {
     } else {
       const buf = Buffer.from(fileIDChunk, 'base64url');
 
-      // We have to manually append '==' since we use the FileID string for
-      // comparing / looking up the FileID strings in the ES indices, which have
-      // the '==' appended.
-      //
-      // We may want to remove '==' in the future to reduce the uncompressed
-      // storage size by 10%.
-      fileIDs[j] = buf.toString('base64url', 0, 16) + '==';
+      fileIDs[j] = buf.toString('base64url', 0, 16);
       fileIDChunkToFileIDCache.set(fileIDChunk, fileIDs[j]);
     }
   }
