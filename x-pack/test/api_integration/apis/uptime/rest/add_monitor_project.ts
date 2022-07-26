@@ -729,7 +729,7 @@ export default function ({ getService }: FtrProviderContext) {
               isServiceManaged: false,
               isInvalid: false,
               name: 'Test private location 0',
-              policyHostId: testPolicyId,
+              agentPolicyId: testPolicyId,
               id: testPolicyId,
               geo: {
                 lat: '',
