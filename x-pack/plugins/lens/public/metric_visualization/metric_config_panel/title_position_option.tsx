@@ -20,11 +20,13 @@ export const DEFAULT_TITLE_POSITION = 'top';
 const titlePositions = [
   {
     id: 'top',
-    label: i18n.translate('xpack.lens.metricChart.titlePositions.top', { defaultMessage: 'Top' }),
+    label: i18n.translate('xpack.lens.legacyMetric.titlePositions.top', {
+      defaultMessage: 'Top',
+    }),
   },
   {
     id: 'bottom',
-    label: i18n.translate('xpack.lens.metricChart.titlePositions.bottom', {
+    label: i18n.translate('xpack.lens.legacyMetric.titlePositions.bottom', {
       defaultMessage: 'Bottom',
     }),
   },
@@ -37,7 +39,7 @@ export const TitlePositionOptions: React.FC<TitlePositionProps> = ({ state, setS
       fullWidth
       label={
         <>
-          {i18n.translate('xpack.lens.metricChart.titlePositionLabel', {
+          {i18n.translate('xpack.lens.legacyMetric.titlePositionLabel', {
             defaultMessage: 'Title position',
           })}
         </>

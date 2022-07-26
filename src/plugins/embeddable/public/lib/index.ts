@@ -15,3 +15,4 @@ export * from './containers';
 export * from './panel';
 export * from './state_transfer';
 export * from './reference_or_value_embeddable';
+export * from './self_styled_embeddable';

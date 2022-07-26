@@ -26,7 +26,9 @@ import {
   EmbeddableInput,
   SavedObjectEmbeddableInput,
   ReferenceOrValueEmbeddable,
+  SelfStyledEmbeddable,
 } from '.';
+import { SelfStyledOptions } from './lib/self_styled_embeddable/types';
 
 export { mockAttributeService } from './lib/attribute_service/attribute_service.mock';
 export type Setup = jest.Mocked<EmbeddableSetup>;
@@ -101,6 +103,15 @@ export const mockRefOrValEmbeddable = <
   return newEmbeddable as OriginalEmbeddableType & ReferenceOrValueEmbeddable;
 };
 
+export function mockSelfStyledEmbeddable<OriginalEmbeddableType>(
+  embeddable: OriginalEmbeddableType,
+  selfStyledOptions: SelfStyledOptions
+): OriginalEmbeddableType & SelfStyledEmbeddable {
+  const newEmbeddable: SelfStyledEmbeddable = embeddable as unknown as SelfStyledEmbeddable;
+  newEmbeddable.getSelfStyledOptions = () => selfStyledOptions;
+  return newEmbeddable as OriginalEmbeddableType & SelfStyledEmbeddable;
+}
+
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     registerEmbeddableFactory: jest.fn(),
@@ -147,4 +158,5 @@ export const embeddablePluginMock = {
   createStartContract,
   createInstance,
   mockRefOrValEmbeddable,
+  mockSelfStyledEmbeddable,
 };

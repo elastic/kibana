@@ -2334,6 +2334,25 @@ describe('IndexPattern Data Source', () => {
         });
       });
     });
+
+    describe('getMaxPossibleNumValues', () => {
+      it('should pass it on to the operation when available', () => {
+        const prediction = 23;
+        const operationPredictSpy = jest
+          .spyOn(operationDefinitionMap.terms, 'getMaxPossibleNumValues')
+          .mockReturnValue(prediction);
+        const columnId = 'col1';
+
+        expect(publicAPI.getMaxPossibleNumValues(columnId)).toEqual(prediction);
+        expect(operationPredictSpy).toHaveBeenCalledWith(
+          expect.objectContaining({ operationType: 'terms' })
+        );
+      });
+
+      it('should default to null', () => {
+        expect(publicAPI.getMaxPossibleNumValues('non-existant')).toEqual(null);
+      });
+    });
   });
 
   describe('#getErrorMessages', () => {

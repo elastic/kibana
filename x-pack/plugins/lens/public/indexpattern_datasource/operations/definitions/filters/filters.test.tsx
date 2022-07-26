@@ -423,4 +423,12 @@ describe('filters', () => {
       });
     });
   });
+
+  describe('getMaxPossibleNumValues', () => {
+    it('reports number of filters', () => {
+      expect(
+        filtersOperation.getMaxPossibleNumValues!(layer.columns.col1 as FiltersIndexPatternColumn)
+      ).toBe(2);
+    });
+  });
 });

@@ -394,6 +394,13 @@ export interface DatasourcePublicAPI {
           lucene: Query[][];
         }
       >;
+
+  /**
+   * Returns the maximum possible number of values for this column when it can be known, otherwise null
+   * (e.g. with a top 5 values operation, we can be sure that there will never be more than 5 values returned
+   *       or 6 if the "Other" bucket is enabled)
+   */
+  getMaxPossibleNumValues: (columnId: string) => number | null;
 }
 
 export interface DatasourceDataPanelProps<T = unknown> {
@@ -762,6 +769,11 @@ export interface VisualizationType {
   showExperimentalBadge?: boolean;
 }
 
+export interface VisualizationDisplayOptions {
+  noPanelTitle?: boolean;
+  noPadding?: boolean;
+}
+
 export interface Visualization<T = unknown> {
   /** Plugin ID, such as "lnsXY" */
   id: string;
@@ -958,6 +970,11 @@ export interface Visualization<T = unknown> {
    * On Edit events the frame will call this to know what's going to be the next visualization state
    */
   onEditAction?: (state: T, event: LensEditEvent<LensEditSupportedActions>) => T;
+
+  /**
+   * Gets custom display options for showing the visualization.
+   */
+  getDisplayOptions?: () => VisualizationDisplayOptions;
 
   /**
    * Get RenderEventCounters events for telemetry

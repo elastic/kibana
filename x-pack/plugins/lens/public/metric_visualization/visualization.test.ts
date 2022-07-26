@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getMetricVisualization } from './visualization';
+import { getLegacyMetricVisualization } from './visualization';
 import type { MetricState } from '../../common/types';
 import { layerTypes } from '../../common';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
@@ -35,7 +35,7 @@ function mockFrame(): FramePublicAPI {
   };
 }
 
-const metricVisualization = getMetricVisualization({
+const metricVisualization = getLegacyMetricVisualization({
   paletteService: chartPluginMock.createPaletteRegistry(),
   theme: themeServiceMock.createStartContract(),
 });

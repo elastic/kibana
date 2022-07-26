@@ -35,7 +35,7 @@ export default function ({
               aggs={aggCount id="1" enabled=true schema="metric"}
               aggs={aggMax id="1" enabled=true schema="metric" field="bytes"}
               aggs={aggTerms id="2" enabled=true schema="segment" field="response.raw" size=4 order="desc" orderBy="1"}
-          | metricVis metric={visdimension 0}
+          | legacyMetricVis metric={visdimension 0}
         `
       );
       await testSubjects.click('run');
