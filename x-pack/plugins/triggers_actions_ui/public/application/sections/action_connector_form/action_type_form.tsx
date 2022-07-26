@@ -29,7 +29,7 @@ import {
 } from '@elastic/eui';
 import { isEmpty, partition, some } from 'lodash';
 import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
-import { show_summary_option } from '../../lib/show_summary_option';
+import { showSummaryOption } from '../../lib/show_summary_option';
 import {
   IErrorObject,
   RuleAction,
@@ -250,7 +250,7 @@ export const ActionTypeForm = ({
 
   const accordionContent = checkEnabledResult.isEnabled ? (
     <>
-      {show_summary_option(actionItem) && (
+      {showSummaryOption(actionItem) && (
         <EuiFormRow>
           <>
             <EuiSwitch
