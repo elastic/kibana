@@ -28,7 +28,7 @@ export const FunctionNavigation = ({ timeRange, getter, setter, kuery }: Props) 
       timeFrom: new Date(timeRange.start).getTime() / 1000,
       timeTo: new Date(timeRange.end).getTime() / 1000,
       startIndex: 0,
-      endIndex: 100,
+      endIndex: 1000,
       kuery,
     }).then((response) => {
       setter(response);
