@@ -12,11 +12,62 @@ interface SandboxProps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
+function mockRuleType() {
+  return {
+    id: 'test.testRuleType',
+    name: 'My Test Rule Type',
+    actionGroups: [{ id: 'default', name: 'Default Action Group' }],
+    actionVariables: {
+      context: [],
+      state: [],
+      params: [],
+    },
+    defaultActionGroupId: 'default',
+    recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+    authorizedConsumers: {},
+    producer: 'rules',
+    minimumLicenseRequired: 'basic',
+    enabledInLicense: true,
+  };
+}
+
+function mockRuleSummary() {
+  return {
+    id: 'rule-id',
+    name: 'rule-name',
+    tags: ['tag-1', 'tag-2'],
+    ruleTypeId: 'test',
+    consumer: 'rule-consumer',
+    status: 'OK',
+    muteAll: false,
+    throttle: '',
+    enabled: true,
+    errorMessages: [],
+    statusStartDate: '2022-03-21T07:40:46-07:00',
+    statusEndDate: '2022-03-25T07:40:46-07:00',
+    alerts: {
+      foo: {
+        status: 'OK',
+        muted: false,
+        actionGroupId: 'testActionGroup',
+      },
+    },
+    executionDuration: {
+      average: 100,
+      valuesWithTimestamp: {},
+    },
+  };
+}
+
 export const RuleEventLogListSandbox = ({ triggersActionsUi }: SandboxProps) => {
   const componenProps: any = {
     rule: {
       id: 'test',
     },
+    ruleType: mockRuleType(),
+    ruleSummary: mockRuleSummary(),
+    numberOfExecutions: 60,
+    onChangeDuration: (duration: number) => {},
     customLoadExecutionLogAggregations: async () => ({
       total: 1,
       data: [
