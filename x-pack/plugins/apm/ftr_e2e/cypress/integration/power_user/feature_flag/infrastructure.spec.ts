@@ -14,7 +14,7 @@ const serviceOverviewPath = '/app/apm/services/opbeans-python/overview';
 const start = '2021-10-10T00:00:00.000Z';
 const end = '2021-10-10T00:15:00.000Z';
 
-describe('Infrastracture feature flag', () => {
+describe.skip('Infrastracture feature flag', () => {
   const infraToggle =
     '[data-test-subj="advancedSetting-editField-observability:enableInfrastructureView"]';
 
