@@ -88,6 +88,10 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
       closed$.next(true);
       handle.close();
     };
+    const closeFlyout = () => {
+      close();
+    };
+
     const triggers = [
       ...ensureNestedTriggers(embeddable.supportedTriggers()),
       CONTEXT_MENU_TRIGGER,
@@ -111,11 +115,11 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
     );
 
     // Close flyout on application change.
-    core.application.currentAppId$.pipe(takeUntil(closed$), skip(1), take(1)).subscribe(() => {
-      close();
-    });
+    core.application.currentAppId$
+      .pipe(takeUntil(closed$), skip(1), take(1))
+      .subscribe(closeFlyout);
 
-    // Close flyout on dashboard switch to "view" mode.
+    // Close flyout on dashboard switch to "view" mode or on embeddable destroy.
     embeddable
       .getInput$()
       .pipe(
@@ -125,8 +129,6 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
         filter((mode) => mode !== ViewMode.EDIT),
         take(1)
       )
-      .subscribe(() => {
-        close();
-      });
+      .subscribe({ next: closeFlyout, complete: closeFlyout });
   }
 }

@@ -15,8 +15,8 @@ import type {
   QueryDslQueryContainer,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsRawDocSource } from '../../serialization';
-import type { ElasticsearchClient } from '../../../elasticsearch';
 import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,

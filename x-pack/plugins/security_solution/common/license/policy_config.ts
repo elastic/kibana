@@ -202,6 +202,28 @@ function isEndpointBehaviorPolicyValidForLicense(policy: PolicyConfig, license: 
   return true;
 }
 
+function isEndpointCredentialDumpingPolicyValidForLicense(
+  policy: PolicyConfig,
+  license: ILicense | null
+) {
+  if (isAtLeast(license, 'platinum')) {
+    // platinum allows all advanced features
+    return true;
+  }
+
+  const defaults = policyFactoryWithoutPaidFeatures();
+
+  // only platinum or higher may use credential hardening
+  if (
+    policy.windows.attack_surface_reduction.credential_hardening.enabled !==
+    defaults.windows.attack_surface_reduction.credential_hardening.enabled
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
 function isEndpointAdvancedPolicyValidForLicense(policy: PolicyConfig, license: ILicense | null) {
   if (isAtLeast(license, 'platinum')) {
     // platinum allows all advanced features
@@ -211,7 +233,10 @@ function isEndpointAdvancedPolicyValidForLicense(policy: PolicyConfig, license: 
   const defaults = policyFactoryWithoutPaidFeatures();
 
   // only platinum or higher may use rollback
-  if (policy.windows.advanced?.rollback !== defaults.windows.advanced?.rollback) {
+  if (
+    policy.windows.advanced?.alerts?.rollback.remediation.enabled !==
+    defaults.windows.advanced?.alerts?.rollback.remediation.enabled
+  ) {
     return false;
   }
 
@@ -231,7 +256,8 @@ export const isEndpointPolicyValidForLicense = (
     isEndpointRansomwarePolicyValidForLicense(policy, license) &&
     isEndpointMemoryPolicyValidForLicense(policy, license) &&
     isEndpointBehaviorPolicyValidForLicense(policy, license) &&
-    isEndpointAdvancedPolicyValidForLicense(policy, license)
+    isEndpointAdvancedPolicyValidForLicense(policy, license) &&
+    isEndpointCredentialDumpingPolicyValidForLicense(policy, license)
   );
 };
 

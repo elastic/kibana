@@ -23,7 +23,7 @@ import { ManageData } from './manage_data';
 import { SolutionsSection } from './solutions_section';
 import { Welcome } from './welcome';
 
-const KEY_ENABLE_WELCOME = 'home:welcome:show';
+export const KEY_ENABLE_WELCOME = 'home:welcome:show';
 
 export interface HomeProps {
   addBasePath: (url: string) => string;

@@ -15,8 +15,9 @@ import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 import type { AgentSOAttributes, Agent, BulkActionResult, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '..';
-import type { FleetServerAgent } from '../../../common';
-import { isAgentUpgradeable, SO_SEARCH_LIMIT } from '../../../common';
+import type { FleetServerAgent } from '../../../common/types';
+import { SO_SEARCH_LIMIT } from '../../../common/constants';
+import { isAgentUpgradeable } from '../../../common/services';
 import { AGENTS_PREFIX, AGENTS_INDEX } from '../../constants';
 import { escapeSearchQueryPhrase, normalizeKuery } from '../saved_object';
 import { IngestManagerError, isESClientError, AgentNotFoundError } from '../../errors';
@@ -111,6 +112,46 @@ export async function closePointInTime(esClient: ElasticsearchClient, pitId: str
     appContextService
       .getLogger()
       .warn(`Error closing point in time with id: ${pitId}. Error: ${error.message}`);
+  }
+}
+
+export async function getAgentTags(
+  esClient: ElasticsearchClient,
+  options: ListWithKuery & {
+    showInactive: boolean;
+  }
+): Promise<string[]> {
+  const { kuery, showInactive = false } = options;
+  const filters = [];
+
+  if (kuery && kuery !== '') {
+    filters.push(kuery);
+  }
+
+  if (showInactive === false) {
+    filters.push(ACTIVE_AGENT_CONDITION);
+  }
+
+  const kueryNode = _joinFilters(filters);
+  const body = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
+  try {
+    const result = await esClient.search<{}, { tags: { buckets: Array<{ key: string }> } }>({
+      index: AGENTS_INDEX,
+      size: 0,
+      body,
+      aggs: {
+        tags: {
+          terms: { field: 'tags', size: SO_SEARCH_LIMIT },
+        },
+      },
+    });
+    const buckets = result.aggregations?.tags.buckets;
+    return buckets?.map((bucket) => bucket.key) ?? [];
+  } catch (err) {
+    if (isESClientError(err) && err.meta.statusCode === 404) {
+      return [];
+    }
+    throw err;
   }
 }
 

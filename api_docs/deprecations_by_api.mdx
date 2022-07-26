@@ -3,7 +3,7 @@ id: kibDevDocsDeprecationsByApi
 slug: /kibana-dev-docs/api-meta/deprecated-api-list-by-api
 title: Deprecated API usage by API
 summary: A list of deprecated APIs, which plugins are still referencing them, and when they need to be removed by.
-date: 2022-07-19
+date: 2022-07-26
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
 warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system.
 ---
@@ -16,15 +16,15 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 | <DocLink id="kibExpressionGaugePluginApi" section="def-common.GaugeState.percentageMode" text="percentageMode"/> | visTypeGauge | - |
 | <DocLink id="kibExpressionPartitionVisPluginApi" section="def-common.LabelsParams.truncate" text="truncate"/> | visTypePie | - |
 | <DocLink id="kibExpressionPartitionVisPluginApi" section="def-common.LabelsParams.last_level" text="last_level"/> | visTypePie | - |
-| <DocLink id="kibDataPluginApi" section="def-public.SearchSource.create" text="create"/> | alerting, discover, securitySolution | - |
-| <DocLink id="kibDataPluginApi" section="def-common.SearchSource.create" text="create"/> | alerting, discover, securitySolution | - |
-| <DocLink id="kibTaskManagerPluginApi" section="def-server.TaskManagerSetupContract.index" text="index"/> | actions, alerting | - |
+| <DocLink id="kibDataPluginApi" section="def-public.SearchSource.create" text="create"/> | discover, alerting, securitySolution | - |
 | <DocLink id="kibDataPluginApi" section="def-public.syncQueryStateWithUrl" text="syncQueryStateWithUrl"/> | discover, visualizations, dashboard, lens, maps, monitoring | - |
 | <DocLink id="kibDataPluginApi" section="def-public.DataPublicPluginStart.indexPatterns" text="indexPatterns"/> | unifiedSearch, discover, maps, infra, graph, securitySolution, stackAlerts, inputControlVis, savedObjects | - |
+| <DocLink id="kibDataPluginApi" section="def-common.SearchSource.create" text="create"/> | discover, alerting, securitySolution | - |
 | <DocLink id="kibUiActionsPluginApi" section="def-public.UiActionsService.executeTriggerActions" text="executeTriggerActions"/> | data, discover, embeddable | - |
 | <DocLink id="kibCorePluginApi" section="def-public.UiSettingsParams.metric" text="metric"/> | advancedSettings, discover | - |
 | <DocLink id="kibCorePluginApi" section="def-server.UiSettingsParams.metric" text="metric"/> | advancedSettings, discover | - |
-| <DocLink id="kibSecurityPluginApi" section="def-server.SecurityPluginSetup.authc" text="authc"/> | encryptedSavedObjects, actions, data, cloud, ml, cloudSecurityPosture, logstash, securitySolution | - |
+| <DocLink id="kibTaskManagerPluginApi" section="def-server.TaskManagerSetupContract.index" text="index"/> | actions, alerting | - |
+| <DocLink id="kibSecurityPluginApi" section="def-server.SecurityPluginSetup.authc" text="authc"/> | encryptedSavedObjects, actions, data, cloud, ml, logstash, securitySolution | - |
 | <DocLink id="kibDataPluginApi" section="def-public.DataPublicPluginStart.fieldFormats" text="fieldFormats"/> | dashboard, lens, stackAlerts, visTypeTable, visTypeTimeseries, visTypeXy, visTypeVislib, expressionPartitionVis | - |
 | <DocLink id="kibKibanaReactPluginApi" section="def-public.RedirectAppLinks" text="RedirectAppLinks"/> | esUiShared, home, data, spaces, fleet, visualizations, lens, observability, ml, apm, cloudSecurityPosture, indexLifecycleManagement, synthetics, upgradeAssistant, ux, savedObjectsManagement, kibanaOverview | - |
 | <DocLink id="kibKibanaReactPluginApi" section="def-public.ExitFullScreenButton" text="ExitFullScreenButton"/> | dashboard | - |
@@ -53,26 +53,26 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 | <DocLink id="kibExpressionsPluginApi" section="def-common.ExpressionsServiceSetup.getFunction" text="getFunction"/> | canvas | - |
 | <DocLink id="kibExpressionsPluginApi" section="def-common.ExpressionsServiceSetup.getFunctions" text="getFunctions"/> | canvas | - |
 | <DocLink id="kibExpressionsPluginApi" section="def-common.ExpressionsServiceSetup.getTypes" text="getTypes"/> | canvas | - |
-| <DocLink id="kibKibanaReactPluginApi" section="def-public.KibanaPageTemplate" text="KibanaPageTemplate"/> | management, spaces, ml, canvas, enterpriseSearch, osquery | - |
+| <DocLink id="kibKibanaReactPluginApi" section="def-public.KibanaPageTemplate" text="KibanaPageTemplate"/> | management, spaces, ml, canvas, enterpriseSearch, osquery, home | - |
 | <DocLink id="kibKibanaReactPluginApi" section="def-public.KibanaPageTemplateProps" text="KibanaPageTemplateProps"/> | management, enterpriseSearch | - |
 | <DocLink id="kibSecurityPluginApi" section="def-public.SecurityPluginStart.uiApi" text="uiApi"/> | enterpriseSearch | - |
 | <DocLink id="kibSecurityPluginApi" section="def-server.SecurityPluginSetup.authz" text="authz"/> | actions, ml, enterpriseSearch, savedObjectsTagging | - |
 | <DocLink id="kibCorePluginApi" section="def-public.SavedObjectsImportSuccess.createNewCopy" text="createNewCopy"/> | spaces, savedObjectsManagement | - |
 | <DocLink id="kibCorePluginApi" section="def-server.SavedObjectsImportSuccess.createNewCopy" text="createNewCopy"/> | spaces, savedObjectsManagement | - |
-| <DocLink id="kibCorePluginApi" section="def-server.ElasticsearchServiceSetup.legacy" text="legacy"/> | console | - |
+| <DocLink id="kibCorePluginApi" section="def-server.ElasticsearchServiceSetup.legacy" text="legacy"/> | console, @kbn/core-elasticsearch-server-internal | - |
 | <DocLink id="kibDataPluginApi" section="def-public.SearchSource.fetch" text="fetch"/> | stackAlerts, alerting, securitySolution, inputControlVis | 8.1 |
 | <DocLink id="kibDataPluginApi" section="def-common.SearchSource.fetch" text="fetch"/> | stackAlerts, alerting, securitySolution, inputControlVis | 8.1 |
+| <DocLink id="kibSavedObjectsPluginApi" section="def-public.SavedObjectSaveModal" text="SavedObjectSaveModal"/> | embeddable, discover, presentationUtil, dashboard, graph | 8.8.0 |
 | <DocLink id="kibFeaturesPluginApi" section="def-server.PluginSetupContract.getKibanaFeatures" text="getKibanaFeatures"/> | spaces, security, alerting | 8.8.0 |
 | <DocLink id="kibLicensingPluginApi" section="def-server.LicensingPluginSetup.license$" text="license$"/> | spaces, security, actions, alerting, ml, remoteClusters, graph, indexLifecycleManagement, mapsEms, painlessLab, rollup, searchprofiler, snapshotRestore, transform, upgradeAssistant | 8.8.0 |
-| <DocLink id="kibSavedObjectsPluginApi" section="def-public.SavedObjectSaveModal" text="SavedObjectSaveModal"/> | embeddable, discover, presentationUtil, dashboard, graph | 8.8.0 |
 | <DocLink id="kibLicensingPluginApi" section="def-public.PublicLicense.mode" text="mode"/> | apm, security, securitySolution | 8.8.0 |
 | <DocLink id="kibLicensingPluginApi" section="def-server.PublicLicense.mode" text="mode"/> | apm, security, securitySolution | 8.8.0 |
 | <DocLink id="kibCorePluginApi" section="def-public.AppMountParameters.onAppLeave" text="onAppLeave"/> | visualizations, dashboard, lens, maps, ml, securitySolution, security | 8.8.0 |
 | <DocLink id="kibCorePluginApi" section="def-public.AppLeaveHandler" text="AppLeaveHandler"/> | securitySolution | 8.8.0 |
 | <DocLink id="kibSavedObjectsPluginApi" section="def-public.SavedObject" text="SavedObject"/> | savedObjectsTaggingOss, visualizations, dashboard, lens | 8.8.0 |
 | <DocLink id="kibSavedObjectsPluginApi" section="def-public.SavedObjectsStart.SavedObjectClass" text="SavedObjectClass"/> | dashboard | 8.8.0 |
-| <DocLink id="kibCorePluginApi" section="def-server.SavedObjectsMigrationLogger.warning" text="warning"/> | dashboard, maps | 8.8.0 |
-| <DocLink id="kibCorePluginApi" section="def-server.OpsMetrics.process" text="process"/> | monitoring, kibanaUsageCollection | 8.8.0 |
+| <DocLink id="kibCorePluginApi" section="def-server.SavedObjectsMigrationLogger.warning" text="warning"/> | maps, dashboard | 8.8.0 |
+| <DocLink id="kibCorePluginApi" section="def-server.OpsMetrics.process" text="process"/> | monitoring, kibanaUsageCollection, @kbn/core-metrics-server-internal | 8.8.0 |
 | <DocLink id="kibHomePluginApi" section="def-public.HomePublicPluginSetup.environment" text="environment"/> | cloud, apm | 8.8.0 |
 | <DocLink id="kibLicensingPluginApi" section="def-public.LicensingPluginSetup.license$" text="license$"/> | security, licenseManagement, ml, apm, crossClusterReplication, logstash, painlessLab, searchprofiler, watcher | 8.8.0 |
 | <DocLink id="kibCorePluginApi" section="def-public.AppMountParameters.appBasePath" text="appBasePath"/> | management, fleet, security, kibanaOverview | 8.8.0 |
@@ -134,8 +134,10 @@ Safe to remove.
 | <DocLink id="kibTaskManagerPluginApi" section="def-server.ConcreteTaskInstance.interval" text="interval"/> | taskManager | 
 | <DocLink id="kibCorePluginApi" section="def-server.AsyncPlugin" text="AsyncPlugin"/> | core | 
 | <DocLink id="kibCorePluginApi" section="def-server.PluginManifest.extraPublicDirs" text="extraPublicDirs"/> | core | 
+| <DocLink id="kibKbnCoreElasticsearchServerPluginApi" section="def-server.ElasticsearchServiceSetup.legacy" text="legacy"/> | @kbn/core-elasticsearch-server | 
 | <DocLink id="kibKbnCoreHttpBrowserPluginApi" section="def-common.IHttpFetchError.req" text="req"/> | @kbn/core-http-browser | 
 | <DocLink id="kibKbnCoreHttpBrowserPluginApi" section="def-common.IHttpFetchError.res" text="res"/> | @kbn/core-http-browser | 
 | <DocLink id="kibKbnCoreInjectedMetadataBrowserPluginApi" section="def-common.InjectedMetadataStart" text="InjectedMetadataStart"/> | @kbn/core-injected-metadata-browser | 
 | <DocLink id="kibKbnCoreInjectedMetadataBrowserPluginApi" section="def-common.InjectedMetadataSetup" text="InjectedMetadataSetup"/> | @kbn/core-injected-metadata-browser | 
+| <DocLink id="kibKbnCoreMetricsServerPluginApi" section="def-server.OpsMetrics.process" text="process"/> | @kbn/core-metrics-server | 
 | <DocLink id="kibKbnCoreUiSettingsCommonPluginApi" section="def-common.UiSettingsParams.metric" text="metric"/> | @kbn/core-ui-settings-common |

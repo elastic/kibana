@@ -11645,16 +11645,16 @@
             "removeBy": "8.8.0",
             "references": [
               {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/server/saved_objects/migrations_730.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/server/saved_objects/migrations_730.ts"
-              },
-              {
                 "plugin": "maps",
                 "path": "x-pack/plugins/maps/server/saved_objects/saved_object_migrations.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/server/saved_objects/migrations_730.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/server/saved_objects/migrations_730.ts"
               }
             ],
             "children": [
@@ -15683,13 +15683,7 @@
         ],
         "signature": [
           "(toolkit: { readonlyEsClient: Pick<",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           ", \"search\">; }) => ",
           "QueryDslQueryContainer",
           " | Promise<",
@@ -15709,13 +15703,7 @@
             "description": [],
             "signature": [
               "{ readonlyEsClient: Pick<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              },
+              "ElasticsearchClient",
               ", \"search\">; }"
             ],
             "path": "src/core/server/saved_objects/types.ts",

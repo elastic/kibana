@@ -16,15 +16,15 @@ import { HotObservable } from 'rxjs/internal/testing/HotObservable';
 import { configServiceMock } from '@kbn/config-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { config as RawLoggingConfig } from '@kbn/core-logging-server-internal';
-import { config as RawElasticsearchConfig } from '../elasticsearch/elasticsearch_config';
+import { config as RawElasticsearchConfig } from '@kbn/core-elasticsearch-server-internal';
 import { config as RawHttpConfig } from '@kbn/core-http-server-internal';
 import { savedObjectsConfig as RawSavedObjectsConfig } from '../saved_objects/saved_objects_config';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
-import { metricsServiceMock } from '../metrics/metrics_service.mock';
+import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 
 import { CoreUsageDataService } from './core_usage_data_service';
-import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { typeRegistryMock } from '../saved_objects/saved_objects_type_registry.mock';
 import { CORE_USAGE_STATS_TYPE } from './constants';
 import { CoreUsageStatsClient } from './core_usage_stats_client';

@@ -6,7 +6,7 @@
  */
 
 import { uniq } from 'lodash';
-import type { RequestHandler } from '@kbn/core/server';
+import { type RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import type {
@@ -16,9 +16,11 @@ import type {
   PutAgentReassignResponse,
   PostBulkAgentReassignResponse,
   PostBulkUpdateAgentTagsResponse,
+  GetAgentTagsResponse,
 } from '../../../common/types';
 import type {
   GetAgentsRequestSchema,
+  GetTagsRequestSchema,
   GetOneAgentRequestSchema,
   UpdateAgentRequestSchema,
   DeleteAgentRequestSchema,
@@ -35,7 +37,6 @@ export const getAgentHandler: RequestHandler<
   TypeOf<typeof GetOneAgentRequestSchema.params>
 > = async (context, request, response) => {
   const coreContext = await context.core;
-  const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
 
   try {
@@ -45,7 +46,7 @@ export const getAgentHandler: RequestHandler<
 
     return response.ok({ body });
   } catch (error) {
-    if (soClient.errors.isNotFoundError(error)) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
       return response.notFound({
         body: { message: `Agent ${request.params.agentId} not found` },
       });
@@ -180,6 +181,28 @@ export const getAgentsHandler: RequestHandler<
       totalInactive,
       page,
       perPage,
+    };
+    return response.ok({ body });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const getAgentTagsHandler: RequestHandler<
+  undefined,
+  TypeOf<typeof GetTagsRequestSchema.query>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+
+  try {
+    const tags = await AgentService.getAgentTags(esClient, {
+      showInactive: request.query.showInactive,
+      kuery: request.query.kuery,
+    });
+
+    const body: GetAgentTagsResponse = {
+      items: tags,
     };
     return response.ok({ body });
   } catch (error) {

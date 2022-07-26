@@ -23,20 +23,15 @@ export const useImportAssets = ({ successToastText }: UseImportAssetsProps) => {
   } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useMutation(
-    () =>
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      http.post<any>('/internal/osquery/assets/update'),
-    {
-      onSuccess: () => {
-        setErrorToast();
-        queryClient.invalidateQueries(PACKS_ID);
-        queryClient.invalidateQueries(INTEGRATION_ASSETS_STATUS_ID);
-        toasts.addSuccess(successToastText);
-      },
-      onError: (error) => {
-        setErrorToast(error);
-      },
-    }
-  );
+  return useMutation(() => http.post('/internal/osquery/assets/update'), {
+    onSuccess: () => {
+      setErrorToast();
+      queryClient.invalidateQueries(PACKS_ID);
+      queryClient.invalidateQueries(INTEGRATION_ASSETS_STATUS_ID);
+      toasts.addSuccess(successToastText);
+    },
+    onError: (error) => {
+      setErrorToast(error);
+    },
+  });
 };

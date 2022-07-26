@@ -153,12 +153,6 @@ export const OPEN_RULE_DETAIL_TOOLTIP = i18n.translate(
     defaultMessage: 'Open rule detail',
   }
 );
-export const OPEN_RULE_ALERTS_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detectionResponse.openRuleAlertsTooltip',
-  {
-    defaultMessage: 'Open rule alerts',
-  }
-);
 
 export const OPEN_ALL_ALERTS_BUTTON = i18n.translate(
   'xpack.securitySolution.detectionResponse.openAllAlertsButton',
@@ -167,24 +161,10 @@ export const OPEN_ALL_ALERTS_BUTTON = i18n.translate(
   }
 );
 
-export const VIEW_ALL_USER_ALERTS = i18n.translate(
-  'xpack.securitySolution.detectionResponse.viewAllUserAlerts',
-  {
-    defaultMessage: 'View all users',
-  }
-);
-
 export const VIEW_RECENT_CASES = i18n.translate(
   'xpack.securitySolution.detectionResponse.viewRecentCases',
   {
     defaultMessage: 'View recent cases',
-  }
-);
-
-export const VIEW_ALL_HOST_ALERTS = i18n.translate(
-  'xpack.securitySolution.detectionResponse.viewAllHostAlerts',
-  {
-    defaultMessage: 'View all hosts',
   }
 );
 

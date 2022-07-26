@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
 import { getUpgradeableConfig } from './get_upgradeable_config';
 import { savedObjectsClientMock } from '../../saved_objects/service/saved_objects_client.mock';
-import { SavedObjectsFindResponse } from '../../saved_objects';
 
 describe('getUpgradeableConfig', () => {
   it('finds saved objects with type "config"', async () => {

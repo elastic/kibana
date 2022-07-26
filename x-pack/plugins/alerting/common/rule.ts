@@ -112,6 +112,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   executionStatus: RuleExecutionStatus;
   monitoring?: RuleMonitoring;
   snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
+  activeSnoozes?: string[];
   isSnoozedUntil?: Date | null;
 }
 
