@@ -28,7 +28,6 @@ import {
   FIXED_PROGRESSION,
   DEFAULT_MAX_STOP,
   DEFAULT_MIN_STOP,
-  ColorStop,
 } from '@kbn/coloring';
 import { getDataBoundsForPalette } from '@kbn/expression-metric-vis-plugin/public';
 import { css } from '@emotion/react';
@@ -112,13 +111,6 @@ export function DimensionEditor(props: Props) {
     default:
       return null;
   }
-}
-
-function colorStopsFromStops(stops: ColorStop[]) {
-  return stops.map((stop, index) => ({
-    ...stop,
-    stop: index === 0 ? -Infinity : stops[index - 1].stop,
-  }));
 }
 
 function MaximumEditor({ setState, state }: Props) {
@@ -284,12 +276,8 @@ function PrimaryMetricEditor(props: Props) {
                 ? {
                     palette: {
                       ...activePalette,
-                      // in case of starting with number palette, directly jump to custom palette to stick with the current values
-                      name: startWithPercentPalette ? 'status' : 'custom',
                       params: {
                         ...activePalette.params,
-                        name: startWithPercentPalette ? 'status' : 'custom',
-                        colorStops: colorStopsFromStops(displayStops),
                         stops: displayStops,
                       },
                     },

@@ -156,11 +156,9 @@ const getColor = (
   let minBound = paletteParams.rangeMin;
   let maxBound = paletteParams.rangeMax;
 
-  if (paletteParams.range === 'percent') {
-    const { min, max } = getDataBoundsForPalette(accessors, data, rowNumber);
-    minBound = min;
-    maxBound = max;
-  }
+  const { min, max } = getDataBoundsForPalette(accessors, data, rowNumber);
+  minBound = min;
+  maxBound = max;
 
   return (
     getPaletteService().get(CUSTOM_PALETTE)?.getColorForValue?.(value, paletteParams, {
