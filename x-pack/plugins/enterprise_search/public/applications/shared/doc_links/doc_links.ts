@@ -8,15 +8,16 @@
 import { DocLinksStart } from '@kbn/core/public';
 
 class DocLinks {
-  public appSearchApis: string;
+  public apiKey: string;
   public appSearchApiClients: string;
   public appSearchApiKeys: string;
+  public appSearchApis: string;
   public appSearchAuthentication: string;
   public appSearchCrawlRules: string;
   public appSearchCurations: string;
   public appSearchDuplicateDocuments: string;
-  public appSearchEntryPoints: string;
   public appSearchElasticsearchIndexedEngines: string;
+  public appSearchEntryPoints: string;
   public appSearchGuide: string;
   public appSearchIndexingDocs: string;
   public appSearchIndexingDocsSchema: string;
@@ -31,6 +32,7 @@ class DocLinks {
   public appSearchWebCrawler: string;
   public appSearchWebCrawlerEventLogs: string;
   public appSearchWebCrawlerReference: string;
+  public bulkApi: string;
   public clientsGoIndex: string;
   public clientsGuide: string;
   public clientsJavaBasicAuthentication: string;
@@ -61,6 +63,7 @@ class DocLinks {
   public enterpriseSearchTroubleshootSetup: string;
   public enterpriseSearchUsersAccess: string;
   public kibanaSecurity: string;
+  public languageAnalyzers: string;
   public licenseManagement: string;
   public pluginsIngestAttachment: string;
   public queryDsl: string;
@@ -70,12 +73,12 @@ class DocLinks {
   public workplaceSearchConfluenceCloudConnectorPackage: string;
   public workplaceSearchConfluenceServer: string;
   public workplaceSearchCustomConnectorPackage: string;
-  public workplaceSearchCustomSources: string;
   public workplaceSearchCustomSourcePermissions: string;
+  public workplaceSearchCustomSources: string;
   public workplaceSearchDocumentPermissions: string;
   public workplaceSearchDropbox: string;
-  public workplaceSearchExternalSharePointOnline: string;
   public workplaceSearchExternalIdentities: string;
+  public workplaceSearchExternalSharePointOnline: string;
   public workplaceSearchGettingStarted: string;
   public workplaceSearchGitHub: string;
   public workplaceSearchGmail: string;
@@ -99,6 +102,7 @@ class DocLinks {
   public workplaceSearchZoom: string;
 
   constructor() {
+    this.apiKey = '';
     this.appSearchApis = '';
     this.appSearchApiClients = '';
     this.appSearchApiKeys = '';
@@ -122,6 +126,7 @@ class DocLinks {
     this.appSearchWebCrawler = '';
     this.appSearchWebCrawlerEventLogs = '';
     this.appSearchWebCrawlerReference = '';
+    this.bulkApi = '';
     this.clientsGoIndex = '';
     this.clientsGuide = '';
     this.clientsJavaBasicAuthentication = '';
@@ -152,6 +157,7 @@ class DocLinks {
     this.enterpriseSearchTroubleshootSetup = '';
     this.enterpriseSearchUsersAccess = '';
     this.kibanaSecurity = '';
+    this.languageAnalyzers = '';
     this.licenseManagement = '';
     this.pluginsIngestAttachment = '';
     this.queryDsl = '';
@@ -191,6 +197,7 @@ class DocLinks {
   }
 
   public setDocLinks(docLinks: DocLinksStart): void {
+    this.apiKey = docLinks.links.enterpriseSearch.apiKey;
     this.appSearchApis = docLinks.links.appSearch.apiRef;
     this.appSearchApiClients = docLinks.links.appSearch.apiClients;
     this.appSearchApiKeys = docLinks.links.appSearch.apiKeys;
@@ -215,6 +222,7 @@ class DocLinks {
     this.appSearchWebCrawler = docLinks.links.appSearch.webCrawler;
     this.appSearchWebCrawlerEventLogs = docLinks.links.appSearch.webCrawlerEventLogs;
     this.appSearchWebCrawlerReference = docLinks.links.appSearch.webCrawlerReference;
+    this.bulkApi = docLinks.links.enterpriseSearch.bulkApi;
     this.clientsGoIndex = docLinks.links.clients.goIndex;
     this.clientsGuide = docLinks.links.clients.guide;
     this.clientsJavaBasicAuthentication = docLinks.links.clients.javaBasicAuthentication;
@@ -245,6 +253,7 @@ class DocLinks {
     this.enterpriseSearchTroubleshootSetup = docLinks.links.enterpriseSearch.troubleshootSetup;
     this.enterpriseSearchUsersAccess = docLinks.links.enterpriseSearch.usersAccess;
     this.kibanaSecurity = docLinks.links.kibana.xpackSecurity;
+    this.languageAnalyzers = docLinks.links.enterpriseSearch.languageAnalyzers;
     this.licenseManagement = docLinks.links.enterpriseSearch.licenseManagement;
     this.pluginsIngestAttachment = docLinks.links.plugins.ingestAttachment;
     this.queryDsl = docLinks.links.query.queryDsl;

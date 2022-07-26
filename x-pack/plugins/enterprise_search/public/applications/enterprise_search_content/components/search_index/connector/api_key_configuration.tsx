@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiText,
   EuiButton,
-  EuiLink,
   EuiSpacer,
   EuiConfirmModal,
 } from '@elastic/eui';
@@ -95,7 +94,11 @@ export const ApiKeyConfig: React.FC<{ hasApiKey: boolean; indexName: string }> =
             'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.description',
             {
               defaultMessage:
-                'Keep your Elasticsearch API key somewhere safe while you configure your connector.',
+                'First, generate an Elasticsearch API key. This {apiKeyName} key will enable read and write permissions for the connector to index to the created {indexName} index. Save the key in a safe place, as you will need it to configure your connector.',
+              values: {
+                apiKeyName: `${indexName}-connector`,
+                indexName,
+              },
             }
           )}
         </EuiText>
@@ -107,20 +110,10 @@ export const ApiKeyConfig: React.FC<{ hasApiKey: boolean; indexName: string }> =
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.button.label',
                 {
-                  defaultMessage: 'Generate an Elasticsearch API key',
+                  defaultMessage: 'Generate API key',
                 }
               )}
             </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiLink href="https://elastic.co/" target="_blank">
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.documentation.label',
-                {
-                  defaultMessage: 'View the documentation',
-                }
-              )}
-            </EuiLink>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

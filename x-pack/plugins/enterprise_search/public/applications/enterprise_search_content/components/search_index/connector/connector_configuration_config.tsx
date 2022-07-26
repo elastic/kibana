@@ -11,48 +11,24 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
-  EuiCodeBlock,
+  EuiCallOut,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-
-import { ConnectorConfiguration } from '../../../../../../common/types/connectors';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ConnectorConfigurationForm } from './connector_configuration_form';
 import { ConnectorConfigurationLogic } from './connector_configuration_logic';
 
-interface ConnectorConfigurationConfigArgs {
-  apiKey: string | undefined;
-  configuration: ConnectorConfiguration;
-  connectorId: string;
-  indexId: string;
-  indexName: string;
-}
-
-export const ConnectorConfigurationConfig: React.FC<ConnectorConfigurationConfigArgs> = ({
-  apiKey,
-  connectorId,
-}) => {
+export const ConnectorConfigurationConfig: React.FC = () => {
   const { configView, isEditing } = useValues(ConnectorConfigurationLogic);
   const { setIsEditing } = useActions(ConnectorConfigurationLogic);
-
-  const ymlBlock = (
-    <EuiCodeBlock fontSize="m" paddingSize="m" color="dark" isCopyable>
-      {`${
-        apiKey
-          ? `elasticsearch:
-  api_key: "${apiKey}"
-`
-          : ''
-      }connector_id: "${connectorId}"
-`}
-    </EuiCodeBlock>
-  );
 
   const displayList = configView.map(({ label, value }) => ({
     description: value ?? '--',
@@ -85,27 +61,73 @@ export const ConnectorConfigurationConfig: React.FC<ConnectorConfigurationConfig
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
         <EuiText size="s">
-          {i18n.translate(
-            'xpack.enterpriseSearch.content.indices.configurationConnector.config.description',
-            {
-              defaultMessage:
-                'Once done return to Enterprise Search and point to your connector instance using the authentication method of your choice.',
-            }
-          )}
+          <FormattedMessage
+            id="xpack.enterpriseSearch.content.indices.configurationConnector.config.description.firstParagraph"
+            defaultMessage="Now that your connector is deployed, enhance the deployed connector client for your custom data source. There’s an {link} for you to start adding your data source specific implementation logic."
+            values={{
+              link: (
+                <EuiLink
+                  href="https://github.com/elastic/connectors-ruby/tree/main/lib/connectors/stub_connector"
+                  target="_blank"
+                >
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.configurationConnector.config.connectorClientLink',
+                    { defaultMessage: 'example connector client' }
+                  )}
+                </EuiLink>
+              ),
+            }}
+          />
+          <EuiSpacer />
+          <p>
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.indices.configurationConnector.config.description.secondParagraph',
+              {
+                defaultMessage:
+                  'While the connector clients in the repository are built in Ruby, there’s no technical limitation to only use Ruby. Build a connector client with the technology that works best for your skillset.',
+              }
+            )}
+          </p>
+          <FormattedMessage
+            id="xpack.enterpriseSearch.content.indices.configurationConnector.config.description.thirdParagraph"
+            defaultMessage="If you need help, you can always open an {issuesLink} in the repository or ask a question in our {discussLink} forum."
+            values={{
+              discussLink: (
+                <EuiLink href="https://github.com/elastic/connectors-ruby/issues" target="_blank">
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.configurationConnector.config.discussLink',
+                    { defaultMessage: 'Discuss' }
+                  )}
+                </EuiLink>
+              ),
+              issuesLink: (
+                <EuiLink href="https://github.com/elastic/connectors-ruby/issues" target="_blank">
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.configurationConnector.config.issuesLink',
+                    { defaultMessage: 'issue' }
+                  )}
+                </EuiLink>
+              ),
+            }}
+          />
+          <EuiSpacer />
+          <EuiCallOut
+            iconType="alert"
+            color="warning"
+            title={i18n.translate(
+              'xpack.enterpriseSearch.content.indices.configurationConnector.config.warning.title',
+              { defaultMessage: 'This connector is tied to your Elastic index' }
+            )}
+          >
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.indices.configurationConnector.warning.description',
+              {
+                defaultMessage:
+                  'If you sync at least one document before you’ve finalized your connector client, you will have to recreate your search index.',
+              }
+            )}
+          </EuiCallOut>
         </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiText size="s">
-          {i18n.translate(
-            'xpack.enterpriseSearch.content.indices.configurationConnector.yml.description',
-            {
-              defaultMessage:
-                'Use this YAML sample with your Elastic API key and Connector id to get going faster',
-            }
-          )}
-        </EuiText>
-        <EuiSpacer />
-        {ymlBlock}
       </EuiFlexItem>
       <EuiFlexItem>
         {isEditing ? <ConnectorConfigurationForm /> : displayList.length > 0 && display}
