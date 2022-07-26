@@ -57,23 +57,36 @@ const InstalledIntegrationsInfoCallout = () => (
   </EuiCallOut>
 );
 
-const VerificationWarningCallout = () => (
-  <EuiCallOut
-    title={i18n.translate('xpack.fleet.epmList.verificationWarningCalloutTitle', {
-      defaultMessage: 'Integrations not verified',
-    })}
-    iconType="alert"
-    color="warning"
-  >
-    <p>
-      <FormattedMessage
-        id="xpack.fleet.epmList.verificationWarningCalloutIntroText"
-        defaultMessage="One or more of the installed integrations contain an unsigned package of unknown authenticity."
-        // TODO: add documentation link
-      />
-    </p>
-  </EuiCallOut>
-);
+const VerificationWarningCallout: React.FC = () => {
+  const { docLinks } = useStartServices();
+
+  return (
+    <EuiCallOut
+      title={i18n.translate('xpack.fleet.epmList.verificationWarningCalloutTitle', {
+        defaultMessage: 'Integrations not verified',
+      })}
+      iconType="alert"
+      color="warning"
+    >
+      <p>
+        <FormattedMessage
+          id="xpack.fleet.epmList.verificationWarningCalloutIntroText"
+          defaultMessage="One or more of the installed integrations contain an unsigned package of unknown authenticity. Learn more about {learnMoreLink}."
+          values={{
+            learnMoreLink: (
+              <EuiLink target="_blank" external href={docLinks.links.fleet.packageSignatures}>
+                <FormattedMessage
+                  id="xpack.fleet.ConfirmForceInstallModal.learnMoreLink"
+                  defaultMessage="package signatures"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      </p>
+    </EuiCallOut>
+  );
+};
 
 // TODO: clintandrewhall - this component is hard to test due to the hooks, particularly those that use `http`
 // or `location` to load data.  Ideally, we'll split this into "connected" and "pure" components.
