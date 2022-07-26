@@ -11,6 +11,7 @@ import React from 'react';
 import { CoreStart, OverlayStart } from '@kbn/core/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { isFilterableEmbeddable } from '@kbn/embeddable-plugin/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 
 import { Action, IncompatibleActionError } from '../../services/ui_actions';
 
@@ -30,12 +31,16 @@ export interface FiltersNotificationActionContext {
 export class FiltersNotificationBadge implements Action<FiltersNotificationActionContext> {
   public readonly id = BADGE_FILTERS_NOTIFICATION;
   public readonly type = BADGE_FILTERS_NOTIFICATION;
-  public readonly order = 1;
+  public readonly order = 2;
 
   private displayName = dashboardFilterNotificationBadge.getDisplayName();
   private icon = 'filter';
 
-  constructor(private theme: CoreStart['theme'], private overlays: OverlayStart) {}
+  constructor(
+    private theme: CoreStart['theme'],
+    private overlays: OverlayStart,
+    private uiSettings: CoreStart['uiSettings']
+  ) {}
 
   public getDisplayName({ embeddable }: FiltersNotificationActionContext) {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
@@ -60,26 +65,33 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
     );
   };
 
-  // public execute = async () => {};
   public execute = async (context: FiltersNotificationActionContext) => {
     const { embeddable } = context;
     const isCompatible = await this.isCompatible({ embeddable });
     if (!isCompatible || !isFilterableEmbeddable(embeddable)) {
       throw new IncompatibleActionError();
     }
+
+    const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
+      uiSettings: this.uiSettings,
+    });
+
     const filters = embeddable.getFilters();
-    const dataViewList: DataView[] =
-      (embeddable.getRoot() as DashboardContainer)?.getAllDataViews() ?? [];
+    const dataViewList: DataView[] = (
+      embeddable.getRoot() as DashboardContainer
+    )?.getAllDataViews();
 
     const session = this.overlays.openModal(
       toMountPoint(
-        <FiltersNotificationModal
-          displayName={this.displayName}
-          id={this.id}
-          closeModal={() => session.close()}
-          filters={filters}
-          dataViewList={dataViewList}
-        />,
+        <KibanaReactContextProvider>
+          <FiltersNotificationModal
+            displayName={this.displayName}
+            id={this.id}
+            closeModal={() => session.close()}
+            filters={filters}
+            dataViewList={dataViewList}
+          />
+        </KibanaReactContextProvider>,
         { theme$: this.theme.theme$ }
       ),
       {

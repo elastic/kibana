@@ -33,6 +33,8 @@ const FilterItemsUI = React.memo(function FilterItemsUI(props: Props) {
   const { appName, usageCollection, uiSettings } = kibana.services;
   const { readOnly = false } = props;
 
+  if (!uiSettings) return null;
+
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
 
   function onFiltersUpdated(filters: Filter[]) {

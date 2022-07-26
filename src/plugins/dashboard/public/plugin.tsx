@@ -417,7 +417,7 @@ export class DashboardPlugin
       uiActions.registerAction(libraryNotificationAction);
       uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, libraryNotificationAction.id);
 
-      const panelLevelFiltersAction = new FiltersNotificationBadge(theme, overlays);
+      const panelLevelFiltersAction = new FiltersNotificationBadge(theme, overlays, uiSettings);
       uiActions.registerAction(panelLevelFiltersAction);
       uiActions.attachAction(PANEL_BADGE_TRIGGER, panelLevelFiltersAction.id);
 
