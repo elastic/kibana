@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import Chance from 'chance';
 import { Rules } from '.';
 import { render, screen } from '@testing-library/react';
 import { QueryClient } from 'react-query';
@@ -14,14 +15,17 @@ import { useCspIntegrationInfo } from './use_csp_integration';
 import { type RouteComponentProps } from 'react-router-dom';
 import type { PageUrlParams } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
-import { useCisKubernetesIntegration } from '../../common/api/use_cis_kubernetes_integration';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { coreMock } from '@kbn/core/public/mocks';
+import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
 
 jest.mock('./use_csp_integration', () => ({
   useCspIntegrationInfo: jest.fn(),
 }));
-jest.mock('../../common/api/use_cis_kubernetes_integration');
+jest.mock('../../common/api/use_setup_status_api');
+jest.mock('../../common/navigation/use_navigate_to_cis_integration');
+const chance = new Chance();
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -58,10 +62,13 @@ describe('<Rules />', () => {
   beforeEach(() => {
     queryClient.clear();
     jest.clearAllMocks();
-
-    (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({
-      data: { item: { status: 'installed' } },
-    }));
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: { status: 'indexed' },
+      })
+    );
+    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
   });
 
   it('calls API with URL params', async () => {
@@ -80,7 +87,7 @@ describe('<Rules />', () => {
 
   it('displays success state when result request is resolved', async () => {
     const Component = getTestComponent({ packagePolicyId: '21', policyId: '22' });
-    const request = createReactQueryResponse({
+    const response = createReactQueryResponse({
       status: 'success',
       data: [
         {
@@ -93,12 +100,12 @@ describe('<Rules />', () => {
       ],
     });
 
-    (useCspIntegrationInfo as jest.Mock).mockReturnValue(request);
+    (useCspIntegrationInfo as jest.Mock).mockReturnValue(response);
 
     render(<Component />);
 
     expect(
-      await screen.findByText(`${request.data?.[0]?.package?.title}, ${request.data?.[1].name}`)
+      await screen.findByText(`${response.data?.[0]?.package?.title}, ${response.data?.[1].name}`)
     ).toBeInTheDocument();
     expect(await screen.findByTestId(TEST_SUBJECTS.CSP_RULES_CONTAINER)).toBeInTheDocument();
   });

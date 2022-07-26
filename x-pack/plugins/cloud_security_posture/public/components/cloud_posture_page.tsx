@@ -11,8 +11,8 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NoDataPage } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
+import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
 import { CspLoadingState } from './csp_loading_state';
-import { useCisKubernetesIntegration } from '../common/api/use_cis_kubernetes_integration';
 import { useCISIntegrationLink } from '../common/navigation/use_navigate_to_cis_integration';
 
 export const LOADING_STATE_TEST_SUBJECT = 'cloud_posture_page_loading';
@@ -154,19 +154,19 @@ export const CloudPosturePage = <TData, TError>({
   errorRender = defaultErrorRenderer,
   noDataRenderer = defaultNoDataRenderer,
 }: CloudPosturePageProps<TData, TError>) => {
-  const cisKubernetesPackageInfo = useCisKubernetesIntegration();
+  const getSetupStatus = useCspSetupStatusApi();
   const cisIntegrationLink = useCISIntegrationLink();
 
   const render = () => {
-    if (cisKubernetesPackageInfo.isError) {
-      return defaultErrorRenderer(cisKubernetesPackageInfo.error);
+    if (getSetupStatus.isError) {
+      return defaultErrorRenderer(getSetupStatus.error);
     }
 
-    if (cisKubernetesPackageInfo.isLoading || cisKubernetesPackageInfo.isIdle) {
+    if (getSetupStatus.isLoading || getSetupStatus.isIdle) {
       return defaultLoadingRenderer();
     }
 
-    if (cisKubernetesPackageInfo.data.item.status !== 'installed') {
+    if (getSetupStatus.data.status === 'not-installed') {
       return packageNotInstalledRenderer(cisIntegrationLink);
     }
 
