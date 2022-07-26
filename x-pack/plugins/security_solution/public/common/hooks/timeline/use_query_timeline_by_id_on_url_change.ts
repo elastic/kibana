@@ -35,7 +35,7 @@ import { URL_PARAM_KEY } from '../use_url_state';
  * For the conflict scenario, we are actively pulling the id changes that take place for the timeline in the URL and calling the query below
  * to request the new data.
  *
- * *** The conflict scenario happens when migrating from an older version to 8.0+
+ * *** The conflict scenario can happen when migrating from an older version to 8.0+. Read more: https://github.com/elastic/kibana/issues/100489
  */
 export const useQueryTimelineByIdOnUrlChange = () => {
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -46,7 +46,7 @@ export const useQueryTimelineByIdOnUrlChange = () => {
   const timelineIdFromReduxStore = flyoutTimeline?.savedObjectId ?? '';
   const dispatch = useDispatch();
 
-  useEffect(() => {
+  const [previousTimeline, currentTimeline] = useMemo(() => {
     const oldUrlStateString = getQueryStringKeyValue({
       urlKey: URL_PARAM_KEY.timeline,
       search: oldSearch ?? '',
@@ -57,6 +57,7 @@ export const useQueryTimelineByIdOnUrlChange = () => {
     if (oldUrlStateString != null && newUrlStateString != null) {
       let newTimeline = null;
       let oldTimeline = null;
+
       try {
         newTimeline = decodeRisonUrlState<TimelineUrl>(newUrlStateString);
       } catch (error) {
@@ -68,23 +69,30 @@ export const useQueryTimelineByIdOnUrlChange = () => {
       } catch (error) {
         // do nothing as timeline is defaulted to null
       }
-      const newId = newTimeline?.id;
-      const oldId = oldTimeline?.id;
 
-      if (newId && newId !== oldId && newId !== timelineIdFromReduxStore) {
-        queryTimelineById({
-          activeTimelineTab: newTimeline?.activeTab ?? TimelineTabs.query,
-          duplicate: false,
-          graphEventId: newTimeline?.graphEventId,
-          timelineId: newId,
-          openTimeline: true,
-          updateIsLoading: (status: { id: string; isLoading: boolean }) =>
-            dispatch(timelineActions.updateIsLoading(status)),
-          updateTimeline: dispatchUpdateTimeline(dispatch),
-        });
-      }
+      return [oldTimeline, newTimeline];
     }
-  }, [search, oldSearch, timelineIdFromReduxStore, dispatch]);
+
+    return [null, null];
+  }, [oldSearch, search]);
+
+  const oldId = previousTimeline?.id;
+  const { id: newId, activeTab, graphEventId } = currentTimeline || {};
+
+  useEffect(() => {
+    if (newId && newId !== oldId && newId !== timelineIdFromReduxStore) {
+      queryTimelineById({
+        activeTimelineTab: activeTab ?? TimelineTabs.query,
+        duplicate: false,
+        graphEventId,
+        timelineId: newId,
+        openTimeline: true,
+        updateIsLoading: (status: { id: string; isLoading: boolean }) =>
+          dispatch(timelineActions.updateIsLoading(status)),
+        updateTimeline: dispatchUpdateTimeline(dispatch),
+      });
+    }
+  }, [timelineIdFromReduxStore, dispatch, oldId, newId, activeTab, graphEventId]);
 };
 
 const getQueryStringKeyValue = ({ search, urlKey }: { search: string; urlKey: string }) =>
