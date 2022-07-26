@@ -99,7 +99,6 @@ export enum SecurityPageName {
   hostIsolationExceptions = 'host_isolation_exceptions',
   hosts = 'hosts',
   hostsAnomalies = 'hosts-anomalies',
-  hostsExternalAlerts = 'hosts-external_alerts',
   hostsRisk = 'hosts-risk',
   hostsEvents = 'hosts-events',
   investigate = 'investigate',
@@ -124,11 +123,11 @@ export enum SecurityPageName {
   trustedApps = 'trusted_apps',
   uncommonProcesses = 'uncommon_processes',
   users = 'users',
-  usersAuthentications = 'users-authentications',
   usersAnomalies = 'users-anomalies',
-  usersRisk = 'users-risk',
+  usersAuthentications = 'users-authentications',
   usersEvents = 'users-events',
   usersExternalAlerts = 'users-external_alerts',
+  usersRisk = 'users-risk',
 }
 
 export const EXPLORE_PATH = '/explore' as const;
@@ -232,6 +231,14 @@ export const IP_REPUTATION_LINKS_SETTING_DEFAULT = `[
 export const SHOW_RELATED_INTEGRATIONS_SETTING =
   'securitySolution:showRelatedIntegrations' as const;
 
+/** This Kibana Advanced Setting enables extended rule execution logging to Event Log */
+export const EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING =
+  'securitySolution:extendedRuleExecutionLoggingEnabled' as const;
+
+/** This Kibana Advanced Setting sets minimum log level starting from which execution logs will be written to Event Log */
+export const EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING =
+  'securitySolution:extendedRuleExecutionLoggingMinLevel' as const;
+
 /**
  * Id for the notifications alerting type
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -252,6 +259,7 @@ export const DETECTION_ENGINE_PREPACKAGED_URL =
   `${DETECTION_ENGINE_RULES_URL}/prepackaged` as const;
 export const DETECTION_ENGINE_PRIVILEGES_URL = `${DETECTION_ENGINE_URL}/privileges` as const;
 export const DETECTION_ENGINE_INDEX_URL = `${DETECTION_ENGINE_URL}/index` as const;
+
 export const DETECTION_ENGINE_TAGS_URL = `${DETECTION_ENGINE_URL}/tags` as const;
 export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL =
   `${DETECTION_ENGINE_RULES_URL}/prepackaged/_status` as const;
@@ -265,17 +273,23 @@ export const DETECTION_ENGINE_RULES_BULK_CREATE =
 export const DETECTION_ENGINE_RULES_BULK_UPDATE =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_update` as const;
 
+export const DEV_TOOL_PREBUILT_CONTENT =
+  `/internal/prebuilt_content/dev_tool/{console_id}` as const;
+export const devToolPrebuiltContentUrl = (consoleId: string) =>
+  `/internal/prebuilt_content/dev_tool/${consoleId}` as const;
+export const PREBUILT_SAVED_OBJECTS_BULK_CREATE =
+  '/internal/prebuilt_content/saved_objects/_bulk_create/{template_name}';
+export const prebuiltSavedObjectsBulkCreateUrl = (templateName: string) =>
+  `/internal/prebuilt_content/saved_objects/_bulk_create/${templateName}` as const;
+
 /**
  * Internal detection engine routes
  */
 export const INTERNAL_DETECTION_ENGINE_URL = '/internal/detection_engine' as const;
-export const DETECTION_ENGINE_RULE_EXECUTION_EVENTS_URL =
-  `${INTERNAL_DETECTION_ENGINE_URL}/rules/{ruleId}/execution/events` as const;
-export const detectionEngineRuleExecutionEventsUrl = (ruleId: string) =>
-  `${INTERNAL_DETECTION_ENGINE_URL}/rules/${ruleId}/execution/events` as const;
 export const DETECTION_ENGINE_INSTALLED_INTEGRATIONS_URL =
   `${INTERNAL_DETECTION_ENGINE_URL}/fleet/integrations/installed` as const;
-
+export const DETECTION_ENGINE_ALERTS_INDEX_URL =
+  `${INTERNAL_DETECTION_ENGINE_URL}/signal/index` as const;
 /**
  * Telemetry detection endpoint for any previews requested of what data we are
  * providing through UI/UX and for e2e tests.

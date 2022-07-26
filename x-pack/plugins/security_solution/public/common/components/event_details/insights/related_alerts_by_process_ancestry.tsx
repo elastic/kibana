@@ -79,6 +79,7 @@ export const RelatedAlertsByProcessAncestry = React.memo<Props>(({ data, eventId
     return (
       <FetchAndNotifyCachedAlertsByProcessAncestry
         data={data}
+        eventId={eventId}
         timelineId={timelineId}
         onCacheLoad={setCache}
       />
@@ -110,14 +111,11 @@ RelatedAlertsByProcessAncestry.displayName = 'RelatedAlertsByProcessAncestry';
  */
 const FetchAndNotifyCachedAlertsByProcessAncestry: React.FC<{
   data: TimelineEventsDetailsItem;
+  eventId: string;
   timelineId?: string;
   onCacheLoad: (cache: Cache) => void;
-}> = ({ data, timelineId, onCacheLoad }) => {
-  const { loading, error, alertIds } = useAlertPrevalenceFromProcessTree({
-    parentEntityId: data.values,
-    timelineId: timelineId ?? '',
-    signalIndexName: null,
-  });
+}> = ({ data, timelineId, onCacheLoad, eventId }) => {
+  const { loading, error, alertIds } = useAlertPrevalenceFromProcessTree(eventId, timelineId);
 
   useEffect(() => {
     if (alertIds) {

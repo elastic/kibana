@@ -343,6 +343,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       policyResponseTroubleshooting: {
         full_disk_access: `${SECURITY_SOLUTION_DOCS}deploy-elastic-endpoint.html#enable-fda-endpoint`,
         macos_system_ext: `${SECURITY_SOLUTION_DOCS}deploy-elastic-endpoint.html#system-extension-endpoint`,
+        linux_deadlock: `${SECURITY_SOLUTION_DOCS}ts-management.html`,
       },
     },
     query: {
