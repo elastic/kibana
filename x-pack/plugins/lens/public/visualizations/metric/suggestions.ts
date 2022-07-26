@@ -78,6 +78,8 @@ export const getSuggestions: Visualization<MetricVisualizationState>['getSuggest
     state: {
       ...baseSuggestion.state,
       ...accessorMappings,
+      secondaryMetricAccessor: undefined,
+      maxAccessor: undefined,
     },
   };
 

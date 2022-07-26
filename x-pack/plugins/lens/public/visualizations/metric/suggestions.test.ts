@@ -220,6 +220,27 @@ describe('metric suggestions', () => {
         ]);
       });
 
+      test('drops excludes max and secondary metric dimensions from suggestions', () => {
+        const suggestedState = getSuggestions({
+          table: {
+            layerId: 'first',
+            isMultiRow: true,
+            columns: [metricColumn],
+            changeType: 'extended',
+          },
+          state: {
+            layerId: 'first',
+            layerType: layerTypes.DATA,
+            secondaryMetricAccessor: 'some-accessor',
+            maxAccessor: 'some-accessor',
+          } as MetricVisualizationState,
+          keptLayerIds: ['first'],
+        })[0].state;
+
+        expect(suggestedState.secondaryMetricAccessor).toBeUndefined();
+        expect(suggestedState.maxAccessor).toBeUndefined();
+      });
+
       test('no suggestions for tables with both metric and bucket', () => {
         expect(
           getSuggestions({

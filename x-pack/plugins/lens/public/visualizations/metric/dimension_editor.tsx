@@ -208,36 +208,25 @@ function PrimaryMetricEditor(props: Props) {
 
   const hasDynamicColoring = Boolean(state?.palette);
 
-  const canFindDataBounds = Boolean(state.maxAccessor || state.breakdownByAccessor);
-
-  const singleMetricValue = frame.activeData![state.layerId].rows[0]?.[state.metricAccessor!] as
-    | number
-    | undefined;
-
-  const currentMinMax = canFindDataBounds
-    ? getDataBoundsForPalette(
-        {
-          metric: state.metricAccessor!,
-          max: state.maxAccessor,
-          breakdownBy: state.breakdownByAccessor,
-        },
-        frame.activeData?.[state.layerId]
-      )
-    : typeof singleMetricValue === 'undefined'
-    ? { min: DEFAULT_MIN_STOP, max: DEFAULT_MAX_STOP }
-    : singleMetricValue > 0
-    ? { min: 0, max: singleMetricValue * 2 }
-    : { min: singleMetricValue * 2, max: 0 };
+  const startWithPercentPalette = Boolean(state.maxAccessor || state.breakdownByAccessor);
 
   const activePalette = state?.palette || {
     type: 'palette',
-    name: (canFindDataBounds ? defaultPercentagePaletteParams : defaultNumberPaletteParams).name,
+    name: (startWithPercentPalette ? defaultPercentagePaletteParams : defaultNumberPaletteParams)
+      .name,
     params: {
-      ...(canFindDataBounds ? defaultPercentagePaletteParams : defaultNumberPaletteParams),
-      rangeMin: currentMinMax.min,
-      rangeMax: currentMinMax.max,
+      ...(startWithPercentPalette ? defaultPercentagePaletteParams : defaultNumberPaletteParams),
     },
   };
+
+  const currentMinMax = getDataBoundsForPalette(
+    {
+      metric: state.metricAccessor!,
+      max: state.maxAccessor,
+      breakdownBy: state.breakdownByAccessor,
+    },
+    frame.activeData?.[state.layerId]
+  );
 
   const displayStops = applyPaletteParams(props.paletteService, activePalette, {
     min: currentMinMax.min ?? DEFAULT_MIN_STOP,
