@@ -64,6 +64,64 @@ To configure your preferences for autocomplete, go to
 <<configuring-console, Settings>>.
 
 [float]
+[[console-comments]]
+==== Comments
+
+You can write notes or temporarily disable parts of a request by using double forward slashes
+or pound signs to create single-line comments.
+
+[source,js]
+----------------------------------
+# This request searches all of your indices.
+GET /_search
+{
+  // The query parameter indicates query context.
+  "query": {
+    "match_all": {} // Matches all documents.
+  }
+}
+----------------------------------
+
+You can also use a forward slash followed by an asterisk to mark the beginning of multi-line
+comments. An asterisk followed by a forward slash marks the end.
+
+[source,js]
+----------------------------------
+GET /_search
+{
+  "query": {
+    /*"match_all": {
+      "boost": 1.2
+    }*/
+    "match_none": {}
+  }
+}
+----------------------------------
+
+[float]
+[[console-variables]]
+==== Variables
+
+Click *Variables* to create, edit, and delete variables.
+
+[role="screenshot"]
+image::dev-tools/console/images/variables.png["Variables", width=60%]
+
+You can refer to these variables in the paths and bodies of your requests.
+Each variable can be referenced multiple times.
+
+----------------------------------
+GET ${pathVariable}
+{
+  "query": {
+    "match": {
+      "${bodyNameVariable}": "${bodyValueVariable}"
+    }
+  }
+}
+----------------------------------
+
+[float]
 [[auto-formatting]]
 ==== Auto-formatting
 
