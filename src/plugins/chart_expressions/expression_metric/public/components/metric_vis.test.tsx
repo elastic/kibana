@@ -948,8 +948,8 @@ describe('MetricVisComponent', function () {
                 "stops": Array [],
               },
               Object {
-                "max": 10,
-                "min": 2,
+                "max": 28.984375,
+                "min": 0,
               },
             ],
           ]
