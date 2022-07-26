@@ -13,8 +13,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'settings', 'header', 'home', 'tagManagement']);
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
-  const toasts = getService('toasts');
 
   describe('Kibana Tags Page Accessibility', () => {
     before(async () => {
