@@ -7,8 +7,8 @@
  */
 
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
-import type { SavedObject } from '@kbn/data-plugin/public';
-import type { DataView, DataViewAttributes } from '@kbn/data-views-plugin/public';
+import type {DataViewListItem } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { ISearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { DataTableRecord } from '../../../../types';
@@ -18,7 +18,7 @@ import { SavedSearch } from '../../../../services/saved_searches';
 
 export interface DiscoverLayoutProps {
   indexPattern: DataView;
-  indexPatternList: Array<SavedObject<DataViewAttributes>>;
+  indexPatternList: DataViewListItem[];
   inspectorAdapters: { requests: RequestAdapter };
   navigateTo: (url: string) => void;
   onChangeIndexPattern: (id: string) => void;

@@ -15,6 +15,7 @@ import {
   AggregateQuery,
   Query,
 } from '@kbn/es-query';
+import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { getState } from '../services/discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
