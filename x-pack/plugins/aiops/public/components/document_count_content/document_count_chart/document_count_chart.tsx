@@ -37,7 +37,7 @@ export interface DocumentCountChartPoint {
 }
 
 interface DocumentCountChartProps {
-  brushSelectionUpdateHandler: (d: WindowParameters) => void;
+  brushSelectionUpdateHandler: (d: WindowParameters, force: boolean) => void;
   width?: number;
   chartPoints: DocumentCountChartPoint[];
   chartPointsSplit?: DocumentCountChartPoint[];
@@ -45,6 +45,7 @@ interface DocumentCountChartProps {
   timeRangeLatest: number;
   interval: number;
   changePoint?: ChangePoint;
+  isBrushedCleared: boolean;
 }
 
 const SPEC_ID = 'document_count';
@@ -73,6 +74,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   timeRangeLatest,
   interval,
   changePoint,
+  isBrushedCleared,
 }) => {
   const {
     services: { data, uiSettings, fieldFormats, charts },
@@ -187,7 +189,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
         );
         setOriginalWindowParameters(wp);
         setWindowParameters(wp);
-        brushSelectionUpdateHandler(wp);
+        brushSelectionUpdateHandler(wp, true);
       }
     }
   };
@@ -199,9 +201,16 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   >();
   const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
 
+  useEffect(() => {
+    if (isBrushedCleared && originalWindowParameters !== undefined) {
+      setOriginalWindowParameters(undefined);
+      setWindowParameters(undefined);
+    }
+  }, [isBrushedCleared, originalWindowParameters]);
+
   function onWindowParametersChange(wp: WindowParameters) {
     setWindowParameters(wp);
-    brushSelectionUpdateHandler(wp);
+    brushSelectionUpdateHandler(wp, false);
   }
 
   const [mlBrushWidth, setMlBrushWidth] = useState<number>();

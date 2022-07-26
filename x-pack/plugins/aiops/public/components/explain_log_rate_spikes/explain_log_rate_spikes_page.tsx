@@ -159,6 +159,12 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
     });
   }, [dataService, searchQueryLanguage, searchString]);
 
+  function clearSelection() {
+    setWindowParameters(undefined);
+    setPinnedChangePoint(null);
+    setSelectedChangePoint(null);
+  }
+
   return (
     <EuiPageBody data-test-subj="aiopsIndexPage" paddingSize="none" panelled={false}>
       <EuiFlexGroup gutterSize="none">
@@ -211,12 +217,14 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
             <EuiFlexItem>
               <DocumentCountContent
                 brushSelectionUpdateHandler={setWindowParameters}
+                clearSelectionHandler={clearSelection}
                 documentCountStats={overallDocStats.documentCountStats}
                 documentCountStatsSplit={
                   currentSelectedChangePoint ? selectedDocStats.documentCountStats : undefined
                 }
                 totalCount={totalCount}
                 changePoint={currentSelectedChangePoint}
+                windowParameters={windowParameters}
               />
             </EuiFlexItem>
           )}
