@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
 import { ContextErrorMessage } from './components/context_error_message';
 import { LoadingStatus } from './services/context_query_state';
-import { AppState, isEqualFilters } from './services/context_state';
+import { AppState, GlobalState, isEqualFilters } from './services/context_state';
 import { useColumns } from '../../hooks/use_data_grid_columns';
 import { useContextAppState } from './hooks/use_context_app_state';
 import { useContextAppFetch } from './hooks/use_context_app_fetch';
@@ -52,8 +52,9 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
   /**
    * Context app state
    */
-  const { appState, setAppState } = useContextAppState({ services });
+  const { appState, globalState, setAppState } = useContextAppState({ services });
   const prevAppState = useRef<AppState>();
+  const prevGlobalState = useRef<GlobalState>({ filters: [] });
 
   /**
    * Context fetched state
@@ -85,13 +86,18 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
       fetchSurroundingRows(SurrDocType.PREDECESSORS);
     } else if (prevAppState.current.successorCount !== appState.successorCount) {
       fetchSurroundingRows(SurrDocType.SUCCESSORS);
-    } else if (!isEqualFilters(prevAppState.current.filters, appState.filters)) {
+    } else if (
+      !isEqualFilters(prevAppState.current.filters, appState.filters) ||
+      !isEqualFilters(prevGlobalState.current.filters, globalState.filters)
+    ) {
       fetchContextRows();
     }
 
     prevAppState.current = cloneDeep(appState);
+    prevGlobalState.current = cloneDeep(globalState);
   }, [
     appState,
+    globalState,
     anchorId,
     fetchContextRows,
     fetchAllRows,
@@ -129,7 +135,7 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
     [filterManager, indexPatterns, indexPattern, capabilities]
   );
 
-  const TopNavMenu = navigation.ui.TopNavMenu;
+  const TopNavMenu = navigation.ui.AggregateQueryTopNavMenu;
   const getNavBarProps = () => {
     return {
       appName: 'context',

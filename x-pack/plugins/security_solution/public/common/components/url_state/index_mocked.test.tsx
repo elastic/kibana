@@ -12,7 +12,7 @@ import { HookWrapper } from '../../mock/hook_wrapper';
 import { SecurityPageName } from '../../../app/types';
 
 import { CONSTANTS } from './constants';
-import { getFilterQuery, getMockPropsObj, mockHistory, testCases } from './test_dependencies';
+import { getFilterQuery, getMockPropsObj, mockHistory } from './test_dependencies';
 import type { UrlStateContainerPropTypes } from './types';
 import { useUrlStateHooks } from './use_url_state';
 import { useLocation } from 'react-router-dom';
@@ -77,62 +77,6 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
   });
 
   describe('componentDidUpdate', () => {
-    test('timerange redux state updates the url', () => {
-      mockProps = getMockPropsObj({
-        page: CONSTANTS.networkPage,
-        examplePath: '/network',
-        namespaceLower: 'network',
-        pageName: SecurityPageName.network,
-        detailName: undefined,
-      }).noSearch.definedQuery;
-
-      (useLocation as jest.Mock).mockReturnValue({
-        pathname: mockProps.pathName,
-        search: mockProps.search,
-      });
-
-      const wrapper = mount(
-        <HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />
-      );
-
-      const newUrlState = {
-        ...mockProps.urlState,
-        [CONSTANTS.timerange]: {
-          global: {
-            [CONSTANTS.timerange]: {
-              from: '2020-07-07T08:20:18.966Z',
-              fromStr: 'now-24h',
-              kind: 'relative',
-              to: '2020-07-08T08:20:18.966Z',
-              toStr: 'now',
-            },
-            linkTo: ['timeline'],
-          },
-          timeline: {
-            [CONSTANTS.timerange]: {
-              from: '2020-07-07T08:20:18.966Z',
-              fromStr: 'now-24h',
-              kind: 'relative',
-              to: '2020-07-08T08:20:18.966Z',
-              toStr: 'now',
-            },
-            linkTo: ['global'],
-          },
-        },
-      };
-
-      wrapper.setProps({ hookProps: { ...mockProps, urlState: newUrlState } });
-      wrapper.update();
-      expect(mockHistory.replace.mock.calls[1][0]).toStrictEqual({
-        hash: '',
-        pathname: '/network',
-        search: expect.stringContaining(
-          "timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))"
-        ),
-        state: '',
-      });
-    });
-
     test('timelineID redux state updates the url', () => {
       mockProps = getMockPropsObj({
         page: CONSTANTS.networkPage,
@@ -163,8 +107,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
       expect(mockHistory.replace.mock.calls[1][0]).toStrictEqual({
         hash: '',
         pathname: '/network',
-        search:
-          "?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))&timeline=(id:hello_timeline_id,isOpen:!t)",
+        search: '?timeline=(id:hello_timeline_id,isOpen:!t)',
         state: '',
       });
     });
@@ -324,123 +267,6 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         pathname: DASHBOARDS_PATH,
         search: mockProps.search,
         state: '',
-      });
-    });
-  });
-
-  describe('handleInitialize', () => {
-    describe('Redux updates URL state', () => {
-      describe('Timerange url state is set when not defined on component mount', () => {
-        test.each(testCases)(
-          '%o',
-          (page, namespaceLower, namespaceUpper, examplePath, type, pageName, detailName) => {
-            mockProps = getMockPropsObj({ page, examplePath, namespaceLower, pageName, detailName })
-              .noSearch.undefinedQuery;
-
-            (useLocation as jest.Mock).mockReturnValue({
-              pathname: mockProps.pathName,
-              search: mockProps.search,
-            });
-
-            mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
-
-            expect(mockHistory.replace.mock.calls[0][0]).toEqual({
-              hash: '',
-              pathname: examplePath,
-              search:
-                "?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
-              state: '',
-            });
-          }
-        );
-
-        test('url state is set from redux data when location updates and initialization', () => {
-          mockProps = getMockPropsObj({
-            page: CONSTANTS.hostsPage,
-            examplePath: '/hosts',
-            namespaceLower: 'hosts',
-            pageName: SecurityPageName.hosts,
-            detailName: undefined,
-          }).noSearch.undefinedQuery;
-          const updatedProps = getMockPropsObj({
-            page: CONSTANTS.networkPage,
-            examplePath: '/network',
-            namespaceLower: 'network',
-            pageName: SecurityPageName.network,
-            detailName: undefined,
-          }).noSearch.definedQuery;
-
-          (useLocation as jest.Mock).mockReturnValue({
-            pathname: mockProps.pathName,
-            search: mockProps.search,
-          });
-
-          const wrapper = mount(
-            <HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />
-          );
-
-          expect(mockHistory.replace.mock.calls[0][0].search).toEqual(
-            "?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))"
-          );
-
-          (useLocation as jest.Mock).mockReturnValue({
-            pathname: updatedProps.pathName,
-            search: mockProps.search,
-          });
-
-          wrapper.setProps({ hookProps: updatedProps });
-
-          wrapper.update();
-
-          expect(mockHistory.replace.mock.calls[1][0].search).toEqual(
-            "?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))"
-          );
-        });
-
-        test("doesn't update url state on administration page", () => {
-          mockProps = getMockPropsObj({
-            page: CONSTANTS.hostsPage,
-            examplePath: '/hosts',
-            namespaceLower: 'hosts',
-            pageName: SecurityPageName.hosts,
-            detailName: undefined,
-          }).noSearch.undefinedQuery;
-
-          const updatedMockProps = {
-            ...getMockPropsObj({
-              ...mockProps,
-              page: CONSTANTS.unknown,
-              examplePath: MANAGEMENT_PATH,
-              namespaceLower: 'administration',
-              pageName: SecurityPageName.administration,
-              detailName: undefined,
-            }).noSearch.definedQuery,
-          };
-
-          (useLocation as jest.Mock).mockReturnValue({
-            pathname: mockProps.pathName,
-            search: mockProps.search,
-          });
-
-          const wrapper = mount(
-            <HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />
-          );
-
-          expect(mockHistory.replace.mock.calls[0][0].search).toEqual(
-            "?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))"
-          );
-
-          (useLocation as jest.Mock).mockReturnValue({
-            pathname: updatedMockProps.pathName,
-            search: mockProps.search,
-          });
-
-          wrapper.setProps({ hookProps: updatedMockProps });
-
-          wrapper.update();
-
-          expect(mockHistory.replace.mock.calls[1][0].search).toEqual('?');
-        });
       });
     });
   });

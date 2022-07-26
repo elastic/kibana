@@ -78,4 +78,13 @@ describe('convertRulesFilterToKQL', () => {
       `alert.attributes.params.immutable: true AND alert.attributes.tags:("tag1" AND "tag2") AND (alert.attributes.name: "foo" OR alert.attributes.params.index: "foo" OR alert.attributes.params.threat.tactic.id: "foo" OR alert.attributes.params.threat.tactic.name: "foo" OR alert.attributes.params.threat.technique.id: "foo" OR alert.attributes.params.threat.technique.name: "foo" OR alert.attributes.params.threat.technique.subtechnique.id: "foo" OR alert.attributes.params.threat.technique.subtechnique.name: "foo")`
     );
   });
+
+  it('handles presence of "excludeRuleTypes" properly', () => {
+    const kql = convertRulesFilterToKQL({
+      ...filterOptions,
+      excludeRuleTypes: ['machine_learning', 'saved_query'],
+    });
+
+    expect(kql).toBe('NOT alert.attributes.params.type: ("machine_learning" OR "saved_query")');
+  });
 });

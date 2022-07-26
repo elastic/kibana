@@ -3532,7 +3532,7 @@
                 "id": "def-public.ExpressionRenderHandler.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n      onRenderError,\n      renderMode,\n      syncColors,\n      syncTooltips,\n      interactive,\n      hasCompatibleActions = async () => false,\n    }",
+                "label": "{\n      onRenderError,\n      renderMode,\n      syncColors,\n      syncTooltips,\n      interactive,\n      hasCompatibleActions = async () => false,\n      executionContext,\n    }",
                 "description": [],
                 "signature": [
                   "ExpressionRenderHandlerParams"
@@ -6980,7 +6980,7 @@
               "\nTracks state of execution.\n\n- `not-started` - before .start() method was called.\n- `pending` - immediately after .start() method is called.\n- `result` - when expression execution completed.\n- `error` - when execution failed with error."
             ],
             "signature": [
-              "\"error\" | \"not-started\" | \"pending\" | \"result\""
+              "\"error\" | \"result\" | \"not-started\" | \"pending\""
             ],
             "path": "src/plugins/expressions/common/execution/container.ts",
             "deprecated": false
@@ -7953,7 +7953,7 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
               },
               {
                 "plugin": "canvas",
@@ -7961,11 +7961,11 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/neq.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/neq.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
               },
               {
                 "plugin": "visTypeXy",
@@ -10465,6 +10465,23 @@
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.IInterpreterRenderHandlers.getExecutionContext",
+            "type": "Function",
+            "tags": [],
+            "label": "getExecutionContext",
+            "description": [],
+            "signature": [
+              "() => ",
+              "KibanaExecutionContext",
+              " | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -10783,7 +10800,7 @@
             "label": "padding",
             "description": [],
             "signature": [
-              "\"m\" | \"s\" | \"xs\" | \"l\" | \"xl\" | undefined"
+              "\"s\" | \"m\" | \"l\" | \"xl\" | \"xs\" | undefined"
             ],
             "path": "src/plugins/expressions/public/react_expression_renderer/react_expression_renderer.tsx",
             "deprecated": false
@@ -10991,7 +11008,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"ip\" | \"nested\" | \"conflict\" | \"_source\" | \"attachment\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"histogram\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"null\" | \"ip\" | \"nested\" | \"conflict\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"histogram\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -11584,7 +11601,7 @@
           "\nAllowed column names in a PointSeries"
         ],
         "signature": [
-          "\"color\" | \"size\" | \"text\" | \"y\" | \"x\""
+          "\"color\" | \"size\" | \"x\" | \"y\" | \"text\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/pointseries.ts",
         "deprecated": false,
@@ -11874,10 +11891,6 @@
           "path": "src/plugins/expressions/common/service/expressions_services.ts",
           "deprecated": true,
           "references": [
-            {
-              "plugin": "canvas",
-              "path": "x-pack/plugins/canvas/public/application.tsx"
-            },
             {
               "plugin": "canvas",
               "path": "x-pack/plugins/canvas/server/routes/functions/functions.ts"
@@ -17434,7 +17447,7 @@
               "\nTracks state of execution.\n\n- `not-started` - before .start() method was called.\n- `pending` - immediately after .start() method is called.\n- `result` - when expression execution completed.\n- `error` - when execution failed with error."
             ],
             "signature": [
-              "\"error\" | \"not-started\" | \"pending\" | \"result\""
+              "\"error\" | \"result\" | \"not-started\" | \"pending\""
             ],
             "path": "src/plugins/expressions/common/execution/container.ts",
             "deprecated": false
@@ -18378,7 +18391,7 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
               },
               {
                 "plugin": "canvas",
@@ -18386,11 +18399,11 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/neq.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/neq.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
               },
               {
                 "plugin": "visTypeXy",
@@ -19681,6 +19694,23 @@
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-server.IInterpreterRenderHandlers.getExecutionContext",
+            "type": "Function",
+            "tags": [],
+            "label": "getExecutionContext",
+            "description": [],
+            "signature": [
+              "() => ",
+              "KibanaExecutionContext",
+              " | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -20078,7 +20108,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"ip\" | \"nested\" | \"conflict\" | \"_source\" | \"attachment\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"histogram\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"null\" | \"ip\" | \"nested\" | \"conflict\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"histogram\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -20599,7 +20629,7 @@
           "\nAllowed column names in a PointSeries"
         ],
         "signature": [
-          "\"color\" | \"size\" | \"text\" | \"y\" | \"x\""
+          "\"color\" | \"size\" | \"x\" | \"y\" | \"text\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/pointseries.ts",
         "deprecated": false,
@@ -27875,7 +27905,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"ip\" | \"nested\" | \"conflict\" | \"_source\" | \"attachment\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"histogram\" | \"null\""
+              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"null\" | \"ip\" | \"nested\" | \"conflict\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"histogram\""
             ],
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false
@@ -28753,7 +28783,7 @@
               "\nTracks state of execution.\n\n- `not-started` - before .start() method was called.\n- `pending` - immediately after .start() method is called.\n- `result` - when expression execution completed.\n- `error` - when execution failed with error."
             ],
             "signature": [
-              "\"error\" | \"not-started\" | \"pending\" | \"result\""
+              "\"error\" | \"result\" | \"not-started\" | \"pending\""
             ],
             "path": "src/plugins/expressions/common/execution/container.ts",
             "deprecated": false
@@ -30181,7 +30211,7 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
               },
               {
                 "plugin": "canvas",
@@ -30189,11 +30219,11 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/neq.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/neq.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
               },
               {
                 "plugin": "visTypeXy",
@@ -31066,10 +31096,6 @@
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": true,
             "references": [
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/public/application.tsx"
-              },
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/routes/functions/functions.ts"
@@ -32806,6 +32832,23 @@
             ],
             "path": "src/plugins/expressions/common/expression_renderers/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.IInterpreterRenderHandlers.getExecutionContext",
+            "type": "Function",
+            "tags": [],
+            "label": "getExecutionContext",
+            "description": [],
+            "signature": [
+              "() => ",
+              "KibanaExecutionContext",
+              " | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -33590,7 +33633,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"ip\" | \"nested\" | \"conflict\" | \"_source\" | \"attachment\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"histogram\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"null\" | \"ip\" | \"nested\" | \"conflict\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"histogram\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -34668,7 +34711,7 @@
         "label": "MathArguments",
         "description": [],
         "signature": [
-          "{ expression: string; onError?: \"null\" | \"false\" | \"zero\" | \"throw\" | undefined; }"
+          "{ expression: string; onError?: \"false\" | \"null\" | \"zero\" | \"throw\" | undefined; }"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/math.ts",
         "deprecated": false,
@@ -34758,7 +34801,7 @@
           "\nAllowed column names in a PointSeries"
         ],
         "signature": [
-          "\"color\" | \"size\" | \"text\" | \"y\" | \"x\""
+          "\"color\" | \"size\" | \"x\" | \"y\" | \"text\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/pointseries.ts",
         "deprecated": false,
@@ -34827,19 +34870,19 @@
         "references": [
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/types/state.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/types/state.ts"
-          },
-          {
-            "plugin": "canvas",
             "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/markdown.ts"
           },
           {
             "plugin": "canvas",
             "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/markdown.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/types/state.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/types/state.ts"
           },
           {
             "plugin": "canvas",
@@ -38182,7 +38225,7 @@
                     "label": "types",
                     "description": [],
                     "signature": [
-                      "(\"string\" | \"null\")[]"
+                      "(\"null\" | \"string\")[]"
                     ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/map_column.ts",
                     "deprecated": false
@@ -38304,7 +38347,7 @@
                     "label": "types",
                     "description": [],
                     "signature": [
-                      "(\"number\" | \"string\" | \"boolean\" | \"null\")[]"
+                      "(\"number\" | \"null\" | \"boolean\" | \"string\")[]"
                     ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/map_column.ts",
                     "deprecated": false
@@ -38378,7 +38421,7 @@
                     "label": "types",
                     "description": [],
                     "signature": [
-                      "(\"string\" | \"null\")[]"
+                      "(\"null\" | \"string\")[]"
                     ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/map_column.ts",
                     "deprecated": false
@@ -38674,7 +38717,7 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      "(\"null\" | \"false\" | \"zero\" | \"throw\")[]"
+                      "(\"false\" | \"null\" | \"zero\" | \"throw\")[]"
                     ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/math.ts",
                     "deprecated": false
@@ -38977,7 +39020,7 @@
                     "label": "types",
                     "description": [],
                     "signature": [
-                      "(\"string\" | \"null\")[]"
+                      "(\"null\" | \"string\")[]"
                     ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
                     "deprecated": false
@@ -40274,7 +40317,7 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      "(\"min\" | \"max\" | \"sum\" | \"average\")[]"
+                      "(\"sum\" | \"min\" | \"max\" | \"average\")[]"
                     ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
                     "deprecated": false

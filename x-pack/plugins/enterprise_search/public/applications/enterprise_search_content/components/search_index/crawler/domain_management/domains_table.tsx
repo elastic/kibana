@@ -26,14 +26,14 @@ import { CrawlerDomain } from '../../../../api/crawler/types';
 import { SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH } from '../../../../routes';
 import { IndexNameLogic } from '../../index_name_logic';
 
-import { getDeleteDomainConfirmationMessage } from '../utils';
-
+import { DeleteDomainModalLogic } from './delete_domain_modal_logic';
 import { DomainManagementLogic } from './domain_management_logic';
 
 export const DomainsTable: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);
   const { domains, meta, isLoading } = useValues(DomainManagementLogic);
-  const { deleteDomain, onPaginate } = useActions(DomainManagementLogic);
+  const { onPaginate } = useActions(DomainManagementLogic);
+  const { showModal } = useActions(DeleteDomainModalLogic);
 
   const columns: Array<EuiBasicTableColumn<CrawlerDomain>> = [
     {
@@ -106,9 +106,7 @@ export const DomainsTable: React.FC = () => {
           icon: 'trash',
           color: 'danger',
           onClick: (domain) => {
-            if (window.confirm(getDeleteDomainConfirmationMessage(domain.url))) {
-              deleteDomain(domain);
-            }
+            showModal(domain);
           },
         },
       ],

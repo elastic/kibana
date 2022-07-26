@@ -9,12 +9,19 @@ import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
+import { HttpError, Status } from '../../../../../common/types/api';
+
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 
 import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
+import {
+  DeleteCrawlerDomainApiLogic,
+  DeleteCrawlerDomainArgs,
+  DeleteCrawlerDomainResponse,
+} from '../../api/crawler/delete_crawler_domain_api_logic';
 import {
   CrawlerDomain,
   CrawlerDomainFromServer,
@@ -33,14 +40,17 @@ export interface CrawlerDomainDetailProps {
 
 export interface CrawlerDomainDetailValues {
   deleteLoading: boolean;
+  deleteStatus: Status;
   domain: CrawlerDomain | null;
   domainId: string;
   getLoading: boolean;
 }
 
 interface CrawlerDomainDetailActions {
+  deleteApiError(error: HttpError): HttpError;
+  deleteApiSuccess(response: DeleteCrawlerDomainResponse): DeleteCrawlerDomainResponse;
   deleteDomain(): void;
-  deleteDomainComplete(): void;
+  deleteMakeRequest(args: DeleteCrawlerDomainArgs): DeleteCrawlerDomainArgs;
   fetchDomainData(domainId: string): { domainId: string };
   receiveDomainData(domain: CrawlerDomain): { domain: CrawlerDomain };
   submitDeduplicationUpdate(payload: { enabled?: boolean; fields?: string[] }): {
@@ -56,6 +66,17 @@ export const CrawlerDomainDetailLogic = kea<
   MakeLogicType<CrawlerDomainDetailValues, CrawlerDomainDetailActions>
 >({
   path: ['enterprise_search', 'crawler', 'crawler_domain_detail_logic'],
+  connect: {
+    actions: [
+      DeleteCrawlerDomainApiLogic,
+      [
+        'apiError as deleteApiError',
+        'apiSuccess as deleteApiSuccess',
+        'makeRequest as deleteMakeRequest',
+      ],
+    ],
+    values: [DeleteCrawlerDomainApiLogic, ['status as deleteStatus']],
+  },
   actions: {
     deleteDomain: () => true,
     deleteDomainComplete: () => true,
@@ -67,13 +88,6 @@ export const CrawlerDomainDetailLogic = kea<
     updateSitemaps: (sitemaps) => ({ sitemaps }),
   },
   reducers: ({ props }) => ({
-    deleteLoading: [
-      false,
-      {
-        deleteDomain: () => true,
-        deleteDomainComplete: () => false,
-      },
-    ],
     domain: [
       null,
       {
@@ -94,34 +108,44 @@ export const CrawlerDomainDetailLogic = kea<
       },
     ],
   }),
+  selectors: ({ selectors }) => ({
+    deleteLoading: [
+      () => [selectors.deleteStatus],
+      (deleteStatus: Status) => deleteStatus === Status.LOADING,
+    ],
+  }),
   listeners: ({ actions, values }) => ({
     deleteDomain: async () => {
-      const { http } = HttpLogic.values;
-      const { domain, domainId } = values;
+      const { domain } = values;
       const { indexName } = IndexNameLogic.values;
-      try {
-        await http.delete(
-          `/internal/enterprise_search/indices/${indexName}/crawler/domains/${domainId}`
-        );
-        flashSuccessToast(
-          i18n.translate('xpack.enterpriseSearch.crawler.action.deleteDomain.successMessage', {
-            defaultMessage: "Domain '{domainUrl}' was deleted",
-            values: {
-              domainUrl: domain?.url,
-            },
-          })
-        );
-        KibanaLogic.values.navigateToUrl(
-          generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
-            indexName,
-            tabId: SearchIndexTabId.DOMAIN_MANAGEMENT,
-          })
-        );
-      } catch (e) {
-        flashAPIErrors(e);
+      if (domain) {
+        actions.deleteMakeRequest({
+          domain,
+          indexName,
+        });
       }
-      actions.deleteDomainComplete();
     },
+    deleteApiSuccess: ({ domain }) => {
+      const { indexName } = IndexNameLogic.values;
+      flashSuccessToast(
+        i18n.translate('xpack.enterpriseSearch.crawler.action.deleteDomain.successMessage', {
+          defaultMessage: "Domain '{domainUrl}' was deleted",
+          values: {
+            domainUrl: domain?.url,
+          },
+        })
+      );
+      KibanaLogic.values.navigateToUrl(
+        generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
+          indexName,
+          tabId: SearchIndexTabId.DOMAIN_MANAGEMENT,
+        })
+      );
+    },
+    deleteApiError: (error) => {
+      flashAPIErrors(error);
+    },
+
     fetchDomainData: async ({ domainId }) => {
       const { http } = HttpLogic.values;
       const { indexName } = IndexNameLogic.values;

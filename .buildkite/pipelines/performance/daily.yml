@@ -19,11 +19,11 @@ steps:
     depends_on: build
     key: tests
 
-  # - label: ':shipit: Performance Tests dataset extraction for scalability benchmarking'
-  #   command: .buildkite/scripts/steps/functional/scalability_dataset_extraction.sh
-  #   agents:
-  #     queue: n2-2
-  #   depends_on: tests
+  - label: ':shipit: Performance Tests dataset extraction for scalability benchmarking'
+    command: .buildkite/scripts/steps/functional/scalability_dataset_extraction.sh
+    agents:
+      queue: n2-2
+    depends_on: tests
 
   - label: ':chart_with_upwards_trend: Report performance metrics to ci-stats'
     command: .buildkite/scripts/steps/functional/report_performance_metrics.sh

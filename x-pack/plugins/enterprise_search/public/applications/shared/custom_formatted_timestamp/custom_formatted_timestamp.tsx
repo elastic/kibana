@@ -12,7 +12,7 @@ import { FormattedRelative } from '@kbn/i18n-react';
 import { FormattedDateTime } from '../formatted_date_time';
 
 interface CustomFormattedTimestampProps {
-  timestamp: string;
+  timestamp: string | number | Date;
 }
 
 export const CustomFormattedTimestamp: React.FC<CustomFormattedTimestampProps> = ({

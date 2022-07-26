@@ -165,6 +165,21 @@
       "matchPackagePatterns": ["^@storybook"],
       "labels": ["Team:Operations", "release_note:skip"],
       "enabled": true
+    },
+    {
+      "groupName": "react-query",
+      "packageNames": ["react-query"],
+      "reviewers": [
+        "team:response-ops",
+        "team:kibana-cloud-security-posture",
+        "team:security-asset-management",
+        "team:fleet",
+        "team:awp-platform",
+        "team:security-onboarding-and-lifecycle-mgt"
+      ],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "backport:skip", "ci:all-cypress-suites"],
+      "enabled": true
     }
   ]
 }

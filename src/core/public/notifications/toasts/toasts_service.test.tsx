@@ -12,7 +12,7 @@ import { ToastsService } from './toasts_service';
 import { ToastsApi } from './toasts_api';
 import { overlayServiceMock } from '../../overlays/overlay_service.mock';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
-import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.mock';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 const mockI18n: any = {
   Context: function I18nContext() {

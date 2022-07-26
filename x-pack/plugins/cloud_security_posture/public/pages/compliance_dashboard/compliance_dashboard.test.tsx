@@ -5,15 +5,16 @@
  * 2.0.
  */
 
+import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { render, screen } from '@testing-library/react';
 import { TestProvider } from '../../test/test_provider';
-import { ComplianceDashboard } from '..';
+import { ComplianceDashboard } from '.';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { useCisKubernetesIntegration } from '../../common/api/use_cis_kubernetes_integration';
 import { useComplianceDashboardDataApi } from '../../common/api/use_compliance_dashboard_data_api';
-import { DASHBOARD_PAGE_HEADER, MISSING_FINDINGS_NO_DATA_CONFIG } from './test_subjects';
+import { DASHBOARD_CONTAINER, MISSING_FINDINGS_NO_DATA_CONFIG } from './test_subjects';
 
 jest.mock('../../common/api/use_setup_status_api');
 jest.mock('../../common/api/use_cis_kubernetes_integration');
@@ -195,25 +196,25 @@ describe('<ComplianceDashboard />', () => {
     );
   };
 
-  it('shows noDataConfig when latestFindingsIndexStatus is inapplicable', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() => ({
-      data: { latestFindingsIndexStatus: 'inapplicable' },
-    }));
-    (useComplianceDashboardDataApi as jest.Mock).mockImplementation(() => ({
-      data: undefined,
-    }));
+  it('shows noDataConfig when status is not deployed', () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({ status: 'success', data: 'not-deployed' })
+    );
+    (useComplianceDashboardDataApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({ status: 'success', data: undefined })
+    );
 
     renderComplianceDashboardPage();
 
     expect(screen.queryByTestId(MISSING_FINDINGS_NO_DATA_CONFIG)).toBeInTheDocument();
-    expect(screen.queryByTestId(DASHBOARD_PAGE_HEADER)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(DASHBOARD_CONTAINER)).not.toBeInTheDocument();
   });
 
-  it('shows dashboard when latestFindingsIndexStatus is applicable', () => {
+  it('shows dashboard when there are findings in latest findings index', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() => ({
       isLoading: false,
       isSuccess: true,
-      data: { latestFindingsIndexStatus: 'applicable' },
+      data: { status: 'indexed' },
     }));
 
     (useComplianceDashboardDataApi as jest.Mock).mockImplementation(() => ({
@@ -225,6 +226,6 @@ describe('<ComplianceDashboard />', () => {
     renderComplianceDashboardPage();
 
     expect(screen.queryByTestId(MISSING_FINDINGS_NO_DATA_CONFIG)).not.toBeInTheDocument();
-    expect(screen.getByTestId(DASHBOARD_PAGE_HEADER)).toBeInTheDocument();
+    expect(screen.getByTestId(DASHBOARD_CONTAINER)).toBeInTheDocument();
   });
 });

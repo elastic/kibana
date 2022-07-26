@@ -288,4 +288,9 @@ export interface CoreEditor {
    * Add folds at given ranges
    */
   addFoldsAtRanges(foldRanges: Range[]): void;
+
+  /**
+   * Detach autocomplete
+   */
+  detachCompleter(): void;
 }

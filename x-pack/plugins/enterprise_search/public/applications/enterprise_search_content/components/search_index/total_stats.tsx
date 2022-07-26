@@ -7,45 +7,58 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat } from '@elastic/eui';
+import { useValues } from 'kea';
+
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiStatProps } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+
+import { OverviewLogic } from './overview.logic';
 
 interface TotalStatsProps {
-  lastUpdated: string;
-  documentCount: number;
-  indexHealth: string;
+  additionalItems?: EuiStatProps[];
   ingestionType: string;
+  lastUpdated?: string;
 }
 
-export const TotalStats: React.FC<TotalStatsProps> = ({
-  lastUpdated,
-  documentCount,
-  indexHealth,
-  ingestionType,
-}) => {
+export const TotalStats: React.FC<TotalStatsProps> = ({ ingestionType, additionalItems = [] }) => {
+  const { indexData, isError, isLoading } = useValues(OverviewLogic);
+  const documentCount = indexData?.total.docs.count ?? 0;
+  const hideStats = isLoading || isError;
+
+  const stats: EuiStatProps[] = [
+    {
+      description: i18n.translate(
+        'xpack.enterpriseSearch.content.searchIndex.totalStats.ingestionTypeCardLabel',
+        {
+          defaultMessage: 'Ingestion type',
+        }
+      ),
+      isLoading: hideStats,
+      title: ingestionType,
+    },
+    {
+      description: i18n.translate(
+        'xpack.enterpriseSearch.content.searchIndex.totalStats.documentCountCardLabel',
+        {
+          defaultMessage: 'Document count',
+        }
+      ),
+      isLoading: hideStats,
+      title: documentCount,
+    },
+    ...additionalItems,
+  ];
+
   return (
     <EuiFlexGroup direction="row">
-      <EuiFlexItem>
-        <EuiPanel color="success" hasShadow={false} paddingSize="l">
-          <EuiStat description="Ingestion type" title={ingestionType} />
-        </EuiPanel>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiPanel color="subdued" hasShadow={false} paddingSize="l">
-          <EuiStat description="Document count" title={documentCount} />
-        </EuiPanel>
-      </EuiFlexItem>
-
-      <EuiFlexItem>
-        <EuiPanel color="subdued" hasShadow={false} paddingSize="l">
-          <EuiStat description="Index health" title={indexHealth} />
-        </EuiPanel>
-      </EuiFlexItem>
-
-      <EuiFlexItem>
-        <EuiPanel color="subdued" hasShadow={false} paddingSize="l">
-          <EuiStat description="Last Updated" title={lastUpdated} />
-        </EuiPanel>
-      </EuiFlexItem>
+      {stats.map((item, index) => (
+        <EuiFlexItem key={index}>
+          <EuiPanel color={index === 0 ? 'primary' : 'subdued'} hasShadow={false} paddingSize="l">
+            <EuiStat {...item} />
+          </EuiPanel>
+        </EuiFlexItem>
+      ))}
     </EuiFlexGroup>
   );
 };

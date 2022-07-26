@@ -113,7 +113,7 @@ const registerCreateDataViewRouteFactory =
           const dataView = await createDataView({
             dataViewsService,
             usageCollection,
-            spec: spec as DataViewSpec,
+            spec: { ...spec, name: spec.name || spec.title } as DataViewSpec,
             override: body.override,
             refreshFields: body.refresh_fields,
             counterName: `${req.route.method} ${path}`,

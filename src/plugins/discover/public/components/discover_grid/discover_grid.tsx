@@ -34,12 +34,7 @@ import {
   getLeadControlColumns,
   getVisibleColumns,
 } from './discover_grid_columns';
-import {
-  defaultPageSize,
-  GRID_STYLE,
-  pageSizeArr,
-  toolbarVisibility as toolbarVisibilityDefaults,
-} from './constants';
+import { GRID_STYLE, toolbarVisibility as toolbarVisibilityDefaults } from './constants';
 import { getDisplayedColumns } from '../../utils/columns';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -54,6 +49,7 @@ import type { DataTableRecord, ValueToStringConverter } from '../../types';
 import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { convertValueToString } from '../../utils/convert_value_to_string';
+import { getRowsPerPageOptions, getDefaultRowsPerPage } from '../../utils/rows_per_page';
 
 interface SortObj {
   id: string;
@@ -121,7 +117,7 @@ export interface DiscoverGridProps {
   /**
    * Function to set the expanded document, which is displayed in a flyout
    */
-  setExpandedDoc: (doc?: DataTableRecord) => void;
+  setExpandedDoc?: (doc?: DataTableRecord) => void;
   /**
    * Grid display settings persisted in Elasticsearch (e.g. column width)
    */
@@ -167,6 +163,18 @@ export interface DiscoverGridProps {
    */
   onUpdateRowHeight?: (rowHeight: number) => void;
   /**
+   * Is text base lang mode enabled
+   */
+  isPlainRecord?: boolean;
+  /**
+   * Current state value for rowsPerPage
+   */
+  rowsPerPageState?: number;
+  /**
+   * Update rows per page state
+   */
+  onUpdateRowsPerPage?: (rowsPerPage: number) => void;
+  /**
    * Callback to execute on edit runtime field
    */
   onFieldEdited?: () => void;
@@ -203,6 +211,9 @@ export const DiscoverGrid = ({
   className,
   rowHeightState,
   onUpdateRowHeight,
+  isPlainRecord = false,
+  rowsPerPageState,
+  onUpdateRowsPerPage,
   onFieldEdited,
 }: DiscoverGridProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
@@ -256,17 +267,28 @@ export const DiscoverGrid = ({
   /**
    * Pagination
    */
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: defaultPageSize });
+  const defaultRowsPerPage = useMemo(
+    () => getDefaultRowsPerPage(services.uiSettings),
+    [services.uiSettings]
+  );
+  const currentPageSize =
+    typeof rowsPerPageState === 'number' && rowsPerPageState > 0
+      ? rowsPerPageState
+      : defaultRowsPerPage;
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: currentPageSize,
+  });
   const rowCount = useMemo(() => (displayedRows ? displayedRows.length : 0), [displayedRows]);
   const pageCount = useMemo(
     () => Math.ceil(rowCount / pagination.pageSize),
     [rowCount, pagination]
   );
-  const isOnLastPage = pagination.pageIndex === pageCount - 1;
 
   const paginationObj = useMemo(() => {
-    const onChangeItemsPerPage = (pageSize: number) =>
-      setPagination((paginationData) => ({ ...paginationData, pageSize }));
+    const onChangeItemsPerPage = (pageSize: number) => {
+      onUpdateRowsPerPage?.(pageSize);
+    };
 
     const onChangePage = (pageIndex: number) =>
       setPagination((paginationData) => ({ ...paginationData, pageIndex }));
@@ -277,10 +299,20 @@ export const DiscoverGrid = ({
           onChangePage,
           pageIndex: pagination.pageIndex > pageCount - 1 ? 0 : pagination.pageIndex,
           pageSize: pagination.pageSize,
-          pageSizeOptions: pageSizeArr,
+          pageSizeOptions: getRowsPerPageOptions(pagination.pageSize),
         }
       : undefined;
-  }, [pagination, pageCount, isPaginationEnabled]);
+  }, [pagination, pageCount, isPaginationEnabled, onUpdateRowsPerPage]);
+
+  const isOnLastPage = paginationObj ? paginationObj.pageIndex === pageCount - 1 : false;
+
+  useEffect(() => {
+    setPagination((paginationData) =>
+      paginationData.pageSize === currentPageSize
+        ? paginationData
+        : { ...paginationData, pageSize: currentPageSize }
+    );
+  }, [currentPageSize, setPagination]);
 
   /**
    * Sorting
@@ -364,9 +396,11 @@ export const DiscoverGrid = ({
         isSortEnabled,
         services,
         valueToStringConverter,
+        onFilter,
         editField,
       }),
     [
+      onFilter,
       displayedColumns,
       displayedRows,
       indexPattern,
@@ -401,8 +435,8 @@ export const DiscoverGrid = ({
     return { columns: sortingColumns, onSort: () => {} };
   }, [sortingColumns, onTableSort, isSortEnabled]);
   const lead = useMemo(
-    () => getLeadControlColumns().filter(({ id }) => controlColumnIds.includes(id)),
-    [controlColumnIds]
+    () => getLeadControlColumns(setExpandedDoc).filter(({ id }) => controlColumnIds.includes(id)),
+    [controlColumnIds, setExpandedDoc]
   );
 
   const additionalControls = useMemo(
@@ -512,7 +546,11 @@ export const DiscoverGrid = ({
           data-title={searchTitle}
           data-description={searchDescription}
           data-document-number={displayedRows.length}
-          className={classnames(className, 'dscDiscoverGrid__table')}
+          className={classnames(
+            className,
+            'dscDiscoverGrid__table',
+            isPlainRecord ? 'dscDiscoverGrid__textLanguageMode' : 'dscDiscoverGrid__documentsMode'
+          )}
         >
           <EuiDataGridMemoized
             aria-describedby={randomId}
@@ -576,7 +614,7 @@ export const DiscoverGrid = ({
             </p>
           </EuiScreenReaderOnly>
         )}
-        {expandedDoc && (
+        {setExpandedDoc && expandedDoc && (
           <DiscoverGridFlyout
             indexPattern={indexPattern}
             hit={expandedDoc}

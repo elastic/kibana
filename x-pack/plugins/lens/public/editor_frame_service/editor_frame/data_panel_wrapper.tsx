@@ -11,6 +11,7 @@ import React, { useMemo, memo, useContext, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { Easteregg } from './easteregg';
 import { NativeRenderer } from '../../native_renderer';
 import { DragContext, DragDropIdentifier } from '../../drag_drop';
 import { StateSetter, DatasourceDataPanelProps, DatasourceMap } from '../../types';
@@ -97,6 +98,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
 
   return (
     <>
+      <Easteregg query={externalContext?.query} />
       {Object.keys(props.datasourceMap).length > 1 && (
         <EuiPopover
           id="datasource-switch"

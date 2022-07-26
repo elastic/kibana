@@ -7,6 +7,7 @@
 
 import { PluginSetupContract as CasesSetup } from '@kbn/cases-plugin/server/types';
 import { Plugin, CoreSetup } from '@kbn/core/server';
+import { getExternalReferenceAttachment } from './attachments/external_reference';
 import { getPersistableStateAttachmentServer } from './attachments/persistable_state';
 
 export interface CasesExamplePublicSetupDeps {
@@ -15,6 +16,7 @@ export interface CasesExamplePublicSetupDeps {
 
 export class CasesFixturePlugin implements Plugin<void, void, CasesExamplePublicSetupDeps> {
   public setup(core: CoreSetup, { cases }: CasesExamplePublicSetupDeps) {
+    cases.attachmentFramework.registerExternalReference(getExternalReferenceAttachment());
     cases.attachmentFramework.registerPersistableState(getPersistableStateAttachmentServer());
   }
 

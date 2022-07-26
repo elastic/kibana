@@ -9,11 +9,16 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
 
 import { fetchConnectorByIndexName } from '../connectors/fetch_connectors';
+import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
 
 import { fetchIndex } from './fetch_index';
 
 jest.mock('../connectors/fetch_connectors', () => ({
   fetchConnectorByIndexName: jest.fn(),
+}));
+
+jest.mock('../crawler/fetch_crawlers', () => ({
+  fetchCrawlerByIndexName: jest.fn(),
 }));
 
 describe('fetchIndex lib function', () => {
@@ -54,22 +59,20 @@ describe('fetchIndex lib function', () => {
   };
 
   const result = {
-    index: {
-      aliases: [],
-      health: 'green',
-      name: 'index_name',
-      status: 'open',
-      total: {
-        docs: {
-          count: 100,
-          deleted: 0,
-        },
-        store: {
-          size_in_bytes: '105.47kb',
-        },
+    aliases: [],
+    health: 'green',
+    name: 'index_name',
+    status: 'open',
+    total: {
+      docs: {
+        count: 100,
+        deleted: 0,
       },
-      uuid: '83a81e7e-5955-4255-b008-5d6961203f57',
+      store: {
+        size_in_bytes: '105.47kb',
+      },
     },
+    uuid: '83a81e7e-5955-4255-b008-5d6961203f57',
   };
 
   it('should return data and stats for index if no connector or crawler is present', async () => {
@@ -78,9 +81,7 @@ describe('fetchIndex lib function', () => {
         index_name: { aliases: [], data: 'full index' },
       })
     );
-    mockClient.asCurrentUser.search.mockImplementation(() =>
-      Promise.resolve({ hits: { hits: [] } })
-    );
+    (fetchCrawlerByIndexName as jest.Mock).mockImplementationOnce(() => Promise.resolve(undefined));
     (fetchConnectorByIndexName as jest.Mock).mockImplementationOnce(() =>
       Promise.resolve(undefined)
     );
@@ -96,9 +97,6 @@ describe('fetchIndex lib function', () => {
       Promise.resolve({
         index_name: { aliases: [], data: 'full index' },
       })
-    );
-    mockClient.asCurrentUser.search.mockImplementation(() =>
-      Promise.resolve({ hits: { hits: [] } })
     );
     (fetchConnectorByIndexName as jest.Mock).mockImplementationOnce(() =>
       Promise.resolve({ doc: 'doc' })
@@ -116,17 +114,24 @@ describe('fetchIndex lib function', () => {
         index_name: { aliases: [], data: 'full index' },
       })
     );
+    (fetchCrawlerByIndexName as jest.Mock).mockImplementationOnce(() =>
+      Promise.resolve({
+        id: '1234',
+      })
+    );
     (fetchConnectorByIndexName as jest.Mock).mockImplementationOnce(() =>
       Promise.resolve(undefined)
     );
-    mockClient.asCurrentUser.search.mockImplementation(() => ({
-      hits: { hits: [{ _source: 'source' }] },
-    }));
     mockClient.asCurrentUser.indices.stats.mockImplementation(() => Promise.resolve(statsResponse));
 
     await expect(
       fetchIndex(mockClient as unknown as IScopedClusterClient, 'index_name')
-    ).resolves.toEqual({ ...result, crawler: 'source' });
+    ).resolves.toEqual({
+      ...result,
+      crawler: {
+        id: '1234',
+      },
+    });
   });
   it('should throw a 404 error if the index cannot be fonud', async () => {
     mockClient.asCurrentUser.indices.get.mockImplementation(() => Promise.resolve({}));

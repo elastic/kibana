@@ -8,52 +8,70 @@
 import { i18n } from '@kbn/i18n';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
-import { JOB_FIELD_TYPES } from '../../../../common/constants';
+import { SUPPORTED_FIELD_TYPES } from '../../../../common/constants';
 
 export const getJobTypeLabel = (type: string) => {
   return type in jobTypeLabels ? jobTypeLabels[type as keyof typeof jobTypeLabels] : null;
 };
 
 export const jobTypeLabels = {
-  [JOB_FIELD_TYPES.BOOLEAN]: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.booleanTypeLabel', {
-    defaultMessage: 'Boolean',
-  }),
-  [JOB_FIELD_TYPES.DATE]: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.dateTypeLabel', {
+  [SUPPORTED_FIELD_TYPES.BOOLEAN]: i18n.translate(
+    'xpack.dataVisualizer.fieldTypeIcon.booleanTypeLabel',
+    {
+      defaultMessage: 'Boolean',
+    }
+  ),
+  [SUPPORTED_FIELD_TYPES.DATE]: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.dateTypeLabel', {
     defaultMessage: 'Date',
   }),
-  [JOB_FIELD_TYPES.GEO_POINT]: i18n.translate(
+  [SUPPORTED_FIELD_TYPES.GEO_POINT]: i18n.translate(
     'xpack.dataVisualizer.fieldTypeIcon.geoPointTypeLabel',
     {
       defaultMessage: 'Geo point',
     }
   ),
-  [JOB_FIELD_TYPES.GEO_SHAPE]: i18n.translate(
+  [SUPPORTED_FIELD_TYPES.GEO_SHAPE]: i18n.translate(
     'xpack.dataVisualizer.fieldTypeIcon.geoShapeTypeLabel',
     {
       defaultMessage: 'Geo shape',
     }
   ),
-  [JOB_FIELD_TYPES.IP]: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.ipTypeLabel', {
+  [SUPPORTED_FIELD_TYPES.IP]: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.ipTypeLabel', {
     defaultMessage: 'IP',
   }),
-  [JOB_FIELD_TYPES.KEYWORD]: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.keywordTypeLabel', {
-    defaultMessage: 'Keyword',
-  }),
-  [JOB_FIELD_TYPES.NUMBER]: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.numberTypeLabel', {
-    defaultMessage: 'Number',
-  }),
-  [JOB_FIELD_TYPES.HISTOGRAM]: i18n.translate(
+  [SUPPORTED_FIELD_TYPES.KEYWORD]: i18n.translate(
+    'xpack.dataVisualizer.fieldTypeIcon.keywordTypeLabel',
+    {
+      defaultMessage: 'Keyword',
+    }
+  ),
+  [SUPPORTED_FIELD_TYPES.NUMBER]: i18n.translate(
+    'xpack.dataVisualizer.fieldTypeIcon.numberTypeLabel',
+    {
+      defaultMessage: 'Number',
+    }
+  ),
+  [SUPPORTED_FIELD_TYPES.HISTOGRAM]: i18n.translate(
     'xpack.dataVisualizer.fieldTypeIcon.histogramTypeLabel',
     {
       defaultMessage: 'Histogram',
     }
   ),
-  [JOB_FIELD_TYPES.TEXT]: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.textTypeLabel', {
+  [SUPPORTED_FIELD_TYPES.TEXT]: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.textTypeLabel', {
     defaultMessage: 'Text',
   }),
-  [JOB_FIELD_TYPES.UNKNOWN]: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.unknownTypeLabel', {
-    defaultMessage: 'Unknown',
-  }),
+  [SUPPORTED_FIELD_TYPES.UNKNOWN]: i18n.translate(
+    'xpack.dataVisualizer.fieldTypeIcon.unknownTypeLabel',
+    {
+      defaultMessage: 'Unknown',
+    }
+  ),
+  [SUPPORTED_FIELD_TYPES.VERSION]: i18n.translate(
+    'xpack.dataVisualizer.fieldTypeIcon.versionTypeLabel',
+    {
+      defaultMessage: 'Version',
+    }
+  ),
 };
 
 // convert kibana types to ML Job types
@@ -62,30 +80,35 @@ export const jobTypeLabels = {
 export function kbnTypeToJobType(field: DataViewField) {
   // Return undefined if not one of the supported data visualizer field types.
   let type;
+
   switch (field.type) {
     case KBN_FIELD_TYPES.STRING:
-      type = field.aggregatable ? JOB_FIELD_TYPES.KEYWORD : JOB_FIELD_TYPES.TEXT;
+      type = field.aggregatable ? SUPPORTED_FIELD_TYPES.KEYWORD : SUPPORTED_FIELD_TYPES.TEXT;
+
+      if (field.esTypes?.includes(SUPPORTED_FIELD_TYPES.VERSION)) {
+        type = SUPPORTED_FIELD_TYPES.VERSION;
+      }
       break;
     case KBN_FIELD_TYPES.NUMBER:
-      type = JOB_FIELD_TYPES.NUMBER;
+      type = SUPPORTED_FIELD_TYPES.NUMBER;
       break;
     case KBN_FIELD_TYPES.DATE:
-      type = JOB_FIELD_TYPES.DATE;
+      type = SUPPORTED_FIELD_TYPES.DATE;
       break;
     case KBN_FIELD_TYPES.IP:
-      type = JOB_FIELD_TYPES.IP;
+      type = SUPPORTED_FIELD_TYPES.IP;
       break;
     case KBN_FIELD_TYPES.BOOLEAN:
-      type = JOB_FIELD_TYPES.BOOLEAN;
+      type = SUPPORTED_FIELD_TYPES.BOOLEAN;
       break;
     case KBN_FIELD_TYPES.GEO_POINT:
-      type = JOB_FIELD_TYPES.GEO_POINT;
+      type = SUPPORTED_FIELD_TYPES.GEO_POINT;
       break;
     case KBN_FIELD_TYPES.GEO_SHAPE:
-      type = JOB_FIELD_TYPES.GEO_SHAPE;
+      type = SUPPORTED_FIELD_TYPES.GEO_SHAPE;
       break;
     case KBN_FIELD_TYPES.HISTOGRAM:
-      type = JOB_FIELD_TYPES.HISTOGRAM;
+      type = SUPPORTED_FIELD_TYPES.HISTOGRAM;
       break;
 
     default:

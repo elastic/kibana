@@ -35,14 +35,16 @@ export async function runTypeCheckCli() {
         return !p.disableTypeCheck && (!projectFilter || p.tsConfigPath === projectFilter);
       });
 
-      const { failed } = await buildTsRefs({
-        log,
-        procRunner,
-        verbose: !!flags.verbose,
-        project: projects.length === 1 ? projects[0] : undefined,
-      });
-      if (failed) {
-        throw createFailError('Unable to build TS project refs');
+      if (projects.length > 1 || projects[0].isCompositeProject()) {
+        const { failed } = await buildTsRefs({
+          log,
+          procRunner,
+          verbose: !!flags.verbose,
+          project: projects.length === 1 ? projects[0] : undefined,
+        });
+        if (failed) {
+          throw createFailError('Unable to build TS project refs');
+        }
       }
 
       if (!projects.length) {

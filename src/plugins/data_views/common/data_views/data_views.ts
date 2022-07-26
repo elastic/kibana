@@ -33,11 +33,15 @@ import {
 } from '../types';
 import { META_FIELDS, SavedObject } from '..';
 import { DataViewMissingIndices } from '../lib';
-import { findByTitle } from '../utils';
+import { findByName } from '../utils';
 import { DuplicateDataViewError, DataViewInsufficientAccessError } from '../errors';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 
+/*
+ * Attributes of the data view saved object
+ * @public
+ */
 export type DataViewSavedObjectAttrs = Pick<
   DataViewAttributes,
   'title' | 'type' | 'typeMeta' | 'name'
@@ -123,10 +127,15 @@ export interface DataViewsServiceDeps {
  */
 export interface DataViewsServicePublicMethods {
   /**
-   * Clear the cache of data views.
-   * @param id
+   * Clear the cache of data view saved objects.
    */
-  clearCache: (id?: string | undefined) => void;
+  clearCache: () => void;
+
+  /**
+   * Clear the cache of data view instances.
+   */
+  clearInstanceCache: (id?: string) => void;
+
   /**
    * Create data view based on the provided spec.
    * @param spec - Data view spec.
@@ -396,11 +405,16 @@ export class DataViewsService {
   };
 
   /**
-   * Clear index pattern list cache.
-   * @param id optionally clear a single id
+   * Clear index pattern saved objects cache.
    */
-  clearCache = (id?: string) => {
+  clearCache = () => {
     this.savedObjectsCache = null;
+  };
+
+  /**
+   * Clear index pattern instance cache
+   */
+  clearInstanceCache = (id?: string) => {
     if (id) {
       this.dataViewCache.clear(id);
     } else {
@@ -435,7 +449,7 @@ export class DataViewsService {
    * Get default index pattern id
    */
   getDefaultId = async (): Promise<string | null> => {
-    const defaultIndexPatternId = await this.config.get('defaultIndex');
+    const defaultIndexPatternId = await this.config.get<string | null>('defaultIndex');
     return defaultIndexPatternId ?? null;
   };
 
@@ -463,7 +477,7 @@ export class DataViewsService {
    * @returns FieldSpec[]
    */
   getFieldsForWildcard = async (options: GetFieldsOptions): Promise<FieldSpec[]> => {
-    const metaFields = await this.config.get(META_FIELDS);
+    const metaFields = await this.config.get<string[]>(META_FIELDS);
     return this.apiClient.getFieldsForWildcard({
       pattern: options.pattern,
       metaFields,
@@ -772,12 +786,17 @@ export class DataViewsService {
    * @param skipFetchFields if true, will not fetch fields
    * @returns DataView
    */
-  async create({ id, ...restOfSpec }: DataViewSpec, skipFetchFields = false): Promise<DataView> {
-    const shortDotsEnable = await this.config.get(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
-    const metaFields = await this.config.get(META_FIELDS);
+  async create(
+    { id, name, title, ...restOfSpec }: DataViewSpec,
+    skipFetchFields = false
+  ): Promise<DataView> {
+    const shortDotsEnable = await this.config.get<boolean>(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
+    const metaFields = await this.config.get<string[] | undefined>(META_FIELDS);
 
     const spec = {
       id: id ?? uuid.v4(),
+      title,
+      name: name || title,
       ...restOfSpec,
     };
 
@@ -821,12 +840,13 @@ export class DataViewsService {
     if (!(await this.getCanSave())) {
       throw new DataViewInsufficientAccessError();
     }
-    const dupe = await findByTitle(this.savedObjectsClient, dataView.title);
+    const dupe = await findByName(this.savedObjectsClient, dataView.getName());
+
     if (dupe) {
       if (override) {
         await this.delete(dupe.id);
       } else {
-        throw new DuplicateDataViewError(`Duplicate data view: ${dataView.title}`);
+        throw new DuplicateDataViewError(`Duplicate data view: ${dataView.getName()}`);
       }
     }
 
@@ -870,7 +890,8 @@ export class DataViewsService {
     // get changed keys
     const originalChangedKeys: string[] = [];
     Object.entries(body).forEach(([key, value]) => {
-      if (value !== (originalBody as any)[key]) {
+      const realKey = key as keyof typeof originalBody;
+      if (value !== originalBody[realKey]) {
         originalChangedKeys.push(key);
       }
     });
@@ -897,7 +918,8 @@ export class DataViewsService {
 
           const serverChangedKeys: string[] = [];
           Object.entries(updatedBody).forEach(([key, value]) => {
-            if (value !== (body as any)[key] && value !== (originalBody as any)[key]) {
+            const realKey = key as keyof typeof originalBody;
+            if (value !== body[realKey] && value !== originalBody[realKey]) {
               serverChangedKeys.push(key);
             }
           });
@@ -930,6 +952,7 @@ export class DataViewsService {
 
           // Set the updated response on this object
           serverChangedKeys.forEach((key) => {
+            // FIXME: this overwrites read-only properties
             (indexPattern as any)[key] = (samePattern as any)[key];
           });
           indexPattern.version = samePattern.version;

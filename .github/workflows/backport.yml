@@ -1,7 +1,7 @@
 on:
   pull_request_target:
-    branches: ["main"]
-    types: ["labeled", "closed"]
+    branches: ['main']
+    types: ['labeled', 'closed']
 
 jobs:
   backport:
@@ -16,7 +16,7 @@ jobs:
       )
     steps:
       - name: Backport Action
-        uses: sqren/backport-github-action@v8.8.0
+        uses: sqren/backport-github-action@v8.9.2
         with:
           github_token: ${{secrets.KIBANAMACHINE_TOKEN}}
 

@@ -7,9 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { get } from 'lodash';
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { getCasesDeepLinks } from '@kbn/cases-plugin/public';
+import {
+  CREATE_CASES_CAPABILITY,
+  DELETE_CASES_CAPABILITY,
+  PUSH_CASES_CAPABILITY,
+  READ_CASES_CAPABILITY,
+  UPDATE_CASES_CAPABILITY,
+} from '@kbn/cases-plugin/common';
 import type { AppDeepLink, AppUpdater, Capabilities } from '@kbn/core/public';
 import { AppNavLinkStatus } from '@kbn/core/public';
 import type { Subject, Subscription } from 'rxjs';
@@ -39,6 +45,7 @@ import {
   DASHBOARDS,
   CREATE_NEW_RULE,
   RESPONSE_ACTIONS,
+  THREAT_INTELLIGENCE,
 } from '../translations';
 import {
   OVERVIEW_PATH,
@@ -63,22 +70,39 @@ import {
   KUBERNETES_PATH,
   RULES_CREATE_PATH,
   RESPONSE_ACTIONS_PATH,
+  THREAT_INTELLIGENCE_PATH,
 } from '../../../common/constants';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
-import { subscribeAppLinks } from '../../common/links';
+import { hasCapabilities, subscribeAppLinks } from '../../common/links';
 import type { AppLinkItems } from '../../common/links/types';
 
-const FEATURE = {
+export const FEATURE = {
   general: `${SERVER_APP_ID}.show`,
-  casesRead: `${CASES_FEATURE_ID}.read_cases`,
-  casesCrud: `${CASES_FEATURE_ID}.crud_cases`,
+  casesCreate: `${CASES_FEATURE_ID}.${CREATE_CASES_CAPABILITY}`,
+  casesRead: `${CASES_FEATURE_ID}.${READ_CASES_CAPABILITY}`,
+  casesUpdate: `${CASES_FEATURE_ID}.${UPDATE_CASES_CAPABILITY}`,
+  casesDelete: `${CASES_FEATURE_ID}.${DELETE_CASES_CAPABILITY}`,
+  casesPush: `${CASES_FEATURE_ID}.${PUSH_CASES_CAPABILITY}`,
 } as const;
 
-type Feature = typeof FEATURE[keyof typeof FEATURE];
+type FeatureKey = typeof FEATURE[keyof typeof FEATURE];
+
+/**
+ * The format of defining features supports OR and AND mechanism. To specify features in an OR fashion
+ * they can be defined in a single level array like: [requiredFeature1, requiredFeature2]. If either of these features
+ * is satisfied the deeplinks would be included. To require that the features be AND'd together a second level array
+ * can be specified: [feature1, [feature2, feature3]] this would result in feature1 || (feature2 && feature3). To specify
+ * features that all must be and'd together an example would be: [[feature1, feature2]], this would result in the boolean
+ * operation feature1 && feature2.
+ *
+ * The final format is to specify a single feature, this would be like: features: feature1, which is the same as
+ * features: [feature1]
+ */
+type Features = FeatureKey | Array<FeatureKey | FeatureKey[]>;
 
 type SecuritySolutionDeepLink = AppDeepLink & {
   isPremium?: boolean;
-  features?: Feature[];
+  features?: Features;
   /**
    * Displays deep link when feature flag is enabled.
    */
@@ -242,13 +266,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
             path: `${HOSTS_PATH}/events`,
           },
           {
-            id: SecurityPageName.hostsExternalAlerts,
-            title: i18n.translate('xpack.securitySolution.search.hosts.externalAlerts', {
-              defaultMessage: 'External Alerts',
-            }),
-            path: `${HOSTS_PATH}/externalAlerts`,
-          },
-          {
             id: SecurityPageName.hostsRisk,
             title: i18n.translate('xpack.securitySolution.search.hosts.risk', {
               defaultMessage: 'Host risk',
@@ -295,13 +312,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
               defaultMessage: 'TLS',
             }),
             path: `${NETWORK_PATH}/tls`,
-          },
-          {
-            id: SecurityPageName.networkExternalAlerts,
-            title: i18n.translate('xpack.securitySolution.search.network.externalAlerts', {
-              defaultMessage: 'External Alerts',
-            }),
-            path: `${NETWORK_PATH}/external-alerts`,
           },
           {
             id: SecurityPageName.networkAnomalies,
@@ -353,13 +363,17 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
             }),
             path: `${USERS_PATH}/events`,
           },
-          {
-            id: SecurityPageName.usersExternalAlerts,
-            title: i18n.translate('xpack.securitySolution.search.users.externalAlerts', {
-              defaultMessage: 'External Alerts',
-            }),
-            path: `${USERS_PATH}/externalAlerts`,
-          },
+        ],
+      },
+      {
+        id: SecurityPageName.threatIntelligence,
+        title: THREAT_INTELLIGENCE,
+        path: THREAT_INTELLIGENCE_PATH,
+        navLinkStatus: AppNavLinkStatus.hidden,
+        keywords: [
+          i18n.translate('xpack.securitySolution.search.threatIntelligence', {
+            defaultMessage: 'Threat Intelligence',
+          }),
         ],
       },
       {
@@ -417,11 +431,11 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
             features: [FEATURE.casesRead],
           },
           [SecurityPageName.caseConfigure]: {
-            features: [FEATURE.casesCrud],
+            features: [FEATURE.casesUpdate],
             isPremium: true,
           },
           [SecurityPageName.caseCreate]: {
-            features: [FEATURE.casesCrud],
+            features: [FEATURE.casesCreate],
           },
         },
       }),
@@ -525,14 +539,15 @@ export function getDeepLinks(
   return filterDeepLinks(securitySolutionsDeepLinks);
 }
 
-function hasFeaturesCapability(
-  features: Feature[] | undefined,
+export function hasFeaturesCapability(
+  features: Features | undefined,
   capabilities: Capabilities
 ): boolean {
   if (!features) {
     return true;
   }
-  return features.some((featureKey) => get(capabilities, featureKey, false));
+
+  return hasCapabilities(features, capabilities);
 }
 
 export function isPremiumLicense(licenseType?: LicenseType): boolean {

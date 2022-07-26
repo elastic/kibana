@@ -1,4 +1,4 @@
-/* eslint-disable */
+/* eslint-disable @kbn/eslint/require-license-header,import/no-default-export,@typescript-eslint/adjacent-overload-signatures,@typescript-eslint/unified-signatures */
 
 // Type definitions for expect.js 0.3.1
 // Project: https://github.com/Automattic/expect.js

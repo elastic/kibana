@@ -201,6 +201,8 @@
       "@kbn/coverage-fixtures-plugin/*": ["test/common/fixtures/plugins/coverage/*"],
       "@kbn/newsfeed-fixtures-plugin": ["test/common/fixtures/plugins/newsfeed"],
       "@kbn/newsfeed-fixtures-plugin/*": ["test/common/fixtures/plugins/newsfeed/*"],
+      "@kbn/open-telemetry-instrumented-plugin": ["test/common/fixtures/plugins/otel_metrics"],
+      "@kbn/open-telemetry-instrumented-plugin/*": ["test/common/fixtures/plugins/otel_metrics/*"],
       "@kbn/kbn-tp-run-pipeline-plugin": ["test/interpreter_functional/plugins/kbn_tp_run_pipeline"],
       "@kbn/kbn-tp-run-pipeline-plugin/*": ["test/interpreter_functional/plugins/kbn_tp_run_pipeline/*"],
       "@kbn/app-link-test-plugin": ["test/plugin_functional/plugins/app_link_test"],
@@ -279,6 +281,8 @@
       "@kbn/third-party-lens-navigation-prompt-plugin/*": ["x-pack/examples/third_party_lens_navigation_prompt/*"],
       "@kbn/third-party-vis-lens-example-plugin": ["x-pack/examples/third_party_vis_lens_example"],
       "@kbn/third-party-vis-lens-example-plugin/*": ["x-pack/examples/third_party_vis_lens_example/*"],
+      "@kbn/triggers-actions-ui-example-plugin": ["x-pack/examples/triggers_actions_ui_example"],
+      "@kbn/triggers-actions-ui-example-plugin/*": ["x-pack/examples/triggers_actions_ui_example/*"],
       "@kbn/ui-actions-enhanced-examples-plugin": ["x-pack/examples/ui_actions_enhanced_examples"],
       "@kbn/ui-actions-enhanced-examples-plugin/*": ["x-pack/examples/ui_actions_enhanced_examples/*"],
       "@kbn/actions-plugin": ["x-pack/plugins/actions"],
@@ -403,6 +407,8 @@
       "@kbn/task-manager-plugin/*": ["x-pack/plugins/task_manager/*"],
       "@kbn/telemetry-collection-xpack-plugin": ["x-pack/plugins/telemetry_collection_xpack"],
       "@kbn/telemetry-collection-xpack-plugin/*": ["x-pack/plugins/telemetry_collection_xpack/*"],
+      "@kbn/threat-intelligence-plugin": ["x-pack/plugins/threat_intelligence"],
+      "@kbn/threat-intelligence-plugin/*": ["x-pack/plugins/threat_intelligence/*"],
       "@kbn/timelines-plugin": ["x-pack/plugins/timelines"],
       "@kbn/timelines-plugin/*": ["x-pack/plugins/timelines/*"],
       "@kbn/transform-plugin": ["x-pack/plugins/transform"],
@@ -447,9 +453,6 @@
       "@kbn/stack-management-usage-test-plugin/*": ["x-pack/test/usage_collection/plugins/stack_management_usage_test/*"],
       // END AUTOMATED PACKAGE LISTING
       // Allows for importing from `kibana` package for the exported types.
-      "kibana": ["./kibana"],
-      "kibana/public": ["src/core/public"],
-      "kibana/server": ["src/core/server"],
       "@emotion/core": ["typings/@emotion"],
       "resize-observer-polyfill": ["typings/resize-observer-polyfill"]
     },

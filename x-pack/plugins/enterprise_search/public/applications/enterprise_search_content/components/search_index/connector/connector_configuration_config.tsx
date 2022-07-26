@@ -5,123 +5,60 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
-  EuiButtonEmpty,
+  EuiCodeBlock,
   EuiDescriptionList,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { Status } from '../../../../../../common/types/api';
-import { isNotNullish } from '../../../../../../common/utils/is_not_nullish';
-import { ConnectorConfigurationApiLogic } from '../../../api/connector_package/update_connector_configuration_api_logic';
-import { ConnectorConfiguration } from '../../../api/index/fetch_index_api_logic';
+import { ConnectorConfiguration } from '../../../../../../common/types/connectors';
 
+import { ConnectorConfigurationForm } from './connector_configuration_form';
 import { ConnectorConfigurationLogic } from './connector_configuration_logic';
 
 interface ConnectorConfigurationConfigArgs {
+  apiKey: string | undefined;
   configuration: ConnectorConfiguration;
+  connectorId: string;
   indexId: string;
   indexName: string;
 }
 
 export const ConnectorConfigurationConfig: React.FC<ConnectorConfigurationConfigArgs> = ({
-  configuration,
-  indexId,
-  indexName,
+  apiKey,
+  connectorId,
 }) => {
-  const configLogic = ConnectorConfigurationLogic({ configuration });
-  const { makeRequest } = useActions(ConnectorConfigurationApiLogic);
-  const { status } = useValues(ConnectorConfigurationApiLogic);
-  const { configState, isEditing } = useValues(configLogic);
-  const { setIsEditing } = useActions(configLogic);
-  // The config state used when in editing mode
-  const [editingConfigState, setEditingConfigState] = useState(configuration);
-  useEffect(() => {
-    if (isEditing) {
-      setEditingConfigState(configState);
-    }
-  }, [isEditing]);
+  const { configView, isEditing } = useValues(ConnectorConfigurationLogic);
+  const { setIsEditing } = useActions(ConnectorConfigurationLogic);
 
-  const form = (
-    <EuiForm
-      onSubmit={(event) => {
-        event.preventDefault();
-        makeRequest({
-          configuration: editingConfigState,
-          indexId,
-          indexName,
-        });
-      }}
-      component="form"
-    >
-      {Object.keys(configuration).map((key) => (
-        <EuiFormRow label={configuration[key]?.label ?? ''}>
-          <EuiFieldText
-            value={editingConfigState[key]?.value}
-            disabled={status === Status.LOADING}
-            onChange={(event) => {
-              const result = editingConfigState[key]
-                ? {
-                    ...editingConfigState,
-                    [key]: {
-                      ...editingConfigState[key],
-                      label: editingConfigState[key]?.label ?? '',
-                      value: event.target.value ?? '',
-                    },
-                  }
-                : editingConfigState;
-              setEditingConfigState(result);
-            }}
-          />
-        </EuiFormRow>
-      ))}
-      <EuiFormRow>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiButton type="submit" isLoading={status === Status.LOADING}>
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.configurationConnector.config.submitButton.title',
-                {
-                  defaultMessage: 'Save configuration',
-                }
-              )}
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              isDisabled={status === Status.LOADING}
-              onClick={() => {
-                setIsEditing(false);
-              }}
-            >
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.configurationConnector.config.cancelEditingButton.title',
-                {
-                  defaultMessage: 'Cancel',
-                }
-              )}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFormRow>
-    </EuiForm>
+  const ymlBlock = (
+    <EuiCodeBlock fontSize="m" paddingSize="m" color="dark" isCopyable>
+      {`${
+        apiKey
+          ? `elasticsearch:
+  api_key: "${apiKey}"
+`
+          : ''
+      }connector_id: "${connectorId}"
+`}
+    </EuiCodeBlock>
   );
 
-  const displayList = Object.values(configState)
-    .filter(isNotNullish)
-    .map(({ label, value }) => ({ description: value ?? '--', title: label }));
+  const displayList = configView.map(({ label, value }) => ({
+    description: value ?? '--',
+    title: label,
+  }));
+
   const display = (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
@@ -144,7 +81,6 @@ export const ConnectorConfigurationConfig: React.FC<ConnectorConfigurationConfig
     </EuiFlexGroup>
   );
 
-  const fields = isEditing ? form : display;
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
@@ -158,7 +94,22 @@ export const ConnectorConfigurationConfig: React.FC<ConnectorConfigurationConfig
           )}
         </EuiText>
       </EuiFlexItem>
-      <EuiFlexItem>{displayList.length > 0 && fields}</EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText size="s">
+          {i18n.translate(
+            'xpack.enterpriseSearch.content.indices.configurationConnector.yml.description',
+            {
+              defaultMessage:
+                'Use this YAML sample with your Elastic API key and Connector id to get going faster',
+            }
+          )}
+        </EuiText>
+        <EuiSpacer />
+        {ymlBlock}
+      </EuiFlexItem>
+      <EuiFlexItem>
+        {isEditing ? <ConnectorConfigurationForm /> : displayList.length > 0 && display}
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

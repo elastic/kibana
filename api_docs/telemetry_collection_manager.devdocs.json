@@ -72,7 +72,7 @@
             "label": "esClient",
             "description": [],
             "signature": [
-              "{ eql: ",
+              "{ name: string | symbol; transform: ",
               "default",
               "; search: { <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
@@ -106,7 +106,11 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; create: { <TDocument = unknown>(this: That, params: ",
+              "<TDocument, TAggregations>>; }; cluster: ",
+              "default",
+              "; eql: ",
+              "default",
+              "; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument> | ",
               "CreateRequest",
@@ -136,7 +140,7 @@
               "default",
               "; security: ",
               "default",
-              "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
+              "; index: { <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
               "<TDocument> | ",
               "IndexRequest",
@@ -336,9 +340,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ClearScrollResponse",
-              ">; }; cluster: ",
-              "default",
-              "; count: { (this: That, params?: ",
+              ">; }; count: { (this: That, params?: ",
               "CountRequest",
               " | ",
               "CountRequest",
@@ -1202,8 +1204,6 @@
               "TermvectorsResponse",
               ">; }; textStructure: ",
               "default",
-              "; transform: ",
-              "default",
               "; updateByQuery: { (this: That, params: ",
               "UpdateByQueryRequest",
               " | ",
@@ -1904,7 +1904,26 @@
       "type": "Interface",
       "tags": [],
       "label": "TelemetryCollectionManagerPluginSetup",
-      "description": [],
+      "description": [
+        "\nPublic contract coming from the setup method."
+      ],
+      "signature": [
+        {
+          "pluginId": "telemetryCollectionManager",
+          "scope": "server",
+          "docId": "kibTelemetryCollectionManagerPluginApi",
+          "section": "def-server.TelemetryCollectionManagerPluginSetup",
+          "text": "TelemetryCollectionManagerPluginSetup"
+        },
+        " extends ",
+        {
+          "pluginId": "telemetryCollectionManager",
+          "scope": "server",
+          "docId": "kibTelemetryCollectionManagerPluginApi",
+          "section": "def-server.TelemetryCollectionManagerPluginStart",
+          "text": "TelemetryCollectionManagerPluginStart"
+        }
+      ],
       "path": "src/plugins/telemetry_collection_manager/server/types.ts",
       "deprecated": false,
       "children": [
@@ -1942,50 +1961,6 @@
             }
           ],
           "returnComment": []
-        },
-        {
-          "parentPluginId": "telemetryCollectionManager",
-          "id": "def-server.TelemetryCollectionManagerPluginSetup.getOptInStats",
-          "type": "Function",
-          "tags": [],
-          "label": "getOptInStats",
-          "description": [],
-          "signature": [
-            "{ (optInStatus: boolean, config: ",
-            "UnencryptedStatsGetterConfig",
-            "): Promise<{ clusterUuid: string; stats: ",
-            "OptInStatsPayload",
-            "; }[]>; (optInStatus: boolean, config: ",
-            "EncryptedStatsGetterConfig",
-            "): Promise<{ clusterUuid: string; stats: string; }[]>; }"
-          ],
-          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-          "deprecated": false
-        },
-        {
-          "parentPluginId": "telemetryCollectionManager",
-          "id": "def-server.TelemetryCollectionManagerPluginSetup.getStats",
-          "type": "Function",
-          "tags": [],
-          "label": "getStats",
-          "description": [],
-          "signature": [
-            "{ (config: ",
-            "UnencryptedStatsGetterConfig",
-            "): Promise<{ clusterUuid: string; stats: ",
-            {
-              "pluginId": "telemetryCollectionManager",
-              "scope": "server",
-              "docId": "kibTelemetryCollectionManagerPluginApi",
-              "section": "def-server.UsageStatsPayload",
-              "text": "UsageStatsPayload"
-            },
-            "; }[]>; (config: ",
-            "EncryptedStatsGetterConfig",
-            "): Promise<{ clusterUuid: string; stats: string; }[]>; }"
-          ],
-          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-          "deprecated": false
         }
       ],
       "lifecycle": "setup",
@@ -1997,7 +1972,9 @@
       "type": "Interface",
       "tags": [],
       "label": "TelemetryCollectionManagerPluginStart",
-      "description": [],
+      "description": [
+        "\nPublic contract coming from the start method."
+      ],
       "path": "src/plugins/telemetry_collection_manager/server/types.ts",
       "deprecated": false,
       "children": [
@@ -2007,7 +1984,9 @@
           "type": "Function",
           "tags": [],
           "label": "getOptInStats",
-          "description": [],
+          "description": [
+            "\nFetches the minimum piece of data to report when Opting IN or OUT."
+          ],
           "signature": [
             "{ (optInStatus: boolean, config: ",
             "UnencryptedStatsGetterConfig",
@@ -2026,7 +2005,9 @@
           "type": "Function",
           "tags": [],
           "label": "getStats",
-          "description": [],
+          "description": [
+            "\nFetches the Snapshot telemetry report."
+          ],
           "signature": [
             "{ (config: ",
             "UnencryptedStatsGetterConfig",
@@ -2044,6 +2025,23 @@
           ],
           "path": "src/plugins/telemetry_collection_manager/server/types.ts",
           "deprecated": false
+        },
+        {
+          "parentPluginId": "telemetryCollectionManager",
+          "id": "def-server.TelemetryCollectionManagerPluginStart.shouldGetTelemetry",
+          "type": "Function",
+          "tags": [],
+          "label": "shouldGetTelemetry",
+          "description": [
+            "\nIs it OK to fetch telemetry?\n\nIt should be called before calling `getStats` or `getOptInStats` to validate that Kibana is in a healthy state\nto attempt to fetch the Telemetry report."
+          ],
+          "signature": [
+            "() => Promise<boolean>"
+          ],
+          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+          "deprecated": false,
+          "children": [],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",

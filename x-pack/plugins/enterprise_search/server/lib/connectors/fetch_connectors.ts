@@ -5,21 +5,22 @@
  * 2.0.
  */
 
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core/server';
 
 import { CONNECTORS_INDEX } from '../..';
-import { isNotNullish } from '../../../common/utils/is_not_nullish';
+import { Connector, ConnectorDocument } from '../../../common/types/connectors';
 import { setupConnectorsIndices } from '../../index_management/setup_indices';
 
-import { Connector, ConnectorWithId } from '../../types/connector';
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
+import { fetchAll } from '../fetch_all';
 
 export const fetchConnectorById = async (
   client: IScopedClusterClient,
   connectorId: string
-): Promise<ConnectorWithId | undefined> => {
+): Promise<Connector | undefined> => {
   try {
-    const connectorResult = await client.asCurrentUser.get<Connector>({
+    const connectorResult = await client.asCurrentUser.get<ConnectorDocument>({
       id: connectorId,
       index: CONNECTORS_INDEX,
     });
@@ -37,11 +38,11 @@ export const fetchConnectorById = async (
 export const fetchConnectorByIndexName = async (
   client: IScopedClusterClient,
   indexName: string
-): Promise<ConnectorWithId | undefined> => {
+): Promise<Connector | undefined> => {
   try {
-    const connectorResult = await client.asCurrentUser.search<Connector>({
+    const connectorResult = await client.asCurrentUser.search<ConnectorDocument>({
       index: CONNECTORS_INDEX,
-      query: { term: { 'index_name.keyword': indexName } },
+      query: { term: { index_name: indexName } },
     });
     const result = connectorResult.hits.hits[0]?._source
       ? {
@@ -58,29 +59,16 @@ export const fetchConnectorByIndexName = async (
   }
 };
 
-export const fetchConnectors = async (client: IScopedClusterClient): Promise<ConnectorWithId[]> => {
+export const fetchConnectors = async (
+  client: IScopedClusterClient,
+  indexNames?: string[]
+): Promise<Connector[]> => {
+  const query: QueryDslQueryContainer = indexNames
+    ? { terms: { index_name: indexNames } }
+    : { match_all: {} };
+
   try {
-    const connectorResult = await client.asCurrentUser.search<Connector>({
-      from: 0,
-      index: CONNECTORS_INDEX,
-      query: { match_all: {} },
-      size: 1000,
-    });
-    let connectors = connectorResult.hits.hits;
-    let length = connectors.length;
-    while (length >= 1000) {
-      const newConnectorResult = await client.asCurrentUser.search<Connector>({
-        from: 0,
-        index: CONNECTORS_INDEX,
-        query: { match_all: {} },
-        size: 1000,
-      });
-      connectors = connectors.concat(newConnectorResult.hits.hits);
-      length = newConnectorResult.hits.hits.length;
-    }
-    return connectors
-      .map(({ _source, _id }) => (_source ? { ..._source, id: _id } : undefined))
-      .filter(isNotNullish);
+    return await fetchAll<Connector>(client, CONNECTORS_INDEX, query);
   } catch (error) {
     if (isIndexNotFoundException(error)) {
       await setupConnectorsIndices(client.asCurrentUser);

@@ -20,12 +20,24 @@ import {
   TestProviders,
 } from '../../common/mock';
 import { inputsActions } from '../../common/store/inputs';
-import { setSearchBarFilter } from '../../common/store/inputs/actions';
+import {
+  setSearchBarFilter,
+  setAbsoluteRangeDatePicker,
+  setRelativeRangeDatePicker,
+} from '../../common/store/inputs/actions';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { Filter } from '@kbn/es-query';
 import { createStore } from '../../common/store';
+import type { TimeRange, UrlInputsModel } from '../../common/store/inputs/model';
+import { SecurityPageName } from '../types';
 
 jest.mock('../../common/store/inputs/actions');
+
+const mockRouteSpy = jest.fn().mockReturnValue([{ pageName: 'hosts' }]);
+
+jest.mock('../../common/utils/route/use_route_spy', () => ({
+  useRouteSpy: () => mockRouteSpy(),
+}));
 
 const DummyComponent = ({ children }: { children: React.ReactNode }) => <>{children}</>;
 
@@ -51,8 +63,13 @@ jest.mock('../../common/utils/global_query_string', () => {
 jest.mock('../../common/components/drag_and_drop/drag_drop_context_wrapper', () => ({
   DragDropContextWrapper: DummyComponent,
 }));
+
 jest.mock('./template_wrapper', () => ({
   SecuritySolutionTemplateWrapper: DummyComponent,
+}));
+const DATE_TIME_NOW = '2020-01-01T00:00:00.000Z';
+jest.mock('../../common/components/super_date_picker', () => ({
+  formatDate: (date: string) => DATE_TIME_NOW,
 }));
 
 jest.mock('react-router-dom', () => {
@@ -102,6 +119,9 @@ jest.mock('../../common/lib/kibana', () => {
         },
       },
     }),
+    KibanaServices: {
+      get: jest.fn(() => ({ uiSettings: { get: () => ({ from: 'now-24h', to: 'now' }) } })),
+    },
   };
 });
 
@@ -118,6 +138,7 @@ jest.mock('react-redux', () => {
 describe('HomePage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedUseInitializeUrlParam.mockImplementation(jest.fn());
     mockedFilterManager.setFilters([]);
   });
 
@@ -289,6 +310,213 @@ describe('HomePage', () => {
           },
         },
       ]);
+    });
+  });
+
+  describe('Timerange', () => {
+    it('sets global absolute timerange initial value in the store', () => {
+      const timerange: TimeRange = {
+        from: '2020-07-07T08:20:18.966Z',
+        fromStr: undefined,
+        kind: 'absolute',
+        to: '2020-07-08T08:20:18.966Z',
+        toStr: undefined,
+      };
+
+      const state: UrlInputsModel = {
+        global: {
+          [CONSTANTS.timerange]: timerange,
+          linkTo: ['timeline'],
+        },
+        timeline: {
+          [CONSTANTS.timerange]: timerange,
+          linkTo: ['global'],
+        },
+      };
+
+      mockUseInitializeUrlParam(CONSTANTS.timerange, state);
+
+      render(
+        <TestProviders>
+          <HomePage onAppLeave={jest.fn()} setHeaderActionMenu={jest.fn()}>
+            <span />
+          </HomePage>
+        </TestProviders>
+      );
+
+      expect(setAbsoluteRangeDatePicker).toHaveBeenCalledWith({
+        from: timerange.from,
+        to: timerange.to,
+        kind: timerange.kind,
+        id: 'global',
+      });
+
+      expect(setAbsoluteRangeDatePicker).toHaveBeenCalledWith({
+        from: timerange.from,
+        to: timerange.to,
+        kind: timerange.kind,
+        id: 'timeline',
+      });
+    });
+
+    it('sets updated relative timerange initial value in the store', () => {
+      const timerange: TimeRange = {
+        from: '2019-01-01T00:00:00.000Z',
+        fromStr: 'now-1d/d',
+        kind: 'relative',
+        to: '2019-01-01T00:00:00.000Z',
+        toStr: 'now-1d/d',
+      };
+
+      const state: UrlInputsModel = {
+        global: {
+          [CONSTANTS.timerange]: timerange,
+          linkTo: ['timeline'],
+        },
+        timeline: {
+          [CONSTANTS.timerange]: timerange,
+          linkTo: ['global'],
+        },
+      };
+
+      mockUseInitializeUrlParam(CONSTANTS.timerange, state);
+
+      render(
+        <TestProviders>
+          <HomePage onAppLeave={jest.fn()} setHeaderActionMenu={jest.fn()}>
+            <span />
+          </HomePage>
+        </TestProviders>
+      );
+
+      expect(setRelativeRangeDatePicker).toHaveBeenCalledWith({
+        ...timerange,
+        to: DATE_TIME_NOW,
+        from: DATE_TIME_NOW,
+        id: 'global',
+      });
+
+      expect(setRelativeRangeDatePicker).toHaveBeenCalledWith({
+        ...timerange,
+        to: DATE_TIME_NOW,
+        from: DATE_TIME_NOW,
+        id: 'timeline',
+      });
+    });
+
+    it('update timerange when navigating to alerts page', () => {
+      const timerange: TimeRange = {
+        from: '2019-01-01T00:00:00.000Z',
+        fromStr: 'now-1d/d',
+        kind: 'relative',
+        to: '2019-01-01T00:00:00.000Z',
+        toStr: 'now-1d/d',
+      };
+
+      const mockstate = {
+        ...mockGlobalState,
+        inputs: {
+          ...mockGlobalState.inputs,
+          global: {
+            ...mockGlobalState.inputs.global,
+            timerange,
+          },
+          timeline: {
+            ...mockGlobalState.inputs.timeline,
+            timerange,
+          },
+        },
+      };
+
+      const { storage } = createSecuritySolutionStorageMock();
+      const mockStore = createStore(mockstate, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+
+      const TestComponent = () => (
+        <TestProviders store={mockStore}>
+          <HomePage onAppLeave={jest.fn()} setHeaderActionMenu={jest.fn()}>
+            <span />
+          </HomePage>
+        </TestProviders>
+      );
+
+      const { rerender } = render(<TestComponent />);
+      jest.clearAllMocks();
+
+      // simulate page navigation
+      mockRouteSpy.mockReturnValueOnce([{ pageName: SecurityPageName.alerts }]);
+      rerender(<TestComponent />);
+
+      expect(setRelativeRangeDatePicker).toHaveBeenCalledWith({
+        ...timerange,
+        to: DATE_TIME_NOW,
+        from: DATE_TIME_NOW,
+        id: 'global',
+      });
+
+      expect(setRelativeRangeDatePicker).toHaveBeenCalledWith({
+        ...timerange,
+        to: DATE_TIME_NOW,
+        from: DATE_TIME_NOW,
+        id: 'timeline',
+      });
+    });
+
+    it('does not update timerange when navigating to hosts page', () => {
+      const timerange: TimeRange = {
+        from: '2019-01-01T00:00:00.000Z',
+        fromStr: 'now-1d/d',
+        kind: 'relative',
+        to: '2019-01-01T00:00:00.000Z',
+        toStr: 'now-1d/d',
+      };
+
+      const mockstate = {
+        ...mockGlobalState,
+        inputs: {
+          ...mockGlobalState.inputs,
+          global: {
+            ...mockGlobalState.inputs.global,
+            timerange,
+          },
+          timeline: {
+            ...mockGlobalState.inputs.timeline,
+            timerange,
+          },
+        },
+      };
+
+      const { storage } = createSecuritySolutionStorageMock();
+      const mockStore = createStore(mockstate, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+
+      const TestComponent = () => (
+        <TestProviders store={mockStore}>
+          <HomePage onAppLeave={jest.fn()} setHeaderActionMenu={jest.fn()}>
+            <span />
+          </HomePage>
+        </TestProviders>
+      );
+
+      // mockedUseInitializeUrlParam.mockImplementation(jest.fn());
+      const { rerender } = render(<TestComponent />);
+      jest.clearAllMocks();
+
+      // simulate page navigation
+      mockRouteSpy.mockReturnValueOnce([{ pageName: SecurityPageName.hosts }]);
+      rerender(<TestComponent />);
+
+      expect(setRelativeRangeDatePicker).not.toHaveBeenCalledWith({
+        ...timerange,
+        to: DATE_TIME_NOW,
+        from: DATE_TIME_NOW,
+        id: 'global',
+      });
+
+      expect(setRelativeRangeDatePicker).not.toHaveBeenCalledWith({
+        ...timerange,
+        to: DATE_TIME_NOW,
+        from: DATE_TIME_NOW,
+        id: 'timeline',
+      });
     });
   });
 });

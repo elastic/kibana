@@ -27,6 +27,7 @@ import { ISearchSource } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { RecordRawType } from '../application/main/hooks/use_saved_search';
 import { buildDataTableRecord } from '../utils/build_data_record';
 import { DataTableRecord } from '../types';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
@@ -52,6 +53,8 @@ import { SortOrder } from '../components/doc_table/components/table_header/helpe
 import { VIEW_MODE } from '../components/view_mode_toggle';
 import { updateSearchSource } from './utils/update_search_source';
 import { FieldStatisticsTable } from '../application/main/components/field_stats_table';
+import { getRawRecordType } from '../application/main/utils/get_raw_record_type';
+import { fetchSql } from '../application/main/utils/fetch_sql';
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {
@@ -65,6 +68,7 @@ export type SearchProps = Partial<DiscoverGridProps> &
     totalHitCount?: number;
     onMoveColumn?: (column: string, index: number) => void;
     onUpdateRowHeight?: (rowHeight?: number) => void;
+    onUpdateRowsPerPage?: (rowsPerPage?: number) => void;
   };
 
 interface SearchEmbeddableConfig {
@@ -139,7 +143,12 @@ export class SavedSearchEmbeddable
       if (titleChanged) {
         this.panelTitle = this.output.title || '';
       }
-      if (this.searchProps && (titleChanged || this.isFetchRequired(this.searchProps))) {
+      if (
+        this.searchProps &&
+        (titleChanged ||
+          this.isFetchRequired(this.searchProps) ||
+          this.isInputChangedAndRerenderRequired(this.searchProps))
+      ) {
         this.pushContainerStateParamsToProps(this.searchProps);
       }
     });
@@ -198,8 +207,36 @@ export class SavedSearchEmbeddable
         }
       : child;
 
+    const query = this.savedSearch.searchSource.getField('query');
+    const recordRawType = getRawRecordType(query);
+    const useSql = recordRawType === RecordRawType.PLAIN;
+
     try {
-      // Make the request
+      // Request SQL data
+      if (useSql && query) {
+        const result = await fetchSql(
+          this.savedSearch.searchSource.getField('query')!,
+          this.services.indexPatterns,
+          this.services.data,
+          this.services.expressions,
+          this.input.filters,
+          this.input.query
+        );
+        this.updateOutput({
+          ...this.getOutput(),
+          loading: false,
+        });
+
+        this.searchProps!.rows = result;
+        this.searchProps!.totalHitCount = result.length;
+        this.searchProps!.isLoading = false;
+        this.searchProps!.isPlainRecord = true;
+        this.searchProps!.showTimeCol = false;
+        this.searchProps!.isSortEnabled = false;
+        return;
+      }
+
+      // Request document data
       const { rawResponse: resp } = await lastValueFrom(
         searchSource.fetch$({
           abortSignal: this.abortController.signal,
@@ -302,7 +339,7 @@ export class SavedSearchEmbeddable
         });
         this.updateInput({ sort: sortOrderArr });
       },
-      sampleSize: 500,
+      sampleSize: this.services.uiSettings.get(SAMPLE_SIZE_SETTING),
       onFilter: async (field, value, operator) => {
         let filters = generateFilters(
           this.filterManager,
@@ -328,6 +365,10 @@ export class SavedSearchEmbeddable
       rowHeightState: this.input.rowHeight || this.savedSearch.rowHeight,
       onUpdateRowHeight: (rowHeight) => {
         this.updateInput({ rowHeight });
+      },
+      rowsPerPageState: this.input.rowsPerPage || this.savedSearch.rowsPerPage,
+      onUpdateRowsPerPage: (rowsPerPage) => {
+        this.updateInput({ rowsPerPage });
       },
     };
 
@@ -364,6 +405,13 @@ export class SavedSearchEmbeddable
     );
   }
 
+  private isInputChangedAndRerenderRequired(searchProps?: SearchProps) {
+    if (!searchProps) {
+      return false;
+    }
+    return this.input.rowsPerPage !== searchProps.rowsPerPageState;
+  }
+
   private async pushContainerStateParamsToProps(
     searchProps: SearchProps,
     { forceFetch = false }: { forceFetch: boolean } = { forceFetch: false }
@@ -384,6 +432,7 @@ export class SavedSearchEmbeddable
     searchProps.sort = this.input.sort || savedSearchSort;
     searchProps.sharedItemTitle = this.panelTitle;
     searchProps.rowHeightState = this.input.rowHeight || this.savedSearch.rowHeight;
+    searchProps.rowsPerPageState = this.input.rowsPerPage || this.savedSearch.rowsPerPage;
     if (forceFetch || isFetchRequired) {
       this.filtersSearchSource.setField('filter', this.input.filters);
       this.filtersSearchSource.setField('query', this.input.query);

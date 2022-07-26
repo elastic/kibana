@@ -8,6 +8,7 @@
 import * as t from 'io-ts';
 
 import { listArray } from '@kbn/securitysolution-io-ts-list-types';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
   risk_score_mapping,
   threat_query,
@@ -21,6 +22,9 @@ import {
   severity_mapping,
   severity,
 } from '@kbn/securitysolution-io-ts-alerting-types';
+
+import { RuleExecutionSummary } from '../../../../../common/detection_engine/rule_monitoring';
+
 import type {
   SortOrder,
   BulkAction,
@@ -40,7 +44,6 @@ import {
   event_category_override,
   tiebreaker_field,
   threshold,
-  ruleExecutionSummary,
   RelatedIntegrationArray,
   RequiredFieldArray,
   SetupGuide,
@@ -51,6 +54,8 @@ import type {
   PatchRulesSchema,
   UpdateRulesSchema,
 } from '../../../../../common/detection_engine/schemas/request';
+
+import type { BulkActionsDryRunErrCode } from '../../../../../common/constants';
 
 /**
  * Params is an "record", since it is a type of RuleActionParams which is action templates.
@@ -142,6 +147,8 @@ export const RuleSchema = t.intersection([
     license,
     meta: MetaRule,
     machine_learning_job_id: t.array(t.string),
+    new_terms_fields: t.array(t.string),
+    history_window_start: t.string,
     output_index: t.string,
     query: t.string,
     rule_name_override,
@@ -164,7 +171,7 @@ export const RuleSchema = t.intersection([
     exceptions_list: listArray,
     uuid: t.string,
     version: t.number,
-    execution_summary: ruleExecutionSummary,
+    execution_summary: RuleExecutionSummary,
   }),
 ]);
 
@@ -172,19 +179,6 @@ export const RulesSchema = t.array(RuleSchema);
 
 export type Rule = t.TypeOf<typeof RuleSchema>;
 export type Rules = t.TypeOf<typeof RulesSchema>;
-
-export interface RuleError {
-  id?: string;
-  rule_id?: string;
-  error: { status_code: number; message: string };
-}
-
-export type BulkRuleResponse = Array<Rule | RuleError>;
-
-export interface RuleResponseBuckets {
-  rules: Rule[];
-  errors: RuleError[];
-}
 
 export interface PaginationOptions {
   page: number;
@@ -223,6 +217,7 @@ export interface FilterOptions {
   showCustomRules: boolean;
   showElasticRules: boolean;
   tags: string[];
+  excludeRuleTypes?: Type[];
 }
 
 export interface FetchRulesResponse {
@@ -242,6 +237,7 @@ export interface BulkActionProps<Action extends BulkAction> {
   query?: string;
   ids?: string[];
   edit?: BulkActionEditPayload[];
+  isDryRun?: boolean;
 }
 
 export interface BulkActionSummary {
@@ -259,6 +255,7 @@ export interface BulkActionResult {
 export interface BulkActionAggregatedError {
   message: string;
   status_code: number;
+  err_code?: BulkActionsDryRunErrCode;
   rules: Array<{ id: string; name?: string }>;
 }
 

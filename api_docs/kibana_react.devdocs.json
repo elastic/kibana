@@ -1077,18 +1077,6 @@
             "path": "x-pack/plugins/canvas/public/components/home/home.component.tsx"
           },
           {
-            "plugin": "cloudSecurityPosture",
-            "path": "x-pack/plugins/cloud_security_posture/public/components/csp_page_template.tsx"
-          },
-          {
-            "plugin": "cloudSecurityPosture",
-            "path": "x-pack/plugins/cloud_security_posture/public/components/csp_page_template.tsx"
-          },
-          {
-            "plugin": "cloudSecurityPosture",
-            "path": "x-pack/plugins/cloud_security_posture/public/components/csp_page_template.tsx"
-          },
-          {
             "plugin": "enterpriseSearch",
             "path": "x-pack/plugins/enterprise_search/public/applications/shared/version_mismatch/version_mismatch_page.tsx"
           },
@@ -1167,6 +1155,18 @@
           {
             "plugin": "osquery",
             "path": "x-pack/plugins/osquery/public/components/empty_state.tsx"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/home.tsx"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/home.tsx"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/home.tsx"
           }
         ],
         "children": [
@@ -2079,6 +2079,26 @@
           {
             "plugin": "home",
             "path": "src/plugins/home/public/application/components/add_data/add_data.tsx"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/manage_data/manage_data.tsx"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/manage_data/manage_data.tsx"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/manage_data/manage_data.tsx"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/manage_data/manage_data.tsx"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/manage_data/manage_data.tsx"
           }
         ],
         "children": [
@@ -4214,7 +4234,7 @@
         "signature": [
           "Omit<",
           "EuiPageProps",
-          ", \"paddingSize\"> & { template?: \"default\" | \"empty\" | \"centeredBody\" | \"centeredContent\" | undefined; paddingSize?: \"none\" | \"m\" | \"s\" | \"l\" | undefined; pageSideBar?: React.ReactNode; pageSideBarProps?: ",
+          ", \"paddingSize\"> & { template?: \"default\" | \"empty\" | \"centeredBody\" | \"centeredContent\" | undefined; paddingSize?: \"none\" | \"s\" | \"m\" | \"l\" | undefined; pageSideBar?: React.ReactNode; pageSideBarProps?: ",
           "EuiPageSideBarProps",
           " | undefined; pageHeader?: ",
           "EuiPageHeaderProps",
@@ -4250,54 +4270,6 @@
           {
             "plugin": "management",
             "path": "src/plugins/management/public/components/management_app/management_app.tsx"
-          },
-          {
-            "plugin": "cloudSecurityPosture",
-            "path": "x-pack/plugins/cloud_security_posture/public/components/csp_page_template.tsx"
-          },
-          {
-            "plugin": "cloudSecurityPosture",
-            "path": "x-pack/plugins/cloud_security_posture/public/components/csp_page_template.tsx"
-          },
-          {
-            "plugin": "cloudSecurityPosture",
-            "path": "x-pack/plugins/cloud_security_posture/public/components/csp_page_template.tsx"
-          },
-          {
-            "plugin": "cloudSecurityPosture",
-            "path": "x-pack/plugins/cloud_security_posture/public/components/csp_page_template.tsx"
-          },
-          {
-            "plugin": "cloudSecurityPosture",
-            "path": "x-pack/plugins/cloud_security_posture/public/components/csp_page_template.tsx"
-          },
-          {
-            "plugin": "cloudSecurityPosture",
-            "path": "x-pack/plugins/cloud_security_posture/public/components/csp_page_template.tsx"
-          },
-          {
-            "plugin": "cloudSecurityPosture",
-            "path": "x-pack/plugins/cloud_security_posture/public/components/csp_page_template.tsx"
-          },
-          {
-            "plugin": "cloudSecurityPosture",
-            "path": "x-pack/plugins/cloud_security_posture/public/components/csp_page_template.tsx"
-          },
-          {
-            "plugin": "cloudSecurityPosture",
-            "path": "x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_dashboard.tsx"
-          },
-          {
-            "plugin": "cloudSecurityPosture",
-            "path": "x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_dashboard.tsx"
-          },
-          {
-            "plugin": "cloudSecurityPosture",
-            "path": "x-pack/plugins/cloud_security_posture/public/pages/rules/index.tsx"
-          },
-          {
-            "plugin": "cloudSecurityPosture",
-            "path": "x-pack/plugins/cloud_security_posture/public/pages/rules/index.tsx"
           },
           {
             "plugin": "enterpriseSearch",
@@ -4369,13 +4341,7 @@
             "text": "OverlayStart"
           },
           " | undefined; uiSettings?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.IUiSettingsClient",
-            "text": "IUiSettingsClient"
-          },
+          "IUiSettingsClient",
           " | undefined; fatalErrors?: ",
           "FatalErrorsSetup",
           " | undefined; deprecations?: ",

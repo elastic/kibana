@@ -20,10 +20,10 @@ jest.doMock('./plugins/plugins_service', () => ({
   PluginsService: jest.fn(() => mockPluginsService),
 }));
 
-import { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 export const mockElasticsearchService = elasticsearchServiceMock.create();
-jest.doMock('./elasticsearch/elasticsearch_service', () => ({
+jest.doMock('@kbn/core-elasticsearch-server-internal', () => ({
   ElasticsearchService: jest.fn(() => mockElasticsearchService),
 }));
 
@@ -82,10 +82,10 @@ jest.doMock('@kbn/core-node-server-internal', () => ({
   NodeService: jest.fn(() => mockNodeService),
 }));
 
-import { metricsServiceMock } from './metrics/metrics_service.mock';
+import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
 
 export const mockMetricsService = metricsServiceMock.create();
-jest.doMock('./metrics/metrics_service', () => ({
+jest.doMock('@kbn/core-metrics-server-internal', () => ({
   MetricsService: jest.fn(() => mockMetricsService),
 }));
 

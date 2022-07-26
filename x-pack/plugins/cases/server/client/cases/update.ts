@@ -339,6 +339,7 @@ export const update = async (
           version,
         };
       }),
+      refresh: false,
     });
 
     // If a status update occurred and the case is synced then we need to update all alerts' status

@@ -89,7 +89,6 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
     indexNames,
     skip: querySkip,
     startDate,
-    type,
   });
 
   const getTitle = useCallback(

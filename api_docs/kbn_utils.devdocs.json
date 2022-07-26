@@ -460,7 +460,7 @@
         "label": "isKibanaDistributable",
         "description": [],
         "signature": [
-          "() => any"
+          "() => boolean"
         ],
         "path": "packages/kbn-utils/src/package_json/index.ts",
         "deprecated": false,
@@ -517,23 +517,11 @@
         "tags": [],
         "label": "kibanaPackageJson",
         "description": [],
+        "signature": [
+          "KibanaPackageJson"
+        ],
         "path": "packages/kbn-utils/src/package_json/index.ts",
         "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/utils",
-            "id": "def-server.kibanaPackageJson.Unnamed",
-            "type": "Any",
-            "tags": [],
-            "label": "Unnamed",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "packages/kbn-utils/src/package_json/index.ts",
-            "deprecated": false
-          }
-        ],
         "initialIsOpen": false
       }
     ]

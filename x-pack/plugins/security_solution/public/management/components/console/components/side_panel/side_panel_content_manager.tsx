@@ -6,37 +6,93 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { memo, useMemo } from 'react';
-import { EuiText } from '@elastic/eui';
+import React, { memo, useMemo, useCallback } from 'react';
+import styled from 'styled-components';
+import {
+  EuiText,
+  EuiIcon,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiTitle,
+} from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CommandList } from '../command_list';
 import { useWithCommandList } from '../../hooks/state_selectors/use_with_command_list';
 import { SidePanelContentLayout } from './side_panel_content_layout';
 import { useWithSidePanel } from '../../hooks/state_selectors/use_with_side_panel';
+import { useConsoleStateDispatch } from '../../hooks/state_selectors/use_console_state_dispatch';
+
+const StyledEuiFlexGroup = styled(EuiFlexGroup)`
+  padding-top: ${({ theme: { eui } }) => eui.euiPanelPaddingModifiers.paddingSmall};
+  padding-right: ${({ theme: { eui } }) => eui.euiPanelPaddingModifiers.paddingSmall};
+`;
 
 export const SidePanelContentManager = memo(() => {
+  const dispatch = useConsoleStateDispatch();
   const commands = useWithCommandList();
   const show = useWithSidePanel().show;
+
+  const closeHelpPanel = useCallback(() => {
+    dispatch({
+      type: 'showSidePanel',
+      payload: { show: null },
+    });
+  }, [dispatch]);
 
   const panelHeader: ReactNode = useMemo(() => {
     if (show === 'help') {
       return (
-        <EuiText size="s">
-          <strong>
+        <>
+          <StyledEuiFlexGroup>
+            <EuiFlexItem>
+              <EuiTitle size="s">
+                <h3>
+                  <FormattedMessage
+                    id="xpack.securitySolution.console.sidePanel.helpTitle"
+                    defaultMessage="Help"
+                  />
+                </h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                aria-label="closeSidePanelIcon"
+                iconType="cross"
+                color="text"
+                onClick={closeHelpPanel}
+              />
+            </EuiFlexItem>
+          </StyledEuiFlexGroup>
+          <EuiSpacer size="m" />
+          <EuiText size="s">
             <FormattedMessage
-              id="xpack.securitySolution.console.sidePanel.helpTitle"
-              defaultMessage="Help"
+              id="xpack.securitySolution.console.sidePanel.helpDescription"
+              defaultMessage="To execute response actions {addText} ({icon}) use a comment or a parameter if necessary."
+              values={{
+                icon: <EuiIcon type="plusInCircle" />,
+                addText: (
+                  <strong>
+                    <FormattedMessage
+                      id="xpack.securitySolution.console.sidePanel.helpDescription.addText"
+                      defaultMessage="add to main text bar"
+                    />
+                  </strong>
+                ),
+              }}
             />
-          </strong>
-        </EuiText>
+          </EuiText>
+        </>
       );
     }
     return null;
-  }, [show]);
+  }, [show, closeHelpPanel]);
 
   const panelBody: ReactNode = useMemo(() => {
     if (show === 'help') {
-      return <CommandList commands={commands} />;
+      return <CommandList commands={commands} display="table" />;
     }
 
     return null;

@@ -10,6 +10,7 @@ import { firstValueFrom } from 'rxjs';
 import { camelCase } from 'lodash';
 import type { IConfigService } from '@kbn/config';
 import type { CoreContext } from '@kbn/core-base-server-internal';
+import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
 import type { NodeRoles } from '@kbn/core-node-server';
 import type { Logger } from '@kbn/logging';
 import {
@@ -32,6 +33,10 @@ export interface InternalNodeServicePreboot {
   roles: NodeRoles;
 }
 
+interface PrebootDeps {
+  loggingSystem: ILoggingSystem;
+}
+
 /** @internal */
 export class NodeService {
   private readonly configService: IConfigService;
@@ -42,18 +47,15 @@ export class NodeService {
     this.log = core.logger.get('node');
   }
 
-  public async preboot(): Promise<InternalNodeServicePreboot> {
-    const nodeRoles = await this.getNodeRoles();
-    this.log.info(`Kibana process configured with roles: [${nodeRoles.join(', ')}]`, {
-      service: {
-        // @ts-expect-error Field not available in ECS until 8.4
-        node: { roles: nodeRoles },
-      },
-    });
+  public async preboot({ loggingSystem }: PrebootDeps): Promise<InternalNodeServicePreboot> {
+    const roles = await this.getNodeRoles();
+    // @ts-expect-error Custom ECS field
+    loggingSystem.setGlobalContext({ service: { node: { roles } } });
+    this.log.info(`Kibana process configured with roles: [${roles.join(', ')}]`);
 
     return {
       roles: NODE_ACCEPTED_ROLES.reduce((acc, curr) => {
-        return { ...acc, [camelCase(curr)]: nodeRoles.includes(curr) };
+        return { ...acc, [camelCase(curr)]: roles.includes(curr) };
       }, {} as NodeRoles),
     };
   }

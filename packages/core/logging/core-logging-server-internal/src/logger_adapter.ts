@@ -7,10 +7,11 @@
  */
 
 import { LogRecord, Logger, LogMeta } from '@kbn/logging';
+import { GlobalContext, mergeGlobalContext } from './global_context';
 
 /** @internal */
 export class LoggerAdapter implements Logger {
-  constructor(private logger: Logger) {}
+  constructor(private logger: Logger, private globalContext: GlobalContext = {}) {}
 
   /**
    * The current logger can be updated "on the fly", e.g. when the log config
@@ -24,32 +25,44 @@ export class LoggerAdapter implements Logger {
     this.logger = logger;
   }
 
+  /**
+   * The current record of {@link GlobalContext} that can be updated on the fly.
+   * Any updates via this method will be applied to all subsequent log entries.
+   *
+   * This is not intended for external use, only internally in Kibana
+   *
+   * @internal
+   */
+  public updateGlobalContext(context: GlobalContext) {
+    this.globalContext = context;
+  }
+
   public trace(message: string, meta?: LogMeta): void {
-    this.logger.trace(message, meta);
+    this.logger.trace(message, mergeGlobalContext(this.globalContext, meta));
   }
 
   public debug(message: string, meta?: LogMeta): void {
-    this.logger.debug(message, meta);
+    this.logger.debug(message, mergeGlobalContext(this.globalContext, meta));
   }
 
   public info(message: string, meta?: LogMeta): void {
-    this.logger.info(message, meta);
+    this.logger.info(message, mergeGlobalContext(this.globalContext, meta));
   }
 
   public warn(errorOrMessage: string | Error, meta?: LogMeta): void {
-    this.logger.warn(errorOrMessage, meta);
+    this.logger.warn(errorOrMessage, mergeGlobalContext(this.globalContext, meta));
   }
 
   public error(errorOrMessage: string | Error, meta?: LogMeta): void {
-    this.logger.error(errorOrMessage, meta);
+    this.logger.error(errorOrMessage, mergeGlobalContext(this.globalContext, meta));
   }
 
   public fatal(errorOrMessage: string | Error, meta?: LogMeta): void {
-    this.logger.fatal(errorOrMessage, meta);
+    this.logger.fatal(errorOrMessage, mergeGlobalContext(this.globalContext, meta));
   }
 
   public log(record: LogRecord) {
-    this.logger.log(record);
+    this.logger.log({ ...record, meta: mergeGlobalContext(this.globalContext, record.meta) });
   }
 
   public get(...contextParts: string[]): Logger {

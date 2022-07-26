@@ -133,7 +133,7 @@ export const CaseViewActivity = ({
                 onShowAlertDetails={onShowAlertDetails}
                 onUpdateField={onUpdateField}
                 statusActionButton={
-                  permissions.all ? (
+                  permissions.update ? (
                     <StatusActionButton
                       status={caseData.status}
                       onStatusChanged={changeStatus}
@@ -149,20 +149,20 @@ export const CaseViewActivity = ({
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
         <SeveritySidebarSelector
-          isDisabled={!permissions.all}
+          isDisabled={!permissions.update}
           isLoading={isLoading}
           selectedSeverity={caseData.severity}
           onSeverityChange={onUpdateSeverity}
         />
         <UserList
-          data-test-subj="case-view-user-list-reporter"
+          dataTestSubj="case-view-user-list-reporter"
           email={emailContent}
           headline={i18n.REPORTER}
           users={[caseData.createdBy]}
         />
         {userActionsData?.participants ? (
           <UserList
-            data-test-subj="case-view-user-list-participants"
+            dataTestSubj="case-view-user-list-participants"
             email={emailContent}
             headline={i18n.PARTICIPANTS}
             loading={isLoadingUserActions}

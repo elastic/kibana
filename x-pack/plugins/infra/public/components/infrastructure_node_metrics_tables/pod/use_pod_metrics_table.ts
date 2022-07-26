@@ -20,10 +20,7 @@ import {
   useInfrastructureNodeMetrics,
 } from '../shared';
 
-type PodMetricsField =
-  | 'kubernetes.pod.start_time'
-  | 'kubernetes.pod.cpu.usage.limit.pct'
-  | 'kubernetes.pod.memory.usage.bytes';
+type PodMetricsField = 'kubernetes.pod.cpu.usage.limit.pct' | 'kubernetes.pod.memory.usage.bytes';
 
 const podMetricsQueryConfig: MetricsQueryOptions<PodMetricsField> = {
   sourceFilter: {
@@ -33,10 +30,6 @@ const podMetricsQueryConfig: MetricsQueryOptions<PodMetricsField> = {
   },
   groupByField: ['kubernetes.pod.uid', 'kubernetes.pod.name'],
   metricsMap: {
-    'kubernetes.pod.start_time': {
-      aggregation: 'max',
-      field: 'kubernetes.pod.start_time',
-    },
     'kubernetes.pod.cpu.usage.limit.pct': {
       aggregation: 'avg',
       field: 'kubernetes.pod.cpu.usage.limit.pct',
@@ -54,7 +47,6 @@ const unpackMetric = makeUnpackMetric(metricByField);
 export interface PodNodeMetricsRow {
   id: string;
   name: string;
-  uptime: number | null;
   averageCpuUsagePercent: number | null;
   averageMemoryUsageMegabytes: number | null;
 }
@@ -107,21 +99,14 @@ function rowWithoutMetrics(id: string, name: string) {
   return {
     id,
     name,
-    uptime: null,
     averageCpuUsagePercent: null,
     averageMemoryUsageMegabytes: null,
   };
 }
 
 function calculateMetricAverages(rows: MetricsExplorerRow[]) {
-  const { startTimeValues, averageCpuUsagePercentValues, averageMemoryUsageMegabytesValues } =
+  const { averageCpuUsagePercentValues, averageMemoryUsageMegabytesValues } =
     collectMetricValues(rows);
-
-  let uptime = null;
-  if (startTimeValues.length !== 0) {
-    const startTime = startTimeValues.at(-1);
-    uptime = Date.now() - startTime!;
-  }
 
   let averageCpuUsagePercent = null;
   if (averageCpuUsagePercentValues.length !== 0) {
@@ -136,23 +121,17 @@ function calculateMetricAverages(rows: MetricsExplorerRow[]) {
   }
 
   return {
-    uptime,
     averageCpuUsagePercent,
     averageMemoryUsageMegabytes,
   };
 }
 
 function collectMetricValues(rows: MetricsExplorerRow[]) {
-  const startTimeValues: number[] = [];
   const averageCpuUsagePercentValues: number[] = [];
   const averageMemoryUsageMegabytesValues: number[] = [];
 
   rows.forEach((row) => {
-    const { startTime, averageCpuUsagePercent, averageMemoryUsageMegabytes } = unpackMetrics(row);
-
-    if (startTime !== null) {
-      startTimeValues.push(startTime);
-    }
+    const { averageCpuUsagePercent, averageMemoryUsageMegabytes } = unpackMetrics(row);
 
     if (averageCpuUsagePercent !== null) {
       averageCpuUsagePercentValues.push(averageCpuUsagePercent);
@@ -164,17 +143,13 @@ function collectMetricValues(rows: MetricsExplorerRow[]) {
   });
 
   return {
-    startTimeValues,
     averageCpuUsagePercentValues,
     averageMemoryUsageMegabytesValues,
   };
 }
 
-function unpackMetrics(
-  row: MetricsExplorerRow
-): Omit<PodNodeMetricsRow, 'id' | 'name' | 'uptime'> & { startTime: number | null } {
+function unpackMetrics(row: MetricsExplorerRow): Omit<PodNodeMetricsRow, 'id' | 'name'> {
   return {
-    startTime: unpackMetric(row, 'kubernetes.pod.start_time'),
     averageCpuUsagePercent: unpackMetric(row, 'kubernetes.pod.cpu.usage.limit.pct'),
     averageMemoryUsageMegabytes: unpackMetric(row, 'kubernetes.pod.memory.usage.bytes'),
   };

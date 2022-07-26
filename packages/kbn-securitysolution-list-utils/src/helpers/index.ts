@@ -36,13 +36,14 @@ import {
 } from '@kbn/es-query';
 
 import {
-  EXCEPTION_OPERATORS,
+  ALL_OPERATORS,
   EXCEPTION_OPERATORS_SANS_LISTS,
   doesNotExistOperator,
   existsOperator,
   isNotOperator,
   isOneOfOperator,
   isOperator,
+  DETECTION_ENGINE_EXCEPTION_OPERATORS,
 } from '../autocomplete_operators';
 
 import {
@@ -192,7 +193,7 @@ export const getExceptionOperatorSelect = (item: BuilderEntry): OperatorOption =
     return isOperator;
   } else {
     const operatorType = getOperatorType(item);
-    const foundOperator = EXCEPTION_OPERATORS.find((operatorOption) => {
+    const foundOperator = ALL_OPERATORS.find((operatorOption) => {
       return item.operator === operatorOption.operator && operatorType === operatorOption.type;
     });
 
@@ -687,12 +688,12 @@ export const getOperatorOptions = (
     return isBoolean ? [isOperator] : [isOperator, isOneOfOperator];
   } else if (item.nested != null && listType === 'detection') {
     return isBoolean ? [isOperator, existsOperator] : [isOperator, isOneOfOperator, existsOperator];
+  } else if (isBoolean) {
+    return [isOperator, isNotOperator, existsOperator, doesNotExistOperator];
+  } else if (!includeValueListOperators) {
+    return EXCEPTION_OPERATORS_SANS_LISTS;
   } else {
-    return isBoolean
-      ? [isOperator, isNotOperator, existsOperator, doesNotExistOperator]
-      : includeValueListOperators
-      ? EXCEPTION_OPERATORS
-      : EXCEPTION_OPERATORS_SANS_LISTS;
+    return listType === 'detection' ? DETECTION_ENGINE_EXCEPTION_OPERATORS : ALL_OPERATORS;
   }
 };
 

@@ -12,6 +12,7 @@ Learn how to perform common APM app tasks.
 * <<filters>>
 * <<correlations>>
 * <<machine-learning-integration>>
+* <<apm-lambda>>
 * <<advanced-queries>>
 * <<transactions-annotations>>
 
@@ -29,6 +30,8 @@ include::filters.asciidoc[]
 include::correlations.asciidoc[]
 
 include::machine-learning.asciidoc[]
+
+include::lambda.asciidoc[]
 
 include::advanced-queries.asciidoc[]
 

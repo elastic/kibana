@@ -7,9 +7,15 @@
 
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import type { DetectionAlert } from '../../../../common/detection_engine/schemas/alerts';
+import { ALERT_THRESHOLD_RESULT_COUNT } from '../../../../common/field_maps/field_names';
 import { sampleThresholdAlert } from '../rule_types/__mocks__/threshold';
 import type { NotificationRuleTypeParams } from './schedule_notification_actions';
-import { scheduleNotificationActions } from './schedule_notification_actions';
+import {
+  formatAlertsForNotificationActions,
+  normalizeAlertForNotificationActions,
+  scheduleNotificationActions,
+} from './schedule_notification_actions';
 
 describe('schedule_notification_actions', () => {
   const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
@@ -72,6 +78,9 @@ describe('schedule_notification_actions', () => {
       expect.objectContaining({
         alerts: [
           expect.objectContaining({
+            host: expect.objectContaining({
+              name: 'garden-gnomes',
+            }),
             kibana: expect.objectContaining({
               alert: expect.objectContaining({
                 rule: expect.objectContaining({
@@ -100,6 +109,40 @@ describe('schedule_notification_actions', () => {
             }),
           }),
         ],
+      })
+    );
+  });
+
+  it('should properly generate normalized alert', () => {
+    const signal = sampleThresholdAlert._source;
+    expect(normalizeAlertForNotificationActions(signal as unknown as DetectionAlert)).toEqual(
+      expect.objectContaining({
+        [ALERT_THRESHOLD_RESULT_COUNT]: 3,
+      })
+    );
+  });
+
+  // Deprecation warning: we'll stop supporting signal.* fields eventually. At that point, this test
+  // and supporting code should be removed.
+  it('should properly generate legacy alert shim', () => {
+    const signals = [sampleThresholdAlert._source];
+    expect(formatAlertsForNotificationActions(signals)[0]).toEqual(
+      expect.objectContaining({
+        kibana: expect.objectContaining({
+          alert: expect.objectContaining({
+            threshold_result: expect.objectContaining({
+              count: 3,
+            }),
+          }),
+        }),
+        signal: expect.objectContaining({
+          rule: expect.objectContaining({
+            id: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
+          }),
+          threshold_result: expect.objectContaining({
+            count: 3,
+          }),
+        }),
       })
     );
   });

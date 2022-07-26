@@ -107,12 +107,16 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
     const isEditMode = container.getInput().viewMode !== ViewMode.VIEW;
     const { isEmbeddedExternally, isFullScreenMode, panelCount, title, description, useMargins } =
       this.state;
+    const hideAnnouncements = Boolean(this.context.services.uiSettings.get('hideAnnouncements'));
 
     return (
       <>
         {controlsEnabled ? (
           <>
-            {isEditMode && panelCount !== 0 && controlGroup?.getPanelCount() === 0 ? (
+            {!hideAnnouncements &&
+            isEditMode &&
+            panelCount !== 0 &&
+            controlGroup?.getPanelCount() === 0 ? (
               <ControlsCallout
                 getCreateControlButton={() => {
                   return controlGroup?.getCreateControlButton('callout');

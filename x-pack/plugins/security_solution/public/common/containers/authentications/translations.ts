@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ERROR_AUTHENTICATIONS = i18n.translate(
-  'xpack.securitySolution.authentications.errorSearchDescription',
-  {
-    defaultMessage: `An error has occurred on authentications search`,
-  }
-);
-
 export const FAIL_AUTHENTICATIONS = i18n.translate(
   'xpack.securitySolution.authentications.failSearchDescription',
   {

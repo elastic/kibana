@@ -21,7 +21,6 @@ import {
 } from '../shared';
 
 type ContainerMetricsField =
-  | 'kubernetes.container.start_time'
   | 'kubernetes.container.cpu.usage.limit.pct'
   | 'kubernetes.container.memory.usage.bytes';
 
@@ -33,10 +32,6 @@ const containerMetricsQueryConfig: MetricsQueryOptions<ContainerMetricsField> = 
   },
   groupByField: 'container.id',
   metricsMap: {
-    'kubernetes.container.start_time': {
-      aggregation: 'max',
-      field: 'kubernetes.container.start_time',
-    },
     'kubernetes.container.cpu.usage.limit.pct': {
       aggregation: 'avg',
       field: 'kubernetes.container.cpu.usage.limit.pct',
@@ -53,7 +48,6 @@ const unpackMetric = makeUnpackMetric(metricByField);
 
 export interface ContainerNodeMetricsRow {
   name: string;
-  uptime: number | null;
   averageCpuUsagePercent: number | null;
   averageMemoryUsageMegabytes: number | null;
 }
@@ -105,21 +99,14 @@ function seriesToContainerNodeMetricsRow(series: MetricsExplorerSeries): Contain
 function rowWithoutMetrics(name: string) {
   return {
     name,
-    uptime: null,
     averageCpuUsagePercent: null,
     averageMemoryUsageMegabytes: null,
   };
 }
 
 function calculateMetricAverages(rows: MetricsExplorerRow[]) {
-  const { startTimeValues, averageCpuUsagePercentValues, averageMemoryUsageMegabytesValues } =
+  const { averageCpuUsagePercentValues, averageMemoryUsageMegabytesValues } =
     collectMetricValues(rows);
-
-  let uptime = null;
-  if (startTimeValues.length !== 0) {
-    const startTime = startTimeValues.at(-1);
-    uptime = Date.now() - startTime!;
-  }
 
   let averageCpuUsagePercent = null;
   if (averageCpuUsagePercentValues.length !== 0) {
@@ -134,23 +121,17 @@ function calculateMetricAverages(rows: MetricsExplorerRow[]) {
   }
 
   return {
-    uptime,
     averageCpuUsagePercent,
     averageMemoryUsageMegabytes,
   };
 }
 
 function collectMetricValues(rows: MetricsExplorerRow[]) {
-  const startTimeValues: number[] = [];
   const averageCpuUsagePercentValues: number[] = [];
   const averageMemoryUsageMegabytesValues: number[] = [];
 
   rows.forEach((row) => {
-    const { startTime, averageCpuUsagePercent, averageMemoryUsageMegabytes } = unpackMetrics(row);
-
-    if (startTime !== null) {
-      startTimeValues.push(startTime);
-    }
+    const { averageCpuUsagePercent, averageMemoryUsageMegabytes } = unpackMetrics(row);
 
     if (averageCpuUsagePercent !== null) {
       averageCpuUsagePercentValues.push(averageCpuUsagePercent);
@@ -162,17 +143,13 @@ function collectMetricValues(rows: MetricsExplorerRow[]) {
   });
 
   return {
-    startTimeValues,
     averageCpuUsagePercentValues,
     averageMemoryUsageMegabytesValues,
   };
 }
 
-function unpackMetrics(
-  row: MetricsExplorerRow
-): Omit<ContainerNodeMetricsRow, 'name' | 'uptime'> & { startTime: number | null } {
+function unpackMetrics(row: MetricsExplorerRow): Omit<ContainerNodeMetricsRow, 'name'> {
   return {
-    startTime: unpackMetric(row, 'kubernetes.container.start_time'),
     averageCpuUsagePercent: unpackMetric(row, 'kubernetes.container.cpu.usage.limit.pct'),
     averageMemoryUsageMegabytes: unpackMetric(row, 'kubernetes.container.memory.usage.bytes'),
   };

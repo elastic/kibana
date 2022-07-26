@@ -9168,7 +9168,7 @@
             "label": "typeRegistry",
             "description": [],
             "signature": [
-              "{ getType: (type: string) => ",
+              "{ isHidden: (type: string) => boolean; getType: (type: string) => ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -9200,7 +9200,7 @@
                 "section": "def-server.SavedObjectsType",
                 "text": "SavedObjectsType"
               },
-              "<any>[]; isNamespaceAgnostic: (type: string) => boolean; isSingleNamespace: (type: string) => boolean; isMultiNamespace: (type: string) => boolean; isShareable: (type: string) => boolean; isHidden: (type: string) => boolean; getIndex: (type: string) => string | undefined; isImportableAndExportable: (type: string) => boolean; }"
+              "<any>[]; isNamespaceAgnostic: (type: string) => boolean; isSingleNamespace: (type: string) => boolean; isMultiNamespace: (type: string) => boolean; isShareable: (type: string) => boolean; getIndex: (type: string) => string | undefined; isImportableAndExportable: (type: string) => boolean; }"
             ],
             "path": "src/core/server/saved_objects/service/lib/scoped_client_provider.ts",
             "deprecated": false
@@ -11645,16 +11645,16 @@
             "removeBy": "8.8.0",
             "references": [
               {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/server/saved_objects/migrations_730.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/server/saved_objects/migrations_730.ts"
-              },
-              {
                 "plugin": "maps",
                 "path": "x-pack/plugins/maps/server/saved_objects/saved_object_migrations.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/server/saved_objects/migrations_730.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/server/saved_objects/migrations_730.ts"
               }
             ],
             "children": [
@@ -12531,7 +12531,7 @@
             "label": "typeRegistry",
             "description": [],
             "signature": [
-              "{ getType: (type: string) => ",
+              "{ isHidden: (type: string) => boolean; getType: (type: string) => ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -12563,7 +12563,7 @@
                 "section": "def-server.SavedObjectsType",
                 "text": "SavedObjectsType"
               },
-              "<any>[]; isNamespaceAgnostic: (type: string) => boolean; isSingleNamespace: (type: string) => boolean; isMultiNamespace: (type: string) => boolean; isShareable: (type: string) => boolean; isHidden: (type: string) => boolean; getIndex: (type: string) => string | undefined; isImportableAndExportable: (type: string) => boolean; }"
+              "<any>[]; isNamespaceAgnostic: (type: string) => boolean; isSingleNamespace: (type: string) => boolean; isMultiNamespace: (type: string) => boolean; isShareable: (type: string) => boolean; getIndex: (type: string) => string | undefined; isImportableAndExportable: (type: string) => boolean; }"
             ],
             "path": "src/core/server/saved_objects/saved_objects_route_handler_context.ts",
             "deprecated": false
@@ -13514,7 +13514,7 @@
               "\nThe {@link SavedObjectsNamespaceType | namespace type} for the type."
             ],
             "signature": [
-              "\"multiple\" | \"single\" | \"multiple-isolated\" | \"agnostic\""
+              "\"single\" | \"multiple\" | \"multiple-isolated\" | \"agnostic\""
             ],
             "path": "src/core/server/saved_objects/types.ts",
             "deprecated": false
@@ -14783,7 +14783,7 @@
           "\nSee {@link SavedObjectTypeRegistry} for documentation.\n"
         ],
         "signature": [
-          "{ getType: (type: string) => ",
+          "{ isHidden: (type: string) => boolean; getType: (type: string) => ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -14815,7 +14815,7 @@
             "section": "def-server.SavedObjectsType",
             "text": "SavedObjectsType"
           },
-          "<any>[]; isNamespaceAgnostic: (type: string) => boolean; isSingleNamespace: (type: string) => boolean; isMultiNamespace: (type: string) => boolean; isShareable: (type: string) => boolean; isHidden: (type: string) => boolean; getIndex: (type: string) => string | undefined; isImportableAndExportable: (type: string) => boolean; }"
+          "<any>[]; isNamespaceAgnostic: (type: string) => boolean; isSingleNamespace: (type: string) => boolean; isMultiNamespace: (type: string) => boolean; isShareable: (type: string) => boolean; getIndex: (type: string) => string | undefined; isImportableAndExportable: (type: string) => boolean; }"
         ],
         "path": "src/core/server/saved_objects/saved_objects_type_registry.ts",
         "deprecated": false,
@@ -15445,7 +15445,7 @@
         "label": "SavedObjectsCreatePointInTimeFinderOptions",
         "description": [],
         "signature": [
-          "{ filter?: any; search?: string | undefined; type: string | string[]; aggs?: Record<string, ",
+          "{ type: string | string[]; filter?: any; search?: string | undefined; aggs?: Record<string, ",
           "AggregationsAggregationContainer",
           "> | undefined; fields?: string[] | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: ",
           "SortOrder",
@@ -15647,7 +15647,7 @@
           "\nThe namespace type dictates how a saved object can be interacted in relation to namespaces. Each type is mutually exclusive:\n * single (default): This type of saved object is namespace-isolated, e.g., it exists in only one namespace.\n * multiple: This type of saved object is shareable, e.g., it can exist in one or more namespaces.\n * multiple-isolated: This type of saved object is namespace-isolated, e.g., it exists in only one namespace, but object IDs must be\n   unique across all namespaces. This is intended to be an intermediate step when objects with a \"single\" namespace type are being\n   converted to a \"multiple\" namespace type. In other words, objects with a \"multiple-isolated\" namespace type will be *share-capable*,\n   but will not actually be shareable until the namespace type is changed to \"multiple\".\n * agnostic: This type of saved object is global.\n"
         ],
         "signature": [
-          "\"multiple\" | \"single\" | \"multiple-isolated\" | \"agnostic\""
+          "\"single\" | \"multiple\" | \"multiple-isolated\" | \"agnostic\""
         ],
         "path": "src/core/server/saved_objects/types.ts",
         "deprecated": false,
@@ -15683,13 +15683,7 @@
         ],
         "signature": [
           "(toolkit: { readonlyEsClient: Pick<",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           ", \"search\">; }) => ",
           "QueryDslQueryContainer",
           " | Promise<",
@@ -15709,13 +15703,7 @@
             "description": [],
             "signature": [
               "{ readonlyEsClient: Pick<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              },
+              "ElasticsearchClient",
               ", \"search\">; }"
             ],
             "path": "src/core/server/saved_objects/types.ts",

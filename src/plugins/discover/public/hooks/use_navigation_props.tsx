@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { MouseEventHandler, useMemo, useRef } from 'react';
+import { MouseEventHandler, useMemo } from 'react';
 import { useHistory, matchPath } from 'react-router-dom';
 import type { Location } from 'history';
 import { stringify } from 'query-string';
@@ -26,8 +26,6 @@ export interface UseNavigationProps {
   filterManager: FilterManager;
   addBasePath: (url: string) => string;
 }
-
-export type HistoryState = { breadcrumb?: string } | undefined;
 
 export const getContextHash = (columns: string[], filterManager: FilterManager) => {
   const globalFilters = filterManager.getGlobalFilters();
@@ -64,9 +62,12 @@ const getCurrentBreadcrumbs = (
   return isContextRoute ? prevBreadcrumb : '#' + currentLocation.pathname + currentLocation.search;
 };
 
+const getCurrentBreadcrumb = (search: string | undefined) =>
+  new URLSearchParams(search).get('breadcrumb') || undefined;
+
 export const useMainRouteBreadcrumb = () => {
-  // useRef needed to retrieve initial breadcrumb link from the push state without updates
-  return useRef(useHistory<HistoryState>().location.state?.breadcrumb).current;
+  const history = useHistory();
+  return useMemo(() => getCurrentBreadcrumb(history.location.search), [history.location.search]);
 };
 
 export const useNavigationProps = ({
@@ -77,10 +78,13 @@ export const useNavigationProps = ({
   filterManager,
   addBasePath,
 }: UseNavigationProps) => {
-  const history = useHistory<HistoryState>();
+  const history = useHistory();
   const currentLocation = useDiscoverServices().history().location;
 
-  const prevBreadcrumb = useRef(history?.location.state?.breadcrumb).current;
+  const prevBreadcrumb = useMemo(
+    () => getCurrentBreadcrumb(history?.location?.search),
+    [history?.location?.search]
+  );
   const contextSearchHash = useMemo(
     () => getContextHash(columns, filterManager),
     [columns, filterManager]
@@ -104,16 +108,16 @@ export const useNavigationProps = ({
       path: '/context/:indexPatternId/:id',
       exact: true,
     });
+    const currentBreadcrumb = encodeURIComponent(
+      getCurrentBreadcrumbs(!!isContextRoute, currentLocation, prevBreadcrumb) ?? ''
+    );
 
     const onOpenSingleDoc: MouseEventHandler<HTMLAnchorElement> = (event) => {
       event?.preventDefault?.();
 
       history.push({
         pathname: `/doc/${indexPatternId}/${rowIndex}`,
-        search: `?id=${encodeURIComponent(rowId)}`,
-        state: {
-          breadcrumb: getCurrentBreadcrumbs(!!isContextRoute, currentLocation, prevBreadcrumb),
-        },
+        search: `?id=${encodeURIComponent(rowId)}&breadcrumb=${currentBreadcrumb}`,
       });
     };
 
@@ -124,16 +128,19 @@ export const useNavigationProps = ({
         pathname: `/context/${encodeURIComponent(indexPatternId)}/${encodeURIComponent(
           String(rowId)
         )}`,
-        search: `?${contextSearchHash}`,
-        state: {
-          breadcrumb: getCurrentBreadcrumbs(!!isContextRoute, currentLocation, prevBreadcrumb),
-        },
+        search: `?${contextSearchHash}&breadcrumb=${currentBreadcrumb}`,
       });
     };
 
     return {
-      singleDocProps: { onClick: onOpenSingleDoc, href: singleDocHref },
-      surrDocsProps: { onClick: onOpenSurrDocs, href: surDocsHref },
+      singleDocProps: {
+        onClick: onOpenSingleDoc,
+        href: `${singleDocHref}&breadcrumb=${currentBreadcrumb}`,
+      },
+      surrDocsProps: {
+        onClick: onOpenSurrDocs,
+        href: `${surDocsHref}&breadcrumb=${currentBreadcrumb}`,
+      },
     };
   }
 

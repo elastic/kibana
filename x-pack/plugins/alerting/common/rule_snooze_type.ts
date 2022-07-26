@@ -14,6 +14,7 @@ export interface RuleSnoozeSchedule {
   rRule: SnoozeRRule;
   // For scheduled/recurring snoozes, `id` uniquely identifies them so that they can be displayed, modified, and deleted individually
   id?: string;
+  skipRecurrences?: string[];
 }
 
 // Type signature of has to be repeated here to avoid issues with SavedObject compatibility
@@ -22,6 +23,7 @@ export type RuleSnooze = Array<{
   duration: number;
   rRule: SnoozeRRule;
   id?: string;
+  skipRecurrences?: string[];
 }>;
 
 // An iCal RRULE  to define a recurrence schedule, see https://github.com/jakubroztocil/rrule for the spec

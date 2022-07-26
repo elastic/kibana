@@ -11,7 +11,7 @@ export type {
   PublicUiSettingsParams,
   UserProvidedValues,
   UiSettingsType,
-} from '../types';
+} from '@kbn/core-ui-settings-common';
 
 /**
  * A function that should mount DOM content inside the provided container element

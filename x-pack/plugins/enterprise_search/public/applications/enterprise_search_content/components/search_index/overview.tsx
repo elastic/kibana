@@ -11,38 +11,62 @@ import { useValues } from 'kea';
 
 import { EuiSpacer } from '@elastic/eui';
 
-import { Status } from '../../../../../common/types/api';
-import { FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
+import { i18n } from '@kbn/i18n';
 
+import { isApiIndex, isConnectorIndex, isCrawlerIndex } from '../../utils/indices';
+
+import { ConnectorOverviewPanels } from './connector/connector_overview_panels';
 import { CrawlDetailsFlyout } from './crawler/crawl_details_flyout/crawl_details_flyout';
 import { CrawlRequestsPanel } from './crawler/crawl_requests_panel/crawl_requests_panel';
+import { CrawlerTotalStats } from './crawler_total_stats';
 import { GenerateApiKeyPanel } from './generate_api_key_panel';
+import { OverviewLogic } from './overview.logic';
 import { TotalStats } from './total_stats';
 
 export const SearchIndexOverview: React.FC = () => {
-  const { data, status } = useValues(FetchIndexApiLogic);
-
-  const isCrawler = typeof data?.crawler !== 'undefined';
-  const isConnector = typeof data?.connector !== 'undefined';
-  const isApi = !(isCrawler || isConnector);
+  const { indexData } = useValues(OverviewLogic);
 
   return (
     <>
       <EuiSpacer />
-      {status === Status.SUCCESS && data && (
+      {isCrawlerIndex(indexData) ? (
+        <CrawlerTotalStats />
+      ) : (
         <TotalStats
-          lastUpdated={'TODO'}
-          documentCount={data.index.total.docs.count ?? 0}
-          indexHealth={data.index.health ?? ''}
-          ingestionType={data.connector ? 'Connector' : data.crawler ? 'Crawler' : 'API'}
+          ingestionType={
+            isConnectorIndex(indexData)
+              ? i18n.translate(
+                  'xpack.enterpriseSearch.content.searchIndex.totalStats.connectorIngestionMethodLabel',
+                  {
+                    defaultMessage: 'Connector',
+                  }
+                )
+              : i18n.translate(
+                  'xpack.enterpriseSearch.content.searchIndex.totalStats.apiIngestionMethodLabel',
+                  {
+                    defaultMessage: 'API',
+                  }
+                )
+          }
         />
       )}
-      <EuiSpacer />
-      {isApi && <GenerateApiKeyPanel />}
-      {isCrawler && (
+      {isApiIndex(indexData) && (
         <>
+          <EuiSpacer />
+          <GenerateApiKeyPanel />
+        </>
+      )}
+      {isCrawlerIndex(indexData) && (
+        <>
+          <EuiSpacer />
           <CrawlRequestsPanel />
           <CrawlDetailsFlyout />
+        </>
+      )}
+      {isConnectorIndex(indexData) && (
+        <>
+          <EuiSpacer />
+          <ConnectorOverviewPanels />
         </>
       )}
     </>

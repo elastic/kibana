@@ -18,7 +18,6 @@ import {
 import { useKibana } from '../common/lib/kibana';
 import type {
   ResultEdges,
-  PageInfoPaginated,
   ResultsRequestOptions,
   ResultsStrategyResponse,
   Direction,
@@ -33,7 +32,6 @@ export interface ResultsArgs {
   id: string;
   inspect: InspectResponse;
   isInspected: boolean;
-  pageInfo: PageInfoPaginated;
   totalCount: number;
 }
 
@@ -77,7 +75,7 @@ export const useAllResults = ({
         )
       );
 
-      if (!responseData?.edges?.length && responseData.totalCount) {
+      if (!responseData?.edges?.length && responseData.total) {
         throw new Error('Empty edges while positive totalCount');
       }
 

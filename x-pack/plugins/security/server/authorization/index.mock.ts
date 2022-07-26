@@ -15,6 +15,7 @@ export const authorizationMock = {
   }: { version?: string; applicationName?: string } = {}) => ({
     actions: actionsMock.create(version),
     checkPrivilegesWithRequest: jest.fn(),
+    checkUserProfilesPrivileges: jest.fn(),
     checkElasticsearchPrivilegesWithRequest: jest.fn(),
     checkPrivilegesDynamicallyWithRequest: jest.fn(),
     checkSavedObjectsPrivilegesWithRequest: jest.fn(),

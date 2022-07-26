@@ -42,6 +42,7 @@ export class DashboardPageObject extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly visualize = this.ctx.getPageObject('visualize');
   private readonly discover = this.ctx.getPageObject('discover');
+
   private readonly logstashIndex = this.config.get('esTestCluster.ccs')
     ? 'ftr-remote:logstash-*'
     : 'logstash-*';
@@ -565,7 +566,9 @@ export class DashboardPageObject extends FtrService {
     return await Promise.all(titleObjects.map(async (title) => await title.getVisibleText()));
   }
 
-  // returns an array of Boolean values - true if the panel title is visible in view mode, false if it is not
+  /**
+   * @return An array of boolean values - true if the panel title is visible in view mode, false if it is not
+   */
   public async getVisibilityOfPanelTitles() {
     this.log.debug('in getVisibilityOfPanels');
     // only works if the dashboard is in view mode
@@ -574,9 +577,12 @@ export class DashboardPageObject extends FtrService {
       await this.clickCancelOutOfEditMode();
     }
     const visibilities: boolean[] = [];
-    const titleObjects = await this.testSubjects.findAll('dashboardPanelTitle__wrapper');
-    for (const titleObject of titleObjects) {
-      const exists = !(await titleObject.elementHasClass('embPanel__header--floater'));
+    const panels = await this.getDashboardPanels();
+    for (const panel of panels) {
+      const exists = await this.find.descendantExistsByCssSelector(
+        'figcaption.embPanel__header',
+        panel
+      );
       visibilities.push(exists);
     }
     // return to edit mode if a switch to view mode above was necessary

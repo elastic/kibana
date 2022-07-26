@@ -50,9 +50,9 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(downloadSource.items[0]).to.eql({
           id: 'fleet-default-download-source',
-          name: 'default',
+          name: 'Elastic Artifacts',
           is_default: true,
-          host: 'https://artifacts.elastic.co',
+          host: 'https://artifacts.elastic.co/downloads/',
         });
       });
     });
@@ -66,9 +66,9 @@ export default function (providerContext: FtrProviderContext) {
         expect(downloadSource).to.eql({
           item: {
             id: 'fleet-default-download-source',
-            name: 'default',
+            name: 'Elastic Artifacts',
             is_default: true,
-            host: 'https://artifacts.elastic.co',
+            host: 'https://artifacts.elastic.co/downloads/',
           },
         });
       });

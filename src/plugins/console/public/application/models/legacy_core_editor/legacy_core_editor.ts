@@ -228,6 +228,10 @@ export class LegacyCoreEditor implements CoreEditor {
     );
   }
 
+  detachCompleter() {
+    return (this.editor as unknown as { completer: { detach(): void } }).completer.detach();
+  }
+
   private forceRetokenize() {
     const session = this.editor.getSession();
     return new Promise<void>((resolve) => {

@@ -39,6 +39,7 @@ export class NavigationPublicPlugin
     return {
       ui: {
         TopNavMenu: createTopNav(unifiedSearch, extensions),
+        AggregateQueryTopNavMenu: createTopNav(unifiedSearch, extensions),
       },
     };
   }

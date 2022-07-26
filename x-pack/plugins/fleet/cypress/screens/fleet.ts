@@ -23,3 +23,32 @@ export const FLEET_SERVER_MISSING_PRIVILEGES_TITLE = 'fleetServerMissingPrivileg
 export const AGENT_POLICY_SAVE_INTEGRATION = 'saveIntegration';
 export const PACKAGE_POLICY_TABLE_LINK = 'PackagePoliciesTableLink';
 export const ADD_PACKAGE_POLICY_BTN = 'addPackagePolicyButton';
+
+export const AGENT_BINARY_SOURCES_TABLE = 'AgentDownloadSourcesTable';
+export const AGENT_BINARY_SOURCES_TABLE_ACTIONS = {
+  DEFAULT_VALUE: 'editDownloadSourceTable.defaultIcon',
+  HOST: 'editDownloadSourceTable.host',
+  ADD: 'addDownloadSourcesBtn',
+  EDIT: 'editDownloadSourceTable.edit.btn',
+  DELETE: 'editDownloadSourceTable.delete.btn',
+  DEFAULT_ICON: 'editDownloadSourceTable.defaultIcon',
+  HOST_NAME: 'editDownloadSourceTable.host',
+};
+export const AGENT_BINARY_SOURCES_FLYOUT = {
+  NAME_INPUT: 'editDownloadSourcesFlyout.nameInput',
+  HOST_INPUT: 'editDownloadSourcesFlyout.hostInput',
+  IS_DEFAULT_SWITCH: 'editDownloadSourcesFlyout.isDefaultSwitch',
+  SUBMIT_BUTTON: 'editDownloadSourcesFlyout.submitBtn',
+  CANCEL_BUTTON: 'editDownloadSourcesFlyout.cancelBtn',
+};
+
+export const ADD_AGENT_FLYOUT = {
+  CONFIRM_AGENT_ENROLLMENT_BUTTON: 'ConfirmAgentEnrollmentButton',
+  INCOMING_DATA_CONFIRMED_CALL_OUT: 'IncomingDataConfirmedCallOut',
+};
+export const CONFIRM_MODAL_CONFIRM_BUTTON = 'confirmModalConfirmButton';
+export const CONFIRM_MODAL_CANCEL_BUTTON = 'confirmModalCancelButton';
+
+export const AGENT_POLICY_FORM = {
+  DOWNLOAD_SOURCE_SELECT: 'agentPolicyForm.downloadSource.select',
+};

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { PointStyleProps, RangeStyleProps } from '../types';
 
 export type ManualPointEventAnnotationArgs = {
@@ -29,3 +30,18 @@ export type EventAnnotationArgs = ManualPointEventAnnotationArgs | ManualRangeEv
 export type EventAnnotationOutput =
   | ManualPointEventAnnotationOutput
   | ManualRangeEventAnnotationOutput;
+
+export const annotationColumns: DatatableColumn[] = [
+  { id: 'time', name: 'time', meta: { type: 'string' } },
+  { id: 'endTime', name: 'endTime', meta: { type: 'string' } },
+  { id: 'timebucket', name: 'timebucket', meta: { type: 'string' } },
+  { id: 'type', name: 'type', meta: { type: 'string' } },
+  { id: 'label', name: 'label', meta: { type: 'string' } },
+  { id: 'color', name: 'color', meta: { type: 'string' } },
+  { id: 'lineStyle', name: 'lineStyle', meta: { type: 'string' } },
+  { id: 'lineWidth', name: 'lineWidth', meta: { type: 'number' } },
+  { id: 'icon', name: 'icon', meta: { type: 'string' } },
+  { id: 'textVisibility', name: 'textVisibility', meta: { type: 'boolean' } },
+  { id: 'outside', name: 'outside', meta: { type: 'number' } },
+  { id: 'skippedAnnotationsCount', name: 'skippedAnnotationsCount', meta: { type: 'number' } },
+];

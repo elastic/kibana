@@ -14,11 +14,8 @@ import { url } from '@kbn/kibana-utils-plugin/public';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { SecurityPageName } from '../../../app/types';
 import type { State } from '../../store';
-import { inputsSelectors } from '../../store';
-import type { UrlInputsModel } from '../../store/inputs/model';
 import type { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { timelineSelectors } from '../../../timelines/store/timeline';
-import { formatDate } from '../super_date_picker';
 import type { NavTab } from '../navigation/types';
 import type { UrlStateType } from './constants';
 import { CONSTANTS } from './constants';
@@ -123,13 +120,8 @@ export const getTitle = (pageName: string, navTabs: Record<string, NavTab>): str
 };
 
 export const makeMapStateToProps = () => {
-  const getInputsSelector = inputsSelectors.inputsSelector();
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const mapStateToProps = (state: State) => {
-    const inputState = getInputsSelector(state);
-    const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
-    const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
-
     const flyoutTimeline = getTimeline(state, TimelineId.active);
     const timeline =
       flyoutTimeline != null
@@ -143,39 +135,12 @@ export const makeMapStateToProps = () => {
 
     return {
       urlState: {
-        [CONSTANTS.timerange]: {
-          global: {
-            [CONSTANTS.timerange]: globalTimerange,
-            linkTo: globalLinkTo,
-          },
-          timeline: {
-            [CONSTANTS.timerange]: timelineTimerange,
-            linkTo: timelineLinkTo,
-          },
-        },
         [CONSTANTS.timeline]: timeline,
       },
     };
   };
 
   return mapStateToProps;
-};
-
-export const updateTimerangeUrl = (
-  timeRange: UrlInputsModel,
-  isFirstPageLoad: boolean
-): UrlInputsModel => {
-  if (timeRange.global.timerange.kind === 'relative') {
-    timeRange.global.timerange.from = formatDate(timeRange.global.timerange.fromStr);
-    timeRange.global.timerange.to = formatDate(timeRange.global.timerange.toStr, { roundUp: true });
-  }
-  if (timeRange.timeline.timerange.kind === 'relative' && isFirstPageLoad) {
-    timeRange.timeline.timerange.from = formatDate(timeRange.timeline.timerange.fromStr);
-    timeRange.timeline.timerange.to = formatDate(timeRange.timeline.timerange.toStr, {
-      roundUp: true,
-    });
-  }
-  return timeRange;
 };
 
 export const isQueryStateEmpty = (

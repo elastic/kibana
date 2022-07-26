@@ -345,6 +345,23 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.Embeddable.getExecutionContext",
+            "type": "Function",
+            "tags": [],
+            "label": "getExecutionContext",
+            "description": [],
+            "signature": [
+              "() => ",
+              "KibanaExecutionContext",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.Embeddable.render",
             "type": "Function",
             "tags": [],
@@ -979,7 +996,7 @@
             "label": "seriesType",
             "description": [],
             "signature": [
-              "\"area\" | \"line\" | \"bar\""
+              "\"bar\" | \"line\" | \"area\""
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
@@ -1426,7 +1443,7 @@
             "label": "layerType",
             "description": [],
             "signature": [
-              "\"data\" | \"annotations\" | \"referenceLine\""
+              "\"data\" | \"referenceLine\" | \"annotations\""
             ],
             "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
             "deprecated": false
@@ -1453,7 +1470,7 @@
             "label": "rowHeight",
             "description": [],
             "signature": [
-              "\"custom\" | \"auto\" | \"single\" | undefined"
+              "\"auto\" | \"custom\" | \"single\" | undefined"
             ],
             "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
             "deprecated": false
@@ -1466,7 +1483,7 @@
             "label": "headerRowHeight",
             "description": [],
             "signature": [
-              "\"custom\" | \"auto\" | \"single\" | undefined"
+              "\"auto\" | \"custom\" | \"single\" | undefined"
             ],
             "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
             "deprecated": false
@@ -2695,7 +2712,7 @@
             "label": "layerType",
             "description": [],
             "signature": [
-              "\"data\" | \"annotations\" | \"referenceLine\""
+              "\"data\" | \"referenceLine\" | \"annotations\""
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false
@@ -2822,7 +2839,7 @@
               "\nordinal: Each name is a unique value, but the names are in sorted order, like \"Top values\"\ninterval: Histogram data, like date or number histograms\nratio: Most number data is rendered as a ratio that includes 0"
             ],
             "signature": [
-              "\"interval\" | \"ordinal\" | \"ratio\" | undefined"
+              "\"ordinal\" | \"interval\" | \"ratio\" | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false
@@ -3211,7 +3228,7 @@
             "label": "numberDisplay",
             "description": [],
             "signature": [
-              "\"percent\" | \"value\" | \"hidden\""
+              "\"percent\" | \"hidden\" | \"value\""
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false
@@ -3237,7 +3254,7 @@
             "label": "legendDisplay",
             "description": [],
             "signature": [
-              "\"default\" | \"show\" | \"hide\""
+              "\"default\" | \"hide\" | \"show\""
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false
@@ -3625,7 +3642,7 @@
               "\nThe change type indicates what was changed in this table compared to the currently active table of this layer."
             ],
             "signature": [
-              "\"layers\" | \"initial\" | \"unchanged\" | \"reduced\" | \"extended\" | \"reorder\""
+              "\"initial\" | \"layers\" | \"unchanged\" | \"reduced\" | \"extended\" | \"reorder\""
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false
@@ -3681,7 +3698,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ size: number; accuracyMode?: boolean | undefined; orderBy: { type: \"alphabetical\"; fallback?: boolean | undefined; } | { type: \"rare\"; maxDocCount: number; } | { type: \"column\"; columnId: string; } | { type: \"custom\"; }; orderAgg?: ",
+              "{ size: number; accuracyMode?: boolean | undefined; include?: number[] | string[] | undefined; exclude?: number[] | string[] | undefined; includeIsRegex?: boolean | undefined; excludeIsRegex?: boolean | undefined; orderBy: { type: \"alphabetical\"; fallback?: boolean | undefined; } | { type: \"rare\"; maxDocCount: number; } | { type: \"column\"; columnId: string; } | { type: \"custom\"; }; orderAgg?: ",
               {
                 "pluginId": "lens",
                 "scope": "public",
@@ -5249,6 +5266,38 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Visualization.getRenderEventCounters",
+            "type": "Function",
+            "tags": [],
+            "label": "getRenderEventCounters",
+            "description": [
+              "\nGet RenderEventCounters events for telemetry"
+            ],
+            "signature": [
+              "((state: T) => string[]) | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.getRenderEventCounters.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -5504,7 +5553,7 @@
             "label": "valueLabels",
             "description": [],
             "signature": [
-              "\"show\" | \"hide\""
+              "\"hide\" | \"show\""
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
@@ -5869,7 +5918,7 @@
             "label": "seriesType",
             "description": [],
             "signature": [
-              "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+              "\"bar\" | \"line\" | \"area\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
             ],
             "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
             "deprecated": false
@@ -6154,7 +6203,7 @@
             "label": "preferredSeriesType",
             "description": [],
             "signature": [
-              "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+              "\"bar\" | \"line\" | \"area\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
             ],
             "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
             "deprecated": false
@@ -6960,7 +7009,7 @@
             "section": "def-common.GaugeState",
             "text": "GaugeState"
           },
-          ", \"goal\" | \"metric\" | \"min\" | \"max\"> & { metricAccessor?: string | undefined; minAccessor?: string | undefined; maxAccessor?: string | undefined; goalAccessor?: string | undefined; } & { layerId: string; layerType: ",
+          ", \"goal\" | \"min\" | \"metric\" | \"max\"> & { metricAccessor?: string | undefined; minAccessor?: string | undefined; maxAccessor?: string | undefined; goalAccessor?: string | undefined; } & { layerId: string; layerType: ",
           {
             "pluginId": "lens",
             "scope": "common",
@@ -7037,7 +7086,7 @@
         "label": "IconPosition",
         "description": [],
         "signature": [
-          "\"above\" | \"below\" | \"left\" | \"right\" | \"auto\""
+          "\"above\" | \"below\" | \"auto\" | \"left\" | \"right\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -7051,7 +7100,7 @@
         "label": "LayerType",
         "description": [],
         "signature": [
-          "\"data\" | \"annotations\" | \"referenceLine\""
+          "\"data\" | \"referenceLine\" | \"annotations\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -7344,9 +7393,32 @@
         "label": "SeriesType",
         "description": [],
         "signature": [
-          "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+          "\"bar\" | \"line\" | \"area\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
         ],
         "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.StandardDeviationIndexPatternColumn",
+        "type": "Type",
+        "tags": [],
+        "label": "StandardDeviationIndexPatternColumn",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FieldBasedIndexPatternColumn",
+            "text": "FieldBasedIndexPatternColumn"
+          },
+          " & { operationType: \"standard_deviation\"; params?: { emptyAsNull?: boolean | undefined; format?: ",
+          "ValueFormatConfig",
+          " | undefined; } | undefined; }"
+        ],
+        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7486,7 +7558,7 @@
         "label": "ValueLabelConfig",
         "description": [],
         "signature": [
-          "\"show\" | \"hide\""
+          "\"hide\" | \"show\""
         ],
         "path": "x-pack/plugins/lens/common/types.ts",
         "deprecated": false,
@@ -7500,7 +7572,7 @@
         "label": "ValueLabelMode",
         "description": [],
         "signature": [
-          "\"show\" | \"hide\""
+          "\"hide\" | \"show\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -7578,7 +7650,7 @@
         "label": "YAxisMode",
         "description": [],
         "signature": [
-          "\"bottom\" | \"left\" | \"right\" | \"auto\""
+          "\"auto\" | \"bottom\" | \"left\" | \"right\""
         ],
         "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
         "deprecated": false,
@@ -7592,7 +7664,7 @@
         "label": "YScaleType",
         "description": [],
         "signature": [
-          "\"time\" | \"log\" | \"linear\" | \"sqrt\""
+          "\"log\" | \"time\" | \"linear\" | \"sqrt\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -8159,26 +8231,6 @@
         "children": [
           {
             "parentPluginId": "lens",
-            "id": "def-server.PluginSetupContract.usageCollection",
-            "type": "Object",
-            "tags": [],
-            "label": "usageCollection",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "usageCollection",
-                "scope": "server",
-                "docId": "kibUsageCollectionPluginApi",
-                "section": "def-server.UsageCollectionSetup",
-                "text": "UsageCollectionSetup"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/lens/server/plugin.tsx",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
             "id": "def-server.PluginSetupContract.taskManager",
             "type": "Object",
             "tags": [],
@@ -8391,7 +8443,7 @@
             "label": "rowHeight",
             "description": [],
             "signature": [
-              "\"custom\" | \"auto\" | \"single\""
+              "\"auto\" | \"custom\" | \"single\""
             ],
             "path": "x-pack/plugins/lens/server/migrations/types.ts",
             "deprecated": false
@@ -8444,7 +8496,7 @@
             "label": "valueLabels",
             "description": [],
             "signature": [
-              "\"show\" | \"hide\""
+              "\"hide\" | \"show\""
             ],
             "path": "x-pack/plugins/lens/server/migrations/types.ts",
             "deprecated": false
@@ -8487,7 +8539,7 @@
             "label": "valueLabels",
             "description": [],
             "signature": [
-              "\"outside\" | \"hide\" | \"inside\""
+              "\"hide\" | \"outside\" | \"inside\""
             ],
             "path": "x-pack/plugins/lens/server/migrations/types.ts",
             "deprecated": false
@@ -8728,7 +8780,7 @@
         "label": "OperationTypePost712",
         "description": [],
         "signature": [
-          "\"filters\" | \"count\" | \"date_histogram\" | \"percentile\" | \"min\" | \"max\" | \"sum\" | \"average\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\""
+          "\"min\" | \"max\" | \"sum\" | \"filters\" | \"count\" | \"date_histogram\" | \"percentile\" | \"average\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\""
         ],
         "path": "x-pack/plugins/lens/server/migrations/types.ts",
         "deprecated": false,
@@ -8742,7 +8794,7 @@
         "label": "OperationTypePre712",
         "description": [],
         "signature": [
-          "\"filters\" | \"count\" | \"date_histogram\" | \"percentile\" | \"min\" | \"max\" | \"sum\" | \"range\" | \"terms\" | \"avg\" | \"median\" | \"cumulative_sum\" | \"derivative\" | \"moving_average\" | \"last_value\" | \"counter_rate\" | \"cardinality\""
+          "\"min\" | \"max\" | \"sum\" | \"filters\" | \"count\" | \"date_histogram\" | \"percentile\" | \"range\" | \"terms\" | \"avg\" | \"median\" | \"cumulative_sum\" | \"derivative\" | \"moving_average\" | \"last_value\" | \"counter_rate\" | \"cardinality\""
         ],
         "path": "x-pack/plugins/lens/server/migrations/types.ts",
         "deprecated": false,
@@ -9309,7 +9361,7 @@
             "label": "layerType",
             "description": [],
             "signature": [
-              "\"data\" | \"annotations\" | \"referenceLine\""
+              "\"data\" | \"referenceLine\" | \"annotations\""
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false
@@ -9639,7 +9691,7 @@
             "label": "numberDisplay",
             "description": [],
             "signature": [
-              "\"percent\" | \"value\" | \"hidden\""
+              "\"percent\" | \"hidden\" | \"value\""
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false
@@ -9665,7 +9717,7 @@
             "label": "legendDisplay",
             "description": [],
             "signature": [
-              "\"default\" | \"show\" | \"hide\""
+              "\"default\" | \"hide\" | \"show\""
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false
@@ -9992,7 +10044,7 @@
         "label": "LayerType",
         "description": [],
         "signature": [
-          "\"data\" | \"annotations\" | \"referenceLine\""
+          "\"data\" | \"referenceLine\" | \"annotations\""
         ],
         "path": "x-pack/plugins/lens/common/types.ts",
         "deprecated": false,
@@ -10006,7 +10058,7 @@
         "label": "LegendDisplayType",
         "description": [],
         "signature": [
-          "\"default\" | \"show\" | \"hide\""
+          "\"default\" | \"hide\" | \"show\""
         ],
         "path": "x-pack/plugins/lens/common/types.ts",
         "deprecated": false,
@@ -10062,7 +10114,7 @@
         "label": "NumberDisplayType",
         "description": [],
         "signature": [
-          "\"percent\" | \"value\" | \"hidden\""
+          "\"percent\" | \"hidden\" | \"value\""
         ],
         "path": "x-pack/plugins/lens/common/types.ts",
         "deprecated": false,
@@ -10147,7 +10199,7 @@
         "label": "ValueLabelConfig",
         "description": [],
         "signature": [
-          "\"show\" | \"hide\""
+          "\"hide\" | \"show\""
         ],
         "path": "x-pack/plugins/lens/common/types.ts",
         "deprecated": false,

@@ -42,7 +42,9 @@ class DocLinks {
   public clientsNetIntroduction: string;
   public clientsNetNest: string;
   public clientsNetSingleNode: string;
+  public clientsPerlGuide: string;
   public clientsPhpConnecting: string;
+  public clientsPhpGuide: string;
   public clientsPhpInstallation: string;
   public clientsPhpOverview: string;
   public clientsPythonAuthentication: string;
@@ -53,6 +55,7 @@ class DocLinks {
   public cloudIndexManagement: string;
   public elasticsearchCreateIndex: string;
   public elasticsearchGettingStarted: string;
+  public elasticsearchMapping: string;
   public enterpriseSearchConfig: string;
   public enterpriseSearchMailService: string;
   public enterpriseSearchTroubleshootSetup: string;
@@ -130,7 +133,9 @@ class DocLinks {
     this.clientsNetIntroduction = '';
     this.clientsNetNest = '';
     this.clientsNetSingleNode = '';
+    this.clientsPerlGuide = '';
     this.clientsPhpConnecting = '';
+    this.clientsPhpGuide = '';
     this.clientsPhpInstallation = '';
     this.clientsPhpOverview = '';
     this.clientsPythonAuthentication = '';
@@ -141,6 +146,7 @@ class DocLinks {
     this.cloudIndexManagement = '';
     this.elasticsearchCreateIndex = '';
     this.elasticsearchGettingStarted = '';
+    this.elasticsearchMapping = '';
     this.enterpriseSearchConfig = '';
     this.enterpriseSearchMailService = '';
     this.enterpriseSearchTroubleshootSetup = '';
@@ -220,7 +226,9 @@ class DocLinks {
     this.clientsNetIntroduction = docLinks.links.clients.netIntroduction;
     this.clientsNetNest = docLinks.links.clients.netNest;
     this.clientsNetSingleNode = docLinks.links.clients.netSingleNode;
+    this.clientsPerlGuide = docLinks.links.clients.perlGuide;
     this.clientsPhpConnecting = docLinks.links.clients.phpConnecting;
+    this.clientsPhpGuide = docLinks.links.clients.phpGuide;
     this.clientsPhpInstallation = docLinks.links.clients.phpInstallation;
     this.clientsPhpOverview = docLinks.links.clients.phpOverview;
     this.clientsPythonAuthentication = docLinks.links.clients.pythonAuthentication;
@@ -231,6 +239,7 @@ class DocLinks {
     this.cloudIndexManagement = docLinks.links.cloud.indexManagement;
     this.elasticsearchCreateIndex = docLinks.links.elasticsearch.createIndex;
     this.elasticsearchGettingStarted = docLinks.links.elasticsearch.gettingStarted;
+    this.elasticsearchMapping = docLinks.links.elasticsearch.mapping;
     this.enterpriseSearchConfig = docLinks.links.enterpriseSearch.configuration;
     this.enterpriseSearchMailService = docLinks.links.enterpriseSearch.mailService;
     this.enterpriseSearchTroubleshootSetup = docLinks.links.enterpriseSearch.troubleshootSetup;

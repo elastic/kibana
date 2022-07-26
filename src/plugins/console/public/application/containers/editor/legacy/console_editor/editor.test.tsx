@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+jest.mock('../../../../../lib/utils', () => ({ replaceVariables: jest.fn() }));
+
 import './editor.test.mock';
 
 import React from 'react';
@@ -30,6 +32,7 @@ import { getEndpointFromPosition } from '../../../../../lib/autocomplete/get_end
 import type { DevToolsSettings } from '../../../../../services';
 import * as consoleMenuActions from '../console_menu_actions';
 import { Editor } from './editor';
+import * as utils from '../../../../../lib/utils';
 
 describe('Legacy (Ace) Console Editor Component Smoke Test', () => {
   let mockedAppContextValue: ContextValue;
@@ -51,6 +54,7 @@ describe('Legacy (Ace) Console Editor Component Smoke Test', () => {
   beforeEach(() => {
     document.queryCommandSupported = sinon.fake(() => true);
     mockedAppContextValue = serviceContextMock.create();
+    (utils.replaceVariables as jest.Mock).mockReturnValue(['test']);
   });
 
   afterEach(() => {

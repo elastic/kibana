@@ -52,6 +52,8 @@ export interface RulePreviewProps {
   machineLearningJobId: string[];
   anomalyThreshold: number;
   eqlOptions: EqlOptionsSelected;
+  newTermsFields: string[];
+  historyWindowSize: string;
 }
 
 const Select = styled(EuiSelect)`
@@ -77,6 +79,8 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   machineLearningJobId,
   anomalyThreshold,
   eqlOptions,
+  newTermsFields,
+  historyWindowSize,
 }) => {
   const { spaces } = useKibana().services;
   const { loading: isMlLoading, jobs } = useSecurityJobs(false);
@@ -121,6 +125,8 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     machineLearningJobId,
     anomalyThreshold,
     eqlOptions,
+    newTermsFields,
+    historyWindowSize,
   });
 
   // Resets the timeFrame to default when rule type is changed because not all time frames are supported by all rule types

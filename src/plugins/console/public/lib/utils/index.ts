@@ -8,7 +8,11 @@
 
 import _ from 'lodash';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
-import type { RequestResult } from '../../application/hooks/use_send_current_request/send_request';
+import type {
+  RequestArgs,
+  RequestResult,
+} from '../../application/hooks/use_send_current_request/send_request';
+import type { DevToolsVariable } from '../../application/components';
 
 const { collapseLiteralStrings, expandLiteralStrings } = XJson;
 
@@ -107,4 +111,67 @@ export const getResponseWithMostSevereStatusCode = (requestData: RequestResult[]
       .sort((a, b) => a.response.statusCode - b.response.statusCode)
       .pop();
   }
+};
+
+export const replaceVariables = (
+  requests: RequestArgs['requests'],
+  variables: DevToolsVariable[]
+) => {
+  const urlRegex = /(\${\w+})/g;
+  const bodyRegex = /("\${\w+}")/g;
+  return requests.map((req) => {
+    if (urlRegex.test(req.url)) {
+      req.url = req.url.replaceAll(urlRegex, (match) => {
+        // Sanitize variable name
+        const key = match.replace('${', '').replace('}', '');
+        const variable = variables.find(({ name }) => name === key);
+
+        return variable?.value ?? match;
+      });
+    }
+
+    if (req.data.length) {
+      if (bodyRegex.test(req.data[0])) {
+        const data = req.data[0].replaceAll(bodyRegex, (match) => {
+          // Sanitize variable name
+          const key = match.replace('"${', '').replace('}"', '');
+          const variable = variables.find(({ name }) => name === key);
+
+          if (variable) {
+            // All values must be stringified to send a successful request to ES.
+            const { value } = variable;
+
+            const isStringifiedObject = value.startsWith('{') && value.endsWith('}');
+            if (isStringifiedObject) {
+              return value;
+            }
+
+            const isStringifiedNumber = !isNaN(parseFloat(value));
+            if (isStringifiedNumber) {
+              return value;
+            }
+
+            const isStringifiedArray = value.startsWith('[') && value.endsWith(']');
+            if (isStringifiedArray) {
+              return value;
+            }
+
+            const isStringifiedBool = value === 'true' || value === 'false';
+            if (isStringifiedBool) {
+              return value;
+            }
+
+            // At this point the value must be an unstringified string, so we have to stringify it.
+            // Example: 'stringValue' -> '"stringValue"'
+            return JSON.stringify(value);
+          }
+
+          return match;
+        });
+        req.data = [data];
+      }
+    }
+
+    return req;
+  });
 };

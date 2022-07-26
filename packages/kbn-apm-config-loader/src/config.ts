@@ -209,6 +209,9 @@ export class ApmConfiguration {
       return {};
     }
 
+    const isPr =
+      !!process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false';
+
     return {
       globalLabels: {
         branch: process.env.GIT_BRANCH || '',
@@ -216,8 +219,8 @@ export class ApmConfiguration {
         ciBuildNumber: process.env.BUILDKITE_BUILD_NUMBER || '',
         ciBuildId: process.env.BUILDKITE_BUILD_ID || '',
         ciBuildJobId: process.env.BUILDKITE_JOB_ID || '',
-        isPr: process.env.BUILDKITE_PULL_REQUEST ? true : false,
-        prId: process.env.BUILDKITE_PULL_REQUEST || '',
+        isPr,
+        prId: isPr ? process.env.BUILDKITE_PULL_REQUEST : '',
       },
     };
   }

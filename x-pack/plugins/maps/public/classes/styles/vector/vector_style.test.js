@@ -35,6 +35,12 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
   const previousFieldName = 'doIStillExist';
   const mapColors = [];
   const layer = {
+    getMaxZoom: () => {
+      return 24;
+    },
+    getMinZoom: () => {
+      return 0;
+    },
     getSource: () => {
       return {
         isMvt: () => {

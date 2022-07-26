@@ -10,7 +10,6 @@ properties:
   host:
     type: string
 required:
-  - id
   - is_default
   - name
   - host

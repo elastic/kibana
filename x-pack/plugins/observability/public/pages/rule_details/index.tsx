@@ -15,20 +15,15 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutSize,
-  EuiButtonIcon,
   EuiPanel,
-  EuiTitle,
   EuiPopover,
   EuiTabbedContent,
   EuiEmptyPrompt,
   EuiSuperSelectOption,
+  EuiButton,
 } from '@elastic/eui';
 
 import {
-  enableRule,
-  disableRule,
-  snoozeRule,
-  unsnoozeRule,
   deleteRules,
   useLoadRuleTypes,
   RuleType,
@@ -39,6 +34,7 @@ import {
 import { ALERTS_FEATURE_ID, RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RuleDefinitionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DeleteModalConfirmation } from './components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from './components/center_justified_spinner';
 import { RuleDetailsPathParams, EVENT_LOG_LIST_TAB, ALERT_LIST_TAB } from './types';
@@ -47,29 +43,30 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { RULES_BREADCRUMB_TEXT } from '../rules/translations';
 import { PageTitle } from './components';
-import { useKibana } from '../../utils/kibana_react';
 import { getHealthColor } from './config';
 import { hasExecuteActionsCapability, hasAllPrivilege } from './config';
 import { paths } from '../../config/paths';
 import { observabilityFeatureId } from '../../../common';
 import { ALERT_STATUS_LICENSE_ERROR, rulesStatusesTranslationsMapping } from './translations';
-
+import { ObservabilityAppServices } from '../../application/types';
+import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 export function RuleDetailsPage() {
   const {
+    cases,
     http,
     triggersActionsUi: {
       alertsTableConfigurationRegistry,
       ruleTypeRegistry,
-      getRuleStatusDropdown,
       getEditAlertFlyout,
       getRuleEventLogList,
       getAlertsStateTable,
+      getRuleAlertsSummary,
       getRuleStatusPanel,
       getRuleDefinition,
     },
     application: { capabilities, navigateToUrl },
     notifications: { toasts },
-  } = useKibana().services;
+  } = useKibana<ObservabilityAppServices>().services;
 
   const { ruleId } = useParams<RuleDetailsPathParams>();
   const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
@@ -98,9 +95,10 @@ export function RuleDetailsPage() {
     loadNotifyWhenOption();
   }, []);
 
-  const handleClosePopover = useCallback(() => setIsRuleEditPopoverOpen(false), []);
+  const togglePopover = () =>
+    setIsRuleEditPopoverOpen((pervIsRuleEditPopoverOpen) => !pervIsRuleEditPopoverOpen);
 
-  const handleOpenPopover = useCallback(() => setIsRuleEditPopoverOpen(true), []);
+  const handleClosePopover = () => setIsRuleEditPopoverOpen(false);
 
   const handleRemoveRule = useCallback(() => {
     setIsRuleEditPopoverOpen(false);
@@ -155,7 +153,12 @@ export function RuleDetailsPage() {
       ? !ruleTypeRegistry.get(rule.ruleTypeId).requiresAppContext
       : false);
 
+  const userPermissions = useGetUserCasesPermissions();
   const alertStateProps = {
+    cases: {
+      ui: cases.ui,
+      permissions: userPermissions,
+    },
     alertsTableConfigurationRegistry,
     configurationId: observabilityFeatureId,
     id: `case-details-alerts-o11y`,
@@ -182,8 +185,9 @@ export function RuleDetailsPage() {
         defaultMessage: 'Execution history',
       }),
       'data-test-subj': 'eventLogListTab',
-      content: getRuleEventLogList({
+      content: getRuleEventLogList<'default'>({
         rule,
+        ruleType,
       } as RuleEventLogListProps),
     },
     {
@@ -233,20 +237,6 @@ export function RuleDetailsPage() {
     ? ALERT_STATUS_LICENSE_ERROR
     : rulesStatusesTranslationsMapping[rule.executionStatus.status];
 
-  const getRuleStatusComponent = () =>
-    getRuleStatusDropdown({
-      rule,
-      enableRule: async () => await enableRule({ http, id: rule.id }),
-      disableRule: async () => await disableRule({ http, id: rule.id }),
-      onRuleChanged: () => reloadRule(),
-      hideSnoozeOption: true,
-      isEditable: hasEditButton,
-      snoozeRule: async (snoozeSchedule) => {
-        await snoozeRule({ http, id: rule.id, snoozeSchedule });
-      },
-      unsnoozeRule: async (scheduleIds) => await unsnoozeRule({ http, id: rule.id, scheduleIds }),
-    });
-
   return (
     <ObservabilityPageTemplate
       data-test-subj="ruleDetails"
@@ -262,14 +252,17 @@ export function RuleDetailsPage() {
                     isOpen={isRuleEditPopoverOpen}
                     closePopover={handleClosePopover}
                     button={
-                      <EuiButtonIcon
-                        display="base"
-                        size="m"
-                        iconType="boxesHorizontal"
-                        aria-label="More"
-                        onClick={handleOpenPopover}
-                        data-test-subj="moreButton"
-                      />
+                      <EuiButton
+                        fill
+                        iconSide="right"
+                        onClick={togglePopover}
+                        iconType="arrowDown"
+                        data-test-subj="actions"
+                      >
+                        {i18n.translate('xpack.observability.ruleDetails.actionsButtonLabel', {
+                          defaultMessage: 'Actions',
+                        })}
+                      </EuiButton>
                     }
                   >
                     <EuiFlexGroup direction="column" alignItems="flexStart">
@@ -305,38 +298,30 @@ export function RuleDetailsPage() {
                   </EuiPopover>
                 </EuiFlexItem>
                 <EuiSpacer size="s" />
-                <EuiFlexItem>
-                  <EuiTitle size="xxs">
-                    <EuiFlexItem>
-                      {i18n.translate('xpack.observability.ruleDetails.triggreAction.status', {
-                        defaultMessage: 'Status',
-                      })}
-                    </EuiFlexItem>
-                  </EuiTitle>
-
-                  {getRuleStatusComponent()}
-                </EuiFlexItem>
               </EuiFlexGroup>,
             ]
           : [],
       }}
     >
       <EuiFlexGroup wrap={true} gutterSize="m">
-        {/* Left side of Rule Summary */}
-        {getRuleStatusPanel({
-          rule,
-          isEditable: hasEditButton,
-          requestRefresh: reloadRule,
-          healthColor: getHealthColor(rule.executionStatus.status),
-          statusMessage,
-        })}
-
-        {/* Right side of Rule Summary */}
-        {getRuleDefinition({
-          filteredRuleTypes,
-          rule,
-          onEditRule: () => reloadRule(),
-        } as RuleDefinitionProps)}
+        <EuiFlexItem style={{ minWidth: 350 }}>
+          {getRuleStatusPanel({
+            rule,
+            isEditable: hasEditButton,
+            requestRefresh: reloadRule,
+            healthColor: getHealthColor(rule.executionStatus.status),
+            statusMessage,
+          })}
+        </EuiFlexItem>
+        <EuiSpacer size="m" />
+        <EuiFlexItem style={{ minWidth: 350 }}>
+          {getRuleAlertsSummary({
+            rule,
+            filteredRuleTypes,
+          })}
+        </EuiFlexItem>
+        <EuiSpacer size="m" />
+        {getRuleDefinition({ rule, onEditRule: () => reloadRule() } as RuleDefinitionProps)}
       </EuiFlexGroup>
 
       <EuiSpacer size="l" />

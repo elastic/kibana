@@ -23,10 +23,6 @@ export const useStyles = () => {
       borderRight: border.thin,
     };
 
-    const treeViewNav: CSSObject = {
-      width: '284px',
-    };
-
     const sessionsPanel: CSSObject = {
       overflowX: 'auto',
     };
@@ -34,7 +30,6 @@ export const useStyles = () => {
     return {
       outerPanel,
       navPanel,
-      treeViewNav,
       sessionsPanel,
     };
   }, [euiTheme]);

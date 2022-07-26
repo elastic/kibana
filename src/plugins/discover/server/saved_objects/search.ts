@@ -38,6 +38,7 @@ export function getSavedSearchObjectType(
         description: { type: 'text' },
         viewMode: { type: 'keyword', index: false, doc_values: false },
         hideChart: { type: 'boolean', index: false, doc_values: false },
+        isTextBasedQuery: { type: 'boolean', index: false, doc_values: false },
         hideAggregatedPreview: { type: 'boolean', index: false, doc_values: false },
         hits: { type: 'integer', index: false, doc_values: false },
         kibanaSavedObjectMeta: {
@@ -50,6 +51,7 @@ export function getSavedSearchObjectType(
         grid: { type: 'object', enabled: false },
         version: { type: 'integer' },
         rowHeight: { type: 'text' },
+        rowsPerPage: { type: 'integer', index: false, doc_values: false },
       },
     },
     migrations: () => getAllMigrations(getSearchSourceMigrations()),

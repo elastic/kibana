@@ -31,6 +31,7 @@ RUNTIME_DEPS = [
   "@npm//elastic-apm-node",
   "//packages/elastic-safer-lodash-set",
   "//packages/kbn-config-schema",
+  "//packages/kbn-std",
 ]
 
 TYPES_DEPS = [

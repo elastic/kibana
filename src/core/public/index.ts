@@ -42,7 +42,9 @@ import type {
   FatalErrorsStart,
   FatalErrorInfo,
 } from '@kbn/core-fatal-errors-browser';
+import type { UiSettingsState, IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { DeprecationsServiceStart } from '@kbn/core-deprecations-browser';
+import type { Capabilities } from '@kbn/core-capabilities-common';
 import type {
   ChromeBadge,
   ChromeBreadcrumb,
@@ -73,8 +75,7 @@ import type {
   PluginInitializerContext,
   PluginOpaqueId,
 } from './plugins';
-import type { UiSettingsState, IUiSettingsClient } from './ui_settings';
-import type { ApplicationSetup, Capabilities, ApplicationStart } from './application';
+import type { ApplicationSetup, ApplicationStart } from './application';
 import type { SavedObjectsStart } from './saved_objects';
 
 export type { PackageInfo, EnvironmentMode } from '@kbn/config';
@@ -82,7 +83,12 @@ export type { DomainDeprecationDetails } from '@kbn/core-deprecations-common';
 export type { CoreContext } from '@kbn/core-base-browser-internal';
 export type { CoreSystem } from './core_system';
 export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
-export type { AppCategory, UiSettingsParams, UserProvidedValues, UiSettingsType } from '../types';
+export type { AppCategory } from '../types';
+export type {
+  UiSettingsParams,
+  UserProvidedValues,
+  UiSettingsType,
+} from '@kbn/core-ui-settings-common';
 
 export type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 export type {
@@ -122,31 +128,33 @@ export type {
   NavigateToUrlOptions,
 } from './application';
 
-export { SimpleSavedObject } from './saved_objects';
-export type { ResolvedSimpleSavedObject } from './saved_objects';
+export { SimpleSavedObjectImpl } from './saved_objects';
 export type {
-  SavedObjectsBatchResponse,
-  SavedObjectsBulkCreateObject,
-  SavedObjectsBulkCreateOptions,
-  SavedObjectsBulkResolveObject,
-  SavedObjectsBulkResolveResponse,
-  SavedObjectsBulkUpdateObject,
-  SavedObjectsBulkUpdateOptions,
+  SavedObjectsClientContract,
+  SimpleSavedObject,
   SavedObjectsCreateOptions,
-  SavedObjectsFindResponsePublic,
-  SavedObjectsResolveResponse,
+  SavedObjectsDeleteOptions,
+  SavedObjectsBatchResponse,
+  SavedObjectsFindOptions,
+  SavedObjectsFindOptionsReference,
   SavedObjectsUpdateOptions,
+  ResolvedSimpleSavedObject,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsFindResponse,
+  SavedObjectsBulkCreateOptions,
+  SavedObjectsBulkUpdateOptions,
+  SavedObjectsBulkResolveResponse,
+  SavedObjectsBulkCreateObject,
+} from '@kbn/core-saved-objects-api-browser';
+export type {
   SavedObject,
+  SavedObjectTypeIdTuple,
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectAttributeSingle,
   SavedObjectError,
   SavedObjectReference,
-  SavedObjectsBaseOptions,
-  SavedObjectsFindOptions,
-  SavedObjectsFindOptionsReference,
   SavedObjectsMigrationVersion,
-  SavedObjectsClientContract,
   SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
   SavedObjectsImportConflictError,
@@ -160,9 +168,7 @@ export type {
   SavedObjectsImportSimpleWarning,
   SavedObjectsImportActionRequiredWarning,
   SavedObjectsImportWarning,
-  SavedObjectReferenceWithContext,
-  SavedObjectsCollectMultiNamespaceReferencesResponse,
-} from './saved_objects';
+} from '@kbn/core-saved-objects-common';
 
 export type {
   HttpHeadersInit,

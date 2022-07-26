@@ -68,7 +68,7 @@ export async function runKibanaServer({
   };
 
   const prefixArgs = devMode
-    ? [Path.relative(process.cwd(), Path.resolve(REPO_ROOT, 'scripts/kibana'))]
+    ? [Path.relative(procRunnerOpts.cwd, Path.resolve(REPO_ROOT, 'scripts/kibana'))]
     : [];
 
   const buildArgs: string[] = config.get('kbnTestServer.buildArgs') || [];
@@ -78,9 +78,7 @@ export async function runKibanaServer({
   const kbnFlags = parseRawFlags([
     // When installDir is passed, we run from a built version of Kibana which uses different command line
     // arguments. If installDir is not passed, we run from source code.
-    ...(installDir
-      ? [...buildArgs, ...serverArgs.filter((a: string) => a !== '--oss')]
-      : [...sourceArgs, ...serverArgs]),
+    ...(installDir ? [...buildArgs, ...serverArgs] : [...sourceArgs, ...serverArgs]),
 
     // We also allow passing in extra Kibana server options, tack those on here so they always take precedence
     ...(options.extraKbnOpts ?? []),

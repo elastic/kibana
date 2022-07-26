@@ -965,7 +965,7 @@
             "label": "listTypes",
             "description": [],
             "signature": [
-              "() => ",
+              "(featureId?: string | undefined) => ",
               {
                 "pluginId": "actions",
                 "scope": "common",
@@ -978,7 +978,21 @@
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
             "returnComment": [],
-            "children": []
+            "children": [
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.ActionsApiRequestHandlerContext.listTypes.$1",
+                "type": "string",
+                "tags": [],
+                "label": "featureId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/actions/server/action_type_registry.ts",
+                "deprecated": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -1096,6 +1110,19 @@
             "description": [],
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
+            ],
+            "path": "x-pack/plugins/actions/server/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ActionType.supportedFeatureIds",
+            "type": "Array",
+            "tags": [],
+            "label": "supportedFeatureIds",
+            "description": [],
+            "signature": [
+              "string[]"
             ],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false
@@ -1553,7 +1580,7 @@
         "label": "ActionParamsType",
         "description": [],
         "signature": [
-          "{ readonly message: string; readonly to: string[]; readonly subject: string; readonly cc: string[]; readonly bcc: string[]; readonly kibanaFooterLink: Readonly<{} & { text: string; path: string; }>; }"
+          "{ readonly to: string[]; readonly message: string; readonly subject: string; readonly cc: string[]; readonly bcc: string[]; readonly kibanaFooterLink: Readonly<{} & { path: string; text: string; }>; }"
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/email.ts",
         "deprecated": false,
@@ -1581,7 +1608,7 @@
         "label": "ActionParamsType",
         "description": [],
         "signature": [
-          "{ readonly source?: string | undefined; readonly group?: string | undefined; readonly component?: string | undefined; readonly summary?: string | undefined; readonly timestamp?: string | undefined; readonly eventAction?: \"resolve\" | \"trigger\" | \"acknowledge\" | undefined; readonly dedupKey?: string | undefined; readonly severity?: \"error\" | \"warning\" | \"info\" | \"critical\" | undefined; readonly class?: string | undefined; }"
+          "{ readonly group?: string | undefined; readonly source?: string | undefined; readonly component?: string | undefined; readonly summary?: string | undefined; readonly timestamp?: string | undefined; readonly eventAction?: \"resolve\" | \"trigger\" | \"acknowledge\" | undefined; readonly dedupKey?: string | undefined; readonly severity?: \"error\" | \"warning\" | \"info\" | \"critical\" | undefined; readonly class?: string | undefined; }"
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/pagerduty.ts",
         "deprecated": false,
@@ -1665,7 +1692,7 @@
         "label": "ActionParamsType",
         "description": [],
         "signature": [
-          "Readonly<{} & { subAction: \"getFields\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"getIncident\"; subActionParams: Readonly<{} & { externalId: string; }>; }> | Readonly<{} & { subAction: \"handshake\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"pushToService\"; subActionParams: Readonly<{} & { incident: Readonly<{} & { description: string | null; name: string; externalId: string | null; incidentTypes: number[] | null; severityCode: number | null; }>; comments: Readonly<{} & { comment: string; commentId: string; }>[] | null; }>; }> | Readonly<{} & { subAction: \"incidentTypes\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"severity\"; subActionParams: Readonly<{} & {}>; }>"
+          "Readonly<{} & { subAction: \"getFields\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"getIncident\"; subActionParams: Readonly<{} & { externalId: string; }>; }> | Readonly<{} & { subAction: \"handshake\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"pushToService\"; subActionParams: Readonly<{} & { incident: Readonly<{} & { name: string; description: string | null; externalId: string | null; incidentTypes: number[] | null; severityCode: number | null; }>; comments: Readonly<{} & { comment: string; commentId: string; }>[] | null; }>; }> | Readonly<{} & { subAction: \"incidentTypes\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"severity\"; subActionParams: Readonly<{} & {}>; }>"
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/resilient/index.ts",
         "deprecated": false,
@@ -1707,7 +1734,17 @@
         "label": "ActionsClient",
         "description": [],
         "signature": [
-          "{ create: ({ action: { actionTypeId, name, config, secrets }, }: ",
+          "{ execute: ({ actionId, params, source, relatedSavedObjects, }: Omit<",
+          "ExecuteOptions",
+          "<unknown>, \"request\">) => Promise<",
+          {
+            "pluginId": "actions",
+            "scope": "common",
+            "docId": "kibActionsPluginApi",
+            "section": "def-common.ActionTypeExecutorResult",
+            "text": "ActionTypeExecutorResult"
+          },
+          "<unknown>>; create: ({ action: { actionTypeId, name, config, secrets }, }: ",
           "CreateOptions",
           ") => Promise<",
           {
@@ -1741,17 +1778,7 @@
           },
           "<",
           "ActionTypeConfig",
-          ">>; execute: ({ actionId, params, source, relatedSavedObjects, }: Omit<",
-          "ExecuteOptions",
-          "<unknown>, \"request\">) => Promise<",
-          {
-            "pluginId": "actions",
-            "scope": "common",
-            "docId": "kibActionsPluginApi",
-            "section": "def-common.ActionTypeExecutorResult",
-            "text": "ActionTypeExecutorResult"
-          },
-          "<unknown>>; getAll: () => Promise<",
+          ">>; getAll: () => Promise<",
           {
             "pluginId": "actions",
             "scope": "server",
@@ -1783,7 +1810,7 @@
             "section": "def-server.RunNowResult",
             "text": "RunNowResult"
           },
-          ">; listTypes: () => Promise<",
+          ">; listTypes: (featureId?: string | undefined) => Promise<",
           {
             "pluginId": "actions",
             "scope": "common",
@@ -2453,6 +2480,37 @@
     "functions": [
       {
         "parentPluginId": "actions",
+        "id": "def-common.areValidFeatures",
+        "type": "Function",
+        "tags": [],
+        "label": "areValidFeatures",
+        "description": [],
+        "signature": [
+          "(ids: string[]) => boolean"
+        ],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.areValidFeatures.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "ids",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
         "id": "def-common.buildAlertHistoryDocument",
         "type": "Function",
         "tags": [],
@@ -2475,6 +2533,37 @@
               "Record<string, unknown>"
             ],
             "path": "x-pack/plugins/actions/common/alert_history_schema.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.getConnectorFeatureName",
+        "type": "Function",
+        "tags": [],
+        "label": "getConnectorFeatureName",
+        "description": [],
+        "signature": [
+          "(id: string) => string"
+        ],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.getConnectorFeatureName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -2911,6 +3000,19 @@
             ],
             "path": "x-pack/plugins/actions/common/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.ActionType.supportedFeatureIds",
+            "type": "Array",
+            "tags": [],
+            "label": "supportedFeatureIds",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/actions/common/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -3288,6 +3390,20 @@
       },
       {
         "parentPluginId": "actions",
+        "id": "def-common.AlertingConnectorFeatureId",
+        "type": "string",
+        "tags": [],
+        "label": "AlertingConnectorFeatureId",
+        "description": [],
+        "signature": [
+          "\"alerting\""
+        ],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
         "id": "def-common.AsApiContract",
         "type": "Type",
         "tags": [],
@@ -3311,6 +3427,20 @@
           "\"/api/actions\""
         ],
         "path": "x-pack/plugins/actions/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.CasesConnectorFeatureId",
+        "type": "string",
+        "tags": [],
+        "label": "CasesConnectorFeatureId",
+        "description": [],
+        "signature": [
+          "\"cases\""
+        ],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3442,6 +3572,20 @@
       },
       {
         "parentPluginId": "actions",
+        "id": "def-common.SecurityConnectorFeatureId",
+        "type": "string",
+        "tags": [],
+        "label": "SecurityConnectorFeatureId",
+        "description": [],
+        "signature": [
+          "\"siem\""
+        ],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
         "id": "def-common.ServiceNowITOMActionTypeId",
         "type": "string",
         "tags": [],
@@ -3531,9 +3675,89 @@
         "path": "x-pack/plugins/actions/common/servicenow_config.ts",
         "deprecated": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.UptimeConnectorFeatureId",
+        "type": "string",
+        "tags": [],
+        "label": "UptimeConnectorFeatureId",
+        "description": [],
+        "signature": [
+          "\"uptime\""
+        ],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.AlertingConnectorFeature",
+        "type": "Object",
+        "tags": [],
+        "label": "AlertingConnectorFeature",
+        "description": [],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.AlertingConnectorFeature.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.AlertingConnectorFeature.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.CasesConnectorFeature",
+        "type": "Object",
+        "tags": [],
+        "label": "CasesConnectorFeature",
+        "description": [],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.CasesConnectorFeature.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.CasesConnectorFeature.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "actions",
         "id": "def-common.MustacheInEmailRegExp",
@@ -3546,6 +3770,39 @@
         ],
         "path": "x-pack/plugins/actions/common/mustache_template.ts",
         "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.SecuritySolutionFeature",
+        "type": "Object",
+        "tags": [],
+        "label": "SecuritySolutionFeature",
+        "description": [],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.SecuritySolutionFeature.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.SecuritySolutionFeature.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -3772,6 +4029,39 @@
                 "deprecated": false
               }
             ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.UptimeConnectorFeature",
+        "type": "Object",
+        "tags": [],
+        "label": "UptimeConnectorFeature",
+        "description": [],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.UptimeConnectorFeature.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.UptimeConnectorFeature.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false

@@ -7,7 +7,7 @@
 import { apm, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
 import { meanBy, sumBy } from 'lodash';
-import { BackendNode, ServiceNode } from '@kbn/apm-plugin/common/connections';
+import { DependencyNode, ServiceNode } from '@kbn/apm-plugin/common/connections';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { roundNumber } from '../../utils';
 
@@ -19,51 +19,57 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
-  async function getThroughputValues(overrides?: { serviceName?: string; backendName?: string }) {
+  async function getThroughputValues(overrides?: {
+    serviceName?: string;
+    dependencyName?: string;
+  }) {
     const commonQuery = {
       start: new Date(start).toISOString(),
       end: new Date(end).toISOString(),
       environment: 'ENVIRONMENT_ALL',
     };
-    const [topBackendsAPIResponse, backendThroughputChartAPIResponse, upstreamServicesApiResponse] =
-      await Promise.all([
-        apmApiClient.readUser({
-          endpoint: `GET /internal/apm/backends/top_backends`,
-          params: {
-            query: {
-              ...commonQuery,
-              numBuckets: 20,
-              kuery: '',
-            },
+    const [
+      topDependenciesAPIResponse,
+      dependencyThroughputChartAPIResponse,
+      upstreamServicesApiResponse,
+    ] = await Promise.all([
+      apmApiClient.readUser({
+        endpoint: `GET /internal/apm/dependencies/top_dependencies`,
+        params: {
+          query: {
+            ...commonQuery,
+            numBuckets: 20,
+            kuery: '',
           },
-        }),
-        apmApiClient.readUser({
-          endpoint: `GET /internal/apm/backends/charts/throughput`,
-          params: {
-            query: {
-              ...commonQuery,
-              backendName: overrides?.backendName || 'elasticsearch',
-              spanName: '',
-              searchServiceDestinationMetrics: false,
-              kuery: '',
-            },
+        },
+      }),
+      apmApiClient.readUser({
+        endpoint: `GET /internal/apm/dependencies/charts/throughput`,
+        params: {
+          query: {
+            ...commonQuery,
+            dependencyName: overrides?.dependencyName || 'elasticsearch',
+            spanName: '',
+            searchServiceDestinationMetrics: false,
+            kuery: '',
           },
-        }),
-        apmApiClient.readUser({
-          endpoint: `GET /internal/apm/backends/upstream_services`,
-          params: {
-            query: {
-              ...commonQuery,
-              backendName: overrides?.backendName || 'elasticsearch',
-              numBuckets: 20,
-              offset: '1d',
-              kuery: '',
-            },
+        },
+      }),
+      apmApiClient.readUser({
+        endpoint: `GET /internal/apm/dependencies/upstream_services`,
+        params: {
+          query: {
+            ...commonQuery,
+            dependencyName: overrides?.dependencyName || 'elasticsearch',
+            numBuckets: 20,
+            offset: '1d',
+            kuery: '',
           },
-        }),
-      ]);
-    const backendThroughputChartMean = roundNumber(
-      meanBy(backendThroughputChartAPIResponse.body.currentTimeseries, 'y')
+        },
+      }),
+    ]);
+    const dependencyThroughputChartMean = roundNumber(
+      meanBy(dependencyThroughputChartAPIResponse.body.currentTimeseries, 'y')
     );
 
     const upstreamServicesThroughput = upstreamServicesApiResponse.body.services.map(
@@ -76,11 +82,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     );
 
     return {
-      topBackends: topBackendsAPIResponse.body.backends.map((item) => [
-        (item.location as BackendNode).backendName,
+      topDependencies: topDependenciesAPIResponse.body.dependencies.map((item) => [
+        (item.location as DependencyNode).dependencyName,
         roundNumber(item.currentStats.throughput.value),
       ]),
-      backendThroughputChartMean,
+      dependencyThroughputChartMean,
       upstreamServicesThroughput,
     };
   }
@@ -166,34 +172,34 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           it('returns elasticsearch and postgresql as dependencies', () => {
-            const { topBackends } = throughputValues;
-            const topBackendsAsObj = Object.fromEntries(topBackends);
-            expect(topBackendsAsObj.elasticsearch).to.equal(
+            const { topDependencies } = throughputValues;
+            const topDependenciesAsObj = Object.fromEntries(topDependencies);
+            expect(topDependenciesAsObj.elasticsearch).to.equal(
               roundNumber(JAVA_PROD_RATE + GO_PROD_RATE)
             );
-            expect(topBackendsAsObj.postgresql).to.equal(roundNumber(GO_PROD_RATE));
+            expect(topDependenciesAsObj.postgresql).to.equal(roundNumber(GO_PROD_RATE));
           });
         });
 
         describe('compare throughput value between top backends, backend throughput chart and upstream services apis', () => {
           describe('elasticsearch dependency', () => {
             before(async () => {
-              throughputValues = await getThroughputValues({ backendName: 'elasticsearch' });
+              throughputValues = await getThroughputValues({ dependencyName: 'elasticsearch' });
             });
 
             it('matches throughput values between throughput chart and top dependency', () => {
-              const { topBackends, backendThroughputChartMean } = throughputValues;
-              const topBackendsAsObj = Object.fromEntries(topBackends);
-              const elasticsearchDependency = topBackendsAsObj.elasticsearch;
-              [elasticsearchDependency, backendThroughputChartMean].forEach((value) =>
+              const { topDependencies, dependencyThroughputChartMean } = throughputValues;
+              const topDependenciesAsObj = Object.fromEntries(topDependencies);
+              const elasticsearchDependency = topDependenciesAsObj.elasticsearch;
+              [elasticsearchDependency, dependencyThroughputChartMean].forEach((value) =>
                 expect(value).to.be.equal(roundNumber(JAVA_PROD_RATE + GO_PROD_RATE))
               );
             });
 
             it('matches throughput values between upstream services and top dependency', () => {
-              const { topBackends, upstreamServicesThroughput } = throughputValues;
-              const topBackendsAsObj = Object.fromEntries(topBackends);
-              const elasticsearchDependency = topBackendsAsObj.elasticsearch;
+              const { topDependencies, upstreamServicesThroughput } = throughputValues;
+              const topDependenciesAsObj = Object.fromEntries(topDependencies);
+              const elasticsearchDependency = topDependenciesAsObj.elasticsearch;
               const upstreamServiceThroughputSum = roundNumber(
                 sumBy(upstreamServicesThroughput, 'throughput')
               );
@@ -204,22 +210,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
           describe('postgresql dependency', () => {
             before(async () => {
-              throughputValues = await getThroughputValues({ backendName: 'postgresql' });
+              throughputValues = await getThroughputValues({ dependencyName: 'postgresql' });
             });
 
             it('matches throughput values between throughput chart and top dependency', () => {
-              const { topBackends, backendThroughputChartMean } = throughputValues;
-              const topBackendsAsObj = Object.fromEntries(topBackends);
-              const postgresqlDependency = topBackendsAsObj.postgresql;
-              [postgresqlDependency, backendThroughputChartMean].forEach((value) =>
+              const { topDependencies, dependencyThroughputChartMean } = throughputValues;
+              const topDependenciesAsObj = Object.fromEntries(topDependencies);
+              const postgresqlDependency = topDependenciesAsObj.postgresql;
+              [postgresqlDependency, dependencyThroughputChartMean].forEach((value) =>
                 expect(value).to.be.equal(roundNumber(GO_PROD_RATE))
               );
             });
 
             it('matches throughput values between upstream services and top dependency', () => {
-              const { topBackends, upstreamServicesThroughput } = throughputValues;
-              const topBackendsAsObj = Object.fromEntries(topBackends);
-              const postgresqlDependency = topBackendsAsObj.postgresql;
+              const { topDependencies, upstreamServicesThroughput } = throughputValues;
+              const topDependenciesAsObj = Object.fromEntries(topDependencies);
+              const postgresqlDependency = topDependenciesAsObj.postgresql;
               const upstreamServiceThroughputSum = roundNumber(
                 sumBy(upstreamServicesThroughput, 'throughput')
               );

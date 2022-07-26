@@ -39,6 +39,7 @@ TYPES_DEPS = [
   "//packages/kbn-config-schema:npm_module_types",
   "//packages/kbn-logging:npm_module_types",
   "//packages/core/base/core-base-server-internal:npm_module_types",
+  "//packages/core/logging/core-logging-server-internal:npm_module_types",
   "//packages/core/node/core-node-server:npm_module_types",
 ]
 

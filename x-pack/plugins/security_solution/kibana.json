@@ -12,22 +12,24 @@
     "actions",
     "alerting",
     "cases",
+    "cloudSecurityPosture",
     "data",
     "embeddable",
     "eventLog",
     "features",
     "inspector",
+    "kubernetesSecurity",
     "lens",
     "licensing",
     "maps",
     "ruleRegistry",
     "sessionView",
     "taskManager",
+    "threatIntelligence",
     "timelines",
     "triggersActionsUi",
     "uiActions",
-    "unifiedSearch",
-    "kubernetesSecurity"
+    "unifiedSearch"
   ],
   "optionalPlugins": [
     "encryptedSavedObjects",
@@ -42,7 +44,8 @@
     "home",
     "telemetry",
     "dataViewFieldEditor",
-    "osquery"
+    "osquery",
+    "savedObjectsTaggingOss"
   ],
   "server": true,
   "ui": true,

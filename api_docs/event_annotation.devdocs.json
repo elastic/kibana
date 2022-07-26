@@ -252,6 +252,23 @@
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "eventAnnotation",
+        "id": "def-common.fetchEventAnnotations",
+        "type": "Function",
+        "tags": [],
+        "label": "fetchEventAnnotations",
+        "description": [],
+        "signature": [
+          "() => ",
+          "FetchEventAnnotationsExpressionFunctionDefinition"
+        ],
+        "path": "src/plugins/event_annotation/common/fetch_event_annotations/index.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -284,6 +301,63 @@
             ],
             "path": "src/plugins/event_annotation/common/event_annotation_group/index.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "eventAnnotation",
+            "id": "def-common.EventAnnotationGroupArgs.index",
+            "type": "Object",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.IndexPatternExpressionType",
+                "text": "IndexPatternExpressionType"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/event_annotation/common/event_annotation_group/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "eventAnnotation",
+        "id": "def-common.FetchEventAnnotationsArgs",
+        "type": "Interface",
+        "tags": [],
+        "label": "FetchEventAnnotationsArgs",
+        "description": [],
+        "path": "src/plugins/event_annotation/common/fetch_event_annotations/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "eventAnnotation",
+            "id": "def-common.FetchEventAnnotationsArgs.group",
+            "type": "Array",
+            "tags": [],
+            "label": "group",
+            "description": [],
+            "signature": [
+              "EventAnnotationGroupOutput",
+              "[]"
+            ],
+            "path": "src/plugins/event_annotation/common/fetch_event_annotations/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "eventAnnotation",
+            "id": "def-common.FetchEventAnnotationsArgs.interval",
+            "type": "string",
+            "tags": [],
+            "label": "interval",
+            "description": [],
+            "path": "src/plugins/event_annotation/common/fetch_event_annotations/index.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -299,7 +373,7 @@
         "label": "AvailableAnnotationIcon",
         "description": [],
         "signature": [
-          "\"alert\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"tag\" | \"circle\" | \"triangle\""
+          "\"alert\" | \"circle\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"tag\" | \"triangle\""
         ],
         "path": "src/plugins/event_annotation/common/types.ts",
         "deprecated": false,
@@ -773,7 +847,7 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      "(\"alert\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"tag\" | \"circle\" | \"triangle\")[]"
+                      "(\"alert\" | \"circle\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"tag\" | \"triangle\")[]"
                     ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                     "deprecated": false

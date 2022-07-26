@@ -10,6 +10,49 @@ import { MockRouter, mockDependencies, mockRequestHandler } from '../../../__moc
 import { registerCrawlerRoutes } from './crawler';
 
 describe('crawler routes', () => {
+  describe('POST /internal/enterprise_search/crawler', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/internal/enterprise_search/crawler',
+      });
+
+      registerCrawlerRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request to enterprise search', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/api/ent/v1/internal/indices',
+      });
+    });
+
+    it('validates correctly with name and language', () => {
+      const request = { body: { index_name: 'index-name', language: 'en' } };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('validates correctly when language is null', () => {
+      const request = { body: { index_name: 'index-name', language: null } };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('fails validation without name', () => {
+      const request = { body: { language: 'en' } };
+      mockRouter.shouldThrow(request);
+    });
+
+    it('fails validation without language', () => {
+      const request = { body: { index_name: 'index-ame' } };
+      mockRouter.shouldThrow(request);
+    });
+  });
+
   describe('GET /internal/enterprise_search/indices/{indexName}/crawler', () => {
     let mockRouter: MockRouter;
 
@@ -430,7 +473,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/ent/v1/internal/crawler/validate_url',
+        path: '/api/ent/v1/internal/crawler2/validate_url',
       });
     });
 

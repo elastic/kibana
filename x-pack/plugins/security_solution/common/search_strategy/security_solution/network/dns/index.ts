@@ -28,7 +28,6 @@ export interface NetworkDnsStrategyResponse extends IEsSearchResponse {
   totalCount: number;
   pageInfo: PageInfoPaginated;
   inspect?: Maybe<Inspect>;
-  histogram?: Maybe<MatrixOverOrdinalHistogramData[]>;
 }
 
 export interface NetworkDnsEdges {
@@ -43,12 +42,6 @@ export interface NetworkDnsItem {
   dnsName?: Maybe<string>;
   queryCount?: Maybe<number>;
   uniqueDomains?: Maybe<number>;
-}
-
-export interface MatrixOverOrdinalHistogramData {
-  x: string;
-  y: number;
-  g: string;
 }
 
 export interface NetworkDnsBuckets {

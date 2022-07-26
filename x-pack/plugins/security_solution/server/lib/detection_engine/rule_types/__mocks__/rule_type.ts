@@ -88,7 +88,6 @@ export const createRuleTypeMocks = (
   return {
     dependencies: {
       alerting,
-      buildRuleMessage: jest.fn(),
       config$: mockedConfig$,
       lists: listMock.createSetup(),
       logger: loggerMock,

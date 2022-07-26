@@ -58,6 +58,7 @@ import { BuilderFactory } from './builder_factory';
 import { defaultSortField, isCommentRequestTypeExternalReferenceSO } from '../../common/utils';
 import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import { injectPersistableReferencesToSO } from '../../attachment_framework/so_references';
+import { IndexRefresh } from '../types';
 
 interface GetCaseUserActionArgs extends ClientArgs {
   caseId: string;
@@ -68,18 +69,18 @@ export interface UserActionItem {
   references: SavedObjectReference[];
 }
 
-interface PostCaseUserActionArgs extends ClientArgs {
+interface PostCaseUserActionArgs extends ClientArgs, IndexRefresh {
   actions: BuilderReturnValue[];
 }
 
-interface CreateUserActionES<T> extends ClientArgs {
+interface CreateUserActionES<T> extends ClientArgs, IndexRefresh {
   attributes: T;
   references: SavedObjectReference[];
 }
 
 type CommonUserActionArgs = ClientArgs & CommonArguments;
 
-interface BulkCreateCaseDeletionUserAction extends ClientArgs {
+interface BulkCreateCaseDeletionUserAction extends ClientArgs, IndexRefresh {
   cases: Array<{ id: string; owner: string; connectorId: string }>;
   user: User;
 }
@@ -90,18 +91,19 @@ interface GetUserActionItemByDifference extends CommonUserActionArgs {
   newValue: unknown;
 }
 
-interface BulkCreateBulkUpdateCaseUserActions extends ClientArgs {
+interface BulkCreateBulkUpdateCaseUserActions extends ClientArgs, IndexRefresh {
   originalCases: Array<SavedObject<CaseAttributes>>;
   updatedCases: Array<SavedObjectsUpdateResponse<CaseAttributes>>;
   user: User;
 }
 
-interface BulkCreateAttachmentUserAction extends Omit<CommonUserActionArgs, 'owner'> {
+interface BulkCreateAttachmentUserAction extends Omit<CommonUserActionArgs, 'owner'>, IndexRefresh {
   attachments: Array<{ id: string; owner: string; attachment: CommentRequest }>;
 }
 
 type CreateUserActionClient<T extends keyof BuilderParameters> = CreateUserAction<T> &
-  CommonUserActionArgs;
+  CommonUserActionArgs &
+  IndexRefresh;
 
 export class CaseUserActionService {
   private static readonly userActionFieldsAllowed: Set<string> = new Set(Object.keys(ActionTypes));
@@ -184,6 +186,7 @@ export class CaseUserActionService {
     unsecuredSavedObjectsClient,
     cases,
     user,
+    refresh,
   }: BulkCreateCaseDeletionUserAction): Promise<void> {
     this.log.debug(`Attempting to create a create case user action`);
     const userActionsWithReferences = cases.reduce<BuilderReturnValue[]>((acc, caseInfo) => {
@@ -204,7 +207,11 @@ export class CaseUserActionService {
       return [...acc, deleteCaseUserAction];
     }, []);
 
-    await this.bulkCreate({ unsecuredSavedObjectsClient, actions: userActionsWithReferences });
+    await this.bulkCreate({
+      unsecuredSavedObjectsClient,
+      actions: userActionsWithReferences,
+      refresh,
+    });
   }
 
   public async bulkCreateUpdateCase({
@@ -212,6 +219,7 @@ export class CaseUserActionService {
     originalCases,
     updatedCases,
     user,
+    refresh,
   }: BulkCreateBulkUpdateCaseUserActions): Promise<void> {
     const userActionsWithReferences = updatedCases.reduce<BuilderReturnValue[]>(
       (acc, updatedCase) => {
@@ -250,7 +258,11 @@ export class CaseUserActionService {
       []
     );
 
-    await this.bulkCreate({ unsecuredSavedObjectsClient, actions: userActionsWithReferences });
+    await this.bulkCreate({
+      unsecuredSavedObjectsClient,
+      actions: userActionsWithReferences,
+      refresh,
+    });
   }
 
   private async bulkCreateAttachment({
@@ -259,6 +271,7 @@ export class CaseUserActionService {
     attachments,
     user,
     action = Actions.create,
+    refresh,
   }: BulkCreateAttachmentUserAction): Promise<void> {
     this.log.debug(`Attempting to create a bulk create case user action`);
     const userActionsWithReferences = attachments.reduce<BuilderReturnValue[]>(
@@ -282,7 +295,11 @@ export class CaseUserActionService {
       []
     );
 
-    await this.bulkCreate({ unsecuredSavedObjectsClient, actions: userActionsWithReferences });
+    await this.bulkCreate({
+      unsecuredSavedObjectsClient,
+      actions: userActionsWithReferences,
+      refresh,
+    });
   }
 
   public async bulkCreateAttachmentDeletion({
@@ -290,6 +307,7 @@ export class CaseUserActionService {
     caseId,
     attachments,
     user,
+    refresh,
   }: BulkCreateAttachmentUserAction): Promise<void> {
     await this.bulkCreateAttachment({
       unsecuredSavedObjectsClient,
@@ -297,6 +315,7 @@ export class CaseUserActionService {
       attachments,
       user,
       action: Actions.delete,
+      refresh,
     });
   }
 
@@ -305,6 +324,7 @@ export class CaseUserActionService {
     caseId,
     attachments,
     user,
+    refresh,
   }: BulkCreateAttachmentUserAction): Promise<void> {
     await this.bulkCreateAttachment({
       unsecuredSavedObjectsClient,
@@ -312,6 +332,7 @@ export class CaseUserActionService {
       attachments,
       user,
       action: Actions.create,
+      refresh,
     });
   }
 
@@ -325,6 +346,7 @@ export class CaseUserActionService {
     payload,
     connectorId,
     attachmentId,
+    refresh,
   }: CreateUserActionClient<T>) {
     try {
       this.log.debug(`Attempting to create a user action of type: ${type}`);
@@ -342,7 +364,7 @@ export class CaseUserActionService {
 
       if (userAction) {
         const { attributes, references } = userAction;
-        await this.create({ unsecuredSavedObjectsClient, attributes, references });
+        await this.create({ unsecuredSavedObjectsClient, attributes, references, refresh });
       }
     } catch (error) {
       this.log.error(`Error on creating user action of type: ${type}. Error: ${error}`);
@@ -382,12 +404,14 @@ export class CaseUserActionService {
     unsecuredSavedObjectsClient,
     attributes,
     references,
+    refresh,
   }: CreateUserActionES<T>): Promise<void> {
     try {
       this.log.debug(`Attempting to POST a new case user action`);
 
       await unsecuredSavedObjectsClient.create<T>(CASE_USER_ACTION_SAVED_OBJECT, attributes, {
         references: references ?? [],
+        refresh,
       });
     } catch (error) {
       this.log.error(`Error on POST a new case user action: ${error}`);
@@ -398,6 +422,7 @@ export class CaseUserActionService {
   public async bulkCreate({
     unsecuredSavedObjectsClient,
     actions,
+    refresh,
   }: PostCaseUserActionArgs): Promise<void> {
     if (isEmpty(actions)) {
       return;
@@ -407,7 +432,8 @@ export class CaseUserActionService {
       this.log.debug(`Attempting to POST a new case user action`);
 
       await unsecuredSavedObjectsClient.bulkCreate(
-        actions.map((action) => ({ type: CASE_USER_ACTION_SAVED_OBJECT, ...action }))
+        actions.map((action) => ({ type: CASE_USER_ACTION_SAVED_OBJECT, ...action })),
+        { refresh }
       );
     } catch (error) {
       this.log.error(`Error on POST a new case user action: ${error}`);

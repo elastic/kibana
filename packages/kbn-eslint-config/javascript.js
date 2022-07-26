@@ -7,7 +7,7 @@ module.exports = {
      * Main JS configuration
      */
     {
-      files: ['**/*.js'],
+      files: ['**/*.js', '**/*.mjs'],
       parser: require.resolve('@babel/eslint-parser'),
 
       plugins: [

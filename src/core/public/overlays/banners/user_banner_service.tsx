@@ -15,7 +15,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 
 import type { I18nStart } from '@kbn/core-i18n-browser';
-import { IUiSettingsClient } from '../../ui_settings';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { OverlayBannersStart } from './banners_service';
 
 interface StartDeps {

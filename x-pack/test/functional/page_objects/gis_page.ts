@@ -302,6 +302,11 @@ export class GisPageObject extends FtrService {
     await this.testSubjects.click('layerVisibilityToggleButton');
   }
 
+  // In 8.4, EMS basemap layers no longer use EMS tile service name, instead using "Basemap"
+  async toggleEmsBasemapLayerVisibility() {
+    await this.toggleLayerVisibility('Basemap');
+  }
+
   async openLegend() {
     const isOpen = await this.testSubjects.exists('mapLayerTOC');
     if (isOpen === false) {
