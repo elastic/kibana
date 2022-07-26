@@ -20,6 +20,7 @@ import type {
 } from '../../../common/types';
 import type {
   GetAgentsRequestSchema,
+  GetTagsRequestSchema,
   GetOneAgentRequestSchema,
   UpdateAgentRequestSchema,
   DeleteAgentRequestSchema,
@@ -188,16 +189,18 @@ export const getAgentsHandler: RequestHandler<
   }
 };
 
-export const getAgentTagsHandler: RequestHandler<undefined, undefined, undefined> = async (
-  context,
-  request,
-  response
-) => {
+export const getAgentTagsHandler: RequestHandler<
+  undefined,
+  TypeOf<typeof GetTagsRequestSchema.query>
+> = async (context, request, response) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
 
   try {
-    const tags = await AgentService.getAgentTags(esClient);
+    const tags = await AgentService.getAgentTags(esClient, {
+      showInactive: request.query.showInactive,
+      kuery: request.query.kuery,
+    });
 
     const body: GetAgentTagsResponse = {
       items: tags,

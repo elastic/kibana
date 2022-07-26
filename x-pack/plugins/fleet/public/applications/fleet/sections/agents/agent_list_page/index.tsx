@@ -250,7 +250,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             sendGetAgentStatus({
               kuery: kuery && kuery !== '' ? kuery : undefined,
             }),
-            sendGetAgentTags(),
+            sendGetAgentTags({
+              kuery: kuery && kuery !== '' ? kuery : undefined,
+              showInactive,
+            }),
           ]);
           isLoadingVar.current = false;
           // Return if a newer request has been triggered
