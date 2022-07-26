@@ -11,7 +11,7 @@ import { Readable } from 'stream';
 
 import type { DownloadFileKindHttpEndpoint } from '../../../common/api_routes';
 import { fileErrors } from '../../file';
-import { getDownloadHeadersForFile } from '../common';
+import { getDownloadHeadersForFile, fileNameSchema } from '../common';
 import { getById } from './helpers';
 import type { FileKindsRequestHandler } from './types';
 
@@ -19,7 +19,7 @@ export const method = 'get' as const;
 
 export const paramsSchema = schema.object({
   id: schema.string(),
-  fileName: schema.maybe(schema.string()),
+  fileName: schema.maybe(fileNameSchema),
 });
 
 type Params = Ensure<DownloadFileKindHttpEndpoint['inputs']['params'], TypeOf<typeof paramsSchema>>;

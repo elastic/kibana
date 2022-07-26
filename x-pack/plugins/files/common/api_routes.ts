@@ -183,7 +183,7 @@ export type FileListSharesHttpEndpoint = HttpApiInterfaceEntryDefinition<
 >;
 
 export type FilePublicDownloadHttpEndpoint = HttpApiInterfaceEntryDefinition<
-  unknown,
+  { fileName?: string },
   { token: string },
   unknown,
   // Should be a readable stream
