@@ -17,7 +17,7 @@ jest.mock('../helpers/protected_rules', () => {
   return {
     PROTECTED_RULES: {
       '@kbn/disable/no_protected_eslint_disable': '*',
-      'no-console': ['xFolder', 'src/foo.ts'],
+      'no-console': '*',
     },
   };
 });
@@ -119,18 +119,6 @@ for (const [name, tester] of [tsTester, babelTester]) {
             let bar = 'ba';
             alert(foo);/* eslint-disable-line no-alert */
             bar += 'r';
-          `,
-        },
-        {
-          filename: 'src/foo.ts',
-          code: dedent`
-            // eslint-disable no-console
-          `,
-        },
-        {
-          filename: 'xFolder/foo.ts',
-          code: dedent`
-            // eslint-disable no-console
           `,
         },
       ],

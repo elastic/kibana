@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-// this configures the rules to protect.
-//   // rule_name: * => protected on every file
-//   // rule_name: [] => only protected on the paths included (it can be a folder or a specific file)
+// this configures the protected eslint rules on our codebase that can't be disabled
+//
+// rule_name: * => will make it impossible for rule_name to be eslint disabled
 export const PROTECTED_RULES = {
   '@kbn/disable/no_protected_eslint_disable': '*',
   '@kbn/disable/no_naked_eslint_disable': '*',

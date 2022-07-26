@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { REPO_ROOT } from '@kbn/utils';
-import { relative } from 'path';
 import Eslint from 'eslint';
 import { PROTECTED_RULES, getReportLocFromComment, parseEslintDisableComment } from '../helpers';
 
@@ -29,7 +27,7 @@ const meta: Eslint.Rule.RuleMetaData = {
 const getDisabledProtectedRule = function (
   sourceFilename: string,
   disabledRules: string[],
-  protectedRules: any
+  protectedRules: { [key: string]: string }
 ) {
   for (const disabledRule of disabledRules) {
     if (!protectedRules[disabledRule]) {
@@ -37,15 +35,6 @@ const getDisabledProtectedRule = function (
     }
 
     if (protectedRules[disabledRule] === '*') {
-      return disabledRule;
-    }
-
-    const relativeSourceFileName = relative(REPO_ROOT, sourceFilename);
-    const isSourceFileAllowedToDisableThisProtectedRule = protectedRules[disabledRule].some(
-      (allowedPath: string) => relativeSourceFileName.startsWith(allowedPath)
-    );
-
-    if (!isSourceFileAllowedToDisableThisProtectedRule) {
       return disabledRule;
     }
   }
