@@ -191,9 +191,11 @@ export function processNameSafeVersion(event: SafeResolverEvent): string | undef
 }
 
 export function eventID(event: SafeResolverEvent): number | undefined | string {
-  return firstNonNullValue(
-    isLegacyEventSafeVersion(event) ? event.endgame.serial_event_id : event.event?.id
-  );
+  if (isLegacyEventSafeVersion(event)) {
+    return firstNonNullValue(event.endgame?.serial_event_id);
+  } else {
+    return firstNonNullValue(event.event?.id);
+  }
 }
 
 /**
@@ -217,11 +219,11 @@ export function eventIDSafeVersion(event: SafeResolverEvent): number | undefined
 /**
  * The event.entity_id field.
  */
-export function entityId(event: ResolverEvent): string {
-  if (isLegacyEvent(event)) {
+export function entityId(event: SafeResolverEvent): string | undefined {
+  if (isLegacyEventSafeVersion(event)) {
     return event.endgame.unique_pid ? String(event.endgame.unique_pid) : '';
   }
-  return event.process.entity_id;
+  return firstNonNullValue(event.process?.entity_id);
 }
 
 /**

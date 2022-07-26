@@ -39,12 +39,8 @@ import {
   ruleExceptionListItemToTelemetryEvent,
 } from './helpers';
 import { Fetcher } from '../../endpoint/routes/resolver/tree/utils/fetch';
-import type { TreeOptions } from '../../endpoint/routes/resolver/tree/utils/fetch';
-import type {
-  ResolverNode,
-  SafeEndpointEvent,
-  ResolverSchema,
-} from '../../../common/endpoint/types';
+import type { TreeOptions, TreeResponse } from '../../endpoint/routes/resolver/tree/utils/fetch';
+import type { SafeEndpointEvent, ResolverSchema } from '../../../common/endpoint/types';
 import type {
   TelemetryEvent,
   EnhancedAlertEvent,
@@ -153,7 +149,7 @@ export interface ITelemetryReceiver {
     resolverSchema: ResolverSchema,
     startOfDay: string,
     endOfDay: string
-  ): Promise<ResolverNode[]>;
+  ): TreeResponse;
 
   fetchTimelineEvents(
     nodeIds: string[]
@@ -739,7 +735,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     resolverSchema: ResolverSchema,
     startOfDay: string,
     endOfDay: string
-  ): Promise<ResolverNode[]> {
+  ): TreeResponse {
     if (this.processTreeFetcher === undefined || this.processTreeFetcher === null) {
       throw Error(
         'resolver tree builder is unavailable: cannot build encoded endpoint event graph'
