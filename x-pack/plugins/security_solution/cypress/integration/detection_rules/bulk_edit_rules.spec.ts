@@ -88,12 +88,6 @@ const DEFAULT_INDEX_PATTERNS = ['index-1-*', 'index-2-*'];
 const TAGS = ['cypress-tag-1', 'cypress-tag-2'];
 const OVERWRITE_INDEX_PATTERNS = ['overwrite-index-1-*', 'overwrite-index-2-*'];
 
-const customRule = {
-  ...getNewRule(),
-  index: DEFAULT_INDEX_PATTERNS,
-  name: RULE_NAME,
-};
-
 const expectedNumberOfCustomRulesToBeEdited = 6;
 const expectedNumberOfMachineLearningRulesToBeEdited = 1;
 const expectedNumberOfNotMLRules =
@@ -108,7 +102,14 @@ describe('Detection rules, bulk edit', () => {
   beforeEach(() => {
     deleteAlertsAndRules();
     esArchiverResetKibana();
-    createCustomRule(customRule, '1');
+    createCustomRule(
+      {
+        ...getNewRule(),
+        name: RULE_NAME,
+        dataSource: { index: DEFAULT_INDEX_PATTERNS, type: 'indexPatterns' },
+      },
+      '1'
+    );
     createEventCorrelationRule(getEqlRule(), '2');
     createMachineLearningRule(getMachineLearningRule(), '3');
     createCustomIndicatorRule(getNewThreatIndicatorRule(), '4');

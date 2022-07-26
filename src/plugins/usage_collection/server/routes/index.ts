@@ -9,7 +9,7 @@
 import {
   IRouter,
   ISavedObjectsRepository,
-  MetricsServiceSetup,
+  type MetricsServiceSetup,
   ServiceStatus,
 } from '@kbn/core/server';
 import { Observable } from 'rxjs';

@@ -107,6 +107,6 @@ describe('RiskyHostLinks', () => {
       </Provider>
     );
 
-    expect(screen.getByTestId('risky-hosts-enable-module-button')).toBeInTheDocument();
+    expect(screen.getByTestId('disabled-open-in-console-button-with-tooltip')).toBeInTheDocument();
   });
 });

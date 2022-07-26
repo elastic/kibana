@@ -9,11 +9,13 @@ import { omit, partition, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import { getFlattenedObject } from '@kbn/std';
-import type { KibanaRequest } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type {
+  KibanaRequest,
   ElasticsearchClient,
   RequestHandlerContext,
   SavedObjectsClientContract,
+  Logger,
 } from '@kbn/core/server';
 import uuid from 'uuid';
 import { safeLoad } from 'js-yaml';
@@ -29,10 +31,8 @@ import {
   doesAgentPolicyAlreadyIncludePackage,
   validatePackagePolicy,
   validationHasErrors,
-  SO_SEARCH_LIMIT,
-  FLEET_APM_PACKAGE,
-  outputType,
-} from '../../common';
+} from '../../common/services';
+import { SO_SEARCH_LIMIT, FLEET_APM_PACKAGE, outputType } from '../../common/constants';
 import type {
   DeletePackagePoliciesResponse,
   UpgradePackagePolicyResponse,
@@ -46,7 +46,7 @@ import type {
   UpgradePackagePolicyDryRunResponseItem,
   RegistryDataStream,
   PackagePolicyPackage,
-} from '../../common';
+} from '../../common/types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import {
   IngestManagerError,
@@ -485,7 +485,19 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
           throw new PackagePolicyRestrictionRelatedError(`Cannot delete package policy ${id}`);
         }
 
-        if (!options?.skipUnassignFromAgentPolicies) {
+        const agentPolicy = await agentPolicyService
+          .get(soClient, packagePolicy.policy_id)
+          .catch((err) => {
+            if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+              appContextService
+                .getLogger()
+                .warn(`Agent policy ${packagePolicy.policy_id} not found`);
+              return null;
+            }
+            throw err;
+          });
+
+        if (agentPolicy && !options?.skipUnassignFromAgentPolicies) {
           await agentPolicyService.unassignPackagePolicies(
             soClient,
             esClient,
@@ -856,9 +868,10 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
 
   public async buildPackagePolicyFromPackage(
     soClient: SavedObjectsClientContract,
-    pkgName: string
+    pkgName: string,
+    logger?: Logger
   ): Promise<NewPackagePolicy | undefined> {
-    const pkgInstall = await getInstallation({ savedObjectsClient: soClient, pkgName });
+    const pkgInstall = await getInstallation({ savedObjectsClient: soClient, pkgName, logger });
     if (pkgInstall) {
       const [packageInfo, defaultOutputId] = await Promise.all([
         getPackageInfo({
@@ -1303,7 +1316,8 @@ export interface PackagePolicyServiceInterface {
 
   buildPackagePolicyFromPackage(
     soClient: SavedObjectsClientContract,
-    pkgName: string
+    pkgName: string,
+    logger?: Logger
   ): Promise<NewPackagePolicy | undefined>;
 
   runExternalCallbacks<A extends ExternalCallback[0]>(
@@ -1330,6 +1344,7 @@ export interface PackagePolicyServiceInterface {
     id: string
   ): Promise<{ packagePolicy: PackagePolicy; packageInfo: PackageInfo }>;
 }
+
 export const packagePolicyService: PackagePolicyServiceInterface = new PackagePolicyService();
 
 export type { PackagePolicyService };

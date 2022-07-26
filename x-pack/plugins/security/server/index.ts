@@ -40,6 +40,7 @@ export type {
   UserProfileBulkGetParams,
   UserProfileSuggestParams,
   UserProfileRequiredPrivileges,
+  UserProfileGetCurrentParams,
 } from './user_profile';
 
 export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
