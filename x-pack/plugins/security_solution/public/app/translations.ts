@@ -18,6 +18,13 @@ export const DETECTION_RESPONSE = i18n.translate(
   }
 );
 
+export const ENTITY_ANALYTICS = i18n.translate(
+  'xpack.securitySolution.navigation.entityAnalytics',
+  {
+    defaultMessage: 'Entity Analytics',
+  }
+);
+
 export const HOSTS = i18n.translate('xpack.securitySolution.navigation.hosts', {
   defaultMessage: 'Hosts',
 });
