@@ -22,7 +22,7 @@ import {
   EuiShowFor,
   EuiTitle,
 } from '@elastic/eui';
-import type {DataView, DataViewField, DataViewListItem} from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField, DataViewListItem } from '@kbn/data-views-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
