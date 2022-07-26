@@ -14,7 +14,7 @@ import { NO_FINDINGS_STATUS_TEST_SUBJ } from './test_subjects';
 import { CloudPosturePage } from './cloud_posture_page';
 import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
 
-const REFETCH_INTERVAL = 20000;
+const REFETCH_INTERVAL_MS = 20000;
 
 const NotDeployed = () => {
   // using an existing hook to get agent id and package policy id

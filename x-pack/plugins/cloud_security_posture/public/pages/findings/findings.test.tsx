@@ -26,7 +26,7 @@ import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_c
 import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
 import { render } from '@testing-library/react';
 import { useFindingsEsPit } from './es_pit/use_findings_es_pit';
-import { toBeOrNotToBe } from '../../test/utils';
+import { expectIdsInDoc } from '../../test/utils';
 
 jest.mock('../../common/api/use_latest_findings_data_view');
 jest.mock('../../common/api/use_setup_status_api');
@@ -75,7 +75,7 @@ describe('<Findings />', () => {
 
     renderFindingsPage();
 
-    toBeOrNotToBe({
+    expectIdsInDoc({
       be: [NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED],
       notToBe: [
         TEST_SUBJECTS.FINDINGS_CONTAINER,
@@ -96,7 +96,7 @@ describe('<Findings />', () => {
 
     renderFindingsPage();
 
-    toBeOrNotToBe({
+    expectIdsInDoc({
       be: [NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING],
       notToBe: [
         TEST_SUBJECTS.FINDINGS_CONTAINER,
@@ -117,7 +117,7 @@ describe('<Findings />', () => {
 
     renderFindingsPage();
 
-    toBeOrNotToBe({
+    expectIdsInDoc({
       be: [NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT],
       notToBe: [
         TEST_SUBJECTS.FINDINGS_CONTAINER,
@@ -147,7 +147,7 @@ describe('<Findings />', () => {
 
     renderFindingsPage();
 
-    toBeOrNotToBe({
+    expectIdsInDoc({
       be: [TEST_SUBJECTS.FINDINGS_CONTAINER],
       notToBe: [
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,

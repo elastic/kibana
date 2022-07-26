@@ -7,7 +7,7 @@
 
 import { screen } from '@testing-library/react';
 
-export const toBeOrNotToBe = ({ be = [], notToBe = [] }: { be: string[]; notToBe: string[] }) => {
+export const expectIdsInDoc = ({ be = [], notToBe = [] }: { be: string[]; notToBe: string[] }) => {
   be.forEach((testId) => {
     expect(screen.getByTestId(testId)).toBeInTheDocument();
   });

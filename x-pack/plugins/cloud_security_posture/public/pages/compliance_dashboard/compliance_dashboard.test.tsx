@@ -18,7 +18,7 @@ import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
 import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
 import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
-import { toBeOrNotToBe } from '../../test/utils';
+import { expectIdsInDoc } from '../../test/utils';
 
 jest.mock('../../common/api/use_setup_status_api');
 jest.mock('../../common/api/use_compliance_dashboard_data_api');
@@ -215,7 +215,7 @@ describe('<ComplianceDashboard />', () => {
 
     renderComplianceDashboardPage();
 
-    toBeOrNotToBe({
+    expectIdsInDoc({
       be: [NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED],
       notToBe: [
         DASHBOARD_CONTAINER,
@@ -236,7 +236,7 @@ describe('<ComplianceDashboard />', () => {
 
     renderComplianceDashboardPage();
 
-    toBeOrNotToBe({
+    expectIdsInDoc({
       be: [NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING],
       notToBe: [
         DASHBOARD_CONTAINER,
@@ -257,7 +257,7 @@ describe('<ComplianceDashboard />', () => {
 
     renderComplianceDashboardPage();
 
-    toBeOrNotToBe({
+    expectIdsInDoc({
       be: [NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT],
       notToBe: [
         DASHBOARD_CONTAINER,
@@ -276,7 +276,7 @@ describe('<ComplianceDashboard />', () => {
 
     renderComplianceDashboardPage();
 
-    toBeOrNotToBe({
+    expectIdsInDoc({
       be: [DASHBOARD_CONTAINER],
       notToBe: [
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
