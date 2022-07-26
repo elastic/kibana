@@ -28,13 +28,7 @@ import {
   SUCCESS_CHANGES_MESSAGE,
   BOOST_TYPE_TO_EMPTY_BOOST,
 } from './constants';
-import {
-  Boost,
-  BoostFunction,
-  BoostOperation,
-  BoostType,
-  SearchSettings,
-} from './types';
+import { Boost, BoostFunction, BoostOperation, BoostType, SearchSettings } from './types';
 import {
   filterIfTerm,
   parseBoostCenter,
