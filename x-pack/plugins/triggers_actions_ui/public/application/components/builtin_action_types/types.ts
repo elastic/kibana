@@ -14,7 +14,6 @@ export interface EmailActionParams {
   bcc: string[];
   subject: string;
   message: string;
-  isSummary: boolean;
 }
 
 export enum EventActionOptions {

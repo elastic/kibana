@@ -12,7 +12,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiSpacer,
   EuiFormRow,
   EuiAccordion,
   EuiButtonIcon,
@@ -24,9 +23,13 @@ import {
   EuiBadge,
   EuiErrorBoundary,
   EuiToolTip,
+  EuiSwitch,
+  EuiFieldNumber,
+  EuiSelect,
 } from '@elastic/eui';
 import { isEmpty, partition, some } from 'lodash';
 import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
+import { show_summary_option } from '../../lib/show_summary_option';
 import {
   IErrorObject,
   RuleAction,
@@ -42,6 +45,7 @@ import { transformActionVariables } from '../../lib/action_variables';
 import { useKibana } from '../../../common/lib/kibana';
 import { DefaultActionParams } from '../../lib/get_defaults_for_action_params';
 import { ConnectorsSelection } from './connectors_selection';
+import { getTimeOptions } from '../../../common/lib';
 
 export type ActionTypeFormProps = {
   actionItem: RuleAction;
@@ -106,6 +110,10 @@ export const ActionTypeForm = ({
   const [actionParamsErrors, setActionParamsErrors] = useState<{ errors: IErrorObject }>({
     errors: {},
   });
+  const [isSummary, setIsSummary] = useState(false);
+  const [notifyWhenValue, setNotifyWhenValue] = useState<string>('once');
+  const [actionThrottle, setActionThrottle] = useState<number>(1);
+  const [actionThrottleUnit, setActionThrottleUnit] = useState<string>('h');
 
   useEffect(() => {
     setAvailableActionVariables(
@@ -139,6 +147,25 @@ export const ActionTypeForm = ({
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionItem]);
+
+  useEffect(() => {
+    setActionParamsProperty('isSummary', isSummary, index);
+    if (isSummary && notifyWhenValue === 'everyTime') {
+      setNotifyWhenValue('once');
+    }
+    setActionParamsProperty('notifyWhen', notifyWhenValue, index);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSummary, notifyWhenValue]);
+
+  useEffect(() => {
+    setActionParamsProperty('actionThrottle', actionThrottle, index);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actionThrottle]);
+
+  useEffect(() => {
+    setActionParamsProperty('actionThrottleUnit', actionThrottleUnit, index);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actionThrottleUnit]);
 
   const canSave = hasSaveActionsCapability(capabilities);
 
@@ -177,11 +204,71 @@ export const ActionTypeForm = ({
     connectors.filter((connector) => connector.isPreconfigured)
   );
 
+  const notifyWhenOptions = [
+    {
+      value: 'once',
+      inputDisplay: `Once rule is in "${selectedActionGroup?.name}" status`,
+      dropdownDisplay: (
+        <>
+          <strong>Once rule is in &quot;{selectedActionGroup?.name}&quot; status</strong>
+          <EuiText size="s" color="subdued">
+            <p>Action runs when the rule status becomes Alert.</p>
+          </EuiText>
+        </>
+      ),
+    },
+    {
+      value: 'everyTime',
+      inputDisplay: `Every time rule is in "${selectedActionGroup?.name}" status`,
+      disabled: isSummary,
+      dropdownDisplay: (
+        <>
+          <strong>Every time rule is in &quot;Alert&quot; status</strong>
+          <EuiText size="s" color="subdued">
+            <p>
+              Actions repeat at the rule interval when the rule is active.
+              <br />
+              Note: This option cannot be used for summarized actions.
+            </p>
+          </EuiText>
+        </>
+      ),
+    },
+    {
+      value: 'interval',
+      inputDisplay: 'On a custom action interval',
+      dropdownDisplay: (
+        <>
+          <strong>On a custom action interval.</strong>
+          <EuiText size="s" color="subdued">
+            <p>Actions run using the interval you set.</p>
+          </EuiText>
+        </>
+      ),
+    },
+  ];
+
   const accordionContent = checkEnabledResult.isEnabled ? (
     <>
+      {show_summary_option(actionItem) && (
+        <EuiFormRow>
+          <>
+            <EuiSwitch
+              compressed
+              label="Summarize this action's notifications"
+              onChange={(e) => {
+                setIsSummary(!isSummary);
+              }}
+              checked={isSummary}
+            />{' '}
+            <EuiIconTip position="right" type="questionInCircle" content="Summarize helper text" />
+          </>
+        </EuiFormRow>
+      )}
       {actionGroups && selectedActionGroup && setActionGroupIdByIndex && (
-        <>
+        <EuiFormRow fullWidth>
           <EuiSuperSelect
+            disabled={isSummary}
             prepend={
               <EuiFormLabel htmlFor={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}>
                 <FormattedMessage
@@ -205,9 +292,68 @@ export const ActionTypeForm = ({
               setActionGroup(group);
             }}
           />
-
-          <EuiSpacer size="l" />
-        </>
+        </EuiFormRow>
+      )}
+      <EuiFormRow fullWidth>
+        <EuiSuperSelect
+          prepend="Notify when"
+          fullWidth
+          id={`addNewActionConnectorNotifyWhen-${actionItem.actionTypeId}`}
+          data-test-subj={`addNewActionConnectorNotifyWhen-${index}`}
+          valueOfSelected={notifyWhenValue}
+          options={notifyWhenOptions}
+          onChange={(when) => {
+            setNotifyWhenValue(when);
+          }}
+        />
+      </EuiFormRow>
+      {notifyWhenValue === 'interval' && (
+        <EuiFormRow fullWidth>
+          <EuiFlexGroup gutterSize="s">
+            {isSummary && (
+              <EuiFlexItem grow={2}>
+                <EuiSelect
+                  prepend="Of"
+                  value={'all'}
+                  options={[
+                    {
+                      value: 'all',
+                      text: 'All alerts since last run',
+                    },
+                    {
+                      value: 'last',
+                      text: 'Alerts of last rule run',
+                    },
+                  ]}
+                  onChange={(e) => {}}
+                />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={1}>
+              <EuiFieldNumber
+                fullWidth
+                min={1}
+                value={actionThrottle}
+                name="throttle"
+                data-test-subj="throttleInput"
+                prepend="Every"
+                onChange={(e) => {
+                  setActionThrottle(parseInt(e.target.value, 10));
+                }}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={1}>
+              <EuiSelect
+                data-test-subj="throttleUnitInput"
+                value={actionThrottleUnit}
+                options={getTimeOptions(1)}
+                onChange={(e) => {
+                  setActionThrottleUnit(e.target.value);
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFormRow>
       )}
       <EuiFormRow
         fullWidth
@@ -248,24 +394,27 @@ export const ActionTypeForm = ({
           onConnectorSelected={onConnectorSelected}
         />
       </EuiFormRow>
-      <EuiSpacer size="xl" />
       {ParamsFieldsComponent ? (
-        <EuiErrorBoundary>
-          <Suspense fallback={null}>
-            <ParamsFieldsComponent
-              actionParams={actionItem.params as any}
-              index={index}
-              errors={actionParamsErrors.errors}
-              editAction={setActionParamsProperty}
-              messageVariables={availableActionVariables}
-              defaultMessage={selectedActionGroup?.defaultActionMessage ?? defaultActionMessage}
-              defaultSummaryMessage={
-                selectedActionGroup?.defaultSummaryActionMessage ?? defaultSummaryActionMessage
-              }
-              actionConnector={actionConnector}
-            />
-          </Suspense>
-        </EuiErrorBoundary>
+        <EuiFormRow fullWidth>
+          <EuiErrorBoundary>
+            <Suspense fallback={null}>
+              <ParamsFieldsComponent
+                actionParams={actionItem.params as any}
+                index={index}
+                errors={actionParamsErrors.errors}
+                editAction={setActionParamsProperty}
+                messageVariables={availableActionVariables}
+                defaultMessage={
+                  isSummary
+                    ? selectedActionGroup?.defaultSummaryActionMessage ??
+                      defaultSummaryActionMessage
+                    : selectedActionGroup?.defaultActionMessage ?? defaultActionMessage
+                }
+                actionConnector={actionConnector}
+              />
+            </Suspense>
+          </EuiErrorBoundary>
+        </EuiFormRow>
       ) : null}
     </>
   ) : (

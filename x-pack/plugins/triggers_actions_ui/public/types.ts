@@ -158,7 +158,6 @@ export interface ActionParamsProps<TParams> {
   errors: IErrorObject;
   messageVariables?: ActionVariable[];
   defaultMessage?: string;
-  defaultSummaryMessage?: string;
   actionConnector?: ActionConnector;
   isLoading?: boolean;
   isDisabled?: boolean;
@@ -295,8 +294,6 @@ export interface RuleTypeParamsExpressionProps<
 > {
   ruleParams: Params;
   ruleInterval: string;
-  ruleThrottle: string;
-  alertNotifyWhen: RuleNotifyWhenType;
   setRuleParams: <Key extends keyof Params>(property: Key, value: Params[Key] | undefined) => void;
   setRuleProperty: <Prop extends keyof Rule>(
     key: Prop,

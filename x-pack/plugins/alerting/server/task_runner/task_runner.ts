@@ -461,24 +461,15 @@ export class TaskRunner<
 
       const alertsWithExecutableActions = Object.entries(activeAlerts).filter(
         ([alertName, alert]: [string, Alert<State, Context, ActionGroupIds>]) => {
-          const throttled = alert.isThrottled(throttle);
           const muted = mutedAlertIdsSet.has(alertName);
           let shouldExecuteAction = true;
 
-          if (throttled || muted) {
+          if (muted) {
             shouldExecuteAction = false;
             this.logger.debug(
               `skipping scheduling of actions for '${alertName}' in rule ${ruleLabel}: rule is ${
                 muted ? 'muted' : 'throttled'
               }`
-            );
-          } else if (
-            notifyWhen === 'onActionGroupChange' &&
-            !alert.scheduledActionGroupOrSubgroupHasChanged()
-          ) {
-            shouldExecuteAction = false;
-            this.logger.debug(
-              `skipping scheduling of actions for '${alertName}' in rule ${ruleLabel}: alert is active but action group has not changed`
             );
           }
 

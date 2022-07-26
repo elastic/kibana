@@ -110,6 +110,8 @@ export function createExecutionHandler<
         }),
       }));
 
+    // console.log('actions', actions);
+
     ruleRunMetricsStore.incrementNumberOfGeneratedActions(actions.length);
 
     const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);

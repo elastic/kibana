@@ -69,7 +69,6 @@ import { useKibana } from '../../../common/lib/kibana';
 import { recoveredActionGroupMessage } from '../../constants';
 import { getDefaultsForActionParams } from '../../lib/get_defaults_for_action_params';
 import { IsEnabledResult, IsDisabledResult } from '../../lib/check_rule_type_enabled';
-import { RuleNotifyWhen } from './rule_notify_when';
 import { checkRuleTypeEnabled } from '../../lib/check_rule_type_enabled';
 import { ruleTypeCompare, ruleTypeGroupCompare } from '../../lib/rule_type_compare';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
@@ -139,12 +138,6 @@ export const RuleForm = ({
     rule.schedule.interval
       ? getDurationUnitValue(rule.schedule.interval)
       : defaultScheduleIntervalUnit
-  );
-  const [ruleThrottle, setRuleThrottle] = useState<number | null>(
-    rule.throttle ? getDurationNumberInItsUnit(rule.throttle) : null
-  );
-  const [ruleThrottleUnit, setRuleThrottleUnit] = useState<string>(
-    rule.throttle ? getDurationUnitValue(rule.throttle) : 'h'
   );
   const [defaultActionGroupId, setDefaultActionGroupId] = useState<string | undefined>(undefined);
 
@@ -515,8 +508,6 @@ export const RuleForm = ({
             <RuleParamsExpressionComponent
               ruleParams={rule.params}
               ruleInterval={`${ruleInterval ?? 1}${ruleIntervalUnit}`}
-              ruleThrottle={`${ruleThrottle ?? 1}${ruleThrottleUnit}`}
-              alertNotifyWhen={rule.notifyWhen ?? 'onActionGroupChange'}
               errors={errors}
               setRuleParams={setRuleParams}
               setRuleProperty={setRuleProperty}
@@ -562,6 +553,7 @@ export const RuleForm = ({
                       : 'all',
                     defaultActionMessage:
                       ruleTypeModel?.defaultRecoveryMessage || recoveredActionGroupMessage,
+                    defaultSummaryActionMessage: ruleTypeModel?.defaultSummaryActionMessage,
                   }
                 : {
                     ...actionGroup,
@@ -749,27 +741,6 @@ export const RuleForm = ({
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <RuleNotifyWhen
-            rule={rule}
-            throttle={ruleThrottle}
-            throttleUnit={ruleThrottleUnit}
-            onNotifyWhenChange={useCallback(
-              (notifyWhen) => {
-                setRuleProperty('notifyWhen', notifyWhen);
-              },
-              [setRuleProperty]
-            )}
-            onThrottleChange={useCallback(
-              (throttle: number | null, throttleUnit: string) => {
-                setRuleThrottle(throttle);
-                setRuleThrottleUnit(throttleUnit);
-                setRuleProperty('throttle', throttle ? `${throttle}${throttleUnit}` : null);
-              },
-              [setRuleProperty]
-            )}
-          />
         </EuiFlexItem>
       </EuiFlexGrid>
       <EuiSpacer size="m" />
