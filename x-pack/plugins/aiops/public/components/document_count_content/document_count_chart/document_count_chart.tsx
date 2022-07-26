@@ -20,8 +20,10 @@ import {
   XYChartElementEvent,
   XYBrushEvent,
 } from '@elastic/charts';
+import { EuiBadge } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { DualBrush, DualBrushAnnotation } from '@kbn/aiops-components';
 import { getWindowParameters } from '@kbn/aiops-utils';
@@ -200,6 +202,9 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
     WindowParameters | undefined
   >();
   const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
+  const [windowParametersAsPixels, setWindowParametersAsPixels] = useState<
+    WindowParameters | undefined
+  >();
 
   useEffect(() => {
     if (isBrushedCleared && originalWindowParameters !== undefined) {
@@ -208,8 +213,9 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
     }
   }, [isBrushedCleared, originalWindowParameters]);
 
-  function onWindowParametersChange(wp: WindowParameters) {
+  function onWindowParametersChange(wp: WindowParameters, wpPx: WindowParameters) {
     setWindowParameters(wp);
+    setWindowParametersAsPixels(wpPx);
     brushSelectionUpdateHandler(wp, false);
   }
 
@@ -230,17 +236,56 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
     <>
       {isBrushVisible && (
         <div className="aiopsHistogramBrushes">
-          <DualBrush
-            windowParameters={originalWindowParameters}
-            min={timeRangeEarliest}
-            max={timeRangeLatest + interval}
-            onChange={onWindowParametersChange}
-            marginLeft={mlBrushMarginLeft}
-            width={mlBrushWidth}
-          />
+          <div
+            css={{
+              position: 'absolute',
+              'margin-left': `${
+                mlBrushMarginLeft + (windowParametersAsPixels?.baselineMin ?? 0)
+              }px`,
+            }}
+          >
+            <EuiBadge>
+              <FormattedMessage
+                id="xpack.aiops.documentCountChart.baselineBadgeContent"
+                defaultMessage="Baseline"
+              />
+            </EuiBadge>
+          </div>
+          <div
+            css={{
+              position: 'absolute',
+              'margin-left': `${
+                mlBrushMarginLeft + (windowParametersAsPixels?.deviationMin ?? 0)
+              }px`,
+            }}
+          >
+            <EuiBadge>
+              <FormattedMessage
+                id="xpack.aiops.documentCountChart.deviationBadgeContent"
+                defaultMessage="Deviation"
+              />
+            </EuiBadge>
+          </div>
+          <div
+            css={{
+              position: 'relative',
+              clear: 'both',
+              'padding-top': '20px',
+              'margin-bottom': '-4px',
+            }}
+          >
+            <DualBrush
+              windowParameters={originalWindowParameters}
+              min={timeRangeEarliest}
+              max={timeRangeLatest + interval}
+              onChange={onWindowParametersChange}
+              marginLeft={mlBrushMarginLeft}
+              width={mlBrushWidth}
+            />
+          </div>
         </div>
       )}
-      <div style={{ width: width ?? '100%' }} data-test-subj="aiopsDocumentCountChart">
+      <div css={{ width: width ?? '100%' }} data-test-subj="aiopsDocumentCountChart">
         <Chart
           size={{
             width: '100%',
