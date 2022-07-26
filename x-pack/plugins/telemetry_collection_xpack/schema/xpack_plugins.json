@@ -8,7 +8,7 @@
         "error_messages": {
           "type": "array",
           "items": {
-            "type": "keyword"
+            "type": "text"
           }
         },
         "alert_history_connector_enabled": {
@@ -276,7 +276,7 @@
         "error_messages": {
           "type": "array",
           "items": {
-            "type": "keyword"
+            "type": "text"
           }
         },
         "count_total": {

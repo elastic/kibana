@@ -24,7 +24,7 @@ export function createActionsUsageCollector(
     },
     schema: {
       has_errors: { type: 'boolean' },
-      error_messages: { type: 'array', items: { type: 'keyword' } },
+      error_messages: { type: 'array', items: { type: 'text' } },
       alert_history_connector_enabled: {
         type: 'boolean',
         _meta: { description: 'Indicates if preconfigured alert history connector is enabled.' },

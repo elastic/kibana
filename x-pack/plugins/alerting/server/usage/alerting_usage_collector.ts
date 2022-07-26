@@ -206,7 +206,7 @@ export function createAlertingUsageCollector(
       has_errors: { type: 'boolean' },
       error_messages: {
         type: 'array',
-        items: { type: 'keyword' },
+        items: { type: 'text' },
       },
       count_total: { type: 'long' },
       count_active_total: { type: 'long' },
