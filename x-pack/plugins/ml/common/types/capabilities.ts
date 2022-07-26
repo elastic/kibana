@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths, @kbn/imports/no_boundary_crossing
 import { KibanaRequest } from '@kbn/core/server';
 import { PLUGIN_ID } from '../constants/app';
 import {

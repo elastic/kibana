@@ -17,6 +17,7 @@ import {
 import { ShareWebsiteFlyout as FlyoutComponent } from './flyout.component';
 import { State, CanvasWorkpad } from '../../../../../types';
 import type { CanvasRenderedWorkpad } from '../../../../../shareable_runtime/types';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { renderFunctionNames } from '../../../../../shareable_runtime/supported_renderers';
 
 import { OnCloseFn } from '../share_menu.component';

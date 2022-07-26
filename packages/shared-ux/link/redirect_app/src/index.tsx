@@ -19,6 +19,7 @@ export {
   getMockServices as getRedirectAppLinksMockServices,
   getStoryArgTypes as getRedirectAppLinksStoryArgTypes,
   getStoryServices as getRedirectAppLinksStoryServices,
+  // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 } from './mocks';
 
 import React, { FC } from 'react';

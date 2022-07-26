@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { demodata } from '../../../canvas_plugin_src/functions/server/demodata';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { DemoRows } from '../../../canvas_plugin_src/functions/server/demodata/demo_rows_types';
 
 export const help: FunctionHelp<FunctionFactory<typeof demodata>> = {
