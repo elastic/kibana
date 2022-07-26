@@ -11,7 +11,7 @@ import React, { ChangeEvent, FormEvent } from 'react';
 import { VisualizationDimensionEditorProps } from '../../types';
 import { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 
-import { getDefaultColor, MetricVisualizationState } from './visualization';
+import { MetricVisualizationState } from './visualization';
 import { DimensionEditor } from './dimension_editor';
 import { HTMLAttributes, ReactWrapper, shallow } from 'enzyme';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
@@ -168,9 +168,7 @@ describe('dimension editor', () => {
           palette: undefined,
           color: undefined,
         });
-        expect(localHarness.colorPicker.props().placeholder).toBe(
-          getDefaultColor(!!fullState.maxAccessor)
-        );
+        expect(localHarness.colorPicker.props().placeholder).toBe('Auto');
       });
 
       it('sets color', () => {

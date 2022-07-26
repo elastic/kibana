@@ -26,9 +26,6 @@ import { generateId } from '../../id_generator';
 
 export const DEFAULT_MAX_COLUMNS = 3;
 
-export const getDefaultColor = (hasMax: boolean) =>
-  hasMax ? euiLightVars.euiColorPrimary : '#FFFFFF';
-
 export interface MetricVisualizationState {
   layerId: string;
   layerType: LayerType;
@@ -104,8 +101,6 @@ const toExpression = (
     };
   };
 
-  const defaultColor = getDefaultColor(!!state.maxAccessor);
-
   return {
     type: 'expression',
     chain: [
@@ -131,7 +126,11 @@ const toExpression = (
             state.breakdownByAccessor && !state.collapseFn ? [state.breakdownByAccessor] : [],
           subtitle: state.subtitle ? [state.subtitle] : [],
           progressDirection: state.progressDirection ? [state.progressDirection] : [],
-          color: [state.color ?? defaultColor],
+          color: state.color
+            ? [state.color]
+            : state.maxAccessor
+            ? [euiLightVars.euiColorPrimary]
+            : [],
           palette: state.palette?.params
             ? [
                 paletteService

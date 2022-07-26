@@ -29,11 +29,11 @@ import type {
   RenderMode,
 } from '@kbn/expressions-plugin/common';
 import { CustomPaletteState } from '@kbn/charts-plugin/public';
-import { euiLightVars } from '@kbn/ui-theme';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
 import { CUSTOM_PALETTE } from '@kbn/coloring';
 import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { VisParams } from '../../common';
 import {
   getPaletteService,
@@ -44,8 +44,7 @@ import {
 import { getCurrencyCode } from './currency_codes';
 import { getDataBoundsForPalette } from '../utils';
 
-export const defaultColor = euiLightVars.euiColorDarkestShade;
-
+export const defaultColor = euiThemeVars.euiColorEmptyShade;
 const getBytesUnit = (value: number) => {
   const units = ['byte', 'kilobyte', 'megabyte', 'gigabyte', 'terabyte', 'petabyte'];
   const abs = Math.abs(value);
@@ -160,12 +159,10 @@ const getColor = (
   minBound = min;
   maxBound = max;
 
-  return (
-    getPaletteService().get(CUSTOM_PALETTE)?.getColorForValue?.(value, paletteParams, {
-      min: minBound,
-      max: maxBound,
-    }) || defaultColor
-  );
+  return getPaletteService().get(CUSTOM_PALETTE)?.getColorForValue?.(value, paletteParams, {
+    min: minBound,
+    max: maxBound,
+  });
 };
 
 const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) => {
@@ -192,7 +189,7 @@ export interface MetricVisComponentProps {
   filterable: boolean;
 }
 
-const MetricVisComponent = ({
+export const MetricVis = ({
   data,
   config,
   renderComplete,
@@ -254,19 +251,20 @@ const MetricVisComponent = ({
             : undefined}
         </span>
       ),
-      color: config.metric.palette
-        ? getColor(
-            value,
-            config.metric.palette,
-            {
-              metric: primaryMetricColumn.id,
-              max: maxColId,
-              breakdownBy: breakdownByColumn?.id,
-            },
-            data,
-            rowIdx
-          )
-        : config.metric.color ?? defaultColor,
+      color:
+        config.metric.palette && value != null
+          ? getColor(
+              value,
+              config.metric.palette,
+              {
+                metric: primaryMetricColumn.id,
+                max: maxColId,
+                breakdownBy: breakdownByColumn?.id,
+              },
+              data,
+              rowIdx
+            ) ?? defaultColor
+          : config.metric.color ?? defaultColor,
       ...getProgressBarConfig(row),
     };
   });
@@ -319,7 +317,16 @@ const MetricVisComponent = ({
     >
       <Chart key={magicKey.current}>
         <Settings
-          theme={[{ background: { color: 'transparent' } }, chartTheme]}
+          theme={[
+            {
+              background: { color: 'transparent' },
+              metric: {
+                background: defaultColor,
+                barBackground: euiThemeVars.euiColorLightestShade,
+              },
+            },
+            chartTheme,
+          ]}
           onRenderChange={onRenderChange}
           onElementClick={(events) => {
             if (!filterable) {
@@ -343,7 +350,3 @@ const MetricVisComponent = ({
     </div>
   );
 };
-
-// default export required for React.Lazy
-// eslint-disable-next-line import/no-default-export
-export { MetricVisComponent as default };

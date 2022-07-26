@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { lazy } from 'react';
+import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
-import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
 import { css } from '@emotion/react';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -20,8 +19,6 @@ import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { ExpressionMetricPluginStart } from '../plugin';
 import { EXPRESSION_METRIC_NAME, MetricVisRenderConfig, VisParams } from '../../common';
 import { extractContainerType, extractVisualizationType } from '../../../common';
-
-const MetricVis = lazy(() => import('../components/metric_vis'));
 
 async function metricFilterable(
   dimensions: VisParams['dimensions'],
@@ -82,9 +79,10 @@ export const getMetricVisRenderer = (
         handlers.done();
       };
 
+      const { MetricVis } = await import('../components/metric_vis');
       render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
-          <VisualizationContainer
+          <div
             data-test-subj="mtrVis"
             css={css`
               height: 100%;
@@ -93,7 +91,6 @@ export const getMetricVisRenderer = (
               align-items: center;
               justify-content: center;
             `}
-            handlers={handlers}
           >
             <MetricVis
               data={visData}
@@ -103,7 +100,7 @@ export const getMetricVisRenderer = (
               renderMode={handlers.getRenderMode()}
               filterable={filterable}
             />
-          </VisualizationContainer>
+          </div>
         </KibanaThemeProvider>,
         domNode
       );
