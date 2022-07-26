@@ -338,26 +338,6 @@ export const registerEnterpriseSearchIntegrations = (
   });
 
   customIntegrations.registerCustomIntegration({
-    id: 'app_search_api',
-    title: i18n.translate('xpack.enterpriseSearch.appSearch.integrations.apiName', {
-      defaultMessage: 'API',
-    }),
-    description: i18n.translate('xpack.enterpriseSearch.appSearch.integrations.apiDescription', {
-      defaultMessage: "Add search to your application with App Search's robust APIs.",
-    }),
-    categories: ['custom'],
-    uiInternalPath: '/app/enterprise_search/app_search/engines/new?method=api',
-    icons: [
-      {
-        type: 'eui',
-        src: 'logoAppSearch',
-      },
-    ],
-    shipper: 'enterprise_search',
-    isBeta: false,
-  });
-
-  customIntegrations.registerCustomIntegration({
     id: 'web_crawler',
     title: i18n.translate('xpack.enterpriseSearch.integrations.webCrawlerName', {
       defaultMessage: 'Web crawler',
@@ -367,6 +347,26 @@ export const registerEnterpriseSearchIntegrations = (
     }),
     categories: ['enterprise_search', 'website_search', 'web', 'elastic_stack'],
     uiInternalPath: '/app/enterprise_search/content/search_indices/new_index?method=crawler',
+    icons: [
+      {
+        type: 'eui',
+        src: 'logoEnterpriseSearch',
+      },
+    ],
+    shipper: 'enterprise_search',
+    isBeta: false,
+  });
+
+  customIntegrations.registerCustomIntegration({
+    id: 'api',
+    title: i18n.translate('xpack.enterpriseSearch.integrations.apiName', {
+      defaultMessage: 'API',
+    }),
+    description: i18n.translate('xpack.enterpriseSearch.integrations.apiDescription', {
+      defaultMessage: "Add search to your application with App Search's robust APIs.",
+    }),
+    categories: ['enterprise_search', 'custom', 'elastic_stack'],
+    uiInternalPath: '/app/enterprise_search/content/search_indices/new_index?method=api',
     icons: [
       {
         type: 'eui',
