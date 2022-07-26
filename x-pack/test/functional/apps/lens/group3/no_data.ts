@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const dataViewTitle = await PageObjects.lens.getDataPanelIndexPattern();
           // data view editor will add wildcard symbol by default
           // so we need to include it in our original title when comparing
-          return dataViewTitle === `${dataViewToCreate}*`;
+          return dataViewTitle === dataViewToCreate;
         }
       );
     });

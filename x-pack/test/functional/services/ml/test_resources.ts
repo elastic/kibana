@@ -122,7 +122,7 @@ export function MachineLearningTestResourcesProvider(
       const { body: createResponse, status } = await supertest
         .post(`/api/saved_objects/${SavedObjectType.INDEX_PATTERN}`)
         .set(COMMON_REQUEST_HEADERS)
-        .send({ attributes: { title, timeFieldName } });
+        .send({ attributes: { title, timeFieldName, name: title } });
       mlApi.assertResponseStatusCode(200, status, createResponse);
 
       await this.assertIndexPatternExistByTitle(title);
