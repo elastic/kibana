@@ -52,6 +52,7 @@ export const LogQueryBar: React.FunctionComponent<{
   return (
     <QueryStringInput
       iconType="search"
+      autoSubmit={true}
       disableLanguageSwitcher={true}
       indexPatterns={
         indexPatternFields
