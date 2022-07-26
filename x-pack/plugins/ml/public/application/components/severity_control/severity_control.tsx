@@ -68,7 +68,7 @@ export const SeverityControl: FC<SeveritySelectorProps> = React.memo(({ value, o
 
   return (
     <EuiFormRow fullWidth>
-      <EuiFlexGroup>
+      <EuiFlexGroup gutterSize={'s'}>
         <EuiFlexItem grow={false}>
           <EuiFieldNumber
             id="severityControl"

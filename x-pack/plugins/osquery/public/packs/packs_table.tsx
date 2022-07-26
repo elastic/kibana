@@ -32,6 +32,8 @@ const UpdatedBy = styled.span`
   text-overflow: ellipsis;
 `;
 
+const EMPTY_ARRAY: PackSavedObject[] = [];
+
 const ScheduledQueryNameComponent = ({ id, name }: { id: string; name: string }) => (
   <EuiLink {...useRouterNavigate(`packs/${id}`)}>{name}</EuiLink>
 );
@@ -42,7 +44,7 @@ const renderName = (_: unknown, item: { id: string; attributes: { name: string }
   <ScheduledQueryName id={item.id} name={item.attributes.name} />
 );
 
-export const AgentPoliciesPopover = ({ agentPolicyIds }: { agentPolicyIds: string[] }) => {
+export const AgentPoliciesPopover = ({ agentPolicyIds = [] }: { agentPolicyIds?: string[] }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onButtonClick = useCallback(
@@ -185,8 +187,7 @@ const PacksTableComponent = () => {
 
   return (
     <EuiInMemoryTable<PackSavedObject>
-      // eslint-disable-next-line react-perf/jsx-no-new-array-as-prop
-      items={data?.saved_objects ?? []}
+      items={data?.data ?? EMPTY_ARRAY}
       columns={columns}
       pagination={true}
       sorting={sorting}

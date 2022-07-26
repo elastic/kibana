@@ -33,6 +33,46 @@ describe('TelemetryEventsSender', () => {
       const sender = new TelemetryEventsSender(logger);
       const input = [
         {
+          credential_access: {
+            Target: {
+              process: {
+                path: 'DeviceHarddiskVolume3WindowsSystem32lsass.exe',
+                pid: 808,
+                ppid: 584,
+                sid: 0,
+              },
+            },
+            handle_type: 'process',
+            desired_access_numeric: 2097151,
+            desired_access: [
+              'DELETE',
+              'READ_CONTROL',
+              'SYNCHRONIZE',
+              'WRITE_DAC',
+              'WRITE_OWNER',
+              'STANDARD_RIGHTS_REQUIRED',
+              'PROCESS_ALL_ACCESS',
+            ],
+            call_stack: {
+              entries: [
+                {
+                  memory_address: 140706712704004,
+                  start_address_allocation_offset: 644100,
+                  module_path: 'DeviceHarddiskVolume3WindowsSystem32\ntdll.dll',
+                },
+                {
+                  memory_address: 140706669379902,
+                  start_address_allocation_offset: 180542,
+                  module_path: 'DeviceHarddiskVolume3WindowsSystem32KernelBase.dll',
+                },
+                {
+                  memory_address: 140704414232808,
+                  start_address_allocation_offset: 127208,
+                  module_path: 'Unbacked',
+                },
+              ],
+            },
+          },
           event: {
             kind: 'alert',
             id: 'test',
@@ -116,6 +156,46 @@ describe('TelemetryEventsSender', () => {
       const result = sender.processEvents(input);
       expect(result).toStrictEqual([
         {
+          credential_access: {
+            Target: {
+              process: {
+                path: 'DeviceHarddiskVolume3WindowsSystem32lsass.exe',
+                pid: 808,
+                ppid: 584,
+                sid: 0,
+              },
+            },
+            handle_type: 'process',
+            desired_access_numeric: 2097151,
+            desired_access: [
+              'DELETE',
+              'READ_CONTROL',
+              'SYNCHRONIZE',
+              'WRITE_DAC',
+              'WRITE_OWNER',
+              'STANDARD_RIGHTS_REQUIRED',
+              'PROCESS_ALL_ACCESS',
+            ],
+            call_stack: {
+              entries: [
+                {
+                  memory_address: 140706712704004,
+                  start_address_allocation_offset: 644100,
+                  module_path: 'DeviceHarddiskVolume3WindowsSystem32\ntdll.dll',
+                },
+                {
+                  memory_address: 140706669379902,
+                  start_address_allocation_offset: 180542,
+                  module_path: 'DeviceHarddiskVolume3WindowsSystem32KernelBase.dll',
+                },
+                {
+                  memory_address: 140704414232808,
+                  start_address_allocation_offset: 127208,
+                  module_path: 'Unbacked',
+                },
+              ],
+            },
+          },
           event: {
             kind: 'alert',
             id: 'test',
