@@ -160,7 +160,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
             {isLastLimitedPage && (
               <>
                 <EuiSpacer size="xxl" />
-                <EuiBottomBar>
+                <EuiBottomBar data-test-subj="test-bottom-bar">
                   <EuiText textAlign="center">
                     <FormattedMessage
                       id="xpack.csp.findings.latestFindings.bottomBarLabel"
