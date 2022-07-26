@@ -613,8 +613,9 @@ export class TaskRunner<
 
     this.alertingEventLogger.start();
 
-    const { stateWithMetrics, schedule, monitoring, isRuleSnoozedUntil } =
-      await errorAsRuleTaskRunResult(this.loadRuleAttributesAndRun());
+    const { stateWithMetrics, schedule, monitoring } = await errorAsRuleTaskRunResult(
+      this.loadRuleAttributesAndRun()
+    );
 
     const ruleMonitoring =
       resolveErr<RuleMonitoring | undefined, Error>(monitoring, () => {
@@ -690,7 +691,6 @@ export class TaskRunner<
       await this.updateRuleSavedObject(ruleId, namespace, {
         executionStatus: ruleExecutionStatusToRaw(executionStatus),
         monitoring: ruleMonitoring,
-        ...isRuleSnoozedUntil,
       });
     }
 

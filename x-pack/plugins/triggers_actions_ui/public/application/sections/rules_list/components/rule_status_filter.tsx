@@ -6,13 +6,7 @@
  */
 import React, { useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiFilterButton,
-  EuiPopover,
-  EuiFilterGroup,
-  EuiSelectableListItem,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiFilterButton, EuiPopover, EuiFilterGroup, EuiSelectableListItem } from '@elastic/eui';
 import { RuleStatus } from '../../../../types';
 
 const statuses: RuleStatus[] = ['enabled', 'disabled', 'snoozed'];
@@ -59,22 +53,29 @@ export const RuleStatusFilter = (props: RuleStatusFilterProps) => {
     setIsPopoverOpen((prevIsOpen) => !prevIsOpen);
   }, [setIsPopoverOpen]);
 
-  const renderClearAll = () => {
-    return (
-      <div>
-        <EuiButtonEmpty
-          style={{
-            width: '100%',
-          }}
-          size="xs"
-          iconType="crossInACircleFilled"
-          color="danger"
-          onClick={() => onChange([])}
-        >
-          Clear all
-        </EuiButtonEmpty>
-      </div>
-    );
+  const renderRuleStateOptions = (status: 'enabled' | 'disabled' | 'snoozed') => {
+    if (status === 'enabled') {
+      return (
+        <FormattedMessage
+          id="xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilter.enabledOptionText"
+          defaultMessage="Rule is enabled"
+        />
+      );
+    } else if (status === 'disabled') {
+      return (
+        <FormattedMessage
+          id="xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilter.disabledOptionText"
+          defaultMessage="Rule is disabled"
+        />
+      );
+    } else if (status === 'snoozed') {
+      return (
+        <FormattedMessage
+          id="xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilter.snoozedOptionText"
+          defaultMessage="Rule has snoozed"
+        />
+      );
+    }
   };
 
   return (
@@ -92,8 +93,8 @@ export const RuleStatusFilter = (props: RuleStatusFilterProps) => {
             onClick={onClick}
           >
             <FormattedMessage
-              id="xpack.triggersActionsUI.sections.ruleDetails.ruleStatusFilterButton"
-              defaultMessage="View"
+              id="xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilterButton"
+              defaultMessage="Rule state"
             />
           </EuiFilterButton>
         }
@@ -108,11 +109,10 @@ export const RuleStatusFilter = (props: RuleStatusFilterProps) => {
                 onClick={onFilterItemClick(status)}
                 checked={selectedStatuses.includes(status) ? 'on' : undefined}
               >
-                {status}
+                {renderRuleStateOptions(status)}
               </EuiSelectableListItem>
             );
           })}
-          {renderClearAll()}
         </div>
       </EuiPopover>
     </EuiFilterGroup>

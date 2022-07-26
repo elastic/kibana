@@ -30715,7 +30715,6 @@
     "xpack.triggersActionsUI.sections.ruleDetails.rulesList.ruleLastExecutionDescription": "Dernière réponse",
     "xpack.triggersActionsUI.sections.ruleDetails.rulesList.status.active": "Actif",
     "xpack.triggersActionsUI.sections.ruleDetails.rulesList.status.inactive": "Récupéré",
-    "xpack.triggersActionsUI.sections.ruleDetails.ruleStatusFilterButton": "Afficher",
     "xpack.triggersActionsUI.sections.ruleDetails.scheduleIntervalToastMessage": "Cette règle possède un intervalle défini au-dessous de l'intervalle minimal configuré. Cela peut avoir un impact sur les performances.",
     "xpack.triggersActionsUI.sections.ruleDetails.scheduleIntervalToastMessageButton": "Modifier la règle",
     "xpack.triggersActionsUI.sections.ruleDetails.scheduleIntervalToastTitle": "Paramètres de configuration",

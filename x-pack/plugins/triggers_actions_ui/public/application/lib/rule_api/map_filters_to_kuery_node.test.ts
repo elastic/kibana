@@ -64,13 +64,7 @@ describe('mapFiltersToKueryNode', () => {
           ruleStatusesFilter: ['enabled'],
         }) as KueryNode
       )
-    ).toEqual(
-      toElasticsearchQuery(
-        fromKueryExpression(
-          '(alert.attributes.enabled: true AND NOT (alert.attributes.muteAll: true OR alert.attributes.isSnoozedUntil > now))'
-        )
-      )
-    );
+    ).toEqual(toElasticsearchQuery(fromKueryExpression('alert.attributes.enabled: true')));
 
     expect(
       toElasticsearchQuery(
@@ -89,7 +83,7 @@ describe('mapFiltersToKueryNode', () => {
     ).toEqual(
       toElasticsearchQuery(
         fromKueryExpression(
-          '((alert.attributes.muteAll: true OR alert.attributes.isSnoozedUntil > now) AND NOT alert.attributes.enabled: false)'
+          '(alert.attributes.muteAll: true OR alert.attributes.snoozeSchedule: { duration > 0 })'
         )
       )
     );
@@ -103,8 +97,8 @@ describe('mapFiltersToKueryNode', () => {
     ).toEqual(
       toElasticsearchQuery(
         fromKueryExpression(
-          `(alert.attributes.enabled: true AND NOT (alert.attributes.muteAll: true OR alert.attributes.isSnoozedUntil > now)) or
-          ((alert.attributes.muteAll: true OR alert.attributes.isSnoozedUntil > now) AND NOT alert.attributes.enabled: false)`
+          `alert.attributes.enabled: true or
+          (alert.attributes.muteAll: true OR alert.attributes.snoozeSchedule: { duration > 0 })`
         )
       )
     );
@@ -119,7 +113,7 @@ describe('mapFiltersToKueryNode', () => {
       toElasticsearchQuery(
         fromKueryExpression(
           `alert.attributes.enabled: false or
-          ((alert.attributes.muteAll: true OR alert.attributes.isSnoozedUntil > now) AND NOT alert.attributes.enabled: false)`
+          (alert.attributes.muteAll: true OR alert.attributes.snoozeSchedule: { duration > 0 })`
         )
       )
     );
@@ -133,9 +127,9 @@ describe('mapFiltersToKueryNode', () => {
     ).toEqual(
       toElasticsearchQuery(
         fromKueryExpression(
-          `(alert.attributes.enabled: true AND NOT (alert.attributes.muteAll: true OR alert.attributes.isSnoozedUntil > now)) or
+          `alert.attributes.enabled: true or
           alert.attributes.enabled: false or
-          ((alert.attributes.muteAll: true OR alert.attributes.isSnoozedUntil > now) AND NOT alert.attributes.enabled: false)`
+          (alert.attributes.muteAll: true OR alert.attributes.snoozeSchedule: { duration > 0 })`
         )
       )
     );

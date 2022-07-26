@@ -45,9 +45,7 @@ describe('mapFiltersToKql', () => {
       mapFiltersToKql({
         ruleStatusesFilter: ['enabled'],
       })
-    ).toEqual([
-      '(alert.attributes.enabled: true AND NOT (alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now))',
-    ]);
+    ).toEqual(['alert.attributes.enabled: true']);
 
     expect(
       mapFiltersToKql({
@@ -60,7 +58,7 @@ describe('mapFiltersToKql', () => {
         ruleStatusesFilter: ['snoozed'],
       })
     ).toEqual([
-      '((alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now) AND NOT alert.attributes.enabled: false)',
+      '(alert.attributes.muteAll:true OR alert.attributes.snoozeSchedule: { duration > 0 })',
     ]);
 
     expect(
@@ -68,7 +66,7 @@ describe('mapFiltersToKql', () => {
         ruleStatusesFilter: ['enabled', 'snoozed'],
       })
     ).toEqual([
-      '(alert.attributes.enabled: true AND NOT (alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)) or ((alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now) AND NOT alert.attributes.enabled: false)',
+      'alert.attributes.enabled: true or (alert.attributes.muteAll:true OR alert.attributes.snoozeSchedule: { duration > 0 })',
     ]);
 
     expect(
@@ -76,7 +74,7 @@ describe('mapFiltersToKql', () => {
         ruleStatusesFilter: ['disabled', 'snoozed'],
       })
     ).toEqual([
-      'alert.attributes.enabled: false or ((alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now) AND NOT alert.attributes.enabled: false)',
+      'alert.attributes.enabled: false or (alert.attributes.muteAll:true OR alert.attributes.snoozeSchedule: { duration > 0 })',
     ]);
 
     expect(
@@ -84,7 +82,7 @@ describe('mapFiltersToKql', () => {
         ruleStatusesFilter: ['enabled', 'disabled', 'snoozed'],
       })
     ).toEqual([
-      '(alert.attributes.enabled: true AND NOT (alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)) or alert.attributes.enabled: false or ((alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now) AND NOT alert.attributes.enabled: false)',
+      'alert.attributes.enabled: true or alert.attributes.enabled: false or (alert.attributes.muteAll:true OR alert.attributes.snoozeSchedule: { duration > 0 })',
     ]);
   });
 

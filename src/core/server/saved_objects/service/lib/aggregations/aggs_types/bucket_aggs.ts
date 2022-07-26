@@ -54,6 +54,13 @@ const termSchema = s.object({
   term: s.recordOf(s.string(), s.oneOf([s.string(), s.boolean(), s.number()])),
 });
 
+const existsSchema = s.object({
+  exists: s.maybe(
+    s.object({
+      field: s.string(),
+    })
+  ),
+});
 // TODO: it would be great if we could recursively build the schema since the aggregation have be nested
 // For more details see how the types are defined in the elasticsearch javascript client:
 // https://github.com/elastic/elasticsearch-js/blob/4ad5daeaf401ce8ebb28b940075e0a67e56ff9ce/src/api/typesWithBodyKey.ts#L5295
@@ -134,7 +141,7 @@ export const bucketAggsSchemas: Record<string, ObjectType> = {
     format: s.string(),
     ranges: s.arrayOf(s.object({ from: s.maybe(s.string()), to: s.maybe(s.string()) })),
   }),
-  filter: termSchema,
+  filter: s.oneOf([termSchema, existsSchema]) as unknown as ObjectType,
   filters: s.object({
     filters: s.recordOf(s.string(), s.oneOf([termSchema, boolSchema])),
   }),

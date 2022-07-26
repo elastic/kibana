@@ -105,7 +105,6 @@ describe('resolve()', () => {
         "alias_target_id": "2",
         "createdAt": 2019-02-12T21:01:22.479Z,
         "id": "1",
-        "isSnoozedUntil": null,
         "notifyWhen": "onActiveAlert",
         "outcome": "aliasMatch",
         "params": Object {
@@ -179,7 +178,6 @@ describe('resolve()', () => {
         "alias_target_id": "2",
         "createdAt": 2019-02-12T21:01:22.479Z,
         "id": "1",
-        "isSnoozedUntil": null,
         "legacyId": "some-legacy-id",
         "notifyWhen": "onActiveAlert",
         "outcome": "aliasMatch",
@@ -286,7 +284,6 @@ describe('resolve()', () => {
         "alias_target_id": "2",
         "createdAt": 2019-02-12T21:01:22.479Z,
         "id": "1",
-        "isSnoozedUntil": null,
         "notifyWhen": "onActiveAlert",
         "outcome": "aliasMatch",
         "params": Object {

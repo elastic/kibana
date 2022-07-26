@@ -54,12 +54,9 @@ export const mapFiltersToKueryNode = ({
   if (ruleStatusesFilter && ruleStatusesFilter.length) {
     const snoozedFilter = nodeBuilder.or([
       fromKueryExpression('alert.attributes.muteAll: true'),
-      nodeTypes.function.buildNode('range', 'alert.attributes.isSnoozedUntil', 'gt', 'now'),
+      fromKueryExpression('alert.attributes.snoozeSchedule:{ duration > 0 }'),
     ]);
-    const enabledFilter = nodeBuilder.and([
-      fromKueryExpression('alert.attributes.enabled: true'),
-      nodeTypes.function.buildNode('not', snoozedFilter),
-    ]);
+    const enabledFilter = fromKueryExpression('alert.attributes.enabled: true');
     const disabledFilter = fromKueryExpression('alert.attributes.enabled: false');
 
     const ruleStatusesFilterKueryNode = [];
@@ -73,9 +70,7 @@ export const mapFiltersToKueryNode = ({
     }
 
     if (ruleStatusesFilter.includes('snoozed')) {
-      ruleStatusesFilterKueryNode.push(
-        nodeBuilder.and([snoozedFilter, nodeTypes.function.buildNode('not', disabledFilter)])
-      );
+      ruleStatusesFilterKueryNode.push(snoozedFilter);
     }
     filterKueryNode.push(nodeBuilder.or(ruleStatusesFilterKueryNode));
   }

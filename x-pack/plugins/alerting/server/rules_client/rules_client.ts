@@ -159,11 +159,9 @@ export interface RuleAggregation {
     }>;
   };
   snoozed: {
-    buckets: Array<{
-      key: number;
-      key_as_string: string;
+    count: {
       doc_count: number;
-    }>;
+    };
   };
   tags: {
     buckets: Array<{
@@ -1111,8 +1109,17 @@ export class RulesClient {
           terms: { field: 'alert.attributes.tags', order: { _key: 'asc' } },
         },
         snoozed: {
-          terms: {
-            field: 'alert.attributes.isSnoozedUntil',
+          nested: {
+            path: 'alert.attributes.snoozeSchedule',
+          },
+          aggs: {
+            count: {
+              filter: {
+                exists: {
+                  field: 'alert.attributes.snoozeSchedule.duration',
+                },
+              },
+            },
           },
         },
       },
@@ -1172,9 +1179,8 @@ export class RulesClient {
       unmuted: mutedBuckets.find((bucket) => bucket.key === 0)?.doc_count ?? 0,
     };
 
-    const snoozedBuckets = resp.aggregations.snoozed.buckets;
     ret.ruleSnoozedStatus = {
-      snoozed: snoozedBuckets.reduce((acc, bucket) => acc + bucket.doc_count, 0),
+      snoozed: resp.aggregations.snoozed?.count?.doc_count ?? 0,
     };
 
     const tagsBuckets = resp.aggregations.tags?.buckets || [];

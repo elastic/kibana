@@ -266,7 +266,7 @@ describe('loadRules', () => {
         Object {
           "query": Object {
             "default_search_operator": "AND",
-            "filter": "(alert.attributes.enabled: true AND NOT (alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)) or ((alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now) AND NOT alert.attributes.enabled: false)",
+            "filter": "alert.attributes.enabled: true or (alert.attributes.muteAll:true OR alert.attributes.snoozeSchedule: { duration > 0 })",
             "page": 1,
             "per_page": 10,
             "search": undefined,
@@ -324,7 +324,7 @@ describe('loadRules', () => {
         Object {
           "query": Object {
             "default_search_operator": "AND",
-            "filter": "(alert.attributes.enabled: true AND NOT (alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)) or alert.attributes.enabled: false or ((alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now) AND NOT alert.attributes.enabled: false)",
+            "filter": "alert.attributes.enabled: true or alert.attributes.enabled: false or (alert.attributes.muteAll:true OR alert.attributes.snoozeSchedule: { duration > 0 })",
             "page": 1,
             "per_page": 10,
             "search": undefined,

@@ -30823,7 +30823,6 @@
     "xpack.triggersActionsUI.sections.ruleDetails.rulesList.ruleLastExecutionDescription": "上次响应",
     "xpack.triggersActionsUI.sections.ruleDetails.rulesList.status.active": "活动",
     "xpack.triggersActionsUI.sections.ruleDetails.rulesList.status.inactive": "已恢复",
-    "xpack.triggersActionsUI.sections.ruleDetails.ruleStatusFilterButton": "查看",
     "xpack.triggersActionsUI.sections.ruleDetails.scheduleIntervalToastMessage": "此规则设置的时间间隔低于配置的最小时间间隔。这可能会影响性能。",
     "xpack.triggersActionsUI.sections.ruleDetails.scheduleIntervalToastMessageButton": "编辑规则",
     "xpack.triggersActionsUI.sections.ruleDetails.scheduleIntervalToastTitle": "配置设置",
