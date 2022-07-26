@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-import { DataFilters } from '../../../../common/descriptor_types';
-import { ISource } from '../source';
-
-export interface ITMSSource extends ISource {
-  getUrlTemplate(dataFilters: DataFilters): Promise<string>;
-}
+export const PLUGIN_ID = 'mapsCustomRasterSource';
+export const PLUGIN_NAME = 'Third party maps source example';
