@@ -73,6 +73,7 @@ import { readPrebuiltDevToolContentRoute } from '../lib/prebuilt_dev_tool_conten
 import { createPrebuiltSavedObjectsRoute } from '../lib/prebuilt_saved_objects/routes/create_prebuilt_saved_objects';
 import { readAlertsIndexExistsRoute } from '../lib/detection_engine/routes/index/read_alerts_index_exists_route';
 import { getInstalledIntegrationsRoute } from '../lib/detection_engine/routes/fleet/get_installed_integrations/get_installed_integrations_route';
+import { registerResolverRoutes } from '../endpoint/routes/resolver';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -119,6 +120,7 @@ export const initRoutes = (
   patchRulesBulkRoute(router, ml, logger);
   deleteRulesBulkRoute(router, logger);
   performBulkActionRoute(router, ml, logger);
+  registerResolverRoutes(router, getStartServices);
 
   registerRuleMonitoringRoutes(router);
 

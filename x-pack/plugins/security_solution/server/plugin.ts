@@ -54,7 +54,6 @@ import {
   DEFAULT_ALERTS_INDEX,
 } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
-import { registerResolverRoutes } from './endpoint/routes/resolver';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { registerActionRoutes } from './endpoint/routes/actions';
 import { EndpointArtifactClient, ManifestManager } from './endpoint/services';
@@ -275,7 +274,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
     registerEndpointRoutes(router, endpointContext);
     registerLimitedConcurrencyRoutes(core);
-    registerResolverRoutes(router);
     registerPolicyRoutes(router, endpointContext);
     registerActionRoutes(router, endpointContext);
 

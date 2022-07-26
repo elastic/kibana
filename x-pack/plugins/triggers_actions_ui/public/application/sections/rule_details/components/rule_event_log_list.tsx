@@ -25,11 +25,12 @@ import { RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS, LOCKED_COLUMNS } from '
 import { RuleEventLogListStatusFilter } from './rule_event_log_list_status_filter';
 import { RuleEventLogDataGrid } from './rule_event_log_data_grid';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
+import { RuleExecutionSummaryAndChartWithApi } from './rule_execution_summary_and_chart';
 import { RuleActionErrorLogFlyout } from './rule_action_error_log_flyout';
 
 import { RefineSearchPrompt } from '../refine_search_prompt';
 import { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
-import { Rule } from '../../../../types';
+import { Rule, RuleSummary, RuleType } from '../../../../types';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
@@ -72,19 +73,51 @@ const MAX_RESULTS = 1000;
 
 const ruleEventListContainerStyle = { minHeight: 400 };
 
-export type RuleEventLogListProps = {
+export type RuleEventLogListOptions = 'stackManagement' | 'default';
+
+export interface RuleEventLogListCommonProps {
   rule: Rule;
+  ruleType: RuleType;
   localStorageKey?: string;
   refreshToken?: number;
   requestRefresh?: () => Promise<void>;
-  customLoadExecutionLogAggregations?: RuleApis['loadExecutionLogAggregations'];
-} & Pick<RuleApis, 'loadExecutionLogAggregations'>;
+  loadExecutionLogAggregations?: RuleApis['loadExecutionLogAggregations'];
+  fetchRuleSummary?: boolean;
+}
 
-export const RuleEventLogList = (props: RuleEventLogListProps) => {
-  const { rule, localStorageKey = RULE_EVENT_LOG_LIST_STORAGE_KEY, refreshToken } = props;
+export interface RuleEventLogListStackManagementProps {
+  ruleSummary: RuleSummary;
+  onChangeDuration: (duration: number) => void;
+  numberOfExecutions: number;
+  isLoadingRuleSummary?: boolean;
+}
 
-  const loadExecutionLogAggregations =
-    props.customLoadExecutionLogAggregations || props.loadExecutionLogAggregations;
+export type RuleEventLogListProps<T extends RuleEventLogListOptions = 'default'> =
+  T extends 'default'
+    ? RuleEventLogListCommonProps
+    : T extends 'stackManagement'
+    ? RuleEventLogListStackManagementProps & RuleEventLogListCommonProps
+    : never;
+
+export const RuleEventLogList = <T extends RuleEventLogListOptions>(
+  props: RuleEventLogListProps<T>
+) => {
+  const {
+    rule,
+    ruleType,
+    localStorageKey = RULE_EVENT_LOG_LIST_STORAGE_KEY,
+    refreshToken,
+    requestRefresh,
+    fetchRuleSummary = true,
+    loadExecutionLogAggregations,
+  } = props;
+
+  const {
+    ruleSummary,
+    numberOfExecutions,
+    onChangeDuration,
+    isLoadingRuleSummary = false,
+  } = props as RuleEventLogListStackManagementProps;
 
   const { uiSettings, notifications } = useKibana().services;
 
@@ -144,6 +177,9 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
   }, [sortingColumns]);
 
   const loadEventLogs = async () => {
+    if (!loadExecutionLogAggregations) {
+      return;
+    }
     setIsLoading(true);
     try {
       const result = await loadExecutionLogAggregations({
@@ -300,8 +336,19 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
   }, [localStorageKey, visibleColumns]);
 
   return (
-    <div style={ruleEventListContainerStyle}>
+    <div style={ruleEventListContainerStyle} data-test-subj="ruleEventLogListContainer">
       <EuiSpacer />
+      <RuleExecutionSummaryAndChartWithApi
+        rule={rule}
+        ruleType={ruleType}
+        ruleSummary={ruleSummary}
+        numberOfExecutions={numberOfExecutions}
+        isLoadingRuleSummary={isLoadingRuleSummary}
+        refreshToken={refreshToken}
+        onChangeDuration={onChangeDuration}
+        requestRefresh={requestRefresh}
+        fetchRuleSummary={fetchRuleSummary}
+      />
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiFieldSearch

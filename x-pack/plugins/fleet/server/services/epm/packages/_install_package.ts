@@ -12,6 +12,7 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsImporter,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import {
   MAX_TIME_COMPLETE_INSTALL,
@@ -285,7 +286,7 @@ export async function _installPackage({
 
     return [...installedKibanaAssetsRefs, ...esReferences];
   } catch (err) {
-    if (savedObjectsClient.errors.isConflictError(err)) {
+    if (SavedObjectsErrorHelpers.isConflictError(err)) {
       throw new ConcurrentInstallOperationError(
         `Concurrent installation or upgrade of ${pkgName || 'unknown'}-${
           pkgVersion || 'unknown'

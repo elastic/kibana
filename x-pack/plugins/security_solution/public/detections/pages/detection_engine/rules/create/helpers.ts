@@ -39,6 +39,7 @@ import type {
   ActionsStepRuleJson,
   RuleStepsFormData,
   RuleStep,
+  AdvancedPreviewOptions,
 } from '../types';
 import { DataSourceType } from '../types';
 import type { FieldValueQueryBar } from '../../../../components/rules/query_bar';
@@ -591,6 +592,7 @@ export const formatPreviewRule = ({
   eqlOptions,
   newTermsFields,
   historyWindowSize,
+  advancedOptions,
 }: {
   index: string[];
   dataViewId?: string;
@@ -606,6 +608,7 @@ export const formatPreviewRule = ({
   eqlOptions: EqlOptionsSelected;
   newTermsFields: string[];
   historyWindowSize: string;
+  advancedOptions?: AdvancedPreviewOptions;
 }): CreateRulesSchema => {
   const defineStepData = {
     ...stepDefineDefaultValue,
@@ -628,10 +631,16 @@ export const formatPreviewRule = ({
     name: 'Preview Rule',
     description: 'Preview Rule',
   };
-  const scheduleStepData = {
+  let scheduleStepData = {
     from: `now-${timeFrame === 'M' ? '25h' : timeFrame === 'd' ? '65m' : '6m'}`,
     interval: `${timeFrame === 'M' ? '1d' : timeFrame === 'd' ? '1h' : '5m'}`,
   };
+  if (advancedOptions) {
+    scheduleStepData = {
+      interval: advancedOptions.interval,
+      from: advancedOptions.lookback,
+    };
+  }
   return {
     ...formatRule<CreateRulesSchema>(
       defineStepData,
@@ -639,6 +648,6 @@ export const formatPreviewRule = ({
       scheduleStepData,
       stepActionsDefaultValue
     ),
-    ...scheduleStepData,
+    ...(!advancedOptions ? scheduleStepData : {}),
   };
 };
