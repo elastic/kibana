@@ -17,8 +17,11 @@ export const createClusterDataCheck = () => {
         const indexIds = indices ? Object.keys(indices) : [];
 
         clusterHasUserData = indexIds.some((indexName: string) => {
+          // Check index to see if it starts with known internal prefixes
           const isInternalIndex =
             indexName.startsWith('.') || indexName.startsWith('kibana_sample_');
+
+          // Check index to see if it has any docs
           const hasDocs = (indices[indexName].primaries?.docs?.count || 0) > 0;
 
           return !isInternalIndex && hasDocs;
