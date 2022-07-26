@@ -96,7 +96,7 @@ export class ServiceAPIClient {
   }
 
   addVersionHeader(req: AxiosRequestConfig) {
-    req.headers = { ...req.headers, 'X-kibana-version': this.kibanaVersion };
+    req.headers = { ...req.headers, 'x-kibana-version': this.kibanaVersion };
     return req;
   }
 
