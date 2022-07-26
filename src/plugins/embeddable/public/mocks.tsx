@@ -10,6 +10,7 @@ import React from 'react';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { CoreStart } from '@kbn/core/public';
 import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import { Filter } from '@kbn/es-query';
 
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
@@ -27,6 +28,7 @@ import {
   SavedObjectEmbeddableInput,
   ReferenceOrValueEmbeddable,
   SelfStyledEmbeddable,
+  FilterableEmbeddable,
 } from '.';
 import { SelfStyledOptions } from './lib/self_styled_embeddable/types';
 
@@ -112,6 +114,15 @@ export function mockSelfStyledEmbeddable<OriginalEmbeddableType>(
   return newEmbeddable as OriginalEmbeddableType & SelfStyledEmbeddable;
 }
 
+export function mockFilterableEmbeddable<OriginalEmbeddableType>(
+  embeddable: OriginalEmbeddableType,
+  options: { getFilters: () => Filter[] }
+): OriginalEmbeddableType & FilterableEmbeddable {
+  const newEmbeddable: FilterableEmbeddable = embeddable as unknown as FilterableEmbeddable;
+  newEmbeddable.getFilters = () => options.getFilters();
+  return newEmbeddable as OriginalEmbeddableType & FilterableEmbeddable;
+}
+
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     registerEmbeddableFactory: jest.fn(),
@@ -159,4 +170,5 @@ export const embeddablePluginMock = {
   createInstance,
   mockRefOrValEmbeddable,
   mockSelfStyledEmbeddable,
+  mockFilterableEmbeddable,
 };
