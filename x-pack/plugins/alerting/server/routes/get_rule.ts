@@ -88,7 +88,11 @@ const buildGetRuleRoute = ({
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
         const { id } = req.params;
-        const rule = await rulesClient.get({ id, excludeFromPublicApi });
+        const rule = await rulesClient.get({
+          id,
+          excludeFromPublicApi,
+          includeSnoozeData: true,
+        });
         return res.ok({
           body: rewriteBodyRes(rule),
         });

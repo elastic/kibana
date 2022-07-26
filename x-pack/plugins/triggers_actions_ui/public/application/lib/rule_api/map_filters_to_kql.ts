@@ -43,8 +43,8 @@ export const mapFiltersToKql = ({
   }
 
   if (ruleStatusesFilter && ruleStatusesFilter.length) {
-    const snoozedFilter = `(alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)`;
-    const enabledFilter = `(alert.attributes.enabled: true AND NOT ${snoozedFilter})`;
+    const snoozedFilter = `(alert.attributes.muteAll:true OR alert.attributes.snoozeSchedule: { duration > 0 })`;
+    const enabledFilter = `alert.attributes.enabled: true`;
     const disabledFilter = `alert.attributes.enabled: false`;
 
     const result = [];
@@ -58,10 +58,10 @@ export const mapFiltersToKql = ({
     }
 
     if (ruleStatusesFilter.includes('snoozed')) {
-      result.push(`(${snoozedFilter} AND NOT ${disabledFilter})`);
+      result.push(`${snoozedFilter}`);
     }
 
-    filters.push(result.join(' or '));
+    filters.push(result.join(' and '));
   }
 
   if (tagsFilter && tagsFilter.length) {

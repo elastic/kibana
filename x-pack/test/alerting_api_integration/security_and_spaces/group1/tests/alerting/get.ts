@@ -85,6 +85,7 @@ const getTestUtils = (
                   ? {
                       monitoring: response.body.monitoring,
                       snooze_schedule: response.body.snooze_schedule,
+                      is_snoozed_until: response.body.is_snoozed_until,
                     }
                   : {}),
               });
