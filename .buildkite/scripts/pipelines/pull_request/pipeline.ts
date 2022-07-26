@@ -114,10 +114,9 @@ const uploadPipeline = (pipelineContent: string | object) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/observability_plugin.yml'));
     }
 
-    // Skipped due to https://github.com/elastic/kibana/issues/137185
-    // if (await doAnyChangesMatch([/^x-pack\/plugins\/synthetics/])) {
-    //   pipeline.push(getPipeline('.buildkite/pipelines/pull_request/synthetics_plugin.yml'));
-    // }
+    if (await doAnyChangesMatch([/^x-pack\/plugins\/synthetics/])) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/synthetics_plugin.yml'));
+    }
 
     if (await doAnyChangesMatch([/^x-pack\/plugins\/ux/])) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ux_plugin_e2e.yml'));
