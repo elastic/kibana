@@ -41,7 +41,7 @@ export const useResponderActionItem = (
     [eventDetailsData]
   );
 
-  const { agentStatus, loading } = useHostIsolationStatus({ agentId: endpointId });
+  const { agentStatus } = useHostIsolationStatus({ agentId: endpointId });
 
   return useMemo(() => {
     const actions: JSX.Element[] = [];
