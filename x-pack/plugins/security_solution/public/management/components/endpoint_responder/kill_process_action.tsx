@@ -60,20 +60,22 @@ export const KillProcessActionResult = memo<
 
   // If kill-process request was created, store the action id if necessary
   useEffect(() => {
-    if (isSuccess && actionId !== data.data.id) {
-      setStore((prevState) => {
-        return { ...prevState, actionId: data.data.id };
-      });
-    } else if (error) {
-      setStatus('error');
-      setStore((prevState) => {
-        return { ...prevState, apiError: error };
-      });
+    if (isPending) {
+      if (isSuccess && actionId !== data.data.id) {
+        setStore((prevState) => {
+          return { ...prevState, actionId: data.data.id };
+        });
+      } else if (error) {
+        setStatus('error');
+        setStore((prevState) => {
+          return { ...prevState, apiError: error };
+        });
+      }
     }
-  }, [actionId, data?.data.id, isSuccess, error, setStore, setStatus]);
+  }, [actionId, data?.data.id, isSuccess, error, setStore, setStatus, isPending]);
 
   useEffect(() => {
-    if (actionDetails?.data.isCompleted) {
+    if (actionDetails?.data.isCompleted && isPending) {
       setStatus('success');
       setStore((prevState) => {
         return {
@@ -82,7 +84,7 @@ export const KillProcessActionResult = memo<
         };
       });
     }
-  }, [actionDetails?.data, setStatus, setStore]);
+  }, [actionDetails?.data, setStatus, setStore, isPending]);
 
   // Show nothing if still pending
   if (isPending) {

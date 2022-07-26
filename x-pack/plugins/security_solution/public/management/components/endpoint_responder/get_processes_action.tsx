@@ -63,7 +63,7 @@ export const GetProcessesActionResult = memo<
     mutate: getProcesses,
     data: getProcessesData,
     isSuccess: isGetProcessesSuccess,
-    error: getProcessesError,
+    error: processesActionRequestError,
   } = useSendGetEndpointProcessesRequest();
 
   const { data: actionDetails } = useGetActionDetails<ProcessesEntry>(actionId ?? '-', {
@@ -87,27 +87,30 @@ export const GetProcessesActionResult = memo<
 
   // If get processes request was created, store the action id if necessary
   useEffect(() => {
-    if (isGetProcessesSuccess && actionId !== getProcessesData?.data.id) {
-      setStore((prevState) => {
-        return { ...prevState, actionId: getProcessesData?.data.id };
-      });
-    } else if (getProcessesError) {
-      setStatus('error');
-      setStore((prevState) => {
-        return { ...prevState, apiError: getProcessesError };
-      });
+    if (isPending) {
+      if (isGetProcessesSuccess && actionId !== getProcessesData?.data.id) {
+        setStore((prevState) => {
+          return { ...prevState, actionId: getProcessesData?.data.id };
+        });
+      } else if (processesActionRequestError) {
+        setStatus('error');
+        setStore((prevState) => {
+          return { ...prevState, apiError: processesActionRequestError };
+        });
+      }
     }
   }, [
     actionId,
     getProcessesData?.data.id,
-    getProcessesError,
+    processesActionRequestError,
     isGetProcessesSuccess,
     setStatus,
     setStore,
+    isPending,
   ]);
 
   useEffect(() => {
-    if (actionDetails?.data.isCompleted) {
+    if (actionDetails?.data.isCompleted && isPending) {
       setStatus('success');
       setStore((prevState) => {
         return {
@@ -116,7 +119,7 @@ export const GetProcessesActionResult = memo<
         };
       });
     }
-  }, [actionDetails?.data, setStatus, setStore]);
+  }, [actionDetails?.data, setStatus, setStore, isPending]);
 
   const columns = useMemo(
     () => [
