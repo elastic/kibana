@@ -40,6 +40,7 @@ export function getGettingStartedStep({
     }),
     status: quickStartCreateForm.status === 'success' ? 'complete' : 'current',
     children: <GettingStartedStepContent quickStartCreateForm={quickStartCreateForm} />,
+    'data-test-subj': 'getStartedFleetServerHeading',
   };
 }
 
