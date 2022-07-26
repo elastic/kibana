@@ -11,15 +11,15 @@ import {
   createRootWithCorePlugins,
   TestElasticsearchUtils,
 } from '@kbn/core/test_helpers/kbn_server';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+import type { AuditLogger } from '@kbn/security-plugin/server';
 import { Readable } from 'stream';
 
 import type { FileStatus, File } from '../../common';
 
 import { fileKindsRegistry } from '../file_kinds_registry';
 import { BlobStorageService } from '../blob_storage_service';
-import { FileServiceFactory } from '../file_service';
-import { FileServiceStart } from '../file_service/file_service';
-import { CreateFileArgs } from '../file_service/internal_file_service';
+import { FileServiceStart, CreateFileArgs, FileServiceFactory } from '../file_service';
 
 describe('FileService', () => {
   const fileKind: string = 'test';
@@ -35,6 +35,8 @@ describe('FileService', () => {
   let coreSetup: Awaited<ReturnType<typeof kbnRoot.setup>>;
   let coreStart: CoreStart;
   let fileServiceFactory: FileServiceFactory;
+  let security: ReturnType<typeof securityMock.createSetup>;
+  let auditLogger: AuditLogger;
 
   beforeAll(async () => {
     const { startES } = createTestServers({ adjustTimeout: jest.setTimeout });
@@ -67,11 +69,15 @@ describe('FileService', () => {
   });
 
   beforeEach(() => {
+    security = securityMock.createSetup();
+    auditLogger = { enabled: true, log: jest.fn() };
+    (security.audit.asScoped as jest.Mock).mockReturnValue(auditLogger);
+    security.audit.withoutRequest = auditLogger;
     blobStorageService = new BlobStorageService(esClient, kbnRoot.logger.get('test-blob-service'));
     fileServiceFactory = new FileServiceFactory(
       coreStart.savedObjects,
       blobStorageService,
-      undefined, // skip security for these tests
+      security,
       fileKindsRegistry,
       kbnRoot.logger.get('test-file-service')
     );
@@ -96,6 +102,15 @@ describe('FileService', () => {
     expect(file.name).toEqual('test');
     expect(file.fileKind).toEqual(fileKind);
     expect(file.status).toBe('AWAITING_UPLOAD' as FileStatus);
+    expect(auditLogger.log).toHaveBeenCalledTimes(1);
+    expect(auditLogger.log).toHaveBeenCalledWith({
+      error: undefined,
+      event: {
+        action: 'create',
+        outcome: 'success',
+      },
+      message: expect.stringContaining('Created file "test"'),
+    });
   });
 
   it('uploads file content', async () => {
@@ -189,17 +204,36 @@ describe('FileService', () => {
         expect.objectContaining({
           id: expect.any(String),
           name: 'test name',
-          valid_until: expect.any(Number),
-          created_at: expect.any(String),
+          validUntil: expect.any(Number),
+          created: expect.any(String),
+          token: expect.any(String),
+          fileId: file.id,
         })
       );
+      expect(auditLogger.log).toHaveBeenCalledTimes(2);
+      expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
+        error: undefined,
+        event: {
+          action: 'create',
+          outcome: 'success',
+        },
+        message: expect.stringContaining('Created file "test"'),
+      });
+      expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
+        error: undefined,
+        event: {
+          action: 'create',
+          outcome: 'success',
+        },
+        message: expect.stringContaining('Shared file "test"'),
+      });
     });
 
     it('retrieves a a file share object', async () => {
       const file = await createDisposableFile({ fileKind, name: 'test' });
       const { id } = await file.share({ name: 'my file share' });
       // Check if a file share exists without using an {@link File} object
-      const result = await fileService.getShareObject({ tokenId: id });
+      const result = await fileService.getShareObject({ id });
       expect(result).toEqual(
         expect.objectContaining({
           id: expect.any(String),
@@ -215,7 +249,7 @@ describe('FileService', () => {
       const { id } = await file.share({ name: 'my file share 1' });
       // Check if a file share exists without using an {@link File} object
       await fileService.updateShareObject({ id, attributes: { name: 'my file share 2' } });
-      const result = await fileService.getShareObject({ tokenId: id });
+      const result = await fileService.getShareObject({ id });
       expect(result).toEqual(
         expect.objectContaining({
           id: expect.any(String),
@@ -272,6 +306,31 @@ describe('FileService', () => {
       expect(await file.listShares()).toHaveLength(1);
       await file.unshare({ shareId: id });
       expect(await file.listShares()).toEqual([]);
+      expect(auditLogger.log).toHaveBeenCalledTimes(3);
+      expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
+        error: undefined,
+        event: {
+          action: 'create',
+          outcome: 'success',
+        },
+        message: expect.stringContaining('Created file "myfile"'),
+      });
+      expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
+        error: undefined,
+        event: {
+          action: 'create',
+          outcome: 'success',
+        },
+        message: expect.stringContaining('Shared file "myfile"'),
+      });
+      expect(auditLogger.log).toHaveBeenNthCalledWith(3, {
+        error: undefined,
+        event: {
+          action: 'delete',
+          outcome: 'success',
+        },
+        message: expect.stringContaining('Removed share for "myfile"'),
+      });
     });
   });
 });
