@@ -21,7 +21,7 @@ import { testMonitorPolicy } from './test_policy';
 describe('SyntheticsPrivateLocation', () => {
   const mockPrivateLocation = {
     id: 'policyId',
-    name: 'Test Location',
+    label: 'Test Location',
     isServiceManaged: false,
   };
   const testConfig = {
