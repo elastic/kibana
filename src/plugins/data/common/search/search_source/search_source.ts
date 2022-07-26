@@ -384,7 +384,6 @@ export class SearchSource {
   /**
    * Fetch this source and reject the returned Promise on error
    * @deprecated Use the `fetch$` method instead
-   * @removeBy 8.1
    */
   fetch(options: ISearchOptions = {}) {
     return lastValueFrom(this.fetch$(options)).then((r) => {

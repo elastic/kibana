@@ -7,7 +7,11 @@
 
 import { getOr } from 'lodash/fp';
 
-import type { SavedObjectsClientContract, SavedObjectsFindOptions } from '@kbn/core/server';
+import {
+  type SavedObjectsClientContract,
+  type SavedObjectsFindOptions,
+  SavedObjectsErrorHelpers,
+} from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type { NoteSavedObject } from '../../../../../common/types/timeline/note';
@@ -37,6 +41,7 @@ import { pickSavedTimeline } from './pick_saved_timeline';
 import { timelineSavedObjectType } from '../../saved_object_mappings';
 import { draftTimelineDefaults } from '../../utils/default_timeline';
 import { timelineFieldsMigrator } from './field_migrator';
+
 export { pickSavedTimeline } from './pick_saved_timeline';
 export { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 
@@ -386,7 +391,7 @@ export const persistTimeline = async (
       version,
     });
   } catch (err) {
-    if (timelineId != null && savedObjectsClient.errors.isConflictError(err)) {
+    if (timelineId != null && SavedObjectsErrorHelpers.isConflictError(err)) {
       return {
         code: 409,
         message: err.message,
@@ -703,7 +708,7 @@ export const getSelectedTimelines = async (
 
   const savedObjects = await Promise.resolve(
     savedObjectsClient.bulkGet<TimelineWithoutExternalRefs>(
-      exportedIds?.reduce(
+      (exportedIds ?? []).reduce(
         (acc, timelineId) => [...acc, { id: timelineId, type: timelineSavedObjectType }],
         [] as Array<{ id: string; type: string }>
       )
