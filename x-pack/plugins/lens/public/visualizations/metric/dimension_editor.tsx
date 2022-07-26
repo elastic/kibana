@@ -122,7 +122,7 @@ function BreakdownByEditor({ setState, state }: Props) {
     <>
       <EuiFormRow
         label={i18n.translate('xpack.lens.metric.maxColumns', {
-          defaultMessage: 'Max columns',
+          defaultMessage: 'Layout columns',
         })}
         fullWidth
         display="columnCompressed"
@@ -153,7 +153,7 @@ function MaximumEditor({ setState, state }: Props) {
   return (
     <EuiFormRow
       label={i18n.translate('xpack.lens.metric.progressDirectionLabel', {
-        defaultMessage: 'Progress bar direction',
+        defaultMessage: 'Bar direction',
       })}
       fullWidth
       display="columnCompressed"
@@ -162,7 +162,7 @@ function MaximumEditor({ setState, state }: Props) {
         isFullWidth
         buttonSize="compressed"
         legend={i18n.translate('xpack.lens.metric.progressDirectionLabel', {
-          defaultMessage: 'Progress bar direction',
+          defaultMessage: 'Bar direction',
         })}
         data-test-subj="lnsMetric_progress_direction_buttons"
         name="alignment"
