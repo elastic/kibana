@@ -55,8 +55,6 @@ export const timelineFullScreenSelector = createSelector(
 
 export const globalTimeRangeSelector = createSelector(selectGlobal, (global) => global.timerange);
 
-export const globalPolicySelector = createSelector(selectGlobal, (global) => global.policy);
-
 export const globalQuery = () => createSelector(selectGlobal, (global) => global.queries);
 
 export const globalQueryByIdSelector = () => createSelector(selectGlobalQuery, (query) => query);

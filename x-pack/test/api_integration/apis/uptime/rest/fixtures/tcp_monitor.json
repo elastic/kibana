@@ -2,6 +2,7 @@
   "type": "tcp",
   "locations": [],
   "enabled": true,
+  "config_id": "",
   "schedule": {
     "number": "3",
     "unit": "m"

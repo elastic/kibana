@@ -5,22 +5,16 @@
  * 2.0.
  */
 
-import type { PropsWithChildren, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import React, { memo, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer } from '@elastic/eui';
 import { UnsupportedMessageCallout } from './unsupported_message_callout';
-import type { ParsedCommandInterface } from '../service/parsed_command_input';
-import type { CommandDefinition, CommandExecutionComponentProps } from '../types';
+import type { CommandExecutionComponentProps } from '../types';
 import { CommandInputUsage } from './command_usage';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { ConsoleCodeBlock } from './console_code_block';
-
-export type BadArgumentProps = PropsWithChildren<{
-  parsedInput: ParsedCommandInterface;
-  commandDefinition: CommandDefinition;
-}>;
 
 /**
  * Shows a bad argument error. The error message needs to be defined via the Command History Item's

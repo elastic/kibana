@@ -18,7 +18,6 @@ import {
   SavedObjectsStart,
   DocLinksStart,
 } from '@kbn/core/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { SearchSelection } from './search_selection';
 import { GroupSelection } from './group_selection';
@@ -36,7 +35,6 @@ interface TypeSelectionProps {
   uiSettings: IUiSettingsClient;
   docLinks: DocLinksStart;
   savedObjects: SavedObjectsStart;
-  usageCollection?: UsageCollectionSetup;
   application: ApplicationStart;
   outsideVisualizeApp?: boolean;
   stateTransfer?: EmbeddableStateTransfer;
@@ -75,11 +73,6 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
       showGroups: !this.props.showAggsSelection,
       visType: this.props.selectedVisType,
     };
-
-    this.trackUiMetric = this.props.usageCollection?.reportUiCounter.bind(
-      this.props.usageCollection,
-      'visualize'
-    );
   }
 
   public render() {

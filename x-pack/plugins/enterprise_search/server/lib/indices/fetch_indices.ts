@@ -13,7 +13,7 @@ import {
 import { ByteSizeValue } from '@kbn/config-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { ElasticsearchIndex } from '../../../common/types';
+import { ElasticsearchIndexWithPrivileges } from '../../../common/types';
 
 export const mapIndexStats = (
   indexData: IndicesIndexState,
@@ -47,9 +47,8 @@ export const mapIndexStats = (
 export const fetchIndices = async (
   client: IScopedClusterClient,
   indexPattern: string,
-  returnHiddenIndices: boolean,
-  indexRegExp?: RegExp
-): Promise<ElasticsearchIndex[]> => {
+  returnHiddenIndices: boolean
+): Promise<ElasticsearchIndexWithPrivileges[]> => {
   // This call retrieves alias and settings information about indices
   const expandWildcards: ExpandWildcard[] = returnHiddenIndices ? ['hidden', 'all'] : ['open'];
   const totalIndices = await client.asCurrentUser.indices.get({
@@ -61,6 +60,14 @@ export const fetchIndices = async (
     filter_path: ['*.aliases', '*.settings.index.hidden'],
     index: indexPattern,
   });
+
+  const indexAndAliasNames = Object.keys(totalIndices).reduce((accum, indexName) => {
+    accum.push(indexName);
+    const aliases = Object.keys(totalIndices[indexName].aliases!);
+
+    aliases.forEach((alias) => accum.push(alias));
+    return accum;
+  }, [] as string[]);
 
   const indicesNames = returnHiddenIndices
     ? Object.keys(totalIndices)
@@ -76,24 +83,47 @@ export const fetchIndices = async (
     index: indexPattern,
     metric: ['docs', 'store'],
   });
-  const resultIndices = indicesNames
+
+  // TODO: make multiple batched requests if indicesNames.length > SOMETHING
+  const { index: indexPrivileges } = await client.asCurrentUser.security.hasPrivileges({
+    index: [
+      {
+        names: indexAndAliasNames,
+        privileges: ['read', 'manage'],
+      },
+    ],
+  });
+
+  return indicesNames
     .map((indexName: string) => {
       const indexData = totalIndices[indexName];
       const indexStats = indicesStats[indexName];
       return mapIndexStats(indexData, indexStats, indexName);
     })
-    .flatMap(({ name, aliases, ...engineData }) => {
+    .flatMap(({ name, aliases, ...indexData }) => {
       // expand aliases and add to results
-      const engines = [];
-      engines.push({ name, ...engineData });
+      const indicesAndAliases = [] as ElasticsearchIndexWithPrivileges[];
+      indicesAndAliases.push({
+        name,
+        alias: false,
+        privileges: { read: false, manage: false, ...indexPrivileges[name] },
+        ...indexData,
+      });
 
       aliases.forEach((alias) => {
-        engines.push({ name: alias, ...engineData });
+        indicesAndAliases.push({
+          name: alias,
+          alias: true,
+          privileges: { read: false, manage: false, ...indexPrivileges[name] },
+          ...indexData,
+        });
       });
-      return engines;
-    });
-
-  // The previous step could have added indices that don't match the index pattern, so filter those out again
-  // We wildcard RegExp the pattern unless user provides a more specific regex
-  return indexRegExp ? resultIndices.filter(({ name }) => name.match(indexRegExp)) : resultIndices;
+      return indicesAndAliases;
+    })
+    .filter(
+      ({ name }, index, array) =>
+        // make list of aliases unique since we add an alias per index above
+        // and aliases can point to multiple indices
+        array.findIndex((engineData) => engineData.name === name) === index
+    );
 };

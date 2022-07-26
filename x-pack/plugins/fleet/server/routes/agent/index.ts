@@ -30,6 +30,7 @@ import { PostBulkUpdateAgentTagsRequestSchema } from '../../types/rest_spec/agen
 
 import {
   getAgentsHandler,
+  getAgentTagsHandler,
   getAgentHandler,
   updateAgentHandler,
   deleteAgentHandler,
@@ -105,6 +106,17 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       },
     },
     getAgentsHandler
+  );
+  // List Agent Tags
+  router.get(
+    {
+      path: AGENT_API_ROUTES.LIST_TAGS_PATTERN,
+      validate: {},
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    getAgentTagsHandler
   );
 
   // Agent actions
