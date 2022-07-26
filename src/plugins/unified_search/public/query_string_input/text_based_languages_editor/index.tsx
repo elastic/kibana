@@ -602,7 +602,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               css={styles.dragResizeButton}
             />
           )}
-          {userDrags && <div css={{ height: '5px', backgroundColor: euiTheme.colors.primary }} />}
         </div>
       )}
     </>

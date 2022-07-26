@@ -39,3 +39,7 @@
 .unifiedTextLangEditor--compact .monaco-editor .monaco-scrollable-element {
   margin-left: 4px;
 }
+
+.unifiedTextLangEditor_errorMessage {
+  @include euiTextBreakWord;
+}

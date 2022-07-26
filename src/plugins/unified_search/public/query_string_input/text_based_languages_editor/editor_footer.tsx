@@ -105,7 +105,7 @@ export const EditorFooter = memo(function EditorFooter({
                         {errors.map((error, index) => {
                           return (
                             <EuiDescriptionListDescription key={index}>
-                              <EuiFlexGroup gutterSize="xl">
+                              <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
                                 <EuiFlexItem grow={false}>
                                   <EuiFlexGroup gutterSize="s" alignItems="center">
                                     <EuiFlexItem grow={false}>
@@ -126,7 +126,12 @@ export const EditorFooter = memo(function EditorFooter({
                                     </EuiFlexItem>
                                   </EuiFlexGroup>
                                 </EuiFlexItem>
-                                <EuiFlexItem grow={false}>{error.message}</EuiFlexItem>
+                                <EuiFlexItem
+                                  grow={false}
+                                  className="unifiedTextLangEditor_errorMessage"
+                                >
+                                  {error.message}
+                                </EuiFlexItem>
                               </EuiFlexGroup>
                             </EuiDescriptionListDescription>
                           );

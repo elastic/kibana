@@ -8,7 +8,6 @@
 
 import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 
 import {
   EuiModal,
@@ -65,11 +64,7 @@ export default function TextBasedLanguagesTransitionModal({
         </EuiText>
       </EuiModalBody>
 
-      <EuiModalFooter
-        css={css`
-          justify-content: space-between;
-        `}
-      >
+      <EuiModalFooter>
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiCheckbox
@@ -85,7 +80,7 @@ export default function TextBasedLanguagesTransitionModal({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="m">
+            <EuiFlexGroup gutterSize="m">
               <EuiFlexItem grow={false}>
                 <EuiButton
                   onClick={() => closeModal(dismissModalChecked)}
