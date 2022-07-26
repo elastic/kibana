@@ -50,7 +50,15 @@ export const schema = {
       defaultMessage: 'Name',
     }),
     defaultValue: '',
-    validations: [],
+    validations: [
+      {
+        validator: fieldValidators.emptyField(
+          i18n.translate('indexPatternEditor.validations.nameIsRequiredErrorMessage', {
+            defaultMessage: 'A name is required.',
+          })
+        ),
+      },
+    ],
   },
   timestampField: {
     label: i18n.translate('indexPatternEditor.editor.form.timeFieldLabel', {
