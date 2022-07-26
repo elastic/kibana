@@ -75,8 +75,6 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
       [pendingIsolate, pendingUnIsolate, totalPending]
     );
 
-    // TODO: This logic needs some cleaning up
-    // cyclomatic complexity > 20 :'/
     // eslint-disable-next-line complexity
     return useMemo(() => {
       if (isPendingStatusDisabled) {
