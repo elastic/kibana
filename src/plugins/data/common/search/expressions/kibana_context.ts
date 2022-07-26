@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition, ExecutionContext } from '@kbn/expressions-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import { Filter } from '@kbn/es-query';
-import { Query, uniqFilters } from '@kbn/es-query';
+import { Query, uniqFilters, AggregateQuery } from '@kbn/es-query';
 import { unboxExpressionValue } from '@kbn/expressions-plugin/common';
 import { SavedObjectReference } from '@kbn/core/types';
 import { SavedObjectsClientCommon } from '@kbn/data-views-plugin/common';
@@ -41,8 +41,11 @@ export type ExpressionFunctionKibanaContext = ExpressionFunctionDefinition<
 const getParsedValue = (data: any, defaultValue: any) =>
   typeof data === 'string' && data.length ? JSON.parse(data) || defaultValue : defaultValue;
 
-const mergeQueries = (first: Query | Query[] = [], second: Query | Query[]) =>
-  uniqBy<Query>(
+const mergeQueries = (
+  first: Query | AggregateQuery | Array<Query | AggregateQuery> = [],
+  second: Query | AggregateQuery | Array<Query | AggregateQuery>
+) =>
+  uniqBy<Query | AggregateQuery>(
     [...(Array.isArray(first) ? first : [first]), ...(Array.isArray(second) ? second : [second])],
     (n: any) => JSON.stringify(n.query)
   );
