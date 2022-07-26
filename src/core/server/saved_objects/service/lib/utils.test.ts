@@ -8,7 +8,7 @@
 
 import { mockUuidv1, mockUuidv5 } from './utils.test.mock';
 
-import { SavedObjectsFindOptions } from '../../types';
+import { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsUtils } from './utils';
 
 describe('SavedObjectsUtils', () => {

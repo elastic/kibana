@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject } from '../../types';
-import { SavedObjectsImportHookResult, SavedObjectsImportWarning } from '../types';
+import type { SavedObject, SavedObjectsImportWarning } from '@kbn/core-saved-objects-common';
+import { SavedObjectsImportHookResult } from '../types';
 import { executeImportHooks } from './execute_import_hooks';
 
 const createObject = (type: string, id: string): SavedObject => ({

@@ -7,28 +7,19 @@
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Logger } from '@kbn/logging';
-import type { SavedObjectsFindOptions, SavedObjectsClientContract } from '../../types';
-import type { SavedObjectsFindResponse } from '..';
+import type {
+  SavedObjectsFindOptions,
+  SavedObjectsFindResponse,
+  SavedObjectsClientContract,
+  SavedObjectsCreatePointInTimeFinderDependencies,
+  SavedObjectsCreatePointInTimeFinderOptions,
+  ISavedObjectsPointInTimeFinder,
+} from '@kbn/core-saved-objects-api-server';
 
 type PointInTimeFinderClient = Pick<
   SavedObjectsClientContract,
   'find' | 'openPointInTimeForType' | 'closePointInTime'
 >;
-
-/**
- * @public
- */
-export type SavedObjectsCreatePointInTimeFinderOptions = Omit<
-  SavedObjectsFindOptions,
-  'page' | 'pit' | 'searchAfter'
->;
-
-/**
- * @public
- */
-export interface SavedObjectsCreatePointInTimeFinderDependencies {
-  client: Pick<SavedObjectsClientContract, 'find' | 'openPointInTimeForType' | 'closePointInTime'>;
-}
 
 /**
  * @internal
@@ -44,28 +35,6 @@ export interface PointInTimeFinderDependencies
 export type CreatePointInTimeFinderFn = <T = unknown, A = unknown>(
   findOptions: SavedObjectsCreatePointInTimeFinderOptions
 ) => ISavedObjectsPointInTimeFinder<T, A>;
-
-/** @public */
-export interface ISavedObjectsPointInTimeFinder<T, A> {
-  /**
-   * An async generator which wraps calls to `savedObjectsClient.find` and
-   * iterates over multiple pages of results using `_pit` and `search_after`.
-   * This will open a new Point-In-Time (PIT), and continue paging until a set
-   * of results is received that's smaller than the designated `perPage` size.
-   */
-  find: () => AsyncGenerator<SavedObjectsFindResponse<T, A>>;
-  /**
-   * Closes the Point-In-Time associated with this finder instance.
-   *
-   * Once you have retrieved all of the results you need, it is recommended
-   * to call `close()` to clean up the PIT and prevent Elasticsearch from
-   * consuming resources unnecessarily. This is only required if you are
-   * done iterating and have not yet paged through all of the results: the
-   * PIT will automatically be closed for you once you reach the last page
-   * of results, or if the underlying call to `find` fails for any reason.
-   */
-  close: () => Promise<void>;
-}
 
 /**
  * @internal

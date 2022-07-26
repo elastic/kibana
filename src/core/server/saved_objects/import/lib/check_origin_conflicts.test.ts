@@ -8,13 +8,13 @@
 
 import { mockCreateOriginQuery } from './check_reference_origins.test.mock';
 
-import {
-  SavedObjectsClientContract,
+import type {
   SavedObjectReference,
   SavedObject,
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
-} from '../../types';
+} from '@kbn/core-saved-objects-common';
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { checkOriginConflicts } from './check_origin_conflicts';
 import { savedObjectsClientMock } from '../../../mocks';
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';

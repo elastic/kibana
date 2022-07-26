@@ -10,10 +10,10 @@ import pMap from 'p-map';
 import { v4 as uuidv4 } from 'uuid';
 import type {
   SavedObject,
-  SavedObjectsClientContract,
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
-} from '../../types';
+} from '@kbn/core-saved-objects-common';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { getObjectKey } from '../../service/lib/internal_utils';
 import type { ImportStateMap } from './types';
@@ -44,14 +44,17 @@ interface InexactMatch<T> {
   object: SavedObject<T>;
   destinations: Array<{ id: string; title?: string; updatedAt?: string }>;
 }
+
 interface Left<T> {
   tag: 'left';
   value: InexactMatch<T>;
 }
+
 interface Right<T> {
   tag: 'right';
   value: SavedObject<T>;
 }
+
 type Either<T> = Left<T> | Right<T>;
 const isLeft = <T>(object: Either<T>): object is Left<T> => object.tag === 'left';
 

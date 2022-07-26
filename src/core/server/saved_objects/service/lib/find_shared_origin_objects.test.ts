@@ -8,9 +8,9 @@
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
+import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import type { CreatePointInTimeFinderFn, PointInTimeFinder } from './point_in_time_finder';
 import { savedObjectsPointInTimeFinderMock } from './point_in_time_finder.mock';
-import type { ISavedObjectsRepository } from './repository';
 import { savedObjectsRepositoryMock } from './repository.mock';
 import { findSharedOriginObjects } from './find_shared_origin_objects';
 

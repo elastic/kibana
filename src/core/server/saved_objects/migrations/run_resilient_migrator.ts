@@ -9,8 +9,8 @@
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
 import { IndexMapping } from '../mappings';
-import type { SavedObjectsMigrationVersion } from '../types';
 import type { TransformRawDocs } from './types';
 import { MigrationResult } from './core';
 import { next } from './next';

@@ -6,14 +6,8 @@
  * Side Public License, v 1.
  */
 
-export type { ISavedObjectsRepository, SavedObjectsRepository } from './repository';
+export type { SavedObjectsRepository } from './repository';
 export { SavedObjectsClientProvider } from './scoped_client_provider';
-
-export type {
-  ISavedObjectsPointInTimeFinder,
-  SavedObjectsCreatePointInTimeFinderOptions,
-  SavedObjectsCreatePointInTimeFinderDependencies,
-} from './point_in_time_finder';
 
 export type {
   SavedObjectsClientWrapperFactory,
@@ -27,19 +21,5 @@ export type {
 export { SavedObjectsErrorHelpers } from './errors';
 
 export { SavedObjectsUtils } from './utils';
-
-export type {
-  SavedObjectsCollectMultiNamespaceReferencesObject,
-  SavedObjectsCollectMultiNamespaceReferencesOptions,
-  SavedObjectReferenceWithContext,
-  SavedObjectsCollectMultiNamespaceReferencesResponse,
-} from './collect_multi_namespace_references';
-
-export type {
-  SavedObjectsUpdateObjectsSpacesObject,
-  SavedObjectsUpdateObjectsSpacesOptions,
-  SavedObjectsUpdateObjectsSpacesResponse,
-  SavedObjectsUpdateObjectsSpacesResponseObject,
-} from './update_objects_spaces';
 
 export { getIndexForType } from './get_index_for_type';

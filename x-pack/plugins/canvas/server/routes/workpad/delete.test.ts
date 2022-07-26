@@ -8,7 +8,12 @@
 import { AwaitedProperties } from '@kbn/utility-types';
 import { CANVAS_TYPE } from '../../../common/lib/constants';
 import { initializeDeleteWorkpadRoute } from './delete';
-import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from '@kbn/core/server';
+import {
+  kibanaResponseFactory,
+  RequestHandlerContext,
+  RequestHandler,
+  SavedObjectsErrorHelpers,
+} from '@kbn/core/server';
 import { savedObjectsClientMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';
 import { getMockedRouterDeps } from '../test_helpers';
 
@@ -61,7 +66,7 @@ describe('DELETE workpad', () => {
     });
 
     (mockRouteContext.core.savedObjects.client.delete as jest.Mock).mockImplementationOnce(() => {
-      throw mockRouteContext.core.savedObjects.client.errors.createBadRequestError('bad request');
+      throw SavedObjectsErrorHelpers.createBadRequestError('bad request');
     });
 
     const response = await routeHandler(

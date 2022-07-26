@@ -128,31 +128,33 @@ export type {
   NavigateToUrlOptions,
 } from './application';
 
-export { SimpleSavedObject } from './saved_objects';
-export type { ResolvedSimpleSavedObject } from './saved_objects';
+export { SimpleSavedObjectImpl } from './saved_objects';
 export type {
-  SavedObjectsBatchResponse,
-  SavedObjectsBulkCreateObject,
-  SavedObjectsBulkCreateOptions,
-  SavedObjectsBulkResolveObject,
-  SavedObjectsBulkResolveResponse,
-  SavedObjectsBulkUpdateObject,
-  SavedObjectsBulkUpdateOptions,
+  SavedObjectsClientContract,
+  SimpleSavedObject,
   SavedObjectsCreateOptions,
-  SavedObjectsFindResponsePublic,
-  SavedObjectsResolveResponse,
+  SavedObjectsDeleteOptions,
+  SavedObjectsBatchResponse,
+  SavedObjectsFindOptions,
+  SavedObjectsFindOptionsReference,
   SavedObjectsUpdateOptions,
+  ResolvedSimpleSavedObject,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsFindResponse,
+  SavedObjectsBulkCreateOptions,
+  SavedObjectsBulkUpdateOptions,
+  SavedObjectsBulkResolveResponse,
+  SavedObjectsBulkCreateObject,
+} from '@kbn/core-saved-objects-api-browser';
+export type {
   SavedObject,
+  SavedObjectTypeIdTuple,
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectAttributeSingle,
   SavedObjectError,
   SavedObjectReference,
-  SavedObjectsBaseOptions,
-  SavedObjectsFindOptions,
-  SavedObjectsFindOptionsReference,
   SavedObjectsMigrationVersion,
-  SavedObjectsClientContract,
   SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
   SavedObjectsImportConflictError,
@@ -166,9 +168,7 @@ export type {
   SavedObjectsImportSimpleWarning,
   SavedObjectsImportActionRequiredWarning,
   SavedObjectsImportWarning,
-  SavedObjectReferenceWithContext,
-  SavedObjectsCollectMultiNamespaceReferencesResponse,
-} from './saved_objects';
+} from '@kbn/core-saved-objects-common';
 
 export type {
   HttpHeadersInit,
