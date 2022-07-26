@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { OverlayStart } from '@kbn/core/public';
+import type { DocLinksStart, OverlayStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import React from 'react';
@@ -16,9 +16,11 @@ import { ConfirmForceInstallModal } from '../components';
 const confirmForceInstall = ({
   pkg,
   overlays,
+  docLinks,
 }: {
   pkg: { name: string; version: string };
   overlays: OverlayStart;
+  docLinks: DocLinksStart;
 }): Promise<boolean> =>
   new Promise((resolve) => {
     const session = overlays.openModal(
@@ -33,13 +35,15 @@ const confirmForceInstall = ({
             session.close();
             resolve(false);
           }}
+          docLinks={docLinks}
         />
       )
     );
   });
 
 export const useConfirmForceInstall = () => {
-  const { overlays } = useStartServices();
+  const { overlays, docLinks } = useStartServices();
 
-  return (pkg: { name: string; version: string }) => confirmForceInstall({ pkg, overlays });
+  return (pkg: { name: string; version: string }) =>
+    confirmForceInstall({ pkg, overlays, docLinks });
 };
