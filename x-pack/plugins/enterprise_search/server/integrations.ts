@@ -379,4 +379,24 @@ export const registerEnterpriseSearchIntegrations = (
     shipper: 'enterprise_search',
     isBeta: false,
   });
+
+  customIntegrations.registerCustomIntegration({
+    id: 'build_a_connector',
+    title: i18n.translate('xpack.enterpriseSearch.integrations.buildAConnectorName', {
+      defaultMessage: 'Build a connector',
+    }),
+    description: i18n.translate('xpack.enterpriseSearch.integrations.buildAConnectorDescription', {
+      defaultMessage: 'Search over data stored on custom data sources with Enterprise Search.',
+    }),
+    categories: ['enterprise_search', 'custom', 'elastic_stack'],
+    uiInternalPath: '/app/enterprise_search/content/search_indices/new_index?method=connector',
+    icons: [
+      {
+        type: 'eui',
+        src: 'logoEnterpriseSearch',
+      },
+    ],
+    shipper: 'enterprise_search',
+    isBeta: false,
+  });
 };
