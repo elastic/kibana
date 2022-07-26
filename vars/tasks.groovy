@@ -156,6 +156,7 @@ def functionalXpack(Map params = [:]) {
       }
     }
 
+    // Skipped, process is hanging
     // whenChanged([
     //   'x-pack/plugins/synthetics/',
     // ]) {
