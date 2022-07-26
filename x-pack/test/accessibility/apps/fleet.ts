@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'fleet']);
-  const log = getService('log');
-  const es = getService('es');
-  const security = getService('security');
+  const a11y = getService('a11y');
 
   describe('Home page', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('fleet');
     });
 
-    describe('Agents', async () => {});
+    describe('Agents', async () => {
+      describe('Quick Start', async () => {
+        await a11y.testAppSnapshot();
+      });
+    });
 
     it('Loads the app', async () => {});
 
