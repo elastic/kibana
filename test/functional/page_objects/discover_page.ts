@@ -507,6 +507,14 @@ export class DiscoverPageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
   }
 
+  public async selectTextBaseLang(lang: 'SQL') {
+    await this.testSubjects.click('discover-dataView-switch-link');
+    await this.find.clickByCssSelector(
+      `[data-test-subj="text-based-languages-switcher"] [title="${lang}"]`
+    );
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
   public async removeHeaderColumn(name: string) {
     const isLegacyDefault = await this.useLegacyTable();
     if (isLegacyDefault) {

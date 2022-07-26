@@ -11645,16 +11645,16 @@
             "removeBy": "8.8.0",
             "references": [
               {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/server/saved_objects/migrations_730.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/server/saved_objects/migrations_730.ts"
-              },
-              {
                 "plugin": "maps",
                 "path": "x-pack/plugins/maps/server/saved_objects/saved_object_migrations.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/server/saved_objects/migrations_730.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/server/saved_objects/migrations_730.ts"
               }
             ],
             "children": [

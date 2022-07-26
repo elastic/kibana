@@ -21,7 +21,7 @@ const originalKibanaLib = jest.requireActual('../../../../common/lib/kibana');
 const mockUseGetUserCasesPermissions = useGetUserCasesPermissions as jest.Mock;
 mockUseGetUserCasesPermissions.mockImplementation(originalKibanaLib.useGetUserCasesPermissions);
 
-jest.mock('../../../../common/components/url_state/normalize_time_range');
+jest.mock('../../../../common/utils/normalize_time_range');
 
 jest.mock('../../../../common/hooks/use_resolve_conflict', () => {
   return {

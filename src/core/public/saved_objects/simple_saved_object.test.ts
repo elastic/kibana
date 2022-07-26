@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject } from '../../server';
-import { SimpleSavedObject } from './simple_saved_object';
-import { SavedObjectsClientContract } from './saved_objects_client';
+import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-browser';
+import { SimpleSavedObjectImpl as SimpleSavedObject } from './simple_saved_object';
 
-describe('SimpleSavedObject', () => {
+describe('SimpleSavedObjectImpl', () => {
   let client: SavedObjectsClientContract;
 
   beforeEach(() => {

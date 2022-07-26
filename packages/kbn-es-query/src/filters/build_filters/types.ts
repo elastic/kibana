@@ -82,6 +82,8 @@ export type Query = {
   language: string;
 };
 
+export type AggregateQuery = { sql: string } | { esql: string };
+
 /**
  * An interface for a latitude-longitude pair
  * @public
