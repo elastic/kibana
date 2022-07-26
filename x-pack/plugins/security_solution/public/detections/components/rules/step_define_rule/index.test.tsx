@@ -9,7 +9,6 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { StepDefineRule, aggregatableFields } from '.';
-import mockBrowserFields from './mock_browser_fields.json';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_selector', () => {
@@ -37,7 +36,53 @@ jest.mock('react-router-dom', () => {
 });
 
 test('aggregatableFields', function () {
-  expect(aggregatableFields(mockBrowserFields)).toMatchSnapshot();
+  expect(
+    aggregatableFields([
+      // @ts-expect-error
+      {
+        name: 'error.message',
+        type: 'string',
+        esTypes: ['text'],
+        searchable: true,
+        aggregatable: false,
+        readFromDocValues: false,
+      },
+    ])
+  ).toEqual([]);
+});
+
+test('aggregatableFields with aggregatable: true', function () {
+  expect(
+    aggregatableFields([
+      // @ts-expect-error
+      {
+        name: 'error.message',
+        type: 'string',
+        esTypes: ['text'],
+        searchable: true,
+        aggregatable: false,
+        readFromDocValues: false,
+      },
+      // @ts-expect-error
+      {
+        name: 'file.path',
+        type: 'string',
+        esTypes: ['keyword'],
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: false,
+      },
+    ])
+  ).toEqual([
+    {
+      name: 'file.path',
+      type: 'string',
+      esTypes: ['keyword'],
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: false,
+    },
+  ]);
 });
 
 describe('StepDefineRule', () => {
