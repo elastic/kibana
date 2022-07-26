@@ -185,8 +185,9 @@ export function RuleDetailsPage() {
         defaultMessage: 'Execution history',
       }),
       'data-test-subj': 'eventLogListTab',
-      content: getRuleEventLogList({
+      content: getRuleEventLogList<'default'>({
         rule,
+        ruleType,
       } as RuleEventLogListProps),
     },
     {

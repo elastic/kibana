@@ -24,8 +24,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should load from the shareable lazy loader', async () => {
-      await testSubjects.find('ruleEventLogList');
-      const exists = await testSubjects.exists('ruleEventLogList');
+      await testSubjects.find('ruleEventLogListContainer');
+      const exists = await testSubjects.exists('ruleEventLogListContainer');
       expect(exists).to.be(true);
     });
   });

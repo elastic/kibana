@@ -477,6 +477,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
           }
           return (
             <RulesListNotifyBadge
+              showOnHover
               rule={rule}
               isLoading={!!isLoadingMap[rule.id]}
               onLoading={(newIsLoading) => onLoading(rule.id, newIsLoading)}
