@@ -14,7 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { CHART_PANEL_TEST_SUBJECTS } from './constants';
+import { CHART_PANEL_TEST_SUBJECTS } from './test_subjects';
 
 interface ChartPanelProps {
   title?: string;

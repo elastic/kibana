@@ -11,3 +11,9 @@ export const CHART_PANEL_TEST_SUBJECTS = {
   ERROR: 'chart_is_error',
   TEST_CHART: 'testing_chart',
 };
+
+export const NO_FINDINGS_STATUS_TEST_SUBJ = {
+  NO_AGENTS_DEPLOYED: 'status-api-no-agent-deployed',
+  INDEXING: 'status-api-indexing',
+  INDEX_TIMEOUT: 'status-api-index-timeout',
+};
