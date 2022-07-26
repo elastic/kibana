@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import moment from 'moment';
 import {
   EuiButtonIcon,
@@ -67,6 +67,13 @@ export function DiscoverChart({
     element: null,
     moveFocus: false,
   });
+
+  const isRollupDataView = useMemo(
+    () => !!indexPattern.getFieldByName('_rollup.id'),
+    [indexPattern]
+  );
+
+  const showChart = isTimeBased && !isRollupDataView;
 
   const timeField =
     indexPattern.timeFieldName && indexPattern.getFieldByName(indexPattern.timeFieldName);
@@ -147,7 +154,7 @@ export function DiscoverChart({
               />
             </EuiFlexItem>
           )}
-          {isTimeBased && (
+          {showChart && (
             <EuiFlexItem className="dscResultCount__toggle" grow={false}>
               <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
                 {canVisualize && (
@@ -202,7 +209,7 @@ export function DiscoverChart({
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      {isTimeBased && !hideChart && (
+      {showChart && !hideChart && (
         <EuiFlexItem grow={false}>
           <section
             ref={(element) => (chartRef.current.element = element)}
