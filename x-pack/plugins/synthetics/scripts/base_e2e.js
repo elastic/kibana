@@ -71,23 +71,15 @@ function executeSyntheticsRunner(dirPath) {
       }
     );
   } else if (runner) {
-    if (grep) {
-      childProcess.execSync(
-        `node ../../../../scripts/${ftrScript} --config ${config} --kibana-install-dir '${kibanaInstallDir}'  --headless ${headless} --bail ${pauseOnError} --grep '${grep}'`,
-        {
-          cwd: dirPath,
-          stdio: 'inherit',
-        }
-      );
-    } else {
-      childProcess.execSync(
-        `node ../../../../scripts/${ftrScript} --config ${config} --kibana-install-dir '${kibanaInstallDir}'  --headless ${headless} --bail ${pauseOnError}`,
-        {
-          cwd: dirPath,
-          stdio: 'inherit',
-        }
-      );
-    }
+    childProcess.execSync(
+      `node ../../../../scripts/${ftrScript} --config ${config} --kibana-install-dir '${kibanaInstallDir}'  --headless ${headless} --bail ${pauseOnError} ${
+        grep ? '--grep ' + grep : ''
+      }`,
+      {
+        cwd: dirPath,
+        stdio: 'inherit',
+      }
+    );
   } else {
     childProcess.execSync(
       `node ../../../../scripts/${ftrScript} --config ${config} --kibana-install-dir '${kibanaInstallDir}' --grep '${grep}'`,
