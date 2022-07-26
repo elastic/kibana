@@ -103,19 +103,14 @@ describe('Filter Utils', () => {
       expect(
         validateConvertFilterToKueryNode(
           ['foo'],
-          esKuery.nodeTypes.function.buildNode('is', `foo.attributes.title`, 'best', true),
+          esKuery.nodeTypes.function.buildNode('is', `foo.attributes.title`, '"best"'),
           mockMappings
         )
       ).toEqual(esKuery.fromKueryExpression('foo.title: "best"'));
     });
 
     test('does not mutate the input KueryNode', () => {
-      const input = esKuery.nodeTypes.function.buildNode(
-        'is',
-        `foo.attributes.title`,
-        'best',
-        true
-      );
+      const input = esKuery.nodeTypes.function.buildNode('is', `foo.attributes.title`, '"best"');
 
       const inputCopy = cloneDeep(input);
 
