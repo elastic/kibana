@@ -88,4 +88,5 @@ export interface NavLinkItem {
   image?: string;
   title: string;
   skipUrlState?: boolean;
+  isBeta?: boolean;
 }

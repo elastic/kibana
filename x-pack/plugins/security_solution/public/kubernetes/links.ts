@@ -21,6 +21,7 @@ export const links: LinkItem = {
   }),
   path: KUBERNETES_PATH,
   globalNavEnabled: false,
+  isBeta: true,
   experimentalKey: 'kubernetesEnabled',
   globalSearchKeywords: ['Kubernetes'],
   globalNavOrder: 9005,
