@@ -248,9 +248,13 @@ export const TrainedModelActions: FC<TrainedModelActionsProps> = ({
       name: i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
         defaultMessage: 'Delete model',
       }),
-      description: i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
-        defaultMessage: 'Delete model',
-      }),
+      description: !isPopulatedObject(modelItem.pipelines)
+        ? i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
+            defaultMessage: 'Delete model',
+          })
+        : i18n.translate('xpack.ml.trainedModels.modelsList.deletionBlockedDescription', {
+            defaultMessage: 'Model has associated pipelines',
+          }),
       'data-test-subj': 'mlModelsTableRowDeleteAction',
       icon: 'trash',
       type: 'icon',
@@ -306,6 +310,7 @@ export const TrainedModelActions: FC<TrainedModelActionsProps> = ({
         items={actions
           .filter((action) => (action.available ? action.available(modelItem) : true))
           .map((action) => {
+            const disabled = action.enabled ? !action.enabled(modelItem) : false;
             return (
               <EuiContextMenuItem
                 key={action.name as string}
@@ -316,8 +321,8 @@ export const TrainedModelActions: FC<TrainedModelActionsProps> = ({
                   }
                   setIsPopoverOpen(false);
                 }}
-                disabled={action.enabled ? action.enabled(modelItem) : false}
-                toolTipContent={'Test'}
+                disabled={disabled}
+                toolTipContent={disabled ? action.description : null}
               >
                 {action.name}
               </EuiContextMenuItem>
