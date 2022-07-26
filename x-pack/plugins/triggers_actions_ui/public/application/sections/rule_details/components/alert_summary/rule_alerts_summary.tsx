@@ -20,9 +20,11 @@ import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
+  EUI_CHARTS_THEME_DARK,
   EUI_CHARTS_THEME_LIGHT,
   EUI_SPARKLINE_THEME_PARTIAL,
 } from '@elastic/eui/dist/eui_charts_theme';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { useLoadRuleAlertsAggs } from '../../../../hooks/use_load_rule_alerts_aggregations';
 import { useLoadRuleTypes } from '../../../../hooks/use_load_rule_types';
 import { formatChartAlertData, getColorSeries } from '.';
@@ -34,6 +36,14 @@ const G_ACCESSORS = ['g'];
 
 export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummaryProps) => {
   const [features, setFeatures] = useState<string>('');
+  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
+  const theme = useMemo(
+    () => [
+      EUI_SPARKLINE_THEME_PARTIAL,
+      isDarkMode ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme,
+    ],
+    [isDarkMode]
+  );
   const { ruleTypes } = useLoadRuleTypes({
     filteredRuleTypes,
   });
@@ -135,10 +145,7 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <Chart size={{ height: 50 }}>
-        <Settings
-          tooltip={TooltipType.None}
-          theme={[EUI_SPARKLINE_THEME_PARTIAL, EUI_CHARTS_THEME_LIGHT.theme]}
-        />
+        <Settings tooltip={TooltipType.None} theme={theme} />
         <BarSeries
           id="bars"
           xScaleType={ScaleType.Time}
