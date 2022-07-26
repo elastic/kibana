@@ -15,8 +15,12 @@ const { camelCase, sortBy } = require('lodash');
 const { resolve } = require('path');
 
 const OUTPUT_DIRECTORY = resolve('public', 'detections', 'mitre');
-const MITRE_ENTERPRISE_ATTACK_URL =
-  'https://raw.githubusercontent.com/mitre/cti/master/enterprise-attack/enterprise-attack.json';
+
+// Every release we should update the version of MITRE ATT&CK content and regenerate the model in our code.
+// This version must correspond to the one used for prebuilt rules in https://github.com/elastic/detection-rules.
+// This version is basically a tag on https://github.com/mitre/cti/tags, or can be a branch name like `master`.
+const MITRE_CONTENT_VERSION = 'ATT&CK-v11.3'; // last updated when preparing for 8.4.0 release
+const MITRE_CONTENT_URL = `https://raw.githubusercontent.com/mitre/cti/${MITRE_CONTENT_VERSION}/enterprise-attack/enterprise-attack.json`;
 
 const getTacticsOptions = (tactics) =>
   tactics.map((t) =>
@@ -177,7 +181,7 @@ const buildMockThreatData = (tacticsData, techniques, subtechniques) => {
 };
 
 async function main() {
-  fetch(MITRE_ENTERPRISE_ATTACK_URL)
+  fetch(MITRE_CONTENT_URL)
     .then((res) => res.json())
     .then((json) => {
       const mitreData = json.objects;
