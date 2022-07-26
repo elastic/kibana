@@ -9,7 +9,6 @@
 import React, { ReactElement } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-
 import './solution_toolbar.scss';
 import { IconButtonGroup, PrimaryButton } from '../buttons';
 import { ToolbarPopover } from '../popover';
@@ -17,9 +16,7 @@ import { ToolbarPopover } from '../popover';
 interface NamedSlots {
   primaryButton: ReactElement<typeof PrimaryButton | typeof ToolbarPopover>;
   iconButtonGroup?: ReactElement<typeof IconButtonGroup>;
-  extraButtons?: Array<
-    ReactElement<typeof PrimaryButton | typeof ToolbarPopover> | undefined
-  >;
+  extraButtons?: Array<ReactElement<typeof PrimaryButton | typeof ToolbarPopover> | undefined>;
 }
 
 export interface Props {
