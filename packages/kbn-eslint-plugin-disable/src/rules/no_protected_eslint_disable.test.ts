@@ -15,11 +15,9 @@ import {
 
 jest.mock('../helpers/protected_rules', () => {
   return {
-    getProtectedRules() {
-      return {
-        '@kbn/disable/no_protected_eslint_disable': '*',
-        'no-console': ['xFolder', 'src/foo.ts'],
-      };
+    PROTECTED_RULES: {
+      '@kbn/disable/no_protected_eslint_disable': '*',
+      'no-console': ['xFolder', 'src/foo.ts'],
     },
   };
 });

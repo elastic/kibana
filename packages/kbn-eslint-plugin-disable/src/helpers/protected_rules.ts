@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 
-export const getProtectedRules = function (): { [key: string]: string | string[] } {
-  // this configures the rules to protect.
-  // rule_name: * => protected on every file
-  // rule_name: [] => only protected on the paths included (it can be a folder or a specific file)
-  return {
-    '@kbn/disable/no_protected_eslint_disable': '*',
-    '@kbn/imports/no_unused_imports': '*',
-  };
+// this configures the rules to protect.
+//   // rule_name: * => protected on every file
+//   // rule_name: [] => only protected on the paths included (it can be a folder or a specific file)
+export const PROTECTED_RULES = {
+  '@kbn/disable/no_protected_eslint_disable': '*',
+  '@kbn/disable/no_naked_eslint_disable': '*',
+  '@kbn/imports/no_unused_imports': '*',
 };

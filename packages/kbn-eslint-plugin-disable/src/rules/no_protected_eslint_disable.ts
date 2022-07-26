@@ -9,7 +9,7 @@
 import { REPO_ROOT } from '@kbn/utils';
 import { relative } from 'path';
 import Eslint from 'eslint';
-import { getProtectedRules, getReportLocFromComment, parseEslintDisableComment } from '../helpers';
+import { PROTECTED_RULES, getReportLocFromComment, parseEslintDisableComment } from '../helpers';
 
 export const PROTECTED_DISABLE_MSG_ID = 'no-protected-eslint-disable';
 const messages = {
@@ -71,7 +71,7 @@ const create = (context: Eslint.Rule.RuleContext): Eslint.Rule.RuleListener => {
           return;
         }
 
-        const configuredProtectedRules = getProtectedRules();
+        const configuredProtectedRules = PROTECTED_RULES;
         const disabledRules = parsedEslintDisable.rules;
         const sourceFilename = context.getPhysicalFilename
           ? context.getPhysicalFilename()
