@@ -152,11 +152,7 @@ export interface GetStateReturn {
   /**
    * Start sync between state and URL
    */
-  startSync: () => void;
-  /**
-   * Stop sync between state and URL
-   */
-  stopSync: () => void;
+  startSync: () => () => void;
   /**
    * Set app state to with a partial new app state
    */
@@ -259,19 +255,13 @@ export function getState({
     }
   };
 
-  let testStop = () => {};
-
   return {
     kbnUrlStateStorage: stateStorage,
     appStateContainer: appStateContainerModified,
     startSync: () => {
       const { start, stop } = syncAppState();
-      testStop = stop;
       start();
-    },
-    stopSync: () => {
-      testStop();
-      testStop = () => {};
+      return stop;
     },
     setAppState: (newPartial: AppState) => setState(appStateContainerModified, newPartial),
     replaceUrlAppState,

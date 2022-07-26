@@ -26,6 +26,8 @@ const uiSettingsMock = {
 } as IUiSettingsClient;
 
 describe('Test discover state', () => {
+  let stopSync = () => {};
+
   beforeEach(async () => {
     history = createBrowserHistory();
     history.push('/');
@@ -35,10 +37,11 @@ describe('Test discover state', () => {
       uiSettings: uiSettingsMock,
     });
     await state.replaceUrlAppState({});
-    await state.startSync();
+    stopSync = state.startSync();
   });
   afterEach(() => {
-    state.stopSync();
+    stopSync();
+    stopSync = () => {};
   });
   test('setting app state and syncing to URL', async () => {
     state.setAppState({ index: 'modified' });
@@ -89,7 +92,7 @@ describe('Test discover initial state sort handling', () => {
       uiSettings: uiSettingsMock,
     });
     await state.replaceUrlAppState({});
-    await state.startSync();
+    const stopSync = state.startSync();
     expect(state.appStateContainer.getState().sort).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -98,6 +101,7 @@ describe('Test discover initial state sort handling', () => {
         ],
       ]
     `);
+    stopSync();
   });
   test('Empty sort in URL should allow fallback state defaults', async () => {
     history = createBrowserHistory();
@@ -109,7 +113,7 @@ describe('Test discover initial state sort handling', () => {
       uiSettings: uiSettingsMock,
     });
     await state.replaceUrlAppState({});
-    await state.startSync();
+    const stopSync = state.startSync();
     expect(state.appStateContainer.getState().sort).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -118,6 +122,7 @@ describe('Test discover initial state sort handling', () => {
         ],
       ]
     `);
+    stopSync();
   });
 });
 
