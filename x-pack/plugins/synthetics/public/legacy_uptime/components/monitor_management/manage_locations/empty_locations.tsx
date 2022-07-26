@@ -78,7 +78,7 @@ const ADD_LOCATION = i18n.translate('xpack.synthetics.monitorManagement.addLocat
 });
 
 export const READ_DOCS = i18n.translate('xpack.synthetics.monitorManagement.readDocs', {
-  defaultMessage: 'Read the docs',
+  defaultMessage: 'read the docs',
 });
 
 export const LEARN_MORE = i18n.translate('xpack.synthetics.monitorManagement.learnMore', {
