@@ -17,14 +17,26 @@ import {
 } from '../../../common/runtime_types';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 
-const getPolicyId = (config: HeartbeatConfig, privateLocation: PrivateLocation) =>
-  config.id + '-' + privateLocation.id;
-
 export class SyntheticsPrivateLocation {
   private readonly server: UptimeServerSetup;
 
   constructor(_server: UptimeServerSetup) {
     this.server = _server;
+  }
+
+  getSpaceId() {
+    if (!this.server.currentRequest) {
+      return '';
+    }
+
+    return this.server.spaces.spacesService.getSpaceId(this.server.currentRequest);
+  }
+
+  getPolicyId(config: HeartbeatConfig, { id: locId }: PrivateLocation) {
+    if (config[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT) {
+      return `${config.id}-${locId}`;
+    }
+    return `${config.id}-${locId}-${this.getSpaceId()}`;
   }
 
   async generateNewPolicy(
@@ -34,6 +46,9 @@ export class SyntheticsPrivateLocation {
     if (!this.server.authSavedObjectsClient) {
       throw new Error('Could not find authSavedObjectsClient');
     }
+
+    const { name: locName } = privateLocation;
+    const spaceId = this.getSpaceId();
 
     try {
       const newPolicy = await this.server.fleet.packagePolicyService.buildPackagePolicyFromPackage(
@@ -48,12 +63,12 @@ export class SyntheticsPrivateLocation {
 
       newPolicy.is_managed = true;
       newPolicy.policy_id = privateLocation.agentPolicyId;
-      newPolicy.name =
-        (config[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT
-          ? config.id
-          : config[ConfigKey.NAME]) +
-        '-' +
-        privateLocation.name;
+      if (config[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT) {
+        newPolicy.name = `${config.id}-${locName}`;
+      } else {
+        newPolicy.name = `${config[ConfigKey.NAME]}-${locName}-${spaceId}`;
+      }
+
       newPolicy.output_id = '';
       newPolicy.namespace = 'default';
 
@@ -90,7 +105,7 @@ export class SyntheticsPrivateLocation {
           throw new Error('Unable to create Synthetics package policy for private location');
         }
 
-        await this.createPolicy(newPolicy, getPolicyId(config, location));
+        await this.createPolicy(newPolicy, this.getPolicyId(config, location));
       }
     } catch (e) {
       this.server.logger.error(e);
@@ -109,7 +124,7 @@ export class SyntheticsPrivateLocation {
 
     for (const privateLocation of allPrivateLocations) {
       const hasLocation = monitorPrivateLocations?.some((loc) => loc.id === privateLocation.id);
-      const currId = getPolicyId(config, privateLocation);
+      const currId = this.getPolicyId(config, privateLocation);
       const hasPolicy = await this.getMonitor(currId);
       try {
         if (hasLocation) {
@@ -226,7 +241,7 @@ export class SyntheticsPrivateLocation {
             await this.server.fleet.packagePolicyService.delete(
               soClient,
               esClient,
-              [getPolicyId(config, location)],
+              [this.getPolicyId(config, location)],
               {
                 force: true,
               }
