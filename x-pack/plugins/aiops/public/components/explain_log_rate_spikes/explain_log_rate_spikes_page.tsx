@@ -161,7 +161,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
 
   return (
     <EuiPageBody data-test-subj="aiopsIndexPage" paddingSize="none" panelled={false}>
-      <EuiFlexGroup gutterSize="m">
+      <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
           <EuiPageContentHeader className="aiopsPageHeader">
             <EuiPageContentHeaderSection>
