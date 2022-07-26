@@ -38,7 +38,7 @@ import {
 } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
-import { DEFAULT_MAX_COLUMNS, getDefaultColor, MetricVisualizationState } from './visualization';
+import { DEFAULT_MAX_COLUMNS, MetricVisualizationState } from './visualization';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
 
 type Props = VisualizationDimensionEditorProps<MetricVisualizationState> & {
@@ -368,8 +368,6 @@ function StaticColorControls({ state, setState }: Pick<Props, 'state' | 'setStat
     defaultMessage: 'Color',
   });
 
-  const defaultColor = getDefaultColor(!!state.maxAccessor);
-
   const setColor = useCallback(
     (color: string) => {
       setState({ ...state, color: color === '' ? undefined : color });
@@ -395,7 +393,9 @@ function StaticColorControls({ state, setState }: Pick<Props, 'state' | 'setStat
         isClearable={true}
         onChange={(color: string) => handleColorChange(color)}
         color={currentColor}
-        placeholder={defaultColor}
+        placeholder={i18n.translate('xpack.lens.metric.colorPlaceholder', {
+          defaultMessage: 'Auto',
+        })}
         aria-label={colorLabel}
         showAlpha={false}
         swatches={euiPaletteColorBlind()}

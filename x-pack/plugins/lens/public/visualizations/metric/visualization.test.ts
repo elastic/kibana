@@ -8,6 +8,7 @@
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { ExpressionAstExpression, ExpressionAstFunction } from '@kbn/expressions-plugin/common';
+import { euiLightVars } from '@kbn/ui-theme';
 import { layerTypes } from '../..';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import {
@@ -18,7 +19,7 @@ import {
   Visualization,
 } from '../../types';
 import { GROUP_ID } from './constants';
-import { getDefaultColor, getMetricVisualization, MetricVisualizationState } from './visualization';
+import { getMetricVisualization, MetricVisualizationState } from './visualization';
 
 const paletteService = chartPluginMock.createPaletteRegistry();
 
@@ -458,7 +459,7 @@ describe('metric visualization', () => {
               datasourceLayers
             ) as ExpressionAstExpression
           ).chain[1].arguments.color[0]
-        ).toBe(getDefaultColor(true));
+        ).toBe(euiLightVars.euiColorPrimary);
 
         expect(
           (
@@ -470,8 +471,8 @@ describe('metric visualization', () => {
               },
               datasourceLayers
             ) as ExpressionAstExpression
-          ).chain[1].arguments.color[0]
-        ).toBe(getDefaultColor(false));
+          ).chain[1].arguments.color
+        ).toEqual([]);
       });
     });
   });

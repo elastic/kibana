@@ -9,7 +9,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { Datatable } from '@kbn/expressions-plugin/common';
-import MetricVis, { defaultColor, MetricVisComponentProps } from './metric_vis';
+import { MetricVis, MetricVisComponentProps } from './metric_vis';
 import {
   LayoutDirection,
   Metric,
@@ -241,7 +241,7 @@ describe('MetricVisComponent', function () {
 
       expect(visConfig).toMatchInlineSnapshot(`
         Object {
-          "color": "#343741",
+          "color": "#ffffff",
           "extra": <span />,
           "subtitle": undefined,
           "title": "Median products.base_price",
@@ -268,7 +268,7 @@ describe('MetricVisComponent', function () {
 
       expect(visConfig).toMatchInlineSnapshot(`
         Object {
-          "color": "#343741",
+          "color": "#ffffff",
           "extra": <span />,
           "subtitle": "subtitle",
           "title": "Median products.base_price",
@@ -301,7 +301,7 @@ describe('MetricVisComponent', function () {
 
       expect(visConfig).toMatchInlineSnapshot(`
         Object {
-          "color": "#343741",
+          "color": "#ffffff",
           "extra": <span>
             secondary prefix
              13.63
@@ -349,7 +349,7 @@ describe('MetricVisComponent', function () {
 
       expect(configWithProgress).toMatchInlineSnapshot(`
         Object {
-          "color": "#343741",
+          "color": "#ffffff",
           "domainMax": 28.984375,
           "extra": <span />,
           "progressBarDirection": "vertical",
@@ -391,7 +391,7 @@ describe('MetricVisComponent', function () {
       expect(visConfig).toMatchInlineSnapshot(`
         Array [
           Object {
-            "color": "#343741",
+            "color": "#ffffff",
             "extra": <span />,
             "subtitle": "Median products.base_price",
             "title": "Friday",
@@ -399,7 +399,7 @@ describe('MetricVisComponent', function () {
             "valueFormatter": [Function],
           },
           Object {
-            "color": "#343741",
+            "color": "#ffffff",
             "extra": <span />,
             "subtitle": "Median products.base_price",
             "title": "Wednesday",
@@ -407,7 +407,7 @@ describe('MetricVisComponent', function () {
             "valueFormatter": [Function],
           },
           Object {
-            "color": "#343741",
+            "color": "#ffffff",
             "extra": <span />,
             "subtitle": "Median products.base_price",
             "title": "Saturday",
@@ -415,7 +415,7 @@ describe('MetricVisComponent', function () {
             "valueFormatter": [Function],
           },
           Object {
-            "color": "#343741",
+            "color": "#ffffff",
             "extra": <span />,
             "subtitle": "Median products.base_price",
             "title": "Sunday",
@@ -423,7 +423,7 @@ describe('MetricVisComponent', function () {
             "valueFormatter": [Function],
           },
           Object {
-            "color": "#343741",
+            "color": "#ffffff",
             "extra": <span />,
             "subtitle": "Median products.base_price",
             "title": "Thursday",
@@ -551,7 +551,7 @@ describe('MetricVisComponent', function () {
         Array [
           Array [
             Object {
-              "color": "#343741",
+              "color": "#ffffff",
               "extra": <span />,
               "subtitle": "Median products.base_price",
               "title": "Friday",
@@ -559,7 +559,7 @@ describe('MetricVisComponent', function () {
               "valueFormatter": [Function],
             },
             Object {
-              "color": "#343741",
+              "color": "#ffffff",
               "extra": <span />,
               "subtitle": "Median products.base_price",
               "title": "Wednesday",
@@ -567,7 +567,7 @@ describe('MetricVisComponent', function () {
               "valueFormatter": [Function],
             },
             Object {
-              "color": "#343741",
+              "color": "#ffffff",
               "extra": <span />,
               "subtitle": "Median products.base_price",
               "title": "Saturday",
@@ -575,7 +575,7 @@ describe('MetricVisComponent', function () {
               "valueFormatter": [Function],
             },
             Object {
-              "color": "#343741",
+              "color": "#ffffff",
               "extra": <span />,
               "subtitle": "Median products.base_price",
               "title": "Sunday",
@@ -583,7 +583,7 @@ describe('MetricVisComponent', function () {
               "valueFormatter": [Function],
             },
             Object {
-              "color": "#343741",
+              "color": "#ffffff",
               "extra": <span />,
               "subtitle": "Median products.base_price",
               "title": "Thursday",
@@ -593,7 +593,7 @@ describe('MetricVisComponent', function () {
           ],
           Array [
             Object {
-              "color": "#343741",
+              "color": "#ffffff",
               "extra": <span />,
               "subtitle": "Median products.base_price",
               "title": "Other",
@@ -633,7 +633,7 @@ describe('MetricVisComponent', function () {
         Array [
           Array [
             Object {
-              "color": "#343741",
+              "color": "#ffffff",
               "domainMax": 28.984375,
               "extra": <span />,
               "progressBarDirection": "vertical",
@@ -643,7 +643,7 @@ describe('MetricVisComponent', function () {
               "valueFormatter": [Function],
             },
             Object {
-              "color": "#343741",
+              "color": "#ffffff",
               "domainMax": 28.984375,
               "extra": <span />,
               "progressBarDirection": "vertical",
@@ -653,7 +653,7 @@ describe('MetricVisComponent', function () {
               "valueFormatter": [Function],
             },
             Object {
-              "color": "#343741",
+              "color": "#ffffff",
               "domainMax": 25.984375,
               "extra": <span />,
               "progressBarDirection": "vertical",
@@ -663,7 +663,7 @@ describe('MetricVisComponent', function () {
               "valueFormatter": [Function],
             },
             Object {
-              "color": "#343741",
+              "color": "#ffffff",
               "domainMax": 25.784375,
               "extra": <span />,
               "progressBarDirection": "vertical",
@@ -673,7 +673,7 @@ describe('MetricVisComponent', function () {
               "valueFormatter": [Function],
             },
             Object {
-              "color": "#343741",
+              "color": "#ffffff",
               "domainMax": 25.348011363636363,
               "extra": <span />,
               "progressBarDirection": "vertical",
@@ -685,7 +685,7 @@ describe('MetricVisComponent', function () {
           ],
           Array [
             Object {
-              "color": "#343741",
+              "color": "#ffffff",
               "domainMax": 24.984375,
               "extra": <span />,
               "progressBarDirection": "vertical",
@@ -1068,7 +1068,7 @@ describe('MetricVisComponent', function () {
 
         const [[datum]] = component.find(Metric).props().data!;
 
-        expect(datum!.color).toBe(defaultColor);
+        expect(datum!.color).toBe('#ffffff');
         expect(mockGetColorForValue).not.toHaveBeenCalled();
       });
     });

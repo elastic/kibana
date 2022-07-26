@@ -45,6 +45,7 @@ Object {
       "filterOperations": [Function],
       "groupId": "max",
       "groupLabel": "Maximum value",
+      "groupTooltip": "If the maximum value is specified, the minimum value is fixed at zero.",
       "layerId": "first",
       "required": false,
       "supportFieldFormat": false,
