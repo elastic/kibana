@@ -1018,7 +1018,7 @@ describe('when on the endpoint list page', () => {
             ...hosts[0].metadata,
             Endpoint: {
               ...hosts[0].metadata.Endpoint,
-              capabilities: RESPONDER_CAPABILITIES,
+              capabilities: [...RESPONDER_CAPABILITIES],
               state: {
                 ...hosts[0].metadata.Endpoint.state,
                 isolation: false,
@@ -1081,7 +1081,10 @@ describe('when on the endpoint list page', () => {
       mockEndpointListApi();
       (useUserPrivileges as jest.Mock).mockReturnValue({
         ...mockInitialUserPrivilegesState(),
-        endpointPrivileges: { canAccessResponseConsole: true },
+        endpointPrivileges: {
+          ...mockInitialUserPrivilegesState().endpointPrivileges,
+          canAccessResponseConsole: true,
+        },
       });
 
       reactTestingLibrary.act(() => {
@@ -1117,8 +1120,8 @@ describe('when on the endpoint list page', () => {
 
       reactTestingLibrary.act(() => {
         // close any open action menus
-        reactTestingLibrary.fireEvent.click(firstActionButton);
-        reactTestingLibrary.fireEvent.click(secondActionButton);
+        userEvent.click(firstActionButton);
+        userEvent.click(secondActionButton);
       });
       const responderButton = await renderResult.findByTestId('console');
       expect(responderButton).toHaveAttribute('disabled');
