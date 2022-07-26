@@ -64,6 +64,7 @@ export const AssignFlyoutResultList: FC<AssignFlyoutResultListProps> = ({
     <EuiSelectable<ResultInternals>
       height="full"
       data-test-subj="assignFlyoutResultList"
+      aria-label="canBeAssignedSavedObjects"
       options={options}
       allowExclusions={false}
       isLoading={isLoading}
