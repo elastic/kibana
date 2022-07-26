@@ -49,11 +49,6 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
     const wasReleasing = useRef<boolean>(false);
     const wasIsolating = useRef<boolean>(false);
 
-    useEffect(() => {
-      wasReleasing.current = pendingIsolate === 0 && pendingUnIsolate > 0;
-      wasIsolating.current = pendingIsolate > 0 && pendingUnIsolate === 0;
-    }, [pendingIsolate, pendingUnIsolate]);
-
     const totalPending = useMemo(
       () =>
         pendingIsolate +
@@ -70,12 +65,22 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
       ]
     );
 
-    const showActionPending = useMemo(
-      () => totalPending > 0 && !(pendingIsolate > 0 || pendingUnIsolate > 0),
-      [pendingIsolate, pendingUnIsolate, totalPending]
-    );
+    const hasMultipleActionTypesPending = useMemo<boolean>(() => {
+      return (
+        Object.values(pendingActions).reduce((countOfTypes, pendingActionCount) => {
+          if (pendingActionCount > 0) {
+            return countOfTypes + 1;
+          }
+          return countOfTypes;
+        }, 0) > 1
+      );
+    }, [pendingActions]);
 
-    // eslint-disable-next-line complexity
+    useEffect(() => {
+      wasReleasing.current = pendingIsolate === 0 && pendingUnIsolate > 0;
+      wasIsolating.current = pendingIsolate > 0 && pendingUnIsolate === 0;
+    }, [pendingIsolate, pendingUnIsolate]);
+
     return useMemo(() => {
       if (isPendingStatusDisabled) {
         // If nothing is pending and host is not currently isolated, then render nothing
@@ -94,10 +99,7 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
       }
 
       // If nothing is pending
-      if (
-        !(pendingActions?.pendingIsolate || pendingActions?.pendingUnIsolate) &&
-        !showActionPending
-      ) {
+      if (totalPending === 0) {
         // and host is either releasing and or currently released, then render nothing
         if ((!wasIsolating.current && wasReleasing.current) || !isIsolated) {
           return null;
@@ -115,15 +117,8 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
         }
       }
 
-      // If there are multiple types of pending isolation actions,
-      // then show count of actions with tooltip that displays breakdown
-      if (
-        pendingIsolate > 1 ||
-        pendingUnIsolate > 1 ||
-        pendingKillProcess > 0 ||
-        pendingSuspendProcess > 0 ||
-        pendingRunningProcesses > 0
-      ) {
+      // If there are different types of action pending, then show a summary with tooltip
+      if (hasMultipleActionTypesPending) {
         return (
           <AgentPendingActionStatusBadge
             data-test-subj={dataTestSubj}
@@ -132,44 +127,35 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
         );
       }
 
-      // show pending badge if a single pending isolation or release
-      // or when other actions are pending
+      // show pending isolation badge if a single type of isolation action has pending numbers.
+      // We don't care about the count here because if there were more than 1 of the same type
+      // (ex. 3 isolate... 0 release), then the action status displayed is still the same - "isolating".
       return (
         <EuiBadge color="hollow" data-test-subj={dataTestSubj}>
           <EuiTextColor color="subdued" data-test-subj={getTestId('pending')}>
-            {showActionPending ? (
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.hostIsolationStatus.isActionPending"
-                defaultMessage="Action pending"
-              />
-            ) : pendingIsolate === 1 ? (
+            {pendingIsolate ? (
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.hostIsolationStatus.isIsolating"
                 defaultMessage="Isolating"
               />
             ) : (
-              pendingUnIsolate === 1 && (
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.hostIsolationStatus.isUnIsolating"
-                  defaultMessage="Releasing"
-                />
-              )
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.hostIsolationStatus.isUnIsolating"
+                defaultMessage="Releasing"
+              />
             )}
           </EuiTextColor>
         </EuiBadge>
       );
     }, [
       isPendingStatusDisabled,
-      pendingActions,
-      showActionPending,
-      pendingIsolate,
-      pendingUnIsolate,
-      pendingKillProcess,
-      pendingSuspendProcess,
-      pendingRunningProcesses,
+      totalPending,
+      hasMultipleActionTypesPending,
       dataTestSubj,
       getTestId,
+      pendingIsolate,
       isIsolated,
+      pendingActions,
     ]);
   }
 );
