@@ -52,7 +52,6 @@ import {
   createNewTermsAlertType,
 } from '../../rule_types';
 import { createSecurityRuleTypeWrapper } from '../../rule_types/create_security_rule_type_wrapper';
-import { RULE_PREVIEW_INVOCATION_COUNT } from '../../../../../common/detection_engine/constants';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import { wrapSearchSourceClient } from './utils/wrap_search_source_client';
 
@@ -91,15 +90,9 @@ export const previewRulesRoute = async (
         const savedObjectsClient = coreContext.savedObjects.client;
         const siemClient = (await context.securitySolution).getAppClient();
 
+        const timeframeEnd = request.body.timeframeEnd;
         let invocationCount = request.body.invocationCount;
-        if (
-          ![
-            RULE_PREVIEW_INVOCATION_COUNT.HOUR,
-            RULE_PREVIEW_INVOCATION_COUNT.DAY,
-            RULE_PREVIEW_INVOCATION_COUNT.WEEK,
-            RULE_PREVIEW_INVOCATION_COUNT.MONTH,
-          ].includes(invocationCount)
-        ) {
+        if (invocationCount < 1) {
           return response.ok({
             body: { logs: [{ errors: ['Invalid invocation count'], warnings: [], duration: 0 }] },
           });
@@ -204,7 +197,7 @@ export const previewRulesRoute = async (
             isAborted = true;
           }, PREVIEW_TIMEOUT_SECONDS * 1000);
 
-          const startedAt = moment();
+          const startedAt = moment(timeframeEnd);
           const parsedDuration = parseDuration(internalRule.schedule.interval) ?? 0;
           startedAt.subtract(moment.duration(parsedDuration * (invocationCount - 1)));
 

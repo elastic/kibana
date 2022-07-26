@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-export const CHART_PANEL_TEST_SUBJECTS = {
-  LOADING: 'chart_is_loading',
-  EMPTY: 'chart_is_empty',
-  ERROR: 'chart_is_error',
-  TEST_CHART: 'testing_chart',
-};
+export const LENS_METRIC_ID = 'lnsMetricNew'; // TODO - rename old one to "legacy"
+
+export const GROUP_ID = {
+  METRIC: 'metric',
+  SECONDARY_METRIC: 'secondaryMetric',
+  MAX: 'max',
+  BREAKDOWN_BY: 'breakdownBy',
+} as const;
