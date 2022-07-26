@@ -435,6 +435,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
   return (
     <section data-test-subj="actionsList">
       <DeleteModalConfirmation
+        data-test-subj="deleteConnectorsConfirmation"
         onDeleted={(deleted: string[]) => {
           if (selectedItems.length === 0 || selectedItems.length === deleted.length) {
             const updatedActions = actions.filter(
