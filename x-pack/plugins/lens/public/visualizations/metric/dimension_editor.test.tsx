@@ -307,24 +307,59 @@ describe('dimension editor', () => {
           ]
         `);
     });
-
-    it('sets max columns', () => {
-      harness.setMaxCols(1);
-      harness.setMaxCols(2);
-      harness.setMaxCols(3);
-      expect(mockSetState).toHaveBeenCalledTimes(3);
-      expect(mockSetState.mock.calls.map((args) => args[0].maxCols)).toMatchInlineSnapshot(`
-          Array [
-            1,
-            2,
-            3,
-          ]
-        `);
-    });
   });
 
   describe('breakdown-by dimension', () => {
     const accessor = 'breakdown-col-id';
+
+    class Harness {
+      public _wrapper;
+
+      constructor(
+        wrapper: ReactWrapper<HTMLAttributes, unknown, React.Component<{}, {}, unknown>>
+      ) {
+        this._wrapper = wrapper;
+      }
+
+      private get collapseSetting() {
+        return this._wrapper.find(CollapseSetting);
+      }
+
+      public get currentCollapseFn() {
+        return this.collapseSetting.props().value;
+      }
+
+      public setCollapseFn(fn: string) {
+        return this.collapseSetting.props().onChange(fn);
+      }
+
+      public setMaxCols(max: number) {
+        act(() => {
+          this._wrapper.find('EuiFieldNumber[data-test-subj="lnsMetric_max_cols"]').props()
+            .onChange!({
+            target: { value: String(max) },
+          } as unknown as FormEvent);
+        });
+      }
+    }
+
+    let harness: Harness;
+    const mockSetState = jest.fn();
+
+    beforeEach(() => {
+      harness = new Harness(
+        mountWithIntl(
+          <DimensionEditor
+            {...props}
+            state={{ ...fullState, breakdownByAccessor: accessor }}
+            accessor={accessor}
+            setState={mockSetState}
+          />
+        )
+      );
+    });
+
+    afterEach(() => mockSetState.mockClear());
 
     it('renders when the accessor matches', () => {
       const component = shallow(
@@ -341,21 +376,24 @@ describe('dimension editor', () => {
     });
 
     it('supports setting a collapse function', () => {
-      const setState = jest.fn();
-      const currentCollapseFn = 'sum';
-      const localState = {
-        ...fullState,
-        breakdownByAccessor: accessor,
-        collapseFn: currentCollapseFn,
-      };
-      const component = shallow(
-        <DimensionEditor {...props} state={localState} setState={setState} accessor={accessor} />
-      );
-      const collapseComponentProps = component.find(CollapseSetting).props();
-      expect(collapseComponentProps.value).toBe(currentCollapseFn);
+      expect(harness.currentCollapseFn).toBe(fullState.collapseFn);
       const newCollapseFunc = 'min';
-      collapseComponentProps.onChange(newCollapseFunc);
-      expect(setState).toHaveBeenCalledWith({ ...localState, collapseFn: newCollapseFunc });
+      harness.setCollapseFn(newCollapseFunc);
+      expect(mockSetState).toHaveBeenCalledWith({ ...fullState, collapseFn: newCollapseFunc });
+    });
+
+    it('sets max columns', () => {
+      harness.setMaxCols(1);
+      harness.setMaxCols(2);
+      harness.setMaxCols(3);
+      expect(mockSetState).toHaveBeenCalledTimes(3);
+      expect(mockSetState.mock.calls.map((args) => args[0].maxCols)).toMatchInlineSnapshot(`
+          Array [
+            1,
+            2,
+            3,
+          ]
+        `);
     });
   });
 });

@@ -15,7 +15,6 @@ import {
   EuiButtonGroup,
   EuiFieldNumber,
   htmlIdGenerator,
-  EuiSpacer,
   EuiColorPicker,
   euiPaletteColorBlind,
 } from '@elastic/eui';
@@ -97,15 +96,7 @@ export function DimensionEditor(props: Props) {
     case state.breakdownByAccessor:
       return (
         <div data-test-subj="lnsMetricDimensionEditor_breakdown">
-          <CollapseSetting
-            value={state.collapseFn || ''}
-            onChange={(collapseFn: string) => {
-              setState({
-                ...state,
-                collapseFn,
-              });
-            }}
-          />
+          <BreakdownByEditor {...props} />
         </div>
       );
     default:
@@ -113,7 +104,7 @@ export function DimensionEditor(props: Props) {
   }
 }
 
-function MaximumEditor({ setState, state }: Props) {
+function BreakdownByEditor({ setState, state }: Props) {
   const setMaxCols = useCallback(
     (columns: string) => {
       setState({ ...state, maxCols: parseInt(columns, 10) });
@@ -127,51 +118,8 @@ function MaximumEditor({ setState, state }: Props) {
       value: String(state.maxCols ?? DEFAULT_MAX_COLUMNS),
     });
 
-  const idPrefix = htmlIdGenerator()();
   return (
     <>
-      <EuiSpacer size="s" />
-      <EuiFormRow
-        label={i18n.translate('xpack.lens.metric.progressDirectionLabel', {
-          defaultMessage: 'Progress bar direction',
-        })}
-        fullWidth
-        display="columnCompressed"
-      >
-        <EuiButtonGroup
-          isFullWidth
-          buttonSize="compressed"
-          legend={i18n.translate('xpack.lens.metric.progressDirectionLabel', {
-            defaultMessage: 'Progress bar direction',
-          })}
-          data-test-subj="lnsMetric_progress_direction_buttons"
-          name="alignment"
-          options={[
-            {
-              id: `${idPrefix}vertical`,
-              label: i18n.translate('xpack.lens.metric.progressDirection.vertical', {
-                defaultMessage: 'Vertical',
-              }),
-              'data-test-subj': 'lnsMetric_progress_bar_vertical',
-            },
-            {
-              id: `${idPrefix}horizontal`,
-              label: i18n.translate('xpack.lens.metric.progressDirection.horizontal', {
-                defaultMessage: 'Horizontal',
-              }),
-              'data-test-subj': 'lnsMetric_progress_bar_horizontal',
-            },
-          ]}
-          idSelected={`${idPrefix}${state.progressDirection ?? 'vertical'}`}
-          onChange={(id) => {
-            const newDirection = id.replace(idPrefix, '') as LayoutDirection;
-            setState({
-              ...state,
-              progressDirection: newDirection,
-            });
-          }}
-        />
-      </EuiFormRow>
       <EuiFormRow
         label={i18n.translate('xpack.lens.metric.maxColumns', {
           defaultMessage: 'Max columns',
@@ -187,7 +135,63 @@ function MaximumEditor({ setState, state }: Props) {
           onChange={({ target: { value } }) => handleMaxColsChange(value)}
         />
       </EuiFormRow>
+      <CollapseSetting
+        value={state.collapseFn || ''}
+        onChange={(collapseFn: string) => {
+          setState({
+            ...state,
+            collapseFn,
+          });
+        }}
+      />
     </>
+  );
+}
+
+function MaximumEditor({ setState, state }: Props) {
+  const idPrefix = htmlIdGenerator()();
+  return (
+    <EuiFormRow
+      label={i18n.translate('xpack.lens.metric.progressDirectionLabel', {
+        defaultMessage: 'Progress bar direction',
+      })}
+      fullWidth
+      display="columnCompressed"
+    >
+      <EuiButtonGroup
+        isFullWidth
+        buttonSize="compressed"
+        legend={i18n.translate('xpack.lens.metric.progressDirectionLabel', {
+          defaultMessage: 'Progress bar direction',
+        })}
+        data-test-subj="lnsMetric_progress_direction_buttons"
+        name="alignment"
+        options={[
+          {
+            id: `${idPrefix}vertical`,
+            label: i18n.translate('xpack.lens.metric.progressDirection.vertical', {
+              defaultMessage: 'Vertical',
+            }),
+            'data-test-subj': 'lnsMetric_progress_bar_vertical',
+          },
+          {
+            id: `${idPrefix}horizontal`,
+            label: i18n.translate('xpack.lens.metric.progressDirection.horizontal', {
+              defaultMessage: 'Horizontal',
+            }),
+            'data-test-subj': 'lnsMetric_progress_bar_horizontal',
+          },
+        ]}
+        idSelected={`${idPrefix}${state.progressDirection ?? 'vertical'}`}
+        onChange={(id) => {
+          const newDirection = id.replace(idPrefix, '') as LayoutDirection;
+          setState({
+            ...state,
+            progressDirection: newDirection,
+          });
+        }}
+      />
+    </EuiFormRow>
   );
 }
 
@@ -206,9 +210,9 @@ function PrimaryMetricEditor(props: Props) {
 
   const canFindDataBounds = Boolean(state.maxAccessor || state.breakdownByAccessor);
 
-  const singleMetricValue = frame.activeData![state.layerId].rows[0][
-    state.metricAccessor!
-  ] as number;
+  const singleMetricValue = frame.activeData![state.layerId].rows[0]?.[state.metricAccessor!] as
+    | number
+    | undefined;
 
   const currentMinMax = canFindDataBounds
     ? getDataBoundsForPalette(
@@ -219,6 +223,8 @@ function PrimaryMetricEditor(props: Props) {
         },
         frame.activeData?.[state.layerId]
       )
+    : typeof singleMetricValue === 'undefined'
+    ? { min: DEFAULT_MIN_STOP, max: DEFAULT_MAX_STOP }
     : singleMetricValue > 0
     ? { min: 0, max: singleMetricValue * 2 }
     : { min: singleMetricValue * 2, max: 0 };
