@@ -36,6 +36,7 @@ export const getSelectAgentPolicyStep = ({
     status: policyId ? 'complete' : undefined,
     children: (
       <SelectAgentPolicyStepContent
+        data-test-subj="createPolicyFleetHeader"
         policyId={policyId}
         setPolicyId={setPolicyId}
         eligibleFleetServerPolicies={eligibleFleetServerPolicies}
