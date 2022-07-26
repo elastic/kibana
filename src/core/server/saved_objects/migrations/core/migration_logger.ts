@@ -7,7 +7,7 @@
  */
 
 import type { Logger, LogMeta } from '@kbn/logging';
-import type { SavedObjectsMigrationLogger } from '@kbn/core-saved-objects-server'
+import type { SavedObjectsMigrationLogger } from '@kbn/core-saved-objects-server';
 
 /*
  * This file provides a helper class for ensuring that all logging
