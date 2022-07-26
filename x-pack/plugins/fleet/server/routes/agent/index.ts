@@ -8,6 +8,7 @@
 import { AGENT_API_ROUTES } from '../../constants';
 import {
   GetAgentsRequestSchema,
+  GetTagsRequestSchema,
   GetOneAgentRequestSchema,
   UpdateAgentRequestSchema,
   DeleteAgentRequestSchema,
@@ -111,7 +112,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
   router.get(
     {
       path: AGENT_API_ROUTES.LIST_TAGS_PATTERN,
-      validate: {},
+      validate: GetTagsRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },

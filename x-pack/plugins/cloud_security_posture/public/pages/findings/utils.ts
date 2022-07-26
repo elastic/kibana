@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildEsQuery } from '@kbn/es-query';
+import { buildEsQuery, type Query } from '@kbn/es-query';
 import { EuiBasicTableProps, Pagination } from '@elastic/eui';
 import { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -50,7 +50,7 @@ export const usePersistedQuery = <T>(getter: ({ filters, query }: FindingsBaseUR
     () =>
       getter({
         filters: filterManager.getAppFilters(),
-        query: queryString.getQuery(),
+        query: queryString.getQuery() as Query,
       }),
     [getter, filterManager, queryString]
   );
@@ -116,7 +116,7 @@ export const getFindingsPageSizeInfo = ({
 });
 
 export const getFindingsCountAggQuery = () => ({
-  count: { terms: { field: 'result.evaluation.keyword' } },
+  count: { terms: { field: 'result.evaluation' } },
 });
 
 export const getAggregationCount = (buckets: estypes.AggregationsStringRareTermsBucketKeys[]) => {
@@ -128,15 +128,3 @@ export const getAggregationCount = (buckets: estypes.AggregationsStringRareTerms
     failed: failed?.doc_count || 0,
   };
 };
-
-const FIELDS_WITHOUT_KEYWORD_MAPPING = new Set([
-  '@timestamp',
-  'resource.sub_type',
-  'resource.name',
-  'resource.id',
-  'rule.name',
-]);
-
-// NOTE: .keyword comes from the mapping we defined for the Findings index
-export const getSortKey = (key: string): string =>
-  FIELDS_WITHOUT_KEYWORD_MAPPING.has(key) ? key : `${key}.keyword`;

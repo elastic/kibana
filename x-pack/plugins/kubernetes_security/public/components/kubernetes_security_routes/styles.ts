@@ -19,6 +19,11 @@ export const useStyles = () => {
       marginBottom: size.l,
     };
 
+    const titleText: CSSObject = {
+      display: 'flex',
+      alignItems: 'center',
+    };
+
     const titleActions: CSSObject = {
       marginLeft: 'auto',
       flexDirection: 'row',
@@ -96,8 +101,13 @@ export const useStyles = () => {
       },
     };
 
+    const betaBadge: CSSObject = {
+      marginLeft: size.m,
+    };
+
     return {
       titleSection,
+      titleText,
       titleActions,
       updatedAt,
       widgetBadge,
@@ -109,6 +119,7 @@ export const useStyles = () => {
       percentageChartTitle,
       widgetHolder,
       widgetsGroup,
+      betaBadge,
     };
   }, [euiTheme]);
 

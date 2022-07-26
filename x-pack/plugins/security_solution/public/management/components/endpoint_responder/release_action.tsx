@@ -5,89 +5,48 @@
  * 2.0.
  */
 
-import React, { memo, useEffect } from 'react';
-import type { ActionDetails } from '../../../../common/endpoint/types';
-import { useGetActionDetails } from '../../hooks/endpoint/use_get_action_details';
-import type { EndpointCommandDefinitionMeta } from './types';
+import React, { memo } from 'react';
+import type { ActionRequestComponentProps } from './types';
 import { useSendReleaseEndpointRequest } from '../../hooks/endpoint/use_send_release_endpoint_request';
-import type { CommandExecutionComponentProps } from '../console/types';
 import { ActionError } from './action_error';
+import { useUpdateActionState } from './hooks';
 
-export const ReleaseActionResult = memo<
-  CommandExecutionComponentProps<
-    { comment?: string },
-    {
-      actionId?: string;
-      actionRequestSent?: boolean;
-      completedActionDetails?: ActionDetails;
-    },
-    EndpointCommandDefinitionMeta
-  >
->(({ command, setStore, store, status, setStatus, ResultComponent }) => {
-  const endpointId = command.commandDefinition?.meta?.endpointId;
-  const { actionId, completedActionDetails } = store;
-  const isPending = status === 'pending';
-  const actionRequestSent = Boolean(store.actionRequestSent);
+export const ReleaseActionResult = memo<ActionRequestComponentProps>(
+  ({ command, setStore, store, status, setStatus, ResultComponent }) => {
+    const endpointId = command.commandDefinition?.meta?.endpointId;
+    const { completedActionDetails, actionRequest } = store;
+    const isPending = status === 'pending';
 
-  const releaseHostApi = useSendReleaseEndpointRequest();
+    const releaseHostApi = useSendReleaseEndpointRequest();
 
-  const { data: actionDetails } = useGetActionDetails(actionId ?? '-', {
-    enabled: Boolean(actionId) && isPending,
-    refetchInterval: isPending ? 3000 : false,
-  });
+    useUpdateActionState({
+      actionRequestApi: releaseHostApi,
+      actionRequest,
+      command,
+      endpointId,
+      setStatus,
+      setStore,
+      isPending,
+    });
 
-  // Send Release request if not yet done
-  useEffect(() => {
-    if (!actionRequestSent && endpointId) {
-      releaseHostApi.mutate({
-        endpoint_ids: [endpointId],
-        comment: command.args.args?.comment?.[0],
-      });
-
-      setStore((prevState) => {
-        return { ...prevState, actionRequestSent: true };
-      });
+    // Show nothing if still pending
+    if (isPending) {
+      return <ResultComponent showAs="pending" />;
     }
-  }, [actionRequestSent, command.args.args?.comment, endpointId, releaseHostApi, setStore]);
 
-  // If release request was created, store the action id if necessary
-  useEffect(() => {
-    if (releaseHostApi.isSuccess && actionId !== releaseHostApi.data.action) {
-      setStore((prevState) => {
-        return { ...prevState, actionId: releaseHostApi.data.action };
-      });
+    // Show errors
+    if (completedActionDetails?.errors) {
+      return (
+        <ActionError
+          dataTestSubj={'releaseErrorCallout'}
+          errors={completedActionDetails?.errors}
+          ResultComponent={ResultComponent}
+        />
+      );
     }
-  }, [actionId, releaseHostApi?.data?.action, releaseHostApi.isSuccess, setStore]);
 
-  useEffect(() => {
-    if (actionDetails?.data.isCompleted) {
-      setStatus('success');
-      setStore((prevState) => {
-        return {
-          ...prevState,
-          completedActionDetails: actionDetails.data,
-        };
-      });
-    }
-  }, [actionDetails?.data, setStatus, setStore]);
-
-  // Show nothing if still pending
-  if (isPending) {
-    return <ResultComponent showAs="pending" />;
+    // Show Success
+    return <ResultComponent data-test-subj="releaseSuccessCallout" />;
   }
-
-  // Show errors
-  if (completedActionDetails?.errors) {
-    return (
-      <ActionError
-        dataTestSubj={'releaseErrorCallout'}
-        errors={completedActionDetails?.errors}
-        ResultComponent={ResultComponent}
-      />
-    );
-  }
-
-  // Show Success
-  return <ResultComponent data-test-subj="releaseSuccessCallout" />;
-});
+);
 ReleaseActionResult.displayName = 'ReleaseActionResult';
