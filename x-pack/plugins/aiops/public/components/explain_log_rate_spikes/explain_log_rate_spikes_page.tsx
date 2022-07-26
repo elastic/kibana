@@ -36,6 +36,7 @@ import { SearchPanel } from '../search_panel';
 import { restorableDefaults } from './explain_log_rate_spikes_app_state';
 import { ExplainLogRateSpikesAnalysis } from './explain_log_rate_spikes_analysis';
 
+// TODO port to `@emotion/react` once `useEuiBreakpoint` is available https://github.com/elastic/eui/pull/6057
 import './explain_log_rate_spikes_page.scss';
 
 /**
