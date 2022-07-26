@@ -29,6 +29,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ConnectorStatus } from '../../../../../../common/types/connectors';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
+import { HttpLogic } from '../../../../shared/http';
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 
 import { GenerateConnectorApiKeyApiLogic } from '../../../api/connector_package/generate_connector_api_key_api_logic';
@@ -48,6 +49,7 @@ export const ConnectorConfiguration: React.FC = () => {
   const { data: indexData } = useValues(FetchIndexApiLogic);
   const { indexName } = useValues(IndexNameLogic);
   const { makeRequest: fetchIndex } = useActions(FetchIndexApiLogic);
+  const { http } = useValues(HttpLogic);
   if (!isConnectorIndex(indexData)) {
     return <></>;
   }
@@ -311,6 +313,16 @@ export const ConnectorConfiguration: React.FC = () => {
                         }
                       )}
                     </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiLink href={http.basePath.prepend('/app/management/security/api_keys')}>
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.manageKeys.label',
+                        {
+                          defaultMessage: 'Manage keys',
+                        }
+                      )}
+                    </EuiLink>
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiLink
