@@ -9,6 +9,7 @@ import { useMemo, useEffect, useState, useCallback } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import { isEqual } from 'lodash';
 import { History } from 'history';
+import { DataViewType } from '@kbn/data-views-plugin/public';
 import {
   isOfAggregateQueryType,
   getIndexPatternFromSQLQuery,
@@ -33,7 +34,6 @@ import { FetchStatus } from '../../types';
 import { getSwitchIndexPatternAppState } from '../utils/get_switch_index_pattern_app_state';
 import { SortPairArr } from '../../../components/doc_table/utils/get_sort';
 import { DataTableRecord } from '../../../types';
-import { DataViewType } from '@kbn/data-views-plugin/public';
 
 const MAX_NUM_OF_COLUMNS = 50;
 
@@ -253,18 +253,23 @@ export function useDiscoverState({
   }, [state.query, prevQuery]);
 
   useEffect(() => {
-    const fetchDataView = async () => {
-      if (!indexPattern.isTimeBased() || indexPattern.type === DataViewType.ROLLUP) {
-        await stateContainer.pauseAutoRefreshInterval();
-      }
-
-      refetch$.next(undefined);
-    };
-
     if (indexPattern) {
-      fetchDataView();
+      refetch$.next(undefined);
     }
-  }, [initialFetchStatus, refetch$, indexPattern, savedSearch.id, stateContainer]);
+  }, [initialFetchStatus, refetch$, indexPattern, savedSearch.id]);
+
+  /**
+   * We need to make sure the auto refresh interval is disabled for
+   * non-time series data or rollups since we don't show the date picker
+   */
+  useEffect(() => {
+    if (
+      indexPattern &&
+      (!indexPattern.isTimeBased() || indexPattern.type === DataViewType.ROLLUP)
+    ) {
+      stateContainer.pauseAutoRefreshInterval();
+    }
+  }, [indexPattern, stateContainer]);
 
   const getResultColumns = useCallback(() => {
     if (documentState.result?.length && documentState.fetchStatus === FetchStatus.COMPLETE) {

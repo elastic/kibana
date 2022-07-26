@@ -236,11 +236,12 @@ export function getState({
     },
   };
 
-  const { start, stop } = syncState({
-    storageKey: APP_STATE_URL_KEY,
-    stateContainer: appStateContainerModified,
-    stateStorage,
-  });
+  const syncAppState = () =>
+    syncState({
+      storageKey: APP_STATE_URL_KEY,
+      stateContainer: appStateContainerModified,
+      stateStorage,
+    });
 
   const replaceUrlAppState = async (newPartial: AppState = {}) => {
     const state = { ...appStateContainer.getState(), ...newPartial };
@@ -249,18 +250,29 @@ export function getState({
 
   const pauseAutoRefreshInterval = async () => {
     const state = stateStorage.get<QueryState>(GLOBAL_STATE_URL_KEY);
-    await stateStorage.set(
-      GLOBAL_STATE_URL_KEY,
-      { ...state, refreshInterval: { ...state?.refreshInterval, pause: true } },
-      { replace: true }
-    );
+    if (state?.refreshInterval && !state.refreshInterval.pause) {
+      await stateStorage.set(
+        GLOBAL_STATE_URL_KEY,
+        { ...state, refreshInterval: { ...state?.refreshInterval, pause: true } },
+        { replace: true }
+      );
+    }
   };
+
+  let testStop = () => {};
 
   return {
     kbnUrlStateStorage: stateStorage,
     appStateContainer: appStateContainerModified,
-    startSync: start,
-    stopSync: stop,
+    startSync: () => {
+      const { start, stop } = syncAppState();
+      testStop = stop;
+      start();
+    },
+    stopSync: () => {
+      testStop();
+      testStop = () => {};
+    },
     setAppState: (newPartial: AppState) => setState(appStateContainerModified, newPartial),
     replaceUrlAppState,
     resetInitialAppState: () => {
@@ -310,6 +322,8 @@ export function getState({
         data.query,
         stateStorage
       );
+
+      const { start, stop } = syncAppState();
 
       replaceUrlAppState({}).then(() => {
         start();
