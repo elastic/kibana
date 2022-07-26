@@ -501,8 +501,8 @@ function getQueryValidationErrors(
       }
     }
 
-    if (arg.name === 'window') {
-      const parsedWindow = parseTimeShift(arg.value);
+    if (arg.name === 'timeWindow') {
+      const parsedWindow = parseTimeShift(arg.value || '');
       if (parsedWindow === 'invalid' || parsedWindow === 'previous') {
         errors.push({
           message: i18n.translate('xpack.lens.indexPattern.invalidWindow', {

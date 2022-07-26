@@ -44,7 +44,12 @@ export interface PercentileIndexPatternColumn extends FieldBasedIndexPatternColu
   };
 }
 
-function ofName(name: string, percentile: number, timeShift: string | undefined) {
+function ofName(
+  name: string,
+  percentile: number,
+  timeShift: string | undefined,
+  window: string | undefined
+) {
   return adjustTimeScaleLabelSuffix(
     i18n.translate('xpack.lens.indexPattern.percentileOf', {
       defaultMessage:
@@ -54,7 +59,9 @@ function ofName(name: string, percentile: number, timeShift: string | undefined)
     undefined,
     undefined,
     undefined,
-    timeShift
+    timeShift,
+    undefined,
+    window
   );
 }
 
@@ -103,7 +110,8 @@ export const percentileOperation: OperationDefinition<
     ofName(
       getSafeName(column.sourceField, indexPattern),
       column.params.percentile,
-      column.timeShift
+      column.timeShift,
+      column.window
     ),
   buildColumn: ({ field, previousColumn, indexPattern }, columnParams) => {
     const existingPercentileParam =
@@ -116,7 +124,8 @@ export const percentileOperation: OperationDefinition<
       label: ofName(
         getSafeName(field.name, indexPattern),
         newPercentileParam,
-        previousColumn?.timeShift
+        previousColumn?.timeShift,
+        previousColumn?.window
       ),
       dataType: 'number',
       operationType: 'percentile',
@@ -135,7 +144,12 @@ export const percentileOperation: OperationDefinition<
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: ofName(field.displayName, oldColumn.params.percentile, oldColumn.timeShift),
+      label: ofName(
+        field.displayName,
+        oldColumn.params.percentile,
+        oldColumn.timeShift,
+        oldColumn.window
+      ),
       sourceField: field.name,
     };
   },
@@ -300,7 +314,8 @@ export const percentileOperation: OperationDefinition<
                 indexPattern.getFieldByName(currentColumn.sourceField)?.displayName ||
                   currentColumn.sourceField,
                 Number(value),
-                currentColumn.timeShift
+                currentColumn.timeShift,
+                currentColumn.window
               ),
           params: {
             ...currentColumn.params,

@@ -80,7 +80,9 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       undefined,
       optionalTimeScaling ? column?.timeScale : undefined,
       undefined,
-      column?.timeShift
+      column?.timeShift,
+      undefined,
+      column?.window
     );
   };
 

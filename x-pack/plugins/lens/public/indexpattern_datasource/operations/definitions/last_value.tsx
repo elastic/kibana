@@ -32,7 +32,7 @@ import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { isScriptedField } from './terms/helpers';
 import { FormRow } from './shared_components/form_row';
 
-function ofName(name: string, timeShift: string | undefined) {
+function ofName(name: string, timeShift: string | undefined, window: string | undefined) {
   return adjustTimeScaleLabelSuffix(
     i18n.translate('xpack.lens.indexPattern.lastValueOf', {
       defaultMessage: 'Last value of {name}',
@@ -43,7 +43,9 @@ function ofName(name: string, timeShift: string | undefined) {
     undefined,
     undefined,
     undefined,
-    timeShift
+    timeShift,
+    undefined,
+    window
   );
 }
 
@@ -130,7 +132,7 @@ export const lastValueOperation: OperationDefinition<
     defaultMessage: 'Last value',
   }),
   getDefaultLabel: (column, indexPattern) =>
-    ofName(getSafeName(column.sourceField, indexPattern), column.timeShift),
+    ofName(getSafeName(column.sourceField, indexPattern), column.timeShift, column.window),
   input: 'field',
   onFieldChange: (oldColumn, field) => {
     const newParams = { ...oldColumn.params };
@@ -143,7 +145,7 @@ export const lastValueOperation: OperationDefinition<
     return {
       ...oldColumn,
       dataType: field.type as DataType,
-      label: ofName(field.displayName, oldColumn.timeShift),
+      label: ofName(field.displayName, oldColumn.timeShift, oldColumn.window),
       sourceField: field.name,
       params: newParams,
       scale: field.type === 'string' ? 'ordinal' : 'ratio',
@@ -204,7 +206,7 @@ export const lastValueOperation: OperationDefinition<
     const showArrayValues = isScriptedField(field) || lastValueParams?.showArrayValues;
 
     return {
-      label: ofName(field.displayName, previousColumn?.timeShift),
+      label: ofName(field.displayName, previousColumn?.timeShift, previousColumn?.window),
       dataType: field.type as DataType,
       operationType: 'last_value',
       isBucketed: false,

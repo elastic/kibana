@@ -48,7 +48,8 @@ const supportedTypes = new Set([
 function ofName(
   field: IndexPatternField | undefined,
   timeShift: string | undefined,
-  timeScale: string | undefined
+  timeScale: string | undefined,
+  window: string | undefined
 ) {
   return adjustTimeScaleLabelSuffix(
     field?.type !== 'document'
@@ -62,7 +63,9 @@ function ofName(
     undefined,
     timeScale as TimeScaleUnit,
     undefined,
-    timeShift
+    timeShift,
+    undefined,
+    window
   );
 }
 
@@ -92,7 +95,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: ofName(field, oldColumn.timeShift, oldColumn.timeShift),
+      label: ofName(field, oldColumn.timeShift, oldColumn.timeShift, oldColumn.window),
       sourceField: field.name,
     };
   },
@@ -108,11 +111,16 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   },
   getDefaultLabel: (column, indexPattern) => {
     const field = indexPattern.getFieldByName(column.sourceField);
-    return ofName(field, column.timeShift, column.timeScale);
+    return ofName(field, column.timeShift, column.timeScale, column.window);
   },
   buildColumn({ field, previousColumn }, columnParams) {
     return {
-      label: ofName(field, previousColumn?.timeShift, previousColumn?.timeScale),
+      label: ofName(
+        field,
+        previousColumn?.timeShift,
+        previousColumn?.timeScale,
+        previousColumn?.window
+      ),
       dataType: 'number',
       operationType: 'count',
       isBucketed: false,

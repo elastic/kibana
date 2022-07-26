@@ -95,7 +95,7 @@ export function generateFormula(
     ) {
       previousFormula += ', ';
     }
-    previousFormula += `window='${previousColumn.window}'`;
+    previousFormula += `timeWindow='${previousColumn.window}'`;
   }
   if (previousFormula) {
     // close the formula at the end

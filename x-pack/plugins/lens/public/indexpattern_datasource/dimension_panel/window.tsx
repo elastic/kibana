@@ -12,12 +12,28 @@ import React, { useEffect, useState } from 'react';
 
 import { parseTimeShift } from '@kbn/data-plugin/common';
 import { Duration } from 'moment';
-import { GenericIndexPatternColumn, operationDefinitionMap } from '../operations';
+import {
+  adjustTimeScaleLabelSuffix,
+  GenericIndexPatternColumn,
+  operationDefinitionMap,
+} from '../operations';
 import { IndexPattern, IndexPatternLayer } from '../types';
 import { windowOptions } from '../window_utils';
 
 export function setWindow(columnId: string, layer: IndexPatternLayer, window: string | undefined) {
   const trimmedWindow = window?.trim();
+  const currentColumn = layer.columns[columnId];
+  const label = currentColumn.customLabel
+    ? currentColumn.label
+    : adjustTimeScaleLabelSuffix(
+        currentColumn.label,
+        currentColumn.timeScale,
+        currentColumn.timeScale,
+        currentColumn.timeShift,
+        currentColumn.timeShift,
+        currentColumn.window,
+        trimmedWindow
+      );
   return {
     ...layer,
     columns: {
@@ -25,6 +41,7 @@ export function setWindow(columnId: string, layer: IndexPatternLayer, window: st
       [columnId]: {
         ...layer.columns[columnId],
         window: trimmedWindow,
+        label,
       },
     },
   };

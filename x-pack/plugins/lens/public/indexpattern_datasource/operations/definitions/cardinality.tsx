@@ -42,7 +42,7 @@ const SCALE = 'ratio';
 const OPERATION_TYPE = 'unique_count';
 const IS_BUCKETED = false;
 
-function ofName(name: string, timeShift: string | undefined) {
+function ofName(name: string, timeShift: string | undefined, window: string | undefined) {
   return adjustTimeScaleLabelSuffix(
     i18n.translate('xpack.lens.indexPattern.cardinalityOf', {
       defaultMessage: 'Unique count of {name}',
@@ -53,7 +53,9 @@ function ofName(name: string, timeShift: string | undefined) {
     undefined,
     undefined,
     undefined,
-    timeShift
+    timeShift,
+    undefined,
+    window
   );
 }
 
@@ -105,10 +107,10 @@ export const cardinalityOperation: OperationDefinition<
   shiftable: true,
   windowable: true,
   getDefaultLabel: (column, indexPattern) =>
-    ofName(getSafeName(column.sourceField, indexPattern), column.timeShift),
+    ofName(getSafeName(column.sourceField, indexPattern), column.timeShift, column.window),
   buildColumn({ field, previousColumn }, columnParams) {
     return {
-      label: ofName(field.displayName, previousColumn?.timeShift),
+      label: ofName(field.displayName, previousColumn?.timeShift, previousColumn?.window),
       dataType: 'number',
       operationType: OPERATION_TYPE,
       scale: SCALE,
@@ -177,7 +179,7 @@ export const cardinalityOperation: OperationDefinition<
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: ofName(field.displayName, oldColumn.timeShift),
+      label: ofName(field.displayName, oldColumn.timeShift, oldColumn.window),
       sourceField: field.name,
     };
   },
