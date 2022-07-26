@@ -25,25 +25,12 @@ type ValidMetaFieldNames = keyof Pick<
   | '_source'
   | '_version'
 >;
-const VALID_META_FIELD_NAMES: ValidMetaFieldNames[] = [
-  '_id',
-  '_ignored',
-  '_index',
-  '_node',
-  '_primary_term',
-  '_routing',
-  '_score',
-  '_seq_no',
-  '_shard',
-  '_source',
-  '_version',
-];
 
 function isValidMetaFieldName(field: string): field is ValidMetaFieldNames {
   // Since the array above is more narrowly typed than string[], we cannot use
   // string to find a value in here. We manually cast it to wider string[] type
   // so we're able to use `includes` on it.
-  return (VALID_META_FIELD_NAMES as string[]).includes(field);
+  return field !== '_source' && field !== '_type' && field.at(0) === '_';
 }
 
 interface TabifyDocsOptions {
@@ -137,13 +124,14 @@ export function flattenHit(hit: Hit, indexPattern?: DataView, params?: TabifyDoc
     });
   }
 
-  // Merge all valid meta fields into the flattened object
-  // expect for _source (in case that was specified as a meta field)
+  // Merge all meta fields into the flattened object
   indexPattern?.metaFields?.forEach((metaFieldName) => {
-    if (!isValidMetaFieldName(metaFieldName) || metaFieldName === '_source') {
+    if (!isValidMetaFieldName(metaFieldName)) {
       return;
     }
-    flat[metaFieldName] = hit[metaFieldName];
+    if (hit[metaFieldName] !== undefined && !flat[metaFieldName]) {
+      flat[metaFieldName] = hit[metaFieldName];
+    }
   });
 
   // Use a proxy to make sure that keys are always returned in a specific order,
