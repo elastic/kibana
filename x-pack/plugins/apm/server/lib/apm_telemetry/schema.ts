@@ -236,7 +236,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
   service_groups: {
     kuery_fields: { type: 'array', items: { type: 'keyword' } },
   },
-  per_service: { type: 'array', items: apmPerServiceSchema },
+  per_service: { type: 'array', items: { ...apmPerServiceSchema } },
   tasks: {
     aggregated_transactions: { took: { ms: long } },
     cloud: { took: { ms: long } },
