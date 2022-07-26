@@ -95,6 +95,7 @@ async function mountComponent(isTimeBased: boolean = false) {
       id: '123',
       getFieldByName: () => ({ type: 'date', name: 'timefield', visualizable: true }),
       timeFieldName: 'timefield',
+      typeMeta: { params: { rollup_index: undefined } },
     } as unknown as DataView,
     resetSavedSearch: jest.fn(),
     savedSearch: savedSearchMock,

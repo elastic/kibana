@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import moment from 'moment';
 import {
   EuiButtonIcon,
@@ -59,6 +59,7 @@ export function DiscoverChart({
   interval?: string;
 }) {
   const isTimeBased = indexPattern.isTimeBased();
+  const isRollupDataView = !!indexPattern.typeMeta?.params?.rollup_index;
   const { uiSettings, data, storage } = useDiscoverServices();
   const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
   const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
@@ -67,13 +68,6 @@ export function DiscoverChart({
     element: null,
     moveFocus: false,
   });
-
-  const isRollupDataView = useMemo(
-    () => !!indexPattern.getFieldByName('_rollup.id'),
-    [indexPattern]
-  );
-
-  const showChart = isTimeBased && !isRollupDataView;
 
   const timeField =
     indexPattern.timeFieldName && indexPattern.getFieldByName(indexPattern.timeFieldName);
@@ -154,7 +148,7 @@ export function DiscoverChart({
               />
             </EuiFlexItem>
           )}
-          {showChart && (
+          {isTimeBased && (
             <EuiFlexItem className="dscResultCount__toggle" grow={false}>
               <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
                 {canVisualize && (
@@ -176,40 +170,42 @@ export function DiscoverChart({
                     </EuiToolTip>
                   </EuiFlexItem>
                 )}
-                <EuiFlexItem grow={false}>
-                  <EuiPopover
-                    id="dscChartOptions"
-                    button={
-                      <EuiToolTip
-                        content={i18n.translate('discover.chartOptionsButton', {
-                          defaultMessage: 'Chart options',
-                        })}
-                      >
-                        <EuiButtonIcon
-                          size="xs"
-                          iconType="gear"
-                          onClick={onShowChartOptions}
-                          data-test-subj="discoverChartOptionsToggle"
-                          aria-label={i18n.translate('discover.chartOptionsButton', {
+                {!isRollupDataView && (
+                  <EuiFlexItem grow={false}>
+                    <EuiPopover
+                      id="dscChartOptions"
+                      button={
+                        <EuiToolTip
+                          content={i18n.translate('discover.chartOptionsButton', {
                             defaultMessage: 'Chart options',
                           })}
-                        />
-                      </EuiToolTip>
-                    }
-                    isOpen={showChartOptionsPopover}
-                    closePopover={closeChartOptions}
-                    panelPaddingSize="none"
-                    anchorPosition="downLeft"
-                  >
-                    <EuiContextMenu initialPanelId={0} panels={panels} />
-                  </EuiPopover>
-                </EuiFlexItem>
+                        >
+                          <EuiButtonIcon
+                            size="xs"
+                            iconType="gear"
+                            onClick={onShowChartOptions}
+                            data-test-subj="discoverChartOptionsToggle"
+                            aria-label={i18n.translate('discover.chartOptionsButton', {
+                              defaultMessage: 'Chart options',
+                            })}
+                          />
+                        </EuiToolTip>
+                      }
+                      isOpen={showChartOptionsPopover}
+                      closePopover={closeChartOptions}
+                      panelPaddingSize="none"
+                      anchorPosition="downLeft"
+                    >
+                      <EuiContextMenu initialPanelId={0} panels={panels} />
+                    </EuiPopover>
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      {showChart && !hideChart && (
+      {isTimeBased && !isRollupDataView && !hideChart && (
         <EuiFlexItem grow={false}>
           <section
             ref={(element) => (chartRef.current.element = element)}
