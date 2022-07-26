@@ -80,6 +80,13 @@ describe('Test discover state', () => {
     state.setAppState({ index: 'second' });
     expect(state.getPreviousAppState()).toEqual(stateA);
   });
+
+  test('pauseAutoRefreshInterval sets refreshInterval.pause to true', async () => {
+    history.push('/#?_g=(refreshInterval:(pause:!f,value:5000))');
+    expect(getCurrentUrl()).toBe('/#?_g=(refreshInterval:(pause:!f,value:5000))');
+    await state.pauseAutoRefreshInterval();
+    expect(getCurrentUrl()).toBe('/#?_g=(refreshInterval:(pause:!t,value:5000))');
+  });
 });
 describe('Test discover initial state sort handling', () => {
   test('Non-empty sort in URL should not fallback to state defaults', async () => {
