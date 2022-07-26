@@ -8,15 +8,7 @@
 
 import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiText,
-  EuiDroppable,
-  EuiDraggable,
-  EuiPanel,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText, EuiPanel } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import type { Path } from './filter_editors_types';
 import { ConditionTypes } from './filters_editor_condition_types';
@@ -71,45 +63,32 @@ export const FilterGroup = ({
   const color = !reverseBackground ? 'plain' : 'subdued';
 
   return (
-    <EuiPanel color={color} paddingSize={'s'} hasShadow={false}>
-      <EuiDroppable droppableId={path} spacing={'s'}>
-        {filters.map((filter, index, acc) => (
-          <>
-            <EuiFlexGroup direction="column" gutterSize="xs">
-              <EuiDraggable
-                spacing="m"
-                key={path}
-                index={index}
-                draggableId={`${path}|${index}`}
-                customDragHandle={true}
-                hasInteractiveChildren={true}
-              >
-                {(provided) => (
-                  <EuiFlexItem>
-                    <EuiPanel color={color} paddingSize={'none'} hasShadow={false}>
-                      <FilterItem
-                        filter={filter}
-                        path={`${path}${path ? '.' : ''}${index}`}
-                        timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-                        reverseBackground={reverseBackground}
-                        disableOr={orDisabled}
-                        disableAnd={andDisabled}
-                        disableRemove={removeDisabled}
-                        dragHandleProps={provided.dragHandleProps}
-                      />
-                    </EuiPanel>
-                  </EuiFlexItem>
-                )}
-              </EuiDraggable>
-              {index + 1 < acc.length ? (
-                <EuiFlexItem>
-                  <Delimiter conditionType={conditionType} />
-                </EuiFlexItem>
-              ) : null}
-            </EuiFlexGroup>
-          </>
-        ))}
-      </EuiDroppable>
+    <EuiPanel color={color} paddingSize="s" hasShadow={false}>
+      {filters.map((filter, index, acc) => (
+        <>
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiFlexItem>
+              <EuiPanel color={color} paddingSize={'none'} hasShadow={false}>
+                <FilterItem
+                  filter={filter}
+                  path={`${path}${path ? '.' : ''}${index}`}
+                  timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+                  reverseBackground={reverseBackground}
+                  disableOr={orDisabled}
+                  disableAnd={andDisabled}
+                  disableRemove={removeDisabled}
+                />
+              </EuiPanel>
+            </EuiFlexItem>
+
+            {index + 1 < acc.length ? (
+              <EuiFlexItem>
+                <Delimiter conditionType={conditionType} />
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
+        </>
+      ))}
     </EuiPanel>
   );
 };
