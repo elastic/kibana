@@ -23,7 +23,7 @@ export const getDataBoundsForPalette = (
     ? rowNumber
       ? data.rows[rowNumber][accessors.max]
       : Math.max(...data.rows.map((row) => row[accessors.max!]))
-    : Infinity;
+    : greatestMetric;
 
   const dataMin = accessors.breakdownBy && !accessors.max ? smallestMetric : 0;
 

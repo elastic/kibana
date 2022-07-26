@@ -28,6 +28,7 @@ import {
   FIXED_PROGRESSION,
   DEFAULT_MAX_STOP,
   DEFAULT_MIN_STOP,
+  ColorStop,
 } from '@kbn/coloring';
 import { getDataBoundsForPalette } from '@kbn/expression-metric-vis-plugin/public';
 import { css } from '@emotion/react';
@@ -38,7 +39,7 @@ import {
   useDebouncedValue,
 } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
-import { defaultPaletteParams } from './palette_config';
+import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor, MetricVisualizationState } from './visualization';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
 
@@ -111,6 +112,13 @@ export function DimensionEditor(props: Props) {
     default:
       return null;
   }
+}
+
+function colorStopsFromStops(stops: ColorStop[]) {
+  return stops.map((stop, index) => ({
+    ...stop,
+    stop: index === 0 ? -Infinity : stops[index - 1].stop,
+  }));
 }
 
 function MaximumEditor({ setState, state }: Props) {
@@ -208,10 +216,10 @@ function PrimaryMetricEditor(props: Props) {
 
   const activePalette = state?.palette || {
     type: 'palette',
-    name: defaultPaletteParams.name,
+    name: (startWithPercentPalette ? defaultPercentagePaletteParams : defaultNumberPaletteParams)
+      .name,
     params: {
-      ...defaultPaletteParams,
-      rangeType: startWithPercentPalette ? 'percent' : 'number',
+      ...(startWithPercentPalette ? defaultPercentagePaletteParams : defaultNumberPaletteParams),
     },
   };
 
@@ -225,8 +233,8 @@ function PrimaryMetricEditor(props: Props) {
   );
 
   const displayStops = applyPaletteParams(props.paletteService, activePalette, {
-    min: activePalette.params?.rangeMin || DEFAULT_MIN_STOP,
-    max: activePalette.params?.rangeMax || DEFAULT_MAX_STOP,
+    min: currentMinMax.min ?? DEFAULT_MIN_STOP,
+    max: currentMinMax.max ?? DEFAULT_MAX_STOP,
   });
 
   const togglePalette = () => setIsPaletteOpen(!isPaletteOpen);
@@ -276,8 +284,12 @@ function PrimaryMetricEditor(props: Props) {
                 ? {
                     palette: {
                       ...activePalette,
+                      // in case of starting with number palette, directly jump to custom palette to stick with the current values
+                      name: startWithPercentPalette ? 'status' : 'custom',
                       params: {
                         ...activePalette.params,
+                        name: startWithPercentPalette ? 'status' : 'custom',
+                        colorStops: colorStopsFromStops(displayStops),
                         stops: displayStops,
                       },
                     },
@@ -285,7 +297,6 @@ function PrimaryMetricEditor(props: Props) {
                 : {
                     palette: undefined,
                   };
-
             setState({
               ...state,
               ...params,
@@ -338,6 +349,11 @@ function PrimaryMetricEditor(props: Props) {
                     palettes={props.paletteService}
                     activePalette={activePalette}
                     dataBounds={currentMinMax}
+                    showRangeTypeSelector={Boolean(
+                      state.breakdownByAccessor ||
+                        state.maxAccessor ||
+                        activePalette.params?.rangeType === 'percent'
+                    )}
                     setPalette={(newPalette) => {
                       setState({
                         ...state,

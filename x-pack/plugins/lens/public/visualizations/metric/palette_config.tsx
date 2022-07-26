@@ -10,9 +10,23 @@ import { defaultPaletteParams as sharedDefaultParams } from '../../shared_compon
 
 export const RANGE_MIN = 0;
 
-export const defaultPaletteParams: RequiredPaletteParamTypes = {
+export const defaultPercentagePaletteParams: RequiredPaletteParamTypes = {
   ...sharedDefaultParams,
   name: 'status',
+  rangeType: 'percent',
+  steps: 3,
+  maxSteps: 5,
+  continuity: 'all',
+  colorStops: [],
+  stops: [],
+};
+
+export const defaultNumberPaletteParams: RequiredPaletteParamTypes = {
+  ...sharedDefaultParams,
+  name: 'status',
+  rangeType: 'number',
+  rangeMin: -Infinity,
+  rangeMax: Infinity,
   steps: 3,
   maxSteps: 5,
   continuity: 'all',
