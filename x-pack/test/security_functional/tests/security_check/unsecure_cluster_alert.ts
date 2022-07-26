@@ -13,9 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const esArchiver = getService('esArchiver');
 
-
   describe('Unsecure Cluster Alert', function () {
-
     before(async () => {
       await esArchiver.emptyKibanaIndex();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
@@ -30,9 +28,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const toastMessage: string = await (await find.byClassName('euiToast')).getVisibleText();
 
-      await expect(toastMessage).to.equal('Your data is not secure\nDon’t lose one bit. Enable our free security features.\nDon\'t show again\nEnable security\nDismiss');
+      await expect(toastMessage).to.equal(
+        "Your data is not secure\nDon’t lose one bit. Enable our free security features.\nDon't show again\nEnable security\nDismiss"
+      );
     });
-
-
   });
 }
