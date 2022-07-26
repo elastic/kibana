@@ -9,7 +9,7 @@
         },
         "schedule": 10,
         "locations": [
-            "us-east4-a"
+            "localhost"
         ],
         "params": {},
         "playwrightOptions": {

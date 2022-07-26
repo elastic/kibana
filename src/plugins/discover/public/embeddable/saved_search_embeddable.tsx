@@ -27,6 +27,7 @@ import { ISearchSource } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { RecordRawType } from '../application/main/hooks/use_saved_search';
 import { buildDataTableRecord } from '../utils/build_data_record';
 import { DataTableRecord } from '../types';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
@@ -52,6 +53,8 @@ import { SortOrder } from '../components/doc_table/components/table_header/helpe
 import { VIEW_MODE } from '../components/view_mode_toggle';
 import { updateSearchSource } from './utils/update_search_source';
 import { FieldStatisticsTable } from '../application/main/components/field_stats_table';
+import { getRawRecordType } from '../application/main/utils/get_raw_record_type';
+import { fetchSql } from '../application/main/utils/fetch_sql';
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {
@@ -204,8 +207,36 @@ export class SavedSearchEmbeddable
         }
       : child;
 
+    const query = this.savedSearch.searchSource.getField('query');
+    const recordRawType = getRawRecordType(query);
+    const useSql = recordRawType === RecordRawType.PLAIN;
+
     try {
-      // Make the request
+      // Request SQL data
+      if (useSql && query) {
+        const result = await fetchSql(
+          this.savedSearch.searchSource.getField('query')!,
+          this.services.indexPatterns,
+          this.services.data,
+          this.services.expressions,
+          this.input.filters,
+          this.input.query
+        );
+        this.updateOutput({
+          ...this.getOutput(),
+          loading: false,
+        });
+
+        this.searchProps!.rows = result;
+        this.searchProps!.totalHitCount = result.length;
+        this.searchProps!.isLoading = false;
+        this.searchProps!.isPlainRecord = true;
+        this.searchProps!.showTimeCol = false;
+        this.searchProps!.isSortEnabled = false;
+        return;
+      }
+
+      // Request document data
       const { rawResponse: resp } = await lastValueFrom(
         searchSource.fetch$({
           abortSignal: this.abortController.signal,

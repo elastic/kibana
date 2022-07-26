@@ -9,7 +9,7 @@ import type {
   GetAgentTagsResponse,
   PostBulkUpdateAgentTagsRequest,
   UpdateAgentRequest,
-} from '../../../common';
+} from '../../../common/types';
 
 import { agentRouteService } from '../../services';
 

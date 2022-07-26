@@ -28,3 +28,11 @@ export const UPDATE_ALERT_STATUS_FAILED_DETAILED = (updated: number, conflicts: 
     defaultMessage: `{ updated } {updated, plural, =1 {alert was} other {alerts were}} updated successfully, but { conflicts } failed to update
          because { conflicts, plural, =1 {it was} other {they were}} already being modified.`,
   });
+
+export const UPGRADE_ENDPOINT_FOR_RESPONDER = i18n.translate(
+  'xpack.securitySolution.endpoint.actions.disabledResponder.tooltip',
+  {
+    defaultMessage:
+      'The current version of the Agent does not support this feature. Upgrade your Agent through Fleet to use this feature and new response actions such as killing and suspending processes.',
+  }
+);

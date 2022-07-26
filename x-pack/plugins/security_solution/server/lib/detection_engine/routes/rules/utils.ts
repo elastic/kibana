@@ -13,7 +13,7 @@ import pMap from 'p-map';
 
 import type { PartialRule, FindResult } from '@kbn/alerting-plugin/server';
 import type { ActionsClient, FindActionResult } from '@kbn/actions-plugin/server';
-import type { RuleExecutionSummary } from '../../../../../common/detection_engine/schemas/common';
+import type { RuleExecutionSummary } from '../../../../../common/detection_engine/rule_monitoring';
 import type { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import type { ImportRulesSchema } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import type { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
@@ -25,7 +25,7 @@ import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 import type { RuleParams } from '../../schemas/rule_schemas';
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
-import type { RuleExecutionSummariesByRuleId } from '../../rule_execution_log';
+import type { RuleExecutionSummariesByRuleId } from '../../rule_monitoring';
 
 type PromiseFromStreams = ImportRulesSchema | Error;
 const MAX_CONCURRENT_SEARCHES = 10;
