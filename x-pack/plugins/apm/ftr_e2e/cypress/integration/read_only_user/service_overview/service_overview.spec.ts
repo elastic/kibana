@@ -213,7 +213,7 @@ describe('Service Overview', () => {
       });
     });
 
-    it('with the correct environment when changing the environment', () => {
+    it.skip('with the correct environment when changing the environment', () => {
       cy.wait(aliasNames, { requestTimeout: 10000 });
 
       cy.intercept('GET', 'internal/apm/suggestions?*').as(
