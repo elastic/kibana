@@ -49,4 +49,5 @@ export type {
   SavedObjectsRawDocParseOptions,
   SavedObjectUnsanitizedDoc,
 } from './serialization';
+export type { ISavedObjectTypeRegistry } from './type_registry';
 export type { SavedObjectsValidationMap, SavedObjectsValidationSpec } from './validation';
