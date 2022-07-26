@@ -11,7 +11,7 @@ import { HttpLogic } from '../../../shared/http';
 
 export interface PostConnectorConfigurationArgs {
   configuration: ConnectorConfiguration;
-  indexId: string;
+  connectorId: string;
   indexName: string;
 }
 
@@ -22,10 +22,10 @@ export interface PostConnectorConfigurationResponse {
 
 export const postConnectorConfiguration = async ({
   configuration,
-  indexId,
+  connectorId,
   indexName,
 }: PostConnectorConfigurationArgs) => {
-  const route = `/internal/enterprise_search/connectors/${indexId}/configuration`;
+  const route = `/internal/enterprise_search/connectors/${connectorId}/configuration`;
 
   await HttpLogic.values.http.post<ConnectorConfiguration>(route, {
     body: JSON.stringify(configuration),
