@@ -15,6 +15,7 @@ import { DataViewListItem } from '@kbn/data-views-plugin/public';
 export interface DataViewsListProps {
   dataViewsList: DataViewListItem[];
   onChangeDataView: (newId: string) => void;
+  isTextBasedLangSelected?: boolean;
   currentDataViewId?: string;
   selectableProps?: EuiSelectableProps;
   searchListInputId?: string;
@@ -23,6 +24,7 @@ export interface DataViewsListProps {
 export function DataViewsList({
   dataViewsList,
   onChangeDataView,
+  isTextBasedLangSelected,
   currentDataViewId,
   selectableProps,
   searchListInputId,
@@ -42,7 +44,7 @@ export function DataViewsList({
         key: id,
         label: name ? name : title,
         value: id,
-        checked: id === currentDataViewId ? 'on' : undefined,
+        checked: id === currentDataViewId && !Boolean(isTextBasedLangSelected) ? 'on' : undefined,
       }))}
       onChange={(choices) => {
         const choice = choices.find(({ checked }) => checked) as unknown as {
@@ -61,16 +63,18 @@ export function DataViewsList({
       }}
     >
       {(list, search) => (
-        <EuiPanel
-          css={css`
-            padding-bottom: 0;
-          `}
-          color="transparent"
-          paddingSize="s"
-        >
-          {search}
+        <>
+          <EuiPanel
+            css={css`
+              padding-bottom: 0;
+            `}
+            color="transparent"
+            paddingSize="s"
+          >
+            {search}
+          </EuiPanel>
           {list}
-        </EuiPanel>
+        </>
       )}
     </EuiSelectable>
   );

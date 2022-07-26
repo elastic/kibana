@@ -51,7 +51,7 @@ interface SecureSavedObjectsClientWrapperOptions {
   actions: Actions;
   auditLogger: AuditLogger;
   baseClient: SavedObjectsClientContract;
-  errors: SavedObjectsClientContract['errors'];
+  errors: typeof SavedObjectsErrorHelpers;
   checkSavedObjectsPrivilegesAsCurrentUser: CheckSavedObjectsPrivileges;
   getSpacesService(): SpacesService | undefined;
 }
@@ -86,7 +86,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   private readonly baseClient: SavedObjectsClientContract;
   private readonly checkSavedObjectsPrivilegesAsCurrentUser: CheckSavedObjectsPrivileges;
   private getSpacesService: () => SpacesService | undefined;
-  public readonly errors: SavedObjectsClientContract['errors'];
+  public readonly errors: typeof SavedObjectsErrorHelpers;
 
   constructor({
     actions,

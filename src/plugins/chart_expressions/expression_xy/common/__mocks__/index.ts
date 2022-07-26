@@ -8,7 +8,7 @@
 
 import { Position } from '@elastic/charts';
 import type { PaletteOutput } from '@kbn/coloring';
-import { Datatable, DatatableRow } from '@kbn/expressions-plugin';
+import { Datatable, DatatableRow } from '@kbn/expressions-plugin/common';
 import { LayerTypes } from '../constants';
 import { DataLayerConfig, ExtendedDataLayerConfig, XYProps } from '../types';
 

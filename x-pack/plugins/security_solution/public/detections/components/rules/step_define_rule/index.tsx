@@ -36,11 +36,14 @@ import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
-import { useUiSetting$ } from '../../../../common/lib/kibana';
+import { useUiSetting$, useKibana } from '../../../../common/lib/kibana';
 import type { EqlOptionsSelected, FieldsEqlOptions } from '../../../../../common/search_strategy';
-import { filterRuleFieldsForType } from '../../../pages/detection_engine/rules/create/helpers';
+import {
+  filterRuleFieldsForType,
+  getStepDataDataSource,
+} from '../../../pages/detection_engine/rules/create/helpers';
 import type { DefineStepRule, RuleStepProps } from '../../../pages/detection_engine/rules/types';
-import { RuleStep } from '../../../pages/detection_engine/rules/types';
+import { RuleStep, DataSourceType } from '../../../pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
 import { QueryBarDefineRule } from '../query_bar';
 import { SelectRuleType } from '../select_rule_type';
@@ -78,11 +81,11 @@ import { NewTermsFields } from '../new_terms_fields';
 import { ScheduleItem } from '../schedule_item_form';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
 
-const DATA_VIEW_SELECT_ID = 'dataView';
-const INDEX_PATTERN_SELECT_ID = 'indexPatterns';
-
 const CommonUseField = getUseField({ component: Field });
 
+const StyledVisibleContainer = styled.div<{ isVisible: boolean }>`
+  display: ${(props) => (props.isVisible ? 'block' : 'none')};
+`;
 interface StepDefineRuleProps extends RuleStepProps {
   defaultValues?: DefineStepRule;
 }
@@ -119,6 +122,7 @@ export const stepDefineDefaultValue: DefineStepRule = {
     title: DEFAULT_TIMELINE_TITLE,
   },
   eqlOptions: {},
+  dataSourceType: DataSourceType.IndexPatterns,
   newTermsFields: [],
   historyWindowSize: '7d',
 };
@@ -174,6 +178,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
   const [threatIndexModified, setThreatIndexModified] = useState(false);
+  const [dataViewTitle, setDataViewTitle] = useState<string>();
 
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
@@ -202,6 +207,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       threatMapping: formThreatMapping,
       machineLearningJobId: formMachineLearningJobId,
       anomalyThreshold: formAnomalyThreshold,
+      dataSourceType: formDataSourceType,
       newTermsFields: formNewTermsFields,
       historyWindowSize: formHistoryWindowSize,
     },
@@ -221,6 +227,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       'threatMapping',
       'machineLearningJobId',
       'anomalyThreshold',
+      'dataSourceType',
       'newTermsFields',
       'historyWindowSize',
     ],
@@ -236,6 +243,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const newTermsFields = formNewTermsFields ?? initialState.newTermsFields;
   const historyWindowSize = formHistoryWindowSize ?? initialState.historyWindowSize;
   const ruleType = formRuleType || initialState.ruleType;
+  const dataSourceType = formDataSourceType || initialState.dataSourceType;
 
   // if 'index' is selected, use these browser fields
   // otherwise use the dataview browserfields
@@ -243,24 +251,51 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [optionsSelected, setOptionsSelected] = useState<EqlOptionsSelected>(
     defaultValues?.eqlOptions || {}
   );
-  const [initIsIndexPatternLoading, { browserFields, indexPatterns: initIndexPattern }] =
-    useFetchIndex(index, false);
-  const [indexPattern, setIndexPattern] = useState<DataViewBase>(initIndexPattern);
-  const [isIndexPatternLoading, setIsIndexPatternLoading] = useState(initIsIndexPatternLoading);
-  const [dataSourceRadioIdSelected, setDataSourceRadioIdSelected] = useState(
-    dataView == null || dataView === '' ? INDEX_PATTERN_SELECT_ID : DATA_VIEW_SELECT_ID
+  const [isIndexPatternLoading, { browserFields, indexPatterns: initIndexPattern }] = useFetchIndex(
+    index,
+    false
   );
+  const [indexPattern, setIndexPattern] = useState<DataViewBase>(initIndexPattern);
 
+  const { data } = useKibana().services;
+
+  // Why do we need this? to ensure the query bar auto-suggest gets the latest updates
+  // when the index pattern changes
+  // when we select new dataView
+  // when we choose some other dataSourceType
   useEffect(() => {
-    if (dataSourceRadioIdSelected === INDEX_PATTERN_SELECT_ID) {
-      setIndexPattern(initIndexPattern);
+    if (dataSourceType === DataSourceType.IndexPatterns) {
+      if (!isIndexPatternLoading) {
+        setIndexPattern(initIndexPattern);
+      }
     }
-  }, [initIndexPattern, dataSourceRadioIdSelected]);
+
+    if (dataSourceType === DataSourceType.DataView) {
+      const fetchDataView = async () => {
+        if (dataView != null) {
+          const dv = await data.dataViews.get(dataView);
+          setDataViewTitle(dv.title);
+          setIndexPattern(dv);
+        }
+      };
+
+      fetchDataView();
+    }
+  }, [dataSourceType, isIndexPatternLoading, data, dataView, initIndexPattern]);
 
   // Callback for when user toggles between Data Views and Index Patterns
-  const onChangeDataSource = (optionId: string) => {
-    setDataSourceRadioIdSelected(optionId);
-  };
+  const onChangeDataSource = useCallback(
+    (optionId: string) => {
+      form.setFieldValue('dataSourceType', optionId);
+      form.getFields().index.reset({
+        resetValue: false,
+      });
+      form.getFields().dataViewId.reset({
+        resetValue: false,
+      });
+    },
+    [form]
+  );
 
   const [aggFields, setAggregatableFields] = useState<DataViewFieldBase[]>([]);
 
@@ -433,28 +468,26 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const dataViewIndexPatternToggleButtonOptions: EuiButtonGroupOptionProps[] = useMemo(
     () => [
       {
-        id: INDEX_PATTERN_SELECT_ID,
+        id: DataSourceType.IndexPatterns,
         label: i18nCore.translate(
           'xpack.securitySolution.ruleDefine.indexTypeSelect.indexPattern',
           {
             defaultMessage: 'Index Patterns',
           }
         ),
-        iconType:
-          dataSourceRadioIdSelected === INDEX_PATTERN_SELECT_ID ? 'checkInCircleFilled' : 'empty',
-        'data-test-subj': `rule-index-toggle-${INDEX_PATTERN_SELECT_ID}`,
+        iconType: dataSourceType === DataSourceType.IndexPatterns ? 'checkInCircleFilled' : 'empty',
+        'data-test-subj': `rule-index-toggle-${DataSourceType.IndexPatterns}`,
       },
       {
-        id: DATA_VIEW_SELECT_ID,
+        id: DataSourceType.DataView,
         label: i18nCore.translate('xpack.securitySolution.ruleDefine.indexTypeSelect.dataView', {
           defaultMessage: 'Data View',
         }),
-        iconType:
-          dataSourceRadioIdSelected === DATA_VIEW_SELECT_ID ? 'checkInCircleFilled' : 'empty',
-        'data-test-subj': `rule-index-toggle-${DATA_VIEW_SELECT_ID}`,
+        iconType: dataSourceType === DataSourceType.DataView ? 'checkInCircleFilled' : 'empty',
+        'data-test-subj': `rule-index-toggle-${DataSourceType.DataView}`,
       },
     ],
-    [dataSourceRadioIdSelected]
+    [dataSourceType]
   );
 
   const DataViewSelectorMemo = useMemo(() => {
@@ -465,8 +498,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         component={DataViewSelector}
         componentProps={{
           kibanaDataViews,
-          setIndexPattern,
-          setIsIndexPatternLoading,
         }}
       />
     );
@@ -503,7 +534,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 isFullWidth={true}
                 legend="Rule index pattern or data view selector"
                 data-test-subj="dataViewIndexPatternButtonGroup"
-                idSelected={dataSourceRadioIdSelected}
+                idSelected={dataSourceType}
                 onChange={onChangeDataSource}
                 options={dataViewIndexPatternToggleButtonOptions}
                 color="primary"
@@ -512,9 +543,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           </EuiFlexItem>
 
           <EuiFlexItem>
-            {dataSourceRadioIdSelected === DATA_VIEW_SELECT_ID ? (
-              DataViewSelectorMemo
-            ) : (
+            <StyledVisibleContainer isVisible={dataSourceType === DataSourceType.DataView}>
+              {DataViewSelectorMemo}
+            </StyledVisibleContainer>
+            <StyledVisibleContainer isVisible={dataSourceType === DataSourceType.IndexPatterns}>
               <CommonUseField
                 path="index"
                 config={{
@@ -534,17 +566,18 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   },
                 }}
               />
-            )}
+            </StyledVisibleContainer>
           </EuiFlexItem>
         </EuiFlexGroup>
       </RuleTypeEuiFormRow>
     );
   }, [
-    dataSourceRadioIdSelected,
+    dataSourceType,
     dataViewIndexPatternToggleButtonOptions,
     DataViewSelectorMemo,
     indexModified,
     handleResetIndices,
+    onChangeDataSource,
   ]);
 
   const QueryBarMemo = useMemo(
@@ -619,19 +652,36 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [indexPattern]
   );
 
+  const dataForDescription: Partial<DefineStepRule> = getStepDataDataSource(initialState);
+
+  if (dataSourceType === DataSourceType.DataView) {
+    dataForDescription.dataViewTitle = dataViewTitle;
+  }
+
   return isReadOnlyView ? (
     <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>
       <StepRuleDescription
         columns={descriptionColumns}
         indexPatterns={indexPattern}
         schema={filterRuleFieldsForType(schema, ruleType)}
-        data={filterRuleFieldsForType(initialState, ruleType)}
+        data={filterRuleFieldsForType(dataForDescription, ruleType)}
       />
     </StepContentWrapper>
   ) : (
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
         <Form form={form} data-test-subj="stepDefineRule">
+          <StyledVisibleContainer isVisible={false}>
+            <UseField
+              path="dataSourceType"
+              componentProps={{
+                euiFieldProps: {
+                  fullWidth: true,
+                  placeholder: '',
+                },
+              }}
+            />
+          </StyledVisibleContainer>
           <UseField
             path="ruleType"
             component={SelectRuleType}
