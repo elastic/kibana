@@ -20458,7 +20458,6 @@
     "xpack.ml.trainedModels.modelsList.pipelines.processorStats.timePerDocDescription": "このノードのライフタイム中にドキュメントの取り込みの前処理にかかった合計時間",
     "xpack.ml.trainedModels.modelsList.pipelines.processorStats.timePerDocHeader": "ドキュメントごとの時間",
     "xpack.ml.trainedModels.modelsList.pipelines.processorStats.typeHeader": "プロセッサータイプ",
-    "xpack.ml.trainedModels.modelsList.refreshManagementList": "更新",
     "xpack.ml.trainedModels.modelsList.selectableMessage": "モデルを選択",
     "xpack.ml.trainedModels.modelsList.selectedModelsMessage": "{modelsCount, plural, other  {#個のモデル}}が選択されました",
     "xpack.ml.trainedModels.modelsList.startFailed": "\"{modelId}\"の開始に失敗しました",

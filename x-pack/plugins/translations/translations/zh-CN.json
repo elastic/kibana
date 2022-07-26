@@ -20481,7 +20481,6 @@
     "xpack.ml.trainedModels.modelsList.pipelines.processorStats.timePerDocDescription": "在此节点的生命周期内预处理采集文档的总时间",
     "xpack.ml.trainedModels.modelsList.pipelines.processorStats.timePerDocHeader": "每个文档的时间",
     "xpack.ml.trainedModels.modelsList.pipelines.processorStats.typeHeader": "处理器类型",
-    "xpack.ml.trainedModels.modelsList.refreshManagementList": "刷新",
     "xpack.ml.trainedModels.modelsList.selectableMessage": "选择模型",
     "xpack.ml.trainedModels.modelsList.selectedModelsMessage": "{modelsCount, plural, other {# 个模型}}已选择",
     "xpack.ml.trainedModels.modelsList.startFailed": "无法启动“{modelId}”",

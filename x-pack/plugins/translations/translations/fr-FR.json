@@ -20373,7 +20373,6 @@
     "xpack.ml.trainedModels.modelsList.pipelines.processorStats.timePerDocDescription": "Temps total passé sur le prétraitement des documents d'ingestion pendant toute la durée de vie de ce nœud",
     "xpack.ml.trainedModels.modelsList.pipelines.processorStats.timePerDocHeader": "Temps par document",
     "xpack.ml.trainedModels.modelsList.pipelines.processorStats.typeHeader": "Type de processeur",
-    "xpack.ml.trainedModels.modelsList.refreshManagementList": "Actualiser",
     "xpack.ml.trainedModels.modelsList.selectableMessage": "Sélectionner un modèle",
     "xpack.ml.trainedModels.modelsList.selectedModelsMessage": "{modelsCount, plural, one{# modèle sélectionné} other {# modèles sélectionnés}}",
     "xpack.ml.trainedModels.modelsList.startFailed": "Impossible de démarrer \"{modelId}\"",
