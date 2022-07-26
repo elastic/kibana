@@ -10,20 +10,6 @@ import { EuiFilterButton, EuiPopover, EuiFilterGroup, EuiSelectableListItem } fr
 import { RuleStatus } from '../../../../types';
 
 const statuses: RuleStatus[] = ['enabled', 'disabled', 'snoozed'];
-const i18nStatuses: Record<'enabled' | 'disabled' | 'snoozed', { id: string; msg: string }> = {
-  enabled: {
-    id: 'xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilter.enabledOptionText',
-    msg: 'Rule is enabled',
-  },
-  disabled: {
-    id: 'xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilter.disabledOptionText',
-    msg: 'Rule is disabled',
-  },
-  snoozed: {
-    id: 'xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilter.snoozedOptionText',
-    msg: 'Rule has snoozed',
-  },
-};
 
 const getOptionDataTestSubj = (status: RuleStatus) => `ruleStatusFilterOption-${status}`;
 
@@ -63,9 +49,30 @@ export const RuleStatusFilter = (props: RuleStatusFilterProps) => {
     setIsPopoverOpen((prevIsOpen) => !prevIsOpen);
   }, [setIsPopoverOpen]);
 
-  const renderRuleStateOptions = (status: 'enabled' | 'disabled' | 'snoozed') => (
-    <FormattedMessage id={i18nStatuses[status].id} defaultMessage={i18nStatuses[status].msg} />
-  );
+  const renderRuleStateOptions = (status: 'enabled' | 'disabled' | 'snoozed') => {
+    if (status === 'enabled') {
+      return (
+        <FormattedMessage
+          id="xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilter.enabledOptionText"
+          defaultMessage="Rule is enabled"
+        />
+      );
+    } else if (status === 'disabled') {
+      return (
+        <FormattedMessage
+          id="xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilter.disabledOptionText"
+          defaultMessage="Rule is disabled"
+        />
+      );
+    } else if (status === 'snoozed') {
+      return (
+        <FormattedMessage
+          id="xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilter.snoozedOptionText"
+          defaultMessage="Rule has snoozed"
+        />
+      );
+    }
+  };
 
   return (
     <EuiFilterGroup data-test-subj={dataTestSubj}>
