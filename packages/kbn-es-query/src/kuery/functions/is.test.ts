@@ -51,16 +51,16 @@ describe('kuery functions', () => {
 
       test('should default to a non-phrase query', () => {
         const {
-          arguments: [, , isPhrase],
+          arguments: [, value],
         } = is.buildNodeParams('response', 200);
-        expect(isPhrase.value).toBe(false);
+        expect(value.isQuoted).toBe(false);
       });
 
       test('should allow specification of a phrase query', () => {
         const {
-          arguments: [, , isPhrase],
-        } = is.buildNodeParams('response', 200, true);
-        expect(isPhrase.value).toBe(true);
+          arguments: [, value],
+        } = is.buildNodeParams('response', '"200"');
+        expect(value.isQuoted).toBe(true);
       });
     });
 
@@ -180,7 +180,7 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('is', 'extension', 'jpg', true);
+        const node = nodeTypes.function.buildNode('is', 'extension', '"jpg"');
         const result = is.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);

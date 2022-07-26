@@ -509,16 +509,14 @@ describe('authorization', () => {
               Object {
                 "arguments": Array [
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "cases.attributes.owner",
                   },
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "a",
-                  },
-                  Object {
-                    "type": "literal",
-                    "value": false,
                   },
                 ],
                 "function": "is",
@@ -527,16 +525,14 @@ describe('authorization', () => {
               Object {
                 "arguments": Array [
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "cases.attributes.owner",
                   },
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "b",
-                  },
-                  Object {
-                    "type": "literal",
-                    "value": false,
                   },
                 ],
                 "function": "is",
@@ -618,16 +614,14 @@ describe('authorization', () => {
               Object {
                 "arguments": Array [
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "cases.attributes.owner",
                   },
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "a",
-                  },
-                  Object {
-                    "type": "literal",
-                    "value": false,
                   },
                 ],
                 "function": "is",
@@ -636,16 +630,14 @@ describe('authorization', () => {
               Object {
                 "arguments": Array [
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "cases.attributes.owner",
                   },
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "b",
-                  },
-                  Object {
-                    "type": "literal",
-                    "value": false,
                   },
                 ],
                 "function": "is",
@@ -774,16 +766,14 @@ describe('authorization', () => {
               Object {
                 "arguments": Array [
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "cases.attributes.owner",
                   },
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "a",
-                  },
-                  Object {
-                    "type": "literal",
-                    "value": false,
                   },
                 ],
                 "function": "is",
@@ -792,16 +782,14 @@ describe('authorization', () => {
               Object {
                 "arguments": Array [
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "cases.attributes.owner",
                   },
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "b",
-                  },
-                  Object {
-                    "type": "literal",
-                    "value": false,
                   },
                 ],
                 "function": "is",
@@ -883,16 +871,14 @@ describe('authorization', () => {
               Object {
                 "arguments": Array [
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "cases.attributes.owner",
                   },
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "a",
-                  },
-                  Object {
-                    "type": "literal",
-                    "value": false,
                   },
                 ],
                 "function": "is",
@@ -901,16 +887,14 @@ describe('authorization', () => {
               Object {
                 "arguments": Array [
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "cases.attributes.owner",
                   },
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "b",
-                  },
-                  Object {
-                    "type": "literal",
-                    "value": false,
                   },
                 ],
                 "function": "is",

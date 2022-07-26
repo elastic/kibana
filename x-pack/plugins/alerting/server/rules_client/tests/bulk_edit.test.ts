@@ -331,14 +331,12 @@ describe('bulkEdit()', () => {
             {
               type: 'literal',
               value: 'alert.attributes.tags',
+              isQuoted: false,
             },
             {
               type: 'literal',
               value: 'APM',
-            },
-            {
-              type: 'literal',
-              value: true,
+              isQuoted: true,
             },
           ],
           function: 'is',
@@ -383,14 +381,12 @@ describe('bulkEdit()', () => {
                 {
                   type: 'literal',
                   value: 'alert.id',
+                  isQuoted: false,
                 },
                 {
                   type: 'literal',
                   value: 'alert:2',
-                },
-                {
-                  type: 'literal',
-                  value: false,
+                  isQuoted: false,
                 },
               ],
               function: 'is',
@@ -401,14 +397,12 @@ describe('bulkEdit()', () => {
                 {
                   type: 'literal',
                   value: 'alert.id',
+                  isQuoted: false,
                 },
                 {
                   type: 'literal',
                   value: 'alert:3',
-                },
-                {
-                  type: 'literal',
-                  value: false,
+                  isQuoted: false,
                 },
               ],
               function: 'is',
@@ -544,14 +538,12 @@ describe('bulkEdit()', () => {
             {
               type: 'literal',
               value: 'alert.attributes.tags',
+              isQuoted: false,
             },
             {
               type: 'literal',
               value: 'APM',
-            },
-            {
-              type: 'literal',
-              value: true,
+              isQuoted: true,
             },
           ],
           function: 'is',
