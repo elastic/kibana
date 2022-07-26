@@ -94,7 +94,7 @@ export const ApiKeyConfig: React.FC<{ hasApiKey: boolean; indexName: string }> =
             'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.description',
             {
               defaultMessage:
-                'First, generate an Elasticsearch API key. This {apiKeyName} key will enable read and write permissions for the connector to index to the created {indexName} index. Save the key in a safe place, as you will need it to configure your connector.',
+                'First, generate an Elasticsearch API key. This {apiKeyName} key will enable read and write permissions for the connector to index documents to the created {indexName} index. Save the key in a safe place, as you will need it to configure your connector.',
               values: {
                 apiKeyName: `${indexName}-connector`,
                 indexName,

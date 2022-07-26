@@ -64,7 +64,7 @@ export const ConnectorConfiguration: React.FC = () => {
             'xpack.enterpriseSearch.content.indices.configurationConnector.scheduleSync.description',
             {
               defaultMessage:
-                'Once your connectors are configured to your liking, don’t forget to set a recurring sync schedule to make sure your documents are indexed and relevant. You can also trigger a one type sync without enabling a sync schedule.',
+                'Once your connectors are configured to your liking, don’t forget to set a recurring sync schedule to make sure your documents are indexed and relevant. You can also trigger a one-time sync without enabling a sync schedule.',
             }
           )}
         </EuiText>

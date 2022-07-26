@@ -93,7 +93,7 @@ export const ConnectorConfigurationConfig: React.FC = () => {
             defaultMessage="If you need help, you can always open an {issuesLink} in the repository or ask a question in our {discussLink} forum."
             values={{
               discussLink: (
-                <EuiLink href="https://github.com/elastic/connectors-ruby/issues" target="_blank">
+                <EuiLink href="https://discuss.elastic.co/c/enterprise-search/84" target="_blank">
                   {i18n.translate(
                     'xpack.enterpriseSearch.content.indices.configurationConnector.config.discussLink',
                     { defaultMessage: 'Discuss' }

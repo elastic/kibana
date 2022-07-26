@@ -138,9 +138,9 @@ export const MethodConnector: React.FC = () => {
                 <p>
                   <FormattedMessage
                     id="xpack.enterpriseSearch.content.newIndex.methodConnector.steps.createConnectorIndex.content"
-                    defaultMessage="Provide a unique index name and optionally set a default {link} for the index. This index will hold your data source content, and is optimized with default field mappings for relevant search experiences."
+                    defaultMessage="Provide a unique index name and optionally set a default {languageAnalyzerDocLink} for the index. This index will hold your data source content, and is optimized with default field mappings for relevant search experiences."
                     values={{
-                      link: (
+                      languageAnalyzerDocLink: (
                         <EuiLink href={docLinks.languageAnalyzers} target="_blank" external>
                           {i18n.translate(
                             'xpack.enterpriseSearch.content.newIndex.methodConnector.steps.createConnectorIndex.languageAnalyzerLink',
@@ -169,9 +169,9 @@ export const MethodConnector: React.FC = () => {
                 <p>
                   <FormattedMessage
                     id="xpack.enterpriseSearch.content.newIndex.steps.buildConnector.content"
-                    defaultMessage="Using our connector framework and connector client examples, you’ll be able to accelerate ingestion to the Elasticsearch {link} for any data source. After creating your index, you will be guided through the steps to access the connector framework and connect your first connector client."
+                    defaultMessage="Using our connector framework and connector client examples, you’ll be able to accelerate ingestion to the Elasticsearch {bulkApiDocLink} for any data source. After creating your index, you will be guided through the steps to access the connector framework and connect your first connector client."
                     values={{
-                      link: (
+                      bulkApiDocLink: (
                         <EuiLink href={docLinks.bulkApi} target="_blank" external>
                           {i18n.translate(
                             'xpack.enterpriseSearch.content.newIndex.methodConnector.steps.buildConnector.bulkAPILink',
@@ -201,7 +201,7 @@ export const MethodConnector: React.FC = () => {
                     'xpack.enterpriseSearch.content.newIndex.connector.steps.buildSearchExperience.content',
                     {
                       defaultMessage:
-                        'After building your connector, your content is ready. Build your first search experience with Elasticsearch, or explore the search experience tools provided by App Search and Workplace Search. We recommend that you create a search engine for the best balance of flexible power and turnkey simplicity.',
+                        'After building your connector, your content is ready. Build your first search experience with Elasticsearch, or explore the search experience tools provided by App Search. We recommend that you create a search engine for the best balance of flexible power and turnkey simplicity.',
                     }
                   )}
                 </p>
