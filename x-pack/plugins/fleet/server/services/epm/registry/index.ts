@@ -310,7 +310,7 @@ export async function fetchArchiveBuffer({
     });
 
     if (verificationResult.verificationStatus === 'unverified' && !ignoreUnverified) {
-      throw new PackageFailedVerificationError(`${pkgName}-${pkgVersion}`);
+      throw new PackageFailedVerificationError(pkgName, pkgVersion);
     }
     return { archiveBuffer, archivePath, verificationResult };
   }

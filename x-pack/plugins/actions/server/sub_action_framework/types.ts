@@ -61,9 +61,11 @@ export interface SubAction {
 }
 
 export interface PushToServiceParams {
-  externalId: string | null;
+  incident: {
+    externalId: string | null;
+    [x: string]: unknown;
+  };
   comments: Array<{ commentId: string; comment: string }>;
-  [x: string]: unknown;
 }
 
 export interface ExternalServiceIncidentResponse {

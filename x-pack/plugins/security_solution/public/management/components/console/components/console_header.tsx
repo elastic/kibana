@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useCallback } from 'react';
+import styled from 'styled-components';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -16,6 +17,14 @@ import type { ConsoleProps } from '..';
 const HELP_LABEL = i18n.translate('xpack.securitySolution.console.layoutHeader.helpButtonLabel', {
   defaultMessage: 'Show help',
 });
+
+const StyledEuiButtonEmpty = styled(EuiButtonEmpty)`
+  margin-left: auto;
+  height: inherit;
+`;
+const StyledEuiFlexItem = styled(EuiFlexItem)`
+  align-self: flex-start;
+`;
 
 export type ConsoleHeaderProps = Pick<ConsoleProps, 'TitleComponent'>;
 
@@ -42,8 +51,8 @@ export const ConsoleHeader = memo<ConsoleHeaderProps>(({ TitleComponent }) => {
         {TitleComponent ? <TitleComponent /> : ''}
       </EuiFlexItem>
       {!isHelpOpen && (
-        <EuiFlexItem grow={1}>
-          <EuiButtonEmpty
+        <StyledEuiFlexItem grow={1}>
+          <StyledEuiButtonEmpty
             style={{ marginLeft: 'auto' }}
             onClick={handleHelpButtonOnClick}
             iconType="help"
@@ -55,8 +64,8 @@ export const ConsoleHeader = memo<ConsoleHeaderProps>(({ TitleComponent }) => {
               id="xpack.securitySolution.console.layoutHeader.helpButtonTitle"
               defaultMessage="Help"
             />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
+          </StyledEuiButtonEmpty>
+        </StyledEuiFlexItem>
       )}
     </EuiFlexGroup>
   );

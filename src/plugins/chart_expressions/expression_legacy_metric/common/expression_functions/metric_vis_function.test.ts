@@ -11,6 +11,7 @@ import type { MetricArguments } from '..';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { LabelPosition } from '../constants';
+import { ExecutionContext } from '@kbn/expressions-plugin';
 
 describe('interpreter/functions#metric', () => {
   const fn = functionWrapper(metricVisFunction());
@@ -55,7 +56,7 @@ describe('interpreter/functions#metric', () => {
   });
 
   it('returns an object with the correct structure', () => {
-    const actual = fn(context, args, undefined);
+    const actual = fn(context, args);
 
     expect(actual).toMatchSnapshot();
   });
@@ -71,8 +72,10 @@ describe('interpreter/functions#metric', () => {
           reset: () => {},
         },
       },
-    };
-    await fn(context, args, handlers as any);
+      getExecutionContext: jest.fn(),
+    } as unknown as ExecutionContext;
+
+    await fn(context, args, handlers);
 
     expect(loggedTable!).toMatchSnapshot();
   });
@@ -88,7 +91,7 @@ describe('interpreter/functions#metric', () => {
       },
     };
 
-    expect(() => fn(context, args, undefined)).toThrowErrorMatchingSnapshot();
+    expect(() => fn(context, args)).toThrowErrorMatchingSnapshot();
   });
 
   it('returns error if several metrics and colorFullBackground specified', () => {
@@ -102,13 +105,13 @@ describe('interpreter/functions#metric', () => {
       },
     });
 
-    expect(() => fn(context, args, undefined)).toThrowErrorMatchingSnapshot();
+    expect(() => fn(context, args)).toThrowErrorMatchingSnapshot();
   });
 
   it('returns error if data includes several rows and colorFullBackground specified', () => {
     args.colorFullBackground = true;
     context.rows.push({ 'col-0-1': 0 });
 
-    expect(() => fn(context, args, undefined)).toThrowErrorMatchingSnapshot();
+    expect(() => fn(context, args)).toThrowErrorMatchingSnapshot();
   });
 });

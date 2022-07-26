@@ -5,5 +5,7 @@
  * 2.0.
  */
 
+/** ID of the cloud security posture plugin. */
 export const PLUGIN_ID = 'csp';
+/** Display name of the cloud security posture application. */
 export const PLUGIN_NAME = 'Cloud Security';

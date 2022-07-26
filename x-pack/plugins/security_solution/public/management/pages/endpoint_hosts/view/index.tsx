@@ -321,6 +321,12 @@ export const EndpointList = () => {
     [dispatch]
   );
 
+  const setTableRowProps = useCallback((endpoint: HostInfo) => {
+    return {
+      'data-endpoint-Id': endpoint.metadata.agent.id,
+    };
+  }, []);
+
   const columns: Array<EuiBasicTableColumn<Immutable<HostInfo>>> = useMemo(() => {
     const lastActiveColumnName = i18n.translate('xpack.securitySolution.endpoint.list.lastActive', {
       defaultMessage: 'Last active',
@@ -538,6 +544,7 @@ export const EndpointList = () => {
           pagination={paginationSetup}
           onChange={onTableChange}
           loading={loading}
+          rowProps={setTableRowProps}
         />
       );
     } else if (!policyItemsLoading && policyItems && policyItems.length > 0) {
@@ -558,8 +565,8 @@ export const EndpointList = () => {
       );
     }
   }, [
-    loading,
     endpointsExist,
+    areEndpointsEnrolling,
     policyItemsLoading,
     policyItems,
     listData,
@@ -567,12 +574,13 @@ export const EndpointList = () => {
     listError?.message,
     paginationSetup,
     onTableChange,
+    loading,
+    setTableRowProps,
     handleDeployEndpointsClick,
     selectedPolicyId,
     handleSelectableOnChange,
     selectionOptions,
     handleCreatePolicyClick,
-    areEndpointsEnrolling,
   ]);
 
   const hasListData = listData && listData.length > 0;

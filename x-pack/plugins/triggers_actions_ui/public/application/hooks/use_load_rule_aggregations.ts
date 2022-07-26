@@ -8,7 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { useState, useCallback, useMemo } from 'react';
 import { RuleExecutionStatusValues } from '@kbn/alerting-plugin/common';
-import { loadRuleAggregations, LoadRuleAggregationsProps } from '../lib/rule_api';
+import type { LoadRuleAggregationsProps } from '../lib/rule_api';
+import { loadRuleAggregationsWithKueryFilter } from '../lib/rule_api/aggregate_kuery_filter';
 import { useKibana } from '../../common/lib/kibana';
 
 type UseLoadRuleAggregationsProps = Omit<LoadRuleAggregationsProps, 'http'> & {
@@ -38,7 +39,7 @@ export function useLoadRuleAggregations({
 
   const internalLoadRuleAggregations = useCallback(async () => {
     try {
-      const rulesAggs = await loadRuleAggregations({
+      const rulesAggs = await loadRuleAggregationsWithKueryFilter({
         http,
         searchText,
         typesFilter,

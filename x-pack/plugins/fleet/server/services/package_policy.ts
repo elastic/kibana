@@ -14,6 +14,7 @@ import type {
   ElasticsearchClient,
   RequestHandlerContext,
   SavedObjectsClientContract,
+  Logger,
 } from '@kbn/core/server';
 import uuid from 'uuid';
 import { safeLoad } from 'js-yaml';
@@ -145,35 +146,29 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
 
     // Make sure the associated package is installed
     if (packagePolicy.package?.name) {
-      const pkgInfoPromise = getPackageInfo({
+      if (!options?.skipEnsureInstalled) {
+        await ensureInstalledPackage({
+          esClient,
+          spaceId: options?.spaceId || DEFAULT_SPACE_ID,
+          savedObjectsClient: soClient,
+          pkgName: packagePolicy.package.name,
+          pkgVersion: packagePolicy.package.version,
+          force: options?.force,
+        });
+      }
+
+      const pkgInfo = await getPackageInfo({
         savedObjectsClient: soClient,
         pkgName: packagePolicy.package.name,
         pkgVersion: packagePolicy.package.version,
       });
-
-      let pkgInfo: PackageInfo;
-
-      if (options?.skipEnsureInstalled) pkgInfo = await pkgInfoPromise;
-      else {
-        const [, packageInfo] = await Promise.all([
-          ensureInstalledPackage({
-            esClient,
-            spaceId: options?.spaceId || DEFAULT_SPACE_ID,
-            savedObjectsClient: soClient,
-            pkgName: packagePolicy.package.name,
-            pkgVersion: packagePolicy.package.version,
-          }),
-          pkgInfoPromise,
-        ]);
-        pkgInfo = packageInfo;
-      }
 
       // Check if it is a limited package, and if so, check that the corresponding agent policy does not
       // already contain a package policy for this package
       if (isPackageLimited(pkgInfo)) {
         if (agentPolicy && doesAgentPolicyAlreadyIncludePackage(agentPolicy, pkgInfo.name)) {
           throw new IngestManagerError(
-            `Unable to create package policy. Package '${pkgInfo.name}' already exists on this agent policy.`
+            `Unable to create integration policy. Integration '${pkgInfo.name}' already exists on this agent policy.`
           );
         }
       }
@@ -853,6 +848,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       savedObjectsClient: soClient,
       pkgName,
       pkgVersion,
+      skipArchive: true,
     });
     if (packageInfo) {
       return packageToPackagePolicy(packageInfo, '', '');
@@ -861,9 +857,10 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
 
   public async buildPackagePolicyFromPackage(
     soClient: SavedObjectsClientContract,
-    pkgName: string
+    pkgName: string,
+    logger?: Logger
   ): Promise<NewPackagePolicy | undefined> {
-    const pkgInstall = await getInstallation({ savedObjectsClient: soClient, pkgName });
+    const pkgInstall = await getInstallation({ savedObjectsClient: soClient, pkgName, logger });
     if (pkgInstall) {
       const [packageInfo, defaultOutputId] = await Promise.all([
         getPackageInfo({
@@ -1308,7 +1305,8 @@ export interface PackagePolicyServiceInterface {
 
   buildPackagePolicyFromPackage(
     soClient: SavedObjectsClientContract,
-    pkgName: string
+    pkgName: string,
+    logger?: Logger
   ): Promise<NewPackagePolicy | undefined>;
 
   runExternalCallbacks<A extends ExternalCallback[0]>(

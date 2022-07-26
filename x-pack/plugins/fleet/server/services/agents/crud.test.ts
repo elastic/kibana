@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { Agent } from '../../types';
 
-import { errorsToResults, getAgentsByKuery, processAgentsInBatches } from './crud';
+import { errorsToResults, getAgentsByKuery, getAgentTags, processAgentsInBatches } from './crud';
 
 jest.mock('../../../common', () => ({
   ...jest.requireActual('../../../common'),
@@ -40,6 +40,41 @@ describe('Agents CRUD test', () => {
       },
     };
   }
+
+  describe('getAgentTags', () => {
+    it('should return tags from aggs', async () => {
+      searchMock.mockResolvedValueOnce({
+        aggregations: {
+          tags: { buckets: [{ key: 'tag1' }, { key: 'tag2' }] },
+        },
+      });
+
+      const result = await getAgentTags(esClientMock);
+
+      expect(result).toEqual(['tag1', 'tag2']);
+    });
+
+    it('should return empty list if no agent tags', async () => {
+      searchMock.mockResolvedValueOnce({
+        aggregations: {
+          tags: {},
+        },
+      });
+
+      const result = await getAgentTags(esClientMock);
+
+      expect(result).toEqual([]);
+    });
+
+    it('should return empty list if no agent index', async () => {
+      searchMock.mockRejectedValueOnce(new errors.ResponseError({ statusCode: 404 } as any));
+
+      const result = await getAgentTags(esClientMock);
+
+      expect(result).toEqual([]);
+    });
+  });
+
   describe('getAgentsByKuery', () => {
     it('should return upgradeable on first page', async () => {
       searchMock

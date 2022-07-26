@@ -19,7 +19,7 @@ import {
   TraceSearchQuery,
   TraceSearchType,
 } from '../../../../../common/trace_explorer';
-import { useStaticDataView } from '../../../../hooks/use_static_data_view';
+import { useApmDataView } from '../../../../hooks/use_apm_data_view';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { EQLCodeEditorSuggestionType } from '../../../shared/eql_code_editor/constants';
 import { LazilyLoadedEQLCodeEditor } from '../../../shared/eql_code_editor/lazily_loaded_code_editor';
@@ -57,7 +57,7 @@ export function TraceSearchBox({
   loading,
 }: Props) {
   const { unifiedSearch } = useApmPluginContext();
-  const { value: dataView } = useStaticDataView();
+  const { dataView } = useApmDataView();
 
   return (
     <EuiFlexGroup direction="column">

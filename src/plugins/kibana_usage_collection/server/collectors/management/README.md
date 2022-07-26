@@ -5,24 +5,30 @@ All user changed UI Settings are automatically collected.
 
 After adding a new setting you will be required to do the following steps:
 
-1. Update the [schema](./schema.ts) to include the setting name and schema type.
-```
-export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
-  'MY_UI_SETTING': { type: 'keyword' },
-}
-```
+1. Update the [UsageStats interface](./types.ts) with the setting name and typescript type.
 
-2. Update the [UsageStats interface](./types.ts) with the setting name and typescript type.
-```
-export interface UsageStats {
-  'MY_UI_SETTING': string;
-}
-```
+    ```typescript
+    export interface UsageStats {
+      'MY_UI_SETTING': string;
+    }
+    ```
+
+2. Update the [schema](./schema.ts) to include the setting name and schema type.
+
+    ```typescript
+    export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
+      'MY_UI_SETTING': { 
+        type: 'keyword',
+        _meta: { description: 'Non-default value of setting.' }
+      },
+    }
+    ```
+
 3. Run the telemetry checker with `--fix` flag to automatically fix the mappings
 
-```
-node scripts/telemetry_check --fix
-```
+    ```bash
+    node scripts/telemetry_check --fix
+    ```
 
 If you forget any of the steps our telemetry tools and tests will help you through the process!
 
@@ -30,7 +36,7 @@ If you forget any of the steps our telemetry tools and tests will help you throu
 
 If the configured UI setting might contain user sensitive information simply add the property `sensitive: true` to the ui setting registration config.
 
-```
+```typescript
 uiSettings.register({
   [NEWS_FEED_URL_SETTING]: {
     name: i18n.translate('xpack.securitySolution.uiSettings.newsFeedUrl', {

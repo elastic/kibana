@@ -47,7 +47,6 @@ export const manifestEntryDispatchSchema = t.intersection([
     })
   ),
 ]);
-export type ManifestEntryDispatchSchema = t.TypeOf<typeof manifestEntryDispatchSchema>;
 
 export const manifestBaseSchema = t.exact(
   t.type({
@@ -74,4 +73,3 @@ export const manifestDispatchSchema = t.intersection([
     })
   ),
 ]);
-export type ManifestDispatchSchema = t.TypeOf<typeof manifestDispatchSchema>;

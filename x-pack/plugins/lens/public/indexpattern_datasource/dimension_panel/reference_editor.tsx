@@ -33,7 +33,6 @@ import type {
   IndexPatternLayer,
   IndexPatternPrivateState,
 } from '../types';
-import { trackUiEvent } from '../../lens_ui_telemetry';
 import type { ParamEditorCustomProps } from '../../types';
 import type { IndexPatternDimensionEditorProps } from './dimension_panel';
 import { FormRow } from '../operations/definitions/shared_components';
@@ -281,7 +280,6 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
                     : undefined;
 
                 onChooseFunction(operationType, field);
-                trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
                 return;
               }}
             />

@@ -361,6 +361,7 @@ export class VisualizeEmbeddable
       onRenderError: (element: HTMLElement, error: ExpressionRenderError) => {
         this.onContainerError(error);
       },
+      executionContext: this.getExecutionContext(),
     });
 
     this.subscriptions.push(
@@ -464,19 +465,24 @@ export class VisualizeEmbeddable
     await this.handleVisUpdate();
   };
 
-  private async updateHandler() {
+  private getExecutionContext() {
     const parentContext = this.parent?.getInput().executionContext || getExecutionContext().get();
     const child: KibanaExecutionContext = {
-      type: 'visualization',
+      type: 'agg_based',
       name: this.vis.type.name,
       id: this.vis.id ?? 'new',
       description: this.vis.title || this.input.title || this.vis.type.name,
       url: this.output.editUrl,
     };
-    const context = {
+
+    return {
       ...parentContext,
       child,
     };
+  }
+
+  private async updateHandler() {
+    const context = this.getExecutionContext();
 
     const expressionParams: IExpressionLoaderParams = {
       searchContext: {

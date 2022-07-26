@@ -37,7 +37,7 @@ describe('getInstallCommandForPlatform', () => {
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--darwin-x86_64.tar.gz
         tar xzvf elastic-agent--darwin-x86_64.tar.gz
         cd elastic-agent--darwin-x86_64
-        sudo ./elastic-agent install  \\\\
+        sudo ./elastic-agent install \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1"
       `);
@@ -55,7 +55,7 @@ describe('getInstallCommandForPlatform', () => {
         wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--windows-x86_64.zip -OutFile elastic-agent--windows-x86_64.zip
         Expand-Archive .\\\\elastic-agent--windows-x86_64.zip
         cd elastic-agent--windows-x86_64
-        .\\\\elastic-agent.exe install  \`
+        .\\\\elastic-agent.exe install \`
           --fleet-server-es=http://elasticsearch:9200 \`
           --fleet-server-service-token=service-token-1"
       `);
@@ -71,7 +71,7 @@ describe('getInstallCommandForPlatform', () => {
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--x86_64.rpm
         sudo rpm -vi elastic-agent--x86_64.rpm
-        sudo elastic-agent enroll  \\\\
+        sudo elastic-agent enroll \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1
         sudo systemctl enable elastic-agent
@@ -89,7 +89,7 @@ describe('getInstallCommandForPlatform', () => {
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--amd64.deb
         sudo dpkg -i elastic-agent--amd64.deb
-        sudo elastic-agent enroll  \\\\
+        sudo elastic-agent enroll \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1
         sudo systemctl enable elastic-agent
@@ -152,7 +152,7 @@ describe('getInstallCommandForPlatform', () => {
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--darwin-x86_64.tar.gz
         tar xzvf elastic-agent--darwin-x86_64.tar.gz
         cd elastic-agent--darwin-x86_64
-        sudo ./elastic-agent install  \\\\
+        sudo ./elastic-agent install \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
           --fleet-server-policy=policy-1"
@@ -172,7 +172,7 @@ describe('getInstallCommandForPlatform', () => {
         wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--windows-x86_64.zip -OutFile elastic-agent--windows-x86_64.zip
         Expand-Archive .\\\\elastic-agent--windows-x86_64.zip
         cd elastic-agent--windows-x86_64
-        .\\\\elastic-agent.exe install  \`
+        .\\\\elastic-agent.exe install \`
           --fleet-server-es=http://elasticsearch:9200 \`
           --fleet-server-service-token=service-token-1 \`
           --fleet-server-policy=policy-1"
@@ -190,7 +190,7 @@ describe('getInstallCommandForPlatform', () => {
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--x86_64.rpm
         sudo rpm -vi elastic-agent--x86_64.rpm
-        sudo elastic-agent enroll  \\\\
+        sudo elastic-agent enroll \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
           --fleet-server-policy=policy-1
@@ -210,7 +210,7 @@ describe('getInstallCommandForPlatform', () => {
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--amd64.deb
         sudo dpkg -i elastic-agent--amd64.deb
-        sudo elastic-agent enroll  \\\\
+        sudo elastic-agent enroll \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
           --fleet-server-policy=policy-1
@@ -235,7 +235,7 @@ describe('getInstallCommandForPlatform', () => {
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--linux-x86_64.tar.gz
         tar xzvf elastic-agent--linux-x86_64.tar.gz
         cd elastic-agent--linux-x86_64
-        sudo ./elastic-agent install--url=http://fleetserver:8220 \\\\
+        sudo ./elastic-agent install --url=http://fleetserver:8220 \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
           --fleet-server-policy=policy-1 \\\\

@@ -139,6 +139,8 @@ export const TagsAddRemove: React.FC<Props> = ({
         anchorPosition="leftUp"
       >
         <EuiSelectable
+          // workaround for auto-scroll to first element after clearing search
+          onFocus={() => {}}
           aria-label={i18n.translate('xpack.fleet.tagsAddRemove.selectableTagsLabel', {
             defaultMessage: 'Add / remove tags',
           })}
@@ -146,7 +148,7 @@ export const TagsAddRemove: React.FC<Props> = ({
           searchProps={{
             'data-test-subj': 'addRemoveTags',
             placeholder: i18n.translate('xpack.fleet.tagsAddRemove.findOrCreatePlaceholder', {
-              defaultMessage: 'Find or create label...',
+              defaultMessage: 'Find or create tag...',
             }),
             onChange: (value: string) => {
               setSearchValue(sanitizeTag(value));

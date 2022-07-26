@@ -60,6 +60,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
     const {
       services: {
         application: { capabilities },
+        charts: chartsService,
       },
     } = useMlKibana();
 
@@ -349,6 +350,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             showTimeline={false}
             showLegend={false}
             yAxisWidth={Y_AXIS_LABEL_WIDTH}
+            chartsService={chartsService}
           />
 
           <EuiSpacer size="m" />
@@ -367,6 +369,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               fromPage={viewByFromPage}
               perPage={viewByPerPage}
               swimlaneLimit={swimlaneLimit}
+              chartsService={chartsService}
               onPaginationChange={({ perPage: perPageUpdate, fromPage: fromPageUpdate }) => {
                 if (perPageUpdate) {
                   anomalyTimelineStateService.setSwimLanePagination({

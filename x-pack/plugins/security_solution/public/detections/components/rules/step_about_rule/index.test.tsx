@@ -54,6 +54,8 @@ export const stepDefineStepMLRule: DefineStepRule = {
   threatMapping: [],
   timeline: { id: null, title: null },
   eqlOptions: {},
+  newTermsFields: ['host.ip'],
+  historyWindowSize: '7d',
 };
 
 describe('StepAboutRuleComponent', () => {
