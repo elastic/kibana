@@ -44,6 +44,7 @@ import type {
   DocumentsTransformFailed,
   DocumentsTransformSuccess,
 } from '../../../../saved_objects/migrations/core';
+import { MIGRATION_CLIENT_OPTIONS } from '../../../../saved_objects/migrations/run_resilient_migrator';
 
 const { startES } = kbnTestServer.createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
@@ -62,7 +63,7 @@ describe('migration actions', () => {
 
   beforeAll(async () => {
     esServer = await startES();
-    client = esServer.es.getClient();
+    client = esServer.es.getClient().child(MIGRATION_CLIENT_OPTIONS);
 
     // Create test fixture data:
     await createIndex({

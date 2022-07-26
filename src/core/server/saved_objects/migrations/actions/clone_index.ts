@@ -60,32 +60,29 @@ export const cloneIndex = ({
     AcknowledgeResponse
   > = () => {
     return client.indices
-      .clone(
-        {
-          index: source,
-          target,
-          wait_for_active_shards: WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
-          body: {
-            settings: {
-              index: {
-                // The source we're cloning from will have a write block set, so
-                // we need to remove it to allow writes to our newly cloned index
-                'blocks.write': false,
-                number_of_shards: INDEX_NUMBER_OF_SHARDS,
-                auto_expand_replicas: INDEX_AUTO_EXPAND_REPLICAS,
-                // Set an explicit refresh interval so that we don't inherit the
-                // value from incorrectly configured index templates (not required
-                // after we adopt system indices)
-                refresh_interval: '1s',
-                // Bump priority so that recovery happens before newer indices
-                priority: 10,
-              },
+      .clone({
+        index: source,
+        target,
+        wait_for_active_shards: WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
+        body: {
+          settings: {
+            index: {
+              // The source we're cloning from will have a write block set, so
+              // we need to remove it to allow writes to our newly cloned index
+              'blocks.write': false,
+              number_of_shards: INDEX_NUMBER_OF_SHARDS,
+              auto_expand_replicas: INDEX_AUTO_EXPAND_REPLICAS,
+              // Set an explicit refresh interval so that we don't inherit the
+              // value from incorrectly configured index templates (not required
+              // after we adopt system indices)
+              refresh_interval: '1s',
+              // Bump priority so that recovery happens before newer indices
+              priority: 10,
             },
           },
-          timeout,
         },
-        { maxRetries: 0 /** handle retry ourselves for now */ }
-      )
+        timeout,
+      })
       .then((response) => {
         /**
          * - acknowledged=false, we timed out before the cluster state was

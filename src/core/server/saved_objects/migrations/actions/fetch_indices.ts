@@ -34,16 +34,12 @@ export const fetchIndices =
     client,
     indices,
   }: FetchIndicesParams): TaskEither.TaskEither<RetryableEsClientError, FetchIndexResponse> =>
-  // @ts-expect-error @elastic/elasticsearch IndexState.alias and IndexState.mappings should be required
   () => {
     return client.indices
-      .get(
-        {
-          index: indices,
-          ignore_unavailable: true, // Don't return an error for missing indices. Note this *will* include closed indices, the docs are misleading https://github.com/elastic/elasticsearch/issues/63607
-        },
-        { maxRetries: 0 }
-      )
+      .get({
+        index: indices,
+        ignore_unavailable: true, // Don't return an error for missing indices. Note this *will* include closed indices, the docs are misleading https://github.com/elastic/elasticsearch/issues/63607
+      })
       .then((body) => {
         return Either.right(body);
       })

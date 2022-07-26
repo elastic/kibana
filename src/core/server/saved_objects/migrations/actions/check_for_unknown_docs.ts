@@ -44,8 +44,9 @@ export interface UnknownDocsFound {
 }
 
 /**
- * Performs a search in ES, aggregating documents by type,
- * retrieving a bunch of documents for each type.
+ * Performs a search in ES, aggregating documents by type, retrieving a bunch
+ * of documents for each type.
+ *
  * @internal
  * @param esClient The ES client to perform the search query
  * @param targetIndices The ES indices to target

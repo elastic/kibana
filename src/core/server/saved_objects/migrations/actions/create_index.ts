@@ -71,37 +71,34 @@ export const createIndex = ({
     const aliasesObject = aliasArrayToRecord(aliases);
 
     return client.indices
-      .create(
-        {
-          index: indexName,
-          // wait up to timeout until the following shards are available before
-          // creating the index: primary, replica (only on multi node clusters)
-          wait_for_active_shards: WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
-          // Timeout for the cluster state to update and all shards to become
-          // available. If the request doesn't complete within timeout,
-          // acknowledged or shards_acknowledged would be false.
-          timeout: DEFAULT_TIMEOUT,
-          body: {
-            mappings,
-            aliases: aliasesObject,
-            settings: {
-              index: {
-                // ES rule of thumb: shards should be several GB to 10's of GB, so
-                // Kibana is unlikely to cross that limit.
-                number_of_shards: 1,
-                auto_expand_replicas: INDEX_AUTO_EXPAND_REPLICAS,
-                // Set an explicit refresh interval so that we don't inherit the
-                // value from incorrectly configured index templates (not required
-                // after we adopt system indices)
-                refresh_interval: '1s',
-                // Bump priority so that recovery happens before newer indices
-                priority: 10,
-              },
+      .create({
+        index: indexName,
+        // wait up to timeout until the following shards are available before
+        // creating the index: primary, replica (only on multi node clusters)
+        wait_for_active_shards: WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
+        // Timeout for the cluster state to update and all shards to become
+        // available. If the request doesn't complete within timeout,
+        // acknowledged or shards_acknowledged would be false.
+        timeout: DEFAULT_TIMEOUT,
+        body: {
+          mappings,
+          aliases: aliasesObject,
+          settings: {
+            index: {
+              // ES rule of thumb: shards should be several GB to 10's of GB, so
+              // Kibana is unlikely to cross that limit.
+              number_of_shards: 1,
+              auto_expand_replicas: INDEX_AUTO_EXPAND_REPLICAS,
+              // Set an explicit refresh interval so that we don't inherit the
+              // value from incorrectly configured index templates (not required
+              // after we adopt system indices)
+              refresh_interval: '1s',
+              // Bump priority so that recovery happens before newer indices
+              priority: 10,
             },
           },
         },
-        { maxRetries: 0 /** handle retry ourselves for now */ }
-      )
+      })
       .then((res) => {
         /**
          * - acknowledged=false, we timed out before the cluster state was
