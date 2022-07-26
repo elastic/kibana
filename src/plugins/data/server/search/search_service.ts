@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { firstValueFrom, from, mergeMap, Observable, of, throwError } from 'rxjs';
+import { concatMap, firstValueFrom, from, Observable, of, throwError } from 'rxjs';
 import { pick } from 'lodash';
 import moment from 'moment';
 import {
@@ -19,7 +19,7 @@ import {
   SharedGlobalConfig,
   StartServicesAccessor,
 } from '@kbn/core/server';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
@@ -376,10 +376,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       };
 
       const searchRequest$ = from(getSearchRequest());
+      let isInternalSearchStored = false; // used to prevent tracking current search more than once
       const search$ = searchRequest$.pipe(
         switchMap((searchRequest) =>
           strategy.search(searchRequest, options, deps).pipe(
-            mergeMap((response) => {
+            concatMap((response) => {
               response = {
                 ...response,
                 isRestored: !!searchRequest.id,
@@ -394,7 +395,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
                 // then track this search inside the search-session saved object
 
                 // check if search was already tracked and extended, don't track again in this case
-                if (options.isSearchStored) {
+                if (options.isSearchStored || isInternalSearchStored) {
                   return of({
                     ...response,
                     isStored: true,
@@ -403,6 +404,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
                   return from(
                     deps.searchSessionsClient.trackId(request, response.id, options)
                   ).pipe(
+                    tap(() => {
+                      isInternalSearchStored = true;
+                    }),
                     map(() => ({
                       ...response,
                       isStored: true,
@@ -542,6 +546,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         extendSession: this.extendSession.bind(this, deps),
         cancelSession: this.cancelSession.bind(this, deps),
         deleteSession: this.deleteSession.bind(this, deps),
+        getSessionStatus: searchSessionsClient.status,
       };
     };
   };

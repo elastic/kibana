@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FieldValueOptionType, SearchFilterConfig } from '@elastic/eui';
+import { SearchFilterConfig } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
 import { UISession } from '../../types';
@@ -18,12 +18,7 @@ export const getAppFilter: (tableData: UISession[]) => SearchFilterConfig = (tab
   }),
   field: 'appId',
   multiSelect: 'or',
-  options: tableData.reduce((options: FieldValueOptionType[], { appId }) => {
-    const existingOption = options.find((o) => o.value === appId);
-    if (!existingOption) {
-      return [...options, { value: appId, view: capitalize(appId) }];
-    }
-
-    return options;
-  }, []),
+  options: [...new Set(tableData.map((data) => data.appId ?? 'unknown'))]
+    .sort()
+    .map((appId) => ({ value: appId, view: capitalize(appId) })),
 });

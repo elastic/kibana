@@ -17,7 +17,18 @@ import {
   Subscription,
   throwError,
 } from 'rxjs';
-import { catchError, finalize, map, shareReplay, switchMap, takeUntil, tap } from 'rxjs/operators';
+import {
+  catchError,
+  filter,
+  finalize,
+  map,
+  shareReplay,
+  skip,
+  switchMap,
+  take,
+  takeUntil,
+  tap,
+} from 'rxjs/operators';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
 
@@ -57,7 +68,7 @@ import {
   TimeoutErrorMode,
   SearchSessionIncompleteWarning,
 } from '../errors';
-import { ISessionService } from '../session';
+import { ISessionService, SearchSessionState } from '../session';
 import { SearchResponseCache } from './search_response_cache';
 import { createRequestHash } from './utils';
 import { SearchAbortController } from './search_abort_controller';
@@ -266,10 +277,27 @@ export class SearchInterceptor {
         })
       : undefined;
 
+    // track if this search's session will be send to background
+    // if yes, then we don't need to cancel this search when it is aborted
+    let isSavedToBackground = false;
+    const savedToBackgroundSub =
+      this.deps.session.isCurrentSession(sessionId) &&
+      this.deps.session.state$
+        .pipe(
+          skip(1), // ignore any state, we are only interested in transition x -> BackgroundLoading
+          filter(
+            (state) =>
+              this.deps.session.isCurrentSession(sessionId) &&
+              state === SearchSessionState.BackgroundLoading
+          ),
+          take(1)
+        )
+        .subscribe(() => {
+          isSavedToBackground = true;
+        });
+
     const cancel = once(() => {
-      if (this.deps.session.isCurrentSession(sessionId) && !this.deps.session.isStored()) {
-        this.deps.http.delete(`/internal/search/${strategy}/${id}`);
-      }
+      if (id && !isSavedToBackground) this.deps.http.delete(`/internal/search/${strategy}/${id}`);
     });
 
     return pollSearch(search, cancel, {
@@ -290,6 +318,9 @@ export class SearchInterceptor {
       }),
       finalize(() => {
         searchAbortController.cleanup();
+        if (savedToBackgroundSub) {
+          savedToBackgroundSub.unsubscribe();
+        }
       }),
       // This observable is cached in the responseCache.
       // Using shareReplay makes sure that future subscribers will get the final response

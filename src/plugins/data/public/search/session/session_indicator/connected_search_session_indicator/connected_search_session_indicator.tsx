@@ -46,10 +46,11 @@ export const createConnectedSearchSessionIndicator = ({
   return () => {
     const state = useObservable(debouncedSessionServiceState$, SearchSessionState.None);
     const isSaveDisabledByApp = sessionService.getSearchSessionIndicatorUiConfig().isDisabled();
-    const disableSaveAfterSessionCompleteTimedOut = useObservable(
-      sessionService.disableSaveAfterSessionCompleteTimedOut$,
+    const disableSaveAfterSearchesExpire = useObservable(
+      sessionService.disableSaveAfterSearchesExpire$,
       false
     );
+
     const [searchSessionIndicator, setSearchSessionIndicator] =
       useState<SearchSessionIndicatorRef | null>(null);
     const searchSessionIndicatorRef = useCallback((ref: SearchSessionIndicatorRef) => {
@@ -64,7 +65,7 @@ export const createConnectedSearchSessionIndicator = ({
     let managementDisabled = false;
     let managementDisabledReasonText: string = '';
 
-    if (disableSaveAfterSessionCompleteTimedOut) {
+    if (disableSaveAfterSearchesExpire) {
       saveDisabled = true;
       saveDisabledReasonText = i18n.translate(
         'data.searchSessionIndicator.disabledDueToTimeoutMessage',
@@ -142,7 +143,7 @@ export const createConnectedSearchSessionIndicator = ({
       startTime,
       completedTime,
       canceledTime,
-    } = useObservable(sessionService.sessionMeta$, { state });
+    } = useObservable(sessionService.sessionMeta$, { state, isContinued: false });
     const saveSearchSessionNameFn = useCallback(async (newName: string) => {
       await sessionService.renameCurrentSession(newName);
     }, []);

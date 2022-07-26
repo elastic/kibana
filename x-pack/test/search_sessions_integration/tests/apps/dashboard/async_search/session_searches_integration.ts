@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await searchSessions.deleteAllSearchSessions();
     });
 
-    it('until session is saved search keepAlive is short, when it is saved, keepAlive is extended and search is saved into the session saved object', async () => {
+    it('until session is saved search keepAlive is short, when it is saved, keepAlive is extended and search is saved into the session saved object, when session is extended, searches are also extended', async () => {
       await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
       await PageObjects.dashboard.waitForRenderComplete();
       await searchSessions.expectState('completed');
@@ -58,9 +58,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await searchSessions.save();
       await searchSessions.expectState('backgroundCompleted');
 
+      let asyncExpirationTimeAfterSessionWasSaved: number;
       await retry.waitFor('async search keepAlive is extended', async () => {
-        const asyncExpirationTimeAfterSessionWasSaved =
-          await searchSessions.getAsyncSearchExpirationTime(asyncSearchId);
+        asyncExpirationTimeAfterSessionWasSaved = await searchSessions.getAsyncSearchExpirationTime(
+          asyncSearchId
+        );
 
         return (
           asyncExpirationTimeAfterSessionWasSaved > asyncExpirationTimeBeforeSessionWasSaved &&
@@ -80,6 +82,52 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const searchSessionList = await PageObjects.searchSessionsManagement.getList();
       const searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
       expect(searchSessionItem.searchesCount).to.be(1);
+
+      await searchSessionItem.extend();
+
+      const asyncExpirationTimeAfterSessionWasExtended =
+        await searchSessions.getAsyncSearchExpirationTime(asyncSearchId);
+
+      expect(asyncExpirationTimeAfterSessionWasExtended).to.be.greaterThan(
+        asyncExpirationTimeAfterSessionWasSaved!
+      );
+    });
+
+    it('When session is deleted, searches are also deleted', async () => {
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
+      await PageObjects.dashboard.waitForRenderComplete();
+      await searchSessions.expectState('completed');
+
+      const searchResponse = await dashboardPanelActions.getSearchResponseByTitle(
+        'Sum of Bytes by Extension'
+      );
+
+      const asyncSearchId = searchResponse.id;
+      expect(typeof asyncSearchId).to.be('string');
+
+      await searchSessions.save();
+      await searchSessions.expectState('backgroundCompleted');
+
+      const savedSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(
+        'Sum of Bytes by Extension'
+      );
+
+      // check that search saved into the session
+
+      await searchSessions.openPopover();
+      await searchSessions.viewSearchSessions();
+
+      const searchSessionList = await PageObjects.searchSessionsManagement.getList();
+      const searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
+      expect(searchSessionItem.searchesCount).to.be(1);
+      await searchSessionItem.delete();
+
+      const searchNotFoundError = await searchSessions
+        .getAsyncSearchStatus(asyncSearchId)
+        .catch((e) => e);
+      expect(searchNotFoundError.name).to.be('ResponseError');
+      expect(searchNotFoundError.meta.body.error.type).to.be('resource_not_found_exception');
     });
   });
 }

@@ -42,5 +42,6 @@ export function createSearchRequestHandlerContext() {
     extendSession: jest.fn(),
     cancelSession: jest.fn(),
     deleteSession: jest.fn(),
+    getSessionStatus: jest.fn(),
   };
 }

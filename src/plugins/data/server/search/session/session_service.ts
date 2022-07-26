@@ -28,7 +28,9 @@ import {
   SEARCH_SESSION_TYPE,
   SearchSessionRequestInfo,
   SearchSessionSavedObjectAttributes,
+  SearchSessionsFindResponse,
   SearchSessionStatus,
+  SearchSessionStatusResponse,
 } from '../../../common';
 import { ISearchSessionService, NoSearchIdInSessionError } from '../..';
 import { createRequestHash } from './utils';
@@ -38,12 +40,12 @@ import { getSessionStatus } from './get_session_status';
 
 export interface SearchSessionDependencies {
   savedObjectsClient: SavedObjectsClientContract;
+}
 
-  /**
-   * Needed for using async search status API
-   */
+export interface SearchSessionStatusDependencies extends SearchSessionDependencies {
   internalElasticsearchClient: ElasticsearchClient;
 }
+
 interface SetupDependencies {
   security?: SecurityPluginSetup;
 }
@@ -256,10 +258,9 @@ export class SearchSessionService implements ISearchSessionService {
   };
 
   public get = async (
-    { savedObjectsClient, internalElasticsearchClient }: SearchSessionDependencies,
+    { savedObjectsClient }: SearchSessionDependencies,
     user: AuthenticatedUser | null,
-    sessionId: string,
-    checkStatus: boolean = false // TODO: make it cleaner
+    sessionId: string
   ) => {
     this.logger.debug(`get | ${sessionId}`);
     const session = await savedObjectsClient.get<SearchSessionSavedObjectAttributes>(
@@ -268,23 +269,14 @@ export class SearchSessionService implements ISearchSessionService {
     );
     this.throwOnUserConflict(user, session);
 
-    if (checkStatus) {
-      const sessionStatus = await getSessionStatus(
-        { internalClient: internalElasticsearchClient },
-        session.attributes,
-        this.sessionConfig
-      );
-      session.attributes.status = sessionStatus;
-    }
-
     return session;
   };
 
   public find = async (
-    { savedObjectsClient, internalElasticsearchClient }: SearchSessionDependencies,
+    { savedObjectsClient, internalElasticsearchClient }: SearchSessionStatusDependencies,
     user: AuthenticatedUser | null,
     options: Omit<SavedObjectsFindOptions, 'type'>
-  ) => {
+  ): Promise<SearchSessionsFindResponse> => {
     const userFilters =
       user === null
         ? []
@@ -308,20 +300,25 @@ export class SearchSessionService implements ISearchSessionService {
       type: SEARCH_SESSION_TYPE,
     });
 
-    // TODO: make it cleaner
-    findResponse.saved_objects = await Promise.all(
+    const sessionStatuses = await Promise.all(
       findResponse.saved_objects.map(async (so) => {
         const sessionStatus = await getSessionStatus(
           { internalClient: internalElasticsearchClient },
           so.attributes,
           this.sessionConfig
         );
-        so.attributes.status = sessionStatus;
-        return so;
+
+        return sessionStatus;
       })
     );
 
-    return findResponse;
+    return {
+      ...findResponse,
+      statuses: sessionStatuses.reduce((res, status, index) => {
+        res[findResponse.saved_objects[index].id] = { status };
+        return res;
+      }, {} as Record<string, SearchSessionStatusResponse>),
+    };
   };
 
   public update = async (
@@ -418,6 +415,23 @@ export class SearchSessionService implements ISearchSessionService {
     return searchIdMapping;
   }
 
+  public async status(
+    deps: SearchSessionStatusDependencies,
+    user: AuthenticatedUser | null,
+    sessionId: string
+  ): Promise<SearchSessionStatusResponse> {
+    this.logger.debug(`status | ${sessionId}`);
+    const session = await this.get(deps, user, sessionId);
+
+    const sessionStatus = await getSessionStatus(
+      { internalClient: deps.internalElasticsearchClient },
+      session.attributes,
+      this.sessionConfig
+    );
+
+    return { status: sessionStatus };
+  }
+
   /**
    * Look up an existing search ID that matches the given request in the given session so that the
    * request can continue rather than restart.
@@ -470,6 +484,7 @@ export class SearchSessionService implements ISearchSessionService {
         extend: this.extend.bind(this, deps, user),
         cancel: this.cancel.bind(this, deps, user),
         delete: this.delete.bind(this, deps, user),
+        status: this.status.bind(this, deps, user),
         getConfig: () => this.config.search.sessions,
       };
     };

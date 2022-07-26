@@ -34,8 +34,9 @@ export function getSessionServiceMock(): jest.Mocked<ISessionService> {
     state$: new BehaviorSubject<SearchSessionState>(SearchSessionState.None).asObservable(),
     sessionMeta$: new BehaviorSubject<SessionMeta>({
       state: SearchSessionState.None,
+      isContinued: false,
     }).asObservable(),
-    disableSaveAfterSessionCompleteTimedOut$: of(false),
+    disableSaveAfterSearchesExpire$: of(false),
     renameCurrentSession: jest.fn(),
     trackSearch: jest.fn((searchDescriptor) => ({
       complete: jest.fn(),

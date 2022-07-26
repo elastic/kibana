@@ -53,14 +53,16 @@ describe('Search Sessions Management API', () => {
               attributes: {
                 name: 'Veggie',
                 appId: 'pizza',
-                status: 'complete',
                 initialState: {},
                 restoreState: {},
                 idMapping: [],
               },
             },
           ],
-        } as SavedObjectsFindResponse;
+          statuses: {
+            'hello-pizza-123': { status: 'complete' },
+          },
+        };
       });
 
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
@@ -94,7 +96,7 @@ describe('Search Sessions Management API', () => {
       `);
     });
 
-    test('completed session with expired time is showed as expired', async () => {
+    test('expired session is showed as expired', async () => {
       sessionsClient.find = jest.fn().mockImplementation(async () => {
         return {
           saved_objects: [
@@ -103,7 +105,6 @@ describe('Search Sessions Management API', () => {
               attributes: {
                 name: 'Veggie',
                 appId: 'pizza',
-                status: 'complete',
                 expires: moment().subtract(3, 'days'),
                 initialState: {},
                 restoreState: {},
@@ -111,7 +112,10 @@ describe('Search Sessions Management API', () => {
               },
             },
           ],
-        } as SavedObjectsFindResponse;
+          statuses: {
+            'hello-pizza-123': { status: 'expired' },
+          },
+        };
       });
 
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {

@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { SerializableRecord } from '@kbn/utility-types';
 import { SearchSessionStatus } from './status';
 
@@ -87,10 +89,20 @@ export interface SearchSessionRequestInfo {
   error?: string;
 }
 
-export interface SearchSessionFindOptions {
-  page?: number;
-  perPage?: number;
-  sortField?: string;
-  sortOrder?: string;
-  filter?: string;
+/**
+ * On-the-fly calculated search session status
+ */
+export interface SearchSessionStatusResponse {
+  status: SearchSessionStatus;
+}
+
+/**
+ * List of search session objects with on-the-fly calculated search session statuses
+ */
+export interface SearchSessionsFindResponse
+  extends SavedObjectsFindResponse<SearchSessionSavedObjectAttributes> {
+  /**
+   * Map containing calculated statuses of search sessions from the find response
+   */
+  statuses: Record<string, SearchSessionStatusResponse>;
 }

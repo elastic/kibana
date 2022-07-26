@@ -60,15 +60,15 @@ export const searchSessionsConfigSchema = schema.object({
   defaultExpiration: schema.duration({ defaultValue: '7d' }),
   management: schema.object({
     /**
-     * maxSessions controls how many saved search sessions we display per page on the management screen.
+     * maxSessions controls how many saved search sessions we load on the management screen.
      */
-    maxSessions: schema.number({ defaultValue: 10000 }),
+    maxSessions: schema.number({ defaultValue: 100 }),
     /**
-     * refreshInterval controls how often we refresh the management screen.
+     * refreshInterval controls how often we refresh the management screen. 0s as duration means that auto-refresh is turned off.
      */
-    refreshInterval: schema.duration({ defaultValue: '10s' }),
+    refreshInterval: schema.duration({ defaultValue: '0s' }),
     /**
-     * refreshTimeout controls how often we refresh the management screen.
+     * refreshTimeout controls the timeout for loading search sessions on mgmt screen
      */
     refreshTimeout: schema.duration({ defaultValue: '1m' }),
     expiresSoonWarning: schema.duration({ defaultValue: '1d' }),

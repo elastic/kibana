@@ -8,7 +8,7 @@
 
 import { ISessionService, SessionService } from './session_service';
 import { coreMock } from '@kbn/core/public/mocks';
-import { take, toArray } from 'rxjs/operators';
+import { first, take, toArray } from 'rxjs/operators';
 import { getSessionsClientMock } from './mocks';
 import { BehaviorSubject } from 'rxjs';
 import { SearchSessionState } from './search_session_state';
@@ -180,6 +180,48 @@ describe('Session service', () => {
 
       expect(abort).toBeCalledTimes(3);
     });
+
+    describe('Keeping searches alive', () => {
+      let dateNowSpy: jest.SpyInstance;
+      let now = Date.now();
+      const advanceTimersBy = (by: number) => {
+        now = now + by;
+        jest.advanceTimersByTime(by);
+      };
+      beforeEach(() => {
+        dateNowSpy = jest.spyOn(Date, 'now').mockImplementation(() => now);
+        now = Date.now();
+        jest.useFakeTimers();
+      });
+      afterEach(() => {
+        dateNowSpy.mockRestore();
+        jest.useRealTimers();
+      });
+
+      it('Polls all completed searches to keep them alive', async () => {
+        const abort = jest.fn();
+        const poll = jest.fn(() => Promise.resolve());
+
+        sessionService.enableStorage({
+          getName: async () => 'Name',
+          getLocatorData: async () => ({
+            id: 'id',
+            initialState: {},
+            restoreState: {},
+          }),
+        });
+        sessionService.start();
+
+        const searchTracker = sessionService.trackSearch({ abort, poll });
+        searchTracker.complete();
+
+        expect(poll).toHaveBeenCalledTimes(0);
+
+        advanceTimersBy(30000);
+
+        expect(poll).toHaveBeenCalledTimes(1);
+      });
+    });
   });
 
   it('Can continue previous session from another app', async () => {
@@ -191,6 +233,7 @@ describe('Session service', () => {
     sessionService.continue(sessionId!);
 
     expect(sessionService.getSessionId()).toBe(sessionId);
+    expect((await sessionService.sessionMeta$.pipe(first()).toPromise())!.isContinued).toBe(true);
   });
 
   it('Calling clear() more than once still allows previous session from another app to continue', async () => {
@@ -410,7 +453,7 @@ describe('Session service', () => {
     );
   });
 
-  describe('disableSaveAfterSessionCompleteTimedOut$', () => {
+  describe('disableSaveAfterSearchesExpire$', () => {
     beforeEach(() => {
       jest.useFakeTimers();
     });
@@ -420,7 +463,7 @@ describe('Session service', () => {
 
     test('disables save after session completes on timeout', async () => {
       const emitResult: boolean[] = [];
-      sessionService.disableSaveAfterSessionCompleteTimedOut$.subscribe((result) => {
+      sessionService.disableSaveAfterSearchesExpire$.subscribe((result) => {
         emitResult.push(result);
       });
 
@@ -447,12 +490,40 @@ describe('Session service', () => {
       expect(emitResult).toEqual([false, true, false]);
     });
 
-    test('emits usage once', async () => {
+    test('disables save for continued from different app sessions', async () => {
       const emitResult: boolean[] = [];
-      sessionService.disableSaveAfterSessionCompleteTimedOut$.subscribe((result) => {
+      sessionService.disableSaveAfterSearchesExpire$.subscribe((result) => {
         emitResult.push(result);
       });
-      sessionService.disableSaveAfterSessionCompleteTimedOut$.subscribe(); // testing that source is shared
+
+      const sessionId = sessionService.start();
+
+      const complete = sessionService.trackSearch({
+        abort: () => {},
+        poll: async () => {},
+      }).complete;
+
+      complete();
+
+      expect(emitResult).toEqual([false]);
+
+      sessionService.clear();
+
+      sessionService.continue(sessionId);
+
+      expect(emitResult).toEqual([false, true]);
+
+      sessionService.start();
+
+      expect(emitResult).toEqual([false, true, false]);
+    });
+
+    test('emits usage once', async () => {
+      const emitResult: boolean[] = [];
+      sessionService.disableSaveAfterSearchesExpire$.subscribe((result) => {
+        emitResult.push(result);
+      });
+      sessionService.disableSaveAfterSearchesExpire$.subscribe(); // testing that source is shared
 
       sessionService.start();
       const complete = sessionService.trackSearch({

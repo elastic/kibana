@@ -6,26 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
 import {
   CoreStart,
   KibanaRequest,
   SavedObject,
   SavedObjectsFindOptions,
-  SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
-  ElasticsearchClient,
-  Logger,
-  SavedObjectsClientContract,
 } from '@kbn/core/server';
-import type {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
-import { KueryNode } from '@kbn/es-query';
-import { SearchSessionSavedObjectAttributes } from '../../../common';
-import { IKibanaSearchRequest, ISearchOptions } from '../../../common/search';
-import { SearchSessionsConfigSchema, ConfigSchema } from '../../../config';
+import {
+  IKibanaSearchRequest,
+  ISearchOptions,
+  SearchSessionsFindResponse,
+  SearchSessionSavedObjectAttributes,
+  SearchSessionStatusResponse,
+} from '../../../common/search';
+import { SearchSessionsConfigSchema } from '../../../config';
 
 export interface IScopedSearchSessionsClient {
   getId: (request: IKibanaSearchRequest, options: ISearchOptions) => Promise<string>;
@@ -39,13 +34,8 @@ export interface IScopedSearchSessionsClient {
     sessionId: string,
     attributes: Partial<SearchSessionSavedObjectAttributes>
   ) => Promise<SavedObject<SearchSessionSavedObjectAttributes> | undefined>;
-  get: (
-    sessionId: string,
-    checkStatus?: boolean
-  ) => Promise<SavedObject<SearchSessionSavedObjectAttributes>>;
-  find: (
-    options: Omit<SavedObjectsFindOptions, 'type'>
-  ) => Promise<SavedObjectsFindResponse<SearchSessionSavedObjectAttributes>>;
+  get: (sessionId: string) => Promise<SavedObject<SearchSessionSavedObjectAttributes>>;
+  find: (options: Omit<SavedObjectsFindOptions, 'type'>) => Promise<SearchSessionsFindResponse>;
   update: (
     sessionId: string,
     attributes: Partial<SearchSessionSavedObjectAttributes>
@@ -56,6 +46,7 @@ export interface IScopedSearchSessionsClient {
     sessionId: string,
     expires: Date
   ) => Promise<SavedObjectsUpdateResponse<SearchSessionSavedObjectAttributes>>;
+  status: (sessionId: string) => Promise<SearchSessionStatusResponse>;
   getConfig: () => SearchSessionsConfigSchema | null;
 }
 
@@ -68,38 +59,3 @@ export enum SearchStatus {
   ERROR = 'error',
   COMPLETE = 'complete',
 }
-
-export interface CheckSearchSessionsDeps {
-  savedObjectsClient: SavedObjectsClientContract;
-  client: ElasticsearchClient;
-  logger: Logger;
-}
-
-export interface SearchSessionTaskSetupDeps {
-  taskManager: TaskManagerSetupContract;
-  logger: Logger;
-  config: ConfigSchema;
-}
-
-export interface SearchSessionTaskStartDeps {
-  taskManager: TaskManagerStartContract;
-  logger: Logger;
-  config: ConfigSchema;
-}
-
-export type SearchSessionTaskFn = (
-  deps: CheckSearchSessionsDeps,
-  config: SearchSessionsConfigSchema
-) => Observable<void>;
-
-export type SearchSessionsResponse = SavedObjectsFindResponse<
-  SearchSessionSavedObjectAttributes,
-  unknown
->;
-
-export type CheckSearchSessionsFn = (
-  deps: CheckSearchSessionsDeps,
-  config: SearchSessionsConfigSchema,
-  filter: KueryNode,
-  page: number
-) => Observable<SearchSessionsResponse>;
