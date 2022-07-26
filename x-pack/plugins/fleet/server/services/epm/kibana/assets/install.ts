@@ -18,7 +18,7 @@ import type { SavedObjectsImportSuccess, SavedObjectsImportFailure } from '@kbn/
 import { createListStream } from '@kbn/utils';
 import { partition } from 'lodash';
 
-import type { IAssignmentService } from '@kbn/saved-objects-tagging-plugin/server';
+import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
 
 import { taggableTypes } from '@kbn/saved-objects-tagging-plugin/common/constants';
 
@@ -133,16 +133,20 @@ export async function installKibanaAssetsAndReferences({
   savedObjectsClient,
   savedObjectsImporter,
   savedObjectTagAssignmentService,
+  savedObjectTagClient,
   logger,
   pkgName,
+  pkgTitle,
   paths,
   installedPkg,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: Pick<SavedObjectsImporter, 'import' | 'resolveImportErrors'>;
   savedObjectTagAssignmentService: IAssignmentService;
+  savedObjectTagClient: ITagsClient;
   logger: Logger;
   pkgName: string;
+  pkgTitle: string;
   paths: string[];
   installedPkg?: SavedObject<Installation>;
 }) {
@@ -162,22 +166,26 @@ export async function installKibanaAssetsAndReferences({
     kibanaAssets,
   });
 
-  // console.log(pkgName);
-  // console.log(installedPkg);
-
-  await tagKibanaAssets({ savedObjectTagAssignmentService, kibanaAssets, pkgName });
+  await tagKibanaAssets({
+    savedObjectTagAssignmentService,
+    savedObjectTagClient,
+    kibanaAssets,
+    pkgTitle,
+  });
 
   return installedKibanaAssetsRefs;
 }
 
 export async function tagKibanaAssets({
   savedObjectTagAssignmentService,
+  savedObjectTagClient,
   kibanaAssets,
-  pkgName,
+  pkgTitle,
 }: {
   savedObjectTagAssignmentService: IAssignmentService;
+  savedObjectTagClient: ITagsClient;
   kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>;
-  pkgName: string;
+  pkgTitle: string;
 }) {
   const taggableAssets = Object.entries(kibanaAssets).flatMap(([assetType, assets]) => {
     if (!taggableTypes.includes(assetType as KibanaAssetType)) {
@@ -191,11 +199,29 @@ export async function tagKibanaAssets({
     return assets;
   });
 
-  // console.log(taggableAssets);
+  const managedTagName = 'Managed';
+  const tagColor = '#FFFFFF';
+  const allTags = await savedObjectTagClient.getAll();
+  let managedTag = allTags.find((tag) => tag.name === managedTagName);
+  if (!managedTag) {
+    managedTag = await savedObjectTagClient.create({
+      name: managedTagName,
+      description: '',
+      color: tagColor,
+    });
+  }
 
-  // TODO use readable name for pkg name tag
+  let packageTag = allTags.find((tag) => tag.name === pkgTitle);
+  if (!packageTag) {
+    packageTag = await savedObjectTagClient.create({
+      name: pkgTitle,
+      description: '',
+      color: tagColor,
+    });
+  }
+
   savedObjectTagAssignmentService.updateTagAssignments({
-    tags: ['Managed', pkgName],
+    tags: [managedTag.id, packageTag.id],
     assign: taggableAssets,
     unassign: [],
   });

@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
-import type { IAssignmentService } from '@kbn/saved-objects-tagging-plugin/server';
+import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
 
 import {
   MAX_TIME_COMPLETE_INSTALL,
@@ -59,6 +59,7 @@ export async function _installPackage({
   savedObjectsClient,
   savedObjectsImporter,
   savedObjectTagAssignmentService,
+  savedObjectTagClient,
   esClient,
   logger,
   installedPkg,
@@ -72,6 +73,7 @@ export async function _installPackage({
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: Pick<SavedObjectsImporter, 'import' | 'resolveImportErrors'>;
   savedObjectTagAssignmentService: IAssignmentService;
+  savedObjectTagClient: ITagsClient;
   esClient: ElasticsearchClient;
   logger: Logger;
   installedPkg?: SavedObject<Installation>;
@@ -82,7 +84,7 @@ export async function _installPackage({
   spaceId: string;
   verificationResult?: PackageVerificationResult;
 }): Promise<AssetReference[]> {
-  const { name: pkgName, version: pkgVersion } = packageInfo;
+  const { name: pkgName, version: pkgVersion, title: pkgTitle } = packageInfo;
 
   try {
     // if some installation already exists
@@ -125,7 +127,9 @@ export async function _installPackage({
         savedObjectsClient,
         savedObjectsImporter,
         savedObjectTagAssignmentService,
+        savedObjectTagClient,
         pkgName,
+        pkgTitle,
         paths,
         installedPkg,
         logger,
