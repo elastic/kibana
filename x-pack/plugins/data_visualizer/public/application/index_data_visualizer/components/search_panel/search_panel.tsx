@@ -15,7 +15,7 @@ import { isDefined } from '../../../common/util/is_defined';
 import { ShardSizeFilter } from './shard_size_select';
 import { DataVisualizerFieldNamesFilter } from './field_name_filter';
 import { DataVisualizerFieldTypeFilter } from './field_type_filter';
-import { JobFieldType } from '../../../../../common/types';
+import { SupportedFieldType } from '../../../../../common/types';
 import { SearchQueryLanguage } from '../../types/combined_query';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import './_index.scss';
@@ -29,7 +29,7 @@ interface Props {
   samplerShardSize: number;
   setSamplerShardSize(s: number): void;
   overallStats: OverallStats;
-  indexedFieldTypes: JobFieldType[];
+  indexedFieldTypes: SupportedFieldType[];
   setVisibleFieldTypes(q: string[]): void;
   visibleFieldTypes: string[];
   setVisibleFieldNames(q: string[]): void;

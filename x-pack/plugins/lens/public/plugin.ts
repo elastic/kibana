@@ -56,9 +56,10 @@ import type {
   XyVisualizationPluginSetupPlugins,
 } from './xy_visualization';
 import type {
-  MetricVisualization as MetricVisualizationType,
-  MetricVisualizationPluginSetupPlugins,
+  LegacyMetricVisualization as LegacyMetricVisualizationType,
+  LegacyMetricVisualizationPluginSetupPlugins,
 } from './metric_visualization';
+import type { MetricVisualization as MetricVisualizationType } from './visualizations/metric';
 import type {
   DatatableVisualization as DatatableVisualizationType,
   DatatableVisualizationPluginSetupPlugins,
@@ -223,6 +224,7 @@ export class LensPlugin {
   private queuedVisualizations: Array<Visualization | (() => Promise<Visualization>)> = [];
   private indexpatternDatasource: IndexPatternDatasourceType | undefined;
   private xyVisualization: XyVisualizationType | undefined;
+  private legacyMetricVisualization: LegacyMetricVisualizationType | undefined;
   private metricVisualization: MetricVisualizationType | undefined;
   private pieVisualization: PieVisualizationType | undefined;
   private heatmapVisualization: HeatmapVisualizationType | undefined;
@@ -400,6 +402,7 @@ export class LensPlugin {
       EditorFrameService,
       IndexPatternDatasource,
       XyVisualization,
+      LegacyMetricVisualization,
       MetricVisualization,
       PieVisualization,
       HeatmapVisualization,
@@ -409,6 +412,7 @@ export class LensPlugin {
     this.editorFrameService = new EditorFrameService();
     this.indexpatternDatasource = new IndexPatternDatasource();
     this.xyVisualization = new XyVisualization();
+    this.legacyMetricVisualization = new LegacyMetricVisualization();
     this.metricVisualization = new MetricVisualization();
     this.pieVisualization = new PieVisualization();
     this.heatmapVisualization = new HeatmapVisualization();
@@ -419,7 +423,7 @@ export class LensPlugin {
     const dependencies: IndexPatternDatasourceSetupPlugins &
       XyVisualizationPluginSetupPlugins &
       DatatableVisualizationPluginSetupPlugins &
-      MetricVisualizationPluginSetupPlugins &
+      LegacyMetricVisualizationPluginSetupPlugins &
       PieVisualizationPluginSetupPlugins = {
       expressions,
       data,
@@ -432,6 +436,7 @@ export class LensPlugin {
     this.indexpatternDatasource.setup(core, dependencies);
     this.xyVisualization.setup(core, dependencies);
     this.datatableVisualization.setup(core, dependencies);
+    this.legacyMetricVisualization.setup(core, dependencies);
     this.metricVisualization.setup(core, dependencies);
     this.pieVisualization.setup(core, dependencies);
     this.heatmapVisualization.setup(core, dependencies);

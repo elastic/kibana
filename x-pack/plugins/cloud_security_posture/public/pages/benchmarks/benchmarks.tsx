@@ -20,6 +20,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
+import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { cloudPosturePages } from '../../common/navigation/constants';
 import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
 import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
@@ -140,7 +141,7 @@ export const BenchmarksNoPageTemplate = () => {
   const totalItemCount = queryResult.data?.total || 0;
 
   return (
-    <>
+    <CloudPosturePage>
       <EuiPageHeader
         data-test-subj={TEST_SUBJ.BENCHMARKS_PAGE_HEADER}
         pageTitle={i18n.translate(
@@ -190,7 +191,7 @@ export const BenchmarksNoPageTemplate = () => {
           ) : undefined
         }
       />
-    </>
+    </CloudPosturePage>
   );
 };
 
