@@ -12,6 +12,17 @@ import { FtrService } from '../ftr_provider_context';
 type AppName = keyof typeof PREFIX_MAP;
 const PREFIX_MAP = { visualize: 'vis', dashboard: 'dashboard', map: 'map' };
 
+// Once "vis" and "map" apps will be using the new <TableView /> component
+// we won't need this handler as all prefix will be "userContent".
+// There is no need to differentiate as there won't be 2 different <TableView /> on
+// the same page.
+const getPrefixTestSubject = (appName: AppName) => {
+  if (appName === 'dashboard') {
+    return 'userContent';
+  }
+  return PREFIX_MAP[appName];
+};
+
 export class ListingTableService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
@@ -91,7 +102,7 @@ export class ListingTableService extends FtrService {
   public async expectItemsCount(appName: AppName, count: number) {
     await this.retry.try(async () => {
       const elements = await this.find.allByCssSelector(
-        `[data-test-subj^="${PREFIX_MAP[appName]}ListingTitleLink"]`
+        `[data-test-subj^="${getPrefixTestSubject(appName)}ListingTitleLink"]`
       );
       expect(elements.length).to.equal(count);
     });
@@ -131,7 +142,7 @@ export class ListingTableService extends FtrService {
     await this.searchForItemWithName(name);
     await this.retry.try(async () => {
       const links = await this.testSubjects.findAll(
-        `${PREFIX_MAP[appName]}ListingTitleLink-${name.replace(/ /g, '-')}`
+        `${getPrefixTestSubject(appName)}ListingTitleLink-${name.replace(/ /g, '-')}`
       );
       expect(links.length).to.equal(count);
     });
@@ -162,7 +173,7 @@ export class ListingTableService extends FtrService {
    */
   public async clickItemLink(appName: AppName, name: string) {
     await this.testSubjects.click(
-      `${PREFIX_MAP[appName]}ListingTitleLink-${name.split(' ').join('-')}`
+      `${getPrefixTestSubject(appName)}ListingTitleLink-${name.split(' ').join('-')}`
     );
   }
 

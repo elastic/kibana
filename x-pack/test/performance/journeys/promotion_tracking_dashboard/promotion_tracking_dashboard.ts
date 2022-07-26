@@ -42,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'Go to Promotion Tracking Dashboard',
             handler: async ({ page }) => {
               const promotionDashboardButton = page.locator(
-                '[data-test-subj="dashboardListingTitleLink-Promotion-Dashboard"]'
+                '[data-test-subj="userContentListingTitleLink-Promotion-Dashboard"]'
               );
               await promotionDashboardButton.click();
             },
