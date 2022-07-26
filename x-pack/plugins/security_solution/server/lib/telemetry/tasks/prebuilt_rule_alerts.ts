@@ -43,7 +43,15 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
             ? licenseInfoPromise.value
             : ({} as ESLicense | undefined);
 
-        const telemetryEvents = await receiver.fetchPrebuiltRuleAlerts();
+        const { events: telemetryEvents, count: totalPrebuiltAlertCount } =
+          await receiver.fetchPrebuiltRuleAlerts();
+
+        sender.getTelemetryUsageCluster()?.incrementCounter({
+          counterName: 'telemetry_prebuilt_rule_alerts',
+          counterType: 'prebuilt_alert_count',
+          incrementBy: totalPrebuiltAlertCount,
+        });
+
         if (telemetryEvents.length === 0) {
           logger.debug('no prebuilt rule alerts retrieved');
           return 0;
