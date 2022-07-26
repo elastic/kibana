@@ -14,17 +14,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'lens', 'header', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'lens', 'header', 'timePicker', 'settings']);
 
   const createDataView = async (dataViewName: string) => {
-    await testSubjects.setValue('createIndexPatternTitleInput', dataViewName, {
-      clearWithKeyboard: true,
-      typeCharByChar: true,
-    });
-    await testSubjects.setValue('createIndexPatternNameInput', dataViewName, {
-      clearWithKeyboard: true,
-      typeCharByChar: true,
-    });
+    await PageObjects.settings.setIndexPatternField(dataViewName);
+    await PageObjects.settings.setNameField(dataViewName);
+
     await testSubjects.click('saveIndexPatternButton');
   };
 

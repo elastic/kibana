@@ -53,7 +53,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should be able to create index pattern with timefield', async function () {
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.createIndexPattern('alias2*', 'date');
+      await PageObjects.settings.createIndexPattern(
+        'alias2*',
+        'date',
+        undefined,
+        undefined,
+        'alias2*'
+      );
     });
 
     describe('discover verify hits', async () => {
