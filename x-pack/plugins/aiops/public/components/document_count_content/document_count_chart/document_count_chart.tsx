@@ -47,7 +47,7 @@ interface DocumentCountChartProps {
   timeRangeLatest: number;
   interval: number;
   changePoint?: ChangePoint;
-  isBrushedCleared: boolean;
+  isBrushCleared: boolean;
 }
 
 const SPEC_ID = 'document_count';
@@ -76,7 +76,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   timeRangeLatest,
   interval,
   changePoint,
-  isBrushedCleared,
+  isBrushCleared,
 }) => {
   const {
     services: { data, uiSettings, fieldFormats, charts },
@@ -207,11 +207,11 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   >();
 
   useEffect(() => {
-    if (isBrushedCleared && originalWindowParameters !== undefined) {
+    if (isBrushCleared && originalWindowParameters !== undefined) {
       setOriginalWindowParameters(undefined);
       setWindowParameters(undefined);
     }
-  }, [isBrushedCleared, originalWindowParameters]);
+  }, [isBrushCleared, originalWindowParameters]);
 
   function onWindowParametersChange(wp: WindowParameters, wpPx: WindowParameters) {
     setWindowParameters(wp);

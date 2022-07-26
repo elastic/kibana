@@ -42,7 +42,7 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   totalCount,
   windowParameters,
 }) => {
-  const [isBrushedCleared, setIsBrushCleared] = useState(true);
+  const [isBrushCleared, setIsBrushCleared] = useState(true);
 
   useEffect(() => {
     setIsBrushCleared(windowParameters === undefined);
@@ -69,7 +69,7 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   }
 
   function brushSelectionUpdate(d: WindowParameters, force: boolean) {
-    if (!isBrushedCleared || force) {
+    if (!isBrushCleared || force) {
       brushSelectionUpdateHandler(d);
     }
     if (force) {
@@ -88,7 +88,7 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
         <EuiFlexItem>
           <TotalCountHeader totalCount={totalCount} />
         </EuiFlexItem>
-        {!isBrushedCleared && (
+        {!isBrushCleared && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               onClick={clearSelection}
@@ -109,7 +109,7 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
           timeRangeLatest={timeRangeLatest}
           interval={documentCountStats.interval}
           changePoint={changePoint}
-          isBrushedCleared={isBrushedCleared}
+          isBrushCleared={isBrushCleared}
         />
       )}
     </>
