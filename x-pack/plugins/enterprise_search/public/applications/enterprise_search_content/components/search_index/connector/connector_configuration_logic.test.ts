@@ -92,7 +92,7 @@ describe('ConnectorConfigurationLogic', () => {
       });
     });
     describe('setLocalConfigEntry', () => {
-      it('should set local config entry', () => {
+      it('should set local config entry and sort keys', () => {
         ConnectorConfigurationLogic.actions.setConfigState({
           bar: { label: 'foo', value: 'foofoo' },
           foo: { label: 'thirdBar', value: 'fourthBar' },
@@ -109,16 +109,16 @@ describe('ConnectorConfigurationLogic', () => {
         expect(ConnectorConfigurationLogic.values).toEqual({
           ...DEFAULT_VALUES,
           configState: {
-            bar: { label: 'foo', value: 'foofoo' },
             foo: { label: 'thirdBar', value: 'fourthBar' },
+            bar: { label: 'foo', value: 'foofoo' },
           },
           configView: [
             { key: 'bar', label: 'foo', value: 'foofoo' },
             { key: 'foo', label: 'thirdBar', value: 'fourthBar' },
           ],
           localConfigState: {
-            bar: { label: 'foo', value: 'fafa' },
             foo: { label: 'thirdBar', value: 'fourthBar' },
+            bar: { label: 'foo', value: 'fafa' },
           },
           localConfigView: [
             { key: 'bar', label: 'foo', value: 'fafa' },

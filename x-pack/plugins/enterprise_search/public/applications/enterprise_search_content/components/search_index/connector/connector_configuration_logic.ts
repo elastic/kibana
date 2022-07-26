@@ -28,7 +28,6 @@ import {
   FetchIndexApiResponse,
 } from '../../../api/index/fetch_index_api_logic';
 import { isConnectorIndex } from '../../../utils/indices';
-import { IndexViewLogic } from '../index_view_logic';
 
 type ConnectorConfigurationActions = Pick<
   Actions<PostConnectorConfigurationArgs, PostConnectorConfigurationResponse>,
@@ -44,8 +43,6 @@ type ConnectorConfigurationActions = Pick<
   setLocalConfigState(configState: ConnectorConfiguration): {
     configState: ConnectorConfiguration;
   };
-  startFetchIndexPoll: () => void;
-  stopFetchIndexPoll: () => void;
 };
 
 interface ConnectorConfigurationValues {
@@ -81,8 +78,6 @@ export const ConnectorConfigurationLogic = kea<
       ['apiError', 'apiSuccess', 'makeRequest'],
       FetchIndexApiLogic,
       ['apiSuccess as fetchIndexApiSuccess'],
-      IndexViewLogic,
-      ['stopFetchIndexPoll', 'startFetchIndexPoll'],
     ],
     values: [FetchIndexApiLogic, ['data as index']],
   },
@@ -153,20 +148,24 @@ export const ConnectorConfigurationLogic = kea<
     configView: [
       () => [selectors.configState],
       (configState) =>
-        Object.keys(configState).map((key) => ({
-          key,
-          label: configState[key].label,
-          value: configState[key].value,
-        })),
+        Object.keys(configState)
+          .map((key) => ({
+            key,
+            label: configState[key].label,
+            value: configState[key].value,
+          }))
+          .sort((a, b) => a.key.localeCompare(b.key)),
     ],
     localConfigView: [
       () => [selectors.localConfigState],
       (configState) =>
-        Object.keys(configState).map((key) => ({
-          key,
-          label: configState[key].label,
-          value: configState[key].value,
-        })),
+        Object.keys(configState)
+          .map((key) => ({
+            key,
+            label: configState[key].label,
+            value: configState[key].value,
+          }))
+          .sort((a, b) => a.key.localeCompare(b.key)),
     ],
   }),
 });
