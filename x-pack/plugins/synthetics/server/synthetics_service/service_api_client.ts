@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import axios, { AxiosError } from 'axios';
+import axios, { AxiosError, AxiosRequestConfig } from 'axios';
 import { forkJoin, from as rxjsFrom, Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import * as https from 'https';
@@ -95,6 +95,11 @@ export class ServiceAPIClient {
     return this.callAPI('POST', { ...data, runOnce: true });
   }
 
+  addVersionHeader(req: AxiosRequestConfig) {
+    req.headers = { ...req.headers, 'x-kibana-version': this.kibanaVersion };
+    return req;
+  }
+
   async checkAccountAccessStatus() {
     if (this.authorization) {
       // in case username/password is provided, we assume it's always allowed
@@ -111,17 +116,13 @@ export class ServiceAPIClient {
 
       if (httpsAgent) {
         try {
-          const { data } = await axios({
-            method: 'GET',
-            url: url + '/allowed',
-            headers:
-              process.env.NODE_ENV !== 'production' && this.authorization
-                ? {
-                    Authorization: this.authorization,
-                  }
-                : undefined,
-            httpsAgent,
-          });
+          const { data } = await axios(
+            this.addVersionHeader({
+              method: 'GET',
+              url: url + '/allowed',
+              httpsAgent,
+            })
+          );
 
           const { allowed, signupUrl } = data;
           return { allowed, signupUrl };
@@ -149,23 +150,25 @@ export class ServiceAPIClient {
         convertToDataStreamFormat(rest)
       );
 
-      return axios({
-        method,
-        url: url + (runOnce ? '/run' : '/monitors'),
-        data: {
-          monitors: monitorsStreams,
-          output,
-          stack_version: this.kibanaVersion,
-          is_edit: isEdit,
-        },
-        headers:
-          process.env.NODE_ENV !== 'production' && this.authorization
-            ? {
-                Authorization: this.authorization,
-              }
-            : undefined,
-        httpsAgent: this.getHttpsAgent(url),
-      });
+      return axios(
+        this.addVersionHeader({
+          method,
+          url: url + (runOnce ? '/run' : '/monitors'),
+          data: {
+            monitors: monitorsStreams,
+            output,
+            stack_version: this.kibanaVersion,
+            is_edit: isEdit,
+          },
+          headers:
+            process.env.NODE_ENV !== 'production' && this.authorization
+              ? {
+                  Authorization: this.authorization,
+                }
+              : undefined,
+          httpsAgent: this.getHttpsAgent(url),
+        })
+      );
     };
 
     const pushErrors: ServiceLocationErrors = [];
