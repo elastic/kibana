@@ -56,7 +56,7 @@ export const AddConnectorPackageLogic = kea<MakeLogicType<AddConnectorValues, Ad
               'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.successToast.description',
               {
                 defaultMessage:
-                  'You can use a connector to build a search experience for your new Elasticsearch index.',
+                  'You can use App Search engines to build a search experience for your new Elasticsearch index.',
               }
             ),
           }

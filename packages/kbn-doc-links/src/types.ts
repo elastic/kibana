@@ -101,7 +101,9 @@ export interface DocLinks {
     readonly webCrawlerReference: string;
   };
   readonly enterpriseSearch: {
+    readonly bulkApi: string;
     readonly configuration: string;
+    readonly languageAnalyzers: string;
     readonly licenseManagement: string;
     readonly mailService: string;
     readonly troubleshootSetup: string;
