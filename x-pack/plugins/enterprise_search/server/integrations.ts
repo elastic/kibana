@@ -318,29 +318,6 @@ export const registerEnterpriseSearchIntegrations = (
   });
 
   customIntegrations.registerCustomIntegration({
-    id: 'app_search_web_crawler',
-    title: i18n.translate('xpack.enterpriseSearch.appSearch.integrations.webCrawlerName', {
-      defaultMessage: 'Web site crawler',
-    }),
-    description: i18n.translate(
-      'xpack.enterpriseSearch.appSearch.integrations.webCrawlerDescription',
-      {
-        defaultMessage: 'Add search to your website with the App Search web crawler.',
-      }
-    ),
-    categories: ['website_search'],
-    uiInternalPath: '/app/enterprise_search/app_search/engines/new?method=crawler',
-    icons: [
-      {
-        type: 'eui',
-        src: 'logoAppSearch',
-      },
-    ],
-    shipper: 'enterprise_search',
-    isBeta: false,
-  });
-
-  customIntegrations.registerCustomIntegration({
     id: 'app_search_json',
     title: i18n.translate('xpack.enterpriseSearch.appSearch.integrations.jsonName', {
       defaultMessage: 'JSON',
@@ -374,6 +351,26 @@ export const registerEnterpriseSearchIntegrations = (
       {
         type: 'eui',
         src: 'logoAppSearch',
+      },
+    ],
+    shipper: 'enterprise_search',
+    isBeta: false,
+  });
+
+  customIntegrations.registerCustomIntegration({
+    id: 'web_crawler',
+    title: i18n.translate('xpack.enterpriseSearch.integrations.webCrawlerName', {
+      defaultMessage: 'Web crawler',
+    }),
+    description: i18n.translate('xpack.enterpriseSearch.integrations.webCrawlerDescription', {
+      defaultMessage: 'Add search to your website with the Enterprise Search web crawler.',
+    }),
+    categories: ['enterprise_search', 'website_search', 'web', 'elastic_stack'],
+    uiInternalPath: '/app/enterprise_search/content/search_indices/new_index?method=crawler',
+    icons: [
+      {
+        type: 'eui',
+        src: 'logoEnterpriseSearch',
       },
     ],
     shipper: 'enterprise_search',
