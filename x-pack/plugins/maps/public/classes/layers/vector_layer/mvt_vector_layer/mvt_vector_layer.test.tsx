@@ -110,7 +110,14 @@ describe('isInitialDataLoadComplete', () => {
       layerDescriptor: {
         __dataRequests: [sourceDataRequestDescriptor],
       } as unknown as VectorLayerDescriptor,
-      source: {} as unknown as IVectorSource,
+      source: {
+        getMaxZoom: () => {
+          return 24;
+        },
+        getMinZoom: () => {
+          return 0;
+        },
+      } as unknown as IVectorSource,
     });
     expect(layer.isInitialDataLoadComplete()).toBe(false);
   });
@@ -122,7 +129,14 @@ describe('isInitialDataLoadComplete', () => {
         __areTilesLoaded: false,
         __dataRequests: [sourceDataRequestDescriptor],
       } as unknown as VectorLayerDescriptor,
-      source: {} as unknown as IVectorSource,
+      source: {
+        getMaxZoom: () => {
+          return 24;
+        },
+        getMinZoom: () => {
+          return 0;
+        },
+      } as unknown as IVectorSource,
     });
     expect(layer.isInitialDataLoadComplete()).toBe(false);
   });
@@ -134,7 +148,14 @@ describe('isInitialDataLoadComplete', () => {
         __areTilesLoaded: true,
         __dataRequests: [sourceDataRequestDescriptor],
       } as unknown as VectorLayerDescriptor,
-      source: {} as unknown as IVectorSource,
+      source: {
+        getMaxZoom: () => {
+          return 24;
+        },
+        getMinZoom: () => {
+          return 0;
+        },
+      } as unknown as IVectorSource,
     });
     expect(layer.isInitialDataLoadComplete()).toBe(true);
   });
@@ -163,7 +184,14 @@ describe('isInitialDataLoadComplete', () => {
           },
         ],
       } as unknown as VectorLayerDescriptor,
-      source: {} as unknown as IVectorSource,
+      source: {
+        getMaxZoom: () => {
+          return 24;
+        },
+        getMinZoom: () => {
+          return 0;
+        },
+      } as unknown as IVectorSource,
     });
     expect(layer.isInitialDataLoadComplete()).toBe(false);
   });
@@ -194,7 +222,14 @@ describe('isInitialDataLoadComplete', () => {
           },
         ],
       } as unknown as VectorLayerDescriptor,
-      source: {} as unknown as IVectorSource,
+      source: {
+        getMaxZoom: () => {
+          return 24;
+        },
+        getMinZoom: () => {
+          return 0;
+        },
+      } as unknown as IVectorSource,
     });
     expect(layer.isInitialDataLoadComplete()).toBe(true);
   });
