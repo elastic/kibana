@@ -22,41 +22,26 @@ import type {
   SourceEditorArgs,
 } from '@kbn/maps-plugin/public';
 
-export interface CustomRasterSourceConfig {
-  urlTemplate: string;
-  isTimeAware?: boolean;
-}
-
-type CustomRasterSourceDescriptor = AbstractSourceDescriptor & {
-  urlTemplate: string;
-  isTimeAware: boolean;
-};
+type CustomRasterSourceDescriptor = AbstractSourceDescriptor;
 
 export class CustomRasterSource implements ITMSSource {
   static type = 'CUSTOM_RASTER';
 
   readonly _descriptor: CustomRasterSourceDescriptor;
 
-  static createDescriptor({
-    urlTemplate,
-    isTimeAware,
-  }: CustomRasterSourceConfig): CustomRasterSourceDescriptor {
+  static createDescriptor(): CustomRasterSourceDescriptor {
     return {
       type: CustomRasterSource.type,
-      urlTemplate,
-      isTimeAware: isTimeAware ?? false,
     };
   }
 
-  constructor(sourceDescriptor: any) {
+  constructor(sourceDescriptor: CustomRasterSourceDescriptor) {
     this._descriptor = sourceDescriptor;
   }
 
   cloneDescriptor(): CustomRasterSourceDescriptor {
     return {
       type: this._descriptor.type,
-      urlTemplate: this._descriptor.urlTemplate,
-      isTimeAware: this._descriptor.isTimeAware,
     };
   }
 
@@ -109,7 +94,7 @@ export class CustomRasterSource implements ITMSSource {
   }
 
   getApplyGlobalTime(): boolean {
-    return this._descriptor.isTimeAware;
+    return true;
   }
 
   getApplyForceRefresh(): boolean {
@@ -142,7 +127,7 @@ export class CustomRasterSource implements ITMSSource {
   }
 
   async isTimeAware(): Promise<boolean> {
-    return this._descriptor.isTimeAware;
+    return true;
   }
 
   isFilterByMapBounds(): boolean {
@@ -166,9 +151,8 @@ export class CustomRasterSource implements ITMSSource {
   }
 
   async getUrlTemplate(dataFilters: DataFilters): Promise<string> {
-    if (!this.getApplyGlobalTime() || (await !this.isTimeAware())) {
-      return this._descriptor.urlTemplate;
-    }
+    const defaultUrl =
+      'https://new.nowcoast.noaa.gov/arcgis/rest/services/nowcoast/radar_meteo_imagery_nexrad_time/MapServer/export?dpi=96&transparent=true&format=png32&time={time}&layers=show%3A3&bbox=-{bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256%2C256&f=image';
 
     const { timeslice, timeFilters } = dataFilters;
     let timestamp;
@@ -177,14 +161,11 @@ export class CustomRasterSource implements ITMSSource {
       // Use the value from the timeslider
       timestamp = new Date(timeslice.to).getTime();
     } else {
-      // Otherwise use the max value from the Time Picker
       const { max } = calculateBounds(timeFilters);
-      timestamp = max?.valueOf();
+      timestamp = max ? max.valueOf() : Date.now();
     }
 
-    if (timestamp === undefined || timestamp === null) return this._descriptor.urlTemplate;
-
     // Replace the '{time}' template value in the URL with the Unix timestamp
-    return this._descriptor.urlTemplate.replace('{time}', timestamp.toString());
+    return defaultUrl.replace('{time}', timestamp.toString());
   }
 }

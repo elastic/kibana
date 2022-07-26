@@ -5,47 +5,35 @@
  * 2.0.
  */
 
-import React, { Component, ChangeEvent } from 'react';
-import _ from 'lodash';
-import { EuiFormRow, EuiFieldText, EuiPanel } from '@elastic/eui';
-import type { CustomRasterSourceConfig } from './custom_raster_source';
+import React, { Component } from 'react';
+import { EuiCallOut, EuiPanel, htmlIdGenerator } from '@elastic/eui';
+import { RenderWizardArguments } from '@kbn/maps-plugin/public';
+import { LayerDescriptor, LAYER_TYPE } from '@kbn/maps-plugin/common';
+import { CustomRasterSource } from './custom_raster_source';
 
-interface Props {
-  onSourceConfigChange: (sourceConfig: CustomRasterSourceConfig | null) => void;
-  defaultUrl: string;
-}
-
-interface State {
-  url: string;
-}
-
-export class CustomRasterEditor extends Component<Props, State> {
-  state = {
-    url: '',
-  };
-
+export class CustomRasterEditor extends Component<RenderWizardArguments> {
   componentDidMount() {
-    this.props.onSourceConfigChange({ urlTemplate: this.props.defaultUrl, isTimeAware: true });
+    const customRasterLayerDescriptor: LayerDescriptor = {
+      id: htmlIdGenerator()(),
+      type: LAYER_TYPE.RASTER_TILE,
+      sourceDescriptor: CustomRasterSource.createDescriptor(),
+      style: {
+        type: 'RASTER',
+      },
+      alpha: 1,
+    };
+    this.props.previewLayers([customRasterLayerDescriptor]);
   }
-
-  _previewLayer = _.debounce(() => {
-    const { url } = this.state;
-    const isUrlValid = ['{x}', '{y}', '{z}'].every((template) => url.indexOf(template) >= 0);
-    const isTimeAware = url.indexOf('{time}') >= 0;
-    const sourceConfig = isUrlValid ? { urlTemplate: url, isTimeAware } : null;
-    this.props.onSourceConfigChange(sourceConfig);
-  }, 500);
-
-  _onUrlChange = (event: ChangeEvent<HTMLInputElement>) => {
-    this.setState({ url: event.target.value }, this._previewLayer);
-  };
 
   render() {
     return (
       <EuiPanel>
-        <EuiFormRow label="Url">
-          <EuiFieldText defaultValue={this.props.defaultUrl} onChange={this._onUrlChange} />
-        </EuiFormRow>
+        <EuiCallOut title="NOAA Weather">
+          <p>
+            Displays NOAA weather data. Kibana time is passed to request so weather data is
+            displayed for selected time range.
+          </p>
+        </EuiCallOut>
       </EuiPanel>
     );
   }

@@ -6,7 +6,7 @@ This example plugin uses a [time-enabled radar imagery service from the U.S. Nat
 
 ## Demo
 1. Open a new Map and modify the time picker to the "Last 2 hours". 
-2. Click "Add layer" and choose "Custom raster layer" and add the layer to the map.
+2. Click "Add layer" and choose "Weather" to add the layer to the map.
 3. You should see current precipitation models over the U.S. 
 4. Use the timeslider to animate the radar model.
 
