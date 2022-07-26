@@ -36,9 +36,9 @@ export const DeleteModalConfirmation = ({
   onErrors: () => void;
   singleTitle: string;
   multipleTitle: string;
-  showWarningText: boolean;
-  warningText: string;
   setIsLoadingState: (isLoading: boolean) => void;
+  showWarningText?: boolean;
+  warningText?: string;
 }) => {
   const [deleteModalFlyoutVisible, setDeleteModalVisibility] = useState<boolean>(false);
 
@@ -65,7 +65,7 @@ export const DeleteModalConfirmation = ({
   const warningModalText = i18n.translate(
     'xpack.triggersActionsUI.deleteSelectedIdsConfirmModal.warningText',
     {
-      defaultMessage: warningText,
+      defaultMessage: warningText || '',
     }
   );
   const confirmButtonText = i18n.translate(
