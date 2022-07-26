@@ -131,7 +131,7 @@ describe('Test Discover Context State', () => {
               "query": "jpg",
             },
             "type": "phrase",
-            "value": [Function],
+            "value": "jpg",
           },
           "query": Object {
             "match_phrase": Object {
@@ -155,7 +155,7 @@ describe('Test Discover Context State', () => {
               "query": "png",
             },
             "type": "phrase",
-            "value": [Function],
+            "value": "png",
           },
           "query": Object {
             "match_phrase": Object {
@@ -169,7 +169,7 @@ describe('Test Discover Context State', () => {
     `);
     state.flushToUrl();
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,index:'logstash-*',key:extension,negate:!f,params:(query:jpg),type:phrase),query:(match_phrase:(extension:(query:jpg))))))&_a=(columns:!(_source),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'logstash-*',key:extension,negate:!t,params:(query:png),type:phrase),query:(match_phrase:(extension:(query:png))))),predecessorCount:4,successorCount:4)"`
+      `"/#?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,index:'logstash-*',key:extension,negate:!f,params:(query:jpg),type:phrase,value:jpg),query:(match_phrase:(extension:(query:jpg))))))&_a=(columns:!(_source),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'logstash-*',key:extension,negate:!t,params:(query:png),type:phrase,value:png),query:(match_phrase:(extension:(query:png))))),predecessorCount:4,successorCount:4)"`
     );
   });
 });
