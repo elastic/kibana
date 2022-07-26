@@ -23,15 +23,15 @@ import {
 
 import { Readable } from 'stream';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  SavedObjectsClientContract,
-  SavedObjectsType,
+import type {
   SavedObject,
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
   SavedObjectReference,
   SavedObjectsImportWarning,
-} from '../types';
+} from '@kbn/core-saved-objects-common';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { SavedObjectsType } from '../types';
 import { savedObjectsClientMock } from '../../mocks';
 import { ISavedObjectTypeRegistry, SavedObjectsImportHook } from '..';
 import { typeRegistryMock } from '../saved_objects_type_registry.mock';

@@ -9,7 +9,11 @@ import pMap from 'p-map';
 import semver from 'semver';
 import type LRU from 'lru-cache';
 import { isEqual, isEmpty } from 'lodash';
-import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import {
+  type Logger,
+  type SavedObjectsClientContract,
+  SavedObjectsErrorHelpers,
+} from '@kbn/core/server';
 import {
   ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
@@ -348,7 +352,7 @@ export class ManifestManager {
       // Cache the compressed body of the artifact
       this.cache.set(artifactId, Buffer.from(artifact.body, 'base64'));
     } catch (err) {
-      if (this.savedObjectsClient.errors.isConflictError(err)) {
+      if (SavedObjectsErrorHelpers.isConflictError(err)) {
         this.logger.debug(`Tried to create artifact ${artifactId}, but it already exists.`);
       } else {
         return [err, undefined];

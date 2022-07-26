@@ -45,7 +45,7 @@ export const getBuiltinCommands = (): CommandDefinition[] => {
       helpCommandPosition: 1,
     },
     {
-      name: 'cls',
+      name: 'clear',
       about: i18n.translate('xpack.securitySolution.console.builtInCommands.clearAbout', {
         defaultMessage: 'Clear console screen',
       }),

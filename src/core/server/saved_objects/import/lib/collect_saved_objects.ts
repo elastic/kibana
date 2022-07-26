@@ -14,8 +14,7 @@ import {
   createPromiseFromStreams,
 } from '@kbn/utils';
 
-import { SavedObject } from '../../types';
-import { SavedObjectsImportFailure } from '../types';
+import type { SavedObject, SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
 import { SavedObjectsImportError } from '../errors';
 import { getNonUniqueEntries } from './get_non_unique_entries';
 import { createLimitStream } from './create_limit_stream';
