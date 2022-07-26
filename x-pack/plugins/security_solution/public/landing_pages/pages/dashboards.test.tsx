@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fireEvent, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import React from 'react';
 import { SecurityPageName } from '../../app/types';
 import { TestProviders } from '../../common/mock';
@@ -13,11 +13,14 @@ import { DashboardsLandingPage } from './dashboards';
 import type { NavLinkItem } from '../../common/components/navigation/types';
 
 jest.mock('../../common/utils/route/spy_routes', () => ({ SpyRoute: () => null }));
+jest.mock('../../common/components/dashboards/dashboards_table', () => ({
+  DashboardsTable: () => <span data-test-subj="dashboardsTable" />,
+}));
 
 const OVERVIEW_ITEM_LABEL = 'Overview';
 const DETECTION_RESPONSE_ITEM_LABEL = 'Detection & Response';
 
-const defaultAppDashboardsLink: NavLinkItem = {
+const APP_DASHBOARD_LINKS: NavLinkItem = {
   id: SecurityPageName.dashboardsLanding,
   title: 'Dashboards',
   links: [
@@ -35,94 +38,92 @@ const defaultAppDashboardsLink: NavLinkItem = {
     },
   ],
 };
+const URL = '/path/to/dashboards';
 
-const mockAppManageLink = jest.fn(() => defaultAppDashboardsLink);
+const mockAppManageLink = jest.fn(() => APP_DASHBOARD_LINKS);
 jest.mock('../../common/components/navigation/nav_links', () => ({
   useAppRootNavLink: () => mockAppManageLink(),
 }));
 
-const dashboardTableItems = [
-  {
-    id: 'id 1',
-    title: 'dashboard title 1',
-    description: 'dashboard desc 1',
-  },
-  {
-    id: 'id 2',
-    title: 'dashboard title 2',
-    description: 'dashboard desc 2',
-  },
-];
-const mockUseSecurityDashboardsTableItems = jest.fn(() => dashboardTableItems);
-jest.mock('../../common/containers/dashboards/use_security_dashboards', () => {
-  const actual = jest.requireActual('../../common/containers/dashboards/use_security_dashboards');
+const CREATE_DASHBOARD_LINK = { isLoading: false, url: URL };
+const mockUseCreateSecurityDashboard = jest.fn(() => CREATE_DASHBOARD_LINK);
+jest.mock('../../common/containers/dashboards/use_create_security_dashboard_link', () => {
+  const actual = jest.requireActual(
+    '../../common/containers/dashboards/use_create_security_dashboard_link'
+  );
   return {
     ...actual,
-    useSecurityDashboardsTableItems: () => mockUseSecurityDashboardsTableItems(),
+    useCreateSecurityDashboardLink: () => mockUseCreateSecurityDashboard(),
   };
 });
 
 const renderDashboardLanding = () => render(<DashboardsLandingPage />, { wrapper: TestProviders });
 
 describe('Dashboards landing', () => {
-  it('should render items', () => {
-    const { queryByText } = renderDashboardLanding();
+  describe('Dashboards default links', () => {
+    it('should render items', () => {
+      const { queryByText } = renderDashboardLanding();
 
-    expect(queryByText(OVERVIEW_ITEM_LABEL)).toBeInTheDocument();
-    expect(queryByText(DETECTION_RESPONSE_ITEM_LABEL)).toBeInTheDocument();
-  });
-
-  it('should render items in the same order as defined', () => {
-    mockAppManageLink.mockReturnValueOnce({
-      ...defaultAppDashboardsLink,
+      expect(queryByText(OVERVIEW_ITEM_LABEL)).toBeInTheDocument();
+      expect(queryByText(DETECTION_RESPONSE_ITEM_LABEL)).toBeInTheDocument();
     });
-    const { queryAllByTestId } = renderDashboardLanding();
 
-    const renderedItems = queryAllByTestId('LandingImageCard-item');
+    it('should render items in the same order as defined', () => {
+      mockAppManageLink.mockReturnValueOnce({
+        ...APP_DASHBOARD_LINKS,
+      });
+      const { queryAllByTestId } = renderDashboardLanding();
 
-    expect(renderedItems[0]).toHaveTextContent(OVERVIEW_ITEM_LABEL);
-    expect(renderedItems[1]).toHaveTextContent(DETECTION_RESPONSE_ITEM_LABEL);
-  });
+      const renderedItems = queryAllByTestId('LandingImageCard-item');
 
-  it('should not render items if all items filtered', () => {
-    mockAppManageLink.mockReturnValueOnce({
-      ...defaultAppDashboardsLink,
-      links: [],
+      expect(renderedItems[0]).toHaveTextContent(OVERVIEW_ITEM_LABEL);
+      expect(renderedItems[1]).toHaveTextContent(DETECTION_RESPONSE_ITEM_LABEL);
     });
-    const { queryByText } = renderDashboardLanding();
 
-    expect(queryByText(OVERVIEW_ITEM_LABEL)).not.toBeInTheDocument();
-    expect(queryByText(DETECTION_RESPONSE_ITEM_LABEL)).not.toBeInTheDocument();
+    it('should not render items if all items filtered', () => {
+      mockAppManageLink.mockReturnValueOnce({
+        ...APP_DASHBOARD_LINKS,
+        links: [],
+      });
+      const { queryByText } = renderDashboardLanding();
+
+      expect(queryByText(OVERVIEW_ITEM_LABEL)).not.toBeInTheDocument();
+      expect(queryByText(DETECTION_RESPONSE_ITEM_LABEL)).not.toBeInTheDocument();
+    });
   });
 
-  it('should render dashboards table', () => {
-    const result = renderDashboardLanding();
+  describe('Security Dashboards', () => {
+    it('should render dashboards table', () => {
+      const result = renderDashboardLanding();
 
-    expect(result.getByTestId('dashboards-table')).toBeInTheDocument();
-  });
+      expect(result.getByTestId('dashboardsTable')).toBeInTheDocument();
+    });
 
-  it('should render dashboards table rows', () => {
-    const result = renderDashboardLanding();
+    describe('Create Security Dashboard button', () => {
+      it('should render', () => {
+        const result = renderDashboardLanding();
 
-    expect(mockUseSecurityDashboardsTableItems).toHaveBeenCalled();
+        expect(result.getByTestId('createDashboardButton')).toBeInTheDocument();
+      });
 
-    expect(result.queryAllByText(dashboardTableItems[0].title).length).toBeGreaterThan(0);
-    expect(result.queryAllByText(dashboardTableItems[0].description).length).toBeGreaterThan(0);
+      it('should be enabled when link loaded', () => {
+        const result = renderDashboardLanding();
 
-    expect(result.queryAllByText(dashboardTableItems[1].title).length).toBeGreaterThan(0);
-    expect(result.queryAllByText(dashboardTableItems[1].description).length).toBeGreaterThan(0);
-  });
+        expect(result.getByTestId('createDashboardButton')).not.toHaveAttribute('disabled');
+      });
 
-  it('should render dashboards table rows filtered by search term', () => {
-    const result = renderDashboardLanding();
+      it('should be disabled when link is not loaded', () => {
+        mockUseCreateSecurityDashboard.mockReturnValueOnce({ isLoading: true, url: '' });
+        const result = renderDashboardLanding();
 
-    const input = result.getByRole('searchbox');
-    fireEvent.change(input, { target: { value: dashboardTableItems[0].title } });
+        expect(result.getByTestId('createDashboardButton')).toHaveAttribute('disabled');
+      });
 
-    expect(result.queryAllByText(dashboardTableItems[0].title).length).toBeGreaterThan(0);
-    expect(result.queryAllByText(dashboardTableItems[0].description).length).toBeGreaterThan(0);
+      it('should link to correct href', () => {
+        const result = renderDashboardLanding();
 
-    expect(result.queryByText(dashboardTableItems[1].title)).not.toBeInTheDocument();
-    expect(result.queryByText(dashboardTableItems[1].description)).not.toBeInTheDocument();
+        expect(result.getByTestId('createDashboardButton')).toHaveAttribute('href', URL);
+      });
+    });
   });
 });

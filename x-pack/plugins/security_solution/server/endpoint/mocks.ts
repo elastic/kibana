@@ -12,12 +12,11 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import type { FleetStartContract, ExternalCallback } from '@kbn/fleet-plugin/server';
+import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import {
   createPackagePolicyServiceMock,
   createMockAgentPolicyService,
   createMockAgentService,
-  createArtifactsClientMock,
   createMockPackageService,
 } from '@kbn/fleet-plugin/server/mocks';
 // A TS error (TS2403) is thrown when attempting to export the mock function below from Cases
@@ -166,28 +165,6 @@ export const createMockEndpointAppContextServiceStartContract =
 export const createFleetAuthzServiceMock = (): jest.Mocked<FleetStartContract['authz']> => {
   return {
     fromRequest: jest.fn(async (_) => createFleetAuthzMock()),
-  };
-};
-
-/**
- * Creates the Fleet Start contract mock return by the Fleet Plugin
- *
- * @param indexPattern a string index pattern to return when called by a test
- * @returns the same value as `indexPattern` parameter
- */
-export const createMockFleetStartContract = (indexPattern: string): FleetStartContract => {
-  return {
-    authz: createFleetAuthzServiceMock(),
-    fleetSetupCompleted: jest.fn().mockResolvedValue(undefined),
-    esIndexPatternService: {
-      getESIndexPattern: jest.fn().mockResolvedValue(indexPattern),
-    },
-    agentService: createMockAgentService(),
-    packageService: createMockPackageService(),
-    agentPolicyService: createMockAgentPolicyService(),
-    registerExternalCallback: jest.fn((...args: ExternalCallback) => {}),
-    packagePolicyService: createPackagePolicyServiceMock(),
-    createArtifactsClient: jest.fn().mockReturnValue(createArtifactsClientMock()),
   };
 };
 

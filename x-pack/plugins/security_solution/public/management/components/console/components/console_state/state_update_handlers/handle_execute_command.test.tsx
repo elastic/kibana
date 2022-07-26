@@ -32,11 +32,7 @@ describe('When a Console command is entered by the user', () => {
     expect(renderResult.getByTestId('test-helpOutput')).toBeTruthy();
 
     await waitFor(() => {
-      expect(renderResult.getAllByTestId('test-commandList-command')).toHaveLength(
-        // `+2` to account for builtin commands
-        // `+2` to account for builtin generic args
-        commands.length + 4
-      );
+      expect(renderResult.getAllByTestId('test-commandList-command')).toHaveLength(commands.length);
     });
   });
 
@@ -52,14 +48,14 @@ describe('When a Console command is entered by the user', () => {
     });
   });
 
-  it('should clear the command output history when `cls` is entered', async () => {
+  it('should clear the command output history when `clear` is entered', async () => {
     render();
     enterCommand('help');
     enterCommand('help');
 
     expect(renderResult.getByTestId('test-historyOutput').childElementCount).toBe(2);
 
-    enterCommand('cls');
+    enterCommand('clear');
 
     expect(renderResult.getByTestId('test-historyOutput').childElementCount).toBe(0);
   });

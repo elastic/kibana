@@ -298,7 +298,7 @@ describe('Fleet setup preconfiguration with multiple instances Kibana', () => {
       type: 'epm-packages',
       perPage: 10000,
     });
-    expect(packages.saved_objects).toHaveLength(2);
+    expect(packages.saved_objects.length).toBeGreaterThanOrEqual(2);
     expect(packages.saved_objects.map((p) => p.attributes.name)).toEqual(
       expect.arrayContaining(['fleet_server', 'apm'])
     );

@@ -7,7 +7,7 @@
  */
 
 import { findObjectByTitle } from './find_object_by_title';
-import { SimpleSavedObject, SavedObjectsClientContract, SavedObject } from '@kbn/core/public';
+import { SimpleSavedObjectImpl, SavedObjectsClientContract, SavedObject } from '@kbn/core/public';
 
 describe('findObjectByTitle', () => {
   const savedObjectsClient: SavedObjectsClientContract = {} as SavedObjectsClientContract;
@@ -22,7 +22,7 @@ describe('findObjectByTitle', () => {
   });
 
   it('matches any case', async () => {
-    const indexPattern = new SimpleSavedObject(savedObjectsClient, {
+    const indexPattern = new SimpleSavedObjectImpl(savedObjectsClient, {
       attributes: { title: 'foo' },
     } as SavedObject);
     savedObjectsClient.find = jest.fn().mockImplementation(() =>

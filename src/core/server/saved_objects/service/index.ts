@@ -8,23 +8,11 @@
 export { SavedObjectsErrorHelpers, SavedObjectsClientProvider, SavedObjectsUtils } from './lib';
 export type {
   SavedObjectsRepository,
-  ISavedObjectsPointInTimeFinder,
-  SavedObjectsCreatePointInTimeFinderOptions,
-  SavedObjectsCreatePointInTimeFinderDependencies,
   ISavedObjectsClientProvider,
   SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
   SavedObjectsClientFactory,
   SavedObjectsClientFactoryProvider,
-  SavedObjectsCollectMultiNamespaceReferencesObject,
-  SavedObjectsCollectMultiNamespaceReferencesOptions,
-  SavedObjectReferenceWithContext,
-  SavedObjectsCollectMultiNamespaceReferencesResponse,
-  SavedObjectsUpdateObjectsSpacesObject,
-  SavedObjectsUpdateObjectsSpacesOptions,
-  SavedObjectsUpdateObjectsSpacesResponse,
-  SavedObjectsUpdateObjectsSpacesResponseObject,
 } from './lib';
-
-export * from './saved_objects_client';
+export { SavedObjectsClient } from './saved_objects_client';

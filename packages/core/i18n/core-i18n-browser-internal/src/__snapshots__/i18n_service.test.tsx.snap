@@ -87,6 +87,7 @@ exports[`#start() returns \`Context\` component 1`] = `
           "euiDataGrid.screenReaderNotice": "Cell contains interactive content.",
           "euiDataGridCell.position": [Function],
           "euiDataGridCellActions.expandButtonTitle": "Click or hit enter to interact with cell content",
+          "euiDataGridHeaderCell.actionsPopoverScreenReaderText": "To navigate through the list of column actions, press the Tab or Up and Down arrow keys.",
           "euiDataGridHeaderCell.headerActions": "Header actions",
           "euiDataGridPagination.detailedPaginationLabel": [Function],
           "euiDataGridPagination.paginationLabel": "Pagination for preceding grid",

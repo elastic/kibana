@@ -29,7 +29,7 @@ export const useAgentGroups = () => {
     AgentsStrategyResponse,
     unknown,
     {
-      totalCount: number;
+      total: number;
       groups: ReturnType<typeof processAggregations>;
     }
   >(
@@ -80,7 +80,7 @@ export const useAgentGroups = () => {
         );
 
         return {
-          totalCount: response.totalCount,
+          total: response.total ?? 0,
           groups: {
             platforms,
             overlap,
@@ -96,13 +96,8 @@ export const useAgentGroups = () => {
         };
       },
       placeholderData: {
-        totalCount: 0,
+        total: 0,
         edges: [],
-        pageInfo: {
-          activePage: 1,
-          fakeTotalCount: 100,
-          showMorePagesIndicator: true,
-        },
         rawResponse: {
           took: 0,
           timed_out: false,

@@ -19,7 +19,7 @@ import {
   encodeRisonUrlState,
   getParamFromQueryString,
   getQueryStringFromLocation,
-} from '../../components/url_state/helpers';
+} from './helpers';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { globalUrlParamActions, globalUrlParamSelectors } from '../../store/global_url_param';
 import { useRouteSpy } from '../route/use_route_spy';

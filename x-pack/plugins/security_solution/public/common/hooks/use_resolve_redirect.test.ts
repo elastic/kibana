@@ -10,7 +10,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useDeepEqualSelector } from './use_selector';
 import { useKibana } from '../lib/kibana';
 import { useResolveRedirect } from './use_resolve_redirect';
-import * as urlHelpers from '../components/url_state/helpers';
+import * as urlHelpers from '../utils/global_query_string/helpers';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');

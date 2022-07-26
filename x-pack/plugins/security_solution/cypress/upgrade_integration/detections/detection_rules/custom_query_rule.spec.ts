@@ -82,6 +82,20 @@ describe('After an upgrade, the custom query rule', () => {
     waitForRulesTableToBeLoaded();
     goToTheRuleDetailsOf(rule.name);
     waitForPageToBeLoaded();
+    // Possible bug on first attempt sometimes redirects page back to alerts
+    // Going to retry the block once
+    cy.url().then((url) => {
+      const currentUrl = url;
+      cy.log(`Current URL is : ${currentUrl}`);
+      if (!currentUrl.includes(DETECTIONS_RULE_MANAGEMENT_URL)) {
+        cy.log('Retrying not on correct page!');
+        visit(DETECTIONS_RULE_MANAGEMENT_URL);
+        waitForRulesTableToBeLoaded();
+        goToTheRuleDetailsOf(rule.name);
+        waitForPageToBeLoaded();
+      }
+    });
+    cy.url().should('include', DETECTIONS_RULE_MANAGEMENT_URL);
   });
 
   it('Has the expected alerts number', () => {

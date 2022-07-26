@@ -92,7 +92,15 @@ async function execute({ data: { layout, logo, title, content } }: GeneratePdfRe
     const printer = new Printer(fonts);
 
     const docDefinition = _.assign(getTemplate(layout, logo, title, tableBorderWidth, assetPath), {
-      content,
+      content: _.cloneDeepWith(content, (value) =>
+        // The `pdfkit` library is using `Buffer.from(new Uint8Array(src))` construction to cast the image source.
+        // According to the Node.js docs, it will create a copy of the source `ArrayBuffer` which should be avoided.
+        // @see https://nodejs.org/api/buffer.html#static-method-bufferfrombuffer
+        // @see https://github.com/foliojs-fork/pdfkit/blob/master/lib/image.js#L16
+        value instanceof Uint8Array
+          ? Buffer.from(value.buffer, value.byteOffset, value.byteLength)
+          : undefined
+      ),
     });
 
     const pdfDoc = printer.createPdfKitDocument(docDefinition, {

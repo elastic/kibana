@@ -28,7 +28,7 @@ describe('Elasticsearch Index Mapping', () => {
     mockRouter = new MockRouter({
       context,
       method: 'get',
-      path: '/internal/enterprise_search/{index_name}/search/{query}',
+      path: '/internal/enterprise_search/indices/{index_name}/search/{query}',
     });
 
     registerSearchRoute({
@@ -37,7 +37,7 @@ describe('Elasticsearch Index Mapping', () => {
     });
   });
 
-  describe('GET /internal/enterprise_search/{index_name}/search/{query}', () => {
+  describe('GET /internal/enterprise_search/indices/{index_name}/search/{query}', () => {
     it('fails validation without index_name', () => {
       const request = { params: { query: 'banana' } };
       mockRouter.shouldThrow(request);
@@ -50,32 +50,22 @@ describe('Elasticsearch Index Mapping', () => {
 
     it('returns search results for a query', async () => {
       const mockData = {
-        took: 4,
-        timed_out: false,
-        _shards: {
-          total: 2,
-          successful: 2,
-          skipped: 0,
-          failed: 0,
-        },
+        _shards: { failed: 0, skipped: 0, successful: 2, total: 2 },
         hits: {
-          total: {
-            value: 1,
-            relation: 'eq',
-          },
-          max_score: null,
           hits: [
             {
-              _index: 'search-regular-index',
               _id: '5a12292a0f5ae10021650d7e',
+              _index: 'search-regular-index',
               _score: 4.437291,
-              _source: {
-                name: 'banana',
-                id: '5a12292a0f5ae10021650d7e',
-              },
+              _source: { id: '5a12292a0f5ae10021650d7e', name: 'banana' },
             },
           ],
+
+          max_score: null,
+          total: { relation: 'eq', value: 1 },
         },
+        timed_out: false,
+        took: 4,
       };
 
       (fetchSearchResults as jest.Mock).mockImplementationOnce(() => {

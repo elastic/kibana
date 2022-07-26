@@ -88,7 +88,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
         selectedGroups: SelectedGroups;
       } = generateAgentSelection(selection);
       if (newAgentSelection.allAgentsSelected) {
-        setNumAgentsSelected(agentGroupsData?.totalCount ?? 0);
+        setNumAgentsSelected(agentGroupsData?.total ?? 0);
       } else {
         const checkAgent = generateAgentCheck(selectedGroups);
         setNumAgentsSelected(
@@ -135,11 +135,11 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
         }
       }
 
-      if (agentSelection.policiesSelected.length) {
+      if (agentSelection.policiesSelected?.length) {
         handleSelectedOptions(agentSelection.policiesSelected, AGENT_POLICY_LABEL);
       }
 
-      if (agentSelection.agents.length) {
+      if (agentSelection.agents?.length) {
         handleSelectedOptions(agentSelection.agents, AGENT_SELECTION_LABEL);
       }
     }
@@ -149,7 +149,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
     if (agentsFetched && groupsFetched && agentGroupsData) {
       const grouper = new AgentGrouper();
       // update the groups when groups or agents have changed
-      grouper.setTotalAgents(agentGroupsData?.totalCount);
+      grouper.setTotalAgents(agentGroupsData?.total);
       grouper.updateGroup(AGENT_GROUP_KEY.Platform, agentGroupsData?.groups.platforms);
       grouper.updateGroup(AGENT_GROUP_KEY.Policy, agentGroupsData?.groups.policies);
       // @ts-expect-error update types

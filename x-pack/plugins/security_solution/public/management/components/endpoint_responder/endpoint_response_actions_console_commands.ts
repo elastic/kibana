@@ -15,11 +15,26 @@ import { EndpointStatusActionResult } from './status_action';
 import { GetProcessesActionResult } from './get_processes_action';
 import type { ParsedArgData } from '../console/service/parsed_command_input';
 
-const emptyArgumentValidator = (argData: ParsedArgData) => {
+const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
   if (argData?.length > 0 && argData[0]?.trim().length > 0) {
     return true;
   } else {
-    return 'Argument cannot be empty';
+    return i18n.translate('xpack.securitySolution.endpointConsoleCommands.emptyArgumentMessage', {
+      defaultMessage: 'Argument cannot be empty',
+    });
+  }
+};
+
+const pidValidator = (argData: ParsedArgData): true | string => {
+  const emptyResult = emptyArgumentValidator(argData);
+  if (emptyResult !== true) {
+    return emptyResult;
+  } else if (Number.isInteger(Number(argData)) && Number(argData) > 0) {
+    return true;
+  } else {
+    return i18n.translate('xpack.securitySolution.endpointConsoleCommands.invalidPidMessage', {
+      defaultMessage: 'Argument must be a positive number representing the PID of a process',
+    });
   }
 };
 
@@ -98,7 +113,7 @@ export const getEndpointResponseActionsConsoleCommands = (
     {
       name: 'kill-process',
       about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.killProcess.about', {
-        defaultMessage: 'Kill a running process. Accepts either a PID or an entity id.',
+        defaultMessage: 'Kill/terminate a process',
       }),
       RenderComponent: KillProcessActionResult,
       meta: {
@@ -120,7 +135,7 @@ export const getEndpointResponseActionsConsoleCommands = (
           about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.pid.arg.comment', {
             defaultMessage: 'A PID representing the process to kill',
           }),
-          validate: emptyArgumentValidator,
+          validate: pidValidator,
         },
         entityId: {
           required: false,
@@ -142,7 +157,7 @@ export const getEndpointResponseActionsConsoleCommands = (
     {
       name: 'suspend-process',
       about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.suspendProcess.about', {
-        defaultMessage: 'Suspend a running process. Accepts either a PID or an entity id.',
+        defaultMessage: 'Temporarily suspend a process',
       }),
       RenderComponent: SuspendProcessActionResult,
       meta: {
@@ -167,7 +182,7 @@ export const getEndpointResponseActionsConsoleCommands = (
               defaultMessage: 'A PID representing the process to suspend',
             }
           ),
-          validate: emptyArgumentValidator,
+          validate: pidValidator,
         },
         entityId: {
           required: false,
@@ -189,7 +204,7 @@ export const getEndpointResponseActionsConsoleCommands = (
     {
       name: 'status',
       about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.status.about', {
-        defaultMessage: 'Display the latest status information for the Endpoint',
+        defaultMessage: 'Show host status information',
       }),
       RenderComponent: EndpointStatusActionResult,
       meta: {
@@ -202,7 +217,7 @@ export const getEndpointResponseActionsConsoleCommands = (
     {
       name: 'processes',
       about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.processes.about', {
-        defaultMessage: 'Display the processes on the endpoint',
+        defaultMessage: 'Show all running processes',
       }),
       RenderComponent: GetProcessesActionResult,
       meta: {

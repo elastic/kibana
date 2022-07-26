@@ -101,5 +101,10 @@ export default function ({ getService }: FtrProviderContext) {
         'agent3',
       ]);
     });
+
+    it('should return tags of all agents', async () => {
+      const { body: apiResponse } = await supertest.get('/api/fleet/agents/tags').expect(200);
+      expect(apiResponse.items).to.eql(['existingTag', 'tag1']);
+    });
   });
 }

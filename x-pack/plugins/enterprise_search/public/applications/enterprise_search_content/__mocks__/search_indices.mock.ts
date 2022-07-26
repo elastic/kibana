@@ -22,20 +22,22 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
   {
     connector: {
       api_key_id: null,
-      configuration: {},
+      configuration: { foo: { label: 'bar', value: 'barbar' } },
       id: '2',
       index_name: 'connector',
+      language: 'en',
       last_seen: null,
+      last_sync_error: null,
+      last_sync_status: SyncStatus.COMPLETED,
       last_synced: null,
+      name: 'connector',
       scheduling: {
         enabled: false,
         interval: '',
       },
       service_type: null,
       status: ConnectorStatus.CONFIGURED,
-      sync_error: null,
       sync_now: false,
-      sync_status: SyncStatus.COMPLETED,
     },
     name: 'connector',
     total: {

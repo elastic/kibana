@@ -33,7 +33,6 @@ import { UptimeESClient } from '../../lib';
 import type { TelemetryEventsSender } from '../../telemetry/sender';
 import type { UptimeRouter } from '../../../../types';
 import { UptimeConfig } from '../../../../../common/config';
-import { SyntheticsService } from '../../../../synthetics_service/synthetics_service';
 
 export type UMElasticsearchQueryFn<P, R = any> = (
   params: {
@@ -57,7 +56,6 @@ export interface UptimeServerSetup {
   savedObjectsClient?: SavedObjectsClientContract;
   authSavedObjectsClient?: SavedObjectsClientContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
-  syntheticsService: SyntheticsService;
   kibanaVersion: string;
   logger: Logger;
   telemetry: TelemetryEventsSender;

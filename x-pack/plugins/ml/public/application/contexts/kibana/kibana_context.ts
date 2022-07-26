@@ -38,7 +38,7 @@ interface StartPlugins {
   fieldFormats: FieldFormatsRegistry;
   dashboard: DashboardSetup;
   spacesApi: SpacesPluginStart;
-  charts?: ChartsPluginStart;
+  charts: ChartsPluginStart;
 }
 export type StartServices = CoreStart &
   StartPlugins & {

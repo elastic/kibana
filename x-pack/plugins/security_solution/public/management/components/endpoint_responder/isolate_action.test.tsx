@@ -16,6 +16,7 @@ import { getEndpointResponseActionsConsoleCommands } from './endpoint_response_a
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
 import { enterConsoleCommand } from '../console/mocks';
 import { waitFor } from '@testing-library/react';
+import { getDeferred } from '../mocks';
 
 describe('When using isolate action from response actions console', () => {
   let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
@@ -119,6 +120,30 @@ describe('When using isolate action from response actions console', () => {
     });
   });
 
+  it('should create action request and store id even if console is closed prior to request api response', async () => {
+    const deferrable = getDeferred();
+    apiMocks.responseProvider.isolateHost.mockDelay.mockReturnValue(deferrable.promise);
+    await render();
+
+    // enter command
+    enterConsoleCommand(renderResult, 'isolate');
+    // hide console
+    await consoleManagerMockAccess.hideOpenedConsole();
+
+    // Release API response
+    deferrable.resolve();
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.isolateHost).toHaveBeenCalledTimes(1);
+    });
+
+    // open console
+    await consoleManagerMockAccess.openRunningConsole();
+    // status should be updating
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.actionDetails.mock.calls.length).toBeGreaterThan(0);
+    });
+  });
+
   describe('and when console is closed (not terminated) and then reopened', () => {
     beforeEach(() => {
       const _render = render;
@@ -170,17 +195,6 @@ describe('When using isolate action from response actions console', () => {
       await consoleManagerMockAccess.openRunningConsole();
 
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(1);
-    });
-
-    it('should show exit modal when action still pending', async () => {
-      const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
-        path: '/api/endpoint/action/1.2.3',
-      });
-      pendingDetailResponse.data.isCompleted = false;
-      apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
-      await render();
-      await consoleManagerMockAccess.openRunningConsole();
-      await consoleManagerMockAccess.hideOpenedConsole();
     });
   });
 });
