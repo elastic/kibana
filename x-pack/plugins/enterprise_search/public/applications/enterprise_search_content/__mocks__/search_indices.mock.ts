@@ -22,7 +22,7 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
   {
     connector: {
       api_key_id: null,
-      configuration: {},
+      configuration: { foo: { label: 'bar', value: 'barbar' } },
       id: '2',
       index_name: 'connector',
       language: 'en',
