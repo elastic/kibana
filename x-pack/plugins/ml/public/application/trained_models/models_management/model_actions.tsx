@@ -9,8 +9,8 @@ import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } fr
 import { i18n } from '@kbn/i18n';
 import React, { FC, useCallback, useMemo, useState } from 'react';
 
-import { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { DefaultItemAction } from '@elastic/eui/src/components/basic_table/action_types';
 import { BUILT_IN_MODEL_TAG } from '../../../../common/constants/data_frame_analytics';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
 import { useToastNotificationService } from '../../services/toast_notification_service';
@@ -77,7 +77,7 @@ export const TrainedModelActions: FC<TrainedModelActionsProps> = ({
    * At the moment EuiInMemoryTable actions don't support tooltips,
    * hence we pass objects of the standard interface to the custom component.
    */
-  const actions: Array<Action<ModelItem>> = [
+  const actions: Array<DefaultItemAction<ModelItem>> = [
     {
       name: i18n.translate('xpack.ml.trainedModels.modelsList.viewTrainingDataActionLabel', {
         defaultMessage: 'View training data',
@@ -308,13 +308,15 @@ export const TrainedModelActions: FC<TrainedModelActionsProps> = ({
           .map((action) => {
             return (
               <EuiContextMenuItem
-                key={action.name}
-                icon={action.icon}
+                key={action.name as string}
+                icon={action.icon as string}
                 onClick={async () => {
-                  await action.onClick(action);
+                  if (action.onClick) {
+                    await action.onClick(modelItem);
+                  }
                   setIsPopoverOpen(false);
                 }}
-                disabled={action.enabled ? action.enabled(action) : false}
+                disabled={action.enabled ? action.enabled(modelItem) : false}
                 toolTipContent={'Test'}
               >
                 {action.name}
