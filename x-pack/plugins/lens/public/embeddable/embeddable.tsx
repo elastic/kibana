@@ -192,7 +192,7 @@ function getViewUnderlyingDataArgs({
   }
 
   const { filters: newFilters, query: newQuery } = combineQueryAndFilters(
-    query,
+    query as Query,
     filters,
     meta,
     dataViews,
