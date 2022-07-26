@@ -48,8 +48,6 @@ Prepend requests to a {kib} API endpoint with `kbn:`
 `GET kbn:/api/index_management/indices`
 --------------------------------------------------
 
-
-
 When you paste the command into *Console*, {kib} automatically converts it
 to *Console* syntax.  Alternatively, if you want to see *Console* syntax in cURL,
 click the action icon (image:dev-tools/console/images/wrench.png[]) and select *Copy as cURL*.
@@ -77,7 +75,6 @@ For example, you might have a request formatted like this:
 
 [role="screenshot"]
 image::dev-tools/console/images/copy-curl.png["Console close-up", width=75%]
-]
 
 *Console* adjusts the JSON body of the request to apply the indents.
 
@@ -87,8 +84,6 @@ image::dev-tools/console/images/request.png["Console close-up", width=75%]
 If you select *Auto indent* on a request that is already well formatted,
 *Console* collapses the request body to a single line per document.
 This is helpful when working with the {es} {ref}/docs-bulk.html[bulk APIs].
-
-
 
 [float]
 [[console-request]]
@@ -102,7 +97,6 @@ You can select multiple requests and submit them together.
 in the response pane. Submitting multiple requests is helpful
 when you're debugging an issue or trying query
 combinations in multiple scenarios.
-
 
 [float]
 [[console-view-api]]
