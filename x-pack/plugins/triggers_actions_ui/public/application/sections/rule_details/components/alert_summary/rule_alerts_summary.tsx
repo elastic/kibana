@@ -5,38 +5,29 @@
  * 2.0.
  */
 
-import { BarSeries, Chart, ScaleType, Settings, PartialTheme, TooltipType } from '@elastic/charts';
+import { BarSeries, Chart, ScaleType, Settings, TooltipType } from '@elastic/charts';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiPanel,
+  EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useState } from 'react';
+import {
+  EUI_CHARTS_THEME_LIGHT,
+  EUI_SPARKLINE_THEME_PARTIAL,
+} from '@elastic/eui/dist/eui_charts_theme';
 import { useLoadRuleAlertsAggs } from '../../../../hooks/use_load_rule_alerts_aggregations';
 import { useLoadRuleTypes } from '../../../../hooks/use_load_rule_types';
 import { formatChartAlertData, getColorSeries } from '.';
 import { RuleAlertsSummaryProps } from '.';
 
-const theme: PartialTheme = {
-  chartMargins: {
-    bottom: 0,
-    left: 0,
-    top: 20,
-    right: 0,
-  },
-  chartPaddings: {
-    bottom: 0,
-    left: 0,
-    top: 0,
-    right: 0,
-  },
-};
 const Y_ACCESSORS = ['y'];
 const X_ACCESSORS = ['x'];
 const G_ACCESSORS = ['g'];
@@ -142,8 +133,12 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
           </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <Chart size={['100%', '35%']}>
-        <Settings tooltip={TooltipType.None} theme={theme} />
+      <EuiSpacer size="m" />
+      <Chart size={{ height: 50 }}>
+        <Settings
+          tooltip={TooltipType.None}
+          theme={[EUI_SPARKLINE_THEME_PARTIAL, EUI_CHARTS_THEME_LIGHT.theme]}
+        />
         <BarSeries
           id="bars"
           xScaleType={ScaleType.Time}
