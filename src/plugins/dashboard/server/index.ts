@@ -15,6 +15,9 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
     allowByValueEmbeddables: true,
   },
   schema: configSchema,
+  deprecations: ({ deprecate }) => {
+    return [deprecate('allowByValueEmbeddables', '8.6.0', { level: 'warning' })];
+  },
 };
 
 //  This exports static code and TypeScript types,
