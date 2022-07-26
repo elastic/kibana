@@ -1,6 +1,4 @@
 package_paths:
   - /packages/package-storage
-  #  TODO remove temp
-  - /packages/snapshot
   - /packages/test-packages
   - /packages/signed-test-packages
