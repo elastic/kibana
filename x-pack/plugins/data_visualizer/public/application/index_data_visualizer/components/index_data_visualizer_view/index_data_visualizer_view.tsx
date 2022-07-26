@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { Required } from 'utility-types';
 import { i18n } from '@kbn/i18n';
-import { Filter, Query } from '@kbn/es-query';
+import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { DV_RANDOM_SAMPLER_PREFERENCE, useStorage } from '../../hooks/use_storage';
@@ -313,10 +313,10 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       // We want to clear all filters have not been pinned globally
       data.query.filterManager
         .getFilters()
-        .filter((f) => f.$state?.store === 'appState')
+        .filter((f) => f.$state?.store === FilterStateStore.APP_STATE)
         .forEach((f) => data.query.filterManager.removeFilter(f));
     };
-  }, [currentDataView.id, data.query.filterManager]);
+  }, [data.query.filterManager]);
 
   useEffect(() => {
     // Force refresh on index pattern change

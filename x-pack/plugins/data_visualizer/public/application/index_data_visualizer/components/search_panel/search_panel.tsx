@@ -136,12 +136,6 @@ export const SearchPanel: FC<Props> = ({
           onQuerySubmit={(params: { dateRange: TimeRange; query?: Query | undefined }) =>
             searchHandler({ query: params.query })
           }
-          onQueryChange={(params: { dateRange: TimeRange; query?: Query | undefined }) => {
-            // Force clear query when x button is clicked
-            if (params.query?.query === '') {
-              searchHandler({ query: params.query });
-            }
-          }}
           // @ts-expect-error onFiltersUpdated is a valid prop on SearchBar
           onFiltersUpdated={(filters: Filter[]) => searchHandler({ filters })}
           indexPatterns={[dataView]}
