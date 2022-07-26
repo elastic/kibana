@@ -169,7 +169,13 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
     const itemCount = changePoints?.length ?? 0;
 
     let items: ChangePoint[] = changePoints ?? [];
-    items = sortBy(changePoints, (item) => item[sortField]);
+    items = sortBy(changePoints, (item) => {
+      if (item && typeof item[sortField] === 'string') {
+        // @ts-ignore Object is possibly null or undefined
+        return item[sortField].toLowerCase();
+      }
+      return item[sortField];
+    });
     items = sortDirection === 'asc' ? items : items.reverse();
 
     return {
