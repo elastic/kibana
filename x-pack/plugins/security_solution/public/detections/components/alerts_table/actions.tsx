@@ -36,6 +36,7 @@ import {
   ALERT_RULE_TIMELINE_ID,
   ALERT_THRESHOLD_RESULT,
   ALERT_NEW_TERMS,
+  ALERT_RULE_INDICES,
 } from '../../../../common/field_maps/field_names';
 import type { TimelineResult } from '../../../../common/types/timeline';
 import { TimelineId, TimelineStatus, TimelineType } from '../../../../common/types/timeline';
@@ -439,7 +440,7 @@ const createThresholdTimeline = async (
     });
     const language = params.language ?? alertDoc.signal?.rule?.language ?? 'kuery';
     const query = params.query ?? alertDoc.signal?.rule?.query ?? '';
-    const indexNames = params.index ?? alertDoc.signal?.rule?.index ?? [];
+    const indexNames = getField(alertDoc, ALERT_RULE_INDICES) ?? alertDoc.signal?.rule?.index ?? [];
 
     const { thresholdFrom, thresholdTo, dataProviders } = getThresholdAggregationData(alertDoc);
     const exceptions = await getExceptions(ecsData);
@@ -588,7 +589,7 @@ const createNewTermsTimeline = async (
     });
     const language = params.language ?? alertDoc.signal?.rule?.language ?? 'kuery';
     const query = params.query ?? alertDoc.signal?.rule?.query ?? '';
-    const indexNames = params.index ?? alertDoc.signal?.rule?.index ?? [];
+    const indexNames = getField(alertDoc, ALERT_RULE_INDICES) ?? alertDoc.signal?.rule?.index ?? [];
 
     const { from, to, dataProviders } = getNewTermsData(alertDoc);
     const exceptions = await getExceptions(ecsData);
