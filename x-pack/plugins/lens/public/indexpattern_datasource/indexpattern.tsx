@@ -576,8 +576,7 @@ export function getIndexPatternDatasource({
           ),
         getVisualDefaults: () => getVisualDefaultsForLayer(layer),
         getMaxPossibleNumValues: (columnId) => {
-          // TODO - is the isReferenced check necessary?
-          if (layer && layer.columns[columnId] && !isReferenced(layer, columnId)) {
+          if (layer && layer.columns[columnId]) {
             const column = layer.columns[columnId];
             return (
               operationDefinitionMap[column.operationType].getMaxPossibleNumValues?.(column) ?? null
