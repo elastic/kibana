@@ -189,11 +189,10 @@ export const getAgentsHandler: RequestHandler<
   }
 };
 
-export const getAgentTagsHandler: RequestHandler<undefined, GetTagsRequestSchema.query> = async (
-  context,
-  request,
-  response
-) => {
+export const getAgentTagsHandler: RequestHandler<
+  undefined,
+  TypeOf<typeof GetTagsRequestSchema.query>
+> = async (context, request, response) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
 
