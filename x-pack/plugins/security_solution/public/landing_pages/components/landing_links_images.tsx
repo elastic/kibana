@@ -54,7 +54,7 @@ const TitleText = styled.h2`
   display: inline;
 `;
 
-const BetaBadge = styled(EuiBetaBadge)<{ label: string, size: "s" | "m" }>`
+const BetaBadge = styled(EuiBetaBadge)<{ label: string; size: 's' | 'm' }>`
   vertical-align: text-top;
   margin-left: ${({ theme }) => theme.eui.euiSizeS};
   color: ${(props) => props.theme.eui.euiTextColor};
