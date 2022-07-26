@@ -307,10 +307,8 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
 
   useEffect(() => {
     return () => {
-      // When navigating away from the index pattern
-      // Reset all previously set filters
-      // to make sure new page doesn't have unrelated filters
-      // We want to clear all filters have not been pinned globally
+      // We want to clear all filters that have not been pinned globally
+      // when navigating to other pages
       data.query.filterManager
         .getFilters()
         .filter((f) => f.$state?.store === FilterStateStore.APP_STATE)

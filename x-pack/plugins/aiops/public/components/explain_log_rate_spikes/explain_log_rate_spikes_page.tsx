@@ -21,7 +21,7 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
-import { Filter, Query } from '@kbn/es-query';
+import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { SavedSearch } from '@kbn/discover-plugin/public';
 
 import { useAiOpsKibana } from '../../kibana_context';
@@ -125,12 +125,14 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
 
   useEffect(() => {
     return () => {
-      // When navigating away from the index pattern
-      // Reset all previously set filters
-      // to make sure new page doesn't have unrelated filters
-      dataService.query.filterManager.removeAll();
+      // We want to clear all filters that have not been pinned globally
+      // when navigating to other pages
+      dataService.query.filterManager
+        .getFilters()
+        .filter((f) => f.$state?.store === FilterStateStore.APP_STATE)
+        .forEach((f) => dataService.query.filterManager.removeFilter(f));
     };
-  }, [dataView.id, dataService.query.filterManager]);
+  }, [dataService.query.filterManager]);
 
   const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
 
