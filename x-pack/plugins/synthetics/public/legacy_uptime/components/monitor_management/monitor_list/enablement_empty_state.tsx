@@ -123,7 +123,7 @@ export const EnablementEmptyState = ({ focusButton }: { focusButton: boolean }) 
             <EuiText size="s">
               <FormattedMessage
                 id="xpack.synthetics.monitorManagement.disclaimerLinkLabel"
-                defaultMessage="There is no cost for the use of the service to execute your tests during the beta period. A fair usage policy will apply. Normal data storage costs apply for test results stored in your Elastic cluster.', "
+                defaultMessage="There is no cost for the use of the service to execute your tests during the beta period. A fair usage policy will apply. Normal data storage costs apply for test results stored in your Elastic cluster."
               />
             </EuiText>
           </EuiCallOut>

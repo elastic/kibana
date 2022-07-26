@@ -8,7 +8,11 @@
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { createReducer } from '@reduxjs/toolkit';
 import { AgentPolicy } from '@kbn/fleet-plugin/common';
-import { getAgentPoliciesAction, setManageFlyoutOpen } from './actions';
+import {
+  getAgentPoliciesAction,
+  setAddingNewPrivateLocation,
+  setManageFlyoutOpen,
+} from './actions';
 
 export interface AgentPoliciesList {
   items: AgentPolicy[];
@@ -22,6 +26,7 @@ export interface AgentPoliciesState {
   loading: boolean;
   error: IHttpFetchError<ResponseErrorBody> | null;
   isManageFlyoutOpen?: boolean;
+  isAddingNewPrivateLocation?: boolean;
 }
 
 const initialState: AgentPoliciesState = {
@@ -29,6 +34,7 @@ const initialState: AgentPoliciesState = {
   loading: false,
   error: null,
   isManageFlyoutOpen: false,
+  isAddingNewPrivateLocation: false,
 };
 
 export const agentPoliciesReducer = createReducer(initialState, (builder) => {
@@ -46,7 +52,9 @@ export const agentPoliciesReducer = createReducer(initialState, (builder) => {
     })
     .addCase(setManageFlyoutOpen, (state, action) => {
       state.isManageFlyoutOpen = action.payload;
-      state.loading = false;
+    })
+    .addCase(setAddingNewPrivateLocation, (state, action) => {
+      state.isAddingNewPrivateLocation = action.payload;
     });
 });
 

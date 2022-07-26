@@ -62,7 +62,7 @@ export const MonitorListContainer = ({
   }
 
   if (isEnabled && monitorList.list.total === 0 && locations.length === 0) {
-    return <EmptyLocations />;
+    return <EmptyLocations inFlyout={false} />;
   }
 
   return (
