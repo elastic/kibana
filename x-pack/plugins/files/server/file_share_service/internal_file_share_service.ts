@@ -158,13 +158,13 @@ export class InternalFileShareService implements FileShareServiceStart {
       saved_objects: [share],
     } = await this.savedObjects.find<FileShareSavedObjectAttributes>({
       type: this.savedObjectsType,
-      filter: nodeBuilder.is('token', escapeKuery(token)),
+      filter: nodeBuilder.is(`${this.savedObjectsType}.attributes.token`, escapeKuery(token)),
     });
 
     if (!share) {
       throw new FileShareNotFoundError(`Could not find file share with token "${token}".`);
     }
-    if (share.attributes.valid_until < Date.now()) {
+    if (share.attributes.valid_until < Date.now() / 1000) {
       throw new FileShareTokenInvalidError(`Share "${token}" has expired.`);
     }
     return toFileShareJSON(share);

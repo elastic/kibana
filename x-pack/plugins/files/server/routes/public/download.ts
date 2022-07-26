@@ -7,6 +7,7 @@
 import type { Ensure } from '@kbn/utility-types';
 import { schema, TypeOf } from '@kbn/config-schema';
 
+import { NoDownloadAvailableError } from '../../file/errors';
 import { FileNotFoundError } from '../../file_service/errors';
 import {
   FileShareNotFoundError,
@@ -44,6 +45,11 @@ const handler: FilesRequestHandler<unknown, Query> = async ({ files }, req, res)
       e instanceof FileShareTokenInvalidError
     ) {
       return res.badRequest({ body: 'Invalid token' });
+    }
+    if (e instanceof NoDownloadAvailableError) {
+      return res.badRequest({
+        body: 'No download available. Try uploading content to the file first.',
+      });
     }
 
     throw e;

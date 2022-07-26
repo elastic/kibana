@@ -145,9 +145,7 @@ export type FileShareSavedObjectAttributes = {
   name?: string;
 
   /**
-   * The date-time this file share will expire.
-   *
-   * @note default date-time is determined by this application
+   * The unix timestamp (in seconds) this file share will expire.
    *
    * TODO: in future we could add a special value like "forever", but this should
    * not be the default.
@@ -160,7 +158,7 @@ export type FileShareSavedObjectAttributes = {
  */
 export interface FileShareJSON {
   id: string;
-  created: FileShareSavedObjectAttributes['created_at'];
+  created: FileShareSavedObjectAttributes['created'];
   validUntil: FileShareSavedObjectAttributes['valid_until'];
   name?: FileShareSavedObjectAttributes['name'];
   fileId: string;
