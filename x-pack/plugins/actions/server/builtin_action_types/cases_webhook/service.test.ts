@@ -41,7 +41,7 @@ const config: CasesWebhookPublicConfigurationType = {
   getIncidentResponseUpdatedDateKey: 'fields.updated',
   hasAuth: true,
   headers: { ['content-type']: 'application/json' },
-  incidentViewUrl: 'https://coolsite.net/browse/{{{external.system.title}}}',
+  viewIncidentUrl: 'https://coolsite.net/browse/{{{external.system.title}}}',
   getIncidentUrl: 'https://coolsite.net/issue/{{{external.system.id}}}',
   updateIncidentJson:
     '{"fields":{"title":{{{case.title}}},"description":{{{case.description}}},"tags":{{{case.tags}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
@@ -75,7 +75,7 @@ describe('Cases webhook service', () => {
   describe('createExternalService', () => {
     const requiredUrls = [
       'createIncidentUrl',
-      'incidentViewUrl',
+      'viewIncidentUrl',
       'getIncidentUrl',
       'updateIncidentUrl',
     ];

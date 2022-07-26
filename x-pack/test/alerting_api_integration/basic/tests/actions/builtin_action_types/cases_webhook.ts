@@ -31,7 +31,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
     getIncidentResponseUpdatedDateKey: 'fields.updated',
     hasAuth: true,
     headers: { ['content-type']: 'application/json' },
-    incidentViewUrl: 'https://coolsite.net/browse/{{{external.system.title}}}',
+    viewIncidentUrl: 'https://coolsite.net/browse/{{{external.system.title}}}',
     getIncidentUrl: 'https://coolsite.net/rest/api/2/issue/{{{external.system.id}}}',
     updateIncidentJson:
       '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"labels":{{{case.tags}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
@@ -79,7 +79,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
             ...config,
             createCommentUrl: `${casesWebhookSimulatorURL}/{{{external.system.id}}}/comments`,
             createIncidentUrl: casesWebhookSimulatorURL,
-            incidentViewUrl: `${casesWebhookSimulatorURL}/{{{external.system.title}}}`,
+            viewIncidentUrl: `${casesWebhookSimulatorURL}/{{{external.system.title}}}`,
             getIncidentUrl: `${casesWebhookSimulatorURL}/{{{external.system.id}}}`,
             updateIncidentUrl: `${casesWebhookSimulatorURL}/{{{external.system.id}}}`,
           },
