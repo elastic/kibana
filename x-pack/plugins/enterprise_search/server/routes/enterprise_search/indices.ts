@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { ErrorCode } from '../../../common/types/error_codes';
 
 import { fetchConnectors } from '../../lib/connectors/fetch_connectors';
+import { fetchCrawlers } from '../../lib/crawler/fetch_crawlers';
 
 import { createApiIndex } from '../../lib/indices/create_index';
 import { fetchIndex } from '../../lib/indices/fetch_index';
@@ -68,9 +69,11 @@ export function registerIndexRoutes({ router }: RouteDependencies) {
         const selectedIndices = totalIndices.slice(startIndex, endIndex);
         const indexNames = selectedIndices.map(({ name }) => name);
         const connectors = await fetchConnectors(client, indexNames);
+        const crawlers = await fetchCrawlers(client, indexNames);
         const indices = selectedIndices.map((index) => ({
           ...index,
           connector: connectors.find((connector) => connector.index_name === index.name),
+          crawler: crawlers.find((crawler) => crawler.index_name === index.name),
         }));
         return response.ok({
           body: {
