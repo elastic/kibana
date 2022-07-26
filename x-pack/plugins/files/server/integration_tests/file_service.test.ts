@@ -199,7 +199,7 @@ describe('FileService', () => {
       const file = await createDisposableFile({ fileKind, name: 'test' });
       const { id } = await file.share({ name: 'my-file-share' });
       // Check if a file share exists without using an {@link File} object
-      const result = await fileService.getShareObject({ tokenId: id });
+      const result = await fileService.getShareObject({ id });
       expect(result).toEqual(
         expect.objectContaining({
           id: expect.any(String),
@@ -216,7 +216,7 @@ describe('FileService', () => {
       const { id } = await file.share({ name: 'my file share 1' });
       // Check if a file share exists without using an {@link File} object
       await fileService.updateShareObject({ id, attributes: { name: 'my file share 2' } });
-      const result = await fileService.getShareObject({ tokenId: id });
+      const result = await fileService.getShareObject({ id });
       expect(result).toEqual(
         expect.objectContaining({
           id: expect.any(String),
