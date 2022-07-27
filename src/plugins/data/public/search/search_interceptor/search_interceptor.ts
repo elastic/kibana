@@ -279,7 +279,8 @@ export class SearchInterceptor {
 
     // track if this search's session will be send to background
     // if yes, then we don't need to cancel this search when it is aborted
-    let isSavedToBackground = false;
+    let isSavedToBackground =
+      this.deps.session.isCurrentSession(sessionId) && this.deps.session.isStored();
     const savedToBackgroundSub =
       this.deps.session.isCurrentSession(sessionId) &&
       this.deps.session.state$

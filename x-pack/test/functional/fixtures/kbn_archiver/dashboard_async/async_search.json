@@ -253,3 +253,37 @@
   "updated_at": "2020-03-19T11:59:53.701Z",
   "version": "WzE3LDJd"
 }
+
+{
+  "attributes": {
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+    },
+    "optionsJSON": "{\"useMargins\":true,\"syncColors\":false,\"syncTooltips\":false,\"hidePanelTitles\":false}",
+    "panelsJSON": "[{\"version\":\"8.4.0\",\"type\":\"lens\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"83d70d60-6917-4432-9a67-c612ea014a3a\"},\"panelIndex\":\"83d70d60-6917-4432-9a67-c612ea014a3a\",\"embeddableConfig\":{\"attributes\":{\"title\":\"Lens with other bucket\",\"visualizationType\":\"lnsXY\",\"type\":\"lens\",\"references\":[{\"type\":\"index-pattern\",\"id\":\"logstash-*\",\"name\":\"indexpattern-datasource-layer-f7673857-e676-47bf-83ac-cd7afb16942e\"}],\"state\":{\"visualization\":{\"legend\":{\"isVisible\":true,\"position\":\"right\"},\"valueLabels\":\"hide\",\"fittingFunction\":\"None\",\"axisTitlesVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"tickLabelsVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"labelsOrientation\":{\"x\":0,\"yLeft\":0,\"yRight\":0},\"gridlinesVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"preferredSeriesType\":\"bar_stacked\",\"layers\":[{\"layerId\":\"f7673857-e676-47bf-83ac-cd7afb16942e\",\"accessors\":[\"e4ae40b5-d347-4473-937e-7519a699330e\"],\"position\":\"top\",\"seriesType\":\"bar_stacked\",\"showGridlines\":false,\"layerType\":\"data\",\"xAccessor\":\"5b89d5af-a7db-4be3-b355-08cbf4c2d124\"}]},\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filters\":[],\"datasourceStates\":{\"indexpattern\":{\"layers\":{\"f7673857-e676-47bf-83ac-cd7afb16942e\":{\"columns\":{\"5b89d5af-a7db-4be3-b355-08cbf4c2d124\":{\"label\":\"Top 3 values of extension.raw\",\"dataType\":\"string\",\"operationType\":\"terms\",\"scale\":\"ordinal\",\"sourceField\":\"extension.raw\",\"isBucketed\":true,\"params\":{\"size\":3,\"orderBy\":{\"type\":\"column\",\"columnId\":\"e4ae40b5-d347-4473-937e-7519a699330e\"},\"orderDirection\":\"desc\",\"otherBucket\":true,\"missingBucket\":false,\"parentFormat\":{\"id\":\"terms\"}}},\"e4ae40b5-d347-4473-937e-7519a699330e\":{\"label\":\"Count of records\",\"dataType\":\"number\",\"operationType\":\"count\",\"isBucketed\":false,\"scale\":\"ratio\",\"sourceField\":\"___records___\",\"params\":{\"emptyAsNull\":true}}},\"columnOrder\":[\"5b89d5af-a7db-4be3-b355-08cbf4c2d124\",\"e4ae40b5-d347-4473-937e-7519a699330e\"],\"incompleteColumns\":{}}}}}}},\"enhancements\":{}}}]",
+    "timeRestore": true,
+    "timeTo": "2015-09-23T00:09:17.180Z",
+    "timeFrom": "2015-09-19T17:34:10.297Z",
+    "refreshInterval": {
+      "pause": true,
+      "value": 0
+    },
+    "title": "Lens with other bucket",
+    "version": 1
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "b4444110-0cfb-11ed-8b10-7919f14bd1fd",
+  "migrationVersion": { "dashboard": "8.3.0" },
+  "references": [
+    {
+      "id": "logstash-*",
+      "name": "83d70d60-6917-4432-9a67-c612ea014a3a:indexpattern-datasource-layer-f7673857-e676-47bf-83ac-cd7afb16942e",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "dashboard",
+  "updated_at": "2022-07-26T15:57:51.910Z",
+  "version": "Wzg5MywzXQ=="
+}
