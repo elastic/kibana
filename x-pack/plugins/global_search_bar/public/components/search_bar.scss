@@ -14,12 +14,6 @@
   border-right: $euiBorderThin; // Adds divider between the tag list and 'Go to' badge
 }
 
-//TODO add these overrides to EUI so that search behaves the same globally (eui/issues/4363)
-.kbnSearchBar {
-  max-width: 100%;
-  will-change: width;
-}
-
 @include euiBreakpoint('xs', 's') {
   .kbnSearchOption__tagsList {
     display: none;

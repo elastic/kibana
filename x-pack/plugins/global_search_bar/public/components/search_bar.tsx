@@ -283,6 +283,7 @@ export const SearchBar: FC<SearchBarProps> = ({
       isPreFiltered
       onChange={onChange}
       options={options}
+      className="kbnSearchBar"
       popoverButtonBreakpoints={['xs', 's']}
       singleSelection={true}
       renderOption={(option) => euiSelectableTemplateSitewideRenderOptions(option, searchTerm)}
@@ -292,7 +293,6 @@ export const SearchBar: FC<SearchBarProps> = ({
         'data-test-subj': 'nav-search-input',
         inputRef: setSearchRef,
         compressed: true,
-        className: 'kbnSearchBar',
         'aria-label': placeholderText,
         placeholder: placeholderText,
         onFocus: () => {
@@ -307,7 +307,7 @@ export const SearchBar: FC<SearchBarProps> = ({
         append: showAppend ? (
           <EuiFormLabel
             title={keyboardShortcutTooltip}
-            css={{ fontFamily: euiTheme.font.familyCode, position: 'absolute', right: 0 }}
+            css={{ fontFamily: euiTheme.font.familyCode }}
           >
             {isMac ? '⌘/' : '^/'}
           </EuiFormLabel>
