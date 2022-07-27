@@ -11,7 +11,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('index based actions panel on trial license', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/137046
+  describe.skip('index based actions panel on trial license', function () {
     this.tags(['ml']);
 
     const indexPatternName = 'ft_farequote';

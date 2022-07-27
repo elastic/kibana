@@ -22,16 +22,16 @@ import { httpHandlerMockFactory } from '../../common/mock/endpoint/http_handler_
 import type {
   ActionDetailsApiResponse,
   ActionListApiResponse,
-  HostIsolationResponse,
+  ResponseActionApiResponse,
   PendingActionsResponse,
   ProcessesEntry,
   ActionDetails,
 } from '../../../common/endpoint/types';
 
 export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
-  isolateHost: () => HostIsolationResponse;
+  isolateHost: () => ResponseActionApiResponse;
 
-  releaseHost: () => HostIsolationResponse;
+  releaseHost: () => ResponseActionApiResponse;
 
   killProcess: () => ActionDetailsApiResponse;
 
@@ -51,16 +51,16 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
     id: 'isolateHost',
     path: ISOLATE_HOST_ROUTE,
     method: 'post',
-    handler: (): HostIsolationResponse => {
-      return { action: '1-2-3' };
+    handler: (): ResponseActionApiResponse => {
+      return { action: '1-2-3', data: { id: '1-2-3' } as ResponseActionApiResponse['data'] };
     },
   },
   {
     id: 'releaseHost',
     path: UNISOLATE_HOST_ROUTE,
     method: 'post',
-    handler: (): HostIsolationResponse => {
-      return { action: '3-2-1' };
+    handler: (): ResponseActionApiResponse => {
+      return { action: '3-2-1', data: { id: '3-2-1' } as ResponseActionApiResponse['data'] };
     },
   },
   {

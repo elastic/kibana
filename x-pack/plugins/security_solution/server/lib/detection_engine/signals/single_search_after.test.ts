@@ -7,23 +7,17 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   sampleDocSearchResultsNoSortId,
-  mockLogger,
   sampleDocSearchResultsWithSortId,
 } from './__mocks__/es_results';
 import { singleSearchAfter } from './single_search_after';
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { buildRuleMessageFactory } from './rule_messages';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { ruleExecutionLogMock } from '../rule_monitoring/mocks';
 
-const buildRuleMessage = buildRuleMessageFactory({
-  id: 'fake id',
-  ruleId: 'fake rule id',
-  index: 'fakeindex',
-  name: 'fake name',
-});
 describe('singleSearchAfter', () => {
   const mockService: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
+  const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -39,12 +33,11 @@ describe('singleSearchAfter', () => {
       from: 'now-360s',
       to: 'now',
       services: mockService,
-      logger: mockLogger,
+      ruleExecutionLogger,
       pageSize: 1,
       filter: {},
       primaryTimestamp: '@timestamp',
       secondaryTimestamp: undefined,
-      buildRuleMessage,
       runtimeMappings: undefined,
     });
     expect(searchResult).toEqual(sampleDocSearchResultsNoSortId());
@@ -59,12 +52,11 @@ describe('singleSearchAfter', () => {
       from: 'now-360s',
       to: 'now',
       services: mockService,
-      logger: mockLogger,
+      ruleExecutionLogger,
       pageSize: 1,
       filter: {},
       primaryTimestamp: '@timestamp',
       secondaryTimestamp: undefined,
-      buildRuleMessage,
       runtimeMappings: undefined,
     });
     expect(searchErrors).toEqual([]);
@@ -111,12 +103,11 @@ describe('singleSearchAfter', () => {
       from: 'now-360s',
       to: 'now',
       services: mockService,
-      logger: mockLogger,
+      ruleExecutionLogger,
       pageSize: 1,
       filter: {},
       primaryTimestamp: '@timestamp',
       secondaryTimestamp: undefined,
-      buildRuleMessage,
       runtimeMappings: undefined,
     });
     expect(searchErrors).toEqual([
@@ -136,12 +127,11 @@ describe('singleSearchAfter', () => {
       from: 'now-360s',
       to: 'now',
       services: mockService,
-      logger: mockLogger,
+      ruleExecutionLogger,
       pageSize: 1,
       filter: {},
       primaryTimestamp: '@timestamp',
       secondaryTimestamp: undefined,
-      buildRuleMessage,
       runtimeMappings: undefined,
     });
     expect(searchResult).toEqual(sampleDocSearchResultsWithSortId());
@@ -158,12 +148,11 @@ describe('singleSearchAfter', () => {
         from: 'now-360s',
         to: 'now',
         services: mockService,
-        logger: mockLogger,
+        ruleExecutionLogger,
         pageSize: 1,
         filter: {},
         primaryTimestamp: '@timestamp',
         secondaryTimestamp: undefined,
-        buildRuleMessage,
         runtimeMappings: undefined,
       })
     ).rejects.toThrow('Fake Error');

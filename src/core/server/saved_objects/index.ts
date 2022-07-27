@@ -12,23 +12,11 @@ export { SavedObjectsImporter } from './import';
 
 export type {
   ISavedObjectsImporter,
-  SavedObjectsImportAmbiguousConflictError,
-  SavedObjectsImportConflictError,
-  SavedObjectsImportFailure,
-  SavedObjectsImportMissingReferencesError,
   SavedObjectsImportOptions,
-  SavedObjectsImportResponse,
-  SavedObjectsImportRetry,
-  SavedObjectsImportSuccess,
-  SavedObjectsImportUnknownError,
-  SavedObjectsImportUnsupportedTypeError,
   SavedObjectsResolveImportErrorsOptions,
   SavedObjectsImportError,
   SavedObjectsImportHook,
   SavedObjectsImportHookResult,
-  SavedObjectsImportSimpleWarning,
-  SavedObjectsImportActionRequiredWarning,
-  SavedObjectsImportWarning,
 } from './import';
 
 export type {
@@ -66,13 +54,6 @@ export type {
 } from './saved_objects_service';
 
 export type {
-  ISavedObjectsRepository,
-  SavedObjectsIncrementCounterOptions,
-  SavedObjectsIncrementCounterField,
-  SavedObjectsDeleteByNamespaceOptions,
-} from './service/lib/repository';
-
-export type {
   SavedObjectsFieldMapping,
   SavedObjectsMappingProperties,
   SavedObjectsTypeMappingDefinition,
@@ -87,7 +68,6 @@ export type {
 export { mergeSavedObjectMigrationMaps } from './migrations';
 
 export type {
-  SavedObjectsNamespaceType,
   SavedObjectStatusMeta,
   SavedObjectsType,
   SavedObjectsTypeManagementDefinition,

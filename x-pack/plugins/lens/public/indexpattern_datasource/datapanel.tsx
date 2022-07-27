@@ -42,7 +42,6 @@ import type {
   IndexPatternField,
   IndexPatternRef,
 } from './types';
-import { trackUiEvent } from '../lens_ui_telemetry';
 import { loadIndexPatterns, syncExistingFields } from './loader';
 import { fieldExists } from './pure_helpers';
 import { Loader } from '../loader';
@@ -533,7 +532,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     () =>
       editPermission
         ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
-            trackUiEvent(`open_field_editor_${uiAction}`);
             const indexPatternInstance = await dataViews.get(currentIndexPattern.id);
             closeFieldEditor.current = indexPatternFieldEditor.openEditor({
               ctx: {
@@ -541,7 +539,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               },
               fieldName,
               onSave: async () => {
-                trackUiEvent(`save_field_${uiAction}`);
                 await refreshFieldList();
               },
             });
@@ -554,7 +551,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     () =>
       editPermission
         ? async (fieldName: string) => {
-            trackUiEvent('open_field_delete_modal');
             const indexPatternInstance = await dataViews.get(currentIndexPattern.id);
             closeFieldEditor.current = indexPatternFieldEditor.openDeleteModal({
               ctx: {
@@ -562,7 +558,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               },
               fieldName,
               onDelete: async () => {
-                trackUiEvent('delete_field');
                 await refreshFieldList();
               },
             });
@@ -616,7 +611,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 defaultMessage: 'Clear name and type filters',
               }),
               onClick: () => {
-                trackUiEvent('indexpattern_filters_cleared');
                 clearLocalState();
               },
             }}
@@ -679,7 +673,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     icon={localState.typeFilter.includes(type) ? 'check' : 'empty'}
                     data-test-subj={`typeFilter-${type}`}
                     onClick={() => {
-                      trackUiEvent('indexpattern_type_filter_toggled');
                       setLocalState((s) => ({
                         ...s,
                         typeFilter: localState.typeFilter.includes(type)

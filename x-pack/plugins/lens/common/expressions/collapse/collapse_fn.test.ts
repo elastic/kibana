@@ -39,6 +39,61 @@ describe('collapse_fn', () => {
     expect(result.rows).toEqual([{ val: 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 }]);
   });
 
+  it('can use different functions for each different metric', async () => {
+    const result = await runFn(
+      {
+        type: 'datatable',
+        columns: [
+          { id: 'val', name: 'val', meta: { type: 'number' } },
+          { id: 'val2', name: 'val2', meta: { type: 'number' } },
+          { id: 'val3', name: 'val3', meta: { type: 'number' } },
+          { id: 'split', name: 'split', meta: { type: 'string' } },
+        ],
+        rows: [
+          { val: 1, val2: 1, val3: 1, split: 'A' },
+          { val: 2, val2: 2, val3: 2, split: 'B' },
+          { val: 3, val2: 3, val3: 3, split: 'B' },
+          { val: 4, val2: 4, val3: 4, split: 'A' },
+          { val: 5, val2: 5, val3: 5, split: 'A' },
+          { val: 6, val2: 6, val3: 6, split: 'A' },
+          { val: 7, val2: 7, val3: 7, split: 'B' },
+          { val: 8, val2: 8, val3: 8, split: 'B' },
+        ],
+      },
+      { metric: ['val', 'val2', 'val3'], fn: ['sum', 'min', 'avg'] }
+    );
+
+    expect(result.rows).toEqual([
+      {
+        val: 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8,
+        val2: Math.min(1, 2, 3, 4, 5, 6, 7, 8),
+        val3: (1 + 2 + 3 + 4 + 5 + 6 + 7 + 8) / 8,
+      },
+    ]);
+  });
+
+  it('throws error if number of functions and metrics do not match', async () => {
+    expect(() =>
+      runFn(
+        {
+          type: 'datatable',
+          columns: [
+            { id: 'val', name: 'val', meta: { type: 'number' } },
+            { id: 'val2', name: 'val2', meta: { type: 'number' } },
+            { id: 'val3', name: 'val3', meta: { type: 'number' } },
+            { id: 'split', name: 'split', meta: { type: 'string' } },
+          ],
+          rows: [{ val: 1, val2: 1, val3: 1, split: 'A' }],
+        },
+        { metric: ['val', 'val2', 'val3'], fn: ['sum', 'min'] }
+      )
+    ).rejects.toMatchInlineSnapshot(`
+      [Error: lens_collapse - Called with 3 metrics and 2 collapse functions. 
+      Must be called with either a single collapse function for all metrics,
+      or a number of collapse functions matching the number of metrics.]
+    `);
+  });
+
   const twoSplitTable: Datatable = {
     type: 'datatable',
     columns: [
