@@ -10,8 +10,8 @@ import { EuiBasicTableProps, Pagination } from '@elastic/eui';
 import { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { estypes } from '@elastic/elasticsearch';
-import type { FindingsBaseProps, FindingsBaseURLQuery } from './types';
-import { useKibana } from '../../common/hooks/use_kibana';
+import type { FindingsBaseProps, FindingsBaseURLQuery } from '../types';
+import { useKibana } from '../../../common/hooks/use_kibana';
 export { getFilters } from './get_filters';
 
 const getBaseQuery = ({ dataView, query, filters }: FindingsBaseURLQuery & FindingsBaseProps) => {

@@ -248,6 +248,7 @@ module.exports = {
       },
     ]],
 
+    '@kbn/disable/no_protected_eslint_disable': 'error',
     '@kbn/disable/no_naked_eslint_disable': 'error',
     '@kbn/eslint/no_async_promise_body': 'error',
     '@kbn/eslint/no_async_foreach': 'error',
