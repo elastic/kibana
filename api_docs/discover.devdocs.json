@@ -339,7 +339,7 @@
           {
             "parentPluginId": "discover",
             "id": "def-public.DiscoverAppLocatorParams.query",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "query",
             "description": [
@@ -347,6 +347,8 @@
             ],
             "signature": [
               "Query",
+              " | ",
+              "AggregateQuery",
               " | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
@@ -933,6 +935,19 @@
           },
           {
             "parentPluginId": "discover",
+            "id": "def-public.SavedSearch.isTextBasedQuery",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isTextBasedQuery",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/discover/public/services/saved_searches/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discover",
             "id": "def-public.SavedSearch.rowsPerPage",
             "type": "number",
             "tags": [],
@@ -1343,6 +1358,20 @@
         "description": [],
         "signature": [
           "\"doc_table:legacy\""
+        ],
+        "path": "src/plugins/discover/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
+        "id": "def-common.ENABLE_SQL",
+        "type": "string",
+        "tags": [],
+        "label": "ENABLE_SQL",
+        "description": [],
+        "signature": [
+          "\"discover:enableSql\""
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
