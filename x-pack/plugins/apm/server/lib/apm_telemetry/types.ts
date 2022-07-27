@@ -38,30 +38,30 @@ export interface APMPerService {
     };
   };
   agent: {
-    name: string | number | null;
-    version: string | number | null;
+    name: string;
+    version: string;
   };
   service: {
     language: {
-      name: string | number | null;
-      version: string | number | null;
+      name: string;
+      version: string;
     };
     framework: {
-      name: string | number | null;
-      version: string | number | null;
+      name: string;
+      version: string;
     };
     runtime: {
-      name: string | number | null;
-      version: string | number | null;
+      name: string;
+      version: string;
     };
   };
   kubernetes: {
     pod: {
-      name: string | number | null;
+      name: string;
     };
   };
   container: {
-    id: string | number | null;
+    id: string;
   };
 }
 
