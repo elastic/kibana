@@ -389,7 +389,6 @@ export type {
   SavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server';
 
-// TODO: see what could be removed once the TS check is green
 export type {
   SavedObjectsRepository,
   SavedObjectsExporter,
