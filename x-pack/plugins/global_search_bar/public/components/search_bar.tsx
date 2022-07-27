@@ -257,13 +257,15 @@ export const SearchBar: FC<SearchBarProps> = ({
 
   const noMatchesMessage = <PopoverPlaceholder darkMode={darkMode} basePath={basePathUrl} />;
   const emptyMessage = (
-    <div style={{
-      minHeight: 300, // hardcoded in PopoverPlaceholder too
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center'
-    }}>
-      <EuiLoadingSpinner size='xl'></EuiLoadingSpinner>
+    <div
+      style={{
+        minHeight: 300, // hardcoded in PopoverPlaceholder too
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+      }}
+    >
+      <EuiLoadingSpinner size="xl" />
     </div>
   );
 
