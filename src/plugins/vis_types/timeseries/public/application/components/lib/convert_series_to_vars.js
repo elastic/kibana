@@ -17,7 +17,7 @@ import { createFieldFormatter } from './create_field_formatter';
 import moment from 'moment';
 import { getFieldsForTerms } from '../../../../common/fields_utils';
 
-export const convertSeriesToVars = (series, model, getConfig = null, fieldFormatMap) => {
+export const convertSeriesToVars = (series, model, getConfig = null, fieldFormatMap, dataView) => {
   const variables = {};
   const dateFormat = getConfig?.('dateFormat') ?? 'lll';
   model.series.forEach((seriesModel) => {
@@ -57,13 +57,21 @@ export const convertSeriesToVars = (series, model, getConfig = null, fieldFormat
           const fieldsForTerms = getFieldsForTerms(seriesModel.terms_field);
 
           if (fieldsForTerms.length === 1) {
-            rowLabel = createFieldFormatter(fieldsForTerms[0], fieldFormatMap)(row.label);
+            rowLabel = createFieldFormatter(
+              fieldsForTerms[0],
+              fieldFormatMap,
+              undefined,
+              false,
+              dataView
+            )(row.label);
           }
         }
 
         set(variables, varName, data);
         // label might be not purely alphanumeric, wrap in brackets to map sure it's resolved correctly
         set(variables, `[${label}].label`, rowLabel);
+        // compatibility
+        set(variables, `[${label}].formatted`, rowLabel);
       });
   });
   return variables;
