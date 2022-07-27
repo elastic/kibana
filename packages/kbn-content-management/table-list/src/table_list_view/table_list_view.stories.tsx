@@ -63,9 +63,7 @@ export const TableListView = (params: Params) => {
     <TableListViewProvider {...getStoryServices(params, action)}>
       <Component
         key={`${params.initialFilter}-${params.initialPageSize}`}
-        tableCaption="Some caption for the table"
         findItems={() => {
-          action('findItems');
           return Promise.resolve({
             total: mockItems.length,
             hits: mockItems,

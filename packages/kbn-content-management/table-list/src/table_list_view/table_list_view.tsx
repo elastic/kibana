@@ -44,10 +44,6 @@ export interface Props<T> {
   listingLimit: number;
   initialFilter: string;
   initialPageSize: number;
-  /**
-   * Describes the content of the table. If not specified, the caption will be "This table contains {itemCount} rows."
-   */
-  tableCaption: string;
   emptyPrompt?: JSX.Element;
   /** Add an additional custom column */
   customTableColumn?: EuiBasicTableColumn<T>;
@@ -96,21 +92,20 @@ export interface UserContentCommonSchema {
 }
 
 function TableListView<T extends UserContentCommonSchema>({
+  tableListTitle,
+  entityName,
+  entityNamePlural,
+  initialFilter: initialQuery,
+  headingId,
+  initialPageSize,
+  listingLimit,
+  customTableColumn,
+  emptyPrompt,
   findItems,
   createItem,
   editItem,
   deleteItems,
-  initialFilter: initialQuery,
-  tableListTitle,
-  entityName,
-  entityNamePlural,
-  headingId,
   getDetailViewLink,
-  tableCaption,
-  customTableColumn,
-  initialPageSize,
-  listingLimit,
-  emptyPrompt,
   children,
 }: Props<T>) {
   const isMounted = useRef(false);
@@ -451,7 +446,7 @@ function TableListView<T extends UserContentCommonSchema>({
         entityName={entityName}
         entityNamePlural={entityNamePlural}
         deleteItems={deleteItems}
-        tableCaption={tableCaption}
+        tableCaption={tableListTitle}
       />
 
       {/* Delete modal */}

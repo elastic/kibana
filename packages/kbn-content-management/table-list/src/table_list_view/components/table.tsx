@@ -30,6 +30,7 @@ interface Props<T extends UserContentCommonSchema> {
   entityName: string;
   entityNamePlural: string;
   isFetchingItems: boolean;
+  tableCaption: string;
   items: TableListViewState<T>['items'];
   selectedIds: TableListViewState<T>['selectedIds'];
   searchQuery: TableListViewState<T>['searchQuery'];
@@ -37,7 +38,6 @@ interface Props<T extends UserContentCommonSchema> {
   tableSort: TableListViewState<T>['tableSort'];
   pagination: TableListViewState<T>['pagination'];
   deleteItems: TableListViewProps<T>['deleteItems'];
-  tableCaption: TableListViewProps<T>['tableCaption'];
 }
 
 export function Table<T extends UserContentCommonSchema>({
