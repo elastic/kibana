@@ -107,6 +107,12 @@ export const i18nTexts = {
         defaultMessage: 'Maximum primary shard size',
       }
     ),
+    maxPrimaryShardDocsLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.hotPhase.maximumPrimaryShardSizeLabel',
+      {
+        defaultMessage: 'Maximum primary shard documents',
+      }
+    ),
     maxPrimaryShardSizeUnitsLabel: i18n.translate(
       'xpack.indexLifecycleMgmt.editPolicy.maximumPrimaryShardSizeAriaLabel',
       {
