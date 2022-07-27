@@ -16,7 +16,7 @@ import {
   EuiFormRow,
   EuiIcon,
 } from '@elastic/eui';
-import { FieldFilter, Filter, getFilterParams } from '@kbn/es-query';
+import { buildEmptyFilter, FieldFilter, Filter, getFilterParams } from '@kbn/es-query';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { ConditionTypes } from '../filters_editor_condition_types';
 import { FiltersEditorContextType } from '../filters_editor_context';
@@ -103,7 +103,7 @@ export function FilterItem({
         type: 'addFilter',
         payload: {
           path,
-          dataViewId: dataView.id,
+          filter: buildEmptyFilter(false, dataView.id),
           conditionalType,
         },
       });
@@ -134,7 +134,7 @@ export function FilterItem({
             spacing="m"
             key={path}
             index={2}
-            draggableId={`${path}|${path}`}
+            draggableId={`${path}`}
             customDragHandle={true}
             hasInteractiveChildren={true}
           >

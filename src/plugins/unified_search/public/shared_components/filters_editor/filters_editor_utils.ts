@@ -108,15 +108,14 @@ export const getFilterByPath = (filters: Filter[], path: string): Filter =>
 
 export const addFilter = (
   filters: Filter[],
+  filter: Filter,
   path: string,
-  dataViewId: string | undefined,
   conditionalType: ConditionTypes
 ) => {
   const newFilters = [...filters];
   const pathInArray = getPathInArray(path);
   const { targetArray, parentConditionType } = getContainerMetaByPath(newFilters, pathInArray);
 
-  const newFilter = buildEmptyFilter(false, dataViewId);
   const selector = pathInArray[pathInArray.length - 1];
 
   if (parentConditionType !== conditionalType) {
@@ -125,11 +124,11 @@ export const addFilter = (
       1,
       buildConditionalFilter(conditionalType === ConditionTypes.AND ? 'and' : 'or', [
         targetArray[selector],
-        newFilter,
+        filter,
       ])
     );
   } else {
-    targetArray.splice(selector + 1, 0, newFilter);
+    targetArray.splice(selector + 1, 0, filter);
   }
 
   return newFilters;
@@ -156,4 +155,26 @@ export const updateFilter = (
   filter?: Filter
 ) => {
   return [...filters];
+};
+
+export const moveFilter = (
+  filters: Filter[],
+  from: string,
+  to: string,
+  conditionalType: ConditionTypes
+) => {
+  const newFilters = [...filters];
+  const movingFilter = getFilterByPath(newFilters, from);
+
+  let resultFilters = newFilters;
+
+  if (getPathInArray(to).length > 1) {
+    const newFilterWithFilter = addFilter(resultFilters, movingFilter, to, conditionalType);
+    resultFilters = removeFilter(newFilterWithFilter, from);
+  } else {
+    const newFiltersWithoutFilter = removeFilter(resultFilters, from);
+    resultFilters = addFilter(newFiltersWithoutFilter, movingFilter, to, conditionalType);
+  }
+
+  return resultFilters;
 };

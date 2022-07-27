@@ -12,7 +12,7 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { Path } from './filter_editors_types';
 import type { Operator } from '../../filter_bar/filter_editor/lib/filter_operators';
 import type { ConditionTypes } from './filters_editor_condition_types';
-import { addFilter, removeFilter, updateFilter } from './filters_editor_utils';
+import { addFilter, moveFilter, removeFilter, updateFilter } from './filters_editor_utils';
 
 /** @internal **/
 export interface FiltersEditorState {
@@ -22,7 +22,7 @@ export interface FiltersEditorState {
 /** @internal **/
 export interface AddFilterPayload {
   path: Path;
-  dataViewId: string | undefined;
+  filter: Filter;
   conditionalType: ConditionTypes;
 }
 
@@ -43,8 +43,9 @@ export interface RemoveFilterPayload {
 
 /** @internal **/
 export interface MoveFilterPayload {
-  path: Path;
-  filter: Filter;
+  pathFrom: Path;
+  pathTo: Path;
+  conditionalType: ConditionTypes;
 }
 
 /** @internal **/
@@ -63,8 +64,8 @@ export const filtersEditorReducer: Reducer<FiltersEditorState, FiltersEditorActi
       return {
         filters: addFilter(
           state.filters,
+          action.payload.filter,
           action.payload.path,
-          action.payload.dataViewId,
           action.payload.conditionalType
         ),
       };
@@ -87,9 +88,16 @@ export const filtersEditorReducer: Reducer<FiltersEditorState, FiltersEditorActi
         ...state,
         filters: removeFilter(state.filters, action.payload.path),
       };
-    // todo: needs for D&D?
     case 'moveFilter':
-      return state;
+      return {
+        ...state,
+        filters: moveFilter(
+          state.filters,
+          action.payload.pathFrom,
+          action.payload.pathTo,
+          action.payload.conditionalType
+        ),
+      };
     default:
       throw new Error('wrong action');
   }
