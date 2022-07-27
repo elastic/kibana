@@ -231,16 +231,14 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "cases.attributes.tags",
                 },
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "tag1",
-                },
-                Object {
-                  "type": "literal",
-                  "value": false,
                 },
               ],
               "function": "is",
@@ -249,16 +247,14 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "cases.attributes.tags",
                 },
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "tag2",
-                },
-                Object {
-                  "type": "literal",
-                  "value": false,
                 },
               ],
               "function": "is",
@@ -278,16 +274,14 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "cases.attributes.created_by.username",
                 },
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "bob",
-                },
-                Object {
-                  "type": "literal",
-                  "value": false,
                 },
               ],
               "function": "is",
@@ -296,16 +290,14 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "cases.attributes.created_by.username",
                 },
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "sam",
-                },
-                Object {
-                  "type": "literal",
-                  "value": false,
                 },
               ],
               "function": "is",
@@ -323,16 +315,14 @@ describe('utils', () => {
         Object {
           "arguments": Array [
             Object {
+              "isQuoted": false,
               "type": "literal",
               "value": "cases.attributes.owner",
             },
             Object {
+              "isQuoted": false,
               "type": "literal",
               "value": "observability",
-            },
-            Object {
-              "type": "literal",
-              "value": false,
             },
           ],
           "function": "is",
@@ -346,16 +336,14 @@ describe('utils', () => {
         Object {
           "arguments": Array [
             Object {
+              "isQuoted": false,
               "type": "literal",
               "value": "cases.attributes.status",
             },
             Object {
+              "isQuoted": false,
               "type": "literal",
               "value": "open",
-            },
-            Object {
-              "type": "literal",
-              "value": false,
             },
           ],
           "function": "is",
@@ -370,16 +358,14 @@ describe('utils', () => {
         Object {
           "arguments": Array [
             Object {
+              "isQuoted": false,
               "type": "literal",
               "value": "cases.attributes.severity",
             },
             Object {
+              "isQuoted": false,
               "type": "literal",
               "value": "critical",
-            },
-            Object {
-              "type": "literal",
-              "value": false,
             },
           ],
           "function": "is",
@@ -395,11 +381,13 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "cases.attributes.created_at",
                 },
                 "gte",
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "now-1M",
                 },
@@ -410,11 +398,13 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "cases.attributes.created_at",
                 },
                 "lte",
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "now",
                 },
@@ -443,16 +433,14 @@ describe('utils', () => {
                 Object {
                   "arguments": Array [
                     Object {
+                      "isQuoted": false,
                       "type": "literal",
                       "value": "cases.attributes.tags",
                     },
                     Object {
+                      "isQuoted": false,
                       "type": "literal",
                       "value": "tag1",
-                    },
-                    Object {
-                      "type": "literal",
-                      "value": false,
                     },
                   ],
                   "function": "is",
@@ -461,16 +449,14 @@ describe('utils', () => {
                 Object {
                   "arguments": Array [
                     Object {
+                      "isQuoted": false,
                       "type": "literal",
                       "value": "cases.attributes.tags",
                     },
                     Object {
+                      "isQuoted": false,
                       "type": "literal",
                       "value": "tag2",
-                    },
-                    Object {
-                      "type": "literal",
-                      "value": false,
                     },
                   ],
                   "function": "is",
@@ -483,16 +469,14 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "cases.attributes.created_by.username",
                 },
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "sam",
-                },
-                Object {
-                  "type": "literal",
-                  "value": false,
                 },
               ],
               "function": "is",

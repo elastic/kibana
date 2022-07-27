@@ -1055,6 +1055,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       </>
     );
   },
+  getMaxPossibleNumValues: (column) => column.params.size + (column.params.otherBucket ? 1 : 0),
 };
 function getLabelForRankFunctions(operationType: string) {
   switch (operationType) {

@@ -114,7 +114,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       webCrawlerReference: `${APP_SEARCH_DOCS}web-crawler-reference.html`,
     },
     enterpriseSearch: {
+      bulkApi: `${ELASTICSEARCH_DOCS}docs-bulk.html`,
       configuration: `${ENTERPRISE_SEARCH_DOCS}configuration.html`,
+      languageAnalyzers: `${ELASTICSEARCH_DOCS}analysis-lang-analyzer.html`,
       licenseManagement: `${ENTERPRISE_SEARCH_DOCS}license-management.html`,
       mailService: `${ENTERPRISE_SEARCH_DOCS}mailer-configuration.html`,
       troubleshootSetup: `${ENTERPRISE_SEARCH_DOCS}troubleshoot-setup.html`,
@@ -618,6 +620,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       learnMoreBlog: `${ELASTIC_WEBSITE_URL}blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic`,
       apiKeysLearnMore: `${KIBANA_DOCS}api-keys.html`,
       onPremRegistry: `${FLEET_DOCS}air-gapped.html`,
+      packageSignatures: `${FLEET_DOCS}package-signatures.html`,
       secureLogstash: `${FLEET_DOCS}secure-logstash-connections.html`,
       agentPolicy: `${FLEET_DOCS}agent-policy.html`,
     },

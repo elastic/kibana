@@ -38,6 +38,7 @@ import { useRuleIndices } from '../../../../detections/containers/detection_engi
 import {
   hasEqlSequenceQuery,
   isEqlRule,
+  isNewTermsRule,
   isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
 import { useFetchIndex } from '../../../containers/source';
@@ -370,7 +371,9 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
               )}
               {getExceptionBuilderComponentLazy({
                 allowLargeValueLists:
-                  !isEqlRule(maybeRule?.type) && !isThresholdRule(maybeRule?.type),
+                  !isEqlRule(maybeRule?.type) &&
+                  !isThresholdRule(maybeRule?.type) &&
+                  !isNewTermsRule(maybeRule?.type),
                 httpService: http,
                 autocompleteService: unifiedSearch.autocomplete,
                 exceptionListItems: [exceptionItem],
