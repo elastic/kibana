@@ -10,7 +10,7 @@ import {
   EuiHeaderSection,
   EuiHeaderSectionItem,
 } from '@elastic/eui';
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { createPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { i18n } from '@kbn/i18n';
@@ -71,6 +71,11 @@ export const GlobalHeader = React.memo(
     }, [portalNode, setHeaderActionMenu, theme.theme$]);
 
     const { isTourShown, endTour } = useTourContext();
+    const closeOnboardingTourIfShown = useCallback(() => {
+      if (isTourShown) {
+        endTour();
+      }
+    }, [isTourShown, endTour]);
     return (
       <InPortal node={portalNode}>
         <EuiHeaderSection side="right">
@@ -87,11 +92,7 @@ export const GlobalHeader = React.memo(
                 data-test-subj="add-data"
                 href={href}
                 iconType="indexOpen"
-                onClick={() => {
-                  if (isTourShown) {
-                    endTour();
-                  }
-                }}
+                onClick={closeOnboardingTourIfShown}
               >
                 {BUTTON_ADD_DATA}
               </EuiHeaderLink>
