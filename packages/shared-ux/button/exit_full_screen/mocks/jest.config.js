@@ -8,6 +8,6 @@
 
 module.exports = {
   preset: '@kbn/test/jest_node',
-  rootDir: '../../../..',
+  rootDir: '../../../../..',
   roots: ['<rootDir>/packages/shared-ux/button/exit_full_screen/mocks'],
 };
