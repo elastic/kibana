@@ -9,24 +9,11 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type {
+  SavedObjectsRequestHandlerContext,
   ISavedObjectTypeRegistry,
   SavedObjectsClientProviderOptions,
-  ISavedObjectsExporter,
-  ISavedObjectsImporter,
 } from '@kbn/core-saved-objects-server';
 import type { InternalSavedObjectsServiceStart } from './saved_objects_service';
-
-/**
- * Core's `savedObjects` request handler context.
- * @public
- */
-export interface SavedObjectsRequestHandlerContext {
-  client: SavedObjectsClientContract;
-  typeRegistry: ISavedObjectTypeRegistry;
-  getClient: (options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
-  getExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;
-  getImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
-}
 
 /**
  * The {@link SavedObjectsRequestHandlerContext} implementation.

@@ -44,6 +44,7 @@ export type {
   SavedObjectsMigrationLogger,
   SavedObjectMigrationFn,
 } from './migration';
+export type { SavedObjectsRequestHandlerContext } from './request_handler_context';
 export type {
   SavedObjectsTypeManagementDefinition,
   SavedObjectsExportablePredicate,

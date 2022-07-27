@@ -30,4 +30,3 @@ export { mergeSavedObjectMigrationMaps } from './migrations';
 export { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects_config';
 export { SavedObjectTypeRegistry } from './saved_objects_type_registry';
 export { CoreSavedObjectsRouteHandlerContext } from './saved_objects_route_handler_context';
-export type { SavedObjectsRequestHandlerContext } from './saved_objects_route_handler_context';
