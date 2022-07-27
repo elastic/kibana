@@ -16,7 +16,7 @@ import { SupportedUserActionTypes } from '../../components/user_actions/types';
 
 export interface AttachmentViewObject<Props = {}> {
   type?: SupportedUserActionTypes;
-  timelineIcon?: EuiCommentProps['timelineIcon'];
+  timelineAvatar?: EuiCommentProps['timelineAvatar'];
   actions?: EuiCommentProps['actions'];
   event?: EuiCommentProps['event'];
   children?: React.LazyExoticComponent<React.FC<Props>>;
