@@ -37,8 +37,8 @@
   // make sure docs are rendered in front of monaco
   z-index: 1;
   background-color: $euiColorLightestShade;
-  border-bottom-right-radius: 6px;
-  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: $euiBorderRadius;
+  border-bottom-left-radius: $euiBorderRadius;
 }
 
 .lnsFormula__editorHeaderGroup,

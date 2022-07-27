@@ -19,6 +19,7 @@ import {
   EuiColorPickerSwatch,
   EuiButtonIcon,
   EuiFieldNumberProps,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import {
@@ -111,6 +112,8 @@ export function ColorRangeItem({
   const ActionButton = getActionButton(mode);
   const isValid = validation?.isValid ?? true;
 
+  const { euiTheme } = useEuiTheme();
+
   const onLeaveFocus = useCallback(
     (e: FocusEvent<HTMLDivElement>) => {
       const prevStartValue = colorRanges[index - 1]?.start ?? Number.NEGATIVE_INFINITY;
@@ -173,7 +176,7 @@ export function ColorRangeItem({
                 <EuiColorPickerSwatch
                   color={colorRange.color}
                   aria-label={selectNewColorText}
-                  style={{ width: '32px', height: '32px' }}
+                  style={{ width: euiTheme.size.xl, height: euiTheme.size.xl }}
                 />
               ) : (
                 <EuiButtonIcon
@@ -194,7 +197,7 @@ export function ColorRangeItem({
             isInvalid={!isColorValid}
           />
         ) : (
-          <EuiIcon type={RelatedIcon} size="m" color="#ABB4C4" />
+          <EuiIcon type={RelatedIcon} size="m" color={euiTheme.colors.disabled} />
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={true}>

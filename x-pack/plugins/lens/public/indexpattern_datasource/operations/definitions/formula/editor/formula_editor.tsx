@@ -672,7 +672,7 @@ export function FormulaEditor({
         className="lnsIndexPatternDimensionEditor--shaded"
         css={css`
           border: ${!isFullscreen ? euiTheme.border.thin : 'none'};
-          border-radius: 6px;
+          border-radius: ${euiTheme.border.radius.medium};
           height: ${isFullscreen ? '100%' : 'auto'};
         `}
       >
