@@ -1,3 +1,3 @@
 # @kbn/core-mount-utils-browser-internal
 
-This package contains the implmentation and tests for Core's browser-side mount utilities.
+This package contains the implementation and tests for Core's browser-side mount utilities.

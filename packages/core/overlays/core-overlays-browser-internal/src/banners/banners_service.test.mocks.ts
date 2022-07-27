@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { type IOverlayBannersStart } from './banners_service';
+import type { IOverlayBannersStart } from './banners_service';
 
 // internal duplicate of public mock for `createStartContractMock`
 export const createStartContractMock = () => {
