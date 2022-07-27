@@ -8,11 +8,11 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import { OverlayService } from './overlay_service';
+import { OverlayService } from '@kbn/core-overlays-browser-internal';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
-import { overlayBannersServiceMock } from './banners/banners_service.mock';
-import { overlayFlyoutServiceMock } from './flyout/flyout_service.mock';
-import { overlayModalServiceMock } from './modal/modal_service.mock';
+import { overlayBannersServiceMock } from './banners_service.mock';
+import { overlayFlyoutServiceMock } from './flyout_service.mock';
+import { overlayModalServiceMock } from './modal_service.mock';
 
 const createStartContractMock = () => {
   const overlayStart = overlayModalServiceMock.createStartContract();

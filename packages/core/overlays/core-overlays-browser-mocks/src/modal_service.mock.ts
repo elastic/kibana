@@ -6,29 +6,30 @@
  * Side Public License, v 1.
  */
 
-import { OverlayFlyoutStart } from '@kbn/core-overlays-browser';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { FlyoutService } from './flyout_service';
+import type { OverlayModalStart } from '@kbn/core-overlays-browser';
+import { ModalService } from '@kbn/core-overlays-browser-internal';
 
 const createStartContractMock = () => {
-  const startContract: jest.Mocked<OverlayFlyoutStart> = {
+  const startContract: jest.Mocked<OverlayModalStart> = {
     open: jest.fn().mockReturnValue({
       close: jest.fn(),
       onClose: Promise.resolve(),
     }),
+    openConfirm: jest.fn().mockResolvedValue(true),
   };
   return startContract;
 };
 
 const createMock = () => {
-  const mocked: jest.Mocked<PublicMethodsOf<FlyoutService>> = {
+  const mocked: jest.Mocked<PublicMethodsOf<ModalService>> = {
     start: jest.fn(),
   };
   mocked.start.mockReturnValue(createStartContractMock());
   return mocked;
 };
 
-export const overlayFlyoutServiceMock = {
+export const overlayModalServiceMock = {
   create: createMock,
   createStartContract: createStartContractMock,
 };
