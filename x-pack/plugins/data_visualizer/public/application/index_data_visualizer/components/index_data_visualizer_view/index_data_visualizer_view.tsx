@@ -155,8 +155,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     if (dataVisualizerProps?.currentSavedSearch !== undefined) {
       setCurrentSavedSearch(dataVisualizerProps?.currentSavedSearch);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataVisualizerProps?.currentSavedSearch?.id]);
+  }, [dataVisualizerProps?.currentSavedSearch]);
 
   useEffect(() => {
     if (!currentDataView.isTimeBased()) {
@@ -305,16 +304,19 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     setDataVisualizerListState({ ...dataVisualizerListState, probability: value });
   };
 
-  useEffect(() => {
-    return () => {
-      // We want to clear all filters that have not been pinned globally
-      // when navigating to other pages
-      data.query.filterManager
-        .getFilters()
-        .filter((f) => f.$state?.store === FilterStateStore.APP_STATE)
-        .forEach((f) => data.query.filterManager.removeFilter(f));
-    };
-  }, [data.query.filterManager]);
+  useEffect(
+    function clearFiltersOnLeave() {
+      return () => {
+        // We want to clear all filters that have not been pinned globally
+        // when navigating to other pages
+        data.query.filterManager
+          .getFilters()
+          .filter((f) => f.$state?.store === FilterStateStore.APP_STATE)
+          .forEach((f) => data.query.filterManager.removeFilter(f));
+      };
+    },
+    [data.query.filterManager]
+  );
 
   useEffect(() => {
     // Force refresh on index pattern change

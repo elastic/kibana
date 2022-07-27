@@ -125,16 +125,20 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
     ? overallDocStats.totalCount + selectedDocStats.totalCount
     : overallDocStats.totalCount;
 
-  useEffect(() => {
-    return () => {
-      // We want to clear all filters that have not been pinned globally
-      // when navigating to other pages
-      dataService.query.filterManager
-        .getFilters()
-        .filter((f) => f.$state?.store === FilterStateStore.APP_STATE)
-        .forEach((f) => dataService.query.filterManager.removeFilter(f));
-    };
-  }, [dataService.query.filterManager]);
+  useEffect(
+    // TODO: Consolidate this hook/function with with Data visualizer's
+    function clearFiltersOnLeave() {
+      return () => {
+        // We want to clear all filters that have not been pinned globally
+        // when navigating to other pages
+        dataService.query.filterManager
+          .getFilters()
+          .filter((f) => f.$state?.store === FilterStateStore.APP_STATE)
+          .forEach((f) => dataService.query.filterManager.removeFilter(f));
+      };
+    },
+    [dataService.query.filterManager]
+  );
 
   const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
 
