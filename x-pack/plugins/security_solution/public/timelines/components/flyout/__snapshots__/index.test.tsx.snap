@@ -226,11 +226,11 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPopover euiPopover--anchorDownRight"
+            class="euiPopover emotion-euiPopover"
             id="timelineSettingsPopover"
           >
             <div
-              class="euiPopover__anchor"
+              class="euiPopover__anchor css-16vtueo-render"
             >
               <button
                 aria-label="Add new timeline or template"
@@ -386,11 +386,11 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
                 </div>
               </div>
               <div
-                class="euiPopover euiPopover--anchorDownLeft"
+                class="euiPopover emotion-euiPopover"
                 id="addFieldsPopover"
               >
                 <div
-                  class="euiPopover__anchor"
+                  class="euiPopover__anchor css-16vtueo-render"
                 >
                   <button
                     class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"

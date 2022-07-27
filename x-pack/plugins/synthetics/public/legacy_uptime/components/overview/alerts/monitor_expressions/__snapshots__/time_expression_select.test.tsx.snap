@@ -8,11 +8,11 @@ exports[`TimeExpressionSelect component should renders against props 1`] = `
     class="euiFlexItem euiFlexItem--flexGrowZero"
   >
     <div
-      class="euiPopover euiPopover--anchorDownLeft"
+      class="euiPopover emotion-euiPopover"
       id="timerange"
     >
       <div
-        class="euiPopover__anchor"
+        class="euiPopover__anchor css-16vtueo-render"
       >
         <span
           aria-label="Open the popover for time range value field"
@@ -38,11 +38,11 @@ exports[`TimeExpressionSelect component should renders against props 1`] = `
     class="euiFlexItem"
   >
     <div
-      class="euiPopover euiPopover--anchorDownLeft"
+      class="euiPopover emotion-euiPopover"
       id="timerange-unit"
     >
       <div
-        class="euiPopover__anchor"
+        class="euiPopover__anchor css-16vtueo-render"
       >
         <span
           aria-label="Open the popover for time range unit select field"
