@@ -29,6 +29,7 @@ import { fetchSql } from './fetch_sql';
 import { fetchChart } from './fetch_chart';
 import { fetchTotalHits } from './fetch_total_hits';
 import { buildDataTableRecord } from '../../../utils/build_data_record';
+import { dataViewMock } from '../../../__mocks__/data_view';
 
 jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),
