@@ -183,7 +183,10 @@ export const AddConnectorInline = ({
             )}
             {actionTypeRegistered && actionTypeRegistered.isExperimental && (
               <EuiFlexItem grow={false}>
-                <EuiBetaBadge label={'boobiez'} tooltipContent={betaBadgeProps.tooltipContent} />
+                <EuiBetaBadge
+                  label={betaBadgeProps.label}
+                  tooltipContent={betaBadgeProps.tooltipContent}
+                />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
