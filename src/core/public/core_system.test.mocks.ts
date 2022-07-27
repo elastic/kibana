@@ -88,7 +88,7 @@ jest.doMock('./chrome', () => ({
 
 export const MockOverlayService = overlayServiceMock.create();
 export const OverlayServiceConstructor = jest.fn().mockImplementation(() => MockOverlayService);
-jest.doMock('./overlays', () => ({
+jest.doMock('@kbn/core-overlays-browser-internal', () => ({
   OverlayService: OverlayServiceConstructor,
 }));
 
