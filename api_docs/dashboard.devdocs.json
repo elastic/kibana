@@ -2377,13 +2377,7 @@
         "description": [],
         "signature": [
           "(savedObjectClient: Pick<",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.ISavedObjectsRepository",
-            "text": "ISavedObjectsRepository"
-          },
+          "ISavedObjectsRepository",
           ", \"find\">, embeddableType: string) => Promise<{ [key: string]: ",
           "Serializable",
           "; }[]>"
@@ -2400,13 +2394,7 @@
             "description": [],
             "signature": [
               "Pick<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.ISavedObjectsRepository",
-                "text": "ISavedObjectsRepository"
-              },
+              "ISavedObjectsRepository",
               ", \"find\">"
             ],
             "path": "src/plugins/dashboard/server/usage/find_by_value_embeddables.ts",

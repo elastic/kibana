@@ -402,13 +402,7 @@
             "description": [],
             "signature": [
               "<T = unknown>(type: string, id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
+              "SavedObjectsBaseOptions",
               " | undefined) => Promise<",
               "SavedObject",
               "<T>>"
@@ -452,13 +446,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsBaseOptions",
-                    "text": "SavedObjectsBaseOptions"
-                  },
+                  "SavedObjectsBaseOptions",
                   " | undefined"
                 ],
                 "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
@@ -479,29 +467,11 @@
             ],
             "signature": [
               "<T = unknown, A = unknown>(findOptions: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCreatePointInTimeFinderOptions",
-                "text": "SavedObjectsCreatePointInTimeFinderOptions"
-              },
+              "SavedObjectsCreatePointInTimeFinderOptions",
               ", dependencies?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCreatePointInTimeFinderDependencies",
-                "text": "SavedObjectsCreatePointInTimeFinderDependencies"
-              },
+              "SavedObjectsCreatePointInTimeFinderDependencies",
               " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.ISavedObjectsPointInTimeFinder",
-                "text": "ISavedObjectsPointInTimeFinder"
-              },
+              "ISavedObjectsPointInTimeFinder",
               "<T, A>>"
             ],
             "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
@@ -517,13 +487,7 @@
                   "matches interface of corresponding argument of Saved Objects API `createPointInTimeFinder` {@link SavedObjectsCreatePointInTimeFinderOptions }"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsCreatePointInTimeFinderOptions",
-                    "text": "SavedObjectsCreatePointInTimeFinderOptions"
-                  }
+                  "SavedObjectsCreatePointInTimeFinderOptions"
                 ],
                 "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
                 "deprecated": false,
@@ -539,13 +503,7 @@
                   "matches interface of corresponding argument of Saved Objects API `createPointInTimeFinder` {@link SavedObjectsCreatePointInTimeFinderDependencies }"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsCreatePointInTimeFinderDependencies",
-                    "text": "SavedObjectsCreatePointInTimeFinderDependencies"
-                  },
+                  "SavedObjectsCreatePointInTimeFinderDependencies",
                   " | undefined"
                 ],
                 "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",

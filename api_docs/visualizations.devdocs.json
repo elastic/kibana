@@ -2600,6 +2600,8 @@
             "signature": [
               "{ type?: string | undefined; query?: ",
               "Query",
+              " | ",
+              "AggregateQuery",
               " | undefined; filter?: ",
               "Filter",
               "[] | undefined; sort?: ",
@@ -6761,6 +6763,8 @@
             "signature": [
               "{ type?: string | undefined; query?: ",
               "Query",
+              " | ",
+              "AggregateQuery",
               " | undefined; filter?: ",
               "Filter",
               "[] | undefined; sort?: ",

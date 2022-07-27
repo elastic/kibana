@@ -2,7 +2,116 @@
   "id": "expressionMetricVis",
   "client": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "expressionMetricVis",
+        "id": "def-public.getDataBoundsForPalette",
+        "type": "Function",
+        "tags": [],
+        "label": "getDataBoundsForPalette",
+        "description": [],
+        "signature": [
+          "(accessors: { metric: string; max?: string | undefined; breakdownBy?: string | undefined; }, data?: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          " | undefined, rowNumber?: number | undefined) => { min: number; max: any; }"
+        ],
+        "path": "src/plugins/chart_expressions/expression_metric/public/utils/palette_data_bounds.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-public.getDataBoundsForPalette.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "accessors",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_metric/public/utils/palette_data_bounds.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressionMetricVis",
+                "id": "def-public.getDataBoundsForPalette.$1.metric",
+                "type": "string",
+                "tags": [],
+                "label": "metric",
+                "description": [],
+                "path": "src/plugins/chart_expressions/expression_metric/public/utils/palette_data_bounds.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "expressionMetricVis",
+                "id": "def-public.getDataBoundsForPalette.$1.max",
+                "type": "string",
+                "tags": [],
+                "label": "max",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/chart_expressions/expression_metric/public/utils/palette_data_bounds.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "expressionMetricVis",
+                "id": "def-public.getDataBoundsForPalette.$1.breakdownBy",
+                "type": "string",
+                "tags": [],
+                "label": "breakdownBy",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/chart_expressions/expression_metric/public/utils/palette_data_bounds.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-public.getDataBoundsForPalette.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_metric/public/utils/palette_data_bounds.ts",
+            "deprecated": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-public.getDataBoundsForPalette.$3",
+            "type": "number",
+            "tags": [],
+            "label": "rowNumber",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_metric/public/utils/palette_data_bounds.ts",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
     "misc": [],
@@ -97,10 +206,10 @@
           },
           {
             "parentPluginId": "expressionMetricVis",
-            "id": "def-common.DimensionsVisParam.breakdownBy",
+            "id": "def-common.DimensionsVisParam.max",
             "type": "CompoundType",
             "tags": [],
-            "label": "breakdownBy",
+            "label": "max",
             "description": [],
             "signature": [
               "string | ",
@@ -118,10 +227,10 @@
           },
           {
             "parentPluginId": "expressionMetricVis",
-            "id": "def-common.DimensionsVisParam.progressMax",
+            "id": "def-common.DimensionsVisParam.breakdownBy",
             "type": "CompoundType",
             "tags": [],
-            "label": "progressMax",
+            "label": "breakdownBy",
             "description": [],
             "signature": [
               "string | ",
@@ -193,6 +302,27 @@
           },
           {
             "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricArguments.max",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "max",
+            "description": [],
+            "signature": [
+              "string | ",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.ExpressionValueVisDimension",
+                "text": "ExpressionValueVisDimension"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
             "id": "def-common.MetricArguments.breakdownBy",
             "type": "CompoundType",
             "tags": [],
@@ -227,34 +357,13 @@
           },
           {
             "parentPluginId": "expressionMetricVis",
-            "id": "def-common.MetricArguments.extraText",
+            "id": "def-common.MetricArguments.secondaryPrefix",
             "type": "string",
             "tags": [],
-            "label": "extraText",
+            "label": "secondaryPrefix",
             "description": [],
             "signature": [
               "string | undefined"
-            ],
-            "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "expressionMetricVis",
-            "id": "def-common.MetricArguments.progressMax",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "progressMax",
-            "description": [],
-            "signature": [
-              "string | ",
-              {
-                "pluginId": "visualizations",
-                "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-common.ExpressionValueVisDimension",
-                "text": "ExpressionValueVisDimension"
-              },
-              " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
             "deprecated": false
@@ -268,6 +377,19 @@
             "description": [],
             "signature": [
               "\"horizontal\" | \"vertical\""
+            ],
+            "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricArguments.color",
+            "type": "string",
+            "tags": [],
+            "label": "color",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
             "deprecated": false
@@ -434,10 +556,23 @@
           },
           {
             "parentPluginId": "expressionMetricVis",
-            "id": "def-common.MetricVisParam.extraText",
+            "id": "def-common.MetricVisParam.secondaryPrefix",
             "type": "string",
             "tags": [],
-            "label": "extraText",
+            "label": "secondaryPrefix",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricVisParam.color",
+            "type": "string",
+            "tags": [],
+            "label": "color",
             "description": [],
             "signature": [
               "string | undefined"

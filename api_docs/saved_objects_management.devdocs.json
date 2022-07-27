@@ -438,13 +438,7 @@
         "description": [],
         "signature": [
           "(response: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsImportResponse",
-            "text": "SavedObjectsImportResponse"
-          },
+          "SavedObjectsImportResponse",
           ") => ",
           {
             "pluginId": "savedObjectsManagement",
@@ -465,13 +459,7 @@
             "label": "response",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsImportResponse",
-                "text": "SavedObjectsImportResponse"
-              }
+              "SavedObjectsImportResponse"
             ],
             "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
             "deprecated": false,
@@ -514,45 +502,15 @@
             "label": "error",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsImportConflictError",
-                "text": "SavedObjectsImportConflictError"
-              },
+              "SavedObjectsImportConflictError",
               " | ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsImportAmbiguousConflictError",
-                "text": "SavedObjectsImportAmbiguousConflictError"
-              },
+              "SavedObjectsImportAmbiguousConflictError",
               " | ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsImportUnsupportedTypeError",
-                "text": "SavedObjectsImportUnsupportedTypeError"
-              },
+              "SavedObjectsImportUnsupportedTypeError",
               " | ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsImportMissingReferencesError",
-                "text": "SavedObjectsImportMissingReferencesError"
-              },
+              "SavedObjectsImportMissingReferencesError",
               " | ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsImportUnknownError",
-                "text": "SavedObjectsImportUnknownError"
-              }
+              "SavedObjectsImportUnknownError"
             ],
             "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
             "deprecated": false
@@ -598,13 +556,7 @@
             "label": "successfulImports",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsImportSuccess",
-                "text": "SavedObjectsImportSuccess"
-              },
+              "SavedObjectsImportSuccess",
               "[]"
             ],
             "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
@@ -654,13 +606,7 @@
             "label": "importWarnings",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsImportWarning",
-                "text": "SavedObjectsImportWarning"
-              },
+              "SavedObjectsImportWarning",
               "[]"
             ],
             "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
@@ -797,13 +743,7 @@
             "label": "namespaceType",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsNamespaceType",
-                "text": "SavedObjectsNamespaceType"
-              },
+              "SavedObjectsNamespaceType",
               " | undefined"
             ],
             "path": "src/plugins/saved_objects_management/common/types.ts",
@@ -1157,13 +1097,7 @@
             "description": [],
             "signature": [
               "{ icon: string; title: string; namespaceType: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsNamespaceType",
-                "text": "SavedObjectsNamespaceType"
-              },
+              "SavedObjectsNamespaceType",
               "; hiddenType: boolean; }"
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
@@ -1582,13 +1516,7 @@
             "label": "namespaceType",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsNamespaceType",
-                "text": "SavedObjectsNamespaceType"
-              },
+              "SavedObjectsNamespaceType",
               " | undefined"
             ],
             "path": "src/plugins/saved_objects_management/common/types.ts",
@@ -1908,13 +1836,7 @@
             "label": "namespaceType",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsNamespaceType",
-                "text": "SavedObjectsNamespaceType"
-              },
+              "SavedObjectsNamespaceType",
               " | undefined"
             ],
             "path": "src/plugins/saved_objects_management/common/types.ts",

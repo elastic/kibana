@@ -9057,6 +9057,39 @@
       },
       {
         "parentPluginId": "embeddable",
+        "id": "def-public.SelfStyledEmbeddable",
+        "type": "Interface",
+        "tags": [],
+        "label": "SelfStyledEmbeddable",
+        "description": [
+          "\nAll embeddables that implement this interface will be able to configure\nthe style of their containing panels"
+        ],
+        "path": "src/plugins/embeddable/public/lib/self_styled_embeddable/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.SelfStyledEmbeddable.getSelfStyledOptions",
+            "type": "Function",
+            "tags": [],
+            "label": "getSelfStyledOptions",
+            "description": [
+              "\nGets the embeddable's style configuration"
+            ],
+            "signature": [
+              "() => ",
+              "SelfStyledOptions"
+            ],
+            "path": "src/plugins/embeddable/public/lib/self_styled_embeddable/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
         "id": "def-public.ValueClickContext",
         "type": "Interface",
         "tags": [],

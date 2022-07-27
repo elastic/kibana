@@ -612,13 +612,7 @@
             "description": [],
             "signature": [
               "{ savedObjects: { client: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsClientContract",
-                "text": "SavedObjectsClientContract"
-              },
+              "SavedObjectsClientContract",
               "; typeRegistry: ",
               {
                 "pluginId": "core",
