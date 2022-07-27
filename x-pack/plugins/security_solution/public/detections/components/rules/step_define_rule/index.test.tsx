@@ -38,7 +38,6 @@ jest.mock('react-router-dom', () => {
 test('aggregatableFields', function () {
   expect(
     aggregatableFields([
-      // @ts-expect-error
       {
         name: 'error.message',
         type: 'string',
@@ -54,7 +53,6 @@ test('aggregatableFields', function () {
 test('aggregatableFields with aggregatable: true', function () {
   expect(
     aggregatableFields([
-      // @ts-expect-error
       {
         name: 'error.message',
         type: 'string',
@@ -63,7 +61,6 @@ test('aggregatableFields with aggregatable: true', function () {
         aggregatable: false,
         readFromDocValues: false,
       },
-      // @ts-expect-error
       {
         name: 'file.path',
         type: 'string',

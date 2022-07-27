@@ -301,6 +301,15 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   useEffect(() => {
     const { fields } = indexPattern;
+    /**
+     * Typecasting to BrowserField because fields is
+     * typed as DataViewFieldBase[] which does not have
+     * the 'aggregatable' property, however the type is incorrect
+     *
+     * fields does contain elements with the aggregatable property.
+     * We will need to determine where these types are defined and
+     * figure out where the discrepency is.
+     */
     setAggregatableFields(aggregatableFields(fields as BrowserField[]));
   }, [indexPattern]);
 
@@ -858,12 +867,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 };
 export const StepDefineRule = memo(StepDefineRuleComponent);
 
-export function aggregatableFields(browserFields: BrowserField[]): BrowserField[] {
-  const fields: BrowserField[] = [];
-  for (const field of browserFields) {
-    if (field.aggregatable === true) {
-      fields.push(field);
-    }
-  }
-  return fields;
+export function aggregatableFields<T extends { aggregatable: boolean }>(browserFields: T[]): T[] {
+  return browserFields.filter((field) => field.aggregatable === true);
 }
