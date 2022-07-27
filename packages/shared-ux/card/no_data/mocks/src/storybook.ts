@@ -20,10 +20,16 @@ type Arguments = PropArguments & ServiceArguments;
  */
 export type Params = Record<keyof Arguments, any>;
 
+const redirectMock = new RedirectAppLinksStorybookMock();
+
+/**
+ * Storybook mocks for the `NoDataDataCard` component.
+ */
 export class StorybookMock extends AbstractStorybookMock<
+  NoDataCardProps,
+  NoDataCardServices,
   PropArguments,
-  ServiceArguments,
-  NoDataCardServices
+  ServiceArguments
 > {
   propArguments = {
     category: {
@@ -59,7 +65,16 @@ export class StorybookMock extends AbstractStorybookMock<
     },
   };
 
-  dependencies = [RedirectAppLinksStorybookMock];
+  dependencies = [redirectMock];
+
+  getProps(params?: Params): NoDataCardProps {
+    return {
+      category: this.getArgumentValue('category', params),
+      title: this.getArgumentValue('title', params),
+      description: this.getArgumentValue('description', params),
+      button: this.getArgumentValue('button', params),
+    };
+  }
 
   getServices(params: Params): NoDataCardServices {
     const { canAccessFleet } = params;
@@ -70,7 +85,7 @@ export class StorybookMock extends AbstractStorybookMock<
         action('addBasePath')(path);
         return path;
       },
-      ...RedirectAppLinksStorybookMock.getServices(),
+      ...redirectMock.getServices(),
     };
   }
 }

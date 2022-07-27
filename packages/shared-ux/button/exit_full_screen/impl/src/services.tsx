@@ -40,7 +40,9 @@ export const ExitFullScreenButtonKibanaProvider: FC<ExitFullScreenButtonKibanaDe
   return (
     <ExitFullScreenButtonContext.Provider
       value={{
-        setIsFullscreen: services.coreStart.chrome.setIsVisible,
+        setIsFullscreen: (isFullscreen: boolean) => {
+          services.coreStart.chrome.setIsVisible(!isFullscreen);
+        },
       }}
     >
       {children}

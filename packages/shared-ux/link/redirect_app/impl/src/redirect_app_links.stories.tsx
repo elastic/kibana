@@ -15,7 +15,7 @@ import { RedirectAppLinks as Component } from './redirect_app_links';
 import mdx from '../README.mdx';
 
 export default {
-  title: 'Link',
+  title: 'Link/Redirect App Links',
   description:
     'An "area of effect" component which intercepts clicks on anchor elements and redirects them to Kibana solutions without a page refresh.',
   parameters: {
@@ -25,10 +25,12 @@ export default {
   },
 };
 
+const mock = new RedirectAppLinksStorybookMock();
+
 export const RedirectAppLinks = () => {
   return (
     <>
-      <Component {...RedirectAppLinksStorybookMock.getServices()}>
+      <Component {...mock.getProps()}>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButton
@@ -65,4 +67,4 @@ export const RedirectAppLinks = () => {
   );
 };
 
-RedirectAppLinks.argTypes = RedirectAppLinksStorybookMock.getArgumentTypes();
+RedirectAppLinks.argTypes = mock.getArgumentTypes();

@@ -27,7 +27,7 @@ export const ExitFullScreenButton = ({ onExit = () => {}, toggleChrome = true }:
 
   const onClick = useCallback(() => {
     if (toggleChrome) {
-      setIsFullscreen(true);
+      setIsFullscreen(false);
     }
     onExit();
   }, [onExit, setIsFullscreen, toggleChrome]);
@@ -45,7 +45,7 @@ export const ExitFullScreenButton = ({ onExit = () => {}, toggleChrome = true }:
     document.addEventListener('keydown', onKeyDown, false);
 
     if (toggleChrome) {
-      setIsFullscreen(false);
+      setIsFullscreen(true);
     }
 
     // cleanup the listener
@@ -56,7 +56,7 @@ export const ExitFullScreenButton = ({ onExit = () => {}, toggleChrome = true }:
 
   useEffect(() => {
     if (!isMounted() && toggleChrome) {
-      setIsFullscreen(true);
+      setIsFullscreen(false);
     }
   }, [isMounted, setIsFullscreen, toggleChrome]);
 

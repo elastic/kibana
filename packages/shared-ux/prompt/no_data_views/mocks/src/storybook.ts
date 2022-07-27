@@ -8,7 +8,10 @@
 
 import { action } from '@storybook/addon-actions';
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
-import { NoDataViewsPromptServices } from '@kbn/shared-ux-prompt-no-data-views-types';
+import {
+  NoDataViewsPromptServices,
+  NoDataViewsPromptProps,
+} from '@kbn/shared-ux-prompt-no-data-views-types';
 
 type ServiceArguments = Pick<
   NoDataViewsPromptServices,
@@ -18,9 +21,10 @@ type ServiceArguments = Pick<
 export type Params = Record<keyof ServiceArguments, any>;
 
 export class StorybookMock extends AbstractStorybookMock<
+  NoDataViewsPromptProps,
+  NoDataViewsPromptServices,
   {},
-  ServiceArguments,
-  NoDataViewsPromptServices
+  ServiceArguments
 > {
   propArguments = {};
   serviceArguments = {
@@ -34,6 +38,12 @@ export class StorybookMock extends AbstractStorybookMock<
     },
   };
   dependencies = [];
+
+  getProps() {
+    return {
+      onDataViewCreated: action('onDataViewCreated'),
+    };
+  }
 
   getServices(params: Params): NoDataViewsPromptServices {
     const { canCreateNewDataView, dataViewsDocLink } = params;

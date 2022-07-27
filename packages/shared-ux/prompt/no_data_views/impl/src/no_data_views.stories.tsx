@@ -6,16 +6,12 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { action } from '@storybook/addon-actions';
 
 import {
   NoDataViewsPromptStorybookMock,
-  NoDataViewsPromptComponentStorybookMock,
   NoDataViewsPromptStorybookParams,
-  NoDataViewsPromptComponentStorybookParams,
 } from '@kbn/shared-ux-prompt-no-data-views-mocks';
 
-import { NoDataViewsPrompt as NoDataViewsPromptComponent } from './no_data_views.component';
 import { NoDataViewsPrompt } from './no_data_views';
 import { NoDataViewsPromptProvider } from './services';
 
@@ -31,18 +27,14 @@ export default {
   },
 };
 
+const mock = new NoDataViewsPromptStorybookMock();
+
 export const NoDataViews = (params: NoDataViewsPromptStorybookParams) => {
   return (
-    <NoDataViewsPromptProvider {...NoDataViewsPromptStorybookMock.getServices(params)}>
-      <NoDataViewsPrompt onDataViewCreated={action('onDataViewCreated')} />
+    <NoDataViewsPromptProvider {...mock.getServices(params)}>
+      <NoDataViewsPrompt {...mock.getProps()} />
     </NoDataViewsPromptProvider>
   );
 };
 
-NoDataViews.argTypes = NoDataViewsPromptStorybookMock.getArgumentTypes();
-
-export const NoDataViewsComponent = (params: NoDataViewsPromptComponentStorybookParams) => {
-  return <NoDataViewsPromptComponent onClickCreate={action('onClick')} {...params} />;
-};
-
-NoDataViewsComponent.argTypes = NoDataViewsPromptComponentStorybookMock.getArgumentTypes();
+NoDataViews.argTypes = mock.getArgumentTypes();

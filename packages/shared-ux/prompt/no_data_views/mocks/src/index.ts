@@ -8,18 +8,5 @@
 
 export { getNoDataViewsPromptServicesMock } from './jest';
 
+export { StorybookMock as NoDataViewsPromptStorybookMock } from './storybook';
 export type { Params as NoDataViewsPromptStorybookParams } from './storybook';
-export type { Params as NoDataViewsPromptComponentStorybookParams } from './storybook_component';
-
-import { StorybookMock } from './storybook';
-import { StorybookComponentMocks } from './storybook_component';
-
-/**
- * Storybook mocks for the `NoDataViewsPrompt` component.
- */
-export const NoDataViewsPromptStorybookMock = new StorybookMock();
-
-/**
- * Storybook mocks for the `NoDataViewsPromptComponent` component.
- */
-export const NoDataViewsPromptComponentStorybookMock = new StorybookComponentMocks();

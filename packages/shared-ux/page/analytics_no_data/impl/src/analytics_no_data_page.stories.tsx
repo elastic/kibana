@@ -15,6 +15,8 @@ import { AnalyticsNoDataPage as Component } from './analytics_no_data_page';
 import { AnalyticsNoDataPageProvider } from './services';
 import mdx from '../README.mdx';
 
+const mock = new AnalyticsNoDataPageStorybookMock();
+
 export default {
   title: 'No Data/Analytics Page',
   description: 'An Analytics-specific version of KibanaNoDataPage.',
@@ -27,20 +29,20 @@ export default {
 
 export const AnalyticsNoDataPage = (params: AnalyticsNoDataPageStorybookParams) => {
   return (
-    <AnalyticsNoDataPageProvider {...AnalyticsNoDataPageStorybookMock.getServices(params)}>
-      <Component onDataViewCreated={action('onDataViewCreated')} />
+    <AnalyticsNoDataPageProvider {...mock.getServices(params)}>
+      <Component {...mock.getProps()} />
     </AnalyticsNoDataPageProvider>
   );
 };
 
-AnalyticsNoDataPage.argTypes = AnalyticsNoDataPageStorybookMock.getArgumentTypes();
+AnalyticsNoDataPage.argTypes = mock.getArgumentTypes();
 
 export const LoadingState = (params: AnalyticsNoDataPageStorybookParams) => {
   // Simulate loading with a Promise that doesn't resolve.
   const dataCheck = () => new Promise<boolean>((_reject, _resolve) => {});
 
   const services = {
-    ...AnalyticsNoDataPageStorybookMock.getServices(params),
+    ...mock.getServices(params),
     hasESData: dataCheck,
     hasUserDataView: dataCheck,
     hasDataView: dataCheck,

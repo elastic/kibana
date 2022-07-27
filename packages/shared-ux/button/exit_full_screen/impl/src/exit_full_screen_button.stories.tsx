@@ -7,15 +7,17 @@
  */
 
 import React from 'react';
-import { action } from '@storybook/addon-actions';
+import {
+  ExitFullScreenButtonStorybookMock,
+  ExitFullScreenButtonStorybookParams,
+} from '@kbn/shared-ux-button-exit-full-screen-mocks';
 
 import { ExitFullScreenButtonProvider } from './services';
-import { ExitFullScreenButton as ExitFullScreenButtonComponent } from './exit_full_screen_button.component';
-import { ExitFullScreenButton } from './exit_full_screen_button';
+import { ExitFullScreenButton as Component } from './exit_full_screen_button';
 import mdx from '../README.mdx';
 
 export default {
-  title: 'Exit Full Screen Button',
+  title: 'Button/Exit Full Screen Button',
   description:
     'A button that floats over the plugin workspace and allows one to exit "full screen" mode.',
   parameters: {
@@ -25,21 +27,14 @@ export default {
   },
 };
 
-export const ConnectedComponent = ({ toggleChrome = true }: { toggleChrome: boolean }) => {
+const mock = new ExitFullScreenButtonStorybookMock();
+
+export const ExitFullScreenButton = (params: ExitFullScreenButtonStorybookParams) => {
   return (
-    <ExitFullScreenButtonProvider setIsFullscreen={action('setIsFullscreen')}>
-      <ExitFullScreenButton onExit={action('onExit')} toggleChrome={toggleChrome} />
+    <ExitFullScreenButtonProvider {...mock.getServices()}>
+      <Component {...mock.getProps(params)} />
     </ExitFullScreenButtonProvider>
   );
 };
 
-ConnectedComponent.argTypes = {
-  toggleChrome: {
-    control: 'boolean',
-    defaultValue: true,
-  },
-};
-
-export const PureComponent = () => {
-  return <ExitFullScreenButtonComponent onClick={action('onClick')} />;
-};
+ExitFullScreenButton.argTypes = mock.getArgumentTypes();

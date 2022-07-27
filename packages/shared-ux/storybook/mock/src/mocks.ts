@@ -25,16 +25,20 @@ const setTableCategory = <T extends ArgTypes>(args: T, category: 'Props' | 'Serv
   return args;
 };
 
+export type ArgumentParams<PropArguments, ServiceArguments = {}> = Record<
+  keyof PropArguments | keyof ServiceArguments,
+  any
+>;
+
 export abstract class AbstractStorybookMock<
-  PropArguments extends Args,
-  ServiceArguments extends Args,
-  Services
+  Props extends Args,
+  Services extends Args,
+  PropArguments extends Args = {},
+  ServiceArguments extends Args = {}
 > {
   abstract readonly propArguments: ArgTypes<PropArguments>;
   abstract readonly serviceArguments: ArgTypes<ServiceArguments>;
-  abstract readonly dependencies: Array<
-    AbstractStorybookMock<ArgTypes<unknown>, ArgTypes<Partial<Services>>, Partial<Services>>
-  >;
+  abstract readonly dependencies: Array<AbstractStorybookMock<Args, Partial<Services>>>;
 
   getPropArgumentTypes(): ArgTypes<PropArguments> {
     return setTableCategory(this.propArguments, 'Props');
@@ -59,7 +63,15 @@ export abstract class AbstractStorybookMock<
     };
   }
 
-  abstract getServices(
-    params?: Record<keyof PropArguments & keyof ServiceArguments, any>
-  ): Services;
+  protected getArgumentValue(
+    arg: keyof PropArguments | keyof ServiceArguments,
+    params?: ArgumentParams<PropArguments, ServiceArguments>
+  ) {
+    return params && params[arg] !== undefined
+      ? params[arg]
+      : this.getArgumentTypes()[arg].defaultValue;
+  }
+
+  abstract getProps(params?: ArgumentParams<PropArguments>): Props;
+  abstract getServices(params?: ArgumentParams<PropArguments, ServiceArguments>): Services;
 }

@@ -8,7 +8,7 @@
 
 import React, { FC, useRef, MouseEventHandler, useCallback } from 'react';
 
-import type { RedirectAppLinksProps } from '@kbn/shared-ux-link-redirect-app-types';
+import type { RedirectAppLinksComponentProps } from '@kbn/shared-ux-link-redirect-app-types';
 
 import { navigateToUrlClickHandler } from './click_handler';
 
@@ -24,7 +24,7 @@ import { navigateToUrlClickHandler } from './click_handler';
  * </RedirectAppLinks>
  * ```
  */
-export const RedirectAppLinks: FC<RedirectAppLinksProps> = ({
+export const RedirectAppLinks: FC<RedirectAppLinksComponentProps> = ({
   children,
   navigateToUrl,
   currentAppId,

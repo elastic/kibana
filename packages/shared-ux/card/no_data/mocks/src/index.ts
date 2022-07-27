@@ -6,13 +6,7 @@
  * Side Public License, v 1.
  */
 
-export type { Params as NoDataCardStorybookParams } from './storybook';
-
 export { getServicesMock as getNoDataCardServicesMock } from './jest';
 
-import { StorybookMock } from './storybook';
-
-/**
- * Storybook mocks for the `NoDataDataCard` component.
- */
-export const NoDataCardStorybookMock = new StorybookMock();
+export { StorybookMock as NoDataCardStorybookMock } from './storybook';
+export type { Params as NoDataCardStorybookParams } from './storybook';

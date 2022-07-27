@@ -7,10 +7,4 @@
  */
 
 export { getRedirectAppLinksServicesMock } from './jest';
-
-import { StorybookMock } from './storybook';
-
-/**
- * Storybook mocks for the `RedirectAppLinks` component.
- */
-export const RedirectAppLinksStorybookMock = new StorybookMock();
+export { StorybookMock as RedirectAppLinksStorybookMock } from './storybook';

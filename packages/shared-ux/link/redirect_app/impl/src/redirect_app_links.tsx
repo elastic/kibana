@@ -8,7 +8,7 @@
 
 import React, { FC } from 'react';
 import type {
-  RedirectAppLinksServices,
+  RedirectAppLinksProps,
   RedirectAppLinksKibanaDependencies,
 } from '@kbn/shared-ux-link-redirect-app-types';
 
@@ -24,13 +24,11 @@ const isKibanaContract = (services: any): services is RedirectAppLinksKibanaDepe
  * `RedirectAppLinksKibanaProvider` based on the services provided, creating a single component
  * with which consumers can wrap their components or solutions.
  */
-export const RedirectAppLinks: FC<
-  RedirectAppLinksServices | RedirectAppLinksKibanaDependencies
-> = ({ children, ...services }) => {
+export const RedirectAppLinks: FC<RedirectAppLinksProps> = ({ children, ...props }) => {
   const container = <RedirectAppLinksContainer>{children}</RedirectAppLinksContainer>;
 
-  if (isKibanaContract(services)) {
-    const { coreStart } = services;
+  if (isKibanaContract(props)) {
+    const { coreStart } = props;
     return (
       <RedirectAppLinksKibanaProvider {...{ coreStart }}>
         {container}
@@ -38,7 +36,7 @@ export const RedirectAppLinks: FC<
     );
   }
 
-  const { navigateToUrl, currentAppId } = services;
+  const { navigateToUrl, currentAppId } = props;
   return (
     <RedirectAppLinksProvider {...{ currentAppId, navigateToUrl }}>
       {container}

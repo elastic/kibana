@@ -6,19 +6,27 @@
  * Side Public License, v 1.
  */
 
-import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
+import { action } from '@storybook/addon-actions';
+
+import { AbstractStorybookMock, ArgumentParams } from '@kbn/shared-ux-storybook-mock';
 import { KibanaNoDataPageStorybookMock } from '@kbn/shared-ux-page-kibana-no-data-mocks';
 import type { KibanaNoDataPageStorybookParams } from '@kbn/shared-ux-page-kibana-no-data-mocks';
-import type { AnalyticsNoDataPageServices } from '@kbn/shared-ux-page-analytics-no-data-types';
+import type {
+  AnalyticsNoDataPageServices,
+  AnalyticsNoDataPageProps,
+} from '@kbn/shared-ux-page-analytics-no-data-types';
 
 type ServiceArguments = Pick<AnalyticsNoDataPageServices, 'kibanaGuideDocLink'>;
 
-export type Params = Record<keyof ServiceArguments, any> & KibanaNoDataPageStorybookParams;
+export type Params = ArgumentParams<{}, ServiceArguments> & KibanaNoDataPageStorybookParams;
+
+const kibanaNoDataMock = new KibanaNoDataPageStorybookMock();
 
 export class StorybookMock extends AbstractStorybookMock<
+  AnalyticsNoDataPageProps,
+  AnalyticsNoDataPageServices,
   {},
-  ServiceArguments,
-  AnalyticsNoDataPageServices
+  ServiceArguments
 > {
   propArguments = {};
   serviceArguments = {
@@ -27,12 +35,19 @@ export class StorybookMock extends AbstractStorybookMock<
       defaultValue: 'Kibana guide',
     },
   };
-  dependencies = [KibanaNoDataPageStorybookMock];
+
+  dependencies = [kibanaNoDataMock];
 
   getServices(params: Params): AnalyticsNoDataPageServices {
     return {
-      ...KibanaNoDataPageStorybookMock.getServices(params),
       kibanaGuideDocLink: 'Kibana guide',
+      ...kibanaNoDataMock.getServices(params),
+    };
+  }
+
+  getProps() {
+    return {
+      onDataViewCreated: action('onDataViewCreated'),
     };
   }
 }

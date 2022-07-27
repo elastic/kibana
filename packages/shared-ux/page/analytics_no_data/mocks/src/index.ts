@@ -8,11 +8,5 @@
 
 export { getServicesMock as getAnalyticsNoDataPageServicesMock } from './jest';
 
+export { StorybookMock as AnalyticsNoDataPageStorybookMock } from './storybook';
 export type { Params as AnalyticsNoDataPageStorybookParams } from './storybook';
-
-import { StorybookMock } from './storybook';
-
-/**
- * Storybook mocks for the `AnalyticsNoDataPage` component.
- */
-export const AnalyticsNoDataPageStorybookMock = new StorybookMock();

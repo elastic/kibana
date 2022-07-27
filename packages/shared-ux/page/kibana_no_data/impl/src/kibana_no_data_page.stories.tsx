@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { action } from '@storybook/addon-actions';
+
 import { KibanaNoDataPageStorybookMock } from '@kbn/shared-ux-page-kibana-no-data-mocks';
 import type { KibanaNoDataPageStorybookParams } from '@kbn/shared-ux-page-kibana-no-data-mocks';
 
@@ -26,38 +26,24 @@ export default {
   },
 };
 
-const noDataConfig = {
-  solution: 'Analytics',
-  logo: 'logoKibana',
-  action: {
-    elasticAgent: {
-      title: 'Add Integrations',
-    },
-  },
-  docsLink: 'http://docs.elastic.dev',
-};
+const mock = new KibanaNoDataPageStorybookMock();
 
 export const KibanaNoDataPage = (params: KibanaNoDataPageStorybookParams) => {
-  const { solution, logo } = params;
-
   return (
-    <KibanaNoDataPageProvider {...KibanaNoDataPageStorybookMock.getServices(params)}>
-      <Component
-        onDataViewCreated={action('onDataViewCreated')}
-        noDataConfig={{ ...noDataConfig, solution, logo }}
-      />
+    <KibanaNoDataPageProvider {...mock.getServices(params)}>
+      <Component {...mock.getProps(params)} />
     </KibanaNoDataPageProvider>
   );
 };
 
-KibanaNoDataPage.argTypes = KibanaNoDataPageStorybookMock.getArgumentTypes();
+KibanaNoDataPage.argTypes = mock.getArgumentTypes();
 
 export const LoadingState = (params: KibanaNoDataPageStorybookParams) => {
   // Simulate loading with a Promise that doesn't resolve.
   const dataCheck = () => new Promise<boolean>((resolve, reject) => {});
 
   const services = {
-    ...KibanaNoDataPageStorybookMock.getServices(params),
+    ...mock.getServices(params),
     hasESData: dataCheck,
     hasUserDataView: dataCheck,
     hasDataView: dataCheck,
@@ -65,7 +51,7 @@ export const LoadingState = (params: KibanaNoDataPageStorybookParams) => {
 
   return (
     <KibanaNoDataPageProvider {...services}>
-      <Component onDataViewCreated={action('onDataViewCreated')} noDataConfig={noDataConfig} />
+      <Component {...mock.getProps(params)} />
     </KibanaNoDataPageProvider>
   );
 };

@@ -7,8 +7,11 @@
  */
 
 import { servicesFactory } from '@kbn/shared-ux-storybook';
-import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
-import type { KibanaNoDataPageServices } from '@kbn/shared-ux-page-kibana-no-data-types';
+import { AbstractStorybookMock, ArgumentParams } from '@kbn/shared-ux-storybook-mock';
+import type {
+  KibanaNoDataPageServices,
+  KibanaNoDataPageProps,
+} from '@kbn/shared-ux-page-kibana-no-data-types';
 import type { NoDataPageProps } from '@kbn/shared-ux-components';
 
 import {
@@ -20,19 +23,23 @@ import {
   NoDataCardStorybookMock,
   NoDataCardStorybookParams,
 } from '@kbn/shared-ux-card-no-data-mocks';
+import { action } from '@storybook/addon-actions';
 
 type PropArguments = Pick<NoDataPageProps, 'solution' | 'logo'>;
 type ServiceArguments = Pick<KibanaNoDataPageServices, 'hasUserDataView' | 'hasESData'>;
-type Arguments = PropArguments & ServiceArguments;
 
-export type Params = NoDataViewsPromptStorybookParams &
+export type Params = ArgumentParams<PropArguments, ServiceArguments> &
   NoDataCardStorybookParams &
-  Record<keyof Arguments, any>;
+  NoDataViewsPromptStorybookParams;
+
+const noDataViewsMock = new NoDataViewsPromptStorybookMock();
+const noDataCardMock = new NoDataCardStorybookMock();
 
 export class StorybookMock extends AbstractStorybookMock<
+  KibanaNoDataPageProps,
+  KibanaNoDataPageServices,
   PropArguments,
-  ServiceArguments,
-  KibanaNoDataPageServices
+  ServiceArguments
 > {
   propArguments = {
     solution: {
@@ -57,7 +64,23 @@ export class StorybookMock extends AbstractStorybookMock<
     },
   };
 
-  dependencies = [NoDataViewsPromptStorybookMock, NoDataCardStorybookMock];
+  dependencies = [noDataViewsMock, noDataCardMock];
+
+  getProps(params: Params) {
+    const { logo, solution } = params;
+    const noDataConfig = {
+      solution: solution || 'Analytics',
+      logo: logo || 'logoKibana',
+      action: {
+        elasticAgent: {
+          title: 'Add Integrations',
+        },
+      },
+      docsLink: 'http://docs.elastic.dev',
+    };
+
+    return { noDataConfig, onDataViewCreated: action('onDataViewCreated') };
+  }
 
   getServices(params: Params): KibanaNoDataPageServices {
     // Workaround to leverage the services package.
@@ -74,8 +97,8 @@ export class StorybookMock extends AbstractStorybookMock<
       ...platform,
       hasESData: () => params.hasESData,
       hasUserDataView: () => params.hasUserDataView,
-      ...NoDataViewsPromptStorybookMock.getServices(params),
-      ...NoDataCardStorybookMock.getServices(params),
+      ...noDataCardMock.getServices(params),
+      ...noDataViewsMock.getServices(params),
     };
   }
 }

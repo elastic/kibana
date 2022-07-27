@@ -8,17 +8,22 @@
 
 import { action } from '@storybook/addon-actions';
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
-import { RedirectAppLinksServices } from '@kbn/shared-ux-link-redirect-app-types';
+import { RedirectAppLinksProps } from '@kbn/shared-ux-link-redirect-app-types';
 
-export class StorybookMock extends AbstractStorybookMock<{}, {}, RedirectAppLinksServices> {
+export class StorybookMock extends AbstractStorybookMock<RedirectAppLinksProps, {}> {
   propArguments = {};
   serviceArguments = {};
   dependencies = [];
 
-  getServices() {
+  getProps() {
     return {
       navigateToUrl: action('navigateToUrl'),
       currentAppId: 'currentAppId',
     };
+  }
+
+  getServices() {
+    // This is an odd case, since the base component also populates services.
+    return { ...this.getProps() };
   }
 }

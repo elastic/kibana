@@ -7,20 +7,23 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
+import { AbstractStorybookMock, ArgumentParams } from '@kbn/shared-ux-storybook-mock';
 import type {
   ExitFullScreenButtonProps as Props,
   ExitFullScreenButtonServices,
 } from '@kbn/shared-ux-button-exit-full-screen-types';
 
 type PropArguments = Pick<Props, 'toggleChrome'>;
+export type Params = ArgumentParams<PropArguments>;
 
-export type Params = Record<keyof PropArguments, any>;
-
+/**
+ * Storybook mocks for the `ExitFullScreenButton` component.
+ */
 export class StorybookMock extends AbstractStorybookMock<
+  Props,
+  ExitFullScreenButtonServices,
   PropArguments,
-  {},
-  ExitFullScreenButtonServices
+  {}
 > {
   propArguments = {
     toggleChrome: {
@@ -31,6 +34,13 @@ export class StorybookMock extends AbstractStorybookMock<
 
   serviceArguments = {};
   dependencies = [];
+
+  getProps(params?: Params): Props {
+    return {
+      toggleChrome: this.getArgumentValue('toggleChrome', params),
+      onExit: action('onExit'),
+    };
+  }
 
   getServices(): ExitFullScreenButtonServices {
     return {

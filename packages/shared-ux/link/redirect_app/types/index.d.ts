@@ -31,8 +31,11 @@ export interface RedirectAppLinksKibanaDependencies {
   };
 }
 
+/** Props for the `RedirectAppLinks` component. */
+export type RedirectAppLinksProps = RedirectAppLinksServices | RedirectAppLinksKibanaDependencies;
+
 /** Props for the `RedirectAppLinksComponent`. */
-export interface RedirectAppLinksProps
+export interface RedirectAppLinksComponentProps
   extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
   navigateToUrl: NavigateToUrl;
   currentAppId?: string | undefined;
