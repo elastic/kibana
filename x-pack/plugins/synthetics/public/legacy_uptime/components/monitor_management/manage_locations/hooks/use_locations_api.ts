@@ -17,26 +17,28 @@ import {
 export const useLocationsAPI = ({ isOpen }: { isOpen: boolean }) => {
   const [formData, setFormData] = useState<PrivateLocation>();
   const [deleteId, setDeleteId] = useState<string>();
+  const [privateLocations, setPrivateLocations] = useState<PrivateLocation[]>([]);
 
   const { savedObjects } = useKibana().services;
 
-  const { data: currentPrivateLocations, loading: fetchLoading } = useFetcher(() => {
-    if (!formData) return getSyntheticsPrivateLocations(savedObjects?.client!);
-    return Promise.resolve(null);
-  }, [formData, deleteId, isOpen]);
+  const { loading: fetchLoading } = useFetcher(async () => {
+    const result = await getSyntheticsPrivateLocations(savedObjects?.client!);
+    setPrivateLocations(result);
+    return result;
+  }, [isOpen]);
 
   const { loading: saveLoading } = useFetcher(async () => {
-    if (currentPrivateLocations && formData) {
-      const existingLocations = currentPrivateLocations.filter((loc) => loc.id !== formData.id);
+    if (privateLocations && formData) {
+      const existingLocations = privateLocations.filter((loc) => loc.id !== formData.agentPolicyId);
 
       const result = await setSyntheticsPrivateLocations(savedObjects?.client!, {
-        locations: [...(existingLocations ?? []), { ...formData, id: formData.policyHostId }],
+        locations: [...(existingLocations ?? []), { ...formData, id: formData.agentPolicyId }],
       });
+      setPrivateLocations(result.locations);
       setFormData(undefined);
       return result;
     }
-    return Promise.resolve(null);
-  }, [formData, currentPrivateLocations]);
+  }, [formData, privateLocations]);
 
   const onSubmit = (data: PrivateLocation) => {
     setFormData(data);
@@ -49,20 +51,18 @@ export const useLocationsAPI = ({ isOpen }: { isOpen: boolean }) => {
   const { loading: deleteLoading } = useFetcher(async () => {
     if (deleteId) {
       const result = await setSyntheticsPrivateLocations(savedObjects?.client!, {
-        locations: (currentPrivateLocations ?? []).filter((loc) => loc.id !== deleteId),
+        locations: (privateLocations ?? []).filter((loc) => loc.id !== deleteId),
       });
+      setPrivateLocations(result.locations);
       setDeleteId(undefined);
       return result;
     }
-    return Promise.resolve(null);
-  }, [deleteId, currentPrivateLocations]);
+  }, [deleteId, privateLocations]);
 
   return {
     onSubmit,
     onDelete,
-    fetchLoading: Boolean(fetchLoading || Boolean(formData)),
-    saveLoading: Boolean(saveLoading),
-    deleteLoading: Boolean(deleteLoading),
-    privateLocations: currentPrivateLocations ?? [],
+    loading: fetchLoading || saveLoading || deleteLoading,
+    privateLocations,
   };
 };

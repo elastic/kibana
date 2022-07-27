@@ -23,6 +23,7 @@ import type {
   LatencyCorrelation,
   LatencyCorrelationsResponse,
 } from '../../../../common/correlations/latency_correlations/types';
+import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 
 import { callApmApi } from '../../../services/rest/create_call_apm_api';
 
@@ -94,6 +95,7 @@ export function useLatencyCorrelations() {
               body: {
                 ...fetchParams,
                 percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+                chartType: LatencyDistributionChartType.latencyCorrelations,
               },
             },
           }
