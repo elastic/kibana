@@ -46,3 +46,9 @@
   padding-top: 0;
   padding-bottom: 0;
 }
+
+.lnsIndexPatternDimensionEditor-advancedOptions button {
+  &:hover {
+    text-decoration-color: $euiColorPrimary;
+  }
+}

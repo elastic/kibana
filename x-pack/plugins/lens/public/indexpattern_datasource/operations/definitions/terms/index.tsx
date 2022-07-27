@@ -930,6 +930,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                 </EuiText>
               }
               data-test-subj="indexPattern-terms-advanced"
+              className="lnsIndexPatternDimensionEditor-advancedOptions"
             >
               <EuiSpacer size="s" />
               <EuiSwitch

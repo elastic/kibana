@@ -18,6 +18,7 @@ export function AdvancedOptions(props: { options: AdvancedOption[] }) {
       id="advancedOptionsAccordion"
       arrowProps={{ color: 'primary' }}
       data-test-subj="indexPattern-advanced-accordion"
+      className="lnsIndexPatternDimensionEditor-advancedOptions"
       buttonContent={
         <EuiText size="s" color={euiTheme.colors.primary}>
           <strong>
