@@ -1102,7 +1102,7 @@ export function getActionType(): ActionTypeModel {
     selectMessage: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.d3securityAction.selectMessageText',
       {
-        defaultMessage: 'Send a request to a web service.',
+        defaultMessage: 'Run Remote Command in D3 VSOC',
       }
     ),
     validateParams: (actionParams: D3SecurityActionParams): Promise<ValidationResult> => {
