@@ -16,6 +16,15 @@ import type {
   FindFileArgs,
 } from './internal_file_service';
 
+export type {
+  CreateFileArgs,
+  UpdateFileArgs,
+  DeleteFileArgs,
+  GetByIdArgs,
+  ListFilesArgs,
+  FindFileArgs,
+};
+
 /**
  * Public file service interface.
  */
