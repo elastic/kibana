@@ -27,7 +27,7 @@ export function registerIndexRoutes({ router }: RouteDependencies) {
     async (context, _, response) => {
       const { client } = (await context.core).elasticsearch;
       try {
-        const indices = await fetchIndices(client, '*', false);
+        const indices = await fetchIndices(client, '*', false, true);
         return response.ok({
           body: indices,
           headers: { 'content-type': 'application/json' },
@@ -62,7 +62,7 @@ export function registerIndexRoutes({ router }: RouteDependencies) {
       const { client } = (await context.core).elasticsearch;
       try {
         const indexPattern = searchQuery ? `*${searchQuery}*` : '*';
-        const totalIndices = await fetchIndices(client, indexPattern, !!returnHiddenIndices);
+        const totalIndices = await fetchIndices(client, indexPattern, !!returnHiddenIndices, false);
         const totalResults = totalIndices.length;
         const totalPages = Math.ceil(totalResults / size) || 1;
         const startIndex = (page - 1) * size;

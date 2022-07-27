@@ -47,7 +47,8 @@ export const mapIndexStats = (
 export const fetchIndices = async (
   client: IScopedClusterClient,
   indexPattern: string,
-  returnHiddenIndices: boolean
+  returnHiddenIndices: boolean,
+  includeAliases: boolean
 ): Promise<ElasticsearchIndexWithPrivileges[]> => {
   // This call retrieves alias and settings information about indices
   const expandWildcards: ExpandWildcard[] = returnHiddenIndices ? ['hidden', 'all'] : ['open'];
@@ -63,9 +64,11 @@ export const fetchIndices = async (
 
   const indexAndAliasNames = Object.keys(totalIndices).reduce((accum, indexName) => {
     accum.push(indexName);
-    const aliases = Object.keys(totalIndices[indexName].aliases!);
 
-    aliases.forEach((alias) => accum.push(alias));
+    if (includeAliases) {
+      const aliases = Object.keys(totalIndices[indexName].aliases!);
+      aliases.forEach((alias) => accum.push(alias));
+    }
     return accum;
   }, [] as string[]);
 
@@ -110,14 +113,16 @@ export const fetchIndices = async (
         ...indexData,
       });
 
-      aliases.forEach((alias) => {
-        indicesAndAliases.push({
-          name: alias,
-          alias: true,
-          privileges: { read: false, manage: false, ...indexPrivileges[name] },
-          ...indexData,
+      if (includeAliases) {
+        aliases.forEach((alias) => {
+          indicesAndAliases.push({
+            name: alias,
+            alias: true,
+            privileges: { read: false, manage: false, ...indexPrivileges[name] },
+            ...indexData,
+          });
         });
-      });
+      }
       return indicesAndAliases;
     })
     .filter(
