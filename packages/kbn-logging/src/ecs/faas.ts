@@ -6,16 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { FieldFormatsContentType, IFieldFormat } from '@kbn/field-formats-plugin/common';
+/**
+ * https://www.elastic.co/guide/en/ecs/master/ecs-faas.html
+ *
+ * @internal
+ */
+export interface EcsFaas {
+  coldstart?: boolean;
+  execution?: string;
+  id?: string;
+  name?: string;
+  trigger?: Trigger;
+  version?: string;
+}
 
-export const formatValue = (
-  value: number | string,
-  fieldFormatter: IFieldFormat,
-  format: FieldFormatsContentType = 'text'
-) => {
-  if (typeof value === 'number' && isNaN(value)) {
-    return '-';
-  }
-
-  return fieldFormatter.convert(value, format);
-};
+interface Trigger {
+  request_id?: string;
+  type?: 'http' | 'pubsub' | 'datasource' | 'timer' | 'other';
+}

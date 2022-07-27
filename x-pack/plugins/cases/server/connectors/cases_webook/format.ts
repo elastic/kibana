@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-export const CHART_PANEL_TEST_SUBJECTS = {
-  LOADING: 'chart_is_loading',
-  EMPTY: 'chart_is_empty',
-  ERROR: 'chart_is_error',
-  TEST_CHART: 'testing_chart',
+import { Format } from './types';
+
+export const format: Format = (theCase) => {
+  return {
+    title: theCase.title,
+    description: theCase.description,
+    tags: theCase.tags,
+  };
 };
