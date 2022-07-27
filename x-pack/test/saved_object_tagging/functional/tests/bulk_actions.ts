@@ -38,7 +38,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await tagManagementPage.waitUntilTableIsLoaded();
 
         const displayedTags = await tagManagementPage.getDisplayedTagNames();
-        expect(displayedTags.length).to.be(3);
+        expect(displayedTags.length).to.be.greaterThan(2);
         expect(displayedTags).to.eql(['my-favorite-tag', 'tag with whitespace', 'tag-2']);
       });
     });

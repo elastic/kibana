@@ -20,8 +20,6 @@ import { partition } from 'lodash';
 
 import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
 
-import { taggableTypes } from '@kbn/saved-objects-tagging-plugin/common/constants';
-
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 import { getAsset, getPathParts } from '../../archive';
 import { KibanaAssetType, KibanaSavedObjectType } from '../../../../types';
@@ -30,6 +28,10 @@ import { savedObjectTypes } from '../../packages';
 import { indexPatternTypes, getIndexPatternSavedObjects } from '../index_pattern/install';
 import { saveKibanaAssetsRefs } from '../../packages/install';
 import { deleteKibanaSavedObjectsAssets } from '../../packages/remove';
+
+import { withPackageSpan } from '../../packages/utils';
+
+import { tagKibanaAssets } from './tag_assets';
 
 type SavedObjectsImporterContract = Pick<SavedObjectsImporter, 'import' | 'resolveImportErrors'>;
 const formatImportErrorsForLog = (errors: SavedObjectsImportFailure[]) =>
@@ -166,66 +168,16 @@ export async function installKibanaAssetsAndReferences({
     kibanaAssets,
   });
 
-  await tagKibanaAssets({
-    savedObjectTagAssignmentService,
-    savedObjectTagClient,
-    kibanaAssets,
-    pkgTitle,
-  });
+  await withPackageSpan('Create and assign package tags', () =>
+    tagKibanaAssets({
+      savedObjectTagAssignmentService,
+      savedObjectTagClient,
+      kibanaAssets,
+      pkgTitle,
+    })
+  );
 
   return installedKibanaAssetsRefs;
-}
-
-const TAG_COLOR = '#FFFFFF';
-const MANAGED_TAG_NAME = 'Managed';
-
-export async function tagKibanaAssets({
-  savedObjectTagAssignmentService,
-  savedObjectTagClient,
-  kibanaAssets,
-  pkgTitle,
-}: {
-  savedObjectTagAssignmentService: IAssignmentService;
-  savedObjectTagClient: ITagsClient;
-  kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>;
-  pkgTitle: string;
-}) {
-  const taggableAssets = Object.entries(kibanaAssets).flatMap(([assetType, assets]) => {
-    if (!taggableTypes.includes(assetType as KibanaAssetType)) {
-      return [];
-    }
-
-    if (!assets.length) {
-      return [];
-    }
-
-    return assets;
-  });
-
-  const allTags = await savedObjectTagClient.getAll();
-  let managedTag = allTags.find((tag) => tag.name === MANAGED_TAG_NAME);
-  if (!managedTag) {
-    managedTag = await savedObjectTagClient.create({
-      name: MANAGED_TAG_NAME,
-      description: '',
-      color: TAG_COLOR,
-    });
-  }
-
-  let packageTag = allTags.find((tag) => tag.name === pkgTitle);
-  if (!packageTag) {
-    packageTag = await savedObjectTagClient.create({
-      name: pkgTitle,
-      description: '',
-      color: TAG_COLOR,
-    });
-  }
-
-  savedObjectTagAssignmentService.updateTagAssignments({
-    tags: [managedTag.id, packageTag.id],
-    assign: taggableAssets,
-    unassign: [],
-  });
 }
 
 export const deleteKibanaInstalledRefs = async (
