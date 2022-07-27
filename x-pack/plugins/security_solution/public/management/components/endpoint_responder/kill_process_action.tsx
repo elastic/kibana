@@ -109,7 +109,7 @@ export const KillProcessActionResult = memo<
     return (
       <ActionError
         dataTestSubj={'killProcessErrorCallout'}
-        errors={completedActionDetails?.errors}
+        action={completedActionDetails}
         ResultComponent={ResultComponent}
       />
     );

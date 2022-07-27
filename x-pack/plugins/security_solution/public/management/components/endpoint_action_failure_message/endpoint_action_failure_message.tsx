@@ -60,7 +60,8 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
         <>
           <FormattedMessage
             id="xpack.securitySolution.endpointResponseActions.actionError.errorMessage"
-            defaultMessage="The following errors were encountered:"
+            defaultMessage="The following { errorCount, plural, =1 {error was} other {errors were}} encountered:"
+            values={{ errorCount: errors.length }}
           />
           <EuiSpacer size="s" />
           <div>{errors.join(' | ')}</div>

@@ -19,9 +19,9 @@ export const endpointActionResponseCodes = Object.freeze({
     { defaultMessage: 'The provided process was not found' }
   ),
 
-  'ra_suspend-process_success_not-permitted': i18n.translate(
+  'ra_suspend-process_error_not-permitted': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.suspendProcess.notPermittedSuccess',
-    { defaultMessage: 'You are not permitted to suspend this process' }
+    { defaultMessage: 'The provided process cannot be suspended' }
   ),
 
   // -----------------------------------------------------------------
@@ -37,8 +37,8 @@ export const endpointActionResponseCodes = Object.freeze({
     { defaultMessage: 'The provided process was not found or already killed' }
   ),
 
-  'ra_kill-process_success_not-permitted': i18n.translate(
+  'ra_kill-process_error_not-permitted': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.killProcess.notPermittedSuccess',
-    { defaultMessage: 'You are not permitted to kill this process' }
+    { defaultMessage: 'The provided process cannot be killed' }
   ),
 });

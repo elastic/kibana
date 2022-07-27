@@ -109,7 +109,7 @@ export const SuspendProcessActionResult = memo<
     return (
       <ActionError
         dataTestSubj={'suspendProcessErrorCallout'}
-        errors={completedActionDetails?.errors}
+        action={completedActionDetails}
         ResultComponent={ResultComponent}
       />
     );

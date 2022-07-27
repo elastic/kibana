@@ -201,7 +201,7 @@ export const GetProcessesActionResult = memo<
           { defaultMessage: 'Get processes action failed' }
         )}
         dataTestSubj={'getProcessesErrorCallout'}
-        errors={completedActionDetails?.errors}
+        action={completedActionDetails}
         ResultComponent={ResultComponent}
       />
     );
