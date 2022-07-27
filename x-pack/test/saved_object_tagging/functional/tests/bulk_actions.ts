@@ -13,9 +13,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'security', 'savedObjects', 'tagManagement']);
   const tagManagementPage = PageObjects.tagManagement;
+  const esArchiver = getService('esArchiver');
 
   describe('table bulk actions', () => {
     beforeEach(async () => {
+      await esArchiver.load('test/functional/fixtures/es_archiver/empty_kibana');
       await kibanaServer.importExport.load(
         'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/functional_base/data.json'
       );
@@ -25,6 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.importExport.unload(
         'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/functional_base/data.json'
       );
+      await esArchiver.unload('test/functional/fixtures/es_archiver/empty_kibana');
     });
 
     describe('bulk delete', () => {
@@ -38,7 +41,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await tagManagementPage.waitUntilTableIsLoaded();
 
         const displayedTags = await tagManagementPage.getDisplayedTagNames();
-        expect(displayedTags.length).to.be.greaterThan(2);
+        expect(displayedTags.length).to.be(3);
         expect(displayedTags).to.eql(['my-favorite-tag', 'tag with whitespace', 'tag-2']);
       });
     });

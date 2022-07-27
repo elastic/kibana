@@ -13,14 +13,17 @@ import { createTestSpaces, deleteTestSpaces, createTags, deleteTags } from './te
 // eslint-disable-next-line import/no-default-export
 export default function (ftrContext: FtrProviderContext) {
   const supertest = ftrContext.getService('supertestWithoutAuth');
+  const esArchiver = ftrContext.getService('esArchiver');
 
   describe('GET /api/saved_objects_tagging/tags', () => {
     before(async () => {
+      await esArchiver.load('test/functional/fixtures/es_archiver/empty_kibana');
       await createTestSpaces(ftrContext);
     });
 
     after(async () => {
       await deleteTestSpaces(ftrContext);
+      await esArchiver.unload('test/functional/fixtures/es_archiver/empty_kibana');
     });
 
     beforeEach(async () => {
@@ -35,20 +38,22 @@ export default function (ftrContext: FtrProviderContext) {
       authorized: {
         httpCode: 200,
         expectResponse: ({ body }) => {
-          expect(body.tags.slice(0, 2)).to.eql([
-            {
-              id: 'default-space-tag-1',
-              name: 'tag-1',
-              description: 'Tag 1 in default space',
-              color: '#FF00FF',
-            },
-            {
-              id: 'default-space-tag-2',
-              name: 'tag-2',
-              description: 'Tag 2 in default space',
-              color: '#77CC11',
-            },
-          ]);
+          expect(body).to.eql({
+            tags: [
+              {
+                id: 'default-space-tag-1',
+                name: 'tag-1',
+                description: 'Tag 1 in default space',
+                color: '#FF00FF',
+              },
+              {
+                id: 'default-space-tag-2',
+                name: 'tag-2',
+                description: 'Tag 2 in default space',
+                color: '#77CC11',
+              },
+            ],
+          });
         },
       },
       unauthorized: {
