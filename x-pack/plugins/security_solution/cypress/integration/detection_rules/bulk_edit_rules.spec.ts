@@ -12,6 +12,7 @@ import {
   RULES_TAGS_FILTER_BTN,
   RULE_CHECKBOX,
   RULES_TAGS_POPOVER_BTN,
+  TOASTER_BODY,
 } from '../../screens/alerts_detection_rules';
 
 import {
@@ -34,6 +35,7 @@ import {
   testMultipleSelectedRulesLabel,
   loadPrebuiltDetectionRulesFromHeaderBtn,
   switchToElasticRules,
+  confirmConfirmationModal,
 } from '../../tasks/alerts_detection_rules';
 
 import {
@@ -52,6 +54,8 @@ import {
   openBulkActionsMenu,
   clickApplyTimelineTemplatesMenuItem,
   checkOverwriteTagsCheckbox,
+  checkOverwriteIndexPatternsCheckbox,
+  clickDeleteIndexPatternsMenuItem,
 } from '../../tasks/rules_bulk_edit';
 
 import { hasIndexPatterns } from '../../tasks/rule_details';
@@ -81,17 +85,20 @@ import { esArchiverResetKibana } from '../../tasks/es_archiver';
 const RULE_NAME = 'Custom rule for bulk actions';
 
 const CUSTOM_INDEX_PATTERN_1 = 'custom-cypress-test-*';
-const DEFAULT_INDEX_PATTERNS = ['index-1-*', 'index-2-*'];
+const defaultIndexPatterns = ['index-1-*', 'index-2-*'];
 const defaultTags = ['test-default-tag-1', 'test-default-tag-2'];
 const OVERWRITE_INDEX_PATTERNS = ['overwrite-index-1-*', 'overwrite-index-2-*'];
 
 const expectedNumberOfCustomRulesToBeEdited = 6;
 const expectedNumberOfMachineLearningRulesToBeEdited = 1;
+/**
+ * total number of custom rules that are not Machine learning
+ */
 const expectedNumberOfNotMLRules =
   expectedNumberOfCustomRulesToBeEdited - expectedNumberOfMachineLearningRulesToBeEdited;
 const numberOfRulesPerPage = 5;
 
-const indexDataSource = { index: DEFAULT_INDEX_PATTERNS, type: 'indexPatterns' } as const;
+const indexDataSource = { index: defaultIndexPatterns, type: 'indexPatterns' } as const;
 
 const defaultRuleData = {
   dataSource: indexDataSource,
@@ -266,55 +273,90 @@ describe('Detection rules, bulk edit', () => {
     });
   });
 
-  it('should add/delete/overwrite index patterns in rules', () => {
-    cy.log('Adds index patterns');
-    // Switch to 5(numberOfRulesPerPage) rules per page, so we can edit all existing rules, not only ones on a page
-    // this way we will use underlying bulk edit API with query parameter, which update all rules based on query search results
-    changeRowsPerPageTo(numberOfRulesPerPage);
-    selectAllRules();
+  describe('Index patterns', () => {
+    it('Add index patterns to custom rules when Machine learning rules selected', () => {
+      const indexPattersToBeAdded = ['index-to-add-1-*', 'index-to-add-2-*'];
 
-    openBulkEditAddIndexPatternsForm();
-    typeIndexPatterns([CUSTOM_INDEX_PATTERN_1]);
-    confirmBulkEditForm();
-    waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      clickAddIndexPatternsMenuItem();
 
-    // check if rule has been updated
-    changeRowsPerPageTo(20);
-    goToTheRuleDetailsOf(RULE_NAME);
-    hasIndexPatterns([...DEFAULT_INDEX_PATTERNS, CUSTOM_INDEX_PATTERN_1].join(''));
-    cy.go('back');
+      // confirm editing custom rules, that are not Machine Learning
+      checkMachineLearningRulesCannotBeModified(expectedNumberOfMachineLearningRulesToBeEdited);
+      cy.get(MODAL_CONFIRMATION_BTN).click();
 
-    cy.log('Deletes index patterns');
-    // select all rules on page (as page displays all existing rules).
-    // this way we will use underlying bulk edit API with ids parameter, which updates rules based their ids
-    cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
-    openBulkEditDeleteIndexPatternsForm();
-    typeIndexPatterns([CUSTOM_INDEX_PATTERN_1]);
-    confirmBulkEditForm();
-    waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
+      typeIndexPatterns(indexPattersToBeAdded);
+      confirmBulkEditForm();
 
-    // check if rule has been updated
-    goToTheRuleDetailsOf(RULE_NAME);
-    hasIndexPatterns(DEFAULT_INDEX_PATTERNS.join(''));
-    cy.go('back');
+      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfNotMLRules });
 
-    cy.log('Overwrites index patterns');
-    cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
-    openBulkEditAddIndexPatternsForm();
-    cy.get(RULES_BULK_EDIT_OVERWRITE_INDEX_PATTERNS_CHECKBOX)
-      .should('have.text', "Overwrite all selected rules' index patterns")
-      .click();
-    cy.get(RULES_BULK_EDIT_INDEX_PATTERNS_WARNING).should(
-      'have.text',
-      `You’re about to overwrite index patterns for ${expectedNumberOfCustomRulesToBeEdited} selected rules, press Save to apply changes.`
-    );
-    typeIndexPatterns(OVERWRITE_INDEX_PATTERNS);
-    confirmBulkEditForm();
-    waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
+      // check if rule has been updated
+      goToTheRuleDetailsOf(RULE_NAME);
+      hasIndexPatterns([...defaultIndexPatterns, ...indexPattersToBeAdded].join(''));
+    });
 
-    // check if rule has been updated
-    goToTheRuleDetailsOf(RULE_NAME);
-    hasIndexPatterns(OVERWRITE_INDEX_PATTERNS.join(''));
+    it('Overwrite index patterns in custom rules', () => {
+      const indexPattersToWrite = ['index-to-write-1-*', 'index-to-write-2-*'];
+
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+
+      // confirm editing custom rules, that are not Machine Learning
+      clickAddIndexPatternsMenuItem();
+      confirmConfirmationModal();
+
+      // check overwrite index patterns checkbox, ensure warning message is displayed and type index patterns
+      checkOverwriteIndexPatternsCheckbox();
+      cy.get(RULES_BULK_EDIT_INDEX_PATTERNS_WARNING).should(
+        'have.text',
+        `You’re about to overwrite index patterns for ${expectedNumberOfNotMLRules} selected rules, press Save to apply changes.`
+      );
+
+      typeIndexPatterns(indexPattersToWrite);
+      confirmBulkEditForm();
+
+      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfNotMLRules });
+
+      // check if rule has been updated
+      goToTheRuleDetailsOf(RULE_NAME);
+      hasIndexPatterns(indexPattersToWrite.join(''));
+    });
+
+    it('Delete index patterns from custom rules', () => {
+      const indexPatternsToDelete = defaultIndexPatterns.slice(0, 1);
+      const indexPatternsLeftNotDeleted = defaultIndexPatterns.slice(1);
+
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+
+      // confirm editing custom rules, that are not Machine Learning
+      clickDeleteIndexPatternsMenuItem();
+      confirmConfirmationModal();
+
+      typeIndexPatterns(indexPatternsToDelete);
+      confirmBulkEditForm();
+      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfNotMLRules });
+
+      // check if rule has been updated
+      goToTheRuleDetailsOf(RULE_NAME);
+      hasIndexPatterns(indexPatternsLeftNotDeleted.join(''));
+    });
+
+    it.only('Delete all index patterns from custom rules', () => {
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+
+      // confirm editing custom rules, that are not Machine Learning
+      clickDeleteIndexPatternsMenuItem();
+      confirmConfirmationModal();
+
+      typeIndexPatterns(defaultIndexPatterns);
+      confirmBulkEditForm();
+
+      // error should be displayed that index patterns property can't be empy
+      // cy.contains(TOASTER_BODY, `You've successfully updated ${rulesCount} rule`);
+      // waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfNotMLRules });
+
+      // // check if rule has been updated
+      // goToTheRuleDetailsOf(RULE_NAME);
+      // hasIndexPatterns(indexPatternsLeftNotDeleted.join(''));
+    });
   });
 
   it('should not lose rules selection after edit action', () => {

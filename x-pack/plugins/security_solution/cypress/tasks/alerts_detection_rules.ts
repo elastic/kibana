@@ -350,3 +350,8 @@ export const bulkExportRules = () => {
   cy.get(BULK_ACTIONS_BTN).click();
   cy.get(BULK_EXPORT_ACTION_BTN).click();
 };
+
+export const confirmConfirmationModal = () => {
+  cy.get(MODAL_CONFIRMATION_BTN).click();
+  cy.get(RULES_DELETE_CONFIRMATION_MODAL).should('not.exist');
+};
