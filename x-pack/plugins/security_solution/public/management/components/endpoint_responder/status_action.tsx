@@ -54,7 +54,10 @@ export const EndpointStatusActionResult = memo<
   });
 
   const pendingIsolationActions = useMemo<
-    Pick<Required<EndpointHostIsolationStatusProps>, 'pendingIsolate' | 'pendingUnIsolate'>
+    Pick<
+      Required<EndpointHostIsolationStatusProps['pendingActions']>,
+      'pendingIsolate' | 'pendingUnIsolate'
+    >
   >(() => {
     if (endpointPendingActions?.data.length) {
       const pendingActions = endpointPendingActions.data[0].pending_actions;

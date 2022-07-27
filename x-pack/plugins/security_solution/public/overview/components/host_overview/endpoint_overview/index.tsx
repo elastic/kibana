@@ -82,8 +82,13 @@ export const EndpointOverview = React.memo<Props>(({ contextID, data }) => {
                 <AgentStatus hostStatus={data.elasticAgentStatus} />
                 <EndpointHostIsolationStatus
                   isIsolated={Boolean(data.isolation)}
-                  pendingIsolate={data.pendingActions?.isolate ?? 0}
-                  pendingUnIsolate={data.pendingActions?.unisolate ?? 0}
+                  pendingActions={{
+                    pendingIsolate: data.pendingActions?.isolate ?? 0,
+                    pendingUnIsolate: data.pendingActions?.unisolate ?? 0,
+                    pendingKillProcess: data.pendingActions?.['kill-process'] ?? 0,
+                    pendingSuspendProcess: data.pendingActions?.['suspend-process'] ?? 0,
+                    pendingRunningProcesses: data.pendingActions?.['running-processes'] ?? 0,
+                  }}
                 />
               </>
             ) : (

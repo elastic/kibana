@@ -196,15 +196,16 @@ export const getPendingActionCounts = async (
   );
 
   const pending: EndpointPendingActions[] = [];
+
   for (const agentId of agentIDs) {
     const agentResponses = responses[agentId];
 
-    // get response actionIds for responses with ACKs
+    // get response actionIds for responses with ACKs from the fleet agent
     const ackResponseActionIdList: string[] = agentResponses
       .filter(hasAckInResponse)
       .map((response) => response.action_id);
 
-    // actions Ids that are indexed in new response index
+    // actions Ids that are indexed in new endpoint response index
     const indexedActionIds = await hasEndpointResponseDoc({
       agentId,
       actionIds: ackResponseActionIdList,
@@ -350,20 +351,30 @@ const fetchActionResponses = async (
   );
 
   for (const actionResponse of actionResponses) {
-    const lastEndpointMetadataEventTimestamp = endpointLastEventCreated[actionResponse.agent_id];
-    const actionCompletedAtTimestamp = new Date(actionResponse.completed_at);
-    // If enough time has lapsed in checking for updated Endpoint metadata doc so that we don't keep
-    // checking it forever.
-    // It uses the `@timestamp` in order to ensure we are looking at times that were set by the server
-    const enoughTimeHasLapsed =
-      Date.now() - new Date(actionResponse['@timestamp']).getTime() >
-      PENDING_ACTION_RESPONSE_MAX_LAPSED_TIME;
+    const actionCommand = actionResponse.action_data.command;
 
-    if (
-      !lastEndpointMetadataEventTimestamp ||
-      enoughTimeHasLapsed ||
-      lastEndpointMetadataEventTimestamp > actionCompletedAtTimestamp
-    ) {
+    // We only (possibly) withhold fleet action responses for `isolate` and `unisolate`.
+    // All others should just return the responses and not wait until a metadata
+    // document update is received.
+    if (actionCommand === 'unisolate' || actionCommand === 'isolate') {
+      const lastEndpointMetadataEventTimestamp = endpointLastEventCreated[actionResponse.agent_id];
+      const actionCompletedAtTimestamp = new Date(actionResponse.completed_at);
+
+      // If enough time has lapsed in checking for updated Endpoint metadata doc so that we don't keep
+      // checking it forever.
+      // It uses the `@timestamp` in order to ensure we are looking at times that were set by the server
+      const enoughTimeHasLapsed =
+        Date.now() - new Date(actionResponse['@timestamp']).getTime() >
+        PENDING_ACTION_RESPONSE_MAX_LAPSED_TIME;
+
+      if (
+        !lastEndpointMetadataEventTimestamp ||
+        enoughTimeHasLapsed ||
+        lastEndpointMetadataEventTimestamp > actionCompletedAtTimestamp
+      ) {
+        actionResponsesByAgentId[actionResponse.agent_id].push(actionResponse);
+      }
+    } else {
       actionResponsesByAgentId[actionResponse.agent_id].push(actionResponse);
     }
   }

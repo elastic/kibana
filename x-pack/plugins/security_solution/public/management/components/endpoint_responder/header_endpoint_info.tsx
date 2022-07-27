@@ -32,20 +32,18 @@ export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId })
     refetchInterval: 10000,
   });
 
-  const pendingIsolationActions = useMemo<
-    Pick<Required<EndpointHostIsolationStatusProps>, 'pendingIsolate' | 'pendingUnIsolate'>
+  const pendingActionRequests = useMemo<
+    Pick<Required<EndpointHostIsolationStatusProps>, 'pendingActions'>
   >(() => {
-    if (endpointPendingActions?.data.length) {
-      const pendingActions = endpointPendingActions.data[0].pending_actions;
-
-      return {
-        pendingIsolate: pendingActions.isolate ?? 0,
-        pendingUnIsolate: pendingActions.unisolate ?? 0,
-      };
-    }
+    const pendingActions = endpointPendingActions?.data?.[0].pending_actions;
     return {
-      pendingIsolate: 0,
-      pendingUnIsolate: 0,
+      pendingActions: {
+        pendingIsolate: pendingActions?.isolate ?? 0,
+        pendingUnIsolate: pendingActions?.unisolate ?? 0,
+        pendingKillProcess: pendingActions?.['kill-process'] ?? 0,
+        pendingSuspendProcess: pendingActions?.['suspend-process'] ?? 0,
+        pendingRunningProcesses: pendingActions?.['running-processes'] ?? 0,
+      },
     };
   }, [endpointPendingActions?.data]);
 
@@ -75,7 +73,7 @@ export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId })
             <EndpointAgentAndIsolationStatus
               status={endpointDetails.host_status}
               isIsolated={endpointDetails.metadata.Endpoint.state?.isolation}
-              {...pendingIsolationActions}
+              {...pendingActionRequests}
               data-test-subj="responderHeaderEndpointAgentIsolationStatus"
             />
           </EuiFlexItem>

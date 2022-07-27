@@ -236,7 +236,7 @@ export interface ResponseActionApiResponse<TOutput extends object = object> {
 export interface EndpointPendingActions {
   agent_id: string;
   pending_actions: {
-    /** Number of actions pending for each type. The `key` could be one of the `ISOLATION_ACTIONS` values. */
+    /** Number of actions pending for each type. The `key` could be one of the `RESPONSE_ACTION_COMMANDS` values. */
     [key: string]: number;
   };
 }
