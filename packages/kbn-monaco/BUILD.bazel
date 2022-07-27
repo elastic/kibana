@@ -11,7 +11,7 @@ SOURCE_FILES = glob(
     "src/**/*",
   ],
   exclude = [
-    "**/__jest__",
+    "**/test_helpers/**",
     "**/*.test.*",
     "**/README.md",
   ],
