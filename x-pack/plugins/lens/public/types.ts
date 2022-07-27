@@ -546,7 +546,6 @@ export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T>;
 export interface DatasourceLayerPanelProps<T> {
   layerId: string;
   state: T;
-  setState: StateSetter<T>;
   activeData?: Record<string, Datatable>;
   dataViews: DataViewsState;
   onChangeIndexPattern: (indexPatternId: string, datasourceId: string, layerId?: string) => void;

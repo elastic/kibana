@@ -13,7 +13,7 @@ import { History } from 'history';
 import { LensEmbeddableInput } from '..';
 import { getDatasourceLayers } from '../editor_frame_service/editor_frame';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
-import type { VisualizeEditorContext, Suggestion } from '../types';
+import type { VisualizeEditorContext, Suggestion, DatasourceMap } from '../types';
 import { getInitialDatasourceId, getResolvedDateRange, getRemoveOperation } from '../utils';
 import { DataViewsState, LensAppState, LensStoreDeps, VisualizationState } from './types';
 import { Datasource, Visualization } from '../types';
@@ -337,6 +337,9 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       }
       if (datasourceIds?.length) {
         newState.datasourceStates = { ...state.datasourceStates };
+        const frame = createFrameAPI(state, datasourceMap);
+        const datasourceLayers = frame.datasourceLayers;
+
         for (const datasourceId of datasourceIds) {
           const activeDatasource = datasourceId && datasourceMap[datasourceId];
           if (activeDatasource && activeDatasource?.onIndexPatternChange) {
@@ -352,9 +355,38 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
                 ),
               },
             };
+            // Update the visualization columns
+            if (layerId && state.visualization.activeId) {
+              const nextPublicAPI = activeDatasource.getPublicAPI({
+                state: newState.datasourceStates[datasourceId].state,
+                layerId,
+                indexPatterns: dataViews.indexPatterns,
+              });
+              const nextTable = new Set(
+                nextPublicAPI.getTableSpec().map(({ columnId }) => columnId)
+              );
+              const removed = datasourceLayers[layerId]
+                .getTableSpec()
+                .map(({ columnId }) => columnId)
+                .filter((columnId) => !nextTable.has(columnId));
+              const nextVisState = (newState.visualization || state.visualization).state;
+              const activeVisualization = visualizationMap[state.visualization.activeId];
+              removed.forEach((columnId) => {
+                newState.visualization = {
+                  ...state.visualization,
+                  state: activeVisualization.removeDimension({
+                    layerId,
+                    columnId,
+                    prevState: nextVisState,
+                    frame,
+                  }),
+                };
+              });
+            }
           }
         }
       }
+
       return { ...state, ...newState };
     },
     [updateIndexPatterns.type]: (state, { payload }: { payload: Partial<DataViewsState> }) => {
@@ -710,15 +742,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         layerType
       );
 
-      const framePublicAPI = {
-        // any better idea to avoid `as`?
-        activeData: state.activeData
-          ? (current(state.activeData) as TableInspectorAdapter)
-          : undefined,
-        datasourceLayers: getDatasourceLayers(state.datasourceStates, datasourceMap),
-        dateRange: current(state.resolvedDateRange),
-        dataViews: current(state.dataViews),
-      };
+      const framePublicAPI = createFrameAPI(state, datasourceMap);
 
       const activeDatasource = datasourceMap[state.activeDatasourceId];
       const { noDatasource } =
@@ -770,15 +794,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       const { activeDatasourceState, activeVisualizationState } = addInitialValueIfAvailable({
         datasourceState: state.datasourceStates[state.activeDatasourceId].state,
         visualizationState: state.visualization.state,
-        framePublicAPI: {
-          // any better idea to avoid `as`?
-          activeData: state.activeData
-            ? (current(state.activeData) as TableInspectorAdapter)
-            : undefined,
-          datasourceLayers: getDatasourceLayers(state.datasourceStates, datasourceMap),
-          dateRange: current(state.resolvedDateRange),
-          dataViews: current(state.dataViews),
-        },
+        framePublicAPI: createFrameAPI(state, datasourceMap),
         activeVisualization,
         activeDatasource,
         layerId,
@@ -792,6 +808,16 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
     },
   });
 };
+
+function createFrameAPI(state: LensAppState, datasourceMap: DatasourceMap) {
+  return {
+    // any better idea to avoid `as`?
+    activeData: state.activeData ? (current(state.activeData) as TableInspectorAdapter) : undefined,
+    datasourceLayers: getDatasourceLayers(state.datasourceStates, datasourceMap),
+    dateRange: current(state.resolvedDateRange),
+    dataViews: current(state.dataViews),
+  };
+}
 
 function addInitialValueIfAvailable({
   visualizationState,

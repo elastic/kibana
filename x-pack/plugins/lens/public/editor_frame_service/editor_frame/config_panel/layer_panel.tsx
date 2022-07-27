@@ -347,34 +347,6 @@ export function LayerPanel(
                   dataViews,
                   onChangeIndexPattern: (indexPatternId) =>
                     onChangeIndexPattern({ indexPatternId, layerId, datasourceId }),
-                  setState: (updater: unknown) => {
-                    const newState =
-                      typeof updater === 'function' ? updater(layerDatasourceState) : updater;
-                    // Look for removed columns
-                    const nextPublicAPI = layerDatasource.getPublicAPI({
-                      state: newState,
-                      layerId,
-                      indexPatterns: dataViews.indexPatterns,
-                    });
-                    const nextTable = new Set(
-                      nextPublicAPI.getTableSpec().map(({ columnId }) => columnId)
-                    );
-                    const removed = datasourcePublicAPI
-                      .getTableSpec()
-                      .map(({ columnId }) => columnId)
-                      .filter((columnId) => !nextTable.has(columnId));
-                    let nextVisState = props.visualizationState;
-                    removed.forEach((columnId) => {
-                      nextVisState = activeVisualization.removeDimension({
-                        layerId,
-                        columnId,
-                        prevState: nextVisState,
-                        frame: framePublicAPI,
-                      });
-                    });
-
-                    props.updateAll(datasourceId, newState, nextVisState);
-                  },
                 }}
               />
             )}

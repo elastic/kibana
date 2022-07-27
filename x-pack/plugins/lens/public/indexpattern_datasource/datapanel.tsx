@@ -40,7 +40,6 @@ import type {
   FramePublicAPI,
   IndexPattern,
   IndexPatternField,
-  StateSetter,
 } from '../types';
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
 import type { IndexPatternPrivateState } from './types';
@@ -57,11 +56,7 @@ export type Props = Omit<
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
-  changeIndexPattern: (
-    id: string,
-    state: IndexPatternPrivateState,
-    setState: StateSetter<IndexPatternPrivateState, { applyImmediately?: boolean }>
-  ) => void;
+  changeIndexPattern: (id: string) => void;
   charts: ChartsPluginSetup;
   core: CoreStart;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
@@ -125,7 +120,6 @@ function buildSafeEsQuery(
 }
 
 export function IndexPatternDataPanel({
-  setState,
   state,
   dragDropContext,
   core,
@@ -149,10 +143,6 @@ export function IndexPatternDataPanel({
   const { indexPatterns, indexPatternRefs, existingFields, isFirstExistenceFetch } =
     frame.dataViews;
   const { currentIndexPatternId } = state;
-  const onChangeIndexPattern = useCallback(
-    (id: string) => changeIndexPattern(id, state, setState),
-    [state, setState, changeIndexPattern]
-  );
 
   const indexPatternList = uniq(
     Object.values(state.layers)
@@ -231,7 +221,7 @@ export function IndexPatternDataPanel({
           fieldFormats={fieldFormats}
           charts={charts}
           indexPatternFieldEditor={indexPatternFieldEditor}
-          onChangeIndexPattern={onChangeIndexPattern}
+          onChangeIndexPattern={changeIndexPattern}
           dropOntoWorkspace={dropOntoWorkspace}
           hasSuggestionForField={hasSuggestionForField}
           uiActions={uiActions}
