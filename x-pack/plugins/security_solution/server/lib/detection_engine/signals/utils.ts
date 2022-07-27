@@ -106,7 +106,7 @@ export const hasTimestampFields = async (args: {
   timestampFieldCapsResponse: TransportResult<Record<string, any>, unknown>;
   inputIndices: string[];
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
-}): Promise<boolean> => {
+}): Promise<{ wroteWarningStatus: boolean; skipExecution: boolean }> => {
   const { timestampField, timestampFieldCapsResponse, inputIndices, ruleExecutionLogger } = args;
   const { ruleName } = ruleExecutionLogger.context;
 
@@ -124,7 +124,7 @@ export const hasTimestampFields = async (args: {
       message: errorString.trimEnd(),
     });
 
-    return true;
+    return { wroteWarningStatus: true, skipExecution: true };
   } else if (
     isEmpty(timestampFieldCapsResponse.body.fields) ||
     timestampFieldCapsResponse.body.fields[timestampField] == null ||
@@ -148,10 +148,10 @@ export const hasTimestampFields = async (args: {
       message: errorString,
     });
 
-    return true;
+    return { wroteWarningStatus: true, skipExecution: false };
   }
 
-  return false;
+  return { wroteWarningStatus: false, skipExecution: false };
 };
 
 export const checkPrivileges = async (

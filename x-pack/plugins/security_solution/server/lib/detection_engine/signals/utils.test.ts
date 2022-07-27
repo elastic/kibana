@@ -640,7 +640,7 @@ describe('utils', () => {
         },
       };
 
-      const res = await hasTimestampFields({
+      const { wroteWarningStatus, skipExecution } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -650,7 +650,8 @@ describe('utils', () => {
         ruleExecutionLogger,
       });
 
-      expect(res).toBeTruthy();
+      expect(wroteWarningStatus).toBeTruthy();
+      expect(skipExecution).toBeFalsy();
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
         newStatus: RuleExecutionStatus['partial failure'],
         message:
@@ -683,7 +684,7 @@ describe('utils', () => {
         },
       };
 
-      const res = await hasTimestampFields({
+      const { wroteWarningStatus, skipExecution } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -693,7 +694,8 @@ describe('utils', () => {
         ruleExecutionLogger,
       });
 
-      expect(res).toBeTruthy();
+      expect(wroteWarningStatus).toBeTruthy();
+      expect(skipExecution).toBeFalsy();
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
         newStatus: RuleExecutionStatus['partial failure'],
         message:
@@ -715,7 +717,7 @@ describe('utils', () => {
         ruleName: 'Endpoint Security',
       });
 
-      const res = await hasTimestampFields({
+      const { wroteWarningStatus, skipExecution } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -725,7 +727,8 @@ describe('utils', () => {
         ruleExecutionLogger,
       });
 
-      expect(res).toBeTruthy();
+      expect(wroteWarningStatus).toBeTruthy();
+      expect(skipExecution).toBeTruthy();
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
         newStatus: RuleExecutionStatus['partial failure'],
         message:
@@ -748,7 +751,7 @@ describe('utils', () => {
         ruleName: 'NOT Endpoint Security',
       });
 
-      const res = await hasTimestampFields({
+      const { wroteWarningStatus, skipExecution } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -758,7 +761,8 @@ describe('utils', () => {
         ruleExecutionLogger,
       });
 
-      expect(res).toBeTruthy();
+      expect(wroteWarningStatus).toBeTruthy();
+      expect(skipExecution).toBeTruthy();
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
         newStatus: RuleExecutionStatus['partial failure'],
         message:
