@@ -14,7 +14,7 @@ import type { SolutionNavPanelProps } from './solution_grouped_nav_panel';
 import { SolutionNavPanel } from './solution_grouped_nav_panel';
 import type { DefaultSideNavItem } from './types';
 import { bottomNavOffset } from '../../../lib/helpers';
-import { BETA } from '../../../../../../kubernetes_security/common/translations';
+import { BETA } from '@kbn/kubernetes-security-plugin/common/translations';
 
 const mockUseIsWithinBreakpoints = jest.fn(() => true);
 jest.mock('@elastic/eui', () => {

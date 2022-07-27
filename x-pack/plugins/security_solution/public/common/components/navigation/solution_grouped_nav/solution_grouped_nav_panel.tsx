@@ -7,7 +7,6 @@
 
 import React, { Fragment, useCallback } from 'react';
 import {
-  EuiBetaBadge,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,

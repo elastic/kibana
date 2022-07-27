@@ -7,7 +7,7 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { BETA } from '../../../../kubernetes_security/common/translations';
+import { BETA } from '@kbn/kubernetes-security-plugin/common/translations';
 import { SecurityPageName } from '../../app/types';
 import type { NavLinkItem } from '../../common/components/navigation/types';
 import { TestProviders } from '../../common/mock';
