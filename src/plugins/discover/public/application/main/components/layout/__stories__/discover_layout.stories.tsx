@@ -9,13 +9,13 @@
 import React, { useState } from 'react';
 import { storiesOf } from '@storybook/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { getDataViewMock } from '../../../../../__mocks__/__storybook_mocks__/get_data_view_mock';
 import { withDiscoverServices } from '../../../../../__mocks__/__storybook_mocks__/with_discover_services';
 import { getDocumentsLayoutProps, getPlainRecordLayoutProps } from './get_layout_props';
 import { DiscoverLayout } from '../discover_layout';
 import { setHeaderActionMenuMounter } from '../../../../../kibana_services';
 import { AppState } from '../../../services/discover_state';
 import { DiscoverLayoutProps } from '../types';
-import { getDataViewMock } from '@kbn/discover-plugin/public/__mocks__/__storybook_mocks__/get_data_view_mock';
 
 setHeaderActionMenuMounter(() => void 0);
 

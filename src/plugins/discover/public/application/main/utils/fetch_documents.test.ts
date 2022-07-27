@@ -16,7 +16,7 @@ import { FetchDeps } from './fetch_all';
 import { fetchTotalHits } from './fetch_total_hits';
 import type { EsHitRecord } from '../../../types';
 import { buildDataTableRecord } from '../../../utils/build_data_record';
-import {dataViewMock} from "@kbn/discover-plugin/public/__mocks__/data_view";
+import { dataViewMock } from '../../../__mocks__/data_view';
 
 const getDeps = () =>
   ({
