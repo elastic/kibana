@@ -24,7 +24,7 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { omit, sumBy } from 'lodash';
+import { omit } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { getConnectorFeatureName } from '@kbn/actions-plugin/common';
@@ -106,14 +106,6 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const [showWarningText, setShowWarningText] = useState<boolean>(false);
-  const singleWarningText = i18n.translate(
-    'xpack.triggersActionsUI.sections.actionsConnectorsList.singleWarningText',
-    { defaultMessage: 'This' }
-  );
-  const multipleWarningText = i18n.translate(
-    'xpack.triggersActionsUI.sections.actionsConnectorsList.multipleWarningText',
-    { defaultMessage: 'At least one' }
-  );
 
   useEffect(() => {
     (async () => {
@@ -163,12 +155,17 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
     : [];
 
   function setDeleteConnectorWarning(connectors: string[]) {
-    const show =
-      sumBy(connectors, (c) => {
-        const action = actions.find((a) => a.id === c);
-        return action && action.referencedByCount ? action.referencedByCount : 0;
-      }) > 0;
+    const show = connectors.some((c) => {
+      const action = actions.find((a) => a.id === c);
+      return (action && action.referencedByCount ? action.referencedByCount : 0) > 0;
+    });
     setShowWarningText(show);
+  }
+
+  function onDelete(items: ActionConnectorTableItem[]) {
+    const itemIds = items.map((item: any) => item.id);
+    setConnectorsToDelete(itemIds);
+    setDeleteConnectorWarning(itemIds);
   }
 
   async function loadActions() {
@@ -303,14 +300,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
       render: (item: ActionConnectorTableItem) => {
         return (
           <EuiFlexGroup justifyContent="flexEnd" alignItems="flexEnd">
-            <DeleteOperation
-              canDelete={canDelete}
-              item={item}
-              onDelete={() => {
-                setConnectorsToDelete([item.id]);
-                setDeleteConnectorWarning([item.id]);
-              }}
-            />
+            <DeleteOperation canDelete={canDelete} item={item} onDelete={() => onDelete([item])} />
             {item.isMissingSecrets ? (
               <>
                 {actionTypesIndex && actionTypesIndex[item.actionTypeId]?.enabled ? (
@@ -413,11 +403,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
                   iconType="trash"
                   color="danger"
                   data-test-subj="bulkDelete"
-                  onClick={() => {
-                    const items = selectedItems.map((selected: any) => selected.id);
-                    setConnectorsToDelete(items);
-                    setDeleteConnectorWarning(items);
-                  }}
+                  onClick={() => onDelete(selectedItems)}
                   title={
                     canDelete
                       ? undefined
@@ -492,11 +478,9 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
           'xpack.triggersActionsUI.sections.actionsConnectorsList.warningText',
           {
             defaultMessage:
-              '{connectors, plural, one {{singleWarningText}} other {{multipleWarningText}}} connector is used in a rule.',
+              '{connectors, plural, one {This} other {At least one}} connector is used in a rule.',
             values: {
               connectors: connectorsToDelete.length,
-              singleWarningText,
-              multipleWarningText,
             },
           }
         )}
