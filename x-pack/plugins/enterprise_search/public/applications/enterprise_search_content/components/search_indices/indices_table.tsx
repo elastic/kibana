@@ -11,7 +11,6 @@ import { generatePath } from 'react-router-dom';
 
 import {
   CriteriaWithPagination,
-  EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiIcon,
@@ -22,6 +21,7 @@ import { FormattedRelative } from '@kbn/i18n-react';
 
 import { Meta } from '../../../../../common/types';
 import { EuiLinkTo, EuiButtonIconTo } from '../../../shared/react_router_helpers';
+import { EuiBadgeTo } from '../../../shared/react_router_helpers/eui_components';
 import { convertMetaToPagination } from '../../../shared/table_pagination';
 import { SEARCH_INDEX_PATH } from '../../routes';
 import { ElasticsearchViewIndex, IngestionMethod } from '../../types';
@@ -126,17 +126,29 @@ const columns: Array<EuiBasicTableColumn<ElasticsearchViewIndex>> = [
         defaultMessage: 'Ingestion status',
       }
     ),
-    render: (index: ElasticsearchViewIndex) =>
-      isCrawlerIndex(index) ? (
-        <EuiBadge color={crawlerStatusToColor(index.crawler?.most_recent_crawl_request_status)}>
-          {crawlerStatusToText(index.crawler?.most_recent_crawl_request_status)}
-        </EuiBadge>
-      ) : (
-        <EuiBadge color={ingestionStatusToColor(index.ingestionStatus)}>
-          {ingestionStatusToText(index.ingestionStatus)}
-        </EuiBadge>
-      ),
+    render: (index: ElasticsearchViewIndex) => {
+      const overviewPath = generatePath(SEARCH_INDEX_PATH, { indexName: index.name });
+      if (isCrawlerIndex(index)) {
+        const label = crawlerStatusToText(index.crawler?.most_recent_crawl_request_status);
 
+        return (
+          <EuiBadgeTo
+            to={overviewPath}
+            label={label}
+            color={crawlerStatusToColor(index.crawler?.most_recent_crawl_request_status)}
+          />
+        );
+      } else {
+        const label = ingestionStatusToText(index.ingestionStatus);
+        return (
+          <EuiBadgeTo
+            to={overviewPath}
+            label={label}
+            color={ingestionStatusToColor(index.ingestionStatus)}
+          />
+        );
+      }
+    },
     truncateText: true,
   },
   {
