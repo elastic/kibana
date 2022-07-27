@@ -9,9 +9,9 @@ import * as t from 'io-ts';
 
 export const PrivateLocationType = t.intersection([
   t.interface({
-    name: t.string,
+    label: t.string,
     id: t.string,
-    policyHostId: t.string,
+    agentPolicyId: t.string,
     concurrentMonitors: t.number,
   }),
   t.partial({ geo: t.interface({ lat: t.number, lon: t.number }) }),

@@ -18,8 +18,7 @@ describe('useLocationsAPI', () => {
 
     expect(result.current).toEqual(
       expect.objectContaining({
-        fetchLoading: true,
-        deleteLoading: true,
+        loading: true,
         privateLocations: [],
       })
     );
@@ -33,7 +32,7 @@ describe('useLocationsAPI', () => {
       locations: [
         {
           id: 'Test',
-          policyHostId: 'testPolicy',
+          agentPolicyId: 'testPolicy',
         },
       ],
     },
@@ -45,8 +44,7 @@ describe('useLocationsAPI', () => {
 
     expect(result.current).toEqual(
       expect.objectContaining({
-        deleteLoading: true,
-        fetchLoading: true,
+        loading: true,
         privateLocations: [],
       })
     );
@@ -55,12 +53,11 @@ describe('useLocationsAPI', () => {
 
     expect(result.current).toEqual(
       expect.objectContaining({
-        deleteLoading: false,
-        fetchLoading: false,
+        loading: false,
         privateLocations: [
           {
             id: 'Test',
-            policyHostId: 'testPolicy',
+            agentPolicyId: 'testPolicy',
           },
         ],
       })
@@ -76,8 +73,8 @@ describe('useLocationsAPI', () => {
 
     result.current.onSubmit({
       id: 'new',
-      policyHostId: 'newPolicy',
-      name: 'new',
+      agentPolicyId: 'newPolicy',
+      label: 'new',
       concurrentMonitors: 1,
       geo: {
         lat: 0,
@@ -91,7 +88,7 @@ describe('useLocationsAPI', () => {
       'synthetics-privates-locations',
       {
         locations: [
-          { id: 'Test', policyHostId: 'testPolicy' },
+          { id: 'Test', agentPolicyId: 'testPolicy' },
           {
             concurrentMonitors: 1,
             id: 'newPolicy',
@@ -99,8 +96,8 @@ describe('useLocationsAPI', () => {
               lat: 0,
               lon: 0,
             },
-            name: 'new',
-            policyHostId: 'newPolicy',
+            label: 'new',
+            agentPolicyId: 'newPolicy',
           },
         ],
       },
@@ -114,11 +111,11 @@ describe('useLocationsAPI', () => {
         locations: [
           {
             id: 'Test',
-            policyHostId: 'testPolicy',
+            agentPolicyId: 'testPolicy',
           },
           {
             id: 'Test1',
-            policyHostId: 'testPolicy1',
+            agentPolicyId: 'testPolicy1',
           },
         ],
       },
@@ -140,7 +137,7 @@ describe('useLocationsAPI', () => {
         locations: [
           {
             id: 'Test1',
-            policyHostId: 'testPolicy1',
+            agentPolicyId: 'testPolicy1',
           },
         ],
       },
