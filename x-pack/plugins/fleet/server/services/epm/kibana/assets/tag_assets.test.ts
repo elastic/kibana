@@ -26,7 +26,7 @@ describe('tagKibanaAssets', () => {
     savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
       Promise.resolve({ id: name.toLowerCase(), name })
     );
-    const kibanaAssets = { dashboard: [{ id: 'dashboard1', type: 'dashboard' }] };
+    const kibanaAssets = { dashboard: [{ id: 'dashboard1', type: 'dashboard' }] } as any;
 
     await tagKibanaAssets({
       savedObjectTagAssignmentService,
@@ -57,7 +57,7 @@ describe('tagKibanaAssets', () => {
       { id: 'managed', name: 'Managed' },
       { id: 'system', name: 'System' },
     ]);
-    const kibanaAssets = { dashboard: [{ id: 'dashboard1', type: 'dashboard' }] };
+    const kibanaAssets = { dashboard: [{ id: 'dashboard1', type: 'dashboard' }] } as any;
 
     await tagKibanaAssets({
       savedObjectTagAssignmentService,
@@ -83,7 +83,7 @@ describe('tagKibanaAssets', () => {
       dashboard: [{ id: 'dashboard1', type: 'dashboard' }],
       search: [{ id: 's1', type: 'search' }],
       visualization: [{ id: 'v1', type: 'visualization' }],
-    };
+    } as any;
 
     await tagKibanaAssets({
       savedObjectTagAssignmentService,
@@ -100,7 +100,7 @@ describe('tagKibanaAssets', () => {
   });
 
   it('should do nothing if no taggable assets', async () => {
-    const kibanaAssets = { search: [{ id: 's1', type: 'search' }] };
+    const kibanaAssets = { search: [{ id: 's1', type: 'search' }] } as any;
 
     await tagKibanaAssets({
       savedObjectTagAssignmentService,
