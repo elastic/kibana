@@ -31,6 +31,7 @@ export type {
   RuntimeField,
   RuntimeFieldSpec,
   RuntimeFieldSubField,
+  RuntimeFieldSubFields,
   DataViewAttributes,
   OnNotification,
   OnError,

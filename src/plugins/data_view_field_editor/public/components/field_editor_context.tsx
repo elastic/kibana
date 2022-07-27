@@ -8,9 +8,14 @@
 
 import React, { createContext, useContext, FunctionComponent, useMemo } from 'react';
 import { NotificationsStart, CoreStart } from '@kbn/core/public';
-import type { DataView, DataPublicPluginStart, FieldFormatsStart } from '../shared_imports';
+import type {
+  DataView,
+  DataPublicPluginStart,
+  FieldFormatsStart,
+  RuntimePrimitiveTypes,
+} from '../shared_imports';
 import { ApiService } from '../lib/api';
-import type { InternalFieldType, PluginStart } from '../types';
+import type { InternalFieldType, PluginStart, Field } from '../types';
 
 export interface Context {
   dataView: DataView;
@@ -42,11 +47,15 @@ export interface Context {
    * It is also used to provide the list of field autocomplete suggestions to the code editor.
    */
   existingConcreteFields: Array<{ name: string; type: string }>;
+  field?: Field;
+  setSubfields: (newValue: Record<string, RuntimePrimitiveTypes>) => void;
 }
 
 const fieldEditorContext = createContext<Context | undefined>(undefined);
 
-export const FieldEditorProvider: FunctionComponent<Context> = ({
+type FieldEditorProviderProps = Omit<Context, 'setSubfields'>;
+
+export const FieldEditorProvider: FunctionComponent<FieldEditorProviderProps> = ({
   services,
   dataView,
   links,
@@ -57,7 +66,25 @@ export const FieldEditorProvider: FunctionComponent<Context> = ({
   namesNotAllowed,
   existingConcreteFields,
   children,
+  field,
 }) => {
+  const fieldToSubfieldMap = field?.fields
+    ? Object.entries(field?.fields).reduce<Record<string, RuntimePrimitiveTypes>>(
+        (acc, [key, value]) => {
+          acc[key] = value.type;
+          return acc;
+        },
+        {}
+      )
+    : undefined;
+
+  // might need to move this elsehwere
+  console.log('Render FieldEditorProvider');
+
+  const [subfields, setSubfields] = React.useState<
+    Record<string, RuntimePrimitiveTypes> | undefined
+  >(fieldToSubfieldMap);
+
   const ctx = useMemo<Context>(
     () => ({
       dataView,
@@ -69,6 +96,8 @@ export const FieldEditorProvider: FunctionComponent<Context> = ({
       fieldFormatEditors,
       namesNotAllowed,
       existingConcreteFields,
+      subfields,
+      setSubfields,
     }),
     [
       dataView,
@@ -80,6 +109,8 @@ export const FieldEditorProvider: FunctionComponent<Context> = ({
       fieldFormatEditors,
       namesNotAllowed,
       existingConcreteFields,
+      subfields,
+      setSubfields,
     ]
   );
 

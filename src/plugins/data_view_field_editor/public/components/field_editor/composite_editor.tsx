@@ -31,6 +31,9 @@ export interface CompositeEditorProps {
 export const CompositeEditor = ({ value, setValue }: CompositeEditorProps) => {
   const { links, existingConcreteFields } = useFieldEditorContext();
   // const { fields } = useFieldPreviewContext();
+  if (value?.a === undefined) {
+    value = { a: 'keyword' };
+  }
   console.log('CompositeEditor VALUE ', value);
   const fields = Object.entries(value);
   // const { fields } = useFieldPreviewContext();
@@ -74,13 +77,13 @@ export const CompositeEditor = ({ value, setValue }: CompositeEditorProps) => {
           </EuiText>
         </div>
         {Object.entries(value)
-          .filter(([key, val]) => val !== undefined)
-          .map(([itemKey, itemValue], idx) => {
-            const key = itemKey.slice(itemKey.search('\\.') + 1);
+          // .filter(([key, val]) => val !== undefined)
+          .map(([key, itemValue], idx) => {
+            // const key = itemKey.slice(itemKey.search('\\.') + 1);
             const val = RUNTIME_FIELD_OPTIONS_PRIMITIVE.find(
-              ({ value: optionValue }) => optionValue === itemValue
+              ({ value: optionValue }) => optionValue === itemValue // || 'keyword'
             );
-            console.log('RENDERING:', val);
+
             return (
               <div>
                 <EuiFlexGroup gutterSize="s">
@@ -107,7 +110,7 @@ export const CompositeEditor = ({ value, setValue }: CompositeEditorProps) => {
                           }
                           value[key] = newValue[0].value!;
                           console.log('I AM SAVING NEW VALUE', value);
-                          setValue(value);
+                          setValue({ ...value });
                         }}
                         isClearable={false}
                         data-test-subj="typeField"

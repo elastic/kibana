@@ -65,9 +65,16 @@ export interface FieldPreview {
   type?: string;
 }
 
+export interface FieldTypeInfo {
+  name: string;
+  type: string;
+}
+
 export interface Context {
   fields: FieldPreview[];
   error: PreviewError | null;
+  fieldTypeInfo?: FieldTypeInfo[];
+  initialPreviewComplete: boolean;
   params: {
     value: Params;
     update: (updated: Partial<Params>) => void;

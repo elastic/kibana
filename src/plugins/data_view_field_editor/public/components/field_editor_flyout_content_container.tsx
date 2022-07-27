@@ -230,6 +230,7 @@ export const FieldEditorFlyoutContentContainer = ({
       fieldFormats={fieldFormats}
       namesNotAllowed={namesNotAllowed}
       existingConcreteFields={existingConcreteFields}
+      field={field}
     >
       <FieldPreviewProvider>
         <FieldEditorFlyoutContent

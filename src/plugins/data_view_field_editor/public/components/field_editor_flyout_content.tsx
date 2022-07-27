@@ -25,6 +25,7 @@ import { useFieldEditorContext } from './field_editor_context';
 import { FieldEditor, FieldEditorFormState } from './field_editor/field_editor';
 import { FieldPreview, useFieldPreviewContext } from './preview';
 import { ModifiedFieldModal, SaveFieldTypeOrNameChangedModal } from './confirm_modals';
+import { fieldTypeMapToRuntimeSpecFormat } from './utils';
 
 const i18nTexts = {
   cancelButtonLabel: i18n.translate('indexPatternFieldEditor.editor.flyoutCancelButtonLabel', {
@@ -67,7 +68,7 @@ const FieldEditorFlyoutContentComponent = ({
 }: Props) => {
   const isMounted = useRef(false);
   const isEditingExistingField = !!field;
-  const { dataView } = useFieldEditorContext();
+  const { dataView, subfields } = useFieldEditorContext();
   const {
     panel: { isVisible: isPanelVisible },
   } = useFieldPreviewContext();
@@ -98,6 +99,7 @@ const FieldEditorFlyoutContentComponent = ({
   }, [isFormModified]);
 
   const onClickSave = useCallback(async () => {
+    console.log('onClickSave');
     const { isValid, data: updatedField } = await submit();
 
     if (!isMounted.current) {
@@ -115,10 +117,13 @@ const FieldEditorFlyoutContentComponent = ({
           confirmChangeNameOrType: true,
         });
       } else {
+        if (updatedField.type === 'composite') {
+          updatedField.fields = fieldTypeMapToRuntimeSpecFormat(subfields);
+        }
         onSave(updatedField);
       }
     }
-  }, [onSave, submit, field, isEditingExistingField]);
+  }, [onSave, submit, field, isEditingExistingField, subfields]);
 
   const onClickCancel = useCallback(() => {
     const canClose = canCloseValidator();

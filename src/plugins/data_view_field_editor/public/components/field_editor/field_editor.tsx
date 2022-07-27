@@ -43,7 +43,7 @@ export interface FieldEditorFormState {
 }
 
 export interface FieldFormInternal extends Omit<Field, 'type' | 'internalType' | 'fields'> {
-  fields?: Array<{ name: string; type: TypeSelection }>;
+  // fields?: Array<{ name: string; type: TypeSelection }>;
   type: TypeSelection;
   __meta__: {
     isCustomLabelVisible: boolean;
@@ -80,21 +80,10 @@ const formDeserializer = (field: Field): FieldFormInternal => {
 
   const format = field.format === null ? undefined : field.format;
 
-  console.log('DESERIALIZER', fieldType);
-  console.log('DESERIALIZER', field.fields);
   return {
     ...field,
     type: fieldType,
     format,
-    fields: field.fields
-      ? Object.entries(field.fields).reduce<Array<{ name: string; type: TypeSelection }>>(
-          (col, [key, val]) => {
-            col.push({ name: key, type: fieldTypeToComboBoxOption(val.type) });
-            return col;
-          },
-          []
-        )
-      : undefined,
     __meta__: {
       isCustomLabelVisible: field.customLabel !== undefined,
       isValueVisible: field.script !== undefined,
@@ -105,34 +94,24 @@ const formDeserializer = (field: Field): FieldFormInternal => {
 };
 
 const formSerializer = (field: FieldFormInternal): Field => {
-  const { __meta__, type, format, fields, ...rest } = field;
-  console.log('SERIALIZER', field);
-
+  const { __meta__, type, format, ...rest } = field;
   return {
     type: type && type[0].value!,
     // By passing "null" we are explicitly telling DataView to remove the
     // format if there is one defined for the field.
     format: format === undefined ? null : format,
-    fields: fields
-      ? fields.reduce<Record<string, RuntimeFieldSubField>>(
-          (acc, { name, type: subfieldType = [{}] }) => {
-            acc[name] = { type: (subfieldType[0].value || 'keyword') as RuntimePrimitiveTypes };
-            return acc;
-          },
-          {}
-        )
-      : undefined,
     ...rest,
   };
 };
 
 const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) => {
-  console.log('FieldEditorComponent - this is rerendering too much');
-  // todo - two initial sources, original field and preview
-  const { namesNotAllowed, fieldTypeToProcess } = useFieldEditorContext();
+  // todo see if we can reduce renders
+  const { namesNotAllowed, fieldTypeToProcess, subfields, setSubfields } = useFieldEditorContext();
   const {
     params: { update: updatePreviewParams },
     fields,
+    isLoadingPreview,
+    initialPreviewComplete,
   } = useFieldPreviewContext();
   const { form } = useForm<Field, FieldFormInternal>({
     defaultValue: field,
@@ -142,7 +121,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
   });
   const { submit, isValid: isFormValid, isSubmitted, getFields, isSubmitting } = form;
 
-  console.log('SUBFIELDS', field?.fields);
+  // loading from saved field
   const savedSubfieldTypes = Object.entries(field?.fields || {}).reduce<Record<string, string>>(
     (col, [key, val]) => {
       col[key] = val.type;
@@ -150,19 +129,13 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
     },
     {}
   );
-  const fieldsAndTypesDefault = fields.reduce<Record<string, string>>((collector, item) => {
-    // todo remove ! and use correct type
-    collector[item.key] = item.type!;
-    return collector;
-  }, {});
 
-  console.log('DEEEEEFAULT', fieldsAndTypesDefault);
-  // todo
+  // todo - non composite
   const [fieldsAndTypes, setFieldsAndTypes] = useState(savedSubfieldTypes);
 
   useEffect(() => {
-    console.log('useEffect fieldsAndTypes', fieldsAndTypes);
-  }, [fieldsAndTypes]);
+    setSubfields(fieldsAndTypes);
+  }, [fieldsAndTypes, setSubfields]);
 
   const nameFieldConfig = getNameFieldConfig(namesNotAllowed, field);
 
@@ -195,32 +168,39 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
   // console.log('RENDER FORM', form.getFields());
 
   useEffect(() => {
-    console.log('FIELDS HAVE BEEN UPDATED', fields);
-    const previewFieldsToFormFields = fields.map((fld) => ({
-      name: fld.key,
-      value: [{ label: 'keyword', type: 'keyword' }],
-    }));
-    console.log('previewFieldsToFormFields', previewFieldsToFormFields);
-    /*
-    form.setFieldValue('fields__array__', [
-      { name: 'a', value: [{ label: 'keyword', type: 'keyword' }] },
-    ]);
-    */
-    form.setFieldValue('fields__array__', previewFieldsToFormFields);
-    form.setFieldValue('TEST', 'TEST VALUE');
-    console.log('SET FIELDS COMPLETE');
-  }, [fields, form]);
+    if (!isLoadingPreview && initialPreviewComplete) {
+      console.log('useEffect PREVIEW', fieldsAndTypes, fields);
+
+      // previously saved - subfields
+      // preview to fieldTypeMap
+      /**
+      const fixedFormat = fields.reduce<Record<string, RuntimePrimitiveTypes>>((col, item) => {
+        col[item.key] = item.type as RuntimePrimitiveTypes;
+        return col;
+      }, {});
+      setSubfields(fixedFormat);
+      */
+
+      const updated = fields.reduce((col, item) => {
+        const parsedKey = item.key.slice(item.key.search('\\.') + 1);
+        col[parsedKey] = fieldsAndTypes[parsedKey] || item.type;
+        return col;
+      }, {});
+
+      // this looks at each preview field, grabs the existing type OR gets the preview type
+      if (!isEqual(updated, fieldsAndTypes)) {
+        setFieldsAndTypes(updated);
+      }
+    }
+  }, [fields, setSubfields, isLoadingPreview, initialPreviewComplete, fieldsAndTypes]);
 
   useEffect(() => {
-    console.log('USE EFFECT ONCHANGE');
     if (onChange) {
       onChange({ isValid: isFormValid, isSubmitted, isSubmitting, submit });
     }
   }, [onChange, isFormValid, isSubmitted, isSubmitting, submit]);
 
-  /*
   useEffect(() => {
-    console.log('USE EFFECT updatePreviewParams');
     updatePreviewParams({
       name: Boolean(updatedName?.trim()) ? updatedName : null,
       type: updatedType?.[0].value,
@@ -238,16 +218,12 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
     updatedFormat,
     updatePreviewParams,
   ]);
-  */
 
   useEffect(() => {
     if (onFormModifiedChange) {
       onFormModifiedChange(isFormModified);
     }
   }, [isFormModified, onFormModifiedChange, form]);
-
-  const formDataBest = form.getFormData();
-  console.log(formDataBest);
 
   return (
     <Form
@@ -313,13 +289,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
       {updatedType && updatedType[0].value !== 'composite' ? (
         <FieldDetail />
       ) : (
-        <CompositeEditor
-          value={fieldsAndTypes}
-          setValue={(update) => {
-            console.log('got update', update);
-            setFieldsAndTypes(update);
-          }}
-        />
+        <CompositeEditor value={fieldsAndTypes} setValue={setFieldsAndTypes} />
       )}
     </Form>
   );

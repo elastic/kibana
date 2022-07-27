@@ -15,11 +15,12 @@ import React, {
   useEffect,
   useRef,
   FunctionComponent,
+  useReducer,
 } from 'react';
 import { renderToString } from 'react-dom/server';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
+import { get, differenceWith, isEqual } from 'lodash';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { RuntimePrimitiveTypes } from '../../shared_imports';
 
@@ -34,6 +35,7 @@ import type {
   EsDocument,
   ScriptErrorCodes,
   FetchDocError,
+  FieldTypeInfo,
 } from './types';
 
 const fieldPreviewContext = createContext<Context | undefined>(undefined);
@@ -91,6 +93,40 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     fields: Context['fields'];
     error: Context['error'];
   }>({ fields: [], error: null });
+  /** Returns true after first preview is completed */
+  const [initialPreviewComplete, setInitialPreviewComplete] = useState(false);
+  const [fieldTypeInfo, setFieldTypeInfo] = useState<FieldTypeInfo[]>();
+
+  const fieldChangeReducer = (
+    prev: FieldTypeInfo[] | undefined,
+    [next, fldTypeInfo]: [FieldTypeInfo[], FieldTypeInfo[] | undefined]
+  ) => {
+    console.log(
+      '*** fieldChangeReducer',
+      next,
+      fieldTypeInfo,
+      differenceWith(next, fldTypeInfo || [], isEqual)
+    );
+    return differenceWith(next, fldTypeInfo || [], isEqual);
+  };
+
+  useEffect(() => {
+    console.log('*** fieldTypeInfo', fieldTypeInfo);
+  }, [fieldTypeInfo]);
+
+  const [fieldUpdate, setFieldUpdate] = useReducer(fieldChangeReducer, []);
+
+  /**
+  useEffect(() => {
+    // console.log('fieldUpdate', fieldUpdate);
+    setFieldUpdate(fieldTypeInfo as FieldTypeInfo[]);
+  }, [fieldTypeInfo]);
+  */
+
+  useEffect(() => {
+    console.log('*** fieldUpdate', fieldUpdate);
+  }, [fieldUpdate]);
+
   /** Possible error while fetching sample documents */
   const [fetchDocError, setFetchDocError] = useState<FetchDocError | null>(null);
   /** The parameters required for the Painless _execute API */
@@ -359,15 +395,28 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         };
       });
 
-      console.log('SET PREVIEW', fields);
+      // Reverse fields to put them in alphabetical order
+      const revFields = fields.reverse();
+
+      // Remove unneeded info for updating types
+      const fieldTypeInfoUpdate = revFields.map((item) => {
+        const key = item.key.slice(item.key.search('\\.') + 1);
+        return { name: key, type: item.type };
+      });
+
+      if (fieldTypeInfo === undefined || !isEqual(fieldTypeInfoUpdate, fieldTypeInfo)) {
+        console.log('*** fieldTypeInfo - pre', fieldTypeInfoUpdate);
+        setFieldUpdate([fieldTypeInfoUpdate, fieldTypeInfo]);
+        setFieldTypeInfo(fieldTypeInfoUpdate);
+      }
       setPreviewResponse({
-        fields: fields.reverse(),
+        fields: revFields,
         error: null,
       });
 
       setFieldsInScript(updatedFieldsInScript);
     },
-    [valueFormatter]
+    [valueFormatter, fieldTypeInfo]
   );
 
   const updatePreview = useCallback(async () => {
@@ -436,6 +485,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       }
     }
 
+    setInitialPreviewComplete(true);
     setIsLoadingPreview(false);
   }, [
     name,
@@ -490,6 +540,8 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       error: previewResponse.error,
       isPreviewAvailable,
       isLoadingPreview,
+      initialPreviewComplete,
+      fieldTypeInfo,
       params: {
         value: params,
         update: updateParams,
@@ -535,6 +587,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       params,
       isPreviewAvailable,
       isLoadingPreview,
+      fieldTypeInfo,
       updateParams,
       currentDocument,
       currentDocId,
@@ -551,6 +604,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       reset,
       pinnedFields,
       fieldsInScript,
+      initialPreviewComplete,
     ]
   );
 

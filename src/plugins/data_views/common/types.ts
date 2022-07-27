@@ -93,8 +93,10 @@ export interface RuntimeField extends RuntimeFieldBase, FieldConfiguration {
   /**
    * Subfields of composite field
    */
-  fields?: Record<string, RuntimeFieldSubField>;
+  fields?: RuntimeFieldSubFields;
 }
+
+export type RuntimeFieldSubFields = Record<string, RuntimeFieldSubField>;
 
 /**
  * Runtime field composite subfield

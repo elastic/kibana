@@ -722,6 +722,7 @@ export class DataViewsService {
         }
       };
 
+      console.log('initFromSavedObject', runtimeFieldMap);
       // CREATE RUNTIME FIELDS
       for (const [name, runtimeField] of Object.entries(runtimeFieldMap || {})) {
         // do not create runtime field if mapped field exists
