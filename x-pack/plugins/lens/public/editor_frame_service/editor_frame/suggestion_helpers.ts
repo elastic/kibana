@@ -28,6 +28,7 @@ import {
   DatasourceStates,
   VisualizationState,
   applyChanges,
+  DataViewsState,
 } from '../../state_management';
 
 /**
@@ -48,6 +49,7 @@ export function getSuggestions({
   field,
   visualizeTriggerFieldContext,
   activeData,
+  dataViews,
   mainPalette,
 }: {
   datasourceMap: DatasourceMap;
@@ -59,6 +61,7 @@ export function getSuggestions({
   field?: unknown;
   visualizeTriggerFieldContext?: VisualizeFieldContext | VisualizeEditorContext;
   activeData?: Record<string, Datatable>;
+  dataViews: DataViewsState;
   mainPalette?: PaletteOutput;
 }): Suggestion[] {
   const datasources = Object.entries(datasourceMap).filter(
@@ -91,25 +94,29 @@ export function getSuggestions({
       if ('isVisualizeAction' in visualizeTriggerFieldContext) {
         dataSourceSuggestions = datasource.getDatasourceSuggestionsForVisualizeCharts(
           datasourceState,
-          visualizeTriggerFieldContext.layers
+          visualizeTriggerFieldContext.layers,
+          dataViews.indexPatterns
         );
       } else {
         // used for navigating from Discover to Lens
         dataSourceSuggestions = datasource.getDatasourceSuggestionsForVisualizeField(
           datasourceState,
           visualizeTriggerFieldContext.indexPatternId,
-          visualizeTriggerFieldContext.fieldName
+          visualizeTriggerFieldContext.fieldName,
+          dataViews.indexPatterns
         );
       }
     } else if (field) {
       dataSourceSuggestions = datasource.getDatasourceSuggestionsForField(
         datasourceState,
         field,
-        (layerId) => isLayerSupportedByVisualization(layerId, [layerTypes.DATA]) // a field dragged to workspace should added to data layer
+        (layerId) => isLayerSupportedByVisualization(layerId, [layerTypes.DATA]), // a field dragged to workspace should added to data layer
+        dataViews.indexPatterns
       );
     } else {
       dataSourceSuggestions = datasource.getDatasourceSuggestionsFromCurrentState(
         datasourceState,
+        dataViews.indexPatterns,
         (layerId) => isLayerSupportedByVisualization(layerId, [layerTypes.DATA]),
         activeData
       );
@@ -162,12 +169,14 @@ export function getVisualizeFieldSuggestions({
   datasourceStates,
   visualizationMap,
   visualizeTriggerFieldContext,
+  dataViews,
 }: {
   datasourceMap: DatasourceMap;
   datasourceStates: DatasourceStates;
   visualizationMap: VisualizationMap;
   subVisualizationId?: string;
   visualizeTriggerFieldContext?: VisualizeFieldContext | VisualizeEditorContext;
+  dataViews: DataViewsState;
 }): Suggestion | undefined {
   const activeVisualization = visualizationMap?.[Object.keys(visualizationMap)[0]] || null;
   const suggestions = getSuggestions({
@@ -177,6 +186,7 @@ export function getVisualizeFieldSuggestions({
     activeVisualization,
     visualizationState: undefined,
     visualizeTriggerFieldContext,
+    dataViews,
   });
 
   if (visualizeTriggerFieldContext && 'isVisualizeAction' in visualizeTriggerFieldContext) {
@@ -266,7 +276,8 @@ export function getTopSuggestionForField(
   datasourceStates: DatasourceStates,
   visualizationMap: Record<string, Visualization<unknown>>,
   datasource: Datasource,
-  field: DragDropIdentifier
+  field: DragDropIdentifier,
+  dataViews: DataViewsState
 ) {
   const hasData = Object.values(datasourceLayers).some(
     (datasourceLayer) => datasourceLayer.getTableSpec().length > 0
@@ -288,6 +299,7 @@ export function getTopSuggestionForField(
     visualizationState: visualization.state,
     field,
     mainPalette,
+    dataViews,
   });
   return (
     suggestions.find((s) => s.visualizationId === visualization.activeId) ||

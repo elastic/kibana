@@ -28,12 +28,13 @@ import {
   LastValueIndexPatternColumn,
   operationDefinitionMap,
 } from '..';
-import { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from '../../../types';
+import { IndexPatternLayer, IndexPatternPrivateState } from '../../../types';
 import { FrameDatasourceAPI } from '../../../../types';
 import { DateHistogramIndexPatternColumn } from '../date_histogram';
 import { getOperationSupportMatrix } from '../../../dimension_panel/operation_support';
 import { FieldSelect } from '../../../dimension_panel/field_select';
 import { ReferenceEditor } from '../../../dimension_panel/reference_editor';
+import { IndexPattern } from '../../../../editor_frame_service/types';
 import { cloneDeep } from 'lodash';
 import { IncludeExcludeRow } from './include_exclude_options';
 

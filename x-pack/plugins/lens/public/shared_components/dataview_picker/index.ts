@@ -5,12 +5,5 @@
  * 2.0.
  */
 
-import type { Datatable } from '@kbn/expressions-plugin/common';
-
-export type TableInspectorAdapter = Record<string, Datatable>;
-
-export interface ErrorMessage {
-  shortMessage: string;
-  longMessage: React.ReactNode;
-  type?: 'fixable' | 'critical';
-}
+export { ChangeIndexPattern } from './dataview_picker';
+export { fieldExists, fieldContainsData } from './helpers';

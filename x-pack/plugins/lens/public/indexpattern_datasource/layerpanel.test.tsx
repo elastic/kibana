@@ -12,7 +12,7 @@ import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { ShallowWrapper } from 'enzyme';
 import { EuiSelectable } from '@elastic/eui';
 import { DataViewsList } from '@kbn/unified-search-plugin/public';
-import { ChangeIndexPattern } from './change_indexpattern';
+import { ChangeIndexPattern } from '../shared_components/dataview_picker/dataview_picker';
 import { getFieldByNameFactory } from './pure_helpers';
 import { TermsIndexPatternColumn } from './operations';
 

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { useMemo, memo } from 'react';
+import React, { useMemo, memo, useCallback } from 'react';
 import { EuiForm } from '@elastic/eui';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
+import { changeIndexPattern } from '../../../state_management/lens_slice';
 import { Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
 import { generateId } from '../../../id_generator';
@@ -49,7 +50,7 @@ export function LayerPanels(
     activeVisualization: Visualization;
   }
 ) {
-  const { activeVisualization, datasourceMap } = props;
+  const { activeVisualization, datasourceMap, indexPatternService } = props;
   const { activeDatasourceId, visualization, datasourceStates } = useLensSelector(
     (state) => state.lens
   );
@@ -146,6 +147,35 @@ export function LayerPanels(
     [dispatchLens]
   );
 
+  const onChangeIndexPattern = useCallback(
+    async ({
+      indexPatternId,
+      datasourceId,
+      visualizationId,
+      layerId,
+    }: {
+      indexPatternId: string;
+      datasourceId?: string;
+      visualizationId?: string;
+      layerId?: string;
+    }) => {
+      const indexPatterns = await props.indexPatternService.ensureIndexPattern({
+        id: indexPatternId,
+        cache: props.framePublicAPI.dataViews.indexPatterns,
+      });
+      dispatchLens(
+        changeIndexPattern({
+          indexPatternId,
+          datasourceIds: datasourceId ? [datasourceId] : [],
+          visualizationIds: visualizationId ? [visualizationId] : [],
+          layerId,
+          dataViews: { indexPatterns },
+        })
+      );
+    },
+    [dispatchLens, props.framePublicAPI.dataViews, props.indexPatternService]
+  );
+
   return (
     <EuiForm className="lnsConfigPanel">
       {layerIds.map((layerId, layerIndex) => (
@@ -160,6 +190,7 @@ export function LayerPanels(
           updateVisualization={setVisualizationState}
           updateDatasource={updateDatasource}
           updateDatasourceAsync={updateDatasourceAsync}
+          onChangeIndexPattern={onChangeIndexPattern}
           updateAll={updateAll}
           isOnlyLayer={
             getRemoveOperation(
@@ -212,6 +243,7 @@ export function LayerPanels(
             removeLayerRef(layerId);
           }}
           toggleFullscreen={toggleFullscreen}
+          indexPatternService={indexPatternService}
         />
       ))}
       <AddLayerButton

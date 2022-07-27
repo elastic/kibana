@@ -209,7 +209,8 @@ export function SuggestionPanel({
 
   const missingIndexPatterns = getMissingIndexPattern(
     activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
-    activeDatasourceId ? datasourceStates[activeDatasourceId] : null
+    activeDatasourceId ? datasourceStates[activeDatasourceId] : null,
+    frame.dataViews.indexPatterns
   );
   const { suggestions, currentStateExpression, currentStateError } = useMemo(() => {
     const newSuggestions = missingIndexPatterns.length
@@ -223,6 +224,7 @@ export function SuggestionPanel({
             : undefined,
           visualizationState: currentVisualization.state,
           activeData,
+          dataViews: frame.dataViews,
         })
           .filter(
             ({
@@ -240,6 +242,7 @@ export function SuggestionPanel({
                   visualizationMap[visualizationId],
                   suggestionVisualizationState,
                   {
+                    dataViews: frame.dataViews,
                     datasourceLayers: getDatasourceLayers(
                       suggestionDatasourceId
                         ? {
@@ -511,6 +514,7 @@ function getPreviewExpression(
         updatedLayerApis[layerId] = datasource.getPublicAPI({
           layerId,
           state: datasourceState,
+          indexPatterns: frame.dataViews.indexPatterns,
         });
       }
     });
@@ -518,7 +522,8 @@ function getPreviewExpression(
 
   const datasourceExpressionsByLayers = getDatasourceExpressionsByLayers(
     datasources,
-    datasourceStates
+    datasourceStates,
+    frame.dataViews.indexPatterns
   );
 
   return visualization.toPreviewExpression(

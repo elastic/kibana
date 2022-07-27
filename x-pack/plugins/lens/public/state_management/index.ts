@@ -33,6 +33,7 @@ export const {
   rollbackSuggestion,
   submitSuggestion,
   switchDatasource,
+  updateIndexPatterns,
   setToggleFullscreen,
   initEmpty,
   editVisualizationAction,

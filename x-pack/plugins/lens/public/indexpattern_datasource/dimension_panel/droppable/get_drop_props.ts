@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { isOperation, DropType, DragDropOperation } from '../../../types';
+import {
+  isOperation,
+  DropType,
+  DragDropOperation,
+  IndexPattern,
+  IndexPatternMap,
+  IndexPatternField,
+} from '../../../types';
 import {
   getCurrentFieldsForOperation,
   getOperationDisplay,
@@ -16,13 +23,7 @@ import { DragContextState } from '../../../drag_drop/providers';
 import { OperationMetadata } from '../../../types';
 import { getOperationTypesForField } from '../../operations';
 import { GenericIndexPatternColumn } from '../../indexpattern';
-import {
-  IndexPatternPrivateState,
-  IndexPattern,
-  IndexPatternField,
-  DraggedField,
-  DataViewDragDropOperation,
-} from '../../types';
+import { IndexPatternPrivateState, DraggedField, DataViewDragDropOperation } from '../../types';
 import {
   getDropPropsForSameGroup,
   isOperationFromTheSameGroup,
@@ -32,6 +33,7 @@ interface GetDropPropsArgs {
   state: IndexPatternPrivateState;
   source?: DragContextState['dragging'];
   target: DragDropOperation;
+  indexPatterns: IndexPatternMap;
 }
 
 type DropProps = { dropTypes: DropType[]; nextLabel?: string } | undefined;
@@ -70,14 +72,14 @@ export function getField(column: GenericIndexPatternColumn | undefined, dataView
 }
 
 export function getDropProps(props: GetDropPropsArgs) {
-  const { state, source, target } = props;
+  const { state, source, target, indexPatterns } = props;
   if (!source) {
     return;
   }
   const targetProps: DataViewDragDropOperation = {
     ...target,
     column: state.layers[target.layerId].columns[target.columnId],
-    dataView: state.indexPatterns[state.layers[target.layerId].indexPatternId],
+    dataView: indexPatterns[state.layers[target.layerId].indexPatternId],
   };
 
   if (isDraggedField(source)) {
@@ -88,7 +90,7 @@ export function getDropProps(props: GetDropPropsArgs) {
     const sourceProps: DataViewDragDropOperation = {
       ...source,
       column: state.layers[source.layerId]?.columns[source.columnId],
-      dataView: state.indexPatterns[state.layers[source.layerId]?.indexPatternId],
+      dataView: indexPatterns[state.layers[source.layerId]?.indexPatternId],
     };
     if (!sourceProps.column) {
       return;
@@ -126,6 +128,7 @@ function getDropPropsForField({
   state,
   source,
   target,
+  indexPatterns,
 }: GetDropPropsArgs & { source: DraggedField }): DropProps {
   const targetColumn = state.layers[target.layerId].columns[target.columnId];
   const isTheSameIndexPattern =
@@ -141,7 +144,7 @@ function getDropPropsForField({
       (hasField(targetColumn) && targetColumn.sourceField !== source.field.name) ||
       !hasField(targetColumn)
     ) {
-      const layerDataView = state.indexPatterns[state.layers[target.layerId].indexPatternId];
+      const layerDataView = indexPatterns[state.layers[target.layerId].indexPatternId];
       return hasField(targetColumn) &&
         layerDataView &&
         hasOperationSupportForMultipleFields(layerDataView, targetColumn, undefined, source.field)
