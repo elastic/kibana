@@ -7,24 +7,44 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+} from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { css } from '@emotion/react';
+import { EditPanelAction, ViewMode } from '@kbn/embeddable-plugin/public';
+import { FiltersNotificationActionContext } from './filters_notification_badge';
+import { dashboardFilterNotificationBadge } from '../../dashboard_strings';
 
 export interface FiltersNotificationProps {
+  context: FiltersNotificationActionContext;
   displayName: string;
   id: string;
   filters: Filter[];
   dataViewList: DataView[];
+  viewMode?: ViewMode;
+  editPanelAction: EditPanelAction;
+  onClose: () => void;
 }
 
 export function FiltersNotificationModal({
+  context,
   displayName,
   id,
   filters,
   dataViewList,
+  viewMode,
+  editPanelAction,
+  onClose,
 }: FiltersNotificationProps) {
   return (
     <>
@@ -47,6 +67,30 @@ export function FiltersNotificationModal({
           <FilterItems filters={filters} indexPatterns={dataViewList} readOnly={true} />
         </EuiFlexGroup>
       </EuiModalBody>
+
+      {viewMode !== ViewMode.VIEW && (
+        <EuiModalFooter>
+          <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={onClose} data-test-subj="cancelPerPanelTimeRangeButton">
+                {dashboardFilterNotificationBadge.getCloseButtonTitle()}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="addPerPanelTimeRangeButton"
+                onClick={() => {
+                  onClose();
+                  editPanelAction.execute(context);
+                }}
+                fill
+              >
+                {dashboardFilterNotificationBadge.getEditButtonTitle()}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiModalFooter>
+      )}
     </>
   );
 }

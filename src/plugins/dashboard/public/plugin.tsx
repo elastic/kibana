@@ -50,6 +50,7 @@ import {
 } from './services/saved_objects';
 import {
   CONTEXT_MENU_TRIGGER,
+  EditPanelAction,
   EmbeddableSetup,
   EmbeddableStart,
   PANEL_BADGE_TRIGGER,
@@ -417,7 +418,17 @@ export class DashboardPlugin
       uiActions.registerAction(libraryNotificationAction);
       uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, libraryNotificationAction.id);
 
-      const panelLevelFiltersAction = new FiltersNotificationBadge(theme, overlays, uiSettings);
+      const editPanelAction = new EditPanelAction(
+        embeddable.getEmbeddableFactory,
+        application,
+        embeddable.getStateTransfer()
+      );
+      const panelLevelFiltersAction = new FiltersNotificationBadge(
+        theme,
+        overlays,
+        uiSettings,
+        editPanelAction
+      );
       uiActions.registerAction(panelLevelFiltersAction);
       uiActions.attachAction(PANEL_BADGE_TRIGGER, panelLevelFiltersAction.id);
 

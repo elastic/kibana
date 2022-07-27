@@ -10,7 +10,7 @@ import React from 'react';
 
 import { CoreStart, OverlayStart } from '@kbn/core/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { isFilterableEmbeddable } from '@kbn/embeddable-plugin/public';
+import { EditPanelAction, isFilterableEmbeddable } from '@kbn/embeddable-plugin/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 
 import { Action, IncompatibleActionError } from '../../services/ui_actions';
@@ -38,7 +38,8 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
   constructor(
     private theme: CoreStart['theme'],
     private overlays: OverlayStart,
-    private uiSettings: CoreStart['uiSettings']
+    private uiSettings: CoreStart['uiSettings'],
+    private editPanelAction: EditPanelAction
   ) {}
 
   public getDisplayName({ embeddable }: FiltersNotificationActionContext) {
@@ -66,6 +67,7 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
 
   public execute = async (context: FiltersNotificationActionContext) => {
     const { embeddable } = context;
+
     const isCompatible = await this.isCompatible({ embeddable });
     if (!isCompatible || !isFilterableEmbeddable(embeddable)) {
       throw new IncompatibleActionError();
@@ -84,14 +86,18 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
       (m) => m.FiltersNotificationModal
     );
 
-    this.overlays.openModal(
+    const session = this.overlays.openModal(
       toMountPoint(
         <KibanaReactContextProvider>
           <FiltersNotificationModal
+            context={context}
             displayName={this.displayName}
             id={this.id}
             filters={filters}
             dataViewList={dataViewList}
+            viewMode={embeddable.getInput()?.viewMode}
+            editPanelAction={this.editPanelAction}
+            onClose={() => session.close()}
           />
         </KibanaReactContextProvider>,
         { theme$: this.theme.theme$ }

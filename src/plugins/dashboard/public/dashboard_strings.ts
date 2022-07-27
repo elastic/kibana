@@ -194,7 +194,15 @@ export const dashboardReplacePanelAction = {
 export const dashboardFilterNotificationBadge = {
   getDisplayName: () =>
     i18n.translate('dashboard.panel.filters', {
-      defaultMessage: 'Custom filters',
+      defaultMessage: 'Panel filters',
+    }),
+  getEditButtonTitle: () =>
+    i18n.translate('dashboard.panel.filters.modal.editButton', {
+      defaultMessage: 'Edit filters',
+    }),
+  getCloseButtonTitle: () =>
+    i18n.translate('dashboard.panel.filters.modal.closeButton', {
+      defaultMessage: 'Close',
     }),
 };
 
