@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { Toolbar } from "./toolbar";
+export { Toolbar } from './toolbar';
 
-export {Props as ToolbarProps } from './toolbar';
+export { Props as ToolbarProps } from './toolbar';
