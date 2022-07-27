@@ -17,11 +17,11 @@ import { JsonCodeEditorCommon } from '../../../../components/json_code_editor/js
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
 
-const mochDataView = {
+const mockDataView = {
   getComputedFields: () => [],
 } as never;
-const getMock = jest.fn(() => Promise.resolve(mochDataView));
-const mochDataViewService = {
+const getMock = jest.fn(() => Promise.resolve(mockDataView));
+const mockDataViewService = {
   get: getMock,
 } as unknown as DataView;
 const services = {
@@ -33,7 +33,7 @@ const services = {
     },
   },
   data: {
-    dataViewService: mochDataViewService,
+    dataViewService: mockDataViewService,
   },
 };
 
@@ -46,7 +46,7 @@ describe('Source Viewer component', () => {
         <DocViewerSource
           id={'1'}
           index={'index1'}
-          dataView={mochDataView}
+          dataView={mockDataView}
           width={123}
           hasLineNumbers={true}
         />
@@ -64,7 +64,7 @@ describe('Source Viewer component', () => {
         <DocViewerSource
           id={'1'}
           index={'index1'}
-          dataView={mochDataView}
+          dataView={mockDataView}
           width={123}
           hasLineNumbers={true}
         />
@@ -103,7 +103,7 @@ describe('Source Viewer component', () => {
         <DocViewerSource
           id={'1'}
           index={'index1'}
-          dataView={mochDataView}
+          dataView={mockDataView}
           width={123}
           hasLineNumbers={true}
         />

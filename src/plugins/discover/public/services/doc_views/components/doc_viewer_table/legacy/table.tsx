@@ -22,7 +22,7 @@ import { isNestedFieldParent } from '../../../../../application/main/utils/neste
 export const DocViewerLegacyTable = ({
   columns,
   hit,
-  dataView: dataView,
+  dataView,
   filter,
   onAddColumn,
   onRemoveColumn,
