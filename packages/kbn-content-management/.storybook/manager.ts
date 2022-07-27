@@ -6,12 +6,15 @@
  * Side Public License, v 1.
  */
 
-export { TableListView } from './table_list_view';
+import { addons } from '@storybook/addons';
+import { create } from '@storybook/theming';
+import { PANEL_ID } from '@storybook/addon-actions';
 
-export type {
-  Props as TableListViewProps,
-  State as TableListViewState,
-  UserContentCommonSchema,
-} from './table_list_view';
-
-export { TableListViewProvider } from './services';
+addons.setConfig({
+  theme: create({
+    base: 'light',
+    brandTitle: 'Content Management Storybook',
+  }),
+  showPanel: () => true,
+  selectedPanel: PANEL_ID,
+});

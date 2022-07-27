@@ -5,9 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export interface SavedObjectsFindOptionsReference {
-  type: string;
-  id: string;
-}
 
-export type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => () => void;
+import { defaultConfig } from '@kbn/storybook';
+
+module.exports = defaultConfig;

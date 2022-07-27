@@ -27,39 +27,23 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { KibanaPageTemplate } from '@kbn/shared-ux-components';
 
-import { SavedObjectsFindOptionsReference } from '../types';
-
 import { Table, ConfirmDeleteModal, ListingLimitWarning } from './components';
 import { useServices } from './services';
 import type { Action } from './actions';
 import { reducer } from './reducer';
 
+interface SavedObjectsReference {
+  type: string;
+  id: string;
+}
+
 export interface Props<T> {
-  createItem?(): void;
-  deleteItems?(items: T[]): Promise<void>;
-  editItem?(item: T): void;
   entityName: string;
   entityNamePlural: string;
-  findItems(
-    searchQuery: string,
-    references?: SavedObjectsFindOptionsReference[]
-  ): Promise<{ total: number; hits: T[] }>;
-  getDetailViewLink(entity: T): string;
+  tableListTitle: string;
   listingLimit: number;
   initialFilter: string;
   initialPageSize: number;
-  /**
-   * Should be an EuiEmptyPrompt (but TS doesn't support this typing)
-   */
-  emptyPrompt?: JSX.Element;
-  /** Add an additional custom column */
-  customTableColumn?: EuiBasicTableColumn<T>;
-  tableListTitle: string;
-  /**
-   * Id of the heading element describing the table. This id will be used as `aria-labelledby` of the wrapper element.
-   * If the table is not empty, this component renders its own h1 element using the same id.
-   */
-  headingId?: string;
   /**
    * Indicates which column should be used as the identifying cell in each row.
    */
@@ -68,7 +52,23 @@ export interface Props<T> {
    * Describes the content of the table. If not specified, the caption will be "This table contains {itemCount} rows."
    */
   tableCaption: string;
+  emptyPrompt?: JSX.Element;
+  /** Add an additional custom column */
+  customTableColumn?: EuiBasicTableColumn<T>;
+  /**
+   * Id of the heading element describing the table. This id will be used as `aria-labelledby` of the wrapper element.
+   * If the table is not empty, this component renders its own h1 element using the same id.
+   */
+  headingId?: string;
   children?: ReactNode | undefined;
+  findItems(
+    searchQuery: string,
+    references?: SavedObjectsReference[]
+  ): Promise<{ total: number; hits: T[] }>;
+  getDetailViewLink(entity: T): string;
+  createItem?(): void;
+  deleteItems?(items: T[]): Promise<void>;
+  editItem?(item: T): void;
 }
 
 export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
@@ -92,7 +92,7 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
 export interface UserContentCommonSchema {
   id: string;
   updatedAt: string;
-  references: SavedObjectsFindOptionsReference[];
+  references: SavedObjectsReference[];
   attributes: {
     title: string;
     description?: string;
@@ -121,7 +121,13 @@ function TableListView<T extends UserContentCommonSchema>({
   const isMounted = useRef(false);
   const fetchIdx = useRef(0);
 
-  const { application, toast, savedObjectTagging, theme, toMountPoint } = useServices();
+  const {
+    canEditAdvancedSettings,
+    getUrlForListingLimitSettings,
+    getTagsColumnDefinition,
+    searchQueryParser,
+    notifyError,
+  } = useServices();
 
   const [state, dispatch] = useReducer<(state: State<T>, action: Action<T>) => State<T>>(reducer, {
     items: [],
@@ -193,8 +199,9 @@ function TableListView<T extends UserContentCommonSchema>({
       columns.push(customTableColumn);
     }
 
-    if (savedObjectTagging) {
-      columns.push(savedObjectTagging.ui.getTableColumnDefinition());
+    const tagsColumnDef = getTagsColumnDefinition ? getTagsColumnDefinition() : undefined;
+    if (tagsColumnDef) {
+      columns.push(tagsColumnDef);
     }
 
     // Add "Actions" column
@@ -231,7 +238,7 @@ function TableListView<T extends UserContentCommonSchema>({
     }
 
     return columns;
-  }, [customTableColumn, stateTableColumns, editItem, rowHeader, savedObjectTagging]);
+  }, [stateTableColumns, customTableColumn, getTagsColumnDefinition, editItem, rowHeader]);
   const itemsById = useMemo(() => {
     return keyBy(items, 'id');
   }, [items]);
@@ -248,17 +255,11 @@ function TableListView<T extends UserContentCommonSchema>({
     try {
       const idx = ++fetchIdx.current;
 
-      let searchQuerySerialized = searchQuery;
-      let references: SavedObjectsFindOptionsReference[] | undefined;
-      if (savedObjectTagging) {
-        const parsed = savedObjectTagging.ui.parseSearchQuery(searchQuery, {
-          useName: true,
-        });
-        searchQuerySerialized = parsed.searchTerm;
-        references = parsed.tagReferences;
-      }
+      const { searchQuery: searchQueryParsed, references } = searchQueryParser
+        ? searchQueryParser(searchQuery)
+        : { searchQuery, references: undefined };
 
-      const response = await findItems(searchQuerySerialized, references);
+      const response = await findItems(searchQueryParsed, references);
 
       if (!isMounted.current) {
         return;
@@ -278,7 +279,7 @@ function TableListView<T extends UserContentCommonSchema>({
         data: err,
       });
     }
-  }, [searchQuery, savedObjectTagging, findItems]);
+  }, [searchQueryParser, searchQuery, findItems]);
 
   const deleteSelectedItems = useCallback(async () => {
     if (isDeletingItems) {
@@ -290,32 +291,22 @@ function TableListView<T extends UserContentCommonSchema>({
     try {
       await deleteItems!(selectedItems);
     } catch (error) {
-      toast.addDanger({
-        title: toMountPoint(
+      notifyError({
+        title: (
           <FormattedMessage
             id="contentManagementTableList.listing.unableToDeleteDangerMessage"
             defaultMessage="Unable to delete {entityName}(s)"
             values={{ entityName }}
-          />,
-          { theme$: theme.theme$ }
+          />
         ),
-        text: `${error}`,
+        text: error,
       });
     }
 
     fetchItems();
 
     dispatch({ type: 'onItemsDeleted' });
-  }, [
-    deleteItems,
-    entityName,
-    fetchItems,
-    isDeletingItems,
-    selectedItems,
-    theme.theme$,
-    toMountPoint,
-    toast,
-  ]);
+  }, [deleteItems, entityName, fetchItems, isDeletingItems, notifyError, selectedItems]);
 
   const renderCreateButton = useCallback(() => {
     if (createItem) {
@@ -440,10 +431,8 @@ function TableListView<T extends UserContentCommonSchema>({
       {/* Too many items error */}
       {showLimitError && (
         <ListingLimitWarning
-          canEditAdvancedSettings={Boolean(application.capabilities.advancedSettings?.save)}
-          advancedSettingsLink={application.getUrlForApp('management', {
-            path: `/kibana/settings?query=savedObjects:listingLimit`,
-          })}
+          canEditAdvancedSettings={canEditAdvancedSettings}
+          advancedSettingsLink={getUrlForListingLimitSettings()}
           entityNamePlural={entityNamePlural}
           totalItems={totalItems}
           listingLimit={listingLimit}

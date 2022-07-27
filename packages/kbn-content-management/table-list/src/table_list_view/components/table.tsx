@@ -56,7 +56,7 @@ export function Table<T extends UserContentCommonSchema>({
   rowHeader,
   tableCaption,
 }: Props<T>) {
-  const { savedObjectTagging } = useServices();
+  const { getSearchBarFilters } = useServices();
 
   const renderToolsLeft = useCallback(() => {
     if (!deleteItems || selectedIds.length === 0) {
@@ -90,9 +90,7 @@ export function Table<T extends UserContentCommonSchema>({
       }
     : undefined;
 
-  const searchFilters = savedObjectTagging
-    ? [savedObjectTagging.ui.getSearchBarFilter({ useName: true })]
-    : [];
+  const searchFilters = getSearchBarFilters ? getSearchBarFilters() : [];
 
   const search = {
     onChange: ({ queryText }: { queryText: string }) =>
