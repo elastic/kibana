@@ -20,6 +20,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
 
+import { useEuiTheme } from '../../hooks/use_eui_theme';
+
 import { MiniHistogram } from '../mini_histogram';
 
 import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
@@ -50,6 +52,8 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
   onSelectedChangePoint,
   selectedChangePoint,
 }) => {
+  const euiTheme = useEuiTheme();
+
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [sortField, setSortField] = useState<keyof ChangePoint>(DEFAULT_SORT_FIELD);
@@ -235,9 +239,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
             selectedChangePoint.fieldValue === changePoint.fieldValue &&
             selectedChangePoint.fieldName === changePoint.fieldName
               ? {
-                  // TODO use euiTheme
-                  // backgroundColor: euiTheme.eui.euiColorLightestShade,
-                  backgroundColor: '#ddd',
+                  backgroundColor: euiTheme.euiColorLightestShade,
                 }
               : null,
         };
