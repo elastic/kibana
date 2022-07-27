@@ -330,7 +330,9 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async waitForTourStep(tourStep: string) {
-      await retry.waitForWithTimeout('tour step', 5000, () => testSubjects.exists(tourStep));
+      await retry.waitForWithTimeout(`tour step ${tourStep}`, 10000, () =>
+        testSubjects.exists(tourStep)
+      );
     },
 
     async ensureTourStepIsClosed(tourStep: string) {
