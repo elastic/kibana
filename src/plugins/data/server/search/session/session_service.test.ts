@@ -694,7 +694,7 @@ describe('SearchSessionService', () => {
 
         expect(type).toBe(SEARCH_SESSION_TYPE);
         expect(id).toBe(sessionId);
-        expect(callAttributes).toHaveProperty('status', SearchSessionStatus.CANCELLED);
+        expect(callAttributes).toHaveProperty('isCanceled', true);
       });
 
       it('throws if user conflicts', () => {
@@ -714,7 +714,7 @@ describe('SearchSessionService', () => {
 
         expect(type).toBe(SEARCH_SESSION_TYPE);
         expect(id).toBe(sessionId);
-        expect(callAttributes).toHaveProperty('status', SearchSessionStatus.CANCELLED);
+        expect(callAttributes).toHaveProperty('isCanceled', true);
       });
     });
 

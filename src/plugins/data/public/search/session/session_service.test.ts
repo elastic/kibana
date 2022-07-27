@@ -16,7 +16,6 @@ import { createNowProviderMock } from '../../now_provider/mocks';
 import { NowProviderInternalContract } from '../../now_provider';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 import type { ISessionsClient, SearchSessionSavedObject } from './sessions_client';
-import { SearchSessionStatus } from '../../../common';
 import { CoreStart } from '@kbn/core/public';
 import { SearchUsageCollector } from '../..';
 import { createSearchUsageCollectorMock } from '../collectors/mocks';
@@ -32,7 +31,6 @@ const mockSavedObject: SearchSessionSavedObject = {
     sessionId: 'session_id',
     created: new Date().toISOString(),
     expires: new Date().toISOString(),
-    status: SearchSessionStatus.COMPLETE,
     version: '8.0.0',
   },
   references: [],
