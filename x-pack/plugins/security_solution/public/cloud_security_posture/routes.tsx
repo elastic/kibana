@@ -12,6 +12,7 @@ import {
   type CspSecuritySolutionContext,
 } from '@kbn/cloud-security-posture-plugin/public';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+import { useIsGroupedNavigationEnabled } from '../common/components/navigation/helpers';
 import { MANAGE_PATH } from '../../common/constants';
 import type { SecurityPageName, SecuritySubPluginRoutes } from '../app/types';
 import { useKibana } from '../common/lib/kibana';
@@ -27,11 +28,13 @@ const CloudPostureSpyRoute = ({ pageName }: { pageName?: CloudSecurityPosturePag
 
 const CloudSecurityPosture = memo(() => {
   const { cloudSecurityPosture } = useKibana().services;
+  const isGroupedNavigationEnabled = useIsGroupedNavigationEnabled();
   const CloudSecurityPostureRouter = cloudSecurityPosture.getCloudSecurityPostureRouter();
   const securitySolutionContext: CspSecuritySolutionContext = {
     getFiltersGlobalComponent: () => FiltersGlobal,
     getSpyRouteComponent: () => CloudPostureSpyRoute,
-    getManageBreadcrumbEntry: () => ({ name: MANAGE, path: MANAGE_PATH }),
+    getManageBreadcrumbEntry: () =>
+      isGroupedNavigationEnabled ? { name: MANAGE, path: MANAGE_PATH } : undefined,
   };
 
   return (

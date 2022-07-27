@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiLoadingLogo, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { FullSizeCenteredPage } from './full_size_centered_page';
 import { useCspBenchmarkIntegrations } from '../pages/benchmarks/use_csp_benchmark_integrations';
 import { useCISIntegrationPoliciesLink } from '../common/navigation/use_navigate_to_cis_integration_policies';
 import { NO_FINDINGS_STATUS_TEST_SUBJ } from './test_subjects';
@@ -131,5 +132,9 @@ export const NoFindingsStates = () => {
     if (status === 'index-timeout') return <IndexTimeout />; // agent added, index timeout has passed
   };
 
-  return <CloudPosturePage query={getSetupStatus}>{render()}</CloudPosturePage>;
+  return (
+    <CloudPosturePage query={getSetupStatus}>
+      <FullSizeCenteredPage>{render()}</FullSizeCenteredPage>
+    </CloudPosturePage>
+  );
 };

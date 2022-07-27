@@ -5,29 +5,20 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { css } from '@emotion/react';
+import { FullSizeCenteredPage } from './full_size_centered_page';
 
+// Keep this component lean as it is part of the main app bundle
 export const CspLoadingState: React.FunctionComponent<{ ['data-test-subj']?: string }> = ({
   children,
   ...rest
 }) => {
-  const { euiTheme } = useEuiTheme();
   return (
-    <EuiFlexGroup
-      css={css`
-        padding: ${euiTheme.size.l};
-        margin-top: 50px;
-      `}
-      direction="column"
-      alignItems="center"
-      data-test-subj={rest['data-test-subj']}
-    >
-      <EuiFlexItem>
-        <EuiLoadingSpinner size="xl" />
-      </EuiFlexItem>
-      <EuiFlexItem>{children}</EuiFlexItem>
-    </EuiFlexGroup>
+    <FullSizeCenteredPage data-test-subj={rest['data-test-subj']}>
+      <EuiLoadingSpinner size="xl" />
+      <EuiSpacer />
+      {children}
+    </FullSizeCenteredPage>
   );
 };

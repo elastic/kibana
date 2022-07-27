@@ -14,10 +14,3 @@ export const pageToComponentMapping: Record<CspPage, RouteProps['component']> = 
   benchmarks: pages.Benchmarks,
   rules: pages.Rules,
 };
-
-export const pageToComponentMappingNoPageTemplate: Record<CspPage, RouteProps['component']> = {
-  findings: pages.FindingsNoPageTemplate,
-  dashboard: pages.ComplianceDashboardNoPageTemplate,
-  benchmarks: pages.BenchmarksNoPageTemplate,
-  rules: pages.RulesNoPageTemplate,
-};
