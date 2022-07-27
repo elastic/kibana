@@ -14,7 +14,7 @@ import { request } from './lib/axios_utils';
 import { renderMustacheString } from '../lib/mustache_renderer';
 import {
   AlertingConnectorFeatureId,
-  UptimeConnectorFeatureId,
+  CasesConnectorFeatureId,
   SecurityConnectorFeatureId,
 } from '../../common';
 
@@ -75,7 +75,7 @@ export function getActionType({
     }),
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
-      UptimeConnectorFeatureId,
+      CasesConnectorFeatureId,
       SecurityConnectorFeatureId,
     ],
     validate: {

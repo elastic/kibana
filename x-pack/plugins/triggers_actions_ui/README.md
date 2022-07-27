@@ -1102,7 +1102,7 @@ export function getActionType(): ActionTypeModel {
     selectMessage: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.d3securityAction.selectMessageText',
       {
-        defaultMessage: 'Run Remote Command in D3 VSOC',
+        defaultMessage: 'Run remote command in D3 VSOC.',
       }
     ),
     validateParams: (actionParams: D3SecurityActionParams): Promise<ValidationResult> => {
@@ -1113,7 +1113,7 @@ export function getActionType(): ActionTypeModel {
   };
 }
 ```
-![D3Security connector card](https://i.imgur.com/zkL4eSr.png)
+![D3Security connector card](https://i.imgur.com/t0ge1mY.png)
 
 ![D3Security connector form](https://i.imgur.com/xBBXXMU.png)
 
