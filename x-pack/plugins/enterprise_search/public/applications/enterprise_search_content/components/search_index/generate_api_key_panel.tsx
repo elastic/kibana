@@ -7,60 +7,100 @@
 
 import React from 'react';
 
+import { useActions, useValues } from 'kea';
+
 import {
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiText,
-  EuiButtonIcon,
-  EuiButton,
-  EuiCodeBlock,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 
-import { getEnterpriseSearchUrl } from '../../../shared/enterprise_search_url';
+import { i18n } from '@kbn/i18n';
+
+import { useCloudDetails } from '../../../shared/cloud_details/cloud_details';
 import { DOCUMENTS_API_JSON_EXAMPLE } from '../new_index/constants';
 
+import { ClientLibrariesPopover } from './components/client_libraries_popover/popover';
+import { GenerateApiKeyModal } from './components/generate_api_key_modal/modal';
+import { ManageKeysPopover } from './components/manage_api_keys_popover/popover';
+
+import { OverviewLogic } from './overview.logic';
+
+const getDeploymentUrls = (cloudId: string) => {
+  const [host, kibanaHost, elasticHost] = window.atob(cloudId);
+  return {
+    elasticUrl: `https://${elasticHost}.${host}`,
+    kibanaUrl: `https://${kibanaHost}.${host}`,
+  };
+};
 export const GenerateApiKeyPanel: React.FC = () => {
-  const searchIndexApiUrl = getEnterpriseSearchUrl('/api/ent/v1/search_indices/');
-  const apiKey = 'Create an API Key';
+  const { apiKey, isGenerateModalOpen, indexData } = useValues(OverviewLogic);
+  const { closeGenerateModal } = useActions(OverviewLogic);
+
+  const cloudContext = useCloudDetails();
+  const searchIndexApiUrl = cloudContext.cloudId
+    ? getDeploymentUrls(cloudContext.cloudId).elasticUrl
+    : '<elasticsearch-host>:<elasticsearch-port>/';
+
+  const apiKeyExample = apiKey || '<Create an API Key>';
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiPanel>
-          <EuiFlexGroup direction="column">
-            <EuiFlexItem>
-              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                <EuiFlexItem>
-                  <EuiText>
-                    <h2>Indexing by API</h2>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-                    <EuiFlexItem>
-                      <EuiButtonIcon iconType="iInCircle" />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiButton>Generate an API key</EuiButton>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiCodeBlock language="bash" fontSize="m" isCopyable>
-                {`\
-curl -X POST '${searchIndexApiUrl}${name}/document' \\
--H 'Content-Type: application/json' \\
--H 'Authorization: Bearer ${apiKey}' \\
--d '${JSON.stringify(DOCUMENTS_API_JSON_EXAMPLE, null, 2)}'
+    <>
+      {isGenerateModalOpen && (
+        <GenerateApiKeyModal indexName={indexData?.name ?? ''} onClose={closeGenerateModal} />
+      )}
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiPanel hasBorder>
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem>
+                <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                  <EuiFlexItem>
+                    {indexData?.name[0] !== '.' && (
+                      <EuiTitle size="s">
+                        <h2>
+                          {i18n.translate(
+                            'xpack.enterpriseSearch.content.overview.documentExample.title',
+                            { defaultMessage: 'Adding documents to your index' }
+                          )}
+                        </h2>
+                      </EuiTitle>
+                    )}
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+                      <EuiFlexItem>
+                        <ClientLibrariesPopover />
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <ManageKeysPopover />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              {indexData?.name[0] !== '.' && (
+                <>
+                  <EuiSpacer />
+                  <EuiFlexItem>
+                    <EuiCodeBlock language="bash" fontSize="m" isCopyable>
+                      {`\
+curl -X POST '${searchIndexApiUrl}${indexData?.name}/_doc' \\
+  -H 'Content-Type: application/json' \\
+  -H 'Authorization: ApiKey ${apiKeyExample}' \\
+  -d '${JSON.stringify(DOCUMENTS_API_JSON_EXAMPLE, null, 2)}'
 `}
-              </EuiCodeBlock>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+                    </EuiCodeBlock>
+                  </EuiFlexItem>
+                </>
+              )}
+            </EuiFlexGroup>
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 };

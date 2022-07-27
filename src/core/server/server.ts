@@ -30,27 +30,33 @@ import {
   executionContextConfig,
 } from '@kbn/core-execution-context-server-internal';
 import { PrebootService } from '@kbn/core-preboot-server-internal';
+import { ContextService } from '@kbn/core-http-context-server-internal';
+import {
+  HttpService,
+  config as httpConfig,
+  cspConfig,
+  externalUrlConfig,
+} from '@kbn/core-http-server-internal';
+import {
+  ElasticsearchService,
+  config as elasticsearchConfig,
+} from '@kbn/core-elasticsearch-server-internal';
+import { MetricsService, opsConfig } from '@kbn/core-metrics-server-internal';
+import { CapabilitiesService } from '@kbn/core-capabilities-server-internal';
 import { CoreApp } from './core_app';
 import { I18nService } from './i18n';
-import { ElasticsearchService } from './elasticsearch';
-import { HttpService } from './http';
 import { HttpResourcesService } from './http_resources';
 import { RenderingService } from './rendering';
 import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
 import { SavedObjectsService, SavedObjectsServiceStart } from './saved_objects';
-import { MetricsService, opsConfig } from './metrics';
-import { CapabilitiesService } from './capabilities';
 // do not try to shorten the import to `./status`, it will break server test mocking
 import { StatusService } from './status/status_service';
 
-import { config as elasticsearchConfig } from './elasticsearch';
-import { config as httpConfig, cspConfig, externalUrlConfig } from './http';
 import { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects';
 import { config as uiSettingsConfig } from './ui_settings';
 import { config as statusConfig } from './status';
 import { config as i18nConfig } from './i18n';
-import { ContextService } from './context';
 import { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from './internal_types';
 import { CoreUsageDataService } from './core_usage_data';
 import { DeprecationsService, config as deprecationConfig } from './deprecations';
@@ -163,7 +169,7 @@ export class Server {
     const analyticsPreboot = this.analytics.preboot();
 
     const environmentPreboot = await this.environment.preboot({ analytics: analyticsPreboot });
-    const nodePreboot = await this.node.preboot();
+    const nodePreboot = await this.node.preboot({ loggingSystem: this.loggingSystem });
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
     this.discoveredPlugins = await this.plugins.discover({

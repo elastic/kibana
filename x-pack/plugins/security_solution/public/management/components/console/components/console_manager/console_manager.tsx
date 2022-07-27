@@ -19,7 +19,11 @@ import { Console } from '../../console';
 interface ManagedConsole
   extends Pick<
     ConsoleRegistrationInterface,
-    'consoleProps' | 'PageTitleComponent' | 'PageBodyComponent' | 'ActionComponents'
+    | 'consoleProps'
+    | 'PageTitleComponent'
+    | 'PageBodyComponent'
+    | 'ActionComponents'
+    | 'showCloseButton'
   > {
   client: RegisteredConsoleClient;
   console: JSX.Element; // actual console component
@@ -291,6 +295,7 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
               return <ActionComponent meta={visibleConsoleMeta} />;
             })
           }
+          showCloseButton={visibleConsole.showCloseButton}
         />
       )}
     </ConsoleManagerContext.Provider>

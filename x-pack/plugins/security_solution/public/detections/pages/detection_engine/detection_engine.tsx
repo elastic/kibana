@@ -39,7 +39,6 @@ import { inputsSelectors } from '../../../common/store/inputs';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { AlertsTable } from '../../components/alerts_table';
 import { NoApiIntegrationKeyCallOut } from '../../components/callouts/no_api_integration_callout';
-import { AlertsHistogramPanel } from '../../components/alerts_kpis/alerts_histogram_panel';
 import { useUserData } from '../../components/user_info';
 import { DetectionEngineNoIndex } from './detection_engine_no_index';
 import { useListsConfig } from '../../containers/detection_engine/lists/use_lists_config';
@@ -62,6 +61,7 @@ import {
   buildShowBuildingBlockFilter,
   buildThreatMatchFilter,
 } from '../../components/alerts_table/default_config';
+import { ChartPanels } from './chart_panels';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useSignalHelpers } from '../../../common/containers/sourcerer/use_signal_helpers';
 
@@ -69,8 +69,6 @@ import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { NeedAdminForUpdateRulesCallOut } from '../../components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../components/callouts/missing_privileges_callout';
 import { useKibana } from '../../../common/lib/kibana';
-import { AlertsCountPanel } from '../../components/alerts_kpis/alerts_count_panel';
-import { CHART_HEIGHT } from '../../components/alerts_kpis/common/config';
 import {
   AlertsTableFilterGroup,
   FILTER_OPEN,
@@ -78,6 +76,7 @@ import {
 import { EmptyPage } from '../../../common/components/empty_page';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LandingPageComponent } from '../../../common/components/landing_page';
+
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -144,9 +143,28 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   const {
     application: { navigateToUrl },
     timelines: timelinesUi,
+    data,
     docLinks,
   } = useKibana().services;
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
+
+  const { filterManager } = data.query;
+
+  const addFilter = useCallback(
+    ({ field, value }: { field: string; value: string | number }) => {
+      filterManager.addFilters([
+        {
+          meta: {
+            alias: null,
+            disabled: false,
+            negate: false,
+          },
+          query: { match_phrase: { [field]: value } },
+        },
+      ]);
+    },
+    [filterManager]
+  );
 
   const showUpdating = useMemo(() => isAlertsLoading || loading, [isAlertsLoading, loading]);
 
@@ -330,45 +348,30 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
                     onFilterGroupChanged={onFilterGroupChangedCallback}
                   />
                 </EuiFlexItem>
+
                 <EuiFlexItem grow={false}>
-                  {updatedAt &&
-                    timelinesUi.getLastUpdated({
-                      updatedAt: updatedAt || Date.now(),
-                      showUpdating,
-                    })}
+                  <EuiFlexGroup alignItems="center" gutterSize="none">
+                    <EuiFlexItem grow={false}>
+                      {updatedAt &&
+                        timelinesUi.getLastUpdated({
+                          updatedAt: updatedAt || Date.now(),
+                          showUpdating,
+                        })}
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="m" />
-              <EuiFlexGroup wrap>
-                <EuiFlexItem grow={1}>
-                  {isLoadingIndexPattern ? (
-                    <EuiLoadingSpinner size="xl" />
-                  ) : (
-                    <AlertsCountPanel
-                      filters={alertsHistogramDefaultFilters}
-                      query={query}
-                      signalIndexName={signalIndexName}
-                      runtimeMappings={runtimeMappings}
-                    />
-                  )}
-                </EuiFlexItem>
-                <EuiFlexItem grow={2}>
-                  {isLoadingIndexPattern ? (
-                    <EuiLoadingSpinner size="xl" />
-                  ) : (
-                    <AlertsHistogramPanel
-                      chartHeight={CHART_HEIGHT}
-                      filters={alertsHistogramDefaultFilters}
-                      query={query}
-                      showTotalAlertsCount={false}
-                      titleSize={'s'}
-                      signalIndexName={signalIndexName}
-                      updateDateRange={updateDateRangeCallback}
-                      runtimeMappings={runtimeMappings}
-                    />
-                  )}
-                </EuiFlexItem>
-              </EuiFlexGroup>
+
+              <ChartPanels
+                addFilter={addFilter}
+                alertsHistogramDefaultFilters={alertsHistogramDefaultFilters}
+                isLoadingIndexPattern={isLoadingIndexPattern}
+                query={query}
+                runtimeMappings={runtimeMappings}
+                signalIndexName={signalIndexName}
+                updateDateRangeCallback={updateDateRangeCallback}
+              />
 
               <EuiSpacer size="l" />
             </Display>

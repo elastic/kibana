@@ -69,8 +69,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     const containerElement = useRef<HTMLDivElement | null>(null);
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
     const graphEventId = useShallowEqualSelector(
-      (state) =>
-        (getTimeline(state, TimelineId.networkPageExternalAlerts) ?? timelineDefaults).graphEventId
+      (state) => (getTimeline(state, TimelineId.networkPageEvents) ?? timelineDefaults).graphEventId
     );
     const getGlobalFiltersQuerySelector = useMemo(
       () => inputsSelectors.globalFiltersQuerySelector(),
@@ -168,7 +167,6 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                 <HeaderPage
                   subtitle={
                     <LastEventTime
-                      docValueFields={docValueFields}
                       indexKey={LastEventIndexKey.network}
                       indexNames={selectedPatterns}
                     />

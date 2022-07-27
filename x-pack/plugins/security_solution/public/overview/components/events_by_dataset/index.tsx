@@ -26,8 +26,8 @@ import { convertToBuildEsQuery } from '../../../common/lib/keury';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
 import {
   eventsStackByOptions,
-  histogramConfigs,
-} from '../../../common/components/events_tab/events_query_tab_body';
+  eventsHistogramConfig,
+} from '../../../common/components/events_tab/histogram_configurations';
 import { HostsTableType } from '../../../hosts/store/model';
 import type { InputsModelId } from '../../../common/store/inputs/constants';
 import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
@@ -154,9 +154,9 @@ const EventsByDatasetComponent: React.FC<Props> = ({
 
   const eventsByDatasetHistogramConfigs: MatrixHistogramConfigs = useMemo(
     () => ({
-      ...histogramConfigs,
+      ...eventsHistogramConfig,
       stackByOptions:
-        onlyField != null ? [getHistogramOption(onlyField)] : histogramConfigs.stackByOptions,
+        onlyField != null ? [getHistogramOption(onlyField)] : eventsHistogramConfig.stackByOptions,
       defaultStackByOption:
         onlyField != null
           ? getHistogramOption(onlyField)

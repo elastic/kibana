@@ -12,6 +12,7 @@ import {
   manualPointEventAnnotation,
   manualRangeEventAnnotation,
   eventAnnotationGroup,
+  fetchEventAnnotations,
 } from '../common';
 import { EventAnnotationService } from './event_annotation_service';
 
@@ -35,6 +36,7 @@ export class EventAnnotationPlugin
     dependencies.expressions.registerFunction(manualPointEventAnnotation);
     dependencies.expressions.registerFunction(manualRangeEventAnnotation);
     dependencies.expressions.registerFunction(eventAnnotationGroup);
+    dependencies.expressions.registerFunction(fetchEventAnnotations);
     return this.eventAnnotationService;
   }
 

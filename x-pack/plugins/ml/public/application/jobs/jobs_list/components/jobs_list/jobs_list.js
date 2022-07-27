@@ -330,6 +330,7 @@ export class JobsList extends Component {
         ),
         actions: actionsMenuContent(
           this.props.showEditJobFlyout,
+          this.props.showDatafeedChartFlyout,
           this.props.showDeleteJobModal,
           this.props.showResetJobModal,
           this.props.showStartDatafeedModal,
@@ -406,6 +407,7 @@ JobsList.propTypes = {
   toggleRow: PropTypes.func.isRequired,
   selectJobChange: PropTypes.func.isRequired,
   showEditJobFlyout: PropTypes.func,
+  showDatafeedChartFlyout: PropTypes.func,
   showDeleteJobModal: PropTypes.func,
   showStartDatafeedModal: PropTypes.func,
   showCloseJobsConfirmModal: PropTypes.func,

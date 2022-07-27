@@ -237,6 +237,7 @@ export const push = async (
           updated_by: { username, full_name, email },
         },
         version: myCase.version,
+        refresh: false,
       }),
 
       attachmentService.bulkUpdate({
@@ -251,6 +252,7 @@ export const push = async (
             },
             version: comment.version,
           })),
+        refresh: false,
       }),
     ]);
 
@@ -262,6 +264,7 @@ export const push = async (
         user,
         caseId,
         owner: myCase.attributes.owner,
+        refresh: false,
       });
 
       if (myCase.attributes.settings.syncAlerts) {

@@ -4,66 +4,70 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
-import { IconExceptionLists } from '../management/icons/exception_lists';
 import {
-  CLOUD_SECURITY_POSTURE_DASHBOARD_PATH,
-  CLOUD_SECURITY_POSTURE_FINDINGS_PATH,
-  CLOUD_SECURITY_POSTURE_BENCHMARKS_PATH,
-  SecurityPageName,
-} from '../../common/constants';
-import type { LinkItem, LinkCategories } from '../common/links/types';
+  getSecuritySolutionDashboardLinks,
+  getSecuritySolutionManageLinks,
+  getSecuritySolutionRootLinks,
+} from '@kbn/cloud-security-posture-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { SecurityPageName } from '../../common/constants';
 import cloudSecurityPostureDashboardImage from '../common/images/cloud_security_posture_dashboard_page.png';
+import type { LinkCategories, LinkItem } from '../common/links/types';
+import { IconExceptionLists } from '../management/icons/exception_lists';
 
 const commonLinkProperties: Partial<LinkItem> = {
-  skipUrlState: true,
   hideTimeline: true,
   experimentalKey: 'cloudSecurityPostureNavigation',
 };
 
-export const rootLinks: LinkItem = {
-  id: SecurityPageName.cloudSecurityPostureFindings,
-  title: i18n.translate('xpack.securitySolution.appLinks.findings', {
-    defaultMessage: 'Findings ',
-  }),
-  path: CLOUD_SECURITY_POSTURE_FINDINGS_PATH,
-  globalNavEnabled: true,
-  globalNavOrder: 3,
-  ...commonLinkProperties,
-};
+export const rootLinks: LinkItem = getSecuritySolutionRootLinks<LinkItem>({
+  [SecurityPageName.cloudSecurityPostureFindings]: {
+    globalNavEnabled: true,
+    globalNavOrder: 3,
+    ...commonLinkProperties,
+  },
+});
 
-export const dashboardLinks: LinkItem = {
-  id: SecurityPageName.cloudSecurityPostureDashboard,
-  title: i18n.translate('xpack.securitySolution.appLinks.cloudSecurityPostureDashboard', {
-    defaultMessage: 'Cloud Posture',
-  }),
-  path: CLOUD_SECURITY_POSTURE_DASHBOARD_PATH,
-  description: i18n.translate(
-    'xpack.securitySolution.appLinks.cloudSecurityPostureDashboardDescription',
-    {
-      defaultMessage: 'An overview of findings across all CSP integrations.',
-    }
-  ),
-  landingImage: cloudSecurityPostureDashboardImage,
-  ...commonLinkProperties,
-};
+export const dashboardLinks = getSecuritySolutionDashboardLinks<LinkItem>({
+  [SecurityPageName.cloudSecurityPostureDashboard]: {
+    description: i18n.translate(
+      'xpack.securitySolution.appLinks.cloudSecurityPostureDashboardDescription',
+      {
+        defaultMessage: 'An overview of findings across all CSP integrations.',
+      }
+    ),
+    landingImage: cloudSecurityPostureDashboardImage,
+    // TODO: When CSP is rendered exclusively in the security solution - remove this and rename the title inside the
+    //  CSP plugin
+    title: i18n.translate('xpack.securitySolution.appLinks.cloudSecurityPostureDashboard', {
+      defaultMessage: 'Cloud Posture',
+    }),
+    ...commonLinkProperties,
+  },
+});
 
-export const manageLinks: LinkItem = {
-  id: SecurityPageName.cloudSecurityPostureBenchmarks,
-  title: i18n.translate('xpack.securitySolution.appLinks.cloudSecurityPostureBenchmarks', {
-    defaultMessage: 'CSP Benchmarks',
-  }),
-  path: CLOUD_SECURITY_POSTURE_BENCHMARKS_PATH,
-  description: i18n.translate(
-    'xpack.securitySolution.appLinks.cloudSecurityPostureBenchmarksDescription',
-    {
-      defaultMessage: 'View, enable, and or disable benchmark rules.',
-    }
-  ),
-  // TODO: Temporary until we have a CSP icon
-  landingIcon: IconExceptionLists,
-  ...commonLinkProperties,
-};
+export const manageLinks: LinkItem = getSecuritySolutionManageLinks<LinkItem>({
+  [SecurityPageName.cloudSecurityPostureBenchmarks]: {
+    // TODO: When CSP is rendered exclusively in the security solution - remove this and rename the title inside the
+    //  CSP plugin
+    title: i18n.translate('xpack.securitySolution.appLinks.cloudSecurityPostureBenchmarks', {
+      defaultMessage: 'CSP Benchmarks',
+    }),
+    description: i18n.translate(
+      'xpack.securitySolution.appLinks.cloudSecurityPostureBenchmarksDescription',
+      {
+        defaultMessage: 'View, enable, and or disable benchmark rules.',
+      }
+    ),
+    landingIcon: IconExceptionLists,
+    ...commonLinkProperties,
+  },
+  [SecurityPageName.cloudSecurityPostureRules]: {
+    sideNavDisabled: true,
+    globalSearchDisabled: true,
+    ...commonLinkProperties,
+  },
+});
 
 export const manageCategories: LinkCategories = [
   {

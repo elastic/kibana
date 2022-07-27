@@ -8,7 +8,7 @@
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { NavigateToPath } from '../../../contexts/kibana';
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
@@ -16,6 +16,7 @@ import { basicResolvers } from '../../resolvers';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { ModelsList } from '../../../trained_models/models_management';
 import { MlPageHeader } from '../../../components/page_header';
+import { TechnicalPreviewBadge } from '../../../components/technical_preview_badge';
 
 export const modelsListRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -60,21 +61,7 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiBetaBadge
-              label={i18n.translate('xpack.ml.navMenu.trainedModelsTabBetaLabel', {
-                defaultMessage: 'Technical preview',
-              })}
-              size="m"
-              color="hollow"
-              tooltipContent={i18n.translate(
-                'xpack.ml.navMenu.trainedModelsTabBetaTooltipContent',
-                {
-                  defaultMessage:
-                    'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-                }
-              )}
-              tooltipPosition={'right'}
-            />
+            <TechnicalPreviewBadge />
           </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>

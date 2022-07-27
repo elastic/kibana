@@ -7,12 +7,13 @@
 
 import React from 'react';
 import { waitFor, act } from '@testing-library/react';
-
 import { mount } from 'enzyme';
-import { TestProviders } from '../../../../common/mock';
 
 import { AlertsCountPanel } from '.';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import { DEFAULT_STACK_BY_FIELD, DEFAULT_STACK_BY_FIELD1 } from '../common/config';
+import { TestProviders } from '../../../../common/mock';
+import { ChartContextMenu } from '../../../pages/detection_engine/chart_panels/chart_context_menu';
 
 jest.mock('../../../../common/containers/query_toggle');
 jest.mock('react-router-dom', () => {
@@ -20,12 +21,32 @@ jest.mock('react-router-dom', () => {
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
 
+const defaultUseQueryAlertsReturn = {
+  loading: false,
+  data: {},
+  setQuery: () => {},
+  response: '',
+  request: '',
+  refetch: () => {},
+};
+const mockUseQueryAlerts = jest.fn().mockReturnValue(defaultUseQueryAlertsReturn);
+jest.mock('../../../containers/detection_engine/alerts/use_query', () => {
+  return {
+    useQueryAlerts: (...props: unknown[]) => mockUseQueryAlerts(...props),
+  };
+});
+
 describe('AlertsCountPanel', () => {
   const defaultProps = {
     signalIndexName: 'signalIndexName',
+    stackByField0: DEFAULT_STACK_BY_FIELD,
+    stackByField1: DEFAULT_STACK_BY_FIELD1,
+    setStackByField0: jest.fn(),
+    setStackByField1: jest.fn(),
   };
   const mockSetToggle = jest.fn();
   const mockUseQueryToggle = useQueryToggle as jest.Mock;
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
@@ -40,6 +61,58 @@ describe('AlertsCountPanel', () => {
       );
 
       expect(wrapper.find('[data-test-subj="alertsCountPanel"]').exists()).toBeTruthy();
+    });
+  });
+
+  it('renders with the specified `alignHeader` alignment', async () => {
+    await act(async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <AlertsCountPanel {...defaultProps} alignHeader="flexEnd" />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper.find('[data-test-subj="headerSectionInnerFlexGroup"]').first().getDOMNode()
+      ).toHaveClass('euiFlexGroup--alignItemsFlexEnd');
+    });
+  });
+
+  it('renders the inspect button by default', async () => {
+    await act(async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <AlertsCountPanel {...defaultProps} alignHeader="flexEnd" />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('button[data-test-subj="inspect-icon-button"]').first().exists()).toBe(
+        true
+      );
+    });
+  });
+
+  it('it does NOT render the inspect button when a `chartOptionsContextMenu` is provided', async () => {
+    const chartOptionsContextMenu = (queryId: string) => (
+      <ChartContextMenu
+        defaultStackByField={DEFAULT_STACK_BY_FIELD}
+        defaultStackByField1={DEFAULT_STACK_BY_FIELD1}
+        queryId={queryId}
+        setStackBy={jest.fn()}
+        setStackByField1={jest.fn()}
+      />
+    );
+
+    await act(async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <AlertsCountPanel {...defaultProps} chartOptionsContextMenu={chartOptionsContextMenu} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('button[data-test-subj="inspect-icon-button"]').first().exists()).toBe(
+        false
+      );
     });
   });
 

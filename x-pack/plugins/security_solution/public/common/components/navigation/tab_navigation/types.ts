@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import type { UrlInputsModel } from '../../../store/inputs/model';
-import type { CONSTANTS } from '../../url_state/constants';
-import type { TimelineUrl } from '../../../../timelines/store/timeline/model';
 import type { SecuritySolutionTabNavigationProps } from '../types';
 import type { SiemRouteType } from '../../../utils/route/types';
 
@@ -15,8 +12,6 @@ export interface TabNavigationProps extends SecuritySolutionTabNavigationProps {
   pathName: string;
   pageName: string;
   tabName: SiemRouteType | undefined;
-  [CONSTANTS.timerange]: UrlInputsModel;
-  [CONSTANTS.timeline]: TimelineUrl;
 }
 
 export interface TabNavigationItemProps {

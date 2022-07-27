@@ -21,13 +21,17 @@ import { uiSettingsMock } from '../../__mocks__/ui_settings';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { LocalStorageMock } from '../../__mocks__/local_storage_mock';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 const mockFilterManager = createFilterManagerMock();
-const mockNavigationPlugin = { ui: { TopNavMenu: mockTopNavMenu } };
+const mockNavigationPlugin = {
+  ui: { TopNavMenu: mockTopNavMenu, AggregateQueryTopNavMenu: mockTopNavMenu },
+};
 
 describe('ContextApp test', () => {
   const services = {
     data: {
+      ...dataPluginMock.createStartContract(),
       search: {
         searchSource: {
           createEmpty: jest.fn(),

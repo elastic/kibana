@@ -21,19 +21,26 @@ import type {
   InternalExecutionContextSetup,
   InternalExecutionContextStart,
 } from '@kbn/core-execution-context-server-internal';
-import { InternalPrebootServicePreboot } from '@kbn/core-preboot-server-internal';
-import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
-import { InternalContextPreboot, InternalContextSetup } from './context';
+import type { InternalPrebootServicePreboot } from '@kbn/core-preboot-server-internal';
+import type {
+  InternalContextPreboot,
+  InternalContextSetup,
+} from '@kbn/core-http-context-server-internal';
+import type {
+  InternalHttpServicePreboot,
+  InternalHttpServiceSetup,
+  InternalHttpServiceStart,
+} from '@kbn/core-http-server-internal';
+import type {
+  InternalMetricsServiceSetup,
+  InternalMetricsServiceStart,
+} from '@kbn/core-metrics-server-internal';
 import {
   InternalElasticsearchServicePreboot,
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
-} from './elasticsearch';
-import {
-  InternalHttpServicePreboot,
-  InternalHttpServiceSetup,
-  InternalHttpServiceStart,
-} from './http';
+} from '@kbn/core-elasticsearch-server-internal';
+import type { CapabilitiesSetup, CapabilitiesStart } from '@kbn/core-capabilities-server';
 import {
   InternalSavedObjectsServiceSetup,
   InternalSavedObjectsServiceStart,
@@ -43,7 +50,6 @@ import {
   InternalUiSettingsServiceSetup,
   InternalUiSettingsServiceStart,
 } from './ui_settings';
-import { InternalMetricsServiceSetup, InternalMetricsServiceStart } from './metrics';
 import { InternalRenderingServiceSetup } from './rendering';
 import { InternalHttpResourcesPreboot, InternalHttpResourcesSetup } from './http_resources';
 import { InternalStatusServiceSetup } from './status';

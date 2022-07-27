@@ -30,6 +30,7 @@ import {
   sumOperation,
   maxOperation,
   medianOperation,
+  standardDeviationOperation,
 } from './metrics';
 import { dateHistogramOperation } from './date_histogram';
 import {
@@ -84,6 +85,7 @@ export type {
   SumIndexPatternColumn,
   MaxIndexPatternColumn,
   MedianIndexPatternColumn,
+  StandardDeviationIndexPatternColumn,
 } from './metrics';
 export type { DateHistogramIndexPatternColumn } from './date_histogram';
 export type {
@@ -115,6 +117,7 @@ const internalOperationDefinitions = [
   averageOperation,
   cardinalityOperation,
   sumOperation,
+  standardDeviationOperation,
   medianOperation,
   percentileOperation,
   percentileRanksOperation,
@@ -139,7 +142,13 @@ export { termsOperation } from './terms';
 export { rangeOperation } from './ranges';
 export { filtersOperation } from './filters';
 export { dateHistogramOperation } from './date_histogram';
-export { minOperation, averageOperation, sumOperation, maxOperation } from './metrics';
+export {
+  minOperation,
+  averageOperation,
+  sumOperation,
+  maxOperation,
+  standardDeviationOperation,
+} from './metrics';
 export { percentileOperation } from './percentile';
 export { percentileRanksOperation } from './percentile_ranks';
 export { countOperation } from './count';
@@ -223,11 +232,7 @@ export interface HelpProps<C> {
 export type TimeScalingMode = 'disabled' | 'mandatory' | 'optional';
 
 export interface AdvancedOption {
-  title: string;
-  optionElement?: React.ReactElement;
   dataTestSubj: string;
-  onClick: () => void;
-  showInPopover: boolean;
   inlineElement: React.ReactElement | null;
   helpPopup?: string | null;
 }
@@ -406,6 +411,13 @@ interface BaseOperationDefinitionProps<
     aggs: ExpressionAstExpressionBuilder[];
     esAggsIdMap: Record<string, OriginalColumn[]>;
   };
+
+  /**
+   * Returns the maximum possible number of values for this column
+   * (e.g. with a top 5 values operation, we can be sure that there will never be
+   *    more than 5 values returned or 6 if the "Other" bucket is enabled)
+   */
+  getMaxPossibleNumValues?: (column: C) => number;
 }
 
 interface BaseBuildColumnArgs {

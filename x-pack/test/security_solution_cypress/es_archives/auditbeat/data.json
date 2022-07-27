@@ -83,7 +83,12 @@
         "args" : [
           "-zsh"
         ],
-        "entity_id" : "q6pltOhTWlQx3BCD"
+        "entity_id" : "q6pltOhTWlQx3BCD",
+        "entry_leader": {
+          "entity_id": "q6pltOhTWlQx3BCD",
+          "name": "fake entry",
+          "pid": 2342342
+        }
       },
       "message" : "Process zsh (PID: 27884) by user test STARTED",
       "user" : {

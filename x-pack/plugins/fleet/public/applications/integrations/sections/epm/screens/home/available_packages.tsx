@@ -219,11 +219,20 @@ export const AvailablePackages: React.FC<{
     category: '',
     excludeInstallStatus: true,
   });
+
+  // Remove Kubernetes package granularity
+  if (eprPackages?.items) {
+    eprPackages.items.forEach(function (element) {
+      if (element.id === 'kubernetes') {
+        element.policy_templates = [];
+      }
+    });
+  }
+
   const eprIntegrationList = useMemo(
     () => packageListToIntegrationsList(eprPackages?.items || []),
     [eprPackages]
   );
-
   const { value: replacementCustomIntegrations } = useGetReplacementCustomIntegrations();
 
   const mergedEprPackages: Array<PackageListItem | CustomIntegration> =
@@ -317,16 +326,19 @@ export const AvailablePackages: React.FC<{
     <>
       <EuiFlexGrid columns={3}>
         <EuiFlexItem>
-          <TrackApplicationView viewId="integration-card:epr:app_search_web_crawler:featured">
+          <TrackApplicationView viewId="integration-card:epr:web_crawler:featured">
             <EuiCard
-              data-test-subj="integration-card:epr:app_search_web_crawler:featured"
-              icon={<EuiIcon type="logoAppSearch" size="xxl" />}
-              href={addBasePath('/app/enterprise_search/app_search/engines/new?method=crawler')}
+              data-test-subj="integration-card:epr:web_crawler:featured"
+              icon={<EuiIcon type="logoEnterpriseSearch" size="xxl" />}
+              href={addBasePath(
+                '/app/enterprise_search/content/search_indices/new_index?method=crawler'
+              )}
               title={i18n.translate('xpack.fleet.featuredSearchTitle', {
-                defaultMessage: 'Web site crawler',
+                defaultMessage: 'Web crawler',
               })}
               description={i18n.translate('xpack.fleet.featuredSearchDesc', {
-                defaultMessage: 'Add search to your website with the App Search web crawler.',
+                defaultMessage:
+                  'Add search to your website with the Enterprise Search web crawler.',
               })}
             />
           </TrackApplicationView>
@@ -340,7 +352,7 @@ export const AvailablePackages: React.FC<{
               })}
               description={i18n.translate('xpack.fleet.featuredObsDesc', {
                 defaultMessage:
-                  'Monitor, detect and diagnose complex performance issues from your application.',
+                  'Monitor, detect, and diagnose complex application performance issues.',
               })}
               href={addBasePath('/app/home#/tutorial/apm')}
               icon={<EuiIcon type="logoObservability" size="xxl" />}

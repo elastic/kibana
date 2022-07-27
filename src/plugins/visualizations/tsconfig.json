@@ -22,7 +22,6 @@
     { "path": "../inspector/tsconfig.json" },
     { "path": "../saved_objects/tsconfig.json" },
     { "path": "../saved_objects_tagging_oss/tsconfig.json" },
-    { "path": "../usage_collection/tsconfig.json" },
     { "path": "../kibana_utils/tsconfig.json" },
     { "path": "../kibana_react/tsconfig.json" },
     { "path": "../discover/tsconfig.json" },

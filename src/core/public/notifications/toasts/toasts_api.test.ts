@@ -10,7 +10,7 @@ import { firstValueFrom } from 'rxjs';
 
 import { ToastsApi } from './toasts_api';
 
-import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.mock';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 
 async function getCurrentToasts(toasts: ToastsApi) {

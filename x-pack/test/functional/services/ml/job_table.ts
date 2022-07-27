@@ -41,10 +41,11 @@ export interface OtherUrlConfig {
 }
 
 export function MachineLearningJobTableProvider(
-  { getService }: FtrProviderContext,
+  { getPageObject, getService }: FtrProviderContext,
   mlCommonUI: MlCommonUI,
   customUrls: MlCustomUrls
 ) {
+  const headerPage = getPageObject('header');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
@@ -366,12 +367,37 @@ export function MachineLearningJobTableProvider(
       );
     }
 
+    public async assertJobActionResetJobButtonEnabled(jobId: string, expectedValue: boolean) {
+      await this.ensureJobActionsMenuOpen(jobId);
+      const isEnabled = await testSubjects.isEnabled('mlActionButtonResetJob');
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected "reset job" action button for AD job '${jobId}' to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    }
+
     public async assertJobActionCloneJobButtonEnabled(jobId: string, expectedValue: boolean) {
       await this.ensureJobActionsMenuOpen(jobId);
       const isEnabled = await testSubjects.isEnabled('mlActionButtonCloneJob');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "clone job" action button for AD job '${jobId}' to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    }
+
+    public async assertJobActionViewDatafeedCountsButtonEnabled(
+      jobId: string,
+      expectedValue: boolean
+    ) {
+      await this.ensureJobActionsMenuOpen(jobId);
+      const isEnabled = await testSubjects.isEnabled('mlActionButtonViewDatafeedChart');
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected "view datafeed counts" action button for AD job '${jobId}' to be '${
           expectedValue ? 'enabled' : 'disabled'
         }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
       );
@@ -581,6 +607,7 @@ export function MachineLearningJobTableProvider(
       // click Custom URLs tab
       await testSubjects.click('mlEditJobFlyout-customUrls');
       await this.ensureEditCustomUrlTabOpen();
+      await headerPage.waitUntilLoadingHasFinished();
     }
 
     public async ensureEditCustomUrlTabOpen() {

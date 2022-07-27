@@ -10,7 +10,7 @@ import { take } from 'rxjs/operators';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { KibanaMigratorOptions, KibanaMigrator } from './kibana_migrator';
 import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { SavedObjectsType } from '../types';
@@ -247,6 +247,9 @@ const mockV2MigrationOptions = () => {
 };
 
 const mockOptions = () => {
+  const mockedClient = elasticsearchClientMock.createElasticsearchClient();
+  (mockedClient as any).child = jest.fn().mockImplementation(() => mockedClient);
+
   const options: MockedOptions = {
     logger: loggingSystemMock.create().get(),
     kibanaVersion: '8.2.3',
@@ -284,7 +287,7 @@ const mockOptions = () => {
       skip: false,
       retryAttempts: 20,
     },
-    client: elasticsearchClientMock.createElasticsearchClient(),
+    client: mockedClient,
     docLinks: docLinksServiceMock.createSetupContract(),
   };
   return options;

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { httpServiceMock } from './http/http_service.mock';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 
 export const mockHttpService = httpServiceMock.create();
-jest.doMock('./http/http_service', () => ({
+jest.doMock('@kbn/core-http-server-internal', () => ({
   HttpService: jest.fn(() => mockHttpService),
 }));
 
@@ -20,10 +20,10 @@ jest.doMock('./plugins/plugins_service', () => ({
   PluginsService: jest.fn(() => mockPluginsService),
 }));
 
-import { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 export const mockElasticsearchService = elasticsearchServiceMock.create();
-jest.doMock('./elasticsearch/elasticsearch_service', () => ({
+jest.doMock('@kbn/core-elasticsearch-server-internal', () => ({
   ElasticsearchService: jest.fn(() => mockElasticsearchService),
 }));
 
@@ -44,10 +44,10 @@ jest.doMock('./saved_objects/saved_objects_service', () => ({
   SavedObjectsService: jest.fn(() => mockSavedObjectsService),
 }));
 
-import { contextServiceMock } from './context/context_service.mock';
+import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 
 export const mockContextService = contextServiceMock.create();
-jest.doMock('./context/context_service', () => ({
+jest.doMock('@kbn/core-http-context-server-internal', () => ({
   ContextService: jest.fn(() => mockContextService),
 }));
 
@@ -82,10 +82,10 @@ jest.doMock('@kbn/core-node-server-internal', () => ({
   NodeService: jest.fn(() => mockNodeService),
 }));
 
-import { metricsServiceMock } from './metrics/metrics_service.mock';
+import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
 
 export const mockMetricsService = metricsServiceMock.create();
-jest.doMock('./metrics/metrics_service', () => ({
+jest.doMock('@kbn/core-metrics-server-internal', () => ({
   MetricsService: jest.fn(() => mockMetricsService),
 }));
 

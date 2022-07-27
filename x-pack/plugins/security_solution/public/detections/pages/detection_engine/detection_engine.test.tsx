@@ -56,10 +56,6 @@ jest.mock('react-router-dom', () => {
     useHistory: jest.fn(),
   };
 });
-jest.mock('../../components/alerts_info', () => ({
-  useAlertInfo: jest.fn().mockReturnValue([]),
-}));
-
 jest.mock('../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../common/lib/kibana');
 
@@ -92,6 +88,10 @@ jest.mock('../../../common/lib/kibana', () => {
               privileges: 'link',
             },
           },
+        },
+        storage: {
+          get: jest.fn(),
+          set: jest.fn(),
         },
       },
     }),
@@ -137,6 +137,20 @@ describe('DetectionEnginePageComponent', () => {
     );
     await waitFor(() => {
       expect(wrapper.find('FiltersGlobal').exists()).toBe(true);
+    });
+  });
+
+  it('renders the chart panels', async () => {
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <Router history={mockHistory}>
+          <DetectionEnginePage />
+        </Router>
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="chartPanels"]').exists()).toBe(true);
     });
   });
 });

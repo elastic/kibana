@@ -20,7 +20,7 @@
         "description": [],
         "signature": [
           "(log: ",
-          "ToolingLog",
+          "SomeDevLog",
           ") => ",
           {
             "pluginId": "@kbn/ci-stats-core",
@@ -42,7 +42,7 @@
             "label": "log",
             "description": [],
             "signature": [
-              "ToolingLog"
+              "SomeDevLog"
             ],
             "path": "packages/kbn-ci-stats-core/src/ci_stats_config.ts",
             "deprecated": false,

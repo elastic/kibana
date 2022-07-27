@@ -76,6 +76,7 @@ export const mockState: SyntheticsAppState = {
     },
     error: null,
     loading: false,
+    loaded: false,
   },
   overview: {
     pageState: {
@@ -87,6 +88,7 @@ export const mockState: SyntheticsAppState = {
       pages: {},
     },
     error: null,
+    loaded: false,
     loading: false,
   },
   syntheticsEnablement: { loading: false, error: null, enablement: null },

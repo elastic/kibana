@@ -126,57 +126,5 @@ export const mockData: NetworkDnsStrategyResponse = {
     fakeTotalCount: 50,
     showMorePagesIndicator: true,
   },
-  histogram: [
-    {
-      x: 'nflxvideo.net',
-      g: 'nflxvideo.net',
-      y: 12546,
-    },
-    {
-      x: 'apple.com',
-      g: 'apple.com',
-      y: 31687,
-    },
-    {
-      x: 'googlevideo.com',
-      g: 'googlevideo.com',
-      y: 16292,
-    },
-    {
-      x: 'netflix.com',
-      g: 'netflix.com',
-      y: 218193,
-    },
-    {
-      x: 'samsungcloudsolution.com',
-      g: 'samsungcloudsolution.com',
-      y: 11702,
-    },
-    {
-      x: 'doubleclick.net',
-      g: 'doubleclick.net',
-      y: 14372,
-    },
-    {
-      x: 'digitalocean.com',
-      g: 'digitalocean.com',
-      y: 4111,
-    },
-    {
-      x: 'samsungelectronics.com',
-      g: 'samsungelectronics.com',
-      y: 36592,
-    },
-    {
-      x: 'google.com',
-      g: 'google.com',
-      y: 8072,
-    },
-    {
-      x: 'samsungcloudsolution.net',
-      g: 'samsungcloudsolution.net',
-      y: 11518,
-    },
-  ],
   rawResponse: {} as NetworkDnsStrategyResponse['rawResponse'],
 };

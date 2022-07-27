@@ -15,8 +15,8 @@ import {
 
 import { load } from 'cheerio';
 
-import { httpServerMock } from '../http/http_server.mocks';
-import { mockRouter } from '../http/router/router.mock';
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import {
   mockRenderingServiceParams,

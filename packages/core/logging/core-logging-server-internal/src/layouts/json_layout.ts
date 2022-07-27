@@ -42,7 +42,7 @@ export class JsonLayout implements Layout {
     const transactionId = record.meta?.transaction?.id ?? record.transactionId;
 
     const log: Ecs = {
-      ecs: { version: '8.0.0' },
+      ecs: { version: '8.4.0' },
       '@timestamp': moment(record.timestamp).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
       message: record.message,
       error: JsonLayout.errorToSerializableObject(record.error),

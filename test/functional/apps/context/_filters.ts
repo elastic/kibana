@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const TEST_INDEX_PATTERN = 'logstash-*';
@@ -19,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const browser = getService('browser');
 
   const PageObjects = getPageObjects(['common', 'context']);
 
@@ -74,6 +76,67 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.context.waitUntilContextLoadingHasFinished();
         return await filterBar.hasFilter(TEST_ANCHOR_FILTER_FIELD, 'exists', true);
       });
+    });
+
+    const addPinnedFilter = async () => {
+      await filterBar.addFilter(TEST_ANCHOR_FILTER_FIELD, 'IS', TEST_ANCHOR_FILTER_VALUE);
+      await filterBar.toggleFilterPinned(TEST_ANCHOR_FILTER_FIELD);
+    };
+
+    const everyFieldMatches = async (matches: (field: string[]) => boolean) => {
+      const fields = await dataGrid.getFields();
+      return fields.every(matches);
+    };
+
+    it('should update the data grid when a pinned filter is modified', async function () {
+      await addPinnedFilter();
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      expect(await everyFieldMatches((field) => field[2] === TEST_ANCHOR_FILTER_VALUE)).to.be(true);
+      await filterBar.toggleFilterNegated(TEST_ANCHOR_FILTER_FIELD);
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      expect(await everyFieldMatches((field) => field[2] === TEST_ANCHOR_FILTER_VALUE)).to.be(
+        false
+      );
+    });
+
+    const expectFiltersToExist = async () => {
+      expect(await filterBar.getFilterCount()).to.be(2);
+      expect(
+        await filterBar.hasFilter(TEST_ANCHOR_FILTER_FIELD, TEST_ANCHOR_FILTER_VALUE, true, true)
+      ).to.be(true);
+      expect(await filterBar.hasFilter('extension', 'png')).to.be(true);
+      expect(
+        await everyFieldMatches(
+          (field) => field[1] === 'png' && field[2] === TEST_ANCHOR_FILTER_VALUE
+        )
+      ).to.be(true);
+    };
+
+    it('should preserve filters when the page is refreshed', async function () {
+      await addPinnedFilter();
+      await filterBar.addFilter('extension', 'IS', 'png');
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      await expectFiltersToExist();
+      await browser.refresh();
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      await expectFiltersToExist();
+    });
+
+    it('should update filters when navigating forward and backward in history', async () => {
+      await filterBar.addFilter('extension', 'IS', 'png');
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      expect(await filterBar.getFilterCount()).to.be(1);
+      expect(await filterBar.hasFilter('extension', 'png')).to.be(true);
+      expect(await everyFieldMatches((field) => field[1] === 'png')).to.be(true);
+      await browser.goBack();
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      expect(await filterBar.getFilterCount()).to.be(0);
+      expect(await everyFieldMatches((field) => field[1] === 'png')).to.be(false);
+      await browser.goForward();
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      expect(await filterBar.getFilterCount()).to.be(1);
+      expect(await filterBar.hasFilter('extension', 'png')).to.be(true);
+      expect(await everyFieldMatches((field) => field[1] === 'png')).to.be(true);
     });
   });
 }

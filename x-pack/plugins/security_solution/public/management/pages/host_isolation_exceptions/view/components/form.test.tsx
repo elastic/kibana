@@ -92,7 +92,9 @@ describe('When on the host isolation exceptions entry form', () => {
     });
   });
 
-  describe('and creating a new exception', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/136165
+  // FLAKY: https://github.com/elastic/kibana/issues/136166
+  describe.skip('and creating a new exception', () => {
     beforeEach(async () => {
       await render();
     });

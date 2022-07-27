@@ -31,8 +31,7 @@ import {
 import type { Agent } from '@kbn/fleet-plugin/common/types/models';
 import type { AgentClient, AgentService } from '@kbn/fleet-plugin/server/services';
 import { get } from 'lodash';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { ScopedClusterClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 describe('test policy response handler', () => {
   let endpointAppContextService: EndpointAppContextService;

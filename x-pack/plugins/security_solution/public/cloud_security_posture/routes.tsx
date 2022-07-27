@@ -5,56 +5,50 @@
  * 2.0.
  */
 
-import { EuiTitle } from '@elastic/eui';
-import React from 'react';
+import React, { memo } from 'react';
+import type { CloudSecurityPosturePageId } from '@kbn/cloud-security-posture-plugin/public';
+import {
+  CLOUD_SECURITY_POSTURE_BASE_PATH,
+  type CspSecuritySolutionContext,
+} from '@kbn/cloud-security-posture-plugin/public';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+import { MANAGE_PATH } from '../../common/constants';
+import type { SecurityPageName, SecuritySubPluginRoutes } from '../app/types';
+import { useKibana } from '../common/lib/kibana';
 import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
 import { SpyRoute } from '../common/utils/route/spy_routes';
-import {
-  CLOUD_SECURITY_POSTURE_BENCHMARKS_PATH,
-  CLOUD_SECURITY_POSTURE_DASHBOARD_PATH,
-  CLOUD_SECURITY_POSTURE_FINDINGS_PATH,
-  CLOUD_SECURITY_POSTURE_PATH,
-  SecurityPageName,
-} from '../../common/constants';
-import type { SecuritySubPluginRoutes } from '../app/types';
+import { FiltersGlobal } from '../common/components/filters_global';
+import { MANAGE } from '../app/translations';
 
-const CloudSecurityPosture = ({ pageName }: { pageName: SecurityPageName }) => {
+// This exists only for the type signature cast
+const CloudPostureSpyRoute = ({ pageName }: { pageName?: CloudSecurityPosturePageId }) => (
+  <SpyRoute pageName={pageName as SecurityPageName | undefined} />
+);
+
+const CloudSecurityPosture = memo(() => {
+  const { cloudSecurityPosture } = useKibana().services;
+  const CloudSecurityPostureRouter = cloudSecurityPosture.getCloudSecurityPostureRouter();
+  const securitySolutionContext: CspSecuritySolutionContext = {
+    getFiltersGlobalComponent: () => FiltersGlobal,
+    getSpyRouteComponent: () => CloudPostureSpyRoute,
+    getManageBreadcrumbEntry: () => ({ name: MANAGE, path: MANAGE_PATH }),
+  };
+
   return (
-    <TrackApplicationView viewId={pageName}>
+    // TODO: Finer granularity of this needs to be implemented in the cloud security posture plugin
+    <TrackApplicationView viewId="cloud_security_posture">
       <SecuritySolutionPageWrapper noPadding noTimeline>
-        <SpyRoute pageName={pageName} />
-        <EuiTitle>
-          <h1>{'Coming soon'}</h1>
-        </EuiTitle>
+        <CloudSecurityPostureRouter securitySolutionContext={securitySolutionContext} />
       </SecuritySolutionPageWrapper>
     </TrackApplicationView>
   );
-};
+});
 
-// TODO: We'll probably use a single route here, and we'll manage all CSP pages in an internal router in the CSP plugin.
-//  For now we have multiple routes as we need `SpyRoute` to use a specific `pageName` for highlighting the correct
-//  navigation bar entry
+CloudSecurityPosture.displayName = 'CloudSecurityPosture';
+
 export const routes: SecuritySubPluginRoutes = [
   {
-    path: CLOUD_SECURITY_POSTURE_PATH,
-    render: () => <CloudSecurityPosture pageName={SecurityPageName.cloudSecurityPosture} />,
-    exact: true,
-  },
-  {
-    path: CLOUD_SECURITY_POSTURE_FINDINGS_PATH,
-    render: () => <CloudSecurityPosture pageName={SecurityPageName.cloudSecurityPostureFindings} />,
-  },
-  {
-    path: CLOUD_SECURITY_POSTURE_DASHBOARD_PATH,
-    render: () => (
-      <CloudSecurityPosture pageName={SecurityPageName.cloudSecurityPostureDashboard} />
-    ),
-  },
-  {
-    path: CLOUD_SECURITY_POSTURE_BENCHMARKS_PATH,
-    render: () => (
-      <CloudSecurityPosture pageName={SecurityPageName.cloudSecurityPostureBenchmarks} />
-    ),
+    path: CLOUD_SECURITY_POSTURE_BASE_PATH,
+    render: () => <CloudSecurityPosture />,
   },
 ];

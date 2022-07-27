@@ -27,13 +27,10 @@ import { DetailsPanel } from '../../timelines/components/side_panel';
 import { useFetchAlertData } from './use_fetch_alert_data';
 
 const TimelineDetailsPanel = () => {
-  const { browserFields, docValueFields, runtimeMappings } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
+  const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.detections);
   return (
     <DetailsPanel
       browserFields={browserFields}
-      docValueFields={docValueFields}
       entityType="events"
       isFlyoutView
       runtimeMappings={runtimeMappings}
@@ -45,8 +42,7 @@ const TimelineDetailsPanel = () => {
 const CaseContainerComponent: React.FC = () => {
   const { cases } = useKibana().services;
   const { getAppUrl, navigateTo } = useNavigation();
-  const userPermissions = useGetUserCasesPermissions();
-  const casesPermissions = { all: userPermissions.crud, read: userPermissions.read };
+  const userCasesPermissions = useGetUserCasesPermissions();
   const dispatch = useDispatch();
   const { formatUrl: detectionsFormatUrl, search: detectionsUrlSearch } = useFormatUrl(
     SecurityPageName.rules
@@ -148,7 +144,7 @@ const CaseContainerComponent: React.FC = () => {
             },
           },
           useFetchAlertData,
-          permissions: casesPermissions,
+          permissions: userCasesPermissions,
         })}
       </CaseDetailsRefreshContext.Provider>
       <SpyRoute pageName={SecurityPageName.case} />

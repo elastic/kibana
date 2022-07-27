@@ -69,6 +69,13 @@ export const CONDITION_OPERATOR_TYPE_WILDCARD_MATCHES = i18n.translate(
   }
 );
 
+export const CONDITION_OPERATOR_TYPE_WILDCARD_DOES_NOT_MATCH = i18n.translate(
+  'xpack.securitySolution.exceptions.exceptionItem.conditions.wildcardDoesNotMatchOperator',
+  {
+    defaultMessage: 'DOES NOT MATCH',
+  }
+);
+
 export const CONDITION_OPERATOR_TYPE_NESTED = i18n.translate(
   'xpack.securitySolution.exceptions.exceptionItem.conditions.nestedOperator',
   {

@@ -18,6 +18,7 @@ export const CspLoadingState: React.FunctionComponent<{ ['data-test-subj']?: str
     <EuiFlexGroup
       css={css`
         padding: ${euiTheme.size.l};
+        margin-top: 50px;
       `}
       direction="column"
       alignItems="center"

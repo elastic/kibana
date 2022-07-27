@@ -74,6 +74,7 @@ const apmPerAgentSchema: Pick<
   // TODO: Find a way for `@kbn/telemetry-tools` to understand and evaluate expressions.
   //  In the meanwhile, we'll have to maintain these lists up to date (TS will remind us to update)
   services_per_agent: {
+    'android/java': long,
     dotnet: long,
     'iOS/swift': long,
     go: long,
@@ -98,6 +99,7 @@ const apmPerAgentSchema: Pick<
     'opentelemetry/webjs': long,
   },
   agents: {
+    'android/java': agentSchema,
     dotnet: agentSchema,
     'iOS/swift': agentSchema,
     go: agentSchema,
