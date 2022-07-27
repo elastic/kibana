@@ -50,13 +50,17 @@ export type SearchSessionSavedObjectAttributesPre$8$0$0 = Omit<
  *  - `completed` - when session was completed
  *  - `persisted` - if session was saved
  *  - `touched` - when session was last updated (touched by the user)
+ *  - `status` - status is no longer persisted. Except 'canceled' which was moved to `isCanceled`
  *  - `status` and `error` in idMapping (search info)
  */
-export interface SearchSessionSavedObjectAttributesPre$8$5$0
-  extends SearchSessionSavedObjectAttributesLatest {
+export type SearchSessionSavedObjectAttributesPre$8$5$0 = Omit<
+  SearchSessionSavedObjectAttributesLatest,
+  'idMapping' | 'isCanceled'
+> & {
   completed?: string | null;
   persisted: boolean;
   touched: string;
+  status: SearchSessionStatus;
   idMapping: Record<
     string,
     {
@@ -66,7 +70,7 @@ export interface SearchSessionSavedObjectAttributesPre$8$5$0
       error?: string;
     }
   >;
-}
+};
 
 function getLocatorId(urlGeneratorId?: string) {
   if (!urlGeneratorId) return;
@@ -117,19 +121,24 @@ export const searchSessionSavedObjectMigrations: SavedObjectMigrationMap = {
     doc: SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesPre$8$5$0>
   ): SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesLatest> => {
     const {
-      attributes: { touched, completed, persisted, idMapping, ...otherAttrs },
+      attributes: { touched, completed, persisted, idMapping, status, ...otherAttrs },
     } = doc;
 
     const attributes: SearchSessionSavedObjectAttributesLatest = {
       ...otherAttrs,
       idMapping: Object.entries(idMapping).reduce(
-        (res, [searchHash, { status, error, ...otherSearchAttrs }]) => {
+        (res, [searchHash, { status: searchStatus, error, ...otherSearchAttrs }]) => {
           res[searchHash] = otherSearchAttrs;
           return res;
         },
         {} as SearchSessionSavedObjectAttributesLatest['idMapping']
       ),
     };
+
+    if (status === SearchSessionStatus.CANCELLED) {
+      attributes.isCanceled = true;
+    }
+
     return { ...doc, attributes };
   },
 };

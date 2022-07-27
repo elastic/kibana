@@ -28,9 +28,6 @@ export const searchSessionSavedObjectType: SavedObjectsType = {
       expires: {
         type: 'date',
       },
-      status: {
-        type: 'keyword',
-      },
       appId: {
         type: 'keyword',
       },
@@ -60,6 +57,9 @@ export const searchSessionSavedObjectType: SavedObjectsType = {
       },
       version: {
         type: 'keyword',
+      },
+      isCanceled: {
+        type: 'boolean',
       },
     },
   },

@@ -29,7 +29,6 @@ import {
   SearchSessionRequestInfo,
   SearchSessionSavedObjectAttributes,
   SearchSessionsFindResponse,
-  SearchSessionStatus,
   SearchSessionStatusResponse,
 } from '../../../common';
 import { ISearchSessionService, NoSearchIdInSessionError } from '../..';
@@ -239,7 +238,6 @@ export class SearchSessionService implements ISearchSessionService {
       SEARCH_SESSION_TYPE,
       {
         sessionId,
-        status: SearchSessionStatus.IN_PROGRESS,
         expires: new Date(
           Date.now() + this.sessionConfig.defaultExpiration.asMilliseconds()
         ).toISOString(),
@@ -354,7 +352,7 @@ export class SearchSessionService implements ISearchSessionService {
   ) => {
     this.logger.debug(`cancel | ${sessionId}`);
     return this.update(deps, user, sessionId, {
-      status: SearchSessionStatus.CANCELLED,
+      isCanceled: true,
     });
   };
 

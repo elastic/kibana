@@ -399,6 +399,13 @@ describe('8.0.0 -> 8.5.0', () => {
 
     const migratedSession = migration(mockSessionSavedObject, {} as SavedObjectMigrationContext);
 
+    expect(migratedSession.attributes).not.toHaveProperty('status');
+    expect(migratedSession.attributes).not.toHaveProperty('touched');
+    expect(migratedSession.attributes).not.toHaveProperty('completed');
+    expect(migratedSession.attributes).not.toHaveProperty('persisted');
+    expect(migratedSession.attributes.idMapping.search1).not.toHaveProperty('status');
+    expect(migratedSession.attributes.idMapping.search2).not.toHaveProperty('error');
+
     expect(migratedSession.attributes).toMatchInlineSnapshot(`
       Object {
         "appId": "my_app_id",
@@ -425,10 +432,24 @@ describe('8.0.0 -> 8.5.0', () => {
         "realmType": "realmType",
         "restoreState": Object {},
         "sessionId": "sessionId",
-        "status": "complete",
         "username": "username",
         "version": "7.14.0",
       }
     `);
+  });
+
+  test('status:canceled -> isCanceled', () => {
+    const migratedSession = migration(
+      {
+        ...mockSessionSavedObject,
+        attributes: {
+          ...mockSessionSavedObject.attributes,
+          status: SearchSessionStatus.CANCELLED,
+        },
+      },
+      {} as SavedObjectMigrationContext
+    );
+
+    expect(migratedSession.attributes.isCanceled).toBe(true);
   });
 });

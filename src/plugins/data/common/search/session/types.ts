@@ -33,14 +33,6 @@ export interface SearchSessionSavedObjectAttributes {
   expires: string;
 
   /**
-   * Session status that is persisted in a saved object, should only be used internally,
-   * Could be {@link SearchSessionStatus.IN_PROGRESS} or {@link SearchSessionStatus.CANCELLED},
-   * Other statuses are calculated dynamically by checking expiration time and async searches statuses
-   * and returned as part of {@link SearchSessionStatusResponse}
-   */
-  status: SearchSessionStatus;
-
-  /**
    * locatorId (see share.url.locators service)
    */
   locatorId?: string;
@@ -69,6 +61,11 @@ export interface SearchSessionSavedObjectAttributes {
    * Version information to display warnings when trying to restore a session from a different version
    */
   version: string;
+
+  /**
+   * `true` if session was cancelled
+   */
+  isCanceled?: boolean;
 }
 
 export interface SearchSessionRequestInfo {
