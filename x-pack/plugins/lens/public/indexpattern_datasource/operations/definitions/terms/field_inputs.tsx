@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiDraggable,
@@ -57,6 +57,7 @@ export function FieldInputs({
   invalidFields,
 }: FieldInputsProps) {
   const { euiTheme } = useEuiTheme();
+  const [isDragging, setIsDragging] = useState(false);
 
   const onChangeWrapped = useCallback(
     (values: WrappedValue[]) =>
@@ -99,7 +100,7 @@ export function FieldInputs({
       <div
         style={{
           padding: euiTheme.size.s,
-          backgroundColor: euiTheme.colors.lightestShade,
+          backgroundColor: isDragging ? 'rgba(0, 191, 179, 0.25)' : euiTheme.colors.lightestShade,
           borderRadius: euiTheme.size.xs,
           marginBottom: euiTheme.size.xs,
         }}
@@ -107,8 +108,11 @@ export function FieldInputs({
         <DragDropBuckets
           onDragEnd={(updatedValues: WrappedValue[]) => {
             handleInputChange(updatedValues);
+            setIsDragging(false);
           }}
-          onDragStart={() => {}}
+          onDragStart={() => {
+            setIsDragging(true);
+          }}
           droppableId="TOP_TERMS_DROPPABLE_AREA"
           items={localValues}
         >

@@ -922,9 +922,11 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
               arrowProps={{ color: 'primary' }}
               buttonContent={
                 <EuiText size="s" color={euiTheme.colors.primary}>
-                  {i18n.translate('xpack.lens.indexPattern.terms.advancedSettings', {
-                    defaultMessage: 'Advanced',
-                  })}
+                  <strong>
+                    {i18n.translate('xpack.lens.indexPattern.terms.advancedSettings', {
+                      defaultMessage: 'Advanced',
+                    })}
+                  </strong>
                 </EuiText>
               }
               data-test-subj="indexPattern-terms-advanced"

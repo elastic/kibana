@@ -20,9 +20,11 @@ export function AdvancedOptions(props: { options: AdvancedOption[] }) {
       data-test-subj="indexPattern-advanced-accordion"
       buttonContent={
         <EuiText size="s" color={euiTheme.colors.primary}>
-          {i18n.translate('xpack.lens.indexPattern.advancedSettings', {
-            defaultMessage: 'Advanced',
-          })}
+          <strong>
+            {i18n.translate('xpack.lens.indexPattern.advancedSettings', {
+              defaultMessage: 'Advanced',
+            })}
+          </strong>
         </EuiText>
       }
       css={css`

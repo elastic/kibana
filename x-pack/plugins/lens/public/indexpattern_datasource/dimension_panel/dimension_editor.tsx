@@ -954,7 +954,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
         <EuiFormRow
           label={
             !incompleteInfo &&
-            temporaryState === 'none' && (
+            temporaryState === 'none' &&
+            selectedColumn && (
               <EuiText
                 size="s"
                 css={css`
