@@ -13,8 +13,6 @@ import { PageLoadDistChart } from '../charts/page_load_dist_chart';
 import { ResetPercentileZoom } from './reset_percentile_zoom';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
 import { PercentileRange } from './types';
-import { usePageLoadDistribution } from '../../../../services/data/page_load_distribution_query';
-import { useDataView } from '../local_uifilters/use_data_view';
 
 export function PageLoadDistribution() {
   const [percentileRange, setPercentileRange] = useState<PercentileRange>({
