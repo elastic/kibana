@@ -39,20 +39,34 @@ export type SearchSessionSavedObjectAttributesPre$7$14$0 = Omit<
  * from using `urlGeneratorId` to `locatorId`.
  */
 export type SearchSessionSavedObjectAttributesPre$8$0$0 = Omit<
-  SearchSessionSavedObjectAttributesPre$8$4$0,
+  SearchSessionSavedObjectAttributesPre$8$5$0,
   'locatorId'
 > & {
   urlGeneratorId?: string;
 };
 
 /**
- * In 8.4.0 with search session refactoring and moving away from using task manager we are no longer track `completed` and `persisted`
+ * In 8.5.0 with search session refactoring and moving away from using task manager we are no longer track of:
+ *  - `completed` - when session was completed
+ *  - `persisted` - if session was saved
+ *  - `touched` - when session was last updated (touched by the user)
+ *  - `status` and `error` in idMapping (search info)
  */
-export type SearchSessionSavedObjectAttributesPre$8$4$0 =
-  SearchSessionSavedObjectAttributesLatest & {
-    completed?: string | null;
-    persisted: boolean;
-  };
+export interface SearchSessionSavedObjectAttributesPre$8$5$0
+  extends SearchSessionSavedObjectAttributesLatest {
+  completed?: string | null;
+  persisted: boolean;
+  touched: string;
+  idMapping: Record<
+    string,
+    {
+      id: string;
+      strategy: string;
+      status: string;
+      error?: string;
+    }
+  >;
+}
 
 function getLocatorId(urlGeneratorId?: string) {
   if (!urlGeneratorId) return;
@@ -96,6 +110,25 @@ export const searchSessionSavedObjectMigrations: SavedObjectMigrationMap = {
     } = doc;
     const locatorId = getLocatorId(urlGeneratorId);
     const attributes = { ...otherAttrs, locatorId };
+    return { ...doc, attributes };
+  },
+  '8.5.0': (
+    doc: SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesPre$8$5$0>
+  ): SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesLatest> => {
+    const {
+      attributes: { touched, completed, persisted, idMapping, ...otherAttrs },
+    } = doc;
+
+    const attributes: SearchSessionSavedObjectAttributesLatest = {
+      ...otherAttrs,
+      idMapping: Object.entries(idMapping).reduce(
+        (res, [searchHash, { status, error, ...otherSearchAttrs }]) => {
+          res[searchHash] = otherSearchAttrs;
+          return res;
+        },
+        {} as SearchSessionSavedObjectAttributesLatest['idMapping']
+      ),
+    };
     return { ...doc, attributes };
   },
 };

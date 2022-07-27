@@ -35,7 +35,6 @@ import {
 import { ISearchSessionService, NoSearchIdInSessionError } from '../..';
 import { createRequestHash } from './utils';
 import { ConfigSchema, SearchSessionsConfigSchema } from '../../../config';
-import { SearchStatus } from './types';
 import { getSessionStatus } from './get_session_status';
 
 export interface SearchSessionDependencies {
@@ -245,7 +244,6 @@ export class SearchSessionService implements ISearchSessionService {
           Date.now() + this.sessionConfig.defaultExpiration.asMilliseconds()
         ).toISOString(),
         created: new Date().toISOString(),
-        touched: new Date().toISOString(),
         idMapping: {},
         version: this.version,
         realmType,
@@ -335,7 +333,6 @@ export class SearchSessionService implements ISearchSessionService {
       sessionId,
       {
         ...attributes,
-        touched: new Date().toISOString(),
       }
     );
   };
@@ -391,10 +388,9 @@ export class SearchSessionService implements ISearchSessionService {
 
     if (searchRequest.params) {
       const requestHash = createRequestHash(searchRequest.params);
-      const searchInfo = {
+      const searchInfo: SearchSessionRequestInfo = {
         id: searchId,
         strategy,
-        status: SearchStatus.IN_PROGRESS,
       };
       idMapping = { [requestHash]: searchInfo };
     }
@@ -408,6 +404,7 @@ export class SearchSessionService implements ISearchSessionService {
     sessionId: string
   ) {
     const searchSession = await this.get(deps, user, sessionId);
+
     const searchIdMapping = new Map<string, string>();
     Object.values(searchSession.attributes.idMapping).forEach((requestInfo) => {
       searchIdMapping.set(requestInfo.id, requestInfo.strategy);

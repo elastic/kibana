@@ -9,14 +9,13 @@
 import { i18n } from '@kbn/i18n';
 import type { TransportResult } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { SearchSessionRequestInfo } from '../../../common';
+import { SearchSessionRequestStatus, SearchStatus } from '../../../common';
 import { AsyncSearchStatusResponse } from '../..';
-import { SearchStatus } from './types';
 
 export async function getSearchStatus(
   internalClient: ElasticsearchClient,
   asyncId: string
-): Promise<Pick<SearchSessionRequestInfo, 'status' | 'error'>> {
+): Promise<SearchSessionRequestStatus> {
   // TODO: Handle strategies other than the default one
   // https://github.com/elastic/kibana/issues/127880
   try {

@@ -11,6 +11,7 @@ import {
   SearchSessionSavedObjectAttributesPre$7$13$0,
   SearchSessionSavedObjectAttributesPre$7$14$0,
   SearchSessionSavedObjectAttributesPre$8$0$0,
+  SearchSessionSavedObjectAttributesPre$8$5$0,
 } from './search_session_migration';
 import { SavedObject } from '@kbn/core/types';
 import { SEARCH_SESSION_TYPE, SearchSessionStatus } from '../../../common';
@@ -354,5 +355,78 @@ describe('7.14.0 -> 8.0.0', () => {
     ).toThrowErrorMatchingInlineSnapshot(
       `"No migration found for search session URL generator my_url_generator_id"`
     );
+  });
+});
+
+describe('8.0.0 -> 8.5.0', () => {
+  const migration = searchSessionSavedObjectMigrations['8.5.0'];
+  test('migrates object', () => {
+    const mockSessionSavedObject: SavedObject<SearchSessionSavedObjectAttributesPre$8$5$0> = {
+      id: 'id',
+      type: SEARCH_SESSION_TYPE,
+      attributes: {
+        appId: 'my_app_id',
+        completed: '2021-03-29T00:00:00.000Z',
+        created: '2021-03-26T00:00:00.000Z',
+        expires: '2021-03-30T00:00:00.000Z',
+        idMapping: {
+          search1: { id: 'id1', strategy: 'ese', status: SearchSessionStatus.COMPLETE },
+          search2: {
+            id: 'id2',
+            strategy: 'sql',
+            status: SearchSessionStatus.ERROR,
+            error: 'error',
+          },
+          search3: { id: 'id3', strategy: 'es', status: SearchSessionStatus.EXPIRED },
+        },
+        initialState: {},
+        locatorId: undefined,
+        name: 'my_name',
+        persisted: true,
+        realmName: 'realmName',
+        realmType: 'realmType',
+        restoreState: {},
+        sessionId: 'sessionId',
+        status: SearchSessionStatus.COMPLETE,
+        touched: '2021-03-29T00:00:00.000Z',
+        username: 'username',
+        version: '7.14.0',
+      },
+      references: [],
+    };
+
+    const migratedSession = migration(mockSessionSavedObject, {} as SavedObjectMigrationContext);
+
+    expect(migratedSession.attributes).toMatchInlineSnapshot(`
+      Object {
+        "appId": "my_app_id",
+        "created": "2021-03-26T00:00:00.000Z",
+        "expires": "2021-03-30T00:00:00.000Z",
+        "idMapping": Object {
+          "search1": Object {
+            "id": "id1",
+            "strategy": "ese",
+          },
+          "search2": Object {
+            "id": "id2",
+            "strategy": "sql",
+          },
+          "search3": Object {
+            "id": "id3",
+            "strategy": "es",
+          },
+        },
+        "initialState": Object {},
+        "locatorId": undefined,
+        "name": "my_name",
+        "realmName": "realmName",
+        "realmType": "realmType",
+        "restoreState": Object {},
+        "sessionId": "sessionId",
+        "status": "complete",
+        "username": "username",
+        "version": "7.14.0",
+      }
+    `);
   });
 });

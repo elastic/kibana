@@ -19,7 +19,6 @@ const mockSavedObject: SearchSessionSavedObject = {
     locatorId: 'my_url_generator_id',
     idMapping: {},
     sessionId: 'session_id',
-    touched: new Date().toISOString(),
     created: new Date().toISOString(),
     expires: new Date().toISOString(),
     status: SearchSessionStatus.COMPLETE,
