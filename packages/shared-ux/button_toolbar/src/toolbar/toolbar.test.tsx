@@ -14,11 +14,8 @@ import { PrimaryButton } from '../buttons';
 
 describe('<Toolbar />', () => {
   test('is rendered', () => {
-    const primaryButton =   <PrimaryButton
-    label="Create chart"
-    onClick={() => 'click'}
-  />
-    const children = {primaryButton, };
+    const primaryButton = <PrimaryButton label="Create chart" onClick={() => 'click'} />;
+    const children = { primaryButton };
     const component = mountWithIntl(<Toolbar children={children} />);
 
     expect(component).toMatchSnapshot();
