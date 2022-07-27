@@ -6,11 +6,8 @@
  * Side Public License, v 1.
  */
 
-export type { OverlayStart } from './overlays';
-export type { OverlayBannersStart } from './banners';
-export type { OverlayFlyoutStart, OverlayFlyoutOpenOptions } from './flyout';
-export type {
-  OverlayModalStart,
-  OverlayModalOpenOptions,
-  OverlayModalConfirmOptions,
-} from './modal';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/overlays/core-overlays-browser-mocks'],
+};

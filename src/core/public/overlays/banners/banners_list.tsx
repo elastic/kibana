@@ -8,8 +8,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { Observable } from 'rxjs';
-
-import { OverlayBanner } from '@kbn/core-overlays-browser';
+import { type OverlayBanner } from './banners_service';
 
 interface Props {
   banners$: Observable<OverlayBanner[]>;

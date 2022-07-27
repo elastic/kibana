@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { type IOverlayBannersStart, OverlayBannersService } from './banners_service';
+import { type IOverlayBannersStart } from './banners_service';
 
-const createStartContractMock = () => {
+// internal duplicate of public mock for `createStartContractMock`
+export const createStartContractMock = () => {
   const startContract: jest.Mocked<IOverlayBannersStart> = {
     add: jest.fn(),
     remove: jest.fn(),
@@ -20,16 +20,6 @@ const createStartContractMock = () => {
   return startContract;
 };
 
-const createMock = () => {
-  const mocked: jest.Mocked<PublicMethodsOf<OverlayBannersService>> = {
-    start: jest.fn(),
-    stop: jest.fn(),
-  };
-  mocked.start.mockReturnValue(createStartContractMock());
-  return mocked;
-};
-
 export const overlayBannersServiceMock = {
-  create: createMock,
   createStartContract: createStartContractMock,
 };

@@ -7,13 +7,13 @@
  */
 
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, type Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
-import type { OverlayBannersStart, OverlayBanner } from '@kbn/core-overlays-browser';
+import type { OverlayBannersStart } from '@kbn/core-overlays-browser';
 import { PriorityMap } from './priority_map';
 import { BannersList } from './banners_list';
 import { UserBannerService } from './user_banner_service';
@@ -21,6 +21,18 @@ import { UserBannerService } from './user_banner_service';
 interface StartDeps {
   i18n: I18nStart;
   uiSettings: IUiSettingsClient;
+}
+
+export interface IOverlayBannersStart extends OverlayBannersStart {
+  /** @internal */
+  get$(): Observable<OverlayBanner[]>;
+}
+
+/** @internal */
+export interface OverlayBanner {
+  readonly id: string;
+  readonly mount: MountPoint;
+  readonly priority: number;
 }
 
 /** @internal */

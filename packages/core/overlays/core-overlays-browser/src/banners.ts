@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Observable } from 'rxjs';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 
 /** @public */
@@ -38,14 +37,6 @@ export interface OverlayBannersStart {
    *          {@link OverlayBannersStart.replace}
    */
   replace(id: string | undefined, mount: MountPoint, priority?: number): string;
-  /** @internal */
-  get$(): Observable<OverlayBanner[]>;
-  getComponent(): JSX.Element;
-}
 
-/** @internal */
-export interface OverlayBanner {
-  readonly id: string;
-  readonly mount: MountPoint;
-  readonly priority: number;
+  getComponent(): JSX.Element;
 }

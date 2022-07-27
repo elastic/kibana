@@ -14,7 +14,7 @@ import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { ModalService } from './modal_service';
 import type { OverlayModalStart } from '@kbn/core-overlays-browser';
-import { mountReactNode } from '../../utils';
+import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 
 const i18nMock = i18nServiceMock.createStartContract();
