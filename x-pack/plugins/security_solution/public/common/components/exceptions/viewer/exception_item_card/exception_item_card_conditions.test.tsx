@@ -74,6 +74,21 @@ describe('ExceptionItemCardConditions', () => {
               value: 'host',
             },
             {
+              field: 'user.name',
+              operator: 'included',
+              type: 'wildcard',
+              value: 'foo*',
+            },
+            {
+              field: 'host.name',
+              list: {
+                id: 'ips.txt',
+                type: 'keyword',
+              },
+              operator: 'included',
+              type: 'list',
+            },
+            {
               field: 'threat.indicator.port',
               operator: 'included',
               type: 'exists',
@@ -103,9 +118,15 @@ describe('ExceptionItemCardConditions', () => {
     ).toEqual(' host.nameIS host');
     expect(
       wrapper.find('[data-test-subj="exceptionItemConditions-condition"]').at(1).text()
-    ).toEqual('AND threat.indicator.portexists ');
+    ).toEqual('AND user.nameMATCHES foo*');
     expect(
       wrapper.find('[data-test-subj="exceptionItemConditions-condition"]').at(2).text()
+    ).toEqual('AND host.nameincluded in ips.txt');
+    expect(
+      wrapper.find('[data-test-subj="exceptionItemConditions-condition"]').at(3).text()
+    ).toEqual('AND threat.indicator.portexists ');
+    expect(
+      wrapper.find('[data-test-subj="exceptionItemConditions-condition"]').at(4).text()
     ).toEqual('AND file.Ext.code_signature  validIS true');
   });
 });
