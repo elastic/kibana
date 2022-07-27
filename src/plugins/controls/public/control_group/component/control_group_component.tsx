@@ -91,7 +91,7 @@ export const ControlGroup = () => {
     return null;
   }
 
-  let panelBg: 'subdued' | 'plain' | 'success' = 'subdued';
+  let panelBg: 'transparent' | 'plain' | 'success' = 'transparent';
   if (emptyState) panelBg = 'plain';
   if (draggingId) panelBg = 'success';
 

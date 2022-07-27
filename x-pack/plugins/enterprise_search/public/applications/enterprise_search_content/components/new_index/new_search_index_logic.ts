@@ -7,32 +7,59 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { formatApiName } from '../../utils/format_api_name';
+import { Actions } from '../../../shared/api_logic/create_api_logic';
 
-import { DEFAULT_LANGUAGE } from './constants';
+import {
+  IndexExistsApiLogic,
+  IndexExistsApiParams,
+  IndexExistsApiResponse,
+} from '../../api/index/index_exists_api_logic';
+
+import { isValidIndexName } from '../../utils/validate_index_name';
+
+import { UNIVERSAL_LANGUAGE_VALUE } from './constants';
+import { LanguageForOptimization } from './types';
+import { getLanguageForOptimization } from './utils';
 
 export interface NewSearchIndexValues {
-  language: string;
-  name: string;
+  data: IndexExistsApiResponse;
+  fullIndexName: string;
+  fullIndexNameExists: boolean;
+  fullIndexNameIsValid: boolean;
+  language: LanguageForOptimization;
+  languageSelectValue: string;
   rawName: string;
 }
 
-export interface NewSearchIndexActions {
-  setLanguage(language: string): { language: string };
+export type NewSearchIndexActions = Pick<
+  Actions<IndexExistsApiParams, IndexExistsApiResponse>,
+  'makeRequest'
+> & {
+  setLanguageSelectValue(language: string): { language: string };
   setRawName(rawName: string): { rawName: string };
-}
+};
 
 export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSearchIndexActions>>({
   actions: {
-    setLanguage: (language) => ({ language }),
+    setLanguageSelectValue: (language) => ({ language }),
     setRawName: (rawName) => ({ rawName }),
   },
+  connect: {
+    actions: [IndexExistsApiLogic, ['makeRequest']],
+    values: [IndexExistsApiLogic, ['data']],
+  },
+  listeners: ({ actions, values }) => ({
+    setRawName: async (_, breakpoint) => {
+      await breakpoint(150);
+      actions.makeRequest({ indexName: values.fullIndexName });
+    },
+  }),
   path: ['enterprise_search', 'content', 'new_search_index'],
   reducers: {
-    language: [
-      DEFAULT_LANGUAGE,
+    languageSelectValue: [
+      UNIVERSAL_LANGUAGE_VALUE,
       {
-        setLanguage: (_, { language }) => language,
+        setLanguageSelectValue: (_, { language }) => language ?? null,
       },
     ],
     rawName: [
@@ -43,6 +70,19 @@ export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSe
     ],
   },
   selectors: ({ selectors }) => ({
-    name: [() => [selectors.rawName], (rawName) => formatApiName(rawName)],
+    fullIndexName: [() => [selectors.rawName], (name: string) => `search-${name}`],
+    fullIndexNameExists: [
+      () => [selectors.data, selectors.fullIndexName],
+      (data: IndexExistsApiResponse | undefined, fullIndexName: string) =>
+        data?.exists === true && data.indexName === fullIndexName,
+    ],
+    fullIndexNameIsValid: [
+      () => [selectors.fullIndexName],
+      (fullIndexName) => isValidIndexName(fullIndexName),
+    ],
+    language: [
+      () => [selectors.languageSelectValue],
+      (languageSelectValue) => getLanguageForOptimization(languageSelectValue),
+    ],
   }),
 });

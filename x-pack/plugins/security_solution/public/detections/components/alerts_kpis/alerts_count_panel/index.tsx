@@ -21,27 +21,49 @@ import { getAlertsCountQuery } from './helpers';
 import * as i18n from './translations';
 import { AlertsCount } from './alerts_count';
 import type { AlertsCountAggregation } from './types';
-import { DEFAULT_STACK_BY_FIELD } from '../common/config';
-import { KpiPanel, StackByComboBox } from '../common/components';
+import { KpiPanel } from '../common/components';
 import { useInspectButton } from '../common/hooks';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import { FieldSelection } from '../../../../common/components/field_selection';
 
 export const DETECTIONS_ALERTS_COUNT_ID = 'detections-alerts-count';
 
 interface AlertsCountPanelProps {
+  alignHeader?: 'center' | 'baseline' | 'stretch' | 'flexStart' | 'flexEnd';
+  chartOptionsContextMenu?: (queryId: string) => React.ReactNode;
   filters?: Filter[];
+  panelHeight?: number;
   query?: Query;
+  setStackByField0: (stackBy: string) => void;
+  setStackByField1: (stackBy: string | undefined) => void;
   signalIndexName: string | null;
+  stackByField0: string;
+  stackByField1: string | undefined;
+  stackByWidth?: number;
+  title?: React.ReactNode;
   runtimeMappings?: MappingRuntimeFields;
 }
 
 export const AlertsCountPanel = memo<AlertsCountPanelProps>(
-  ({ filters, query, signalIndexName, runtimeMappings }) => {
+  ({
+    alignHeader,
+    chartOptionsContextMenu,
+    filters,
+    panelHeight,
+    query,
+    runtimeMappings,
+    setStackByField0,
+    setStackByField1,
+    signalIndexName,
+    stackByField0,
+    stackByField1,
+    stackByWidth,
+    title = i18n.COUNT_TABLE_TITLE,
+  }) => {
     const { to, from, deleteQuery, setQuery } = useGlobalTime();
 
     // create a unique, but stable (across re-renders) query id
     const uniqueQueryId = useMemo(() => `${DETECTIONS_ALERTS_COUNT_ID}-${uuid.v4()}`, []);
-    const [selectedStackByOption, setSelectedStackByOption] = useState(DEFAULT_STACK_BY_FIELD);
 
     // Disabling the fecth method in useQueryAlerts since it is defaulted to the old one
     // const fetchMethod = fetchQueryRuleRegistryAlerts;
@@ -82,22 +104,38 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
       request,
       refetch,
     } = useQueryAlerts<{}, AlertsCountAggregation>({
-      query: getAlertsCountQuery(
-        selectedStackByOption,
+      query: getAlertsCountQuery({
+        stackByField0,
+        stackByField1,
         from,
         to,
         additionalFilters,
-        runtimeMappings
-      ),
+        runtimeMappings,
+      }),
       indexName: signalIndexName,
       skip: querySkip,
     });
 
     useEffect(() => {
       setAlertsQuery(
-        getAlertsCountQuery(selectedStackByOption, from, to, additionalFilters, runtimeMappings)
+        getAlertsCountQuery({
+          additionalFilters,
+          from,
+          runtimeMappings,
+          stackByField0,
+          stackByField1,
+          to,
+        })
       );
-    }, [setAlertsQuery, selectedStackByOption, from, to, additionalFilters, runtimeMappings]);
+    }, [
+      additionalFilters,
+      from,
+      runtimeMappings,
+      setAlertsQuery,
+      stackByField0,
+      stackByField1,
+      to,
+    ]);
 
     useInspectButton({
       setQuery,
@@ -111,22 +149,39 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
 
     return (
       <InspectButtonContainer show={toggleStatus}>
-        <KpiPanel $toggleStatus={toggleStatus} hasBorder data-test-subj="alertsCountPanel">
+        <KpiPanel
+          $toggleStatus={toggleStatus}
+          data-test-subj="alertsCountPanel"
+          hasBorder
+          height={panelHeight}
+        >
           <HeaderSection
+            alignHeader={alignHeader}
             id={uniqueQueryId}
-            title={i18n.COUNT_TABLE_TITLE}
+            outerDirection="row"
+            title={title}
             titleSize="s"
             hideSubtitle
+            showInspectButton={chartOptionsContextMenu == null}
             toggleStatus={toggleStatus}
             toggleQuery={toggleQuery}
           >
-            <StackByComboBox selected={selectedStackByOption} onSelect={setSelectedStackByOption} />
+            <FieldSelection
+              chartOptionsContextMenu={chartOptionsContextMenu}
+              setStackByField0={setStackByField0}
+              setStackByField1={setStackByField1}
+              stackByField0={stackByField0}
+              stackByField1={stackByField1}
+              stackByWidth={stackByWidth}
+              uniqueQueryId={uniqueQueryId}
+            />
           </HeaderSection>
-          {toggleStatus && (
+          {toggleStatus && alertsData != null && (
             <AlertsCount
               data={alertsData}
               loading={isLoadingAlerts}
-              selectedStackByOption={selectedStackByOption}
+              stackByField0={stackByField0}
+              stackByField1={stackByField1}
             />
           )}
         </KpiPanel>

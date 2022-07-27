@@ -47,11 +47,3 @@ export const esArchiverCCSLoad = (folder: string) => {
     { env: { NODE_TLS_REJECT_UNAUTHORIZED } }
   );
 };
-
-export const esArchiverCCSUnload = (folder: string) => {
-  const path = Path.join(ES_ARCHIVE_DIR, folder);
-  cy.exec(
-    `node ../../../scripts/es_archiver unload "${path}" --config "${CONFIG_PATH}" --es-url "${CCS_ES_URL}" --kibana-url "${CCS_KIBANA_URL}"`,
-    { env: { NODE_TLS_REJECT_UNAUTHORIZED } }
-  );
-};

@@ -52,6 +52,16 @@ describe('Search Strategy EQL helper', () => {
           "allow_no_indices": true,
           "body": Object {
             "event_category_field": "event.category",
+            "fields": Array [
+              Object {
+                "field": "*",
+                "include_unmapped": true,
+              },
+              Object {
+                "field": "@timestamp",
+                "format": "strict_date_optional_time",
+              },
+            ],
             "filter": Object {
               "bool": Object {
                 "filter": Array [
@@ -106,6 +116,16 @@ describe('Search Strategy EQL helper', () => {
           "allow_no_indices": true,
           "body": Object {
             "event_category_field": "event.super.category",
+            "fields": Array [
+              Object {
+                "field": "*",
+                "include_unmapped": true,
+              },
+              Object {
+                "field": "@timestamp",
+                "format": "strict_date_optional_time",
+              },
+            ],
             "filter": Object {
               "bool": Object {
                 "filter": Array [

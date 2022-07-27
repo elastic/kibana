@@ -90,10 +90,17 @@ async function getConnectionData({
   });
 }
 
-async function getServicesData(options: IEnvOptions) {
-  const { environment, setup, searchAggregatedTransactions, start, end } =
-    options;
-
+async function getServicesData(
+  options: IEnvOptions & { maxNumberOfServices: number }
+) {
+  const {
+    environment,
+    setup,
+    searchAggregatedTransactions,
+    start,
+    end,
+    maxNumberOfServices,
+  } = options;
   const params = {
     apm: {
       events: [
@@ -117,7 +124,7 @@ async function getServicesData(options: IEnvOptions) {
         services: {
           terms: {
             field: SERVICE_NAME,
-            size: 500,
+            size: maxNumberOfServices,
           },
           aggs: {
             agent_name: {
@@ -156,7 +163,9 @@ async function getServicesData(options: IEnvOptions) {
 export type ConnectionsResponse = Awaited<ReturnType<typeof getConnectionData>>;
 export type ServicesResponse = Awaited<ReturnType<typeof getServicesData>>;
 
-export function getServiceMap(options: IEnvOptions) {
+export function getServiceMap(
+  options: IEnvOptions & { maxNumberOfServices: number }
+) {
   return withApmSpan('get_service_map', async () => {
     const { logger } = options;
     const anomaliesPromise = getServiceAnomalies(

@@ -17,7 +17,7 @@ import { validateImmutable, validateIndexPatterns } from '../utils';
 export const createSavedQueryAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<SavedQueryRuleParams, {}, {}, 'default'> => {
-  const { experimentalFeatures, logger, version } = createOptions;
+  const { experimentalFeatures, version } = createOptions;
   return {
     id: SAVED_QUERY_RULE_TYPE_ID,
     name: 'Saved Query Rule',
@@ -65,14 +65,16 @@ export const createSavedQueryAlertType = (
         runOpts: {
           inputIndex,
           runtimeMappings,
-          buildRuleMessage,
-          bulkCreate,
+          completeRule,
+          tuple,
           exceptionItems,
           listClient,
-          completeRule,
+          ruleExecutionLogger,
           searchAfterSize,
-          tuple,
+          bulkCreate,
           wrapHits,
+          primaryTimestamp,
+          secondaryTimestamp,
         },
         services,
         state,
@@ -81,19 +83,20 @@ export const createSavedQueryAlertType = (
       const result = await queryExecutor({
         inputIndex,
         runtimeMappings,
-        buildRuleMessage,
-        bulkCreate,
+        completeRule: completeRule as CompleteRule<SavedQueryRuleParams>,
+        tuple,
         exceptionItems,
         experimentalFeatures,
-        eventsTelemetry: undefined,
         listClient,
-        logger,
-        completeRule: completeRule as CompleteRule<SavedQueryRuleParams>,
-        searchAfterSize,
+        ruleExecutionLogger,
+        eventsTelemetry: undefined,
         services,
-        tuple,
         version,
+        searchAfterSize,
+        bulkCreate,
         wrapHits,
+        primaryTimestamp,
+        secondaryTimestamp,
       });
       return { ...result, state };
     },

@@ -12,15 +12,14 @@ import { useEuiTheme } from '@elastic/eui';
 import { generatePath } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import * as TEST_SUBJECTS from '../../test_subjects';
-import { PageWrapper, PageTitle, PageTitleText } from '../../layout/findings_layout';
-import { useCspBreadcrumbs } from '../../../../common/navigation/use_csp_breadcrumbs';
+import { PageTitle, PageTitleText } from '../../layout/findings_layout';
 import { findingsNavigation } from '../../../../common/navigation/constants';
 import { ResourceFindingsQuery, useResourceFindings } from './use_resource_findings';
 import { useUrlQuery } from '../../../../common/hooks/use_url_query';
 import type { FindingsBaseURLQuery, FindingsBaseProps, CspFinding } from '../../types';
 import {
   getFindingsPageSizeInfo,
-  addFilter,
+  getFilters,
   getPaginationQuery,
   getPaginationTableParams,
   useBaseEsQuery,
@@ -54,7 +53,6 @@ const BackToResourcesButton = () => (
 );
 
 export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
-  useCspBreadcrumbs([findingsNavigation.findings_default]);
   const { euiTheme } = useEuiTheme();
   const params = useParams<{ resourceId: string }>();
 
@@ -95,73 +93,71 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
         }}
         loading={resourceFindings.isFetching}
       />
-      <PageWrapper>
-        <PageTitle>
-          <BackToResourcesButton />
-          <PageTitleText
-            title={
-              <div style={{ padding: euiTheme.size.s }}>
-                <FormattedMessage
-                  id="xpack.csp.findings.resourceFindings.resourceFindingsPageTitle"
-                  defaultMessage="{resourceId} - Findings"
-                  values={{ resourceId: params.resourceId }}
-                />
-              </div>
+      <PageTitle>
+        <BackToResourcesButton />
+        <PageTitleText
+          title={
+            <div style={{ padding: euiTheme.size.s }}>
+              <FormattedMessage
+                id="xpack.csp.findings.resourceFindings.resourceFindingsPageTitle"
+                defaultMessage="{resourceId} - Findings"
+                values={{ resourceId: params.resourceId }}
+              />
+            </div>
+          }
+        />
+      </PageTitle>
+      <EuiSpacer />
+      {error && <ErrorCallout error={error} />}
+      {!error && (
+        <>
+          {resourceFindings.isSuccess && !!resourceFindings.data.page.length && (
+            <FindingsDistributionBar
+              {...{
+                type: i18n.translate('xpack.csp.findings.resourceFindings.tableRowTypeLabel', {
+                  defaultMessage: 'Findings',
+                }),
+                total: resourceFindings.data.total,
+                passed: resourceFindings.data.count.passed,
+                failed: resourceFindings.data.count.failed,
+                ...getFindingsPageSizeInfo({
+                  pageIndex: urlQuery.pageIndex,
+                  pageSize: urlQuery.pageSize,
+                  currentPageSize: resourceFindings.data.page.length,
+                }),
+              }}
+            />
+          )}
+          <EuiSpacer />
+          <ResourceFindingsTable
+            loading={resourceFindings.isFetching}
+            items={resourceFindings.data?.page || []}
+            pagination={getPaginationTableParams({
+              pageSize: urlQuery.pageSize,
+              pageIndex: urlQuery.pageIndex,
+              totalItemCount: resourceFindings.data?.total || 0,
+            })}
+            sorting={{
+              sort: { field: urlQuery.sort.field, direction: urlQuery.sort.direction },
+            }}
+            setTableOptions={({ page, sort }) =>
+              setUrlQuery({ pageIndex: page.index, pageSize: page.size, sort })
+            }
+            onAddFilter={(field, value, negate) =>
+              setUrlQuery({
+                pageIndex: 0,
+                filters: getFilters({
+                  filters: urlQuery.filters,
+                  dataView,
+                  field,
+                  value,
+                  negate,
+                }),
+              })
             }
           />
-        </PageTitle>
-        <EuiSpacer />
-        {error && <ErrorCallout error={error} />}
-        {!error && (
-          <>
-            {resourceFindings.isSuccess && !!resourceFindings.data.page.length && (
-              <FindingsDistributionBar
-                {...{
-                  type: i18n.translate('xpack.csp.findings.resourceFindings.tableRowTypeLabel', {
-                    defaultMessage: 'Findings',
-                  }),
-                  total: resourceFindings.data.total,
-                  passed: resourceFindings.data.count.passed,
-                  failed: resourceFindings.data.count.failed,
-                  ...getFindingsPageSizeInfo({
-                    pageIndex: urlQuery.pageIndex,
-                    pageSize: urlQuery.pageSize,
-                    currentPageSize: resourceFindings.data.page.length,
-                  }),
-                }}
-              />
-            )}
-            <EuiSpacer />
-            <ResourceFindingsTable
-              loading={resourceFindings.isFetching}
-              items={resourceFindings.data?.page || []}
-              pagination={getPaginationTableParams({
-                pageSize: urlQuery.pageSize,
-                pageIndex: urlQuery.pageIndex,
-                totalItemCount: resourceFindings.data?.total || 0,
-              })}
-              sorting={{
-                sort: { field: urlQuery.sort.field, direction: urlQuery.sort.direction },
-              }}
-              setTableOptions={({ page, sort }) =>
-                setUrlQuery({ pageIndex: page.index, pageSize: page.size, sort })
-              }
-              onAddFilter={(field, value, negate) =>
-                setUrlQuery({
-                  pageIndex: 0,
-                  filters: addFilter({
-                    filters: urlQuery.filters,
-                    dataView,
-                    field,
-                    value,
-                    negate,
-                  }),
-                })
-              }
-            />
-          </>
-        )}
-      </PageWrapper>
+        </>
+      )}
     </div>
   );
 };

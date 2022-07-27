@@ -54,10 +54,11 @@ const abs: CSSProperties = {
   right: '0',
 };
 
-const DEFAULT_INPUT_VALUE = `GET _search
+const DEFAULT_INPUT_VALUE = `# Click the Variables button, above, to create your own variables.
+GET \${exampleVariable1} // _search
 {
   "query": {
-    "match_all": {}
+    "\${exampleVariable2}": {} // match_all
   }
 }`;
 
@@ -233,6 +234,8 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
       autocompleteInfo.clearSubscriptions();
       window.removeEventListener('hashchange', onHashChange);
       if (editorInstanceRef.current) {
+        // Close autocomplete popup on unmount
+        editorInstanceRef.current?.getCoreEditor().detachCompleter();
         editorInstanceRef.current.getCoreEditor().destroy();
       }
     };

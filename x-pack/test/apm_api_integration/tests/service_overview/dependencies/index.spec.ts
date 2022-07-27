@@ -28,7 +28,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const { start, end } = archives[archiveName];
 
   function getName(node: Node) {
-    return node.type === NodeType.service ? node.serviceName : node.backendName;
+    return node.type === NodeType.service ? node.serviceName : node.dependencyName;
   }
 
   registry.when(
@@ -282,7 +282,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           throughput: roundNumber(postgres?.currentStats.throughput.value),
           errorRate: roundNumber(postgres?.currentStats.errorRate.value),
           impact: postgres?.currentStats.impact,
-          ...pick(postgres?.location, 'spanType', 'spanSubtype', 'backendName', 'type'),
+          ...pick(postgres?.location, 'spanType', 'spanSubtype', 'dependencyName', 'type'),
         };
 
         const count = 1;
@@ -292,8 +292,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(values).to.eql({
           spanType: 'external',
           spanSubtype: 'http',
-          backendName: 'postgres',
-          type: 'backend',
+          dependencyName: 'postgres',
+          type: 'dependency',
           errorRate: roundNumber(errors / count),
           latency: roundNumber(sum / count),
           throughput: roundNumber(count / ((endTime - startTime) / 1000 / 60)),

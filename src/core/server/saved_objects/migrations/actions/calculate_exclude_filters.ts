@@ -10,8 +10,8 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { withTimeout } from '@kbn/std';
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { RetryableEsClientError } from '.';
-import type { ElasticsearchClient } from '../../../elasticsearch';
 import type { SavedObjectTypeExcludeFromUpgradeFilterHook } from '../../types';
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 

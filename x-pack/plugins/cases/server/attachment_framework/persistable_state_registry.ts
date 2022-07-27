@@ -6,10 +6,10 @@
  */
 
 import { identity } from 'lodash';
-import { CaseRegistry } from '../../common/registry';
+import { AttachmentTypeRegistry } from '../../common/registry';
 import { PersistableStateAttachmentType, PersistableStateAttachmentTypeSetup } from './types';
 
-export class PersistableStateAttachmentTypeRegistry extends CaseRegistry<PersistableStateAttachmentType> {
+export class PersistableStateAttachmentTypeRegistry extends AttachmentTypeRegistry<PersistableStateAttachmentType> {
   constructor() {
     super('PersistableStateAttachmentTypeRegistry');
   }

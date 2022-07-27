@@ -6,4 +6,4 @@
  */
 
 export const MISSING_FINDINGS_NO_DATA_CONFIG = 'missing-findings-no-data-config';
-export const DASHBOARD_PAGE_HEADER = 'dashboard-page-header';
+export const DASHBOARD_CONTAINER = 'dashboard-container';

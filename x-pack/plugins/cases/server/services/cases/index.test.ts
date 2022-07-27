@@ -554,6 +554,7 @@ describe('CasesService', () => {
                 "type": "action",
               },
             ],
+            "refresh": undefined,
           }
         `);
       });

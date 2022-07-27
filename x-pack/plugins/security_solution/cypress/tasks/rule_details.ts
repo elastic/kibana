@@ -19,7 +19,6 @@ import {
 import {
   ALERTS_TAB,
   BACK_TO_RULES,
-  DATA_VIEW_DETAILS,
   EXCEPTIONS_TAB,
   FIELDS_BROWSER_BTN,
   REFRESH_BUTTON,
@@ -99,9 +98,9 @@ export const goToExceptionsTab = () => {
 };
 
 export const editException = () => {
-  cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).click();
+  cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).click({ force: true });
 
-  cy.get(EDIT_EXCEPTION_BTN).click();
+  cy.get(EDIT_EXCEPTION_BTN).click({ force: true });
 };
 
 export const removeException = () => {
@@ -130,11 +129,5 @@ export const getDetails = (title: string) =>
 export const hasIndexPatterns = (indexPatterns: string) => {
   cy.get(DEFINITION_DETAILS).within(() => {
     getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns);
-  });
-};
-
-export const doesNotHaveDataView = () => {
-  cy.get(DEFINITION_DETAILS).within(() => {
-    cy.get(DETAILS_TITLE).within(() => cy.get(DATA_VIEW_DETAILS).should('not.exist'));
   });
 };

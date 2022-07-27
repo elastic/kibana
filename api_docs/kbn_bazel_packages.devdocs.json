@@ -273,7 +273,7 @@
           "\nResolve all the BAZEL_PACKAGE_DIRS to absolute paths"
         ],
         "signature": [
-          "() => EntryInternal[] & string[]"
+          "() => string[]"
         ],
         "path": "packages/kbn-bazel-packages/src/bazel_package_dirs.ts",
         "deprecated": false,

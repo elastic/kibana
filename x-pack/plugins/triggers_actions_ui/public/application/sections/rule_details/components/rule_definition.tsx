@@ -24,13 +24,13 @@ import { NOTIFY_WHEN_OPTIONS } from '../../rule_form/rule_notify_when';
 import { RuleActions } from './rule_actions';
 import { RuleEdit } from '../../rule_form';
 
-const OBSERVABILITY_SOLUTIONS = ['logs', 'uptime', 'infrastructure', 'apm'];
-
 export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
   rule,
   actionTypeRegistry,
   ruleTypeRegistry,
   onEditRule,
+  hideEditButton = false,
+  filteredRuleTypes,
 }) => {
   const {
     application: { capabilities },
@@ -39,7 +39,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
   const [editFlyoutVisible, setEditFlyoutVisible] = useState<boolean>(false);
   const [ruleType, setRuleType] = useState<RuleType>();
   const { ruleTypes, ruleTypeIndex } = useLoadRuleTypes({
-    filteredSolutions: OBSERVABILITY_SOLUTIONS,
+    filteredRuleTypes,
   });
 
   const getRuleType = useMemo(() => {
@@ -69,13 +69,19 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
     hasAllPrivilege(rule, ruleType) &&
     // if the rule has actions, can the user save the rule's action params
     (canExecuteActions || (!canExecuteActions && rule.actions.length === 0));
-  const hasEditButton =
+  const hasEditButton = useMemo(() => {
+    if (hideEditButton) {
+      return false;
+    }
     // can the user save the rule
-    canSaveRule &&
-    // is this rule type editable from within Rules Management
-    (ruleTypeRegistry.has(rule.ruleTypeId)
-      ? !ruleTypeRegistry.get(rule.ruleTypeId).requiresAppContext
-      : false);
+    return (
+      canSaveRule &&
+      // is this rule type editable from within Rules Management
+      (ruleTypeRegistry.has(rule.ruleTypeId)
+        ? !ruleTypeRegistry.get(rule.ruleTypeId).requiresAppContext
+        : false)
+    );
+  }, [hideEditButton, canSaveRule, ruleTypeRegistry, rule]);
   return (
     <EuiFlexItem data-test-subj="ruleSummaryRuleDefinition" grow={3}>
       <EuiPanel color="subdued" hasBorder={false} paddingSize={'m'}>

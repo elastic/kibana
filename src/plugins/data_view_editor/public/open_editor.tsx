@@ -45,6 +45,7 @@ export const getEditorOpener =
       onCancel = () => {},
       defaultTypeIsRollup = false,
       requireTimestampField = false,
+      allowAdHocDataView = false,
     }: DataViewEditorProps): CloseEditor => {
       const closeEditor = () => {
         if (overlayRef) {
@@ -73,6 +74,7 @@ export const getEditorOpener =
                 }}
                 defaultTypeIsRollup={defaultTypeIsRollup}
                 requireTimestampField={requireTimestampField}
+                allowAdHocDataView={allowAdHocDataView}
               />
             </I18nProvider>
           </KibanaReactContextProvider>,

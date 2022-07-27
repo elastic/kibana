@@ -10,14 +10,18 @@ import {
   SavedObjectsErrorHelpers,
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
-import { EncryptedSyntheticsMonitor, ServiceLocations } from '../../../common/runtime_types';
+import { SyntheticsService } from '../../synthetics_service/synthetics_service';
+import {
+  ConfigKey,
+  EncryptedSyntheticsMonitor,
+  ServiceLocations,
+} from '../../../common/runtime_types';
 import { monitorAttributes } from '../../../common/types/saved_objects';
 import { UMServerLibs } from '../../legacy_uptime/lib/lib';
-import { UMRestApiRouteFactory } from '../../legacy_uptime/routes/types';
+import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS, SYNTHETICS_API_URLS } from '../../../common/constants';
 import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
-import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 
 const querySchema = schema.object({
   page: schema.maybe(schema.number()),
@@ -36,7 +40,7 @@ type MonitorsQuery = TypeOf<typeof querySchema>;
 
 const getMonitors = (
   request: MonitorsQuery,
-  server: UptimeServerSetup,
+  syntheticsService: SyntheticsService,
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<SavedObjectsFindResponse<EncryptedSyntheticsMonitor>> => {
   const {
@@ -51,7 +55,7 @@ const getMonitors = (
     filter = '',
   } = request as MonitorsQuery;
 
-  const locationFilter = parseLocationFilter(server.syntheticsService.locations, locations);
+  const locationFilter = parseLocationFilter(syntheticsService.locations, locations);
 
   const filters =
     getFilter('tags', tags) +
@@ -70,7 +74,7 @@ const getMonitors = (
   });
 };
 
-export const getSyntheticsMonitorRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
+export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
   path: API_URLS.SYNTHETICS_MONITORS + '/{monitorId}',
   validate: {
@@ -102,15 +106,19 @@ export const getSyntheticsMonitorRoute: UMRestApiRouteFactory = (libs: UMServerL
   },
 });
 
-export const getAllSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
+export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: API_URLS.SYNTHETICS_MONITORS,
   validate: {
     query: querySchema,
   },
-  handler: async ({ request, savedObjectsClient, server }): Promise<any> => {
+  handler: async ({ request, savedObjectsClient, syntheticsMonitorClient }): Promise<any> => {
     const { filters, query } = request.query;
-    const monitorsPromise = getMonitors(request.query, server, savedObjectsClient);
+    const monitorsPromise = getMonitors(
+      request.query,
+      syntheticsMonitorClient.syntheticsService,
+      savedObjectsClient
+    );
 
     if (filters || query) {
       const totalMonitorsPromise = savedObjectsClient.find({
@@ -128,7 +136,7 @@ export const getAllSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
         monitors,
         perPage: perPageT,
         absoluteTotal: total,
-        syncErrors: server.syntheticsService.syncErrors,
+        syncErrors: syntheticsMonitorClient.syntheticsService.syncErrors,
       };
     }
 
@@ -139,7 +147,7 @@ export const getAllSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       monitors,
       perPage: perPageT,
       absoluteTotal: rest.total,
-      syncErrors: server.syntheticsService.syncErrors,
+      syncErrors: syntheticsMonitorClient.syntheticsService.syncErrors,
     };
   },
 });
@@ -176,13 +184,13 @@ export const findLocationItem = (query: string, locations: ServiceLocations) => 
   return locations.find(({ id, label }) => query === id || label === query);
 };
 
-export const getSyntheticsMonitorOverviewRoute: UMRestApiRouteFactory = () => ({
+export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW,
   validate: {
     query: querySchema,
   },
-  handler: async ({ request, savedObjectsClient, server }): Promise<any> => {
+  handler: async ({ request, savedObjectsClient, syntheticsMonitorClient }): Promise<any> => {
     const { perPage = 5 } = request.query;
     const { saved_objects: monitors } = await getMonitors(
       {
@@ -191,13 +199,13 @@ export const getSyntheticsMonitorOverviewRoute: UMRestApiRouteFactory = () => ({
         sortOrder: 'asc',
         page: 1,
       },
-      server,
+      syntheticsMonitorClient.syntheticsService,
       savedObjectsClient
     );
 
     const allMonitorIds: string[] = [];
     const pages: Record<number, unknown[]> = {};
-    let currentPage = 1;
+    let currentPage = 0;
     let currentItem = 0;
     let total = 0;
 
@@ -208,12 +216,13 @@ export const getSyntheticsMonitorOverviewRoute: UMRestApiRouteFactory = () => ({
       allMonitorIds.push(id);
 
       /* for reach location, add a config item */
-      const locations = monitor.attributes.locations;
+      const locations = monitor.attributes[ConfigKey.LOCATIONS];
       locations.forEach((location) => {
         const config = {
           id,
-          name: monitor.attributes.name,
+          name: monitor.attributes[ConfigKey.NAME],
           location,
+          isEnabled: monitor.attributes[ConfigKey.ENABLED],
         };
         if (!pages[currentPage]) {
           pages[currentPage] = [config];

@@ -7,7 +7,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { InternalHttpServiceSetup } from '../../http';
+import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import { InternalCoreUsageDataSetup } from '../../core_usage_data';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { IKibanaMigrator } from '../migrations';

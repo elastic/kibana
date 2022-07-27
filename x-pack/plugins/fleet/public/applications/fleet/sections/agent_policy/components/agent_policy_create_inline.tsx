@@ -22,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 
-import { dataTypes } from '../../../../../../common';
+import { dataTypes } from '../../../../../../common/constants';
 
 import type { AgentPolicy, NewAgentPolicy } from '../../../types';
 

@@ -36,9 +36,11 @@ import type {
 import type { ExceptionsBuilderExceptionItem } from '@kbn/securitysolution-list-utils';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
+import { useRuleIndices } from '../../../../detections/containers/detection_engine/rules/use_rule_indices';
 import {
   hasEqlSequenceQuery,
   isEqlRule,
+  isNewTermsRule,
   isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
 import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
@@ -67,7 +69,6 @@ import type { ErrorInfo } from '../error_callout';
 import { ErrorCallout } from '../error_callout';
 import type { AlertData } from '../types';
 import { useFetchIndex } from '../../../containers/source';
-import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
 
 export interface AddExceptionFlyoutProps {
   ruleName: string;
@@ -159,16 +160,10 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   const [isSignalIndexPatternLoading, { indexPatterns: signalIndexPatterns }] =
     useFetchIndex(memoSignalIndexName);
 
-  const memoMlJobIds = useMemo(() => maybeRule?.machine_learning_job_id ?? [], [maybeRule]);
-  const { loading: mlJobLoading, jobs } = useGetInstalledJob(memoMlJobIds);
-
-  const memoRuleIndices = useMemo(() => {
-    if (jobs.length > 0) {
-      return jobs[0].results_index_name ? [`.ml-anomalies-${jobs[0].results_index_name}`] : [];
-    } else {
-      return ruleIndices;
-    }
-  }, [jobs, ruleIndices]);
+  const { mlJobLoading, ruleIndices: memoRuleIndices } = useRuleIndices(
+    maybeRule?.machine_learning_job_id,
+    ruleIndices
+  );
 
   const [isIndexPatternLoading, { indexPatterns: indexIndexPatterns }] =
     useFetchIndex(memoRuleIndices);
@@ -525,7 +520,9 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
               )}
               {getExceptionBuilderComponentLazy({
                 allowLargeValueLists:
-                  !isEqlRule(maybeRule?.type) && !isThresholdRule(maybeRule?.type),
+                  !isEqlRule(maybeRule?.type) &&
+                  !isThresholdRule(maybeRule?.type) &&
+                  !isNewTermsRule(maybeRule?.type),
                 httpService: http,
                 autocompleteService: unifiedSearch.autocomplete,
                 exceptionListItems: initialExceptionItems,

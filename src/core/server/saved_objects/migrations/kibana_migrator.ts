@@ -15,7 +15,7 @@ import { BehaviorSubject } from 'rxjs';
 import Semver from 'semver';
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
-import { ElasticsearchClient } from '../../elasticsearch';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { IndexMapping, SavedObjectsTypeMappingDefinitions } from '../mappings';
 import {
   SavedObjectUnsanitizedDoc,

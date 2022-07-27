@@ -130,17 +130,19 @@ export function useContextAppFetch({
 
       try {
         setState({ [statusKey]: { value: LoadingStatus.LOADING } });
-        const rows = await fetchSurroundingDocs(
-          type,
-          indexPattern,
-          anchor,
-          tieBreakerField,
-          SortDirection.desc,
-          count,
-          filters,
-          data,
-          useNewFieldsApi
-        );
+        const rows = anchor.id
+          ? await fetchSurroundingDocs(
+              type,
+              indexPattern,
+              anchor,
+              tieBreakerField,
+              SortDirection.desc,
+              count,
+              filters,
+              data,
+              useNewFieldsApi
+            )
+          : [];
         setState({ [type]: rows, [statusKey]: { value: LoadingStatus.LOADED } });
       } catch (error) {
         setState(createError(statusKey, FailureReason.UNKNOWN, error));

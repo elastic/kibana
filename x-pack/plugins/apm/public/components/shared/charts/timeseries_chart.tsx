@@ -86,12 +86,16 @@ export function TimeseriesChart({
   const history = useHistory();
   const { core } = useApmPluginContext();
   const { annotations } = useAnnotationsContext();
-  const { setPointerEvent, chartRef } = useChartPointerEventContext();
+  const { chartRef, updatePointerEvent } = useChartPointerEventContext();
   const theme = useTheme();
   const chartTheme = useChartTheme();
   const {
     query: { comparisonEnabled, offset },
-  } = useAnyOfApmParams('/services', '/backends/*', '/services/{serviceName}');
+  } = useAnyOfApmParams(
+    '/services',
+    '/dependencies/*',
+    '/services/{serviceName}'
+  );
 
   const anomalyChartTimeseries = getChartAnomalyTimeseries({
     anomalyTimeseries,
@@ -169,7 +173,7 @@ export function TimeseriesChart({
             },
             ...chartTheme,
           ]}
-          onPointerUpdate={setPointerEvent}
+          onPointerUpdate={updatePointerEvent}
           externalPointerEvents={{
             tooltip: { visible: true },
           }}

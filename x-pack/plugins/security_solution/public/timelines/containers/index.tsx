@@ -29,7 +29,6 @@ import type {
   TimelineEdges,
   TimelineItem,
   TimelineRequestSortField,
-  DocValueFields,
 } from '../../../common/search_strategy';
 import { Direction, TimelineEventsQueries } from '../../../common/search_strategy';
 import type { InspectResponse } from '../../types';
@@ -76,7 +75,6 @@ type TimelineResponse<T extends KueryFilterQueryKind> = T extends 'kuery'
 
 export interface UseTimelineEventsProps {
   dataViewId: string | null;
-  docValueFields?: DocValueFields[];
   endDate: string;
   eqlOptions?: EqlOptionsSelected;
   fields: string[];
@@ -130,7 +128,6 @@ const deStructureEqlOptions = (eqlOptions?: EqlOptionsSelected) => ({
 
 export const useTimelineEvents = ({
   dataViewId,
-  docValueFields,
   endDate,
   eqlOptions = undefined,
   id = ID,
@@ -366,10 +363,9 @@ export const useTimelineEvents = ({
 
       const currentRequest = {
         defaultIndex: indexNames,
-        docValueFields: docValueFields ?? [],
         factoryQueryType: TimelineEventsQueries.all,
         fieldRequested: fields,
-        fields: [],
+        fields,
         filterQuery: createFilter(filterQuery),
         pagination: {
           activePage: newActivePage,
@@ -401,7 +397,6 @@ export const useTimelineEvents = ({
     dispatch,
     indexNames,
     activePage,
-    docValueFields,
     endDate,
     eqlOptions,
     filterQuery,

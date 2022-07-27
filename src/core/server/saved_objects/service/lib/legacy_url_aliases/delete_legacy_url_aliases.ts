@@ -8,7 +8,7 @@
 
 import * as esKuery from '@kbn/es-query';
 
-import { getErrorMessage as getEsErrorMessage } from '../../../../elasticsearch';
+import { getErrorMessage as getEsErrorMessage } from '@kbn/core-elasticsearch-client-server-internal';
 import type { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
 import type { IndexMapping } from '../../../mappings';
 import { LEGACY_URL_ALIAS_TYPE } from '../../../object_types';

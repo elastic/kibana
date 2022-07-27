@@ -1924,7 +1924,7 @@
         "signature": [
           "React.HTMLAttributes<HTMLElement> & ",
           "CommonProps",
-          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; text: React.ReactNode; truncate?: boolean | undefined; color?: \"subdued\" | \"primary\" | \"accent\" | \"success\" | \"warning\" | \"danger\" | \"text\" | \"ghost\" | undefined; 'aria-current'?: boolean | \"date\" | \"page\" | \"time\" | \"true\" | \"false\" | \"step\" | \"location\" | undefined; }"
+          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; text: React.ReactNode; truncate?: boolean | undefined; color?: \"primary\" | \"success\" | \"accent\" | \"warning\" | \"danger\" | \"text\" | \"subdued\" | \"ghost\" | undefined; 'aria-current'?: boolean | \"true\" | \"false\" | \"page\" | \"step\" | \"location\" | \"date\" | \"time\" | undefined; }"
         ],
         "path": "src/core/public/chrome/types.ts",
         "deprecated": false,
@@ -1938,9 +1938,9 @@
         "label": "ChromeHelpExtensionLinkBase",
         "description": [],
         "signature": [
-          "{ iconType?: ",
+          "{ target?: string | (string & {}) | undefined; 'data-test-subj'?: string | undefined; iconType?: ",
           "IconType",
-          " | undefined; 'data-test-subj'?: string | undefined; rel?: string | undefined; target?: string | (string & {}) | undefined; }"
+          " | undefined; rel?: string | undefined; }"
         ],
         "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
         "deprecated": false,

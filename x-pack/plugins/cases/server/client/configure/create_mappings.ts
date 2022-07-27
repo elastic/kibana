@@ -13,7 +13,7 @@ import { CreateMappingsArgs } from './types';
 import { casesConnectors } from '../../connectors';
 
 export const createMappings = async (
-  { connector, owner }: CreateMappingsArgs,
+  { connector, owner, refresh }: CreateMappingsArgs,
   clientArgs: CasesClientArgs
 ): Promise<ConnectorMappingsAttributes[]> => {
   const { unsecuredSavedObjectsClient, connectorMappingsService, logger } = clientArgs;
@@ -34,6 +34,7 @@ export const createMappings = async (
           id: connector.id,
         },
       ],
+      refresh,
     });
 
     return theMapping.attributes.mappings;

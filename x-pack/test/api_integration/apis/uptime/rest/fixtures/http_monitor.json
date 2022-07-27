@@ -10,6 +10,7 @@
     "unit": "m"
   },
   "service.name": "",
+  "config_id": "",
   "timeout": "3m",
   "__ui": {
     "is_tls_enabled": false,

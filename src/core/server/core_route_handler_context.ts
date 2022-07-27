@@ -7,15 +7,13 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ElasticsearchRequestHandlerContext } from '@kbn/core-elasticsearch-server';
+import { CoreElasticsearchRouteHandlerContext } from '@kbn/core-elasticsearch-server-internal';
 import type { InternalCoreStart } from './internal_types';
 import {
   CoreSavedObjectsRouteHandlerContext,
   SavedObjectsRequestHandlerContext,
 } from './saved_objects';
-import {
-  CoreElasticsearchRouteHandlerContext,
-  ElasticsearchRequestHandlerContext,
-} from './elasticsearch';
 import { CoreUiSettingsRouteHandlerContext, UiSettingsRequestHandlerContext } from './ui_settings';
 import {
   CoreDeprecationsRouteHandlerContext,
