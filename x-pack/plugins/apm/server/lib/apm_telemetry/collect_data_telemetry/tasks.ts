@@ -1278,45 +1278,50 @@ export const tasks: TelemetryTask[] = [
               },
             },
             agent: {
-              name: serviceBucket.top_metrics?.top[0].metrics[AGENT_NAME],
-              version: serviceBucket.top_metrics?.top[0].metrics[AGENT_VERSION],
+              name: serviceBucket.top_metrics?.top[0].metrics[
+                AGENT_NAME
+              ] as string,
+              version: serviceBucket.top_metrics?.top[0].metrics[
+                AGENT_VERSION
+              ] as string,
             },
             service: {
               language: {
                 name: serviceBucket.top_metrics?.top[0].metrics[
                   SERVICE_LANGUAGE_NAME
-                ],
-                version:
-                  serviceBucket.top_metrics?.top[0].metrics[
-                    SERVICE_LANGUAGE_VERSION
-                  ],
+                ] as string,
+                version: serviceBucket.top_metrics?.top[0].metrics[
+                  SERVICE_LANGUAGE_VERSION
+                ] as string,
               },
               framework: {
                 name: serviceBucket.top_metrics?.top[0].metrics[
                   SERVICE_FRAMEWORK_NAME
-                ],
-                version:
-                  serviceBucket.top_metrics?.top[0].metrics[
-                    SERVICE_FRAMEWORK_VERSION
-                  ],
+                ] as string,
+                version: serviceBucket.top_metrics?.top[0].metrics[
+                  SERVICE_FRAMEWORK_VERSION
+                ] as string,
               },
               runtime: {
                 name: serviceBucket.top_metrics?.top[0].metrics[
                   SERVICE_RUNTIME_NAME
-                ],
-                version:
-                  serviceBucket.top_metrics?.top[0].metrics[
-                    SERVICE_RUNTIME_VERSION
-                  ],
+                ] as string,
+                version: serviceBucket.top_metrics?.top[0].metrics[
+                  SERVICE_RUNTIME_VERSION
+                ] as string,
               },
             },
             kubernetes: {
               pod: {
-                name: serviceBucket.top_metrics?.top[0].metrics[POD_NAME],
+                name: serviceBucket.top_metrics?.top[0].metrics[
+                  POD_NAME
+                ] as string,
               },
             },
             container: {
-              id: serviceBucket.top_metrics?.top[0].metrics[CONTAINER_ID],
+              id: serviceBucket.top_metrics?.top[0].metrics[
+                CONTAINER_ID
+              ] as string,
             },
           };
         });
