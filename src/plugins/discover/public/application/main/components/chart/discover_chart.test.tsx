@@ -91,11 +91,9 @@ async function mountComponent(isTimeBased: boolean = false) {
 
   const props = {
     indexPattern: {
-      isTimeBased: () => isTimeBased,
       id: '123',
       getFieldByName: () => ({ type: 'date', name: 'timefield', visualizable: true }),
       timeFieldName: 'timefield',
-      typeMeta: { params: { rollup_index: undefined } },
     } as unknown as DataView,
     resetSavedSearch: jest.fn(),
     savedSearch: savedSearchMock,
@@ -113,6 +111,7 @@ async function mountComponent(isTimeBased: boolean = false) {
     } as unknown as GetStateReturn,
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
     setDiscoverViewMode: jest.fn(),
+    isTimeBased,
   };
 
   let instance: ReactWrapper = {} as ReactWrapper;
