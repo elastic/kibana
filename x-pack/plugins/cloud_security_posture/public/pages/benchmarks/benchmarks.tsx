@@ -20,10 +20,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
-import { cloudPosturePages } from '../../common/navigation/constants';
-import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
+import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
-import { CspPageTemplate } from '../../components/csp_page_template';
 import { BenchmarksTable } from './benchmarks_table';
 import {
   useCspBenchmarkIntegrations,
@@ -32,7 +30,6 @@ import {
 import { extractErrorMessage } from '../../../common/utils/helpers';
 import * as TEST_SUBJ from './test_subjects';
 
-const BENCHMARKS_BREADCRUMBS = [cloudPosturePages.benchmarks];
 const SEARCH_DEBOUNCE_MS = 300;
 
 const AddCisIntegrationButton = () => {
@@ -127,7 +124,7 @@ const BenchmarkSearchField = ({
   );
 };
 
-export const BenchmarksNoPageTemplate = () => {
+export const Benchmarks = () => {
   const [query, setQuery] = useState<UseCspBenchmarkIntegrationsProps>({
     name: '',
     page: 1,
@@ -140,7 +137,7 @@ export const BenchmarksNoPageTemplate = () => {
   const totalItemCount = queryResult.data?.total || 0;
 
   return (
-    <>
+    <CloudPosturePage>
       <EuiPageHeader
         data-test-subj={TEST_SUBJ.BENCHMARKS_PAGE_HEADER}
         pageTitle={i18n.translate(
@@ -190,16 +187,6 @@ export const BenchmarksNoPageTemplate = () => {
           ) : undefined
         }
       />
-    </>
-  );
-};
-
-export const Benchmarks = () => {
-  useCspBreadcrumbs(BENCHMARKS_BREADCRUMBS);
-
-  return (
-    <CspPageTemplate>
-      <BenchmarksNoPageTemplate />
-    </CspPageTemplate>
+    </CloudPosturePage>
   );
 };
