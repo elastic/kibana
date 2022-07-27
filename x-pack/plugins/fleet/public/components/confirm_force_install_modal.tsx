@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiConfirmModal, EuiCallOut } from '@elastic/eui';
+import { EuiConfirmModal, EuiCallOut, EuiLink } from '@elastic/eui';
+import type { DocLinksStart } from '@kbn/core/public';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -17,7 +18,8 @@ export const ConfirmForceInstallModal: React.FC<{
   onCancel: () => void;
   onConfirm: () => void;
   pkg?: Pick<PackageInfo, 'name' | 'version'>;
-}> = ({ onCancel, onConfirm, pkg }) => {
+  docLinks: DocLinksStart;
+}> = ({ onCancel, onConfirm, pkg, docLinks }) => {
   const title =
     pkg && pkg.name && pkg.version
       ? i18n.translate('xpack.fleet.ConfirmForceInstallModal.calloutTitleWithPkg', {
@@ -30,7 +32,6 @@ export const ConfirmForceInstallModal: React.FC<{
       : i18n.translate('xpack.fleet.ConfirmForceInstallModal.calloutTitleNoPkg', {
           defaultMessage: 'The integration has failed verification',
         });
-  // TODO: add link to docs
   return (
     <EuiConfirmModal
       title={
@@ -64,7 +65,17 @@ export const ConfirmForceInstallModal: React.FC<{
         children={
           <FormattedMessage
             id="xpack.fleet.ConfirmForceInstallModal.calloutBody"
-            defaultMessage="This integration contains an unsigned package of unknown authenticity and could contain malicious files. "
+            defaultMessage="This integration contains an unsigned package of unknown authenticity and could contain malicious files. Learn more about {learnMoreLink}."
+            values={{
+              learnMoreLink: (
+                <EuiLink target="_blank" external href={docLinks.links.fleet.packageSignatures}>
+                  <FormattedMessage
+                    id="xpack.fleet.ConfirmForceInstallModal.learnMoreLink"
+                    defaultMessage="package signatures"
+                  />
+                </EuiLink>
+              ),
+            }}
           />
         }
       />
