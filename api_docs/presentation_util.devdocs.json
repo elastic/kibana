@@ -2061,13 +2061,7 @@
             "description": [],
             "signature": [
               "(query: string, fields: string[]) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-public.SimpleSavedObject",
-                "text": "SimpleSavedObject"
-              },
+              "SimpleSavedObject",
               "<",
               "PartialDashboardAttributes",
               ">[]>"
@@ -2115,13 +2109,7 @@
             "description": [],
             "signature": [
               "(title: string) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-public.SimpleSavedObject",
-                "text": "SimpleSavedObject"
-              },
+              "SimpleSavedObject",
               "<",
               "PartialDashboardAttributes",
               ">[]>"
