@@ -132,15 +132,14 @@ function DragAndDropTextListComponent({
                         <EuiFlexGroup
                           className="pipelineProcessorsEditor__form__dragAndDropList__item"
                           justifyContent="center"
-                          alignItems="center"
                           gutterSize="none"
                         >
                           <EuiFlexItem grow={false}>
-                            <div {...provided.dragHandleProps}>
-                              <EuiIcon
-                                className="pipelineProcessorsEditor__form__dragAndDropList__grabIcon"
-                                type="grab"
-                              />
+                            <div
+                              {...provided.dragHandleProps}
+                              className="pipelineProcessorsEditor__form__dragAndDropList__grabIcon"
+                            >
+                              <EuiIcon type="grab" />
                             </div>
                           </EuiFlexItem>
                           <EuiFlexItem>
@@ -182,6 +181,7 @@ function DragAndDropTextListComponent({
                                 iconType="minusInCircle"
                                 color="danger"
                                 onClick={() => onRemove(item.id)}
+                                size="s"
                               />
                             ) : (
                               // Render a no-op placeholder button
