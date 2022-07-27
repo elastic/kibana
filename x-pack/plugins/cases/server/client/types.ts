@@ -21,7 +21,6 @@ import {
 } from '../services';
 import { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 import { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
-import { UserProfileService } from '../services/user_profiles';
 
 export interface CasesServices {
   alertsService: AlertService;
@@ -30,7 +29,6 @@ export interface CasesServices {
   connectorMappingsService: ConnectorMappingsService;
   userActionService: CaseUserActionService;
   attachmentService: AttachmentService;
-  userProfileService: UserProfileService;
 }
 
 /**

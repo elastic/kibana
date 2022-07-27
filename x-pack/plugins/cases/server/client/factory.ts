@@ -33,7 +33,6 @@ import { CasesClient, createCasesClient } from '.';
 import { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 import { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 import { CasesServices } from './types';
-import { UserProfileService } from '../services/user_profiles';
 
 // TODO: refactor this structure into more sections
 interface CasesClientFactoryArgs {
@@ -109,7 +108,6 @@ export class CasesClientFactory {
     const services = this.createServices({
       unsecuredSavedObjectsClient,
       esClient: scopedClusterClient,
-      request,
     });
 
     const userInfo = services.caseService.getUser({ request });
@@ -131,11 +129,9 @@ export class CasesClientFactory {
   private createServices({
     unsecuredSavedObjectsClient,
     esClient,
-    request,
   }: {
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
     esClient: ElasticsearchClient;
-    request: KibanaRequest;
   }): CasesServices {
     if (!this.isInitialized || !this.options) {
       throw new Error('CasesClientFactory must be initialized before calling create');
@@ -163,12 +159,6 @@ export class CasesClientFactory {
         this.options.persistableStateAttachmentTypeRegistry
       ),
       attachmentService,
-      userProfileService: new UserProfileService({
-        log: this.logger,
-        request,
-        spaces: this.options.spacesPluginStart,
-        security: this.options.securityPluginStart,
-      }),
     };
   }
 }

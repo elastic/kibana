@@ -24,7 +24,7 @@ describe('getStatusTotalsByType', () => {
 
   describe('MTTR', () => {
     beforeEach(() => {
-      mockServices.caseService.getCaseStatusStats.mockResolvedValue({
+      mockServices.services.caseService.getCaseStatusStats.mockResolvedValue({
         open: 1,
         'in-progress': 2,
         closed: 1,
@@ -50,7 +50,8 @@ describe('getStatusTotalsByType', () => {
         clientArgs
       );
 
-      expect(mockServices.caseService.getCaseStatusStats.mock.calls[0][0]).toMatchInlineSnapshot(`
+      expect(mockServices.services.caseService.getCaseStatusStats.mock.calls[0][0])
+        .toMatchInlineSnapshot(`
         Object {
           "searchOptions": Object {
             "filter": Object {

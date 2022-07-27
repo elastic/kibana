@@ -5,33 +5,29 @@
  * 2.0.
  */
 
+import { UserProfileService } from '../../../services';
 import { INTERNAL_SUGGEST_USER_PROFILES_URL } from '../../../../common/constants';
-import { SuggestUserProfilesRequest } from '../../../../common/api';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { escapeHatch } from '../utils';
 
-export const suggestUserProfilesRoute = createCasesRoute({
-  method: 'post',
-  path: INTERNAL_SUGGEST_USER_PROFILES_URL,
-  params: {
-    body: escapeHatch,
-  },
-  handler: async ({ context, request, response }) => {
-    const params = request.body as SuggestUserProfilesRequest;
-
-    try {
-      const casesContext = await context.cases;
-      const casesClient = await casesContext.getCasesClient();
-
-      return response.ok({
-        body: await casesClient.userProfiles.suggestUserProfiles(params),
-      });
-    } catch (error) {
-      throw createCaseError({
-        message: `Failed to find user profiles for name: ${params.name}: ${error}`,
-        error,
-      });
-    }
-  },
-});
+export const suggestUserProfilesRoute = (userProfileService: UserProfileService) =>
+  createCasesRoute({
+    method: 'post',
+    path: INTERNAL_SUGGEST_USER_PROFILES_URL,
+    params: {
+      body: escapeHatch,
+    },
+    handler: async ({ request, response }) => {
+      try {
+        return response.ok({
+          body: await userProfileService.suggest(request),
+        });
+      } catch (error) {
+        throw createCaseError({
+          message: `Failed to find user profiles: ${error}`,
+          error,
+        });
+      }
+    },
+  });

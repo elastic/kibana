@@ -62,6 +62,7 @@ import { ActionResult, FindActionResult } from '@kbn/actions-plugin/server/types
 import { ESCasesConfigureAttributes } from '@kbn/cases-plugin/server/services/configure/types';
 import { ESCaseAttributes } from '@kbn/cases-plugin/server/services/cases/types';
 import { SavedObjectsRawDocSource } from '@kbn/core/server/saved_objects/serialization';
+import { UserProfileService } from '@kbn/cases-plugin/server/services';
 import { User } from './authentication/types';
 import { superUser } from './authentication/users';
 import { getPostCaseRequest, postCaseReq } from './mock';
@@ -1330,7 +1331,7 @@ export const suggestUserProfiles = async ({
   req: SuggestUserProfilesRequest;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
-}) => {
+}): ReturnType<UserProfileService['suggest']> => {
   const { body: profiles } = await supertest
     .post(`${getSpaceUrlPrefix(auth.space)}${INTERNAL_SUGGEST_USER_PROFILES_URL}`)
     .auth(auth.user.username, auth.user.password)
@@ -1348,18 +1349,16 @@ export const loginUsers = async ({
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   users?: User[];
 }) => {
-  await Promise.all(
-    users.map((user) => {
-      supertest
-        .post('/internal/security/login')
-        .set('kbn-xsrf', 'xxx')
-        .send({
-          providerType: 'basic',
-          providerName: 'basic',
-          currentURL: '/',
-          params: { username: user.username, password: user.password },
-        })
-        .expect(200);
-    })
-  );
+  for (const user of users) {
+    await supertest
+      .post('/internal/security/login')
+      .set('kbn-xsrf', 'xxx')
+      .send({
+        providerType: 'basic',
+        providerName: 'basic',
+        currentURL: '/',
+        params: { username: user.username, password: user.password },
+      })
+      .expect(200);
+  }
 };
