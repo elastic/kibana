@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Metric, MetricType } from '../../../../common/types';
+import type { Metric } from '../../../../common/types';
 import { SUPPORTED_METRICS } from './supported_metrics';
 import { getFilterRatioFormula } from './filter_ratio_formula';
 import { getParentPipelineSeriesFormula } from './parent_pipeline_formula';
@@ -40,6 +40,15 @@ export const getPercentileRankSeries = (
   });
 };
 
+export const getTimeScale = (metric: Metric) => {
+  const supportedTimeScales = ['1s', '1m', '1h', '1d'];
+  let timeScale;
+  if (metric.unit && supportedTimeScales.includes(metric.unit)) {
+    timeScale = metric.unit.replace('1', '');
+  }
+  return timeScale;
+};
+
 export const getFormulaSeries = (script: string) => {
   return [
     {
@@ -57,49 +66,6 @@ export const getPipelineAgg = (subFunctionMetric: Metric) => {
     return null;
   }
   return pipelineAggMap.name;
-};
-
-export const getTimeScale = (metric: Metric) => {
-  const supportedTimeScales = ['1s', '1m', '1h', '1d'];
-  let timeScale;
-  if (metric.unit && supportedTimeScales.includes(metric.unit)) {
-    timeScale = metric.unit.replace('1', '');
-  }
-  return timeScale;
-};
-
-export const computeParentSeries = (
-  aggregation: MetricType,
-  currentMetric: Metric,
-  subFunctionMetric: Metric,
-  pipelineAgg: string,
-  meta?: number
-) => {
-  const aggregationMap = SUPPORTED_METRICS[aggregation];
-  if (subFunctionMetric.type === 'filter_ratio') {
-    const script = getFilterRatioFormula(subFunctionMetric);
-    if (!script) {
-      return null;
-    }
-    const formula = `${aggregationMap.name}(${script})`;
-    return getFormulaSeries(formula);
-  }
-  const timeScale = getTimeScale(currentMetric);
-  return [
-    {
-      agg: aggregationMap.name,
-      isFullReference: aggregationMap.isFullReference,
-      pipelineAggType: pipelineAgg,
-      fieldName:
-        subFunctionMetric?.field && pipelineAgg !== 'count' ? subFunctionMetric?.field : 'document',
-      params: {
-        ...(currentMetric.window && { window: currentMetric.window }),
-        ...(timeScale && { timeScale }),
-        ...(pipelineAgg === 'percentile' && meta && { percentile: meta }),
-        ...(pipelineAgg === 'percentile_rank' && meta && { value: meta }),
-      },
-    },
-  ];
 };
 
 export const getFormulaEquivalent = (

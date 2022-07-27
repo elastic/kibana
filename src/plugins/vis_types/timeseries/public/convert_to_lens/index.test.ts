@@ -60,7 +60,7 @@ const model = {
   ],
 } as Panel;
 
-describe('triggerTSVBtoLensConfiguration', () => {
+describe('convertTSVBtoLensConfiguration', () => {
   test('should return null for a non timeseries chart', async () => {
     const metricModel = {
       ...model,
