@@ -21,7 +21,7 @@ export function getActionType(): ActionTypeModel<
     selectMessage: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.d3securityAction.selectMessageText',
       {
-        defaultMessage: 'Run remote command in D3 VSOC.',
+        defaultMessage: 'Create event or trigger playbook workflow actions in D3 SOAR.',
       }
     ),
     actionTypeTitle: i18n.translate(
