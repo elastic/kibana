@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { buildEsQuery, type Filter, buildFilter, FILTERS, FilterStateStore } from '@kbn/es-query';
+import { buildEsQuery, type Query } from '@kbn/es-query';
 import { EuiBasicTableProps, Pagination } from '@elastic/eui';
 import { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { estypes } from '@elastic/elasticsearch';
-import type { Serializable } from '@kbn/utility-types';
 import type { FindingsBaseProps, FindingsBaseURLQuery } from './types';
 import { useKibana } from '../../common/hooks/use_kibana';
-import { isNonNullable } from '../../../common/utils/helpers';
+export { getFilters } from './get_filters';
 
 const getBaseQuery = ({ dataView, query, filters }: FindingsBaseURLQuery & FindingsBaseProps) => {
   try {
@@ -51,7 +50,7 @@ export const usePersistedQuery = <T>(getter: ({ filters, query }: FindingsBaseUR
     () =>
       getter({
         filters: filterManager.getAppFilters(),
-        query: queryString.getQuery(),
+        query: queryString.getQuery() as Query,
       }),
     [getter, filterManager, queryString]
   );
@@ -117,7 +116,7 @@ export const getFindingsPageSizeInfo = ({
 });
 
 export const getFindingsCountAggQuery = () => ({
-  count: { terms: { field: 'result.evaluation.keyword' } },
+  count: { terms: { field: 'result.evaluation' } },
 });
 
 export const getAggregationCount = (buckets: estypes.AggregationsStringRareTermsBucketKeys[]) => {
@@ -129,47 +128,3 @@ export const getAggregationCount = (buckets: estypes.AggregationsStringRareTerms
     failed: failed?.doc_count || 0,
   };
 };
-
-export const addFilter = ({
-  filters,
-  dataView,
-  field,
-  value,
-  negate,
-}: {
-  filters: Filter[];
-  dataView: FindingsBaseProps['dataView'];
-  field: string;
-  value: Serializable;
-  negate: boolean;
-}): Filter[] => {
-  const dataViewField = dataView.getFieldByName(field);
-  if (!dataViewField) return filters;
-
-  const singleValue = Array.isArray(value) ? value[0] : value;
-
-  const filter = buildFilter(
-    dataView,
-    dataViewField,
-    FILTERS.PHRASE,
-    negate,
-    false,
-    singleValue,
-    null,
-    FilterStateStore.APP_STATE
-  );
-
-  return [...filters, filter].filter(isNonNullable);
-};
-
-const FIELDS_WITHOUT_KEYWORD_MAPPING = new Set([
-  '@timestamp',
-  'resource.sub_type',
-  'resource.name',
-  'resource.id',
-  'rule.name',
-]);
-
-// NOTE: .keyword comes from the mapping we defined for the Findings index
-export const getSortKey = (key: string): string =>
-  FIELDS_WITHOUT_KEYWORD_MAPPING.has(key) ? key : `${key}.keyword`;

@@ -107,6 +107,31 @@ tr:hover .c5:focus::before {
   background-image: linear-gradient( 135deg, #1d1e24 25%, transparent 25% ), linear-gradient( -135deg, #1d1e24 25%, transparent 25% ), linear-gradient( 135deg, transparent 75%, #1d1e24 75% ), linear-gradient( -135deg, transparent 75%, #1d1e24 75% );
 }
 
+.c4 {
+  display: inline-block;
+  max-width: 100%;
+}
+
+.c4 [data-rbd-placeholder-context-id] {
+  display: none !important;
+}
+
+.c6 > span.euiToolTipAnchor {
+  display: block;
+}
+
+.c6 > span.euiToolTipAnchor.eui-textTruncate {
+  display: inline-block;
+}
+
+.c7 {
+  vertical-align: top;
+}
+
+.c24 {
+  margin-right: 5px;
+}
+
 .c23 {
   margin-right: 5px;
 }
@@ -177,31 +202,6 @@ tr:hover .c5:focus::before {
 
 .c2 {
   margin-right: 10px;
-}
-
-.c4 {
-  display: inline-block;
-  max-width: 100%;
-}
-
-.c4 [data-rbd-placeholder-context-id] {
-  display: none !important;
-}
-
-.c6 > span.euiToolTipAnchor {
-  display: block;
-}
-
-.c6 > span.euiToolTipAnchor.eui-textTruncate {
-  display: inline-block;
-}
-
-.c7 {
-  vertical-align: top;
-}
-
-.c24 {
-  margin-right: 5px;
 }
 
 .c1 {

@@ -12,11 +12,18 @@ import { ConfigKey, DataStream, MonitorFields } from '../runtime_types';
 export const formatSyntheticsPolicy = (
   newPolicy: NewPackagePolicy,
   monitorType: DataStream,
-  config: Partial<MonitorFields & { location_name: string }>
+  config: Partial<
+    MonitorFields & {
+      location_name: string;
+      'monitor.project.name': string;
+      'monitor.project.id': string;
+    }
+  >
 ) => {
   const configKeys = Object.keys(config) as ConfigKey[];
 
   const formattedPolicy = { ...newPolicy };
+
   const currentInput = formattedPolicy.inputs.find(
     (input) => input.type === `synthetics/${monitorType}`
   );

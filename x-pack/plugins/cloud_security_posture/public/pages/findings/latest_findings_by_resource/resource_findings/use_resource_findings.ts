@@ -16,7 +16,7 @@ import { FINDINGS_REFETCH_INTERVAL_MS } from '../../constants';
 import { useKibana } from '../../../../common/hooks/use_kibana';
 import { showErrorToast } from '../../latest_findings/use_latest_findings';
 import type { CspFinding, FindingsBaseEsQuery, Sort } from '../../types';
-import { getAggregationCount, getFindingsCountAggQuery, getSortKey } from '../../utils';
+import { getAggregationCount, getFindingsCountAggQuery } from '../../utils';
 
 interface UseResourceFindingsOptions extends FindingsBaseEsQuery {
   resourceId: string;
@@ -57,7 +57,7 @@ const getResourceFindingsQuery = ({
         filter: [...(query?.bool?.filter || []), { term: { 'resource.id': resourceId } }],
       },
     },
-    sort: [{ [getSortKey(sort.field)]: sort.direction }],
+    sort: [{ [sort.field]: sort.direction }],
     pit: { id: pitId },
     aggs: getFindingsCountAggQuery(),
   },

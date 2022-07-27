@@ -12,18 +12,16 @@ import deepMerge from 'deepmerge';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 
-import type { ActionType, ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import { loadActionTypes } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import type { RuleAction } from '@kbn/alerting-plugin/common';
-import { NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS } from '../../../../../common/constants';
+import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { FieldHook } from '../../../../shared_imports';
 import { useFormContext } from '../../../../shared_imports';
-import { convertArrayToCamelCase, useKibana } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import { FORM_ERRORS_TITLE } from './translations';
 
 interface Props {
   field: FieldHook;
-  hasErrorOnCreationCaseAction: boolean;
   messageVariables: ActionVariables;
 }
 
@@ -58,29 +56,11 @@ const ContainerActions = styled.div.attrs(
     )}
 `;
 
-export const getSupportedActions = (
-  actionTypes: ActionType[],
-  hasErrorOnCreationCaseAction: boolean
-): ActionType[] => {
-  return actionTypes.filter((actionType) => {
-    if (actionType.id === '.case' && hasErrorOnCreationCaseAction) {
-      return false;
-    }
-    return NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS.includes(actionType.id);
-  });
-};
-
-export const RuleActionsField: React.FC<Props> = ({
-  field,
-  hasErrorOnCreationCaseAction,
-  messageVariables,
-}) => {
+export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) => {
   const [fieldErrors, setFieldErrors] = useState<string | null>(null);
-  const [supportedActionTypes, setSupportedActionTypes] = useState<ActionType[] | undefined>();
   const form = useFormContext();
   const { isSubmitted, isSubmitting, isValid } = form;
   const {
-    http,
     triggersActionsUi: { getActionForm },
   } = useKibana().services;
 
@@ -141,7 +121,7 @@ export const RuleActionsField: React.FC<Props> = ({
         setActionIdByIndex,
         setActions: setAlertActionsProperty,
         setActionParamsProperty,
-        actionTypes: supportedActionTypes,
+        featureId: SecurityConnectorFeatureId,
         defaultActionMessage: DEFAULT_ACTION_MESSAGE,
       }),
     [
@@ -151,18 +131,8 @@ export const RuleActionsField: React.FC<Props> = ({
       setActionIdByIndex,
       setActionParamsProperty,
       setAlertActionsProperty,
-      supportedActionTypes,
     ]
   );
-
-  useEffect(() => {
-    (async function () {
-      const actionTypes = convertArrayToCamelCase(await loadActionTypes({ http })) as ActionType[];
-      const supportedTypes = getSupportedActions(actionTypes, hasErrorOnCreationCaseAction);
-      setSupportedActionTypes(supportedTypes);
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasErrorOnCreationCaseAction]);
 
   useEffect(() => {
     if (isSubmitting || !field.errors.length) {
@@ -173,8 +143,6 @@ export const RuleActionsField: React.FC<Props> = ({
       return setFieldErrors(errorsString);
     }
   }, [isSubmitted, isSubmitting, field.isChangingValue, isValid, field.errors, setFieldErrors]);
-
-  if (!supportedActionTypes) return <></>;
 
   return (
     <ContainerActions $caseIndexes={caseActionIndexes}>

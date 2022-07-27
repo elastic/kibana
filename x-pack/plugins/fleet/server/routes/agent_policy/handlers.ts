@@ -37,7 +37,7 @@ import type {
   GetFullAgentPolicyResponse,
   GetFullAgentConfigMapResponse,
   GetFullAgentManifestResponse,
-} from '../../../common';
+} from '../../../common/types';
 import { defaultIngestErrorHandler } from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
 

@@ -38,7 +38,7 @@ export interface DiscoverGridFlyoutProps {
   indexPattern: DataView;
   onAddColumn: (column: string) => void;
   onClose: () => void;
-  onFilter: DocViewFilterFn;
+  onFilter?: DocViewFilterFn;
   onRemoveColumn: (column: string) => void;
   setExpandedDoc: (doc: DataTableRecord) => void;
 }
@@ -213,14 +213,18 @@ export function DiscoverGridFlyout({
             hit={actualHit}
             columns={columns}
             indexPattern={indexPattern}
-            filter={(mapping, value, mode) => {
-              onFilter(mapping, value, mode);
-              services.toastNotifications.addSuccess(
-                i18n.translate('discover.grid.flyout.toastFilterAdded', {
-                  defaultMessage: `Filter was added`,
-                })
-              );
-            }}
+            filter={
+              onFilter
+                ? (mapping, value, mode) => {
+                    onFilter(mapping, value, mode);
+                    services.toastNotifications.addSuccess(
+                      i18n.translate('discover.grid.flyout.toastFilterAdded', {
+                        defaultMessage: `Filter was added`,
+                      })
+                    );
+                  }
+                : undefined
+            }
             onRemoveColumn={(columnName: string) => {
               onRemoveColumn(columnName);
               services.toastNotifications.addSuccess(

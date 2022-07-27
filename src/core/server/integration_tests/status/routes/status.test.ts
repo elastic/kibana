@@ -13,8 +13,8 @@ import { omit } from 'lodash';
 import { ContextService } from '@kbn/core-http-context-server-internal';
 import { createCoreContext, createHttpServer } from '@kbn/core-http-server-mocks';
 import type { HttpService, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
-import { metricsServiceMock } from '../../../metrics/metrics_service.mock';
-import type { MetricsServiceSetup } from '../../../metrics';
+import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
+import type { MetricsServiceSetup } from '@kbn/core-metrics-server';
 
 import { registerStatusRoute } from '../../../status/routes/status';
 import { ServiceStatus, ServiceStatusLevels, ServiceStatusLevel } from '../../../status/types';
