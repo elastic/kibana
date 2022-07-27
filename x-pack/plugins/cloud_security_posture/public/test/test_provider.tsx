@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import React, { useMemo } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router, Switch, Route } from 'react-router-dom';
@@ -16,7 +16,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
-import { CspClientPluginStartDeps } from '../types';
+import type { CspClientPluginStartDeps } from '../types';
 
 interface CspAppDeps {
   core: CoreStart;
