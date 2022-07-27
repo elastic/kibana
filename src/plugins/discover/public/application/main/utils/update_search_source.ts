@@ -12,6 +12,7 @@ import { SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
 import type { SortOrder } from '../../../services/saved_searches';
 import { DiscoverServices } from '../../../build_services';
 import { getSortForSearchSource } from '../../../components/doc_table';
+import { getApplicableFilters } from '../../../utils/get_applicable_filters';
 
 /**
  * Helper function to update the given searchSource before fetching/sharing/persisting
@@ -37,7 +38,7 @@ export function updateSearchSource(
   parentSearchSource
     .setField('index', dataView)
     .setField('query', data.query.queryString.getQuery() || null)
-    .setField('filter', data.query.filterManager.getFilters());
+    .setField('filter', getApplicableFilters(indexPattern, data.query.filterManager));
 
   if (!persist) {
     const usedSort = getSortForSearchSource(
