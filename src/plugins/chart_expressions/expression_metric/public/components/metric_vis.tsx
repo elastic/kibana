@@ -94,7 +94,7 @@ const getMetricFormatter = (
     );
   }
 
-  if (formatId === 'string' || 'null') {
+  if (formatId === 'string' || formatId === 'null') {
     return getFormatService().deserialize(serializedFieldFormat).getConverterFor('text');
   }
 
