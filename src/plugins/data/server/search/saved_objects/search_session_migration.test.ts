@@ -362,41 +362,41 @@ describe('8.0.0 -> 8.5.0', () => {
   // TODO: change to 8.5.0 when possible
   // const migration = searchSessionSavedObjectMigrations['8.5.0'];
   const migration = searchSessionSavedObjectMigrations['8.4.0'];
-  test('migrates object', () => {
-    const mockSessionSavedObject: SavedObject<SearchSessionSavedObjectAttributesPre$8$5$0> = {
-      id: 'id',
-      type: SEARCH_SESSION_TYPE,
-      attributes: {
-        appId: 'my_app_id',
-        completed: '2021-03-29T00:00:00.000Z',
-        created: '2021-03-26T00:00:00.000Z',
-        expires: '2021-03-30T00:00:00.000Z',
-        idMapping: {
-          search1: { id: 'id1', strategy: 'ese', status: SearchSessionStatus.COMPLETE },
-          search2: {
-            id: 'id2',
-            strategy: 'sql',
-            status: SearchSessionStatus.ERROR,
-            error: 'error',
-          },
-          search3: { id: 'id3', strategy: 'es', status: SearchSessionStatus.EXPIRED },
+  const mockSessionSavedObject: SavedObject<SearchSessionSavedObjectAttributesPre$8$5$0> = {
+    id: 'id',
+    type: SEARCH_SESSION_TYPE,
+    attributes: {
+      appId: 'my_app_id',
+      completed: '2021-03-29T00:00:00.000Z',
+      created: '2021-03-26T00:00:00.000Z',
+      expires: '2021-03-30T00:00:00.000Z',
+      idMapping: {
+        search1: { id: 'id1', strategy: 'ese', status: SearchSessionStatus.COMPLETE },
+        search2: {
+          id: 'id2',
+          strategy: 'sql',
+          status: SearchSessionStatus.ERROR,
+          error: 'error',
         },
-        initialState: {},
-        locatorId: undefined,
-        name: 'my_name',
-        persisted: true,
-        realmName: 'realmName',
-        realmType: 'realmType',
-        restoreState: {},
-        sessionId: 'sessionId',
-        status: SearchSessionStatus.COMPLETE,
-        touched: '2021-03-29T00:00:00.000Z',
-        username: 'username',
-        version: '7.14.0',
+        search3: { id: 'id3', strategy: 'es', status: SearchSessionStatus.EXPIRED },
       },
-      references: [],
-    };
+      initialState: {},
+      locatorId: undefined,
+      name: 'my_name',
+      persisted: true,
+      realmName: 'realmName',
+      realmType: 'realmType',
+      restoreState: {},
+      sessionId: 'sessionId',
+      status: SearchSessionStatus.COMPLETE,
+      touched: '2021-03-29T00:00:00.000Z',
+      username: 'username',
+      version: '7.14.0',
+    },
+    references: [],
+  };
 
+  test('migrates object', () => {
     const migratedSession = migration(mockSessionSavedObject, {} as SavedObjectMigrationContext);
 
     expect(migratedSession.attributes).not.toHaveProperty('status');
