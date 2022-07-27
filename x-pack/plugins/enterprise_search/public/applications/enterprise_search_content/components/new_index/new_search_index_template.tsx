@@ -38,6 +38,7 @@ import { LanguageForOptimization } from './types';
 
 export interface Props {
   buttonLoading?: boolean;
+  docsUrl?: string;
   error?: string | React.ReactNode;
   onNameChange?(name: string): void;
   onSubmit(name: string, language: LanguageForOptimization): void;
@@ -47,6 +48,7 @@ export interface Props {
 
 export const NewSearchIndexTemplate: React.FC<Props> = ({
   children,
+  docsUrl,
   error,
   title,
   onNameChange,
@@ -57,7 +59,6 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
     fullIndexName,
     fullIndexNameExists,
     fullIndexNameIsValid,
-    isLoading,
     language,
     rawName,
     languageSelectValue,
@@ -197,8 +198,8 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              isDisabled={!rawName || buttonLoading || isLoading || formInvalid}
-              isLoading={buttonLoading || isLoading}
+              isDisabled={!rawName || buttonLoading || formInvalid}
+              isLoading={buttonLoading}
               type="submit"
             >
               {i18n.translate(
@@ -209,16 +210,18 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
               )}
             </EuiButton>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiLink target="_blank" href="#">
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.viewDocumentation.linkText',
-                {
-                  defaultMessage: 'View the documentation',
-                }
-              )}
-            </EuiLink>
-          </EuiFlexItem>
+          {!!docsUrl && (
+            <EuiFlexItem grow={false}>
+              <EuiLink target="_blank" href={docsUrl}>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.viewDocumentation.linkText',
+                  {
+                    defaultMessage: 'View the documentation',
+                  }
+                )}
+              </EuiLink>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiForm>
       <EuiHorizontalRule />

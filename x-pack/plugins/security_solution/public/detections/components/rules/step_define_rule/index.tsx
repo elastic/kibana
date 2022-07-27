@@ -806,7 +806,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 path="newTermsFields"
                 component={NewTermsFields}
                 componentProps={{
-                  browserFields,
+                  browserFields: aggFields,
                 }}
               />
               <UseField
@@ -844,6 +844,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             threatMapping: formThreatMapping,
             machineLearningJobId,
             queryBar: formQuery ?? initialState.queryBar,
+            newTermsFields: formNewTermsFields,
           })}
           query={formQuery}
           ruleType={ruleType}

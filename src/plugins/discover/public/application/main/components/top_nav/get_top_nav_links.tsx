@@ -32,6 +32,7 @@ export const getTopNavLinks = ({
   onOpenInspector,
   searchSource,
   onOpenSavedSearch,
+  isPlainRecord,
 }: {
   indexPattern: DataView;
   navigateTo: (url: string) => void;
@@ -41,6 +42,7 @@ export const getTopNavLinks = ({
   onOpenInspector: () => void;
   searchSource: ISearchSource;
   onOpenSavedSearch: (id: string) => void;
+  isPlainRecord: boolean;
 }): TopNavMenuData[] => {
   const options = {
     id: 'options',
@@ -196,11 +198,12 @@ export const getTopNavLinks = ({
     ...(services.capabilities.advancedSettings.save ? [options] : []),
     newSearch,
     openSearch,
+    ...(!isPlainRecord ? [shareSearch] : []),
     ...(services.triggersActionsUi &&
-    services.capabilities.management?.insightsAndAlerting?.triggersActions
+    services.capabilities.management?.insightsAndAlerting?.triggersActions &&
+    !isPlainRecord
       ? [alerts]
       : []),
-    shareSearch,
     inspectSearch,
     ...(services.capabilities.discover.save ? [saveSearch] : []),
   ];

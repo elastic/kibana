@@ -8,7 +8,7 @@
 
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { SavedObjectsClient } from './saved_objects_client';
-import { SimpleSavedObject } from './simple_saved_object';
+import { SimpleSavedObjectImpl as SimpleSavedObject } from './simple_saved_object';
 
 describe('SavedObjectsClient', () => {
   const doc = {

@@ -8,18 +8,11 @@
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
-import { mockLogger, sampleEmptyDocSearchResults } from '../__mocks__/es_results';
-import { buildRuleMessageFactory } from '../rule_messages';
+import { sampleEmptyDocSearchResults } from '../__mocks__/es_results';
 import * as single_search_after from '../single_search_after';
 import { findThresholdSignals } from './find_threshold_signals';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
-
-const buildRuleMessage = buildRuleMessageFactory({
-  id: 'fake id',
-  ruleId: 'fake rule id',
-  index: 'fakeindex',
-  name: 'fake name',
-});
+import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 
 const queryFilter = getQueryFilter('', 'kuery', [], ['*'], []);
 const mockSingleSearchAfter = jest.fn(async () => ({
@@ -37,6 +30,7 @@ const mockSingleSearchAfter = jest.fn(async () => ({
 
 describe('findThresholdSignals', () => {
   let mockService: RuleExecutorServicesMock;
+  const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -51,13 +45,12 @@ describe('findThresholdSignals', () => {
       maxSignals: 100,
       inputIndexPattern: ['*'],
       services: mockService,
-      logger: mockLogger,
+      ruleExecutionLogger,
       filter: queryFilter,
       threshold: {
         field: [],
         value: 100,
       },
-      buildRuleMessage,
       runtimeMappings: undefined,
       primaryTimestamp: TIMESTAMP,
       secondaryTimestamp: undefined,
@@ -87,13 +80,12 @@ describe('findThresholdSignals', () => {
       maxSignals: 100,
       inputIndexPattern: ['*'],
       services: mockService,
-      logger: mockLogger,
+      ruleExecutionLogger,
       filter: queryFilter,
       threshold: {
         field: ['host.name'],
         value: 100,
       },
-      buildRuleMessage,
       runtimeMappings: undefined,
       primaryTimestamp: TIMESTAMP,
       secondaryTimestamp: undefined,
@@ -148,14 +140,13 @@ describe('findThresholdSignals', () => {
       maxSignals: 100,
       inputIndexPattern: ['*'],
       services: mockService,
-      logger: mockLogger,
+      ruleExecutionLogger,
       filter: queryFilter,
       threshold: {
         field: ['host.name', 'user.name'],
         value: 100,
         cardinality: [],
       },
-      buildRuleMessage,
       runtimeMappings: undefined,
       primaryTimestamp: TIMESTAMP,
       secondaryTimestamp: undefined,
@@ -217,7 +208,7 @@ describe('findThresholdSignals', () => {
       maxSignals: 100,
       inputIndexPattern: ['*'],
       services: mockService,
-      logger: mockLogger,
+      ruleExecutionLogger,
       filter: queryFilter,
       threshold: {
         field: ['host.name', 'user.name'],
@@ -229,7 +220,6 @@ describe('findThresholdSignals', () => {
           },
         ],
       },
-      buildRuleMessage,
       runtimeMappings: undefined,
       primaryTimestamp: TIMESTAMP,
       secondaryTimestamp: undefined,
@@ -304,7 +294,7 @@ describe('findThresholdSignals', () => {
       maxSignals: 100,
       inputIndexPattern: ['*'],
       services: mockService,
-      logger: mockLogger,
+      ruleExecutionLogger,
       filter: queryFilter,
       threshold: {
         cardinality: [
@@ -316,7 +306,6 @@ describe('findThresholdSignals', () => {
         field: [],
         value: 200,
       },
-      buildRuleMessage,
       runtimeMappings: undefined,
       primaryTimestamp: TIMESTAMP,
       secondaryTimestamp: undefined,
