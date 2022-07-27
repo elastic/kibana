@@ -380,7 +380,7 @@ export function ChangeDataView({
         isOpen={isPopoverOpen}
         closePopover={() => setPopoverIsOpen(false)}
         panelPaddingSize="none"
-        initialFocus={!isTextBasedLangSelected ? `#${searchListInputId}` : false}
+        initialFocus={!isTextBasedLangSelected ? `#${searchListInputId}` : undefined}
         display="block"
         buffer={8}
       >
