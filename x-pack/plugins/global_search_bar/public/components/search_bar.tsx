@@ -19,6 +19,8 @@ import {
   EuiSelectableTemplateSitewideOption,
   euiSelectableTemplateSitewideRenderOptions,
   EuiLoadingSpinner,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
@@ -257,16 +259,11 @@ export const SearchBar: FC<SearchBarProps> = ({
 
   const noMatchesMessage = <PopoverPlaceholder darkMode={darkMode} basePath={basePathUrl} />;
   const emptyMessage = (
-    <div
-      style={{
-        minHeight: 300, // hardcoded in PopoverPlaceholder too
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-      }}
-    >
-      <EuiLoadingSpinner size="xl" />
-    </div>
+    <EuiFlexGroup direction="column" justifyContent="center" style={{ minHeight: '300px' }}>
+      <EuiFlexItem grow={false}>
+        <EuiLoadingSpinner size="xl" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 
   const placeholderText = i18n.translate('xpack.globalSearchBar.searchBar.placeholder', {
