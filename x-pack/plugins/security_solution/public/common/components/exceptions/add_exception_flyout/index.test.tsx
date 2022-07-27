@@ -15,10 +15,7 @@ import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import { useAsync } from '@kbn/securitysolution-hook-utils';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 import { useFetchIndex } from '../../../containers/source';
-import {
-  createStubIndexPattern,
-  stubIndexPattern,
-} from '@kbn/data-plugin/common/stubs';
+import { createStubIndexPattern, stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { useAddOrUpdateException } from '../use_add_exception';
 import { useFetchOrCreateRuleExceptionList } from '../use_fetch_or_create_rule_exception_list';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
@@ -400,21 +397,21 @@ describe('When the add exception modal is opened', () => {
         _id: 'test-id',
         file: { path: 'test/path' },
       };
-        wrapper = mount(
-          <TestProviders>
-            <AddExceptionFlyout
-              ruleId={'123'}
-              ruleIndices={['filebeat-*']}
-              ruleName={ruleName}
-              exceptionListType={'endpoint'}
-              onCancel={jest.fn()}
-              onConfirm={jest.fn()}
-              alertData={alertDataMock}
-              isAlertDataLoading={false}
-            />
-          </TestProviders>
-        );
-    
+      wrapper = mount(
+        <TestProviders>
+          <AddExceptionFlyout
+            ruleId={'123'}
+            ruleIndices={['filebeat-*']}
+            ruleName={ruleName}
+            exceptionListType={'endpoint'}
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
+            alertData={alertDataMock}
+            isAlertDataLoading={false}
+          />
+        </TestProviders>
+      );
+
       const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
       await waitFor(() => {
         return callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] });
