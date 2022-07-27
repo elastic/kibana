@@ -7,9 +7,9 @@
 
 import { SavedObject } from '@kbn/core/server';
 import {
-  CaseMetricsResponse,
   CaseStatuses,
   CaseUserActionResponse,
+  SingleCaseMetricsResponse,
   StatusInfo,
   StatusUserAction,
   StatusUserActionRt,
@@ -17,22 +17,22 @@ import {
 } from '../../../common/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
-import { BaseHandler } from './base_handler';
-import { BaseHandlerCommonOptions } from './types';
+import { SingleCaseBaseHandler } from './single_case_base_handler';
+import { SingleCaseBaseHandlerCommonOptions } from './types';
 
-export class Lifespan extends BaseHandler {
-  constructor(options: BaseHandlerCommonOptions) {
+export class Lifespan extends SingleCaseBaseHandler {
+  constructor(options: SingleCaseBaseHandlerCommonOptions) {
     super(options, ['lifespan']);
   }
 
-  public async compute(): Promise<CaseMetricsResponse> {
+  public async compute(): Promise<SingleCaseMetricsResponse> {
     const { unsecuredSavedObjectsClient, authorization, userActionService, logger } =
       this.options.clientArgs;
 
-    const { caseId, casesClient } = this.options;
+    const { casesClient } = this.options;
 
     try {
-      const caseInfo = await casesClient.cases.get({ id: caseId });
+      const caseInfo = await casesClient.cases.get({ id: this.caseId });
 
       const caseOpenTimestamp = new Date(caseInfo.created_at);
       if (!isDateValid(caseOpenTimestamp)) {
@@ -47,7 +47,7 @@ export class Lifespan extends BaseHandler {
 
       const statusUserActions = await userActionService.findStatusChanges({
         unsecuredSavedObjectsClient,
-        caseId,
+        caseId: this.caseId,
         filter: authorizationFilter,
       });
 
@@ -62,7 +62,7 @@ export class Lifespan extends BaseHandler {
       };
     } catch (error) {
       throw createCaseError({
-        message: `Failed to retrieve lifespan metrics for case id: ${caseId}: ${error}`,
+        message: `Failed to retrieve lifespan metrics for case id: ${this.caseId}: ${error}`,
         error,
         logger,
       });

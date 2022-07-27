@@ -165,7 +165,9 @@ export class ValidateJobUI extends Component {
               title: job.job_id,
             });
             if (typeof this.props.setIsValid === 'function') {
-              this.props.setIsValid(!messagesContainError);
+              // we show a warning that the user can proceed at their own risk
+              // therefore return true so the wizard can enable the Next button
+              this.props.setIsValid(true);
             }
           })
           .catch((error) => {

@@ -40,6 +40,7 @@ import {
 } from '../../../common/expressions';
 
 import './dimension_editor.scss';
+import { CollapseSetting } from '../../shared_components/collapse_setting';
 
 const idPrefix = htmlIdGenerator()();
 
@@ -128,6 +129,17 @@ export function TableDimensionEditor(
 
   return (
     <>
+      {props.groupId === 'rows' && (
+        <CollapseSetting
+          value={column.collapseFn || ''}
+          onChange={(collapseFn: string) => {
+            setState({
+              ...state,
+              columns: updateColumnWith(state, accessor, { collapseFn }),
+            });
+          }}
+        />
+      )}
       <EuiFormRow
         display="columnCompressed"
         fullWidth
@@ -178,6 +190,7 @@ export function TableDimensionEditor(
       </EuiFormRow>
       {!column.isTransposed && (
         <EuiFormRow
+          fullWidth
           label={i18n.translate('xpack.lens.table.columnVisibilityLabel', {
             defaultMessage: 'Hide column',
           })}
@@ -254,6 +267,7 @@ export function TableDimensionEditor(
               })}
             >
               <EuiFieldText
+                fullWidth
                 compressed
                 data-test-subj="lnsDatatable_summaryrow_label"
                 value={summaryLabel ?? fallbackSummaryLabel}

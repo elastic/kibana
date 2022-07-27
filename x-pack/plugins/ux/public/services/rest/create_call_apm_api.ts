@@ -8,16 +8,11 @@
 import { CoreSetup, CoreStart } from '@kbn/core/public';
 import type {
   ClientRequestParamsOf,
-  formatRequest as formatRequestType,
   ReturnOf,
   RouteRepositoryClient,
   ServerRouteRepository,
 } from '@kbn/server-route-repository';
-// @ts-expect-error cannot find module or correspondent type declarations
-// The code and types are at separated folders on @kbn/server-route-repository
-// so in order to do targeted imports they must me imported separately, and
-// an error is expected here
-import { formatRequest } from '@kbn/server-route-repository/target_node/format_request';
+import { formatRequest } from '@kbn/server-route-repository';
 import type {
   APMServerRouteRepository,
   APIEndpoint,
@@ -73,10 +68,7 @@ export function createCallApmApi(core: CoreStart | CoreSetup) {
       params?: Partial<Record<string, any>>;
     };
 
-    const { method, pathname } = formatRequest(
-      endpoint,
-      params?.path
-    ) as ReturnType<typeof formatRequestType>;
+    const { method, pathname } = formatRequest(endpoint, params?.path);
 
     return callApi(core, {
       ...options,

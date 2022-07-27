@@ -14,13 +14,8 @@ import { isFunction } from 'lodash';
 import { EVENTS } from './constants';
 
 // @ts-expect-error untyped local
-import { resolvedArgs } from '../../../public/state/middleware/resolved_args';
-
-// @ts-expect-error untyped local
 import { getRootReducer } from '../../../public/state/reducers';
 
-// @ts-expect-error Untyped local
-import { getDefaultWorkpad } from '../../../public/state/defaults';
 // @ts-expect-error Untyped local
 import { getInitialState as getState } from '../../../public/state/initial_state';
 import { State } from '../../../types';

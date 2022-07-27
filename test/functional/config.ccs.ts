@@ -12,15 +12,19 @@ import { RemoteEsProvider } from './services/remote_es/remote_es';
 
 // eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('./config'));
+  const baseConfig = await readConfigFile(require.resolve('./config.base.js'));
 
   return {
-    ...functionalConfig.getAll(),
+    ...baseConfig.getAll(),
 
-    testFiles: [require.resolve('./apps/discover')],
+    testFiles: [
+      require.resolve('./apps/dashboard/group3'),
+      require.resolve('./apps/discover'),
+      require.resolve('./apps/console/_console_ccs'),
+    ],
 
     services: {
-      ...functionalConfig.get('services'),
+      ...baseConfig.get('services'),
       remoteEs: RemoteEsProvider,
       remoteEsArchiver: RemoteEsArchiverProvider,
     },
@@ -30,7 +34,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
 
     security: {
-      ...functionalConfig.get('security'),
+      ...baseConfig.get('security'),
       remoteEsRoles: {
         ccs_remote_search: {
           indices: [
@@ -41,17 +45,15 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           ],
         },
       },
-      defaultRoles: [...(functionalConfig.get('security.defaultRoles') ?? []), 'ccs_remote_search'],
+      defaultRoles: [...(baseConfig.get('security.defaultRoles') ?? []), 'ccs_remote_search'],
     },
 
     esTestCluster: {
-      ...functionalConfig.get('esTestCluster'),
+      ...baseConfig.get('esTestCluster'),
       ccs: {
         remoteClusterUrl:
           process.env.REMOTE_CLUSTER_URL ??
-          `http://elastic:changeme@localhost:${
-            functionalConfig.get('servers.elasticsearch.port') + 1
-          }`,
+          `http://elastic:changeme@localhost:${baseConfig.get('servers.elasticsearch.port') + 1}`,
       },
     },
   };

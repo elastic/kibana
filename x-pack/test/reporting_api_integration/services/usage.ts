@@ -101,31 +101,47 @@ export function createUsageServices({ getService }: FtrProviderContext) {
     },
 
     expectRecentPdfAppStats(stats: UsageStats, app: string, count: number) {
-      expect(
-        stats.reporting.last_7_days.printable_pdf.app![app as keyof AvailableTotal['app']]
-      ).to.be(count);
+      const actual =
+        stats.reporting.last_7_days.printable_pdf.app![app as keyof AvailableTotal['app']];
+      log.info(`expecting recent ${app} stats to have ${count} printable pdfs (actual: ${actual})`);
+      expect(actual).to.be(count);
     },
 
     expectAllTimePdfAppStats(stats: UsageStats, app: string, count: number) {
-      expect(stats.reporting.printable_pdf.app![app as keyof AvailableTotal['app']]).to.be(count);
+      const actual = stats.reporting.printable_pdf.app![app as keyof AvailableTotal['app']];
+      log.info(
+        `expecting all time pdf ${app} stats to have ${count} printable pdfs (actual: ${actual})`
+      );
+      expect(actual).to.be(count);
     },
 
     expectRecentPdfLayoutStats(stats: UsageStats, layout: string, count: number) {
-      expect(stats.reporting.last_7_days.printable_pdf.layout![layout as keyof LayoutCounts]).to.be(
-        count
-      );
+      const actual =
+        stats.reporting.last_7_days.printable_pdf.layout![layout as keyof LayoutCounts];
+      log.info(`expecting recent stats to report ${count} ${layout} layouts (actual: ${actual})`);
+      expect(actual).to.be(count);
     },
 
     expectAllTimePdfLayoutStats(stats: UsageStats, layout: string, count: number) {
-      expect(stats.reporting.printable_pdf.layout![layout as keyof LayoutCounts]).to.be(count);
+      const actual = stats.reporting.printable_pdf.layout![layout as keyof LayoutCounts];
+      log.info(`expecting all time stats to report ${count} ${layout} layouts (actual: ${actual})`);
+      expect(actual).to.be(count);
     },
 
     expectRecentJobTypeTotalStats(stats: UsageStats, jobType: string, count: number) {
-      expect(stats.reporting.last_7_days[jobType as keyof JobTypes].total).to.be(count);
+      const actual = stats.reporting.last_7_days[jobType as keyof JobTypes].total;
+      log.info(
+        `expecting recent stats to report ${count} ${jobType} job types (actual: ${actual})`
+      );
+      expect(actual).to.be(count);
     },
 
     expectAllTimeJobTypeTotalStats(stats: UsageStats, jobType: string, count: number) {
-      expect(stats.reporting[jobType as keyof JobTypes].total).to.be(count);
+      const actual = stats.reporting[jobType as keyof JobTypes].total;
+      log.info(
+        `expecting all time stats to report ${count} ${jobType} job types (actual: ${actual})`
+      );
+      expect(actual).to.be(count);
     },
 
     getCompletedReportCount(stats: UsageStats) {

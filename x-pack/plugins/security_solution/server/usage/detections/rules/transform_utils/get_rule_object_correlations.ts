@@ -9,8 +9,6 @@ import type { SavedObjectsFindResult } from '@kbn/core/server';
 import type { RuleMetric } from '../types';
 import type { RuleSearchResult } from '../../../types';
 
-import { isElasticRule } from '../../../queries/utils/is_elastic_rule';
-
 export interface RuleObjectCorrelationsOptions {
   ruleResults: Array<SavedObjectsFindResult<RuleSearchResult>>;
   legacyNotificationRuleIds: Map<
@@ -32,7 +30,6 @@ export const getRuleObjectCorrelations = ({
   return ruleResults.map((result) => {
     const ruleId = result.id;
     const { attributes } = result;
-    const isElastic = isElasticRule(attributes.tags);
 
     // Even if the legacy notification is set to "no_actions" we still count the rule as having a legacy notification that is not migrated yet.
     const hasLegacyNotification = legacyNotificationRuleIds.get(ruleId) != null;
@@ -50,7 +47,8 @@ export const getRuleObjectCorrelations = ({
       rule_type: attributes.params.type,
       rule_version: attributes.params.version,
       enabled: attributes.enabled,
-      elastic_rule: isElastic,
+      // if rule immutable, it's Elastic/prebuilt
+      elastic_rule: attributes.params.immutable,
       created_on: attributes.createdAt,
       updated_on: attributes.updatedAt,
       alert_count_daily: alertsCounts.get(ruleId) || 0,

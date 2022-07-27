@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import React from 'react';
 
 import { DefaultDraggable } from '../../../common/components/draggables';
@@ -17,32 +17,47 @@ export const Port = React.memo<{
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   eventId: string;
   fieldName: string;
+  fieldType?: string;
+  isAggregatable?: boolean;
   isDraggable?: boolean;
   title?: string;
   value: string | undefined | null;
-}>(({ Component, contextId, eventId, fieldName, isDraggable, title, value }) =>
-  isDraggable ? (
-    <DefaultDraggable
-      data-test-subj="port"
-      field={fieldName}
-      id={`port-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
-      isDraggable={isDraggable}
-      tooltipContent={fieldName}
-      value={value}
-    >
+}>(
+  ({
+    Component,
+    contextId,
+    eventId,
+    fieldName,
+    fieldType,
+    isAggregatable,
+    isDraggable,
+    title,
+    value,
+  }) =>
+    isDraggable ? (
+      <DefaultDraggable
+        data-test-subj="port"
+        field={fieldName}
+        fieldType={fieldType}
+        isAggregatable={isAggregatable}
+        id={`port-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
+        isDraggable={isDraggable}
+        tooltipContent={fieldName}
+        value={value}
+      >
+        <PortOrServiceNameLink
+          portOrServiceName={value || getEmptyValue()}
+          Component={Component}
+          title={title}
+        />
+      </DefaultDraggable>
+    ) : (
       <PortOrServiceNameLink
         portOrServiceName={value || getEmptyValue()}
         Component={Component}
         title={title}
       />
-    </DefaultDraggable>
-  ) : (
-    <PortOrServiceNameLink
-      portOrServiceName={value || getEmptyValue()}
-      Component={Component}
-      title={title}
-    />
-  )
+    )
 );
 
 Port.displayName = 'Port';

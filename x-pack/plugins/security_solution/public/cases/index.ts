@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SecuritySubPlugin } from '../app/types';
+import type { SecuritySubPlugin } from '../app/types';
 import { routes } from './routes';
 
 export class Cases {

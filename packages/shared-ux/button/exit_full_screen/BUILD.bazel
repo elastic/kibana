@@ -15,6 +15,7 @@ SOURCE_FILES = glob(
   ],
   exclude = [
     "**/*.test.*",
+    "**/*.stories.*",
   ],
 )
 
@@ -43,7 +44,6 @@ RUNTIME_DEPS = [
   "@npm//@elastic/eui",
   "@npm//@emotion/css",
   "@npm//@emotion/react",
-  "@npm//@storybook/addon-actions",
   "@npm//classnames",
   "@npm//enzyme",
   "@npm//react-use",
@@ -67,7 +67,6 @@ TYPES_DEPS = [
   "@npm//@elastic/eui",
   "@npm//@emotion/css",
   "@npm//@emotion/react",
-  "@npm//@storybook/addon-actions",
   "@npm//@types/classnames",
   "@npm//@types/enzyme",
   "@npm//@types/jest",
@@ -112,6 +111,7 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",

@@ -6,6 +6,7 @@
  */
 import semver from 'semver';
 import {
+  ALERT_GRID_CELL,
   DESTINATION_IP,
   HOST_NAME,
   PROCESS_NAME_COLUMN,
@@ -52,6 +53,7 @@ const alert = {
   riskScore: '7',
   reason:
     'file event with process test, file The file to test, by Security Solution on security-solution.local created low alert Custom query rule for upgrade.',
+  reasonAlt: '—',
   hostName: 'security-solution.local',
   username: 'Security Solution',
   processName: 'test',
@@ -80,6 +82,20 @@ describe('After an upgrade, the custom query rule', () => {
     waitForRulesTableToBeLoaded();
     goToTheRuleDetailsOf(rule.name);
     waitForPageToBeLoaded();
+    // Possible bug on first attempt sometimes redirects page back to alerts
+    // Going to retry the block once
+    cy.url().then((url) => {
+      const currentUrl = url;
+      cy.log(`Current URL is : ${currentUrl}`);
+      if (!currentUrl.includes(DETECTIONS_RULE_MANAGEMENT_URL)) {
+        cy.log('Retrying not on correct page!');
+        visit(DETECTIONS_RULE_MANAGEMENT_URL);
+        waitForRulesTableToBeLoaded();
+        goToTheRuleDetailsOf(rule.name);
+        waitForPageToBeLoaded();
+      }
+    });
+    cy.url().should('include', DETECTIONS_RULE_MANAGEMENT_URL);
   });
 
   it('Has the expected alerts number', () => {
@@ -106,16 +122,15 @@ describe('After an upgrade, the custom query rule', () => {
   });
 
   it('Displays the alert details at the tgrid', () => {
-    let expectedReason;
-    if (semver.gt(Cypress.env('ORIGINAL_VERSION'), '7.15.0')) {
-      expectedReason = alert.reason;
-    } else {
-      expectedReason = '-';
+    let expectedReason = alert.reason;
+    if (semver.lt(Cypress.env('ORIGINAL_VERSION'), '7.15.0')) {
+      expectedReason = alert.reasonAlt;
     }
+    cy.get(ALERT_GRID_CELL).first().focus();
     cy.get(RULE_NAME).should('have.text', alert.rule);
     cy.get(SEVERITY).should('have.text', alert.severity);
     cy.get(RISK_SCORE).should('have.text', alert.riskScore);
-    cy.get(REASON).should('have.text', expectedReason).type('{rightarrow}');
+    cy.get(REASON).contains(expectedReason);
     cy.get(HOST_NAME).should('have.text', alert.hostName);
     cy.get(USER_NAME).should('have.text', alert.username);
     cy.get(PROCESS_NAME_COLUMN).eq(0).scrollIntoView();

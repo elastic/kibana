@@ -11,20 +11,20 @@ import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition, ExecutionContext } from '@kbn/expressions-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import { Filter } from '@kbn/es-query';
-import { Query, uniqFilters } from '@kbn/es-query';
+import { Query, uniqFilters, AggregateQuery } from '@kbn/es-query';
 import { unboxExpressionValue } from '@kbn/expressions-plugin/common';
 import { SavedObjectReference } from '@kbn/core/types';
+import { SavedObjectsClientCommon } from '@kbn/data-views-plugin/common';
 import { ExecutionContextSearch, KibanaContext, KibanaFilter } from './kibana_context_type';
 import { KibanaQueryOutput } from './kibana_context_type';
 import { KibanaTimerangeOutput } from './timerange';
-import { SavedObjectsClientCommon } from '../..';
 
 export interface KibanaContextStartDependencies {
   savedObjectsClient: SavedObjectsClientCommon;
 }
 
 interface Arguments {
-  q?: KibanaQueryOutput | null;
+  q?: KibanaQueryOutput[] | null;
   filters?: KibanaFilter[] | null;
   timeRange?: KibanaTimerangeOutput | null;
   savedSearchId?: string | null;
@@ -41,8 +41,11 @@ export type ExpressionFunctionKibanaContext = ExpressionFunctionDefinition<
 const getParsedValue = (data: any, defaultValue: any) =>
   typeof data === 'string' && data.length ? JSON.parse(data) || defaultValue : defaultValue;
 
-const mergeQueries = (first: Query | Query[] = [], second: Query | Query[]) =>
-  uniqBy<Query>(
+const mergeQueries = (
+  first: Query | AggregateQuery | Array<Query | AggregateQuery> = [],
+  second: Query | AggregateQuery | Array<Query | AggregateQuery>
+) =>
+  uniqBy<Query | AggregateQuery>(
     [...(Array.isArray(first) ? first : [first]), ...(Array.isArray(second) ? second : [second])],
     (n: any) => JSON.stringify(n.query)
   );
@@ -62,8 +65,8 @@ export const getKibanaContextFn = (
     args: {
       q: {
         types: ['kibana_query', 'null'],
+        multi: true,
         aliases: ['query', '_'],
-        default: null,
         help: i18n.translate('data.search.functions.kibana_context.q.help', {
           defaultMessage: 'Specify Kibana free form text query',
         }),
@@ -123,7 +126,7 @@ export const getKibanaContextFn = (
       const { savedObjectsClient } = await getStartDependencies(getKibanaRequest);
 
       const timeRange = args.timeRange || input?.timeRange;
-      let queries = mergeQueries(input?.query, args?.q || []);
+      let queries = mergeQueries(input?.query, args?.q?.filter(Boolean) || []);
       let filters = [
         ...(input?.filters || []),
         ...((args?.filters?.map(unboxExpressionValue) || []) as Filter[]),

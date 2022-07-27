@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Logger, LogMeta } from '../../../logging';
+import type { Logger, LogMeta } from '@kbn/logging';
 
 /*
  * This file provides a helper class for ensuring that all logging

@@ -44,13 +44,7 @@ describe('tagcloud vis toExpressionAst function', () => {
       params: {
         showLabel: false,
       },
-      data: {
-        indexPattern: { id: '123' },
-        aggs: {
-          getResponseAggs: () => [],
-          aggs: [],
-        },
-      },
+      data: {},
     } as unknown as Vis<TagCloudVisParams>;
   });
 

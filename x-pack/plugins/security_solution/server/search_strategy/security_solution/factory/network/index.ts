@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { FactoryQueryTypes } from '../../../../../common/search_strategy/security_solution';
 import {
-  FactoryQueryTypes,
   NetworkQueries,
   NetworkKpiQueries,
 } from '../../../../../common/search_strategy/security_solution';
@@ -16,7 +16,7 @@ import { networkKpiNetworkEvents } from './kpi/network_events';
 import { networkKpiTlsHandshakes } from './kpi/tls_handshakes';
 import { networkKpiUniqueFlows } from './kpi/unique_flows';
 import { networkKpiUniquePrivateIps } from './kpi/unique_private_ips';
-import { SecuritySolutionFactory } from '../types';
+import type { SecuritySolutionFactory } from '../types';
 import { networkDetails } from './details';
 import { networkDns } from './dns';
 import { networkHttp } from './http';

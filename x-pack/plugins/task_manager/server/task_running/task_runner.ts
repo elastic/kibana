@@ -283,7 +283,7 @@ export class TaskManagerRunner implements TaskRunner {
         }`
       );
     }
-    this.logger.debug(`Running task ${this}`);
+    this.logger.debug(`Running task ${this}`, { tags: ['task:start', this.id, this.taskType] });
 
     const apmTrans = apm.startTransaction(this.taskType, TASK_MANAGER_RUN_TRANSACTION_TYPE, {
       childOf: this.instance.task.traceparent,
@@ -313,7 +313,10 @@ export class TaskManagerRunner implements TaskRunner {
       if (apmTrans) apmTrans.end('success');
       return processedResult;
     } catch (err) {
-      this.logger.error(`Task ${this} failed: ${err}`);
+      this.logger.error(`Task ${this} failed: ${err}`, {
+        tags: [this.taskType, this.instance.task.id, 'task-run-failed'],
+        error: { stack_trace: err.stack },
+      });
       // in error scenario, we can not get the RunResult
       // re-use modifiedContext's state, which is correct as of beforeRun
       const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
@@ -324,6 +327,8 @@ export class TaskManagerRunner implements TaskRunner {
       );
       if (apmTrans) apmTrans.end('failure');
       return processedResult;
+    } finally {
+      this.logger.debug(`Task ${this} ended`, { tags: ['task:end', this.id, this.taskType] });
     }
   }
 

@@ -1,0 +1,9 @@
+{
+  "monitoredClusters": {
+    "clusters": {},
+    "execution": {
+      "timedOut": false,
+      "errors": []
+    }
+  }
+}

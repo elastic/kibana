@@ -7,19 +7,21 @@
  */
 
 import { memoize } from 'lodash';
-import dateMath from '@kbn/datemath';
-import { buildEsQuery } from '@kbn/es-query';
 
-import { TimeRange } from '@kbn/data-plugin/public';
+import dateMath from '@kbn/datemath';
+import { buildEsQuery, type TimeRange } from '@kbn/es-query';
 import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
-import { ControlsOptionsListService, OptionsListRequest } from '../options_list';
+
 import {
-  OptionsListRequestBody,
+  OptionsListRequest,
   OptionsListResponse,
+  OptionsListRequestBody,
+  OptionsListField,
 } from '../../control_types/options_list/types';
-import { ControlsPluginStartDeps } from '../../types';
-import { ControlsDataService } from '../data';
 import { ControlsHTTPService } from '../http';
+import { ControlsDataService } from '../data';
+import { ControlsPluginStartDeps } from '../../types';
+import { ControlsOptionsListService } from '../options_list';
 
 class OptionsListService implements ControlsOptionsListService {
   private data: ControlsDataService;
@@ -40,6 +42,7 @@ class OptionsListService implements ControlsOptionsListService {
       filters,
       timeRange,
       searchString,
+      runPastTimeout,
       selectedOptions,
       field: { name: fieldName },
       dataView: { title: dataViewTitle },
@@ -50,6 +53,7 @@ class OptionsListService implements ControlsOptionsListService {
       selectedOptions?.join(','),
       JSON.stringify(filters),
       JSON.stringify(query),
+      runPastTimeout,
       dataViewTitle,
       searchString,
       fieldName,
@@ -83,6 +87,7 @@ class OptionsListService implements ControlsOptionsListService {
       filters: esFilters,
       fieldName: field.name,
       fieldSpec: field.toSpec?.(),
+      textFieldName: (field as OptionsListField).textFieldName,
     };
   };
 

@@ -8,11 +8,11 @@
 import React, { Fragment } from 'react';
 import uuid from 'uuid/v4';
 
-import { EuiTitle, EuiSpacer, EuiToolTip, EuiTextAlign, EuiCallOut } from '@elastic/eui';
+import { EuiTitle, EuiSpacer, EuiTextAlign, EuiCallOut } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { Join } from './resources/join';
+import { JoinDocumentationPopover } from './resources/join_documentation_popover';
 import { IVectorLayer } from '../../../classes/layers/vector_layer';
 import { JoinDescriptor } from '../../../../common/descriptor_types';
 import { SOURCE_TYPES } from '../../../../common/constants';
@@ -79,6 +79,7 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
 
   function renderContent() {
     const disabledReason = layer.getJoinsDisabledReason();
+
     return disabledReason ? (
       <EuiCallOut color="warning">{disabledReason}</EuiCallOut>
     ) : (
@@ -100,17 +101,11 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
     <div>
       <EuiTitle size="xs">
         <h5>
-          <EuiToolTip
-            content={i18n.translate('xpack.maps.layerPanel.joinEditor.termJoinTooltip', {
-              defaultMessage:
-                'Use term joins to augment this layer with properties for data driven styling.',
-            })}
-          >
-            <FormattedMessage
-              id="xpack.maps.layerPanel.joinEditor.termJoinsTitle"
-              defaultMessage="Term joins"
-            />
-          </EuiToolTip>
+          <FormattedMessage
+            id="xpack.maps.layerPanel.joinEditor.termJoinsTitle"
+            defaultMessage="Term joins"
+          />{' '}
+          <JoinDocumentationPopover />
         </h5>
       </EuiTitle>
 

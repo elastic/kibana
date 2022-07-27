@@ -9,7 +9,7 @@ import { flatten } from 'lodash';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 
-import { TimeRange } from '@kbn/data-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
 import { ExpressionFunctionDefinition, DatatableRow } from '@kbn/expressions-plugin/public';
 import { fetch } from '../../common/lib/fetch';
 // @ts-expect-error untyped local

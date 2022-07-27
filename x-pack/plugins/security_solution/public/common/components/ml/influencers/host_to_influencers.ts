@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HostItem } from '../../../../../common/search_strategy/security_solution/hosts';
-import { InfluencerInput } from '../types';
+import type { HostItem } from '../../../../../common/search_strategy/security_solution/hosts';
+import type { InfluencerInput } from '../types';
 
 export const hostToInfluencers = (hostItem: HostItem): InfluencerInput[] | null => {
   if (hostItem.host != null && hostItem.host.name != null) {

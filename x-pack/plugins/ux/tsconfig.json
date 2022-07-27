@@ -27,5 +27,6 @@
     { "path": "../licensing/tsconfig.json" },
     { "path": "../maps/tsconfig.json" },
     { "path": "../observability/tsconfig.json" },
+    { "path": "../lens/tsconfig.json" },
   ]
 }

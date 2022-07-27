@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { ReactElement, useState } from 'react';
 import type { Capabilities } from '@kbn/core/public';
+import { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
 import { DashboardSavedObject } from '../..';
 import { shareModalStrings } from '../../dashboard_strings';
 import { DashboardAppLocatorParams, DASHBOARD_APP_LOCATOR } from '../../locator';
@@ -116,7 +117,7 @@ export function ShowShareModal({
 
   let unsavedStateForLocator: Pick<
     DashboardAppLocatorParams,
-    'options' | 'query' | 'savedQuery' | 'filters' | 'panels'
+    'options' | 'query' | 'savedQuery' | 'filters' | 'panels' | 'controlGroupInput'
   > = {};
   const unsavedDashboardState = dashboardSessionStorage.getState(savedDashboard.id);
   if (unsavedDashboardState) {
@@ -125,6 +126,7 @@ export function ShowShareModal({
       filters: unsavedDashboardState.filters,
       options: unsavedDashboardState.options,
       savedQuery: unsavedDashboardState.savedQuery,
+      controlGroupInput: unsavedDashboardState.controlGroupInput as SerializableControlGroupInput,
       panels: unsavedDashboardState.panels
         ? convertPanelMapToSavedPanels(unsavedDashboardState.panels, kibanaVersion)
         : undefined,

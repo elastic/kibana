@@ -23,6 +23,7 @@ exports[`ImportDataModal renders correctly against snapshot 1`] = `
         size="s"
       />
       <EuiFilePicker
+        accept=".ndjson"
         compressed={false}
         display="large"
         fullWidth={true}

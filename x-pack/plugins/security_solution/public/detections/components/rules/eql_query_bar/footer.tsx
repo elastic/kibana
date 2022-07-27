@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButtonIcon,
-  EuiComboBoxOptionOption,
   EuiComboBox,
   EuiFieldNumber,
   EuiFlexGroup,
@@ -18,11 +18,13 @@ import {
   EuiPopover,
   EuiPopoverTitle,
 } from '@elastic/eui';
-import React, { FC, useCallback, useMemo, useRef, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 
-import { Cancelable, debounce } from 'lodash';
-import {
+import type { Cancelable } from 'lodash';
+import { debounce } from 'lodash';
+import type {
   EqlOptionsData,
   EqlOptionsSelected,
   FieldsEqlOptions,
@@ -34,9 +36,10 @@ import { EqlOverviewLink } from './eql_overview_link';
 export interface Props {
   errors: string[];
   isLoading?: boolean;
+  isSizeOptionDisabled?: boolean;
   optionsData?: EqlOptionsData;
   optionsSelected?: EqlOptionsSelected;
-  onOptionsChange?: (field: FieldsEqlOptions, newValue: string | null) => void;
+  onOptionsChange?: (field: FieldsEqlOptions, newValue: string | undefined) => void;
 }
 
 type SizeVoidFunc = (newSize: string) => void;
@@ -68,6 +71,7 @@ const singleSelection = { asPlainText: true };
 export const EqlQueryBarFooter: FC<Props> = ({
   errors,
   isLoading,
+  isSizeOptionDisabled,
   optionsData,
   optionsSelected,
   onOptionsChange,
@@ -89,7 +93,7 @@ export const EqlQueryBarFooter: FC<Props> = ({
         if (opt.length > 0) {
           onOptionsChange('eventCategoryField', opt[0].label);
         } else {
-          onOptionsChange('eventCategoryField', null);
+          onOptionsChange('eventCategoryField', undefined);
         }
       }
     },
@@ -101,7 +105,7 @@ export const EqlQueryBarFooter: FC<Props> = ({
         if (opt.length > 0) {
           onOptionsChange('tiebreakerField', opt[0].label);
         } else {
-          onOptionsChange('tiebreakerField', null);
+          onOptionsChange('tiebreakerField', undefined);
         }
       }
     },
@@ -113,7 +117,7 @@ export const EqlQueryBarFooter: FC<Props> = ({
         if (opt.length > 0) {
           onOptionsChange('timestampField', opt[0].label);
         } else {
-          onOptionsChange('timestampField', null);
+          onOptionsChange('timestampField', undefined);
         }
       }
     },
@@ -192,17 +196,19 @@ export const EqlQueryBarFooter: FC<Props> = ({
               >
                 <EuiPopoverTitle>{i18n.EQL_SETTINGS_TITLE}</EuiPopoverTitle>
                 <div style={{ width: '300px' }}>
-                  <EuiFormRow
-                    label={i18n.EQL_OPTIONS_SIZE_LABEL}
-                    helpText={i18n.EQL_OPTIONS_SIZE_HELPER}
-                  >
-                    <EuiFieldNumber
-                      value={localSize}
-                      onChange={handleSizeField}
-                      min={1}
-                      max={10000}
-                    />
-                  </EuiFormRow>
+                  {!isSizeOptionDisabled && (
+                    <EuiFormRow
+                      label={i18n.EQL_OPTIONS_SIZE_LABEL}
+                      helpText={i18n.EQL_OPTIONS_SIZE_HELPER}
+                    >
+                      <EuiFieldNumber
+                        value={localSize}
+                        onChange={handleSizeField}
+                        min={1}
+                        max={10000}
+                      />
+                    </EuiFormRow>
+                  )}
                   <EuiFormRow
                     label={i18n.EQL_OPTIONS_EVENT_CATEGORY_FIELD_LABEL}
                     helpText={i18n.EQL_OPTIONS_EVENT_CATEGORY_FIELD_HELPER}

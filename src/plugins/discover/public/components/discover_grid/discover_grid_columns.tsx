@@ -6,59 +6,88 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiDataGridColumn, EuiIconTip, EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiDataGridColumn, EuiIcon, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { ExpandButton } from './discover_grid_expand_button';
 import { DiscoverGridSettings } from './types';
+import type { ValueToStringConverter } from '../../types';
 import { buildCellActions } from './discover_grid_cell_actions';
 import { getSchemaByKbnType } from './discover_grid_schema';
 import { SelectButton } from './discover_grid_document_selection';
 import { defaultTimeColumnWidth } from './constants';
-import { buildCopyColumnNameButton } from './copy_column_name_button';
+import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_copy_column_button';
+import { DiscoverServices } from '../../build_services';
+import { DataTableRecord } from '../../types';
+import { buildEditFieldButton } from './build_edit_field_button';
 
-export function getLeadControlColumns() {
-  return [
-    {
-      id: 'openDetails',
-      width: 24,
-      headerCellRender: () => (
-        <EuiScreenReaderOnly>
-          <span>
-            {i18n.translate('discover.controlColumnHeader', {
-              defaultMessage: 'Control column',
-            })}
-          </span>
-        </EuiScreenReaderOnly>
-      ),
-      rowCellRender: ExpandButton,
-    },
-    {
-      id: 'select',
-      width: 24,
-      rowCellRender: SelectButton,
-      headerCellRender: () => (
-        <EuiScreenReaderOnly>
-          <span>
-            {i18n.translate('discover.selectColumnHeader', {
-              defaultMessage: 'Select column',
-            })}
-          </span>
-        </EuiScreenReaderOnly>
-      ),
-    },
-  ];
+const openDetails = {
+  id: 'openDetails',
+  width: 24,
+  headerCellRender: () => (
+    <EuiScreenReaderOnly>
+      <span>
+        {i18n.translate('discover.controlColumnHeader', {
+          defaultMessage: 'Control column',
+        })}
+      </span>
+    </EuiScreenReaderOnly>
+  ),
+  rowCellRender: ExpandButton,
+};
+
+const select = {
+  id: 'select',
+  width: 24,
+  rowCellRender: SelectButton,
+  headerCellRender: () => (
+    <EuiScreenReaderOnly>
+      <span>
+        {i18n.translate('discover.selectColumnHeader', {
+          defaultMessage: 'Select column',
+        })}
+      </span>
+    </EuiScreenReaderOnly>
+  ),
+};
+
+export function getLeadControlColumns(setExpandedDoc?: (doc?: DataTableRecord) => void) {
+  if (!setExpandedDoc) {
+    return [select];
+  }
+  return [openDetails, select];
 }
 
-export function buildEuiGridColumn(
-  columnName: string,
-  columnWidth: number | undefined = 0,
-  indexPattern: DataView,
-  defaultColumns: boolean,
-  isSortEnabled: boolean
-) {
+function buildEuiGridColumn({
+  columnName,
+  columnWidth = 0,
+  indexPattern,
+  defaultColumns,
+  isSortEnabled,
+  services,
+  valueToStringConverter,
+  rowsCount,
+  onFilter,
+  editField,
+}: {
+  columnName: string;
+  columnWidth: number | undefined;
+  indexPattern: DataView;
+  defaultColumns: boolean;
+  isSortEnabled: boolean;
+  services: DiscoverServices;
+  valueToStringConverter: ValueToStringConverter;
+  rowsCount: number;
+  onFilter?: DocViewFilterFn;
+  editField?: (fieldName: string) => void;
+}) {
   const indexPatternField = indexPattern.getFieldByName(columnName);
+  const editFieldButton =
+    editField &&
+    indexPatternField &&
+    buildEditFieldButton({ services, dataView: indexPattern, field: indexPatternField, editField });
   const column: EuiDataGridColumn = {
     id: columnName,
     schema: getSchemaByKbnType(indexPatternField?.type),
@@ -81,15 +110,30 @@ export function buildEuiGridColumn(
             },
       showMoveLeft: !defaultColumns,
       showMoveRight: !defaultColumns,
-      additional: columnName === '_source' ? undefined : [buildCopyColumnNameButton(columnName)],
+      additional: [
+        ...(columnName === '__source'
+          ? []
+          : [buildCopyColumnNameButton({ columnId: columnName, services })]),
+        buildCopyColumnValuesButton({
+          columnId: columnName,
+          services,
+          rowsCount,
+          valueToStringConverter,
+        }),
+        ...(editFieldButton ? [editFieldButton] : []),
+      ],
     },
-    cellActions: indexPatternField ? buildCellActions(indexPatternField) : [],
+    cellActions: indexPatternField ? buildCellActions(indexPatternField, onFilter) : [],
   };
 
   if (column.id === indexPattern.timeFieldName) {
+    const timeFieldName = indexPatternField?.customLabel ?? indexPattern.timeFieldName;
     const primaryTimeAriaLabel = i18n.translate(
       'discover.docTable.tableHeader.timeFieldIconTooltipAriaLabel',
-      { defaultMessage: 'Primary time field.' }
+      {
+        defaultMessage: '{timeFieldName} - this field represents the time that events occurred.',
+        values: { timeFieldName },
+      }
     );
     const primaryTimeTooltip = i18n.translate(
       'discover.docTable.tableHeader.timeFieldIconTooltip',
@@ -99,15 +143,13 @@ export function buildEuiGridColumn(
     );
 
     column.display = (
-      <Fragment>
-        {indexPatternField?.customLabel ?? indexPattern.timeFieldName}{' '}
-        <EuiIconTip
-          iconProps={{ tabIndex: -1 }}
-          type="clock"
-          aria-label={primaryTimeAriaLabel}
-          content={primaryTimeTooltip}
-        />
-      </Fragment>
+      <div aria-label={primaryTimeAriaLabel}>
+        <EuiToolTip content={primaryTimeTooltip}>
+          <>
+            {timeFieldName} <EuiIcon type="clock" />
+          </>
+        </EuiToolTip>
+      </div>
     );
     column.initialWidth = defaultTimeColumnWidth;
   }
@@ -117,26 +159,52 @@ export function buildEuiGridColumn(
   return column;
 }
 
-export function getEuiGridColumns(
-  columns: string[],
-  settings: DiscoverGridSettings | undefined,
-  indexPattern: DataView,
-  showTimeCol: boolean,
-  defaultColumns: boolean,
-  isSortEnabled: boolean
-) {
+export function getEuiGridColumns({
+  columns,
+  rowsCount,
+  settings,
+  indexPattern,
+  showTimeCol,
+  defaultColumns,
+  isSortEnabled,
+  services,
+  valueToStringConverter,
+  onFilter,
+  editField,
+}: {
+  columns: string[];
+  rowsCount: number;
+  settings: DiscoverGridSettings | undefined;
+  indexPattern: DataView;
+  showTimeCol: boolean;
+  defaultColumns: boolean;
+  isSortEnabled: boolean;
+  services: DiscoverServices;
+  valueToStringConverter: ValueToStringConverter;
+  onFilter: DocViewFilterFn;
+  editField?: (fieldName: string) => void;
+}) {
   const timeFieldName = indexPattern.timeFieldName;
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
 
+  let visibleColumns = columns;
   if (showTimeCol && indexPattern.timeFieldName && !columns.find((col) => col === timeFieldName)) {
-    const usedColumns = [indexPattern.timeFieldName, ...columns];
-    return usedColumns.map((column) =>
-      buildEuiGridColumn(column, getColWidth(column), indexPattern, defaultColumns, isSortEnabled)
-    );
+    visibleColumns = [indexPattern.timeFieldName, ...columns];
   }
 
-  return columns.map((column) =>
-    buildEuiGridColumn(column, getColWidth(column), indexPattern, defaultColumns, isSortEnabled)
+  return visibleColumns.map((column) =>
+    buildEuiGridColumn({
+      columnName: column,
+      columnWidth: getColWidth(column),
+      indexPattern,
+      defaultColumns,
+      isSortEnabled,
+      services,
+      valueToStringConverter,
+      rowsCount,
+      onFilter,
+      editField,
+    })
   );
 }
 

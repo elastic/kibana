@@ -1,0 +1,23 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "exclude": ["tmp", "target/**/*"],
+  "include": ["./**/*"],
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [ "node"],
+  },
+  "references": [
+    {
+      "path": "../../apm/tsconfig.json",
+    },
+    {
+      "path": "../../synthetics/e2e/tsconfig.json",
+    },
+    {
+      "path": "../../observability/e2e/tsconfig.json"
+    },
+    {
+      "path": "../tsconfig.json",
+    }
+  ]
+}

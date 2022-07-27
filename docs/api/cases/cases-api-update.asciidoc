@@ -144,6 +144,10 @@ An object that contains the case settings.
 (Required, boolean) Turn on or off synching with alerts.
 =====
 
+`severity`::
+(Optional,string) The severity of the case. Valid values are: `critical`, `high`,
+`low`, and `medium`.
+
 `status`::
 (Optional, string) The case status. Valid values are: `closed`, `in-progress`,
 and `open`.
@@ -155,7 +159,8 @@ and `open`.
 (Optional, string) A title for the case.
 
 `version`::
-(Required, string) The current version of the case. To determine this value, use <<cases-api-get-case>> or <<cases-api-find-cases>>.
+(Required, string) The current version of the case. To determine this value, use
+<<cases-api-get-case>> or <<cases-api-find-cases>>.
 ====
 
 === {api-response-codes-title}
@@ -186,15 +191,8 @@ PATCH api/cases
           "parent": null
         }
       },
-      "description": "James Bond clicked on a highly suspicious email
-      banner advertising cheap holidays for underpaid civil servants.
-      Operation bubblegum is active. Repeat - operation bubblegum is
-      now active!",
-      "tags": [
-        "phishing",
-        "social engineering",
-        "bubblegum"
-      ],
+      "description": "A new description.",
+      "tags": [ "tag-1", "tag-2" ],
       "settings": {
         "syncAlerts": true
       }
@@ -215,31 +213,29 @@ The API returns the updated case with a new `version` value. For example:
     "comments": [],
     "totalComment": 0,
     "totalAlerts": 0,
-    "title": "This case will self-destruct in 5 seconds",
-    "tags": [
-      "phishing",
-      "social engineering",
-      "bubblegum"
-    ],
+    "title": "Case title 1",
+    "tags": [ "tag-1", "tag-2" ],
     "settings": {
       "syncAlerts": true
     },
-    "owner": "securitySolution",
-    "description": "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants. Operation bubblegum is active. Repeat - operation bubblegum is now active!",
+    "owner": "cases",
+    "description": "A new description.",
+    "duration": null,
+    "severity": "low",
     "closed_at": null,
     "closed_by": null,
     "created_at": "2022-05-13T09:16:17.416Z",
     "created_by": {
-      "email": "ahunley@imf.usa.gov",
-      "full_name": "Alan Hunley",
-      "username": "ahunley"
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
     },
     "status": "open",
     "updated_at": "2022-05-13T09:48:33.043Z",
     "updated_by": {
-      "email": "classified@hms.oo.gov.uk",
-      "full_name": "Classified",
-      "username": "M"
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
     },
     "connector": {
       "id": "131d4448-abe0-4789-939d-8ef60680b498",
@@ -254,9 +250,9 @@ The API returns the updated case with a new `version` value. For example:
     "external_service": {
       "external_title": "IS-4",
       "pushed_by": {
-        "full_name": "Classified",
-        "email": "classified@hms.oo.gov.uk",
-        "username": "M"
+        "full_name": null,
+        "email": null,
+        "username": "elastic"
       },
       "external_url": "https://hms.atlassian.net/browse/IS-4",
       "pushed_at": "2022-05-13T09:20:40.672Z",

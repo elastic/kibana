@@ -11,7 +11,11 @@ import { useRef, useEffect, useLayoutEffect, useReducer } from 'react';
 import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
-import { ExpressionAstExpression, IInterpreterRenderHandlers } from '../../common';
+import {
+  ExpressionAstExpression,
+  IInterpreterRenderHandlers,
+  isExpressionValueError,
+} from '../../common';
 import { ExpressionLoader } from '../loader';
 import { IExpressionLoaderParams, ExpressionRenderError, ExpressionRendererEvent } from '../types';
 import { useDebouncedValue } from './use_debounced_value';
@@ -111,6 +115,7 @@ export function useExpressionRenderer(
     debouncedLoaderParams.interactive,
     debouncedLoaderParams.renderMode,
     debouncedLoaderParams.syncColors,
+    debouncedLoaderParams.syncTooltips,
   ]);
 
   useEffect(() => {
@@ -120,11 +125,14 @@ export function useExpressionRenderer(
   }, [expressionLoaderRef.current, onEvent]);
 
   useEffect(() => {
-    const subscription =
-      onData$ &&
-      expressionLoaderRef.current?.data$.subscribe(({ partial, result }) => {
-        onData$(result, expressionLoaderRef.current?.inspect(), partial);
+    const subscription = expressionLoaderRef.current?.data$.subscribe(({ partial, result }) => {
+      setState({
+        isEmpty: false,
+        ...(!isExpressionValueError(result) ? { error: null } : {}),
       });
+
+      onData$?.(result, expressionLoaderRef.current?.inspect(), partial);
+    });
 
     return () => subscription?.unsubscribe();
   }, [expressionLoaderRef.current, onData$]);
@@ -141,7 +149,9 @@ export function useExpressionRenderer(
         onRender$?.(item);
       });
 
-    return () => subscription?.unsubscribe();
+    return () => {
+      subscription?.unsubscribe();
+    };
   }, [expressionLoaderRef.current, onRender$]);
   /* eslint-enable react-hooks/exhaustive-deps */
 

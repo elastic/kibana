@@ -6,7 +6,7 @@
  */
 
 import './toolbar.scss';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import type { Position } from '@elastic/charts';
 import type { PaletteRegistry } from '@kbn/coloring';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { LegendDisplay, PieVisualizationState, SharedPieLayerState } from '../../common';
@@ -72,6 +73,10 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
     emptySizeRatioOptions,
     isDisabled: isToolbarPopoverDisabled,
   } = PartitionChartsMeta[state.shape].toolbarPopover;
+
+  const legendSize = layer.legendSize;
+
+  const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
 
   const onStateChange = useCallback(
     (part: Record<string, unknown>) => {
@@ -259,8 +264,9 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
         onTruncateLegendChange={onTruncateLegendChange}
         maxLines={layer?.legendMaxLines}
         onMaxLinesChange={onLegendMaxLinesChange}
-        legendSize={layer.legendSize}
+        legendSize={legendSize}
         onLegendSizeChange={onLegendSizeChange}
+        showAutoLegendSizeOption={hadAutoLegendSize}
       />
     </EuiFlexGroup>
   );
@@ -300,6 +306,7 @@ export function DimensionEditor(
     paletteService: PaletteRegistry;
   }
 ) {
+  if (props.accessor !== Object.values(props.state.layers)[0].groups[0]) return null;
   return (
     <PalettePicker
       palettes={props.paletteService}

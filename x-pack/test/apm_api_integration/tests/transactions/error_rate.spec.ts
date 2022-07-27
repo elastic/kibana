@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
-import { format } from 'url';
 import moment from 'moment';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
@@ -18,7 +17,7 @@ type ErrorRate =
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
-  const supertest = getService('legacySupertestAsApmReadUser');
+  const apmApiClient = getService('apmApiClient');
 
   const archiveName = 'apm_8.0.0';
 
@@ -26,14 +25,41 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const { start, end } = archives_metadata[archiveName];
   const transactionType = 'request';
 
+  async function fetchErrorCharts({
+    serviceName,
+    query,
+  }: {
+    serviceName: string;
+    query: {
+      start: string;
+      end: string;
+      transactionType: string;
+      environment: string;
+      kuery: string;
+      offset?: string;
+    };
+  }) {
+    return await apmApiClient.readUser({
+      endpoint: `GET /internal/apm/services/{serviceName}/transactions/charts/error_rate`,
+      params: {
+        path: { serviceName },
+        query,
+      },
+    });
+  }
+
   registry.when('Error rate when data is not loaded', { config: 'basic', archives: [] }, () => {
     it('handles the empty state', async () => {
-      const response = await supertest.get(
-        format({
-          pathname: '/internal/apm/services/opbeans-java/transactions/charts/error_rate',
-          query: { start, end, transactionType, environment: 'ENVIRONMENT_ALL', kuery: '' },
-        })
-      );
+      const response = await fetchErrorCharts({
+        serviceName: 'opbeans-java',
+        query: {
+          start,
+          end,
+          transactionType,
+          environment: 'ENVIRONMENT_ALL',
+          kuery: '',
+        },
+      });
       expect(response.status).to.be(200);
 
       const body = response.body as ErrorRate;
@@ -44,19 +70,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     it('handles the empty state with comparison data', async () => {
-      const response = await supertest.get(
-        format({
-          pathname: '/internal/apm/services/opbeans-java/transactions/charts/error_rate',
-          query: {
-            transactionType,
-            start: moment(end).subtract(15, 'minutes').toISOString(),
-            end,
-            offset: '15m',
-            environment: 'ENVIRONMENT_ALL',
-            kuery: '',
-          },
-        })
-      );
+      const response = await fetchErrorCharts({
+        serviceName: 'opbeans-java',
+        query: {
+          transactionType,
+          start: moment(end).subtract(15, 'minutes').toISOString(),
+          end,
+          offset: '15m',
+          environment: 'ENVIRONMENT_ALL',
+          kuery: '',
+        },
+      });
       expect(response.status).to.be(200);
 
       const body = response.body as ErrorRate;
@@ -75,12 +99,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         let errorRateResponse: ErrorRate;
 
         before(async () => {
-          const response = await supertest.get(
-            format({
-              pathname: '/internal/apm/services/opbeans-java/transactions/charts/error_rate',
-              query: { start, end, transactionType, environment: 'ENVIRONMENT_ALL', kuery: '' },
-            })
-          );
+          const response = await fetchErrorCharts({
+            serviceName: 'opbeans-java',
+            query: {
+              start,
+              end,
+              transactionType,
+              environment: 'ENVIRONMENT_ALL',
+              kuery: '',
+            },
+          });
+
           errorRateResponse = response.body;
         });
 
@@ -129,19 +158,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         let errorRateResponse: ErrorRate;
 
         before(async () => {
-          const response = await supertest.get(
-            format({
-              pathname: '/internal/apm/services/opbeans-java/transactions/charts/error_rate',
-              query: {
-                transactionType,
-                start: moment(end).subtract(15, 'minutes').toISOString(),
-                end,
-                offset: '15m',
-                environment: 'ENVIRONMENT_ALL',
-                kuery: '',
-              },
-            })
-          );
+          const response = await fetchErrorCharts({
+            serviceName: 'opbeans-java',
+            query: {
+              transactionType,
+              start: moment(end).subtract(15, 'minutes').toISOString(),
+              end,
+              offset: '15m',
+              environment: 'ENVIRONMENT_ALL',
+              kuery: '',
+            },
+          });
+
           errorRateResponse = response.body;
         });
 

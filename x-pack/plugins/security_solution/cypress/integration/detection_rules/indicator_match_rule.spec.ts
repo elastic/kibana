@@ -178,13 +178,11 @@ describe('indicator match', () => {
           selectIndicatorMatchType();
         });
 
-        // Unskip once https://github.com/elastic/kibana/issues/130770 is fixed
-        it.skip('Has a default set of *:*', () => {
+        it('Has a default set of *:*', () => {
           getCustomQueryInput().should('have.text', '*:*');
         });
 
-        // Unskip once https://github.com/elastic/kibana/issues/1307707 is fixed
-        it.skip('Shows invalidation text if text is removed', () => {
+        it('Shows invalidation text if text is removed', () => {
           getCustomQueryInput().type('{selectall}{del}');
           getCustomQueryInvalidationText().should('exist');
         });
@@ -207,12 +205,12 @@ describe('indicator match', () => {
 
       describe('Indicator mapping', () => {
         beforeEach(() => {
+          const rule = getNewThreatIndicatorRule();
           visitWithoutDateRange(RULE_CREATION);
           selectIndicatorMatchType();
-          fillIndexAndIndicatorIndexPattern(
-            getNewThreatIndicatorRule().index,
-            getNewThreatIndicatorRule().indicatorIndexPattern
-          );
+          if (rule.dataSource.type === 'indexPatterns') {
+            fillIndexAndIndicatorIndexPattern(rule.dataSource.index, rule.indicatorIndexPattern);
+          }
         });
 
         it('Does NOT show invalidation text on initial page load', () => {
@@ -401,8 +399,7 @@ describe('indicator match', () => {
       });
 
       describe('Schedule', () => {
-        // Unskip once https://github.com/elastic/kibana/issues/1307707 is fixed
-        it.skip('IM rule has 1h time interval and lookback by default', () => {
+        it('IM rule has 1h time interval and lookback by default', () => {
           visitWithoutDateRange(RULE_CREATION);
           selectIndicatorMatchType();
           fillDefineIndicatorMatchRuleAndContinue(getNewThreatIndicatorRule());
@@ -421,13 +418,13 @@ describe('indicator match', () => {
         deleteAlertsAndRules();
       });
 
-      // Unskip once https://github.com/elastic/kibana/issues/1307707 is fixed
-      it.skip('Creates and enables a new Indicator Match rule', () => {
+      it('Creates and enables a new Indicator Match rule', () => {
+        const rule = getNewThreatIndicatorRule();
         visitWithoutDateRange(RULE_CREATION);
         selectIndicatorMatchType();
-        fillDefineIndicatorMatchRuleAndContinue(getNewThreatIndicatorRule());
-        fillAboutRuleAndContinue(getNewThreatIndicatorRule());
-        fillScheduleRuleAndContinue(getNewThreatIndicatorRule());
+        fillDefineIndicatorMatchRuleAndContinue(rule);
+        fillAboutRuleAndContinue(rule);
+        fillScheduleRuleAndContinue(rule);
         createAndEnableRule();
 
         cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
@@ -436,22 +433,19 @@ describe('indicator match', () => {
           cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
         });
 
-        cy.get(RULE_NAME).should('have.text', getNewThreatIndicatorRule().name);
-        cy.get(RISK_SCORE).should('have.text', getNewThreatIndicatorRule().riskScore);
-        cy.get(SEVERITY).should('have.text', getNewThreatIndicatorRule().severity);
+        cy.get(RULE_NAME).should('have.text', rule.name);
+        cy.get(RISK_SCORE).should('have.text', rule.riskScore);
+        cy.get(SEVERITY).should('have.text', rule.severity);
         cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
         goToRuleDetails();
 
-        cy.get(RULE_NAME_HEADER).should('contain', `${getNewThreatIndicatorRule().name}`);
-        cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', getNewThreatIndicatorRule().description);
+        cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
+        cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', rule.description);
         cy.get(ABOUT_DETAILS).within(() => {
-          getDetails(SEVERITY_DETAILS).should('have.text', getNewThreatIndicatorRule().severity);
-          getDetails(RISK_SCORE_DETAILS).should('have.text', getNewThreatIndicatorRule().riskScore);
-          getDetails(INDICATOR_PREFIX_OVERRIDE).should(
-            'have.text',
-            getNewThreatIndicatorRule().threatIndicatorPath
-          );
+          getDetails(SEVERITY_DETAILS).should('have.text', rule.severity);
+          getDetails(RISK_SCORE_DETAILS).should('have.text', rule.riskScore);
+          getDetails(INDICATOR_PREFIX_OVERRIDE).should('have.text', rule.threatIndicatorPath);
           getDetails(REFERENCE_URLS_DETAILS).should((details) => {
             expect(removeExternalLinkText(details.text())).equal(expectedUrls);
           });
@@ -465,22 +459,19 @@ describe('indicator match', () => {
         cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
 
         cy.get(DEFINITION_DETAILS).within(() => {
-          getDetails(INDEX_PATTERNS_DETAILS).should(
-            'have.text',
-            getNewThreatIndicatorRule().index.join('')
-          );
+          if (rule.dataSource.type === 'indexPatterns') {
+            getDetails(INDEX_PATTERNS_DETAILS).should('have.text', rule.dataSource.index?.join(''));
+          }
           getDetails(CUSTOM_QUERY_DETAILS).should('have.text', '*:*');
           getDetails(RULE_TYPE_DETAILS).should('have.text', 'Indicator Match');
           getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
           getDetails(INDICATOR_INDEX_PATTERNS).should(
             'have.text',
-            getNewThreatIndicatorRule().indicatorIndexPattern.join('')
+            rule.indicatorIndexPattern.join('')
           );
           getDetails(INDICATOR_MAPPING).should(
             'have.text',
-            `${getNewThreatIndicatorRule().indicatorMappingField} MATCHES ${
-              getNewThreatIndicatorRule().indicatorIndexField
-            }`
+            `${rule.indicatorMappingField} MATCHES ${rule.indicatorIndexField}`
           );
           getDetails(INDICATOR_INDEX_QUERY).should('have.text', '*:*');
         });
@@ -488,15 +479,11 @@ describe('indicator match', () => {
         cy.get(SCHEDULE_DETAILS).within(() => {
           getDetails(RUNS_EVERY_DETAILS).should(
             'have.text',
-            `${getNewThreatIndicatorRule().runsEvery.interval}${
-              getNewThreatIndicatorRule().runsEvery.type
-            }`
+            `${rule.runsEvery.interval}${rule.runsEvery.type}`
           );
           getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should(
             'have.text',
-            `${getNewThreatIndicatorRule().lookBack.interval}${
-              getNewThreatIndicatorRule().lookBack.type
-            }`
+            `${rule.lookBack.interval}${rule.lookBack.type}`
           );
         });
 
@@ -504,11 +491,9 @@ describe('indicator match', () => {
         waitForAlertsToPopulate();
 
         cy.get(NUMBER_OF_ALERTS).should('have.text', expectedNumberOfAlerts);
-        cy.get(ALERT_RULE_NAME).first().should('have.text', getNewThreatIndicatorRule().name);
-        cy.get(ALERT_SEVERITY)
-          .first()
-          .should('have.text', getNewThreatIndicatorRule().severity.toLowerCase());
-        cy.get(ALERT_RISK_SCORE).first().should('have.text', getNewThreatIndicatorRule().riskScore);
+        cy.get(ALERT_RULE_NAME).first().should('have.text', rule.name);
+        cy.get(ALERT_SEVERITY).first().should('have.text', rule.severity.toLowerCase());
+        cy.get(ALERT_RISK_SCORE).first().should('have.text', rule.riskScore);
       });
 
       it('Investigate alert in timeline', () => {

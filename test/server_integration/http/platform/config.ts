@@ -10,7 +10,7 @@ import { FtrConfigProviderContext } from '@kbn/test';
 
 // eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const httpConfig = await readConfigFile(require.resolve('../../config'));
+  const httpConfig = await readConfigFile(require.resolve('../../config.base.js'));
 
   return {
     testFiles: [require.resolve('./cache'), require.resolve('./headers')],

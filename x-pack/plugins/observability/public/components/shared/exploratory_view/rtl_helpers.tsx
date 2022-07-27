@@ -29,6 +29,8 @@ import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
+import { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { rumFieldFormats } from './configurations/rum/field_formats';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import * as useAppDataViewHook from './hooks/use_app_data_view';
 import { DataViewContext, DataViewContextProvider } from './hooks/use_app_data_view';
@@ -319,6 +321,7 @@ function mockSeriesStorageContext({
     firstSeries: mockDataSeries[0],
     allSeries: mockDataSeries,
     setReportType: jest.fn(),
+    setChartTimeRangeContext: jest.fn(),
     storage: {
       get: jest
         .fn()
@@ -364,12 +367,19 @@ export const mockHistory = {
   },
 };
 
+const fieldFormatMap: DataViewSpec['fieldFormats'] = {};
+
+rumFieldFormats.forEach(({ field, format }) => {
+  fieldFormatMap[field] = format;
+});
+
 export const mockDataView = createStubDataView({
   spec: {
     id: 'apm-*',
     title: 'apm-*',
     timeFieldName: '@timestamp',
     fields: JSON.parse(dataViewData.attributes.fields),
+    fieldFormats: fieldFormatMap,
   },
 });
 

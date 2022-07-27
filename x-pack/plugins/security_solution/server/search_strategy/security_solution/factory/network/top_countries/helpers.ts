@@ -8,7 +8,7 @@
 import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import {
+import type {
   NetworkTopCountriesBuckets,
   NetworkTopCountriesEdges,
   NetworkTopCountriesRequestOptions,

@@ -172,8 +172,9 @@ export default function ({ getService }: FtrProviderContext) {
     await ml.dataVisualizerIndexBased.assertTotalFieldsCount(testData.expected.totalFieldsCount);
   }
 
-  describe('data view management', function () {
-    this.tags(['mlqa']);
+  // Failing: See https://github.com/elastic/kibana/issues/137174
+  describe.skip('data view management', function () {
+    this.tags(['ml']);
     const indexPatternTitle = 'ft_farequote';
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');

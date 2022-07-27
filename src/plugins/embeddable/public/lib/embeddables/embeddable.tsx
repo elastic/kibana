@@ -33,6 +33,7 @@ export abstract class Embeddable<
   public readonly parent?: IContainer;
   public readonly isContainer: boolean = false;
   public readonly deferEmbeddableLoad: boolean = false;
+
   public abstract readonly type: string;
   public readonly id: string;
   public fatalError?: Error;
@@ -53,8 +54,15 @@ export abstract class Embeddable<
 
   constructor(input: TEmbeddableInput, output: TEmbeddableOutput, parent?: IContainer) {
     this.id = input.id;
+
     this.output = {
       title: getPanelTitle(input, output),
+      ...(this.reportsEmbeddableLoad()
+        ? {}
+        : {
+            loading: false,
+            rendered: true,
+          }),
       ...output,
     };
     this.input = {
@@ -87,6 +95,10 @@ export abstract class Embeddable<
         },
         () => {}
       );
+  }
+
+  public reportsEmbeddableLoad() {
+    return false;
   }
 
   public refreshInputFromParent() {

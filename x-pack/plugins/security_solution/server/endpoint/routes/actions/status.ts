@@ -5,25 +5,26 @@
  * 2.0.
  */
 
-import { RequestHandler } from '@kbn/core/server';
-import { TypeOf } from '@kbn/config-schema';
+import type { RequestHandler } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
 import { ActionStatusRequestSchema } from '../../../../common/endpoint/schema/actions';
 import { ACTION_STATUS_ROUTE } from '../../../../common/endpoint/constants';
-import {
+import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
-import { EndpointAppContext } from '../../types';
+import type { EndpointAppContext } from '../../types';
 import { getPendingActionCounts } from '../../services';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 
 /**
- * Registers routes for checking status of endpoints based on pending actions
+ * Registers routes for checking status of actions
  */
 export function registerActionStatusRoutes(
   router: SecuritySolutionPluginRouter,
   endpointContext: EndpointAppContext
 ) {
+  // Summary of action status for a given list of endpoints
   router.get(
     {
       path: ACTION_STATUS_ROUTE,

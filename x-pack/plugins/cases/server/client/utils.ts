@@ -12,7 +12,11 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { nodeBuilder, fromKueryExpression, KueryNode } from '@kbn/es-query';
+import { nodeBuilder, fromKueryExpression, KueryNode, escapeKuery } from '@kbn/es-query';
+import {
+  isCommentRequestTypeExternalReference,
+  isCommentRequestTypePersistableState,
+} from '../../common/utils/attachments';
 import { CASE_SAVED_OBJECT } from '../../common/constants';
 import {
   OWNER_FIELD,
@@ -23,6 +27,12 @@ import {
   ContextTypeUserRt,
   excess,
   throwErrors,
+  CaseSeverity,
+  ExternalReferenceStorageType,
+  ExternalReferenceSORt,
+  CommentRequestExternalReferenceType,
+  ExternalReferenceNoSORt,
+  PersistableStateAttachmentRt,
 } from '../../common/api';
 import { combineFilterWithAuthorizationFilter } from '../authorization/utils';
 import {
@@ -30,8 +40,10 @@ import {
   isCommentRequestTypeAlert,
   isCommentRequestTypeUser,
   isCommentRequestTypeActions,
+  assertUnreachable,
 } from '../common/utils';
 import { SavedObjectFindOptionsKueryNode } from '../common/types';
+import { ConstructQueryParams } from './types';
 
 export const decodeCommentRequest = (comment: CommentRequest) => {
   if (isCommentRequestTypeUser(comment)) {
@@ -82,6 +94,31 @@ export const decodeCommentRequest = (comment: CommentRequest) => {
         )} indices: ${JSON.stringify(indices)}`
       );
     }
+  } else if (isCommentRequestTypeExternalReference(comment)) {
+    decodeExternalReferenceAttachment(comment);
+  } else if (isCommentRequestTypePersistableState(comment)) {
+    pipe(
+      excess(PersistableStateAttachmentRt).decode(comment),
+      fold(throwErrors(badRequest), identity)
+    );
+  } else {
+    /**
+     * This assertion ensures that TS will show an error
+     * when we add a new attachment type. This way, we rely on TS
+     * to remind us that we have to do a check for the new attachment.
+     */
+    assertUnreachable(comment);
+  }
+};
+
+const decodeExternalReferenceAttachment = (attachment: CommentRequestExternalReferenceType) => {
+  if (attachment.externalReferenceStorage.type === ExternalReferenceStorageType.savedObject) {
+    pipe(excess(ExternalReferenceSORt).decode(attachment), fold(throwErrors(badRequest), identity));
+  } else {
+    pipe(
+      excess(ExternalReferenceNoSORt).decode(attachment),
+      fold(throwErrors(badRequest), identity)
+    );
   }
 };
 
@@ -106,6 +143,25 @@ export const addStatusFilter = ({
 }): KueryNode => {
   const filters: KueryNode[] = [];
   filters.push(nodeBuilder.is(`${type}.attributes.status`, status));
+
+  if (appendFilter) {
+    filters.push(appendFilter);
+  }
+
+  return filters.length > 1 ? nodeBuilder.and(filters) : filters[0];
+};
+
+export const addSeverityFilter = ({
+  severity,
+  appendFilter,
+  type = CASE_SAVED_OBJECT,
+}: {
+  severity: CaseSeverity;
+  appendFilter?: KueryNode;
+  type?: string;
+}): KueryNode => {
+  const filters: KueryNode[] = [];
+  filters.push(nodeBuilder.is(`${type}.attributes.severity`, severity));
 
   if (appendFilter) {
     filters.push(appendFilter);
@@ -199,8 +255,14 @@ export const buildRangeFilter = ({
   }
 
   try {
-    const fromKQL = from != null ? `${savedObjectType}.attributes.${field} >= ${from}` : undefined;
-    const toKQL = to != null ? `${savedObjectType}.attributes.${field} <= ${to}` : undefined;
+    const fromKQL =
+      from != null
+        ? `${escapeKuery(savedObjectType)}.attributes.${escapeKuery(field)} >= ${escapeKuery(from)}`
+        : undefined;
+    const toKQL =
+      to != null
+        ? `${escapeKuery(savedObjectType)}.attributes.${escapeKuery(field)} <= ${escapeKuery(to)}`
+        : undefined;
 
     const rangeKQLQuery = `${fromKQL != null ? fromKQL : ''} ${
       fromKQL != null && toKQL != null ? 'and' : ''
@@ -216,48 +278,37 @@ export const constructQueryOptions = ({
   tags,
   reporters,
   status,
+  severity,
   sortByField,
   owner,
   authorizationFilter,
   from,
   to,
-}: {
-  tags?: string | string[];
-  reporters?: string | string[];
-  status?: CaseStatuses;
-  sortByField?: string;
-  owner?: string | string[];
-  authorizationFilter?: KueryNode;
-  from?: string;
-  to?: string;
-}): SavedObjectFindOptionsKueryNode => {
-  const kueryNodeExists = (filter: KueryNode | null | undefined): filter is KueryNode =>
-    filter != null;
-
-  const tagsFilter = buildFilter({ filters: tags ?? [], field: 'tags', operator: 'or' });
+}: ConstructQueryParams): SavedObjectFindOptionsKueryNode => {
+  const tagsFilter = buildFilter({ filters: tags, field: 'tags', operator: 'or' });
   const reportersFilter = buildFilter({
-    filters: reporters ?? [],
+    filters: reporters,
     field: 'created_by.username',
     operator: 'or',
   });
   const sortField = sortToSnake(sortByField);
-  const ownerFilter = buildFilter({ filters: owner ?? [], field: OWNER_FIELD, operator: 'or' });
+  const ownerFilter = buildFilter({ filters: owner, field: OWNER_FIELD, operator: 'or' });
 
   const statusFilter = status != null ? addStatusFilter({ status }) : undefined;
+  const severityFilter = severity != null ? addSeverityFilter({ severity }) : undefined;
   const rangeFilter = buildRangeFilter({ from, to });
 
-  const filters: KueryNode[] = [
+  const filters = combineFilters([
     statusFilter,
+    severityFilter,
     tagsFilter,
     reportersFilter,
     rangeFilter,
     ownerFilter,
-  ].filter(kueryNodeExists);
-
-  const caseFilters = filters.length > 1 ? nodeBuilder.and(filters) : filters[0];
+  ]);
 
   return {
-    filter: combineFilterWithAuthorizationFilter(caseFilters, authorizationFilter),
+    filter: combineFilterWithAuthorizationFilter(filters, authorizationFilter),
     sortField,
   };
 };

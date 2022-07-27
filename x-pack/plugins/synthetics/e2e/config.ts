@@ -19,7 +19,7 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('../../../../test/common/config.js')
   );
   const xpackFunctionalTestsConfig = await readConfigFile(
-    require.resolve('../../../test/functional/config.js')
+    require.resolve('../../../test/functional/config.base.js')
   );
 
   const kibanaConfig = readKibanaConfig();
@@ -52,17 +52,18 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         `--elasticsearch.ignoreVersionMismatch=${process.env.CI ? 'false' : 'true'}`,
-        `--uiSettings.overrides.theme:darkMode=true`,
         `--elasticsearch.username=kibana_system`,
         `--elasticsearch.password=changeme`,
         '--xpack.reporting.enabled=false',
         `--xpack.uptime.service.manifestUrl=${manifestUrl}`,
+        `--xpack.uptime.service.showExperimentalLocations=true`,
         `--xpack.uptime.service.username=${
           process.env.SYNTHETICS_REMOTE_ENABLED
             ? serviceUsername
             : 'localKibanaIntegrationTestsUser'
         }`,
         `--xpack.uptime.service.password=${servicePassword}`,
+        `--xpack.uptime.service.showExperimentalLocations=${true}`,
       ],
     },
   };

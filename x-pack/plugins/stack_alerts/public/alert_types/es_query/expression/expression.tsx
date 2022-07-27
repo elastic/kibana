@@ -5,66 +5,99 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-
+import React, { memo, PropsWithChildren, useCallback, useRef } from 'react';
+import deepEqual from 'fast-deep-equal';
 import 'brace/theme/github';
-
-import { EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { EsQueryAlertParams } from '../types';
-import { SearchSourceExpression } from './search_source_expression';
+import { EsQueryAlertParams, SearchType } from '../types';
+import { SearchSourceExpression, SearchSourceExpressionProps } from './search_source_expression';
 import { EsQueryExpression } from './es_query_expression';
+import { QueryFormTypeChooser } from './query_form_type_chooser';
 import { isSearchSourceAlert } from '../util';
+import { EXPRESSION_ERROR_KEYS } from '../constants';
 
-const expressionFieldsWithValidation = [
-  'index',
-  'size',
-  'timeField',
-  'threshold0',
-  'threshold1',
-  'timeWindowSize',
-  'searchType',
-  'esQuery',
-  'searchConfiguration',
-];
+function areSearchSourceExpressionPropsEqual(
+  prevProps: Readonly<PropsWithChildren<SearchSourceExpressionProps>>,
+  nextProps: Readonly<PropsWithChildren<SearchSourceExpressionProps>>
+) {
+  const areErrorsEqual = deepEqual(prevProps.errors, nextProps.errors);
+  const areRuleParamsEqual = deepEqual(prevProps.ruleParams, nextProps.ruleParams);
+  return areErrorsEqual && areRuleParamsEqual;
+}
+
+const SearchSourceExpressionMemoized = memo<SearchSourceExpressionProps>(
+  SearchSourceExpression,
+  areSearchSourceExpressionPropsEqual
+);
 
 export const EsQueryAlertTypeExpression: React.FunctionComponent<
   RuleTypeParamsExpressionProps<EsQueryAlertParams>
 > = (props) => {
-  const { ruleParams, errors } = props;
+  const { ruleParams, errors, setRuleProperty, setRuleParams } = props;
   const isSearchSource = isSearchSourceAlert(ruleParams);
+  const isManagementPage = useRef(!Object.keys(ruleParams).length).current;
 
-  const hasExpressionErrors = !!Object.keys(errors).find((errorKey) => {
-    return (
-      expressionFieldsWithValidation.includes(errorKey) &&
-      errors[errorKey].length >= 1 &&
-      ruleParams[errorKey as keyof EsQueryAlertParams] !== undefined
-    );
-  });
+  const formTypeSelected = useCallback(
+    (searchType: SearchType | null) => {
+      if (!searchType) {
+        // @ts-expect-error Reset rule params regardless of their type
+        setRuleProperty('params', {});
+        return;
+      }
+      setRuleParams('searchType', searchType);
+    },
+    [setRuleParams, setRuleProperty]
+  );
 
-  const expressionErrorMessage = i18n.translate(
+  const expressionGenericErrorMessage = i18n.translate(
     'xpack.stackAlerts.esQuery.ui.alertParams.fixErrorInExpressionBelowValidationMessage',
     {
       defaultMessage: 'Expression contains errors.',
     }
   );
 
+  const errorParam = EXPRESSION_ERROR_KEYS.find((errorKey) => {
+    return errors[errorKey]?.length >= 1 && ruleParams[errorKey] !== undefined;
+  });
+
+  const expressionError = !!errorParam && (
+    <>
+      <EuiCallOut
+        color="danger"
+        size="s"
+        title={
+          ['index', 'searchType'].includes(errorParam)
+            ? errors[errorParam]
+            : expressionGenericErrorMessage
+        }
+      />
+      <EuiSpacer />
+    </>
+  );
+
   return (
     <>
-      {hasExpressionErrors && (
-        <>
-          <EuiSpacer />
-          <EuiCallOut color="danger" size="s" title={expressionErrorMessage} />
-          <EuiSpacer />
-        </>
+      {expressionError}
+
+      {/* Showing the selected type */}
+      {isManagementPage && (
+        <QueryFormTypeChooser
+          searchType={ruleParams.searchType as SearchType}
+          onFormTypeSelect={formTypeSelected}
+        />
       )}
 
-      {isSearchSource ? (
-        <SearchSourceExpression {...props} ruleParams={ruleParams} />
-      ) : (
+      {ruleParams.searchType && isSearchSource && (
+        <SearchSourceExpressionMemoized {...props} ruleParams={ruleParams} />
+      )}
+
+      {ruleParams.searchType && !isSearchSource && (
         <EsQueryExpression {...props} ruleParams={ruleParams} />
       )}
+
+      <EuiHorizontalRule />
     </>
   );
 };

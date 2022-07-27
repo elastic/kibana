@@ -8,7 +8,7 @@
 import type { EuiStepProps } from '@elastic/eui';
 import type { ComponentType, LazyExoticComponent } from 'react';
 
-import type { NewPackagePolicy, PackageInfo, PackagePolicy } from '.';
+import type { Agent, NewPackagePolicy, PackageInfo, PackagePolicy } from '.';
 
 /** Register a Fleet UI extension */
 export type UIExtensionRegistrationCallback = (extensionPoint: UIExtensionPoint) => void;
@@ -46,12 +46,32 @@ export interface PackagePolicyEditExtensionComponentProps {
   }) => void;
 }
 
+/**
+ * UI Component Extension is used on the pages displaying the ability to see
+ * Policy response view
+ */
+export type PackagePolicyResponseExtensionComponent =
+  ComponentType<PackagePolicyResponseExtensionComponentProps>;
+
+export interface PackagePolicyResponseExtensionComponentProps {
+  /** The current agent to retrieve response from */
+  agent: Agent;
+  /** A callback function to set the `needs attention` state */
+  onShowNeedsAttentionBadge?: (val: boolean) => void;
+}
+
 /** Extension point registration contract for Integration Policy Edit views */
 export interface PackagePolicyEditExtension {
   package: string;
   view: 'package-policy-edit';
   useLatestPackageVersion?: boolean;
   Component: LazyExoticComponent<PackagePolicyEditExtensionComponent>;
+}
+
+export interface PackagePolicyResponseExtension {
+  package: string;
+  view: 'package-policy-response';
+  Component: LazyExoticComponent<PackagePolicyResponseExtensionComponent>;
 }
 
 /** Extension point registration contract for Integration Policy Edit tabs views */
@@ -133,6 +153,7 @@ export interface AgentEnrollmentFlyoutFinalStepExtension {
 /** Fleet UI Extension Point */
 export type UIExtensionPoint =
   | PackagePolicyEditExtension
+  | PackagePolicyResponseExtension
   | PackagePolicyEditTabsExtension
   | PackageCustomExtension
   | PackagePolicyCreateExtension

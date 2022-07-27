@@ -54,6 +54,7 @@ export interface SearchOpts {
 export interface AggregationOpts {
   aggs: Record<string, estypes.AggregationsAggregationContainer>;
   query?: estypes.QueryDslQueryContainer;
+  runtime_mappings?: estypes.MappingRuntimeFields;
   size?: number;
 }
 
@@ -332,6 +333,8 @@ export class TaskStore {
   public async aggregate<TSearchRequest extends AggregationOpts>({
     aggs,
     query,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    runtime_mappings,
     size = 0,
   }: TSearchRequest): Promise<estypes.SearchResponse<ConcreteTaskInstance>> {
     const body = await this.esClient.search<
@@ -344,6 +347,7 @@ export class TaskStore {
       body: ensureAggregationOnlyReturnsTaskObjects({
         query,
         aggs,
+        runtime_mappings,
         size,
       }),
     });

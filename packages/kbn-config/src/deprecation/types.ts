@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import type { RecursiveReadonly } from '@kbn/utility-types';
+import type { DocLinks } from '@kbn/doc-links';
 
 /**
  * Config deprecation hook used when invoking a {@link ConfigDeprecation}
@@ -77,6 +78,8 @@ export interface ConfigDeprecationContext {
   version: string;
   /** The current Kibana branch, e.g `7.x`, `7.16`, `master` */
   branch: string;
+  /** Allow direct access to the doc links from the deprecation handler */
+  docLinks: DocLinks;
 }
 
 /**

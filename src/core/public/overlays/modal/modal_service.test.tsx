@@ -10,8 +10,8 @@ import { mockReactDomRender, mockReactDomUnmount } from '../overlay.test.mocks';
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { i18nServiceMock } from '../../i18n/i18n_service.mock';
-import { themeServiceMock } from '../../theme/theme_service.mock';
+import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { ModalService, OverlayModalStart } from './modal_service';
 import { mountReactNode } from '../../utils';
 import { OverlayRef } from '../types';
@@ -50,7 +50,7 @@ describe('ModalService', () => {
       });
       expect(mockReactDomRender.mock.calls).toMatchSnapshot();
       const modalContent = mount(mockReactDomRender.mock.calls[0][0]);
-      expect(modalContent.html()).toMatchSnapshot();
+      expect(modalContent.render()).toMatchSnapshot();
     });
 
     describe('with a currently active modal', () => {
@@ -108,7 +108,7 @@ describe('ModalService', () => {
       });
       expect(mockReactDomRender.mock.calls).toMatchSnapshot();
       const modalContent = mount(mockReactDomRender.mock.calls[0][0]);
-      expect(modalContent.html()).toMatchSnapshot();
+      expect(modalContent.render()).toMatchSnapshot();
     });
 
     it('renders a string confirm message', () => {
@@ -116,7 +116,7 @@ describe('ModalService', () => {
       modals.openConfirm('Some message');
       expect(mockReactDomRender.mock.calls).toMatchSnapshot();
       const modalContent = mount(mockReactDomRender.mock.calls[0][0]);
-      expect(modalContent.html()).toMatchSnapshot();
+      expect(modalContent.render()).toMatchSnapshot();
     });
 
     describe('with a currently active modal', () => {

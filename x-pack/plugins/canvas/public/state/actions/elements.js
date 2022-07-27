@@ -7,15 +7,17 @@
 
 import { createAction } from 'redux-actions';
 import immutable from 'object-path-immutable';
-import { get, pick, cloneDeep, without, last } from 'lodash';
+import { get, pick, cloneDeep, without, last, debounce } from 'lodash';
 import { toExpression, safeElementFromExpression } from '@kbn/interpreter';
 import { createThunk } from '../../lib/create_thunk';
+import { isGroupId } from '../../lib/workpad';
 import {
   getPages,
   getWorkpadVariablesAsObject,
   getNodeById,
   getNodes,
   getSelectedPageIndex,
+  getElementById,
 } from '../selectors/workpad';
 import { getValue as getResolvedArgsValue } from '../selectors/resolved_args';
 import { getDefaultElement } from '../defaults';
@@ -68,50 +70,55 @@ export const setMultiplePositions = createAction('setMultiplePosition', (reposit
 export const flushContext = createAction('flushContext');
 export const flushContextAfterIndex = createAction('flushContextAfterIndex');
 
-export const fetchContext = createThunk(
-  'fetchContext',
-  ({ dispatch, getState }, index, element, fullRefresh = false, path) => {
-    const pathToTarget = [...path.split('.'), 'chain'];
-    const chain = get(element, pathToTarget);
-    const invalidIndex = chain ? index >= chain.length : true;
+const fetchContextFn = ({ dispatch, getState }, index, element, fullRefresh = false, path) => {
+  const pathToTarget = [...path.split('.'), 'chain'];
+  const chain = get(element, pathToTarget);
+  const invalidIndex = chain ? index >= chain.length : true;
 
-    if (!element || !chain || invalidIndex) {
-      throw new Error(strings.getInvalidArgIndexErrorMessage(index));
-    }
-
-    // cache context as the previous index
-    const contextIndex = index - 1;
-    const contextPath = [element.id, 'expressionContext', path, contextIndex];
-
-    // set context state to loading
-    dispatch(args.setLoading({ path: contextPath }));
-
-    // function to walk back up to find the closest context available
-    const getContext = () => getSiblingContext(getState(), element.id, contextIndex - 1, [path]);
-    const { index: prevContextIndex, context: prevContextValue } =
-      fullRefresh !== true ? getContext() : {};
-
-    // modify the ast chain passed to the interpreter
-    const astChain = chain.filter((exp, i) => {
-      if (prevContextValue != null) {
-        return i > prevContextIndex && i < index;
-      }
-      return i < index;
-    });
-
-    const variables = getWorkpadVariablesAsObject(getState());
-
-    const { expressions } = pluginServices.getServices();
-    const elementWithNewAst = set(element, pathToTarget, astChain);
-
-    // get context data from a partial AST
-    return expressions
-      .interpretAst(elementWithNewAst.ast, variables, prevContextValue)
-      .then((value) => {
-        dispatch(args.setValue({ path: contextPath, value }));
-      });
+  if (!element || !chain || invalidIndex) {
+    throw new Error(strings.getInvalidArgIndexErrorMessage(index));
   }
-);
+
+  // cache context as the previous index
+  const contextIndex = index - 1;
+  const contextPath = [element.id, 'expressionContext', path, contextIndex];
+
+  // set context state to loading
+  dispatch(args.setLoading({ path: contextPath }));
+
+  // function to walk back up to find the closest context available
+  const getContext = () => getSiblingContext(getState(), element.id, contextIndex - 1, [path]);
+  const { index: prevContextIndex, context: prevContextValue } =
+    fullRefresh !== true ? getContext() : {};
+
+  // modify the ast chain passed to the interpreter
+  const astChain = chain.filter((exp, i) => {
+    if (prevContextValue != null) {
+      return i > prevContextIndex && i < index;
+    }
+    return i < index;
+  });
+
+  const variables = getWorkpadVariablesAsObject(getState());
+
+  const { expressions } = pluginServices.getServices();
+  const elementWithNewAst = set(element, pathToTarget, astChain);
+
+  // get context data from a partial AST
+  return expressions
+    .interpretAst(elementWithNewAst.ast, variables, prevContextValue)
+    .then((value) => {
+      dispatch(args.setValue({ path: contextPath, value }));
+    });
+};
+
+// It is necessary to debounce fetching of the context in the situations
+// when the components of the arguments update the expression. For example, suppose there are
+// multiple datacolumns that change the column to the first one from the list after datasource update.
+// In that case, it is necessary to fetch the context only for the last version of the expression.
+const fetchContextFnDebounced = debounce(fetchContextFn, 100);
+
+export const fetchContext = createThunk('fetchContext', fetchContextFnDebounced);
 
 const fetchRenderableWithContextFn = ({ dispatch, getState }, element, ast, context) => {
   const argumentPath = [element.id, 'expressionRenderable'];
@@ -129,6 +136,7 @@ const fetchRenderableWithContextFn = ({ dispatch, getState }, element, ast, cont
 
   const variables = getWorkpadVariablesAsObject(getState());
   const { expressions, notify } = pluginServices.getServices();
+
   return expressions
     .runInterpreter(ast, context, variables, { castToRender: true })
     .then((renderable) => {
@@ -140,9 +148,15 @@ const fetchRenderableWithContextFn = ({ dispatch, getState }, element, ast, cont
     });
 };
 
+// It is necessary to debounce fetching of the renderable with the context in the situations
+// when the components of the arguments update the expression. For example, suppose there are
+// multiple datacolumns that change the column to the first one from the list after datasource update.
+// In that case, it is necessary to fetch the context only for the last version of the expression.
+const fetchRenderableWithContextFnDebounced = debounce(fetchRenderableWithContextFn, 100);
+
 export const fetchRenderableWithContext = createThunk(
   'fetchRenderableWithContext',
-  fetchRenderableWithContextFn
+  fetchRenderableWithContextFnDebounced
 );
 
 export const fetchRenderable = createThunk('fetchRenderable', ({ dispatch }, element) => {
@@ -358,18 +372,20 @@ export const setAstAtIndex = createThunk(
  * @param {any} args.element - the element, which contains the expression.
  * @param {any} args.pageId - the workpad's page, where element is located.
  */
-export const setArgument = createThunk('setArgument', ({ dispatch }, args) => {
-  const { argName, value, valueIndex, element, pageId, path } = args;
+export const setArgument = createThunk('setArgument', ({ dispatch, getState }, args) => {
+  const { argName, value, valueIndex, elementId, pageId, path } = args;
   let selector = `${path}.${argName}`;
   if (valueIndex != null) {
     selector += '.' + valueIndex;
   }
+  const element = getElementById(getState(), elementId);
 
   const newElement = set(element, selector, value);
   const pathTerms = path.split('.');
   const argumentChainPath = pathTerms.slice(0, 3);
   const argumnentChainIndex = last(argumentChainPath);
   const newAst = get(newElement, argumentChainPath);
+
   dispatch(setAstAtIndex(argumnentChainIndex, newAst, element, pageId));
 });
 
@@ -381,13 +397,15 @@ export const setArgument = createThunk('setArgument', ({ dispatch }, args) => {
  * @param {any} args.element - the element, which contains the expression.
  * @param {any} args.pageId - the workpad's page, where element is located.
  */
-export const addArgumentValue = createThunk('addArgumentValue', ({ dispatch }, args) => {
-  const { argName, value, element, path } = args;
+export const addArgumentValue = createThunk('addArgumentValue', ({ dispatch, getState }, args) => {
+  const { argName, value, elementId, path } = args;
+  const element = getElementById(getState(), elementId);
   const values = get(element, [...path.split('.'), argName], []);
   const newValue = values.concat(value);
   dispatch(
     setArgument({
       ...args,
+      elementId,
       value: newValue,
     })
   );
@@ -433,7 +451,8 @@ export const addElement = createThunk('addElement', ({ dispatch }, pageId, eleme
   // refresh all elements if there's a filter, otherwise just render the new element
   if (element.filter) {
     dispatch(fetchAllRenderables());
-  } else {
+    // element, which represents the group, should not be rendered. Its elements are rendered separately.
+  } else if (!isGroupId(newElement.id)) {
     dispatch(fetchRenderable(newElement));
   }
 

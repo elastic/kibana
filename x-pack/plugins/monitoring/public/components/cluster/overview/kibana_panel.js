@@ -5,37 +5,40 @@
  * 2.0.
  */
 
-import React from 'react';
-import { formatNumber } from '../../../lib/format_number';
 import {
-  ClusterItemContainer,
-  HealthStatusIndicator,
-  BytesPercentageUsage,
-  DisabledIfNoDataAndInSetupModeLink,
-} from './helpers';
-import { get } from 'lodash';
-import {
+  EuiBadge,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
-  EuiTitle,
-  EuiPanel,
-  EuiDescriptionList,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
   EuiHorizontalRule,
+  EuiLink,
+  EuiPanel,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { SetupModeTooltip } from '../../setup_mode/tooltip';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { get } from 'lodash';
+import React from 'react';
 import { KIBANA_SYSTEM_ID, RULE_KIBANA_VERSION_MISMATCH } from '../../../../common/constants';
-import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
+import { SetupModeFeature } from '../../../../common/enums';
 import { AlertsBadge } from '../../../alerts/badge';
 import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badge';
+import { ExternalConfigContext } from '../../../application/contexts/external_config_context';
+import { formatNumber, formatPercentageUsage } from '../../../lib/format_number';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
-import { SetupModeFeature } from '../../../../common/enums';
 import { SetupModeContext } from '../../setup_mode/setup_mode_context';
+import { SetupModeTooltip } from '../../setup_mode/tooltip';
+import {
+  BytesPercentageUsage,
+  ClusterItemContainer,
+  DisabledIfNoDataAndInSetupModeLink,
+  HealthStatusIndicator,
+} from './helpers';
 
 const INSTANCES_PANEL_ALERTS = [RULE_KIBANA_VERSION_MISMATCH];
 
@@ -43,13 +46,12 @@ export function KibanaPanel(props) {
   const setupMode = props.setupMode;
   const alerts = props.alerts;
   const setupModeContext = React.useContext(SetupModeContext);
+  const { staleStatusThresholdSeconds } = React.useContext(ExternalConfigContext);
   const showDetectedKibanas =
     setupMode.enabled && get(setupMode.data, 'kibana.detected.doesExist', false);
   if (!props.count && !showDetectedKibanas) {
     return null;
   }
-
-  const statusIndicator = <HealthStatusIndicator status={props.status} product={'kb'} />;
 
   const goToKibana = () => getSafeForExternalLink('#/kibana');
   const goToInstances = () => getSafeForExternalLink('#/kibana/instances');
@@ -78,7 +80,12 @@ export function KibanaPanel(props) {
   return (
     <ClusterItemContainer
       {...props}
-      statusIndicator={statusIndicator}
+      statusIndicator={statusIndicator(
+        props.status,
+        props.some_status_is_stale,
+        goToInstances(),
+        staleStatusThresholdSeconds
+      )}
       url="kibana"
       title={i18n.translate('xpack.monitoring.cluster.overview.kibanaPanel.kibanaTitle', {
         defaultMessage: 'Kibana',
@@ -136,6 +143,31 @@ export function KibanaPanel(props) {
                   values={{ maxTime: props.response_time_max }}
                 />
               </EuiDescriptionListDescription>
+              {props.rules.instance && props.rules.cluster && (
+                <>
+                  <EuiDescriptionListTitle className="eui-textBreakWord">
+                    <FormattedMessage
+                      id="xpack.monitoring.cluster.overview.kibanaPanel.ruleFailuresLabel"
+                      defaultMessage="Rule Success Ratio"
+                    />
+                  </EuiDescriptionListTitle>
+                  <EuiDescriptionListDescription data-test-subj="kbnRuleFailures">
+                    {formatPercentageUsage(
+                      props.rules.instance.executions - props.rules.instance.failures,
+                      props.rules.instance.executions
+                    )}
+                  </EuiDescriptionListDescription>
+                  <EuiDescriptionListTitle className="eui-textBreakWord">
+                    <FormattedMessage
+                      id="xpack.monitoring.cluster.overview.kibanaPanel.queuedRulesCountLabel"
+                      defaultMessage="Queued Rules"
+                    />
+                  </EuiDescriptionListTitle>
+                  <EuiDescriptionListDescription data-test-subj="kbnQueuedRules">
+                    {props.rules.cluster.overdue.count}
+                  </EuiDescriptionListDescription>
+                </>
+              )}
             </EuiDescriptionList>
           </EuiPanel>
         </EuiFlexItem>
@@ -201,5 +233,44 @@ export function KibanaPanel(props) {
         </EuiFlexItem>
       </EuiFlexGrid>
     </ClusterItemContainer>
+  );
+}
+
+function statusIndicator(status, someStatusIsStale, instancesHref, staleStatusThresholdSeconds) {
+  if (!someStatusIsStale) {
+    return <HealthStatusIndicator status={status} product={'kb'} />;
+  }
+
+  const staleMessage = i18n.translate(
+    'xpack.monitoring.cluster.overview.kibanaPanel.staleStatusTooltip',
+    {
+      defaultMessage:
+        "It's been more than {staleStatusThresholdSeconds} seconds since we have heard from some instances.",
+      values: {
+        staleStatusThresholdSeconds,
+      },
+    }
+  );
+
+  return (
+    <>
+      <div style={{ marginBottom: '8px' }}>
+        <EuiToolTip position="top" content={staleMessage}>
+          <EuiBadge iconType="alert" color="warning" data-test-subj="status">
+            {i18n.translate('xpack.monitoring.cluster.overview.kibanaPanel.staleStatusLabel', {
+              defaultMessage: 'Stale',
+            })}
+          </EuiBadge>
+        </EuiToolTip>
+      </div>
+      <EuiLink href={instancesHref}>
+        {i18n.translate(
+          'xpack.monitoring.cluster.overview.kibanaPanel.staleStatusLinkToInstancesLabel',
+          {
+            defaultMessage: 'View all instances',
+          }
+        )}
+      </EuiLink>
+    </>
   );
 }

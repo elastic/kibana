@@ -8,9 +8,10 @@
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { RulesBulkSchema, rulesBulkSchema } from './rules_bulk_schema';
-import { RulesSchema } from './rules_schema';
-import { ErrorSchema } from './error_schema';
+import type { RulesBulkSchema } from './rules_bulk_schema';
+import { rulesBulkSchema } from './rules_bulk_schema';
+import type { RulesSchema } from './rules_schema';
+import type { ErrorSchema } from './error_schema';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 import { getRulesSchemaMock } from './rules_schema.mocks';

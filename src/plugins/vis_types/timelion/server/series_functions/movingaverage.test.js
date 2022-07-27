@@ -7,7 +7,7 @@
  */
 
 import fn from './movingaverage';
-const expect = require('chai').expect;
+import expect from '@kbn/expect';
 
 import moment from 'moment';
 import _ from 'lodash';

@@ -8,7 +8,7 @@
 
 import { isNumber } from 'lodash';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
-import type { FieldFormatMap } from '@kbn/data-plugin/common';
+import type { FieldFormatMap } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsContentType } from '@kbn/field-formats-plugin/common';
 import { isEmptyValue, DISPLAY_EMPTY_VALUE } from '../../../../common/last_value_utils';
 import { getFieldFormats } from '../../../services';

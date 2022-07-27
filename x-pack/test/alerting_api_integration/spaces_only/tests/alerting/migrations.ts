@@ -398,14 +398,9 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
       // Only the rule that was enabled should be tagged
       expect(responseEnabledBeforeMigration.body._source?.alert?.tags).to.eql([
-        '__internal_rule_id:064e3fed-6328-416b-bb85-c08265088f41',
-        '__internal_immutable:false',
         'auto_disabled_8.0',
       ]);
-      expect(responseDisabledBeforeMigration.body._source?.alert?.tags).to.eql([
-        '__internal_rule_id:364e3fed-6328-416b-bb85-c08265088f41',
-        '__internal_immutable:false',
-      ]);
+      expect(responseDisabledBeforeMigration.body._source?.alert?.tags).to.eql([]);
     });
 
     it('8.2.0 migrates params to mapped_params for specific params properties', async () => {
@@ -422,6 +417,31 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         risk_score: 90,
         severity: '80-critical',
       });
+    });
+
+    it('8.2.0 migrates existing esQuery alerts to contain searchType param', async () => {
+      const response = await es.get<{ alert: RawRule }>(
+        {
+          index: '.kibana',
+          id: 'alert:776cb5c0-ad1e-11ec-ab9e-5f5932f4fad8',
+        },
+        { meta: true }
+      );
+      expect(response.statusCode).to.equal(200);
+      expect(response.body._source?.alert?.params.searchType).to.eql('esQuery');
+    });
+
+    it('8.3.0 removes internal tags in Security Solution rule', async () => {
+      const response = await es.get<{ alert: RawRule }>(
+        {
+          index: '.kibana',
+          id: 'alert:8990af61-c09a-11ec-9164-4bfd6fc32c43',
+        },
+        { meta: true }
+      );
+
+      expect(response.statusCode).to.equal(200);
+      expect(response.body._source?.alert?.tags).to.eql(['test-tag-1', 'foo-tag']);
     });
   });
 }

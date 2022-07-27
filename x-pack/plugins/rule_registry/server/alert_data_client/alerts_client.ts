@@ -97,6 +97,7 @@ interface SingleSearchAfterAndAudit {
   track_total_hits?: boolean | undefined;
   size?: number | undefined;
   operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get;
+  sort?: estypes.SortOptions[] | undefined;
   lastSortIds?: Array<string | number> | undefined;
 }
 
@@ -224,6 +225,7 @@ export class AlertsClient {
     size,
     index,
     operation,
+    sort,
     lastSortIds = [],
   }: SingleSearchAfterAndAudit) {
     try {
@@ -243,7 +245,7 @@ export class AlertsClient {
         _source,
         track_total_hits: trackTotalHits,
         size,
-        sort: [
+        sort: sort || [
           {
             '@timestamp': {
               order: 'asc',
@@ -605,6 +607,8 @@ export class AlertsClient {
     track_total_hits: trackTotalHits,
     size,
     index,
+    sort,
+    search_after: searchAfter,
   }: {
     query?: object | undefined;
     aggs?: object | undefined;
@@ -612,6 +616,8 @@ export class AlertsClient {
     track_total_hits?: boolean | undefined;
     _source?: string[] | undefined;
     size?: number | undefined;
+    sort?: estypes.SortOptions[] | undefined;
+    search_after?: Array<string | number> | undefined;
   }) {
     try {
       // first search for the alert by id, then use the alert info to check if user has access to it
@@ -623,6 +629,8 @@ export class AlertsClient {
         size,
         index,
         operation: ReadOperations.Find,
+        sort,
+        lastSortIds: searchAfter,
       });
 
       if (alertsSearchResponse == null) {
@@ -647,7 +655,6 @@ export class AlertsClient {
         [ReadOperations.Find, ReadOperations.Get, WriteOperations.Update],
         AlertingAuthorizationEntity.Alert
       );
-
       // As long as the user can read a minimum of one type of rule type produced by the provided feature,
       // the user should be provided that features' alerts index.
       // Limiting which alerts that user can read on that index will be done via the findAuthorizationFilter
@@ -655,24 +662,56 @@ export class AlertsClient {
       for (const ruleType of augmentedRuleTypes.authorizedRuleTypes) {
         authorizedFeatures.add(ruleType.producer);
       }
-
       const validAuthorizedFeatures = Array.from(authorizedFeatures).filter(
         (feature): feature is ValidFeatureId =>
           featureIds.includes(feature) && isValidFeatureId(feature)
       );
-
-      const toReturn = validAuthorizedFeatures.flatMap((feature) => {
-        const indices = this.ruleDataService.findIndicesByFeature(feature, Dataset.alerts);
-        if (feature === 'siem') {
-          return indices.map((i) => `${i.baseName}-${this.spaceId}`);
-        } else {
-          return indices.map((i) => i.baseName);
+      const toReturn = validAuthorizedFeatures.map((feature) => {
+        const index = this.ruleDataService.findIndexByFeature(feature, Dataset.alerts);
+        if (index == null) {
+          throw new Error(`This feature id ${feature} should be associated to an alert index`);
         }
+        return index?.getPrimaryAlias(this.spaceId ?? '*') ?? '';
       });
 
       return toReturn;
     } catch (exc) {
       const errMessage = `getAuthorizedAlertsIndices failed to get authorized rule types: ${exc}`;
+      this.logger.error(errMessage);
+      throw Boom.failedDependency(errMessage);
+    }
+  }
+
+  public async getFeatureIdsByRegistrationContexts(
+    RegistrationContexts: string[]
+  ): Promise<string[]> {
+    try {
+      const featureIds =
+        this.ruleDataService.findFeatureIdsByRegistrationContexts(RegistrationContexts);
+      if (featureIds.length > 0) {
+        // ATTENTION FUTURE DEVELOPER when you are a super user the augmentedRuleTypes.authorizedRuleTypes will
+        // return all of the features that you can access and does not care about your featureIds
+        const augmentedRuleTypes = await this.authorization.getAugmentedRuleTypesWithAuthorization(
+          featureIds,
+          [ReadOperations.Find, ReadOperations.Get, WriteOperations.Update],
+          AlertingAuthorizationEntity.Alert
+        );
+        // As long as the user can read a minimum of one type of rule type produced by the provided feature,
+        // the user should be provided that features' alerts index.
+        // Limiting which alerts that user can read on that index will be done via the findAuthorizationFilter
+        const authorizedFeatures = new Set<string>();
+        for (const ruleType of augmentedRuleTypes.authorizedRuleTypes) {
+          authorizedFeatures.add(ruleType.producer);
+        }
+        const validAuthorizedFeatures = Array.from(authorizedFeatures).filter(
+          (feature): feature is ValidFeatureId =>
+            featureIds.includes(feature) && isValidFeatureId(feature)
+        );
+        return validAuthorizedFeatures;
+      }
+      return featureIds;
+    } catch (exc) {
+      const errMessage = `getFeatureIdsByRegistrationContexts failed to get feature ids: ${exc}`;
       this.logger.error(errMessage);
       throw Boom.failedDependency(errMessage);
     }

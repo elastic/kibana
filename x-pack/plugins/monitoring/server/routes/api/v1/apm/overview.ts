@@ -8,6 +8,7 @@
 import {
   postApmOverviewRequestParamsRT,
   postApmOverviewRequestPayloadRT,
+  postApmOverviewResponsePayloadRT,
 } from '../../../../../common/http_api/apm';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { getMetrics } from '../../../../lib/details/get_metrics';
@@ -17,12 +18,15 @@ import { metricSet } from './metric_set_overview';
 import { getApmClusterStatus } from './_get_apm_cluster_status';
 
 export function apmOverviewRoute(server: MonitoringCore) {
+  const validateParams = createValidationFunction(postApmOverviewRequestParamsRT);
+  const validateBody = createValidationFunction(postApmOverviewRequestPayloadRT);
+
   server.route({
     method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/apm',
     validate: {
-      params: createValidationFunction(postApmOverviewRequestParamsRT),
-      body: createValidationFunction(postApmOverviewRequestPayloadRT),
+      params: validateParams,
+      body: validateBody,
     },
     async handler(req) {
       const config = server.config;
@@ -42,10 +46,10 @@ export function apmOverviewRoute(server: MonitoringCore) {
           getMetrics(req, 'beats', metricSet),
         ]);
 
-        return {
+        return postApmOverviewResponsePayloadRT.encode({
           stats,
           metrics,
-        };
+        });
       } catch (err) {
         return handleError(err, req);
       }

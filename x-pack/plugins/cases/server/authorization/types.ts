@@ -43,6 +43,7 @@ export enum ReadOperations {
   GetAlertsAttachedToCase = 'getAlertsAttachedToCase',
   GetAttachmentMetrics = 'getAttachmentMetrics',
   GetCaseMetrics = 'getCaseMetrics',
+  GetCasesMetrics = 'getCasesMetrics',
   GetUserActionMetrics = 'getUserActionMetrics',
 }
 

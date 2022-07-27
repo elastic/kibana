@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import type { SavedObject, SavedObjectError } from '@kbn/core-saved-objects-common';
 import { applyExportTransformsMock } from './collect_exported_objects.test.mocks';
 import { savedObjectsClientMock } from '../../mocks';
-import { httpServerMock } from '../../http/http_server.mocks';
-import { loggerMock } from '../../logging/logger.mock';
-import { SavedObject, SavedObjectError } from '../../../types';
+import { loggerMock } from '@kbn/logging-mocks';
 import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import type { SavedObjectsExportTransform } from './types';
 import { collectExportedObjects, ExclusionReason } from './collect_exported_objects';

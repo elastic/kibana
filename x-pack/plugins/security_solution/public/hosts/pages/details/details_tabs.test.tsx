@@ -12,7 +12,7 @@ import useResizeObserver from 'use-resize-observer/polyfilled';
 import '../../../common/mock/match_media';
 import { mockIndexPattern, TestProviders } from '../../../common/mock';
 import { HostDetailsTabs } from './details_tabs';
-import { HostDetailsTabsProps, SetAbsoluteRangeDatePicker } from './types';
+import type { HostDetailsTabsProps, SetAbsoluteRangeDatePicker } from './types';
 import { hostDetailsPagePath } from '../types';
 import { type } from './utils';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
@@ -36,7 +36,7 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../../../common/components/url_state/normalize_time_range');
+jest.mock('../../../common/utils/normalize_time_range');
 
 jest.mock('../../../common/containers/source', () => ({
   useFetchIndex: () => [false, { indicesExist: true, indexPatterns: mockIndexPattern }],
@@ -74,7 +74,6 @@ describe('body', () => {
     [HostsTableType.uncommonProcesses]: 'UncommonProcessQueryTabBody',
     [HostsTableType.anomalies]: 'AnomaliesQueryTabBody',
     [HostsTableType.events]: 'EventsQueryTabBody',
-    [HostsTableType.alerts]: 'HostAlertsQueryTabBody',
   };
 
   const mockHostDetailsPageFilters = getHostDetailsPageFilters('host-1');

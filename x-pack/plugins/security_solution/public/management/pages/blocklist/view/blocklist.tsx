@@ -8,11 +8,12 @@
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DocLinks } from '@kbn/doc-links';
+import type { DocLinks } from '@kbn/doc-links';
 import { EuiLink } from '@elastic/eui';
 
 import { useHttp } from '../../../../common/lib/kibana';
-import { ArtifactListPage, ArtifactListPageProps } from '../../../components/artifact_list_page';
+import type { ArtifactListPageProps } from '../../../components/artifact_list_page';
+import { ArtifactListPage } from '../../../components/artifact_list_page';
 import { BlocklistsApiClient } from '../services';
 import { BlockListForm } from './components/blocklist_form';
 
@@ -71,7 +72,7 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
         <EuiLink target="_blank" href={`${securitySolutionDocsLinks.blocklist}`}>
           <FormattedMessage
             id="xpack.securitySolution.blocklist.flyoutDowngradedLicenseDocsLink"
-            defaultMessage="Blocklist documentation"
+            defaultMessage="blocklist documentation."
           />
         </EuiLink>
       </>
@@ -87,7 +88,7 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   }),
   emptyStateInfo: i18n.translate('xpack.securitySolution.blocklist.emptyStateInfo', {
     defaultMessage:
-      'The blocklist prevents selected applications from running on your hosts by extending the list of processes the Endpoint considers malicious.',
+      'The blocklist prevents specified applications from running on your hosts, extending the list of processes that Endpoint Security considers malicious.',
   }),
   emptyStatePrimaryButtonLabel: i18n.translate(
     'xpack.securitySolution.blocklist.emptyStatePrimaryButtonLabel',

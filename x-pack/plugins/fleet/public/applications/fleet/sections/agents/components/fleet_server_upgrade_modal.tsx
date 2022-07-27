@@ -164,7 +164,7 @@ export const FleetServerUpgradeModal: React.FunctionComponent<Props> = ({ onClos
                 ),
                 link: (
                   <EuiLink
-                    href={docLinks.links.fleet.upgradeElasticAgent712lower}
+                    href={docLinks.links.fleet.upgradeElasticAgent}
                     external={true}
                     target="_blank"
                   >

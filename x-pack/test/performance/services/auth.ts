@@ -15,7 +15,7 @@ export interface Credentials {
 }
 
 function extractCookieValue(authResponse: AxiosResponse) {
-  return authResponse.headers['set-cookie'][0].toString().split(';')[0].split('sid=')[1] as string;
+  return authResponse.headers['set-cookie']?.[0].toString().split(';')[0].split('sid=')[1] ?? '';
 }
 export class AuthService extends FtrService {
   private readonly kibanaServer = this.ctx.getService('kibanaServer');

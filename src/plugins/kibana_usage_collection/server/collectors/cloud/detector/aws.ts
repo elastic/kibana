@@ -9,6 +9,7 @@
 import { readFile } from 'fs/promises';
 import { get, omit } from 'lodash';
 import fetch from 'node-fetch';
+import { AbortSignal } from 'abort-controller';
 import { CloudService } from './cloud_service';
 import { CloudServiceResponse } from './cloud_response';
 
@@ -95,10 +96,11 @@ export class AWSCloudService extends CloudService {
     return process.platform.startsWith('win');
   };
 
-  protected _checkIfService = async () => {
+  protected _checkIfService = async (signal?: AbortSignal) => {
     try {
       const response = await fetch(SERVICE_ENDPOINT, {
         method: 'GET',
+        signal,
       });
 
       if (!response.ok || response.status === 404) {

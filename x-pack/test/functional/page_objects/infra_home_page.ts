@@ -328,5 +328,29 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     async closeAlertFlyout() {
       await testSubjects.click('euiFlyoutCloseButton');
     },
+
+    async waitForTourStep(tourStep: string) {
+      await retry.waitForWithTimeout('tour step', 5000, () => testSubjects.exists(tourStep));
+    },
+
+    async ensureTourStepIsClosed(tourStep: string) {
+      await testSubjects.missingOrFail(tourStep);
+    },
+
+    async clickTourNextButton() {
+      await testSubjects.click('onboarding--observTourNextStepButton');
+    },
+
+    async clickTourEndButton() {
+      await testSubjects.click('onboarding--observTourEndButton');
+    },
+
+    async clickTourSkipButton() {
+      await testSubjects.click('onboarding--observTourSkipButton');
+    },
+
+    async clickGuidedSetupButton() {
+      await testSubjects.click('guidedSetupButton');
+    },
   };
 }

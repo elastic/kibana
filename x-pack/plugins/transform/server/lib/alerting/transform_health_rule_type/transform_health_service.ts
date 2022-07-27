@@ -8,7 +8,7 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { keyBy } from 'lodash';
+import { keyBy, partition } from 'lodash';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { TransformHealthRuleParams } from './schema';
 import {
@@ -28,6 +28,7 @@ import { isContinuousTransform } from '../../../../common/types/transform';
 import { ML_DF_NOTIFICATION_INDEX_PATTERN } from '../../../routes/api/transforms_audit_messages';
 
 interface TestResult {
+  isHealthy: boolean;
   name: string;
   context: TransformHealthAlertContext;
 }
@@ -91,26 +92,31 @@ export function transformHealthServiceProvider(
 
   return {
     /**
-     * Returns report about not started transform
+     * Returns report about not started transforms
      * @param transformIds
+     *
+     * @return - Partitions with not started and started transforms
      */
-    async getNotStartedTransformsReport(
+    async getTransformsStateReport(
       transformIds: string[]
-    ): Promise<NotStartedTransformResponse[]> {
+    ): Promise<[NotStartedTransformResponse[], NotStartedTransformResponse[]]> {
       const transformsStats = (
         await esClient.transform.getTransformStats({
           transform_id: transformIds.join(','),
         })
       ).transforms;
 
-      return transformsStats
-        .filter((t) => t.state !== TRANSFORM_STATE.STARTED && t.state !== TRANSFORM_STATE.INDEXING)
-        .map((t) => ({
+      return partition(
+        transformsStats.map((t) => ({
           transform_id: t.id,
           description: transformsDict.get(t.id)?.description,
           transform_state: t.state,
           node_name: t.node?.name,
-        }));
+        })),
+        (t) =>
+          t.transform_state !== TRANSFORM_STATE.STARTED &&
+          t.transform_state !== TRANSFORM_STATE.INDEXING
+      );
     },
     /**
      * Returns report about transforms that contain error messages
@@ -201,49 +207,68 @@ export function transformHealthServiceProvider(
       const result: TestResult[] = [];
 
       if (testsConfig.notStarted.enabled) {
-        const response = await this.getNotStartedTransformsReport(transformIds);
-        if (response.length > 0) {
-          const count = response.length;
-          const transformsString = response.map((t) => t.transform_id).join(', ');
+        const [notStartedTransform, startedTransforms] = await this.getTransformsStateReport(
+          transformIds
+        );
 
-          result.push({
-            name: TRANSFORM_HEALTH_CHECK_NAMES.notStarted.name,
-            context: {
-              results: response,
-              message: i18n.translate(
-                'xpack.transform.alertTypes.transformHealth.notStartedMessage',
-                {
+        const isHealthy = notStartedTransform.length === 0;
+
+        const count = isHealthy ? startedTransforms.length : notStartedTransform.length;
+        const transformsString = (isHealthy ? startedTransforms : notStartedTransform)
+          .map((t) => t.transform_id)
+          .join(', ');
+
+        result.push({
+          isHealthy,
+          name: TRANSFORM_HEALTH_CHECK_NAMES.notStarted.name,
+          context: {
+            results: isHealthy ? startedTransforms : notStartedTransform,
+            message: isHealthy
+              ? i18n.translate(
+                  'xpack.transform.alertTypes.transformHealth.notStartedRecoveryMessage',
+                  {
+                    defaultMessage:
+                      '{count, plural, one {Transform} other {Transform}} {transformsString} {count, plural, one {is} other {are}} started.',
+                    values: { count, transformsString },
+                  }
+                )
+              : i18n.translate('xpack.transform.alertTypes.transformHealth.notStartedMessage', {
                   defaultMessage:
                     '{count, plural, one {Transform} other {Transform}} {transformsString} {count, plural, one {is} other {are}} not started.',
                   values: { count, transformsString },
-                }
-              ),
-            },
-          });
-        }
+                }),
+          },
+        });
       }
 
       if (testsConfig.errorMessages.enabled) {
         const response = await this.getErrorMessagesReport(transformIds);
-        if (response.length > 0) {
-          const count = response.length;
-          const transformsString = response.map((t) => t.transform_id).join(', ');
 
-          result.push({
-            name: TRANSFORM_HEALTH_CHECK_NAMES.errorMessages.name,
-            context: {
-              results: response,
-              message: i18n.translate(
-                'xpack.transform.alertTypes.transformHealth.errorMessagesMessage',
-                {
+        const isHealthy = response.length === 0;
+        const count = response.length;
+        const transformsString = response.map((t) => t.transform_id).join(', ');
+
+        result.push({
+          isHealthy,
+          name: TRANSFORM_HEALTH_CHECK_NAMES.errorMessages.name,
+          context: {
+            results: isHealthy ? [] : response,
+            message: isHealthy
+              ? i18n.translate(
+                  'xpack.transform.alertTypes.transformHealth.errorMessagesRecoveryMessage',
+                  {
+                    defaultMessage:
+                      'No errors in the {count, plural, one {transform} other {transforms}} messages.',
+                    values: { count: transformIds.length },
+                  }
+                )
+              : i18n.translate('xpack.transform.alertTypes.transformHealth.errorMessagesMessage', {
                   defaultMessage:
                     '{count, plural, one {Transform} other {Transforms}} {transformsString} {count, plural, one {contains} other {contain}} error messages.',
                   values: { count, transformsString },
-                }
-              ),
-            },
-          });
-        }
+                }),
+          },
+        });
       }
 
       return result;

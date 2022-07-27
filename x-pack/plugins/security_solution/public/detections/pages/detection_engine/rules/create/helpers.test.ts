@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { List } from '@kbn/securitysolution-io-ts-list-types';
-import { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
-import { Rule } from '../../../../containers/detection_engine/rules';
+import type { List } from '@kbn/securitysolution-io-ts-list-types';
+import type { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
+import type { Rule } from '../../../../containers/detection_engine/rules';
 import {
   getListMock,
   getEndpointListMock,
 } from '../../../../../../common/detection_engine/schemas/types/lists.mock';
-import {
+import type {
   DefineStepRuleJson,
   ScheduleStepRuleJson,
   AboutStepRuleJson,
@@ -40,7 +40,7 @@ import {
   mockActionsStepRule,
 } from '../all/__mocks__/mock';
 import { getThreatMock } from '../../../../../../common/detection_engine/schemas/types/threat.mock';
-import { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 
 describe('helpers', () => {
   describe('getTimeTypeValue', () => {
@@ -290,6 +290,40 @@ describe('helpers', () => {
       expect(result).toEqual(expect.objectContaining(expected));
     });
 
+    test('returns option fields if specified for eql type', () => {
+      const mockStepData: DefineStepRule = {
+        ...mockData,
+        ruleType: 'eql',
+        queryBar: {
+          ...mockData.queryBar,
+          query: {
+            ...mockData.queryBar.query,
+            language: 'eql',
+            query: 'process where process_name == "explorer.exe"',
+          },
+        },
+        eqlOptions: {
+          timestampField: 'event.created',
+          tiebreakerField: 'process.name',
+          eventCategoryField: 'event.action',
+        },
+      };
+      const result = formatDefineStepData(mockStepData);
+
+      const expected: DefineStepRuleJson = {
+        filters: mockStepData.queryBar.filters,
+        index: mockStepData.index,
+        language: 'eql',
+        query: 'process where process_name == "explorer.exe"',
+        type: 'eql',
+        timestamp_field: 'event.created',
+        tiebreaker_field: 'process.name',
+        event_category_override: 'event.action',
+      };
+
+      expect(result).toEqual(expect.objectContaining(expected));
+    });
+
     test('returns expected indicator matching rule type if all fields are filled out', () => {
       const threatFilters: DefineStepRule['threatQueryBar']['filters'] = [
         {
@@ -330,6 +364,7 @@ describe('helpers', () => {
         threatQueryBar: {
           query: { language: 'kql', query: 'threat_host: *' },
           filters: threatFilters,
+          saved_id: null,
         },
         threatMapping,
       };
@@ -671,6 +706,34 @@ describe('helpers', () => {
             ],
           },
         ],
+      };
+
+      expect(result).toEqual(expected);
+    });
+
+    test('returns formatted object with timestamp override', () => {
+      const mockStepData: AboutStepRule = {
+        ...mockData,
+        timestampOverride: 'event.ingest',
+        timestampOverrideFallbackDisabled: true,
+      };
+      const result = formatAboutStepData(mockStepData);
+      const expected: AboutStepRuleJson = {
+        author: ['Elastic'],
+        description: '24/7',
+        false_positives: ['test'],
+        license: 'Elastic License',
+        name: 'Query with rule-id',
+        note: '# this is some markdown documentation',
+        references: ['www.test.co'],
+        risk_score: 21,
+        risk_score_mapping: [],
+        severity: 'low',
+        severity_mapping: [],
+        tags: ['tag1', 'tag2'],
+        threat: getThreatMock(),
+        timestamp_override: 'event.ingest',
+        timestamp_override_fallback_disabled: true,
       };
 
       expect(result).toEqual(expected);

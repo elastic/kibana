@@ -28,8 +28,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.load('test/functional/fixtures/es_archiver/long_window_logstash');
-      await esArchiver.load(
-        'test/functional/fixtures/es_archiver/long_window_logstash_index_pattern'
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern'
       );
       await security.testUser.setRoles(['kibana_admin', 'long_window_logstash']);
       await kibanaServer.uiSettings.replace(defaultSettings);
@@ -37,9 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
     after(async () => {
       await esArchiver.unload('test/functional/fixtures/es_archiver/long_window_logstash');
-      await esArchiver.unload(
-        'test/functional/fixtures/es_archiver/long_window_logstash_index_pattern'
-      );
+      await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.restoreDefaults();
       await PageObjects.common.unsetTime();
     });

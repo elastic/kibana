@@ -37,6 +37,7 @@ export interface Test {
 export interface Runner extends EventEmitter {
   abort(): void;
   failures: any[];
+  uncaught: (error: Error) => void;
 }
 
 export interface Mocha {

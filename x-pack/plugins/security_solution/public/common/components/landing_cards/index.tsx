@@ -6,26 +6,19 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import {
-  EuiButton,
-  EuiCard,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiImage,
-  EuiLink,
-  EuiPageHeader,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButton, EuiCard, EuiFlexGroup, EuiFlexItem, EuiPageHeader } from '@elastic/eui';
 import styled from 'styled-components';
 import * as i18n from './translations';
-import endpointSvg from '../../images/endpoint.svg';
-import siemPng from '../../images/siem.png';
+import endpointSvg from '../../images/endpoint1.svg';
+import cloudSvg from '../../images/cloud1.svg';
+import siemSvg from '../../images/siem1.svg';
 import videoSvg from '../../images/video.svg';
 import { ADD_DATA_PATH } from '../../../../common/constants';
 import { useKibana } from '../../lib/kibana';
 
 const imgUrls = {
-  siem: siemPng,
+  cloud: cloudSvg,
+  siem: siemSvg,
   video: videoSvg,
   endpoint: endpointSvg,
 };
@@ -51,13 +44,6 @@ const StyledEuiPageHeader = styled(EuiPageHeader)`
   }
 `;
 
-const StyledEuiImage = styled(EuiImage)`
-  img {
-    display: block;
-    margin: 0 auto;
-  }
-`;
-
 const StyledImgEuiCard = styled(EuiCard)`
   img {
     margin-top: 20px;
@@ -71,20 +57,12 @@ const StyledEuiFlexItem = styled(EuiFlexItem)`
   margin: -12px !important;
 `;
 
-const ELASTIC_SECURITY_URL = `elastic.co/security`;
-
 export const LandingCards = memo(() => {
   const {
     http: {
       basePath: { prepend },
     },
   } = useKibana().services;
-
-  const tooltipContent = (
-    <EuiLink color="ghost" href="https://elastic.co/security" target="_blank">
-      {ELASTIC_SECURITY_URL}
-    </EuiLink>
-  );
 
   const href = useMemo(() => prepend(ADD_DATA_PATH), [prepend]);
   return (
@@ -106,16 +84,24 @@ export const LandingCards = memo(() => {
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiToolTip content={tooltipContent} position="top">
-              <EuiLink href="https://www.elastic.co/security" external={false} target="_blank">
-                <StyledEuiImage alt={i18n.SIEM_HEADER} size="xl" margin="l" src={imgUrls.video} />
-              </EuiLink>
-            </EuiToolTip>
+            <iframe
+              allowFullScreen
+              allowTransparency
+              className="vidyard_iframe"
+              frameBorder="0"
+              height="100%"
+              referrerPolicy="no-referrer"
+              sandbox="allow-scripts allow-same-origin"
+              scrolling="no"
+              src="//play.vidyard.com/K6kKDBbP9SpXife9s2tHNP.html?"
+              title={i18n.SIEM_HEADER}
+              width="100%"
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       <StyledEuiFlexItem>
-        <EuiFlexGroup gutterSize="xl">
+        <EuiFlexGroup gutterSize="m">
           <EuiFlexItem>
             <StyledImgEuiCard
               hasBorder
@@ -132,6 +118,15 @@ export const LandingCards = memo(() => {
               image={imgUrls.endpoint}
               textAlign="center"
               title={i18n.ENDPOINT_TITLE}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <StyledImgEuiCard
+              hasBorder
+              description={i18n.CLOUD_CARD_DESCRIPTION}
+              image={imgUrls.cloud}
+              textAlign="center"
+              title={i18n.CLOUD_CARD_TITLE}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

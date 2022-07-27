@@ -6,7 +6,8 @@
  */
 
 import { NETWORK_PATH } from '../../../../common/constants';
-import { GetNetworkRoutePath, NetworkRouteType } from './types';
+import type { GetNetworkRoutePath } from './types';
+import { NetworkRouteType } from './types';
 
 export const getNetworkRoutePath: GetNetworkRoutePath = (
   capabilitiesFetched,

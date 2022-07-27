@@ -6,7 +6,7 @@
  */
 
 import { OperatingSystem } from '@kbn/securitysolution-utils';
-import { GetTrustedAppsListResponse, TrustedApp } from '../../../../../common/endpoint/types';
+import type { GetTrustedAppsListResponse, TrustedApp } from '../../../../../common/endpoint/types';
 import {
   MANAGEMENT_DEFAULT_PAGE,
   MANAGEMENT_DEFAULT_PAGE_SIZE,

@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.savedObjects.clickImportDone();
       await PageObjects.savedObjects.waitTableIsLoaded();
       const newObjectCount = await PageObjects.savedObjects.getExportCount();
-      expect(newObjectCount - initialObjectCount).to.eql(86);
+      expect(newObjectCount - initialObjectCount).to.eql(82);
 
       // logstash by reference dashboard with drilldowns
       await PageObjects.common.navigateToApp('dashboard');

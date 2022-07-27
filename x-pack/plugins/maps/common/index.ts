@@ -34,6 +34,7 @@ export type {
   ESTermSourceDescriptor,
   LayerDescriptor,
   TooltipFeature,
+  TooltipFeatureAction,
   VectorLayerDescriptor,
   VectorStyleDescriptor,
   VectorSourceRequestMeta,

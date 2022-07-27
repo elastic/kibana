@@ -7,9 +7,8 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import type { Query } from '@kbn/data-plugin/public';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import {
   EmbeddableInput,
@@ -18,16 +17,16 @@ import {
   IEmbeddable,
   isErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import { useDiscoverServices } from '../../../../utils/use_discover_services';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
 import type { SavedSearch } from '../../../../services/saved_searches';
 import type { GetStateReturn } from '../../services/discover_state';
-import { AvailableFields$, DataRefetch$ } from '../../utils/use_saved_search';
+import { AvailableFields$, DataRefetch$ } from '../../hooks/use_saved_search';
 
 export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   dataView: DataView;
   savedSearch?: SavedSearch;
-  query?: Query;
+  query?: Query | AggregateQuery;
   visibleFieldNames?: string[];
   filters?: Filter[];
   showPreviewByDefault?: boolean;
@@ -66,7 +65,7 @@ export interface FieldStatisticsTableProps {
   /**
    * Optional query to update the table content
    */
-  query?: Query;
+  query?: Query | AggregateQuery;
   /**
    * Filters query to update the table content
    */

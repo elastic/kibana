@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { DataLayerConfigResult } from '@kbn/expression-xy-plugin/common';
 import { layerTypes } from '../../common';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import { getAxesConfiguration } from './axes_configuration';
+import { XYDataLayerConfig } from './types';
 
 describe('axes_configuration', () => {
   const tables: Record<string, Datatable> = {
@@ -219,8 +219,7 @@ describe('axes_configuration', () => {
     },
   };
 
-  const sampleLayer: DataLayerConfigResult = {
-    type: 'dataLayer',
+  const sampleLayer: XYDataLayerConfig = {
     layerId: 'first',
     layerType: layerTypes.DATA,
     seriesType: 'line',
@@ -229,7 +228,6 @@ describe('axes_configuration', () => {
     splitAccessor: 'd',
     columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
     xScaleType: 'ordinal',
-    yScaleType: 'linear',
     isHistogram: false,
     palette: { type: 'palette', name: 'default' },
   };

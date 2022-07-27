@@ -9,7 +9,7 @@ import moment from 'moment';
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 
 // @ts-expect-error
-import { getDefaultWorkpad, getExportedWorkpad } from '../../state/defaults';
+import { getDefaultWorkpad } from '../../state/defaults';
 import { CanvasWorkpadService } from '../workpad';
 import { CanvasTemplate, CanvasWorkpad } from '../../../types';
 

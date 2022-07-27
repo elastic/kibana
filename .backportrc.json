@@ -3,6 +3,7 @@
   "repoName": "kibana",
   "targetBranchChoices": [
     "main",
+    "8.3",
     "8.2",
     "8.1",
     "8.0",
@@ -39,10 +40,11 @@
     "backport"
   ],
   "branchLabelMapping": {
-    "^v8.3.0$": "main",
+    "^v8.4.0$": "main",
     "^v(\\d+).(\\d+).\\d+$": "$1.$2"
   },
   "autoMerge": true,
   "autoMergeMethod": "squash",
-  "backportBinary": "node scripts/backport"
+  "backportBinary": "node scripts/backport",
+  "prDescription": "{defaultPrDescription}\n\n<!--BACKPORT {commits} BACKPORT-->"
 }

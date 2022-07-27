@@ -66,7 +66,7 @@ export interface IEventLogClient {
 
 export interface IEventLogger {
   logEvent(properties: IEvent): void;
-  startTiming(event: IEvent): void;
+  startTiming(event: IEvent, startTime?: Date): void;
   stopTiming(event: IEvent): void;
 }
 

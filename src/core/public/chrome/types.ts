@@ -36,6 +36,11 @@ export interface ChromeUserBanner {
 }
 
 /** @public */
+export interface ChromeHelpMenuActions {
+  hideHelpMenu: () => void;
+}
+
+/** @public */
 export interface ChromeHelpExtension {
   /**
    * Provide your plugin's name to create a header for separation
@@ -48,7 +53,7 @@ export interface ChromeHelpExtension {
   /**
    * Custom content to occur below the list of links
    */
-  content?: (element: HTMLDivElement) => () => void;
+  content?: (element: HTMLDivElement, menuActions: ChromeHelpMenuActions) => () => void;
 }
 
 /**

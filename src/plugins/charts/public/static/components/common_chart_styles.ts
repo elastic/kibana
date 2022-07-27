@@ -17,9 +17,9 @@ export const useCommonChartStyles = () => {
 
   const subdued = useMemo(
     () => css`
-      fill: ${euiTheme.colors.subdued};
+      fill: ${euiTheme.colors.subduedText};
     `,
-    [euiTheme.colors.subdued]
+    [euiTheme.colors.subduedText]
   );
 
   const accent = css`

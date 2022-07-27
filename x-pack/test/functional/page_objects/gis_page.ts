@@ -195,6 +195,14 @@ export class GisPageObject extends FtrService {
     await this.testSubjects.missingOrFail('addLayerButton');
   }
 
+  async expectMissingToolsControl() {
+    await this.testSubjects.missingOrFail('mapToolsControlPopover');
+  }
+
+  async expectExistsToolsControl() {
+    await this.testSubjects.existOrFail('mapToolsControlPopover');
+  }
+
   async expectExistAddLayerButton() {
     await this.testSubjects.existOrFail('addLayerButton');
   }
@@ -292,6 +300,11 @@ export class GisPageObject extends FtrService {
     this.log.debug(`Toggle layer visibility, layer: ${layerName}`);
     await this.openLayerTocActionsPanel(layerName);
     await this.testSubjects.click('layerVisibilityToggleButton');
+  }
+
+  // In 8.4, EMS basemap layers no longer use EMS tile service name, instead using "Basemap"
+  async toggleEmsBasemapLayerVisibility() {
+    await this.toggleLayerVisibility('Basemap');
   }
 
   async openLegend() {
@@ -556,7 +569,7 @@ export class GisPageObject extends FtrService {
   }
 
   async openInspectorMapView() {
-    await this.inspector.openInspectorView('~inspectorViewChooserMap');
+    await this.inspector.openInspectorView('Map details');
   }
 
   // Method should only be used when multiple requests are expected
@@ -600,6 +613,7 @@ export class GisPageObject extends FtrService {
   }
 
   async _getResponse(requestName: string) {
+    await this.inspector.openInspectorRequestsView();
     if (requestName) {
       await this.testSubjects.click('inspectorRequestChooser');
       await this.testSubjects.click(`inspectorRequestChooser${requestName}`);
@@ -667,7 +681,7 @@ export class GisPageObject extends FtrService {
   }
 
   async getCategorySuggestions() {
-    return await this.comboBox.getOptionsList(`colorStopInput1`);
+    return await this.comboBox.getOptionsList(`colorStopInput0`);
   }
 
   async enableAutoFitToBounds() {

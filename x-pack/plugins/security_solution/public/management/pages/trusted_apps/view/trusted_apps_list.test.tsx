@@ -9,12 +9,12 @@ import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { TRUSTED_APPS_PATH } from '../../../../../common/constants';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { TrustedAppsList } from './trusted_apps_list';
-import { exceptionsListAllHttpMocks } from '../../mocks/exceptions_list_http_mocks';
+import { exceptionsListAllHttpMocks } from '../../../mocks/exceptions_list_http_mocks';
 import { SEARCHABLE_FIELDS } from '../constants';
 import { parseQueryFilterToKQL } from '../../../common/utils';
-import { useUserPrivileges as _useUserPrivileges } from '../../../../common/components/user_privileges';
 
 jest.mock('../../../../common/components/user_privileges');
 

@@ -7,7 +7,6 @@
 import path from 'path';
 import type { CustomPageSize } from 'pdfmake/interfaces';
 import type { LayoutSelectorDictionary, Size } from '../../common/layout';
-import { LayoutTypes } from '../../common';
 import { DEFAULT_SELECTORS } from '.';
 import type { Layout } from '.';
 import { BaseLayout } from './base_layout';
@@ -25,7 +24,7 @@ export class PreserveLayout extends BaseLayout implements Layout {
   private readonly scaledWidth: number;
 
   constructor(size: Size, selectors?: Partial<LayoutSelectorDictionary>) {
-    super(LayoutTypes.PRESERVE_LAYOUT);
+    super('preserve_layout');
     this.height = size.height;
     this.width = size.width;
     this.scaledHeight = size.height * ZOOM;

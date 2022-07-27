@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AxiosError } from 'axios';
+import axios from 'axios';
 
 import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -14,10 +14,31 @@ import {
   createServiceError,
   getPushedDate,
   throwIfSubActionIsNotSupported,
+  getAxiosInstance,
 } from './utils';
+import type { ResponseError } from './types';
+import { connectorTokenClientMock } from '../lib/connector_token_client.mock';
+import { actionsConfigMock } from '../../actions_config.mock';
+import { getOAuthJwtAccessToken } from '../lib/get_oauth_jwt_access_token';
 
+jest.mock('../lib/get_oauth_jwt_access_token', () => ({
+  getOAuthJwtAccessToken: jest.fn(),
+}));
+
+jest.mock('axios', () => ({
+  create: jest.fn(),
+}));
+const createAxiosInstanceMock = axios.create as jest.Mock;
+const axiosInstanceMock = {
+  interceptors: {
+    request: { eject: jest.fn(), use: jest.fn() },
+    response: { eject: jest.fn(), use: jest.fn() },
+  },
+};
+
+const connectorTokenClient = connectorTokenClientMock.create();
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
-
+const configurationUtilities = actionsConfigMock.create();
 /**
  * The purpose of this test is to
  * prevent developers from accidentally
@@ -53,7 +74,7 @@ describe('utils', () => {
       const axiosError = {
         message: 'An error occurred',
         response: { data: { error: { message: 'Denied', detail: 'no access' } } },
-      } as AxiosError;
+      } as ResponseError;
 
       expect(createServiceError(axiosError, 'Unable to do action').message).toBe(
         '[Action][ServiceNow]: Unable to do action. Error: An error occurred Reason: Denied: no access'
@@ -64,7 +85,7 @@ describe('utils', () => {
       const axiosError = {
         message: 'An error occurred',
         response: { data: { error: null } },
-      } as AxiosError;
+      } as ResponseError;
 
       expect(createServiceError(axiosError, 'Unable to do action').message).toBe(
         '[Action][ServiceNow]: Unable to do action. Error: An error occurred Reason: unknown: no error in error response'
@@ -129,6 +150,268 @@ describe('utils', () => {
           logger,
         })
       ).not.toThrow();
+    });
+  });
+
+  describe('getAxiosInstance', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      createAxiosInstanceMock.mockReturnValue(axiosInstanceMock);
+    });
+
+    test('creates axios instance with basic auth when isOAuth is false and username and password are defined', () => {
+      getAxiosInstance({
+        connectorId: '123',
+        logger,
+        configurationUtilities,
+        credentials: {
+          config: {
+            apiUrl: 'https://servicenow',
+            usesTableApi: true,
+            isOAuth: false,
+            clientId: null,
+            jwtKeyId: null,
+            userIdentifierValue: null,
+          },
+          secrets: {
+            clientSecret: null,
+            privateKey: null,
+            privateKeyPassword: null,
+            username: 'username',
+            password: 'password',
+          },
+        },
+        snServiceUrl: 'https://dev23432523.service-now.com',
+        connectorTokenClient,
+      });
+
+      expect(createAxiosInstanceMock).toHaveBeenCalledTimes(1);
+      expect(createAxiosInstanceMock).toHaveBeenCalledWith({
+        auth: { password: 'password', username: 'username' },
+      });
+    });
+
+    test('creates axios instance with interceptor when isOAuth is true and OAuth fields are defined', async () => {
+      getAxiosInstance({
+        connectorId: '123',
+        logger,
+        configurationUtilities,
+        credentials: {
+          config: {
+            apiUrl: 'https://servicenow',
+            usesTableApi: true,
+            isOAuth: true,
+            clientId: 'clientId',
+            jwtKeyId: 'jwtKeyId',
+            userIdentifierValue: 'userIdentifierValue',
+          },
+          secrets: {
+            clientSecret: 'clientSecret',
+            privateKey: 'privateKey',
+            privateKeyPassword: null,
+            username: null,
+            password: null,
+          },
+        },
+        snServiceUrl: 'https://dev23432523.service-now.com',
+        connectorTokenClient,
+      });
+
+      expect(createAxiosInstanceMock).toHaveBeenCalledTimes(1);
+      expect(createAxiosInstanceMock).toHaveBeenCalledWith();
+      expect(axiosInstanceMock.interceptors.request.use).toHaveBeenCalledTimes(1);
+
+      (getOAuthJwtAccessToken as jest.Mock).mockResolvedValueOnce('Bearer tokentokentoken');
+
+      const mockRequestCallback = (axiosInstanceMock.interceptors.request.use as jest.Mock).mock
+        .calls[0][0];
+      expect(await mockRequestCallback({ headers: {} })).toEqual({
+        headers: { Authorization: 'Bearer tokentokentoken' },
+      });
+
+      expect(getOAuthJwtAccessToken as jest.Mock).toHaveBeenCalledWith({
+        connectorId: '123',
+        logger,
+        configurationUtilities,
+        credentials: {
+          config: {
+            clientId: 'clientId',
+            jwtKeyId: 'jwtKeyId',
+            userIdentifierValue: 'userIdentifierValue',
+          },
+          secrets: {
+            clientSecret: 'clientSecret',
+            privateKey: 'privateKey',
+            privateKeyPassword: null,
+          },
+        },
+        tokenUrl: 'https://dev23432523.service-now.com/oauth_token.do',
+        connectorTokenClient,
+      });
+    });
+
+    test('throws expected error if getOAuthJwtAccessToken returns null access token', async () => {
+      getAxiosInstance({
+        connectorId: '123',
+        logger,
+        configurationUtilities,
+        credentials: {
+          config: {
+            apiUrl: 'https://servicenow',
+            usesTableApi: true,
+            isOAuth: true,
+            clientId: 'clientId',
+            jwtKeyId: 'jwtKeyId',
+            userIdentifierValue: 'userIdentifierValue',
+          },
+          secrets: {
+            clientSecret: 'clientSecret',
+            privateKey: 'privateKey',
+            privateKeyPassword: null,
+            username: null,
+            password: null,
+          },
+        },
+        snServiceUrl: 'https://dev23432523.service-now.com',
+        connectorTokenClient,
+      });
+      expect(createAxiosInstanceMock).toHaveBeenCalledTimes(1);
+      expect(createAxiosInstanceMock).toHaveBeenCalledWith();
+      expect(axiosInstanceMock.interceptors.request.use).toHaveBeenCalledTimes(1);
+
+      (getOAuthJwtAccessToken as jest.Mock).mockResolvedValueOnce(null);
+
+      const mockRequestCallback = (axiosInstanceMock.interceptors.request.use as jest.Mock).mock
+        .calls[0][0];
+
+      await expect(() =>
+        mockRequestCallback({ headers: {} })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unable to retrieve access token for connectorId: 123"`
+      );
+
+      expect(getOAuthJwtAccessToken as jest.Mock).toHaveBeenCalledWith({
+        connectorId: '123',
+        logger,
+        configurationUtilities,
+        credentials: {
+          config: {
+            clientId: 'clientId',
+            jwtKeyId: 'jwtKeyId',
+            userIdentifierValue: 'userIdentifierValue',
+          },
+          secrets: {
+            clientSecret: 'clientSecret',
+            privateKey: 'privateKey',
+            privateKeyPassword: null,
+          },
+        },
+        tokenUrl: 'https://dev23432523.service-now.com/oauth_token.do',
+        connectorTokenClient,
+      });
+    });
+
+    test('deletes saved access tokens if 4xx response received', async () => {
+      getAxiosInstance({
+        connectorId: '123',
+        logger,
+        configurationUtilities,
+        credentials: {
+          config: {
+            apiUrl: 'https://servicenow',
+            usesTableApi: true,
+            isOAuth: true,
+            clientId: 'clientId',
+            jwtKeyId: 'jwtKeyId',
+            userIdentifierValue: 'userIdentifierValue',
+          },
+          secrets: {
+            clientSecret: 'clientSecret',
+            privateKey: 'privateKey',
+            privateKeyPassword: null,
+            username: null,
+            password: null,
+          },
+        },
+        snServiceUrl: 'https://dev23432523.service-now.com',
+        connectorTokenClient,
+      });
+      expect(createAxiosInstanceMock).toHaveBeenCalledTimes(1);
+      expect(createAxiosInstanceMock).toHaveBeenCalledWith();
+      expect(axiosInstanceMock.interceptors.request.use).toHaveBeenCalledTimes(1);
+      expect(axiosInstanceMock.interceptors.response.use).toHaveBeenCalledTimes(1);
+
+      (getOAuthJwtAccessToken as jest.Mock).mockResolvedValueOnce('Bearer tokentokentoken');
+
+      const mockResponseCallback = (axiosInstanceMock.interceptors.response.use as jest.Mock).mock
+        .calls[0][1];
+
+      const errorResponse = {
+        response: {
+          status: 403,
+          statusText: 'Forbidden',
+          data: {
+            error: {
+              message: 'Insufficient rights to query records',
+              detail: 'Field(s) present in the query do not have permission to be read',
+            },
+            status: 'failure',
+          },
+        },
+      };
+
+      await expect(() => mockResponseCallback(errorResponse)).rejects.toEqual(errorResponse);
+
+      expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledWith({
+        connectorId: '123',
+      });
+    });
+
+    test('does not delete saved access token if not 4xx error response received', async () => {
+      getAxiosInstance({
+        connectorId: '123',
+        logger,
+        configurationUtilities,
+        credentials: {
+          config: {
+            apiUrl: 'https://servicenow',
+            usesTableApi: true,
+            isOAuth: true,
+            clientId: 'clientId',
+            jwtKeyId: 'jwtKeyId',
+            userIdentifierValue: 'userIdentifierValue',
+          },
+          secrets: {
+            clientSecret: 'clientSecret',
+            privateKey: 'privateKey',
+            privateKeyPassword: null,
+            username: null,
+            password: null,
+          },
+        },
+        snServiceUrl: 'https://dev23432523.service-now.com',
+        connectorTokenClient,
+      });
+      expect(createAxiosInstanceMock).toHaveBeenCalledTimes(1);
+      expect(createAxiosInstanceMock).toHaveBeenCalledWith();
+      expect(axiosInstanceMock.interceptors.request.use).toHaveBeenCalledTimes(1);
+      expect(axiosInstanceMock.interceptors.response.use).toHaveBeenCalledTimes(1);
+
+      (getOAuthJwtAccessToken as jest.Mock).mockResolvedValueOnce('Bearer tokentokentoken');
+
+      const mockResponseCallback = (axiosInstanceMock.interceptors.response.use as jest.Mock).mock
+        .calls[0][1];
+
+      const errorResponse = {
+        response: {
+          status: 500,
+          statusText: 'Server error',
+        },
+      };
+
+      await expect(() => mockResponseCallback(errorResponse)).rejects.toEqual(errorResponse);
+
+      expect(connectorTokenClient.deleteConnectorTokens).not.toHaveBeenCalled();
     });
   });
 });

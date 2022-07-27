@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Matrix3, Vector2 } from '../types';
+import type { Matrix3, Vector2 } from '../types';
 
 /**
  * The inverse of `orthographicProjection`.

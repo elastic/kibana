@@ -11,11 +11,12 @@ import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
+import { ActionForm } from '../action_connector_form';
 import {
   ValidationResult,
   Rule,
   RuleType,
-  ConnectorValidationResult,
+  RuleTypeModel,
   GenericValidationResult,
 } from '../../../types';
 import { RuleForm } from './rule_form';
@@ -30,6 +31,12 @@ jest.mock('../../hooks/use_load_rule_types', () => ({
   useLoadRuleTypes: jest.fn(),
 }));
 jest.mock('../../../common/lib/kibana');
+jest.mock('../../lib/capabilities', () => ({
+  hasAllPrivilege: jest.fn(() => true),
+  hasSaveRulesCapability: jest.fn(() => true),
+  hasShowActionsCapability: jest.fn(() => true),
+  hasExecuteActionsCapability: jest.fn(() => true),
+}));
 
 describe('rule_form', () => {
   const ruleType = {
@@ -48,16 +55,6 @@ describe('rule_form', () => {
     id: 'my-action-type',
     iconClass: 'test',
     selectMessage: 'test',
-    validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
-      return Promise.resolve({
-        config: {
-          errors: {},
-        },
-        secrets: {
-          errors: {},
-        },
-      });
-    },
     validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
       return Promise.resolve(validationResult);
@@ -91,10 +88,151 @@ describe('rule_form', () => {
 
   const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
+  describe('rule recovery message', () => {
+    let wrapper: ReactWrapper<any>;
+    const defaultRecoveryMessage = 'Sample default recovery message';
+
+    async function setup(enforceMinimum = false, schedule = '1m') {
+      const mocks = coreMock.createSetup();
+      const { useLoadRuleTypes } = jest.requireMock('../../hooks/use_load_rule_types');
+      const myRuleModel = {
+        id: 'my-rule-type',
+        description: 'Sample rule type model',
+        iconClass: 'sampleIconClass',
+        defaultActionMessage: 'Sample default action message',
+        defaultRecoveryMessage,
+        requiresAppContext: false,
+      };
+      const myRule = {
+        id: 'my-rule-type',
+        name: 'Test',
+        actionGroups: [
+          {
+            id: 'testActionGroup',
+            name: 'Test Action Group',
+          },
+          {
+            id: 'recovered',
+            name: 'Recovered',
+          },
+        ],
+        defaultActionGroupId: 'testActionGroup',
+        minimumLicenseRequired: 'basic',
+        recoveryActionGroup: RecoveredActionGroup,
+        producer: ALERTS_FEATURE_ID,
+        authorizedConsumers: {
+          [ALERTS_FEATURE_ID]: { read: true, all: true },
+          test: { read: true, all: true },
+        },
+        actionVariables: {
+          params: [],
+          state: [],
+        },
+        enabledInLicense: true,
+      };
+      const disabledByLicenseRule = {
+        id: 'disabled-by-license',
+        name: 'Test',
+        actionGroups: [
+          {
+            id: 'testActionGroup',
+            name: 'Test Action Group',
+          },
+        ],
+        defaultActionGroupId: 'testActionGroup',
+        minimumLicenseRequired: 'gold',
+        recoveryActionGroup: RecoveredActionGroup,
+        producer: ALERTS_FEATURE_ID,
+        authorizedConsumers: {
+          [ALERTS_FEATURE_ID]: { read: true, all: true },
+          test: { read: true, all: true },
+        },
+        actionVariables: {
+          params: [],
+          state: [],
+        },
+        enabledInLicense: false,
+      };
+      useLoadRuleTypes.mockReturnValue({
+        ruleTypes: [myRule, disabledByLicenseRule],
+        ruleTypeIndex: new Map([
+          [myRule.id, myRule],
+          [disabledByLicenseRule.id, disabledByLicenseRule],
+        ]),
+      });
+      const [
+        {
+          application: { capabilities },
+        },
+      ] = await mocks.getStartServices();
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      useKibanaMock().services.application.capabilities = {
+        ...capabilities,
+        rules: {
+          show: true,
+          save: true,
+          delete: true,
+        },
+      };
+      ruleTypeRegistry.list.mockReturnValue([
+        ruleType,
+        ruleTypeNonEditable,
+        disabledByLicenseRuleType,
+      ]);
+      ruleTypeRegistry.has.mockReturnValue(true);
+      ruleTypeRegistry.get.mockReturnValue(myRuleModel as RuleTypeModel);
+      actionTypeRegistry.list.mockReturnValue([actionType]);
+      actionTypeRegistry.has.mockReturnValue(true);
+      actionTypeRegistry.get.mockReturnValue(actionType);
+      const initialRule = {
+        name: 'test',
+        params: {},
+        consumer: ALERTS_FEATURE_ID,
+        schedule: {
+          interval: schedule,
+        },
+        actions: [],
+        tags: [],
+        muteAll: false,
+        enabled: false,
+        mutedInstanceIds: [],
+        ruleTypeId: 'my-rule-type',
+      } as unknown as Rule;
+
+      wrapper = mountWithIntl(
+        <RuleForm
+          rule={initialRule}
+          config={{
+            isUsingSecurity: true,
+            minimumScheduleInterval: { value: '1m', enforce: enforceMinimum },
+          }}
+          dispatch={() => {}}
+          errors={{ name: [], 'schedule.interval': [], ruleTypeId: [], actionConnectors: [] }}
+          operation="create"
+          actionTypeRegistry={actionTypeRegistry}
+          ruleTypeRegistry={ruleTypeRegistry}
+        />
+      );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+    }
+
+    it('renders defaultRecoveryMessage for recovery action when specified', async () => {
+      await setup();
+      const actionForm = wrapper.find(ActionForm);
+      expect(actionForm.first().prop('actionGroups')?.[1]).toEqual(
+        expect.objectContaining({ defaultActionMessage: defaultRecoveryMessage })
+      );
+    });
+  });
+
   describe('rule_form create rule', () => {
     let wrapper: ReactWrapper<any>;
 
-    async function setup(enforceMinimum = false, schedule = '1m') {
+    async function setup(enforceMinimum = false, schedule = '1m', featureId = 'alerting') {
       const mocks = coreMock.createSetup();
       const { useLoadRuleTypes } = jest.requireMock('../../hooks/use_load_rule_types');
       const ruleTypes: RuleType[] = [
@@ -186,12 +324,16 @@ describe('rule_form', () => {
       wrapper = mountWithIntl(
         <RuleForm
           rule={initialRule}
-          config={{ minimumScheduleInterval: { value: '1m', enforce: enforceMinimum } }}
+          config={{
+            isUsingSecurity: true,
+            minimumScheduleInterval: { value: '1m', enforce: enforceMinimum },
+          }}
           dispatch={() => {}}
           errors={{ name: [], 'schedule.interval': [], ruleTypeId: [] }}
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
+          connectorFeatureId={featureId}
         />
       );
 
@@ -246,7 +388,15 @@ describe('rule_form', () => {
     it('renders registered action types', async () => {
       await setup();
       const ruleTypeSelectOptions = wrapper.find(
-        '[data-test-subj=".server-log-ActionTypeSelectOption"]'
+        '[data-test-subj=".server-log-alerting-ActionTypeSelectOption"]'
+      );
+      expect(ruleTypeSelectOptions.exists()).toBeFalsy();
+    });
+
+    it('renders uses feature id to load action types', async () => {
+      await setup(false, '1m', 'anotherFeature');
+      const ruleTypeSelectOptions = wrapper.find(
+        '[data-test-subj=".server-log-anotherFeature-ActionTypeSelectOption"]'
       );
       expect(ruleTypeSelectOptions.exists()).toBeFalsy();
     });
@@ -282,7 +432,6 @@ describe('rule_form', () => {
 
     async function setup() {
       const { useLoadRuleTypes } = jest.requireMock('../../hooks/use_load_rule_types');
-
       useLoadRuleTypes.mockReturnValue({
         ruleTypes: [
           {
@@ -382,9 +531,12 @@ describe('rule_form', () => {
       wrapper = mountWithIntl(
         <RuleForm
           rule={initialRule}
-          config={{ minimumScheduleInterval: { value: '1m', enforce: false } }}
+          config={{
+            isUsingSecurity: true,
+            minimumScheduleInterval: { value: '1m', enforce: false },
+          }}
           dispatch={() => {}}
-          errors={{ name: [], 'schedule.interval': [], ruleTypeId: [] }}
+          errors={{ name: [], 'schedule.interval': [], ruleTypeId: [], actionConnectors: [] }}
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
@@ -445,7 +597,10 @@ describe('rule_form', () => {
       wrapper = mountWithIntl(
         <RuleForm
           rule={initialRule}
-          config={{ minimumScheduleInterval: { value: '1m', enforce: false } }}
+          config={{
+            isUsingSecurity: true,
+            minimumScheduleInterval: { value: '1m', enforce: false },
+          }}
           dispatch={() => {}}
           errors={{ name: [], 'schedule.interval': [], ruleTypeId: [] }}
           operation="create"

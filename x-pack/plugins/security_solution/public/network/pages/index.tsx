@@ -6,7 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import { Redirect, Switch } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
 
 import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
 import { hasMlUserPermissions } from '../../../common/machine_learning/has_ml_user_permissions';

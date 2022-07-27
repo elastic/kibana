@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
 import type { PaletteOutput } from '@kbn/coloring';
-import type { SeriesType } from '@kbn/expression-xy-plugin/common';
 import {
   SuggestionRequest,
   VisualizationSuggestion,
@@ -17,7 +16,14 @@ import {
   TableSuggestion,
   TableChangeType,
 } from '../types';
-import { State, XYState, visualizationTypes, XYLayerConfig, XYDataLayerConfig } from './types';
+import {
+  State,
+  XYState,
+  visualizationTypes,
+  XYLayerConfig,
+  XYDataLayerConfig,
+  SeriesType,
+} from './types';
 import { layerTypes } from '../../common';
 import { getIconForSeries } from './state_helpers';
 import { getDataLayers, isDataLayer } from './visualization_helpers';
@@ -551,6 +557,8 @@ function buildSuggestion({
     valuesInLegend: currentState?.valuesInLegend,
     yLeftExtent: currentState?.yLeftExtent,
     yRightExtent: currentState?.yRightExtent,
+    yLeftScale: currentState?.yLeftScale,
+    yRightScale: currentState?.yRightScale,
     axisTitlesVisibilitySettings: currentState?.axisTitlesVisibilitySettings || {
       x: true,
       yLeft: true,

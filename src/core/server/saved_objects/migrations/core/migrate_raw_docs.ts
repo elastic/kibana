@@ -24,6 +24,7 @@ export interface DocumentsTransformFailed {
   readonly type: string;
   readonly corruptDocumentIds: string[];
   readonly transformErrors: TransformErrorObjects[];
+  readonly processedDocs: SavedObjectsRawDoc[];
 }
 
 export interface DocumentsTransformSuccess {
@@ -139,6 +140,7 @@ export function migrateRawDocsSafely({
         type: 'documents_transform_failed',
         corruptDocumentIds: [...corruptSavedObjectIds],
         transformErrors,
+        processedDocs,
       });
     }
     return Either.right({ processedDocs });

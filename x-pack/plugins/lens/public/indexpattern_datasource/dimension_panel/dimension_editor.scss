@@ -37,13 +37,7 @@
 
 .lnsIndexPatternDimensionEditor__columns {
   column-count: 2;
-  column-gap: $euiSizeXL;
-}
-
-// overrides the .euiListGroupItem display flex.
-// The parent container has a column-count property that only works properly with block elements.
-.lnsIndexPatternDimensionEditor__operation {
-  display: block;
+  column-gap: $euiSizeM;
 }
 
 .lnsIndexPatternDimensionEditor__operation .euiListGroupItem__label {

@@ -56,7 +56,7 @@ describe('getOperationTypesForField', () => {
           aggregatable: true,
           searchable: true,
         })
-      ).toEqual(['terms', 'unique_count', 'last_value']);
+      ).toEqual(['terms', 'unique_count', 'last_value', 'count']);
     });
 
     it('should return only bucketed operations on strings when passed proper filterOperations function', () => {
@@ -92,8 +92,11 @@ describe('getOperationTypesForField', () => {
         'min',
         'max',
         'unique_count',
+        'standard_deviation',
         'percentile',
+        'percentile_rank',
         'last_value',
+        'count',
       ]);
     });
 
@@ -116,8 +119,11 @@ describe('getOperationTypesForField', () => {
         'min',
         'max',
         'unique_count',
+        'standard_deviation',
         'percentile',
+        'percentile_rank',
         'last_value',
+        'count',
       ]);
     });
 
@@ -366,12 +372,37 @@ describe('getOperationTypesForField', () => {
               },
               Object {
                 "field": "bytes",
+                "operationType": "standard_deviation",
+                "type": "field",
+              },
+              Object {
+                "field": "bytes",
                 "operationType": "percentile",
                 "type": "field",
               },
               Object {
                 "field": "bytes",
+                "operationType": "percentile_rank",
+                "type": "field",
+              },
+              Object {
+                "field": "bytes",
                 "operationType": "last_value",
+                "type": "field",
+              },
+              Object {
+                "field": "timestamp",
+                "operationType": "count",
+                "type": "field",
+              },
+              Object {
+                "field": "bytes",
+                "operationType": "count",
+                "type": "field",
+              },
+              Object {
+                "field": "source",
+                "operationType": "count",
                 "type": "field",
               },
               Object {

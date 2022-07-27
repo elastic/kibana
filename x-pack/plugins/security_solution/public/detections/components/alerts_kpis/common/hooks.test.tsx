@@ -7,12 +7,8 @@
 
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
-import {
-  getAggregatableFields,
-  useInspectButton,
-  UseInspectButtonParams,
-  useStackByFields,
-} from './hooks';
+import type { UseInspectButtonParams } from './hooks';
+import { getAggregatableFields, useInspectButton, useStackByFields } from './hooks';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { TestProviders } from '../../../../common/mock';
 

@@ -54,49 +54,51 @@ const DefaultIconComponent = ({ status }) => (
   </Fragment>
 );
 
-const StatusIndicator = ({ status, isOnline, IconComponent }) => {
+export const DefaultStatusIndicator = ({ status, isOnline, IconComponent }) => {
   if (isEmpty(status)) {
     return null;
   }
 
   return (
-    <EuiFlexItem
-      className="eui-textTruncate"
-      style={{ maxWidth: 200 }}
-      key={`summary-status-item-status`}
-      grow={false}
-    >
-      <EuiStat
-        title={
-          <Fragment>
-            <IconComponent status={status} isOnline={isOnline} />
-            &nbsp;
-            {capitalize(status)}
-          </Fragment>
-        }
-        titleSize="xxxs"
-        textAlign="left"
-        className="monSummaryStatusNoWrap__stat"
-        description={i18n.translate('xpack.monitoring.summaryStatus.statusDescription', {
-          defaultMessage: 'Status',
-        })}
-      />
-    </EuiFlexItem>
+    <EuiStat
+      data-test-subj="status"
+      title={
+        <>
+          <IconComponent status={status} isOnline={isOnline} />
+          &nbsp;
+          {capitalize(status)}
+        </>
+      }
+      titleSize="xxxs"
+      textAlign="left"
+      className="monSummaryStatusNoWrap__stat"
+      description={i18n.translate('xpack.monitoring.summaryStatus.statusDescription', {
+        defaultMessage: 'Status',
+      })}
+    />
   );
 };
 
 export function SummaryStatus({
-  metrics,
+  StatusIndicator = DefaultStatusIndicator,
   status,
-  alerts,
   isOnline,
   IconComponent = DefaultIconComponent,
+  alerts,
+  metrics,
   ...props
 }) {
   return (
     <div {...props} className="monSummaryStatusNoWrap">
       <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="spaceBetween">
-        <StatusIndicator status={status} IconComponent={IconComponent} isOnline={isOnline} />
+        <EuiFlexItem
+          className="eui-textTruncate"
+          style={{ maxWidth: 200 }}
+          key={`summary-status-item-status`}
+          grow={false}
+        >
+          <StatusIndicator status={status} isOnline={isOnline} IconComponent={IconComponent} />
+        </EuiFlexItem>
         {alerts ? (
           <EuiFlexItem grow={false}>
             <EuiStat

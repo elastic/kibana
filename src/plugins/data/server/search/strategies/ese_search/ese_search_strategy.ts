@@ -26,7 +26,7 @@ import {
   getIgnoreThrottled,
 } from './request_utils';
 import { toAsyncKibanaSearchResponse } from './response_utils';
-import { SearchUsage, searchUsageObserver } from '../../collectors';
+import { SearchUsage, searchUsageObserver } from '../../collectors/search';
 import {
   getDefaultSearchParams,
   getShardTimeout,

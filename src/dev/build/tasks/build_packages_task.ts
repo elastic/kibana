@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import cpy from 'cpy';
 import Path from 'path';
 
 import { discoverBazelPackages } from '@kbn/bazel-packages';
@@ -19,10 +20,7 @@ export const BuildBazelPackages: Task = {
     const packages = (await discoverBazelPackages()).filter((pkg) => !pkg.isDevOnly());
 
     log.info(`Preparing Bazel projects production build non-devOnly packages`);
-    await runBazel({
-      log,
-      bazelArgs: ['build', '//packages:build'],
-    });
+    await runBazel(['build', '//packages:build']);
 
     for (const pkg of packages) {
       log.info(`Copying build of`, pkg.pkg.name, 'into build');
@@ -53,9 +51,9 @@ export const BuildXpack: Task = {
     });
 
     log.info('copying built x-pack into build dir');
-    await scanCopy({
-      source: config.resolveFromRepo('x-pack/build/plugin/kibana/x-pack'),
-      destination: build.resolvePath('x-pack'),
+    await cpy('**/{.,}*', build.resolvePath('x-pack'), {
+      cwd: config.resolveFromRepo('x-pack/build/plugin/kibana/x-pack'),
+      parents: true,
     });
   },
 };

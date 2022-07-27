@@ -43,7 +43,8 @@ describe('AggTypesMetricsPercentilesProvider class', () => {
           },
         },
       ],
-      { typesRegistry }
+      { typesRegistry },
+      jest.fn()
     );
   });
 

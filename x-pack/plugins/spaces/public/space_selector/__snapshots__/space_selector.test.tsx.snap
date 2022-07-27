@@ -18,7 +18,7 @@ exports[`it renders without crashing 1`] = `
     <EuiSpacer
       size="xxl"
     />
-    <ForwardRef
+    <KibanaSolutionAvatar
       name="Elastic"
       size="xl"
     />

@@ -57,6 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/date_nested');
       await esArchiver.unload('test/functional/fixtures/es_archiver/date_nested');
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.uiSettings.replace(defaultSettings);
     });
 
     describe(`when it's false`, () => {

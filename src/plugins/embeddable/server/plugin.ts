@@ -19,7 +19,6 @@ import {
   EnhancementsRegistry,
   EnhancementRegistryDefinition,
   EnhancementRegistryItem,
-  EmbeddableRegistryDefinition,
 } from './types';
 import {
   getExtractFunction,
@@ -27,7 +26,11 @@ import {
   getMigrateFunction,
   getTelemetryFunction,
 } from '../common/lib';
-import { EmbeddableStateWithType, CommonEmbeddableStartContract } from '../common/types';
+import {
+  EmbeddableStateWithType,
+  CommonEmbeddableStartContract,
+  EmbeddableRegistryDefinition,
+} from '../common/types';
 import { getAllMigrations } from '../common/lib/get_all_migrations';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {

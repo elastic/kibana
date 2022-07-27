@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-// @ts-expect-error
-import { formatRequest } from '@kbn/server-route-repository/target_node/format_request';
-import type { formatRequest as formatRequestType } from '@kbn/server-route-repository/target_types/format_request';
+import { formatRequest } from '@kbn/server-route-repository';
 import type { HttpSetup } from '@kbn/core/public';
 import type { AbstractObservabilityClient, ObservabilityClient } from './types';
 
@@ -19,9 +17,7 @@ export function createCallObservabilityApi(http: HttpSetup) {
   const client: AbstractObservabilityClient = (endpoint, options) => {
     const { params: { path, body, query } = {}, ...rest } = options;
 
-    const { method, pathname } = formatRequest(endpoint, path) as ReturnType<
-      typeof formatRequestType
-    >;
+    const { method, pathname } = formatRequest(endpoint, path);
 
     return http[method](pathname, {
       ...rest,

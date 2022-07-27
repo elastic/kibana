@@ -20,7 +20,6 @@ import {
   EuiFilterGroup,
   EuiFilterButton,
   EuiScreenReaderOnly,
-  EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EsQueryConfig, Query, Filter } from '@kbn/es-query';
@@ -43,10 +42,11 @@ import type {
   IndexPatternField,
   IndexPatternRef,
 } from './types';
-import { trackUiEvent } from '../lens_ui_telemetry';
 import { loadIndexPatterns, syncExistingFields } from './loader';
 import { fieldExists } from './pure_helpers';
 import { Loader } from '../loader';
+import { LensFieldIcon } from '../shared_components/field_picker/lens_field_icon';
+import { FieldGroups, FieldList } from './field_list';
 
 export type Props = Omit<DatasourceDataPanelProps<IndexPatternPrivateState>, 'core'> & {
   data: DataPublicPluginStart;
@@ -61,9 +61,6 @@ export type Props = Omit<DatasourceDataPanelProps<IndexPatternPrivateState>, 'co
   core: CoreStart;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
 };
-import { LensFieldIcon } from './lens_field_icon';
-import { ChangeIndexPattern } from './change_indexpattern';
-import { FieldGroups, FieldList } from './field_list';
 
 function sortFields(fieldA: IndexPatternField, fieldB: IndexPatternField) {
   return fieldA.displayName.localeCompare(fieldB.displayName, undefined, { sensitivity: 'base' });
@@ -535,7 +532,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     () =>
       editPermission
         ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
-            trackUiEvent(`open_field_editor_${uiAction}`);
             const indexPatternInstance = await dataViews.get(currentIndexPattern.id);
             closeFieldEditor.current = indexPatternFieldEditor.openEditor({
               ctx: {
@@ -543,7 +539,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               },
               fieldName,
               onSave: async () => {
-                trackUiEvent(`save_field_${uiAction}`);
                 await refreshFieldList();
               },
             });
@@ -556,7 +551,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     () =>
       editPermission
         ? async (fieldName: string) => {
-            trackUiEvent('open_field_delete_modal');
             const indexPatternInstance = await dataViews.get(currentIndexPattern.id);
             closeFieldEditor.current = indexPatternFieldEditor.openDeleteModal({
               ctx: {
@@ -564,18 +558,12 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               },
               fieldName,
               onDelete: async () => {
-                trackUiEvent('delete_field');
                 await refreshFieldList();
               },
             });
           }
         : undefined,
     [currentIndexPattern.id, dataViews, editPermission, indexPatternFieldEditor, refreshFieldList]
-  );
-
-  const addField = useMemo(
-    () => (editPermission && editField ? () => editField(undefined, 'add') : undefined),
-    [editField, editPermission]
   );
 
   const fieldProps = useMemo(
@@ -603,8 +591,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     ]
   );
 
-  const [popoverOpen, setPopoverOpen] = useState(false);
-
   return (
     <ChildDragDropProvider {...dragDropContext}>
       <EuiFlexGroup
@@ -613,91 +599,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         direction="column"
         responsive={false}
       >
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup
-            gutterSize="s"
-            alignItems="center"
-            className="lnsInnerIndexPatternDataPanel__header"
-            responsive={false}
-          >
-            <EuiFlexItem grow={true} className="lnsInnerIndexPatternDataPanel__switcher">
-              <ChangeIndexPattern
-                data-test-subj="indexPattern-switcher"
-                trigger={{
-                  label: currentIndexPattern.title,
-                  title: currentIndexPattern.title,
-                  'data-test-subj': 'indexPattern-switch-link',
-                  fontWeight: 'bold',
-                }}
-                indexPatternId={currentIndexPatternId}
-                indexPatternRefs={indexPatternRefs}
-                onChangeIndexPattern={(newId: string) => {
-                  onChangeIndexPattern(newId);
-                  clearLocalState();
-                }}
-              />
-            </EuiFlexItem>
-            {addField && (
-              <EuiFlexItem grow={false}>
-                <EuiPopover
-                  panelPaddingSize="s"
-                  isOpen={popoverOpen}
-                  closePopover={() => {
-                    setPopoverOpen(false);
-                  }}
-                  ownFocus
-                  data-test-subj="lnsIndexPatternActions-popover"
-                  button={
-                    <EuiButtonIcon
-                      color="text"
-                      iconType="boxesHorizontal"
-                      data-test-subj="lnsIndexPatternActions"
-                      aria-label={i18n.translate('xpack.lens.indexPatterns.actionsPopoverLabel', {
-                        defaultMessage: 'Data view settings',
-                      })}
-                      onClick={() => {
-                        setPopoverOpen(!popoverOpen);
-                      }}
-                    />
-                  }
-                >
-                  <EuiContextMenuPanel
-                    size="s"
-                    items={[
-                      <EuiContextMenuItem
-                        key="add"
-                        icon="indexOpen"
-                        data-test-subj="indexPattern-add-field"
-                        onClick={() => {
-                          setPopoverOpen(false);
-                          addField();
-                        }}
-                      >
-                        {i18n.translate('xpack.lens.indexPatterns.addFieldButton', {
-                          defaultMessage: 'Add field to data view',
-                        })}
-                      </EuiContextMenuItem>,
-                      <EuiContextMenuItem
-                        key="manage"
-                        icon="indexSettings"
-                        onClick={() => {
-                          setPopoverOpen(false);
-                          core.application.navigateToApp('management', {
-                            path: `/kibana/indexPatterns/patterns/${currentIndexPattern.id}`,
-                          });
-                        }}
-                      >
-                        {i18n.translate('xpack.lens.indexPatterns.manageFieldButton', {
-                          defaultMessage: 'Manage data view fields',
-                        })}
-                      </EuiContextMenuItem>,
-                    ]}
-                  />
-                </EuiPopover>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormControlLayout
             icon="search"
@@ -710,7 +611,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 defaultMessage: 'Clear name and type filters',
               }),
               onClick: () => {
-                trackUiEvent('indexpattern_filters_cleared');
                 clearLocalState();
               },
             }}
@@ -765,7 +665,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               }
             >
               <EuiContextMenuPanel
-                watchedItemProps={['icon', 'disabled']}
                 data-test-subj="lnsIndexPatternTypeFilterOptions"
                 items={(availableFieldTypes as DataType[]).map((type) => (
                   <EuiContextMenuItem
@@ -774,7 +673,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     icon={localState.typeFilter.includes(type) ? 'check' : 'empty'}
                     data-test-subj={`typeFilter-${type}`}
                     onClick={() => {
-                      trackUiEvent('indexpattern_type_filter_toggled');
                       setLocalState((s) => ({
                         ...s,
                         typeFilter: localState.typeFilter.includes(type)

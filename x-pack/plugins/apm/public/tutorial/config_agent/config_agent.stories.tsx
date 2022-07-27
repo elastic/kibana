@@ -107,6 +107,7 @@ export default {
           'php',
           'js',
           'js_script',
+          'openTelemetry',
         ],
       },
     },

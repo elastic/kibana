@@ -7,6 +7,7 @@ PKG_REQUIRE_NAME = "@kbn/bazel-runner"
 
 SOURCE_FILES = glob(
   [
+    "src/**/*.js",
     "src/**/*.ts",
   ],
   exclude = [
@@ -58,6 +59,7 @@ TYPES_DEPS = [
   "@npm//chalk",
   "@npm//rxjs",
   "//packages/kbn-dev-utils:npm_module_types",
+  "//packages/kbn-tooling-log:npm_module_types",
 ]
 
 jsts_transpiler(
@@ -80,7 +82,9 @@ ts_project(
   args = ['--pretty'],
   srcs = SRCS,
   deps = TYPES_DEPS,
+  allow_js = True,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",

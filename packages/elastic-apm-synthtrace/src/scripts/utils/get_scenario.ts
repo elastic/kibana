@@ -5,20 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import Path from 'path';
+
 import { Logger } from '../../lib/utils/create_logger';
 import { Scenario } from '../scenario';
 import { Fields } from '../../lib/entity';
 
-export function getScenario({ file, logger }: { file: unknown; logger: Logger }) {
-  const location = Path.join(process.cwd(), String(file));
+export function getScenario({ file, logger }: { file: string; logger: Logger }) {
+  logger.debug(`Loading scenario from ${file}`);
 
-  logger.debug(`Loading scenario from ${location}`);
-
-  return import(location).then((m) => {
+  return import(file).then((m) => {
     if (m && m.default) {
       return m.default;
     }
-    throw new Error(`Could not find scenario at ${location}`);
+    throw new Error(`Could not import scenario at ${file}`);
   }) as Promise<Scenario<Fields>>;
 }

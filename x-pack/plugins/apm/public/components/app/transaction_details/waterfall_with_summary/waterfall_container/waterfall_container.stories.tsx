@@ -17,7 +17,6 @@ import {
   simpleTrace,
   traceChildStartBeforeParent,
   traceWithErrors,
-  urlParams as testUrlParams,
 } from './waterfall_container.stories.data';
 import type { ApmPluginContextValue } from '../../../../../context/apm_plugin/apm_plugin_context';
 
@@ -50,48 +49,87 @@ const stories: Meta<Args> = {
 };
 export default stories;
 
-export const Example: Story<Args> = ({ urlParams, waterfall }) => {
-  return <WaterfallContainer urlParams={urlParams} waterfall={waterfall} />;
+export const Example: Story<Args> = ({
+  serviceName,
+  waterfallItemId,
+  waterfall,
+}) => {
+  return (
+    <WaterfallContainer
+      serviceName={serviceName}
+      waterfallItemId={waterfallItemId}
+      waterfall={waterfall}
+    />
+  );
 };
 Example.args = {
-  urlParams: testUrlParams,
   waterfall: getWaterfall(simpleTrace, '975c8d5bfd1dd20b'),
 };
 
-export const WithErrors: Story<Args> = ({ urlParams, waterfall }) => {
-  return <WaterfallContainer urlParams={urlParams} waterfall={waterfall} />;
+export const WithErrors: Story<Args> = ({
+  serviceName,
+  waterfallItemId,
+  waterfall,
+}) => {
+  return (
+    <WaterfallContainer
+      serviceName={serviceName}
+      waterfallItemId={waterfallItemId}
+      waterfall={waterfall}
+    />
+  );
 };
 WithErrors.args = {
-  urlParams: testUrlParams,
   waterfall: getWaterfall(traceWithErrors, '975c8d5bfd1dd20b'),
 };
 
 export const ChildStartsBeforeParent: Story<Args> = ({
-  urlParams,
+  serviceName,
+  waterfallItemId,
   waterfall,
 }) => {
-  return <WaterfallContainer urlParams={urlParams} waterfall={waterfall} />;
+  return (
+    <WaterfallContainer
+      serviceName={serviceName}
+      waterfallItemId={waterfallItemId}
+      waterfall={waterfall}
+    />
+  );
 };
 ChildStartsBeforeParent.args = {
-  urlParams: testUrlParams,
   waterfall: getWaterfall(traceChildStartBeforeParent, '975c8d5bfd1dd20b'),
 };
 
-export const InferredSpans: Story<Args> = ({ urlParams, waterfall }) => {
-  return <WaterfallContainer urlParams={urlParams} waterfall={waterfall} />;
+export const InferredSpans: Story<Args> = ({
+  serviceName,
+  waterfallItemId,
+  waterfall,
+}) => {
+  return (
+    <WaterfallContainer
+      serviceName={serviceName}
+      waterfallItemId={waterfallItemId}
+      waterfall={waterfall}
+    />
+  );
 };
 InferredSpans.args = {
-  urlParams: testUrlParams,
   waterfall: getWaterfall(inferredSpans, 'f2387d37260d00bd'),
 };
 
 export const ManyChildrenWithSameLength: Story<Args> = ({
-  urlParams,
+  serviceName,
+  waterfallItemId,
   waterfall,
 }) => {
-  return <WaterfallContainer urlParams={urlParams} waterfall={waterfall} />;
+  return (
+    <WaterfallContainer
+      serviceName={serviceName}
+      waterfallItemId={waterfallItemId}
+      waterfall={waterfall}
+    />
+  );
 };
 ManyChildrenWithSameLength.args = {
-  urlParams: testUrlParams,
   waterfall: getWaterfall(manyChildrenWithSameLength, '9a7f717439921d39'),
 };

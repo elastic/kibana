@@ -7,8 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { euiPaletteColorBlindBehindText } from '@elastic/eui';
-import {
-  AGENT_GROUP_KEY,
+import type {
   SelectedGroups,
   Overlap,
   Group,
@@ -18,6 +17,7 @@ import {
   GroupOptionValue,
   GroupOption,
 } from './types';
+import { AGENT_GROUP_KEY } from './types';
 
 export const getNumOverlapped = (
   { policy = {}, platform = {} }: SelectedGroups,
@@ -38,7 +38,17 @@ interface Aggs extends estypes.AggregationsTermsAggregateBase {
   buckets: AggregationDataPoint[];
 }
 
-export const processAggregations = (aggs: Record<string, estypes.AggregationsAggregate>) => {
+export const processAggregations = (
+  aggs: Record<string, estypes.AggregationsAggregate> | undefined
+) => {
+  if (!aggs) {
+    return {
+      platforms: [],
+      overlap: {},
+      policies: [],
+    };
+  }
+
   const platforms: Group[] = [];
   const overlap: Overlap = {};
   const platformTerms = aggs.platforms as Aggs;

@@ -23,8 +23,11 @@ import {
 import { RangeSliderStrings } from './range_slider_strings';
 import { RangeValue } from './types';
 
+const INVALID_CLASS = 'rangeSliderAnchor__fieldNumber--invalid';
+
 export interface Props {
   id: string;
+  isInvalid?: boolean;
   isLoading?: boolean;
   min: string;
   max: string;
@@ -36,6 +39,7 @@ export interface Props {
 
 export const RangeSliderPopover: FC<Props> = ({
   id,
+  isInvalid,
   isLoading,
   min,
   max,
@@ -45,11 +49,20 @@ export const RangeSliderPopover: FC<Props> = ({
   fieldFormatter,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+  const [rangeSliderMin, setRangeSliderMin] = useState<number>(-Infinity);
+  const [rangeSliderMax, setRangeSliderMax] = useState<number>(Infinity);
   const rangeRef = useRef<EuiDualRange | null>(null);
   let errorMessage = '';
   let helpText = '';
 
   const hasAvailableRange = min !== '' && max !== '';
+
+  if (!hasAvailableRange) {
+    helpText = RangeSliderStrings.popover.getNoAvailableDataHelpText();
+  } else if (isInvalid) {
+    helpText = RangeSliderStrings.popover.getNoDataHelpText();
+  }
+
   const hasLowerBoundSelection = value[0] !== '';
   const hasUpperBoundSelection = value[1] !== '';
 
@@ -58,37 +71,13 @@ export const RangeSliderPopover: FC<Props> = ({
   const minValue = parseFloat(min);
   const maxValue = parseFloat(max);
 
-  if (!hasAvailableRange) {
-    helpText = 'There is no data to display. Adjust the time range and filters.';
-  }
-
   // EuiDualRange can only handle integers as min/max
   const roundedMin = hasAvailableRange ? Math.floor(minValue) : minValue;
   const roundedMax = hasAvailableRange ? Math.ceil(maxValue) : maxValue;
 
-  const isLowerSelectionInvalid = hasLowerBoundSelection && lowerBoundValue > roundedMax;
-  const isUpperSelectionInvalid = hasUpperBoundSelection && upperBoundValue < roundedMin;
-  const isSelectionInvalid =
-    hasAvailableRange && (isLowerSelectionInvalid || isUpperSelectionInvalid);
-
-  if (isSelectionInvalid) {
-    helpText = RangeSliderStrings.popover.getNoDataHelpText();
-  }
-
   if (lowerBoundValue > upperBoundValue) {
     errorMessage = RangeSliderStrings.errors.getUpperLessThanLowerErrorMessage();
   }
-
-  const rangeSliderMin = Math.min(
-    roundedMin,
-    isNaN(lowerBoundValue) ? Infinity : lowerBoundValue,
-    isNaN(upperBoundValue) ? Infinity : upperBoundValue
-  );
-  const rangeSliderMax = Math.max(
-    roundedMax,
-    isNaN(lowerBoundValue) ? -Infinity : lowerBoundValue,
-    isNaN(upperBoundValue) ? -Infinity : upperBoundValue
-  );
 
   const displayedValue = [
     hasLowerBoundSelection ? String(lowerBoundValue) : hasAvailableRange ? String(roundedMin) : '',
@@ -98,7 +87,7 @@ export const RangeSliderPopover: FC<Props> = ({
   const ticks = [];
   const levels = [];
 
-  if (hasAvailableRange) {
+  if (hasAvailableRange && isPopoverOpen) {
     ticks.push({ value: rangeSliderMin, label: fieldFormatter(String(rangeSliderMin)) });
     ticks.push({ value: rangeSliderMax, label: fieldFormatter(String(rangeSliderMax)) });
     levels.push({ min: roundedMin, max: roundedMax, color: 'success' });
@@ -106,7 +95,27 @@ export const RangeSliderPopover: FC<Props> = ({
 
   const button = (
     <button
-      onClick={() => setIsPopoverOpen((openState) => !openState)}
+      onClick={() => {
+        // caches min and max displayed on popover open so the range slider doesn't resize as selections change
+        if (!isPopoverOpen) {
+          setRangeSliderMin(
+            Math.min(
+              roundedMin,
+              isNaN(lowerBoundValue) ? Infinity : lowerBoundValue,
+              isNaN(upperBoundValue) ? Infinity : upperBoundValue
+            )
+          );
+          setRangeSliderMax(
+            Math.max(
+              roundedMax,
+              isNaN(lowerBoundValue) ? -Infinity : lowerBoundValue,
+              isNaN(upperBoundValue) ? -Infinity : upperBoundValue
+            )
+          );
+        }
+
+        setIsPopoverOpen((openState) => !openState);
+      }}
       className="rangeSliderAnchor__button"
       data-test-subj={`range-slider-control-${id}`}
     >
@@ -116,17 +125,15 @@ export const RangeSliderPopover: FC<Props> = ({
             controlOnly
             fullWidth
             className={`rangeSliderAnchor__fieldNumber ${
-              hasLowerBoundSelection && isSelectionInvalid
-                ? 'rangeSliderAnchor__fieldNumber--invalid'
-                : ''
+              hasLowerBoundSelection && isInvalid ? INVALID_CLASS : ''
             }`}
             value={hasLowerBoundSelection ? lowerBoundValue : ''}
             onChange={(event) => {
               onChange([event.target.value, isNaN(upperBoundValue) ? '' : String(upperBoundValue)]);
             }}
-            disabled={!hasAvailableRange || isLoading}
+            disabled={isLoading}
             placeholder={`${hasAvailableRange ? roundedMin : ''}`}
-            isInvalid={isLowerSelectionInvalid}
+            isInvalid={isInvalid}
             data-test-subj="rangeSlider__lowerBoundFieldNumber"
           />
         </EuiFlexItem>
@@ -140,17 +147,15 @@ export const RangeSliderPopover: FC<Props> = ({
             controlOnly
             fullWidth
             className={`rangeSliderAnchor__fieldNumber ${
-              hasUpperBoundSelection && isSelectionInvalid
-                ? 'rangeSliderAnchor__fieldNumber--invalid'
-                : ''
+              hasUpperBoundSelection && isInvalid ? INVALID_CLASS : ''
             }`}
             value={hasUpperBoundSelection ? upperBoundValue : ''}
             onChange={(event) => {
               onChange([isNaN(lowerBoundValue) ? '' : String(lowerBoundValue), event.target.value]);
             }}
-            disabled={!hasAvailableRange || isLoading}
+            disabled={isLoading}
             placeholder={`${hasAvailableRange ? roundedMax : ''}`}
-            isInvalid={isUpperSelectionInvalid}
+            isInvalid={isInvalid}
             data-test-subj="rangeSlider__upperBoundFieldNumber"
           />
         </EuiFlexItem>
@@ -223,19 +228,17 @@ export const RangeSliderPopover: FC<Props> = ({
             {errorMessage || helpText}
           </EuiText>
         </EuiFlexItem>
-        {hasAvailableRange ? (
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={RangeSliderStrings.popover.getClearRangeButtonTitle()}>
-              <EuiButtonIcon
-                iconType="eraser"
-                color="danger"
-                onClick={() => onChange(['', ''])}
-                aria-label={RangeSliderStrings.popover.getClearRangeButtonTitle()}
-                data-test-subj="rangeSlider__clearRangeButton"
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        ) : null}
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={RangeSliderStrings.popover.getClearRangeButtonTitle()}>
+            <EuiButtonIcon
+              iconType="eraser"
+              color="danger"
+              onClick={() => onChange(['', ''])}
+              aria-label={RangeSliderStrings.popover.getClearRangeButtonTitle()}
+              data-test-subj="rangeSlider__clearRangeButton"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiInputPopover>
   );

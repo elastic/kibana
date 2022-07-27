@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TimelineFilter } from '../objects/timeline';
+import type { TimelineFilter } from '../objects/timeline';
 
 export const ADD_NOTE_BUTTON = '[data-test-subj="add-note"]';
 
@@ -17,8 +17,6 @@ export const ATTACH_TIMELINE_TO_NEW_CASE_ICON = '[data-test-subj="attach-timelin
 
 export const ATTACH_TIMELINE_TO_EXISTING_CASE_ICON =
   '[data-test-subj="attach-timeline-existing-case"]';
-
-export const BULK_ACTIONS = '[data-test-subj="utility-bar-action-button"]';
 
 export const SELECT_CASE = (id: string) => {
   return `[data-test-subj="cases-table-row-select-${id}"]`;
@@ -92,8 +90,6 @@ export const NOTES_AUTHOR = '.euiCommentEvent__headerUsername';
 
 export const NOTES_LINK = '[data-test-subj="markdown-link"]';
 
-export const NOTES_COUNT = '[data-test-subj="timeline-notes-count"]';
-
 export const OPEN_TIMELINE_ICON = '[data-test-subj="open-timeline-button"]';
 
 export const OPEN_TIMELINE_MODAL = '[data-test-subj="open-timeline-modal"]';
@@ -104,9 +100,6 @@ export const OPEN_TIMELINE_TEMPLATE_ICON =
   '[data-test-subj="open-timeline-modal-body-filter-template"]';
 
 export const PIN_EVENT = '[data-test-subj="pin"]';
-
-export const PINNED_EVENT_TABLE_CELL =
-  '[data-test-subj="pinned-events-table"] [data-test-subj="statefulCell"]';
 
 export const PINNED_TAB_BUTTON = '[data-test-subj="timelineTabs-pinned"]';
 
@@ -246,8 +239,6 @@ export const TIMELINE_ROW_RENDERERS_MODAL = '[data-test-subj="row-renderers-moda
 
 export const TIMELINE_ROW_RENDERERS_DISABLE_ALL_BTN = `[data-test-subj="disable-all"]`;
 
-export const TIMELINE_ROW_RENDERERS_ENABLE_ALL_BTN = `button[data-test-subj="enable-alll"]`;
-
 export const TIMELINE_ROW_RENDERERS_MODAL_CLOSE_BUTTON = `${TIMELINE_ROW_RENDERERS_MODAL} .euiModal__closeIcon`;
 
 export const TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX = `${TIMELINE_ROW_RENDERERS_MODAL} .euiCheckbox__input`;
@@ -272,3 +263,7 @@ export const TIMELINE_TAB_CONTENT_GRAPHS_NOTES =
 export const TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN = '[data-test-subj="more-actions-@timestamp"]';
 
 export const USER_KPI = '[data-test-subj="siem-timeline-user-kpi"]';
+
+export const EDIT_TIMELINE_BTN = '[data-test-subj="save-timeline-button-icon"]';
+
+export const EDIT_TIMELINE_TOOLTIP = '[data-test-subj="save-timeline-btn-tooltip"]';

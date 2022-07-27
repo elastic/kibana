@@ -79,6 +79,7 @@ describe('interpreter/functions#table', () => {
           logDatatable: (name: string, datatable: Datatable) => {
             loggedTable = datatable;
           },
+          reset: () => {},
         },
       },
     };

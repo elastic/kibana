@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useDetailPanel, UseDetailPanelConfig } from './use_detail_panel';
+import type { UseDetailPanelConfig } from './use_detail_panel';
+import { useDetailPanel } from './use_detail_panel';
 import { timelineActions } from '../../../store/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
@@ -25,7 +26,6 @@ jest.mock('react-redux', () => {
 jest.mock('../../../../common/containers/sourcerer', () => {
   const mockSourcererReturn = {
     browserFields: {},
-    docValueFields: [],
     loading: true,
     indexPattern: {},
     selectedPatterns: [],
@@ -139,7 +139,6 @@ describe('useDetailPanel', () => {
       expect(result.current.DetailsPanel).toMatchInlineSnapshot(`
         <Memo(DetailsPanel)
           browserFields={Object {}}
-          docValueFields={Array []}
           handleOnPanelClosed={[Function]}
           tabType="session"
           timelineId="test"

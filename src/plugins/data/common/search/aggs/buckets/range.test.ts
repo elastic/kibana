@@ -51,7 +51,8 @@ describe('Range Agg', () => {
       ],
       {
         typesRegistry: mockAggTypesRegistry(),
-      }
+      },
+      jest.fn()
     );
   };
 

@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { APP_OWNER } from '../../../common/constants';
+import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
+import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 import { getCasesLazy } from '../../client/ui/get_cases';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
 
@@ -15,15 +17,25 @@ import { CasesRoutesProps } from './types';
 
 export type CasesProps = CasesRoutesProps;
 
-const CasesAppComponent: React.FC = () => {
+interface CasesAppProps {
+  externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+}
+
+const CasesAppComponent: React.FC<CasesAppProps> = ({
+  externalReferenceAttachmentTypeRegistry,
+  persistableStateAttachmentTypeRegistry,
+}) => {
   const userCapabilities = useApplicationCapabilities();
 
   return (
     <Wrapper data-test-subj="cases-app">
       {getCasesLazy({
+        externalReferenceAttachmentTypeRegistry,
+        persistableStateAttachmentTypeRegistry,
         owner: [APP_OWNER],
         useFetchAlertData: () => [false, {}],
-        userCanCrud: userCapabilities.generalCases.crud,
+        permissions: userCapabilities.generalCases,
         basePath: '/',
         features: { alerts: { enabled: false } },
         releasePhase: 'experimental',

@@ -82,7 +82,7 @@ export default function ({
   // Only update the baseline images from Jenkins session images after comparing them
   // These tests might fail locally because of scaling factors and resolution.
 
-  describe('maps smoke tests', function describeIndexTests() {
+  describe('upgrade maps smoke tests', function describeIndexTests() {
     const spaces = [
       { space: 'default', basePath: '' },
       { space: 'automation', basePath: 's/automation' },
@@ -101,7 +101,7 @@ export default function ({
     });
 
     spaces.forEach(({ space, basePath }) => {
-      describe('space ' + space + ' ecommerce', () => {
+      describe('space: ' + space + ', name: ecommerce', () => {
         before(async () => {
           await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
             basePath,
@@ -110,7 +110,7 @@ export default function ({
           await PageObjects.home.launchSampleMap('ecommerce');
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.maps.waitForLayersToLoad();
-          await mapsHelper.toggleLayerVisibilityRoadMap();
+          await PageObjects.maps.toggleEmsBasemapLayerVisibility();
           await PageObjects.maps.toggleLayerVisibility('United Kingdom');
           await PageObjects.maps.toggleLayerVisibility('France');
           await PageObjects.maps.toggleLayerVisibility('United States');
@@ -123,13 +123,13 @@ export default function ({
         });
         it('should load layers', async () => {
           const percentDifference = await screenshot.compareAgainstBaseline(
-            'ecommerce_map',
+            'upgrade_ecommerce_map',
             updateBaselines
           );
-          expect(percentDifference.toFixed(3)).to.be.lessThan(0.031);
+          expect(percentDifference.toFixed(3)).to.be.lessThan(0.05);
         });
       });
-      describe('space ' + space + ' flights', () => {
+      describe('space: ' + space + ', name: flights', () => {
         before(async () => {
           await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
             basePath,
@@ -138,7 +138,7 @@ export default function ({
           await PageObjects.home.launchSampleMap('flights');
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.maps.waitForLayersToLoad();
-          await mapsHelper.toggleLayerVisibilityRoadMap();
+          await PageObjects.maps.toggleEmsBasemapLayerVisibility();
           await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
           await PageObjects.maps.enterFullScreen();
           await PageObjects.maps.closeLegend();
@@ -147,13 +147,13 @@ export default function ({
         });
         it('should load saved object and display layers', async () => {
           const percentDifference = await screenshot.compareAgainstBaseline(
-            'flights_map',
+            'upgrade_flights_map',
             updateBaselines
           );
-          expect(percentDifference.toFixed(3)).to.be.lessThan(0.031);
+          expect(percentDifference.toFixed(3)).to.be.lessThan(0.05);
         });
       });
-      describe('space ' + space + ' web logs', () => {
+      describe('space: ' + space + ', name: web logs', () => {
         before(async () => {
           await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
             basePath,
@@ -162,7 +162,7 @@ export default function ({
           await PageObjects.home.launchSampleMap('logs');
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.maps.waitForLayersToLoad();
-          await mapsHelper.toggleLayerVisibilityRoadMap();
+          await PageObjects.maps.toggleEmsBasemapLayerVisibility();
           await mapsHelper.toggleLayerVisibilityTotalRequests();
           await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
           await PageObjects.maps.enterFullScreen();
@@ -172,10 +172,10 @@ export default function ({
         });
         it('should load saved object and display layers', async () => {
           const percentDifference = await screenshot.compareAgainstBaseline(
-            'web_logs_map',
+            'upgrade_web_logs_map',
             updateBaselines
           );
-          expect(percentDifference.toFixed(3)).to.be.lessThan(0.031);
+          expect(percentDifference.toFixed(3)).to.be.lessThan(0.05);
         });
       });
     });

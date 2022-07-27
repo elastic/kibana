@@ -12,6 +12,7 @@ export type {
   FormData,
   FormHook,
   FormSchema,
+  ValidationConfig,
   ValidationError,
   ValidationFunc,
   ValidationFuncArg,
@@ -23,6 +24,8 @@ export {
   Form,
   FormDataProvider,
   UseArray,
+  ArrayItem,
+  FormArrayField,
   UseField,
   UseMultiFields,
   useForm,
@@ -37,6 +40,7 @@ export {
   ToggleField,
   SelectField,
   JsonEditorField,
+  SuperSelectField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 export { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 export type { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';

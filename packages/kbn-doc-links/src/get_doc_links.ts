@@ -26,14 +26,13 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
   const PLUGIN_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/plugins/${DOC_LINK_VERSION}/`;
   const APM_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/apm/`;
   const SECURITY_SOLUTION_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/`;
-  const STACK_GETTING_STARTED = `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack-get-started/${DOC_LINK_VERSION}/`;
   const APP_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}/`;
   const ENTERPRISE_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/enterprise-search/${DOC_LINK_VERSION}/`;
   const WORKPLACE_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/`;
 
   return deepFreeze({
     settings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/settings.html`,
-    elasticStackGetStarted: `${STACK_GETTING_STARTED}get-started-elastic-stack.html`,
+    elasticStackGetStarted: `${ELASTIC_WEBSITE_URL}guide/en/index.html`,
     upgrade: {
       upgradingStackOnPrem: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/8.0/upgrading-elastic-stack-on-prem.html`,
       upgradingStackOnCloud: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/8.0/upgrade-elastic-stack-for-elastic-cloud.html`,
@@ -47,6 +46,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       metaData: `${APM_DOCS}guide/${DOC_LINK_VERSION}/data-model-metadata.html`,
       overview: `${APM_DOCS}guide/${DOC_LINK_VERSION}/apm-overview.html`,
       tailSamplingPolicies: `${APM_DOCS}guide/${DOC_LINK_VERSION}/configure-tail-based-sampling.html`,
+      elasticAgent: `${APM_DOCS}guide/${DOC_LINK_VERSION}/upgrade-to-apm-integration.html`,
     },
     canvas: {
       guide: `${KIBANA_DOCS}canvas.html`,
@@ -60,9 +60,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     dashboard: {
       guide: `${KIBANA_DOCS}dashboard.html`,
       drilldowns: `${KIBANA_DOCS}drilldowns.html`,
-      drilldownsTriggerPicker: `${KIBANA_DOCS}drilldowns.html#url-drilldowns`,
-      urlDrilldownTemplateSyntax: `${KIBANA_DOCS}url_templating-language.html`,
-      urlDrilldownVariables: `${KIBANA_DOCS}url_templating-language.html#url-template-variables`,
+      drilldownsTriggerPicker: `${KIBANA_DOCS}create-drilldowns.html#url-drilldowns`,
+      urlDrilldownTemplateSyntax: `${KIBANA_DOCS}create-drilldowns.html#url_templating-language`,
+      urlDrilldownVariables: `${KIBANA_DOCS}create-drilldowns.html#url-template-variables`,
     },
     discover: {
       guide: `${KIBANA_DOCS}discover.html`,
@@ -111,9 +111,12 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       synonyms: `${APP_SEARCH_DOCS}synonyms-guide.html`,
       webCrawler: `${APP_SEARCH_DOCS}web-crawler.html`,
       webCrawlerEventLogs: `${APP_SEARCH_DOCS}view-web-crawler-events-logs.html`,
+      webCrawlerReference: `${APP_SEARCH_DOCS}web-crawler-reference.html`,
     },
     enterpriseSearch: {
+      bulkApi: `${ELASTICSEARCH_DOCS}docs-bulk.html`,
       configuration: `${ENTERPRISE_SEARCH_DOCS}configuration.html`,
+      languageAnalyzers: `${ELASTICSEARCH_DOCS}analysis-lang-analyzer.html`,
       licenseManagement: `${ENTERPRISE_SEARCH_DOCS}license-management.html`,
       mailService: `${ENTERPRISE_SEARCH_DOCS}mailer-configuration.html`,
       troubleshootSetup: `${ENTERPRISE_SEARCH_DOCS}troubleshoot-setup.html`,
@@ -123,7 +126,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       apiKeys: `${WORKPLACE_SEARCH_DOCS}workplace-search-api-authentication.html`,
       box: `${WORKPLACE_SEARCH_DOCS}workplace-search-box-connector.html`,
       confluenceCloud: `${WORKPLACE_SEARCH_DOCS}workplace-search-confluence-cloud-connector.html`,
+      confluenceCloudConnectorPackage: `${WORKPLACE_SEARCH_DOCS}confluence-cloud.html`,
       confluenceServer: `${WORKPLACE_SEARCH_DOCS}workplace-search-confluence-server-connector.html`,
+      customConnectorPackage: `${WORKPLACE_SEARCH_DOCS}custom-connector-package.html`,
       customSources: `${WORKPLACE_SEARCH_DOCS}workplace-search-custom-api-sources.html`,
       customSourcePermissions: `${WORKPLACE_SEARCH_DOCS}workplace-search-custom-api-sources.html#custom-api-source-document-level-access-control`,
       documentPermissions: `${WORKPLACE_SEARCH_DOCS}workplace-search-sources-document-permissions.html`,
@@ -137,6 +142,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       indexingSchedule: `${WORKPLACE_SEARCH_DOCS}workplace-search-customizing-indexing-rules.html#_indexing_schedule`,
       jiraCloud: `${WORKPLACE_SEARCH_DOCS}workplace-search-jira-cloud-connector.html`,
       jiraServer: `${WORKPLACE_SEARCH_DOCS}workplace-search-jira-server-connector.html`,
+      networkDrive: `${WORKPLACE_SEARCH_DOCS}network-drives.html`,
       oneDrive: `${WORKPLACE_SEARCH_DOCS}workplace-search-onedrive-connector.html`,
       permissions: `${WORKPLACE_SEARCH_DOCS}workplace-search-permissions.html#organizational-sources-private-sources`,
       salesforce: `${WORKPLACE_SEARCH_DOCS}workplace-search-salesforce-connector.html`,
@@ -332,9 +338,15 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       ruleApiOverview: `${SECURITY_SOLUTION_DOCS}rule-api-overview.html`,
     },
     securitySolution: {
-      trustedApps: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/trusted-apps-ov.html`,
-      eventFilters: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/event-filters.html`,
-      blocklist: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/blocklist.html`,
+      trustedApps: `${SECURITY_SOLUTION_DOCS}trusted-apps-ov.html`,
+      eventFilters: `${SECURITY_SOLUTION_DOCS}event-filters.html`,
+      blocklist: `${SECURITY_SOLUTION_DOCS}blocklist.html`,
+      threatIntelInt: `${SECURITY_SOLUTION_DOCS}es-threat-intel-integrations.html`,
+      policyResponseTroubleshooting: {
+        full_disk_access: `${SECURITY_SOLUTION_DOCS}deploy-elastic-endpoint.html#enable-fda-endpoint`,
+        macos_system_ext: `${SECURITY_SOLUTION_DOCS}deploy-elastic-endpoint.html#system-extension-endpoint`,
+        linux_deadlock: `${SECURITY_SOLUTION_DOCS}ts-management.html`,
+      },
     },
     query: {
       eql: `${ELASTICSEARCH_DOCS}eql.html`,
@@ -388,6 +400,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       classificationAucRoc: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfa-classification.html#ml-dfanalytics-class-aucroc`,
       setUpgradeMode: `${ELASTICSEARCH_DOCS}ml-set-upgrade-mode.html`,
       trainedModels: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-trained-models.html`,
+      startTrainedModelsDeployment: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-nlp-deploy-models.html#ml-nlp-deploy-model`,
     },
     transforms: {
       guide: `${ELASTICSEARCH_DOCS}transforms.html`,
@@ -442,6 +455,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       guide: `${KIBANA_DOCS}maps.html`,
       importGeospatialPrivileges: `${KIBANA_DOCS}import-geospatial-data.html#import-geospatial-privileges`,
       gdalTutorial: `${ELASTIC_WEBSITE_URL}blog/how-to-ingest-geospatial-data-into-elasticsearch-with-gdal`,
+      termJoinsExample: `${KIBANA_DOCS}terms-join.html#_example_term_join`,
     },
     monitoring: {
       alertsKibana: `${KIBANA_DOCS}kibana-alerts.html`,
@@ -458,6 +472,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       monitorKibana: `${KIBANA_DOCS}monitoring-metricbeat.html`,
       monitorLogstash: `${ELASTIC_WEBSITE_URL}guide/en/logstash/${DOC_LINK_VERSION}/monitoring-with-metricbeat.html`,
       troubleshootKibana: `${KIBANA_DOCS}monitor-troubleshooting.html`,
+    },
+    reporting: {
+      cloudMinimumRequirements: `${KIBANA_DOCS}reporting-getting-started.html#reporting-on-cloud-resource-requirements`,
     },
     security: {
       apiKeyServiceSettings: `${ELASTICSEARCH_DOCS}security-settings.html#api-key-service-settings`,
@@ -522,6 +539,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       azureRepo: `${ELASTICSEARCH_DOCS}repository-azure.html`,
       gcsRepo: `${ELASTICSEARCH_DOCS}repository-gcs.html`,
       hdfsRepo: `${PLUGIN_DOCS}repository-hdfs.html`,
+      ingestAttachment: `${PLUGIN_DOCS}ingest-attachment.html`,
       s3Repo: `${ELASTICSEARCH_DOCS}repository-s3.html`,
       snapshotRestoreRepos: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html`,
       mapperSize: `${PLUGIN_DOCS}mapper-size-usage.html`,
@@ -599,11 +617,12 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       installElasticAgent: `${FLEET_DOCS}install-fleet-managed-elastic-agent.html`,
       installElasticAgentStandalone: `${FLEET_DOCS}install-standalone-elastic-agent.html`,
       upgradeElasticAgent: `${FLEET_DOCS}upgrade-elastic-agent.html`,
-      upgradeElasticAgent712lower: `${FLEET_DOCS}upgrade-elastic-agent.html#upgrade-7.12-lower`,
       learnMoreBlog: `${ELASTIC_WEBSITE_URL}blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic`,
       apiKeysLearnMore: `${KIBANA_DOCS}api-keys.html`,
       onPremRegistry: `${FLEET_DOCS}air-gapped.html`,
+      packageSignatures: `${FLEET_DOCS}package-signatures.html`,
       secureLogstash: `${FLEET_DOCS}secure-logstash-connections.html`,
+      agentPolicy: `${FLEET_DOCS}agent-policy.html`,
     },
     ecs: {
       guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,
@@ -638,13 +657,16 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       rustOverview: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/rust-api/${DOC_LINK_VERSION}/overview.html`,
     },
     endpoints: {
-      troubleshooting: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/ts-management.html#ts-endpoints`,
+      troubleshooting: `${SECURITY_SOLUTION_DOCS}ts-management.html#ts-endpoints`,
     },
     legal: {
       privacyStatement: `${ELASTIC_WEBSITE_URL}legal/privacy-statement`,
     },
     kibanaUpgradeSavedObjects: {
       resolveMigrationFailures: `${KIBANA_DOCS}resolve-migrations-failures.html`,
+      repeatedTimeoutRequests: `${KIBANA_DOCS}resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail`,
+      routingAllocationDisabled: `${KIBANA_DOCS}resolve-migrations-failures.html#routing-allocation-disabled`,
+      clusterShardLimitExceeded: `${KIBANA_DOCS}resolve-migrations-failures.html#cluster-shard-limit-exceeded`,
     },
   });
 };

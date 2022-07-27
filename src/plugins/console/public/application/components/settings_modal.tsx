@@ -59,7 +59,7 @@ const intervalOptions = PRESETS_IN_MINUTES.map((value) => ({
       : everyNMinutesTimeInterval(value),
 }));
 
-interface Props {
+export interface DevToolsSettingsModalProps {
   onSaveSettings: (newSettings: DevToolsSettings) => void;
   onClose: () => void;
   refreshAutocompleteSettings: (selectedSettings: DevToolsSettings['autocomplete']) => void;
@@ -67,7 +67,7 @@ interface Props {
   editorInstance: SenseEditor | null;
 }
 
-export function DevToolsSettingsModal(props: Props) {
+export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
   const [fontSize, setFontSize] = useState(props.settings.fontSize);
   const [wrapMode, setWrapMode] = useState(props.settings.wrapMode);
   const [fields, setFields] = useState(props.settings.autocomplete.fields);
@@ -169,7 +169,7 @@ export function DevToolsSettingsModal(props: Props) {
 
   // It only makes sense to show polling options if the user needs to fetch any data.
   const pollingFields =
-    fields || indices || templates ? (
+    fields || indices || templates || dataStreams ? (
       <Fragment>
         <EuiFormRow
           label={
@@ -355,4 +355,4 @@ export function DevToolsSettingsModal(props: Props) {
       </EuiModalFooter>
     </EuiModal>
   );
-}
+};

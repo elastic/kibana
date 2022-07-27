@@ -14,9 +14,8 @@
  * Side Public License, v 1.
  */
 
-import { omit } from 'lodash';
 import fastIsEqual from 'fast-deep-equal';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiFlyoutHeader,
   EuiButtonGroup,
@@ -29,22 +28,18 @@ import {
   EuiFormRow,
   EuiButtonEmpty,
   EuiSpacer,
-  EuiCheckbox,
   EuiForm,
-  EuiAccordion,
-  useGeneratedHtmlId,
   EuiSwitch,
   EuiText,
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-import { CONTROL_LAYOUT_OPTIONS, CONTROL_WIDTH_OPTIONS } from './editor_constants';
+import { CONTROL_LAYOUT_OPTIONS } from './editor_constants';
 import { ControlGroupStrings } from '../control_group_strings';
-import { ControlStyle, ControlWidth } from '../../types';
+import { ControlStyle } from '../../types';
 import { ParentIgnoreSettings } from '../..';
-import { ControlsPanels } from '../types';
 import { ControlGroupInput } from '..';
-import { DEFAULT_CONTROL_WIDTH, getDefaultControlGroupInput } from '../../../common';
+import { getDefaultControlGroupInput } from '../../../common';
 
 interface EditControlGroupProps {
   initialInput: ControlGroupInput;
@@ -54,8 +49,7 @@ interface EditControlGroupProps {
   onClose: () => void;
 }
 
-type EditorControlGroupInput = ControlGroupInput &
-  Required<Pick<ControlGroupInput, 'defaultControlWidth'>>;
+type EditorControlGroupInput = ControlGroupInput;
 
 const editorControlGroupInputIsEqual = (a: ControlGroupInput, b: ControlGroupInput) =>
   fastIsEqual(a, b);
@@ -67,11 +61,7 @@ export const ControlGroupEditor = ({
   onDeleteAll,
   onClose,
 }: EditControlGroupProps) => {
-  const [resetAllWidths, setResetAllWidths] = useState(false);
-  const advancedSettingsAccordionId = useGeneratedHtmlId({ prefix: 'advancedSettingsAccordion' });
-
   const [controlGroupEditorState, setControlGroupEditorState] = useState<EditorControlGroupInput>({
-    defaultControlWidth: DEFAULT_CONTROL_WIDTH,
     ...getDefaultControlGroupInput(),
     ...initialInput,
   });
@@ -99,29 +89,10 @@ export const ControlGroupEditor = ({
     [controlGroupEditorState]
   );
 
-  const fullQuerySyncActive = useMemo(
-    () =>
-      !Object.values(omit(controlGroupEditorState.ignoreParentSettings, 'ignoreValidations')).some(
-        Boolean
-      ),
-    [controlGroupEditorState]
-  );
-
   const applyChangesToInput = useCallback(() => {
     const inputToApply = { ...controlGroupEditorState };
-    if (resetAllWidths) {
-      const newPanels = {} as ControlsPanels;
-      Object.entries(initialInput.panels).forEach(
-        ([id, panel]) =>
-          (newPanels[id] = {
-            ...panel,
-            width: inputToApply.defaultControlWidth,
-          })
-      );
-      inputToApply.panels = newPanels;
-    }
     if (!editorControlGroupInputIsEqual(inputToApply, initialInput)) updateInput(inputToApply);
-  }, [controlGroupEditorState, resetAllWidths, initialInput, updateInput]);
+  }, [controlGroupEditorState, initialInput, updateInput]);
 
   return (
     <>
@@ -145,101 +116,6 @@ export const ControlGroupEditor = ({
               }}
             />
           </EuiFormRow>
-          <EuiSpacer size="m" />
-          <EuiFormRow label={ControlGroupStrings.management.getDefaultWidthTitle()}>
-            <>
-              <EuiButtonGroup
-                color="primary"
-                data-test-subj="control-group-default-size-options"
-                idSelected={controlGroupEditorState.defaultControlWidth}
-                legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
-                options={CONTROL_WIDTH_OPTIONS}
-                onChange={(newWidth: string) => {
-                  updateControlGroupEditorSetting({
-                    defaultControlWidth: newWidth as ControlWidth,
-                  });
-                }}
-              />
-              {controlCount > 0 && (
-                <>
-                  <EuiSpacer size="s" />
-                  <EuiCheckbox
-                    id="editControls_setAllSizesCheckbox"
-                    data-test-subj="set-all-control-sizes-checkbox"
-                    label={ControlGroupStrings.management.getSetAllWidthsToDefaultTitle()}
-                    checked={resetAllWidths}
-                    onChange={(e) => {
-                      setResetAllWidths(e.target.checked);
-                    }}
-                  />
-                </>
-              )}
-            </>
-          </EuiFormRow>
-          <EuiHorizontalRule margin="m" />
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiSpacer size="xs" />
-              <EuiSwitch
-                label={ControlGroupStrings.management.querySync.getQuerySettingsTitle()}
-                data-test-subj="control-group-query-sync"
-                showLabel={false}
-                checked={fullQuerySyncActive}
-                onChange={(e) => {
-                  const newSetting = !e.target.checked;
-                  updateIgnoreSetting({
-                    ignoreFilters: newSetting,
-                    ignoreTimerange: newSetting,
-                    ignoreQuery: newSetting,
-                  });
-                }}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="xxs">
-                <h3>{ControlGroupStrings.management.querySync.getQuerySettingsTitle()}</h3>
-              </EuiTitle>
-              <EuiText size="s">
-                <p>{ControlGroupStrings.management.querySync.getQuerySettingsSubtitle()}</p>
-              </EuiText>
-              <EuiSpacer size="s" />
-              <EuiAccordion
-                data-test-subj="control-group-query-sync-advanced"
-                id={advancedSettingsAccordionId}
-                initialIsOpen={!fullQuerySyncActive}
-                buttonContent={ControlGroupStrings.management.querySync.getAdvancedSettingsTitle()}
-              >
-                <EuiSpacer size="s" />
-                <EuiFormRow hasChildLabel display="columnCompressedSwitch">
-                  <EuiSwitch
-                    data-test-subj="control-group-query-sync-time-range"
-                    label={ControlGroupStrings.management.querySync.getIgnoreTimerangeTitle()}
-                    compressed
-                    checked={Boolean(controlGroupEditorState.ignoreParentSettings?.ignoreTimerange)}
-                    onChange={(e) => updateIgnoreSetting({ ignoreTimerange: e.target.checked })}
-                  />
-                </EuiFormRow>
-                <EuiFormRow hasChildLabel display="columnCompressedSwitch">
-                  <EuiSwitch
-                    data-test-subj="control-group-query-sync-query"
-                    label={ControlGroupStrings.management.querySync.getIgnoreQueryTitle()}
-                    compressed
-                    checked={Boolean(controlGroupEditorState.ignoreParentSettings?.ignoreQuery)}
-                    onChange={(e) => updateIgnoreSetting({ ignoreQuery: e.target.checked })}
-                  />
-                </EuiFormRow>
-                <EuiFormRow hasChildLabel display="columnCompressedSwitch">
-                  <EuiSwitch
-                    data-test-subj="control-group-query-sync-filters"
-                    label={ControlGroupStrings.management.querySync.getIgnoreFilterPillsTitle()}
-                    compressed
-                    checked={Boolean(controlGroupEditorState.ignoreParentSettings?.ignoreFilters)}
-                    onChange={(e) => updateIgnoreSetting({ ignoreFilters: e.target.checked })}
-                  />
-                </EuiFormRow>
-              </EuiAccordion>
-            </EuiFlexItem>
-          </EuiFlexGroup>
           <EuiHorizontalRule margin="m" />
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>

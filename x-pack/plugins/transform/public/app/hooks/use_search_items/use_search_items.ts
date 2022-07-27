@@ -15,33 +15,24 @@ import { getSavedSearch, getSavedSearchUrlConflictMessage } from '../../../share
 
 import { useAppDependencies } from '../../app_dependencies';
 
-import {
-  createSearchItems,
-  getDataViewIdByTitle,
-  loadCurrentDataView,
-  loadDataViews,
-  SearchItems,
-} from './common';
+import { createSearchItems, getDataViewIdByTitle, loadDataViews, SearchItems } from './common';
 
 export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
   const [savedObjectId, setSavedObjectId] = useState(defaultSavedObjectId);
   const [error, setError] = useState<string | undefined>();
 
   const appDeps = useAppDependencies();
-  const dataViews = appDeps.data.dataViews;
+  const dataViewsContract = appDeps.data.dataViews;
   const uiSettings = appDeps.uiSettings;
-  const savedObjectsClient = appDeps.savedObjects.client;
 
   const [searchItems, setSearchItems] = useState<SearchItems | undefined>(undefined);
 
   async function fetchSavedObject(id: string) {
-    await loadDataViews(savedObjectsClient, dataViews);
-
     let fetchedDataView;
     let fetchedSavedSearch;
 
     try {
-      fetchedDataView = await loadCurrentDataView(dataViews, id);
+      fetchedDataView = await dataViewsContract.get(id);
     } catch (e) {
       // Just let fetchedDataView stay undefined in case it doesn't exist.
     }

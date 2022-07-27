@@ -17,6 +17,7 @@ import { ControlsService } from './controls';
 import { ControlsHTTPService } from './http';
 import { ControlsOptionsListService } from './options_list';
 import { ControlsSettingsService } from './settings';
+import { ControlsThemeService } from './theme';
 
 export interface ControlsServices {
   // dependency services
@@ -26,6 +27,7 @@ export interface ControlsServices {
   unifiedSearch: ControlsUnifiedSearchService;
   http: ControlsHTTPService;
   settings: ControlsSettingsService;
+  theme: ControlsThemeService;
 
   // controls plugin's own services
   controls: ControlsService;

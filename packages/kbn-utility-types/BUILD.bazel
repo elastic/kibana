@@ -6,7 +6,6 @@ PKG_BASE_NAME = "kbn-utility-types"
 PKG_REQUIRE_NAME = "@kbn/utility-types"
 
 SOURCE_FILES = glob([
-  "src/jest/index.ts",
   "src/serializable/**",
   "src/index.ts"
 ])
@@ -19,9 +18,7 @@ filegroup(
 )
 
 NPM_MODULE_EXTRA_FILES = [
-  "jest/package.json",
   "package.json",
-  "README.md",
 ]
 
 RUNTIME_DEPS = [
@@ -30,8 +27,7 @@ RUNTIME_DEPS = [
 
 TYPES_DEPS = [
   "@npm//utility-types",
-  "@npm//@types/node",
-  "@npm//@types/jest",
+  "@npm//@types/node"
 ]
 
 jsts_transpiler(
@@ -55,6 +51,7 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",
@@ -65,7 +62,7 @@ js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
   deps = RUNTIME_DEPS + [":target_node"],
-  package_name = "@kbn/utility-types",
+  package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
 

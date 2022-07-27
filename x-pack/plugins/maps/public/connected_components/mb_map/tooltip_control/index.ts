@@ -15,6 +15,7 @@ import {
   openOnClickTooltip,
   closeOnHoverTooltip,
   openOnHoverTooltip,
+  updateOpenTooltips,
 } from '../../../actions';
 import {
   getLayerList,
@@ -51,6 +52,9 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     },
     openOnHoverTooltip(tooltipState: TooltipState) {
       dispatch(openOnHoverTooltip(tooltipState));
+    },
+    updateOpenTooltips(openTooltips: TooltipState[]) {
+      dispatch(updateOpenTooltips(openTooltips));
     },
   };
 }

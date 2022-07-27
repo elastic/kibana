@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { agentPolicyStatuses, GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';
+import type { GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';
+import { agentPolicyStatuses } from '@kbn/fleet-plugin/common';
 import { BaseDataGenerator } from './base_data_generator';
 
 export class FleetAgentPolicyGenerator extends BaseDataGenerator<GetAgentPoliciesResponseItem> {

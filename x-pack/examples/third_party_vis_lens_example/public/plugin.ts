@@ -91,18 +91,24 @@ export class EmbeddedLensExamplePlugin
       id: 'third_party_lens_vis_example',
       title: 'Third party Lens vis example',
       navLinkStatus: AppNavLinkStatus.hidden,
-      mount: (params) => {
+      mount: ({ history }) => {
         (async () => {
-          const [, { lens: lensStart, dataViews }] = await core.getStartServices();
-          const defaultDataView = await dataViews.getDefault();
-          lensStart.navigateToPrefilledEditor({
-            id: '',
-            timeRange: {
-              from: 'now-5d',
-              to: 'now',
-            },
-            attributes: getLensAttributes(defaultDataView!),
-          });
+          const [coreStart, { lens: lensStart, dataViews }] = await core.getStartServices();
+          // if it's a regular navigation, redirect to Lens
+          if (history.action === 'PUSH') {
+            const defaultDataView = await dataViews.getDefault();
+            lensStart.navigateToPrefilledEditor({
+              id: '',
+              timeRange: {
+                from: 'now-5d',
+                to: 'now',
+              },
+              attributes: getLensAttributes(defaultDataView!),
+            });
+          } else {
+            // if it's a "back" navigation, go to developer examples
+            coreStart.application.navigateToApp('developerExamples');
+          }
         })();
         return () => {};
       },

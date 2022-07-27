@@ -5,15 +5,35 @@
  * 2.0.
  */
 
-/**
- * As of 2022-04-04, this shapre is still in debate. Specifically, the `source_type` will be changing as we get closer to 8.3.
- * These merely serve as placeholders for static data for now.
- */
-export interface SearchIndex {
-  name: string;
-  indexSlug: string;
-  source_type: string;
-  elasticsearch_index_name: string;
-  search_engines: string;
-  document_count: number;
+import { ConnectorIndex, CrawlerIndex, ElasticsearchIndex } from '../../../common/types/indices';
+
+export interface Crawler {
+  domains: [];
 }
+
+export const enum IngestionMethod {
+  CONNECTOR,
+  CRAWLER,
+  API,
+}
+
+export const enum IngestionStatus {
+  CONNECTED,
+  ERROR,
+  SYNC_ERROR,
+  INCOMPLETE,
+}
+
+interface ElasticsearchViewIndexExtension {
+  ingestionMethod: IngestionMethod;
+  ingestionStatus: IngestionStatus;
+  lastUpdated: string | 'never' | null; // date string
+}
+
+export type ConnectorViewIndex = ConnectorIndex & ElasticsearchViewIndexExtension;
+
+export type CrawlerViewIndex = CrawlerIndex & ElasticsearchViewIndexExtension;
+
+export type ApiViewIndex = ElasticsearchIndex & ElasticsearchViewIndexExtension;
+
+export type ElasticsearchViewIndex = CrawlerViewIndex | ConnectorViewIndex | ApiViewIndex;

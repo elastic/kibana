@@ -7,11 +7,10 @@
 
 import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import {
-  ContextMenuWithRouterSupport,
-  ContextMenuWithRouterSupportProps,
-} from './context_menu_with_router_support';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type { ContextMenuWithRouterSupportProps } from './context_menu_with_router_support';
+import { ContextMenuWithRouterSupport } from './context_menu_with_router_support';
 import { act, fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
 import { APP_UI_ID } from '../../../../common/constants';
 

@@ -8,7 +8,7 @@
 
 import { hashedItemStore, getStatesFromKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { mockStorage } from '@kbn/kibana-utils-plugin/public/storage/hashed_item_store/mock';
-import { FilterStateStore } from '@kbn/data-plugin/public';
+import { FilterStateStore } from '@kbn/es-query';
 import { DiscoverAppLocatorDefinition } from './locator';
 import { SerializableRecord } from '@kbn/utility-types';
 

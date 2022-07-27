@@ -21,16 +21,15 @@ jest.mock('./install');
 jest.mock('./get');
 
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
-import { installKibanaAssets } from '../kibana/assets/install';
+import { installKibanaAssetsAndReferences } from '../kibana/assets/install';
 
 import { _installPackage } from './_install_package';
 
 const mockedUpdateCurrentWriteIndices = updateCurrentWriteIndices as jest.MockedFunction<
   typeof updateCurrentWriteIndices
 >;
-const mockedGetKibanaAssets = installKibanaAssets as jest.MockedFunction<
-  typeof installKibanaAssets
->;
+const mockedInstallKibanaAssetsAndReferences =
+  installKibanaAssetsAndReferences as jest.MockedFunction<typeof installKibanaAssetsAndReferences>;
 
 function sleep(millis: number) {
   return new Promise((resolve) => setTimeout(resolve, millis));
@@ -50,7 +49,7 @@ describe('_installPackage', () => {
   });
   it('handles errors from  installKibanaAssets', async () => {
     // force errors from this function
-    mockedGetKibanaAssets.mockImplementation(async () => {
+    mockedInstallKibanaAssetsAndReferences.mockImplementation(async () => {
       throw new Error('mocked async error A: should be caught');
     });
 

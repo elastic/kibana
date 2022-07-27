@@ -67,5 +67,5 @@
   "timeline_title": "Comprehensive Registry Timeline",
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 7
+  "version": 9
 }

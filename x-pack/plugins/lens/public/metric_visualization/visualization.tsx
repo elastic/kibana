@@ -3,9 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
- */
-
-import React from 'react';
+ */ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -15,6 +13,7 @@ import { PaletteOutput, PaletteRegistry, CUSTOM_PALETTE, shiftPalette } from '@k
 import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { getSuggestions } from './metric_suggestions';
 import { LensIconChartMetric } from '../assets/chart_metric';
 import { Visualization, OperationMetadata, DatasourceLayers } from '../types';
@@ -35,7 +34,7 @@ interface MetricConfig extends Omit<MetricState, 'palette' | 'colorMode'> {
   palette: PaletteOutput<CustomPaletteState>;
 }
 
-export const supportedTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
+export const legacyMetricSupportedTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
 
 const getFontSizeAndUnit = (fontSize: string) => {
   const [size, sizeUnit] = fontSize.split(/(\d+)/).filter(Boolean);
@@ -49,13 +48,15 @@ const toExpression = (
   paletteService: PaletteRegistry,
   state: MetricState,
   datasourceLayers: DatasourceLayers,
-  attributes?: Partial<Omit<MetricConfig, keyof MetricState>>
+  attributes?: Partial<Omit<MetricConfig, keyof MetricState>>,
+  datasourceExpressionsByLayers: Record<string, Ast> | undefined = {}
 ): Ast | null => {
   if (!state.accessor) {
     return null;
   }
 
   const [datasource] = Object.values(datasourceLayers);
+  const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
   const operation = datasource && datasource.getOperationForColumnId(state.accessor);
 
   const stops = state.palette?.params?.stops || [];
@@ -99,9 +100,10 @@ const toExpression = (
   return {
     type: 'expression',
     chain: [
+      ...(datasourceExpression?.chain ?? []),
       {
         type: 'function',
-        function: 'metricVis',
+        function: 'legacyMetricVis',
         arguments: {
           labelPosition: [state?.titlePosition || DEFAULT_TITLE_POSITION],
           font: [
@@ -167,7 +169,7 @@ const toExpression = (
   };
 };
 
-export const getMetricVisualization = ({
+export const getLegacyMetricVisualization = ({
   paletteService,
   theme,
 }: {
@@ -180,13 +182,12 @@ export const getMetricVisualization = ({
     {
       id: 'lnsMetric',
       icon: LensIconChartMetric,
-      label: i18n.translate('xpack.lens.metric.label', {
-        defaultMessage: 'Metric',
+      label: i18n.translate('xpack.lens.legacyMetric.label', {
+        defaultMessage: 'Legacy Metric',
       }),
-      groupLabel: i18n.translate('xpack.lens.metric.groupLabel', {
+      groupLabel: i18n.translate('xpack.lens.legacyMetric.groupLabel', {
         defaultMessage: 'Goal and single value',
       }),
-      sortPriority: 3,
     },
   ],
 
@@ -208,8 +209,8 @@ export const getMetricVisualization = ({
   getDescription() {
     return {
       icon: LensIconChartMetric,
-      label: i18n.translate('xpack.lens.metric.label', {
-        defaultMessage: 'Metric',
+      label: i18n.translate('xpack.lens.legacyMetric.label', {
+        defaultMessage: 'Legacy Metric',
       }),
     };
   },
@@ -225,6 +226,7 @@ export const getMetricVisualization = ({
       }
     );
   },
+  triggers: [VIS_EVENT_TO_TRIGGER.filter],
 
   getConfiguration(props) {
     const hasColoring = props.state.palette != null;
@@ -233,7 +235,9 @@ export const getMetricVisualization = ({
       groups: [
         {
           groupId: 'metric',
-          groupLabel: i18n.translate('xpack.lens.metric.label', { defaultMessage: 'Metric' }),
+          groupLabel: i18n.translate('xpack.lens.legacyMetric.label', {
+            defaultMessage: 'Legacy Metric',
+          }),
           layerId: props.state.layerId,
           accessors: props.state.accessor
             ? [
@@ -246,7 +250,7 @@ export const getMetricVisualization = ({
             : [],
           supportsMoreColumns: !props.state.accessor,
           filterOperations: (op: OperationMetadata) =>
-            !op.isBucketed && supportedTypes.has(op.dataType),
+            !op.isBucketed && legacyMetricSupportedTypes.has(op.dataType),
           enableDimensionEditor: true,
           required: true,
         },
@@ -258,7 +262,7 @@ export const getMetricVisualization = ({
     return [
       {
         type: layerTypes.DATA,
-        label: i18n.translate('xpack.lens.metric.addLayer', {
+        label: i18n.translate('xpack.lens.legacyMetric.addLayer', {
           defaultMessage: 'Visualization',
         }),
       },
@@ -271,10 +275,23 @@ export const getMetricVisualization = ({
     }
   },
 
-  toExpression: (state, datasourceLayers, attributes) =>
-    toExpression(paletteService, state, datasourceLayers, { ...attributes }),
-  toPreviewExpression: (state, datasourceLayers) =>
-    toExpression(paletteService, state, datasourceLayers, { mode: 'reduced' }),
+  toExpression: (state, datasourceLayers, attributes, datasourceExpressionsByLayers) =>
+    toExpression(
+      paletteService,
+      state,
+      datasourceLayers,
+      { ...attributes },
+      datasourceExpressionsByLayers
+    ),
+
+  toPreviewExpression: (state, datasourceLayers, datasourceExpressionsByLayers) =>
+    toExpression(
+      paletteService,
+      state,
+      datasourceLayers,
+      { mode: 'reduced' },
+      datasourceExpressionsByLayers
+    ),
 
   setDimension({ prevState, columnId }) {
     return { ...prevState, accessor: columnId };

@@ -27,7 +27,6 @@ type GetDescriptionUserActionArgs = Pick<
   | 'caseData'
   | 'commentRefs'
   | 'manageMarkdownEditIds'
-  | 'userCanCrud'
   | 'handleManageMarkdownEditId'
   | 'handleManageQuote'
 > &
@@ -38,11 +37,11 @@ export const getDescriptionUserAction = ({
   commentRefs,
   manageMarkdownEditIds,
   isLoadingDescription,
-  userCanCrud,
   onUpdateField,
   handleManageMarkdownEditId,
   handleManageQuote,
 }: GetDescriptionUserActionArgs): EuiCommentProps => {
+  const isEditable = manageMarkdownEditIds.includes(DESCRIPTION_ID);
   return {
     username: (
       <UserActionUsername
@@ -55,10 +54,11 @@ export const getDescriptionUserAction = ({
     timestamp: <UserActionTimestamp createdAt={caseData.createdAt} />,
     children: (
       <UserActionMarkdown
+        key={isEditable ? DESCRIPTION_ID : undefined}
         ref={(element) => (commentRefs.current[DESCRIPTION_ID] = element)}
         id={DESCRIPTION_ID}
         content={caseData.description}
-        isEditable={manageMarkdownEditIds.includes(DESCRIPTION_ID)}
+        isEditable={isEditable}
         onSaveContent={(content: string) => {
           onUpdateField({ key: DESCRIPTION_ID, value: content });
         }}
@@ -83,7 +83,6 @@ export const getDescriptionUserAction = ({
         isLoading={isLoadingDescription}
         onEdit={handleManageMarkdownEditId.bind(null, DESCRIPTION_ID)}
         onQuote={handleManageQuote.bind(null, caseData.description)}
-        userCanCrud={userCanCrud}
       />
     ),
   };

@@ -6,6 +6,7 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
+import { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 
 const DATA_API_ROOT = '/api/triggers_actions_ui/data';
 
@@ -62,57 +63,25 @@ export async function getESIndexFields({
   return fields;
 }
 
-let savedObjectsClient: any;
+type DataViewsService = Pick<DataViewsContract, 'find'>;
+let dataViewsService: DataViewsService;
 
-export const setSavedObjectsClient = (aSavedObjectsClient: any) => {
-  savedObjectsClient = aSavedObjectsClient;
+export const setDataViewsService = (aDataViewsService: DataViewsService) => {
+  dataViewsService = aDataViewsService;
 };
 
-export const getSavedObjectsClient = () => {
-  return savedObjectsClient;
+export const getDataViewsService = () => {
+  return dataViewsService;
 };
 
 export const loadIndexPatterns = async (pattern: string) => {
-  let allSavedObjects = [];
   const formattedPattern = formatPattern(pattern);
   const perPage = 1000;
 
   try {
-    const { savedObjects, total } = await getSavedObjectsClient().find({
-      type: 'index-pattern',
-      fields: ['title'],
-      page: 1,
-      search: formattedPattern,
-      perPage,
-    });
+    const dataViews: DataView[] = await getDataViewsService().find(formattedPattern, perPage);
 
-    allSavedObjects = savedObjects;
-
-    if (total > perPage) {
-      let currentPage = 2;
-      const numberOfPages = Math.ceil(total / perPage);
-      const promises = [];
-
-      while (currentPage <= numberOfPages) {
-        promises.push(
-          getSavedObjectsClient().find({
-            type: 'index-pattern',
-            page: currentPage,
-            fields: ['title'],
-            search: formattedPattern,
-            perPage,
-          })
-        );
-        currentPage++;
-      }
-
-      const paginatedResults = await Promise.all(promises);
-
-      allSavedObjects = paginatedResults.reduce((oldResult, result) => {
-        return oldResult.concat(result.savedObjects);
-      }, allSavedObjects);
-    }
-    return allSavedObjects.map((indexPattern: any) => indexPattern.attributes.title);
+    return dataViews.map((dataView: DataView) => dataView.title);
   } catch (e) {
     return [];
   }

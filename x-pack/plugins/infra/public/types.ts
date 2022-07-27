@@ -6,7 +6,7 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin as PluginClass } from '@kbn/core/public';
-import { IHttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
@@ -20,7 +20,6 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type { DataEnhancedSetup, DataEnhancedStart } from '@kbn/data-enhanced-plugin/public';
 import { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type {
   ObservabilityPublicSetup,
@@ -52,7 +51,6 @@ export interface InfraClientStartExports {
 }
 
 export interface InfraClientSetupDeps {
-  dataEnhanced: DataEnhancedSetup;
   home?: HomePublicPluginSetup;
   observability: ObservabilityPublicSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
@@ -64,7 +62,6 @@ export interface InfraClientSetupDeps {
 
 export interface InfraClientStartDeps {
   data: DataPublicPluginStart;
-  dataEnhanced: DataEnhancedStart;
   dataViews: DataViewsPublicPluginStart;
   observability: ObservabilityPublicStart;
   spaces: SpacesPluginStart;

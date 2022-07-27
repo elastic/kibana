@@ -133,6 +133,7 @@ describe('waterfall_helpers', () => {
         traceDocs: hits,
         errorDocs,
         exceedsMax: false,
+        linkedChildrenOfSpanCountBySpanId: {},
       };
       const waterfall = getWaterfall(apiResp, entryTransactionId);
       const { apiResponse, ...waterfallRest } = waterfall;
@@ -151,6 +152,7 @@ describe('waterfall_helpers', () => {
         traceDocs: hits,
         errorDocs,
         exceedsMax: false,
+        linkedChildrenOfSpanCountBySpanId: {},
       };
       const waterfall = getWaterfall(apiResp, entryTransactionId);
 
@@ -236,6 +238,7 @@ describe('waterfall_helpers', () => {
           traceDocs: traceItems,
           errorDocs: [],
           exceedsMax: false,
+          linkedChildrenOfSpanCountBySpanId: {},
         },
         entryTransactionId
       );
@@ -342,6 +345,7 @@ describe('waterfall_helpers', () => {
           traceDocs: traceItems,
           errorDocs: [],
           exceedsMax: false,
+          linkedChildrenOfSpanCountBySpanId: {},
         },
         entryTransactionId
       );
@@ -404,6 +408,10 @@ describe('waterfall_helpers', () => {
           skew: 0,
           legendValues,
           color: '',
+          spanLinksCount: {
+            linkedChildren: 0,
+            linkedParents: 0,
+          },
         },
         {
           docType: 'span',
@@ -426,6 +434,10 @@ describe('waterfall_helpers', () => {
           skew: 0,
           legendValues,
           color: '',
+          spanLinksCount: {
+            linkedChildren: 0,
+            linkedParents: 0,
+          },
         },
         {
           docType: 'span',
@@ -448,6 +460,10 @@ describe('waterfall_helpers', () => {
           skew: 0,
           legendValues,
           color: '',
+          spanLinksCount: {
+            linkedChildren: 0,
+            linkedParents: 0,
+          },
         },
         {
           docType: 'transaction',
@@ -464,6 +480,10 @@ describe('waterfall_helpers', () => {
           skew: 0,
           legendValues,
           color: '',
+          spanLinksCount: {
+            linkedChildren: 0,
+            linkedParents: 0,
+          },
         },
         {
           docType: 'transaction',
@@ -481,6 +501,10 @@ describe('waterfall_helpers', () => {
           skew: 0,
           legendValues,
           color: '',
+          spanLinksCount: {
+            linkedChildren: 0,
+            linkedParents: 0,
+          },
         },
       ];
 

@@ -10,14 +10,12 @@ import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
-import { DescriptionList } from '../../../../../common/utility_types';
+import type { DescriptionList } from '../../../../../common/utility_types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/field_renderers';
 import * as i18n from './translations';
-import {
-  EndpointFields,
-  HostPolicyResponseActionStatus,
-} from '../../../../../common/search_strategy/security_solution/hosts';
+import type { EndpointFields } from '../../../../../common/search_strategy/security_solution/hosts';
+import { HostPolicyResponseActionStatus } from '../../../../../common/search_strategy/security_solution/hosts';
 import { AgentStatus } from '../../../../common/components/endpoint/agent_status';
 import { EndpointHostIsolationStatus } from '../../../../common/components/endpoint/host_isolation';
 

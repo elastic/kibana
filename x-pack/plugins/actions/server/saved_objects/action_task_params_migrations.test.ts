@@ -26,6 +26,7 @@ const preconfiguredActions = [
     name: 'Slack #xyz',
     secrets: {},
     isPreconfigured: true,
+    isDeprecated: false,
   },
 ];
 

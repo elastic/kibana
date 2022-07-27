@@ -8,13 +8,13 @@
 
 import { omit } from 'lodash';
 
+import type { Logger } from '@kbn/logging';
 import {
   IUiSettingsClient,
   UiSettingsParams,
   PublicUiSettingsParams,
   UserProvidedValues,
 } from './types';
-import { Logger } from '../logging';
 
 export interface BaseUiSettingsDefaultsClientOptions {
   overrides?: Record<string, any>;

@@ -46,20 +46,16 @@ const numberMetricOperations = (op: OperationMetadata) =>
 
 const applyPaletteToColumnConfig = (
   columns: AccessorConfig[],
-  { shape, palette }: PieVisualizationState,
+  { palette }: PieVisualizationState,
   paletteService: PaletteRegistry
 ) => {
-  const colorPickerIndex = shape === 'mosaic' ? columns.length - 1 : 0;
-
-  if (colorPickerIndex >= 0) {
-    columns[colorPickerIndex] = {
-      columnId: columns[colorPickerIndex].columnId,
-      triggerIcon: 'colorBy',
-      palette: paletteService
-        .get(palette?.name || 'default')
-        .getCategoricalColors(10, palette?.params),
-    };
-  }
+  columns[0] = {
+    columnId: columns[0].columnId,
+    triggerIcon: 'colorBy',
+    palette: paletteService
+      .get(palette?.name || 'default')
+      .getCategoricalColors(10, palette?.params),
+  };
 };
 
 export const getPieVisualization = ({
@@ -241,9 +237,11 @@ export const getPieVisualization = ({
     return state?.layers.find(({ layerId: id }) => id === layerId)?.layerType;
   },
 
-  toExpression: (state, layers, attributes) =>
-    toExpression(state, layers, paletteService, attributes),
-  toPreviewExpression: (state, layers) => toPreviewExpression(state, layers, paletteService),
+  toExpression: (state, layers, attributes, datasourceExpressionsByLayers) =>
+    toExpression(state, layers, paletteService, attributes, datasourceExpressionsByLayers),
+
+  toPreviewExpression: (state, layers, datasourceExpressionsByLayers) =>
+    toPreviewExpression(state, layers, paletteService, datasourceExpressionsByLayers),
 
   renderToolbar(domElement, props) {
     render(

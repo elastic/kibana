@@ -7,9 +7,9 @@
 
 import { useReducer, useCallback, useRef, useEffect } from 'react';
 import { useToasts } from '../common/lib/kibana';
-import { deleteComment, getCase } from './api';
+import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
+import { deleteComment } from './api';
 import * as i18n from './translations';
-import { Case } from './types';
 
 interface CommentDeleteState {
   isError: boolean;
@@ -49,12 +49,10 @@ const dataFetchReducer = (state: CommentDeleteState, action: Action): CommentDel
 interface DeleteComment {
   caseId: string;
   commentId: string;
-  fetchUserActions: () => void;
-  updateCase: (newCase: Case) => void;
 }
 
 export interface UseDeleteComment extends CommentDeleteState {
-  deleteComment: ({ caseId, commentId, fetchUserActions }: DeleteComment) => void;
+  deleteComment: ({ caseId, commentId }: DeleteComment) => void;
 }
 
 export const useDeleteComment = (): UseDeleteComment => {
@@ -64,9 +62,10 @@ export const useDeleteComment = (): UseDeleteComment => {
   const toasts = useToasts();
   const isCancelledRef = useRef(false);
   const abortCtrlRef = useRef(new AbortController());
+  const refreshCaseViewPage = useRefreshCaseViewPage();
 
   const dispatchDeleteComment = useCallback(
-    async ({ caseId, commentId, fetchUserActions, updateCase }: DeleteComment) => {
+    async ({ caseId, commentId }: DeleteComment) => {
       try {
         isCancelledRef.current = false;
         abortCtrlRef.current.abort();
@@ -80,9 +79,7 @@ export const useDeleteComment = (): UseDeleteComment => {
         });
 
         if (!isCancelledRef.current) {
-          const theCase = await getCase(caseId, true, abortCtrlRef.current.signal);
-          updateCase(theCase);
-          fetchUserActions();
+          refreshCaseViewPage();
           dispatch({ type: 'FETCH_SUCCESS', payload: { commentId } });
         }
       } catch (error) {

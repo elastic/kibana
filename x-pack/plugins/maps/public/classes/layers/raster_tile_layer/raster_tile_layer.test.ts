@@ -21,7 +21,7 @@ const sourceDescriptor: XYZTMSSourceDescriptor = {
 class MockTileSource extends AbstractSource implements ITMSSource {
   readonly _descriptor: XYZTMSSourceDescriptor;
   constructor(descriptor: XYZTMSSourceDescriptor) {
-    super(descriptor, {});
+    super(descriptor);
     this._descriptor = descriptor;
   }
 

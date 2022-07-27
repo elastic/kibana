@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -24,6 +25,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'common',
     'header',
   ]);
+
+  const DASHBOARD_NAME = 'Test Range Slider Control';
 
   const validateRange = async (
     compare: 'value' | 'placeholder', // if 'value', compare actual selections; otherwise, compare the default range
@@ -66,6 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Oct 22, 2018 @ 00:00:00.000',
         'Dec 3, 2018 @ 00:00:00.000'
       );
+      await dashboard.saveDashboard(DASHBOARD_NAME, { exitFromEditMode: false });
     });
 
     after(async () => {
@@ -80,16 +84,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('create and edit', async () => {
       it('can create a new range slider control from a blank state', async () => {
-        await dashboardControls.createRangeSliderControl({
+        await dashboardControls.createControl({
+          controlType: RANGE_SLIDER_CONTROL,
           dataViewTitle: 'logstash-*',
           fieldName: 'bytes',
           width: 'small',
         });
         expect(await dashboardControls.getControlsCount()).to.be(1);
+        await dashboard.clearUnsavedChanges();
       });
 
       it('can add a second range list control with a non-default data view', async () => {
-        await dashboardControls.createRangeSliderControl({
+        await dashboardControls.createControl({
+          controlType: RANGE_SLIDER_CONTROL,
           dataViewTitle: 'kibana_sample_data_flights',
           fieldName: 'AvgTicketPrice',
           width: 'medium',
@@ -99,6 +106,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         validateRange('placeholder', secondId, '100', '1200');
         // data views should be properly propagated from the control group to the dashboard
         expect(await filterBar.getIndexPatterns()).to.be('logstash-*,kibana_sample_data_flights');
+        await dashboard.clearUnsavedChanges();
       });
 
       it('renames an existing control', async () => {
@@ -108,6 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.controlEditorSetTitle(newTitle);
         await dashboardControls.controlEditorSave();
         expect(await dashboardControls.doesControlTitleExist(newTitle)).to.be(true);
+        await dashboard.clearUnsavedChanges();
       });
 
       it('can edit range slider control', async () => {
@@ -118,7 +127,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await saveButton.isEnabled()).to.be(true);
         await dashboardControls.controlsEditorSetDataView('kibana_sample_data_flights');
         expect(await saveButton.isEnabled()).to.be(false);
-        await dashboardControls.controlsEditorSetfield('dayOfWeek');
+        await dashboardControls.controlsEditorSetfield('dayOfWeek', RANGE_SLIDER_CONTROL);
         await dashboardControls.controlEditorSave();
         await dashboardControls.rangeSliderWaitForLoading();
         validateRange('placeholder', firstId, '0', '6');
@@ -130,6 +139,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await filterBar.ensureFieldEditorModalIsClosed();
           expect(indexPatternSelectExists).to.be(false);
         });
+        await dashboard.clearUnsavedChanges();
       });
 
       it('can enter lower bound selection from the number field', async () => {
@@ -161,7 +171,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('editing field clears selections', async () => {
         const secondId = (await dashboardControls.getAllControlIds())[1];
         await dashboardControls.editExistingControl(secondId);
-        await dashboardControls.controlsEditorSetfield('FlightDelayMin');
+        await dashboardControls.controlsEditorSetfield('FlightDelayMin', RANGE_SLIDER_CONTROL);
         await dashboardControls.controlEditorSave();
 
         await dashboardControls.rangeSliderWaitForLoading();
@@ -193,6 +203,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const firstId = (await dashboardControls.getAllControlIds())[0];
         await dashboardControls.removeExistingControl(firstId);
         expect(await dashboardControls.getControlsCount()).to.be(1);
+        await dashboard.clearUnsavedChanges();
       });
     });
 
@@ -203,19 +214,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.rangeSliderSetUpperBound(firstId, '400');
       });
 
-      it('disables inputs when no data available', async () => {
-        await dashboardControls.createRangeSliderControl({
+      it('disables range slider when no data available', async () => {
+        await dashboardControls.createControl({
+          controlType: RANGE_SLIDER_CONTROL,
           dataViewTitle: 'logstash-*',
           fieldName: 'bytes',
           width: 'small',
         });
         const secondId = (await dashboardControls.getAllControlIds())[1];
-        expect(
-          await dashboardControls.rangeSliderGetLowerBoundAttribute(secondId, 'disabled')
-        ).to.be('true');
-        expect(
-          await dashboardControls.rangeSliderGetUpperBoundAttribute(secondId, 'disabled')
-        ).to.be('true');
         await dashboardControls.rangeSliderOpenPopover(secondId);
         await dashboardControls.rangeSliderPopoverAssertOpen();
         expect(

@@ -12,7 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
 
-  describe('License Management page a11y tests', () => {
+  describe('License Management page Accessibility', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('licenseManagement');
     });

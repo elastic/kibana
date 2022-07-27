@@ -18,7 +18,7 @@ import {
   removeSuffixFromVersion,
   showNewsItem,
 } from './helpers';
-import { NewsItem, RawNewsApiResponse } from './types';
+import type { NewsItem, RawNewsApiResponse } from './types';
 
 jest.mock('../../lib/kibana');
 

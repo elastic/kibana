@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { isOfAggregateQueryType, Query, AggregateQuery } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { getSortArray, SortPairArr } from '../../../components/doc_table/lib/get_sort';
+import { getSortArray, SortPairArr } from '../../../components/doc_table/utils/get_sort';
 
 /**
  * Helper function to remove or adapt the currently selected columns/sort to be valid with the next
@@ -19,7 +19,8 @@ export function getSwitchIndexPatternAppState(
   currentColumns: string[],
   currentSort: SortPairArr[],
   modifyColumns: boolean = true,
-  sortDirection: string = 'desc'
+  sortDirection: string = 'desc',
+  query?: Query | AggregateQuery
 ) {
   const nextColumns = modifyColumns
     ? currentColumns.filter(
@@ -27,7 +28,11 @@ export function getSwitchIndexPatternAppState(
           nextIndexPattern.fields.getByName(column) || !currentIndexPattern.fields.getByName(column)
       )
     : currentColumns;
-  const columns = nextColumns.length ? nextColumns : [];
+
+  let columns = nextColumns.length ? nextColumns : [];
+  if (query && isOfAggregateQueryType(query)) {
+    columns = [];
+  }
 
   // when switching from an index pattern with timeField to an index pattern without timeField
   // filter out sorting by timeField in case it is set. index patterns without timeField don't

@@ -41,7 +41,8 @@ describe('AggTypeMetricStandardDeviationProvider class', () => {
           },
         },
       ],
-      { typesRegistry }
+      { typesRegistry },
+      jest.fn()
     );
   };
 

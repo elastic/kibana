@@ -14,6 +14,7 @@ import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ISearchSource } from '../../../public';
 import { initParams } from './agg_params';
@@ -208,7 +209,7 @@ export class AggType<
    * @param  {agg} agg - the agg to pick a format for
    * @return {SerializedFieldFormat}
    */
-  getSerializedFormat: (agg: TAggConfig) => SerializedFieldFormat;
+  getSerializedFormat: <T extends FieldFormatParams>(agg: TAggConfig) => SerializedFieldFormat<T>;
 
   getValue: (agg: TAggConfig, bucket: any) => any;
 

@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { CaseConnector, ConnectorTypes } from '../../common/api';
-import { newCase } from '../routes/api/__mocks__/request_responses';
-import { transformNewCase } from '../common/utils';
-import { buildRangeFilter, sortToSnake } from './utils';
+import { buildRangeFilter, constructQueryOptions, sortToSnake } from './utils';
 import { toElasticsearchQuery } from '@kbn/es-query';
+import { CaseStatuses } from '../../common';
+import { CaseSeverity } from '../../common/api';
 
 describe('utils', () => {
   describe('sortToSnake', () => {
@@ -38,73 +37,6 @@ describe('utils', () => {
     });
   });
 
-  describe('transformNewCase', () => {
-    beforeAll(() => {
-      jest.useFakeTimers('modern');
-      jest.setSystemTime(new Date('2020-04-09T09:43:51.778Z'));
-    });
-
-    afterAll(() => {
-      jest.useRealTimers();
-    });
-
-    const connector: CaseConnector = {
-      id: '123',
-      name: 'My connector',
-      type: ConnectorTypes.jira,
-      fields: { issueType: 'Task', priority: 'High', parent: null },
-    };
-    it('transform correctly', () => {
-      const myCase = {
-        newCase: { ...newCase, connector },
-        user: {
-          email: 'elastic@elastic.co',
-          full_name: 'Elastic',
-          username: 'elastic',
-        },
-      };
-
-      const res = transformNewCase(myCase);
-
-      expect(res).toMatchInlineSnapshot(`
-        Object {
-          "closed_at": null,
-          "closed_by": null,
-          "connector": Object {
-            "fields": Object {
-              "issueType": "Task",
-              "parent": null,
-              "priority": "High",
-            },
-            "id": "123",
-            "name": "My connector",
-            "type": ".jira",
-          },
-          "created_at": "2020-04-09T09:43:51.778Z",
-          "created_by": Object {
-            "email": "elastic@elastic.co",
-            "full_name": "Elastic",
-            "username": "elastic",
-          },
-          "description": "A description",
-          "external_service": null,
-          "owner": "securitySolution",
-          "settings": Object {
-            "syncAlerts": true,
-          },
-          "status": "open",
-          "tags": Array [
-            "new",
-            "case",
-          ],
-          "title": "My new case",
-          "updated_at": null,
-          "updated_by": null,
-        }
-      `);
-    });
-  });
-
   describe('buildRangeFilter', () => {
     it('returns undefined if both the from and or are undefined', () => {
       const node = buildRangeFilter({});
@@ -115,18 +47,6 @@ describe('utils', () => {
       // @ts-expect-error
       const node = buildRangeFilter({ from: null, to: null });
       expect(node).toBeFalsy();
-    });
-
-    it('returns undefined if the from is malformed', () => {
-      expect(() => buildRangeFilter({ from: '<' })).toThrowError(
-        'Invalid "from" and/or "to" query parameters'
-      );
-    });
-
-    it('returns undefined if the to is malformed', () => {
-      expect(() => buildRangeFilter({ to: '<' })).toThrowError(
-        'Invalid "from" and/or "to" query parameters'
-      );
     });
 
     it('creates a range filter with only the from correctly', () => {
@@ -216,6 +136,7 @@ describe('utils', () => {
         field: 'test',
         savedObjectType: 'test-type',
       });
+
       expect(toElasticsearchQuery(node!)).toMatchInlineSnapshot(`
         Object {
           "bool": Object {
@@ -250,6 +171,320 @@ describe('utils', () => {
               },
             ],
           },
+        }
+      `);
+    });
+
+    it('escapes the query correctly', () => {
+      const node = buildRangeFilter({
+        from: '2022-04-27T12:55:47.576Z',
+        to: '2022-04-27T12:56:47.576Z',
+        field: '<weird field)',
+        savedObjectType: '.weird SO)',
+      });
+
+      expect(toElasticsearchQuery(node!)).toMatchInlineSnapshot(`
+        Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "range": Object {
+                        ".weird SO).attributes.<weird field)": Object {
+                          "gte": "2022-04-27T12:55:47.576Z",
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "range": Object {
+                        ".weird SO).attributes.<weird field)": Object {
+                          "lte": "2022-04-27T12:56:47.576Z",
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        }
+      `);
+    });
+  });
+
+  describe('constructQueryOptions', () => {
+    it('creates a filter with the tags', () => {
+      const { filter } = constructQueryOptions({ tags: ['tag1', 'tag2'] });
+      expect(filter).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "cases.attributes.tags",
+                },
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "tag1",
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "cases.attributes.tags",
+                },
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "tag2",
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+          ],
+          "function": "or",
+          "type": "function",
+        }
+      `);
+    });
+
+    it('creates a filter with the reporters', () => {
+      expect(constructQueryOptions({ reporters: ['bob', 'sam'] }).filter).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "cases.attributes.created_by.username",
+                },
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "bob",
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "cases.attributes.created_by.username",
+                },
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "sam",
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+          ],
+          "function": "or",
+          "type": "function",
+        }
+      `);
+    });
+
+    it('creates a filter with the owner', () => {
+      expect(constructQueryOptions({ owner: 'observability' }).filter).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [
+            Object {
+              "isQuoted": false,
+              "type": "literal",
+              "value": "cases.attributes.owner",
+            },
+            Object {
+              "isQuoted": false,
+              "type": "literal",
+              "value": "observability",
+            },
+          ],
+          "function": "is",
+          "type": "function",
+        }
+      `);
+    });
+
+    it('creates a filter for the status', () => {
+      expect(constructQueryOptions({ status: CaseStatuses.open }).filter).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [
+            Object {
+              "isQuoted": false,
+              "type": "literal",
+              "value": "cases.attributes.status",
+            },
+            Object {
+              "isQuoted": false,
+              "type": "literal",
+              "value": "open",
+            },
+          ],
+          "function": "is",
+          "type": "function",
+        }
+      `);
+    });
+
+    it('creates a filter for the severity', () => {
+      expect(constructQueryOptions({ severity: CaseSeverity.CRITICAL }).filter)
+        .toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [
+            Object {
+              "isQuoted": false,
+              "type": "literal",
+              "value": "cases.attributes.severity",
+            },
+            Object {
+              "isQuoted": false,
+              "type": "literal",
+              "value": "critical",
+            },
+          ],
+          "function": "is",
+          "type": "function",
+        }
+      `);
+    });
+
+    it('creates a filter for the time range', () => {
+      expect(constructQueryOptions({ from: 'now-1M', to: 'now' }).filter).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "cases.attributes.created_at",
+                },
+                "gte",
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "now-1M",
+                },
+              ],
+              "function": "range",
+              "type": "function",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "cases.attributes.created_at",
+                },
+                "lte",
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "now",
+                },
+              ],
+              "function": "range",
+              "type": "function",
+            },
+          ],
+          "function": "and",
+          "type": "function",
+        }
+      `);
+    });
+
+    it('sets filter to undefined when no options were passed', () => {
+      expect(constructQueryOptions({}).filter).toBeUndefined();
+    });
+
+    it('creates a filter with tags and reporters', () => {
+      expect(constructQueryOptions({ tags: ['tag1', 'tag2'], reporters: 'sam' }).filter)
+        .toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [
+            Object {
+              "arguments": Array [
+                Object {
+                  "arguments": Array [
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "cases.attributes.tags",
+                    },
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "tag1",
+                    },
+                  ],
+                  "function": "is",
+                  "type": "function",
+                },
+                Object {
+                  "arguments": Array [
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "cases.attributes.tags",
+                    },
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "tag2",
+                    },
+                  ],
+                  "function": "is",
+                  "type": "function",
+                },
+              ],
+              "function": "or",
+              "type": "function",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "cases.attributes.created_by.username",
+                },
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "sam",
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+          ],
+          "function": "and",
+          "type": "function",
         }
       `);
     });

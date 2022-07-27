@@ -88,6 +88,10 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
           return !item.signal?.aborted;
         });
 
+        if (items.length === 0) {
+          return; // all items have been aborted before a request has been sent
+        }
+
         const donePromises: Array<Promise<any>> = items.map((item) => {
           return new Promise<void>((resolve) => {
             const { promise: abortPromise, cleanup } = item.signal

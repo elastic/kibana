@@ -8,7 +8,7 @@
 import { LegacyRequest } from '../../types';
 import { createTimeFilter } from '../create_query';
 
-interface Opts {
+export interface FilebeatIndexCheckOpts {
   start: number;
   end: number;
   clusterUuid?: string;
@@ -19,7 +19,7 @@ interface Opts {
 async function doesFilebeatIndexExist(
   req: LegacyRequest,
   filebeatIndexPattern: string,
-  { start, end, clusterUuid, nodeUuid, indexUuid }: Opts
+  { start, end, clusterUuid, nodeUuid, indexUuid }: FilebeatIndexCheckOpts
 ) {
   const metric = { timestampField: '@timestamp' };
   const filter = [createTimeFilter({ start, end, metric })];
@@ -142,6 +142,10 @@ async function doesFilebeatIndexExist(
   };
 }
 
-export async function detectReason(req: LegacyRequest, filebeatIndexPattern: string, opts: Opts) {
+export async function detectReason(
+  req: LegacyRequest,
+  filebeatIndexPattern: string,
+  opts: FilebeatIndexCheckOpts
+) {
   return await doesFilebeatIndexExist(req, filebeatIndexPattern, opts);
 }

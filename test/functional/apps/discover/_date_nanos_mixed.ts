@@ -15,8 +15,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
-  const fromTime = 'Jan 1, 2019 @ 00:00:00.000';
-  const toTime = 'Jan 1, 2019 @ 23:59:59.999';
+  const from = 'Jan 1, 2019 @ 00:00:00.000';
+  const to = 'Jan 1, 2019 @ 23:59:59.999';
 
   describe('date_nanos_mixed', function () {
     before(async function () {
@@ -27,8 +27,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await kibanaServer.uiSettings.replace({ defaultIndex: 'timestamp-*' });
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos_mixed']);
+      await PageObjects.common.setTime({ from, to });
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     });
 
     after(async () => {
@@ -47,6 +47,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(rowData3).to.contain('Jan 1, 2019 @ 12:10:30.123456789');
       const rowData4 = await PageObjects.discover.getDocTableIndex(isLegacy ? 7 : 4);
       expect(rowData4).to.contain('Jan 1, 2019 @ 12:10:30.123000000');
+    });
+
+    after(async () => {
+      await PageObjects.common.unsetTime();
     });
   });
 }

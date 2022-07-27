@@ -77,17 +77,28 @@ describe('Fleet startup', () => {
     });
 
     it('should create Fleet Server policy', () => {
+      cy.getBySel('fleetServerFlyoutTab-advanced').click();
       cy.getBySel('createFleetServerPolicyBtn').click();
+
+      // Wait until the success callout is shown before navigating away
+      cy.getBySel('agentPolicyCreateStatusCallOut')
+        .should('exist')
+        .and('have.class', 'euiCallOut--success');
 
       // verify policy is created and has fleet server and system package
       verifyPolicy('Fleet Server policy 1', ['Fleet Server', 'System']);
 
       navigateToTab(AGENTS_TAB);
+      cy.getBySel('fleetServerFlyoutTab-advanced').click();
+
       // verify create button changed to dropdown
       cy.getBySel('agentPolicyDropdown');
 
       // verify fleet server enroll command contains created policy id
-      cy.getBySel('fleetServerHostInput').type('https://localhost:8220');
+      cy.getBySel('fleetServerHostInput')
+        .getBySel('comboBoxSearchInput')
+        .type('https://localhost:8220');
+
       cy.getBySel('fleetServerAddHostBtn').click();
       cy.getBySel('fleetServerGenerateServiceTokenBtn').click();
       cy.get('.euiCodeBlock__code').contains('--fleet-server-policy=fleet-server-policy');

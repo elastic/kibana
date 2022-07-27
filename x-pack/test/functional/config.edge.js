@@ -6,10 +6,10 @@
  */
 
 export default async function ({ readConfigFile }) {
-  const chromeConfig = await readConfigFile(require.resolve('./config'));
+  const firefoxConfig = await readConfigFile(require.resolve('./config.firefox.js'));
 
   return {
-    ...chromeConfig.getAll(),
+    ...firefoxConfig.getAll(),
 
     browser: {
       type: 'msedge',

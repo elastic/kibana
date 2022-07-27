@@ -21,6 +21,7 @@ import { LogColumnRenderConfiguration } from '../../utils/log_column_render_conf
 import { useKibanaQuerySettings } from '../../utils/use_kibana_query_settings';
 import { ScrollableLogTextStreamView } from '../logging/log_text_stream';
 import { LogStreamErrorBoundary } from './log_stream_error_boundary';
+import { useLogEntryFlyout } from '../logging/log_entry_flyout';
 
 interface LogStreamPluginDeps {
   data: DataPublicPluginStart;
@@ -63,8 +64,13 @@ export interface LogStreamProps extends LogStreamContentProps {
   height?: string | number;
 }
 
+interface LogView {
+  type: 'log-view-reference';
+  logViewId: string;
+}
+
 interface LogStreamContentProps {
-  sourceId?: string;
+  logView: LogView;
   startTimestamp: number;
   endTimestamp: number;
   query?: string | Query | BuiltEsQuery;
@@ -72,9 +78,10 @@ interface LogStreamContentProps {
   center?: LogEntryCursor;
   highlight?: string;
   columns?: LogColumnDefinition[];
+  showFlyoutAction?: boolean;
 }
 
-export const LogStream: React.FC<LogStreamProps> = ({ height = 400, ...contentProps }) => {
+export const LogStream = ({ height = 400, ...contentProps }: LogStreamProps) => {
   return (
     <LogStreamContainer style={{ height }}>
       <LogStreamErrorBoundary resetOnChange={[contentProps.query]}>
@@ -84,8 +91,8 @@ export const LogStream: React.FC<LogStreamProps> = ({ height = 400, ...contentPr
   );
 };
 
-export const LogStreamContent: React.FC<LogStreamContentProps> = ({
-  sourceId = 'default',
+export const LogStreamContent = ({
+  logView,
   startTimestamp,
   endTimestamp,
   query,
@@ -93,7 +100,8 @@ export const LogStreamContent: React.FC<LogStreamContentProps> = ({
   center,
   highlight,
   columns,
-}) => {
+  showFlyoutAction = false,
+}: LogStreamProps) => {
   const customColumns = useMemo(
     () => (columns ? convertLogColumnDefinitionToLogSourceColumnDefinition(columns) : undefined),
     [columns]
@@ -112,6 +120,8 @@ Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_reac
     );
   }
 
+  const { openLogEntryFlyout } = useLogEntryFlyout(logView.logViewId);
+
   const kibanaQuerySettings = useKibanaQuerySettings();
 
   const logViews = useMemo(
@@ -125,7 +135,7 @@ Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_reac
     load: loadLogView,
     resolvedLogView,
   } = useLogView({
-    logViewId: sourceId,
+    logViewId: logView.logViewId,
     logViews,
     fetch: http.fetch,
   });
@@ -157,7 +167,7 @@ Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_reac
     isLoadingMore,
     isReloading: isLoadingEntries,
   } = useLogStream({
-    sourceId,
+    sourceId: logView.logViewId,
     startTimestamp,
     endTimestamp,
     query: parsedQuery,
@@ -223,6 +233,7 @@ Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_reac
       jumpToTarget={noop}
       reportVisibleInterval={handlePagination}
       reloadItems={fetchEntries}
+      onOpenLogEntryFlyout={showFlyoutAction ? openLogEntryFlyout : undefined}
       highlightedItem={highlight ?? null}
       currentHighlightKey={null}
       startDateExpression={''}

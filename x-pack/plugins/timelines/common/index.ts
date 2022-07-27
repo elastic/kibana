@@ -27,7 +27,6 @@ export type {
   ControlColumnProps,
   DataProvidersAnd,
   DataProvider,
-  FieldBrowserOptions,
   GenericActionRowCellRenderProps,
   HeaderActionProps,
   HeaderCellRender,
@@ -37,6 +36,7 @@ export type {
   RowRenderer,
   SetEventsDeleted,
   SetEventsLoading,
+  TimelineType,
 } from './types';
 
 export { IS_OPERATOR, EXISTS_OPERATOR, DataProviderType, TimelineId } from './types';

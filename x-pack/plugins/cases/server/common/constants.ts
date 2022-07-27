@@ -27,3 +27,8 @@ export const CASE_REF_NAME = `associated-${CASE_SAVED_OBJECT}`;
  * The name of the saved object reference indicating the commentId reference
  */
 export const COMMENT_REF_NAME = `associated-${CASE_COMMENT_SAVED_OBJECT}`;
+
+/**
+ * The name of the saved object reference indicating the externalReferenceId reference
+ */
+export const EXTERNAL_REFERENCE_REF_NAME = 'externalReferenceId';

@@ -28,10 +28,11 @@ import { AssignmentError } from './errors';
 import { toAssignableObject } from './utils';
 
 interface AssignmentServiceOptions {
-  request: KibanaRequest;
+  request?: KibanaRequest;
   client: SavedObjectsClientContract;
   typeRegistry: ISavedObjectTypeRegistry;
   authorization?: SecurityPluginSetup['authz'];
+  internal?: boolean;
 }
 
 export type IAssignmentService = PublicMethodsOf<AssignmentService>;
@@ -40,9 +41,20 @@ export class AssignmentService {
   private readonly soClient: SavedObjectsClientContract;
   private readonly typeRegistry: ISavedObjectTypeRegistry;
   private readonly authorization?: SecurityPluginSetup['authz'];
-  private readonly request: KibanaRequest;
+  private readonly request?: KibanaRequest;
+  private readonly internal: boolean;
 
-  constructor({ client, typeRegistry, authorization, request }: AssignmentServiceOptions) {
+  constructor({
+    client,
+    typeRegistry,
+    authorization,
+    request,
+    internal = false,
+  }: AssignmentServiceOptions) {
+    if (!internal && !request) {
+      throw new Error('request required for non-internal usages');
+    }
+    this.internal = internal;
     this.soClient = client;
     this.typeRegistry = typeRegistry;
     this.authorization = authorization;
@@ -84,8 +96,11 @@ export class AssignmentService {
   }
 
   public async getAssignableTypes(types?: string[]) {
+    if (this.internal) {
+      return types ?? taggableTypes;
+    }
     return getUpdatableSavedObjectTypes({
-      request: this.request,
+      request: this.request!,
       types: types ?? taggableTypes,
       authorization: this.authorization,
     });

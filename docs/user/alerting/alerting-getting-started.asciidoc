@@ -63,7 +63,7 @@ Rule schedules are defined as an interval between subsequent checks, and can ran
 
 [IMPORTANT]
 ==============================================
-The intervals of rule checks in {kib} are approximate. The timing of their execution is affected by factors such as the frequency at which tasks are claimed and the task load on the system. See <<alerting-production-considerations, Alerting production considerations>> for more information.
+The intervals of rule checks in {kib} are approximate. Their timing is affected by factors such as the frequency at which tasks are claimed and the task load on the system. Refer to <<alerting-production-considerations>> for more information.
 ==============================================
 
 [float]
@@ -82,7 +82,7 @@ The result is a template: all the parameters needed to invoke a service are supp
 
 In the server monitoring example, the `email` connector type is used, and `server` is mapped to the body of the email, using the template string `CPU on {{server}} is high`.
 
-When the rule detects the condition, it creates an <<alerting-concepts-alerts, alert>> containing the details of the condition, renders the template with these details such as server name, and executes the action on the {kib} server by invoking the `email` connector type. 
+When the rule detects the condition, it creates an <<alerting-concepts-alerts,alert>> containing the details of the condition, renders the template with these details such as server name, and runs the action on the {kib} server by invoking the `email` connector type. 
 
 image::images/what-is-an-action.svg[Actions are like templates that are rendered when an alert detects a condition]
 

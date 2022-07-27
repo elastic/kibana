@@ -6,7 +6,7 @@
  */
 
 import { defaults } from 'lodash/fp';
-import { LegacyEndpointEvent } from '../../../common/endpoint/types';
+import type { LegacyEndpointEvent } from '../../../common/endpoint/types';
 
 type DeepPartial<T> = { [K in keyof T]?: DeepPartial<T[K]> };
 /**

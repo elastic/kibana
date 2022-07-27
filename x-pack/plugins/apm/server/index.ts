@@ -99,7 +99,7 @@ export const config: PluginConfigDescriptor<APMConfig> = {
       { level: 'warning' }
     ),
     renameFromRoot(
-      'xpack.apm.maxServiceSelections',
+      'xpack.apm.maxServiceSelection',
       `uiSettings.overrides[${maxSuggestions}]`,
       { level: 'warning' }
     ),

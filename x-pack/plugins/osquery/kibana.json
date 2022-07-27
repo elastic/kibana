@@ -12,7 +12,7 @@
   "requiredPlugins": [
     "actions",
     "data",
-    "dataEnhanced",
+    "dataViews",
     "discover",
     "features",
     "navigation",

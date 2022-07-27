@@ -20,7 +20,7 @@ import {
   ExecutionContract,
 } from '../common';
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/no-var-requires,import/no-commonjs
 const { __getLastExecution, __getLastRenderMode } = require('./services');
 
 const element = null as unknown as HTMLElement;
@@ -154,12 +154,12 @@ describe('ExpressionLoader', () => {
   it('throttles partial results', async () => {
     testScheduler.run(({ cold, expectObservable }) => {
       const expressionLoader = new ExpressionLoader(element, 'var foo', {
-        variables: { foo: cold('a 5ms b 5ms c 10ms d', { a: 1, b: 2, c: 3, d: 4 }) },
+        variables: { foo: cold('a 5ms b 5ms c 10ms (d|)', { a: 1, b: 2, c: 3, d: 4 }) },
         partial: true,
         throttle: 20,
       });
 
-      expectObservable(expressionLoader.data$).toBe('a 19ms c 19ms d', {
+      expectObservable(expressionLoader.data$).toBe('a 19ms c 2ms d', {
         a: expect.objectContaining({ result: 1 }),
         c: expect.objectContaining({ result: 3 }),
         d: expect.objectContaining({ result: 4 }),

@@ -14,11 +14,15 @@ const getAgent = ({
   upgradeable = false,
   unenrolling = false,
   unenrolled = false,
+  updating = false,
+  upgraded = false,
 }: {
   version: string;
   upgradeable?: boolean;
   unenrolling?: boolean;
   unenrolled?: boolean;
+  updating?: boolean;
+  upgraded?: boolean;
 }): Agent => {
   const agent: Agent = {
     id: 'de9006e1-54a7-4320-b24e-927e6fe518a8',
@@ -94,6 +98,12 @@ const getAgent = ({
   if (unenrolled) {
     agent.unenrolled_at = '2020-10-01T14:43:27.255Z';
   }
+  if (updating) {
+    agent.upgrade_started_at = new Date(Date.now()).toISOString();
+  }
+  if (upgraded) {
+    agent.upgraded_at = new Date(Date.now()).toISOString();
+  }
   return agent;
 };
 describe('Fleet - isAgentUpgradeable', () => {
@@ -166,6 +176,34 @@ describe('Fleet - isAgentUpgradeable', () => {
   it('returns true if agent reports upgradeable, with agent version < kibana snapshot version', () => {
     expect(
       isAgentUpgradeable(getAgent({ version: '7.9.0', upgradeable: true }), '8.0.0-SNAPSHOT')
+    ).toBe(true);
+  });
+  it('returns false if agent reports upgradeable, with target version < current agent version ', () => {
+    expect(
+      isAgentUpgradeable(
+        getAgent({ version: '7.9.0', upgradeable: true }),
+        '8.0.0-SNAPSHOT',
+        '7.8.0'
+      )
+    ).toBe(false);
+  });
+  it('returns false if agent reports upgradeable, with target version == current agent version ', () => {
+    expect(
+      isAgentUpgradeable(
+        getAgent({ version: '7.9.0', upgradeable: true }),
+        '8.0.0-SNAPSHOT',
+        '7.9.0'
+      )
+    ).toBe(false);
+  });
+  it('returns false if agent reports upgradeable, but is already updating', () => {
+    expect(
+      isAgentUpgradeable(getAgent({ version: '7.9.0', upgradeable: true, updating: true }), '8.0.0')
+    ).toBe(false);
+  });
+  it('returns true if agent was recently upgraded', () => {
+    expect(
+      isAgentUpgradeable(getAgent({ version: '7.9.0', upgradeable: true, upgraded: true }), '8.0.0')
     ).toBe(true);
   });
 });

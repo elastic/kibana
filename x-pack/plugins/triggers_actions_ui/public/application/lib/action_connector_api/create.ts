@@ -14,11 +14,10 @@ import type {
 } from '../../../types';
 
 const rewriteBodyRequest: RewriteResponseCase<
-  Omit<ActionConnectorWithoutId, 'referencedByCount' | 'isMissingSecrets'>
-> = ({ actionTypeId, isPreconfigured, ...res }) => ({
+  Pick<ActionConnectorWithoutId, 'actionTypeId' | 'name' | 'config' | 'secrets'>
+> = ({ actionTypeId, ...res }) => ({
   ...res,
   connector_type_id: actionTypeId,
-  is_preconfigured: isPreconfigured,
 });
 
 const rewriteBodyRes: RewriteRequestCase<
@@ -26,12 +25,14 @@ const rewriteBodyRes: RewriteRequestCase<
 > = ({
   connector_type_id: actionTypeId,
   is_preconfigured: isPreconfigured,
+  is_deprecated: isDeprecated,
   is_missing_secrets: isMissingSecrets,
   ...res
 }) => ({
   ...res,
   actionTypeId,
   isPreconfigured,
+  isDeprecated,
   isMissingSecrets,
 });
 
@@ -40,7 +41,7 @@ export async function createActionConnector({
   connector,
 }: {
   http: HttpSetup;
-  connector: Omit<ActionConnectorWithoutId, 'referencedByCount'>;
+  connector: Pick<ActionConnectorWithoutId, 'actionTypeId' | 'name' | 'config' | 'secrets'>;
 }): Promise<ActionConnector> {
   const res = await http.post<Parameters<typeof rewriteBodyRes>[0]>(
     `${BASE_ACTION_API_PATH}/connector`,

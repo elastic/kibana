@@ -24,18 +24,22 @@ export const useStyles = () => {
       top: 0,
       zIndex: 1,
       backgroundColor: colors.emptyShade,
-      paddingTop: size.base,
     };
 
     const viewMode: CSSObject = {
       margin: size.base,
-      marginBottom: 0,
+    };
+
+    const loadMoreBtn: CSSObject = {
+      margin: size.m,
+      width: `calc(100% - ${size.m} * 2)`,
     };
 
     return {
       container,
       stickyItem,
       viewMode,
+      loadMoreBtn,
     };
   }, [euiTheme]);
 

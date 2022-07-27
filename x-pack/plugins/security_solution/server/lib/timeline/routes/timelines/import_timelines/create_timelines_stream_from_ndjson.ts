@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
-import { Transform } from 'stream';
+import type * as rt from 'io-ts';
+import type { Transform } from 'stream';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
@@ -18,7 +18,7 @@ import {
   createLimitStream,
 } from '../../../../../utils/read_stream/create_stream_from_ndjson';
 
-import { ImportTimelineResponse } from './types';
+import type { ImportTimelineResponse } from './types';
 import { ImportTimelinesSchemaRt } from '../../../schemas/timelines/import_timelines_schema';
 import { throwErrors } from '../../../utils/common';
 

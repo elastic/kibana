@@ -45,10 +45,11 @@ export const createStubDataView = ({
   deps?: {
     fieldFormats?: FieldFormatsStartCommon;
   };
-}): DataView =>
-  new DataView({
-    spec,
+}): DataView => {
+  return new DataView({
+    spec: { version: '1', ...spec },
     metaFields: opts?.metaFields ?? ['_id', '_type', '_source'],
     shortDotsEnable: opts?.shortDotsEnable,
     fieldFormats: deps?.fieldFormats ?? fieldFormatsMock,
   });
+};

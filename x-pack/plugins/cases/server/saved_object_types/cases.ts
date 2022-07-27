@@ -59,6 +59,9 @@ export const createCaseSavedObjectType = (
           },
         },
       },
+      duration: {
+        type: 'unsigned_long',
+      },
       description: {
         type: 'text',
       },
@@ -149,13 +152,16 @@ export const createCaseSavedObjectType = (
           },
         },
       },
+      severity: {
+        type: 'keyword',
+      },
     },
   },
   migrations: caseMigrations,
   management: {
     importableAndExportable: true,
     defaultSearchField: 'title',
-    icon: 'folderExclamation',
+    icon: 'casesApp',
     getTitle: (savedObject: SavedObject<ESCaseAttributes>) => savedObject.attributes.title,
     onExport: async (
       context: SavedObjectsExportTransformContext,

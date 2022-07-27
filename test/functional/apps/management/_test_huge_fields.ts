@@ -14,11 +14,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'home', 'settings']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/89031
   describe('test large number of fields', function () {
     this.tags(['skipCloud']);
 
-    const EXPECTED_FIELD_COUNT = '10006';
+    const EXPECTED_FIELD_COUNT = '10005';
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_testhuge_reader']);
       await esArchiver.emptyKibanaIndex();

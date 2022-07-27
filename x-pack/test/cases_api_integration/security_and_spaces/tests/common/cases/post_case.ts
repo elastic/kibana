@@ -12,6 +12,7 @@ import {
   ConnectorTypes,
   ConnectorJiraTypeFields,
   CaseStatuses,
+  CaseSeverity,
 } from '@kbn/cases-plugin/common/api';
 import { getPostCaseRequest, postCaseResp, defaultUser } from '../../../../common/lib/mock';
 import {
@@ -102,6 +103,32 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       });
 
+      it('should post a case without severity', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+        const data = removeServerGeneratedPropertiesFromCase(postedCase);
+
+        expect(data).to.eql(postCaseResp(null, getPostCaseRequest()));
+      });
+
+      it('should post a case with severity', async () => {
+        const postedCase = await createCase(
+          supertest,
+          getPostCaseRequest({
+            severity: CaseSeverity.HIGH,
+          })
+        );
+        const data = removeServerGeneratedPropertiesFromCase(postedCase);
+
+        expect(data).to.eql(
+          postCaseResp(
+            null,
+            getPostCaseRequest({
+              severity: CaseSeverity.HIGH,
+            })
+          )
+        );
+      });
+
       it('should create a user action when creating a case', async () => {
         const postedCase = await createCase(supertest, getPostCaseRequest());
         const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
@@ -122,6 +149,7 @@ export default ({ getService }: FtrProviderContext): void => {
             settings: postedCase.settings,
             owner: postedCase.owner,
             status: CaseStatuses.open,
+            severity: CaseSeverity.LOW,
           },
         });
       });
@@ -205,6 +233,11 @@ export default ({ getService }: FtrProviderContext): void => {
         const { tags, ...caseWithoutTags } = getPostCaseRequest();
 
         await supertest.post(CASES_URL).set('kbn-xsrf', 'true').send(caseWithoutTags).expect(400);
+      });
+
+      it('400s when passing a wrong severity value', async () => {
+        // @ts-expect-error
+        await createCase(supertest, { ...getPostCaseRequest(), severity: 'very-severe' }, 400);
       });
 
       it('400s if you passing status for a new case', async () => {

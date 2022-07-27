@@ -6,17 +6,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { $Values } from '@kbn/utility-types';
 import type { PaletteOutput } from '@kbn/coloring';
 import type {
-  SeriesType,
   LegendConfig,
   AxisExtentConfig,
   XYCurveType,
-  AxesSettingsConfig,
   FittingFunction,
-  LabelsOrientationConfig,
   EndValue,
-  YConfig,
+  YScaleType,
+  XScaleType,
+  LineStyle,
+  IconPosition,
+  FillStyle,
+  YAxisConfig,
 } from '@kbn/expression-xy-plugin/common';
 import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { LensIconChartArea } from '../assets/chart_area';
@@ -33,16 +36,70 @@ import { LensIconChartLine } from '../assets/chart_line';
 import type { VisualizationType, Suggestion } from '../types';
 import type { ValueLabelConfig } from '../../common/types';
 
+export const YAxisModes = {
+  AUTO: 'auto',
+  LEFT: 'left',
+  RIGHT: 'right',
+  BOTTOM: 'bottom',
+} as const;
+
+export const SeriesTypes = {
+  BAR: 'bar',
+  LINE: 'line',
+  AREA: 'area',
+  BAR_STACKED: 'bar_stacked',
+  AREA_STACKED: 'area_stacked',
+  BAR_HORIZONTAL: 'bar_horizontal',
+  BAR_PERCENTAGE_STACKED: 'bar_percentage_stacked',
+  BAR_HORIZONTAL_STACKED: 'bar_horizontal_stacked',
+  AREA_PERCENTAGE_STACKED: 'area_percentage_stacked',
+  BAR_HORIZONTAL_PERCENTAGE_STACKED: 'bar_horizontal_percentage_stacked',
+} as const;
+
+export type YAxisMode = $Values<typeof YAxisModes>;
+export type SeriesType = $Values<typeof SeriesTypes>;
+export interface AxesSettingsConfig {
+  x: boolean;
+  yRight: boolean;
+  yLeft: boolean;
+}
+
+export interface AxisConfig extends Omit<YAxisConfig, 'extent'> {
+  extent?: AxisExtentConfig;
+}
+
+export interface LabelsOrientationConfig {
+  x: number;
+  yLeft: number;
+  yRight: number;
+}
+
+export interface YConfig {
+  forAccessor: string;
+  color?: string;
+  icon?: string;
+  lineWidth?: number;
+  lineStyle?: LineStyle;
+  fill?: FillStyle;
+  iconPosition?: IconPosition;
+  textVisibility?: boolean;
+  axisMode?: YAxisMode;
+}
+
 export interface XYDataLayerConfig {
   layerId: string;
   accessors: string[];
   layerType: 'data';
   seriesType: SeriesType;
   xAccessor?: string;
-  hide?: boolean;
+  simpleView?: boolean;
   yConfig?: YConfig[];
   splitAccessor?: string;
   palette?: PaletteOutput;
+  collapseFn?: string;
+  xScaleType?: XScaleType;
+  isHistogram?: boolean;
+  columnToLabel?: string;
 }
 
 export interface XYReferenceLineLayerConfig {
@@ -56,13 +113,20 @@ export interface XYAnnotationLayerConfig {
   layerId: string;
   layerType: 'annotations';
   annotations: EventAnnotationConfig[];
-  hide?: boolean;
+  simpleView?: boolean;
 }
 
 export type XYLayerConfig =
   | XYDataLayerConfig
   | XYReferenceLineLayerConfig
   | XYAnnotationLayerConfig;
+
+export interface ValidXYDataLayerConfig extends XYDataLayerConfig {
+  xAccessor: NonNullable<XYDataLayerConfig['xAccessor']>;
+  layerId: string;
+}
+
+export type ValidLayer = ValidXYDataLayerConfig | XYReferenceLineLayerConfig;
 
 // Persisted parts of the state
 export interface XYState {
@@ -72,12 +136,15 @@ export interface XYState {
   fittingFunction?: FittingFunction;
   emphasizeFitting?: boolean;
   endValue?: EndValue;
+  xExtent?: AxisExtentConfig;
   yLeftExtent?: AxisExtentConfig;
   yRightExtent?: AxisExtentConfig;
   layers: XYLayerConfig[];
   xTitle?: string;
   yTitle?: string;
   yRightTitle?: string;
+  yLeftScale?: YScaleType;
+  yRightScale?: YScaleType;
   axisTitlesVisibilitySettings?: AxesSettingsConfig;
   tickLabelsVisibilitySettings?: AxesSettingsConfig;
   gridlinesVisibilitySettings?: AxesSettingsConfig;

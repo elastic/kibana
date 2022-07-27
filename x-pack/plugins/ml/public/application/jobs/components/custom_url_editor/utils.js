@@ -17,6 +17,10 @@ import { ml } from '../../../services/ml_api_service';
 import { escapeForElasticsearchQuery } from '../../../util/string_utils';
 import { getSavedObjectsClient, getDashboard } from '../../../util/dependency_cache';
 
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import { cleanEmptyKeys } from '@kbn/dashboard-plugin/public';
+import { isFilterPinned } from '@kbn/es-query';
+
 export function getNewCustomUrlDefaults(job, dashboards, dataViews) {
   // Returns the settings object in the format used by the custom URL editor
   // for a new custom URL.
@@ -121,69 +125,74 @@ export function buildCustomUrlFromSettings(settings) {
   }
 }
 
-function buildDashboardUrlFromSettings(settings) {
+async function buildDashboardUrlFromSettings(settings) {
   // Get the complete list of attributes for the selected dashboard (query, filters).
-  return new Promise((resolve, reject) => {
-    const { dashboardId, queryFieldNames } = settings.kibanaSettings;
+  const { dashboardId, queryFieldNames } = settings.kibanaSettings;
 
-    const savedObjectsClient = getSavedObjectsClient();
-    savedObjectsClient
-      .get('dashboard', dashboardId)
-      .then((response) => {
-        // Use the filters from the saved dashboard if there are any.
-        let filters = [];
+  const savedObjectsClient = getSavedObjectsClient();
 
-        // Use the query from the dashboard only if no job entities are selected.
-        let query = undefined;
+  const response = await savedObjectsClient.get('dashboard', dashboardId);
 
-        const searchSourceJSON = response.get('kibanaSavedObjectMeta.searchSourceJSON');
-        if (searchSourceJSON !== undefined) {
-          const searchSourceData = JSON.parse(searchSourceJSON);
-          if (searchSourceData.filter !== undefined) {
-            filters = searchSourceData.filter;
-          }
-          query = searchSourceData.query;
-        }
+  // Use the filters from the saved dashboard if there are any.
+  let filters = [];
 
-        const queryFromEntityFieldNames = buildAppStateQueryParam(queryFieldNames);
-        if (queryFromEntityFieldNames !== undefined) {
-          query = queryFromEntityFieldNames;
-        }
+  // Use the query from the dashboard only if no job entities are selected.
+  let query = undefined;
 
-        const dashboard = getDashboard();
+  const searchSourceJSON = response.get('kibanaSavedObjectMeta.searchSourceJSON');
+  if (searchSourceJSON !== undefined) {
+    const searchSourceData = JSON.parse(searchSourceJSON);
+    if (searchSourceData.filter !== undefined) {
+      filters = searchSourceData.filter;
+    }
+    query = searchSourceData.query;
+  }
 
-        dashboard.locator
-          .getUrl({
-            dashboardId,
-            timeRange: {
-              from: '$earliest$',
-              to: '$latest$',
-              mode: 'absolute',
-            },
-            filters,
-            query,
-            // Don't hash the URL since this string will be 1. shown to the user and 2. used as a
-            // template to inject the time parameters.
-            useHash: false,
-          })
-          .then((urlValue) => {
-            const urlToAdd = {
-              url_name: settings.label,
-              url_value: decodeURIComponent(`dashboards${url.parse(urlValue).hash}`),
-              time_range: TIME_RANGE_TYPE.AUTO,
-            };
+  const queryFromEntityFieldNames = buildAppStateQueryParam(queryFieldNames);
+  if (queryFromEntityFieldNames !== undefined) {
+    query = queryFromEntityFieldNames;
+  }
 
-            if (settings.timeRange.type === TIME_RANGE_TYPE.INTERVAL) {
-              urlToAdd.time_range = settings.timeRange.interval;
-            }
+  const dashboard = getDashboard();
 
-            resolve(urlToAdd);
-          });
-      })
-      .catch((resp) => {
-        reject(resp);
-      });
+  const location = await dashboard.locator.getLocation({
+    dashboardId,
+    timeRange: {
+      from: '$earliest$',
+      to: '$latest$',
+      mode: 'absolute',
+    },
+    filters,
+    query,
+    // Don't hash the URL since this string will be 1. shown to the user and 2. used as a
+    // template to inject the time parameters.
+    useHash: false,
   });
+
+  // Temp workaround
+  const state = location.state;
+  const resultPath = setStateToKbnUrl(
+    '_a',
+    cleanEmptyKeys({
+      query: state.query,
+      filters: state.filters?.filter((f) => !isFilterPinned(f)),
+      savedQuery: state.savedQuery,
+    }),
+    { useHash: false, storeInHashQuery: true },
+    location.path
+  );
+
+  const urlToAdd = {
+    url_name: settings.label,
+    url_value: decodeURIComponent(`dashboards${url.parse(resultPath).hash}`),
+    time_range: TIME_RANGE_TYPE.AUTO,
+  };
+
+  if (settings.timeRange.type === TIME_RANGE_TYPE.INTERVAL) {
+    urlToAdd.time_range = settings.timeRange.interval;
+  }
+
+  return urlToAdd;
 }
 
 function buildDiscoverUrlFromSettings(settings) {

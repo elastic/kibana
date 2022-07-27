@@ -12,7 +12,7 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import rison, { RisonValue } from 'rison-node';
 import url from 'url';
-import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../common/index_pattern_constants';
+import { APM_STATIC_DATA_VIEW_ID } from '../../../../../common/data_view_constants';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getTimepickerRisonData } from '../rison_helpers';
 
@@ -46,7 +46,7 @@ export const getDiscoverHref = ({
     _g: getTimepickerRisonData(location.search),
     _a: {
       ...query._a,
-      index: APM_STATIC_INDEX_PATTERN_ID,
+      index: APM_STATIC_DATA_VIEW_ID,
     },
   };
 

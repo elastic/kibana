@@ -7,4 +7,3 @@
 
 export const ROOT_PATH = '/';
 export const SETUP_GUIDE_PATH = '/setup_guide';
-export const ELASTICSEARCH_GUIDE_PATH = '/elasticsearch_guide';

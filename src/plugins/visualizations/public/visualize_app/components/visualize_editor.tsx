@@ -18,6 +18,7 @@ import {
   useVisualizeAppState,
   useEditorUpdates,
   useLinkedSearchUpdates,
+  useDataViewUpdates,
 } from '../utils';
 import { VisualizeServices } from '../types';
 import { VisualizeEditorCommon } from './visualize_editor_common';
@@ -63,6 +64,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     visEditorController
   );
   useLinkedSearchUpdates(services, eventEmitter, appState, savedVisInstance);
+  useDataViewUpdates(services, eventEmitter, appState, savedVisInstance);
 
   useEffect(() => {
     const { stateTransferService, data } = services;

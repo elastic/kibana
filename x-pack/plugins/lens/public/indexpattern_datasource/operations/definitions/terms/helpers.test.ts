@@ -17,6 +17,7 @@ import {
   isSortableByColumn,
 } from './helpers';
 import { ReferenceBasedIndexPatternColumn } from '../column_types';
+import type { PercentileRanksIndexPatternColumn } from '../percentile_ranks';
 import { MULTI_KEY_VISUAL_SEPARATOR } from './constants';
 
 const indexPattern = createMockedIndexPattern();
@@ -450,6 +451,44 @@ describe('isSortableByColumn()', () => {
         'col2'
       )
     ).toBeFalsy();
+  });
+
+  it('should not be sortable by percentile_rank column with non integer value', () => {
+    expect(
+      isSortableByColumn(
+        getLayer(getStringBasedOperationColumn(), [
+          {
+            label: 'Percentile rank (1024.5) of bytes',
+            dataType: 'number',
+            operationType: 'percentile_rank',
+            sourceField: 'bytes',
+            isBucketed: false,
+            scale: 'ratio',
+            params: { value: 1024.5 },
+          } as PercentileRanksIndexPatternColumn,
+        ]),
+        'col2'
+      )
+    ).toBeFalsy();
+  });
+
+  it('should be sortable by percentile_rank column with integer value', () => {
+    expect(
+      isSortableByColumn(
+        getLayer(getStringBasedOperationColumn(), [
+          {
+            label: 'Percentile rank (1024) of bytes',
+            dataType: 'number',
+            operationType: 'percentile_rank',
+            sourceField: 'bytes',
+            isBucketed: false,
+            scale: 'ratio',
+            params: { value: 1024 },
+          } as PercentileRanksIndexPatternColumn,
+        ]),
+        'col2'
+      )
+    ).toBeTruthy();
   });
 
   describe('last_value operation', () => {

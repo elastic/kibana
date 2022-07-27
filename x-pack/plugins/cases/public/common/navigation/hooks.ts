@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useCallback, useEffect, useState } from 'react';
+import { useLocation, useParams } from 'react-router-dom';
 
+import { parse, stringify } from 'query-string';
 import { APP_ID } from '../../../common/constants';
 import { useNavigation } from '../lib/kibana';
 import { useCasesContext } from '../../components/cases_context/use_cases_context';
@@ -16,10 +17,27 @@ import {
   CASES_CONFIGURE_PATH,
   CASES_CREATE_PATH,
   CaseViewPathParams,
+  CaseViewPathSearchParams,
   generateCaseViewPath,
 } from './paths';
 
 export const useCaseViewParams = () => useParams<CaseViewPathParams>();
+
+export function useUrlParams() {
+  const { search } = useLocation();
+  const [urlParams, setUrlParams] = useState<CaseViewPathSearchParams>(() => parse(search));
+  const toUrlParams = useCallback(
+    (params: CaseViewPathSearchParams = urlParams) => stringify(params),
+    [urlParams]
+  );
+  useEffect(() => {
+    setUrlParams(parse(search));
+  }, [search]);
+  return {
+    urlParams,
+    toUrlParams,
+  };
+}
 
 type GetCasesUrl = (absolute?: boolean) => string;
 type NavigateToCases = () => void;

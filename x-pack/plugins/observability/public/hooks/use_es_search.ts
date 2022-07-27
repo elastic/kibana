@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { IInspectorInfo, isCompleteResponse } from '@kbn/data-plugin/common';
+import { IInspectorInfo, isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { FETCH_STATUS, useFetcher } from './use_fetcher';
 import { useInspectorContext } from '../context/inspector/use_inspector_context';
 import { getInspectResponse } from '../../common/utils/get_inspect_response';
@@ -67,6 +67,34 @@ export const useEsSearch = <DocumentSource extends unknown, TParams extends esty
                 // Final result
                 resolve(result);
                 search$.unsubscribe();
+              }
+            },
+            error: (err) => {
+              if (isErrorResponse(err)) {
+                console.error(err);
+                if (addInspectorRequest) {
+                  addInspectorRequest({
+                    data: {
+                      _inspect: [
+                        getInspectResponse({
+                          startTime,
+                          esRequestParams: params,
+                          esResponse: null,
+                          esError: { originalError: err, name: err.name, message: err.message },
+                          esRequestStatus: 2,
+                          operationName: name,
+                          kibanaRequest: {
+                            route: {
+                              path: '/internal/bsearch',
+                              method: 'POST',
+                            },
+                          } as any,
+                        }),
+                      ],
+                    },
+                    status: FETCH_STATUS.SUCCESS,
+                  });
+                }
               }
             },
           });

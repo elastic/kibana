@@ -11,6 +11,7 @@ import { EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef } from 'react';
 import { convertMapboxVectorTileToJson } from './mapbox_vector_tile';
+import { Mode } from '../../../../models/legacy_core_editor/mode/output';
 
 // Ensure the modes we might switch to dynamically are available
 import 'brace/mode/text';
@@ -83,7 +84,10 @@ function EditorOutputUI() {
   useEffect(() => {
     const editor = editorInstanceRef.current!;
     if (data) {
-      const mode = modeForContentType(data[0].response.contentType);
+      const isMultipleRequest = data.length > 1;
+      const mode = isMultipleRequest
+        ? new Mode()
+        : modeForContentType(data[0].response.contentType);
       editor.update(
         data
           .map((result) => {

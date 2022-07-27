@@ -163,8 +163,7 @@ export default function ({ getService }: FtrProviderContext) {
     ];
 
     for (const testData of testDataList) {
-      // FLAKY: https://github.com/elastic/kibana/issues/126112
-      describe.skip(`${testData.suiteTitle}`, function () {
+      describe(`${testData.suiteTitle}`, function () {
         after(async () => {
           await ml.api.deleteIndices(testData.destinationIndex);
           await ml.testResources.deleteIndexPatternByTitle(testData.destinationIndex);
@@ -218,12 +217,10 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('displays the source data preview');
           await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewExists();
-
-          await ml.testExecution.logTestStep('enables the source data preview histogram charts');
-          await ml.dataFrameAnalyticsCreation.enableSourceDataPreviewHistogramCharts(true);
+          await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewHistogramChartEnabled(true);
 
           await ml.testExecution.logTestStep('displays the source data preview histogram charts');
-          await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewHistogramCharts(
+          await ml.dataFrameAnalyticsCreation.enableAndAssertSourceDataPreviewHistogramCharts(
             testData.expected.histogramCharts
           );
 

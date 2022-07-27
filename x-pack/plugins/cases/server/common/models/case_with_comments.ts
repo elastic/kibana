@@ -32,6 +32,7 @@ import {
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
 import { CasesClientArgs } from '../../client';
+import { RefreshSetting } from '../../services/types';
 import { createCaseError } from '../error';
 import {
   countAlertsForID,
@@ -43,7 +44,7 @@ import {
 } from '../utils';
 
 type CaseCommentModelParams = Omit<CasesClientArgs, 'authorization'>;
-const ALERT_LIMIT_MSG = `Case has already reach the maximum allowed number (${MAX_ALERTS_PER_CASE}) of attached alerts on a case`;
+const ALERT_LIMIT_MSG = `Case has reached the maximum allowed number (${MAX_ALERTS_PER_CASE}) of attached alerts.`;
 
 /**
  * This class represents a case that can have a comment attached to it.
@@ -88,6 +89,7 @@ export class CaseCommentModel {
       const { id, version, ...queryRestAttributes } = updateRequest;
       const options: SavedObjectsUpdateOptions<CommentAttributes> = {
         version,
+        refresh: false,
       };
 
       if (queryRestAttributes.type === CommentType.user && queryRestAttributes?.comment) {
@@ -115,7 +117,7 @@ export class CaseCommentModel {
           },
           options,
         }),
-        this.updateCaseUserAndDate(updatedAt),
+        this.updateCaseUserAndDateSkipRefresh(updatedAt),
       ]);
 
       await commentableCase.createUpdateCommentUserAction(comment, updateRequest, owner);
@@ -130,7 +132,14 @@ export class CaseCommentModel {
     }
   }
 
-  private async updateCaseUserAndDate(date: string): Promise<CaseCommentModel> {
+  private async updateCaseUserAndDateSkipRefresh(date: string) {
+    return this.updateCaseUserAndDate(date, false);
+  }
+
+  private async updateCaseUserAndDate(
+    date: string,
+    refresh: RefreshSetting
+  ): Promise<CaseCommentModel> {
     try {
       const updatedCase = await this.params.caseService.patchCase({
         originalCase: this.caseInfo,
@@ -140,6 +149,7 @@ export class CaseCommentModel {
           updated_by: { ...this.params.user },
         },
         version: this.caseInfo.version,
+        refresh,
       });
 
       return this.newObjectWithInfo({
@@ -209,8 +219,9 @@ export class CaseCommentModel {
           }),
           references,
           id,
+          refresh: false,
         }),
-        this.updateCaseUserAndDate(createdDate),
+        this.updateCaseUserAndDateSkipRefresh(createdDate),
       ]);
 
       await Promise.all([
@@ -386,6 +397,7 @@ export class CaseCommentModel {
       });
     }
   }
+
   public async bulkCreate({
     attachments,
   }: {
@@ -410,8 +422,9 @@ export class CaseCommentModel {
               id,
             };
           }),
+          refresh: false,
         }),
-        this.updateCaseUserAndDate(new Date().toISOString()),
+        this.updateCaseUserAndDateSkipRefresh(new Date().toISOString()),
       ]);
 
       const savedObjectsWithoutErrors = newlyCreatedAttachments.saved_objects.filter(

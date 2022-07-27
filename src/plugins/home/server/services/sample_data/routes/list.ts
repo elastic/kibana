@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { sortBy } from 'lodash';
 import type { IRouter, Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { AppLinkData, SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { createIndexName } from '../lib/create_index_name';
@@ -35,12 +36,12 @@ export const createListRoute = (
             ?.foundObjectId ?? id;
 
         const appLinks = (appLinksMap.get(sampleDataset.id) ?? []).map((data) => {
-          const { sampleObject, getPath, label, icon } = data;
+          const { sampleObject, getPath, label, icon, order } = data;
           if (sampleObject === null) {
-            return { path: getPath(''), label, icon };
+            return { path: getPath(''), label, icon, order };
           }
           const objectId = findObjectId(sampleObject.type, sampleObject.id);
-          return { path: getPath(objectId), label, icon };
+          return { path: getPath(objectId), label, icon, order };
         });
         const sampleDataStatus = await getSampleDatasetStatus(
           context,
@@ -55,7 +56,7 @@ export const createListRoute = (
           previewImagePath: sampleDataset.previewImagePath,
           darkPreviewImagePath: sampleDataset.darkPreviewImagePath,
           overviewDashboard: findObjectId('dashboard', sampleDataset.overviewDashboard),
-          appLinks,
+          appLinks: sortBy(appLinks, 'order'),
           defaultIndex: findObjectId('index-pattern', sampleDataset.defaultIndex),
           dataIndices: sampleDataset.dataIndices.map(({ id }) => ({ id })),
           ...sampleDataStatus,

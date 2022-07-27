@@ -1,0 +1,38 @@
+---
+id: kibDevDocsOpsJestSerializers
+slug: /kibana-dev-docs/ops/jest-serializers
+title: "@kbn/jest-serializers"
+description: A set of shared serializers to help on writing jest tests
+date: 2022-05-17
+tags: ['kibana', 'dev', 'contributor', 'operations', 'jest', 'serializers']
+---
+
+This package holds a set of shared serializers that may be useful when you're writing jest tests. To use them import the package and call one of the functions, passing the result to `expect.addSnapshotSerializer()`.
+
+## createAbsolutePathSerializer
+
+Replaces a given path starting a string with the provided replacer. Additionally also replaces any `\\` with `/` it founds.
+
+## createStripAnsiSerializer
+
+Strips ansi from a string.
+
+## createRecursiveSerializer
+
+It helps on printing recursive nodes.
+
+## createAnyInstanceSerializer
+
+It serializes any kind of instance inside `<>`. If it is a function calls the function inside the node otherwise prints as `Class.name`.
+
+## createReplaceSerializer
+
+Search for a substring using given Regex or string and replaces with a provided replacer.
+
+## Example
+
+```ts
+import { createAbsolutePathSerializer } from '@kbn/jest-serializers'
+
+expect.addSnapshotSerializer(createAbsolutePathSerializer());
+```

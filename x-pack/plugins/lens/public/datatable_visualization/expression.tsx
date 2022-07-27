@@ -12,8 +12,9 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { IAggType } from '@kbn/data-plugin/public';
 import { IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
-import { ExpressionRenderDefinition } from '@kbn/expressions-plugin';
+import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { trackUiCounterEvents } from '../lens_ui_telemetry';
 import { DatatableComponent } from './components/table_basic';
 
 import type { ILensInterpreterRenderHandlers } from '../types';
@@ -39,23 +40,29 @@ export const getDatatableRenderer = (dependencies: {
     config: DatatableProps,
     handlers: ILensInterpreterRenderHandlers
   ) => {
+    handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+
     const resolvedGetType = await dependencies.getType;
     const { hasCompatibleActions, isInteractive } = handlers;
+
+    const renderComplete = () => {
+      trackUiCounterEvents('table', handlers.getExecutionContext());
+      handlers.done();
+    };
 
     // An entry for each table row, whether it has any actions attached to
     // ROW_CLICK_TRIGGER trigger.
     let rowHasRowClickTriggerActions: boolean[] = [];
     if (hasCompatibleActions) {
-      const table = Object.values(config.data.tables)[0];
-      if (!!table) {
+      if (!!config.data) {
         rowHasRowClickTriggerActions = await Promise.all(
-          table.rows.map(async (row, rowIndex) => {
+          config.data.rows.map(async (row, rowIndex) => {
             try {
               const hasActions = await hasCompatibleActions({
                 name: 'tableRowContextMenuClick',
                 data: {
                   rowIndex,
-                  table,
+                  table: config.data,
                   columns: config.args.columns.map((column) => column.columnId),
                 },
               });
@@ -82,14 +89,11 @@ export const getDatatableRenderer = (dependencies: {
             rowHasRowClickTriggerActions={rowHasRowClickTriggerActions}
             interactive={isInteractive()}
             uiSettings={dependencies.uiSettings}
+            renderComplete={renderComplete}
           />
         </I18nProvider>
       </KibanaThemeProvider>,
-      domNode,
-      () => {
-        handlers.done();
-      }
+      domNode
     );
-    handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
   },
 });

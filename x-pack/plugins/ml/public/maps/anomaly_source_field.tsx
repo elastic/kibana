@@ -7,6 +7,11 @@
 
 // eslint-disable-next-line max-classes-per-file
 import React, { ReactNode } from 'react';
+import type {
+  AggregationsExtendedStatsAggregation,
+  AggregationsPercentilesAggregation,
+  AggregationsTermsAggregation,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { escape } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Filter } from '@kbn/es-query';
@@ -230,15 +235,22 @@ export class AnomalySourceField implements IField {
     return false;
   }
 
-  async getExtendedStatsFieldMetaRequest(): Promise<unknown> {
+  async getExtendedStatsFieldMetaRequest(): Promise<Record<
+    string,
+    { extended_stats: AggregationsExtendedStatsAggregation }
+  > | null> {
     return null;
   }
 
-  async getPercentilesFieldMetaRequest(percentiles: number[]): Promise<unknown> {
+  async getPercentilesFieldMetaRequest(
+    percentiles: number[]
+  ): Promise<Record<string, { percentiles: AggregationsPercentilesAggregation }> | null> {
     return null;
   }
 
-  async getCategoricalFieldMetaRequest(size: number): Promise<unknown> {
+  async getCategoricalFieldMetaRequest(
+    size: number
+  ): Promise<Record<string, { terms: AggregationsTermsAggregation }> | null> {
     return null;
   }
 

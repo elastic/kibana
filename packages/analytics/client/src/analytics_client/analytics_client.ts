@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { Type } from 'io-ts';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, Subject, combineLatest, from } from 'rxjs';
+import { BehaviorSubject, Subject, combineLatest, from, merge } from 'rxjs';
 import {
   buffer,
   bufferCount,
@@ -23,6 +24,7 @@ import {
   takeUntil,
   tap,
 } from 'rxjs/operators';
+import type { LogMeta } from '@kbn/logging';
 import type { IShipper } from '../shippers';
 import type {
   AnalyticsClientInitContext,
@@ -35,10 +37,14 @@ import type {
   ShipperClassConstructor,
 } from './types';
 import type { Event, EventContext, EventType, TelemetryCounter } from '../events';
-import { TelemetryCounterType } from '../events';
 import { ShippersRegistry } from './shippers_registry';
 import { OptInConfigService } from './opt_in_config';
 import { ContextService } from './context_service';
+import { schemaToIoTs, validateSchema } from '../schema/validation';
+
+interface EventDebugLogMeta extends LogMeta {
+  ebt_event: Event;
+}
 
 export class AnalyticsClient implements IAnalyticsClient {
   private readonly internalTelemetryCounter$ = new Subject<TelemetryCounter>();
@@ -57,7 +63,10 @@ export class AnalyticsClient implements IAnalyticsClient {
    * @private
    */
   private readonly shipperRegistered$ = new Subject<void>();
-  private readonly eventTypeRegistry = new Map<EventType, EventTypeOpts<unknown>>();
+  private readonly eventTypeRegistry = new Map<
+    EventType,
+    EventTypeOpts<unknown> & { validator?: Type<Record<string, unknown>> }
+  >();
   private readonly contextService: ContextService;
   private readonly context$ = new BehaviorSubject<Partial<EventContext>>({});
   private readonly optInConfig$ = new BehaviorSubject<OptInConfigService | undefined>(undefined);
@@ -71,7 +80,11 @@ export class AnalyticsClient implements IAnalyticsClient {
   );
 
   constructor(private readonly initContext: AnalyticsClientInitContext) {
-    this.contextService = new ContextService(this.context$, this.initContext.isDev);
+    this.contextService = new ContextService(
+      this.context$,
+      this.initContext.isDev,
+      this.initContext.logger.get('context-service')
+    );
     this.reportEnqueuedEventsWhenClientIsReady();
   }
 
@@ -83,16 +96,17 @@ export class AnalyticsClient implements IAnalyticsClient {
     const timestamp = new Date().toISOString();
 
     this.internalTelemetryCounter$.next({
-      type: TelemetryCounterType.enqueued,
+      type: 'enqueued',
       source: 'client',
       event_type: eventType,
       code: 'enqueued',
       count: 1,
     });
 
-    if (!this.eventTypeRegistry.get(eventType)) {
+    const eventTypeOpts = this.eventTypeRegistry.get(eventType);
+    if (!eventTypeOpts) {
       this.internalTelemetryCounter$.next({
-        type: TelemetryCounterType.dropped,
+        type: 'dropped',
         source: 'client',
         event_type: eventType,
         code: 'UnregisteredType',
@@ -103,15 +117,9 @@ export class AnalyticsClient implements IAnalyticsClient {
       );
     }
 
-    if (this.initContext.isDev) {
-      // TODO: In the future we may need to validate the eventData based on the eventType's registered schema (only if isDev)
-    }
-
-    const optInConfig = this.optInConfig$.value;
-
-    if (optInConfig?.isEventTypeOptedIn(eventType) === false) {
-      // If opted out, skip early
-      return;
+    // If the validator is registered (dev-mode only), perform the validation.
+    if (eventTypeOpts.validator) {
+      validateSchema(`Event Type '${eventType}'`, eventTypeOpts.validator, eventData);
     }
 
     const event: Event = {
@@ -120,6 +128,20 @@ export class AnalyticsClient implements IAnalyticsClient {
       context: this.context$.value,
       properties: eventData,
     };
+
+    // debug-logging before checking the opt-in status to help during development
+    if (this.initContext.isDev) {
+      this.initContext.logger.debug<EventDebugLogMeta>(`Report event "${eventType}"`, {
+        ebt_event: event,
+      });
+    }
+
+    const optInConfig = this.optInConfig$.value;
+
+    if (optInConfig?.isEventTypeOptedIn(eventType) === false) {
+      // If opted out, skip early
+      return;
+    }
 
     if (typeof optInConfig === 'undefined') {
       // If the opt-in config is not provided yet, we need to enqueue the event to an internal queue
@@ -133,7 +155,11 @@ export class AnalyticsClient implements IAnalyticsClient {
     if (this.eventTypeRegistry.get(eventTypeOps.eventType)) {
       throw new Error(`Event Type "${eventTypeOps.eventType}" is already registered.`);
     }
-    this.eventTypeRegistry.set(eventTypeOps.eventType, eventTypeOps);
+
+    this.eventTypeRegistry.set(eventTypeOps.eventType, {
+      ...eventTypeOps,
+      validator: this.initContext.isDev ? schemaToIoTs(eventTypeOps.schema) : undefined,
+    });
   };
 
   public optIn = (optInConfig: OptInConfig) => {
@@ -208,6 +234,21 @@ export class AnalyticsClient implements IAnalyticsClient {
     this.shipperRegistered$.next();
   };
 
+  public shutdown = () => {
+    this.shippersRegistry.allShippers.forEach((shipper, shipperName) => {
+      try {
+        shipper.shutdown();
+      } catch (err) {
+        this.initContext.logger.warn(`Failed to shutdown shipper "${shipperName}"`, err);
+      }
+    });
+    this.internalEventQueue$.complete();
+    this.internalTelemetryCounter$.complete();
+    this.shipperRegistered$.complete();
+    this.optInConfig$.complete();
+    this.context$.complete();
+  };
+
   /**
    * Forwards the `events` to the registered shippers, bearing in mind if the shipper is opted-in for that eventType.
    * @param eventType The event type's name
@@ -234,7 +275,7 @@ export class AnalyticsClient implements IAnalyticsClient {
     });
     if (sentToShipper) {
       this.internalTelemetryCounter$.next({
-        type: TelemetryCounterType.sent_to_shipper,
+        type: 'sent_to_shipper',
         source: 'client',
         event_type: eventType,
         code: 'OK',
@@ -252,7 +293,11 @@ export class AnalyticsClient implements IAnalyticsClient {
     // Observer that will emit when both events occur: the OptInConfig is set + a shipper has been registered
     const configReceivedAndShipperReceivedObserver$ = combineLatest([
       this.optInConfigWithReplay$,
-      this.shipperRegistered$,
+      merge([
+        this.shipperRegistered$,
+        // Merging shipperRegistered$ with the optInConfigWithReplay$ when optedIn is false, so that we don't need to wait for the shipper if opted-in === false
+        this.optInConfigWithReplay$.pipe(filter((cfg) => cfg?.isOptedIn() === false)),
+      ]),
     ]);
 
     // Flush the internal queue when we get any optInConfig and, at least, 1 shipper

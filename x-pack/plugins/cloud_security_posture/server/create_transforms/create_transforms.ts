@@ -7,18 +7,18 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { errors } from '@elastic/elasticsearch';
 import { latestFindingsTransform } from './latest_findings_transform';
-import { benchmarkScoreTransform } from './benchmark_score_transform';
 
 // TODO: Move transforms to integration package
 export const initializeCspTransforms = async (
   esClient: ElasticsearchClient,
   logger: Logger
 ): Promise<void> => {
-  await Promise.all([
-    initializeTransform(esClient, latestFindingsTransform, logger),
-    initializeTransform(esClient, benchmarkScoreTransform, logger),
-  ]);
+  // Deletes old assets from previous versions as part of upgrade process
+  const LATEST_TRANSFORM_V830 = 'cloud_security_posture.findings_latest-default-0.0.1';
+  await deleteTransformSafe(esClient, logger, LATEST_TRANSFORM_V830);
+  await initializeTransform(esClient, latestFindingsTransform, logger);
 };
 
 export const initializeTransform = async (
@@ -26,11 +26,11 @@ export const initializeTransform = async (
   transform: TransformPutTransformRequest,
   logger: Logger
 ) => {
-  return createTransformIfNotExists(esClient, transform, logger).then((succeeded) => {
-    if (succeeded) {
-      startTransformIfNotStarted(esClient, transform.transform_id, logger);
-    }
-  });
+  const success = await createTransformIfNotExists(esClient, transform, logger);
+
+  if (success) {
+    await startTransformIfNotStarted(esClient, transform.transform_id, logger);
+  }
 };
 
 /**
@@ -104,5 +104,19 @@ export const startTransformIfNotStarted = async (
   } catch (statsErr) {
     const statsError = transformError(statsErr);
     logger.error(`Failed to check if transform ${transformId} is started: ${statsError.message}`);
+  }
+};
+
+const deleteTransformSafe = async (esClient: ElasticsearchClient, logger: Logger, name: string) => {
+  try {
+    await esClient.transform.deleteTransform({ transform_id: name, force: true });
+    logger.info(`Deleted transform successfully [Name: ${name}]`);
+  } catch (e) {
+    if (e instanceof errors.ResponseError && e.statusCode === 404) {
+      logger.trace(`Transform no longer exists [Name: ${name}]`);
+    } else {
+      logger.error(`Failed to delete transform [Name: ${name}]`);
+      logger.error(e);
+    }
   }
 };

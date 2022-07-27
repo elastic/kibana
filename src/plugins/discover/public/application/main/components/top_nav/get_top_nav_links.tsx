@@ -32,6 +32,7 @@ export const getTopNavLinks = ({
   onOpenInspector,
   searchSource,
   onOpenSavedSearch,
+  isPlainRecord,
 }: {
   indexPattern: DataView;
   navigateTo: (url: string) => void;
@@ -41,6 +42,7 @@ export const getTopNavLinks = ({
   onOpenInspector: () => void;
   searchSource: ISearchSource;
   onOpenSavedSearch: (id: string) => void;
+  isPlainRecord: boolean;
 }): TopNavMenuData[] => {
   const options = {
     id: 'options',
@@ -74,6 +76,7 @@ export const getTopNavLinks = ({
         anchorElement,
         searchSource: savedSearch.searchSource,
         services,
+        savedQueryId: state.appStateContainer.getState().savedQuery,
       });
     },
     testId: 'discoverAlertsButton',
@@ -102,7 +105,17 @@ export const getTopNavLinks = ({
     testId: 'discoverSaveButton',
     iconType: 'save',
     emphasize: true,
-    run: () => onSaveSearch({ savedSearch, services, indexPattern, navigateTo, state }),
+    run: (anchorElement: HTMLElement) =>
+      onSaveSearch({
+        savedSearch,
+        services,
+        indexPattern,
+        navigateTo,
+        state,
+        onClose: () => {
+          anchorElement?.focus();
+        },
+      }),
   };
 
   const openSearch = {
@@ -160,6 +173,9 @@ export const getTopNavLinks = ({
         },
         isDirty: !savedSearch.id || state.isAppStateDirty(),
         showPublicUrlSwitch,
+        onClose: () => {
+          anchorElement?.focus();
+        },
       });
     },
   };
@@ -182,8 +198,12 @@ export const getTopNavLinks = ({
     ...(services.capabilities.advancedSettings.save ? [options] : []),
     newSearch,
     openSearch,
-    ...(services.triggersActionsUi ? [alerts] : []),
-    shareSearch,
+    ...(!isPlainRecord ? [shareSearch] : []),
+    ...(services.triggersActionsUi &&
+    services.capabilities.management?.insightsAndAlerting?.triggersActions &&
+    !isPlainRecord
+      ? [alerts]
+      : []),
     inspectSearch,
     ...(services.capabilities.discover.save ? [saveSearch] : []),
   ];

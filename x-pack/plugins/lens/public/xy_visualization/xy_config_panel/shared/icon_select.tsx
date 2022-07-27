@@ -6,71 +6,20 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiIcon, IconType } from '@elastic/eui';
+import { AvailableReferenceLineIcon } from '@kbn/expression-xy-plugin/common';
 
 export function hasIcon(icon: string | undefined): icon is string {
   return icon != null && icon !== 'empty';
 }
 
-export type IconSet = Array<{ value: string; label: string; icon?: IconType }>;
-
-export const euiIconsSet = [
-  {
-    value: 'empty',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.noIconLabel', {
-      defaultMessage: 'None',
-    }),
-  },
-  {
-    value: 'asterisk',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.asteriskIconLabel', {
-      defaultMessage: 'Asterisk',
-    }),
-  },
-  {
-    value: 'bell',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.bellIconLabel', {
-      defaultMessage: 'Bell',
-    }),
-  },
-  {
-    value: 'bolt',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.boltIconLabel', {
-      defaultMessage: 'Bolt',
-    }),
-  },
-  {
-    value: 'bug',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.bugIconLabel', {
-      defaultMessage: 'Bug',
-    }),
-  },
-  {
-    value: 'editorComment',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.commentIconLabel', {
-      defaultMessage: 'Comment',
-    }),
-  },
-  {
-    value: 'alert',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.alertIconLabel', {
-      defaultMessage: 'Alert',
-    }),
-  },
-  {
-    value: 'flag',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.flagIconLabel', {
-      defaultMessage: 'Flag',
-    }),
-  },
-  {
-    value: 'tag',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.tagIconLabel', {
-      defaultMessage: 'Tag',
-    }),
-  },
-];
+export type IconSet<T> = Array<{
+  value: T;
+  label: string;
+  icon?: T | IconType;
+  shouldRotate?: boolean;
+  canFill?: boolean;
+}>;
 
 const IconView = (props: { value?: string; label: string; icon?: IconType }) => {
   if (!props.value) return null;
@@ -84,24 +33,33 @@ const IconView = (props: { value?: string; label: string; icon?: IconType }) => 
   );
 };
 
-export const IconSelect = ({
+export function IconSelect<Icon extends string = AvailableReferenceLineIcon>({
   value,
   onChange,
-  customIconSet = euiIconsSet,
+  customIconSet,
+  defaultIcon = 'empty',
 }: {
-  value?: string;
-  onChange: (newIcon: string) => void;
-  customIconSet?: IconSet;
-}) => {
+  value?: Icon;
+  onChange: (newIcon: Icon) => void;
+  customIconSet: IconSet<Icon>;
+  defaultIcon?: string;
+}) {
   const selectedIcon =
     customIconSet.find((option) => value === option.value) ||
-    customIconSet.find((option) => option.value === 'empty')!;
+    customIconSet.find((option) => option.value === defaultIcon)!;
 
   return (
     <EuiComboBox
+      fullWidth
+      data-test-subj="lns-icon-select"
       isClearable={false}
       options={customIconSet}
-      selectedOptions={[selectedIcon]}
+      selectedOptions={[
+        {
+          label: selectedIcon.label,
+          value: selectedIcon.value,
+        },
+      ]}
       onChange={(selection) => {
         onChange(selection[0].value!);
       }}
@@ -115,4 +73,4 @@ export const IconSelect = ({
       }
     />
   );
-};
+}

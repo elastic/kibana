@@ -23,6 +23,18 @@ test('alias', () => {
   expect(container).toMatchSnapshot();
 });
 
+test('field custom label', () => {
+  const filter = {
+    ...phraseFilter,
+    meta: {
+      ...phraseFilter.meta,
+      alias: 'geo.coordinates in US',
+    },
+  };
+  const { container } = render(<FilterLabel filter={filter} fieldLabel="test label" />);
+  expect(container).toMatchSnapshot();
+});
+
 test('alias with warning status', () => {
   const filter = {
     ...phraseFilter,

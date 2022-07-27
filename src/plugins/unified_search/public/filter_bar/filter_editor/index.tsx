@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSpacer,
   EuiSwitch,
@@ -32,7 +33,7 @@ import {
 import { get } from 'lodash';
 import React, { Component } from 'react';
 import { XJsonLang } from '@kbn/monaco';
-import { DataView, IFieldType } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { getIndexPatternFromFilter } from '@kbn/data-plugin/public';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
@@ -55,11 +56,12 @@ export interface Props {
   onCancel: () => void;
   intl: InjectedIntl;
   timeRangeForSuggestionsOverride?: boolean;
+  mode?: 'edit' | 'add';
 }
 
 interface State {
   selectedIndexPattern?: DataView;
-  selectedField?: IFieldType;
+  selectedField?: DataViewField;
   selectedOperator?: Operator;
   params: any;
   useCustomLabel: boolean;
@@ -67,6 +69,20 @@ interface State {
   queryDsl: string;
   isCustomEditorOpen: boolean;
 }
+
+const panelTitleAdd = i18n.translate('unifiedSearch.filter.filterEditor.addFilterPopupTitle', {
+  defaultMessage: 'Add filter',
+});
+const panelTitleEdit = i18n.translate('unifiedSearch.filter.filterEditor.editFilterPopupTitle', {
+  defaultMessage: 'Edit filter',
+});
+
+const addButtonLabel = i18n.translate('unifiedSearch.filter.filterEditor.addButtonLabel', {
+  defaultMessage: 'Add filter',
+});
+const updateButtonLabel = i18n.translate('unifiedSearch.filter.filterEditor.updateButtonLabel', {
+  defaultMessage: 'Update filter',
+});
 
 class FilterEditorUI extends Component<Props, State> {
   constructor(props: Props) {
@@ -86,14 +102,9 @@ class FilterEditorUI extends Component<Props, State> {
   public render() {
     return (
       <div>
-        <EuiPopoverTitle paddingSize="m">
+        <EuiPopoverTitle paddingSize="s">
           <EuiFlexGroup alignItems="baseline" responsive={false}>
-            <EuiFlexItem>
-              <FormattedMessage
-                id="unifiedSearch.filter.filterEditor.editFilterPopupTitle"
-                defaultMessage="Edit filter"
-              />
-            </EuiFlexItem>
+            <EuiFlexItem>{this.props.mode === 'add' ? panelTitleAdd : panelTitleEdit}</EuiFlexItem>
             <EuiFlexItem grow={false} className="filterEditor__hiddenItem" />
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
@@ -117,8 +128,8 @@ class FilterEditorUI extends Component<Props, State> {
           </EuiFlexGroup>
         </EuiPopoverTitle>
 
-        <div className="globalFilterItem__editorForm">
-          <EuiForm>
+        <EuiForm>
+          <div className="globalFilterItem__editorForm">
             {this.renderIndexPatternInput()}
 
             {this.state.isCustomEditorOpen ? this.renderCustomEditor() : this.renderRegularEditor()}
@@ -154,9 +165,9 @@ class FilterEditorUI extends Component<Props, State> {
                 </EuiFormRow>
               </div>
             )}
+          </div>
 
-            <EuiSpacer size="m" />
-
+          <EuiPopoverFooter paddingSize="s">
             <EuiFlexGroup direction="rowReverse" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiButton
@@ -165,10 +176,7 @@ class FilterEditorUI extends Component<Props, State> {
                   isDisabled={!this.isFilterValid()}
                   data-test-subj="saveFilter"
                 >
-                  <FormattedMessage
-                    id="unifiedSearch.filter.filterEditor.saveButtonLabel"
-                    defaultMessage="Save"
-                  />
+                  {this.props.mode === 'add' ? addButtonLabel : updateButtonLabel}
                 </EuiButton>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -185,8 +193,8 @@ class FilterEditorUI extends Component<Props, State> {
               </EuiFlexItem>
               <EuiFlexItem />
             </EuiFlexGroup>
-          </EuiForm>
-        </div>
+          </EuiPopoverFooter>
+        </EuiForm>
       </div>
     );
   }
@@ -207,32 +215,31 @@ class FilterEditorUI extends Component<Props, State> {
     }
     const { selectedIndexPattern } = this.state;
     return (
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFormRow
+      <>
+        <EuiFormRow
+          fullWidth
+          label={this.props.intl.formatMessage({
+            id: 'unifiedSearch.filter.filterEditor.dateViewSelectLabel',
+            defaultMessage: 'Data view',
+          })}
+        >
+          <IndexPatternComboBox
             fullWidth
-            label={this.props.intl.formatMessage({
-              id: 'unifiedSearch.filter.filterEditor.indexPatternSelectLabel',
-              defaultMessage: 'Index Pattern',
+            placeholder={this.props.intl.formatMessage({
+              id: 'unifiedSearch.filter.filterBar.indexPatternSelectPlaceholder',
+              defaultMessage: 'Select a data view',
             })}
-          >
-            <IndexPatternComboBox
-              fullWidth
-              placeholder={this.props.intl.formatMessage({
-                id: 'unifiedSearch.filter.filterBar.indexPatternSelectPlaceholder',
-                defaultMessage: 'Select an index pattern',
-              })}
-              options={this.props.indexPatterns}
-              selectedOptions={selectedIndexPattern ? [selectedIndexPattern] : []}
-              getLabel={(indexPattern) => indexPattern.title}
-              onChange={this.onIndexPatternChange}
-              singleSelection={{ asPlainText: true }}
-              isClearable={false}
-              data-test-subj="filterIndexPatternsSelect"
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            options={this.props.indexPatterns}
+            selectedOptions={selectedIndexPattern ? [selectedIndexPattern] : []}
+            getLabel={(indexPattern) => indexPattern.getName()}
+            onChange={this.onIndexPatternChange}
+            singleSelection={{ asPlainText: true }}
+            isClearable={false}
+            data-test-subj="filterIndexPatternsSelect"
+          />
+        </EuiFormRow>
+        <EuiSpacer size="s" />
+      </>
     );
   }
 
@@ -273,7 +280,7 @@ class FilterEditorUI extends Component<Props, State> {
           })}
           options={fields}
           selectedOptions={selectedField ? [selectedField] : []}
-          getLabel={(field) => field.name}
+          getLabel={(field) => field.customLabel || field.name}
           onChange={this.onFieldChange}
           singleSelection={{ asPlainText: true }}
           isClearable={false}
@@ -440,7 +447,7 @@ class FilterEditorUI extends Component<Props, State> {
     this.setState({ selectedIndexPattern, selectedField, selectedOperator, params });
   };
 
-  private onFieldChange = ([selectedField]: IFieldType[]) => {
+  private onFieldChange = ([selectedField]: DataViewField[]) => {
     const selectedOperator = undefined;
     const params = undefined;
     this.setState({ selectedField, selectedOperator, params });
@@ -522,7 +529,7 @@ function IndexPatternComboBox(props: GenericComboBoxProps<DataView>) {
   return GenericComboBox(props);
 }
 
-function FieldComboBox(props: GenericComboBoxProps<IFieldType>) {
+function FieldComboBox(props: GenericComboBoxProps<DataViewField>) {
   return GenericComboBox(props);
 }
 

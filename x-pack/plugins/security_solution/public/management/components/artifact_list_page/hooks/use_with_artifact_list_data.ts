@@ -6,18 +6,18 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { Pagination } from '@elastic/eui';
+import type { Pagination } from '@elastic/eui';
 import { useQuery } from 'react-query';
 import type { ServerApiError } from '../../../../common/types';
-import { useIsMounted } from '../../hooks/use_is_mounted';
+import { useIsMounted } from '../../../hooks/use_is_mounted';
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
-import { useUrlParams } from '../../hooks/use_url_params';
-import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
-import { ArtifactListPageUrlParams } from '../types';
-import { MaybeImmutable } from '../../../../../common/endpoint/types';
+import { useUrlParams } from '../../../hooks/use_url_params';
+import type { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
+import type { ArtifactListPageUrlParams } from '../types';
+import type { MaybeImmutable } from '../../../../../common/endpoint/types';
 import { useKueryFromExceptionsSearchFilter } from './use_kuery_from_exceptions_search_filter';
 import { useListArtifact } from '../../../hooks/artifacts';
-import { useUrlPagination } from '../../hooks/use_url_pagination';
+import { useUrlPagination } from '../../../hooks/use_url_pagination';
 
 type WithArtifactListDataInterface = ReturnType<typeof useListArtifact> & {
   /**

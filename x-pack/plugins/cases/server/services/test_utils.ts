@@ -10,15 +10,18 @@ import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import { ESConnectorFields } from '.';
 import { CONNECTOR_ID_REFERENCE_NAME, PUSH_CONNECTOR_ID_REFERENCE_NAME } from '../common/constants';
 import {
+  CaseAttributes,
   CaseConnector,
   CaseExternalServiceBasic,
   CaseFullExternalService,
+  CaseSeverity,
   CaseStatuses,
   ConnectorTypes,
   NONE_CONNECTOR_ID,
 } from '../../common/api';
 import { CASE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { ESCaseAttributes, ExternalServicesWithoutConnectorId } from './cases/types';
+import { getNoneCaseConnector } from '../common/utils';
 
 /**
  * This is only a utility interface to help with constructing test cases. After the migration, the ES format will no longer
@@ -96,7 +99,7 @@ export const createExternalService = (
   ...overrides,
 });
 
-export const basicCaseFields = {
+export const basicCaseFields: CaseAttributes = {
   closed_at: null,
   closed_by: null,
   created_at: '2019-11-25T21:54:48.952Z',
@@ -105,6 +108,8 @@ export const basicCaseFields = {
     email: 'testemail@elastic.co',
     username: 'elastic',
   },
+  severity: CaseSeverity.LOW,
+  duration: null,
   description: 'This is a brand new case of a bad meanie defacing data',
   title: 'Super Bad Security Issue',
   status: CaseStatuses.open,
@@ -115,6 +120,8 @@ export const basicCaseFields = {
     email: 'testemail@elastic.co',
     username: 'elastic',
   },
+  connector: getNoneCaseConnector(),
+  external_service: null,
   settings: {
     syncAlerts: true,
   },

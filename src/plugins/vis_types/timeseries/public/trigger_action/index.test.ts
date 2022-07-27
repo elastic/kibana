@@ -87,7 +87,7 @@ describe('triggerTSVBtoLensConfiguration', () => {
           ...model.series[0],
           metrics: [
             {
-              type: 'percentile_rank',
+              type: 'std_deviation',
             },
           ] as Series['metrics'],
         },
@@ -117,6 +117,7 @@ describe('triggerTSVBtoLensConfiguration', () => {
         '0': {
           axisPosition: 'left',
           chartType: 'line',
+          collapseFn: undefined,
           indexPatternId: 'test2',
           metrics: [
             {
@@ -219,7 +220,42 @@ describe('triggerTSVBtoLensConfiguration', () => {
     ]);
   });
 
-  test('should return termsParams information if the chart is broken down by terms', async () => {
+  test('should return termsParams information if the chart is broken down by terms including series agg collapse fn', async () => {
+    const modelWithTerms = {
+      ...model,
+      series: [
+        {
+          ...model.series[0],
+          metrics: [
+            ...model.series[0].metrics,
+            {
+              type: 'series_agg',
+              function: 'sum',
+            },
+          ],
+          split_mode: 'terms',
+          terms_size: 6,
+          terms_direction: 'desc',
+          terms_order_by: '_key',
+        },
+      ] as unknown as Series[],
+    };
+    const triggerOptions = await triggerTSVBtoLensConfiguration(modelWithTerms);
+    expect(triggerOptions?.layers[0]?.collapseFn).toStrictEqual('sum');
+    expect(triggerOptions?.layers[0]?.termsParams).toStrictEqual({
+      size: 6,
+      otherBucket: false,
+      orderDirection: 'desc',
+      orderBy: { type: 'alphabetical' },
+      includeIsRegex: false,
+      excludeIsRegex: false,
+      parentFormat: {
+        id: 'terms',
+      },
+    });
+  });
+
+  test('should return include exclude information if the chart is broken down by terms', async () => {
     const modelWithTerms = {
       ...model,
       series: [
@@ -229,6 +265,7 @@ describe('triggerTSVBtoLensConfiguration', () => {
           terms_size: 6,
           terms_direction: 'desc',
           terms_order_by: '_key',
+          terms_include: 't.*',
         },
       ] as unknown as Series[],
     };
@@ -238,6 +275,9 @@ describe('triggerTSVBtoLensConfiguration', () => {
       otherBucket: false,
       orderDirection: 'desc',
       orderBy: { type: 'alphabetical' },
+      includeIsRegex: true,
+      include: ['t.*'],
+      excludeIsRegex: false,
       parentFormat: {
         id: 'terms',
       },
@@ -290,6 +330,7 @@ describe('triggerTSVBtoLensConfiguration', () => {
         '0': {
           axisPosition: 'right',
           chartType: 'area_stacked',
+          collapseFn: undefined,
           indexPatternId: 'test2',
           metrics: [
             {

@@ -46,7 +46,7 @@ export function LensEmbeddable(props: Props) {
     (isLoading) => {
       const timeLoaded = Date.now();
 
-      setChartTimeRangeContext({
+      setChartTimeRangeContext?.({
         lastUpdated: timeLoaded,
         to: parseRelativeDate(timeRange?.to || '')?.valueOf(),
         from: parseRelativeDate(timeRange?.from || '')?.valueOf(),
@@ -92,6 +92,9 @@ export function LensEmbeddable(props: Props) {
         attributes={lensAttributes}
         onLoad={onLensLoad}
         onBrushEnd={onBrushEnd}
+        executionContext={{
+          type: 'observability_exploratory_view',
+        }}
       />
       {isSaveOpen && lensAttributes && (
         <LensSaveModalComponent

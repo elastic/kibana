@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'header', 'home', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'header', 'home', 'timePicker', 'unifiedSearch']);
   const appsMenu = getService('appsMenu');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -37,6 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Navigate to discover app
       await appsMenu.clickLink('Discover');
+      await PageObjects.unifiedSearch.closeTourPopoverByLocalStorage();
       const discoverUrl = await browser.getCurrentUrl();
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       const modifiedTimeDiscoverUrl = await browser.getCurrentUrl();

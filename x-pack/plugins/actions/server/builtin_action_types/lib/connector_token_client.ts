@@ -33,6 +33,14 @@ export interface UpdateOptions {
   tokenType?: string;
 }
 
+interface UpdateOrReplaceOptions {
+  connectorId: string;
+  token: ConnectorToken | null;
+  newToken: string;
+  expiresInSec: number;
+  tokenRequestDate: number;
+  deleteExisting: boolean;
+}
 export class ConnectorTokenClient {
   private readonly logger: Logger;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
@@ -188,6 +196,7 @@ export class ConnectorTokenClient {
       return { hasErrors: false, connectorToken: null };
     }
 
+    let accessToken: string;
     try {
       const {
         attributes: { token },
@@ -196,14 +205,7 @@ export class ConnectorTokenClient {
         connectorTokensResult[0].id
       );
 
-      return {
-        hasErrors: false,
-        connectorToken: {
-          id: connectorTokensResult[0].id,
-          ...connectorTokensResult[0].attributes,
-          token,
-        },
-      };
+      accessToken = token;
     } catch (err) {
       this.logger.error(
         `Failed to decrypt connector_token for connectorId "${connectorId}" and tokenType: "${
@@ -212,6 +214,24 @@ export class ConnectorTokenClient {
       );
       return { hasErrors: true, connectorToken: null };
     }
+
+    if (isNaN(Date.parse(connectorTokensResult[0].attributes.expiresAt))) {
+      this.logger.error(
+        `Failed to get connector_token for connectorId "${connectorId}" and tokenType: "${
+          tokenType ?? 'access_token'
+        }". Error: expiresAt is not a valid Date "${connectorTokensResult[0].attributes.expiresAt}"`
+      );
+      return { hasErrors: true, connectorToken: null };
+    }
+
+    return {
+      hasErrors: false,
+      connectorToken: {
+        id: connectorTokensResult[0].id,
+        ...connectorTokensResult[0].attributes,
+        token: accessToken,
+      },
+    };
   }
 
   /**
@@ -243,6 +263,40 @@ export class ConnectorTokenClient {
         `Failed to delete connector_token records for connectorId "${connectorId}". Error: ${err.message}`
       );
       throw err;
+    }
+  }
+
+  public async updateOrReplace({
+    connectorId,
+    token,
+    newToken,
+    expiresInSec,
+    tokenRequestDate,
+    deleteExisting,
+  }: UpdateOrReplaceOptions) {
+    expiresInSec = expiresInSec ?? 3600;
+    tokenRequestDate = tokenRequestDate ?? Date.now();
+    if (token === null) {
+      if (deleteExisting) {
+        await this.deleteConnectorTokens({
+          connectorId,
+          tokenType: 'access_token',
+        });
+      }
+
+      await this.create({
+        connectorId,
+        token: newToken,
+        expiresAtMillis: new Date(tokenRequestDate + expiresInSec * 1000).toISOString(),
+        tokenType: 'access_token',
+      });
+    } else {
+      await this.update({
+        id: token.id!.toString(),
+        token: newToken,
+        expiresAtMillis: new Date(tokenRequestDate + expiresInSec * 1000).toISOString(),
+        tokenType: 'access_token',
+      });
     }
   }
 }

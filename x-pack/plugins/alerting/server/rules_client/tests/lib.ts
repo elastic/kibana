@@ -50,13 +50,14 @@ export function getBeforeSetup(
   jest.resetAllMocks();
   rulesClientParams.createAPIKey.mockResolvedValue({ apiKeysEnabled: false });
   rulesClientParams.getUserName.mockResolvedValue('elastic');
-  taskManager.runNow.mockResolvedValue({ id: '' });
+  taskManager.runSoon.mockResolvedValue({ id: '' });
   const actionsClient = actionsClientMock.create();
 
   actionsClient.getBulk.mockResolvedValueOnce([
     {
       id: '1',
       isPreconfigured: false,
+      isDeprecated: false,
       actionTypeId: 'test',
       name: 'test',
       config: {
@@ -66,6 +67,7 @@ export function getBeforeSetup(
     {
       id: '2',
       isPreconfigured: false,
+      isDeprecated: false,
       actionTypeId: 'test2',
       name: 'test2',
       config: {
@@ -76,6 +78,7 @@ export function getBeforeSetup(
       id: 'testPreconfigured',
       actionTypeId: '.slack',
       isPreconfigured: true,
+      isDeprecated: false,
       name: 'test',
     },
   ]);

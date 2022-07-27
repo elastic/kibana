@@ -62,9 +62,10 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const elasticChart = getService('elasticChart');
+  const browser = getService('browser');
 
   describe('anomaly explorer', function () {
-    this.tags(['mlqa']);
+    this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
@@ -128,7 +129,7 @@ export default function ({ getService }: FtrProviderContext) {
             }
           }
 
-          await ml.testExecution.logTestStep('displays the swimlanes');
+          await ml.testExecution.logTestStep('displays the swim lanes');
           await ml.anomalyExplorer.assertOverallSwimlaneExists();
           await ml.anomalyExplorer.assertSwimlaneViewByExists();
 
@@ -140,6 +141,10 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('anomalies table is not empty');
           await ml.anomaliesTable.assertTableNotEmpty();
+        });
+
+        it('has enabled Single Metric Viewer button', async () => {
+          await ml.anomalyExplorer.assertSingleMetricViewerButtonEnabled(true);
         });
 
         it('renders Overall swim lane', async () => {
@@ -213,6 +218,19 @@ export default function ({ getService }: FtrProviderContext) {
             'selectedLanes%3A!(Overall)%2CselectedTimes%3A!(1454846400%2C1454860800)%2CselectedType%3Aoverall%2CshowTopFieldValues%3A!t'
           );
 
+          await ml.testExecution.logTestStep('restores app state from the URL state');
+          await browser.refresh();
+          await elasticChart.setNewChartUiDebugFlag(true);
+          await ml.swimLane.waitForSwimLanesToLoad();
+          await ml.swimLane.assertSelection(overallSwimLaneTestSubj, {
+            x: [1454846400000, 1454860800000],
+            y: ['Overall'],
+          });
+          await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'y', ['EGF', 'DAL']);
+          await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(5);
+          await ml.anomalyExplorer.assertInfluencerFieldListLength('airline', 2);
+          await ml.anomaliesTable.assertTableRowsCount(4);
+
           await ml.testExecution.logTestStep('clears the selection');
           await ml.anomalyExplorer.clearSwimLaneSelection();
           await ml.swimLane.waitForSwimLanesToLoad();
@@ -269,6 +287,22 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(1);
 
           await ml.testExecution.logTestStep('highlights the Overall swim lane');
+          await ml.swimLane.assertSelection(overallSwimLaneTestSubj, {
+            x: [1454817600000, 1454832000000],
+            y: ['Overall'],
+          });
+
+          await ml.testExecution.logTestStep('restores app state from the URL state');
+          await browser.refresh();
+          await elasticChart.setNewChartUiDebugFlag(true);
+          await ml.swimLane.waitForSwimLanesToLoad();
+          await ml.swimLane.assertSelection(viewBySwimLaneTestSubj, {
+            x: [1454817600000, 1454832000000],
+            y: ['AAL'],
+          });
+          await ml.anomaliesTable.assertTableRowsCount(1);
+          await ml.anomalyExplorer.assertInfluencerFieldListLength('airline', 1);
+          await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(1);
           await ml.swimLane.assertSelection(overallSwimLaneTestSubj, {
             x: [1454817600000, 1454832000000],
             y: ['Overall'],

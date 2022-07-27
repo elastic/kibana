@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import React, { ReactNode, useEffect } from 'react';
+import React, { ReactNode } from 'react';
 import {
   EuiIcon,
   EuiLink,
   EuiLinkButtonProps,
   EuiPopover,
   EuiPopoverProps,
+  EuiWrappingPopover,
+  EuiWrappingPopoverProps,
   EuiPopoverTitle,
   EuiText,
 } from '@elastic/eui';
-import { trackUiEvent } from '../lens_ui_telemetry';
 import './help_popover.scss';
 
 export const HelpPopoverButton = ({
@@ -51,11 +52,6 @@ export const HelpPopover = ({
   isOpen: EuiPopoverProps['isOpen'];
   title?: string;
 }) => {
-  useEffect(() => {
-    if (isOpen) {
-      trackUiEvent('open_help_popover');
-    }
-  }, [isOpen]);
   return (
     <EuiPopover
       anchorPosition={anchorPosition}
@@ -73,5 +69,40 @@ export const HelpPopover = ({
         {children}
       </EuiText>
     </EuiPopover>
+  );
+};
+
+export const WrappingHelpPopover = ({
+  anchorPosition,
+  button,
+  children,
+  closePopover,
+  isOpen,
+  title,
+}: {
+  anchorPosition?: EuiWrappingPopoverProps['anchorPosition'];
+  button: EuiWrappingPopoverProps['button'];
+  children: ReactNode;
+  closePopover: EuiWrappingPopoverProps['closePopover'];
+  isOpen: EuiWrappingPopoverProps['isOpen'];
+  title?: string;
+}) => {
+  return (
+    <EuiWrappingPopover
+      anchorPosition={anchorPosition}
+      button={button}
+      className="lnsHelpPopover"
+      closePopover={closePopover}
+      isOpen={isOpen}
+      ownFocus
+      panelClassName="lnsHelpPopover__panel"
+      panelPaddingSize="none"
+    >
+      {title && <EuiPopoverTitle paddingSize="m">{title}</EuiPopoverTitle>}
+
+      <EuiText className="lnsHelpPopover__content" size="s">
+        {children}
+      </EuiText>
+    </EuiWrappingPopover>
   );
 };

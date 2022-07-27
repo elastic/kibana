@@ -1,0 +1,420 @@
+{
+  "id": "@kbn/shared-ux-prompt-no-data-views",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+        "id": "def-common.getMockServices",
+        "type": "Function",
+        "tags": [],
+        "label": "getMockServices",
+        "description": [],
+        "signature": [
+          "(params?: ",
+          "Params",
+          " | undefined) => ",
+          {
+            "pluginId": "@kbn/shared-ux-prompt-no-data-views",
+            "scope": "common",
+            "docId": "kibKbnSharedUxPromptNoDataViewsPluginApi",
+            "section": "def-common.NoDataViewsPromptServices",
+            "text": "NoDataViewsPromptServices"
+          }
+        ],
+        "path": "packages/shared-ux/prompt/no_data_views/src/mocks.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+            "id": "def-common.getMockServices.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "Params",
+              " | undefined"
+            ],
+            "path": "packages/shared-ux/prompt/no_data_views/src/mocks.ts",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+        "id": "def-common.getStoryArgTypes",
+        "type": "Function",
+        "tags": [],
+        "label": "getStoryArgTypes",
+        "description": [],
+        "signature": [
+          "() => { canCreateNewDataView: { control: string; defaultValue: boolean; }; dataViewsDocLink: { options: (string | undefined)[]; control: { type: string; }; }; }"
+        ],
+        "path": "packages/shared-ux/prompt/no_data_views/src/mocks.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+        "id": "def-common.getStoryServices",
+        "type": "Function",
+        "tags": [],
+        "label": "getStoryServices",
+        "description": [],
+        "signature": [
+          "(params: ",
+          "Params",
+          ", action?: ActionFn) => ",
+          {
+            "pluginId": "@kbn/shared-ux-prompt-no-data-views",
+            "scope": "common",
+            "docId": "kibKbnSharedUxPromptNoDataViewsPluginApi",
+            "section": "def-common.NoDataViewsPromptServices",
+            "text": "NoDataViewsPromptServices"
+          }
+        ],
+        "path": "packages/shared-ux/prompt/no_data_views/src/mocks.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+            "id": "def-common.getStoryServices.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "Params"
+            ],
+            "path": "packages/shared-ux/prompt/no_data_views/src/mocks.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+            "id": "def-common.getStoryServices.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "action",
+            "description": [],
+            "signature": [
+              "ActionFn"
+            ],
+            "path": "packages/shared-ux/prompt/no_data_views/src/mocks.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+        "id": "def-common.NoDataViewsPrompt",
+        "type": "Function",
+        "tags": [],
+        "label": "NoDataViewsPrompt",
+        "description": [
+          "\nA service-enabled component that provides Kibana-specific functionality to the `NoDataViewsPrompt`\ncomponent.\n\nUse of this component requires both the `EuiTheme` context as well as a `NoDataViewsPrompt` provider."
+        ],
+        "signature": [
+          "({ onDataViewCreated }: ",
+          "Props",
+          ") => JSX.Element"
+        ],
+        "path": "packages/shared-ux/prompt/no_data_views/src/no_data_views.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+            "id": "def-common.NoDataViewsPrompt.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ onDataViewCreated }",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "packages/shared-ux/prompt/no_data_views/src/no_data_views.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+        "id": "def-common.NoDataViewsPrompt",
+        "type": "Function",
+        "tags": [],
+        "label": "NoDataViewsPrompt",
+        "description": [
+          "\nA presentational component that is shown in cases when there are no data views created yet."
+        ],
+        "signature": [
+          "({ onClickCreate, canCreateNewDataView, dataViewsDocLink, emptyPromptColor, }: ",
+          "Props",
+          ") => JSX.Element"
+        ],
+        "path": "packages/shared-ux/prompt/no_data_views/src/no_data_views.component.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+            "id": "def-common.NoDataViewsPrompt.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  onClickCreate,\n  canCreateNewDataView,\n  dataViewsDocLink,\n  emptyPromptColor = 'plain',\n}",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "packages/shared-ux/prompt/no_data_views/src/no_data_views.component.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+        "id": "def-common.NoDataViewsPromptKibanaProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "NoDataViewsPromptKibanaProvider",
+        "description": [
+          "\nKibana-specific Provider that maps to known dependency types."
+        ],
+        "signature": [
+          "({ children, ...services }: React.PropsWithChildren<",
+          {
+            "pluginId": "@kbn/shared-ux-prompt-no-data-views",
+            "scope": "common",
+            "docId": "kibKbnSharedUxPromptNoDataViewsPluginApi",
+            "section": "def-common.NoDataViewsPromptKibanaServices",
+            "text": "NoDataViewsPromptKibanaServices"
+          },
+          ">) => JSX.Element"
+        ],
+        "path": "packages/shared-ux/prompt/no_data_views/src/services.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+            "id": "def-common.NoDataViewsPromptKibanaProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  ...services\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              {
+                "pluginId": "@kbn/shared-ux-prompt-no-data-views",
+                "scope": "common",
+                "docId": "kibKbnSharedUxPromptNoDataViewsPluginApi",
+                "section": "def-common.NoDataViewsPromptKibanaServices",
+                "text": "NoDataViewsPromptKibanaServices"
+              },
+              ">"
+            ],
+            "path": "packages/shared-ux/prompt/no_data_views/src/services.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+        "id": "def-common.NoDataViewsPromptProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "NoDataViewsPromptProvider",
+        "description": [
+          "\nAbstract external service Provider."
+        ],
+        "signature": [
+          "({ children, ...services }: React.PropsWithChildren<",
+          {
+            "pluginId": "@kbn/shared-ux-prompt-no-data-views",
+            "scope": "common",
+            "docId": "kibKbnSharedUxPromptNoDataViewsPluginApi",
+            "section": "def-common.NoDataViewsPromptServices",
+            "text": "NoDataViewsPromptServices"
+          },
+          ">) => JSX.Element"
+        ],
+        "path": "packages/shared-ux/prompt/no_data_views/src/services.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+            "id": "def-common.NoDataViewsPromptProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  ...services\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              {
+                "pluginId": "@kbn/shared-ux-prompt-no-data-views",
+                "scope": "common",
+                "docId": "kibKbnSharedUxPromptNoDataViewsPluginApi",
+                "section": "def-common.NoDataViewsPromptServices",
+                "text": "NoDataViewsPromptServices"
+              },
+              ">"
+            ],
+            "path": "packages/shared-ux/prompt/no_data_views/src/services.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+        "id": "def-common.NoDataViewsPromptKibanaServices",
+        "type": "Interface",
+        "tags": [],
+        "label": "NoDataViewsPromptKibanaServices",
+        "description": [
+          "\nKibana-specific service types."
+        ],
+        "path": "packages/shared-ux/prompt/no_data_views/src/services.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+            "id": "def-common.NoDataViewsPromptKibanaServices.coreStart",
+            "type": "Object",
+            "tags": [],
+            "label": "coreStart",
+            "description": [],
+            "signature": [
+              "{ docLinks: { links: { indexPatterns: { introduction: string; }; }; }; }"
+            ],
+            "path": "packages/shared-ux/prompt/no_data_views/src/services.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+            "id": "def-common.NoDataViewsPromptKibanaServices.dataViewEditor",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViewEditor",
+            "description": [],
+            "signature": [
+              "{ userPermissions: { editDataView: () => boolean; }; openEditor: (options: DataViewEditorOptions) => () => void; }"
+            ],
+            "path": "packages/shared-ux/prompt/no_data_views/src/services.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+        "id": "def-common.NoDataViewsPromptServices",
+        "type": "Interface",
+        "tags": [],
+        "label": "NoDataViewsPromptServices",
+        "description": [
+          "\nAbstract external services for this component."
+        ],
+        "path": "packages/shared-ux/prompt/no_data_views/src/services.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+            "id": "def-common.NoDataViewsPromptServices.canCreateNewDataView",
+            "type": "boolean",
+            "tags": [],
+            "label": "canCreateNewDataView",
+            "description": [
+              "True if the user has permission to create a new Data View, false otherwise."
+            ],
+            "path": "packages/shared-ux/prompt/no_data_views/src/services.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+            "id": "def-common.NoDataViewsPromptServices.openDataViewEditor",
+            "type": "Function",
+            "tags": [],
+            "label": "openDataViewEditor",
+            "description": [
+              "A method to open the Data View Editor flow."
+            ],
+            "signature": [
+              "(options: DataViewEditorOptions) => () => void"
+            ],
+            "path": "packages/shared-ux/prompt/no_data_views/src/services.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+                "id": "def-common.NoDataViewsPromptServices.openDataViewEditor.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "DataViewEditorOptions"
+                ],
+                "path": "packages/shared-ux/prompt/no_data_views/src/services.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+            "id": "def-common.NoDataViewsPromptServices.dataViewsDocLink",
+            "type": "string",
+            "tags": [],
+            "label": "dataViewsDocLink",
+            "description": [
+              "A link to information about Data Views in Kibana"
+            ],
+            "path": "packages/shared-ux/prompt/no_data_views/src/services.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

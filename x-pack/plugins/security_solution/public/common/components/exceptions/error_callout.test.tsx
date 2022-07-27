@@ -43,7 +43,10 @@ describe('ErrorCallout', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="errorCalloutContainer"] .euiCallOutHeader__title').text()
+      wrapper
+        .find('[data-test-subj="errorCalloutContainer"] .euiCallOutHeader__title')
+        .last()
+        .text()
     ).toEqual('Error: error reason (500)');
     expect(wrapper.find('[data-test-subj="errorCalloutMessage"]').at(0).text()).toEqual(
       'Error fetching exception list'
@@ -91,7 +94,10 @@ describe('ErrorCallout', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="errorCalloutContainer"] .euiCallOutHeader__title').text()
+      wrapper
+        .find('[data-test-subj="errorCalloutContainer"] .euiCallOutHeader__title')
+        .last()
+        .text()
     ).toEqual('Error: not found');
     expect(wrapper.find('[data-test-subj="errorCalloutMessage"]').at(0).text()).toEqual(
       'Error fetching exception list'
@@ -117,7 +123,10 @@ describe('ErrorCallout', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="errorCalloutContainer"] .euiCallOutHeader__title').text()
+      wrapper
+        .find('[data-test-subj="errorCalloutContainer"] .euiCallOutHeader__title')
+        .last()
+        .text()
     ).toEqual('Error: not found (404)');
     expect(wrapper.find('[data-test-subj="errorCalloutMessage"]').at(0).text()).toEqual(
       'The associated exception list (some_uuid) no longer exists. Please remove the missing exception list to add additional exceptions to the detection rule.'
