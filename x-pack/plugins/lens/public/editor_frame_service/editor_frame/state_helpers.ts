@@ -199,7 +199,7 @@ export function initializeDatasources({
   for (const [datasourceId, datasource] of Object.entries(datasourceMap)) {
     if (datasourceStates[datasourceId]) {
       const state = datasource.initialize(
-        datasourceStates[datasourceId] || undefined,
+        datasourceStates[datasourceId].state || undefined,
         references,
         initialContext,
         indexPatternRefs,
@@ -210,34 +210,6 @@ export function initializeDatasources({
   }
   return states;
 }
-
-// export async function initializeDatasources(
-//   datasourceMap: DatasourceMap,
-//   datasourceStates: DatasourceStates,
-//   references?: SavedObjectReference[],
-//   initialContext?: VisualizeFieldContext | VisualizeEditorContext,
-//   options?: InitializationOptions
-// ) {
-//   const states: DatasourceStates = {};
-
-//   await Promise.all(
-//     Object.entries(datasourceMap).map(([datasourceId, datasource]) => {
-//       if (datasourceStates[datasourceId]) {
-//         return datasource
-//           .initialize(
-//             datasourceStates[datasourceId].state || undefined,
-//             references,
-//             initialContext,
-//             options
-//           )
-//           .then((datasourceState) => {
-//             states[datasourceId] = { isLoading: false, state: datasourceState };
-//           });
-//       }
-//     })
-//   );
-//   return states;
-// }
 
 export const getDatasourceLayers = memoizeOne(function getDatasourceLayers(
   datasourceStates: DatasourceStates,

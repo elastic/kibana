@@ -51,7 +51,10 @@ import { FieldGroups, FieldList } from './field_list';
 import { fieldContainsData, fieldExists } from '../shared_components';
 import { IndexPatternServiceAPI } from '../data_views_service/service';
 
-export type Props = Omit<DatasourceDataPanelProps<IndexPatternPrivateState>, 'core'> & {
+export type Props = Omit<
+  DatasourceDataPanelProps<IndexPatternPrivateState>,
+  'core' | 'onChangeIndexPattern'
+> & {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;

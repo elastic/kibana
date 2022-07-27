@@ -18,14 +18,9 @@ export interface EventAnnotationGroupOutput {
 }
 
 export interface EventAnnotationGroupArgs {
-  index: string;
   annotations: EventAnnotationOutput[];
   index?: IndexPatternExpressionType;
 }
-
-export type EventAnnotationGroupOutput = EventAnnotationGroupArgs & {
-  type: 'event_annotation_group';
-};
 
 export function eventAnnotationGroup(): ExpressionFunctionDefinition<
   'event_annotation_group',
@@ -66,7 +61,6 @@ export function eventAnnotationGroup(): ExpressionFunctionDefinition<
         type: 'event_annotation_group',
         index: args.index,
         annotations: args.annotations,
-        index: args.index,
       };
     },
   };

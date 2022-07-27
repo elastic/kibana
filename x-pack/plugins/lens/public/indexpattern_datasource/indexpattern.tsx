@@ -42,6 +42,7 @@ import {
   injectReferences,
   loadInitialState,
   onRefreshIndexPattern,
+  triggerActionOnIndexPatternChange,
 } from './loader';
 import { toExpression } from './to_expression';
 import {
@@ -135,9 +136,11 @@ export function getIndexPatternDatasource({
 }) {
   const uiSettings = core.uiSettings;
 
+  const DATASOURCE_ID = 'indexpattern';
+
   // Not stateful. State is persisted to the frame
   const indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState> = {
-    id: 'indexpattern',
+    id: DATASOURCE_ID,
 
     initialize(
       persistedState?: IndexPatternPersistedState,
@@ -156,15 +159,6 @@ export function getIndexPatternDatasource({
         indexPatternRefs,
         indexPatterns,
       });
-      // return loadInitialState({
-      //   persistedState,
-      //   references,
-      //   defaultIndexPatternId: core.uiSettings.get('defaultIndex'),
-      //   storage,
-      //   indexPatternsService,
-      //   initialContext,
-      //   options,
-      // });
     },
 
     getPersistableState(state: IndexPatternPrivateState) {
@@ -251,26 +245,20 @@ export function getIndexPatternDatasource({
       domElement: Element,
       props: DatasourceDataPanelProps<IndexPatternPrivateState>
     ) {
+      const { onChangeIndexPattern, ...otherProps } = props;
       render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
           <I18nProvider>
             <IndexPatternDataPanel
-              changeIndexPattern={async (id, state, setState) => {
-                changeIndexPattern({
-                  id,
-                  state,
-                  setState,
-                  storage,
-                  indexPatterns: props.frame.dataViews.indexPatterns,
-                  indexPatternService: props.indexPatternService,
-                });
+              changeIndexPattern={(indexPattern) => {
+                onChangeIndexPattern(indexPattern, DATASOURCE_ID);
               }}
               data={data}
               dataViews={dataViews}
               fieldFormats={fieldFormats}
               charts={charts}
               indexPatternFieldEditor={dataViewFieldEditor}
-              {...props}
+              {...otherProps}
               core={core}
               uiActions={uiActions}
               onIndexPatternRefresh={onRefreshIndexPattern}
@@ -393,23 +381,20 @@ export function getIndexPatternDatasource({
       domElement: Element,
       props: DatasourceLayerPanelProps<IndexPatternPrivateState>
     ) => {
+      const { onChangeIndexPattern, ...otherProps } = props;
       render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
           <LayerPanel
             onChangeIndexPattern={(indexPatternId) => {
-              changeLayerIndexPattern({
+              triggerActionOnIndexPatternChange({
                 indexPatternId,
-                setState: props.setState,
                 state: props.state,
                 layerId: props.layerId,
-                replaceIfPossible: true,
-                storage,
-                indexPatterns: props.dataViews.indexPatterns,
-                indexPatternService: props.indexPatternService,
                 uiActions,
               });
+              onChangeIndexPattern(indexPatternId, DATASOURCE_ID, props.layerId);
             }}
-            {...props}
+            {...otherProps}
           />
         </KibanaThemeProvider>,
         domElement
@@ -459,6 +444,19 @@ export function getIndexPatternDatasource({
     },
 
     onRefreshIndexPattern,
+    onIndexPatternChange(state, indexPatterns, indexPatternId, layerId) {
+      if (layerId) {
+        return changeLayerIndexPattern({
+          indexPatternId,
+          layerId,
+          state,
+          replaceIfPossible: true,
+          storage,
+          indexPatterns,
+        });
+      }
+      return changeIndexPattern({ indexPatternId, state, storage, indexPatterns });
+    },
 
     // Reset the temporary invalid state when closing the editor, but don't
     // update the state if it's not needed
@@ -480,7 +478,7 @@ export function getIndexPatternDatasource({
       const visibleColumnIds = layer.columnOrder.filter((colId) => !isReferenced(layer, colId));
 
       return {
-        datasourceId: 'indexpattern',
+        datasourceId: DATASOURCE_ID,
         getTableSpec: () => {
           // consider also referenced columns in this case
           // but map fields to the top referencing column

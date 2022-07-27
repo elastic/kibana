@@ -171,6 +171,13 @@ export const setLayerDefaultDimension = createAction<{
 export const updateIndexPatterns = createAction<Partial<DataViewsState>>(
   'lens/updateIndexPatterns'
 );
+export const changeIndexPattern = createAction<{
+  visualizationIds?: string[];
+  datasourceIds?: string[];
+  indexPatternId: string;
+  layerId?: string;
+  dataViews: Partial<DataViewsState>;
+}>('lens/changeIndexPattern');
 
 export const lensActions = {
   setState,
@@ -198,6 +205,7 @@ export const lensActions = {
   addLayer,
   setLayerDefaultDimension,
   updateIndexPatterns,
+  changeIndexPattern,
 };
 
 export const makeLensReducer = (storeDeps: LensStoreDeps) => {
@@ -291,6 +299,57 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         isOnlyLayer || !activeVisualization.removeLayer
           ? activeVisualization.clearLayer(state.visualization.state, layerId)
           : activeVisualization.removeLayer(state.visualization.state, layerId);
+    },
+    [changeIndexPattern.type]: (
+      state,
+      {
+        payload,
+      }: {
+        payload: {
+          visualizationIds?: string;
+          datasourceIds?: string;
+          layerId?: string;
+          indexPatternId: string;
+          dataViews: Pick<DataViewsState, 'indexPatterns'>;
+        };
+      }
+    ) => {
+      const { visualizationIds, datasourceIds, layerId, indexPatternId, dataViews } = payload;
+      if (visualizationIds?.length) {
+        for (const visualizationId of visualizationIds) {
+          const activeVisualization =
+            visualizationId &&
+            state.visualization.activeId !== visualizationId &&
+            visualizationMap[visualizationId];
+          if (activeVisualization && layerId && activeVisualization?.onIndexPatternChange) {
+            state.visualization.state = activeVisualization.onIndexPatternChange(
+              state.visualization.state,
+              layerId,
+              indexPatternId
+            );
+          }
+        }
+      }
+      if (datasourceIds?.length) {
+        for (const datasourceId of datasourceIds) {
+          const activeDatasource = datasourceId && datasourceMap[datasourceId];
+          if (activeDatasource && activeDatasource?.onIndexPatternChange) {
+            state.datasourceStates = {
+              ...state.datasourceStates,
+              [datasourceId]: {
+                isLoading: false,
+                state: activeDatasource.onIndexPatternChange(
+                  state.datasourceStates[datasourceId].state,
+                  dataViews.indexPatterns,
+                  indexPatternId,
+                  layerId
+                ),
+              },
+            };
+          }
+        }
+      }
+      state.dataViews = { ...state.dataViews, ...dataViews };
     },
     [updateIndexPatterns.type]: (state, { payload }: { payload: Partial<DataViewsState> }) => {
       return {

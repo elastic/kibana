@@ -16,7 +16,6 @@ import { exporters, getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { trackUiEvent } from '../lens_ui_telemetry';
-import type { StateSetter } from '../types';
 import {
   LensAppServices,
   LensTopNavActions,
@@ -30,16 +29,15 @@ import {
   useLensDispatch,
   LensAppState,
   DispatchSetState,
-  updateDatasourceState,
 } from '../state_management';
 import {
   getIndexPatternsObjects,
   getIndexPatternsIds,
   getResolvedDateRange,
-  handleIndexPatternChange,
   refreshIndexPatternsList,
 } from '../utils';
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
+import { changeIndexPattern } from '../state_management/lens_slice';
 
 function getLensTopNavConfig(options: {
   showSaveAndReturn: boolean;
@@ -236,19 +234,6 @@ export const LensTopNavMenu = ({
     dataViews: dataViewsService,
   } = useKibana<LensAppServices>().services;
 
-  const dispatch = useLensDispatch();
-  const dispatchSetState: DispatchSetState = React.useCallback(
-    (state: Partial<LensAppState>) => dispatch(setState(state)),
-    [dispatch]
-  );
-
-  const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
-  const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView>();
-  const [rejectedIndexPatterns, setRejectedIndexPatterns] = useState<string[]>([]);
-  const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
-  const closeFieldEditor = useRef<() => void | undefined>();
-  const closeDataViewEditor = useRef<() => void | undefined>();
-
   const {
     isSaveable,
     isLinkedToOriginatingApp,
@@ -261,6 +246,42 @@ export const LensTopNavMenu = ({
     filters,
     dataViews,
   } = useLensSelector((state) => state.lens);
+
+  const dispatch = useLensDispatch();
+  const dispatchSetState: DispatchSetState = React.useCallback(
+    (state: Partial<LensAppState>) => dispatch(setState(state)),
+    [dispatch]
+  );
+  const dispatchChangeIndexPattern = React.useCallback(
+    async (indexPatternId) => {
+      const newIndexPatterns = await indexPatternService.ensureIndexPattern({
+        id: indexPatternId,
+        cache: dataViews.indexPatterns,
+      });
+      dispatch(
+        changeIndexPattern({
+          dataViews: { indexPatterns: newIndexPatterns },
+          datasourceIds: Object.keys(datasourceStates),
+          visualizationIds: visualization.activeId ? [visualization.activeId] : [],
+          indexPatternId,
+        })
+      );
+    },
+    [
+      dataViews.indexPatterns,
+      datasourceStates,
+      dispatch,
+      indexPatternService,
+      visualization.activeId,
+    ]
+  );
+
+  const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
+  const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView>();
+  const [rejectedIndexPatterns, setRejectedIndexPatterns] = useState<string[]>([]);
+  const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
+  const closeFieldEditor = useRef<() => void | undefined>();
+  const closeDataViewEditor = useRef<() => void | undefined>();
 
   const allLoaded = Object.values(datasourceStates).every(({ isLoading }) => isLoading === false);
 
@@ -611,18 +632,6 @@ export const LensTopNavMenu = ({
     });
   }, [data.query.filterManager, data.query.queryString, dispatchSetState]);
 
-  const setDatasourceState: StateSetter<unknown> = useMemo(() => {
-    return (updater) => {
-      dispatch(
-        updateDatasourceState({
-          updater,
-          datasourceId: activeDatasourceId!,
-          clearStagedPreview: true,
-        })
-      );
-    };
-  }, [activeDatasourceId, dispatch]);
-
   const refreshFieldList = useCallback(async () => {
     if (currentIndexPattern && currentIndexPattern.id) {
       refreshIndexPatternsList({
@@ -688,32 +697,14 @@ export const LensTopNavMenu = ({
             closeDataViewEditor.current = dataViewEditor.openEditor({
               onSave: async (dataView) => {
                 if (dataView.id) {
-                  handleIndexPatternChange({
-                    activeDatasources: Object.keys(datasourceStates).reduce(
-                      (acc, datasourceId) => ({
-                        ...acc,
-                        [datasourceId]: datasourceMap[datasourceId],
-                      }),
-                      {}
-                    ),
-                    datasourceStates,
-                    indexPatternId: dataView.id,
-                    setDatasourceState,
-                  });
+                  await dispatchChangeIndexPattern(dataView.id);
                   refreshFieldList();
                 }
               },
             });
           }
         : undefined,
-    [
-      dataViewEditor,
-      canEditDataView,
-      datasourceMap,
-      datasourceStates,
-      refreshFieldList,
-      setDatasourceState,
-    ]
+    [canEditDataView, dataViewEditor, dispatchChangeIndexPattern, refreshFieldList]
   );
 
   const dataViewPickerProps = {
@@ -730,18 +721,7 @@ export const LensTopNavMenu = ({
         (indexPattern) => indexPattern.id === newIndexPatternId
       );
       setCurrentIndexPattern(currentDataView);
-      handleIndexPatternChange({
-        activeDatasources: Object.keys(datasourceStates).reduce(
-          (acc, datasourceId) => ({
-            ...acc,
-            [datasourceId]: datasourceMap[datasourceId],
-          }),
-          {}
-        ),
-        datasourceStates,
-        indexPatternId: newIndexPatternId,
-        setDatasourceState,
-      });
+      dispatchChangeIndexPattern(newIndexPatternId);
     },
   };
 

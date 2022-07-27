@@ -167,18 +167,13 @@ export async function loadIndexPatterns({
   return indexPatternsObject;
 }
 
-export async function changeIndexPattern({
+export async function loadIndexPattern({
   id,
-  updateIndexPatterns,
   onError,
   dataViews,
   cache = {},
 }: {
   id: string;
-  updateIndexPatterns: (
-    newFieldState: Pick<DataViewsState, 'indexPatterns'>,
-    options?: { applyImmediately: boolean }
-  ) => void;
   onError: ErrorHandler;
   dataViews: DataViewsContract;
   cache?: IndexPatternMap;
@@ -198,13 +193,6 @@ export async function changeIndexPattern({
     ...cache,
     [id]: indexPatterns[id],
   };
-
-  updateIndexPatterns(
-    {
-      indexPatterns: newIndexPatterns,
-    },
-    { applyImmediately: true }
-  );
   return newIndexPatterns;
 }
 

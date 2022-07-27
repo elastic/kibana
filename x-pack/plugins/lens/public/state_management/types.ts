@@ -20,9 +20,8 @@ import {
   SharingSavedObjectProps,
   VisualizeEditorContext,
   IndexPattern,
+  IndexPatternRef,
 } from '../types';
-import type { IndexPatternRef } from '../shared_components';
-// import type { IndexPattern } from '../indexpattern_datasource';
 export interface VisualizationState {
   activeId: string | null;
   state: unknown;

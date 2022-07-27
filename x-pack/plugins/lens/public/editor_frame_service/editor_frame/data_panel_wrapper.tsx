@@ -7,7 +7,7 @@
 
 import './data_panel_wrapper.scss';
 
-import React, { useMemo, memo, useContext, useState, useEffect } from 'react';
+import React, { useMemo, memo, useContext, useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -30,6 +30,7 @@ import {
 } from '../../state_management';
 import { initializeSources } from './state_helpers';
 import type { IndexPatternServiceAPI } from '../../data_views_service/service';
+import { changeIndexPattern } from '../../state_management/lens_slice';
 
 interface DataPanelWrapperProps {
   datasourceMap: DatasourceMap;
@@ -105,6 +106,26 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
     props.core.uiSettings,
   ]);
 
+  const onChangeIndexPattern = useCallback(
+    async (indexPatternId: string, datasourceId: string, layerId?: string) => {
+      // reload the indexpattern
+      const indexPatterns = await props.indexPatternService.ensureIndexPattern({
+        id: indexPatternId,
+        cache: props.frame.dataViews.indexPatterns,
+      });
+      // now update the state
+      dispatchLens(
+        changeIndexPattern({
+          dataViews: { indexPatterns },
+          datasourceIds: [datasourceId],
+          indexPatternId,
+          layerId,
+        })
+      );
+    },
+    [props.indexPatternService, props.frame.dataViews.indexPatterns, dispatchLens]
+  );
+
   const datasourceProps: DatasourceDataPanelProps = {
     ...externalContext,
     dragDropContext: useContext(DragContext),
@@ -115,6 +136,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
     dropOntoWorkspace: props.dropOntoWorkspace,
     hasSuggestionForField: props.hasSuggestionForField,
     uiActions: props.plugins.uiActions,
+    onChangeIndexPattern,
     indexPatternService: props.indexPatternService,
     frame: props.frame,
   };

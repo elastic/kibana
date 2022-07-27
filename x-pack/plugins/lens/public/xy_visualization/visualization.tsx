@@ -199,6 +199,20 @@ export const getXyVisualization = ({
     ];
   },
 
+  onIndexPatternChange(state, indexPatternId, layerId) {
+    const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
+    const layer = state.layers[layerIndex];
+    if (!layer || !isAnnotationsLayer(layer)) {
+      return state;
+    }
+    const newLayers = [...state.layers];
+    newLayers[layerIndex] = { ...layer, indexPatternId };
+    return {
+      ...state,
+      layers: newLayers,
+    };
+  },
+
   getConfiguration({ state, frame, layerId }) {
     const layer = state.layers.find((l) => l.layerId === layerId);
     if (!layer) {

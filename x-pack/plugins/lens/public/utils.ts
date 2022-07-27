@@ -18,7 +18,6 @@ import type {
   Datasource,
   DatasourceMap,
   Visualization,
-  StateSetter,
   IndexPatternMap,
   IndexPatternRef,
 } from './types';
@@ -76,26 +75,6 @@ export function getInitialDataViewsObject(
     existingFields: {},
     isFirstExistenceFetch: true,
   };
-}
-
-export function handleIndexPatternChange({
-  activeDatasources,
-  datasourceStates,
-  indexPatternId,
-  setDatasourceState,
-}: {
-  activeDatasources: Record<string, Datasource>;
-  datasourceStates: DatasourceStates;
-  indexPatternId: string;
-  setDatasourceState: StateSetter<unknown>;
-}): void {
-  Object.entries(activeDatasources).forEach(([id, datasource]) => {
-    datasource?.updateCurrentIndexPatternId?.({
-      state: datasourceStates[id].state,
-      indexPatternId,
-      setState: setDatasourceState,
-    });
-  });
 }
 
 export async function refreshIndexPatternsList({

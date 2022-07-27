@@ -335,8 +335,13 @@ export interface Datasource<T = unknown, P = unknown> {
     state: T;
     setState: StateSetter<T>;
   }) => void;
+  onIndexPatternChange?: (
+    state: T,
+    indexPatterns: IndexPatternMap,
+    indexPatternId: string,
+    layerId?: string
+  ) => T;
 
-  // refreshIndexPatternsList?: (props: { indexPatternId: string; setState: StateSetter<T> }) => void;
   onRefreshIndexPattern: () => void;
 
   toExpression: (
@@ -472,6 +477,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
   filters: Filter[];
   dropOntoWorkspace: (field: DragDropIdentifier) => void;
   hasSuggestionForField: (field: DragDropIdentifier) => boolean;
+  onChangeIndexPattern: (indexPatternId: string, datasourceId: string, layerId?: string) => void;
   uiActions: UiActionsStart;
   indexPatternService: IndexPatternServiceAPI;
   frame: FramePublicAPI;
@@ -536,7 +542,7 @@ export interface DatasourceLayerPanelProps<T> {
   setState: StateSetter<T>;
   activeData?: Record<string, Datatable>;
   dataViews: DataViewsState;
-  indexPatternService: IndexPatternServiceAPI;
+  onChangeIndexPattern: (indexPatternId: string, datasourceId: string, layerId?: string) => void;
 }
 
 export interface DragDropOperation {
@@ -627,6 +633,7 @@ export interface VisualizationConfigProps<T = unknown> {
 
 export type VisualizationLayerWidgetProps<T = unknown> = VisualizationConfigProps<T> & {
   setState: (newState: T) => void;
+  onChangeIndexPattern: (indexPatternId: string, layerId: string) => void;
 };
 
 export type VisualizationLayerHeaderContentProps<T = unknown> = VisualizationLayerWidgetProps<T> & {
@@ -1051,6 +1058,12 @@ export interface Visualization<T = unknown> {
    * On Edit events the frame will call this to know what's going to be the next visualization state
    */
   onEditAction?: (state: T, event: LensEditEvent<LensEditSupportedActions>) => T;
+
+  /**
+   * Some visualization track indexPattern changes (i.e. annotations)
+   * This method makes it aware of the change and produces a new updated state
+   */
+  onIndexPatternChange?: (state: T, indexPatternId: string, layerId?: string) => T;
 }
 
 // Use same technique as TriggerContext

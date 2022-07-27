@@ -67,6 +67,12 @@ export function LayerPanel(
     registerNewLayerRef: (layerId: string, instance: HTMLDivElement | null) => void;
     toggleFullscreen: () => void;
     onEmptyDimensionAdd: (columnId: string, group: { groupId: string }) => void;
+    onChangeIndexPattern: (args: {
+      indexPatternId: string;
+      layerId: string;
+      datasourceId?: string;
+      visualizationId?: string;
+    }) => void;
     indexPatternService: IndexPatternServiceAPI;
   }
 ) {
@@ -89,7 +95,7 @@ export function LayerPanel(
     updateAll,
     updateDatasourceAsync,
     visualizationState,
-    indexPatternService,
+    onChangeIndexPattern,
   } = props;
 
   const datasourceStates = useLensSelector(selectDatasourceStates);
@@ -311,6 +317,12 @@ export function LayerPanel(
                   layerConfigProps={{
                     ...layerVisualizationConfigProps,
                     setState: props.updateVisualization,
+                    onChangeIndexPattern: (indexPatternId) =>
+                      onChangeIndexPattern({
+                        indexPatternId,
+                        layerId,
+                        visualizationId: activeVisualization.id,
+                      }),
                   }}
                   activeVisualization={activeVisualization}
                 />
@@ -334,7 +346,8 @@ export function LayerPanel(
                   state: layerDatasourceState,
                   activeData: props.framePublicAPI.activeData,
                   dataViews,
-                  indexPatternService,
+                  onChangeIndexPattern: (indexPatternId) =>
+                    onChangeIndexPattern({ indexPatternId, layerId, datasourceId }),
                   setState: (updater: unknown) => {
                     const newState =
                       typeof updater === 'function' ? updater(layerDatasourceState) : updater;
@@ -373,9 +386,13 @@ export function LayerPanel(
                   layerId,
                   state: visualizationState,
                   frame: framePublicAPI,
-                  setState: (newState) => {
-                    props.updateVisualization(newState);
-                  },
+                  setState: props.updateVisualization,
+                  onChangeIndexPattern: (indexPatternId) =>
+                    onChangeIndexPattern({
+                      indexPatternId,
+                      layerId,
+                      visualizationId: activeVisualization.id,
+                    }),
                 }}
               />
             )}

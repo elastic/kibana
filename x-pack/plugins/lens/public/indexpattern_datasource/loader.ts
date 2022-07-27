@@ -17,15 +17,12 @@ import {
   UiActionsStart,
   VisualizeFieldContext,
 } from '@kbn/ui-actions-plugin/public';
-import type { DatasourceDataPanelProps, VisualizeEditorContext } from '../types';
+import type { VisualizeEditorContext } from '../types';
 import { IndexPatternPersistedState, IndexPatternPrivateState, IndexPatternLayer } from './types';
 
 import { memoizedGetAvailableOperationsByMetadata, updateLayerIndexPattern } from './operations';
 import { readFromStorage, writeToStorage } from '../settings_storage';
 import type { IndexPattern, IndexPatternRef } from '../types';
-import { IndexPatternServiceAPI } from '../data_views_service/service';
-
-type SetState = DatasourceDataPanelProps<IndexPatternPrivateState>['setState'];
 
 export function onRefreshIndexPattern() {
   if (memoizedGetAvailableOperationsByMetadata.cache.clear) {
@@ -180,65 +177,40 @@ export function loadInitialState({
   };
 }
 
-export async function changeIndexPattern({
-  id,
+export function changeIndexPattern({
+  indexPatternId,
   state,
-  setState,
   storage,
   indexPatterns,
-  indexPatternService,
 }: {
-  id: string;
+  indexPatternId: string;
   state: IndexPatternPrivateState;
-  setState: SetState;
   storage: IStorageWrapper;
   indexPatterns: Record<string, IndexPattern>;
-  indexPatternService: IndexPatternServiceAPI;
 }) {
-  const newIndexPatterns = await indexPatternService.addIndexPattern({
-    id,
-    cache: indexPatterns,
-  });
-  if (newIndexPatterns) {
-    setState(
-      (s) => ({
-        ...s,
-        layers: isSingleEmptyLayer(state.layers)
-          ? mapValues(state.layers, (layer) => updateLayerIndexPattern(layer, indexPatterns[id]))
-          : state.layers,
-        currentIndexPatternId: id,
-      }),
-      { applyImmediately: true }
-    );
-    setLastUsedIndexPatternId(storage, id);
-  }
+  setLastUsedIndexPatternId(storage, indexPatternId);
+  return {
+    ...state,
+    layers: isSingleEmptyLayer(state.layers)
+      ? mapValues(state.layers, (layer) =>
+          updateLayerIndexPattern(layer, indexPatterns[indexPatternId])
+        )
+      : state.layers,
+    currentIndexPatternId: indexPatternId,
+  };
 }
 
-export async function changeLayerIndexPattern({
-  indexPatternId,
-  layerId,
+export function triggerActionOnIndexPatternChange({
   state,
-  setState,
-  replaceIfPossible,
-  storage,
-  indexPatterns,
-  indexPatternService,
+  layerId,
   uiActions,
+  indexPatternId,
 }: {
   indexPatternId: string;
   layerId: string;
   state: IndexPatternPrivateState;
-  setState: SetState;
-  replaceIfPossible?: boolean;
-  storage: IStorageWrapper;
-  indexPatterns: Record<string, IndexPattern>;
-  indexPatternService: IndexPatternServiceAPI;
   uiActions: UiActionsStart;
 }) {
-  const newIndexPatterns = await indexPatternService.addIndexPattern({
-    id: indexPatternId,
-    cache: indexPatterns,
-  });
   const fromDataView = state.layers[layerId].indexPatternId;
   const toDataView = indexPatternId;
 
@@ -252,17 +224,32 @@ export async function changeLayerIndexPattern({
     defaultDataView: toDataView,
     usedDataViews: Object.values(Object.values(state.layers).map((layer) => layer.indexPatternId)),
   } as ActionExecutionContext);
-  if (newIndexPatterns) {
-    setState((s) => ({
-      ...s,
-      layers: {
-        ...s.layers,
-        [layerId]: updateLayerIndexPattern(s.layers[layerId], indexPatterns[indexPatternId]),
-      },
-      currentIndexPatternId: replaceIfPossible ? indexPatternId : s.currentIndexPatternId,
-    }));
-    setLastUsedIndexPatternId(storage, indexPatternId);
-  }
+}
+
+export function changeLayerIndexPattern({
+  indexPatternId,
+  indexPatterns,
+  layerId,
+  state,
+  replaceIfPossible,
+  storage,
+}: {
+  indexPatternId: string;
+  layerId: string;
+  state: IndexPatternPrivateState;
+  replaceIfPossible?: boolean;
+  storage: IStorageWrapper;
+  indexPatterns: Record<string, IndexPattern>;
+}) {
+  setLastUsedIndexPatternId(storage, indexPatternId);
+  return {
+    ...state,
+    layers: {
+      ...state.layers,
+      [layerId]: updateLayerIndexPattern(state.layers[layerId], indexPatterns[indexPatternId]),
+    },
+    currentIndexPatternId: replaceIfPossible ? indexPatternId : state.currentIndexPatternId,
+  };
 }
 
 function isSingleEmptyLayer(layerMap: IndexPatternPrivateState['layers']) {

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { DateRange } from '../../common';
 import type { IndexPattern, IndexPatternMap, IndexPatternRef } from '../types';
 import {
-  changeIndexPattern,
+  loadIndexPattern,
   loadIndexPatternRefs,
   loadIndexPatterns,
   syncExistingFields,
@@ -51,13 +51,9 @@ export interface IndexPatternServiceAPI {
    */
   loadIndexPatternRefs: (options: { isFullEditor: boolean }) => Promise<IndexPatternRef[]>;
   /**
-   * Load an indexPattern to the cache, usually used in conjuction with a indexPattern change action.
-   *
-   * **Note**:
-   * this function has sideEffects, updating the Lens state with the new indexPattern loaded, or showing
-   * a notification error toast in case of loading issues
+   * Ensure an indexPattern is loaded in the cache, usually used in conjuction with a indexPattern change action.
    */
-  addIndexPattern: (args: {
+  ensureIndexPattern: (args: {
     id: string;
     cache: IndexPatternMap;
   }) => Promise<IndexPatternMap | undefined>;
@@ -107,8 +103,7 @@ export function createIndexPatternService({
         ...args,
       });
     },
-    addIndexPattern: (args) =>
-      changeIndexPattern({ updateIndexPatterns, onError: onChangeError, dataViews, ...args }),
+    ensureIndexPattern: (args) => loadIndexPattern({ onError: onChangeError, dataViews, ...args }),
     refreshExistingFields: (args) =>
       syncExistingFields({
         updateIndexPatterns,
