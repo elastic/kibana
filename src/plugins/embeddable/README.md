@@ -343,6 +343,17 @@ This can ne achieved in two ways by implementing one of the following:
 - `EmbeddableFactory.getDefaultInput` will provide default values, only if the container did not supply them through inheritance.
 Explicit input will always provide these values, and will always be stored in a containers `panel[id].explicitInput`, even if the container _did_ provide it.
 
+### React
+The plugin provides a set of ready-to-use React components that abstract rendering of an embeddable behind a React component:
+
+- `EmbeddablePanel` provides a way to render an embeddable inside a rectangular panel. This also provides error handling and a basic user interface over some of the embeddable properties.
+- `EmbeddableChildPanel` is a higher-order component for the `EmbeddablePanel` that provides a way to render that inside a container.
+- `EmbeddableRoot` is the most straightforward wrapper performing rendering of an embeddable.
+- `EmbeddableRenderer` is a helper component to render an embeddable or an embeddable factory.
+
+Apart from the React components, there is also a way to construct an embeddable object using `useEmbeddableFactory` hook.
+This React hook takes care of producing an embeddable and updating its input state if passed state changes.
+
 ## API
 Please use automatically generated API reference or generated TypeDoc comments to find the complete documentation.
 
