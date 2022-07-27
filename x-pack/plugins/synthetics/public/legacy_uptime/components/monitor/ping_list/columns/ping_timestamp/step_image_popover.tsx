@@ -19,7 +19,7 @@ const POPOVER_IMG_WIDTH = 640;
 const StepImage = styled(EuiImage)`
   &&& {
     display: flex;
-    figure.euiImage-isFullScreen {
+    figure.euiImageFullScreenWrapper {
       display: flex;
       div.stepArrowsFullScreen {
         display: flex;
