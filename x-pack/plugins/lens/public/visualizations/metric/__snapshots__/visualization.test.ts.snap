@@ -1,0 +1,113 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`metric visualization dimension groups configuration generates configuration 1`] = `
+Object {
+  "groups": Array [
+    Object {
+      "accessors": Array [
+        Object {
+          "columnId": "metric-col-id",
+          "palette": Array [],
+          "triggerIcon": "colorBy",
+        },
+      ],
+      "enableDimensionEditor": true,
+      "filterOperations": [Function],
+      "groupId": "metric",
+      "groupLabel": "Primary metric",
+      "layerId": "first",
+      "required": true,
+      "supportFieldFormat": false,
+      "supportsMoreColumns": false,
+    },
+    Object {
+      "accessors": Array [
+        Object {
+          "columnId": "secondary-metric-col-id",
+        },
+      ],
+      "enableDimensionEditor": true,
+      "filterOperations": [Function],
+      "groupId": "secondaryMetric",
+      "groupLabel": "Secondary metric",
+      "layerId": "first",
+      "required": false,
+      "supportFieldFormat": false,
+      "supportsMoreColumns": false,
+    },
+    Object {
+      "accessors": Array [
+        Object {
+          "columnId": "max-metric-col-id",
+        },
+      ],
+      "enableDimensionEditor": true,
+      "filterOperations": [Function],
+      "groupId": "max",
+      "groupLabel": "Maximum value",
+      "groupTooltip": "If the maximum value is specified, the minimum value is fixed at zero.",
+      "layerId": "first",
+      "required": false,
+      "supportFieldFormat": false,
+      "supportStaticValue": true,
+      "supportsMoreColumns": false,
+    },
+    Object {
+      "accessors": Array [
+        Object {
+          "columnId": "breakdown-col-id",
+          "triggerIcon": "aggregate",
+        },
+      ],
+      "enableDimensionEditor": true,
+      "filterOperations": [Function],
+      "groupId": "breakdownBy",
+      "groupLabel": "Break down by",
+      "layerId": "first",
+      "required": false,
+      "supportFieldFormat": false,
+      "supportsMoreColumns": false,
+    },
+  ],
+}
+`;
+
+exports[`metric visualization dimension groups configuration operation filtering breakdownBy supports correct operations 1`] = `
+Array [
+  Object {
+    "dataType": "number",
+    "isBucketed": true,
+  },
+  Object {
+    "dataType": "string",
+    "isBucketed": true,
+  },
+]
+`;
+
+exports[`metric visualization dimension groups configuration operation filtering max supports correct operations 1`] = `
+Array [
+  Object {
+    "dataType": "number",
+    "isBucketed": false,
+  },
+]
+`;
+
+exports[`metric visualization dimension groups configuration operation filtering metric supports correct operations 1`] = `
+Array [
+  Object {
+    "dataType": "number",
+    "isBucketed": false,
+  },
+]
+`;
+
+exports[`metric visualization dimension groups configuration operation filtering secondaryMetric supports correct operations 1`] = `
+Array [
+  Object {
+    "dataType": "number",
+    "isBucketed": false,
+  },
+]
+`;
