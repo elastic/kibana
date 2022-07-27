@@ -13,7 +13,8 @@ import { getFixtureJson } from './helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('[DELETE] /internal/uptime/service/monitors', function () {
+  // FAILING ON 8.4: https://github.com/elastic/kibana/issues/137338
+  describe.skip('[DELETE] /internal/uptime/service/monitors', function () {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
