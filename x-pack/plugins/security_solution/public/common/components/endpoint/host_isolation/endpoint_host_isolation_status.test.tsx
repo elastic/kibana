@@ -61,7 +61,9 @@ describe('when using the EndpointHostIsolationStatus component', () => {
       },
     ],
     [
-      '2 actions pending',
+      // Because they are both of the same type and there are no other types,
+      // the status should be `isolating`
+      'Isolating',
       {
         pendingActions: {
           pendingIsolate: 2,
@@ -69,7 +71,9 @@ describe('when using the EndpointHostIsolationStatus component', () => {
       },
     ],
     [
-      '2 actions pending',
+      // Because they are both of the same type and there are no other types,
+      // the status should be `Releasing`
+      'Releasing',
       {
         pendingActions: {
           pendingUnIsolate: 2,
