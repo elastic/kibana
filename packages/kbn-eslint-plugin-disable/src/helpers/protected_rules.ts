@@ -6,24 +6,9 @@
  * Side Public License, v 1.
  */
 
-/**
- * https://www.elastic.co/guide/en/ecs/master/ecs-service.html
- *
- * @internal
- */
-export interface EcsService {
-  address?: string;
-  environment?: string;
-  ephemeral_id?: string;
-  id?: string;
-  name?: string;
-  node?: Node;
-  state?: string;
-  type?: string;
-  version?: string;
-}
-
-interface Node {
-  name?: string;
-  roles?: string[];
-}
+// this configures the protected eslint rules on our codebase that can't be disabled
+export const PROTECTED_RULES = new Set([
+  '@kbn/disable/no_protected_eslint_disable',
+  '@kbn/disable/no_naked_eslint_disable',
+  '@kbn/imports/no_unused_imports',
+]);
