@@ -98,7 +98,7 @@ export const waitForBulkEditActionToFinish = ({ rulesCount }: { rulesCount: numb
   cy.contains(TOASTER_BODY, `You've successfully updated ${rulesCount} rule`);
 };
 
-export const checkElasticRulesCannotBeModified = (rulesCount: number) => {
+export const checkPrebuiltRulesCannotBeModified = (rulesCount: number) => {
   cy.get(MODAL_CONFIRMATION_BODY).contains(
     `${rulesCount} prebuilt Elastic rules (editing prebuilt rules is not supported)`
   );

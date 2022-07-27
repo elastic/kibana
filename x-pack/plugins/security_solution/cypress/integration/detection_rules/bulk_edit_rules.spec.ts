@@ -43,7 +43,7 @@ import {
   waitForBulkEditActionToFinish,
   confirmBulkEditForm,
   clickAddIndexPatternsMenuItem,
-  checkElasticRulesCannotBeModified,
+  checkPrebuiltRulesCannotBeModified,
   checkMachineLearningRulesCannotBeModified,
   waitForMixedRulesBulkEditModal,
   openBulkEditAddTagsForm,
@@ -138,7 +138,7 @@ describe('Detection rules, bulk edit', () => {
       cy.get(APPLY_TIMELINE_RULE_BULK_MENU_ITEM).should('be.disabled');
     });
 
-    it('Only immutable rules selected', () => {
+    it('Only prebuilt rules selected', () => {
       const expectedNumberOfSelectedRules = 10;
 
       loadPrebuiltDetectionRulesFromHeaderBtn();
@@ -150,7 +150,7 @@ describe('Detection rules, bulk edit', () => {
       clickApplyTimelineTemplatesMenuItem();
 
       // check modal window for Elastic rule that can't be edited
-      checkElasticRulesCannotBeModified(expectedNumberOfSelectedRules);
+      checkPrebuiltRulesCannotBeModified(expectedNumberOfSelectedRules);
 
       // the only action available for users to cancel action
       cy.get(MODAL_CONFIRMATION_BTN).should('have.text', 'Close');
@@ -158,7 +158,7 @@ describe('Detection rules, bulk edit', () => {
       cy.get(MODAL_CONFIRMATION_CANCEL_BTN).should('have.text', '');
     });
 
-    it('Immutable and custom rules selected', () => {
+    it('Prebuilt and custom rules selected', () => {
       loadPrebuiltDetectionRulesFromHeaderBtn();
 
       // modal window should show how many rules can be edit, how many not
@@ -166,8 +166,8 @@ describe('Detection rules, bulk edit', () => {
       clickApplyTimelineTemplatesMenuItem();
       waitForMixedRulesBulkEditModal(expectedNumberOfCustomRulesToBeEdited);
 
-      // check rules that cannot be edited for index patterns: immutable and ML
-      checkElasticRulesCannotBeModified(totalNumberOfPrebuiltRules);
+      // check rules that cannot be edited for index patterns: prebuilt and ML
+      checkPrebuiltRulesCannotBeModified(totalNumberOfPrebuiltRules);
 
       // user can proceed with custom rule editing
       cy.get(MODAL_CONFIRMATION_BTN).should(
@@ -184,9 +184,9 @@ describe('Detection rules, bulk edit', () => {
       clickAddIndexPatternsMenuItem();
       waitForMixedRulesBulkEditModal(expectedNumberOfNotMLRules);
 
-      // check rules that cannot be edited for index patterns: immutable and ML
+      // check rules that cannot be edited for index patterns: prebuilt and ML
       checkMachineLearningRulesCannotBeModified(expectedNumberOfMachineLearningRulesToBeEdited);
-      checkElasticRulesCannotBeModified(totalNumberOfPrebuiltRules);
+      checkPrebuiltRulesCannotBeModified(totalNumberOfPrebuiltRules);
 
       // user can proceed with custom rule editing
       cy.get(MODAL_CONFIRMATION_BTN).should(
