@@ -13,16 +13,37 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const dataGrid = getService('dataGrid');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'context']);
+  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'context', 'settings']);
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
+  const es = getService('es');
+  const security = getService('security');
   const defaultSettings = { defaultIndex: 'logstash-*' };
+
+  const createIndex = (indexName: string) => {
+    return es.transport.request({
+      path: `/${indexName}/_doc/1`,
+      method: 'PUT',
+      body: {
+        username: 'Dmitry',
+        '@timestamp': '2015-09-21T09:30:23',
+        message: 'hello',
+      },
+    });
+  };
 
   describe('discover data grid doc link', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      await security.testUser.setRoles(['kibana_admin', 'similar_index', 'similar_index_two']);
+
+      await createIndex('similar_index');
+      await createIndex('similar_index_two');
+
+      await PageObjects.common.navigateToApp('settings');
+      await PageObjects.settings.createIndexPattern('similar_index*', '@timestamp', true);
     });
 
     after(async () => {
@@ -33,6 +54,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);
       await PageObjects.common.navigateToApp('discover');
+    });
+
+    it('should navigate through rows with the same id but different indices correctly', async () => {
+      await PageObjects.discover.selectIndexPattern('similar_index*');
+
+      await dataGrid.clickRowToggle();
+      const indexBeforePaginating = await testSubjects.getVisibleText(
+        'tableDocViewRow-_index-value'
+      );
+      expect(indexBeforePaginating).to.be('similar_index');
+
+      await testSubjects.click('pagination-button-next');
+      const indexAfterPaginating = await testSubjects.getVisibleText(
+        'tableDocViewRow-_index-value'
+      );
+      expect(indexAfterPaginating).to.be('similar_index_two');
     });
 
     it('should open the doc view of the selected document', async function () {
