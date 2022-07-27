@@ -106,11 +106,11 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
               class="c2"
             >
               <div
-                class="euiPopover euiPopover--anchorDownCenter"
+                class="euiPopover emotion-euiPopover"
                 data-test-subj="alertStatus"
               >
                 <div
-                  class="euiPopover__anchor"
+                  class="euiPopover__anchor css-16vtueo-render"
                 >
                   <button
                     aria-label="Click to change alert status"
