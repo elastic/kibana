@@ -7,10 +7,7 @@
  */
 
 import type { Metric } from '../../../../common/types';
-import {
-  getPercentilesSeries,
-  getPercentileRankSeries,
-} from './metrics_helpers';
+import { getPercentilesSeries, getPercentileRankSeries } from './metrics_helpers';
 
 describe('getPercentilesSeries', () => {
   test('should return correct config for multiple percentiles', () => {
