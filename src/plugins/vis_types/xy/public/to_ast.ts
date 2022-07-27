@@ -140,7 +140,8 @@ const prepareLayers = (
       'interval' in (xAccessor?.params || {})
     ),
     splitAccessors: splitAccessors ? splitAccessors.map(prepareVisDimension) : undefined,
-    markSizeAccessor: markSizeAccessor ? prepareVisDimension(markSizeAccessor) : undefined,
+    markSizeAccessor:
+      markSizeAccessor && !isBar ? prepareVisDimension(markSizeAccessor) : undefined,
     palette: palette ? preparePalette(palette) : undefined,
     columnToLabel: JSON.stringify(
       [...yAccessors, xAccessor, ...(splitAccessors ?? [])].reduce<Record<string, string>>(
@@ -172,10 +173,11 @@ const getMode = (scale: Scale, bounds?: Bounds) => {
 const getLabelArgs = (data: CategoryAxis, isTimeChart?: boolean) => {
   return {
     truncate: data.labels.truncate,
-    labelsOrientation: data.labels.rotate ?? (isTimeChart ? 0 : -90),
+    labelsOrientation: -(data.labels.rotate ?? (isTimeChart ? 0 : 90)),
     showOverlappingLabels: data.labels.filter === false,
     showDuplicates: data.labels.filter === false,
     labelColor: data.labels.color,
+    showLabels: data.labels.show,
   };
 };
 
@@ -184,6 +186,7 @@ const prepareAxisExtentConfig = (scale: Scale, bounds?: Bounds) => {
     mode: getMode(scale, bounds),
     lowerBound: bounds?.min || scale.min,
     upperBound: bounds?.max || scale.max,
+    enforce: true,
   });
 
   return buildExpression([axisExtentConfig]);
@@ -274,9 +277,8 @@ const getLineStyle = (style: ThresholdLine['style']) => {
     case 'full':
       return 'solid';
     case 'dashed':
-      return 'dashed';
     case 'dot-dashed':
-      return 'dotted';
+      return style;
   }
 };
 
@@ -433,7 +435,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
         ? [prepareReferenceLine(vis.params.thresholdLine, vis.params.valueAxes[0].id)]
         : []),
     ],
-    addTimeMarker: vis.params.addTimeMarker,
+    addTimeMarker: vis.params.addTimeMarker && (dimensions.x?.params as DateHistogramParams)?.date,
     orderBucketsBySum: vis.params.orderBucketsBySum,
     fittingFunction: vis.params.fittingFunction
       ? vis.params.fittingFunction.charAt(0).toUpperCase() + vis.params.fittingFunction.slice(1)
@@ -441,7 +443,13 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     detailedTooltip: vis.params.detailedTooltip,
     fillOpacity: vis.params.fillOpacity,
     showTooltip: vis.params.addTooltip,
-    markSizeRatio: dimensions.z ? vis.params.radiusRatio : undefined,
+    markSizeRatio:
+      dimensions.z &&
+      finalSeriesParams.some(
+        (param) => param.type === ChartType.Area || param.type === ChartType.Line
+      )
+        ? vis.params.radiusRatio * 0.6 // NOTE: downscale ratio to match current vislib implementation
+        : undefined,
     legend: prepareLengend(vis.params, legendSize),
     xAxisConfig: prepareXAxis(
       vis.params.categoryAxes[0],

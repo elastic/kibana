@@ -30,7 +30,7 @@ import {
 } from '@elastic/charts';
 import { IconType } from '@elastic/eui';
 import { PaletteRegistry } from '@kbn/coloring';
-import { RenderMode } from '@kbn/expressions-plugin/common';
+import { Datatable, RenderMode } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EmptyPlaceholder, LegendToggle } from '@kbn/charts-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
@@ -158,8 +158,27 @@ function getIconForSeriesType(layer: CommonXYDataLayerConfig): IconType {
         `${layer.seriesType}${layer.isHorizontal ? '_horizontal' : ''}${
           layer.isPercentage ? '_percentage' : ''
         }${layer.isStacked ? '_stacked' : ''}`
-    )!.icon || 'empty'
+    )?.icon || 'empty'
   );
+}
+
+function createSplitPoint(
+  accessor: string | number,
+  value: string | number,
+  rows: Datatable['rows'],
+  table: Datatable
+) {
+  const splitPointRowIndex = rows.findIndex((row) => {
+    return row[accessor] === value;
+  });
+  if (splitPointRowIndex !== -1) {
+    return {
+      row: splitPointRowIndex,
+      column: table.columns.findIndex((column) => column.id === accessor),
+      value: table.rows[splitPointRowIndex][accessor],
+      table,
+    };
+  }
 }
 
 export const XYChartReportable = React.memo(XYChart);
@@ -264,7 +283,8 @@ export function XYChart({
 
   const dataLayers: CommonXYDataLayerConfig[] = filteredLayers.filter(isDataLayer);
   const formattedDatatables = useMemo(
-    () => getFormattedTablesByLayers(dataLayers, formatFactory),
+    () =>
+      getFormattedTablesByLayers(dataLayers, formatFactory, splitColumnAccessor, splitRowAccessor),
     [dataLayers, formatFactory]
   );
 
@@ -463,7 +483,7 @@ export function XYChart({
     let max: number = NaN;
     if (extent.mode === 'custom') {
       const { inclusiveZeroError, boundaryError } = validateExtent(hasBarOrArea, extent);
-      if (!inclusiveZeroError && !boundaryError) {
+      if ((!inclusiveZeroError && !boundaryError) || extent.enforce) {
         min = extent.lowerBound ?? NaN;
         max = extent.upperBound ?? NaN;
       }
@@ -560,21 +580,44 @@ export function XYChart({
 
     if (xySeries.seriesKeys.length > 1) {
       xySeries.splitAccessors.forEach((value, accessor) => {
-        const splitPointRowIndex = formattedDatatables[layer.layerId].table.rows.findIndex(
-          (row) => {
-            return row[accessor] === value;
-          }
+        const point = createSplitPoint(
+          accessor,
+          value,
+          formattedDatatables[layer.layerId].table.rows,
+          table
         );
-        if (splitPointRowIndex !== -1) {
-          splitPoints.push({
-            row: splitPointRowIndex,
-            column: table.columns.findIndex((column) => column.id === accessor),
-            value: table.rows[splitPointRowIndex][accessor],
-            table,
-          });
+        if (point) {
+          splitPoints.push(point);
         }
       });
     }
+
+    if (xySeries.smHorizontalAccessorValue && splitColumnAccessor) {
+      const accessor = getAccessorByDimension(splitColumnAccessor, table.columns);
+      const point = createSplitPoint(
+        accessor,
+        xySeries.smHorizontalAccessorValue,
+        formattedDatatables[layer.layerId].table.rows,
+        table
+      );
+      if (point) {
+        splitPoints.push(point);
+      }
+    }
+
+    if (xySeries.smVerticalAccessorValue && splitRowAccessor) {
+      const accessor = getAccessorByDimension(splitRowAccessor, table.columns);
+      const point = createSplitPoint(
+        accessor,
+        xySeries.smVerticalAccessorValue,
+        formattedDatatables[layer.layerId].table.rows,
+        table
+      );
+      if (point) {
+        splitPoints.push(point);
+      }
+    }
+
     const context: FilterEvent['data'] = {
       data: [...points, ...splitPoints],
     };

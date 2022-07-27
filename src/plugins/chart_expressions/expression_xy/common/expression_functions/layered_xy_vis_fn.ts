@@ -21,15 +21,15 @@ import { appendLayerIds, getDataLayers } from '../helpers';
 
 export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers) => {
   const layers = appendLayerIds(args.layers ?? [], 'layers');
+  const dataLayers = getDataLayers(layers);
 
   // for visialize we should log one datable for all layers
-  if (handlers.getExecutionContext()?.name === 'visualize') {
+  if (dataLayers.every((l) => l.table === dataLayers[0].table)) {
     logDatatable(data, layers, handlers, args.splitColumnAccessor, args.splitRowAccessor);
   } else {
     logDatatables(layers, handlers, args.splitColumnAccessor, args.splitRowAccessor);
   }
 
-  const dataLayers = getDataLayers(layers);
   const hasBar = hasBarLayer(dataLayers);
   validateAddTimeMarker(dataLayers, args.addTimeMarker);
   validateMarkSizeRatioLimits(args.markSizeRatio);

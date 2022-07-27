@@ -7269,7 +7269,13 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   "convert": [MockFunction] {
                     "calls": Array [
                       Array [
+                        2,
+                      ],
+                      Array [
                         1652034840000,
+                      ],
+                      Array [
+                        5,
                       ],
                       Array [
                         1652122440000,
@@ -7278,7 +7284,15 @@ exports[`XYChart component split chart should render split chart if both, splitR
                     "results": Array [
                       Object {
                         "type": "return",
+                        "value": 2,
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 5,
                       },
                       Object {
                         "type": "return",
@@ -7313,6 +7327,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
         "formattedDatatables": Object {
           "first": Object {
             "formattedColumns": Object {
+              "b": true,
               "c": true,
             },
             "table": Object {
@@ -7633,7 +7648,13 @@ exports[`XYChart component split chart should render split chart if both, splitR
                     "convert": [MockFunction] {
                       "calls": Array [
                         Array [
+                          2,
+                        ],
+                        Array [
                           1652034840000,
+                        ],
+                        Array [
+                          5,
                         ],
                         Array [
                           1652122440000,
@@ -7642,7 +7663,15 @@ exports[`XYChart component split chart should render split chart if both, splitR
                       "results": Array [
                         Object {
                           "type": "return",
+                          "value": 2,
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652034840000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": 5,
                         },
                         Object {
                           "type": "return",
@@ -7738,7 +7767,13 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   "convert": [MockFunction] {
                     "calls": Array [
                       Array [
+                        2,
+                      ],
+                      Array [
                         1652034840000,
+                      ],
+                      Array [
+                        5,
                       ],
                       Array [
                         1652122440000,
@@ -7747,7 +7782,15 @@ exports[`XYChart component split chart should render split chart if both, splitR
                     "results": Array [
                       Object {
                         "type": "return",
+                        "value": 2,
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 5,
                       },
                       Object {
                         "type": "return",
@@ -7763,7 +7806,13 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   "convert": [MockFunction] {
                     "calls": Array [
                       Array [
+                        2,
+                      ],
+                      Array [
                         1652034840000,
+                      ],
+                      Array [
+                        5,
                       ],
                       Array [
                         1652122440000,
@@ -7772,7 +7821,15 @@ exports[`XYChart component split chart should render split chart if both, splitR
                     "results": Array [
                       Object {
                         "type": "return",
+                        "value": 2,
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 5,
                       },
                       Object {
                         "type": "return",
@@ -7788,7 +7845,13 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   "convert": [MockFunction] {
                     "calls": Array [
                       Array [
+                        2,
+                      ],
+                      Array [
                         1652034840000,
+                      ],
+                      Array [
+                        5,
                       ],
                       Array [
                         1652122440000,
@@ -7797,7 +7860,15 @@ exports[`XYChart component split chart should render split chart if both, splitR
                     "results": Array [
                       Object {
                         "type": "return",
+                        "value": 2,
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 5,
                       },
                       Object {
                         "type": "return",
@@ -7813,7 +7884,13 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   "convert": [MockFunction] {
                     "calls": Array [
                       Array [
+                        2,
+                      ],
+                      Array [
                         1652034840000,
+                      ],
+                      Array [
+                        5,
                       ],
                       Array [
                         1652122440000,
@@ -7822,7 +7899,15 @@ exports[`XYChart component split chart should render split chart if both, splitR
                     "results": Array [
                       Object {
                         "type": "return",
+                        "value": 2,
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 5,
                       },
                       Object {
                         "type": "return",
@@ -7838,7 +7923,13 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   "convert": [MockFunction] {
                     "calls": Array [
                       Array [
+                        2,
+                      ],
+                      Array [
                         1652034840000,
+                      ],
+                      Array [
+                        5,
                       ],
                       Array [
                         1652122440000,
@@ -7847,7 +7938,15 @@ exports[`XYChart component split chart should render split chart if both, splitR
                     "results": Array [
                       Object {
                         "type": "return",
+                        "value": 2,
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 5,
                       },
                       Object {
                         "type": "return",
@@ -7863,7 +7962,13 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   "convert": [MockFunction] {
                     "calls": Array [
                       Array [
+                        2,
+                      ],
+                      Array [
                         1652034840000,
+                      ],
+                      Array [
+                        5,
                       ],
                       Array [
                         1652122440000,
@@ -7872,7 +7977,15 @@ exports[`XYChart component split chart should render split chart if both, splitR
                     "results": Array [
                       Object {
                         "type": "return",
+                        "value": 2,
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 5,
                       },
                       Object {
                         "type": "return",
@@ -7888,7 +8001,13 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   "convert": [MockFunction] {
                     "calls": Array [
                       Array [
+                        2,
+                      ],
+                      Array [
                         1652034840000,
+                      ],
+                      Array [
+                        5,
                       ],
                       Array [
                         1652122440000,
@@ -7897,7 +8016,15 @@ exports[`XYChart component split chart should render split chart if both, splitR
                     "results": Array [
                       Object {
                         "type": "return",
+                        "value": 2,
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 5,
                       },
                       Object {
                         "type": "return",
@@ -7913,7 +8040,13 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   "convert": [MockFunction] {
                     "calls": Array [
                       Array [
+                        2,
+                      ],
+                      Array [
                         1652034840000,
+                      ],
+                      Array [
+                        5,
                       ],
                       Array [
                         1652122440000,
@@ -7922,7 +8055,15 @@ exports[`XYChart component split chart should render split chart if both, splitR
                     "results": Array [
                       Object {
                         "type": "return",
+                        "value": 2,
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 5,
                       },
                       Object {
                         "type": "return",
@@ -7939,6 +8080,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
           Object {
             "first": Object {
               "formattedColumns": Object {
+                "b": true,
                 "c": true,
               },
               "table": Object {
@@ -8155,7 +8297,13 @@ exports[`XYChart component split chart should render split chart if both, splitR
                 "convert": [MockFunction] {
                   "calls": Array [
                     Array [
+                      2,
+                    ],
+                    Array [
                       1652034840000,
+                    ],
+                    Array [
+                      5,
                     ],
                     Array [
                       1652122440000,
@@ -8164,7 +8312,15 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   "results": Array [
                     Object {
                       "type": "return",
+                      "value": 2,
+                    },
+                    Object {
+                      "type": "return",
                       "value": 1652034840000,
+                    },
+                    Object {
+                      "type": "return",
+                      "value": 5,
                     },
                     Object {
                       "type": "return",
@@ -8332,7 +8488,13 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   "convert": [MockFunction] {
                     "calls": Array [
                       Array [
+                        2,
+                      ],
+                      Array [
                         1652034840000,
+                      ],
+                      Array [
+                        5,
                       ],
                       Array [
                         1652122440000,
@@ -8341,7 +8503,15 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                     "results": Array [
                       Object {
                         "type": "return",
+                        "value": 2,
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 5,
                       },
                       Object {
                         "type": "return",
@@ -8376,6 +8546,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
         "formattedDatatables": Object {
           "first": Object {
             "formattedColumns": Object {
+              "b": true,
               "c": true,
             },
             "table": Object {
@@ -8689,7 +8860,13 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                     "convert": [MockFunction] {
                       "calls": Array [
                         Array [
+                          2,
+                        ],
+                        Array [
                           1652034840000,
+                        ],
+                        Array [
+                          5,
                         ],
                         Array [
                           1652122440000,
@@ -8698,7 +8875,15 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                       "results": Array [
                         Object {
                           "type": "return",
+                          "value": 2,
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652034840000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": 5,
                         },
                         Object {
                           "type": "return",
@@ -8794,7 +8979,13 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   "convert": [MockFunction] {
                     "calls": Array [
                       Array [
+                        2,
+                      ],
+                      Array [
                         1652034840000,
+                      ],
+                      Array [
+                        5,
                       ],
                       Array [
                         1652122440000,
@@ -8803,7 +8994,15 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                     "results": Array [
                       Object {
                         "type": "return",
+                        "value": 2,
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 5,
                       },
                       Object {
                         "type": "return",
@@ -8819,7 +9018,13 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   "convert": [MockFunction] {
                     "calls": Array [
                       Array [
+                        2,
+                      ],
+                      Array [
                         1652034840000,
+                      ],
+                      Array [
+                        5,
                       ],
                       Array [
                         1652122440000,
@@ -8828,7 +9033,15 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                     "results": Array [
                       Object {
                         "type": "return",
+                        "value": 2,
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 5,
                       },
                       Object {
                         "type": "return",
@@ -8844,7 +9057,13 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   "convert": [MockFunction] {
                     "calls": Array [
                       Array [
+                        2,
+                      ],
+                      Array [
                         1652034840000,
+                      ],
+                      Array [
+                        5,
                       ],
                       Array [
                         1652122440000,
@@ -8853,7 +9072,15 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                     "results": Array [
                       Object {
                         "type": "return",
+                        "value": 2,
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 5,
                       },
                       Object {
                         "type": "return",
@@ -8869,7 +9096,13 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   "convert": [MockFunction] {
                     "calls": Array [
                       Array [
+                        2,
+                      ],
+                      Array [
                         1652034840000,
+                      ],
+                      Array [
+                        5,
                       ],
                       Array [
                         1652122440000,
@@ -8878,7 +9111,15 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                     "results": Array [
                       Object {
                         "type": "return",
+                        "value": 2,
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 5,
                       },
                       Object {
                         "type": "return",
@@ -8894,7 +9135,13 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   "convert": [MockFunction] {
                     "calls": Array [
                       Array [
+                        2,
+                      ],
+                      Array [
                         1652034840000,
+                      ],
+                      Array [
+                        5,
                       ],
                       Array [
                         1652122440000,
@@ -8903,7 +9150,15 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                     "results": Array [
                       Object {
                         "type": "return",
+                        "value": 2,
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 5,
                       },
                       Object {
                         "type": "return",
@@ -8919,7 +9174,13 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   "convert": [MockFunction] {
                     "calls": Array [
                       Array [
+                        2,
+                      ],
+                      Array [
                         1652034840000,
+                      ],
+                      Array [
+                        5,
                       ],
                       Array [
                         1652122440000,
@@ -8928,7 +9189,15 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                     "results": Array [
                       Object {
                         "type": "return",
+                        "value": 2,
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 5,
                       },
                       Object {
                         "type": "return",
@@ -8944,7 +9213,13 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   "convert": [MockFunction] {
                     "calls": Array [
                       Array [
+                        2,
+                      ],
+                      Array [
                         1652034840000,
+                      ],
+                      Array [
+                        5,
                       ],
                       Array [
                         1652122440000,
@@ -8953,7 +9228,15 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                     "results": Array [
                       Object {
                         "type": "return",
+                        "value": 2,
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 5,
                       },
                       Object {
                         "type": "return",
@@ -8969,7 +9252,13 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   "convert": [MockFunction] {
                     "calls": Array [
                       Array [
+                        2,
+                      ],
+                      Array [
                         1652034840000,
+                      ],
+                      Array [
+                        5,
                       ],
                       Array [
                         1652122440000,
@@ -8978,7 +9267,15 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                     "results": Array [
                       Object {
                         "type": "return",
+                        "value": 2,
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 5,
                       },
                       Object {
                         "type": "return",
@@ -8995,6 +9292,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
           Object {
             "first": Object {
               "formattedColumns": Object {
+                "b": true,
                 "c": true,
               },
               "table": Object {
@@ -9209,7 +9507,13 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                 "convert": [MockFunction] {
                   "calls": Array [
                     Array [
+                      2,
+                    ],
+                    Array [
                       1652034840000,
+                    ],
+                    Array [
+                      5,
                     ],
                     Array [
                       1652122440000,
@@ -9218,7 +9522,15 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   "results": Array [
                     Object {
                       "type": "return",
+                      "value": 2,
+                    },
+                    Object {
+                      "type": "return",
                       "value": 1652034840000,
+                    },
+                    Object {
+                      "type": "return",
+                      "value": 5,
                     },
                     Object {
                       "type": "return",
@@ -9386,7 +9698,13 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                   "convert": [MockFunction] {
                     "calls": Array [
                       Array [
+                        2,
+                      ],
+                      Array [
                         1652034840000,
+                      ],
+                      Array [
+                        5,
                       ],
                       Array [
                         1652122440000,
@@ -9395,7 +9713,15 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                     "results": Array [
                       Object {
                         "type": "return",
+                        "value": 2,
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 5,
                       },
                       Object {
                         "type": "return",
@@ -9430,6 +9756,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
         "formattedDatatables": Object {
           "first": Object {
             "formattedColumns": Object {
+              "b": true,
               "c": true,
             },
             "table": Object {
@@ -9743,7 +10070,13 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                     "convert": [MockFunction] {
                       "calls": Array [
                         Array [
+                          2,
+                        ],
+                        Array [
                           1652034840000,
+                        ],
+                        Array [
+                          5,
                         ],
                         Array [
                           1652122440000,
@@ -9752,7 +10085,15 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                       "results": Array [
                         Object {
                           "type": "return",
+                          "value": 2,
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652034840000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": 5,
                         },
                         Object {
                           "type": "return",
@@ -9848,7 +10189,13 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                   "convert": [MockFunction] {
                     "calls": Array [
                       Array [
+                        2,
+                      ],
+                      Array [
                         1652034840000,
+                      ],
+                      Array [
+                        5,
                       ],
                       Array [
                         1652122440000,
@@ -9857,7 +10204,15 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                     "results": Array [
                       Object {
                         "type": "return",
+                        "value": 2,
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 5,
                       },
                       Object {
                         "type": "return",
@@ -9873,7 +10228,13 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                   "convert": [MockFunction] {
                     "calls": Array [
                       Array [
+                        2,
+                      ],
+                      Array [
                         1652034840000,
+                      ],
+                      Array [
+                        5,
                       ],
                       Array [
                         1652122440000,
@@ -9882,7 +10243,15 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                     "results": Array [
                       Object {
                         "type": "return",
+                        "value": 2,
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 5,
                       },
                       Object {
                         "type": "return",
@@ -9898,7 +10267,13 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                   "convert": [MockFunction] {
                     "calls": Array [
                       Array [
+                        2,
+                      ],
+                      Array [
                         1652034840000,
+                      ],
+                      Array [
+                        5,
                       ],
                       Array [
                         1652122440000,
@@ -9907,7 +10282,15 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                     "results": Array [
                       Object {
                         "type": "return",
+                        "value": 2,
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 5,
                       },
                       Object {
                         "type": "return",
@@ -9923,7 +10306,13 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                   "convert": [MockFunction] {
                     "calls": Array [
                       Array [
+                        2,
+                      ],
+                      Array [
                         1652034840000,
+                      ],
+                      Array [
+                        5,
                       ],
                       Array [
                         1652122440000,
@@ -9932,7 +10321,15 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                     "results": Array [
                       Object {
                         "type": "return",
+                        "value": 2,
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 5,
                       },
                       Object {
                         "type": "return",
@@ -9948,7 +10345,13 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                   "convert": [MockFunction] {
                     "calls": Array [
                       Array [
+                        2,
+                      ],
+                      Array [
                         1652034840000,
+                      ],
+                      Array [
+                        5,
                       ],
                       Array [
                         1652122440000,
@@ -9957,7 +10360,15 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                     "results": Array [
                       Object {
                         "type": "return",
+                        "value": 2,
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 5,
                       },
                       Object {
                         "type": "return",
@@ -9973,7 +10384,13 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                   "convert": [MockFunction] {
                     "calls": Array [
                       Array [
+                        2,
+                      ],
+                      Array [
                         1652034840000,
+                      ],
+                      Array [
+                        5,
                       ],
                       Array [
                         1652122440000,
@@ -9982,7 +10399,15 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                     "results": Array [
                       Object {
                         "type": "return",
+                        "value": 2,
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 5,
                       },
                       Object {
                         "type": "return",
@@ -9998,7 +10423,13 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                   "convert": [MockFunction] {
                     "calls": Array [
                       Array [
+                        2,
+                      ],
+                      Array [
                         1652034840000,
+                      ],
+                      Array [
+                        5,
                       ],
                       Array [
                         1652122440000,
@@ -10007,7 +10438,15 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                     "results": Array [
                       Object {
                         "type": "return",
+                        "value": 2,
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 5,
                       },
                       Object {
                         "type": "return",
@@ -10023,7 +10462,13 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                   "convert": [MockFunction] {
                     "calls": Array [
                       Array [
+                        2,
+                      ],
+                      Array [
                         1652034840000,
+                      ],
+                      Array [
+                        5,
                       ],
                       Array [
                         1652122440000,
@@ -10032,7 +10477,15 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                     "results": Array [
                       Object {
                         "type": "return",
+                        "value": 2,
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 5,
                       },
                       Object {
                         "type": "return",
@@ -10049,6 +10502,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
           Object {
             "first": Object {
               "formattedColumns": Object {
+                "b": true,
                 "c": true,
               },
               "table": Object {
@@ -10263,7 +10717,13 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 "convert": [MockFunction] {
                   "calls": Array [
                     Array [
+                      2,
+                    ],
+                    Array [
                       1652034840000,
+                    ],
+                    Array [
+                      5,
                     ],
                     Array [
                       1652122440000,
@@ -10272,7 +10732,15 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                   "results": Array [
                     Object {
                       "type": "return",
+                      "value": 2,
+                    },
+                    Object {
+                      "type": "return",
                       "value": 1652034840000,
+                    },
+                    Object {
+                      "type": "return",
+                      "value": 5,
                     },
                     Object {
                       "type": "return",

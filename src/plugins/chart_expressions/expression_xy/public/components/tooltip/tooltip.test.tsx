@@ -37,8 +37,8 @@ const getSeriesIdentifier = ({
   splitAccessors: seriesSplitAccessors,
   seriesKeys: [],
   key: '1',
-  smVerticalAccessorValue: splitColumnAccessor,
-  smHorizontalAccessorValue: splitRowAccessor,
+  smVerticalAccessorValue: splitRowAccessor,
+  smHorizontalAccessorValue: splitColumnAccessor,
 });
 
 describe('Tooltip', () => {

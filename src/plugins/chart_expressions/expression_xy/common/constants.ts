@@ -62,6 +62,7 @@ export const LineStyles = {
   SOLID: 'solid',
   DASHED: 'dashed',
   DOTTED: 'dotted',
+  DOT_DASHED: 'dot-dashed',
 } as const;
 
 export const FillStyles = {

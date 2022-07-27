@@ -87,21 +87,21 @@ export const Tooltip: FC<Props> = ({
 
   if (
     splitAccessors?.splitColumnAccessor &&
-    seriesIdentifier.smVerticalAccessorValue !== undefined
+    seriesIdentifier.smHorizontalAccessorValue !== undefined
   ) {
     data.push({
       label: layerTitles?.splitColumnTitles?.[splitAccessors?.splitColumnAccessor],
-      value: `${seriesIdentifier.smVerticalAccessorValue}`,
+      value: `${seriesIdentifier.smHorizontalAccessorValue}`,
     });
   }
 
   if (
     splitAccessors?.splitRowAccessor &&
-    seriesIdentifier.smHorizontalAccessorValue !== undefined
+    seriesIdentifier.smVerticalAccessorValue !== undefined
   ) {
     data.push({
       label: layerTitles?.splitRowTitles?.[splitAccessors?.splitRowAccessor],
-      value: `${seriesIdentifier.smHorizontalAccessorValue}`,
+      value: `${seriesIdentifier.smVerticalAccessorValue}`,
     });
   }
 
