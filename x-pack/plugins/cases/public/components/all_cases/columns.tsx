@@ -250,7 +250,7 @@ export const useCasesColumns = ({
             render: (caseOwner: CasesOwners) => {
               const ownerInfo = OWNER_INFO[caseOwner];
               return ownerInfo ? (
-                <EuiIcon size="s" type={ownerInfo.iconType} title={ownerInfo.label} />
+                <EuiIcon size="m" type={ownerInfo.iconType} title={ownerInfo.label} />
               ) : (
                 getEmptyTagValue()
               );
