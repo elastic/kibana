@@ -307,7 +307,7 @@ export const SearchBar: FC<SearchBarProps> = ({
         append: showAppend ? (
           <EuiFormLabel
             title={keyboardShortcutTooltip}
-            css={{ fontFamily: euiTheme.font.familyCode }}
+            css={{ fontFamily: euiTheme.font.familyCode, position: 'absolute', right: 0 }}
           >
             {isMac ? '⌘/' : '^/'}
           </EuiFormLabel>
