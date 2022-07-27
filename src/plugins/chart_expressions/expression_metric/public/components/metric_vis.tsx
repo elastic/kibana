@@ -301,7 +301,7 @@ export const MetricVis = ({
     // In the editor, we constrain the maximum size of the tiles for aesthetic reasons
     const maxTileSideLength = metricConfigs.flat().length > 1 ? 200 : 300;
     pixelHeight = grid.length * maxTileSideLength;
-    pixelWidth = grid[0].length * maxTileSideLength;
+    pixelWidth = grid[0]?.length * maxTileSideLength;
   }
 
   // force chart to re-render to circumvent a charts bug
