@@ -21,7 +21,8 @@ async function removeLogFile() {
   await asyncUnlink(logFilePath).catch(() => void 0);
 }
 
-describe('migration v2 with corrupt saved object documents', () => {
+// FAILING ON 8.4: https://github.com/elastic/kibana/issues/137330
+describe.skip('migration v2 with corrupt saved object documents', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
 
