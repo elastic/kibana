@@ -11,6 +11,8 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
+  const kibanaServer = getService('kibanaServer');
+  const browser = getService('browser');
   const PageObjects = getPageObjects([
     'common',
     'header',
@@ -18,9 +20,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'visChart',
     'searchSessionsManagement',
   ]);
+  const toasts = getService('toasts');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const searchSessions = getService('searchSessions');
   const retry = getService('retry');
+  const listingTable = getService('listingTable');
+  const testSubjects = getService('testSubjects');
+  const elasticChart = getService('elasticChart');
 
   describe('Session and searches integration', () => {
     before(async function () {
@@ -128,6 +134,69 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         .catch((e) => e);
       expect(searchNotFoundError.name).to.be('ResponseError');
       expect(searchNotFoundError.meta.body.error.type).to.be('resource_not_found_exception');
+    });
+
+    describe('Slow lens with other bucket', () => {
+      before(async function () {
+        await kibanaServer.uiSettings.unset('search:timeout');
+        await PageObjects.common.navigateToApp('dashboard', { insertTimestamp: false });
+        await browser.execute(() => {
+          window.ELASTIC_LENS_DELAY_SECONDS = 25;
+        });
+        await elasticChart.setNewChartUiDebugFlag(true);
+      });
+
+      after(async function () {
+        await browser.execute(() => {
+          window.ELASTIC_LENS_DELAY_SECONDS = undefined;
+        });
+        await kibanaServer.uiSettings.replace({ 'search:timeout': 10000 });
+      });
+
+      it('Other bucket should be added to a session when restoring', async () => {
+        // not using regular navigation method, because don't want to wait until all panels load
+        // await PageObjects.dashboard.loadSavedDashboard('Lens with other bucket');
+        await listingTable.clickItemLink('dashboard', 'Lens with other bucket');
+        await testSubjects.missingOrFail('dashboardLandingPage');
+
+        await searchSessions.expectState('loading');
+        await searchSessions.save();
+        await searchSessions.expectState('backgroundLoading');
+
+        const savedSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(
+          'Lens with other bucket'
+        );
+
+        await searchSessions.openPopover();
+        await searchSessions.viewSearchSessions();
+
+        let searchSessionList = await PageObjects.searchSessionsManagement.getList();
+        let searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
+        expect(searchSessionItem.searchesCount).to.be(1);
+
+        await searchSessionItem.view();
+
+        // Check that session is still loading
+        await searchSessions.expectState('backgroundLoading');
+        expect(await toasts.getToastCount()).to.be(1); // there should be a session restoration warnings related to other bucket
+        await toasts.dismissAllToasts();
+
+        // check that other bucket requested add to a session
+        await searchSessions.openPopover();
+        await searchSessions.viewSearchSessions();
+
+        searchSessionList = await PageObjects.searchSessionsManagement.getList();
+        searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
+        expect(searchSessionItem.searchesCount).to.be(2);
+
+        await searchSessionItem.view();
+        expect(await toasts.getToastCount()).to.be(0); // there should be no warnings
+        await searchSessions.expectState('restored', 20000);
+        await testSubjects.missingOrFail('embeddableError');
+
+        const data = await elasticChart.getChartDebugData();
+        expect(data!.bars![0].bars.length).to.eql(4);
+      });
     });
   });
 }
