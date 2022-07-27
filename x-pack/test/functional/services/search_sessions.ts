@@ -50,14 +50,18 @@ export class SearchSessionsService extends FtrService {
     await expect(await (await this.find()).getAttribute('data-save-disabled')).to.be('true');
   }
 
-  public async expectState(state: SessionStateType) {
-    return this.retry.waitFor(`searchSessions indicator to get into state = ${state}`, async () => {
-      const currentState = await (
-        await this.testSubjects.find(SEARCH_SESSION_INDICATOR_TEST_SUBJ)
-      ).getAttribute('data-state');
-      this.log.info(`searchSessions state current: ${currentState} expected: ${state}`);
-      return currentState === state;
-    });
+  public async expectState(state: SessionStateType, timeout = 10000) {
+    return this.retry.waitForWithTimeout(
+      `searchSessions indicator to get into state = ${state}`,
+      timeout,
+      async () => {
+        const currentState = await (
+          await this.testSubjects.find(SEARCH_SESSION_INDICATOR_TEST_SUBJ)
+        ).getAttribute('data-state');
+        this.log.info(`searchSessions state current: ${currentState} expected: ${state}`);
+        return currentState === state;
+      }
+    );
   }
 
   public async viewSearchSessions() {
