@@ -13,10 +13,10 @@ import {
   RULE_CHECKBOX,
   RULES_TAGS_POPOVER_BTN,
   TOASTER_BODY,
+  MODAL_ERROR_BODY,
 } from '../../screens/alerts_detection_rules';
 
 import {
-  RULES_BULK_EDIT_OVERWRITE_INDEX_PATTERNS_CHECKBOX,
   RULES_BULK_EDIT_INDEX_PATTERNS_WARNING,
   RULES_BULK_EDIT_TAGS_WARNING,
   TAGS_RULE_BULK_MENU_ITEM,
@@ -36,11 +36,10 @@ import {
   loadPrebuiltDetectionRulesFromHeaderBtn,
   switchToElasticRules,
   confirmConfirmationModal,
+  clickErrorToastBtn,
 } from '../../tasks/alerts_detection_rules';
 
 import {
-  openBulkEditAddIndexPatternsForm,
-  openBulkEditDeleteIndexPatternsForm,
   typeIndexPatterns,
   waitForBulkEditActionToFinish,
   confirmBulkEditForm,
@@ -84,10 +83,8 @@ import { esArchiverResetKibana } from '../../tasks/es_archiver';
 
 const RULE_NAME = 'Custom rule for bulk actions';
 
-const CUSTOM_INDEX_PATTERN_1 = 'custom-cypress-test-*';
 const defaultIndexPatterns = ['index-1-*', 'index-2-*'];
 const defaultTags = ['test-default-tag-1', 'test-default-tag-2'];
-const OVERWRITE_INDEX_PATTERNS = ['overwrite-index-1-*', 'overwrite-index-2-*'];
 
 const expectedNumberOfCustomRulesToBeEdited = 6;
 const expectedNumberOfMachineLearningRulesToBeEdited = 1;
@@ -339,7 +336,7 @@ describe('Detection rules, bulk edit', () => {
       hasIndexPatterns(indexPatternsLeftNotDeleted.join(''));
     });
 
-    it.only('Delete all index patterns from custom rules', () => {
+    it('Delete all index patterns from custom rules', () => {
       selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
 
       // confirm editing custom rules, that are not Machine Learning
@@ -349,13 +346,12 @@ describe('Detection rules, bulk edit', () => {
       typeIndexPatterns(defaultIndexPatterns);
       confirmBulkEditForm();
 
-      // error should be displayed that index patterns property can't be empy
-      // cy.contains(TOASTER_BODY, `You've successfully updated ${rulesCount} rule`);
-      // waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfNotMLRules });
+      // error toast should be displayed that that rules edit failed
+      cy.contains(TOASTER_BODY, `${expectedNumberOfNotMLRules} rules failed to update.`);
 
-      // // check if rule has been updated
-      // goToTheRuleDetailsOf(RULE_NAME);
-      // hasIndexPatterns(indexPatternsLeftNotDeleted.join(''));
+      // on error toast button click display error that index patterns can't be empty
+      clickErrorToastBtn();
+      cy.contains(MODAL_ERROR_BODY, "Index patterns can't be empty");
     });
   });
 

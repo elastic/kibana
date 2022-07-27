@@ -102,6 +102,8 @@ export const MODAL_CONFIRMATION_TITLE = '[data-test-subj="confirmModalTitleText"
 
 export const MODAL_CONFIRMATION_BODY = '[data-test-subj="confirmModalBodyText"]';
 
+export const MODAL_ERROR_BODY = '[data-test-subj="errorModalBody"]';
+
 export const MODAL_CONFIRMATION_CANCEL_BTN = '[data-test-subj="confirmModalCancelButton"]';
 
 export const RULE_DETAILS_DELETE_BTN = '[data-test-subj="rules-details-delete-rule"]';
@@ -119,6 +121,8 @@ export const INPUT_FILE = 'input[type=file]';
 export const TOASTER = '[data-test-subj="euiToastHeader"]';
 
 export const TOASTER_BODY = '[data-test-subj="globalToastList"] .euiToastBody';
+
+export const TOASTER_ERROR_BTN = '[data-test-subj="errorToastBtn"]';
 
 export const RULE_IMPORT_OVERWRITE_CHECKBOX = '[id="import-data-modal-checkbox-label"]';
 

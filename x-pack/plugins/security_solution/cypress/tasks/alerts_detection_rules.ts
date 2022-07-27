@@ -53,6 +53,7 @@ import {
   REFRESH_SETTINGS_SWITCH,
   ELASTIC_RULES_BTN,
   BULK_EXPORT_ACTION_BTN,
+  TOASTER_ERROR_BTN,
 } from '../screens/alerts_detection_rules';
 import { ALL_ACTIONS } from '../screens/rule_details';
 import { LOADING_INDICATOR } from '../screens/security_header';
@@ -354,4 +355,8 @@ export const bulkExportRules = () => {
 export const confirmConfirmationModal = () => {
   cy.get(MODAL_CONFIRMATION_BTN).click();
   cy.get(RULES_DELETE_CONFIRMATION_MODAL).should('not.exist');
+};
+
+export const clickErrorToastBtn = () => {
+  cy.get(TOASTER_ERROR_BTN).click();
 };
