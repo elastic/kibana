@@ -35,11 +35,12 @@ export { removeWriteBlock } from './remove_write_block';
 export type { CloneIndexResponse, CloneIndexParams } from './clone_index';
 export { cloneIndex } from './clone_index';
 
-export type {
-  WaitForIndexStatusYellowParams,
-  IndexNotYellowTimeout,
-} from './wait_for_index_status_yellow';
-import { IndexNotYellowTimeout, waitForIndexStatusYellow } from './wait_for_index_status_yellow';
+export type { WaitForIndexStatusParams, IndexNotYellowTimeout } from './wait_for_index_status';
+import {
+  type IndexNotGreenTimeout,
+  type IndexNotYellowTimeout,
+  waitForIndexStatus,
+} from './wait_for_index_status';
 
 export type { WaitForTaskResponse, WaitForTaskCompletionTimeout } from './wait_for_task';
 import { waitForTask, WaitForTaskCompletionTimeout } from './wait_for_task';
@@ -48,7 +49,7 @@ export type { UpdateByQueryResponse } from './pickup_updated_mappings';
 import { pickupUpdatedMappings } from './pickup_updated_mappings';
 
 export type { OpenPitResponse, OpenPitParams } from './open_pit';
-export { openPit, pitKeepAlive } from './open_pit';
+export { openPit } from './open_pit';
 
 export type { ReadWithPit, ReadWithPitParams } from './read_with_pit';
 export { readWithPit } from './read_with_pit';
@@ -68,9 +69,6 @@ export { reindex } from './reindex';
 import type { IncompatibleMappingException } from './wait_for_reindex_task';
 
 export { waitForReindexTask } from './wait_for_reindex_task';
-
-export type { VerifyReindexParams } from './verify_reindex';
-export { verifyReindex } from './verify_reindex';
 
 import type { AliasNotFound, RemoveIndexNotAConcreteIndex } from './update_aliases';
 
@@ -114,7 +112,7 @@ export type {
 } from './calculate_exclude_filters';
 export { calculateExcludeFilters } from './calculate_exclude_filters';
 
-export { pickupUpdatedMappings, waitForTask, waitForIndexStatusYellow };
+export { pickupUpdatedMappings, waitForTask, waitForIndexStatus };
 export type { AliasNotFound, RemoveIndexNotAConcreteIndex };
 
 export interface IndexNotFound {
@@ -153,6 +151,7 @@ export interface ActionErrorTypeMap {
   request_entity_too_large_exception: RequestEntityTooLargeException;
   unknown_docs_found: UnknownDocsFound;
   incompatible_cluster_routing_allocation: IncompatibleClusterRoutingAllocation;
+  index_not_green_timeout: IndexNotGreenTimeout;
   index_not_yellow_timeout: IndexNotYellowTimeout;
   cluster_shard_limit_exceeded: ClusterShardLimitExceeded;
 }
