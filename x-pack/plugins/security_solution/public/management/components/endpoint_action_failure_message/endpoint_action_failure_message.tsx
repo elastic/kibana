@@ -13,9 +13,7 @@ import { endpointActionResponseCodes } from '../endpoint_responder/endpoint_acti
 import type { ActionDetails, MaybeImmutable } from '../../../../common/endpoint/types';
 
 interface EndpointActionFailureMessageProps {
-  action: MaybeImmutable<
-    ActionDetails<{ code?: string & keyof typeof endpointActionResponseCodes }>
-  >;
+  action: MaybeImmutable<ActionDetails<{ code?: string }>>;
 }
 
 export const EndpointActionFailureMessage = memo<EndpointActionFailureMessageProps>(

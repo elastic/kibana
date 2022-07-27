@@ -7,10 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-/**
- * A map of possible code's that can be returned from the endpoint for response actions
- */
-export const endpointActionResponseCodes = Object.freeze({
+const CODES = Object.freeze({
   // -----------------------------------------------------------------
   // SUSPEND-PROCESS CODES
   // -----------------------------------------------------------------
@@ -34,7 +31,7 @@ export const endpointActionResponseCodes = Object.freeze({
 
   'ra_kill-process_success_no-action': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.killProcess.noActionSuccess',
-    { defaultMessage: 'The provided process was not found or already killed' }
+    { defaultMessage: 'Action completed. The provided process was not found or already killed' }
   ),
 
   'ra_kill-process_error_not-permitted': i18n.translate(
@@ -42,3 +39,9 @@ export const endpointActionResponseCodes = Object.freeze({
     { defaultMessage: 'The provided process cannot be killed' }
   ),
 });
+
+/**
+ * A map of possible code's that can be returned from the endpoint for response actions
+ */
+export const endpointActionResponseCodes: Readonly<Record<string | keyof typeof CODES, string>> =
+  CODES;

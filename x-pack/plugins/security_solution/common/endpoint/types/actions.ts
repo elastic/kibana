@@ -32,6 +32,20 @@ export interface GetProcessesActionOutputContent {
   entries: ProcessesEntry[];
 }
 
+export interface SuspendProcessActionOutputContent {
+  code: string;
+  command?: string;
+  pid?: number;
+  entity_id?: string;
+}
+
+export interface KillProcessActionOutputContent {
+  code: string;
+  command?: string;
+  pid?: number;
+  entity_id?: string;
+}
+
 export const RESPONSE_ACTION_COMMANDS = [
   'isolate',
   'unisolate',
