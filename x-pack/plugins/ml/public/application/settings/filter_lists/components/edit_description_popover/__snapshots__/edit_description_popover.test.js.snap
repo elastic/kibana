@@ -16,7 +16,7 @@ exports[`FilterListUsagePopover opens the popover onButtonClick 1`] = `
       />
     }
     closePopover={[Function]}
-    display="inlineBlock"
+    display="inline-block"
     hasArrow={true}
     id="filter_list_description_popover"
     initialFocus="#filter_list_edit_description_row"
@@ -77,7 +77,7 @@ exports[`FilterListUsagePopover renders the popover with a description 1`] = `
       />
     }
     closePopover={[Function]}
-    display="inlineBlock"
+    display="inline-block"
     hasArrow={true}
     id="filter_list_description_popover"
     initialFocus="#filter_list_edit_description_row"
@@ -138,7 +138,7 @@ exports[`FilterListUsagePopover renders the popover with no description 1`] = `
       />
     }
     closePopover={[Function]}
-    display="inlineBlock"
+    display="inline-block"
     hasArrow={true}
     id="filter_list_description_popover"
     initialFocus="#filter_list_edit_description_row"

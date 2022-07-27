@@ -14,7 +14,7 @@ exports[`FilterListUsagePopover opens the popover onButtonClick 1`] = `
       </EuiButtonEmpty>
     }
     closePopover={[Function]}
-    display="inlineBlock"
+    display="inline-block"
     hasArrow={true}
     id="detector_filter_list_usage"
     isOpen={true}
@@ -57,7 +57,7 @@ exports[`FilterListUsagePopover renders the popover for 1 job 1`] = `
       </EuiButtonEmpty>
     }
     closePopover={[Function]}
-    display="inlineBlock"
+    display="inline-block"
     hasArrow={true}
     id="job_filter_list_usage"
     isOpen={false}
@@ -90,7 +90,7 @@ exports[`FilterListUsagePopover renders the popover for 2 detectors 1`] = `
       </EuiButtonEmpty>
     }
     closePopover={[Function]}
-    display="inlineBlock"
+    display="inline-block"
     hasArrow={true}
     id="detector_filter_list_usage"
     isOpen={false}

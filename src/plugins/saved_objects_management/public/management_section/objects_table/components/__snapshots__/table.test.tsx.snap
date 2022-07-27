@@ -57,7 +57,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             </EuiButton>
           }
           closePopover={[Function]}
-          display="inlineBlock"
+          display="inline-block"
           hasArrow={true}
           isOpen={false}
           ownFocus={true}
@@ -292,7 +292,7 @@ exports[`Table should render normally 1`] = `
             </EuiButton>
           }
           closePopover={[Function]}
-          display="inlineBlock"
+          display="inline-block"
           hasArrow={true}
           isOpen={false}
           ownFocus={true}
