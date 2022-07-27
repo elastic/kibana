@@ -16,7 +16,7 @@ import { filterFieldToList } from '../filter_field_to_list';
 import { getGenericComboBoxProps } from '../get_generic_combo_box_props';
 
 // TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/100715
-// import { HttpStart } from 'kibana/public';
+// import { HttpStart } from '@kbn/core/public';
 type HttpStart = any;
 
 import * as i18n from '../translations';

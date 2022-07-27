@@ -96,6 +96,9 @@ export const HOST_ISOLATION_EXCEPTIONS = i18n.translate(
 export const DETECT = i18n.translate('xpack.securitySolution.navigation.detect', {
   defaultMessage: 'Detect',
 });
+export const FINDINGS = i18n.translate('xpack.securitySolution.navigation.findings', {
+  defaultMessage: 'Findings',
+});
 export const EXPLORE = i18n.translate('xpack.securitySolution.navigation.explore', {
   defaultMessage: 'Explore',
 });
@@ -138,3 +141,10 @@ export const NO_PERMISSIONS_MSG = (subPluginKey: string) =>
 export const NO_PERMISSIONS_TITLE = i18n.translate('xpack.securitySolution.noPermissionsTitle', {
   defaultMessage: 'Privileges required',
 });
+
+export const THREAT_INTELLIGENCE = i18n.translate(
+  'xpack.securitySolution.navigation.threatIntelligence',
+  {
+    defaultMessage: 'Threat Intelligence',
+  }
+);

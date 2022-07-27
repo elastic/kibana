@@ -113,7 +113,7 @@ export const getEndpointResponseActionsConsoleCommands = (
     {
       name: 'kill-process',
       about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.killProcess.about', {
-        defaultMessage: 'Kill a running process. Accepts either a PID or an entity id.',
+        defaultMessage: 'Kill/terminate a process',
       }),
       RenderComponent: KillProcessActionResult,
       meta: {
@@ -157,7 +157,7 @@ export const getEndpointResponseActionsConsoleCommands = (
     {
       name: 'suspend-process',
       about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.suspendProcess.about', {
-        defaultMessage: 'Suspend a running process. Accepts either a PID or an entity id.',
+        defaultMessage: 'Temporarily suspend a process',
       }),
       RenderComponent: SuspendProcessActionResult,
       meta: {
@@ -204,7 +204,7 @@ export const getEndpointResponseActionsConsoleCommands = (
     {
       name: 'status',
       about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.status.about', {
-        defaultMessage: 'Display the latest status information for the Endpoint',
+        defaultMessage: 'Show host status information',
       }),
       RenderComponent: EndpointStatusActionResult,
       meta: {
@@ -217,7 +217,7 @@ export const getEndpointResponseActionsConsoleCommands = (
     {
       name: 'processes',
       about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.processes.about', {
-        defaultMessage: 'Display the processes on the endpoint',
+        defaultMessage: 'Show all running processes',
       }),
       RenderComponent: GetProcessesActionResult,
       meta: {

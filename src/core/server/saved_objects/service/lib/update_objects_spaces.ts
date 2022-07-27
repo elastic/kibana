@@ -12,14 +12,15 @@ import intersection from 'lodash/intersection';
 
 import type { Logger } from '@kbn/logging';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
+import type {
+  SavedObjectsUpdateObjectsSpacesObject,
+  SavedObjectsUpdateObjectsSpacesOptions,
+  SavedObjectsUpdateObjectsSpacesResponse,
+  SavedObjectsUpdateObjectsSpacesResponseObject,
+} from '@kbn/core-saved-objects-api-server';
 import type { IndexMapping } from '../../mappings';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type { SavedObjectsRawDocSource, SavedObjectsSerializer } from '../../serialization';
-import type {
-  MutatingOperationRefreshSetting,
-  SavedObjectError,
-  SavedObjectsBaseOptions,
-} from '../../types';
 import type { DecoratedError } from './errors';
 import { SavedObjectsErrorHelpers } from './errors';
 import {
@@ -35,65 +36,6 @@ import type { RepositoryEsClient } from './repository_es_client';
 import { ALL_NAMESPACES_STRING } from './utils';
 import type { DeleteLegacyUrlAliasesParams } from './legacy_url_aliases';
 import { deleteLegacyUrlAliases } from './legacy_url_aliases';
-
-/**
- * An object that should have its spaces updated.
- *
- * @public
- */
-export interface SavedObjectsUpdateObjectsSpacesObject {
-  /** The type of the object to update */
-  id: string;
-  /** The ID of the object to update */
-  type: string;
-  /**
-   * The space(s) that the object to update currently exists in. This is only intended to be used by SOC wrappers.
-   *
-   * @internal
-   */
-  spaces?: string[];
-  /**
-   * The version of the object to update; this is used for optimistic concurrency control. This is only intended to be used by SOC wrappers.
-   *
-   * @internal
-   */
-  version?: string;
-}
-
-/**
- * Options for the update operation.
- *
- * @public
- */
-export interface SavedObjectsUpdateObjectsSpacesOptions extends SavedObjectsBaseOptions {
-  /** The Elasticsearch Refresh setting for this operation */
-  refresh?: MutatingOperationRefreshSetting;
-}
-
-/**
- * The response when objects' spaces are updated.
- *
- * @public
- */
-export interface SavedObjectsUpdateObjectsSpacesResponse {
-  objects: SavedObjectsUpdateObjectsSpacesResponseObject[];
-}
-
-/**
- * Details about a specific object's update result.
- *
- * @public
- */
-export interface SavedObjectsUpdateObjectsSpacesResponseObject {
-  /** The type of the referenced object */
-  type: string;
-  /** The ID of the referenced object */
-  id: string;
-  /** The space(s) that the referenced object exists in */
-  spaces: string[];
-  /** Included if there was an error updating this object's spaces */
-  error?: SavedObjectError;
-}
 
 /**
  * Parameters for the updateObjectsSpaces function.
