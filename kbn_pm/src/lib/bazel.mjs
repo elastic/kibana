@@ -56,7 +56,7 @@ function throwBazelError(log, name, code, output) {
 async function runBazel(log, inputArgs, opts = undefined) {
   const bazel = (await getBazelRunner()).runBazel;
 
-  const args = [...(opts?.offline ? ['--config=offline'] : []), ...inputArgs];
+  const args = [...inputArgs, ...(opts?.offline ? ['--config=offline'] : [])];
   log.debug(`> bazel ${args.join(' ')}`);
   await bazel(args, {
     env: opts?.env,
