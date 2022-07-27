@@ -24,7 +24,7 @@ import {
   useBaseEsQuery,
   usePersistedQuery,
 } from '../utils/utils';
-import { PageWrapper, PageTitle, PageTitleText } from '../layout/findings_layout';
+import { PageTitle, PageTitleText } from '../layout/findings_layout';
 import { FindingsGroupBySelector } from '../layout/findings_group_by_selector';
 import { useUrlQuery } from '../../../common/hooks/use_url_query';
 import { ErrorCallout } from '../layout/error_callout';
@@ -88,80 +88,78 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
         }}
         loading={findingsGroupByNone.isFetching}
       />
-      <PageWrapper>
-        <LatestFindingsPageTitle />
-        {error && <ErrorCallout error={error} />}
-        {!error && (
-          <>
-            <FindingsGroupBySelector type="default" />
-            {findingsGroupByNone.isSuccess && !!findingsGroupByNone.data.page.length && (
-              <FindingsDistributionBar
-                {...{
-                  type: i18n.translate('xpack.csp.findings.latestFindings.tableRowTypeLabel', {
-                    defaultMessage: 'Findings',
-                  }),
-                  total: findingsGroupByNone.data.total,
-                  passed: findingsGroupByNone.data.count.passed,
-                  failed: findingsGroupByNone.data.count.failed,
-                  ...getFindingsPageSizeInfo({
-                    pageIndex: urlQuery.pageIndex,
-                    pageSize: urlQuery.pageSize,
-                    currentPageSize: findingsGroupByNone.data.page.length,
-                  }),
-                }}
-              />
-            )}
-            <EuiSpacer />
-            <FindingsTable
-              loading={findingsGroupByNone.isFetching}
-              items={findingsGroupByNone.data?.page || []}
-              pagination={getPaginationTableParams({
-                pageSize: urlQuery.pageSize,
-                pageIndex: urlQuery.pageIndex,
-                totalItemCount: limitedTotalItemCount,
-              })}
-              sorting={{
-                sort: { field: urlQuery.sort.field, direction: urlQuery.sort.direction },
+      <LatestFindingsPageTitle />
+      {error && <ErrorCallout error={error} />}
+      {!error && (
+        <>
+          <FindingsGroupBySelector type="default" />
+          {findingsGroupByNone.isSuccess && !!findingsGroupByNone.data.page.length && (
+            <FindingsDistributionBar
+              {...{
+                type: i18n.translate('xpack.csp.findings.latestFindings.tableRowTypeLabel', {
+                  defaultMessage: 'Findings',
+                }),
+                total: findingsGroupByNone.data.total,
+                passed: findingsGroupByNone.data.count.passed,
+                failed: findingsGroupByNone.data.count.failed,
+                ...getFindingsPageSizeInfo({
+                  pageIndex: urlQuery.pageIndex,
+                  pageSize: urlQuery.pageSize,
+                  currentPageSize: findingsGroupByNone.data.page.length,
+                }),
               }}
-              setTableOptions={({ page, sort }) =>
-                setUrlQuery({
-                  sort,
-                  pageIndex: page.index,
-                  pageSize: page.size,
-                })
-              }
-              onAddFilter={(field, value, negate) =>
-                setUrlQuery({
-                  pageIndex: 0,
-                  filters: getFilters({
-                    filters: urlQuery.filters,
-                    dataView,
-                    field,
-                    value,
-                    negate,
-                  }),
-                })
-              }
             />
-            {isLastLimitedPage && (
-              <>
-                <EuiSpacer size="xxl" />
-                <EuiBottomBar data-test-subj="test-bottom-bar">
-                  <EuiText textAlign="center">
-                    <FormattedMessage
-                      id="xpack.csp.findings.latestFindings.bottomBarLabel"
-                      defaultMessage="These are the first {maxItems} findings matching your search, refine your search to see others."
-                      values={{
-                        maxItems: MAX_ITEMS,
-                      }}
-                    />
-                  </EuiText>
-                </EuiBottomBar>
-              </>
-            )}
-          </>
-        )}
-      </PageWrapper>
+          )}
+          <EuiSpacer />
+          <FindingsTable
+            loading={findingsGroupByNone.isFetching}
+            items={findingsGroupByNone.data?.page || []}
+            pagination={getPaginationTableParams({
+              pageSize: urlQuery.pageSize,
+              pageIndex: urlQuery.pageIndex,
+              totalItemCount: findingsGroupByNone.data?.total || 0,
+            })}
+            sorting={{
+              sort: { field: urlQuery.sort.field, direction: urlQuery.sort.direction },
+            }}
+            setTableOptions={({ page, sort }) =>
+              setUrlQuery({
+                sort,
+                pageIndex: page.index,
+                pageSize: page.size,
+              })
+            }
+            onAddFilter={(field, value, negate) =>
+              setUrlQuery({
+                pageIndex: 0,
+                filters: getFilters({
+                  filters: urlQuery.filters,
+                  dataView,
+                  field,
+                  value,
+                  negate,
+                }),
+              })
+            }
+          />
+          {isLastLimitedPage && (
+            <>
+              <EuiSpacer size="xxl" />
+              <EuiBottomBar data-test-subj="test-bottom-bar">
+                <EuiText textAlign="center">
+                  <FormattedMessage
+                    id="xpack.csp.findings.latestFindings.bottomBarLabel"
+                    defaultMessage="These are the first {maxItems} findings matching your search, refine your search to see others."
+                    values={{
+                      maxItems: MAX_ITEMS,
+                    }}
+                  />
+                </EuiText>
+              </EuiBottomBar>
+            </>
+          )}
+        </>
+      )}
     </div>
   );
 };
