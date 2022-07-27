@@ -12,14 +12,12 @@ import * as i18n from './translations';
 import endpointSvg from '../../images/endpoint1.svg';
 import cloudSvg from '../../images/cloud1.svg';
 import siemSvg from '../../images/siem1.svg';
-import videoSvg from '../../images/video.svg';
 import { ADD_DATA_PATH } from '../../../../common/constants';
 import { useKibana } from '../../lib/kibana';
 
 const imgUrls = {
   cloud: cloudSvg,
   siem: siemSvg,
-  video: videoSvg,
   endpoint: endpointSvg,
 };
 
