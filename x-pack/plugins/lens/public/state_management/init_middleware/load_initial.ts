@@ -157,40 +157,6 @@ export function loadInitial(
         });
         redirectCallback();
       });
-    // return initializeDatasources(datasourceMap, lens.datasourceStates, undefined, initialContext, {
-    //   isFullEditor: true,
-    // })
-    //   .then((result) => {
-    //     store.dispatch(
-    //       initEmpty({
-    //         newState: {
-    //           ...emptyState,
-    //           searchSessionId: data.search.session.getSessionId() || data.search.session.start(),
-    //           datasourceStates: Object.entries(result).reduce(
-    //             (state, [datasourceId, datasourceState]) => ({
-    //               ...state,
-    //               [datasourceId]: {
-    //                 ...datasourceState,
-    //                 isLoading: false,
-    //               },
-    //             }),
-    //             {}
-    //           ),
-    //           isLoading: false,
-    //         },
-    //         initialContext,
-    //       })
-    //     );
-    //     if (autoApplyDisabled) {
-    //       store.dispatch(disableAutoApply());
-    //     }
-    //   })
-    //   .catch((e: { message: string }) => {
-    //     notifications.toasts.addDanger({
-    //       title: e.message,
-    //     });
-    //     redirectCallback();
-    //   });
   }
 
   getPersisted({ initialInput, lensServices, history })
@@ -221,15 +187,6 @@ export function loadInitial(
           // Don't overwrite any pinned filters
           data.query.filterManager.setAppFilters(filters);
 
-          // initializeDatasources(
-          //   datasourceMap,
-          //   docDatasourceStates,
-          //   doc.references,
-          //   initialContext,
-          //   {
-          //     isFullEditor: true,
-          //   }
-          // )
           initializeSources(
             {
               datasourceMap,

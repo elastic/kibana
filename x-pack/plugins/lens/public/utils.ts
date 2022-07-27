@@ -111,23 +111,6 @@ export async function refreshIndexPatternsList({
   });
 }
 
-// export function refreshIndexPatternsList({
-//   activeDatasources,
-//   indexPatternId,
-//   setDatasourceState,
-// }: {
-//   activeDatasources: Record<string, Datasource>;
-//   indexPatternId: string;
-//   setDatasourceState: StateSetter<unknown>;
-// }): void {
-//   Object.entries(activeDatasources).forEach(([id, datasource]) => {
-//     datasource?.refreshIndexPatternsList?.({
-//       indexPatternId,
-//       setState: setDatasourceState,
-//     });
-//   });
-// }
-
 export function getIndexPatternsIds({
   activeDatasources,
   datasourceStates,

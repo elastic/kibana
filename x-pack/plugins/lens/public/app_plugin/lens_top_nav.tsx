@@ -694,7 +694,7 @@ export const LensTopNavMenu = ({
             closeDataViewEditor.current = dataViewEditor.openEditor({
               onSave: async (dataView) => {
                 if (dataView.id) {
-                  await dispatchChangeIndexPattern(dataView.id);
+                  dispatchChangeIndexPattern(dataView.id);
                   refreshFieldList();
                 }
               },

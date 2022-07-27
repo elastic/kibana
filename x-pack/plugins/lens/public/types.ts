@@ -870,15 +870,6 @@ export interface Visualization<T = unknown> {
    */
   initialize: (addNewLayer: () => string, state?: T, mainPalette?: PaletteOutput) => T;
 
-  /**
-   * Retrieve the used indexpatterns in the visualization
-   */
-  getUsedIndexPatterns?: (
-    state?: T,
-    indexPatternRefs?: IndexPatternRef[],
-    savedObjectReferences?: SavedObjectReference[]
-  ) => { usedPatterns: string[] };
-
   getMainPalette?: (state: T) => undefined | PaletteOutput;
 
   /**
