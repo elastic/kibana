@@ -10,6 +10,7 @@ import { set } from 'lodash';
 import { Readable } from 'stream';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ContentStream, ContentStreamEncoding, ContentStreamParameters } from './content_stream';
+import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import { encode } from './cborx';
 
 describe('ContentStream', () => {
@@ -17,9 +18,9 @@ describe('ContentStream', () => {
   let logger: Logger;
   let stream: ContentStream;
 
-  const toReadable = (...args: unknown[]) => {
-    return Readable.from([...args.map(encode)]);
-  };
+  function toReadable(...args: unknown[]) {
+    return Readable.from([...args.map(encode)]) as unknown as GetResponse;
+  }
 
   const getContentStream = ({
     id = 'something',
