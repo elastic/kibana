@@ -39,12 +39,12 @@ export interface OverlayBanner {
 export class OverlayBannersService {
   private readonly userBanner = new UserBannerService();
 
-  public start({ i18n, uiSettings }: StartDeps): OverlayBannersStart {
+  public start({ i18n, uiSettings }: StartDeps): IOverlayBannersStart {
     let uniqueId = 0;
     const genId = () => `${uniqueId++}`;
     const banners$ = new BehaviorSubject(new PriorityMap<string, OverlayBanner>());
 
-    const service: OverlayBannersStart = {
+    const service: IOverlayBannersStart = {
       add: (mount, priority = 0) => {
         const id = genId();
         const nextBanner: OverlayBanner = { id, mount, priority };
