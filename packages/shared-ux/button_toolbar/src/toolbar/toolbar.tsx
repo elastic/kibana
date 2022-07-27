@@ -34,10 +34,7 @@ export const Toolbar = ({ children }: Props) => {
   );
 
   return (
-    <EuiFlexGroup
-      id={`kbnPresentationToolbar__solutionToolbar`}
-      gutterSize="s"
-    >
+    <EuiFlexGroup id={`kbnPresentationToolbar__solutionToolbar`} gutterSize="s">
       <EuiFlexItem grow={false}>{primaryButton}</EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup wrap={true} responsive={false} alignItems="center" gutterSize="xs">

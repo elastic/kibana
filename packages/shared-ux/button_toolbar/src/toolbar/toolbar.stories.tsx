@@ -16,44 +16,38 @@ import { AddFromLibraryButton, IconButtonGroup, PrimaryButton } from '../buttons
 import { ToolbarPopover } from '../popover';
 
 const iconButtons = [
-    {
-      label: 'Text',
-      onClick: action('onTextClick'),
-      iconType: 'visText',
-      title: 'Text as markdown',
-    },
-    {
-      label: 'Control',
-      onClick: action('onControlClick'),
-      iconType: 'controlsHorizontal',
-    },
-    {
-      label: 'Link',
-      onClick: action('onLinkClick'),
-      iconType: 'link',
-    },
-    {
-      label: 'Image',
-      onClick: action('onImageClick'),
-      iconType: 'image',
-    },
-    {
-      label: 'Markup',
-      onClick: action('onMarkupClick'),
-      iconType: 'visVega',
-    },
-  ];
+  {
+    label: 'Text',
+    onClick: action('onTextClick'),
+    iconType: 'visText',
+    title: 'Text as markdown',
+  },
+  {
+    label: 'Control',
+    onClick: action('onControlClick'),
+    iconType: 'controlsHorizontal',
+  },
+  {
+    label: 'Link',
+    onClick: action('onLinkClick'),
+    iconType: 'link',
+  },
+  {
+    label: 'Image',
+    onClick: action('onImageClick'),
+    iconType: 'image',
+  },
+  {
+    label: 'Markup',
+    onClick: action('onMarkupClick'),
+    iconType: 'visVega',
+  },
+];
 
 const primaryButtonConfigs = {
-  Generic: (
-    <PrimaryButton label="Primary Action" iconType="apps" onClick={action('generic')} />
-  ),
+  Generic: <PrimaryButton label="Primary Action" iconType="apps" onClick={action('generic')} />,
   Canvas: (
-    <ToolbarPopover
-      label="Add element"
-      iconType="plusInCircle"
-      panelPaddingSize="none"
-    >
+    <ToolbarPopover label="Add element" iconType="plusInCircle" panelPaddingSize="none">
       {() => (
         <EuiContextMenu
           initialPanelId={0}
@@ -82,11 +76,7 @@ const primaryButtonConfigs = {
     </ToolbarPopover>
   ),
   Dashboard: (
-    <PrimaryButton
-      label="Create chart"
-      iconType="plusInCircle"
-      onClick={action('dashboard')}
-    />
+    <PrimaryButton label="Create chart" iconType="plusInCircle" onClick={action('dashboard')} />
   ),
 };
 
@@ -171,7 +161,9 @@ const Template: Story<{
   let addFromLibraryButton;
 
   if (iconButtonCount > 0) {
-    iconButtonGroup = <IconButtonGroup buttons={iconButtons.slice(0, iconButtonCount)} legend="example" />;
+    iconButtonGroup = (
+      <IconButtonGroup buttons={iconButtons.slice(0, iconButtonCount)} legend="example" />
+    );
   }
 
   if (showAddFromLibraryButton) {
