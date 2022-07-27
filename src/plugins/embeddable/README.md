@@ -4,7 +4,7 @@ The Embeddables Plugin provides an opportunity to expose reusable interactive wi
 ## Capabilities
 - Framework-agnostic API.
 - Out-of-the-box React support.
-- Integration with [UI Actions](https://github.com/elastic/kibana/tree/HEAD/src/plugins/ui_actions) plugin.
+- Integration with the [UI Actions](https://github.com/elastic/kibana/tree/HEAD/src/plugins/ui_actions) plugin.
 - Hierarchical structure to enclose multiple widgets.
 - Error handling.
 
