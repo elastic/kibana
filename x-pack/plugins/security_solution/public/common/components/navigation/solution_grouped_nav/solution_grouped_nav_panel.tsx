@@ -25,7 +25,7 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import styled from 'styled-components';
-import { EuiPanelStyled } from './solution_grouped_nav_panel.styles';
+import { EuiBetaBadgeStyled, EuiPanelStyled } from './solution_grouped_nav_panel.styles';
 import type { DefaultSideNavItem } from './types';
 import type { LinkCategories } from '../../../links/types';
 import { BETA } from '../../../translations';
@@ -161,11 +161,6 @@ const FlexLink = styled.a`
   align-items: center;
 `;
 
-const BetaBadge = styled(EuiBetaBadge)<{ label: string; size?: 's' | 'm' }>`
-  margin-left: ${({ theme }) => theme.eui.euiSizeS};
-  color: ${(props) => props.theme.eui.euiTextColor};
-`;
-
 const SolutionNavPanelItems: React.FC<SolutionNavPanelItemsProps> = ({ items, onClose }) => (
   <>
     {items.map(({ id, href, onClick, label, description, isBeta }) => (
@@ -182,7 +177,7 @@ const SolutionNavPanelItems: React.FC<SolutionNavPanelItemsProps> = ({ items, on
             }}
           >
             {label}
-            {isBeta && <BetaBadge label={BETA} size="s" />}
+            {isBeta && <EuiBetaBadgeStyled label={BETA} size="s" />}
           </FlexLink>
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription>{description}</EuiDescriptionListDescription>
