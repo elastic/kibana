@@ -26,11 +26,14 @@ import { ParamsEditor } from './filters_editor_filter_item_params_editor';
 import { FilterGroup } from '../filters_editor_filter_group';
 import { getConditionalOperationType } from '../filters_editor_utils';
 import type { Path } from '../filter_editors_types';
+
+// @todo: {start} should be refactored cause shared component cannot be linked with non-shared components
 import {
   getFieldFromFilter,
   getOperatorFromFilter,
 } from '../../../filter_bar/filter_editor/lib/filter_editor_utils';
 import { Operator } from '../../../filter_bar/filter_editor/lib/filter_operators';
+// @todo: {end}
 
 export interface FilterItemProps {
   path: Path;

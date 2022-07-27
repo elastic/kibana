@@ -8,10 +8,10 @@
 
 import type { Reducer } from 'react';
 import type { Filter } from '@kbn/es-query';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { Path } from './filter_editors_types';
-import { Operator } from '../../filter_bar/filter_editor/lib/filter_operators';
-import { ConditionTypes } from './filters_editor_condition_types';
+import type { Operator } from '../../filter_bar/filter_editor/lib/filter_operators';
+import type { ConditionTypes } from './filters_editor_condition_types';
 import { addFilter, removeFilter, updateFilter } from './filters_editor_utils';
 
 /** @internal **/

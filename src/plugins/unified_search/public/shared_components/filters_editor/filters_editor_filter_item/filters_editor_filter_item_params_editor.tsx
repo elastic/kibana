@@ -8,23 +8,28 @@
 
 import React, { useCallback } from 'react';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { Filter } from '@kbn/es-query';
+
+// @todo: {start} should be refactored cause shared component cannot be linked with non-shared components
 import { Operator } from '../../../filter_bar/filter_editor/lib/filter_operators';
 import { PhraseValueInput } from '../../../filter_bar/filter_editor/phrase_value_input';
 import { PhrasesValuesInput } from '../../../filter_bar/filter_editor/phrases_values_input';
-import { RangeValueInput } from '../../../filter_bar/filter_editor/range_value_input';
+import {
+  RangeValueInput,
+  isRangeParams,
+} from '../../../filter_bar/filter_editor/range_value_input';
+// @todo: {end}
 
-interface ParamsEditorProps {
+interface ParamsEditorProps<TParams = unknown> {
   dataView: DataView;
-  field: DataViewField | undefined;
-  operator: Operator | undefined;
-  params: Filter['meta']['params'];
-  onHandleParamsChange: (params: string) => void;
-  onHandleParamsUpdate: (value: Filter['meta']['params']) => void;
+  params: TParams;
+  onHandleParamsChange: (params: TParams) => void;
+  onHandleParamsUpdate: (value: TParams) => void;
   timeRangeForSuggestionsOverride: boolean;
+  field?: DataViewField;
+  operator?: Operator;
 }
 
-export const ParamsEditor = ({
+export function ParamsEditor<TParams = unknown>({
   dataView,
   field,
   operator,
@@ -32,16 +37,16 @@ export const ParamsEditor = ({
   onHandleParamsChange,
   onHandleParamsUpdate,
   timeRangeForSuggestionsOverride,
-}: ParamsEditorProps) => {
+}: ParamsEditorProps<TParams>) {
   const onParamsChange = useCallback(
-    (selectedParams: Filter['meta']['params']) => {
+    (selectedParams) => {
       onHandleParamsChange(selectedParams);
     },
     [onHandleParamsChange]
   );
 
   const onParamsUpdate = useCallback(
-    (value: string) => {
+    (value) => {
       onHandleParamsUpdate(value);
     },
     [onHandleParamsUpdate]
@@ -56,7 +61,7 @@ export const ParamsEditor = ({
           compressed
           indexPattern={dataView}
           field={field!}
-          value={params}
+          value={typeof params === 'string' ? params : undefined}
           onChange={onParamsChange}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           fullWidth
@@ -68,7 +73,7 @@ export const ParamsEditor = ({
           compressed
           indexPattern={dataView}
           field={field!}
-          values={params}
+          values={Array.isArray(params) ? params : undefined}
           onChange={onParamsChange}
           onParamsUpdate={onParamsUpdate}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
@@ -80,7 +85,7 @@ export const ParamsEditor = ({
         <RangeValueInput
           compressed
           field={field!}
-          value={params}
+          value={isRangeParams(params) ? params : undefined}
           onChange={onParamsChange}
           fullWidth
         />
@@ -91,7 +96,7 @@ export const ParamsEditor = ({
           disabled={!dataView || !operator}
           indexPattern={dataView}
           field={field!}
-          value={params}
+          value={typeof params === 'string' ? params : undefined}
           onChange={onParamsChange}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           fullWidth
@@ -99,4 +104,4 @@ export const ParamsEditor = ({
         />
       );
   }
-};
+}

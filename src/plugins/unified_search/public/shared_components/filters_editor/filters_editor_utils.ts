@@ -75,8 +75,8 @@ const getContainerMetaByPath = (filters: Filter[], pathInArray: number[]) => {
 const getParentFilterPath = (pathInArray: number[]) =>
   pathInArray.slice(0, -1).join(PATH_SEPARATOR);
 
-const normalizeFilters = (filters: Filter[]): Filter[] => {
-  return filters
+const normalizeFilters = (filters: Filter[]): Filter[] =>
+  filters
     .map((filter: Filter) => {
       if (getConditionalOperationType(filter)) {
         const f = normalizeFilters(filter.meta.params.filters);
@@ -102,11 +102,9 @@ const normalizeFilters = (filters: Filter[]): Filter[] => {
       return filter;
     })
     .filter(Boolean) as Filter[];
-};
 
-export const getFilterByPath = (filters: Filter[], path: string): Filter => {
-  return doForFilterByPath(filters, path, (f) => f);
-};
+export const getFilterByPath = (filters: Filter[], path: string): Filter =>
+  doForFilterByPath(filters, path, (f) => f);
 
 export const addFilter = (
   filters: Filter[],

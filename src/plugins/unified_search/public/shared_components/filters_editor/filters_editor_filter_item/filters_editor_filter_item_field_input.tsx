@@ -7,21 +7,24 @@
  */
 
 import React, { useCallback } from 'react';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { useGeneratedHtmlId } from '@elastic/eui';
+
+// todo: {start} should be refactored cause shared component cannot be linked with non-shared components
 import { GenericComboBox } from '../../../filter_bar/filter_editor/generic_combo_box';
 import { getFilterableFields } from '../../../filter_bar/filter_editor/lib/filter_editor_utils';
+// todo: {end}
 
-export function FieldInput({
-  field,
-  dataView,
-  onHandleField,
-}: {
-  field: DataViewField | undefined;
+interface FieldInputProps {
   dataView: DataView;
   onHandleField: (field: DataViewField) => void;
-}) {
+  field?: DataViewField;
+}
+
+export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) {
   const fields = dataView ? getFilterableFields(dataView) : [];
+  const id = useGeneratedHtmlId({ prefix: 'fieldInput' });
 
   const onFieldChange = useCallback(
     ([selectedfield]: DataViewField[]) => {
@@ -30,21 +33,23 @@ export function FieldInput({
     [onHandleField]
   );
 
+  const getLabel = useCallback((view: DataViewField) => view.customLabel || view.name, []);
+
   return (
     <GenericComboBox
-      fullWidth
-      compressed
-      id="fieldInput"
+      id={id}
       isDisabled={!dataView}
       placeholder={i18n.translate('unifiedSearch.filter.filterEditor.fieldSelectPlaceholder', {
         defaultMessage: 'Select a field first',
       })}
       options={fields}
       selectedOptions={field ? [field] : []}
-      getLabel={(view: DataViewField) => view.customLabel || view.name}
+      getLabel={getLabel}
       onChange={onFieldChange}
       singleSelection={{ asPlainText: true }}
       isClearable={false}
+      compressed
+      fullWidth
     />
   );
 }

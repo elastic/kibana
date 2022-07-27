@@ -7,24 +7,28 @@
  */
 
 import React, { useCallback } from 'react';
-import { DataViewField } from '@kbn/data-views-plugin/common';
-import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { getOperatorOptions } from '../../../filter_bar/filter_editor/lib/filter_editor_utils';
-import { Operator } from '../../../filter_bar/filter_editor/lib/filter_operators';
-import { GenericComboBox } from '../../../filter_bar/filter_editor/generic_combo_box';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 
-export function OperatorInput({
+// todo: {start} should be refactored cause shared component cannot be linked with non-shared components
+import type { Operator } from '../../../filter_bar/filter_editor/lib/filter_operators';
+import { getOperatorOptions } from '../../../filter_bar/filter_editor/lib/filter_editor_utils';
+import { GenericComboBox } from '../../../filter_bar/filter_editor/generic_combo_box';
+// todo: {end}
+
+interface OperatorInputProps<TParams = unknown> {
+  field: DataViewField | undefined;
+  operator: Operator | undefined;
+  params: TParams;
+  onHandleOperator: (operator: Operator, params?: TParams) => void;
+}
+
+export function OperatorInput<TParams = unknown>({
   field,
   operator,
   params,
   onHandleOperator,
-}: {
-  field: DataViewField | undefined;
-  operator: Operator | undefined;
-  params: Filter['meta']['params'];
-  onHandleOperator: (operator: Operator, params: Filter['meta']['params']) => void;
-}) {
+}: OperatorInputProps<TParams>) {
   const operators = field ? getOperatorOptions(field) : [];
 
   const onOperatorChange = useCallback(

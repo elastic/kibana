@@ -31,6 +31,10 @@ interface Props {
   compressed?: boolean;
 }
 
+export function isRangeParams(params: any): params is RangeParams {
+  return Boolean(params && 'from' in params && 'to' in params);
+}
+
 function RangeValueInputUI(props: Props) {
   const kibana = useKibana();
   const tzConfig = kibana.services.uiSettings!.get('dateFormat:tz');
