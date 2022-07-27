@@ -240,7 +240,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
           ),
           threshold: mapToConditionsLookup(
             alertResults,
-            (result) => formatAlertResult(result[group]).threshold
+            (result) => formatAlertResult(result[group], nextState === AlertStates.WARNING).threshold
           ),
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
         });
