@@ -31,6 +31,9 @@ intersection() {
   echo "${intersections[@]}"
 }
 
+# Just a note that this is using Gnu date.
+# On OSX if you don't install this, and instead use the native date you only get seconds.
+# With gdate you can something like nanoseconds.
 alias timestamp='while read line; do echo "[`gdate +%H:%M:%S.%N`] $line"; done'
 
 is_zipped() {
@@ -332,6 +335,14 @@ run_test() {
 
   set -x
   node scripts/functional_test_runner --config "$config"
+  set +x
+}
+
+run_test_with_timestamp() {
+  local config=${1:-$test_config}
+
+  set -x
+  node scripts/functional_test_runner --config "$config" | timestamp
   set +x
 }
 
