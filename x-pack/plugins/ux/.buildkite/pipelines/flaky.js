@@ -54,6 +54,7 @@ pipeline.env[KIBANA_BUILD_ID] = env[E2E_ARTIFACTS_ID];
 steps.push(getBuildJob());
 steps.push(getGroupRunnerJob(env));
 
+// eslint-disable-next-line no-console
 console.log(JSON.stringify(pipeline, null, 2));
 
 /***
