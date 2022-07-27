@@ -69,16 +69,19 @@ export function FiltersNotificationModal({
       </EuiModalBody>
 
       {viewMode !== ViewMode.VIEW && (
-        <EuiModalFooter>
+        <EuiModalFooter id="filtersNotificationModal__footer">
           <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={onClose} data-test-subj="cancelPerPanelTimeRangeButton">
+              <EuiButtonEmpty
+                onClick={onClose}
+                data-test-subj="filtersNotificationModal__closeButton"
+              >
                 {dashboardFilterNotificationBadge.getCloseButtonTitle()}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
-                data-test-subj="addPerPanelTimeRangeButton"
+                data-test-subj="filtersNotificationModal__editButton"
                 onClick={() => {
                   onClose();
                   editPanelAction.execute(context);
