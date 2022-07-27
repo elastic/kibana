@@ -79,7 +79,6 @@ export const useHostRiskScore = ({
 }: UseHostRiskScore) => {
   const spaceId = useSpaceId();
   const defaultIndex = spaceId ? getHostRiskIndex(spaceId, onlyLatest) : undefined;
-  console.log('defaultIndex');
   const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
   return useRiskScore({
     timerange,
@@ -150,17 +149,17 @@ export const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.
     showErrorToast: false,
   });
 
-  const riskScoreResponse = useMemo(() => {
-    console.log('xxx', response);
-    return {
+  const riskScoreResponse = useMemo(
+    () => ({
       data: response.data,
       inspect,
       refetch,
       totalCount: response.totalCount,
       isModuleEnabled: response.data != null,
       isInspected: false,
-    };
-  }, [inspect, refetch, response]);
+    }),
+    [inspect, refetch, response]
+  );
 
   const riskScoreRequest = useMemo(
     () =>
