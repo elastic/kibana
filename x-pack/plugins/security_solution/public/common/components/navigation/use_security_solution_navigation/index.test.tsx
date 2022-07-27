@@ -11,10 +11,6 @@ import { useKibana } from '../../../lib/kibana/kibana_react';
 import { useGetUserCasesPermissions } from '../../../lib/kibana';
 import { SecurityPageName } from '../../../../app/types';
 import { useSecuritySolutionNavigation } from '.';
-import { CONSTANTS } from '../../url_state/constants';
-import { TimelineTabs } from '../../../../../common/types/timeline';
-import { useDeepEqualSelector } from '../../../hooks/use_selector';
-import type { UrlInputsModel } from '../../../store/inputs/model';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { TestProviders } from '../../../mock';
@@ -44,37 +40,6 @@ jest.mock('../../../../management/pages/host_isolation_exceptions/view/hooks');
 jest.mock('../../guided_onboarding');
 
 describe('useSecuritySolutionNavigation', () => {
-  const mockUrlState = {
-    [CONSTANTS.timeline]: {
-      activeTab: TimelineTabs.query,
-      id: '',
-      isOpen: false,
-      graphEventId: '',
-    },
-    [CONSTANTS.timerange]: {
-      global: {
-        [CONSTANTS.timerange]: {
-          from: '2020-07-07T08:20:18.966Z',
-          fromStr: 'now-24h',
-          kind: 'relative',
-          to: '2020-07-08T08:20:18.966Z',
-          toStr: 'now',
-        },
-        linkTo: ['timeline'],
-      },
-      timeline: {
-        [CONSTANTS.timerange]: {
-          from: '2020-07-07T08:20:18.966Z',
-          fromStr: 'now-24h',
-          kind: 'relative',
-          to: '2020-07-08T08:20:18.966Z',
-          toStr: 'now',
-        },
-        linkTo: ['global'],
-      },
-    } as UrlInputsModel,
-  };
-
   const mockRouteSpy = [
     {
       detailName: '',
@@ -89,7 +54,6 @@ describe('useSecuritySolutionNavigation', () => {
 
   beforeEach(() => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
-    (useDeepEqualSelector as jest.Mock).mockReturnValue({ urlState: mockUrlState });
     (useRouteSpy as jest.Mock).mockReturnValue(mockRouteSpy);
     (useCanSeeHostIsolationExceptionsMenu as jest.Mock).mockReturnValue(true);
     (useTourContext as jest.Mock).mockReturnValue({ isTourShown: false });

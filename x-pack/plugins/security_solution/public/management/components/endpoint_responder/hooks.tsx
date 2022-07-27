@@ -87,7 +87,7 @@ export const useUpdateActionState = ({
   }, [isMounted]);
 
   useEffect(() => {
-    if (actionDetails?.data.isCompleted) {
+    if (actionDetails?.data.isCompleted && isPending) {
       setStatus('success');
       setStore((prevState) => {
         return {
@@ -96,5 +96,5 @@ export const useUpdateActionState = ({
         };
       });
     }
-  }, [actionDetails?.data, actionDetails?.data.isCompleted, setStatus, setStore]);
+  }, [actionDetails?.data, actionDetails?.data.isCompleted, setStatus, setStore, isPending]);
 };

@@ -25,7 +25,6 @@ import { useGlobalQueryString } from '../../../utils/global_query_string';
 export const usePrimaryNavigationItems = ({
   navTabs,
   selectedTabId,
-  ...urlStateProps
 }: PrimaryNavigationItemsProps): Array<EuiSideNavItemType<{}>> => {
   const { navigateTo, getAppUrl } = useNavigation();
   const globalQueryString = useGlobalQueryString();
@@ -34,7 +33,7 @@ export const usePrimaryNavigationItems = ({
     (tab: NavTab) => {
       const { id, name, disabled } = tab;
       const isSelected = selectedTabId === id;
-      const urlSearch = getSearch(tab, urlStateProps, globalQueryString);
+      const urlSearch = getSearch(tab, globalQueryString);
 
       const handleClick = (ev: React.MouseEvent) => {
         ev.preventDefault();
@@ -54,7 +53,7 @@ export const usePrimaryNavigationItems = ({
         onClick: handleClick,
       };
     },
-    [getAppUrl, navigateTo, selectedTabId, urlStateProps, globalQueryString]
+    [getAppUrl, navigateTo, selectedTabId, globalQueryString]
   );
 
   const navItemsToDisplay = usePrimaryNavigationItemsToDisplay(navTabs);
