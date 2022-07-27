@@ -346,6 +346,7 @@ export const ActionTypeForm = ({
           {actionTypeRegistered && actionTypeRegistered.isExperimental && (
             <EuiFlexItem grow={false}>
               <EuiBetaBadge
+                data-test-subj="action-type-form-beta-badge"
                 label={betaBadgeProps.label}
                 tooltipContent={betaBadgeProps.tooltipContent}
               />

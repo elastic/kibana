@@ -297,7 +297,21 @@ describe('CreateConnectorFlyout', () => {
       expect(getByText(`selectMessage-${actionTypeModel.id}`)).toBeInTheDocument();
     });
 
+    it('does not show beta badge when isExperimental is undefined', async () => {
+      const { queryByText } = appMockRenderer.render(
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+          onTestConnector={onTestConnector}
+        />
+      );
+      await act(() => Promise.resolve());
+      expect(queryByText(betaBadgeProps.label)).not.toBeInTheDocument();
+    });
+
     it('does not show beta badge when isExperimental is false', async () => {
+      actionTypeRegistry.get.mockReturnValue({ ...actionTypeModel, isExperimental: false });
       const { queryByText } = appMockRenderer.render(
         <CreateConnectorFlyout
           actionTypeRegistry={actionTypeRegistry}

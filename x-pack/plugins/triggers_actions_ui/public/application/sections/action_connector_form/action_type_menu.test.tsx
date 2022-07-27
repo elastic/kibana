@@ -168,6 +168,46 @@ describe('connector_add_flyout', () => {
   });
 
   describe('beta badge', () => {
+    it(`does not render beta badge when isExperimental=undefined`, async () => {
+      const onActionTypeChange = jest.fn();
+      const actionType = actionTypeRegistryMock.createMockActionTypeModel({
+        id: 'my-action-type',
+        iconClass: 'test',
+        selectMessage: 'test',
+        validateParams: (): Promise<GenericValidationResult<unknown>> => {
+          const validationResult = { errors: {} };
+          return Promise.resolve(validationResult);
+        },
+        actionConnectorFields: null,
+      });
+      actionTypeRegistry.get.mockReturnValueOnce(actionType);
+      loadActionTypes.mockResolvedValueOnce([
+        {
+          id: actionType.id,
+          enabled: false,
+          name: 'Test',
+          enabledInConfig: true,
+          enabledInLicense: false,
+          minimumLicenseRequired: 'gold',
+          supportedFeatureIds: ['alerting'],
+        },
+      ]);
+
+      const wrapper = mountWithIntl(
+        <ActionTypeMenu
+          onActionTypeChange={onActionTypeChange}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      );
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(
+        wrapper.find('EuiToolTip [data-test-subj="my-action-type-card"] EuiBetaBadge').exists()
+      ).toBeFalsy();
+    });
     it(`does not render beta badge when isExperimental=false`, async () => {
       const onActionTypeChange = jest.fn();
       const actionType = actionTypeRegistryMock.createMockActionTypeModel({

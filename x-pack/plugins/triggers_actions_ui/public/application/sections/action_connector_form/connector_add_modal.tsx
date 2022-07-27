@@ -156,7 +156,7 @@ const ConnectorAddModal = ({
               </EuiTitle>
             </EuiFlexItem>
             {actionTypeModel && actionTypeModel.isExperimental && (
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem className="betaBadgeFlexItem" grow={false}>
                 <EuiBetaBadge
                   label={betaBadgeProps.label}
                   tooltipContent={betaBadgeProps.tooltipContent}

@@ -149,6 +149,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
       isMounted.current = false;
     };
   }, []);
+
   return (
     <EuiFlyout onClose={onClose} data-test-subj="create-connector-flyout">
       <FlyoutHeader
