@@ -45,10 +45,6 @@ export interface Props<T> {
   initialFilter: string;
   initialPageSize: number;
   /**
-   * Indicates which column should be used as the identifying cell in each row.
-   */
-  rowHeader: string;
-  /**
    * Describes the content of the table. If not specified, the caption will be "This table contains {itemCount} rows."
    */
   tableCaption: string;
@@ -109,7 +105,6 @@ function TableListView<T extends UserContentCommonSchema>({
   entityName,
   entityNamePlural,
   headingId,
-  rowHeader,
   getDetailViewLink,
   tableCaption,
   customTableColumn,
@@ -208,13 +203,14 @@ function TableListView<T extends UserContentCommonSchema>({
     if (editItem) {
       const actions: EuiTableActionsColumnType<T>['actions'] = [
         {
-          name: (item) =>
-            i18n.translate('contentManagementTableList.listing.table.editActionName', {
+          name: (item) => {
+            return i18n.translate('contentManagementTableList.listing.table.editActionName', {
               defaultMessage: 'Edit {itemDescription}',
               values: {
-                itemDescription: get(item, rowHeader),
+                itemDescription: get(item, 'attributes.title'),
               },
-            }),
+            });
+          },
           description: i18n.translate(
             'contentManagementTableList.listing.table.editActionDescription',
             {
@@ -238,7 +234,7 @@ function TableListView<T extends UserContentCommonSchema>({
     }
 
     return columns;
-  }, [stateTableColumns, customTableColumn, getTagsColumnDefinition, editItem, rowHeader]);
+  }, [stateTableColumns, customTableColumn, getTagsColumnDefinition, editItem]);
   const itemsById = useMemo(() => {
     return keyBy(items, 'id');
   }, [items]);
@@ -456,7 +452,6 @@ function TableListView<T extends UserContentCommonSchema>({
         entityNamePlural={entityNamePlural}
         deleteItems={deleteItems}
         tableCaption={tableCaption}
-        rowHeader={rowHeader}
       />
 
       {/* Delete modal */}

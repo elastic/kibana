@@ -37,7 +37,6 @@ interface Props<T extends UserContentCommonSchema> {
   tableSort: TableListViewState<T>['tableSort'];
   pagination: TableListViewState<T>['pagination'];
   deleteItems: TableListViewProps<T>['deleteItems'];
-  rowHeader: TableListViewProps<T>['rowHeader'];
   tableCaption: TableListViewProps<T>['tableCaption'];
 }
 
@@ -53,7 +52,6 @@ export function Table<T extends UserContentCommonSchema>({
   entityName,
   entityNamePlural,
   deleteItems,
-  rowHeader,
   tableCaption,
 }: Props<T>) {
   const { getSearchBarFilters } = useServices();
@@ -127,7 +125,7 @@ export function Table<T extends UserContentCommonSchema>({
         dispatch({ type: 'onTableChange', data: criteria })
       }
       data-test-subj="itemsInMemTable"
-      rowHeader={rowHeader}
+      rowHeader="attributes.title"
       tableCaption={tableCaption}
     />
   );

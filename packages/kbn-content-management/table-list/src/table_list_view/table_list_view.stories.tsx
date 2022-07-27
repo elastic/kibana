@@ -11,7 +11,7 @@ import { action } from '@storybook/addon-actions';
 
 import { Params, getStoryArgTypes, getStoryServices } from './mocks';
 
-import { TableListView as Component } from './table_list_view';
+import { TableListView as Component, UserContentCommonSchema } from './table_list_view';
 import { TableListViewProvider } from './services';
 
 import mdx from '../../README.mdx';
@@ -28,36 +28,66 @@ export default {
 
 const argTypes = getStoryArgTypes();
 
+const mockItems: UserContentCommonSchema[] = [
+  {
+    id: '123',
+    references: [],
+    updatedAt: '2022-28-07T10:00:00',
+    attributes: {
+      title: 'Dashboard title 1',
+      description: 'Description of dashboard 1',
+    },
+  },
+  {
+    id: '456',
+    references: [],
+    updatedAt: '2022-20-07T10:00:00',
+    attributes: {
+      title: 'Dashboard title 2',
+      description: 'Description of dashboard 2',
+    },
+  },
+  {
+    id: '789',
+    references: [],
+    updatedAt: '2022-12-07T10:00:00',
+    attributes: {
+      title: 'Dashboard title 3',
+      description: 'Description of dashboard 3',
+    },
+  },
+];
+
 export const TableListView = (params: Params) => {
   return (
     <TableListViewProvider {...getStoryServices(params, action)}>
       <Component
-        entityName="Dashboard"
-        entityNamePlural="Dashboards"
-        tableListTitle="Dashboards"
-        listingLimit={20}
-        initialFilter=""
-        initialPageSize={20}
-        rowHeader="title"
+        key={`${params.initialFilter}-${params.initialPageSize}`}
         tableCaption="Some caption for the table"
         findItems={() => {
           action('findItems');
           return Promise.resolve({
-            total: 1,
-            hits: [
-              {
-                id: '123',
-                references: [],
-                updatedAt: '2022-28-07T10:00:00',
-                attributes: {
-                  title: 'My first dashboard',
-                  description: 'Some description',
-                },
-              },
-            ],
+            total: mockItems.length,
+            hits: mockItems,
           });
         }}
-        getDetailViewLink={() => ''}
+        getDetailViewLink={() => 'http://elastic.co'}
+        editItem={
+          params.canEditItem
+            ? ({ attributes: { title } }) => {
+                action('Edit item')(title);
+              }
+            : undefined
+        }
+        deleteItems={
+          params.canDeleteItem
+            ? async (items) => {
+                action('Delete item(s)')(
+                  items.map(({ attributes: { title } }) => title).join(', ')
+                );
+              }
+            : undefined
+        }
         {...params}
       />
     </TableListViewProvider>

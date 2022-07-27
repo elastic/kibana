@@ -47,4 +47,49 @@ export const getStoryServices = (params: Params, action: ActionFn = () => {}) =>
  * Returns the Storybook arguments for `NoDataCard`, for its stories and for
  * consuming component stories.
  */
-export const getStoryArgTypes = () => ({});
+export const getStoryArgTypes = () => ({
+  tableListTitle: {
+    control: {
+      type: 'text',
+    },
+    defaultValue: 'My dashboards',
+  },
+  entityName: {
+    control: {
+      type: 'text',
+    },
+    defaultValue: 'Dashboard',
+  },
+  entityNamePlural: {
+    control: {
+      type: 'text',
+    },
+    defaultValue: 'Dashboards',
+  },
+  canEditItem: {
+    control: 'boolean',
+    defaultValue: true,
+  },
+  canDeleteItem: {
+    control: 'boolean',
+    defaultValue: true,
+  },
+  initialFilter: {
+    control: {
+      type: 'text',
+    },
+    defaultValue: '',
+  },
+  initialPageSize: {
+    control: {
+      type: 'number',
+    },
+    defaultValue: 20,
+  },
+  listingLimit: {
+    control: {
+      type: 'number',
+    },
+    defaultValue: 20,
+  },
+});
