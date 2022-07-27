@@ -51,9 +51,7 @@ export async function deleteAll(
   const {
     user,
     unsecuredSavedObjectsClient,
-    caseService,
-    attachmentService,
-    userActionService,
+    services: { caseService, attachmentService, userActionService },
     logger,
     authorization,
   } = clientArgs;
@@ -118,8 +116,7 @@ export async function deleteComment(
   const {
     user,
     unsecuredSavedObjectsClient,
-    attachmentService,
-    userActionService,
+    services: { attachmentService, userActionService },
     logger,
     authorization,
   } = clientArgs;
