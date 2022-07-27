@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { TIMELINE_SEARCH_BOX } from '../screens/common/controllers';
+
 import {
   BULK_ACTIONS_BTN,
   BULK_ACTIONS_PROGRESS_BTN,
@@ -27,6 +29,7 @@ import {
   APPLY_TIMELINE_RULE_BULK_MENU_ITEM,
   RULES_BULK_EDIT_OVERWRITE_TAGS_CHECKBOX,
   RULES_BULK_EDIT_OVERWRITE_INDEX_PATTERNS_CHECKBOX,
+  RULES_BULK_EDIT_TIMELINE_TEMPLATES_SELECTOR,
 } from '../screens/rules_bulk_edit';
 
 export const clickApplyTimelineTemplatesMenuItem = () => {
@@ -91,7 +94,7 @@ export const typeTags = (tags: string[]) => {
   cy.get(RULES_BULK_EDIT_TAGS).find('input').type(tags.join('{enter}'));
 };
 
-export const confirmBulkEditForm = () => cy.get(RULES_BULK_EDIT_FORM_CONFIRM_BTN).click();
+export const submitBulkEditForm = () => cy.get(RULES_BULK_EDIT_FORM_CONFIRM_BTN).click();
 
 export const waitForBulkEditActionToFinish = ({ rulesCount }: { rulesCount: number }) => {
   cy.get(BULK_ACTIONS_PROGRESS_BTN).should('be.disabled');
@@ -131,4 +134,9 @@ export const checkOverwriteIndexPatternsCheckbox = () => {
     .click()
     .get('input')
     .should('be.checked');
+};
+
+export const selectTimelineTemplate = (timelineTitle: string) => {
+  cy.get(RULES_BULK_EDIT_TIMELINE_TEMPLATES_SELECTOR).click();
+  cy.get(TIMELINE_SEARCH_BOX).type(`${timelineTitle}{enter}`).should('not.exist');
 };

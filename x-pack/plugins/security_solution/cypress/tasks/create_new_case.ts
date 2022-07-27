@@ -14,6 +14,7 @@ import type {
 } from '../objects/case';
 import { ALL_CASES_OPEN_CASES_COUNT, ALL_CASES_OPEN_FILTER } from '../screens/all_cases';
 
+import { TIMELINE_SEARCH_BOX } from '../screens/common/controllers';
 import {
   BACK_TO_CASES_BTN,
   DESCRIPTION_INPUT,
@@ -21,7 +22,6 @@ import {
   INSERT_TIMELINE_BTN,
   LOADING_SPINNER,
   TAGS_INPUT,
-  TIMELINE_SEARCHBOX,
   TITLE_INPUT,
 } from '../screens/create_new_case';
 import {
@@ -57,7 +57,7 @@ export const fillCasesMandatoryfields = (newCase: TestCaseWithoutTimeline) => {
 
 export const attachTimeline = (newCase: TestCase) => {
   cy.get(INSERT_TIMELINE_BTN).click({ force: true });
-  cy.get(TIMELINE_SEARCHBOX).type(`${newCase.timeline.title}{enter}`);
+  cy.get(TIMELINE_SEARCH_BOX).type(`${newCase.timeline.title}{enter}`);
 };
 
 export const createCase = () => {

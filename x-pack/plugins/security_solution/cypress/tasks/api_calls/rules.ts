@@ -58,6 +58,12 @@ export const createCustomRule = (
       enabled: false,
       exceptions_list: rule.exceptionLists ?? [],
       tags: rule.tags,
+      ...(rule.timeline.id ?? rule.timeline.templateTimelineId
+        ? {
+            timeline_id: rule.timeline.id ?? rule.timeline.templateTimelineId,
+            timeline_title: rule.timeline.title,
+          }
+        : {}),
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
     failOnStatusCode: false,
