@@ -65,7 +65,8 @@ export function getColumnWindowError(
   return [
     hasDateHistogram &&
       i18n.translate('xpack.lens.indexPattern.windowWithDateHistogram', {
-        defaultMessage: 'Reduced time range can only be used without a date histogram.',
+        defaultMessage:
+          'Reduced time range can only be used without a date histogram. Either remove the date histogram dimension or remove the reduced time range from {column}.',
         values: {
           column: currentColumn.label,
         },
@@ -73,7 +74,7 @@ export function getColumnWindowError(
     !hasTimeField &&
       i18n.translate('xpack.lens.indexPattern.windowWithoutTimefield', {
         defaultMessage:
-          'Reduced time range can only be used with a specified default time field on the data view.',
+          'Reduced time range can only be used with a specified default time field on the data view. Either use a different data view with default time field or remove the reduced time range from {column}.',
         values: {
           column: currentColumn.label,
         },
