@@ -16,7 +16,7 @@ import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { notificationServiceMock } from './notifications/notifications_service.mock';
-import { overlayServiceMock } from './overlays/overlay_service.mock';
+import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { pluginsServiceMock } from './plugins/plugins_service.mock';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { renderingServiceMock } from './rendering/rendering_service.mock';
