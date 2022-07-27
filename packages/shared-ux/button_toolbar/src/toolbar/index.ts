@@ -8,4 +8,4 @@
 
 export { Toolbar } from './toolbar';
 
-export { Props as ToolbarProps } from './toolbar';
+export type { Props as ToolbarProps } from './toolbar';
