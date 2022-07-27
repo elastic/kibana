@@ -16,7 +16,8 @@ import { comparePolicies, testSyntheticsPolicy } from './sample_data/test_policy
 import { PrivateLocationTestService } from './services/private_location_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('PrivateLocationMonitor', function () {
+  // FAILING ON 8.4: https://github.com/elastic/kibana/issues/137328
+  describe.skip('PrivateLocationMonitor', function () {
     this.tags('skipCloud');
 
     const supertestAPI = getService('supertest');
