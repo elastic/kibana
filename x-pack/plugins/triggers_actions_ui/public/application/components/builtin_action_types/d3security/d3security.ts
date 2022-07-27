@@ -16,8 +16,8 @@ export function getActionType(): ActionTypeModel<
   D3ActionParams
 > {
   return {
-    id: '.d3',
-    iconClass: 'logoD3',
+    id: '.d3security',
+    iconClass: lazy(() => import('./logo')),
     selectMessage: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.d3securityAction.selectMessageText',
       {
