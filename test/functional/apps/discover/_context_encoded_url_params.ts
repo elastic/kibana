@@ -35,8 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'context_encoded_param',
         '@timestamp',
         true,
-        customDataViewIdParam,
-        'context_encoded_param'
+        customDataViewIdParam
       );
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');

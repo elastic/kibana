@@ -36,7 +36,7 @@ export const schema = {
       {
         validator: fieldValidators.emptyField(
           i18n.translate('indexPatternEditor.validations.titleIsRequiredErrorMessage', {
-            defaultMessage: 'An index pattern is required.',
+            defaultMessage: 'An Index pattern is required.',
           })
         ),
       },
@@ -50,15 +50,7 @@ export const schema = {
       defaultMessage: 'Name',
     }),
     defaultValue: '',
-    validations: [
-      {
-        validator: fieldValidators.emptyField(
-          i18n.translate('indexPatternEditor.validations.nameIsRequiredErrorMessage', {
-            defaultMessage: 'A name is required.',
-          })
-        ),
-      },
-    ],
+    validations: [],
   },
   timestampField: {
     label: i18n.translate('indexPatternEditor.editor.form.timeFieldLabel', {

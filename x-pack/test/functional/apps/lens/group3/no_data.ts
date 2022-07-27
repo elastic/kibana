@@ -14,12 +14,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'lens', 'header', 'timePicker', 'settings']);
+  const PageObjects = getPageObjects(['common', 'lens', 'header', 'timePicker']);
 
   const createDataView = async (dataViewName: string) => {
-    await PageObjects.settings.setIndexPatternField(dataViewName);
-    await PageObjects.settings.setNameField(dataViewName);
-
+    await testSubjects.setValue('createIndexPatternTitleInput', dataViewName, {
+      clearWithKeyboard: true,
+      typeCharByChar: true,
+    });
     await testSubjects.click('saveIndexPatternButton');
   };
 
@@ -56,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return await (await find.byClassName('indexPatternEditor__form')).isDisplayed();
       });
 
-      const dataViewToCreate = 'logstash-*';
+      const dataViewToCreate = 'logstash';
       await createDataView(dataViewToCreate);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitForWithTimeout(
@@ -66,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const dataViewTitle = await PageObjects.lens.getDataPanelIndexPattern();
           // data view editor will add wildcard symbol by default
           // so we need to include it in our original title when comparing
-          return dataViewTitle === dataViewToCreate;
+          return dataViewTitle === `${dataViewToCreate}*`;
         }
       );
     });

@@ -27,13 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.setWindowSize(1200, 800);
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
-      await PageObjects.settings.createIndexPattern(
-        'logstash-*',
-        undefined,
-        undefined,
-        undefined,
-        'logstash-*'
-      );
+      await PageObjects.settings.createIndexPattern('logstash-*');
 
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();

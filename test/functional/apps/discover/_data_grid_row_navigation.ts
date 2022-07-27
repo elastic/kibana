@@ -36,13 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await createIndex('similar_index');
       await createIndex('similar_index_two');
 
-      await PageObjects.settings.createIndexPattern(
-        'similar_index*',
-        '@timestamp',
-        true,
-        undefined,
-        'similar_index*'
-      );
+      await PageObjects.settings.createIndexPattern('similar_index*', '@timestamp', true);
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
     });
