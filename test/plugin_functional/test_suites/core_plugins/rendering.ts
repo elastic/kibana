@@ -151,7 +151,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'telemetry.labels.gitRev (string)',
         'telemetry.labels.isPr (boolean)',
         'telemetry.labels.journeyName (string)',
-        'telemetry.labels.prId (string)',
+        'telemetry.labels.prId (number)',
         'telemetry.labels.testBuildId (string)',
         'telemetry.labels.testJobId (string)',
         'telemetry.hidePrivacyStatement (boolean)',
