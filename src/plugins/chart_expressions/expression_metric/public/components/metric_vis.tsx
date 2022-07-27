@@ -81,7 +81,7 @@ const getMetricFormatter = (
   const serializedFieldFormat = getFormatByAccessor(accessor, columns);
   const formatId = serializedFieldFormat?.id ?? 'number';
 
-  if (!['number', 'currency', 'percent', 'bytes', 'duration'].includes(formatId)) {
+  if (!['number', 'currency', 'percent', 'bytes', 'duration', 'string'].includes(formatId)) {
     throw new Error(
       i18n.translate('expressionMetricVis.errors.unsupportedColumnFormat', {
         defaultMessage: 'Metric visualization expression - Unsupported column format: "{id}"',
@@ -90,6 +90,10 @@ const getMetricFormatter = (
         },
       })
     );
+  }
+
+  if (formatId === 'string') {
+    return getFormatService().deserialize(serializedFieldFormat).getConverterFor('text');
   }
 
   if (formatId === 'duration') {
