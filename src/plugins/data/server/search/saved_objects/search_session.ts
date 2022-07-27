@@ -16,9 +16,6 @@ export const searchSessionSavedObjectType: SavedObjectsType = {
   hidden: true,
   mappings: {
     properties: {
-      persisted: {
-        type: 'boolean',
-      },
       sessionId: {
         type: 'keyword',
       },
@@ -29,12 +26,6 @@ export const searchSessionSavedObjectType: SavedObjectsType = {
         type: 'date',
       },
       expires: {
-        type: 'date',
-      },
-      touched: {
-        type: 'date',
-      },
-      completed: {
         type: 'date',
       },
       status: {
