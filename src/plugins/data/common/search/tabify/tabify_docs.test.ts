@@ -63,8 +63,6 @@ describe('tabify_docs', () => {
           _source: {
             name: 'first',
           },
-          _routing: 'test',
-          _score: 1,
           fields: {
             date: ['1'],
             zzz: ['z'],
