@@ -95,7 +95,7 @@ export function getOperationParams(
     if (operation.shiftable && name === 'shift') {
       args[name] = value;
     }
-    if (operation.windowable && name === 'timeWindow') {
+    if (operation.windowable && name === 'timeRange') {
       args.window = value;
     }
     return args;

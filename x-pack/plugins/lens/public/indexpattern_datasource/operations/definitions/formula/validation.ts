@@ -501,7 +501,7 @@ function getQueryValidationErrors(
       }
     }
 
-    if (arg.name === 'timeWindow') {
+    if (arg.name === 'timeRange') {
       const parsedWindow = parseTimeShift(arg.value || '');
       if (parsedWindow === 'invalid' || parsedWindow === 'previous') {
         errors.push({

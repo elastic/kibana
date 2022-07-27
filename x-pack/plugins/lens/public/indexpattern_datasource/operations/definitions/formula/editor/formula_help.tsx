@@ -153,6 +153,32 @@ sum(products.base_price) / overall_sum(sum(products.base_price))
           />
         ),
       },
+      {
+        label: i18n.translate('xpack.lens.formulaDocumentation.recentChange', {
+          defaultMessage: 'Recent change',
+        }),
+        description: (
+          <Markdown
+            markdown={i18n.translate(
+              'xpack.lens.formulaDocumentation.recentChangeDescription.markdown',
+              {
+                defaultMessage: `### Recent change
+
+Use \`timeRange='30m'\` to add an additional filter on the time range of a metric aligned with the end of the global time range. This can be used to calculate how much a value changed recently.
+
+\`\`\`
+max(system.network.in.bytes, timeRange="30m")
+ - min(system.network.in.bytes, timeRange="30m")
+\`\`\`
+        `,
+
+                description:
+                  'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              }
+            )}
+          />
+        ),
+      },
     ],
   });
 
@@ -498,7 +524,7 @@ export function getFunctionSignatureLabel(
     }
     if (def.windowable) {
       extraArgs += i18n.translate('xpack.lens.formula.windowExtraArguments', {
-        defaultMessage: '[timeWindow]?: string',
+        defaultMessage: '[timeRange]?: string',
       });
     }
     return `${name}(${def.documentation?.signature}${extraArgs})`;

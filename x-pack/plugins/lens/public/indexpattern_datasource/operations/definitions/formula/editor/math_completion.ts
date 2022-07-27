@@ -261,8 +261,8 @@ function getArgumentSuggestions(
       }
     }
     if (operation.windowable) {
-      if (!namedArguments.find((arg) => arg.name === 'timeWindow')) {
-        list.push('timeWindow');
+      if (!namedArguments.find((arg) => arg.name === 'timeRange')) {
+        list.push('timeRange');
       }
     }
     if ('operationParams' in operation) {
@@ -369,7 +369,7 @@ export async function getNamedArgumentSuggestions({
       type: SUGGESTION_TYPE.SHIFTS,
     };
   }
-  if (ast.name === 'timeWindow') {
+  if (ast.name === 'timeRange') {
     return {
       list: windowOptions.map(({ value }) => value),
       type: SUGGESTION_TYPE.WINDOWS,
@@ -460,7 +460,7 @@ export function getSuggestion(
       break;
     case SUGGESTION_TYPE.NAMED_ARGUMENT:
       kind = monaco.languages.CompletionItemKind.Keyword;
-      if (label === 'kql' || label === 'lucene' || label === 'shift' || label === 'timeWindow') {
+      if (label === 'kql' || label === 'lucene' || label === 'shift' || label === 'timeRange') {
         command = TRIGGER_SUGGESTION_COMMAND;
         insertText = `${label}='$0'`;
         insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;

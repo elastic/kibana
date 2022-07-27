@@ -98,15 +98,16 @@ export function Window({
         fullWidth
         data-test-subj="indexPattern-dimension-window-row"
         label={i18n.translate('xpack.lens.indexPattern.window.label', {
-          defaultMessage: 'Window',
+          defaultMessage: 'Reduced time range',
         })}
         helpText={i18n.translate('xpack.lens.indexPattern.window.help', {
-          defaultMessage: 'Enter the time window filter applied to this metric',
+          defaultMessage:
+            'Additional time range filter aligned with the end of the global time range',
         })}
         error={
           isLocalValueInvalid &&
           i18n.translate('xpack.lens.indexPattern.window.genericInvalidHelp', {
-            defaultMessage: 'Window value is not valid.',
+            defaultMessage: 'Time range value is not valid.',
           })
         }
         isInvalid={Boolean(isLocalValueInvalid)}
@@ -119,7 +120,7 @@ export function Window({
               isClearable={true}
               data-test-subj="indexPattern-dimension-window"
               placeholder={i18n.translate('xpack.lens.indexPattern.windowPlaceholder', {
-                defaultMessage: 'Type custom values (e.g. 8w)',
+                defaultMessage: 'Type custom values (e.g. 12m)',
               })}
               options={windowOptions}
               selectedOptions={getSelectedOption()}

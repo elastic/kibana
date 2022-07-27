@@ -62,7 +62,7 @@ export function getColumnWindowWarnings(
     warnings.push(
       i18n.translate('xpack.lens.indexPattern.window.notApplicableHelp', {
         defaultMessage:
-          'Window can only be used without a date histogram and with a specified default time field on the data view. Otherwise it is ignored',
+          'Reduced time range can only be used without a date histogram and with a specified default time field on the data view. Otherwise it is ignored',
       })
     );
   }
