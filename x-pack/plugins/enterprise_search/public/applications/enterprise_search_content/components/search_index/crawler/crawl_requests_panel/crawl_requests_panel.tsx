@@ -7,7 +7,6 @@
 
 import React from 'react';
 
-import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { DataPanel } from '../../../../../shared/data_panel/data_panel';
@@ -30,16 +29,6 @@ export const CrawlRequestsPanel: React.FC = () => (
       defaultMessage:
         "Recent crawl requests are logged here. You can track progress and examine crawl events in Kibana's Discover or Logs user intefaces",
     })}
-    action={
-      <EuiButton size="s" color="primary">
-        {i18n.translate(
-          'xpack.enterpriseSearch.crawler.crawlRequestsPanel.viewInDiscoverButtonLabel',
-          {
-            defaultMessage: 'View in Discover',
-          }
-        )}
-      </EuiButton>
-    }
   >
     <CrawlRequestsTable />
   </DataPanel>
