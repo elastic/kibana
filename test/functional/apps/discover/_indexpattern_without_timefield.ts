@@ -103,5 +103,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         async () => !(await PageObjects.timePicker.timePickerExists())
       );
     });
+
+    it('should disable the auto refresh interval when switching to a data view without a time field', async () => {
+      const autoRefreshInterval = 5;
+      await PageObjects.discover.selectIndexPattern('with-timefield');
+      await PageObjects.timePicker.startAutoRefresh(autoRefreshInterval);
+      let url = await browser.getCurrentUrl();
+      expect(url).to.contain(`refreshInterval:(pause:!f,value:${autoRefreshInterval * 1000})`);
+      await PageObjects.discover.selectIndexPattern('without-timefield');
+      url = await browser.getCurrentUrl();
+      expect(url).to.contain(`refreshInterval:(pause:!t,value:${autoRefreshInterval * 1000})`);
+    });
   });
 }

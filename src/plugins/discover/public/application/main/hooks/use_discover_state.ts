@@ -9,6 +9,7 @@ import { useMemo, useEffect, useState, useCallback } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import { isEqual } from 'lodash';
 import { History } from 'history';
+import { DataViewType } from '@kbn/data-views-plugin/public';
 import {
   isOfAggregateQueryType,
   getIndexPatternFromSQLQuery,
@@ -256,6 +257,19 @@ export function useDiscoverState({
       refetch$.next(undefined);
     }
   }, [initialFetchStatus, refetch$, indexPattern, savedSearch.id]);
+
+  /**
+   * We need to make sure the auto refresh interval is disabled for
+   * non-time series data or rollups since we don't show the date picker
+   */
+  useEffect(() => {
+    if (
+      indexPattern &&
+      (!indexPattern.isTimeBased() || indexPattern.type === DataViewType.ROLLUP)
+    ) {
+      stateContainer.pauseAutoRefreshInterval();
+    }
+  }, [indexPattern, stateContainer]);
 
   const getResultColumns = useCallback(() => {
     if (documentState.result?.length && documentState.fetchStatus === FetchStatus.COMPLETE) {
