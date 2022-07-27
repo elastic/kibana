@@ -982,4 +982,28 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'windows.advanced.memory_protection.context_manipulation_detection',
+    first_supported_version: '8.4',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.context_manipulation_detection',
+      {
+        defaultMessage:
+          'Detect injection based on thread context manipulation (e.g. `SetThreadContext`) as a part of memory protection. Default: true',
+      }
+    ),
+    license: 'platinum',
+  },
+  {
+    key: 'windows.advanced.kernel.image_and_process_file_timestamp',
+    first_supported_version: '8.4',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.image_and_process_file_timestamp',
+      {
+        defaultMessage:
+          'Collect executable/dll timestamps for process and async image load events. Default: true',
+      }
+    ),
+    license: 'platinum',
+  },
 ];
