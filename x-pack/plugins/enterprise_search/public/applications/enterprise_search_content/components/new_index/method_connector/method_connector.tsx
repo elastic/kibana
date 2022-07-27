@@ -119,6 +119,7 @@ export const MethodConnector: React.FC = () => {
 
   return (
     <NewSearchIndexTemplate
+      docsUrl="https://github.com/elastic/connectors-ruby/blob/main/README.md"
       error={errorToMessage(error)}
       title={i18n.translate('xpack.enterpriseSearch.content.newIndex.steps.buildConnector.title', {
         defaultMessage: 'Build a connector',
