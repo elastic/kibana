@@ -40,22 +40,20 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('Exports and Spaces', () => {
-    const ids = ['non_default_space', 'non_timezone_space'];
+    const id = 'non_default_space';
     before(async () => {
-      for (const id of ids) {
-        await spacesService.create({ id, name: id });
-        await kibanaServer.importExport.load(
-          `x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_kibana_${id}`,
-          { space: id }
-        );
-      }
+      await spacesService.create({ id, name: id });
+      await kibanaServer.importExport.load(
+        `x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_kibana_${id}`,
+        { space: id }
+      );
       await reportingAPI.initEcommerce();
     });
 
     after(async () => {
       await reportingAPI.teardownEcommerce();
       await reportingAPI.deleteAllReports();
-      for (const id of ids) await spacesService.delete(id);
+      await spacesService.delete(id);
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
