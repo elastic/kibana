@@ -82,29 +82,3 @@ export interface NetworkHit {
     value_as_string: string;
   };
 }
-
-export type NetworkDetailsHostHit = ResultHit<object>;
-
-export interface NetworkDetailsHit {
-  aggregations: {
-    destination?: NetworkHit;
-    source?: NetworkHit;
-    host: ResultHit<object>;
-  };
-  _shards: {
-    total: number;
-    successful: number;
-    skipped: number;
-    failed: number;
-  };
-  hits: {
-    total: {
-      value: number;
-      relation: string;
-    };
-    max_score: number | null;
-    hits: [];
-  };
-  took: number;
-  timeout: number;
-}

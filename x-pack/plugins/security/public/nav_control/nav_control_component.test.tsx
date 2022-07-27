@@ -25,7 +25,14 @@ const useObservableMock = useObservable as jest.Mock;
 const useUserProfileMock = jest.spyOn(UseCurrentUserImports, 'useUserProfile');
 const useCurrentUserMock = jest.spyOn(UseCurrentUserImports, 'useCurrentUser');
 
-const userProfile = userProfileMock.create();
+const userProfileWithSecurity = userProfileMock.createWithSecurity();
+const userProfile = {
+  ...userProfileWithSecurity,
+  user: {
+    ...userProfileWithSecurity.user,
+    authentication_provider: { type: 'basic', name: 'basic1' },
+  },
+};
 const userMenuLinks$ = new BehaviorSubject([]);
 
 describe('SecurityNavControl', () => {

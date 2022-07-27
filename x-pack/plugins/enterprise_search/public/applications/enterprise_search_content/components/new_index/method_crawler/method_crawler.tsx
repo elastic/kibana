@@ -40,7 +40,6 @@ export const MethodCrawler: React.FC = () => {
       )}
       type="crawler"
       onSubmit={(indexName, language) => makeRequest({ indexName, language })}
-      formDisabled={status === Status.LOADING}
       buttonLoading={status === Status.LOADING}
     >
       <EuiSteps
@@ -97,7 +96,7 @@ export const MethodCrawler: React.FC = () => {
               <EuiText size="s">
                 <p>
                   {i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.steps.buildSearchExperience.content',
+                    'xpack.enterpriseSearch.content.newIndex.crawler.steps.buildSearchExperience.content',
                     {
                       defaultMessage:
                         'Connect your newly created Elasticsearch index to an App Search engine to build a cusomtizable search experience.',

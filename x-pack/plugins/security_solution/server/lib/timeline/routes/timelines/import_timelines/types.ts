@@ -7,7 +7,6 @@
 import type { BulkError } from '../../../../detection_engine/routes/utils';
 
 import type { SavedTimeline } from '../../../../../../common/types/timeline';
-import type { HapiReadableStream } from '../../../../detection_engine/rules/types';
 import type { TimelineStatusActions } from '../../../utils/common';
 import type { NoteResult } from '../../../../../../common/types/timeline/note';
 
@@ -29,6 +28,3 @@ export interface ImportRegular {
 }
 
 export type ImportTimelineResponse = ImportRegular | BulkError;
-export interface ImportTimelinesRequestParams {
-  body: { file: HapiReadableStream };
-}

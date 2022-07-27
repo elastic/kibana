@@ -188,6 +188,7 @@ const AlertsTreemapComponent: React.FC<Props> = ({
           <LegendContainer>
             {legendItems.length > 0 && (
               <DraggableLegend
+                className="eui-yScroll"
                 height={minChartHeight}
                 legendItems={legendItems}
                 minWidth={DEFAULT_LEGEND_WIDTH}

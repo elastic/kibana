@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject, SavedObjectAttributes } from '../../../..';
+import type { SavedObject, SavedObjectAttributes } from '@kbn/core-saved-objects-common';
 import { savedObjectsClientMock } from '../../../../mocks';
 import { collectReferencesDeep } from './collect_references_deep';
 
