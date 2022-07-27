@@ -26,23 +26,14 @@
   }
 }
 
-@include euiBreakpoint('m', 'l', 'xl') {
+@include euiBreakpoint('m') {
   .kbnSearchBar {
     width: 400px;
   }
 }
 
 @include euiBreakpoint('l', 'xl') {
-  .kbnSearchBar:focus {
-    animation: kbnAnimateSearchBar $euiAnimSpeedFast forwards;
-  }
-}
-
-@keyframes kbnAnimateSearchBar {
-  from {
-    width: 400px;
-  }
-  to {
+  .kbnSearchBar {
     width: 600px;
   }
 }

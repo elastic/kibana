@@ -301,7 +301,7 @@ export const SearchBar: FC<SearchBarProps> = ({
           setShowAppend(false);
         },
         onBlur: () => {
-          setShowAppend(true);
+          setShowAppend(!searchValue.length);
         },
         fullWidth: true,
         append: showAppend ? (
