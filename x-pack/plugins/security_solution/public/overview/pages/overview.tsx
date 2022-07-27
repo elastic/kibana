@@ -69,6 +69,13 @@ const OverviewComponent = () => {
 
   const riskyHostsEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
 
+  const timerange = useMemo(
+    () => ({
+      from,
+      to,
+    }),
+    [from, to]
+  );
   return (
     <>
       {indicesExist ? (
@@ -143,10 +150,7 @@ const OverviewComponent = () => {
                           <RiskyHostLinks
                             deleteQuery={deleteQuery}
                             setQuery={setQuery}
-                            timerange={{
-                              from,
-                              to,
-                            }}
+                            timerange={timerange}
                           />
                         )}
                       </EuiFlexItem>

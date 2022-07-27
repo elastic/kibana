@@ -6,14 +6,15 @@
  */
 
 import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/data-plugin/common';
-import type { FactoryQueryTypes } from '../..';
+import type { RiskQueries } from '../..';
 
-import type { ESQuery } from '../../../../typed_json';
 import type { Inspect, Maybe, SortField, TimerangeInput } from '../../../common';
 
-export interface RiskScoreRequestOptions extends IEsSearchRequest {
+export interface RiskScoreRequestOptions<
+  T extends RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore
+> extends IEsSearchRequest {
   defaultIndex: string[];
-  factoryQueryType?: FactoryQueryTypes;
+  factoryQueryType: T;
   timerange?: TimerangeInput;
   onlyLatest?: boolean;
   pagination?: {
@@ -21,12 +22,19 @@ export interface RiskScoreRequestOptions extends IEsSearchRequest {
     querySize: number;
   };
   sort?: RiskScoreSortField;
-  filterQuery?: ESQuery | string | undefined;
+  filterQuery?: string | undefined;
 }
 
-export interface RiskScoreStrategyResponse extends IEsSearchResponse {
+export interface HostsRiskScoreStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
   totalCount: number;
+  data: HostsRiskScore[] | undefined;
+}
+
+export interface UsersRiskScoreStrategyResponse extends IEsSearchResponse {
+  inspect?: Maybe<Inspect>;
+  totalCount: number;
+  data: UsersRiskScore[] | undefined;
 }
 
 export interface RiskScore {

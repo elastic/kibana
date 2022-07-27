@@ -79,6 +79,7 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
   initialResult,
   errorMessage,
   abort = false,
+  showErrorToast = true,
 }: {
   factoryQueryType: QueryType;
   /**
@@ -93,6 +94,10 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
    * When the flag switches from `false` to `true`, it will abort any ongoing request.
    */
   abort?: boolean;
+  /**
+   * Show error toast when error occurs on search complete
+   */
+  showErrorToast?: boolean;
 }) => {
   const abortCtrl = useRef(new AbortController());
 
@@ -106,12 +111,12 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
   >(searchComplete);
 
   useEffect(() => {
-    if (error != null && !(error instanceof AbortError)) {
+    if (showErrorToast && error != null && !(error instanceof AbortError)) {
       addError(error, {
         title: errorMessage ?? i18n.DEFAULT_ERROR_SEARCH_STRATEGY(factoryQueryType),
       });
     }
-  }, [addError, error, errorMessage, factoryQueryType]);
+  }, [addError, error, errorMessage, factoryQueryType, showErrorToast]);
 
   const searchCb = useCallback(
     (props: OptionalSignalArgs<StrategyRequestType<QueryType>>) => {
@@ -147,9 +152,7 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
 
   const [formatedResult, inspect] = useMemo(
     () => [
-      result
-        ? omit<StrategyResponseType<QueryType>, 'rawResponse'>('rawResponse', result)
-        : initialResult,
+      result ? omit('rawResponse', result) : initialResult,
       result ? getInspectResponse(result, EMPTY_INSPECT) : EMPTY_INSPECT,
     ],
     [result, initialResult]
