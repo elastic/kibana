@@ -18,7 +18,7 @@ import { EuiModalFooter } from '@elastic/eui';
 import { getStubPluginServices } from '@kbn/presentation-util-plugin/public';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import { FiltersNotificationModal, FiltersNotificationProps } from './filters_notification_modal';
-import { isErrorEmbeddable, ViewMode } from '../../services/embeddable';
+import { FilterableEmbeddable, isErrorEmbeddable, ViewMode } from '../../services/embeddable';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
@@ -36,6 +36,7 @@ describe('LibraryNotificationPopover', () => {
   const start = doStart();
 
   let container: DashboardContainer;
+  let embeddable: ContactCardEmbeddable & FilterableEmbeddable;
   let defaultProps: FiltersNotificationProps;
   let coreStart: CoreStart;
 
@@ -67,18 +68,17 @@ describe('LibraryNotificationPopover', () => {
     >(CONTACT_CARD_EMBEDDABLE, {
       firstName: 'Kibanana',
     });
-
     if (isErrorEmbeddable(contactCardEmbeddable)) {
       throw new Error('Failed to create embeddable');
     }
+    embeddable = embeddablePluginMock.mockFilterableEmbeddable(contactCardEmbeddable, {
+      getFilters: jest.fn(),
+    });
 
     defaultProps = {
       context: { embeddable: contactCardEmbeddable },
       displayName: 'test display',
       id: 'testId',
-      filters: [],
-      dataViewList: [],
-      viewMode: ViewMode.EDIT,
       editPanelAction: {
         execute: jest.fn(),
       } as unknown as FiltersNotificationProps['editPanelAction'],
@@ -91,18 +91,21 @@ describe('LibraryNotificationPopover', () => {
   }
 
   test('show modal footer in edit mode', () => {
+    embeddable.updateInput({ viewMode: ViewMode.EDIT });
     const component = mountComponent();
     const footer = component.find(EuiModalFooter);
     expect(footer.exists()).toBe(true);
   });
 
   test('hide modal footer in view mode', () => {
-    const component = mountComponent({ viewMode: ViewMode.VIEW });
+    embeddable.updateInput({ viewMode: ViewMode.VIEW });
+    const component = mountComponent();
     const footer = component.find(EuiModalFooter);
     expect(footer.exists()).toBe(false);
   });
 
   test('clicking edit button executes edit panel action', () => {
+    embeddable.updateInput({ viewMode: ViewMode.EDIT });
     const component = mountComponent();
     const editButton = findTestSubject(component, 'filtersNotificationModal__editButton');
     editButton.simulate('click');
@@ -110,6 +113,7 @@ describe('LibraryNotificationPopover', () => {
   });
 
   test('clicking close button calls onClose', () => {
+    embeddable.updateInput({ viewMode: ViewMode.EDIT });
     const component = mountComponent();
     const editButton = findTestSubject(component, 'filtersNotificationModal__closeButton');
     editButton.simulate('click');

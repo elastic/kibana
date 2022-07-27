@@ -17,21 +17,23 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
 } from '@elastic/eui';
-import { Filter } from '@kbn/es-query';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { css } from '@emotion/react';
-import { EditPanelAction, ViewMode } from '@kbn/embeddable-plugin/public';
+import {
+  EditPanelAction,
+  FilterableEmbeddable,
+  IEmbeddable,
+  ViewMode,
+} from '@kbn/embeddable-plugin/public';
 import { FiltersNotificationActionContext } from './filters_notification_badge';
 import { dashboardFilterNotificationBadge } from '../../dashboard_strings';
+import { DashboardContainer } from '../embeddable';
 
 export interface FiltersNotificationProps {
   context: FiltersNotificationActionContext;
   displayName: string;
   id: string;
-  filters: Filter[];
-  dataViewList: DataView[];
-  viewMode?: ViewMode;
   editPanelAction: EditPanelAction;
   onClose: () => void;
 }
@@ -40,12 +42,15 @@ export function FiltersNotificationModal({
   context,
   displayName,
   id,
-  filters,
-  dataViewList,
-  viewMode,
   editPanelAction,
   onClose,
 }: FiltersNotificationProps) {
+  const { embeddable } = context;
+
+  const filters = (embeddable as IEmbeddable & FilterableEmbeddable).getFilters();
+  const dataViewList: DataView[] = (embeddable.getRoot() as DashboardContainer)?.getAllDataViews();
+  const viewMode = embeddable.getInput()?.viewMode;
+
   return (
     <>
       <EuiModalHeader id="filtersNotificationModal__header">

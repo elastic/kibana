@@ -9,16 +9,12 @@
 import React from 'react';
 
 import { CoreStart, OverlayStart } from '@kbn/core/public';
-import { DataView } from '@kbn/data-views-plugin/public';
 import { EditPanelAction, isFilterableEmbeddable } from '@kbn/embeddable-plugin/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 
 import { Action, IncompatibleActionError } from '../../services/ui_actions';
-
 import { toMountPoint } from '../../services/kibana_react';
 import { IEmbeddable, isErrorEmbeddable } from '../../services/embeddable';
-
-import { DashboardContainer } from '../embeddable';
 import { dashboardFilterNotificationBadge } from '../../dashboard_strings';
 
 export const BADGE_FILTERS_NOTIFICATION = 'ACTION_FILTERS_NOTIFICATION';
@@ -77,11 +73,6 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
       uiSettings: this.uiSettings,
     });
 
-    const filters = embeddable.getFilters();
-    const dataViewList: DataView[] = (
-      embeddable.getRoot() as DashboardContainer
-    )?.getAllDataViews();
-
     const FiltersNotificationModal = await import('./filters_notification_modal').then(
       (m) => m.FiltersNotificationModal
     );
@@ -93,9 +84,6 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
             context={context}
             displayName={this.displayName}
             id={this.id}
-            filters={filters}
-            dataViewList={dataViewList}
-            viewMode={embeddable.getInput()?.viewMode}
             editPanelAction={this.editPanelAction}
             onClose={() => session.close()}
           />
