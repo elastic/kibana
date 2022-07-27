@@ -331,6 +331,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         management: new subPluginClasses.Management(),
         landingPages: new subPluginClasses.LandingPages(),
         cloudSecurityPosture: new subPluginClasses.CloudSecurityPosture(),
+        threatIntelligence: new subPluginClasses.ThreatIntelligence(),
       };
     }
     return this._subPlugins;
@@ -359,6 +360,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       management: subPlugins.management.start(core, plugins),
       landingPages: subPlugins.landingPages.start(),
       cloudSecurityPosture: subPlugins.cloudSecurityPosture.start(),
+      threatIntelligence: subPlugins.threatIntelligence.start(),
     };
   }
   /**

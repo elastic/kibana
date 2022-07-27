@@ -50,7 +50,6 @@ import { observabilityFeatureId } from '../../../common';
 import { ALERT_STATUS_LICENSE_ERROR, rulesStatusesTranslationsMapping } from './translations';
 import { ObservabilityAppServices } from '../../application/types';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
-
 export function RuleDetailsPage() {
   const {
     cases,
@@ -61,6 +60,7 @@ export function RuleDetailsPage() {
       getEditAlertFlyout,
       getRuleEventLogList,
       getAlertsStateTable,
+      getRuleAlertsSummary,
       getRuleStatusPanel,
       getRuleDefinition,
     },
@@ -154,7 +154,6 @@ export function RuleDetailsPage() {
       : false);
 
   const userPermissions = useGetUserCasesPermissions();
-
   const alertStateProps = {
     cases: {
       ui: cases.ui,
@@ -186,8 +185,9 @@ export function RuleDetailsPage() {
         defaultMessage: 'Execution history',
       }),
       'data-test-subj': 'eventLogListTab',
-      content: getRuleEventLogList({
+      content: getRuleEventLogList<'default'>({
         rule,
+        ruleType,
       } as RuleEventLogListProps),
     },
     {
@@ -304,21 +304,24 @@ export function RuleDetailsPage() {
       }}
     >
       <EuiFlexGroup wrap={true} gutterSize="m">
-        {/* Left side of Rule Summary */}
-        {getRuleStatusPanel({
-          rule,
-          isEditable: hasEditButton,
-          requestRefresh: reloadRule,
-          healthColor: getHealthColor(rule.executionStatus.status),
-          statusMessage,
-        })}
-
-        {/* Right side of Rule Summary */}
-        {getRuleDefinition({
-          filteredRuleTypes,
-          rule,
-          onEditRule: () => reloadRule(),
-        } as RuleDefinitionProps)}
+        <EuiFlexItem style={{ minWidth: 350 }}>
+          {getRuleStatusPanel({
+            rule,
+            isEditable: hasEditButton,
+            requestRefresh: reloadRule,
+            healthColor: getHealthColor(rule.executionStatus.status),
+            statusMessage,
+          })}
+        </EuiFlexItem>
+        <EuiSpacer size="m" />
+        <EuiFlexItem style={{ minWidth: 350 }}>
+          {getRuleAlertsSummary({
+            rule,
+            filteredRuleTypes,
+          })}
+        </EuiFlexItem>
+        <EuiSpacer size="m" />
+        {getRuleDefinition({ rule, onEditRule: () => reloadRule() } as RuleDefinitionProps)}
       </EuiFlexGroup>
 
       <EuiSpacer size="l" />

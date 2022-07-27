@@ -699,6 +699,13 @@ export type SafeEndpointEvent = Partial<{
     kind: ECSField<string>;
     sequence: ECSField<number>;
   }>;
+  kibana: Partial<{
+    alert: Partial<{
+      rule: Partial<{
+        name: ECSField<string>;
+      }>;
+    }>;
+  }>;
   host: Partial<{
     id: ECSField<string>;
     hostname: ECSField<string>;
