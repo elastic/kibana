@@ -7,23 +7,20 @@
  */
 
 /**
- * https://www.elastic.co/guide/en/ecs/master/ecs-service.html
+ * https://www.elastic.co/guide/en/ecs/master/ecs-faas.html
  *
  * @internal
  */
-export interface EcsService {
-  address?: string;
-  environment?: string;
-  ephemeral_id?: string;
+export interface EcsFaas {
+  coldstart?: boolean;
+  execution?: string;
   id?: string;
   name?: string;
-  node?: Node;
-  state?: string;
-  type?: string;
+  trigger?: Trigger;
   version?: string;
 }
 
-interface Node {
-  name?: string;
-  roles?: string[];
+interface Trigger {
+  request_id?: string;
+  type?: 'http' | 'pubsub' | 'datasource' | 'timer' | 'other';
 }

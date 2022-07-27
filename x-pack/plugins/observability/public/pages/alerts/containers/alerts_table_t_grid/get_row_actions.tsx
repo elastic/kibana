@@ -12,7 +12,7 @@ import type { ObservabilityActionsProps } from './alerts_table_t_grid';
 
 const buildData = (alerts: EcsFieldsResponse): ObservabilityActionsProps['data'] => {
   return Object.entries(alerts).reduce<ObservabilityActionsProps['data']>(
-    (acc, [field, value]) => [...acc, { field, value }],
+    (acc, [field, value]) => [...acc, { field, value: value as string[] }],
     []
   );
 };
