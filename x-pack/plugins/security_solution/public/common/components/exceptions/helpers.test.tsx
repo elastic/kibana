@@ -158,7 +158,7 @@ describe('Exception helpers', () => {
       const payload = getCommentsArrayMock();
       const result = getFormattedComments(payload);
 
-      const wrapper = mount<React.ReactElement>(result[0].timelineIcon as React.ReactElement);
+      const wrapper = mount<React.ReactElement>(result[0].timelineAvatar as React.ReactElement);
 
       expect(wrapper.text()).toEqual('SU');
     });

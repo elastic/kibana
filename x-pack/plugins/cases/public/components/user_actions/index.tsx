@@ -243,7 +243,7 @@ export const UserActions = React.memo(
               />
             ),
             'data-test-subj': 'add-comment',
-            timelineIcon: (
+            timelineAvatar: (
               <UserActionAvatar username={currentUser?.username} fullName={currentUser?.fullName} />
             ),
             className: 'isEdit',
