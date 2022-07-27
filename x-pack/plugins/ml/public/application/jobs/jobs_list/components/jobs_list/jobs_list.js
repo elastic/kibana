@@ -293,13 +293,6 @@ export class JobsList extends Component {
         width: '8%',
       },
       {
-        name: i18n.translate('xpack.ml.jobsList.actionsLabel', {
-          defaultMessage: 'Actions',
-        }),
-        render: (item) => <ResultLinks jobs={[item]} />,
-        width: '8%',
-      },
-      {
         name: i18n.translate('xpack.ml.jobsList.latestTimestampLabel', {
           defaultMessage: 'Latest timestamp',
         }),
@@ -316,6 +309,13 @@ export class JobsList extends Component {
         ),
         textOnly: true,
         width: '15%',
+      },
+      {
+        name: i18n.translate('xpack.ml.jobsList.actionsLabel', {
+          defaultMessage: 'Actions',
+        }),
+        render: (item) => <ResultLinks jobs={[item]} />,
+        width: '8%',
       },
       {
         name: (
