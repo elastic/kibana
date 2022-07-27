@@ -159,25 +159,17 @@ function DragAndDropTextListComponent({
                                 const { isInvalid, errorMessage } =
                                   getFieldValidityAndErrorMessage(field);
                                 return (
-                                  <EuiFlexGroup gutterSize="none" alignItems="center">
-                                    <EuiFlexItem>
-                                      <EuiFormRow
-                                        isInvalid={isInvalid}
-                                        error={errorMessage}
-                                        fullWidth
-                                      >
-                                        <EuiFieldText
-                                          data-test-subj={`input-${idx}`}
-                                          id={idx === 0 ? firstItemId : undefined}
-                                          isInvalid={isInvalid}
-                                          value={field.value}
-                                          onChange={field.onChange}
-                                          compressed
-                                          fullWidth
-                                        />
-                                      </EuiFormRow>
-                                    </EuiFlexItem>
-                                  </EuiFlexGroup>
+                                  <EuiFormRow isInvalid={isInvalid} error={errorMessage} fullWidth>
+                                    <EuiFieldText
+                                      data-test-subj={`input-${idx}`}
+                                      id={idx === 0 ? firstItemId : undefined}
+                                      isInvalid={isInvalid}
+                                      value={field.value}
+                                      onChange={field.onChange}
+                                      compressed
+                                      fullWidth
+                                    />
+                                  </EuiFormRow>
                                 );
                               }}
                             </UseField>
