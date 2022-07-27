@@ -31,7 +31,7 @@ GET /_search
 
 Here is the equivalent command in cURL:
 
-[source,bash]
+[source,js]
 ----------------------------------
 curl -XGET "http://localhost:9200/_search" -d'
 {
@@ -43,7 +43,7 @@ curl -XGET "http://localhost:9200/_search" -d'
 
 Prepend requests to a {kib} API endpoint with `kbn:`
 
-[source,bash]
+[source,js]
 --------------------------------------------------
 `GET kbn:/api/index_management/indices`
 --------------------------------------------------
@@ -67,7 +67,7 @@ To configure your preferences for autocomplete, go to
 [[console-comments]]
 ==== Comments
 
-You can write notes or temporarily disable parts of a request by using double forward slashes
+You can write comments or temporarily disable parts of a request by using double forward slashes
 or pound signs to create single-line comments.
 
 [source,js]
@@ -110,6 +110,7 @@ image::dev-tools/console/images/variables.png["Variables", width=60%]
 You can refer to these variables in the paths and bodies of your requests.
 Each variable can be referenced multiple times.
 
+[source,js]
 ----------------------------------
 GET ${pathVariable}
 {
