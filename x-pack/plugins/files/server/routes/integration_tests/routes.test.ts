@@ -228,11 +228,12 @@ describe('File HTTP API', () => {
         .expect(200);
 
       const { body: buffer, header } = await request
+        // By providing a file name like "myfilename.pdf" we imply that we want a pdf
         .get(root, `/api/files/public/blob/myfilename.pdf?token=${token}`)
         .buffer()
         .expect(200);
 
-      expect(header['content-type']).toEqual('image/png');
+      expect(header['content-type']).toEqual('application/pdf');
       expect(header['content-disposition']).toEqual('attachment; filename="myfilename.pdf"');
       expect(buffer.toString('utf8')).toEqual('test');
     });
