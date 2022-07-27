@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
 
-      expect(profiles).to.equal([]);
+      expect(profiles).to.be.empty();
     });
   });
 }

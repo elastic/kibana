@@ -10,11 +10,8 @@ import { AuditEvent, AuditLogger } from '@kbn/security-plugin/server';
 import { DATABASE_CATEGORY, ECS_OUTCOMES, isWriteOperation, OperationDetails } from '.';
 import { OwnerEntity } from './types';
 
-// type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
-
 interface CreateAuditMsgParams {
   operation: OperationDetails;
-  // entity?: Optional<OwnerEntity, 'id'>;
   entity?: OwnerEntity;
   error?: Error;
 }
