@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { AbstractStorybookMocks } from './mocks';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/shared-ux/storybook/mock'],
+};

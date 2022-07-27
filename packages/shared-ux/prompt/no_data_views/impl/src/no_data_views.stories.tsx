@@ -9,8 +9,8 @@ import React from 'react';
 import { action } from '@storybook/addon-actions';
 
 import {
-  NoDataViewsPromptStorybookMocks,
-  NoDataViewsPromptComponentStorybookMocks,
+  NoDataViewsPromptStorybookMock,
+  NoDataViewsPromptComponentStorybookMock,
   NoDataViewsPromptStorybookParams,
   NoDataViewsPromptComponentStorybookParams,
 } from '@kbn/shared-ux-prompt-no-data-views-mocks';
@@ -33,16 +33,16 @@ export default {
 
 export const NoDataViews = (params: NoDataViewsPromptStorybookParams) => {
   return (
-    <NoDataViewsPromptProvider {...NoDataViewsPromptStorybookMocks.getServices(params)}>
+    <NoDataViewsPromptProvider {...NoDataViewsPromptStorybookMock.getServices(params)}>
       <NoDataViewsPrompt onDataViewCreated={action('onDataViewCreated')} />
     </NoDataViewsPromptProvider>
   );
 };
 
-NoDataViews.argTypes = NoDataViewsPromptStorybookMocks.getArgumentTypes();
+NoDataViews.argTypes = NoDataViewsPromptStorybookMock.getArgumentTypes();
 
 export const NoDataViewsComponent = (params: NoDataViewsPromptComponentStorybookParams) => {
   return <NoDataViewsPromptComponent onClickCreate={action('onClick')} {...params} />;
 };
 
-NoDataViewsComponent.argTypes = NoDataViewsPromptComponentStorybookMocks.getArgumentTypes();
+NoDataViewsComponent.argTypes = NoDataViewsPromptComponentStorybookMock.getArgumentTypes();

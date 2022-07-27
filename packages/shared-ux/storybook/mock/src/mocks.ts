@@ -25,7 +25,7 @@ const setTableCategory = <T extends ArgTypes>(args: T, category: 'Props' | 'Serv
   return args;
 };
 
-export abstract class AbstractStorybookMocks<
+export abstract class AbstractStorybookMock<
   PropArguments extends Args,
   ServiceArguments extends Args,
   Services
@@ -33,7 +33,7 @@ export abstract class AbstractStorybookMocks<
   abstract readonly propArguments: ArgTypes<PropArguments>;
   abstract readonly serviceArguments: ArgTypes<ServiceArguments>;
   abstract readonly dependencies: Array<
-    AbstractStorybookMocks<ArgTypes<unknown>, ArgTypes<Partial<Services>>, Partial<Services>>
+    AbstractStorybookMock<ArgTypes<unknown>, ArgTypes<Partial<Services>>, Partial<Services>>
   >;
 
   getPropArgumentTypes(): ArgTypes<PropArguments> {

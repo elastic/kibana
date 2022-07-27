@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { AbstractStorybookMocks } from '@kbn/shared-ux-storybook-mocks';
-import { KibanaNoDataPageStorybookMocks } from '@kbn/shared-ux-page-kibana-no-data-mocks';
+import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
+import { KibanaNoDataPageStorybookMock } from '@kbn/shared-ux-page-kibana-no-data-mocks';
 import type { KibanaNoDataPageStorybookParams } from '@kbn/shared-ux-page-kibana-no-data-mocks';
 import type { AnalyticsNoDataPageServices } from '@kbn/shared-ux-page-analytics-no-data-types';
 
@@ -15,7 +15,7 @@ type ServiceArguments = Pick<AnalyticsNoDataPageServices, 'kibanaGuideDocLink'>;
 
 export type Params = Record<keyof ServiceArguments, any> & KibanaNoDataPageStorybookParams;
 
-export class StorybookMocks extends AbstractStorybookMocks<
+export class StorybookMock extends AbstractStorybookMock<
   {},
   ServiceArguments,
   AnalyticsNoDataPageServices
@@ -27,11 +27,11 @@ export class StorybookMocks extends AbstractStorybookMocks<
       defaultValue: 'Kibana guide',
     },
   };
-  dependencies = [KibanaNoDataPageStorybookMocks];
+  dependencies = [KibanaNoDataPageStorybookMock];
 
   getServices(params: Params): AnalyticsNoDataPageServices {
     return {
-      ...KibanaNoDataPageStorybookMocks.getServices(params),
+      ...KibanaNoDataPageStorybookMock.getServices(params),
       kibanaGuideDocLink: 'Kibana guide',
     };
   }

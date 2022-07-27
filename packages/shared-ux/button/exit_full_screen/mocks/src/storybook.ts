@@ -7,7 +7,7 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { AbstractStorybookMocks } from '@kbn/shared-ux-storybook-mocks';
+import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 import type {
   ExitFullScreenButtonProps as Props,
   ExitFullScreenButtonServices,
@@ -17,7 +17,7 @@ type PropArguments = Pick<Props, 'toggleChrome'>;
 
 export type Params = Record<keyof PropArguments, any>;
 
-export class StorybookMocks extends AbstractStorybookMocks<
+export class StorybookMock extends AbstractStorybookMock<
   PropArguments,
   {},
   ExitFullScreenButtonServices

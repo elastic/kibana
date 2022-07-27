@@ -7,8 +7,8 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { AbstractStorybookMocks } from '@kbn/shared-ux-storybook-mocks';
-import { RedirectAppLinksStorybookMocks } from '@kbn/shared-ux-link-redirect-app-mocks';
+import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
+import { RedirectAppLinksStorybookMock } from '@kbn/shared-ux-link-redirect-app-mocks';
 import type { NoDataCardServices, NoDataCardProps } from '@kbn/shared-ux-card-no-data-types';
 
 type PropArguments = Pick<NoDataCardProps, 'category' | 'title' | 'description' | 'button'>;
@@ -20,7 +20,7 @@ type Arguments = PropArguments & ServiceArguments;
  */
 export type Params = Record<keyof Arguments, any>;
 
-export class StorybookMocks extends AbstractStorybookMocks<
+export class StorybookMock extends AbstractStorybookMock<
   PropArguments,
   ServiceArguments,
   NoDataCardServices
@@ -59,7 +59,7 @@ export class StorybookMocks extends AbstractStorybookMocks<
     },
   };
 
-  dependencies = [RedirectAppLinksStorybookMocks];
+  dependencies = [RedirectAppLinksStorybookMock];
 
   getServices(params: Params): NoDataCardServices {
     const { canAccessFleet } = params;
@@ -70,7 +70,7 @@ export class StorybookMocks extends AbstractStorybookMocks<
         action('addBasePath')(path);
         return path;
       },
-      ...RedirectAppLinksStorybookMocks.getServices(),
+      ...RedirectAppLinksStorybookMock.getServices(),
     };
   }
 }

@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/shared-ux-storybook-mocks",
+  "name": "@kbn/shared-ux-storybook-mock",
   "private": true,
   "version": "1.0.0",
   "main": "./target_node/index.js",

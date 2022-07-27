@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { action } from '@storybook/addon-actions';
-import { AnalyticsNoDataPageStorybookMocks } from '@kbn/shared-ux-page-analytics-no-data-mocks';
+import { AnalyticsNoDataPageStorybookMock } from '@kbn/shared-ux-page-analytics-no-data-mocks';
 import type { AnalyticsNoDataPageStorybookParams } from '@kbn/shared-ux-page-analytics-no-data-mocks';
 
 import { AnalyticsNoDataPage as Component } from './analytics_no_data_page';
@@ -27,20 +27,20 @@ export default {
 
 export const AnalyticsNoDataPage = (params: AnalyticsNoDataPageStorybookParams) => {
   return (
-    <AnalyticsNoDataPageProvider {...AnalyticsNoDataPageStorybookMocks.getServices(params)}>
+    <AnalyticsNoDataPageProvider {...AnalyticsNoDataPageStorybookMock.getServices(params)}>
       <Component onDataViewCreated={action('onDataViewCreated')} />
     </AnalyticsNoDataPageProvider>
   );
 };
 
-AnalyticsNoDataPage.argTypes = AnalyticsNoDataPageStorybookMocks.getArgumentTypes();
+AnalyticsNoDataPage.argTypes = AnalyticsNoDataPageStorybookMock.getArgumentTypes();
 
 export const LoadingState = (params: AnalyticsNoDataPageStorybookParams) => {
   // Simulate loading with a Promise that doesn't resolve.
   const dataCheck = () => new Promise<boolean>((_reject, _resolve) => {});
 
   const services = {
-    ...AnalyticsNoDataPageStorybookMocks.getServices(params),
+    ...AnalyticsNoDataPageStorybookMock.getServices(params),
     hasESData: dataCheck,
     hasUserDataView: dataCheck,
     hasDataView: dataCheck,

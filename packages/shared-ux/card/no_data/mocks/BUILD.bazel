@@ -39,7 +39,7 @@ NPM_MODULE_EXTRA_FILES = [
 RUNTIME_DEPS = [
   "@npm//@storybook/addon-actions",
   "//packages/shared-ux/link/redirect_app/mocks",
-  "//packages/shared-ux/storybook/mocks",
+  "//packages/shared-ux/storybook/mock",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -55,7 +55,7 @@ TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
   "@npm//@storybook/addon-actions",
-  "//packages/shared-ux/storybook/mocks:npm_module_types",
+  "//packages/shared-ux/storybook/mock:npm_module_types",
   "//packages/shared-ux/link/redirect_app/mocks:npm_module_types",
   "//packages/shared-ux/card/no_data/types:npm_module_types",
 ]

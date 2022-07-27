@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AbstractStorybookMocks } from '@kbn/shared-ux-storybook-mocks';
+import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 import { NoDataViewsPromptComponentProps } from '@kbn/shared-ux-prompt-no-data-views-types';
 
 type PropArguments = Pick<
@@ -16,7 +16,7 @@ type PropArguments = Pick<
 
 export type Params = Record<keyof PropArguments, any>;
 
-export class StorybookComponentMocks extends AbstractStorybookMocks<PropArguments, {}, {}> {
+export class StorybookComponentMocks extends AbstractStorybookMock<PropArguments, {}, {}> {
   propArguments = {
     canCreateNewDataView: {
       control: 'boolean',

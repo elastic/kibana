@@ -10,9 +10,9 @@ export { getServicesMock as getKibanaNoDataPageServicesMock } from './jest';
 
 export type { Params as KibanaNoDataPageStorybookParams } from './storybook';
 
-import { StorybookMocks } from './storybook';
+import { StorybookMock } from './storybook';
 
 /**
  * Storybook mocks for the `KibanaNoDataPage` component.
  */
-export const KibanaNoDataPageStorybookMocks = new StorybookMocks();
+export const KibanaNoDataPageStorybookMock = new StorybookMock();

@@ -7,7 +7,7 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { AbstractStorybookMocks } from '@kbn/shared-ux-storybook-mocks';
+import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 import { NoDataViewsPromptServices } from '@kbn/shared-ux-prompt-no-data-views-types';
 
 type ServiceArguments = Pick<
@@ -17,7 +17,7 @@ type ServiceArguments = Pick<
 
 export type Params = Record<keyof ServiceArguments, any>;
 
-export class StorybookMocks extends AbstractStorybookMocks<
+export class StorybookMock extends AbstractStorybookMock<
   {},
   ServiceArguments,
   NoDataViewsPromptServices

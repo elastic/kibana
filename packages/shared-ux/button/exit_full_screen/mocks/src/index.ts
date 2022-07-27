@@ -11,9 +11,9 @@ export type {
   getExitFullScreenButtonServicesMock,
 } from './jest';
 
-import { StorybookMocks } from './storybook';
+import { StorybookMock } from './storybook';
 
 /**
  * Storybook mocks for the `ExitFullScreenButton` component.
  */
-export const ExitFullScreenButtonStorybookMocks = new StorybookMocks();
+export const ExitFullScreenButtonStorybookMock = new StorybookMock();

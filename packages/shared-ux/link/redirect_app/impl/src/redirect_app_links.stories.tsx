@@ -9,7 +9,7 @@
 import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { action } from '@storybook/addon-actions';
-import { RedirectAppLinksStorybookMocks } from '@kbn/shared-ux-link-redirect-app-mocks';
+import { RedirectAppLinksStorybookMock } from '@kbn/shared-ux-link-redirect-app-mocks';
 
 import { RedirectAppLinks as Component } from './redirect_app_links';
 import mdx from '../README.mdx';
@@ -28,7 +28,7 @@ export default {
 export const RedirectAppLinks = () => {
   return (
     <>
-      <Component {...RedirectAppLinksStorybookMocks.getServices()}>
+      <Component {...RedirectAppLinksStorybookMock.getServices()}>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButton
@@ -65,4 +65,4 @@ export const RedirectAppLinks = () => {
   );
 };
 
-RedirectAppLinks.argTypes = RedirectAppLinksStorybookMocks.getArgumentTypes();
+RedirectAppLinks.argTypes = RedirectAppLinksStorybookMock.getArgumentTypes();

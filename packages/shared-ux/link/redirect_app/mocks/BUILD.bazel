@@ -38,7 +38,7 @@ NPM_MODULE_EXTRA_FILES = [
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
   "@npm//@storybook/addon-actions",
-  "//packages/shared-ux/storybook/mocks",
+  "//packages/shared-ux/storybook/mock",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -53,7 +53,7 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@storybook/addon-actions",
   "//packages/shared-ux/link/redirect_app/types",
-  "//packages/shared-ux/storybook/mocks:npm_module_types",
+  "//packages/shared-ux/storybook/mock:npm_module_types",
 ]
 
 jsts_transpiler(

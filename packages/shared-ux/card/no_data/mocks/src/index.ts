@@ -10,9 +10,9 @@ export type { Params as NoDataCardStorybookParams } from './storybook';
 
 export { getServicesMock as getNoDataCardServicesMock } from './jest';
 
-import { StorybookMocks } from './storybook';
+import { StorybookMock } from './storybook';
 
 /**
  * Storybook mocks for the `NoDataDataCard` component.
  */
-export const NoDataCardStorybookMocks = new StorybookMocks();
+export const NoDataCardStorybookMock = new StorybookMock();

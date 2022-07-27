@@ -7,17 +7,17 @@
  */
 
 import { servicesFactory } from '@kbn/shared-ux-storybook';
-import { AbstractStorybookMocks } from '@kbn/shared-ux-storybook-mocks';
+import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 import type { KibanaNoDataPageServices } from '@kbn/shared-ux-page-kibana-no-data-types';
 import type { NoDataPageProps } from '@kbn/shared-ux-components';
 
 import {
-  NoDataViewsPromptStorybookMocks,
+  NoDataViewsPromptStorybookMock,
   NoDataViewsPromptStorybookParams,
 } from '@kbn/shared-ux-prompt-no-data-views-mocks';
 
 import {
-  NoDataCardStorybookMocks,
+  NoDataCardStorybookMock,
   NoDataCardStorybookParams,
 } from '@kbn/shared-ux-card-no-data-mocks';
 
@@ -29,7 +29,7 @@ export type Params = NoDataViewsPromptStorybookParams &
   NoDataCardStorybookParams &
   Record<keyof Arguments, any>;
 
-export class StorybookMocks extends AbstractStorybookMocks<
+export class StorybookMock extends AbstractStorybookMock<
   PropArguments,
   ServiceArguments,
   KibanaNoDataPageServices
@@ -57,7 +57,7 @@ export class StorybookMocks extends AbstractStorybookMocks<
     },
   };
 
-  dependencies = [NoDataViewsPromptStorybookMocks, NoDataCardStorybookMocks];
+  dependencies = [NoDataViewsPromptStorybookMock, NoDataCardStorybookMock];
 
   getServices(params: Params): KibanaNoDataPageServices {
     // Workaround to leverage the services package.
@@ -74,8 +74,8 @@ export class StorybookMocks extends AbstractStorybookMocks<
       ...platform,
       hasESData: () => params.hasESData,
       hasUserDataView: () => params.hasUserDataView,
-      ...NoDataViewsPromptStorybookMocks.getServices(params),
-      ...NoDataCardStorybookMocks.getServices(params),
+      ...NoDataViewsPromptStorybookMock.getServices(params),
+      ...NoDataCardStorybookMock.getServices(params),
     };
   }
 }

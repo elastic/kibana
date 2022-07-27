@@ -7,10 +7,10 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { AbstractStorybookMocks } from '@kbn/shared-ux-storybook-mocks';
+import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 import { RedirectAppLinksServices } from '@kbn/shared-ux-link-redirect-app-types';
 
-export class StorybookMocks extends AbstractStorybookMocks<{}, {}, RedirectAppLinksServices> {
+export class StorybookMock extends AbstractStorybookMock<{}, {}, RedirectAppLinksServices> {
   propArguments = {};
   serviceArguments = {};
   dependencies = [];
