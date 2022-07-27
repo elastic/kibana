@@ -150,7 +150,7 @@ export interface GetStateReturn {
     data: DataPublicPluginStart
   ) => () => void;
   /**
-   * Start sync between state and URL
+   * Start sync between state and URL -- only used for testing
    */
   startSync: () => () => void;
   /**
@@ -232,6 +232,12 @@ export function getState({
     },
   };
 
+  // Calling syncState from within initializeAndSync causes state syncing issues.
+  // syncState takes a snapshot of the initial state when it's called to compare
+  // against before syncing state updates. When syncState is called from outside
+  // of initializeAndSync, the snapshot doesn't get reset when the data view is
+  // changed. Then when the user presses the back button, the new state appears
+  // to be the same as the initial state, so syncState ignores the update.
   const syncAppState = () =>
     syncState({
       storageKey: APP_STATE_URL_KEY,
