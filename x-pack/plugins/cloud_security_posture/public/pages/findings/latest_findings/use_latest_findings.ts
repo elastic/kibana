@@ -65,7 +65,7 @@ export const getFindingsQuery = ({
 }: UseFindingsOptions & { pitId: string }) => ({
   body: {
     query,
-    sort: [{ [getSortKey(sort.field)]: sort.direction }],
+    sort: [{ [sort.field]: sort.direction }],
     size,
     from,
     aggs: getFindingsCountAggQuery(),
