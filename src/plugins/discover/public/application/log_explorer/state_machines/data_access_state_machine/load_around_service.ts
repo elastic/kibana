@@ -24,24 +24,30 @@ import {
 import { decodeOrThrow } from '../../utils/runtime_types';
 import { LogExplorerContext, LogExplorerEvent } from './state_machine';
 
+export type LoadAroundParameters = FetchEntriesAroundParameters & {
+  centerRowIndex: number;
+};
+
 export type LoadAroundEvent =
   | {
       type: 'loadAroundSucceeded';
-      requestParameters: FetchEntriesAroundParameters;
+      requestParameters: LoadAroundParameters;
       beforeResponse: IEsSearchResponse;
       afterResponse: IEsSearchResponse;
     }
   | {
       type: 'loadAroundFailed';
-      requestParameters: FetchEntriesAroundParameters;
+      requestParameters: LoadAroundParameters;
       error: unknown;
     };
 
 export const loadAround = ({
+  centerRowIndex,
   dataView,
   query,
   searchSource,
 }: {
+  centerRowIndex: number;
   dataView: DataView;
   query: QueryStart;
   searchSource: ISearchSource;
@@ -52,7 +58,7 @@ export const loadAround = ({
     // console.log(searchSource.getSearchRequestBody());
     const { position, timeRange } = context;
 
-    const requestParameters: FetchEntriesAroundParameters = {
+    const fetchAroundRequestParamters: FetchEntriesAroundParameters = {
       chunkSize: 100,
       position,
       sorting: [
@@ -62,12 +68,17 @@ export const loadAround = ({
       timeRange,
     };
 
-    return boundFetchEntriesAround(requestParameters).pipe(
+    const eventRequestParameters: LoadAroundParameters = {
+      ...fetchAroundRequestParamters,
+      centerRowIndex,
+    };
+
+    return boundFetchEntriesAround(fetchAroundRequestParamters).pipe(
       last(),
       map(({ beforeResponse, afterResponse }) => {
         return {
           type: 'loadAroundSucceeded' as const,
-          requestParameters,
+          requestParameters: eventRequestParameters,
           beforeResponse,
           afterResponse,
         };
@@ -75,7 +86,7 @@ export const loadAround = ({
       catchError((err) => {
         return of({
           type: 'loadAroundFailed' as const,
-          requestParameters,
+          requestParameters: eventRequestParameters,
           error: err,
         });
       })
@@ -101,7 +112,7 @@ export const updateChunksFromLoadAround = assign(
 );
 
 export const createTopChunkFromResponse = (
-  requestParameters: FetchEntriesAroundParameters,
+  requestParameters: LoadAroundParameters,
   response: IEsSearchResponse
 ): LogExplorerChunk => {
   const hits = response.rawResponse.hits.hits;
@@ -113,6 +124,7 @@ export const createTopChunkFromResponse = (
       startPosition: getPositionFromTimestamp(requestParameters.timeRange.from),
       endPosition: requestParameters.position,
       chunkSize: requestParameters.chunkSize,
+      rowIndex: requestParameters.centerRowIndex - 1,
     };
   }
 
@@ -124,11 +136,12 @@ export const createTopChunkFromResponse = (
     endPosition,
     entries: hits.map(getEntryFromHit).reverse(),
     chunkSize: requestParameters.chunkSize,
+    rowIndex: requestParameters.centerRowIndex - hits.length,
   };
 };
 
 export const createBottomChunkFromResponse = (
-  requestParameters: FetchEntriesAroundParameters,
+  requestParameters: LoadAroundParameters,
   response: IEsSearchResponse
 ): LogExplorerChunk => {
   const hits = response.rawResponse.hits.hits;
@@ -140,6 +153,7 @@ export const createBottomChunkFromResponse = (
       startPosition,
       endPosition: getPositionFromTimestamp(requestParameters.timeRange.to),
       chunkSize: requestParameters.chunkSize,
+      rowIndex: requestParameters.centerRowIndex,
     };
   }
 
@@ -151,6 +165,7 @@ export const createBottomChunkFromResponse = (
     endPosition: getPositionFromCursor(getCursorFromHitSort(lastHit.sort)),
     entries: hits.map(getEntryFromHit),
     chunkSize: requestParameters.chunkSize,
+    rowIndex: requestParameters.centerRowIndex,
   };
 };
 

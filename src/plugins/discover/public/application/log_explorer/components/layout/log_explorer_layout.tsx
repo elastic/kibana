@@ -23,6 +23,8 @@ import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import { InspectorSession } from '@kbn/inspector-plugin/public';
+import { useActor } from '@xstate/react';
+import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../../../main/components/no_results';
 import { LoadingSpinner } from '../../../main/components/loading_spinner/loading_spinner';
@@ -32,17 +34,14 @@ import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../../common';
 import { popularizeField } from '../../../../utils/popularize_field';
 import { DiscoverTopNav } from '../../../main/components/top_nav/discover_topnav';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
-import { getResultState } from '../../../main/utils/get_result_state';
 import { DiscoverUninitialized } from '../../../main/components/uninitialized/uninitialized';
 import { DataMainMsg } from '../../../main/hooks/use_saved_search';
 import { useColumns } from '../../../../hooks/use_data_grid_columns';
-import { FetchStatus } from '../../../types';
 import { useDataState } from '../../../main/hooks/use_data_state';
 import { SavedSearchURLConflictCallout } from '../../../../services/saved_searches';
 import { hasActiveFilter } from '../../../main/components/layout/utils';
 import { LogExplorer } from './log_explorer';
-import { useStateMachineContextState as useQueryDataMachineState } from '../../hooks/query_data/use_state_machine';
-import { VIEW_MODE } from '../../../../components/view_mode_toggle';
+import { useStateMachineContext } from '../../hooks/query_data/use_state_machine';
 
 /**
  * Local storage key for sidebar persistence state
@@ -81,19 +80,13 @@ export function LogExplorerLayout({
     spaces,
     inspector,
   } = useDiscoverServices();
-  const queryDataState = useQueryDataMachineState();
-  console.log(queryDataState);
   const { main$ } = savedSearchData$;
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
 
-  const fetchCounter = useRef<number>(0);
-  const dataState: DataMainMsg = useDataState(main$);
+  const stateMachine = useStateMachineContext();
+  const [dataAccessState] = useActor(stateMachine);
 
-  useEffect(() => {
-    if (dataState.fetchStatus === FetchStatus.LOADING) {
-      fetchCounter.current++;
-    }
-  }, [dataState.fetchStatus]);
+  const dataState: DataMainMsg = useDataState(main$);
 
   // We treat rollup v1 data views as non time based in Discover, since we query them
   // in a non time based way using the regular _search API, since the internal
@@ -107,10 +100,10 @@ export function LogExplorerLayout({
   const [isSidebarClosed, setIsSidebarClosed] = useState(initialSidebarClosed);
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
-  const resultState = useMemo(
-    () => getResultState(dataState.fetchStatus, dataState.foundDocuments!),
-    [dataState.fetchStatus, dataState.foundDocuments]
-  );
+  // const resultState = useMemo(
+  //   () => getResultState(dataState.fetchStatus, dataState.foundDocuments!),
+  //   [dataState.fetchStatus, dataState.foundDocuments]
+  // );
 
   const onOpenInspector = useCallback(() => {
     // prevent overlapping
@@ -169,7 +162,8 @@ export function LogExplorerLayout({
     setIsSidebarClosed(!isSidebarClosed);
   }, [isSidebarClosed, storage]);
 
-  const contentCentered = resultState === 'uninitialized' || resultState === 'none';
+  const contentCentered =
+    dataAccessState.matches('uninitialized') || dataAccessState.matches('failedNoData');
   const onDataViewCreated = useCallback(
     (dataView: DataView) => {
       if (dataView.id) {
@@ -185,7 +179,7 @@ export function LogExplorerLayout({
   }, []);
 
   return (
-    <EuiPage className="dscPage" data-fetch-counter={fetchCounter.current}>
+    <EuiPage className="dscPage">
       <h1
         id="savedSearchTitle"
         className="euiScreenReaderOnly"
@@ -276,10 +270,10 @@ export function LogExplorerLayout({
               hasShadow={false}
               className={classNames('dscPageContent', {
                 'dscPageContent--centered': contentCentered,
-                'dscPageContent--emptyPrompt': resultState === 'none',
+                'dscPageContent--emptyPrompt': dataAccessState.matches('failedNoData'),
               })}
             >
-              {resultState === 'none' && (
+              {dataAccessState.matches('failedNoData') ? (
                 <DiscoverNoResults
                   isTimeBased={isTimeBased}
                   data={data}
@@ -288,12 +282,11 @@ export function LogExplorerLayout({
                   hasFilters={hasActiveFilter(state.filters)}
                   onDisableFilters={onDisableFilters}
                 />
-              )}
-              {resultState === 'uninitialized' && (
+              ) : dataAccessState.matches('uninitialized') ? (
                 <DiscoverUninitialized onRefresh={() => savedSearchRefetch$.next(undefined)} />
-              )}
-              {resultState === 'loading' && <LoadingSpinner />}
-              {resultState === 'ready' && (
+              ) : dataAccessState.matches('loadingAround') ? (
+                <LoadingSpinner />
+              ) : (
                 <EuiFlexGroup
                   className="dscPageContent__inner"
                   direction="column"
@@ -302,7 +295,7 @@ export function LogExplorerLayout({
                   responsive={false}
                 >
                   <LogExplorer
-                    documents$={savedSearchData$.documents$}
+                    stateMachine={stateMachine}
                     expandedDoc={expandedDoc}
                     indexPattern={indexPattern}
                     navigateTo={navigateTo}

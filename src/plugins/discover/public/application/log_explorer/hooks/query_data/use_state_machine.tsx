@@ -9,10 +9,10 @@
 import { ISearchSource, QueryStart } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { TimeRange } from '@kbn/es-query';
-import { useActor, useInterpret } from '@xstate/react';
+import { useInterpret } from '@xstate/react';
 import createContainer from 'constate';
 import moment from 'moment';
-import React from 'react';
+import { useMemo } from 'react';
 import { assign } from 'xstate';
 import {
   dataAccessStateMachine,
@@ -22,16 +22,18 @@ import {
 import { useSubscription } from '../use_observable';
 
 export const useStateMachineService = ({
-  children,
+  virtualRowCount,
   dataView,
   query,
   searchSource,
 }: {
-  children: React.ReactNode;
+  virtualRowCount: number;
   dataView: DataView;
   query: QueryStart;
   searchSource: ISearchSource;
 }) => {
+  const centerRowIndex = useMemo(() => Math.floor(virtualRowCount / 2), [virtualRowCount]);
+
   const dataAccessService = useInterpret(
     () => {
       const initialTimeRange = query.timefilter.timefilter.getAbsoluteTime();
@@ -76,7 +78,12 @@ export const useStateMachineService = ({
         endTimestampReducesLoadedBottom: constantGuard(false),
       },
       services: {
-        loadAround: loadAround({ dataView, query, searchSource }),
+        loadAround: loadAround({
+          centerRowIndex,
+          dataView,
+          query,
+          searchSource,
+        }),
       },
       devTools: true,
     }
@@ -98,11 +105,20 @@ export const useStateMachineService = ({
 export const [StateMachineProvider, useStateMachineContext] =
   createContainer(useStateMachineService);
 
-export const useStateMachineContextState = () => {
-  const dataAccessService = useStateMachineContext();
-  const [state] = useActor(dataAccessService);
-  return state;
-};
+// export const useStateMachineContextSelector = <T, TEmitted = DataAccessService['state']>(
+//   selector: (emitted: TEmitted) => T,
+//   compare?: (a: T, b: T) => boolean,
+//   getSnapshot?: (a: DataAccessService) => TEmitted
+// ) => {
+//   const dataAccessMachine = useStateMachineContext();
+
+//   return useSelector(dataAccessMachine, selector, compare, getSnapshot);
+// };
+
+// export const useStateMachineContextActor = () => {
+//   const dataAccessService = useStateMachineContext();
+//   return useActor(dataAccessService);
+// };
 
 const getMiddleOfTimeRange = ({ from, to }: TimeRange): string => {
   const fromMoment = moment.utc(from);

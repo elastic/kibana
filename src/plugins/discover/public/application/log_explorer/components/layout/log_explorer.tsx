@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useSelector } from '@xstate/react';
 import React, { memo, useCallback, useMemo } from 'react';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -27,15 +28,18 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { SavedSearch } from '../../../../services/saved_searches';
 import { DataTableRecord } from '../../../../types';
-import { useDataState } from '../../../main/hooks/use_data_state';
-import { DataDocuments$, DataDocumentsMsg } from '../../../main/hooks/use_saved_search';
 import { AppState, GetStateReturn } from '../../../main/services/discover_state';
-import { FetchStatus } from '../../../types';
+import {
+  DataAccessService,
+  selectIsLoading,
+  selectIsReloading,
+} from '../../state_machines/data_access_state_machine';
+import { LogExplorerGrid } from '../log_explorer_grid';
 
 const DataGridMemoized = React.memo(DiscoverGrid);
+const LogExplorerGridMemoized = React.memo(LogExplorerGrid);
 
 function LogExplorerComponent({
-  documents$,
   expandedDoc,
   indexPattern,
   onAddFilter,
@@ -43,8 +47,8 @@ function LogExplorerComponent({
   setExpandedDoc,
   state,
   stateContainer,
+  stateMachine,
 }: {
-  documents$: DataDocuments$;
   expandedDoc?: DataTableRecord;
   indexPattern: DataView;
   navigateTo: (url: string) => void;
@@ -53,15 +57,18 @@ function LogExplorerComponent({
   setExpandedDoc: (doc?: DataTableRecord) => void;
   state: AppState;
   stateContainer: GetStateReturn;
+  stateMachine: DataAccessService;
 }) {
   const { capabilities, indexPatterns, uiSettings } = useDiscoverServices();
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
   const sampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING), [uiSettings]);
 
-  const documentState: DataDocumentsMsg = useDataState(documents$);
-  const isLoading = documentState.fetchStatus === FetchStatus.LOADING;
+  const isLoading = useSelector(stateMachine, selectIsLoading);
+  const isReloading = useSelector(stateMachine, selectIsReloading);
 
-  const rows = useMemo(() => documentState.result || [], [documentState.result]);
+  // const documentState: DataDocumentsMsg = useDataState(documents$);
+  // const rows = useMemo(() => documentState.result || [], [documentState.result]);
+  const rows = [];
 
   const { columns, onAddColumn, onRemoveColumn, onSetColumns } = useColumns({
     capabilities,
@@ -105,10 +112,7 @@ function LogExplorerComponent({
     [uiSettings, indexPattern.timeFieldName]
   );
 
-  if (
-    (!documentState.result || documentState.result.length === 0) &&
-    documentState.fetchStatus === FetchStatus.LOADING
-  ) {
+  if (isReloading) {
     return (
       <div className="dscDocuments__loading">
         <EuiText size="xs" color="subdued">
@@ -119,6 +123,19 @@ function LogExplorerComponent({
       </div>
     );
   }
+
+  return (
+    <EuiFlexItem className="dscTable" aria-labelledby="documentsAriaLabel">
+      <EuiScreenReaderOnly>
+        <h2 id="documentsAriaLabel">
+          <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />
+        </h2>
+      </EuiScreenReaderOnly>
+      <div className="dscDiscoverGrid">
+        <LogExplorerGridMemoized />
+      </div>
+    </EuiFlexItem>
+  );
 
   return (
     <EuiFlexItem className="dscTable" aria-labelledby="documentsAriaLabel">

@@ -19,10 +19,11 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DataTableRecord } from '../../types';
 import { useQueryData } from './hooks/query_data/use_query_data';
 import { StateMachineProvider as QueryDataProvider } from './hooks/query_data/use_state_machine';
+import { LOG_EXPLORER_VIRTUAL_GRID_ROWS } from './constants';
 
 const LogExplorerLayoutMemoized = React.memo(LogExplorerLayout);
 
-export interface DiscoverMainProps {
+export interface LogExplorerMainAppProps {
   /**
    * List of available index patterns
    */
@@ -33,7 +34,7 @@ export interface DiscoverMainProps {
   savedSearch: SavedSearch;
 }
 
-export function LogExplorerMainApp(props: DiscoverMainProps) {
+export function LogExplorerMainApp(props: LogExplorerMainAppProps) {
   const { savedSearch, indexPatternList } = props;
   const services = useDiscoverServices();
   const { chrome, docLinks, uiSettings: config, data, spaces, history } = services;
@@ -102,7 +103,12 @@ export function LogExplorerMainApp(props: DiscoverMainProps) {
   useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
 
   return (
-    <QueryDataProvider dataView={dataView} query={data.query} searchSource={searchSource}>
+    <QueryDataProvider
+      virtualRowCount={LOG_EXPLORER_VIRTUAL_GRID_ROWS}
+      dataView={dataView}
+      query={data.query}
+      searchSource={searchSource}
+    >
       <LogExplorerLayoutMemoized
         indexPattern={indexPattern}
         indexPatternList={indexPatternList}

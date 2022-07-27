@@ -20,6 +20,19 @@ export interface LogExplorerContext {
   bottomChunk: LogExplorerChunk;
 }
 
+export interface LogExplorerState {
+  value:
+    | 'uninitialized' // not used yet, but there's a setting that disables automatic initial search
+    | 'loadingAround'
+    | 'failedNoData'
+    | 'loaded'
+    | 'loadingTop'
+    | 'loadingBottom'
+    | 'extendingTop'
+    | 'extendingBottom';
+  context: LogExplorerContext;
+}
+
 export type LogExplorerExternalEvent =
   | {
       type: 'columnsChanged';
@@ -87,11 +100,11 @@ export type LogExplorerInternalEvent =
 
 export type LogExplorerEvent = LogExplorerExternalEvent | LogExplorerInternalEvent;
 
-export const dataAccessStateMachine = createMachine({
-  schema: {
-    context: {} as LogExplorerContext,
-    events: {} as LogExplorerEvent,
-  },
+export const dataAccessStateMachine = createMachine<
+  LogExplorerContext,
+  LogExplorerEvent,
+  LogExplorerState
+>({
   id: 'logExplorerData',
   initial: 'loadingAround',
   states: {
@@ -106,7 +119,10 @@ export const dataAccessStateMachine = createMachine({
           actions: 'updateChunksFromLoadAround',
           target: 'loaded',
         },
-        positionChanged: {},
+        positionChanged: {
+          target: 'loadingAround',
+          internal: false,
+        },
         loadAroundFailed: {
           target: 'failedNoData',
         },
@@ -322,6 +338,19 @@ export const dataAccessStateMachine = createMachine({
         reloadSucceeded: {
           actions: ['updateTopChunk', 'updateBottomChunk'],
           target: 'loaded',
+        },
+      },
+    },
+    uninitialized: {
+      on: {
+        positionChanged: {
+          target: 'loadingAround',
+        },
+        timeRangeChanged: {
+          target: 'loadingAround',
+        },
+        columnsChanged: {
+          target: 'loadingAround',
         },
       },
     },
