@@ -20,13 +20,13 @@
   }
 }
 
-@include euiBreakpoint('m') {
+@include euiBreakpoint('m', 'l') {
   .kbnSearchBar {
     width: 400px;
   }
 }
 
-@include euiBreakpoint('l', 'xl') {
+@include euiBreakpoint('xl') {
   .kbnSearchBar {
     width: 600px;
   }
