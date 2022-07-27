@@ -135,7 +135,7 @@ export interface SavedObjectsServiceSetup {
 }
 
 /**
- * Saved Objects is Kibana's data persisentence mechanism allowing plugins to
+ * Saved Objects is Kibana's data persistence mechanism allowing plugins to
  * use Elasticsearch for storing and querying state. The
  * SavedObjectsServiceStart API provides a scoped Saved Objects client for
  * interacting with Saved Objects.
@@ -180,7 +180,7 @@ export interface SavedObjectsServiceStart {
    */
   createInternalRepository: (includedHiddenTypes?: string[]) => ISavedObjectsRepository;
   /**
-   * Creates a {@link SavedObjectsSerializer | serializer} that is aware of all registered types.
+   * Creates a {@link ISavedObjectsSerializer | serializer} that is aware of all registered types.
    */
   createSerializer: () => ISavedObjectsSerializer;
   /**
