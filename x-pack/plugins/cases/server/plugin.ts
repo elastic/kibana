@@ -66,7 +66,7 @@ export interface PluginsStart {
   features: FeaturesPluginStart;
   taskManager?: TaskManagerStartContract;
   security?: SecurityPluginStart;
-  spaces?: SpacesPluginStart;
+  spaces: SpacesPluginStart;
 }
 
 export class CasePlugin {
