@@ -8,7 +8,6 @@
 import { delay, finalize, switchMap, tap } from 'rxjs/operators';
 import { debounce, isEqual } from 'lodash';
 import { waitUntilNextSessionCompletes$, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { trackUiEvent } from '../../lens_ui_telemetry';
 import { setState, LensGetState, LensDispatch } from '..';
 import { getResolvedDateRange } from '../../utils';
 
@@ -53,7 +52,6 @@ export function subscribeToExternalContext(
   const filterSubscription = filterManager.getUpdates$().subscribe({
     next: () => {
       debounceDispatchFromExternal();
-      trackUiEvent('app_filters_updated');
     },
   });
 

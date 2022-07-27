@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import usePrevious from 'react-use/lib/usePrevious';
 import type { SecurityPageName } from '../../../app/types';
 import { formatDate } from '../../components/super_date_picker';
-import { isDetectionsPages } from '../../components/url_state/helpers';
+import { isDetectionsPages } from '../../utils/global_query_string/helpers';
 import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/inputs';
 import type { InputsModelId } from '../../store/inputs/constants';
