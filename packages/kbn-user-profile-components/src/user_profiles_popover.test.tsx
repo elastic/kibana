@@ -73,7 +73,7 @@ describe('UserProfilesPopover', () => {
           </button>
         }
         closePopover={[MockFunction]}
-        display="inlineBlock"
+        display="inline-block"
         hasArrow={true}
         isOpen={false}
         ownFocus={true}

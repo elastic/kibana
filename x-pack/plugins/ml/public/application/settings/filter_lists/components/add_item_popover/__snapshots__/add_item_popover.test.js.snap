@@ -22,7 +22,7 @@ exports[`AddItemPopover calls addItems with multiple items on clicking Add butto
       </EuiButton>
     }
     closePopover={[Function]}
-    display="inlineBlock"
+    display="inline-block"
     hasArrow={true}
     id="add_item_popover"
     initialFocus="#filter_list_add_item_input_row"
@@ -112,7 +112,7 @@ exports[`AddItemPopover opens the popover onButtonClick 1`] = `
       </EuiButton>
     }
     closePopover={[Function]}
-    display="inlineBlock"
+    display="inline-block"
     hasArrow={true}
     id="add_item_popover"
     initialFocus="#filter_list_add_item_input_row"
@@ -202,7 +202,7 @@ exports[`AddItemPopover renders the popover 1`] = `
       </EuiButton>
     }
     closePopover={[Function]}
-    display="inlineBlock"
+    display="inline-block"
     hasArrow={true}
     id="add_item_popover"
     initialFocus="#filter_list_add_item_input_row"
