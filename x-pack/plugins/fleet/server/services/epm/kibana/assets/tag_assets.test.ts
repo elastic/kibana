@@ -4,17 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
 
 import { tagKibanaAssets } from './tag_assets';
 
 describe('tagKibanaAssets', () => {
   const savedObjectTagAssignmentService = {
     updateTagAssignments: jest.fn(),
-  };
+  } as IAssignmentService;
   const savedObjectTagClient = {
     getAll: jest.fn(),
     create: jest.fn(),
-  };
+  } as ITagsClient;
 
   beforeEach(() => {
     savedObjectTagAssignmentService.updateTagAssignments.mockReset();
