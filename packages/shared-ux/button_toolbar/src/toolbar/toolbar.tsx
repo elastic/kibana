@@ -9,8 +9,6 @@
 import React, { ReactElement } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-
-import './solution_toolbar.scss';
 import { IconButtonGroup, PrimaryButton } from '../buttons';
 import { ToolbarPopover } from '../popover';
 
@@ -23,11 +21,10 @@ interface NamedSlots {
 }
 
 export interface Props {
-  isDarkModeEnabled?: boolean;
   children: NamedSlots;
 }
 
-export const Toolbar = ({ isDarkModeEnabled, children }: Props) => {
+export const Toolbar = ({ children }: Props) => {
   const { primaryButton, iconButtonGroup, extraButtons = [] } = children;
 
   const extra = extraButtons.map((button, index) =>
@@ -40,9 +37,6 @@ export const Toolbar = ({ isDarkModeEnabled, children }: Props) => {
 
   return (
     <EuiFlexGroup
-      className={`solutionToolbar ${
-        isDarkModeEnabled ? 'solutionToolbar--dark' : 'solutionToolbar--light'
-      }`}
       id={`kbnPresentationToolbar__solutionToolbar`}
       gutterSize="s"
     >
