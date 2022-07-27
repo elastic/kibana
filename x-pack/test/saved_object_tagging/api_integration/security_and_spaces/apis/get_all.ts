@@ -35,22 +35,20 @@ export default function (ftrContext: FtrProviderContext) {
       authorized: {
         httpCode: 200,
         expectResponse: ({ body }) => {
-          expect(body.tags.slice(0, 2)).to.eql({
-            tags: [
-              {
-                id: 'default-space-tag-1',
-                name: 'tag-1',
-                description: 'Tag 1 in default space',
-                color: '#FF00FF',
-              },
-              {
-                id: 'default-space-tag-2',
-                name: 'tag-2',
-                description: 'Tag 2 in default space',
-                color: '#77CC11',
-              },
-            ],
-          });
+          expect(body.tags.slice(0, 2)).to.eql([
+            {
+              id: 'default-space-tag-1',
+              name: 'tag-1',
+              description: 'Tag 1 in default space',
+              color: '#FF00FF',
+            },
+            {
+              id: 'default-space-tag-2',
+              name: 'tag-2',
+              description: 'Tag 2 in default space',
+              color: '#77CC11',
+            },
+          ]);
         },
       },
       unauthorized: {
