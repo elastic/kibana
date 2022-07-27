@@ -66,7 +66,22 @@ export function createIndicesRoute(logger: Logger, router: IRouter, baseRoute: s
       logger.warn(`route ${path} error getting indices from pattern "${pattern}": ${err.message}`);
     }
 
-    const result = { indices: uniqueCombined(aliases, indices, MAX_INDICES) };
+    let dataStreams: string[] = [];
+    try {
+      dataStreams = await getDataStreamsFromPattern(esClient, pattern);
+    } catch (err) {
+      logger.warn(
+        `route ${path} error getting dataStreams from pattern "${pattern}": ${err.message}`
+      );
+    }
+
+    const result = {
+      indices: uniqueCombined(
+        dataStreams,
+        uniqueCombined(aliases, indices, MAX_INDICES),
+        MAX_INDICES
+      ),
+    };
 
     logger.debug(`route ${path} response: ${JSON.stringify(result)}`);
     return res.ok({ body: result });
@@ -137,6 +152,18 @@ async function getAliasesFromPattern(
   }
 
   return result;
+}
+
+async function getDataStreamsFromPattern(
+  esClient: ElasticsearchClient,
+  pattern: string
+): Promise<string[]> {
+  const params = {
+    name: pattern,
+  };
+
+  const { data_streams: response } = await esClient.indices.getDataStream(params);
+  return response.map((r) => r.name);
 }
 
 interface IndiciesAggregation {
