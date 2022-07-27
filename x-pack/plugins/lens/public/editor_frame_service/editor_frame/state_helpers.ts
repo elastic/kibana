@@ -213,7 +213,8 @@ export function initializeDatasources({
 
 export const getDatasourceLayers = memoizeOne(function getDatasourceLayers(
   datasourceStates: DatasourceStates,
-  datasourceMap: DatasourceMap
+  datasourceMap: DatasourceMap,
+  indexPatterns: DataViewsState['indexPatterns']
 ) {
   const datasourceLayers: DatasourceLayers = {};
   Object.keys(datasourceMap)
@@ -227,8 +228,7 @@ export const getDatasourceLayers = memoizeOne(function getDatasourceLayers(
         datasourceLayers[layer] = datasourceMap[id].getPublicAPI({
           state: datasourceState,
           layerId: layer,
-          // @TODO
-          indexPatterns: {},
+          indexPatterns,
         });
       });
     });
@@ -290,7 +290,7 @@ export async function persistedStateToExpression(
     indexPatternRefs,
   });
 
-  const datasourceLayers = getDatasourceLayers(datasourceStates, datasourceMap);
+  const datasourceLayers = getDatasourceLayers(datasourceStates, datasourceMap, indexPatterns);
 
   const datasourceId = getActiveDatasourceIdFromDoc(doc);
   if (datasourceId == null) {

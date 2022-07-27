@@ -337,7 +337,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       }
       if (datasourceIds?.length) {
         newState.datasourceStates = { ...state.datasourceStates };
-        const frame = createFrameAPI(state, datasourceMap);
+        const frame = createFrameAPI(state, datasourceMap, newState.dataViews);
         const datasourceLayers = frame.datasourceLayers;
 
         for (const datasourceId of datasourceIds) {
@@ -809,13 +809,21 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
   });
 };
 
-function createFrameAPI(state: LensAppState, datasourceMap: DatasourceMap) {
+function createFrameAPI(
+  state: LensAppState,
+  datasourceMap: DatasourceMap,
+  dataViews: DataViewsState = current(state.dataViews)
+) {
   return {
     // any better idea to avoid `as`?
     activeData: state.activeData ? (current(state.activeData) as TableInspectorAdapter) : undefined,
-    datasourceLayers: getDatasourceLayers(state.datasourceStates, datasourceMap),
+    datasourceLayers: getDatasourceLayers(
+      state.datasourceStates,
+      datasourceMap,
+      dataViews.indexPatterns
+    ),
     dateRange: current(state.resolvedDateRange),
-    dataViews: current(state.dataViews),
+    dataViews,
   };
 }
 
