@@ -48,7 +48,7 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
         } else {
           errors.push(
             i18n.translate('xpack.securitySolution.endpointActionFailureMessage.unknownFailure', {
-              defaultMessage: 'Unknown failure',
+              defaultMessage: 'Action failed',
             })
           );
         }
