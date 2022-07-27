@@ -38,6 +38,11 @@ export async function tagKibanaAssets({
     return assets;
   });
 
+  // no assets to tag
+  if (taggableAssets.length === 0) {
+    return;
+  }
+
   const allTags = await savedObjectTagClient.getAll();
   let managedTag = allTags.find((tag) => tag.name === MANAGED_TAG_NAME);
   if (!managedTag) {
