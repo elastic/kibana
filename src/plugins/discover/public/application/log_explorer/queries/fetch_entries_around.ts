@@ -15,8 +15,17 @@ import {
 } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { TimeRange } from '@kbn/es-query';
+// import * as rt from 'io-ts';
 import { forkJoin, Observable } from 'rxjs';
 import { LogExplorerPosition, SortCriteria, SortCriterion } from '../types';
+import { getCursorFromPosition, getPredecessorPosition } from '../utils/cursor';
+
+export interface FetchEntriesAroundParameters {
+  chunkSize: number;
+  position: LogExplorerPosition;
+  sorting: SortCriteria;
+  timeRange: TimeRange;
+}
 
 export const fetchEntriesAround =
   ({
@@ -29,24 +38,27 @@ export const fetchEntriesAround =
     searchSource: ISearchSource;
   }) =>
   ({
+    chunkSize,
     position,
     sorting,
     timeRange,
-  }: {
-    position: LogExplorerPosition;
-    sorting: SortCriteria;
-    timeRange: TimeRange;
-  }): Observable<{ before: IEsSearchResponse; after: IEsSearchResponse }> => {
+  }: FetchEntriesAroundParameters): Observable<{
+    beforeResponse: IEsSearchResponse;
+    afterResponse: IEsSearchResponse;
+  }> => {
     const normalizeSortCriteria = normalizeSortCriteriaForDataView(dataView);
     const timeRangeFilter = query.timefilter.timefilter.createFilter(dataView, timeRange);
 
-    const commonSearchSource = searchSource.createCopy().setField('filter', timeRangeFilter);
+    const commonSearchSource = searchSource
+      .createCopy()
+      .setField('filter', timeRangeFilter)
+      .setField('size', chunkSize);
 
     // TODO: create and use point-in-time, not currently possible from client?
     const beforeResponse$ = commonSearchSource
       .createCopy()
       .setField('searchAfter', getCursorFromPosition(position))
-      .setField('sort', normalizeSortCriteria(invertSorting(sorting)))
+      .setField('sort', normalizeSortCriteria(invertSortCriteria(sorting)))
       .fetch$();
     const afterResponse$ = commonSearchSource
       .createCopy()
@@ -55,19 +67,10 @@ export const fetchEntriesAround =
       .fetch$();
 
     return forkJoin({
-      before: beforeResponse$,
-      after: afterResponse$,
+      beforeResponse: beforeResponse$,
+      afterResponse: afterResponse$,
     });
   };
-
-const getCursorFromPosition = (
-  position: LogExplorerPosition
-): [string | number, string | number] => [position.timestamp, position.tiebreaker];
-
-const getPredecessorPosition = (position: LogExplorerPosition): LogExplorerPosition => ({
-  ...position,
-  tiebreaker: position.tiebreaker - 1,
-});
 
 const normalizeSortCriteriaForDataView =
   (dataView: DataView) =>
@@ -80,12 +83,12 @@ const normalizeSortCriterionForDataView =
     [fieldName]: {
       order: SortDirection[sortDirection],
       ...(fieldName === dataView.timeFieldName && dataView.isTimeNanosBased()
-        ? { numeric_type: 'date_nanos' }
-        : {}),
+        ? { format: 'strict_date_optional_time_nanos', numeric_type: 'date_nanos' }
+        : { format: 'strict_date_optional_time' }),
     },
   });
 
-const invertSorting = (sortCriteria: SortCriteria): SortCriteria =>
+const invertSortCriteria = (sortCriteria: SortCriteria): SortCriteria =>
   sortCriteria.map(([fieldName, sortDirection]) => [
     fieldName,
     sortDirection === 'asc' ? 'desc' : 'asc',

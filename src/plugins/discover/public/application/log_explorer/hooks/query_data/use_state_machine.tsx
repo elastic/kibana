@@ -6,15 +6,20 @@
  * Side Public License, v 1.
  */
 
-import createContainer from 'constate';
-import React from 'react';
 import { ISearchSource, QueryStart } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { useInterpret, useActor } from '@xstate/react';
+import { TimeRange } from '@kbn/es-query';
+import { useActor, useInterpret } from '@xstate/react';
+import createContainer from 'constate';
+import moment from 'moment';
+import React from 'react';
 import { ignoreElements, timer } from 'rxjs';
 import { assign } from 'xstate';
-import { dataAccessStateMachine } from '../../state_machines';
-import { loadAround, updateChunks } from '../../state_machines/services/load_around';
+import {
+  dataAccessStateMachine,
+  loadAround,
+  updateChunksFromLoadAround,
+} from '../../state_machines/data_access_state_machine';
 import { useSubscription } from '../use_observable';
 
 export const useStateMachineService = ({
@@ -36,7 +41,7 @@ export const useStateMachineService = ({
         dataView,
         timeRange: initialTimeRange,
         position: {
-          timestamp: initialTimeRange.from,
+          timestamp: getMiddleOfTimeRange(initialTimeRange),
           tiebreaker: 0,
         },
         topChunk: {
@@ -58,7 +63,7 @@ export const useStateMachineService = ({
             status: 'uninitialized' as const,
           },
         })),
-        updateChunks,
+        updateChunksFromLoadAround,
       },
       guards: {
         succeededTop: constantGuard(true),
@@ -98,6 +103,13 @@ export const useStateMachineContextState = () => {
   const dataAccessService = useStateMachineContext();
   const [state] = useActor(dataAccessService);
   return state;
+};
+
+const getMiddleOfTimeRange = ({ from, to }: TimeRange): string => {
+  const fromMoment = moment.utc(from);
+  const toMoment = moment.utc(to);
+
+  return fromMoment.add(toMoment.diff(fromMoment) / 2, 'ms').toISOString();
 };
 
 const createDummyService =
