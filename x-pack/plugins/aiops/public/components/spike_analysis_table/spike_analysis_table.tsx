@@ -24,6 +24,8 @@ import { MiniHistogram } from '../mini_histogram';
 
 import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
 
+const NARROW_COLUMN_WIDTH = '120px';
+
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 const noDataText = i18n.translate('xpack.aiops.correlations.correlationsTable.noDataText', {
   defaultMessage: 'No data',
@@ -72,6 +74,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       sortable: true,
     },
     {
+      width: NARROW_COLUMN_WIDTH,
       field: 'pValue',
       name: (
         <EuiToolTip
@@ -93,14 +96,17 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
           </>
         </EuiToolTip>
       ),
-      render: (_, { histogram, fieldName, fieldValue }) => {
-        return histogram ? (
-          <MiniHistogram chartData={histogram} label={`${fieldName}:${fieldValue}`} />
-        ) : null;
-      },
+      render: (_, { histogram, fieldName, fieldValue }) => (
+        <MiniHistogram
+          chartData={histogram}
+          isLoading={loading && histogram === undefined}
+          label={`${fieldName}:${fieldValue}`}
+        />
+      ),
       sortable: false,
     },
     {
+      width: NARROW_COLUMN_WIDTH,
       field: 'pValue',
       name: (
         <EuiToolTip
@@ -126,6 +132,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       sortable: true,
     },
     {
+      width: NARROW_COLUMN_WIDTH,
       field: 'pValue',
       name: (
         <EuiToolTip
