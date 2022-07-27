@@ -35,7 +35,7 @@ export default function (ftrContext: FtrProviderContext) {
       authorized: {
         httpCode: 200,
         expectResponse: ({ body }) => {
-          expect(body.tags.slice(0, 1)).to.eql({
+          expect(body.tags.slice(0, 2)).to.eql({
             tags: [
               {
                 id: 'default-space-tag-1',
