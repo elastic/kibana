@@ -168,21 +168,30 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   const [isIndexPatternLoading, { indexPatterns: indexIndexPatterns }] =
     useFetchIndex(memoRuleIndices);
 
-  const [indexPattern, setIndexPattern] = useState<DataViewBase>(indexIndexPatterns);
+  const [indexPattern, setIndexPattern] = useState<DataViewBase | null>(null);
 
   useEffect(() => {
     const fetchAppropriateIndexPatterns = async () => {
       const hasDataViewId = dataViewId || maybeRule?.data_view_id || null;
+
       if (hasDataViewId) {
         const dv = await data.dataViews.get(hasDataViewId);
         setIndexPattern(dv);
-      } else {
+      } else if (!isIndexPatternLoading && indexPattern == null) {
         setIndexPattern(indexIndexPatterns);
       }
     };
 
     fetchAppropriateIndexPatterns();
-  }, [data.dataViews, dataViewId, maybeRule?.data_view_id, setIndexPattern, indexIndexPatterns]);
+  }, [
+    data.dataViews,
+    dataViewId,
+    maybeRule?.data_view_id,
+    setIndexPattern,
+    indexIndexPatterns,
+    indexPattern,
+    isIndexPatternLoading,
+  ]);
 
   const handleBuilderOnChange = useCallback(
     ({
@@ -480,6 +489,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
           <Loader data-test-subj="loadingAddExceptionFlyout" size="xl" />
         )}
       {fetchOrCreateListError == null &&
+        indexPattern != null &&
         !isSignalIndexLoading &&
         !isSignalIndexPatternLoading &&
         !isLoadingExceptionList &&
