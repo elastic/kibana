@@ -56,7 +56,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     screenshots: { directory: resolve(__dirname, 'screenshots') },
 
     junit: {
-      reportName: 'Security Check Functional Tests',
+      reportName: 'Unsecure Cluster Alert Functional Tests',
     },
   };
 }
