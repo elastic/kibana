@@ -95,10 +95,7 @@ export const Tooltip: FC<Props> = ({
     });
   }
 
-  if (
-    splitAccessors?.splitRowAccessor &&
-    seriesIdentifier.smVerticalAccessorValue !== undefined
-  ) {
+  if (splitAccessors?.splitRowAccessor && seriesIdentifier.smVerticalAccessorValue !== undefined) {
     data.push({
       label: layerTitles?.splitRowTitles?.[splitAccessors?.splitRowAccessor],
       value: `${seriesIdentifier.smVerticalAccessorValue}`,
