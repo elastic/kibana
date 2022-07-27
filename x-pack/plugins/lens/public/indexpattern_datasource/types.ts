@@ -66,17 +66,6 @@ export type PersistedIndexPatternLayer = Omit<IndexPatternLayer, 'indexPatternId
 export interface IndexPatternPrivateState {
   currentIndexPatternId: string;
   layers: Record<string, IndexPatternLayer>;
-  // indexPatternRefs: IndexPatternRef[];
-  // indexPatterns: Record<string, IndexPattern>;
-
-  // /**
-  //  * indexPatternId -> fieldName -> boolean
-  //  */
-  // existingFields: Record<string, Record<string, boolean>>;
-  // isFirstExistenceFetch: boolean;
-  // existenceFetchFailed?: boolean;
-  // existenceFetchTimeout?: boolean;
-
   isDimensionClosePrevented?: boolean;
 }
 
