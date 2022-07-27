@@ -8,7 +8,7 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
+  rootDir: '../../../../..',
   roots: ['<rootDir>/packages/shared-ux/link/redirect_app'],
   verbose: true,
 };
