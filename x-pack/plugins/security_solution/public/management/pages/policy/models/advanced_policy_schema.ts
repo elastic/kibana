@@ -992,7 +992,6 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
           'Detect injection based on thread context manipulation (e.g. `SetThreadContext`) as a part of memory protection. Default: true',
       }
     ),
-    license: 'platinum',
   },
   {
     key: 'windows.advanced.kernel.image_and_process_file_timestamp',
@@ -1004,6 +1003,5 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
           'Collect executable/dll timestamps for process and async image load events. Default: true',
       }
     ),
-    license: 'platinum',
   },
 ];
