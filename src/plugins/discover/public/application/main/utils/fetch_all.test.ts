@@ -123,7 +123,7 @@ describe('test fetchAll', () => {
       { _id: '1', _index: 'logs' },
       { _id: '2', _index: 'logs' },
     ];
-    const documents = hits.map((hit) => buildDataTableRecord(hit, indexPatternMock));
+    const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     mockFetchDocuments.mockResolvedValue(documents);
     await fetchAll(subjects, searchSource, false, deps);
     expect(await collect()).toEqual([
@@ -144,7 +144,7 @@ describe('test fetchAll', () => {
       { _id: '2', _index: 'logs' },
     ];
     searchSource.getField('index')!.isTimeBased = () => false;
-    const documents = hits.map((hit) => buildDataTableRecord(hit, indexPatternMock));
+    const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     mockFetchDocuments.mockResolvedValue(documents);
 
     mockFetchTotalHits.mockResolvedValue(42);
@@ -194,7 +194,7 @@ describe('test fetchAll', () => {
     searchSource.getField('index')!.isTimeBased = () => false;
     mockFetchTotalHits.mockRejectedValue({ msg: 'Oh noes!' });
     const hits = [{ _id: '1', _index: 'logs' }];
-    const documents = hits.map((hit) => buildDataTableRecord(hit, indexPatternMock));
+    const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     mockFetchDocuments.mockResolvedValue(documents);
     await fetchAll(subjects, searchSource, false, deps);
     expect(await collectTotalHits()).toEqual([
@@ -240,7 +240,7 @@ describe('test fetchAll', () => {
       { _id: '1', _index: 'logs' },
       { _id: '2', _index: 'logs' },
     ];
-    const documents = hits.map((hit) => buildDataTableRecord(hit, indexPatternMock));
+    const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     mockFetchSQL.mockResolvedValue(documents);
     deps = {
       appStateContainer: {

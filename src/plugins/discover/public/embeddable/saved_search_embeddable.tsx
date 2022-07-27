@@ -216,7 +216,7 @@ export class SavedSearchEmbeddable
       if (useSql && query) {
         const result = await fetchSql(
           this.savedSearch.searchSource.getField('query')!,
-          this.services.indexPatterns,
+          this.services.dataViews,
           this.services.data,
           this.services.expressions,
           this.input.filters,

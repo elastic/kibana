@@ -174,7 +174,7 @@ describe('discover responsive sidebar', function () {
       documents$: new BehaviorSubject({
         fetchStatus: FetchStatus.COMPLETE,
         recordRawType: RecordRawType.PLAIN,
-        result: getDataTableRecords(stubLogstashIndexPattern),
+        result: getDataTableRecords(stubLogstashDataView),
       }) as DataDocuments$,
       state: {
         ...initialProps.state,

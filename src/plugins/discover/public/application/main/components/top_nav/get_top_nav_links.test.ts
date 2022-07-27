@@ -90,7 +90,7 @@ test('getTopNavLinks result', () => {
 
 test('getTopNavLinks result for sql mode', () => {
   const topNavLinks = getTopNavLinks({
-    indexPattern: indexPatternMock,
+    dataView: dataViewMock,
     navigateTo: jest.fn(),
     onOpenInspector: jest.fn(),
     savedSearch: savedSearchMock,

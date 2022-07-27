@@ -273,7 +273,7 @@ export function useDiscoverState({
     async function fetchDataview() {
       if (state.query && isOfAggregateQueryType(state.query) && 'sql' in state.query) {
         const indexPatternFromQuery = getIndexPatternFromSQLQuery(state.query.sql);
-        const idsTitles = await indexPatterns.getIdsWithTitle();
+        const idsTitles = await dataViews.getIdsWithTitle();
         const dataViewObj = idsTitles.find(({ title }) => title === indexPatternFromQuery);
         if (dataViewObj) {
           const columns = getResultColumns();
@@ -290,7 +290,7 @@ export function useDiscoverState({
     }
     fetchDataview();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config, documentState, indexPatterns]);
+  }, [config, documentState, dataViews]);
 
   return {
     data$,

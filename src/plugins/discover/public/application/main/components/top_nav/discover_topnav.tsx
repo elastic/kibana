@@ -199,14 +199,14 @@ export const DiscoverTopNav = ({
       await onSaveSearch({
         savedSearch,
         services,
-        indexPattern,
+        dataView,
         navigateTo,
         state: stateContainer,
         onClose: onCancel,
         onSaveCb: onSave,
       });
     },
-    [indexPattern, navigateTo, savedSearch, services, stateContainer]
+    [dataView, navigateTo, savedSearch, services, stateContainer]
   );
 
   return (

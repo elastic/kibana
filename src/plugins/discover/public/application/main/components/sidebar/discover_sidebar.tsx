@@ -23,12 +23,10 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
-
 import { isEqual } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { indexPatterns as indexPatternUtils } from '@kbn/data-plugin/public';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
-import { DataViewField } from '@kbn/data-views-plugin/public';
+import { DataViewField, getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverField } from './discover_field';
 import { DiscoverFieldSearch } from './discover_field_search';
@@ -248,7 +246,7 @@ export function DiscoverSidebarComponent({
     }
     const map = new Map<string, Array<{ field: DataViewField; isSelected: boolean }>>();
     fields.forEach((field) => {
-      const subTypeMulti = indexPatternUtils.getFieldSubtypeMulti(field);
+      const subTypeMulti = getFieldSubtypeMulti(field);
       const parent = subTypeMulti?.multi.parent;
       if (!parent) {
         return;

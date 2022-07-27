@@ -186,7 +186,7 @@ describe('Discover component', () => {
 
   test('sql query displays no chart toggle', () => {
     const component = mountComponent(
-      indexPatternWithTimefieldMock,
+      dataViewWithTimefieldMock,
       false,
       {},
       { sql: 'SELECT * FROM test' },

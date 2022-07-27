@@ -212,7 +212,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
 
   const editField = useMemo(
     () =>
-      !isPlainRecord && canEditDataView && selectedIndexPattern
+      !isPlainRecord && canEditDataView && selectedDataView
         ? (fieldName?: string) => {
             const ref = dataViewFieldEditor.openEditor({
               ctx: {
