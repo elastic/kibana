@@ -54,7 +54,6 @@ export default function ({ getService }: FtrProviderContext) {
       await reportingAPI.teardownEcommerce();
       await reportingAPI.deleteAllReports();
       await spacesService.delete(id);
-      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     /*
