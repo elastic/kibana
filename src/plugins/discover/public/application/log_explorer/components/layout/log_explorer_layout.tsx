@@ -42,6 +42,7 @@ import { SavedSearchURLConflictCallout } from '../../../../services/saved_search
 import { hasActiveFilter } from '../../../main/components/layout/utils';
 import { LogExplorer } from './log_explorer';
 import { useStateMachineContextState as useQueryDataMachineState } from '../../hooks/query_data/use_state_machine';
+import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 
 /**
  * Local storage key for sidebar persistence state
@@ -227,7 +228,6 @@ export function LogExplorerLayout({
           <EuiFlexItem grow={false}>
             <SidebarMemoized
               columns={columns}
-              documents$={savedSearchData$.documents$}
               indexPatternList={indexPatternList}
               onAddField={onAddColumn}
               onAddFilter={onAddFilter}
@@ -240,7 +240,13 @@ export function LogExplorerLayout({
               useNewFieldsApi={useNewFieldsApi}
               onFieldEdited={onFieldEdited}
               onDataViewCreated={onDataViewCreated}
-              availableFields$={savedSearchData$.availableFields$}
+              viewMode={VIEW_MODE.LOG_EXPLORER}
+              /* Short circuit deriving fields from the documents, instead just use fields derived from the data view */
+              documents={[]}
+              /* Log explorer entries are queried with the selected fields only, they don't return all fields, this makes the fieldCounts -> available fields connection
+              irrelevant in our use case. This means "hide empty fields" needs to be selected to make the fields visible. This is a POC stop gap until the sidebar consolidation
+              effort between Discover / Lens lands */
+              fieldCounts={{}}
             />
           </EuiFlexItem>
           <EuiHideFor sizes={['xs', 's']}>

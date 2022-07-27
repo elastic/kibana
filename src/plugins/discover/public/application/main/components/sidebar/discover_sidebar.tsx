@@ -40,14 +40,13 @@ import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
-import type { DataTableRecord } from '../../../../types';
 
 /**
  * Default number of available fields displayed and added on scroll
  */
 const FIELDS_PER_PAGE = 50;
 
-export interface DiscoverSidebarProps extends Omit<DiscoverSidebarResponsiveProps, 'documents$'> {
+export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
   /**
    * Current state of the field filter, filtering fields by name, type, ...
    */
@@ -81,14 +80,6 @@ export interface DiscoverSidebarProps extends Omit<DiscoverSidebarResponsiveProp
    */
   createNewDataView?: () => void;
 
-  /**
-   * a statistics of the distribution of fields in the given hits
-   */
-  fieldCounts?: Record<string, number>;
-  /**
-   * hits fetched from ES, displayed in the doc table
-   */
-  documents?: DataTableRecord[];
   /**
    * Discover view mode
    */

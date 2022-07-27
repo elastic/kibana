@@ -27,7 +27,7 @@ import { InspectorSession } from '@kbn/inspector-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
-import { DiscoverSidebarResponsive } from '../sidebar';
+import { DiscoverSidebarContainer } from '../sidebar';
 import { DiscoverLayoutProps } from './types';
 import { SEARCH_FIELDS_FROM_SOURCE, SHOW_FIELD_STATISTICS } from '../../../../../common';
 import { popularizeField } from '../../../../utils/popularize_field';
@@ -52,7 +52,7 @@ import { hasActiveFilter } from './utils';
  */
 export const SIDEBAR_CLOSED_KEY = 'discover:sidebarClosed';
 
-const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
+const SidebarMemoized = React.memo(DiscoverSidebarContainer);
 const TopNavMemoized = React.memo(DiscoverTopNav);
 const DiscoverChartMemoized = React.memo(DiscoverChart);
 const FieldStatisticsTableMemoized = React.memo(FieldStatisticsTable);

@@ -13,7 +13,6 @@ import { useActor, useInterpret } from '@xstate/react';
 import createContainer from 'constate';
 import moment from 'moment';
 import React from 'react';
-import { ignoreElements, timer } from 'rxjs';
 import { assign } from 'xstate';
 import {
   dataAccessStateMachine,
@@ -111,11 +110,6 @@ const getMiddleOfTimeRange = ({ from, to }: TimeRange): string => {
 
   return fromMoment.add(toMoment.diff(fromMoment) / 2, 'ms').toISOString();
 };
-
-const createDummyService =
-  (delay: number = 3000) =>
-  () =>
-    timer(delay).pipe(ignoreElements());
 
 const constantGuard =
   <Value extends unknown>(value: Value) =>
