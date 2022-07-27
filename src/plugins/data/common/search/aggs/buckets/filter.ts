@@ -89,7 +89,7 @@ export const getFilterBucketAgg = ({
             : undefined;
 
           output.params =
-            !timeWindow || !timeRangeAnchor
+            !timeWindow || !timeRangeAnchor || !aggConfig.getIndexPattern().timeFieldName
               ? query
               : {
                   bool: {

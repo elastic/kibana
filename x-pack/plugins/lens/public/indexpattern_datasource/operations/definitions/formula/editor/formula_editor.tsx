@@ -24,7 +24,6 @@ import { monaco } from '@kbn/monaco';
 import classNames from 'classnames';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import type { CodeEditorProps } from '@kbn/kibana-react-plugin/public';
-import { getColumnWindowWarnings } from '../../../../window_utils';
 import { TooltipWrapper, useDebounceWithOptions } from '../../../../../shared_components';
 import { ParamEditorProps } from '../..';
 import { getManagedColumnsFrom } from '../../../layer_helpers';
@@ -341,22 +340,6 @@ export function FormulaEditor({
                     severity: monaco.MarkerSeverity.Warning,
                   });
                 }
-              }
-              if (def.windowable && column.window) {
-                const startPosition = offsetToRowColumn(text, locations[id].min);
-                const endPosition = offsetToRowColumn(text, locations[id].max);
-                newWarnings.push(
-                  ...getColumnWindowWarnings(dateHistogramInterval, column, indexPattern).map(
-                    (message) => ({
-                      message,
-                      startColumn: startPosition.column + 1,
-                      startLineNumber: startPosition.lineNumber,
-                      endColumn: endPosition.column + 1,
-                      endLineNumber: endPosition.lineNumber,
-                      severity: monaco.MarkerSeverity.Warning,
-                    })
-                  )
-                );
               }
               if (def.shiftable && column.timeShift) {
                 const startPosition = offsetToRowColumn(text, locations[id].min);

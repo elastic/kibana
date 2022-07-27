@@ -30,6 +30,7 @@ import {
 } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { updateColumnParam } from '../layer_helpers';
+import { getColumnWindowError } from '../../window_utils';
 
 type MetricColumn<T> = FieldBasedIndexPatternColumn & {
   operationType: T;
@@ -207,6 +208,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
           indexPattern
         ),
         getDisallowedPreviousShiftMessage(layer, columnId),
+        getColumnWindowError(layer, columnId, indexPattern),
       ]),
     filterable: true,
     windowable: true,

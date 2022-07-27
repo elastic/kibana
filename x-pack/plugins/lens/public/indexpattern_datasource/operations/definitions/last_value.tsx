@@ -31,6 +31,7 @@ import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { isScriptedField } from './terms/helpers';
 import { FormRow } from './shared_components/form_row';
+import { getColumnWindowError } from '../../window_utils';
 
 function ofName(name: string, timeShift: string | undefined, window: string | undefined) {
   return adjustTimeScaleLabelSuffix(
@@ -187,6 +188,7 @@ export const lastValueOperation: OperationDefinition<
       errorMessages = [invalidSortFieldMessage];
     }
     errorMessages.push(...(getDisallowedPreviousShiftMessage(layer, columnId) || []));
+    errorMessages.push(...(getColumnWindowError(layer, columnId, indexPattern) || []));
     return errorMessages.length ? errorMessages : undefined;
   },
   buildColumn({ field, previousColumn, indexPattern }, columnParams) {

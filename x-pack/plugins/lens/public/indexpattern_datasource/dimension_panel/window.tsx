@@ -72,12 +72,16 @@ export function Window({
   const hasDateHistogram = Object.values(layer.columns).some(
     (c) => c.operationType === 'date_histogram'
   );
-  if (!selectedOperation.windowable || hasDateHistogram || !indexPattern.timeFieldName) {
+  if (
+    !selectedOperation.windowable ||
+    (!selectedColumn.window && (hasDateHistogram || !indexPattern.timeFieldName))
+  ) {
     return null;
   }
 
   const parsedLocalValue = localValue && parseTimeShift(localValue);
   const isLocalValueInvalid = Boolean(parsedLocalValue && isInvalid(parsedLocalValue));
+  const shouldNotUseWindow = Boolean(hasDateHistogram || !indexPattern.timeFieldName);
 
   function getSelectedOption() {
     if (!localValue) return [];
@@ -105,12 +109,18 @@ export function Window({
             'Additional time range filter aligned with the end of the global time range',
         })}
         error={
-          isLocalValueInvalid &&
-          i18n.translate('xpack.lens.indexPattern.window.genericInvalidHelp', {
-            defaultMessage: 'Time range value is not valid.',
-          })
+          shouldNotUseWindow
+            ? i18n.translate('xpack.lens.indexPattern.window.notApplicableHelp', {
+                defaultMessage:
+                  'Additional time range filter can not be used together with date histogram or without a default time field specified on the data view',
+              })
+            : isLocalValueInvalid
+            ? i18n.translate('xpack.lens.indexPattern.window.genericInvalidHelp', {
+                defaultMessage: 'Time range value is not valid.',
+              })
+            : undefined
         }
-        isInvalid={Boolean(isLocalValueInvalid)}
+        isInvalid={isLocalValueInvalid || shouldNotUseWindow}
       >
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem>

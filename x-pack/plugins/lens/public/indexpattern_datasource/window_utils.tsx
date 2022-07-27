@@ -6,9 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { GenericIndexPatternColumn } from './indexpattern';
-import { getDateHistogramInterval } from './time_shift_utils';
-import { IndexPattern } from './types';
+import { IndexPattern, IndexPatternLayer } from './types';
 
 export const windowOptions = [
   {
@@ -51,20 +49,34 @@ export const windowOptionOrder = windowOptions.reduce<{ [key: string]: number }>
   {}
 );
 
-export function getColumnWindowWarnings(
-  dateHistogramInterval: ReturnType<typeof getDateHistogramInterval>,
-  column: GenericIndexPatternColumn,
+export function getColumnWindowError(
+  layer: IndexPatternLayer,
+  columnId: string,
   indexPattern: IndexPattern
-) {
-  const warnings: string[] = [];
-
-  if ((dateHistogramInterval.hasDateHistogram || !indexPattern.timeFieldName) && column.window) {
-    warnings.push(
-      i18n.translate('xpack.lens.indexPattern.window.notApplicableHelp', {
-        defaultMessage:
-          'Reduced time range can only be used without a date histogram and with a specified default time field on the data view. Otherwise it is ignored',
-      })
-    );
+): string[] | undefined {
+  const currentColumn = layer.columns[columnId];
+  if (!currentColumn.window) {
+    return;
   }
-  return warnings;
+  const hasDateHistogram = Object.values(layer.columns).some(
+    (column) => column.operationType === 'date_histogram'
+  );
+  const hasTimeField = Boolean(indexPattern.timeFieldName);
+  return [
+    hasDateHistogram &&
+      i18n.translate('xpack.lens.indexPattern.windowWithDateHistogram', {
+        defaultMessage: 'Reduced time range can only be used without a date histogram.',
+        values: {
+          column: currentColumn.label,
+        },
+      }),
+    !hasTimeField &&
+      i18n.translate('xpack.lens.indexPattern.windowWithoutTimefield', {
+        defaultMessage:
+          'Reduced time range can only be used with a specified default time field on the data view.',
+        values: {
+          column: currentColumn.label,
+        },
+      }),
+  ].filter(Boolean) as string[];
 }
