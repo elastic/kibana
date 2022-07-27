@@ -64,7 +64,7 @@ export const FilterView: FC<Props> = ({
   }
 
   // need title to be undefined so that we don't show the native tooltip - we'll use EuiTooltip instead
-  const readOnlyProps = { title: undefined, color: 'hollow' };
+  const readOnlyProps = { title: undefined, color: 'hollow', tabIndex: 0 };
 
   const badgeProps: EuiBadgeProps = readOnly
     ? readOnlyProps
