@@ -146,7 +146,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'telemetry.labels.branch (string)',
         'telemetry.labels.ciBuildId (string)',
         'telemetry.labels.ciBuildJobId (string)',
-        'telemetry.labels.ciBuildNumber (string)',
+        'telemetry.labels.ciBuildNumber (number)',
         'telemetry.labels.ftrConfig (string)',
         'telemetry.labels.gitRev (string)',
         'telemetry.labels.isPr (boolean)',
