@@ -45,7 +45,7 @@ interface BuildEqlSearchRequestParams {
   tiebreakerField?: string;
 }
 
-const buildTimeRangeFilter = ({
+export const buildTimeRangeFilter = ({
   to,
   from,
   primaryTimestamp,

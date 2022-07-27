@@ -80,6 +80,8 @@ export type FiltersOrUndefined = t.TypeOf<typeof filtersOrUndefined>;
 export const immutable = t.boolean;
 export type Immutable = t.TypeOf<typeof immutable>;
 
+export const groupBy = t.array(t.string);
+
 // Note: Never make this a strict uuid, we allow the rule_id to be any string at the moment
 // in case we encounter 3rd party rule systems which might be using auto incrementing numbers
 // or other different things.
