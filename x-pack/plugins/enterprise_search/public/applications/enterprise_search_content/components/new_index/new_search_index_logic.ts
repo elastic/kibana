@@ -8,6 +8,21 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { Actions } from '../../../shared/api_logic/create_api_logic';
+import {
+  AddConnectorPackageApiLogic,
+  AddConnectorPackageApiLogicArgs,
+  AddConnectorPackageApiLogicResponse,
+} from '../../api/connector_package/add_connector_package_api_logic';
+import {
+  CreateCrawlerIndexApiLogic,
+  CreateCrawlerIndexArgs,
+  CreateCrawlerIndexResponse,
+} from '../../api/crawler/create_crawler_index_api_logic';
+import {
+  CreateApiIndexApiLogic,
+  CreateApiIndexApiLogicArgs,
+  CreateApiIndexApiLogicResponse,
+} from '../../api/index/create_api_index_api_logic';
 
 import {
   IndexExistsApiLogic,
@@ -18,6 +33,7 @@ import {
 import { isValidIndexName } from '../../utils/validate_index_name';
 
 import { UNIVERSAL_LANGUAGE_VALUE } from './constants';
+import { flashIndexCreatedToast } from './new_index_created_toast';
 import { LanguageForOptimization } from './types';
 import { getLanguageForOptimization } from './utils';
 
@@ -31,12 +47,22 @@ export interface NewSearchIndexValues {
   rawName: string;
 }
 
-export type NewSearchIndexActions = Pick<
+type NewSearchIndexActions = Pick<
   Actions<IndexExistsApiParams, IndexExistsApiResponse>,
   'makeRequest'
 > & {
+  apiIndexCreated: Actions<
+    CreateApiIndexApiLogicArgs,
+    CreateApiIndexApiLogicResponse
+  >['apiSuccess'];
+  connectorIndexCreated: Actions<
+    AddConnectorPackageApiLogicArgs,
+    AddConnectorPackageApiLogicResponse
+  >['apiSuccess'];
+  crawlerIndexCreated: Actions<CreateCrawlerIndexArgs, CreateCrawlerIndexResponse>['apiSuccess'];
   setLanguageSelectValue(language: string): { language: string };
   setRawName(rawName: string): { rawName: string };
+  showIndexCreatedCallout: () => void;
 };
 
 export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSearchIndexActions>>({
@@ -45,10 +71,28 @@ export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSe
     setRawName: (rawName) => ({ rawName }),
   },
   connect: {
-    actions: [IndexExistsApiLogic, ['makeRequest']],
+    actions: [
+      AddConnectorPackageApiLogic,
+      ['apiSuccess as connectorIndexCreated'],
+      CreateApiIndexApiLogic,
+      ['apiSuccess as apiIndexCreated'],
+      CreateCrawlerIndexApiLogic,
+      ['apiSuccess as crawlerIndexCreated'],
+      IndexExistsApiLogic,
+      ['makeRequest'],
+    ],
     values: [IndexExistsApiLogic, ['data']],
   },
   listeners: ({ actions, values }) => ({
+    apiIndexCreated: () => {
+      flashIndexCreatedToast();
+    },
+    connectorIndexCreated: () => {
+      flashIndexCreatedToast();
+    },
+    crawlerIndexCreated: () => {
+      flashIndexCreatedToast();
+    },
     setRawName: async (_, breakpoint) => {
       await breakpoint(150);
       actions.makeRequest({ indexName: values.fullIndexName });

@@ -7,14 +7,12 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { i18n } from '@kbn/i18n';
-
 import { ErrorCode } from '../../../../../../common/types/error_codes';
 
 import { generateEncodedPath } from '../../../../app_search/utils/encode_path_params';
 
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
-import { flashAPIErrors, flashSuccessToast } from '../../../../shared/flash_messages';
+import { flashAPIErrors } from '../../../../shared/flash_messages';
 import { KibanaLogic } from '../../../../shared/kibana';
 import {
   AddConnectorPackageApiLogic,
@@ -46,23 +44,7 @@ export const AddConnectorPackageLogic = kea<MakeLogicType<AddConnectorValues, Ad
     listeners: {
       apiError: (error) => flashAPIErrors(error),
       apiSuccess: async ({ indexName }, breakpoint) => {
-        flashSuccessToast(
-          i18n.translate(
-            'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.successToast.label',
-            { defaultMessage: 'Index created successfully' }
-          ),
-          {
-            text: i18n.translate(
-              'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.successToast.description',
-              {
-                defaultMessage:
-                  'You can use App Search engines to build a search experience for your new Elasticsearch index.',
-              }
-            ),
-          }
-        );
-        // Flash the success toast so people can read it
-        // But also give Elasticsearch the chance to propagate the index so we don't end up in an error state after navigating
+        // Give Elasticsearch the chance to propagate the index so we don't end up in an error state after navigating
         await breakpoint(1000);
         KibanaLogic.values.navigateToUrl(
           generateEncodedPath(SEARCH_INDEX_TAB_PATH, {

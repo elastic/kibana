@@ -21,9 +21,15 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import {
+  APP_SEARCH_URL,
+  ENTERPRISE_SEARCH_ELASTICSEARCH_URL,
+} from '../../../../../../common/constants';
+
 import { HttpError, Status } from '../../../../../../common/types/api';
 import { ErrorCode } from '../../../../../../common/types/error_codes';
 import { docLinks } from '../../../../shared/doc_links';
+import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 import { AddConnectorPackageApiLogic } from '../../../api/connector_package/add_connector_package_api_logic';
 
 import { NewSearchIndexLogic } from '../new_search_index_logic';
@@ -198,13 +204,36 @@ export const MethodConnector: React.FC = () => {
             children: (
               <EuiText size="s">
                 <p>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.connector.steps.buildSearchExperience.content',
-                    {
-                      defaultMessage:
-                        'After building your connector, your content is ready. Build your first search experience with Elasticsearch, or explore the search experience tools provided by App Search. We recommend that you create a search engine for the best balance of flexible power and turnkey simplicity.',
-                    }
-                  )}
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.content.newIndex.connector.steps.buildSearchExperience.content"
+                    defaultMessage="After building your connector, your content is ready. Build your first search experience with {elasticsearchLink}, or explore the search experience tools provided by {appSearchLink}. We recommend that you create a {searchEngineLink} for the best balance of flexible power and turnkey simplicity."
+                    values={{
+                      appSearchLink: (
+                        <EuiLinkTo to={APP_SEARCH_URL} shouldNotCreateHref>
+                          {i18n.translate(
+                            'xpack.enterpriseSearch.content.newIndex.methodConnector.steps.buildConnector.appSearchLink',
+                            { defaultMessage: 'App Search' }
+                          )}
+                        </EuiLinkTo>
+                      ),
+                      elasticsearchLink: (
+                        <EuiLinkTo to={ENTERPRISE_SEARCH_ELASTICSEARCH_URL} shouldNotCreateHref>
+                          {i18n.translate(
+                            'xpack.enterpriseSearch.content.newIndex.methodConnector.steps.buildConnector.elasticsearchLink',
+                            { defaultMessage: 'Elasticsearch' }
+                          )}
+                        </EuiLinkTo>
+                      ),
+                      searchEngineLink: (
+                        <EuiLinkTo to={`${APP_SEARCH_URL}/engines/new`} shouldNotCreateHref>
+                          {i18n.translate(
+                            'xpack.enterpriseSearch.content.newIndex.methodConnector.steps.buildConnector.searchEngineLink',
+                            { defaultMessage: 'search engine' }
+                          )}
+                        </EuiLinkTo>
+                      ),
+                    }}
+                  />
                 </p>
               </EuiText>
             ),
