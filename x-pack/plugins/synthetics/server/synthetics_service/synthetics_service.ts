@@ -29,11 +29,7 @@ import {
 import { getEsHosts } from './get_es_hosts';
 import { ServiceConfig } from '../../common/config';
 import { ServiceAPIClient } from './service_api_client';
-import {
-  formatMonitorConfig,
-  formatHeartbeatRequest,
-  SyntheticsConfig,
-} from './formatters/format_configs';
+import { formatMonitorConfig, formatHeartbeatRequest } from './formatters/format_configs';
 import {
   ConfigKey,
   MonitorFields,
@@ -43,6 +39,7 @@ import {
   SyntheticsMonitorWithId,
   ServiceLocationErrors,
   SyntheticsMonitorWithSecrets,
+  HeartbeatConfig,
 } from '../../common/runtime_types';
 import { getServiceLocations } from './get_service_locations';
 import { hydrateSavedObjects } from './hydrate_saved_object';
@@ -262,7 +259,7 @@ export class SyntheticsService {
     };
   }
 
-  async addConfig(config: SyntheticsConfig) {
+  async addConfig(config: HeartbeatConfig) {
     const monitors = this.formatConfigs([config]);
 
     this.apiKey = await this.getApiKey();
@@ -287,7 +284,7 @@ export class SyntheticsService {
     }
   }
 
-  async editConfig(monitorConfig: SyntheticsConfig) {
+  async editConfig(monitorConfig: HeartbeatConfig) {
     const monitors = this.formatConfigs([monitorConfig]);
 
     this.apiKey = await this.getApiKey();
@@ -311,7 +308,7 @@ export class SyntheticsService {
     }
   }
 
-  async pushConfigs(configs?: SyntheticsConfig[], isEdit?: boolean) {
+  async pushConfigs(configs?: HeartbeatConfig[], isEdit?: boolean) {
     const monitorConfigs = configs ?? (await this.getMonitorConfigs());
     const monitors = this.formatConfigs(monitorConfigs);
 
@@ -348,7 +345,7 @@ export class SyntheticsService {
     }
   }
 
-  async runOnceConfigs(configs?: SyntheticsConfig[]) {
+  async runOnceConfigs(configs?: HeartbeatConfig[]) {
     const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
     if (monitors.length === 0) {
       return;
@@ -373,7 +370,7 @@ export class SyntheticsService {
     }
   }
 
-  async triggerConfigs(request?: KibanaRequest, configs?: SyntheticsConfig[]) {
+  async triggerConfigs(request?: KibanaRequest, configs?: HeartbeatConfig[]) {
     const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
     if (monitors.length === 0) {
       return;

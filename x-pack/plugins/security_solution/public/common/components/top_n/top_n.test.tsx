@@ -143,8 +143,7 @@ describe('TopN', () => {
 
     const nonDetectionAlertTables = [
       TimelineId.hostsPageEvents,
-      TimelineId.hostsPageExternalAlerts,
-      TimelineId.networkPageExternalAlerts,
+      TimelineId.networkPageEvents,
       TimelineId.casePage,
     ];
 

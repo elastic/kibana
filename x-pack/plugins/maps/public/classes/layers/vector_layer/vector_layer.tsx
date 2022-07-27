@@ -861,7 +861,6 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     });
 
     this.syncVisibilityWithMb(mbMap, labelLayerId);
-    mbMap.setLayerZoomRange(labelLayerId, this.getMinZoom(), this.getMaxZoom());
   }
 
   _getMbPointLayerId() {
