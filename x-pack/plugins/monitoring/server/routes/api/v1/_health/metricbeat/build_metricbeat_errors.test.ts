@@ -17,7 +17,7 @@ describe(__filename, () => {
           errors_by_dataset: {
             buckets: [
               {
-                key: 'beat.state',
+                key: 'state',
                 latest_docs: {
                   hits: {
                     hits: [
@@ -59,19 +59,17 @@ describe(__filename, () => {
       const monitoredClusters = buildMetricbeatErrors(metricbeatErrors);
       assert.deepEqual(monitoredClusters, {
         beat: {
-          'beat.state': {
-            errors: [
-              {
-                lastSeen: '2022-07-26T08:43:32.625Z',
-                message:
-                  'error making http request: Get "http://host.docker.internal:5067/state": dial tcp 192.168.65.2:5067: connect: connection refused',
-              },
-              {
-                lastSeen: '2022-07-26T08:41:32.625Z',
-                message: 'Generic random error',
-              },
-            ],
-          },
+          state: [
+            {
+              lastSeen: '2022-07-26T08:43:32.625Z',
+              message:
+                'error making http request: Get "http://host.docker.internal:5067/state": dial tcp 192.168.65.2:5067: connect: connection refused',
+            },
+            {
+              lastSeen: '2022-07-26T08:41:32.625Z',
+              message: 'Generic random error',
+            },
+          ],
         },
       });
     });
