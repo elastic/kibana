@@ -35,7 +35,7 @@ const createRulesClientMock = () => {
     bulkEdit: jest.fn(),
     snooze: jest.fn(),
     unsnooze: jest.fn(),
-    updateSnoozedUntilTime: jest.fn(),
+    calculateIsSnoozedUntil: jest.fn(),
     clearExpiredSnoozes: jest.fn(),
   };
   return mocked;

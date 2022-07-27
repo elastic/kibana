@@ -14,6 +14,7 @@ import {
   EQL_RULE_TYPE_ID,
   SAVED_QUERY_RULE_TYPE_ID,
   THRESHOLD_RULE_TYPE_ID,
+  NEW_TERMS_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
 
 import type { Logger } from '@kbn/core/server';
@@ -285,6 +286,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       QUERY_RULE_TYPE_ID,
       SAVED_QUERY_RULE_TYPE_ID,
       THRESHOLD_RULE_TYPE_ID,
+      NEW_TERMS_RULE_TYPE_ID,
     ];
 
     plugins.features.registerKibanaFeature(getKibanaPrivilegesFeaturePrivileges(ruleTypes));

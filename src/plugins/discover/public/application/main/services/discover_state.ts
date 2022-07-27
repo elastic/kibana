@@ -16,6 +16,7 @@ import {
   compareFilters,
   COMPARE_ALL_OPTIONS,
   Query,
+  AggregateQuery,
 } from '@kbn/es-query';
 import {
   createKbnUrlStateStorage,
@@ -30,6 +31,7 @@ import {
   connectToQueryState,
   DataPublicPluginStart,
   FilterManager,
+  QueryState,
   SearchSessionInfoProvider,
   syncQueryStateWithUrl,
 } from '@kbn/data-plugin/public';
@@ -69,7 +71,7 @@ export interface AppState {
   /**
    * Lucence or KQL query
    */
-  query?: Query;
+  query?: Query | AggregateQuery;
   /**
    * Array of the used sorting [[field,direction],...]
    */
@@ -148,13 +150,9 @@ export interface GetStateReturn {
     data: DataPublicPluginStart
   ) => () => void;
   /**
-   * Start sync between state and URL
+   * Start sync between state and URL -- only used for testing
    */
-  startSync: () => void;
-  /**
-   * Stop sync between state and URL
-   */
-  stopSync: () => void;
+  startSync: () => () => void;
   /**
    * Set app state to with a partial new app state
    */
@@ -183,8 +181,14 @@ export interface GetStateReturn {
    * Reset AppState to default, discarding all changes
    */
   resetAppState: () => void;
+  /**
+   * Pause the auto refresh interval without pushing an entry to history
+   */
+  pauseAutoRefreshInterval: () => Promise<void>;
 }
+
 const APP_STATE_URL_KEY = '_a';
+const GLOBAL_STATE_URL_KEY = '_g';
 
 /**
  * Builds and returns appState and globalState containers and helper functions
@@ -228,22 +232,43 @@ export function getState({
     },
   };
 
-  const { start, stop } = syncState({
-    storageKey: APP_STATE_URL_KEY,
-    stateContainer: appStateContainerModified,
-    stateStorage,
-  });
+  // Calling syncState from within initializeAndSync causes state syncing issues.
+  // syncState takes a snapshot of the initial state when it's called to compare
+  // against before syncing state updates. When syncState is called from outside
+  // of initializeAndSync, the snapshot doesn't get reset when the data view is
+  // changed. Then when the user presses the back button, the new state appears
+  // to be the same as the initial state, so syncState ignores the update.
+  const syncAppState = () =>
+    syncState({
+      storageKey: APP_STATE_URL_KEY,
+      stateContainer: appStateContainerModified,
+      stateStorage,
+    });
 
   const replaceUrlAppState = async (newPartial: AppState = {}) => {
     const state = { ...appStateContainer.getState(), ...newPartial };
     await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
   };
 
+  const pauseAutoRefreshInterval = async () => {
+    const state = stateStorage.get<QueryState>(GLOBAL_STATE_URL_KEY);
+    if (state?.refreshInterval && !state.refreshInterval.pause) {
+      await stateStorage.set(
+        GLOBAL_STATE_URL_KEY,
+        { ...state, refreshInterval: { ...state?.refreshInterval, pause: true } },
+        { replace: true }
+      );
+    }
+  };
+
   return {
     kbnUrlStateStorage: stateStorage,
     appStateContainer: appStateContainerModified,
-    startSync: start,
-    stopSync: stop,
+    startSync: () => {
+      const { start, stop } = syncAppState();
+      start();
+      return stop;
+    },
     setAppState: (newPartial: AppState) => setState(appStateContainerModified, newPartial),
     replaceUrlAppState,
     resetInitialAppState: () => {
@@ -259,6 +284,7 @@ export function getState({
     getPreviousAppState: () => previousAppState,
     flushToUrl: () => stateStorage.kbnUrlControls.flush(),
     isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
+    pauseAutoRefreshInterval,
     initializeAndSync: (
       indexPattern: DataView,
       filterManager: FilterManager,
@@ -292,6 +318,8 @@ export function getState({
         data.query,
         stateStorage
       );
+
+      const { start, stop } = syncAppState();
 
       replaceUrlAppState({}).then(() => {
         start();
