@@ -117,7 +117,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
             pagination={getPaginationTableParams({
               pageSize: urlQuery.pageSize,
               pageIndex: urlQuery.pageIndex,
-              totalItemCount: findingsGroupByNone.data?.total || 0,
+              totalItemCount: limitedTotalItemCount,
             })}
             sorting={{
               sort: { field: urlQuery.sort.field, direction: urlQuery.sort.direction },
