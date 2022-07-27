@@ -1245,15 +1245,14 @@ export const tasks: TelemetryTask[] = [
           },
         },
       });
-      const data: APMPerService[] = [];
       const envBuckets = response.aggregations?.environments.buckets ?? [];
-      envBuckets.forEach((envBucket) => {
+      const data: APMPerService[] = envBuckets.flatMap((envBucket) => {
         const env = envBucket.key;
         const serviceBuckets = envBucket.service_names?.buckets ?? [];
-        serviceBuckets.forEach((serviceBucket) => {
+        return serviceBuckets.map((serviceBucket) => {
           const name = serviceBucket.key;
-          const fullServiceName = env + '~' + name;
-          data.push({
+          const fullServiceName = `${env}~${name}`;
+          return {
             service_id: fullServiceName,
             timed_out: response.timed_out,
             cloud: {
@@ -1319,7 +1318,7 @@ export const tasks: TelemetryTask[] = [
             container: {
               id: serviceBucket.top_metrics?.top[0].metrics[CONTAINER_ID],
             },
-          });
+          };
         });
       });
       return {
