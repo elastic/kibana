@@ -116,6 +116,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     enterpriseSearch: {
       bulkApi: `${ELASTICSEARCH_DOCS}docs-bulk.html`,
       configuration: `${ENTERPRISE_SEARCH_DOCS}configuration.html`,
+      crawlerGettingStarted: `${ENTERPRISE_SEARCH_DOCS}crawler-getting-started.html`,
+      crawlerManaging: `${ENTERPRISE_SEARCH_DOCS}crawler-managing.html`,
+      crawlerOverview: `${ENTERPRISE_SEARCH_DOCS}crawler.html`,
       languageAnalyzers: `${ELASTICSEARCH_DOCS}analysis-lang-analyzer.html`,
       licenseManagement: `${ENTERPRISE_SEARCH_DOCS}license-management.html`,
       mailService: `${ENTERPRISE_SEARCH_DOCS}mailer-configuration.html`,

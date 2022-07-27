@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-/**
- * TODO:
- * - Need to add logic to take a query param to select the correct method when applicable.
- *   This is needed for the use case where a user clicks on an integration method from the
- *   Kibana intgegrations page
- */
-
 import React, { useState } from 'react';
 
 import { useLocation } from 'react-router-dom';
