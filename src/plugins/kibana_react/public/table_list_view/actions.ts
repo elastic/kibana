@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { HttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core/public';
 import type { CriteriaWithPagination } from '@elastic/eui';
 
 export interface OnFetchItemsAction {
@@ -24,7 +24,7 @@ export interface OnFetchItemsSuccessAction<T> {
 
 export interface OnFetchItemsErrorAction {
   type: 'onFetchItemsError';
-  data: HttpFetchError;
+  data: IHttpFetchError;
 }
 
 export interface DeleteItemsActions {
