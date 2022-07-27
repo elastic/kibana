@@ -19,7 +19,7 @@ import { EuiButtonTo } from '../../../shared/react_router_helpers';
 const SuccessToast = (
   <>
     <EuiText size="s">
-      {i18n.translate('xpack.enterprise_search.content.new_index.successToast.description', {
+      {i18n.translate('xpack.enterpriseSearch.content.new_index.successToast.description', {
         defaultMessage:
           'You can use App Search engines to build a search experience for your new Elasticsearch index.',
       })}
@@ -28,7 +28,7 @@ const SuccessToast = (
     <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
       <EuiFlexItem grow={false}>
         <EuiButtonTo to={`${APP_SEARCH_URL}/engines`} shouldNotCreateHref color="success">
-          {i18n.translate('xpack.enterprise_search.content.new_index.successToast.button.label', {
+          {i18n.translate('xpack.enterpriseSearch.content.new_index.successToast.button.label', {
             defaultMessage: 'Create an engine',
           })}
         </EuiButtonTo>
@@ -39,7 +39,7 @@ const SuccessToast = (
 
 export function flashIndexCreatedToast(): void {
   flashSuccessToast(
-    i18n.translate('xpack.enterprise_search.content.new_index.successToast.title', {
+    i18n.translate('xpack.enterpriseSearch.content.new_index.successToast.title', {
       defaultMessage: 'Index created successfully',
     }),
     {
