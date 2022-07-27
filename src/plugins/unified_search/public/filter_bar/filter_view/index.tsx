@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiBadge, EuiBadgeProps, useInnerText } from '@elastic/eui';
+import { EuiBadge, EuiBadgeProps, EuiToolTip, useInnerText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
 import { Filter, isFilterPinned } from '@kbn/es-query';
@@ -38,16 +38,20 @@ export const FilterView: FC<Props> = ({
 }: Props) => {
   const [ref, innerText] = useInnerText();
 
-  const actionText = i18n.translate('unifiedSearch.filter.filterBar.filterActionsMessage', {
-    defaultMessage: 'Select for more filter actions.',
-  });
-  const filterString = i18n.translate('unifiedSearch.filter.filterBar.filterString', {
+  let filterString = i18n.translate('unifiedSearch.filter.filterBar.filterString', {
     defaultMessage: 'Filter: {innerText}.',
     values: { innerText },
   });
+  if (!readOnly) {
+    filterString = `${filterString} ${i18n.translate(
+      'unifiedSearch.filter.filterBar.filterActionsMessage',
+      {
+        defaultMessage: 'Select for more filter actions.',
+      }
+    )}`;
+  }
 
-  let title: string = errorMessage || (readOnly ? filterString : filterString + ' ' + actionText);
-
+  let title: string = errorMessage || filterString;
   if (isFilterPinned(filter)) {
     title = `${i18n.translate('unifiedSearch.filter.filterBar.pinnedFilterPrefix', {
       defaultMessage: 'Pinned',
@@ -59,7 +63,8 @@ export const FilterView: FC<Props> = ({
     })} ${title}`;
   }
 
-  const readOnlyProps = { title, color: 'hollow' };
+  // need title to be undefined so that we don't show the native tooltip - we'll use EuiTooltip instead
+  const readOnlyProps = { title: undefined, color: 'hollow' };
 
   const badgeProps: EuiBadgeProps = readOnly
     ? readOnlyProps
@@ -90,16 +95,18 @@ export const FilterView: FC<Props> = ({
       };
 
   return (
-    <EuiBadge {...badgeProps} {...rest}>
-      <span ref={ref}>
-        <FilterLabel
-          filter={filter}
-          valueLabel={valueLabel}
-          fieldLabel={fieldLabel}
-          filterLabelStatus={filterLabelStatus}
-          hideAlias={hideAlias}
-        />
-      </span>
-    </EuiBadge>
+    <EuiToolTip position="bottom" content={title}>
+      <EuiBadge {...badgeProps} {...rest}>
+        <span ref={ref}>
+          <FilterLabel
+            filter={filter}
+            valueLabel={valueLabel}
+            fieldLabel={fieldLabel}
+            filterLabelStatus={filterLabelStatus}
+            hideAlias={hideAlias}
+          />
+        </span>
+      </EuiBadge>
+    </EuiToolTip>
   );
 };
