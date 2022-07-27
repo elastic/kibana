@@ -58,15 +58,28 @@ const mockItems: UserContentCommonSchema[] = [
   },
 ];
 
+const getMockItems = (total: number) =>
+  new Array(total).fill(' ').map((_, i) => ({
+    id: i,
+    references: [],
+    updatedAt: '2022-12-07T10:00:00',
+    attributes: {
+      title: `Item title ${i}`,
+      description: `Description of item ${i}`,
+    },
+  }));
+
 export const TableListView = (params: Params) => {
   return (
     <TableListViewProvider {...getStoryServices(params, action)}>
       <Component
         key={`${params.initialFilter}-${params.initialPageSize}`}
         findItems={() => {
+          const hits = getMockItems(params.numberOfItemsToRender);
+
           return Promise.resolve({
-            total: mockItems.length,
-            hits: mockItems,
+            total: hits.length,
+            hits,
           });
         }}
         getDetailViewLink={() => 'http://elastic.co'}

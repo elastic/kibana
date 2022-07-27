@@ -74,6 +74,12 @@ export const getStoryArgTypes = () => ({
     control: 'boolean',
     defaultValue: true,
   },
+  numberOfItemsToRender: {
+    control: {
+      type: 'number',
+    },
+    defaultValue: 15,
+  },
   initialFilter: {
     control: {
       type: 'text',
@@ -84,7 +90,7 @@ export const getStoryArgTypes = () => ({
     control: {
       type: 'number',
     },
-    defaultValue: 20,
+    defaultValue: 10,
   },
   listingLimit: {
     control: {
