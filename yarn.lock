@@ -7507,7 +7507,7 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__shared-ux-card-no-data@link:bazel-bin/packages/shared-ux/card/no_data/npm_module_types":
+"@types/kbn__shared-ux-card-no-data@link:bazel-bin/packages/shared-ux/card/no_data/impl/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -7523,7 +7523,7 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__shared-ux-link-redirect-app@link:bazel-bin/packages/shared-ux/link/redirect_app/npm_module_types":
+"@types/kbn__shared-ux-link-redirect-app@link:bazel-bin/packages/shared-ux/link/redirect_app/impl/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -7535,7 +7535,7 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__shared-ux-page-analytics-no-data@link:bazel-bin/packages/shared-ux/page/analytics_no_data/npm_module_types":
+"@types/kbn__shared-ux-page-analytics-no-data@link:bazel-bin/packages/shared-ux/page/analytics_no_data/impl/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -7547,7 +7547,7 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__shared-ux-page-kibana-no-data@link:bazel-bin/packages/shared-ux/page/kibana_no_data/npm_module_types":
+"@types/kbn__shared-ux-page-kibana-no-data@link:bazel-bin/packages/shared-ux/page/kibana_no_data/impl/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -7563,7 +7563,7 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__shared-ux-prompt-no-data-views@link:bazel-bin/packages/shared-ux/prompt/no_data_views/npm_module_types":
+"@types/kbn__shared-ux-prompt-no-data-views@link:bazel-bin/packages/shared-ux/prompt/no_data_views/impl/npm_module_types":
   version "0.0.0"
   uid ""
 
