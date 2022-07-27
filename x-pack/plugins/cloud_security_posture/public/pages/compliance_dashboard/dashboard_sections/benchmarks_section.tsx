@@ -26,6 +26,8 @@ import type { ComplianceDashboardData, Evaluation } from '../../../../common/typ
 import { RisksTable } from '../compliance_charts/risks_table';
 import { INTERNAL_FEATURE_FLAGS, RULE_FAILED } from '../../../../common/constants';
 import { useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
+import cisK8sVanillaIcon from '../../../assets/icons/k8s_logo.svg';
+import cisEksIcon from '../../../assets/icons/cis_eks_logo.svg';
 
 const cardHeight = 300;
 
@@ -61,7 +63,6 @@ export const BenchmarksSection = ({
     <>
       {complianceData.clusters.map((cluster) => {
         const shortId = cluster.meta.clusterId.slice(0, 6);
-
         return (
           <React.Fragment key={cluster.meta.clusterId}>
             <EuiPanel hasBorder hasShadow={false} paddingSize="none">
@@ -82,8 +83,12 @@ export const BenchmarksSection = ({
                       </EuiText>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      {/* TODO: change default k8s logo to use a getBenchmarkLogo function */}
-                      <EuiIcon type="logoKubernetes" size="xxl" />
+                      {cluster.meta.benchmarkId === 'cis_eks' && (
+                        <EuiIcon type={cisEksIcon} size="xxl" />
+                      )}
+                      {cluster.meta.benchmarkId === 'cis_k8s' && (
+                        <EuiIcon type={cisK8sVanillaIcon} size="xxl" />
+                      )}
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       {INTERNAL_FEATURE_FLAGS.showManageRulesMock && (

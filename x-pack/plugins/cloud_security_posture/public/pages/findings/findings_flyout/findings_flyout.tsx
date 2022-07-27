@@ -30,7 +30,9 @@ import { ResourceTab } from './resource_tab';
 import { JsonTab } from './json_tab';
 import { OverviewTab } from './overview_tab';
 import { RuleTab } from './rule_tab';
-import k8sLogoIcon from '../../../assets/icons/k8s_logo.svg';
+import cisK8sVanillaIcon from '../../../assets/icons/k8s_logo.svg';
+import cisEksIcon from '../../../assets/icons/cis_eks_logo.svg';
+import { BenchmarkId } from '../../../../common/types';
 
 const tabs = [
   {
@@ -74,13 +76,14 @@ export const Markdown: React.FC<PropsOf<typeof EuiMarkdownFormat>> = (props) => 
   <EuiMarkdownFormat textSize="s" {...props} />
 );
 
-export const CisKubernetesIcons = () => (
+export const CisKubernetesIcons = ({ benchmarkId }: { benchmarkId: BenchmarkId }) => (
   <EuiFlexGroup gutterSize="s">
     <EuiFlexItem grow={false}>
       <EuiIcon type={cisLogoIcon} size="xxl" />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiIcon type={k8sLogoIcon} size="xxl" />
+      {benchmarkId === 'cis_eks' && <EuiIcon type={cisEksIcon} size="xxl" />}
+      {benchmarkId === 'cis_k8s' && <EuiIcon type={cisK8sVanillaIcon} size="xxl" />}
     </EuiFlexItem>
   </EuiFlexGroup>
 );
