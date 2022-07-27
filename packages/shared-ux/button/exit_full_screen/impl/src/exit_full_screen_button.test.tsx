@@ -7,12 +7,31 @@
  */
 
 import React from 'react';
-import { ReactWrapper } from 'enzyme';
+import { ReactWrapper, mount as enzymeMount } from 'enzyme';
 import { keys } from '@elastic/eui';
 
-import { ExitFullScreenButton } from './exit_full_screen_button';
-import { componentMount, componentServices, kibanaMount, kibanaServices } from './mocks';
+import {
+  getExitFullScreenButtonServicesMock,
+  getExitFullScreenButtonKibanaDependenciesMock,
+} from '@kbn/shared-ux-button-exit-full-screen-mocks';
 
+import { ExitFullScreenButton } from './exit_full_screen_button';
+import { ExitFullScreenButtonKibanaProvider, ExitFullScreenButtonProvider } from './services';
+
+const componentServices = getExitFullScreenButtonServicesMock();
+const kibanaServices = getExitFullScreenButtonKibanaDependenciesMock();
+
+export const componentMount = (element: JSX.Element) =>
+  enzymeMount(
+    <ExitFullScreenButtonProvider {...componentServices}>{element}</ExitFullScreenButtonProvider>
+  );
+
+export const kibanaMount = (element: JSX.Element) =>
+  enzymeMount(
+    <ExitFullScreenButtonKibanaProvider {...kibanaServices}>
+      {element}
+    </ExitFullScreenButtonKibanaProvider>
+  );
 describe('<ExitFullScreenButton />', () => {
   afterEach(() => {
     jest.resetAllMocks();

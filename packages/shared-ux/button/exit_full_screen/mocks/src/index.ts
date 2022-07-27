@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export type {
+export {
   getExitFullScreenButtonKibanaDependenciesMock,
   getExitFullScreenButtonServicesMock,
 } from './jest';
