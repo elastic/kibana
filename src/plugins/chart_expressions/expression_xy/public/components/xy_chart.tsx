@@ -285,7 +285,7 @@ export function XYChart({
   const formattedDatatables = useMemo(
     () =>
       getFormattedTablesByLayers(dataLayers, formatFactory, splitColumnAccessor, splitRowAccessor),
-    [dataLayers, formatFactory]
+    [dataLayers, formatFactory, splitColumnAccessor, splitRowAccessor]
   );
 
   const fieldFormats = useMemo(
