@@ -8,15 +8,12 @@
 import {
   MODAL_CONFIRMATION_BTN,
   MODAL_CONFIRMATION_CANCEL_BTN,
-  SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
   RULES_TAGS_FILTER_BTN,
   RULE_CHECKBOX,
   RULES_TAGS_POPOVER_BTN,
-  TOASTER_BODY,
 } from '../../screens/alerts_detection_rules';
 
 import {
-  RULES_BULK_EDIT_OVERWRITE_INDEX_PATTERNS_CHECKBOX,
   RULES_BULK_EDIT_INDEX_PATTERNS_WARNING,
   RULES_BULK_EDIT_TAGS_WARNING,
   TAGS_RULE_BULK_MENU_ITEM,
@@ -39,8 +36,6 @@ import {
 } from '../../tasks/alerts_detection_rules';
 
 import {
-  openBulkEditAddIndexPatternsForm,
-  openBulkEditDeleteIndexPatternsForm,
   typeIndexPatterns,
   waitForBulkEditActionToFinish,
   confirmBulkEditForm,
