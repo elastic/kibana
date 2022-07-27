@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { camelCase, isArray, isObject } from 'lodash';
 import { set } from '@elastic/safer-lodash-set';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
-import type { NavigateToAppOptions } from '@kbn/core/public';
+import type { Capabilities, NavigateToAppOptions } from '@kbn/core/public';
 import type { CasesPermissions } from '@kbn/cases-plugin/common/ui';
 import {
   APP_UI_ID,
@@ -182,18 +182,16 @@ export const useGetUserCasesPermissions = () => {
   return casesPermissions;
 };
 
-/**
- * Returns a full URL to the provided page path by using
- * kibana's `getUrlForApp()`
- */
-
 export type GetAppUrl = (param: {
   appId?: string;
   deepLinkId?: string;
   path?: string;
   absolute?: boolean;
 }) => string;
-
+/**
+ * The `getAppUrl` function returns a full URL to the provided page path by using
+ * kibana's `getUrlForApp()`
+ */
 export const useAppUrl = () => {
   const { getUrlForApp } = useKibana().services.application;
 
@@ -204,18 +202,16 @@ export const useAppUrl = () => {
   return { getAppUrl };
 };
 
-/**
- * Navigate to any app using kibana's `navigateToApp()`
- * or by url using `navigateToUrl()`
- */
-
 export type NavigateTo = (
   param: {
     url?: string;
     appId?: string;
   } & NavigateToAppOptions
 ) => void;
-
+/**
+ * The `navigateTo` function navigates to any app using kibana's `navigateToApp()`.
+ * When the `{ url: string }` parameter is passed it will navigate using `navigateToUrl()`.
+ */
 export const useNavigateTo = () => {
   const { navigateToApp, navigateToUrl } = useKibana().services.application;
 
@@ -233,11 +229,27 @@ export const useNavigateTo = () => {
 };
 
 /**
- * Returns navigateTo and getAppUrl navigation hooks
- *
+ * Returns `navigateTo` and `getAppUrl` navigation hooks
  */
 export const useNavigation = () => {
   const { navigateTo } = useNavigateTo();
   const { getAppUrl } = useAppUrl();
   return { navigateTo, getAppUrl };
+};
+
+// Get the type for any feature capability
+export type FeatureCapability = Capabilities[string];
+interface UseCapabilities {
+  (): Capabilities;
+  <T extends FeatureCapability = FeatureCapability>(featureId: string): T;
+}
+/**
+ * Returns the feature capability when the `featureId` parameter is defined,
+ * or the entire kibana `Capabilities` object when the parameter is omitted.
+ */
+export const useCapabilities: UseCapabilities = <T extends FeatureCapability = FeatureCapability>(
+  featureId?: string
+) => {
+  const { capabilities } = useKibana().services.application;
+  return featureId ? (capabilities[featureId] as T) : capabilities;
 };
