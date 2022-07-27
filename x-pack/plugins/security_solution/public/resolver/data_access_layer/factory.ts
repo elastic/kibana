@@ -93,7 +93,7 @@ export function dataAccessLayerFactory(
         return context.services.http.post('/api/endpoint/resolver/events', {
           query: commonFields.query,
           body: JSON.stringify({
-            ...commonFields,
+            ...commonFields.body,
             entityType: 'alerts',
             eventID: entityID,
           }),
@@ -102,7 +102,7 @@ export function dataAccessLayerFactory(
         return context.services.http.post('/api/endpoint/resolver/events', {
           query: commonFields.query,
           body: JSON.stringify({
-            ...commonFields,
+            ...commonFields.body,
             filter: JSON.stringify({
               bool: {
                 filter: [
