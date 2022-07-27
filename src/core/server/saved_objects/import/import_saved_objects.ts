@@ -7,13 +7,13 @@
  */
 
 import { Readable } from 'stream';
-import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import { SavedObjectsClientContract } from '../types';
-import {
+import type {
   SavedObjectsImportFailure,
   SavedObjectsImportResponse,
-  SavedObjectsImportHook,
-} from './types';
+} from '@kbn/core-saved-objects-common';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
+import { SavedObjectsImportHook } from './types';
 import {
   checkReferenceOrigins,
   validateReferences,

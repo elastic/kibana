@@ -57,14 +57,25 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(apiResponse.body.locations).eql([
         {
+          id: 'localhost',
+          label: 'Local Synthetics Service',
+          geo: { lat: 0, lon: 0 },
+          url: 'mockDevUrl',
+          isServiceManaged: true,
+          status: 'experimental',
+          isInvalid: false,
+        },
+        {
           concurrentMonitors: 1,
           id: testFleetPolicyID,
           isInvalid: false,
           isServiceManaged: false,
           label: 'Test private location 0',
-          latLon: '',
-          name: 'Test private location 0',
-          policyHostId: testFleetPolicyID,
+          geo: {
+            lat: '',
+            lon: '',
+          },
+          agentPolicyId: testFleetPolicyID,
         },
       ]);
     });
@@ -95,7 +106,8 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       const packagePolicy = apiResponse.body.items.find(
-        (pkgPolicy: PackagePolicy) => pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID
+        (pkgPolicy: PackagePolicy) =>
+          pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID + '-default'
       );
 
       expect(packagePolicy.policy_id).eql(testFleetPolicyID);
@@ -133,7 +145,8 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       let packagePolicy = apiResponsePolicy.body.items.find(
-        (pkgPolicy: PackagePolicy) => pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID
+        (pkgPolicy: PackagePolicy) =>
+          pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID + '-default'
       );
 
       expect(packagePolicy.policy_id).eql(testFleetPolicyID);
@@ -141,7 +154,8 @@ export default function ({ getService }: FtrProviderContext) {
       comparePolicies(packagePolicy, testSyntheticsPolicy);
 
       packagePolicy = apiResponsePolicy.body.items.find(
-        (pkgPolicy: PackagePolicy) => pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID2
+        (pkgPolicy: PackagePolicy) =>
+          pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID2 + '-default'
       );
 
       expect(packagePolicy.policy_id).eql(testFleetPolicyID2);
@@ -164,7 +178,8 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       let packagePolicy = apiResponsePolicy.body.items.find(
-        (pkgPolicy: PackagePolicy) => pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID
+        (pkgPolicy: PackagePolicy) =>
+          pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID + '-default'
       );
 
       expect(packagePolicy.policy_id).eql(testFleetPolicyID);
@@ -172,7 +187,8 @@ export default function ({ getService }: FtrProviderContext) {
       comparePolicies(packagePolicy, testSyntheticsPolicy);
 
       packagePolicy = apiResponsePolicy.body.items.find(
-        (pkgPolicy: PackagePolicy) => pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID2
+        (pkgPolicy: PackagePolicy) =>
+          pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID2 + '-default'
       );
 
       expect(packagePolicy).eql(undefined);

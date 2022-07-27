@@ -15,11 +15,15 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiConfirmModal, EuiSteps, EuiText } from '@elastic/eui';
+import { EuiConfirmModal, EuiLink, EuiSteps, EuiText } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
+
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { HttpError, Status } from '../../../../../../common/types/api';
 import { ErrorCode } from '../../../../../../common/types/error_codes';
+import { docLinks } from '../../../../shared/doc_links';
 import { AddConnectorPackageApiLogic } from '../../../api/connector_package/add_connector_package_api_logic';
 
 import { NewSearchIndexLogic } from '../new_search_index_logic';
@@ -68,7 +72,7 @@ export const MethodConnector: React.FC = () => {
   const { error, status } = useValues(AddConnectorPackageApiLogic);
   const { isModalVisible } = useValues(AddConnectorPackageLogic);
   const { setIsModalVisible } = useActions(AddConnectorPackageLogic);
-  const { fullIndexName } = useValues(NewSearchIndexLogic);
+  const { fullIndexName, language } = useValues(NewSearchIndexLogic);
 
   const confirmModal = isModalVisible && (
     <EuiConfirmModal
@@ -84,7 +88,7 @@ export const MethodConnector: React.FC = () => {
       }}
       onConfirm={(event) => {
         event.preventDefault();
-        makeRequest({ deleteExistingConnector: true, indexName: fullIndexName });
+        makeRequest({ deleteExistingConnector: true, indexName: fullIndexName, language });
       }}
       cancelButtonText={i18n.translate(
         'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.confirmModal.cancelButton.label',
@@ -115,6 +119,7 @@ export const MethodConnector: React.FC = () => {
 
   return (
     <NewSearchIndexTemplate
+      docsUrl="https://github.com/elastic/connectors-ruby/blob/main/README.md"
       error={errorToMessage(error)}
       title={i18n.translate('xpack.enterpriseSearch.content.newIndex.steps.buildConnector.title', {
         defaultMessage: 'Build a connector',
@@ -123,7 +128,7 @@ export const MethodConnector: React.FC = () => {
       onNameChange={() => {
         apiReset();
       }}
-      onSubmit={(name) => makeRequest({ indexName: name })}
+      onSubmit={(name, lang) => makeRequest({ indexName: name, language: lang })}
       buttonLoading={status === Status.LOADING}
     >
       <EuiSteps
@@ -132,13 +137,20 @@ export const MethodConnector: React.FC = () => {
             children: (
               <EuiText size="s">
                 <p>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.steps.createIndex.content',
-                    {
-                      defaultMessage:
-                        'Provide a unique name for your index and select an optional index language.',
-                    }
-                  )}
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.content.newIndex.methodConnector.steps.createConnectorIndex.content"
+                    defaultMessage="Provide a unique index name and optionally set a default {languageAnalyzerDocLink} for the index. This index will hold your data source content, and is optimized with default field mappings for relevant search experiences."
+                    values={{
+                      languageAnalyzerDocLink: (
+                        <EuiLink href={docLinks.languageAnalyzers} target="_blank" external>
+                          {i18n.translate(
+                            'xpack.enterpriseSearch.content.newIndex.methodConnector.steps.createConnectorIndex.languageAnalyzerLink',
+                            { defaultMessage: 'language analyzer' }
+                          )}
+                        </EuiLink>
+                      ),
+                    }}
+                  />
                 </p>
               </EuiText>
             ),
@@ -156,21 +168,28 @@ export const MethodConnector: React.FC = () => {
             children: (
               <EuiText size="s">
                 <p>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.methodConnector.steps.configureIngestion.content',
-                    {
-                      defaultMessage:
-                        'TODO TODO TODO Clone the connector package repository on GitHub and build a custom connector that suits your needs.',
-                    }
-                  )}
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.content.newIndex.steps.buildConnector.content"
+                    defaultMessage="Using our connector framework and connector client examples, you’ll be able to accelerate ingestion to the Elasticsearch {bulkApiDocLink} for any data source. After creating your index, you will be guided through the steps to access the connector framework and connect your first connector client."
+                    values={{
+                      bulkApiDocLink: (
+                        <EuiLink href={docLinks.bulkApi} target="_blank" external>
+                          {i18n.translate(
+                            'xpack.enterpriseSearch.content.newIndex.methodConnector.steps.buildConnector.bulkAPILink',
+                            { defaultMessage: 'Bulk API' }
+                          )}
+                        </EuiLink>
+                      ),
+                    }}
+                  />
                 </p>
               </EuiText>
             ),
             status: 'incomplete',
             title: i18n.translate(
-              'xpack.enterpriseSearch.content.newIndex.steps.configureIngestion.title',
+              'xpack.enterpriseSearch.content.newIndex.methodConnector.steps.buildConnector.title',
               {
-                defaultMessage: 'Configure ingestion settings',
+                defaultMessage: 'Build and configure a connector',
               }
             ),
             titleSize: 'xs',
@@ -180,10 +199,10 @@ export const MethodConnector: React.FC = () => {
               <EuiText size="s">
                 <p>
                   {i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.steps.buildSearchExperience.content',
+                    'xpack.enterpriseSearch.content.newIndex.connector.steps.buildSearchExperience.content',
                     {
                       defaultMessage:
-                        'Connect your newly created Elasticsearch index to an App Search engine to build a cusomtizable search experience.',
+                        'After building your connector, your content is ready. Build your first search experience with Elasticsearch, or explore the search experience tools provided by App Search. We recommend that you create a search engine for the best balance of flexible power and turnkey simplicity.',
                     }
                   )}
                 </p>

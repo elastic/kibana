@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject } from '../../types';
-import { SavedObjectsImportFailure, CreatedObject } from '../types';
+import type { SavedObject, SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
+import { CreatedObject } from '../types';
 
 export function extractErrors(
   // TODO: define saved object type

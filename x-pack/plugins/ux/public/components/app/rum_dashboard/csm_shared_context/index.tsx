@@ -11,7 +11,7 @@ import {
   DataView,
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
-import { useDynamicDataViewFetcher } from '../../../../hooks/use_dynamic_data_view';
+import { useDynamicDataViewTitle } from '../../../../hooks/use_dynamic_data_view';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 
 interface SharedData {
@@ -51,15 +51,15 @@ export function CsmSharedContextProvider({
     services: { dataViews },
   } = useKibana<{ dataViews: DataViewsPublicPluginStart }>();
 
-  const { dataView: uxDataView } = useDynamicDataViewFetcher();
+  const { dataViewTitle } = useDynamicDataViewTitle();
 
   const { data } = useFetcher<Promise<DataView | undefined>>(async () => {
-    if (uxDataView?.title) {
+    if (dataViewTitle) {
       return dataViews.create({
-        title: uxDataView?.title,
+        title: dataViewTitle,
       });
     }
-  }, [uxDataView?.title, dataViews]);
+  }, [dataViewTitle, dataViews]);
 
   useEffect(() => {
     setDataView(data);

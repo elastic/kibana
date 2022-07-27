@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Datatable } from '@kbn/expressions-plugin';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 
 export type TableInspectorAdapter = Record<string, Datatable>;
 

@@ -10,13 +10,11 @@ import { partition } from 'lodash';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
-import { trackUiEvent } from '../../lens_ui_telemetry';
 import type { OperationType } from '../indexpattern';
 import type { OperationSupportMatrix } from './operation_support';
-import type { IndexPatternPrivateState } from '../types';
 import { FieldOption, FieldOptionValue, FieldPicker } from '../../shared_components/field_picker';
-import type { IndexPattern } from '../../editor_frame_service/types';
 import { fieldContainsData } from '../../shared_components';
+import type { ExistingFieldsMap, IndexPattern } from '../../types';
 
 export type FieldChoiceWithOperationType = FieldOptionValue & {
   operationType: OperationType;
@@ -30,7 +28,7 @@ export interface FieldSelectProps extends EuiComboBoxProps<EuiComboBoxOptionOpti
   operationByField: OperationSupportMatrix['operationByField'];
   onChoose: (choice: FieldChoiceWithOperationType) => void;
   onDeleteColumn?: () => void;
-  existingFields: IndexPatternPrivateState['existingFields'];
+  existingFields: ExistingFieldsMap[string];
   fieldIsInvalid: boolean;
   markAllFieldsCompatible?: boolean;
   'data-test-subj'?: string;
@@ -164,7 +162,6 @@ export function FieldSelect({
       options={memoizedFieldOptions as Array<FieldOption<FieldChoiceWithOperationType>>}
       onChoose={(choice) => {
         if (choice && choice.field !== selectedField) {
-          trackUiEvent('indexpattern_dimension_field_changed');
           onChoose(choice);
         }
       }}

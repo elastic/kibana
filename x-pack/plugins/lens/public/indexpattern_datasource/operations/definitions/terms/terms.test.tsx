@@ -35,6 +35,7 @@ import { getOperationSupportMatrix } from '../../../dimension_panel/operation_su
 import { FieldSelect } from '../../../dimension_panel/field_select';
 import { ReferenceEditor } from '../../../dimension_panel/reference_editor';
 import { IndexPattern } from '../../../../editor_frame_service/types';
+import { cloneDeep } from 'lodash';
 import { IncludeExcludeRow } from './include_exclude_options';
 
 // mocking random id generator function
@@ -3073,6 +3074,22 @@ describe('terms', () => {
           defaultProps.indexPattern
         )
       ).toEqual(['unsupported']);
+    });
+  });
+
+  describe('getMaxPossibleNumValues', () => {
+    it('reports correct number of values', () => {
+      const termsSize = 5;
+
+      const withoutOther = cloneDeep(layer.columns.col1 as TermsIndexPatternColumn);
+      withoutOther.params.size = termsSize;
+      withoutOther.params.otherBucket = false;
+
+      const withOther = cloneDeep(withoutOther);
+      withOther.params.otherBucket = true;
+
+      expect(termsOperation.getMaxPossibleNumValues!(withoutOther)).toBe(termsSize);
+      expect(termsOperation.getMaxPossibleNumValues!(withOther)).toBe(termsSize + 1);
     });
   });
 });

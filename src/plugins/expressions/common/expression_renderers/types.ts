@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { ExpressionAstExpression } from '../ast';
 
 export interface ExpressionRenderDefinition<Config = unknown> {
@@ -99,4 +100,6 @@ export interface IInterpreterRenderHandlers {
    * Downstream consumers of the uiState handler will need to cast for now.
    */
   uiState?: unknown;
+
+  getExecutionContext(): KibanaExecutionContext | undefined;
 }
