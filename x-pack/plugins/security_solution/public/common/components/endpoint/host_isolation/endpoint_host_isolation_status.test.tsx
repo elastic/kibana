@@ -93,6 +93,15 @@ describe('when using the EndpointHostIsolationStatus component', () => {
         },
       },
     ],
+    [
+      '1 action pending',
+      {
+        isIsolated: true,
+        pendingActions: {
+          pendingKillProcess: 1,
+        },
+      },
+    ],
   ])('should show %s}', (expectedLabel, componentProps) => {
     const { getByTestId } = render(componentProps);
     expect(getByTestId('test').textContent).toBe(expectedLabel);
