@@ -112,7 +112,8 @@ export const searchSessionSavedObjectMigrations: SavedObjectMigrationMap = {
     const attributes = { ...otherAttrs, locatorId };
     return { ...doc, attributes };
   },
-  '8.5.0': (
+  '8.4.0': (
+    // TODO: change to 8.5.0 when available
     doc: SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesPre$8$5$0>
   ): SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesLatest> => {
     const {

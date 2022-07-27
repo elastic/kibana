@@ -359,7 +359,9 @@ describe('7.14.0 -> 8.0.0', () => {
 });
 
 describe('8.0.0 -> 8.5.0', () => {
-  const migration = searchSessionSavedObjectMigrations['8.5.0'];
+  // TODO: change to 8.5.0 when possible
+  // const migration = searchSessionSavedObjectMigrations['8.5.0'];
+  const migration = searchSessionSavedObjectMigrations['8.4.0'];
   test('migrates object', () => {
     const mockSessionSavedObject: SavedObject<SearchSessionSavedObjectAttributesPre$8$5$0> = {
       id: 'id',
