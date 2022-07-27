@@ -27,7 +27,7 @@ describe('StepImagePopover', () => {
       <StepImagePopover {...defaultProps} />
     );
 
-    const closeFullScreenButton = 'Close fullscreen test caption image';
+    const closeFullScreenButton = 'Press Escape or click to close image fullscreen mode';
 
     expect(queryByLabelText(closeFullScreenButton)).toBeNull();
 
