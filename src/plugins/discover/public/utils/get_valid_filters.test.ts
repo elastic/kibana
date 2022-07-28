@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { FilterManager } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { getValidFilters } from './get_valid_filters';
 
@@ -22,19 +21,16 @@ describe('getValidFilters', () => {
       },
       ...(script ? { query: { script: {} } } : {}),
     });
-    const filterManager = {
-      getFilters: jest.fn(() => [
-        filter('123', false, false),
-        filter('123', true, false),
-        filter('123', false, true),
-        filter('123', true, true),
-        filter('321', false, false),
-        filter('321', true, false),
-        filter('321', false, true),
-        filter('321', true, true),
-      ]),
-    } as unknown as FilterManager;
-    const filters = getValidFilters(dataView, filterManager.getFilters());
+    const filters = getValidFilters(dataView, [
+      filter('123', false, false),
+      filter('123', true, false),
+      filter('123', false, true),
+      filter('123', true, true),
+      filter('321', false, false),
+      filter('321', true, false),
+      filter('321', false, true),
+      filter('321', true, true),
+    ]);
     expect(filters.length).toBe(8);
     expect(filters[0].meta.disabled).toBe(false);
     expect(filters[1].meta.disabled).toBe(true);
