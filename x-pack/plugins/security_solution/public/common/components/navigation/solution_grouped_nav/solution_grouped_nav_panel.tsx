@@ -23,8 +23,7 @@ import {
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import styled from 'styled-components';
-import { EuiBetaBadgeStyled, EuiPanelStyled } from './solution_grouped_nav_panel.styles';
+import { EuiBetaBadgeStyled, EuiPanelStyled, FlexLink } from './solution_grouped_nav_panel.styles';
 import type { DefaultSideNavItem } from './types';
 import type { LinkCategories } from '../../../links/types';
 import { BETA } from '../../../translations';
@@ -154,11 +153,6 @@ const SolutionNavPanelCategories: React.FC<SolutionNavPanelCategoriesProps> = ({
     </>
   );
 };
-
-const FlexLink = styled.a`
-  display: flex;
-  align-items: center;
-`;
 
 const SolutionNavPanelItems: React.FC<SolutionNavPanelItemsProps> = ({ items, onClose }) => (
   <>

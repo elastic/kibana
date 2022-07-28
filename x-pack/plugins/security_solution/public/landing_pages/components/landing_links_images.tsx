@@ -54,6 +54,7 @@ const TitleText = styled.h2`
   display: inline;
 `;
 
+// Remove explicit typing after eui update https://github.com/elastic/eui/pull/6086
 const BetaBadge: typeof EuiBetaBadge = styled(EuiBetaBadge)`
   vertical-align: text-top;
   margin-left: ${({ theme }) => theme.eui.euiSizeS};

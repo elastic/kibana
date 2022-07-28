@@ -31,7 +31,13 @@ export const EuiPanelStyled = styled(EuiPanel)<{ $bottomOffset?: string }>`
       `}
 `;
 
+// Remove explicit typing after eui update https://github.com/elastic/eui/pull/6086
 export const EuiBetaBadgeStyled: typeof EuiBetaBadge = styled(EuiBetaBadge)`
   margin-left: ${({ theme }) => theme.eui.euiSizeS};
   color: ${(props) => props.theme.eui.euiTextColor};
+`;
+
+export const FlexLink = styled.a`
+  display: flex;
+  align-items: center;
 `;
