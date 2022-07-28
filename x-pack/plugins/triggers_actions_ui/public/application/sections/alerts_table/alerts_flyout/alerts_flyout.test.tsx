@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { act } from 'react-dom/test-utils';
 import { AlertsFlyout } from './alerts_flyout';
 import { AlertsField } from '../../../../types';
@@ -18,7 +19,7 @@ const props = {
     [AlertsField.reason]: ['two'],
     _id: '0123456789',
     _index: '.alerts-default',
-  },
+  } as unknown as EcsFieldsResponse,
   alertsTableConfiguration: {
     id: 'test',
     columns: [

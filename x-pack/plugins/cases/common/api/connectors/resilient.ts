@@ -7,7 +7,6 @@
 
 import * as rt from 'io-ts';
 
-// New fields should also be added at: x-pack/plugins/cases/server/connectors/case/schema.ts
 export const ResilientFieldsRT = rt.type({
   incidentTypes: rt.union([rt.array(rt.string), rt.null]),
   severityCode: rt.union([rt.string, rt.null]),
