@@ -14,12 +14,12 @@ import {
 } from './stacktrace';
 
 enum fileID {
-  A = 'aQpJmTLWydNvOapSFZOwKg==',
-  B = 'hz_u-HGyrN6qeIk6UIJeCA==',
-  C = 'AJ8qrcXSoJbl_haPhlc4og==',
-  D = 'lHZiv7a58px6Gumcpo-6yA==',
-  E = 'fkbxUTZgljnk71ZMnqJnyA==',
-  F = 'gnEsgxvvEODj6iFYMQWYlA==',
+  A = 'aQpJmTLWydNvOapSFZOwKg',
+  B = 'hz_u-HGyrN6qeIk6UIJeCA',
+  C = 'AJ8qrcXSoJbl_haPhlc4og',
+  D = 'lHZiv7a58px6Gumcpo-6yA',
+  E = 'fkbxUTZgljnk71ZMnqJnyA',
+  F = 'gnEsgxvvEODj6iFYMQWYlA',
 }
 
 enum frameID {
