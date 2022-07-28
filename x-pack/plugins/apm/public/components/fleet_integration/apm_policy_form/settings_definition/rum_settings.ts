@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { PackagePolicyVars, SettingsRow } from '../typings';
 import { isSettingsFormValid, OPTIONAL_LABEL } from '../settings_form/utils';
 
-const arrayRegex = new RegExp(/\[[^\]]*\]/);
+const arrayRegex = new RegExp(/[\[\]]/);
 function getAllowedOriginsRt() {
   return new t.Type<string, string, unknown>(
     'allowedOriginsRt',
@@ -20,7 +20,14 @@ function getAllowedOriginsRt() {
         t.string.validate(input, context),
         (inputAsString) => {
           return arrayRegex.test(inputAsString)
-            ? t.failure(input, context, 'Invalid value. Array is not allowed')
+            ? t.failure(
+                input,
+                context,
+                i18n.translate(
+                  'xpack.apm.fleet_integration.settings.rum.allowedHeadersValidation',
+                  { defaultMessage: 'Invalid value. Array is not allowed' }
+                )
+              )
             : t.success(inputAsString);
         }
       );

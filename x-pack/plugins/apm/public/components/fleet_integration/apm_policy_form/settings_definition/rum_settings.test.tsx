@@ -25,7 +25,7 @@ describe('rum_settings - isRUMFormValid', () => {
       {
         enable_rum: { value: true, type: 'bool' },
         rum_allow_origins: {
-          value: ['*', 'foo', '1', '["bar"]'],
+          value: ['*', 'foo', '1', '["bar"', ']'],
           type: 'text',
         },
       },
