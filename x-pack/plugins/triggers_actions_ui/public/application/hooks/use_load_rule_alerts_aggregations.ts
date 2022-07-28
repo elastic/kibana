@@ -204,10 +204,11 @@ export async function fetchRuleAlertsAggByTimeRange({
       }),
     });
 
-    // Total alerts count in the last 30 days per status
     const active = res?.aggregations?.total.buckets.totalActiveAlerts?.doc_count ?? 0;
     const recovered = res?.aggregations?.total.buckets.totalRecoveredAlerts?.doc_count ?? 0;
+    // Total alerts count in the last 30 days per status
     const totalAlerts = active + recovered;
+
     const alertsChartData = [
       ...res?.aggregations?.statusPerDay.buckets.reduce(
         (
