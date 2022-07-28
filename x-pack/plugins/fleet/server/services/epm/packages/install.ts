@@ -35,7 +35,7 @@ import type {
   KibanaAssetType,
   PackageVerificationResult,
 } from '../../../types';
-import { AUTO_UPGRADE_POLICIES_PACKAGES } from '../../../../common';
+import { AUTO_UPGRADE_POLICIES_PACKAGES } from '../../../../common/constants';
 import { IngestManagerError, PackageOutdatedError } from '../../../errors';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import { licenseService } from '../..';
@@ -99,8 +99,16 @@ export async function ensureInstalledPackage(options: {
   esClient: ElasticsearchClient;
   pkgVersion?: string;
   spaceId?: string;
+  force?: boolean;
 }): Promise<Installation> {
-  const { savedObjectsClient, pkgName, esClient, pkgVersion, spaceId = DEFAULT_SPACE_ID } = options;
+  const {
+    savedObjectsClient,
+    pkgName,
+    esClient,
+    pkgVersion,
+    force = false,
+    spaceId = DEFAULT_SPACE_ID,
+  } = options;
 
   // If pkgVersion isn't specified, find the latest package version
   const pkgKeyProps = pkgVersion
@@ -122,6 +130,7 @@ export async function ensureInstalledPackage(options: {
     pkgkey,
     spaceId,
     esClient,
+    neverIgnoreVerificationError: !force,
     force: true, // Always force outdated packages to be installed if a later version isn't installed
   });
 
@@ -142,7 +151,8 @@ export async function ensureInstalledPackage(options: {
               pkgVersion: pkgKeyProps.version,
             },
           });
-    throw new Error(`${errorPrefix}: ${installResult.error.message}`);
+    installResult.error.message = `${errorPrefix}: ${installResult.error.message}`;
+    throw installResult.error;
   }
 
   const installation = await getInstallation({ savedObjectsClient, pkgName });
@@ -222,6 +232,7 @@ interface InstallRegistryPackageParams {
   esClient: ElasticsearchClient;
   spaceId: string;
   force?: boolean;
+  neverIgnoreVerificationError?: boolean;
   ignoreConstraints?: boolean;
 }
 interface InstallUploadedArchiveParams {
@@ -259,6 +270,7 @@ async function installPackageFromRegistry({
   spaceId,
   force = false,
   ignoreConstraints = false,
+  neverIgnoreVerificationError = false,
 }: InstallRegistryPackageParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
   // TODO: change epm API to /packageName/version so we don't need to do this
@@ -289,7 +301,9 @@ async function installPackageFromRegistry({
       Registry.fetchFindLatestPackageOrThrow(pkgName, {
         ignoreConstraints,
       }),
-      Registry.getRegistryPackage(pkgName, pkgVersion, { ignoreUnverified: force }),
+      Registry.getRegistryPackage(pkgName, pkgVersion, {
+        ignoreUnverified: force && !neverIgnoreVerificationError,
+      }),
     ]);
 
     // let the user install if using the force flag or needing to reinstall or install a previous version due to failed update
@@ -503,6 +517,7 @@ async function installPackageByUpload({
 
 export type InstallPackageParams = {
   spaceId: string;
+  neverIgnoreVerificationError?: boolean;
 } & (
   | ({ installSource: Extract<InstallSource, 'registry'> } & InstallRegistryPackageParams)
   | ({ installSource: Extract<InstallSource, 'upload'> } & InstallUploadedArchiveParams)
@@ -520,7 +535,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
   const bundledPackages = await getBundledPackages();
 
   if (args.installSource === 'registry') {
-    const { pkgkey, force, ignoreConstraints, spaceId } = args;
+    const { pkgkey, force, ignoreConstraints, spaceId, neverIgnoreVerificationError } = args;
 
     const matchingBundledPackage = bundledPackages.find(
       (pkg) => Registry.pkgToPkgKey(pkg) === pkgkey
@@ -549,6 +564,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       esClient,
       spaceId,
       force,
+      neverIgnoreVerificationError,
       ignoreConstraints,
     });
     return response;

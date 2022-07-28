@@ -45,6 +45,8 @@ export const fromSavedSearchAttributes = (
   viewMode: attributes.viewMode,
   hideAggregatedPreview: attributes.hideAggregatedPreview,
   rowHeight: attributes.rowHeight,
+  isTextBasedQuery: attributes.isTextBasedQuery,
+  rowsPerPage: attributes.rowsPerPage,
 });
 
 export const toSavedSearchAttributes = (
@@ -61,4 +63,6 @@ export const toSavedSearchAttributes = (
   viewMode: savedSearch.viewMode,
   hideAggregatedPreview: savedSearch.hideAggregatedPreview,
   rowHeight: savedSearch.rowHeight,
+  isTextBasedQuery: savedSearch.isTextBasedQuery ?? false,
+  rowsPerPage: savedSearch.rowsPerPage,
 });

@@ -9057,6 +9057,39 @@
       },
       {
         "parentPluginId": "embeddable",
+        "id": "def-public.SelfStyledEmbeddable",
+        "type": "Interface",
+        "tags": [],
+        "label": "SelfStyledEmbeddable",
+        "description": [
+          "\nAll embeddables that implement this interface will be able to configure\nthe style of their containing panels"
+        ],
+        "path": "src/plugins/embeddable/public/lib/self_styled_embeddable/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.SelfStyledEmbeddable.getSelfStyledOptions",
+            "type": "Function",
+            "tags": [],
+            "label": "getSelfStyledOptions",
+            "description": [
+              "\nGets the embeddable's style configuration"
+            ],
+            "signature": [
+              "() => ",
+              "SelfStyledOptions"
+            ],
+            "path": "src/plugins/embeddable/public/lib/self_styled_embeddable/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
         "id": "def-public.ValueClickContext",
         "type": "Interface",
         "tags": [],
@@ -9237,7 +9270,7 @@
             "section": "def-public.EmbeddableFactory",
             "text": "EmbeddableFactory"
           },
-          "<I, O, E, T>, \"create\" | \"type\" | \"isEditable\" | \"getDisplayName\"> & Partial<Pick<",
+          "<I, O, E, T>, \"type\" | \"create\" | \"isEditable\" | \"getDisplayName\"> & Partial<Pick<",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -9245,7 +9278,7 @@
             "section": "def-public.EmbeddableFactory",
             "text": "EmbeddableFactory"
           },
-          "<I, O, E, T>, \"createFromSavedObject\" | \"isContainerType\" | \"getExplicitInput\" | \"savedObjectMetaData\" | \"canCreateNew\" | \"getDefaultInput\" | \"telemetry\" | \"extract\" | \"inject\" | \"migrations\" | \"grouping\" | \"getIconType\" | \"getDescription\">>"
+          "<I, O, E, T>, \"telemetry\" | \"inject\" | \"extract\" | \"migrations\" | \"createFromSavedObject\" | \"isContainerType\" | \"getExplicitInput\" | \"savedObjectMetaData\" | \"canCreateNew\" | \"getDefaultInput\" | \"grouping\" | \"getIconType\" | \"getDescription\">>"
         ],
         "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory_definition.ts",
         "deprecated": false,

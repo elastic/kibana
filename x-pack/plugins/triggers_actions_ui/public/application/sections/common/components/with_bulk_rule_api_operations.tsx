@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { IExecutionLogWithErrorsResult } from '@kbn/alerting-plugin/common';
+import { IExecutionLogResult, IExecutionErrorsResult } from '@kbn/alerting-plugin/common';
 import {
   Rule,
   RuleType,
@@ -37,6 +37,8 @@ import {
   resolveRule,
   loadExecutionLogAggregations,
   LoadExecutionLogAggregationsProps,
+  loadActionErrorLog,
+  LoadActionErrorLogProps,
   snoozeRule,
   unsnoozeRule,
 } from '../../../lib/rule_api';
@@ -67,7 +69,8 @@ export interface ComponentOpts {
   loadRuleTypes: () => Promise<RuleType[]>;
   loadExecutionLogAggregations: (
     props: LoadExecutionLogAggregationsProps
-  ) => Promise<IExecutionLogWithErrorsResult>;
+  ) => Promise<IExecutionLogResult>;
+  loadActionErrorLog: (props: LoadActionErrorLogProps) => Promise<IExecutionErrorsResult>;
   getHealth: () => Promise<AlertingFrameworkHealth>;
   resolveRule: (id: Rule['id']) => Promise<ResolvedRule>;
   snoozeRule: (rule: Rule, snoozeSchedule: SnoozeSchedule) => Promise<void>;
@@ -144,6 +147,12 @@ export function withBulkRuleOperations<T>(
         loadRuleTypes={async () => loadRuleTypes({ http })}
         loadExecutionLogAggregations={async (loadProps: LoadExecutionLogAggregationsProps) =>
           loadExecutionLogAggregations({
+            ...loadProps,
+            http,
+          })
+        }
+        loadActionErrorLog={async (loadProps: LoadActionErrorLogProps) =>
+          loadActionErrorLog({
             ...loadProps,
             http,
           })

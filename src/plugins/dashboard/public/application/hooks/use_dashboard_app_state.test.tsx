@@ -70,6 +70,7 @@ const createDashboardAppStateServices = () => {
 
   const data = dataPluginMock.createStartContract();
   data.query.filterManager.getUpdates$ = jest.fn().mockImplementation(() => of(void 0));
+  data.query.filterManager.getFilters = jest.fn().mockImplementation(() => []);
   data.query.queryString.getUpdates$ = jest.fn().mockImplementation(() => of({}));
   data.query.timefilter.timefilter.getTimeUpdate$ = jest.fn().mockImplementation(() => of(void 0));
   data.query.timefilter.timefilter.getRefreshIntervalUpdate$ = jest

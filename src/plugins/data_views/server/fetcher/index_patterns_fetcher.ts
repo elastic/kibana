@@ -79,11 +79,17 @@ export class IndexPatternsFetcher {
     });
     if (type === 'rollup' && rollupIndex) {
       const rollupFields: FieldDescriptor[] = [];
-      const rollupIndexCapabilities = getCapabilitiesForRollupIndices(
+      const capabilityCheck = getCapabilitiesForRollupIndices(
         await this.elasticsearchClient.rollup.getRollupIndexCaps({
           index: rollupIndex,
         })
-      )[rollupIndex].aggs;
+      )[rollupIndex];
+
+      if (capabilityCheck.error) {
+        throw new Error(capabilityCheck.error);
+      }
+
+      const rollupIndexCapabilities = capabilityCheck.aggs;
       const fieldCapsResponseObj = keyBy(fieldCapsResponse, 'name');
       // Keep meta fields
       metaFields!.forEach(
@@ -91,7 +97,7 @@ export class IndexPatternsFetcher {
           fieldCapsResponseObj[field] && rollupFields.push(fieldCapsResponseObj[field])
       );
       return mergeCapabilitiesWithFields(
-        rollupIndexCapabilities,
+        rollupIndexCapabilities!,
         fieldCapsResponseObj,
         rollupFields
       );

@@ -20,7 +20,7 @@ import { overlayServiceMock } from './overlays/overlay_service.mock';
 import { pluginsServiceMock } from './plugins/plugins_service.mock';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { renderingServiceMock } from './rendering/rendering_service.mock';
-import { integrationsServiceMock } from './integrations/integrations_service.mock';
+import { integrationsServiceMock } from '@kbn/core-integrations-browser-mocks';
 import { coreAppMock } from './core_app/core_app.mock';
 
 export const analyticsServiceStartMock = analyticsServiceMock.createAnalyticsServiceStart();
@@ -122,7 +122,7 @@ export const MockIntegrationsService = integrationsServiceMock.create();
 export const IntegrationsServiceConstructor = jest
   .fn()
   .mockImplementation(() => MockIntegrationsService);
-jest.doMock('./integrations', () => ({
+jest.doMock('@kbn/core-integrations-browser-internal', () => ({
   IntegrationsService: IntegrationsServiceConstructor,
 }));
 

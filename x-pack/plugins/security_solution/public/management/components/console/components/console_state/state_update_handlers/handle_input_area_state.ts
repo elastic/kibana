@@ -22,7 +22,8 @@ type InputAreaStateAction = ConsoleDataAction & {
     | 'updateInputPopoverState'
     | 'updateInputHistoryState'
     | 'updateInputTextEnteredState'
-    | 'updateInputPlaceholderState';
+    | 'updateInputPlaceholderState'
+    | 'setInputState';
 };
 
 export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
@@ -95,6 +96,19 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
           },
         };
       }
+      break;
+
+    case 'setInputState':
+      if (state.input.visibleState !== payload.value) {
+        return {
+          ...state,
+          input: {
+            ...state.input,
+            visibleState: payload.value,
+          },
+        };
+      }
+      break;
   }
 
   // No updates needed. Just return original state

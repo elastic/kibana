@@ -82,6 +82,8 @@ export const useInputHints = () => {
           type: 'updateFooterContent',
           payload: { value: hint },
         });
+
+        dispatch({ type: 'setInputState', payload: { value: undefined } });
       } else {
         dispatch({
           type: 'updateFooterContent',
@@ -89,9 +91,12 @@ export const useInputHints = () => {
             value: UNKNOWN_COMMAND_HINT(commandEntered),
           },
         });
+
+        dispatch({ type: 'setInputState', payload: { value: 'error' } });
       }
     } else {
       dispatch({ type: 'updateFooterContent', payload: { value: '' } });
+      dispatch({ type: 'setInputState', payload: { value: undefined } });
     }
   }, [commandEntered, commandEnteredDefinition, dispatch, isInputPopoverOpen]);
 };

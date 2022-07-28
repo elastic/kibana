@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { map, mergeMap } from 'rxjs/operators';
+import { from, map, mergeMap } from 'rxjs';
 import type { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
 import { shimHitsTotal } from '@kbn/data-plugin/server';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import type { CoreStart } from '@kbn/core/server';
+import { ACTIONS_INDEX } from '../../../common/constants';
 import type {
   FactoryQueryTypes,
   StrategyResponseType,
@@ -18,7 +20,8 @@ import { osqueryFactory } from './factory';
 import type { OsqueryFactory } from './factory/types';
 
 export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
-  data: PluginStart
+  data: PluginStart,
+  esClient: CoreStart['elasticsearch']['client']
 ): ISearchStrategy<StrategyRequestType<T>, StrategyResponseType<T>> => {
   let es: typeof data.search.searchAsInternalUser;
 
@@ -29,31 +32,38 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
       }
 
       const queryFactory: OsqueryFactory<T> = osqueryFactory[request.factoryQueryType];
-      const dsl = queryFactory.buildDsl(request);
 
-      // use internal user for searching .fleet* indicies
-      es = dsl.index?.includes('fleet')
-        ? data.search.searchAsInternalUser
-        : data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
+      return from(
+        esClient.asInternalUser.indices.exists({
+          index: `${ACTIONS_INDEX}*`,
+        })
+      ).pipe(
+        mergeMap((exists) => {
+          const dsl = queryFactory.buildDsl({ ...request, componentTemplateExists: exists });
+          // use internal user for searching .fleet* indices
+          es =
+            dsl.index?.includes('fleet') || dsl.index?.includes('logs-osquery_manager.action')
+              ? data.search.searchAsInternalUser
+              : data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
 
-      return es
-        .search(
-          {
-            ...request,
-            params: dsl,
-          },
-          options,
-          deps
-        )
-        .pipe(
-          map((response) => ({
-            ...response,
-            ...{
-              rawResponse: shimHitsTotal(response.rawResponse),
+          return es.search(
+            {
+              ...request,
+              params: dsl,
             },
-          })),
-          mergeMap((esSearchRes) => queryFactory.parse(request, esSearchRes))
-        );
+            options,
+            deps
+          );
+        }),
+        map((response) => ({
+          ...response,
+          ...{
+            rawResponse: shimHitsTotal(response.rawResponse, options),
+          },
+          total: response.rawResponse.hits.total as number,
+        })),
+        mergeMap((esSearchRes) => queryFactory.parse(request, esSearchRes))
+      );
     },
     cancel: async (id, options, deps) => {
       if (es?.cancel) {

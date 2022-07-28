@@ -59,7 +59,7 @@ import { SignalHit } from '@kbn/security-solution-plugin/server/lib/detection_en
 import { ActionResult, FindActionResult } from '@kbn/actions-plugin/server/types';
 import { ESCasesConfigureAttributes } from '@kbn/cases-plugin/server/services/configure/types';
 import { ESCaseAttributes } from '@kbn/cases-plugin/server/services/cases/types';
-import { SavedObjectsRawDocSource } from '@kbn/core/server/saved_objects/serialization';
+import type { SavedObjectsRawDocSource } from '@kbn/core/server';
 import { User } from './authentication/types';
 import { superUser } from './authentication/users';
 import { getPostCaseRequest, postCaseReq } from './mock';
@@ -247,6 +247,36 @@ export const getJiraConnector = () => ({
   config: {
     apiUrl: 'http://some.non.existent.com',
     projectKey: 'pkey',
+  },
+});
+
+export const getCasesWebhookConnector = () => ({
+  name: 'Cases Webhook Connector',
+  connector_type_id: '.cases-webhook',
+  secrets: {
+    user: 'user',
+    password: 'pass',
+  },
+  config: {
+    createCommentJson: '{"body":{{{case.comment}}}}',
+    createCommentMethod: 'post',
+    createCommentUrl: 'http://some.non.existent.com/{{{external.system.id}}}/comment',
+    createIncidentJson:
+      '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
+    createIncidentMethod: 'post',
+    createIncidentResponseKey: 'id',
+    createIncidentUrl: 'http://some.non.existent.com/',
+    getIncidentResponseCreatedDateKey: 'fields.created',
+    getIncidentResponseExternalTitleKey: 'key',
+    getIncidentResponseUpdatedDateKey: 'fields.updated',
+    hasAuth: true,
+    headers: { [`content-type`]: 'application/json' },
+    incidentViewUrl: 'http://some.non.existent.com/browse/{{{external.system.title}}}',
+    getIncidentUrl: 'http://some.non.existent.com/{{{external.system.id}}}',
+    updateIncidentJson:
+      '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
+    updateIncidentMethod: 'put',
+    updateIncidentUrl: 'http://some.non.existent.com/{{{external.system.id}}}',
   },
 });
 

@@ -247,6 +247,37 @@ describe('triggerTSVBtoLensConfiguration', () => {
       otherBucket: false,
       orderDirection: 'desc',
       orderBy: { type: 'alphabetical' },
+      includeIsRegex: false,
+      excludeIsRegex: false,
+      parentFormat: {
+        id: 'terms',
+      },
+    });
+  });
+
+  test('should return include exclude information if the chart is broken down by terms', async () => {
+    const modelWithTerms = {
+      ...model,
+      series: [
+        {
+          ...model.series[0],
+          split_mode: 'terms',
+          terms_size: 6,
+          terms_direction: 'desc',
+          terms_order_by: '_key',
+          terms_include: 't.*',
+        },
+      ] as unknown as Series[],
+    };
+    const triggerOptions = await triggerTSVBtoLensConfiguration(modelWithTerms);
+    expect(triggerOptions?.layers[0]?.termsParams).toStrictEqual({
+      size: 6,
+      otherBucket: false,
+      orderDirection: 'desc',
+      orderBy: { type: 'alphabetical' },
+      includeIsRegex: true,
+      include: ['t.*'],
+      excludeIsRegex: false,
       parentFormat: {
         id: 'terms',
       },

@@ -401,10 +401,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         values: { page, pageCount },
         description: 'Screen reader text to describe the size of the data grid',
       }),
-    'euiDataGridCell.position': ({ row, col }: EuiValues) =>
+    'euiDataGridCell.position': ({ columnId, row, col }: EuiValues) =>
       i18n.translate('core.euiDataGridCell.position', {
-        defaultMessage: 'Row: {row}; Column: {col}',
-        values: { row, col },
+        defaultMessage: '{columnId}, column {col}, row {row}',
+        values: { columnId, row, col },
       }),
     'euiDataGridCellActions.expandButtonTitle': i18n.translate(
       'core.euiDataGridCellActions.expandButtonTitle',
@@ -416,6 +416,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       'core.euiDataGridHeaderCell.headerActions',
       {
         defaultMessage: 'Header actions',
+      }
+    ),
+    'euiDataGridHeaderCell.actionsPopoverScreenReaderText': i18n.translate(
+      'core.euiDataGridHeaderCell.actionsPopoverScreenReaderText',
+      {
+        defaultMessage:
+          'To navigate through the list of column actions, press the Tab or Up and Down arrow keys.',
       }
     ),
     'euiDataGridPagination.detailedPaginationLabel': ({ label }: EuiValues) =>

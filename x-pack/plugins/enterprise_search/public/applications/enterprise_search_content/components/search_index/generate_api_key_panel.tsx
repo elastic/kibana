@@ -50,16 +50,16 @@ export const GenerateApiKeyPanel: React.FC = () => {
   return (
     <>
       {isGenerateModalOpen && (
-        <GenerateApiKeyModal indexName={indexData.index.name} onClose={closeGenerateModal} />
+        <GenerateApiKeyModal indexName={indexData?.name ?? ''} onClose={closeGenerateModal} />
       )}
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiPanel>
+          <EuiPanel hasBorder>
             <EuiFlexGroup direction="column">
               <EuiFlexItem>
                 <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                   <EuiFlexItem>
-                    {indexData.index.name[0] !== '.' && (
+                    {indexData?.name[0] !== '.' && (
                       <EuiTitle size="s">
                         <h2>
                           {i18n.translate(
@@ -82,13 +82,13 @@ export const GenerateApiKeyPanel: React.FC = () => {
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
-              {indexData.index.name[0] !== '.' && (
+              {indexData?.name[0] !== '.' && (
                 <>
                   <EuiSpacer />
                   <EuiFlexItem>
                     <EuiCodeBlock language="bash" fontSize="m" isCopyable>
                       {`\
-curl -X POST '${searchIndexApiUrl}${indexData.index.name}/_doc' \\
+curl -X POST '${searchIndexApiUrl}${indexData?.name}/_doc' \\
   -H 'Content-Type: application/json' \\
   -H 'Authorization: ApiKey ${apiKeyExample}' \\
   -d '${JSON.stringify(DOCUMENTS_API_JSON_EXAMPLE, null, 2)}'

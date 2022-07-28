@@ -15,11 +15,26 @@ import { EndpointStatusActionResult } from './status_action';
 import { GetProcessesActionResult } from './get_processes_action';
 import type { ParsedArgData } from '../console/service/parsed_command_input';
 
-const emptyArgumentValidator = (argData: ParsedArgData) => {
+const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
   if (argData?.length > 0 && argData[0]?.trim().length > 0) {
     return true;
   } else {
-    return 'Argument cannot be empty';
+    return i18n.translate('xpack.securitySolution.endpointConsoleCommands.emptyArgumentMessage', {
+      defaultMessage: 'Argument cannot be empty',
+    });
+  }
+};
+
+const pidValidator = (argData: ParsedArgData): true | string => {
+  const emptyResult = emptyArgumentValidator(argData);
+  if (emptyResult !== true) {
+    return emptyResult;
+  } else if (Number.isInteger(Number(argData)) && Number(argData) > 0) {
+    return true;
+  } else {
+    return i18n.translate('xpack.securitySolution.endpointConsoleCommands.invalidPidMessage', {
+      defaultMessage: 'Argument must be a positive number representing the PID of a process',
+    });
   }
 };
 
@@ -31,6 +46,21 @@ const HELP_GROUPS = Object.freeze({
     }),
   },
 });
+
+const ENTER_PID_OR_ENTITY_ID_INSTRUCTION = i18n.translate(
+  'xpack.securitySolution.endpointResponseActionsConsoleCommands.enterPidOrEntityId',
+  { defaultMessage: 'Enter a pid or an entity id to execute' }
+);
+
+const ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION = i18n.translate(
+  'xpack.securitySolution.endpointResponseActionsConsoleCommands.enterOrAddOptionalComment',
+  { defaultMessage: 'Hit enter to execute or add an optional comment' }
+);
+
+const COMMENT_ARG_ABOUT = i18n.translate(
+  'xpack.securitySolution.endpointConsoleCommands.suspendProcess.commandArgAbout',
+  { defaultMessage: 'A comment to go along with the action' }
+);
 
 export const getEndpointResponseActionsConsoleCommands = (
   endpointAgentId: string
@@ -46,15 +76,12 @@ export const getEndpointResponseActionsConsoleCommands = (
         endpointId: endpointAgentId,
       },
       exampleUsage: 'isolate --comment "isolate this host"',
-      exampleInstruction: 'Hit enter to execute or add an optional comment',
+      exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
       args: {
         comment: {
           required: false,
           allowMultiples: false,
-          about: i18n.translate(
-            'xpack.securitySolution.endpointConsoleCommands.isolate.arg.comment',
-            { defaultMessage: 'A comment to go along with the action' }
-          ),
+          about: COMMENT_ARG_ABOUT,
         },
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
@@ -71,15 +98,12 @@ export const getEndpointResponseActionsConsoleCommands = (
         endpointId: endpointAgentId,
       },
       exampleUsage: 'release --comment "isolate this host"',
-      exampleInstruction: 'Hit enter to execute or add an optional comment',
+      exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
       args: {
         comment: {
           required: false,
           allowMultiples: false,
-          about: i18n.translate(
-            'xpack.securitySolution.endpointConsoleCommands.release.arg.comment',
-            { defaultMessage: 'A comment to go along with the action' }
-          ),
+          about: COMMENT_ARG_ABOUT,
         },
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
@@ -89,23 +113,20 @@ export const getEndpointResponseActionsConsoleCommands = (
     {
       name: 'kill-process',
       about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.killProcess.about', {
-        defaultMessage: 'Kill a running process. Accepts either a PID or an entity id.',
+        defaultMessage: 'Kill/terminate a process',
       }),
       RenderComponent: KillProcessActionResult,
       meta: {
         endpointId: endpointAgentId,
       },
       exampleUsage: 'kill-process --pid 123 --comment "kill this process"',
-      exampleInstruction: 'Enter a pid or an entity id to execute',
+      exampleInstruction: ENTER_PID_OR_ENTITY_ID_INSTRUCTION,
       mustHaveArgs: true,
       args: {
         comment: {
           required: false,
           allowMultiples: false,
-          about: i18n.translate(
-            'xpack.securitySolution.endpointConsoleCommands.release.arg.comment',
-            { defaultMessage: 'A comment to go along with the action' }
-          ),
+          about: COMMENT_ARG_ABOUT,
         },
         pid: {
           required: false,
@@ -114,7 +135,7 @@ export const getEndpointResponseActionsConsoleCommands = (
           about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.pid.arg.comment', {
             defaultMessage: 'A PID representing the process to kill',
           }),
-          validate: emptyArgumentValidator,
+          validate: pidValidator,
         },
         entityId: {
           required: false,
@@ -136,23 +157,20 @@ export const getEndpointResponseActionsConsoleCommands = (
     {
       name: 'suspend-process',
       about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.suspendProcess.about', {
-        defaultMessage: 'Suspend a running process. Accepts either a PID or an entity id.',
+        defaultMessage: 'Temporarily suspend a process',
       }),
       RenderComponent: SuspendProcessActionResult,
       meta: {
         endpointId: endpointAgentId,
       },
       exampleUsage: 'suspend-process --pid 123 --comment "suspend this process"',
-      exampleInstruction: 'Enter a pid or an entity id to execute',
+      exampleInstruction: ENTER_PID_OR_ENTITY_ID_INSTRUCTION,
       mustHaveArgs: true,
       args: {
         comment: {
           required: false,
           allowMultiples: false,
-          about: i18n.translate(
-            'xpack.securitySolution.endpointConsoleCommands.suspendProcess.arg.comment',
-            { defaultMessage: 'A comment to go along with the action' }
-          ),
+          about: COMMENT_ARG_ABOUT,
         },
         pid: {
           required: false,
@@ -164,7 +182,7 @@ export const getEndpointResponseActionsConsoleCommands = (
               defaultMessage: 'A PID representing the process to suspend',
             }
           ),
-          validate: emptyArgumentValidator,
+          validate: pidValidator,
         },
         entityId: {
           required: false,
@@ -186,7 +204,7 @@ export const getEndpointResponseActionsConsoleCommands = (
     {
       name: 'status',
       about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.status.about', {
-        defaultMessage: 'Display the latest status information for the Endpoint',
+        defaultMessage: 'Show host status information',
       }),
       RenderComponent: EndpointStatusActionResult,
       meta: {
@@ -199,22 +217,19 @@ export const getEndpointResponseActionsConsoleCommands = (
     {
       name: 'processes',
       about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.processes.about', {
-        defaultMessage: 'Display the processes on the endpoint',
+        defaultMessage: 'Show all running processes',
       }),
       RenderComponent: GetProcessesActionResult,
       meta: {
         endpointId: endpointAgentId,
       },
       exampleUsage: 'processes --comment "get the processes"',
-      exampleInstruction: 'Hit enter to execute or add an optional comment',
+      exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
       args: {
         comment: {
           required: false,
           allowMultiples: false,
-          about: i18n.translate(
-            'xpack.securitySolution.endpointConsoleCommands.processes.arg.comment',
-            { defaultMessage: 'A comment to go along with the action' }
-          ),
+          about: COMMENT_ARG_ABOUT,
         },
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
