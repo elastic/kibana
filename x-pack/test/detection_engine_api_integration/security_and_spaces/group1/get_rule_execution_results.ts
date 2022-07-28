@@ -100,7 +100,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should return execution events for a rule that has executed in a warning state', async () => {
-      const rule = getRuleForSignalTesting(['auditbeat-*', 'no-name-index']);
+      const rule = getRuleForSignalTesting(['no-name-index']);
       const { id } = await createRule(supertest, log, rule);
       await waitForRuleSuccessOrStatus(supertest, log, id, RuleExecutionStatus['partial failure']);
       await waitForEventLogExecuteComplete(es, log, id);
