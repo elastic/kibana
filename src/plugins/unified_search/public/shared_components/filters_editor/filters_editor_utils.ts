@@ -30,16 +30,14 @@ const buildConditionalFilter = (conditionalType: 'or' | 'and', filters: Filter[]
   };
 };
 
-export const getConditionalOperationType = (filter: Filter): ConditionTypes | undefined => {
-  const { conditionalType } = filter.meta?.params || {};
+/** to: @kbn/es-query **/
+export const isOrFilter = (filter: Filter) => Boolean(filter.meta?.params.filters);
 
-  if (conditionalType) {
-    switch (conditionalType) {
-      case 'or':
-        return ConditionTypes.OR;
-      case 'and':
-        return ConditionTypes.AND;
-    }
+export const getConditionalOperationType = (filter: Filter | Filter[]) => {
+  if (Array.isArray(filter)) {
+    return ConditionTypes.AND;
+  } else if (isOrFilter(filter)) {
+    return ConditionTypes.OR;
   }
 };
 

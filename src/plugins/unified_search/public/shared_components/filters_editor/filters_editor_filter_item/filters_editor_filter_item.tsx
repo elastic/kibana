@@ -56,9 +56,16 @@ export function FilterItem({
 }: FilterItemProps) {
   const { dispatch, dataView } = useContext(FiltersEditorContextType);
   const conditionalOperationType = getConditionalOperationType(filter);
-  const field: DataViewField | undefined = getFieldFromFilter(filter as FieldFilter, dataView);
-  const operator: Operator | undefined = getOperatorFromFilter(filter);
-  const params: Filter['meta']['params'] = getFilterParams(filter);
+
+  let field: DataViewField | undefined;
+  let operator: Operator | undefined;
+  let params: Filter['meta']['params'] | undefined;
+
+  if (!conditionalOperationType) {
+    field = getFieldFromFilter(filter as FieldFilter, dataView);
+    operator = getOperatorFromFilter(filter);
+    params = getFilterParams(filter);
+  }
 
   const onHandleField = (field: DataViewField) => {
     dispatch({
@@ -124,7 +131,7 @@ export function FilterItem({
         <FilterGroup
           path={path}
           conditionType={conditionalOperationType}
-          filters={filter.meta?.params?.filters}
+          filters={Array.isArray(filter) ? filter : filter.meta?.params?.filters}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           reverseBackground={!reverseBackground}
         />
