@@ -20,12 +20,15 @@ import {
 } from '../../types';
 import { GROUP_ID } from './constants';
 import { getMetricVisualization, MetricVisualizationState } from './visualization';
+import { themeServiceMock } from '@kbn/core/public/mocks';
 
 const paletteService = chartPluginMock.createPaletteRegistry();
+const theme = themeServiceMock.createStartContract();
 
 describe('metric visualization', () => {
   const visualization = getMetricVisualization({
     paletteService,
+    theme,
   });
 
   const palette: PaletteOutput<CustomPaletteParams> = {

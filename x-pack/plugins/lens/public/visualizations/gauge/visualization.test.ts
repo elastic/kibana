@@ -13,6 +13,7 @@ import type { DatasourceLayers, OperationDescriptor } from '../../types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { layerTypes } from '../../../common';
 import type { GaugeVisualizationState } from './constants';
+import { themeServiceMock } from '@kbn/core/public/mocks';
 
 function exampleState(): GaugeVisualizationState {
   return {
@@ -25,6 +26,7 @@ function exampleState(): GaugeVisualizationState {
 }
 
 const paletteService = chartPluginMock.createPaletteRegistry();
+const theme = themeServiceMock.createStartContract();
 
 describe('gauge', () => {
   let frame: ReturnType<typeof createMockFramePublicAPI>;
@@ -35,7 +37,7 @@ describe('gauge', () => {
 
   describe('#intialize', () => {
     test('returns a default state', () => {
-      expect(getGaugeVisualization({ paletteService }).initialize(() => 'l1')).toEqual({
+      expect(getGaugeVisualization({ paletteService, theme }).initialize(() => 'l1')).toEqual({
         layerId: 'l1',
         layerType: layerTypes.DATA,
         shape: 'horizontalBullet',
@@ -46,7 +48,10 @@ describe('gauge', () => {
 
     test('returns persisted state', () => {
       expect(
-        getGaugeVisualization({ paletteService }).initialize(() => 'test-layer', exampleState())
+        getGaugeVisualization({ paletteService, theme }).initialize(
+          () => 'test-layer',
+          exampleState()
+        )
       ).toEqual(exampleState());
     });
   });
@@ -86,6 +91,7 @@ describe('gauge', () => {
       expect(
         getGaugeVisualization({
           paletteService,
+          theme,
         }).getConfiguration({ state, frame, layerId: 'first' })
       ).toEqual({
         groups: [
@@ -152,6 +158,7 @@ describe('gauge', () => {
       expect(
         getGaugeVisualization({
           paletteService,
+          theme,
         }).getConfiguration({ state, frame, layerId: 'first' })
       ).toEqual({
         groups: [
@@ -224,6 +231,7 @@ describe('gauge', () => {
       expect(
         getGaugeVisualization({
           paletteService,
+          theme,
         }).getConfiguration({ state, frame, layerId: 'first' })
       ).toEqual({
         groups: [
@@ -301,6 +309,7 @@ describe('gauge', () => {
       expect(
         getGaugeVisualization({
           paletteService,
+          theme,
         }).getConfiguration({ state, frame, layerId: 'first' })
       ).toEqual({
         groups: [
@@ -373,6 +382,7 @@ describe('gauge', () => {
       expect(
         getGaugeVisualization({
           paletteService,
+          theme,
         }).setDimension({
           prevState,
           layerId: 'first',
@@ -400,6 +410,7 @@ describe('gauge', () => {
       expect(
         getGaugeVisualization({
           paletteService,
+          theme,
         }).removeDimension({
           prevState,
           layerId: 'first',
@@ -415,6 +426,7 @@ describe('gauge', () => {
       expect(
         getGaugeVisualization({
           paletteService,
+          theme,
         }).removeDimension({
           prevState,
           layerId: 'first',
@@ -435,6 +447,7 @@ describe('gauge', () => {
       expect(
         getGaugeVisualization({
           paletteService,
+          theme,
         }).getSupportedLayers()
       ).toHaveLength(1);
     });
@@ -448,6 +461,7 @@ describe('gauge', () => {
       };
       const instance = getGaugeVisualization({
         paletteService,
+        theme,
       });
       expect(instance.getLayerType('test-layer', state)).toEqual(layerTypes.DATA);
       expect(instance.getLayerType('foo', state)).toBeUndefined();
@@ -479,6 +493,7 @@ describe('gauge', () => {
       expect(
         getGaugeVisualization({
           paletteService,
+          theme,
         }).toExpression(state, datasourceLayers)
       ).toEqual({
         type: 'expression',
@@ -512,6 +527,7 @@ describe('gauge', () => {
       expect(
         getGaugeVisualization({
           paletteService,
+          theme,
         }).toExpression(state, datasourceLayers)
       ).toEqual(null);
     });
@@ -521,6 +537,7 @@ describe('gauge', () => {
     it('returns undefined if no error is raised', () => {
       const error = getGaugeVisualization({
         paletteService,
+        theme,
       }).getErrorMessages(exampleState());
       expect(error).not.toBeDefined();
     });
@@ -564,6 +581,7 @@ describe('gauge', () => {
       expect(
         getGaugeVisualization({
           paletteService,
+          theme,
         }).getWarningMessages!(state, frame)
       ).toHaveLength(0);
     });
@@ -586,6 +604,7 @@ describe('gauge', () => {
       expect(
         getGaugeVisualization({
           paletteService,
+          theme,
         }).getWarningMessages!(state, frame)
       ).toHaveLength(1);
     });
@@ -608,6 +627,7 @@ describe('gauge', () => {
       expect(
         getGaugeVisualization({
           paletteService,
+          theme,
         }).getWarningMessages!(state, frame)
       ).toHaveLength(1);
     });
@@ -630,6 +650,7 @@ describe('gauge', () => {
       expect(
         getGaugeVisualization({
           paletteService,
+          theme,
         }).getWarningMessages!(state, frame)
       ).toHaveLength(1);
     });
@@ -652,6 +673,7 @@ describe('gauge', () => {
       expect(
         getGaugeVisualization({
           paletteService,
+          theme,
         }).getWarningMessages!(state, frame)
       ).toHaveLength(1);
     });
