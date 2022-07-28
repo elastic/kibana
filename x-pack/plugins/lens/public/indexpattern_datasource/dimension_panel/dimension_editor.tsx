@@ -853,25 +853,20 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   return (
     <div id={columnId}>
-      <EuiFormRow
-        label={
-          <EuiText
-            size="s"
-            css={css`
-              margin-bottom: ${euiTheme.size.base};
-            `}
-          >
-            <h4>
-              {paramEditorCustomProps?.headingLabel ??
-                i18n.translate('xpack.lens.indexPattern.dimensionEditor.headingData', {
-                  defaultMessage: 'Data',
-                })}
-            </h4>
-          </EuiText>
-        }
-        className="lnsIndexPatternDimensionEditor--padded"
-        fullWidth
-      >
+      <div className="lnsIndexPatternDimensionEditor--padded">
+        <EuiText
+          size="s"
+          css={css`
+            margin-bottom: ${euiTheme.size.base};
+          `}
+        >
+          <h4>
+            {paramEditorCustomProps?.headingLabel ??
+              i18n.translate('xpack.lens.indexPattern.dimensionEditor.headingData', {
+                defaultMessage: 'Data',
+              })}
+          </h4>
+        </EuiText>
         <>
           {hasButtonGroups ? (
             <DimensionEditorButtonGroups
@@ -888,7 +883,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           />
           {ButtonGroupContent}
         </>
-      </EuiFormRow>
+      </div>
 
       {shouldDisplayAdvancedOptions && (
         <AdvancedOptions
@@ -951,28 +946,21 @@ export function DimensionEditor(props: DimensionEditorProps) {
       )}
 
       {!isFullscreen && !currentFieldIsInvalid && (
-        <EuiFormRow
-          label={
-            !incompleteInfo &&
-            temporaryState === 'none' &&
-            selectedColumn && (
-              <EuiText
-                size="s"
-                css={css`
-                  margin-bottom: ${euiTheme.size.base};
-                `}
-              >
-                <h4>
-                  {i18n.translate('xpack.lens.indexPattern.dimensionEditor.headingAppearance', {
-                    defaultMessage: 'Appearance',
-                  })}
-                </h4>
-              </EuiText>
-            )
-          }
-          className="lnsIndexPatternDimensionEditor--collapseNext lnsIndexPatternDimensionEditor--padded"
-          fullWidth
-        >
+        <div className="lnsIndexPatternDimensionEditor--padded lnsIndexPatternDimensionEditor--collapseNext">
+          {!incompleteInfo && temporaryState === 'none' && selectedColumn && (
+            <EuiText
+              size="s"
+              css={css`
+                margin-bottom: ${euiTheme.size.base};
+              `}
+            >
+              <h4>
+                {i18n.translate('xpack.lens.indexPattern.dimensionEditor.headingAppearance', {
+                  defaultMessage: 'Appearance',
+                })}
+              </h4>
+            </EuiText>
+          )}
           <>
             {!incompleteInfo && selectedColumn && temporaryState === 'none' && (
               <NameInput
@@ -1016,7 +1004,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
               <FormatSelector selectedColumn={selectedColumn} onChange={onFormatChange} />
             ) : null}
           </>
-        </EuiFormRow>
+        </div>
       )}
     </div>
   );

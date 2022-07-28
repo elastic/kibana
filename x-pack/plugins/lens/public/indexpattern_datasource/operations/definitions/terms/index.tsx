@@ -19,6 +19,8 @@ import {
   EuiButtonGroup,
   EuiText,
   useEuiTheme,
+  EuiTitle,
+  EuiTextColor,
 } from '@elastic/eui';
 import { uniq } from 'lodash';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
@@ -921,13 +923,15 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
               id="lnsTermsAdvanced"
               arrowProps={{ color: 'primary' }}
               buttonContent={
-                <EuiText size="s" color={euiTheme.colors.primary}>
-                  <strong>
-                    {i18n.translate('xpack.lens.indexPattern.terms.advancedSettings', {
-                      defaultMessage: 'Advanced',
-                    })}
-                  </strong>
-                </EuiText>
+                <EuiTitle size="xxs">
+                  <h5>
+                    <EuiTextColor color={euiTheme.colors.primary}>
+                      {i18n.translate('xpack.lens.indexPattern.advancedSettings', {
+                        defaultMessage: 'Advanced',
+                      })}
+                    </EuiTextColor>
+                  </h5>
+                </EuiTitle>
               }
               data-test-subj="indexPattern-terms-advanced"
               className="lnsIndexPatternDimensionEditor-advancedOptions"

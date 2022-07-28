@@ -15,8 +15,7 @@
 import './dimension_editor.scss';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
-import { EuiCallOut, EuiButtonGroup, EuiFormRow, useEuiTheme } from '@elastic/eui';
+import { EuiCallOut, EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import { operationDefinitionMap } from '../operations';
 
 export const formulaOperationName = 'formula';
@@ -54,7 +53,6 @@ export const CalloutWarning = ({
   currentOperationType: keyof typeof operationDefinitionMap | undefined;
   temporaryStateType: TemporaryState;
 }) => {
-  const { euiTheme } = useEuiTheme();
   if (
     temporaryStateType === 'none' ||
     (currentOperationType != null && isQuickFunction(currentOperationType))
@@ -75,9 +73,6 @@ export const CalloutWarning = ({
           })}
           iconType="alert"
           color="warning"
-          css={css`
-            margin-bottom: ${euiTheme.size.base};
-          `}
         >
           <p>
             {i18n.translate('xpack.lens.indexPattern.staticValueWarningText', {
@@ -98,9 +93,6 @@ export const CalloutWarning = ({
         })}
         iconType="alert"
         color="warning"
-        css={css`
-          margin-bottom: ${euiTheme.size.base};
-        `}
       >
         {temporaryStateType !== 'quickFunctions' ? (
           <p>

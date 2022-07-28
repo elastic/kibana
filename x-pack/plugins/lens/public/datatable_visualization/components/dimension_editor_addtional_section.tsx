@@ -86,24 +86,20 @@ export function TableDimensionEditorAdditionalSection(
   return (
     <>
       {isNumeric && (
-        <EuiFormRow
-          label={
-            <EuiText
-              size="s"
-              css={css`
-                margin-bottom: ${euiTheme.size.base};
-              `}
-            >
-              <h4>
-                {i18n.translate('xpack.lens.indexPattern.dimensionEditor.headingSummary', {
-                  defaultMessage: 'Summary',
-                })}
-              </h4>
-            </EuiText>
-          }
-          className="lnsIndexPatternDimensionEditor--padded lnsIndexPatternDimensionEditor--collapseNext"
-          fullWidth
-        >
+        <div className="lnsIndexPatternDimensionEditor--padded lnsIndexPatternDimensionEditor--collapseNext">
+          <EuiText
+            size="s"
+            css={css`
+              margin-bottom: ${euiTheme.size.base};
+            `}
+          >
+            <h4>
+              {i18n.translate('xpack.lens.indexPattern.dimensionEditor.headingSummary', {
+                defaultMessage: 'Summary',
+              })}
+            </h4>
+          </EuiText>
+
           <>
             <EuiFormRow
               fullWidth
@@ -157,7 +153,7 @@ export function TableDimensionEditorAdditionalSection(
               </EuiFormRow>
             )}
           </>
-        </EuiFormRow>
+        </div>
       )}
     </>
   );

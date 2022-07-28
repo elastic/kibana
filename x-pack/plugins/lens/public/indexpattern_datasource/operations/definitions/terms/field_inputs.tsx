@@ -99,8 +99,7 @@ export function FieldInputs({
     <>
       <div
         style={{
-          padding: euiTheme.size.s,
-          backgroundColor: isDragging ? 'rgba(0, 191, 179, 0.25)' : euiTheme.colors.lightestShade,
+          backgroundColor: isDragging ? 'transparent' : euiTheme.colors.lightestShade,
           borderRadius: euiTheme.size.xs,
           marginBottom: euiTheme.size.xs,
         }}
@@ -110,6 +109,7 @@ export function FieldInputs({
             handleInputChange(updatedValues);
             setIsDragging(false);
           }}
+          className="lnsIndexPatternDimensionEditor__droppable"
           onDragStart={() => {
             setIsDragging(true);
           }}

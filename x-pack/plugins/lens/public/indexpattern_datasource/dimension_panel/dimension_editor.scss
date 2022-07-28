@@ -47,8 +47,18 @@
   padding-bottom: 0;
 }
 
+.lnsIndexPatternDimensionEditor__warning {
+  margin-bottom: $euiSize;
+  margin-top: $euiSizeS;
+}
+
+.lnsIndexPatternDimensionEditor__droppable {
+  padding: $euiSizeS;
+  border-radius: $euiBorderRadius;
+}
+
 .lnsIndexPatternDimensionEditor-advancedOptions button {
-  &:hover {
+  &:hover, &:focus {
     text-decoration-color: $euiColorPrimary;
   }
 }

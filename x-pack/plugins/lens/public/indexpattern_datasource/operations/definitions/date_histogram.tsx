@@ -363,20 +363,16 @@ export const dateHistogramOperation: OperationDefinition<
           display="rowCompressed"
           helpText={
             <>
-              <span>
-                {i18n.translate('xpack.lens.indexPattern.dateHistogram.selectOptionHelpText', {
-                  defaultMessage: `Select an option or create a custom value.`,
-                })}
-              </span>
+              {i18n.translate('xpack.lens.indexPattern.dateHistogram.selectOptionHelpText', {
+                defaultMessage: `Select an option or create a custom value.`,
+              })}
               <br />
-              <span>
-                {i18n.translate(
-                  'xpack.lens.indexPattern.dateHistogram.selectOptionExamplesHelpText',
-                  {
-                    defaultMessage: `Examples: 30s, 20m, 24h, 2d, 1w, 1M`,
-                  }
-                )}
-              </span>
+              {i18n.translate(
+                'xpack.lens.indexPattern.dateHistogram.selectOptionExamplesHelpText',
+                {
+                  defaultMessage: `Examples: 30s, 20m, 24h, 2d, 1w, 1M`,
+                }
+              )}
             </>
           }
           isInvalid={!isValid}
@@ -436,7 +432,7 @@ export const dateHistogramOperation: OperationDefinition<
               'xpack.lens.indexPattern.dateHistogram.dropPartialBucketsHelp',
               {
                 defaultMessage:
-                  'Drop partial intervas is disabled as these can be computed only for a time field bound to global time picker in the top right.',
+                  'Drop partial intervals is disabled as these can be computed only for a time field bound to global time picker in the top right.',
               }
             )}
             condition={!bindToGlobalTimePickerValue}

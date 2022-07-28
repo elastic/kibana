@@ -8,7 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
-import React, { useState, useCallback, Dispatch, FocusEvent, useContext } from 'react';
+import React, { useState, useCallback, Dispatch, FocusEvent, useContext, useMemo } from 'react';
+import { css } from '@emotion/react';
 
 import {
   EuiFieldNumber,
@@ -165,9 +166,17 @@ export function ColorRangeItem({
     }
   );
 
+  const styles = useMemo(
+    () => css`
+      min-width: ${euiTheme.size.xl};
+      text-align: center;
+    `,
+    [euiTheme.size.xl]
+  );
+
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false} responsive={false}>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} css={isLast ? styles : null}>
         {!isLast ? (
           <EuiColorPicker
             onChange={onUpdateColor}
