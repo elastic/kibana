@@ -240,7 +240,7 @@ export async function fetchRuleAlertsAggByTimeRange({
                 count: alert.doc_count,
                 status: alert.key,
               })),
-              // if there is alerts for this day, we calculate the delta, and add it as a background bar
+              // We add the background bar even if there is alerts in this day, but we calculate the delta.
               { ...totalDayAlerts, count: totalAlerts - dayAlerts.doc_count },
             ];
           } else {
