@@ -64,7 +64,8 @@ export default function ({ getService }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const browser = getService('browser');
 
-  describe('anomaly explorer', function () {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/137300
+  describe.skip('anomaly explorer', function () {
     this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
