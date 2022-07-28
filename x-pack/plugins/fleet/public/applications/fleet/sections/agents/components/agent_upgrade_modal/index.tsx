@@ -136,7 +136,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       value: option === 0 ? 0 : option * 3600,
     })
   );
-  const preselected = [
+  const preselected: Array<EuiComboBoxOptionOption<string>> = [
     {
       label: kibanaVersion,
       value: kibanaVersion,
