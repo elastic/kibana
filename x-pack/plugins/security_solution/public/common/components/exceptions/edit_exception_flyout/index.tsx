@@ -93,7 +93,7 @@ const FlyoutBodySection = styled.section`
   `}
 `;
 
-const FlyoutCheckboxesSection = styled(EuiFlyoutBody)`
+const FlyoutCheckboxesSection = styled.section`
   overflow-y: inherit;
   height: auto;
   .euiFlyoutBody__overflowContent {
@@ -324,7 +324,11 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
   };
 
   return (
-    <EuiFlyout size="l" onClose={onCancel} data-test-subj="edit-exception-flyout">
+    <EuiFlyout
+      size="l"
+      onClose={onCancel}
+      data-test-subj="edit-exception-flyout"
+    >
       <FlyoutHeader>
         <EuiTitle>
           <h2 data-test-subj="exception-flyout-title">
@@ -345,7 +349,7 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
         !isIndexPatternLoading &&
         !isRuleLoading &&
         !mlJobLoading && (
-          <>
+          <EuiFlyoutBody>
             <FlyoutBodySection className="builder-section">
               {isRuleEQLSequenceStatement && (
                 <>
@@ -423,7 +427,7 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
                 </>
               )}
             </FlyoutCheckboxesSection>
-          </>
+          </EuiFlyoutBody>
         )}
 
       <EuiFlyoutFooter>
