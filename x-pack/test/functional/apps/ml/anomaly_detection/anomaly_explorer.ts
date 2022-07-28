@@ -64,8 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const browser = getService('browser');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/137300
-  describe.skip('anomaly explorer', function () {
+  describe('anomaly explorer', function () {
     this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
@@ -167,11 +166,11 @@ export default function ({ getService }: FtrProviderContext) {
           ]);
           await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'y', [
             'AAL',
-            'VRD',
             'EGF',
+            'VRD',
             'SWR',
-            'AMX',
             'JZA',
+            'AMX',
             'TRS',
             'ACA',
             'BAW',
@@ -341,13 +340,13 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.swimLane.waitForSwimLanesToLoad();
 
           await ml.swimLane.assertSelection(viewBySwimLaneTestSubj, {
-            x: [1454817600000, 1454846400000],
-            y: ['AAL', 'VRD'],
+            x: [1454817600000, 1454860800000],
+            y: ['AAL', 'EGF'],
           });
 
-          await ml.anomaliesTable.assertTableRowsCount(2);
+          await ml.anomaliesTable.assertTableRowsCount(3);
           await ml.anomalyExplorer.assertInfluencerFieldListLength('airline', 2);
-          await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(2);
+          await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(3);
 
           await ml.testExecution.logTestStep('clears the selection');
           await ml.anomalyExplorer.clearSwimLaneSelection();
