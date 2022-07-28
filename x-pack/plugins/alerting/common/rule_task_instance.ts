@@ -32,3 +32,7 @@ export const ruleParamsSchema = t.intersection([
   }),
 ]);
 export type RuleTaskParams = t.TypeOf<typeof ruleParamsSchema>;
+
+export interface ActionsStore {
+  [key: string]: { isSummary: boolean };
+}

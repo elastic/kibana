@@ -8,7 +8,7 @@
 import { RuleAction } from '@kbn/alerting-plugin/common';
 
 export const showSummaryOption = (actionItem: RuleAction) =>
-  actionItem.actionTypeId === '.email' &&
+  (actionItem.actionTypeId === '.email' || actionItem.actionTypeId === '.server-log') &&
   (actionItem.group === 'metrics.threshold.fired' ||
     actionItem.group === 'metrics.threshold.warning' ||
     actionItem.group === 'metrics.threshold.nodata');

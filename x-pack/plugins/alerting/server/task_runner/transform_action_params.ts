@@ -6,6 +6,7 @@
  */
 
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import { Alert } from '../alert';
 import {
   RuleActionParams,
   AlertInstanceState,
@@ -31,6 +32,7 @@ interface TransformActionParamsOptions {
   state: AlertInstanceState;
   kibanaBaseUrl?: string;
   context: AlertInstanceContext;
+  alerts: Alert[];
 }
 
 export function transformActionParams({
@@ -51,6 +53,7 @@ export function transformActionParams({
   state,
   kibanaBaseUrl,
   alertParams,
+  alerts,
 }: TransformActionParamsOptions): RuleActionParams {
   // when the list of variables we pass in here changes,
   // the UI will need to be updated as well; see:
@@ -82,6 +85,7 @@ export function transformActionParams({
       actionGroupName: alertActionGroupName,
       actionSubgroup: alertActionSubgroup,
     },
+    alerts,
   };
   return actionsPlugin.renderActionParameterTemplates(
     actionTypeId,

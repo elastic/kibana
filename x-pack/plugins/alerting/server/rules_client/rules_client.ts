@@ -2708,6 +2708,7 @@ export class RulesClient {
       }
       return {
         ...omit(action, 'actionRef'),
+        ref: action.actionRef,
         id: reference.id,
       };
     }) as Rule['actions'];

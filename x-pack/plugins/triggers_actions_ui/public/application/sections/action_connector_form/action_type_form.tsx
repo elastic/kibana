@@ -110,10 +110,18 @@ export const ActionTypeForm = ({
   const [actionParamsErrors, setActionParamsErrors] = useState<{ errors: IErrorObject }>({
     errors: {},
   });
-  const [isSummary, setIsSummary] = useState(false);
-  const [notifyWhenValue, setNotifyWhenValue] = useState<string>('once');
-  const [actionThrottle, setActionThrottle] = useState<number>(1);
-  const [actionThrottleUnit, setActionThrottleUnit] = useState<string>('h');
+  const [isSummary, setIsSummary] = useState<boolean>(
+    Boolean(actionItem.params.isSummary) || false
+  );
+  const [notifyWhenValue, setNotifyWhenValue] = useState<string>(
+    actionItem.params.notifyWhen ? String(actionItem.params.notifyWhen) : 'once'
+  );
+  const [actionThrottle, setActionThrottle] = useState<number>(
+    actionItem.params.actionThrottle ? parseInt(String(actionItem.params.actionThrottle), 10) : 1
+  );
+  const [actionThrottleUnit, setActionThrottleUnit] = useState<string>(
+    actionItem.params.actionThrottleUnit ? String(actionItem.params.actionThrottleUnit) : 'h'
+  );
 
   useEffect(() => {
     setAvailableActionVariables(
@@ -158,14 +166,14 @@ export const ActionTypeForm = ({
   }, [isSummary, notifyWhenValue]);
 
   useEffect(() => {
-    setActionParamsProperty('actionThrottle', actionThrottle, index);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionThrottle]);
-
-  useEffect(() => {
     setActionParamsProperty('actionThrottleUnit', actionThrottleUnit, index);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionThrottleUnit]);
+
+  useEffect(() => {
+    setActionParamsProperty('actionThrottle', actionThrottle, index);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actionThrottle]);
 
   const canSave = hasSaveActionsCapability(capabilities);
 
@@ -207,23 +215,35 @@ export const ActionTypeForm = ({
   const notifyWhenOptions = [
     {
       value: 'once',
-      inputDisplay: `Once rule is in "${selectedActionGroup?.name}" status`,
+      inputDisplay: isSummary
+        ? 'Only on status change'
+        : `Once rule is in "${selectedActionGroup?.name}" status`,
       dropdownDisplay: (
         <>
-          <strong>Once rule is in &quot;{selectedActionGroup?.name}&quot; status</strong>
+          <strong>
+            {isSummary
+              ? 'Only on status change'
+              : `Once rule is in "${selectedActionGroup?.name}" status`}
+          </strong>
           <EuiText size="s" color="subdued">
-            <p>Action runs when the rule status becomes Alert.</p>
+            <p>Action runs when the rule status changes.</p>
           </EuiText>
         </>
       ),
     },
     {
       value: 'everyTime',
-      inputDisplay: `Every time rule is in "${selectedActionGroup?.name}" status`,
+      inputDisplay: isSummary
+        ? `Every time rule is active`
+        : `Every time rule is in "${selectedActionGroup?.name}" status`,
       disabled: isSummary,
       dropdownDisplay: (
         <>
-          <strong>Every time rule is in &quot;Alert&quot; status</strong>
+          <strong>
+            {isSummary
+              ? `Every time rule is active`
+              : `Every time rule is in "${selectedActionGroup?.name}" status`}
+          </strong>
           <EuiText size="s" color="subdued">
             <p>
               Actions repeat at the rule interval when the rule is active.

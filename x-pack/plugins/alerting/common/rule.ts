@@ -70,6 +70,7 @@ export interface RuleAction {
   id: string;
   actionTypeId: string;
   params: RuleActionParams;
+  ref?: string;
 }
 
 export interface RuleAggregations {
