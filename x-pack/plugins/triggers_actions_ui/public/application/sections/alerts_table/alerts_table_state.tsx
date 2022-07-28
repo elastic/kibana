@@ -149,7 +149,14 @@ const AlertsTableState = ({
 
   const [
     isLoading,
-    { alerts, isInitializing, getInspectQuery, refetch: refresh, totalAlerts: alertsCount },
+    {
+      alerts,
+      isInitializing,
+      getInspectQuery,
+      refetch: refresh,
+      totalAlerts: alertsCount,
+      updatedAt,
+    },
   ] = useFetchAlerts({
     fields: columns.map((col) => ({ field: col.id, include_unmapped: true })),
     featureIds,
@@ -215,6 +222,7 @@ const AlertsTableState = ({
       onSortChange,
       refresh,
       sort,
+      updatedAt,
     };
   }, [
     alerts,
@@ -228,6 +236,7 @@ const AlertsTableState = ({
     pagination.pageIndex,
     refresh,
     sort,
+    updatedAt,
   ]);
 
   const tableProps = useMemo(
@@ -246,6 +255,7 @@ const AlertsTableState = ({
       useFetchAlertsData,
       visibleColumns: storageAlertsTable.current.visibleColumns ?? [],
       'data-test-subj': 'internalAlertsState',
+      updatedAt,
     }),
     [
       alertsTableConfiguration,
@@ -254,6 +264,7 @@ const AlertsTableState = ({
       pagination.pageSize,
       showExpandToDetails,
       useFetchAlertsData,
+      updatedAt,
     ]
   );
 

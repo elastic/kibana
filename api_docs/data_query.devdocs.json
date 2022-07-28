@@ -2036,16 +2036,26 @@
             "signature": [
               "{ getDefaultQuery: () => { query: string; language: any; }; formatQuery: (query: string | ",
               "Query",
+              " | ",
+              "AggregateQuery",
               " | undefined) => ",
               "Query",
+              " | ",
+              "AggregateQuery",
               "; getUpdates$: () => ",
               "Observable",
               "<",
               "Query",
+              " | ",
+              "AggregateQuery",
               ">; getQuery: () => ",
               "Query",
+              " | ",
+              "AggregateQuery",
               "; setQuery: (query: ",
               "Query",
+              " | ",
+              "AggregateQuery",
               ") => void; clearQuery: () => void; }"
             ],
             "path": "src/plugins/data/public/query/query_service.ts",
@@ -2190,16 +2200,26 @@
             "signature": [
               "{ getDefaultQuery: () => { query: string; language: any; }; formatQuery: (query: string | ",
               "Query",
+              " | ",
+              "AggregateQuery",
               " | undefined) => ",
               "Query",
+              " | ",
+              "AggregateQuery",
               "; getUpdates$: () => ",
               "Observable",
               "<",
               "Query",
+              " | ",
+              "AggregateQuery",
               ">; getQuery: () => ",
               "Query",
+              " | ",
+              "AggregateQuery",
               "; setQuery: (query: ",
               "Query",
+              " | ",
+              "AggregateQuery",
               ") => void; clearQuery: () => void; }"
             ],
             "path": "src/plugins/data/public/query/query_service.ts",
@@ -3012,16 +3032,26 @@
         "signature": [
           "{ getDefaultQuery: () => { query: string; language: any; }; formatQuery: (query: string | ",
           "Query",
+          " | ",
+          "AggregateQuery",
           " | undefined) => ",
           "Query",
+          " | ",
+          "AggregateQuery",
           "; getUpdates$: () => ",
           "Observable",
           "<",
           "Query",
+          " | ",
+          "AggregateQuery",
           ">; getQuery: () => ",
           "Query",
+          " | ",
+          "AggregateQuery",
           "; setQuery: (query: ",
           "Query",
+          " | ",
+          "AggregateQuery",
           ") => void; clearQuery: () => void; }"
         ],
         "path": "src/plugins/data/public/query/query_string/query_string_manager.ts",
@@ -3616,22 +3646,15 @@
           "\nConverts QueryState to expression AST"
         ],
         "signature": [
-          "({ filters, query, time }: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.QueryState",
-            "text": "QueryState"
-          },
-          ") => ",
+          "({\n  filters,\n  query,\n  inputQuery,\n  time,\n  dataViewsService,\n}: Args) => Promise<",
           {
             "pluginId": "expressions",
             "scope": "common",
             "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionAstExpressionBuilder",
-            "text": "ExpressionAstExpressionBuilder"
-          }
+            "section": "def-common.ExpressionAstExpression",
+            "text": "ExpressionAstExpression"
+          },
+          ">"
         ],
         "path": "src/plugins/data/common/query/to_expression_ast.ts",
         "deprecated": false,
@@ -3641,16 +3664,10 @@
             "id": "def-common.queryStateToExpressionAst.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ filters, query, time }",
+            "label": "{\n  filters,\n  query,\n  inputQuery,\n  time,\n  dataViewsService,\n}",
             "description": [],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.QueryState",
-                "text": "QueryState"
-              }
+              "Args"
             ],
             "path": "src/plugins/data/common/query/to_expression_ast.ts",
             "deprecated": false,
@@ -3856,6 +3873,8 @@
           "Filter",
           "[] | undefined; query?: ",
           "Query",
+          " | ",
+          "AggregateQuery",
           " | undefined; }"
         ],
         "path": "src/plugins/data/common/query/query_state.ts",

@@ -9,12 +9,14 @@
 import * as Option from 'fp-ts/lib/Option';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { DocLinks } from '@kbn/doc-links';
+import type {
+  SavedObjectsRawDoc,
+  SavedObjectTypeExcludeFromUpgradeFilterHook,
+} from '@kbn/core-saved-objects-server';
 import type { ControlState } from './state_action_machine';
 import type { AliasAction } from './actions';
 import type { IndexMapping } from '../mappings';
-import type { SavedObjectsRawDoc } from '..';
 import type { TransformErrorObjects } from './core';
-import type { SavedObjectTypeExcludeFromUpgradeFilterHook } from '../types';
 import type { MigrationLog, Progress } from './types';
 
 export interface BaseState extends ControlState {
@@ -182,7 +184,7 @@ export interface FatalState extends BaseState {
 }
 
 export interface WaitForYellowSourceState extends BaseState {
-  /** Wait for the source index to be yellow before requesting it. */
+  /** Wait for the source index to be yellow before reading from it. */
   readonly controlState: 'WAIT_FOR_YELLOW_SOURCE';
   readonly sourceIndex: Option.Some<string>;
   readonly sourceIndexMappings: IndexMapping;

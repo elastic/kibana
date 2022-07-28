@@ -18,6 +18,7 @@ export interface OverallLatencyDistributionOptions {
 }
 
 export interface OverallLatencyDistributionResponse {
+  totalDocCount?: number;
   percentileThresholdValue?: number | null;
   overallHistogram?: Array<{
     key: number;
