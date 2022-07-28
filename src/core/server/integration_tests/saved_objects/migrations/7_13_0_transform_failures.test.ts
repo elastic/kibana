@@ -16,7 +16,9 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '../../../root';
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import { getMigrationDocLink } from './test_utils';
 
+const migrationDocLink = getMigrationDocLink().resolveMigrationFailures;
 const logFilePath = Path.join(__dirname, '7_13_corrupt_transform_failures.log');
 
 const asyncUnlink = Util.promisify(Fs.unlink);
@@ -26,8 +28,7 @@ async function removeLogFile() {
   await asyncUnlink(logFilePath).catch(() => void 0);
 }
 
-// FAILING ON 8.4: https://github.com/elastic/kibana/issues/137329
-describe.skip('migration v2', () => {
+describe('migration v2', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
 
@@ -87,7 +88,7 @@ describe.skip('migration v2', () => {
 
           To allow migrations to proceed, please delete or fix these documents.
           Note that you can configure Kibana to automatically discard corrupt documents and transform errors for this migration.
-          Please refer to https://www.elastic.co/guide/en/kibana/master/resolve-migrations-failures.html for more information."
+          Please refer to ${migrationDocLink} for more information."
         `);
         return;
       }
