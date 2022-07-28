@@ -41,6 +41,7 @@ const adColumns: Array<EuiBasicTableColumn<AnomalyDetectionManagementItems>> = [
     truncateText: true,
     'data-test-subj': 'mlSpaceManagementTableColumnId',
     scope: 'row',
+    width: '200px',
     render: (id: string) => <AnomalyDetectionJobIdLink id={id} />,
   },
   {
@@ -66,6 +67,7 @@ const adColumns: Array<EuiBasicTableColumn<AnomalyDetectionManagementItems>> = [
     sortable: true,
     truncateText: true,
     'data-test-subj': 'mlSpaceManagementTableColumnJobState',
+    width: '100px',
   },
   {
     field: 'datafeedState',
@@ -75,6 +77,7 @@ const adColumns: Array<EuiBasicTableColumn<AnomalyDetectionManagementItems>> = [
     sortable: true,
     truncateText: true,
     'data-test-subj': 'mlSpaceManagementTableColumnDatafeedState',
+    width: '120px',
   },
 ];
 

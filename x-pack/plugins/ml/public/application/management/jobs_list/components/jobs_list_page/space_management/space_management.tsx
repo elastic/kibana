@@ -102,6 +102,8 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
               'data-test-subj': 'mlSpaceManagementTableColumnSpaces',
               sortable: true,
               truncateText: true,
+              align: 'right',
+              width: '10%',
               render: (item: ManagementItems) => {
                 return (
                   <MLSavedObjectsSpacesList
