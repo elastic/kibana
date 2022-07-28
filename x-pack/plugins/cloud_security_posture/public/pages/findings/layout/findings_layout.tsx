@@ -13,7 +13,6 @@ import {
   EuiTitle,
   EuiToolTip,
   PropsOf,
-  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import moment from 'moment';
@@ -26,19 +25,6 @@ import {
   FINDINGS_TABLE_CELL_ADD_FILTER,
   FINDINGS_TABLE_CELL_ADD_NEGATED_FILTER,
 } from '../test_subjects';
-
-export const PageWrapper: React.FC = ({ children }) => {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <div
-      css={css`
-        padding: ${euiTheme.size.l};
-      `}
-    >
-      {children}
-    </div>
-  );
-};
 
 export const PageTitle: React.FC = ({ children }) => (
   <EuiTitle size="l">

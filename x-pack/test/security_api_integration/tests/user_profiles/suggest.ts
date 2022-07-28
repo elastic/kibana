@@ -74,24 +74,23 @@ export default function ({ getService }: FtrProviderContext) {
         )
       );
 
-      // 3. Activate user profiles
-      await Promise.all(
-        ['one', 'two', 'three'].map(async (userPrefix) => {
-          const response = await supertestWithoutAuth
-            .post('/internal/security/login')
-            .set('kbn-xsrf', 'xxx')
-            .send({
-              providerType: 'basic',
-              providerName: 'basic',
-              currentURL: '/',
-              params: { username: `user_${userPrefix}`, password: 'changeme' },
-            })
-            .expect(200);
-          usersSessions.set(`user_${userPrefix}`, {
-            cookie: parseCookie(response.headers['set-cookie'][0])!,
-          });
-        })
-      );
+      // 3. Activate user profiles (activation time affects the order in which Elasticsearch returns results, that's why
+      // we should activate profiles in a predefined order to keep tests as stable as possible).
+      for (const userPrefix of ['one', 'two', 'three']) {
+        const response = await supertestWithoutAuth
+          .post('/internal/security/login')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            providerType: 'basic',
+            providerName: 'basic',
+            currentURL: '/',
+            params: { username: `user_${userPrefix}`, password: 'changeme' },
+          })
+          .expect(200);
+        usersSessions.set(`user_${userPrefix}`, {
+          cookie: parseCookie(response.headers['set-cookie'][0])!,
+        });
+      }
     });
 
     after(async () => {

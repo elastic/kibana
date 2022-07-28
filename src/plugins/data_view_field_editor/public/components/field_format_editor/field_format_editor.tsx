@@ -10,14 +10,17 @@ import { EuiCode, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import type { FieldFormatInstanceType, FieldFormatParams } from '@kbn/field-formats-plugin/common';
+import type {
+  FieldFormatInstanceType,
+  FieldFormatParams,
+  SerializedFieldFormat,
+} from '@kbn/field-formats-plugin/common';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { PureComponent } from 'react';
 import { FormatEditorServiceStart } from '../../service';
-import { FieldFormatConfig } from '../../types';
 import { FormatEditor } from './format_editor';
 
 export interface FormatSelectEditorProps {
@@ -26,9 +29,9 @@ export interface FormatSelectEditorProps {
   fieldFormatEditors: FormatEditorServiceStart['fieldFormatEditors'];
   fieldFormats: FieldFormatsStart;
   uiSettings: CoreStart['uiSettings'];
-  onChange: (change?: FieldFormatConfig) => void;
+  onChange: (change?: SerializedFieldFormat) => void;
   onError: (error?: string) => void;
-  value?: FieldFormatConfig;
+  value?: SerializedFieldFormat;
 }
 
 interface FieldTypeFormat {

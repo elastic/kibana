@@ -11,17 +11,16 @@ import type { Query } from '@kbn/data-plugin/common';
 import { Filter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
 import {
-  CustomIcon,
   DrawState,
   EditState,
   Goto,
   LayerDescriptor,
   MapCenter,
   MapExtent,
+  MapSettings,
   Timeslice,
   TooltipState,
 } from '../../../common/descriptor_types';
-import { INITIAL_LOCATION } from '../../../common/constants';
 
 export interface MapExtentState {
   zoom: number;
@@ -46,35 +45,6 @@ export type MapContext = Partial<MapViewContext> & {
   editState?: EditState;
   searchSessionId?: string;
   searchSessionMapBuffer?: MapExtent;
-};
-
-export type MapSettings = {
-  autoFitToDataBounds: boolean;
-  backgroundColor: string;
-  customIcons: CustomIcon[];
-  disableInteractive: boolean;
-  disableTooltipControl: boolean;
-  hideToolbarOverlay: boolean;
-  hideLayerControl: boolean;
-  hideViewControl: boolean;
-  initialLocation: INITIAL_LOCATION;
-  fixedLocation: {
-    lat: number;
-    lon: number;
-    zoom: number;
-  };
-  browserLocation: {
-    zoom: number;
-  };
-  keydownScrollZoom: boolean;
-  maxZoom: number;
-  minZoom: number;
-  showScaleControl: boolean;
-  showSpatialFilters: boolean;
-  showTimesliderToggleButton: boolean;
-  spatialFiltersAlpa: number;
-  spatialFiltersFillColor: string;
-  spatialFiltersLineColor: string;
 };
 
 export type MapState = {

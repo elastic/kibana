@@ -34,4 +34,17 @@ describe('Custom links', () => {
     cy.get('[data-test-subj="editCustomLink"]').click();
     cy.contains('Delete').click();
   });
+
+  it('clears filter values when field is selected', () => {
+    cy.visit(basePath);
+    cy.contains('Create custom link').click();
+    cy.get('[data-test-subj="filter-0"]').select('service.name');
+    cy.get(
+      '[data-test-subj="service.name.value"] [data-test-subj="comboBoxSearchInput"]'
+    ).type('foo');
+    cy.get('[data-test-subj="filter-0"]').select('service.environment');
+    cy.get(
+      '[data-test-subj="service.environment.value"] [data-test-subj="comboBoxInput"]'
+    ).should('not.contain', 'foo');
+  });
 });

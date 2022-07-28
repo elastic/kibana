@@ -38,5 +38,21 @@ describe('Tags', () => {
         'tag1, tag2, tag3, tag4, tag5'
       );
     });
+
+    it('renders a list of tags with tooltip on hover', async () => {
+      const tags = ['tag1', 'tag2', 'tag3'];
+      render(<Tags tags={tags} />);
+
+      const tagsNode = screen.getByTestId('agentTags');
+
+      expect(tagsNode).toHaveTextContent('tag1, tag2, tag3');
+
+      fireEvent.mouseEnter(tagsNode);
+      await waitFor(() => {
+        screen.getByTestId('agentTagsTooltip');
+      });
+
+      expect(screen.getByTestId('agentTagsTooltip')).toHaveTextContent('tag1, tag2, tag3');
+    });
   });
 });

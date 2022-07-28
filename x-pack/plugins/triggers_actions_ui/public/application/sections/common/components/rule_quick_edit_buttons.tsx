@@ -166,7 +166,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.muteAllTitle"
-              defaultMessage="Mute"
+              defaultMessage="Snooze indefinitely"
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -181,7 +181,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.unmuteAllTitle"
-              defaultMessage="Unmute"
+              defaultMessage="Cancel snooze"
             />
           </EuiButtonEmpty>
         </EuiFlexItem>

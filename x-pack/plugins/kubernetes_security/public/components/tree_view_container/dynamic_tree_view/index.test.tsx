@@ -9,7 +9,8 @@ import React from 'react';
 import { waitFor } from '@testing-library/react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../test';
 import { DynamicTreeView } from '.';
-import { clusterResponseMock, nodeResponseMock } from './mocks';
+import { clusterResponseMock, nodeResponseMock } from '../mocks';
+import { TreeViewContextProvider } from '../contexts';
 
 describe('DynamicTreeView component', () => {
   let render: (props?: any) => ReturnType<AppContextTestRender['render']>;
@@ -19,37 +20,48 @@ describe('DynamicTreeView component', () => {
 
   const waitForApiCall = () => waitFor(() => expect(mockedApi).toHaveBeenCalled());
 
+  const defaultProps = {
+    globalFilter: {
+      startDate: Date.now().toString(),
+      endDate: (Date.now() + 1).toString(),
+    },
+    indexPattern: {
+      title: '*-logs',
+    },
+  } as any;
+
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
     mockedApi = mockedContext.coreStart.http.get;
     mockedApi.mockResolvedValue(clusterResponseMock);
     render = (props) =>
       (renderResult = mockedContext.render(
-        <DynamicTreeView
-          query={{
-            bool: {
-              filter: [],
-              must: [],
-              must_not: [],
-              should: [],
-            },
-          }}
-          indexPattern={'*-logs'}
-          tree={[
-            {
-              key: 'cluster',
-              name: 'cluster',
-              namePlural: 'clusters',
-              type: 'cluster',
-              iconProps: {
-                type: 'cluster',
+        <TreeViewContextProvider {...defaultProps}>
+          <DynamicTreeView
+            query={{
+              bool: {
+                filter: [],
+                must: [],
+                must_not: [],
+                should: [],
               },
-            },
-          ]}
-          aria-label="Logical Tree View"
-          onSelect={(selectionDepth, key, type) => {}}
-          {...props}
-        />
+            }}
+            tree={[
+              {
+                key: 'cluster',
+                name: 'cluster',
+                namePlural: 'clusters',
+                type: 'cluster',
+                iconProps: {
+                  type: 'cluster',
+                },
+              },
+            ]}
+            aria-label="Logical Tree View"
+            onSelect={(selectionDepth, key, type) => {}}
+            {...props}
+          />
+        </TreeViewContextProvider>
       ));
   });
 
