@@ -24,6 +24,9 @@ export const DATE_PICKER_END_DATE_POPOVER_BUTTON_TIMELINE =
 export const DATE_PICKER_START_DATE_POPOVER_BUTTON =
   '[data-test-subj="filters-global-container"] [data-test-subj="superDatePickerShowDatesButton"]';
 
+export const DATE_PICKER_SHOW_DATE_POPOVER_BUTTON =
+  '[data-test-subj="filters-global-container"] [data-test-subj="superDatePickerShowDatesButton"]';
+
 export const DATE_PICKER_RELATIVE_DATE_INPUT_UNIT_SELECTOR =
   '[data-test-subj="superDatePickerRelativeDateInputUnitSelector"]';
 
