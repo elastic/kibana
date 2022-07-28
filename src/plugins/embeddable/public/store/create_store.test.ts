@@ -6,9 +6,17 @@
  * Side Public License, v 1.
  */
 
+// eslint-disable-next-line max-classes-per-file
 import { createAction, createReducer, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { Store } from 'redux';
-import { Embeddable, EmbeddableInput, EmbeddableOutput } from '../lib';
+import {
+  defaultEmbeddableFactoryProvider,
+  Container,
+  ContainerInput,
+  Embeddable,
+  EmbeddableInput,
+  EmbeddableOutput,
+} from '../lib';
 import { createStore, State } from './create_store';
 import { input } from './input_slice';
 import { output } from './output_slice';
@@ -21,10 +29,24 @@ interface TestEmbeddableOutput extends EmbeddableOutput {
   custom?: string;
 }
 
+interface TestContainerInput extends ContainerInput {
+  custom?: string;
+}
+
 class TestEmbeddable extends Embeddable<TestEmbeddableInput, TestEmbeddableOutput> {
   type = 'test';
   reload = jest.fn();
   render = jest.fn();
+}
+
+class TestContainer extends Container<Partial<TestEmbeddableInput>, TestContainerInput> {
+  type = 'test';
+
+  getInheritedInput() {
+    return {
+      custom: this.input.custom,
+    };
+  }
 }
 
 describe('createStore', () => {
@@ -151,5 +173,73 @@ describe('createStore', () => {
     expect(embeddable.updateOutput).toHaveBeenCalledWith(
       expect.objectContaining({ custom: 'Something else' })
     );
+  });
+
+  describe('of a nested embeddable', () => {
+    const factory = defaultEmbeddableFactoryProvider<
+      TestEmbeddableInput,
+      TestEmbeddableOutput,
+      TestEmbeddable
+    >({
+      type: 'test',
+      getDisplayName: () => 'Test',
+      isEditable: async () => true,
+      create: async (data, parent) => new TestEmbeddable(data, {}, parent),
+    });
+    const getFactory = jest.fn().mockReturnValue(factory);
+
+    let container: TestContainer;
+
+    beforeEach(async () => {
+      container = new TestContainer(
+        { custom: 'something', id: 'id', panels: {} },
+        { embeddableLoaded: {} },
+        getFactory
+      );
+      embeddable = (await container.addNewEmbeddable('test', { id: '12345' })) as TestEmbeddable;
+      store = createStore(embeddable);
+    });
+
+    it('should populate inherited input', () => {
+      expect(store.getState()).toHaveProperty('input.custom', 'something');
+    });
+
+    it('should override inherited input on dispatch', async () => {
+      store.dispatch(
+        input.actions.update({ custom: 'something else' } as Partial<TestEmbeddableInput>)
+      );
+      await new Promise((resolve) => setTimeout(resolve));
+
+      expect(store.getState()).toHaveProperty('input.custom', 'something else');
+      expect(container.getInput()).toHaveProperty(
+        'input.custom',
+        expect.not.stringMatching('something else')
+      );
+    });
+
+    it('should restore value from the inherited input', async () => {
+      store.dispatch(
+        input.actions.update({ custom: 'something else' } as Partial<TestEmbeddableInput>)
+      );
+      await new Promise((resolve) => setTimeout(resolve));
+      store.dispatch(input.actions.update({ custom: undefined } as Partial<TestEmbeddableInput>));
+      await new Promise((resolve) => setTimeout(resolve));
+
+      expect(store.getState()).toHaveProperty('input.custom', 'something');
+    });
+
+    it('should not override inherited input on dispatch', async () => {
+      store.dispatch(input.actions.setTitle('Something'));
+      await new Promise((resolve) => setTimeout(resolve));
+      container.updateInput({ custom: 'something else' });
+
+      expect(store.getState()).toHaveProperty(
+        'input',
+        expect.objectContaining({
+          title: 'Something',
+          custom: 'something else',
+        })
+      );
+    });
   });
 });

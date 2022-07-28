@@ -49,9 +49,6 @@ export const input = createSlice({
     setViewMode(state, action: PayloadAction<EmbeddableInput['viewMode']>) {
       state.viewMode = action.payload;
     },
-    set(state, action: PayloadAction<EmbeddableInput>) {
-      return action.payload;
-    },
     update(state, action: PayloadAction<Partial<EmbeddableInput>>) {
       return { ...state, ...action.payload };
     },

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { chain, isEmpty, keys } from 'lodash';
 import { combineReducers, Reducer, Store, ReducersMapObject } from 'redux';
 import { configureStore, ConfigureStoreOptions } from '@reduxjs/toolkit';
 import {
@@ -13,6 +14,7 @@ import {
   distinctUntilChanged,
   filter,
   last,
+  map,
   pluck,
   takeUntil,
   Observable,
@@ -52,6 +54,17 @@ function createReducer<S extends State>(
   } as ReducersMapObject<S>;
 }
 
+function diff<T extends Record<keyof any, any>>(previous: T, current: T) {
+  return chain(current)
+    .keys()
+    .concat(keys(previous))
+    .uniq()
+    .filter((key) => previous[key] !== current[key])
+    .map((key) => [key, current[key]])
+    .fromPairs()
+    .value() as Partial<T>;
+}
+
 /**
  * Creates a Redux store for the given embeddable.
  * @param embeddable The embeddable instance.
@@ -63,54 +76,48 @@ export function createStore<E extends IEmbeddable = IEmbeddable, S extends State
   { reducer, ...options }: CreateStoreOptions<S> = {}
 ): Store<S> {
   const store = configureStore({ ...options, reducer: createReducer(reducer) });
+
   const state$ = new Observable<S>((subscriber) => {
     subscriber.add(store.subscribe(() => subscriber.next(store.getState())));
   });
   const input$ = embeddable.getInput$();
   const output$ = embeddable.getOutput$();
 
-  let isUpstreamUpdate = false;
-  let isDownstreamUpdate = false;
-
   state$
     .pipe(
       takeUntil(input$.pipe(last())),
       pluck('input'),
       distinctUntilChanged(),
-      filter(() => !isUpstreamUpdate),
-      debounceTime(0)
+      debounceTime(0),
+      map((value) => diff(embeddable.getInput(), value)),
+      filter((patch) => !isEmpty(patch))
     )
-    .subscribe((value) => {
-      isDownstreamUpdate = true;
-      embeddable.updateInput(value);
-      isDownstreamUpdate = false;
-    });
+    .subscribe((patch) => embeddable.updateInput(patch));
 
   state$
     .pipe(
       takeUntil(output$.pipe(last())),
       pluck('output'),
       distinctUntilChanged(),
-      filter(() => !isUpstreamUpdate),
-      debounceTime(0)
+      debounceTime(0),
+      map((value) => diff(embeddable.getOutput(), value)),
+      filter((patch) => !isEmpty(patch))
     )
-    .subscribe((value) => {
-      isDownstreamUpdate = true;
-      embeddable.updateOutput(value);
-      isDownstreamUpdate = false;
-    });
+    .subscribe((patch) => embeddable.updateOutput(patch));
 
-  input$.pipe(filter(() => !isDownstreamUpdate)).subscribe((value) => {
-    isUpstreamUpdate = true;
-    store.dispatch(input.actions.set(value));
-    isUpstreamUpdate = false;
-  });
+  input$
+    .pipe(
+      map((value) => diff(store.getState().input, value)),
+      filter((patch) => !isEmpty(patch))
+    )
+    .subscribe((patch) => store.dispatch(input.actions.update(patch)));
 
-  output$.pipe(filter(() => !isDownstreamUpdate)).subscribe((value) => {
-    isUpstreamUpdate = true;
-    store.dispatch(output.actions.set(value));
-    isUpstreamUpdate = false;
-  });
+  output$
+    .pipe(
+      map((value) => diff(store.getState().output, value)),
+      filter((patch) => !isEmpty(patch))
+    )
+    .subscribe((patch) => store.dispatch(output.actions.update(patch)));
 
   return store;
 }

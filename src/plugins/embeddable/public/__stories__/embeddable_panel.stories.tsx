@@ -96,10 +96,12 @@ const HelloWorldEmbeddablePanel = forwardRef<
     useEffect(() => theme$.next(theme), [theme$, theme]);
     useEffect(() => {
       embeddable.store.dispatch(actions.input.setTitle(title));
+    }, [embeddable.store, title]);
+    useEffect(() => {
       embeddable.store.dispatch(
         actions.input.setViewMode(viewMode ? ViewMode.VIEW : ViewMode.EDIT)
       );
-    }, [embeddable.store, title, viewMode]);
+    }, [embeddable.store, viewMode]);
     useEffect(
       () => void embeddable.store.dispatch(actions.output.setLoading(loading)),
       [embeddable, loading]

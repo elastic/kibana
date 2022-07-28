@@ -43,9 +43,6 @@ export const output = createSlice({
     setSavedObjectId(state, action: PayloadAction<EmbeddableOutput['savedObjectId']>) {
       state.savedObjectId = action.payload;
     },
-    set(state, action: PayloadAction<EmbeddableOutput>) {
-      return action.payload;
-    },
     update(state, action: PayloadAction<Partial<EmbeddableOutput>>) {
       return { ...state, ...action.payload };
     },
