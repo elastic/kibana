@@ -31,7 +31,7 @@ export const EuiPanelStyled = styled(EuiPanel)<{ $bottomOffset?: string }>`
       `}
 `;
 
-export const EuiBetaBadgeStyled = styled(EuiBetaBadge)<{ label: string; size?: 's' | 'm' }>`
+export const EuiBetaBadgeStyled: typeof EuiBetaBadge = styled(EuiBetaBadge)`
   margin-left: ${({ theme }) => theme.eui.euiSizeS};
   color: ${(props) => props.theme.eui.euiTextColor};
 `;
