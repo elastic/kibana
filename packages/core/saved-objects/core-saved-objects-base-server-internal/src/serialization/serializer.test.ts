@@ -7,28 +7,47 @@
  */
 
 import _ from 'lodash';
-import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsRawDoc, ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { SavedObjectsSerializer } from './serializer';
-import { typeRegistryMock } from '../saved_objects_type_registry.mock';
 import { encodeVersion } from '../version';
-import { LEGACY_URL_ALIAS_TYPE } from '../object_types';
+import { LEGACY_URL_ALIAS_TYPE } from '../legacy_alias';
 
-let typeRegistry = typeRegistryMock.create();
-typeRegistry.isNamespaceAgnostic.mockReturnValue(true);
-typeRegistry.isSingleNamespace.mockReturnValue(false);
-typeRegistry.isMultiNamespace.mockReturnValue(false);
+const createMockedTypeRegistry = ({
+  isNamespaceAgnostic,
+  isSingleNamespace,
+  isMultiNamespace,
+}: {
+  isNamespaceAgnostic: boolean;
+  isSingleNamespace: boolean;
+  isMultiNamespace: boolean;
+}): ISavedObjectTypeRegistry => {
+  const typeRegistry: Partial<ISavedObjectTypeRegistry> = {
+    isNamespaceAgnostic: jest.fn().mockReturnValue(isNamespaceAgnostic),
+    isSingleNamespace: jest.fn().mockReturnValue(isSingleNamespace),
+    isMultiNamespace: jest.fn().mockReturnValue(isMultiNamespace),
+  };
+  return typeRegistry as ISavedObjectTypeRegistry;
+};
+
+let typeRegistry = createMockedTypeRegistry({
+  isNamespaceAgnostic: true,
+  isSingleNamespace: false,
+  isMultiNamespace: false,
+});
 const namespaceAgnosticSerializer = new SavedObjectsSerializer(typeRegistry);
 
-typeRegistry = typeRegistryMock.create();
-typeRegistry.isNamespaceAgnostic.mockReturnValue(false);
-typeRegistry.isSingleNamespace.mockReturnValue(true);
-typeRegistry.isMultiNamespace.mockReturnValue(false);
+typeRegistry = typeRegistry = createMockedTypeRegistry({
+  isNamespaceAgnostic: false,
+  isSingleNamespace: true,
+  isMultiNamespace: false,
+});
 const singleNamespaceSerializer = new SavedObjectsSerializer(typeRegistry);
 
-typeRegistry = typeRegistryMock.create();
-typeRegistry.isNamespaceAgnostic.mockReturnValue(false);
-typeRegistry.isSingleNamespace.mockReturnValue(false);
-typeRegistry.isMultiNamespace.mockReturnValue(true);
+typeRegistry = typeRegistry = createMockedTypeRegistry({
+  isNamespaceAgnostic: false,
+  isSingleNamespace: false,
+  isMultiNamespace: true,
+});
 const multiNamespaceSerializer = new SavedObjectsSerializer(typeRegistry);
 
 const sampleTemplate = {

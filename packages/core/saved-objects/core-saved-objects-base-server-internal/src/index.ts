@@ -6,6 +6,23 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { LEGACY_URL_ALIAS_TYPE, type LegacyUrlAlias } from './legacy_alias';
+export {
+  getProperty,
+  getRootProperties,
+  getRootPropertiesObjects,
+  getTypes,
+  type IndexMapping,
+  type IndexMappingMeta,
+  type SavedObjectsTypeMappingDefinitions,
+} from './mappings';
+export { SavedObjectsSerializer } from './serialization';
+export { SavedObjectsTypeValidator } from './validation';
+export { decodeRequestVersion, decodeVersion, encodeVersion, encodeHitVersion } from './version';
+export {
+  savedObjectsConfig,
+  savedObjectsMigrationConfig,
+  SavedObjectConfig,
+  type SavedObjectsConfigType,
+  type SavedObjectsMigrationConfigType,
+} from './saved_objects_config';

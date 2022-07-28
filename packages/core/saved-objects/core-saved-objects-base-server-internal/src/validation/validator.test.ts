@@ -7,12 +7,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import type {
   SavedObjectSanitizedDoc,
   SavedObjectsValidationMap,
 } from '@kbn/core-saved-objects-server';
-import { SavedObjectsTypeValidator } from '.';
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import { SavedObjectsTypeValidator } from './validator';
 
 describe('Saved Objects type validator', () => {
   let validator: SavedObjectsTypeValidator;
