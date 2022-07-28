@@ -104,6 +104,7 @@ export interface DocLinks {
     readonly webCrawlerReference: string;
   };
   readonly enterpriseSearch: {
+    readonly apiKeys: string;
     readonly bulkApi: string;
     readonly configuration: string;
     readonly crawlerGettingStarted: string;

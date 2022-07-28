@@ -8,6 +8,7 @@
 import { DocLinksStart } from '@kbn/core/public';
 
 class DocLinks {
+  public apiKeys: string;
   public appSearchAdaptiveRelevance: string;
   public appSearchApiClients: string;
   public appSearchApiKeys: string;
@@ -111,6 +112,7 @@ class DocLinks {
   public workplaceSearchZoom: string;
 
   constructor() {
+    this.apiKeys = '';
     this.appSearchAdaptiveRelevance = '';
     this.appSearchApis = '';
     this.appSearchApiClients = '';
@@ -215,6 +217,7 @@ class DocLinks {
   }
 
   public setDocLinks(docLinks: DocLinksStart): void {
+    this.apiKeys = docLinks.links.enterpriseSearch.apiKeys;
     this.appSearchAdaptiveRelevance = docLinks.links.appSearch.adaptiveRelevance;
     this.appSearchApis = docLinks.links.appSearch.apiRef;
     this.appSearchApiClients = docLinks.links.appSearch.apiClients;

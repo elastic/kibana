@@ -118,6 +118,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       webCrawlerReference: `${APP_SEARCH_DOCS}web-crawler-reference.html`,
     },
     enterpriseSearch: {
+      apiKeys: `${KIBANA_DOCS}api-keys.html`,
       bulkApi: `${ELASTICSEARCH_DOCS}docs-bulk.html`,
       configuration: `${ENTERPRISE_SEARCH_DOCS}configuration.html`,
       crawlerGettingStarted: `${ENTERPRISE_SEARCH_DOCS}crawler-getting-started.html`,
