@@ -112,7 +112,7 @@ describe('output preconfiguration', () => {
     expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
   });
 
-  it('should create preconfigured logstash output that does not exists', async () => {
+  it('should create preconfigured logstash output that does not exist', async () => {
     const soClient = savedObjectsClientMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
