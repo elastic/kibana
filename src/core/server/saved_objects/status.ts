@@ -8,8 +8,8 @@
 
 import { Observable, combineLatest } from 'rxjs';
 import { startWith, map } from 'rxjs/operators';
+import type { SavedObjectStatusMeta } from '@kbn/core-saved-objects-server';
 import { ServiceStatus, ServiceStatusLevels } from '../status';
-import { SavedObjectStatusMeta } from './types';
 import { KibanaMigratorStatus } from './migrations';
 
 export const calculateStatus$ = (
