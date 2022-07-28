@@ -20,12 +20,12 @@ export function updateSearchSource(
   searchSource: ISearchSource,
   persist = true,
   {
-    indexPattern,
+    dataView,
     services,
     sort,
     useNewFieldsApi,
   }: {
-    indexPattern: DataView;
+    dataView: DataView;
     services: DiscoverServices;
     sort: SortOrder[];
     useNewFieldsApi: boolean;
@@ -35,21 +35,21 @@ export function updateSearchSource(
   const parentSearchSource = persist ? searchSource : searchSource.getParent()!;
 
   parentSearchSource
-    .setField('index', indexPattern)
+    .setField('index', dataView)
     .setField('query', data.query.queryString.getQuery() || null)
     .setField('filter', data.query.filterManager.getFilters());
 
   if (!persist) {
     const usedSort = getSortForSearchSource(
       sort,
-      indexPattern,
+      dataView,
       uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
     );
     searchSource.setField('trackTotalHits', true).setField('sort', usedSort);
 
-    if (indexPattern.type !== DataViewType.ROLLUP) {
+    if (dataView.type !== DataViewType.ROLLUP) {
       // Set the date range filter fields from timeFilter using the absolute format. Search sessions requires that it be converted from a relative range
-      searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(indexPattern));
+      searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(dataView));
     }
 
     if (useNewFieldsApi) {
