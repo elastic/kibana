@@ -8,21 +8,19 @@
 
 import { set } from '@elastic/safer-lodash-set';
 import { get, has } from 'lodash';
-import { SavedObject as SavedObjectType } from '../../server';
-import { SavedObjectsClientContract } from './saved_objects_client';
+import type { SavedObject as SavedObjectType } from '@kbn/core-saved-objects-common';
+import type {
+  SavedObjectsClientContract,
+  SimpleSavedObject,
+} from '@kbn/core-saved-objects-api-browser';
 
 /**
- * This class is a very simple wrapper for SavedObjects loaded from the server
- * with the {@link SavedObjectsClientContract}.
+ * Core internal implementation of {@link SimpleSavedObject}
  *
- * It provides basic functionality for creating/saving/deleting saved objects,
- * but doesn't include any type-specific implementations.
- *
- * @public
+ * @internal Should use the {@link SimpleSavedObject} interface instead
  */
-export class SimpleSavedObject<T = unknown> {
+export class SimpleSavedObjectImpl<T = unknown> implements SimpleSavedObject<T> {
   public attributes: T;
-  // We want to use the same interface this class had in JS
   public _version?: SavedObjectType<T>['version'];
   public id: SavedObjectType<T>['id'];
   public type: SavedObjectType<T>['type'];
@@ -31,10 +29,6 @@ export class SimpleSavedObject<T = unknown> {
   public error: SavedObjectType<T>['error'];
   public references: SavedObjectType<T>['references'];
   public updatedAt: SavedObjectType<T>['updated_at'];
-  /**
-   * Space(s) that this saved object exists in. This attribute is not used for "global" saved object types which are registered with
-   * `namespaceType: 'agnostic'`.
-   */
   public namespaces: SavedObjectType<T>['namespaces'];
 
   constructor(

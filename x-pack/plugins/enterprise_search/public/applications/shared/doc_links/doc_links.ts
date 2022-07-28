@@ -8,15 +8,15 @@
 import { DocLinksStart } from '@kbn/core/public';
 
 class DocLinks {
-  public appSearchApis: string;
   public appSearchApiClients: string;
   public appSearchApiKeys: string;
+  public appSearchApis: string;
   public appSearchAuthentication: string;
   public appSearchCrawlRules: string;
   public appSearchCurations: string;
   public appSearchDuplicateDocuments: string;
-  public appSearchEntryPoints: string;
   public appSearchElasticsearchIndexedEngines: string;
+  public appSearchEntryPoints: string;
   public appSearchGuide: string;
   public appSearchIndexingDocs: string;
   public appSearchIndexingDocsSchema: string;
@@ -31,6 +31,7 @@ class DocLinks {
   public appSearchWebCrawler: string;
   public appSearchWebCrawlerEventLogs: string;
   public appSearchWebCrawlerReference: string;
+  public bulkApi: string;
   public clientsGoIndex: string;
   public clientsGuide: string;
   public clientsJavaBasicAuthentication: string;
@@ -53,6 +54,9 @@ class DocLinks {
   public clientsRubyOverview: string;
   public clientsRustOverview: string;
   public cloudIndexManagement: string;
+  public crawlerGettingStarted: string;
+  public crawlerManaging: string;
+  public crawlerOverview: string;
   public elasticsearchCreateIndex: string;
   public elasticsearchGettingStarted: string;
   public elasticsearchMapping: string;
@@ -61,6 +65,7 @@ class DocLinks {
   public enterpriseSearchTroubleshootSetup: string;
   public enterpriseSearchUsersAccess: string;
   public kibanaSecurity: string;
+  public languageAnalyzers: string;
   public licenseManagement: string;
   public pluginsIngestAttachment: string;
   public queryDsl: string;
@@ -70,12 +75,12 @@ class DocLinks {
   public workplaceSearchConfluenceCloudConnectorPackage: string;
   public workplaceSearchConfluenceServer: string;
   public workplaceSearchCustomConnectorPackage: string;
-  public workplaceSearchCustomSources: string;
   public workplaceSearchCustomSourcePermissions: string;
+  public workplaceSearchCustomSources: string;
   public workplaceSearchDocumentPermissions: string;
   public workplaceSearchDropbox: string;
-  public workplaceSearchExternalSharePointOnline: string;
   public workplaceSearchExternalIdentities: string;
+  public workplaceSearchExternalSharePointOnline: string;
   public workplaceSearchGettingStarted: string;
   public workplaceSearchGitHub: string;
   public workplaceSearchGmail: string;
@@ -122,6 +127,7 @@ class DocLinks {
     this.appSearchWebCrawler = '';
     this.appSearchWebCrawlerEventLogs = '';
     this.appSearchWebCrawlerReference = '';
+    this.bulkApi = '';
     this.clientsGoIndex = '';
     this.clientsGuide = '';
     this.clientsJavaBasicAuthentication = '';
@@ -144,6 +150,9 @@ class DocLinks {
     this.clientsRubyOverview = '';
     this.clientsRustOverview = '';
     this.cloudIndexManagement = '';
+    this.crawlerGettingStarted = '';
+    this.crawlerManaging = '';
+    this.crawlerOverview = '';
     this.elasticsearchCreateIndex = '';
     this.elasticsearchGettingStarted = '';
     this.elasticsearchMapping = '';
@@ -152,6 +161,7 @@ class DocLinks {
     this.enterpriseSearchTroubleshootSetup = '';
     this.enterpriseSearchUsersAccess = '';
     this.kibanaSecurity = '';
+    this.languageAnalyzers = '';
     this.licenseManagement = '';
     this.pluginsIngestAttachment = '';
     this.queryDsl = '';
@@ -215,6 +225,7 @@ class DocLinks {
     this.appSearchWebCrawler = docLinks.links.appSearch.webCrawler;
     this.appSearchWebCrawlerEventLogs = docLinks.links.appSearch.webCrawlerEventLogs;
     this.appSearchWebCrawlerReference = docLinks.links.appSearch.webCrawlerReference;
+    this.bulkApi = docLinks.links.enterpriseSearch.bulkApi;
     this.clientsGoIndex = docLinks.links.clients.goIndex;
     this.clientsGuide = docLinks.links.clients.guide;
     this.clientsJavaBasicAuthentication = docLinks.links.clients.javaBasicAuthentication;
@@ -237,6 +248,9 @@ class DocLinks {
     this.clientsRubyOverview = docLinks.links.clients.rubyOverview;
     this.clientsRustOverview = docLinks.links.clients.rustOverview;
     this.cloudIndexManagement = docLinks.links.cloud.indexManagement;
+    this.crawlerGettingStarted = docLinks.links.enterpriseSearch.crawlerGettingStarted;
+    this.crawlerManaging = docLinks.links.enterpriseSearch.crawlerManaging;
+    this.crawlerOverview = docLinks.links.enterpriseSearch.crawlerOverview;
     this.elasticsearchCreateIndex = docLinks.links.elasticsearch.createIndex;
     this.elasticsearchGettingStarted = docLinks.links.elasticsearch.gettingStarted;
     this.elasticsearchMapping = docLinks.links.elasticsearch.mapping;
@@ -245,6 +259,7 @@ class DocLinks {
     this.enterpriseSearchTroubleshootSetup = docLinks.links.enterpriseSearch.troubleshootSetup;
     this.enterpriseSearchUsersAccess = docLinks.links.enterpriseSearch.usersAccess;
     this.kibanaSecurity = docLinks.links.kibana.xpackSecurity;
+    this.languageAnalyzers = docLinks.links.enterpriseSearch.languageAnalyzers;
     this.licenseManagement = docLinks.links.enterpriseSearch.licenseManagement;
     this.pluginsIngestAttachment = docLinks.links.plugins.ingestAttachment;
     this.queryDsl = docLinks.links.query.queryDsl;
