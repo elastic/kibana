@@ -43,7 +43,7 @@ export const getFieldDeleteModalOpener =
       const doesBelongToCompositeField = fieldToDelete?.runtimeField?.type === 'composite';
 
       if (doesBelongToCompositeField) {
-        console.log( // eslint-disable-line
+        console.log(
           'TODO: display a modal to indicate that this field needs to be deleted through its parent.'
         );
         return () => undefined;
