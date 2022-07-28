@@ -5,17 +5,21 @@
  * 2.0.
  */
 
+import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { ICON_SOURCE, MB_LOOKUP_FUNCTION, VECTOR_STYLES } from '../../../../common/constants';
 import { Category } from '../../../../common/descriptor_types';
 import { StaticTextProperty } from './properties/static_text_property';
 import { DynamicTextProperty } from './properties/dynamic_text_property';
 
-export function getOtherCategoryLabel() {
-  return i18n.translate('xpack.maps.styles.categorical.otherCategoryLabel', {
+export const OTHER_CATEGORY_LABEL = i18n.translate(
+  'xpack.maps.styles.categorical.otherCategoryLabel',
+  {
     defaultMessage: 'Other',
-  });
-}
+  }
+);
+
+export const OTHER_CATEGORY_DEFAULT_COLOR = euiThemeVars.euiColorLightShade;
 
 export function getComputedFieldName(styleName: VECTOR_STYLES, fieldName: string) {
   return `${getComputedFieldNamePrefix(fieldName)}__${styleName as string}`;

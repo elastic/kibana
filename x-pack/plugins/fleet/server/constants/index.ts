@@ -64,7 +64,7 @@ export {
   DEFAULT_DOWNLOAD_SOURCE_URI,
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
   DEFAULT_DOWNLOAD_SOURCE_ID,
-} from '../../common';
+} from '../../common/constants';
 
 export {
   FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,

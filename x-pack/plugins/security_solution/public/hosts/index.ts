@@ -16,7 +16,6 @@ import { initialHostsState, hostsReducer } from './store';
 
 const HOST_TIMELINE_IDS: TimelineIdLiteral[] = [
   TimelineId.hostsPageEvents,
-  TimelineId.hostsPageExternalAlerts,
   TimelineId.hostsPageSessions,
 ];
 

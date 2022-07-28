@@ -155,7 +155,7 @@ let testProps = {
   browserFields: mockBrowserFields,
   field,
   indexPattern: mockIndexPattern,
-  timelineId: TimelineId.hostsPageExternalAlerts,
+  timelineId: TimelineId.hostsPageEvents,
   toggleTopN: jest.fn(),
   onFilterAdded: jest.fn(),
   value,

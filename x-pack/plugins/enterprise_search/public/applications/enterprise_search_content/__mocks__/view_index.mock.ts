@@ -31,13 +31,15 @@ export const apiIndex: ApiViewIndex = {
 export const connectorIndex: ConnectorViewIndex = {
   connector: {
     api_key_id: null,
-    configuration: {},
+    configuration: { foo: { label: 'bar', value: 'barbar' } },
     id: '2',
     index_name: 'connector',
+    language: 'en',
     last_seen: null,
     last_sync_error: null,
     last_sync_status: SyncStatus.COMPLETED,
     last_synced: null,
+    name: 'connector',
     scheduling: {
       enabled: false,
       interval: '',

@@ -28,7 +28,7 @@ export const useDeletePack = ({ packId, withRedirect }: UseDeletePackProps) => {
   } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useMutation(() => http.delete(`/internal/osquery/packs/${packId}`), {
+  return useMutation(() => http.delete(`/api/osquery/packs/${packId}`), {
     onError: (error: { body: { error: string; message: string } }) => {
       setErrorToast(error, {
         title: error.body.error,

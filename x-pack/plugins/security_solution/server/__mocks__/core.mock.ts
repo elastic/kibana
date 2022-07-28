@@ -10,6 +10,9 @@
 // We _must_ import from the restricted path or we pull in _everything_ including memory leaks from Kibana core
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectsUtils } from '@kbn/core/server/saved_objects/service/lib/utils';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { SavedObjectsErrorHelpers } from '@kbn/core/server/saved_objects/service/lib/errors';
 module.exports = {
   SavedObjectsUtils,
+  SavedObjectsErrorHelpers,
 };

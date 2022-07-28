@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import semverValid from 'semver/functions/valid';
 
 import { PRECONFIGURATION_LATEST_KEYWORD } from '../../constants';
-import type { PreconfiguredOutput } from '../../../common';
+import type { PreconfiguredOutput } from '../../../common/types';
 
 import { AgentPolicyBaseSchema } from './agent_policy';
 import { NamespaceSchema } from './package_policy';

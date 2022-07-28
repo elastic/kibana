@@ -25,6 +25,7 @@ export function registerConnectorRoutes({ router }: RouteDependencies) {
         body: schema.object({
           delete_existing_connector: schema.maybe(schema.boolean()),
           index_name: schema.string(),
+          language: schema.nullable(schema.string()),
         }),
       },
     },

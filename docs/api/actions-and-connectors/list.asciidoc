@@ -26,6 +26,12 @@ run this API.
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
+[[list-connector-types-api-query-params]]
+=== {api-query-parms-title}
+
+`feature_id`::
+(Optional, string) Filters list of connector types to those that support the feature id.
+
 [[list-connector-types-api-codes]]
 ==== {api-response-codes-title}
 
@@ -52,7 +58,8 @@ The API returns the following:
     "minimum_license_required": "gold", <3>
     "enabled": false, <4>
     "enabled_in_config": true, <5>
-    "enabled_in_license": true <6>
+    "enabled_in_license": true, <6>
+    "supported_feature_ids": ["alerting"] <7>
   },
   {
     "id": ".index",
@@ -60,7 +67,8 @@ The API returns the following:
     "minimum_license_required": "basic",
     "enabled": true,
     "enabled_in_config": true,
-    "enabled_in_license": true
+    "enabled_in_license": true,
+    "supported_feature_ids": ["alerting"]
   },
   ...
 ]
@@ -71,3 +79,4 @@ The API returns the following:
 <4> `enabled` - Specifies if the connector type is enabled or disabled in {kib}.
 <5> `enabled_in_config` - Specifies if the connector type is enabled or enabled in the {kib} `.yml` file.
 <6> `enabled_in_license` - Specifies if the connector type is enabled or disabled in the license.
+<7> `supported_feature_ids` - Specifies which Kibana features this connector type supports.
