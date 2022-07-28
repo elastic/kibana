@@ -143,29 +143,29 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
     ruleIndices
   );
 
-  const [isIndexPatternLoading, { indexPatterns: indexIndexPatterns }] =
-    useFetchIndex(memoRuleIndices);
-  const [indexPattern, setIndexPattern] = useState<DataViewBase | null>(null);
+  const hasDataViewId = dataViewId || maybeRule?.data_view_id || null;
+  const [dataViewIndexPatterns, setDataViewIndexPatterns] = useState<DataViewBase | null>(null);
 
-  useEffect(() => {
-    const fetchAppropriateIndexPatterns = async () => {
-      if (dataViewId != null && dataViewId !== '') {
-        const dv = await data.dataViews.get(dataViewId);
-        setIndexPattern(dv);
-      } else if (!isIndexPatternLoading && indexPattern == null) {
-        setIndexPattern(indexIndexPatterns);
-      }
-    };
-
-    fetchAppropriateIndexPatterns();
+  useCallback(async () => {
+    if (hasDataViewId) {
+      const dv = await data.dataViews.get(hasDataViewId);
+      setDataViewIndexPatterns(dv);
+    }  else {
+      return null;
+    }
   }, [
+    hasDataViewId,
     data.dataViews,
-    dataViewId,
-    setIndexPattern,
-    indexIndexPatterns,
-    indexPattern,
-    isIndexPatternLoading,
+    setDataViewIndexPatterns
   ]);
+
+  // Don't fetch indices if rule has data view id (currently rule can technically have
+  // both defined and in that case we'd be doing unnecessary work here if all we want is
+  // the data view fields)
+  const [isIndexPatternLoading, { indexPatterns: indexIndexPatterns }] =
+    useFetchIndex(hasDataViewId ? [] : memoRuleIndices);
+
+  const indexPattern = useMemo((): DataViewBase | null => hasDataViewId ? dataViewIndexPatterns : indexIndexPatterns, [hasDataViewId, dataViewIndexPatterns, indexIndexPatterns])
 
   const handleExceptionUpdateError = useCallback(
     (error: Error, statusCode: number | null, message: string | null) => {

@@ -164,34 +164,26 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     maybeRule?.machine_learning_job_id,
     ruleIndices
   );
+  const hasDataViewId = dataViewId || maybeRule?.data_view_id || null;
+  const [dataViewIndexPatterns, setDataViewIndexPatterns] = useState<DataViewBase | null>(null);
+
+  useCallback(async () => {
+    if (hasDataViewId) {
+      const dv = await data.dataViews.get(hasDataViewId);
+      setDataViewIndexPatterns(dv);
+    }  else {
+      return null;
+    }
+  }, [
+    hasDataViewId,
+    data.dataViews,
+    setDataViewIndexPatterns
+  ]);
 
   const [isIndexPatternLoading, { indexPatterns: indexIndexPatterns }] =
-    useFetchIndex(memoRuleIndices);
+    useFetchIndex(hasDataViewId ? [] : memoRuleIndices);
 
-  const [indexPattern, setIndexPattern] = useState<DataViewBase | null>(null);
-
-  useEffect(() => {
-    const fetchAppropriateIndexPatterns = async () => {
-      const hasDataViewId = dataViewId || maybeRule?.data_view_id || null;
-
-      if (hasDataViewId) {
-        const dv = await data.dataViews.get(hasDataViewId);
-        setIndexPattern(dv);
-      } else if (!isIndexPatternLoading && indexPattern == null) {
-        setIndexPattern(indexIndexPatterns);
-      }
-    };
-
-    fetchAppropriateIndexPatterns();
-  }, [
-    data.dataViews,
-    dataViewId,
-    maybeRule?.data_view_id,
-    setIndexPattern,
-    indexIndexPatterns,
-    indexPattern,
-    isIndexPatternLoading,
-  ]);
+  const indexPattern = useMemo((): DataViewBase | null => hasDataViewId ? dataViewIndexPatterns : indexIndexPatterns, [hasDataViewId, dataViewIndexPatterns, indexIndexPatterns])
 
   const handleBuilderOnChange = useCallback(
     ({
