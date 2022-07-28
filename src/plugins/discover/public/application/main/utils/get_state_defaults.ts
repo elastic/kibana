@@ -10,6 +10,7 @@ import { cloneDeep, isEqual } from 'lodash';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { getDefaultSort, getSortArray } from '../../../utils';
 import {
   DEFAULT_COLUMNS_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -20,7 +21,6 @@ import { SavedSearch } from '../../../services/saved_searches';
 
 import { AppState } from '../services/discover_state';
 import { CHART_HIDDEN_KEY } from '../components/chart/discover_chart';
-import {getDefaultSort, getSortArray} from "@kbn/discover-plugin/public/utils";
 
 function getDefaultColumns(savedSearch: SavedSearch, config: IUiSettingsClient) {
   if (savedSearch.columns && savedSearch.columns.length > 0) {
