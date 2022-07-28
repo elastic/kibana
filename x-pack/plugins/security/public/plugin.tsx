@@ -24,7 +24,11 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UserProfile, UserProfileData, UserProfileWithSecurity } from '../common';
 import type { SecurityLicense } from '../common/licensing';
 import { SecurityLicenseService } from '../common/licensing';
-import type { UserProfileBulkGetParams, UserProfileGetCurrentParams, UserProfileSuggestParams } from './account_management';
+import type {
+  UserProfileBulkGetParams,
+  UserProfileGetCurrentParams,
+  UserProfileSuggestParams,
+} from './account_management';
 import { accountManagementApp, UserProfileAPIClient } from './account_management';
 import { AnalyticsService } from './analytics';
 import { AnonymousAccessService } from './anonymous_access';
@@ -268,7 +272,8 @@ export interface SecurityPluginStart {
      * @param params.requiredPrivileges The set of the privileges that users associated with the suggested user profile should have in the specified space. If not specified, privileges check isn't performed and all matched profiles are returned irrespective to the privileges of the associated users.
      */
     suggest<D extends UserProfileData>(
-      path: string, params: UserProfileSuggestParams
+      path: string,
+      params: UserProfileSuggestParams
     ): Promise<Array<UserProfile<D>>>;
   };
 
