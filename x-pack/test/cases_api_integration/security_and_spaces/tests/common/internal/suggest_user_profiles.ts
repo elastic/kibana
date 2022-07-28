@@ -127,6 +127,46 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    it('returns no profiles for an owner that does not exist', async () => {
+      const profiles = await suggestUserProfiles({
+        supertest: supertestWithoutAuth,
+        req: {
+          name: 'read',
+          owners: ['invalidOwner'],
+        },
+        auth: { user: superUser, space: null },
+      });
+
+      expect(profiles).to.be.empty();
+    });
+
+    // TODO: unskip when security plugin implements fix for size issue
+    it.skip('limits the results to one, when the size is specified as one', async () => {
+      const profiles = await suggestUserProfiles({
+        supertest: supertestWithoutAuth,
+        req: {
+          name: 'only',
+          owners: ['securitySolutionFixture'],
+          size: 1,
+        },
+        auth: { user: superUser, space: 'space1' },
+      });
+
+      expect(profiles.length).to.be(1);
+      expectSnapshot(profiles.map(({ user, data }) => ({ user, data }))).toMatchInline(`
+        Array [
+          Object {
+            "data": Object {},
+            "user": Object {
+              "email": "sec_only_no_delete@elastic.co",
+              "full_name": "sec only_no_delete",
+              "username": "sec_only_no_delete",
+            },
+          }
+        ]
+      `);
+    });
+
     describe('user with both security and observability privileges', () => {
       const obsAndSecRole: Role = {
         name: 'obsAndSecRole',
