@@ -30,6 +30,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { docLinks } from '../../../../../shared/doc_links';
+
 import { ApiKey } from '../../../api_key/api_key';
 
 import { GenerateApiKeyModalLogic } from './generate_api_key_modal.logic';
