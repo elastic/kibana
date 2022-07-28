@@ -18,6 +18,9 @@ import {
   EuiSelectableTemplateSitewide,
   EuiSelectableTemplateSitewideOption,
   euiSelectableTemplateSitewideRenderOptions,
+  EuiLoadingSpinner,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
@@ -254,7 +257,15 @@ export const SearchBar: FC<SearchBarProps> = ({
 
   const clearField = () => setSearchValue('');
 
-  const emptyMessage = <PopoverPlaceholder darkMode={darkMode} basePath={basePathUrl} />;
+  const noMatchesMessage = <PopoverPlaceholder darkMode={darkMode} basePath={basePathUrl} />;
+  const emptyMessage = (
+    <EuiFlexGroup direction="column" justifyContent="center" style={{ minHeight: '300px' }}>
+      <EuiFlexItem grow={false}>
+        <EuiLoadingSpinner size="xl" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
   const placeholderText = i18n.translate('xpack.globalSearchBar.searchBar.placeholder', {
     defaultMessage: 'Find apps, content, and more. Ex: Discover',
   });
@@ -314,7 +325,7 @@ export const SearchBar: FC<SearchBarProps> = ({
         ) : undefined,
       }}
       emptyMessage={emptyMessage}
-      noMatchesMessage={emptyMessage}
+      noMatchesMessage={noMatchesMessage}
       popoverProps={{
         'data-test-subj': 'nav-search-popover',
         panelClassName: 'navSearch__panel',

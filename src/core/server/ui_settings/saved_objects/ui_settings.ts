@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsType } from '../../saved_objects';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { migrations } from './migrations';
 
 /**

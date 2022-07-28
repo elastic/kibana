@@ -13,7 +13,6 @@ import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
-
 import { comparePolicies, getTestProjectSyntheticsPolicy } from './sample_data/test_policy';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -729,7 +728,7 @@ export default function ({ getService }: FtrProviderContext) {
               isServiceManaged: false,
               isInvalid: false,
               name: 'Test private location 0',
-              policyHostId: testPolicyId,
+              agentPolicyId: testPolicyId,
               id: testPolicyId,
               geo: {
                 lat: '',

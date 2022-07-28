@@ -26,7 +26,7 @@ const defaultUiSettings = {
   },
 };
 
-function getMockIndexPattern() {
+function getMockDataView() {
   return {
     id: 'test',
     title: 'Test',
@@ -59,7 +59,7 @@ function getMockIndexPattern() {
 
 function getMockProps(props = {}) {
   const defaultProps = {
-    indexPattern: getMockIndexPattern(),
+    dataView: getMockDataView(),
     hideTimeColumn: false,
     columns: ['first', 'middle', 'last'],
     defaultSortOrder: 'desc',

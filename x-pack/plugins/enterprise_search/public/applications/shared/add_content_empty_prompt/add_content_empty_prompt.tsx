@@ -59,7 +59,7 @@ export const AddContentEmptyPrompt: React.FC<EmptyPromptProps> = ({ title, butto
                 <p>
                   {i18n.translate('xpack.enterpriseSearch.emptyState.description', {
                     defaultMessage:
-                      'You can now easily create and add content to Elasticsearch indices with Enterprise Search - including website content with the Elastic Web Crawler or third-party data sources with Custom Connectors.',
+                      'An Elasticsearch index is where your content gets stored. Get started by creating an Elasticsearch index and selecting an ingestion method. Options include the Elastic web crawler, third party data integrations, or using Elasticsearch API endpoints.',
                   })}
                 </p>
                 <p>
