@@ -56,6 +56,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('a11y tests for Kibana Instances Page', async function () {
       await kibanaOverview.isOnOverview();
+      await retry.waitForWithTimeout(
+        'Make sure Kibana instances tab is visble',
+        30000,
+        async () => {
+          return await testSubjects.isDisplayed('kibanaInstancesPage');
+        }
+      );
       await kibanaOverview.clickInstanceTab();
       await a11y.testAppSnapshot();
     });
