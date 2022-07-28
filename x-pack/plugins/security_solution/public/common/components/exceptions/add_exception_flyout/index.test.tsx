@@ -8,20 +8,20 @@
 import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
-import { act, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 
 import { AddExceptionFlyout } from '.';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import { useAsync } from '@kbn/securitysolution-hook-utils';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 import { useFetchIndex } from '../../../containers/source';
-import { createIndexPatternFieldStub, stubIndexPattern } from '@kbn/data-plugin/common/stubs';
+import { createStubIndexPattern, stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { useAddOrUpdateException } from '../use_add_exception';
 import { useFetchOrCreateRuleExceptionList } from '../use_fetch_or_create_rule_exception_list';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import * as helpers from '../helpers';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
-import type { EntriesArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 
 import { TestProviders } from '../../../mock';
 
@@ -346,52 +346,74 @@ describe('When the add exception modal is opened', () => {
 
   describe('when there is bulk-closeable alert data passed to an endpoint list exception', () => {
     let wrapper: ReactWrapper;
-    const stubbed = [
-      { name: 'file.path.caseless', type: 'string', aggregatable: true, searchable: true },
-      { name: 'subject_name', type: 'string', aggregatable: true, searchable: true },
-      { name: 'trusted', type: 'string', aggregatable: true, searchable: true },
-      { name: 'file.hash.sha256', type: 'string', aggregatable: true, searchable: true },
-      { name: 'event.code', type: 'string', aggregatable: true, searchable: true },
-    ].map((item) => createIndexPatternFieldStub({ spec: item }));
-    let callProps: {
-      onChange: (props: { exceptionItems: ExceptionListItemSchema[] }) => void;
-      exceptionListItems: ExceptionListItemSchema[];
-    };
+
     beforeEach(async () => {
-      const stubbedIndexPattern = stubIndexPattern;
-      // Mocks the index patterns to contain the pre-populated endpoint fields so that the exception qualifies as bulk closable
       mockUseFetchIndex.mockImplementation(() => [
         false,
         {
-          indexPatterns: {
-            ...stubbedIndexPattern,
-            fields: stubbed,
-          },
+          indexPatterns: createStubIndexPattern({
+            spec: {
+              id: '1234',
+              title: 'filebeat-*',
+              fields: {
+                'event.code': {
+                  name: 'event.code',
+                  type: 'string',
+                  aggregatable: true,
+                  searchable: true,
+                },
+                'file.path.caseless': {
+                  name: 'file.path.caseless',
+                  type: 'string',
+                  aggregatable: true,
+                  searchable: true,
+                },
+                subject_name: {
+                  name: 'subject_name',
+                  type: 'string',
+                  aggregatable: true,
+                  searchable: true,
+                },
+                trusted: {
+                  name: 'trusted',
+                  type: 'string',
+                  aggregatable: true,
+                  searchable: true,
+                },
+                'file.hash.sha256': {
+                  name: 'file.hash.sha256',
+                  type: 'string',
+                  aggregatable: true,
+                  searchable: true,
+                },
+              },
+            },
+          }),
         },
       ]);
+
       const alertDataMock: AlertData = {
         '@timestamp': '1234567890',
         _id: 'test-id',
         file: { path: 'test/path' },
       };
-      await act(async () => {
-        wrapper = mount(
-          <TestProviders>
-            <AddExceptionFlyout
-              ruleId={'123'}
-              ruleIndices={['filebeat-*']}
-              ruleName={ruleName}
-              exceptionListType={'endpoint'}
-              onCancel={jest.fn()}
-              onConfirm={jest.fn()}
-              alertData={alertDataMock}
-            />
-          </TestProviders>
-        );
-      });
-      await waitFor(() => {
-        callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+      wrapper = mount(
+        <TestProviders>
+          <AddExceptionFlyout
+            ruleId={'123'}
+            ruleIndices={['filebeat-*']}
+            ruleName={ruleName}
+            exceptionListType={'endpoint'}
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
+            alertData={alertDataMock}
+            isAlertDataLoading={false}
+          />
+        </TestProviders>
+      );
 
+      const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+      await waitFor(() => {
         return callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] });
       });
     });
@@ -423,6 +445,8 @@ describe('When the add exception modal is opened', () => {
     });
     describe('when a "is in list" entry is added', () => {
       it('should have the bulk close checkbox disabled', async () => {
+        const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+
         await waitFor(() =>
           callProps.onChange({
             exceptionItems: [
