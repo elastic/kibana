@@ -31,7 +31,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
     ciBuildNumber: Number(process.env.BUILDKITE_BUILD_NUMBER) || 0,
     gitRev: process.env.BUILDKITE_COMMIT,
     isPr: !!process.env.GITHUB_PR_NUMBER,
-    prId: Number(process.env.GITHUB_PR_NUMBER) || 0,
+    ...(process.env.GITHUB_PR_NUMBER ? { prId: process.env.GITHUB_PR_NUMBER } : {}),
     testJobId,
     testBuildId,
   };
