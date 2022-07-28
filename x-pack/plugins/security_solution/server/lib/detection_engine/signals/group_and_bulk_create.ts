@@ -6,11 +6,15 @@
  */
 
 import { identity } from 'lodash';
+
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { createSearchAfterReturnType } from './utils';
-import type { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from './types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
+
 import { withSecuritySpan } from '../../../utils/with_security_span';
 import { buildTimeRangeFilter } from './build_events_query';
+import type { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from './types';
+import { createSearchAfterReturnType } from './utils';
 
 // search_after through grouped documents and re-index using bulk endpoint.
 export const groupAndBulkCreate = async ({
@@ -83,7 +87,20 @@ export const groupAndBulkCreate = async ({
     };
 
     const getEventsByGroup = async (_baseQuery: estypes.SearchRequest, bucketSize: number) => {
-      // TODO
+      return services.scopedClusterClient.asCurrentUser.search({
+        ..._baseQuery,
+        body: {
+          ..._baseQuery.body,
+          aggregations: {
+            eventGroup: {
+              terms: {
+                field: (completeRule.ruleParams as unknown as { groupBy: string[] }).groupBy[0],
+                size: bucketSize,
+              },
+            },
+          },
+        },
+      });
     };
 
     // Get cardinality of "groupBy" field
@@ -97,16 +114,17 @@ export const groupAndBulkCreate = async ({
     // Get aggregated results
     const aggResult = await getEventsByGroup(baseQuery, Math.min(cardinalityValue, 10000));
 
+    const bucketsToIndex = {};
+    const exceptionsWithLargeValueLists = exceptionsList.filter((item) =>
+      hasLargeValueList(item.entries)
+    );
+    // (item): item is ExceptionItemWithLargeValueLists => hasLargeValueList(item.entries)
+    // );
+
     // TODO
     // Intialize bucketsToIndex = {}
-    // If value list exceptions:
     //   For each exception list entry
-    //      For each bucket
-    //         Filter against list
-    //         If docs left over, add to bucketsToIndex
-    // For each bucket (mod cardinalityValue)
-    //    Add to index list
-    // Bulk create from index list
+    //      For each bucket mod cardinalityValue, create and index alerts 
 
     return toReturn;
   });
