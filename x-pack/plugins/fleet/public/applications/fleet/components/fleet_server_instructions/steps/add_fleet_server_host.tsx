@@ -140,6 +140,7 @@ export const AddFleetServerHostStepContent = ({
             iconType="check"
             size="s"
             color="success"
+            data-test-subj="addedFleetServerConfirmationCallout"
             title={
               <FormattedMessage
                 id="xpack.fleet.fleetServerSetup.addFleetServerHostSuccessTitle"

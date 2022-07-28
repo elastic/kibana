@@ -18,13 +18,13 @@ export async function FleetPageProvider({ getService }: FtrProviderContext) {
         return await testSubjects.isDisplayed('getStartedFleetServerHeading');
       });
     },
-    async clickAdvanceTab() {
+    async clickAdvanceOption() {
       await testSubjects.click('fleetServerFlyoutTab-advanced');
       await retry.waitFor('create a policy header', async () => {
         return await testSubjects.isDisplayed('addFleetServerHeader');
       });
     },
-    async clickQuickStartTab() {
+    async clickQuickStartOption() {
       await testSubjects.click('fleetServerFlyoutTab-quickStart');
       await retry.waitFor('get started with fleet server', async () => {
         return await testSubjects.isDisplayed('getStartedFleetServerHeading');
@@ -37,6 +37,32 @@ export async function FleetPageProvider({ getService }: FtrProviderContext) {
         return await testSubjects.isDisplayed('platformTypeLinux');
       });
     },
-    async addFleetServer() {},
+    async addFleetServerInAdvanced() {
+      await testSubjects.click('fleetServerAddHostBtn');
+      await retry.waitFor('added fleet server host callout', async () => {
+        return await testSubjects.isDisplayed('addedFleetServerConfirmationCallout');
+      });
+    },
+    async addGeneratedServiceToken() {
+      await testSubjects.click('fleetServerGenerateServiceTokenBtn');
+      await retry.waitFor('for platform button to show up', async () => {
+        return await testSubjects.isDisplayed('platformTypeLinux');
+      });
+    },
+    async clickAgentPoliciesTab() {
+      await testSubjects.click('fleet-agent-policies-tab');
+      await retry.waitFor('kql bar to be visible', async () => {
+        return await testSubjects.isDisplayed('queryInput');
+      });
+    },
+    async clickFleetServerPolicyInTable() {
+      await testSubjects.click('agentPolicyNameLink');
+    },
+    async clickEnrollmentTokensTab() {
+      await testSubjects.click('fleet-enrollment-tokens-tab');
+      await retry.waitFor('kql bar to be visible', async () => {
+        return await testSubjects.isDisplayed('queryInput');
+      });
+    },
   };
 }

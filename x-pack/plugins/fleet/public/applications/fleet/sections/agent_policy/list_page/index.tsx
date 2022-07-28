@@ -181,6 +181,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         iconType="plusInCircle"
         isDisabled={!hasFleetAllPrivileges}
         onClick={() => setIsCreateAgentPolicyFlyoutOpen(true)}
+        data-test-subj="createAgentPolicyButton"
       >
         <FormattedMessage
           id="xpack.fleet.agentPolicyList.addButton"
