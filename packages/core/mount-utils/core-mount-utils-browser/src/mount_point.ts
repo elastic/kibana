@@ -6,13 +6,6 @@
  * Side Public License, v 1.
  */
 
-export type {
-  UiSettingsParams,
-  PublicUiSettingsParams,
-  UserProvidedValues,
-  UiSettingsType,
-} from '@kbn/core-ui-settings-common';
-
 /**
  * A function that should mount DOM content inside the provided container element
  * and return a handler to unmount it.
