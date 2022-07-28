@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/schemas/common';
+import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
 import { CreateRulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';

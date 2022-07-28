@@ -3343,6 +3343,22 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-saved-objects-api-browser@link:bazel-bin/packages/core/saved-objects/core-saved-objects-api-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-saved-objects-api-server@link:bazel-bin/packages/core/saved-objects/core-saved-objects-api-server":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-saved-objects-common@link:bazel-bin/packages/core/saved-objects/core-saved-objects-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-saved-objects-server@link:bazel-bin/packages/core/saved-objects/core-saved-objects-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-test-helpers-http-setup-browser@link:bazel-bin/packages/core/test-helpers/core-test-helpers-http-setup-browser":
   version "0.0.0"
   uid ""
@@ -3463,6 +3479,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/get-repo-files@link:bazel-bin/packages/kbn-get-repo-files":
+  version "0.0.0"
+  uid ""
+
 "@kbn/handlebars@link:bazel-bin/packages/kbn-handlebars":
   version "0.0.0"
   uid ""
@@ -3471,7 +3491,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/home-sample-data-cards@link:bazel-bin/packages/home/sample_data_cards":
+"@kbn/home-sample-data-card@link:bazel-bin/packages/home/sample_data_card":
+  version "0.0.0"
+  uid ""
+
+"@kbn/home-sample-data-tab@link:bazel-bin/packages/home/sample_data_tab":
+  version "0.0.0"
+  uid ""
+
+"@kbn/home-sample-data-types@link:bazel-bin/packages/home/sample_data_types":
   version "0.0.0"
   uid ""
 
@@ -3559,6 +3587,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/repo-source-classifier-cli@link:bazel-bin/packages/kbn-repo-source-classifier-cli":
+  version "0.0.0"
+  uid ""
+
+"@kbn/repo-source-classifier@link:bazel-bin/packages/kbn-repo-source-classifier":
+  version "0.0.0"
+  uid ""
+
 "@kbn/rule-data-utils@link:bazel-bin/packages/kbn-rule-data-utils":
   version "0.0.0"
   uid ""
@@ -3635,7 +3671,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-button-exit-full-screen@link:bazel-bin/packages/shared-ux/button/exit_full_screen":
+"@kbn/shared-ux-button-exit-full-screen-mocks@link:bazel-bin/packages/shared-ux/button/exit_full_screen/mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-button-exit-full-screen-types@link:bazel-bin/packages/shared-ux/button/exit_full_screen/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-button-exit-full-screen@link:bazel-bin/packages/shared-ux/button/exit_full_screen/impl":
   version "0.0.0"
   uid ""
 
@@ -3643,7 +3687,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-card-no-data@link:bazel-bin/packages/shared-ux/card/no_data":
+"@kbn/shared-ux-card-no-data-mocks@link:bazel-bin/packages/shared-ux/card/no_data/mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-card-no-data-types@link:bazel-bin/packages/shared-ux/card/no_data/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-card-no-data@link:bazel-bin/packages/shared-ux/card/no_data/impl":
   version "0.0.0"
   uid ""
 
@@ -3651,15 +3703,39 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-link-redirect-app@link:bazel-bin/packages/shared-ux/link/redirect_app":
+"@kbn/shared-ux-link-redirect-app-mocks@link:bazel-bin/packages/shared-ux/link/redirect_app/mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-analytics-no-data@link:bazel-bin/packages/shared-ux/page/analytics_no_data":
+"@kbn/shared-ux-link-redirect-app-types@link:bazel-bin/packages/shared-ux/link/redirect_app/types":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-kibana-no-data@link:bazel-bin/packages/shared-ux/page/kibana_no_data":
+"@kbn/shared-ux-link-redirect-app@link:bazel-bin/packages/shared-ux/link/redirect_app/impl":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-page-analytics-no-data-mocks@link:bazel-bin/packages/shared-ux/page/analytics_no_data/mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-page-analytics-no-data-types@link:bazel-bin/packages/shared-ux/page/analytics_no_data/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-page-analytics-no-data@link:bazel-bin/packages/shared-ux/page/analytics_no_data/impl":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-page-kibana-no-data-mocks@link:bazel-bin/packages/shared-ux/page/kibana_no_data/mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-page-kibana-no-data-types@link:bazel-bin/packages/shared-ux/page/kibana_no_data/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-page-kibana-no-data@link:bazel-bin/packages/shared-ux/page/kibana_no_data/impl":
   version "0.0.0"
   uid ""
 
@@ -3667,11 +3743,23 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-prompt-no-data-views@link:bazel-bin/packages/shared-ux/prompt/no_data_views":
+"@kbn/shared-ux-prompt-no-data-views-mocks@link:bazel-bin/packages/shared-ux/prompt/no_data_views/mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-prompt-no-data-views-types@link:bazel-bin/packages/shared-ux/prompt/no_data_views/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-prompt-no-data-views@link:bazel-bin/packages/shared-ux/prompt/no_data_views/impl":
   version "0.0.0"
   uid ""
 
 "@kbn/shared-ux-services@link:bazel-bin/packages/kbn-shared-ux-services":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-storybook-mock@link:bazel-bin/packages/shared-ux/storybook/mock":
   version "0.0.0"
   uid ""
 
@@ -7099,6 +7187,22 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-saved-objects-api-browser@link:bazel-bin/packages/core/saved-objects/core-saved-objects-api-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-saved-objects-api-server@link:bazel-bin/packages/core/saved-objects/core-saved-objects-api-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-saved-objects-common@link:bazel-bin/packages/core/saved-objects/core-saved-objects-common/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-saved-objects-server@link:bazel-bin/packages/core/saved-objects/core-saved-objects-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-server-internal-base@link:bazel-bin/packages/core/server/internal-base/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7203,6 +7307,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__get-repo-files@link:bazel-bin/packages/kbn-get-repo-files/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__handlebars@link:bazel-bin/packages/kbn-handlebars/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7211,7 +7319,15 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__home-sample-data-cards@link:bazel-bin/packages/home/sample_data_cards/npm_module_types":
+"@types/kbn__home-sample-data-card@link:bazel-bin/packages/home/sample_data_card/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__home-sample-data-tab@link:bazel-bin/packages/home/sample_data_tab/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__home-sample-data-types@link:bazel-bin/packages/home/sample_data_types/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -7303,6 +7419,14 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__repo-source-classifier-cli@link:bazel-bin/packages/kbn-repo-source-classifier-cli/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__repo-source-classifier@link:bazel-bin/packages/kbn-repo-source-classifier/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__rule-data-utils@link:bazel-bin/packages/kbn-rule-data-utils/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7379,7 +7503,15 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__shared-ux-button-exit-full-screen@link:bazel-bin/packages/shared-ux/button/exit_full_screen/npm_module_types":
+"@types/kbn__shared-ux-button-exit-full-screen-mocks@link:bazel-bin/packages/shared-ux/button/exit_full_screen/mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-button-exit-full-screen-types@link:bazel-bin/packages/shared-ux/button/exit_full_screen/types/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-button-exit-full-screen@link:bazel-bin/packages/shared-ux/button/exit_full_screen/impl/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -7387,7 +7519,15 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__shared-ux-card-no-data@link:bazel-bin/packages/shared-ux/card/no_data/npm_module_types":
+"@types/kbn__shared-ux-card-no-data-mocks@link:bazel-bin/packages/shared-ux/card/no_data/mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-card-no-data-types@link:bazel-bin/packages/shared-ux/card/no_data/types/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-card-no-data@link:bazel-bin/packages/shared-ux/card/no_data/impl/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -7395,15 +7535,39 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__shared-ux-link-redirect-app@link:bazel-bin/packages/shared-ux/link/redirect_app/npm_module_types":
+"@types/kbn__shared-ux-link-redirect-app-mocks@link:bazel-bin/packages/shared-ux/link/redirect_app/mocks/npm_module_types":
   version "0.0.0"
   uid ""
 
-"@types/kbn__shared-ux-page-analytics-no-data@link:bazel-bin/packages/shared-ux/page/analytics_no_data/npm_module_types":
+"@types/kbn__shared-ux-link-redirect-app-types@link:bazel-bin/packages/shared-ux/link/redirect_app/types/npm_module_types":
   version "0.0.0"
   uid ""
 
-"@types/kbn__shared-ux-page-kibana-no-data@link:bazel-bin/packages/shared-ux/page/kibana_no_data/npm_module_types":
+"@types/kbn__shared-ux-link-redirect-app@link:bazel-bin/packages/shared-ux/link/redirect_app/impl/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-page-analytics-no-data-mocks@link:bazel-bin/packages/shared-ux/page/analytics_no_data/mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-page-analytics-no-data-types@link:bazel-bin/packages/shared-ux/page/analytics_no_data/types/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-page-analytics-no-data@link:bazel-bin/packages/shared-ux/page/analytics_no_data/impl/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-page-kibana-no-data-mocks@link:bazel-bin/packages/shared-ux/page/kibana_no_data/mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-page-kibana-no-data-types@link:bazel-bin/packages/shared-ux/page/kibana_no_data/types/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-page-kibana-no-data@link:bazel-bin/packages/shared-ux/page/kibana_no_data/impl/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -7411,11 +7575,23 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__shared-ux-prompt-no-data-views@link:bazel-bin/packages/shared-ux/prompt/no_data_views/npm_module_types":
+"@types/kbn__shared-ux-prompt-no-data-views-mocks@link:bazel-bin/packages/shared-ux/prompt/no_data_views/mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-prompt-no-data-views-types@link:bazel-bin/packages/shared-ux/prompt/no_data_views/types/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-prompt-no-data-views@link:bazel-bin/packages/shared-ux/prompt/no_data_views/impl/npm_module_types":
   version "0.0.0"
   uid ""
 
 "@types/kbn__shared-ux-services@link:bazel-bin/packages/kbn-shared-ux-services/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-storybook-mock@link:bazel-bin/packages/shared-ux/storybook/mock/npm_module_types":
   version "0.0.0"
   uid ""
 
