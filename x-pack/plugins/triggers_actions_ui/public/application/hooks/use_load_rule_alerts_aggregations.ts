@@ -223,7 +223,7 @@ export async function fetchRuleAlertsAggByTimeRange({
             };
           }
         ) => {
-          // We are adding this to each day to construct the 30 days bars (background bar) when there is no data for a given day.
+          // We are adding this to each day to construct the 30 days bars (background bar) when there is no data for a given day or to show the delta today alerts/total alerts.
           const totalDayAlerts = {
             date: dayAlerts.key_as_string,
             count: totalAlerts,
