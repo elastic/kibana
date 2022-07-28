@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import SimpleGit from 'simple-git/promise';
+import SimpleGit from 'simple-git';
 
 import { run } from '@kbn/dev-cli-runner';
 import { createFlagError, combineErrors } from '@kbn/dev-cli-errors';
