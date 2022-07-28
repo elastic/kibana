@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-/* eslint complexity: ["error", 30]*/
+// Component being re-implemented in 8.5
+
+/* eslint complexity: ["error", 35]*/
 
 import React, { memo, useEffect, useState, useCallback, useMemo } from 'react';
 import styled, { css } from 'styled-components';
