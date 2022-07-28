@@ -14,8 +14,8 @@ import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mock
 
 const useQueryMock = _useQuery as jest.Mock;
 
-jest.mock('react-query', () => {
-  const actualReactQueryModule = jest.requireActual('react-query');
+jest.mock('@tanstack/react-query', () => {
+  const actualReactQueryModule = jest.requireActual('@tanstack/react-query');
 
   return {
     ...actualReactQueryModule,
