@@ -76,7 +76,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           cases: {
             read: [observabilityFeatureId],
           },
-          api: [],
+          api: ['cases-read'],
           savedObject: {
             all: [],
             read: [],

@@ -15,6 +15,9 @@ export const suggestUserProfilesRoute = (userProfileService: UserProfileService)
   createCasesRoute({
     method: 'post',
     path: INTERNAL_SUGGEST_USER_PROFILES_URL,
+    routerOptions: {
+      tags: ['access:cases-read'],
+    },
     params: {
       body: escapeHatch,
     },

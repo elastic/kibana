@@ -50,7 +50,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
         cases: {
           read: [APP_ID],
         },
-        api: [],
+        api: ['cases-read'],
         savedObject: {
           all: [],
           read: [],

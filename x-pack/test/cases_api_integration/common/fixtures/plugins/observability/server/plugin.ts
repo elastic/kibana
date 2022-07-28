@@ -42,6 +42,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           ui: [],
         },
         read: {
+          api: ['cases-read'],
           app: ['kibana'],
           cases: {
             read: ['observabilityFixture'],

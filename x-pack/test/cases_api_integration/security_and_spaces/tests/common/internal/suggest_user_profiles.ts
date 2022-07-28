@@ -14,6 +14,7 @@ import {
   secOnlyNoDelete,
   secOnlyRead,
   obsOnly,
+  noCasesPrivilegesSpace1,
 } from '../../../../common/lib/authentication/users';
 import { Role, User } from '../../../../common/lib/authentication/types';
 import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../common/lib/authentication';
@@ -112,6 +113,18 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       expect(profiles).to.be.empty();
+    });
+
+    it('fails with a 403 because the user making the request does not have the appropriate api kibana endpoint privileges', async () => {
+      await suggestUserProfiles({
+        supertest: supertestWithoutAuth,
+        req: {
+          name: 'delete',
+          owners: ['securitySolutionFixture'],
+        },
+        auth: { user: noCasesPrivilegesSpace1, space: 'space1' },
+        expectedHttpCode: 403,
+      });
     });
 
     describe('user with both security and observability privileges', () => {

@@ -54,6 +54,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
         ui: capabilities.all,
       },
       read: {
+        api: ['cases-read'],
         cases: {
           read: [APP_ID],
         },
