@@ -63,13 +63,13 @@ export const FilterView: FC<Props> = ({
     })} ${title}`;
   }
 
-  // need title to be undefined so that we don't show the native tooltip - we'll use EuiTooltip instead
-  const readOnlyProps = { title: undefined, color: 'hollow', tabIndex: 0 };
-
+  const sharedProps = { color: 'hollow', tabIndex: 0 };
   const badgeProps: EuiBadgeProps = readOnly
-    ? readOnlyProps
+    ? // prevent native tooltip for read-only filter pulls by setting title to undefined
+      { ...sharedProps, title: undefined }
     : {
-        ...readOnlyProps,
+        ...sharedProps,
+        title, // use native tooltip for non-read-only filter pills
         iconType: 'cross',
         iconSide: 'right',
         closeButtonProps: {
@@ -94,19 +94,27 @@ export const FilterView: FC<Props> = ({
         ),
       };
 
-  return (
+  const FilterPill = () => (
+    <EuiBadge {...badgeProps} {...rest}>
+      <FilterLabel
+        filter={filter}
+        valueLabel={valueLabel}
+        fieldLabel={fieldLabel}
+        filterLabelStatus={filterLabelStatus}
+        hideAlias={hideAlias}
+      />
+    </EuiBadge>
+  );
+
+  return readOnly ? (
     <EuiToolTip position="bottom" content={title}>
-      <EuiBadge {...badgeProps} {...rest}>
-        <span ref={ref}>
-          <FilterLabel
-            filter={filter}
-            valueLabel={valueLabel}
-            fieldLabel={fieldLabel}
-            filterLabelStatus={filterLabelStatus}
-            hideAlias={hideAlias}
-          />
-        </span>
-      </EuiBadge>
+      <span ref={ref}>
+        <FilterPill />
+      </span>
     </EuiToolTip>
+  ) : (
+    <span ref={ref}>
+      <FilterPill />
+    </span>
   );
 };
