@@ -11,7 +11,6 @@ import { memoize } from 'lodash';
 
 import {
   Capabilities,
-  ChromeStart,
   CoreStart,
   DocLinksStart,
   ToastsStart,
@@ -55,7 +54,6 @@ export interface DiscoverServices {
   application: ApplicationStart;
   addBasePath: (path: string) => string;
   capabilities: Capabilities;
-  chrome: ChromeStart;
   core: CoreStart;
   data: DataPublicPluginStart;
   docLinks: DocLinksStart;
@@ -98,7 +96,6 @@ export const buildServices = memoize(function (
     application: core.application,
     addBasePath: core.http.basePath.prepend,
     capabilities: core.application.capabilities,
-    chrome: core.chrome,
     core,
     data: plugins.data,
     docLinks: core.docLinks,

@@ -33,7 +33,14 @@ export interface DiscoverMainProps {
 export function DiscoverMainApp(props: DiscoverMainProps) {
   const { savedSearch, dataViewList } = props;
   const services = useDiscoverServices();
-  const { chrome, docLinks, uiSettings: config, data, spaces, history } = services;
+  const {
+    core: { chrome },
+    docLinks,
+    uiSettings: config,
+    data,
+    spaces,
+    history,
+  } = services;
   const usedHistory = useHistory();
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
   const navigateTo = useCallback(

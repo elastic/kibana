@@ -52,14 +52,14 @@ async function saveDataSource({
         } else {
           // Update defaults so that "reload saved query" functions correctly
           state.resetAppState();
-          services.chrome.docTitle.change(savedSearch.title!);
+          services.core.chrome.docTitle.change(savedSearch.title!);
 
           setBreadcrumbsTitle(
             {
               ...savedSearch,
               id: prevSavedSearchId ?? id,
             },
-            services.chrome
+            services.core.chrome
           );
         }
       }

@@ -31,13 +31,16 @@ export interface DocUrlParams {
 }
 
 const SingleDoc = ({ id }: SingleDocRouteProps) => {
-  const services = useDiscoverServices();
-  const { chrome, timefilter, core } = services;
+  const {
+    dataViews,
+    timefilter,
+    core: { chrome, executionContext },
+  } = useDiscoverServices();
 
   const { dataViewId, index } = useParams<DocUrlParams>();
   const breadcrumb = useMainRouteBreadcrumb();
 
-  useExecutionContext(core.executionContext, {
+  useExecutionContext(executionContext, {
     type: 'application',
     page: 'single-doc',
     id: dataViewId,
@@ -57,7 +60,7 @@ const SingleDoc = ({ id }: SingleDocRouteProps) => {
     timefilter.disableTimeRangeSelector();
   });
 
-  const { dataView, error } = useDataView(services.dataViews, dataViewId);
+  const { dataView, error } = useDataView(dataViews, dataViewId);
 
   if (error) {
     return (

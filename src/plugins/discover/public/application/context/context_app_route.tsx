@@ -23,8 +23,10 @@ export interface ContextUrlParams {
 }
 
 export function ContextAppRoute() {
-  const services = useDiscoverServices();
-  const { chrome } = services;
+  const {
+    core: { chrome },
+    dataViews,
+  } = useDiscoverServices();
 
   const { dataViewId, id } = useParams<ContextUrlParams>();
   const anchorId = decodeURIComponent(id);
@@ -42,7 +44,7 @@ export function ContextAppRoute() {
     ]);
   }, [chrome, breadcrumb]);
 
-  const { dataView, error } = useDataView(services.dataViews, usedDataViewId);
+  const { dataView, error } = useDataView(dataViews, usedDataViewId);
 
   if (error) {
     return (

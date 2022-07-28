@@ -11,11 +11,11 @@ import { discoverRouter } from './discover_router';
 import { DiscoverServices } from '../build_services';
 
 export const renderApp = (element: HTMLElement, services: DiscoverServices, isDev: boolean) => {
-  const { history: getHistory, capabilities, chrome, data, core } = services;
+  const { history: getHistory, capabilities, data, core } = services;
 
   const history = getHistory();
   if (!capabilities.discover.save) {
-    chrome.setBadge({
+    core.chrome.setBadge({
       text: i18n.translate('discover.badge.readOnly.text', {
         defaultMessage: 'Read only',
       }),

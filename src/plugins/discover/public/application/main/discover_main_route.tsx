@@ -46,7 +46,7 @@ export function DiscoverMainRoute(props: Props) {
   const { isDev } = props;
   const {
     core,
-    chrome,
+    core: { chrome },
     uiSettings,
     data,
     toastNotifications,
