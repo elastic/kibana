@@ -26,7 +26,7 @@ import { RegisterManagementAppArgs, ManagementAppMountParams } from '@kbn/manage
 
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { LicenseStatus } from '../../common/types/license_status';
-import { WatchStatus } from './sections/watch_status/components/watch_status';
+import { WatchStatusPage } from './sections/watch_status_page';
 import { WatchEdit } from './sections/watch_edit/components/watch_edit';
 import { WatchList } from './sections/watch_list/components/watch_list';
 import { registerRouter } from './lib/navigation';
@@ -108,7 +108,7 @@ export const App = (deps: AppDeps) => {
 export const AppWithoutRouter = () => (
   <Switch>
     <Route exact path="/watches" component={WatchList} />
-    <Route exact path="/watches/watch/:id/status" component={WatchStatus} />
+    <Route exact path="/watches/watch/:id/status" component={WatchStatusPage} />
     <Route exact path="/watches/watch/:id/edit" component={WatchEdit} />
     <Route exact path="/watches/new-watch/:type(json|threshold)" component={WatchEdit} />
     <Redirect exact from="/" to="/watches" />

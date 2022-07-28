@@ -16,44 +16,36 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { WatchDetail } from './watch_detail';
-import { WatchHistory } from './watch_history';
-import { listBreadcrumb, statusBreadcrumb } from '../../../lib/breadcrumbs';
-import { useLoadWatchDetail, deactivateWatch, activateWatch } from '../../../lib/api';
-import { WatchDetailsContext } from '../watch_details_context';
-import {
-  getPageErrorCode,
-  PageError,
-  SectionLoading,
-  DeleteWatchesModal,
-} from '../../../components';
-import { goToWatchList } from '../../../lib/navigation';
-import { useAppContext } from '../../../app_context';
 
+import { listBreadcrumb, statusBreadcrumb } from '../../lib/breadcrumbs';
+import { useLoadWatchDetail, deactivateWatch, activateWatch } from '../../lib/api';
+import { goToWatchList } from '../../lib/navigation';
+import { useAppContext } from '../../app_context';
+import { getPageErrorCode, PageError, SectionLoading, DeleteWatchesModal } from '../../components';
+
+import { ActionStatusesPanel, ExecutionHistoryPanel } from './components';
+import { WatchDetailsContext } from './watch_details_context';
 interface WatchStatusTab {
   id: string;
   name: string;
 }
 
-const WATCH_EXECUTION_HISTORY_TAB = 'watchExecutionHistoryTab';
-const WATCH_ACTIONS_TAB = 'watchActionsTab';
-
-const WATCH_STATUS_TABS: WatchStatusTab[] = [
+const TABS: WatchStatusTab[] = [
   {
-    id: WATCH_EXECUTION_HISTORY_TAB,
+    id: 'executionHistoryTab',
     name: i18n.translate('xpack.watcher.sections.watchStatus.executionHistoryTabLabel', {
       defaultMessage: 'Execution history',
     }),
   },
   {
-    id: WATCH_ACTIONS_TAB,
+    id: 'actionStatusesTab',
     name: i18n.translate('xpack.watcher.sections.watchStatus.actionsTabLabel', {
       defaultMessage: 'Action statuses',
     }),
   },
 ];
 
-export const WatchStatus = ({
+export const WatchStatusPage = ({
   match: {
     params: { id },
   },
@@ -71,7 +63,7 @@ export const WatchStatus = ({
     isLoading: isWatchDetailLoading,
   } = useLoadWatchDetail(id);
 
-  const [selectedTab, setSelectedTab] = useState<string>(WATCH_EXECUTION_HISTORY_TAB);
+  const [selectedTab, setSelectedTab] = useState<string>('executionHistoryTab');
   const [isActivated, setIsActivated] = useState<boolean | undefined>(undefined);
   const [watchesToDelete, setWatchesToDelete] = useState<string[]>([]);
   const [isTogglingActivation, setIsTogglingActivation] = useState<boolean>(false);
@@ -216,7 +208,7 @@ export const WatchStatus = ({
                     </EuiButtonEmpty>,
                   ]
             }
-            tabs={WATCH_STATUS_TABS.map((tab, index) => ({
+            tabs={TABS.map((tab, index) => ({
               onClick: () => {
                 setSelectedTab(tab.id);
               },
@@ -229,7 +221,11 @@ export const WatchStatus = ({
 
           <EuiSpacer size="l" />
 
-          {selectedTab === WATCH_ACTIONS_TAB ? <WatchDetail /> : <WatchHistory />}
+          {selectedTab === 'executionHistoryTab' ? (
+            <ExecutionHistoryPanel />
+          ) : (
+            <ActionStatusesPanel />
+          )}
 
           <DeleteWatchesModal
             callback={(deleted?: string[]) => {
