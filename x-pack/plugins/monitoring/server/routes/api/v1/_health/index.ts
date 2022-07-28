@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { LegacyRequest, MonitoringCore } from '../../../../types';
-import { MonitoringConfig } from '../../../../config';
+import type { LegacyRequest, MonitoringCore } from '../../../../types';
+import type { MonitoringConfig } from '../../../../config';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { getHealthRequestQueryRT } from '../../../../../common/http_api/_health';
-import { TimeRange } from '../../../../../common/http_api/shared';
+import type { TimeRange } from '../../../../../common/http_api/shared';
 import { INDEX_PATTERN, INDEX_PATTERN_ENTERPRISE_SEARCH } from '../../../../../common/constants';
 
 import { fetchMonitoredClusters } from './monitored_clusters';
 import { fetchMetricbeatErrors } from './metricbeat';
-import { FetchParameters } from './types';
+import type { FetchParameters } from './types';
 
 const DEFAULT_QUERY_TIMERANGE = { min: 'now-15m', max: 'now' };
 const DEFAULT_QUERY_TIMEOUT_SECONDS = 15;
