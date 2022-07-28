@@ -102,7 +102,7 @@ export function resolveDataView(
       title: warningTitle,
       text: i18n.translate('discover.showingDefaultDataViewWarningDescription', {
         defaultMessage:
-          'Showing the default data view: "{loadedIndexPatternTitle}" ({loadedIndexPatternId})',
+          'Showing the default data view: "{loadedDataViewTitle}" ({loadedDataViewId})',
         values: {
           loadedIndexPatternTitle: loadedIndexPattern.title,
           loadedIndexPatternId: loadedIndexPattern.id,
