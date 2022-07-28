@@ -16,6 +16,7 @@ import {
   EuiInMemoryTable,
   SearchFilterConfig,
   EuiBasicTableColumn,
+  EuiProgress,
 } from '@elastic/eui';
 
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -124,6 +125,8 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
   const getTable = useCallback(() => {
     return (
       <>
+        {isLoading ? <EuiProgress size="xs" color="accent" /> : null}
+
         <EuiSpacer size="m" />
         {items === undefined ? null : (
           <>
