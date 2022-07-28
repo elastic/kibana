@@ -32,6 +32,14 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     before(async () => {
+      // we must first force install the system package to override package verification error on policy create
+      // https://github.com/elastic/kibana/issues/137450
+      await supertest
+        .post(`/api/fleet/epm/packages/fleet_server-1.2.0`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true })
+        .expect(200);
+
       // create agent policies
       let { body: apiResponse } = await supertest
         .post(`/api/fleet/agent_policies`)
