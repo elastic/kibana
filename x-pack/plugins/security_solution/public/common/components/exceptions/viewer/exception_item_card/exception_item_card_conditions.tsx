@@ -42,6 +42,8 @@ const OPERATOR_TYPE_LABELS_EXCLUDED = Object.freeze({
   [ListOperatorTypeEnum.MATCH_ANY]: i18n.CONDITION_OPERATOR_TYPE_NOT_MATCH_ANY,
   [ListOperatorTypeEnum.MATCH]: i18n.CONDITION_OPERATOR_TYPE_NOT_MATCH,
   [ListOperatorTypeEnum.WILDCARD]: i18n.CONDITION_OPERATOR_TYPE_WILDCARD_DOES_NOT_MATCH,
+  [ListOperatorTypeEnum.EXISTS]: i18n.CONDITION_OPERATOR_TYPE_DOES_NOT_EXIST,
+  [ListOperatorTypeEnum.LIST]: i18n.CONDITION_OPERATOR_TYPE_NOT_IN_LIST,
 });
 
 const EuiFlexGroupNested = styled(EuiFlexGroup)`
@@ -92,7 +94,7 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
     const getNestedEntriesContent = useCallback(
       (type: string, nestedEntries: NonEmptyNestedEntriesArray) => {
         if (type === 'nested' && nestedEntries.length) {
-          return nestedEntries.map((entry) => {
+          return nestedEntries.map((entry, index) => {
             const { field: nestedField, type: nestedType, operator: nestedOperator } = entry;
             const nestedValue = 'value' in entry ? entry.value : '';
 
