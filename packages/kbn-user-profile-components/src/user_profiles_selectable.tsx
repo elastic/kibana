@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import type { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
@@ -24,13 +25,14 @@ import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { getUserDisplayName } from '../../../common/model';
-import type { UserProfile, UserProfileAvatarData } from '../../../common/model/user_profile';
-import { UserAvatar } from '../../components/user_avatar';
+import { getUserDisplayName } from './imported_types/user';
+import type { UserProfile, UserProfileAvatarData } from './imported_types/user_profile';
+import { UserAvatar } from './user_avatar';
 
 export type UserProfileWithAvatar = UserProfile<{ avatar?: UserProfileAvatarData }>;
 
-export interface UserProfilesSelectableProps extends Pick<EuiSelectableProps, 'singleSelection'> {
+export interface UserProfilesSelectableProps
+  extends Pick<EuiSelectableProps, 'height' | 'singleSelection'> {
   /**
    * List of users to be rendered as suggestions.
    */
@@ -70,6 +72,7 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
   onSearchChange,
   isLoading = false,
   singleSelection = false,
+  height,
 }) => {
   const [displayedOptions, setDisplayedOptions] = useState<SelectableOption[]>([]);
 
@@ -162,7 +165,6 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
     <EuiSelectable
       options={displayedOptions}
       searchable // We need to set `searchable` prop to true, despite implementing our own async search, since pressing space key would be used to toggle selection instead of typing space otherwise
-      style={{ maxHeight: 320, width: 500 }}
       // @ts-ignore: Type of `nextOptions` in EuiSelectable does not match what's actually being passed back so need to manually override it
       onChange={(nextOptions: Array<EuiSelectableOption<{ data: UserProfileWithAvatar }>>) => {
         if (onChange) {
@@ -192,6 +194,7 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
           onChange(values);
         }
       }}
+      height={height}
       singleSelection={singleSelection}
       isPreFiltered
     >
@@ -216,24 +219,25 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
                 <EuiText size="xs" color="subdued">
                   <FormattedMessage
                     id="xpack.security.userProfilesSelectable.selectedStatus"
-                    defaultMessage="{count, plural, one {# user assigned} other {# users assigned}}"
+                    defaultMessage="{count, plural, one {# assignee} other {# assignees}}"
                     values={{ count: selectedCount }}
                   />
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="xs"
-                  flush="right"
-                  onClick={() => onChange?.([])}
-                  disabled={!selectedCount}
-                  style={{ height: 18 }}
-                >
-                  <FormattedMessage
-                    id="xpack.security.userProfilesSelectable.clearButton"
-                    defaultMessage="Remove all assignees"
-                  />
-                </EuiButtonEmpty>
+                {selectedCount ? (
+                  <EuiButtonEmpty
+                    size="xs"
+                    flush="right"
+                    onClick={() => onChange?.([])}
+                    style={{ height: '1rem' }}
+                  >
+                    <FormattedMessage
+                      id="xpack.security.userProfilesSelectable.clearButton"
+                      defaultMessage="Remove all assignees"
+                    />
+                  </EuiButtonEmpty>
+                ) : undefined}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
@@ -251,7 +255,7 @@ function toSelectableOption(userProfile: UserProfileWithAvatar): SelectableOptio
   // @ts-ignore: `isGroupLabel` is not required here but TS complains
   return {
     key: userProfile.uid,
-    prepend: <UserAvatar user={userProfile.user} avatar={userProfile.data.avatar} size="s" />,
+    prepend: <UserAvatar userProfile={userProfile} size="s" />,
     label: getUserDisplayName(userProfile.user),
     append: <EuiTextColor color="subdued">{userProfile.user.email}</EuiTextColor>,
     data: userProfile,
