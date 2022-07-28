@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { take, filter } from 'rxjs/operators';
 
 import { i18n } from '@kbn/i18n';
 import type {
@@ -423,7 +423,18 @@ export class FleetPlugin
           summary: 'Fleet is setting up',
         });
 
-        await plugins.licensing.license$.pipe(take(1)).toPromise();
+        // We need to wait for the licence feature to be available,
+        // to have our internal saved object client with encrypted saved object working properly
+        await plugins.licensing.license$
+          .pipe(
+            filter(
+              (licence) =>
+                licence.getFeature('security').isEnabled &&
+                licence.getFeature('security').isAvailable
+            ),
+            take(1)
+          )
+          .toPromise();
 
         await setupFleet(
           new SavedObjectsClient(core.savedObjects.createInternalRepository()),
