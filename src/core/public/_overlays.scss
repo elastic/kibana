@@ -1,0 +1,9 @@
+.kbnGlobalBannerList__item + .kbnGlobalBannerList__item {
+  margin-top: $euiSizeS;
+}
+
+.kbnOverlayMountWrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
