@@ -9,7 +9,6 @@
 import React from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { EuiBetaBadgeProps } from '@elastic/eui';
 import { parse } from 'query-string';
 
@@ -40,7 +39,7 @@ import {
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
 } from '../types';
-import { VISUALIZE_APP_NAME, VisualizeConstants } from '../../../common/constants';
+import { VisualizeConstants } from '../../../common/constants';
 import { getEditBreadcrumbs } from './breadcrumbs';
 import { VISUALIZE_APP_LOCATOR, VisualizeLocatorParams } from '../../../common/locator';
 import { getUiActions } from '../../services';
@@ -121,23 +120,12 @@ export const getTopNavConfig = (
     i18n: { Context: I18nContext },
     savedObjectsTagging,
     presentationUtil,
-    usageCollection,
     getKibanaVersion,
     savedObjects,
   }: VisualizeServices
 ) => {
   const { vis, embeddableHandler } = visInstance;
   const savedVis = visInstance.savedVis;
-
-  const doTelemetryForSaveEvent = (visType: string) => {
-    if (usageCollection) {
-      usageCollection.reportUiCounter(
-        originatingApp ?? VISUALIZE_APP_NAME,
-        METRIC_TYPE.CLICK,
-        `${visType}:save`
-      );
-    }
-  };
 
   /**
    * Called when the user clicks "Save" button.
@@ -523,8 +511,6 @@ export const getTopNavConfig = (
                   return { id: true };
                 }
 
-                doTelemetryForSaveEvent(vis.type.name);
-
                 // We're adding the viz to a library so we need to save it and then
                 // add to a dashboard if necessary
                 const response = await doSave(saveOptions);
@@ -642,8 +628,6 @@ export const getTopNavConfig = (
               }
             },
             run: async () => {
-              doTelemetryForSaveEvent(vis.type.name);
-
               if (!savedVis?.id) {
                 return createVisReference();
               }

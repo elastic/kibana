@@ -30,7 +30,6 @@ export class DatatableVisualization {
     editorFrame.registerVisualization(async () => {
       const { getDatatableRenderer, getDatatableVisualization } = await import('../async_services');
       const palettes = await charts.palettes.getPalettes();
-
       expressions.registerRenderer(() =>
         getDatatableRenderer({
           formatFactory,

@@ -20,13 +20,13 @@ import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { SEARCH_INDEX_TAB_PATH } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 import { CrawlCustomSettingsFlyout } from '../search_index/crawler/crawl_custom_settings_flyout/crawl_custom_settings_flyout';
-import { CrawlerStatusIndicator } from '../search_index/crawler/crawler_status_indicator/crawler_status_indicator';
 import { CrawlerStatusBanner } from '../search_index/crawler/domain_management/crawler_status_banner';
 import { DeleteDomainModal } from '../search_index/crawler/domain_management/delete_domain_modal';
 import { DeleteDomainModalLogic } from '../search_index/crawler/domain_management/delete_domain_modal_logic';
 import { IndexNameLogic } from '../search_index/index_name_logic';
 import { SearchIndexTabId } from '../search_index/search_index';
 import { baseBreadcrumbs } from '../search_indices';
+import { CrawlerStatusIndicator } from '../shared/crawler_status_indicator/crawler_status_indicator';
 
 import { CrawlRulesTable } from './crawl_rules_table';
 import { CrawlerDomainDetailLogic } from './crawler_domain_detail_logic';

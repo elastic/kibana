@@ -13,7 +13,7 @@ import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { TimeRange } from '@kbn/es-query';
 import { EuiLink, EuiTextColor, EuiButton, EuiSpacer } from '@elastic/eui';
 
-import type { DatatableColumn } from '@kbn/expressions-plugin';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { groupBy, escape } from 'lodash';
 import type { Query } from '@kbn/data-plugin/common';
 import type { FramePublicAPI, StateSetter } from '../types';

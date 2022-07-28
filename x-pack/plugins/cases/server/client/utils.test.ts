@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { buildRangeFilter, sortToSnake } from './utils';
+import { buildRangeFilter, constructQueryOptions, sortToSnake } from './utils';
 import { toElasticsearchQuery } from '@kbn/es-query';
+import { CaseStatuses } from '../../common';
+import { CaseSeverity } from '../../common/api';
 
 describe('utils', () => {
   describe('sortToSnake', () => {
@@ -215,6 +217,274 @@ describe('utils', () => {
               },
             ],
           },
+        }
+      `);
+    });
+  });
+
+  describe('constructQueryOptions', () => {
+    it('creates a filter with the tags', () => {
+      const { filter } = constructQueryOptions({ tags: ['tag1', 'tag2'] });
+      expect(filter).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "cases.attributes.tags",
+                },
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "tag1",
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "cases.attributes.tags",
+                },
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "tag2",
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+          ],
+          "function": "or",
+          "type": "function",
+        }
+      `);
+    });
+
+    it('creates a filter with the reporters', () => {
+      expect(constructQueryOptions({ reporters: ['bob', 'sam'] }).filter).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "cases.attributes.created_by.username",
+                },
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "bob",
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "cases.attributes.created_by.username",
+                },
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "sam",
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+          ],
+          "function": "or",
+          "type": "function",
+        }
+      `);
+    });
+
+    it('creates a filter with the owner', () => {
+      expect(constructQueryOptions({ owner: 'observability' }).filter).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [
+            Object {
+              "isQuoted": false,
+              "type": "literal",
+              "value": "cases.attributes.owner",
+            },
+            Object {
+              "isQuoted": false,
+              "type": "literal",
+              "value": "observability",
+            },
+          ],
+          "function": "is",
+          "type": "function",
+        }
+      `);
+    });
+
+    it('creates a filter for the status', () => {
+      expect(constructQueryOptions({ status: CaseStatuses.open }).filter).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [
+            Object {
+              "isQuoted": false,
+              "type": "literal",
+              "value": "cases.attributes.status",
+            },
+            Object {
+              "isQuoted": false,
+              "type": "literal",
+              "value": "open",
+            },
+          ],
+          "function": "is",
+          "type": "function",
+        }
+      `);
+    });
+
+    it('creates a filter for the severity', () => {
+      expect(constructQueryOptions({ severity: CaseSeverity.CRITICAL }).filter)
+        .toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [
+            Object {
+              "isQuoted": false,
+              "type": "literal",
+              "value": "cases.attributes.severity",
+            },
+            Object {
+              "isQuoted": false,
+              "type": "literal",
+              "value": "critical",
+            },
+          ],
+          "function": "is",
+          "type": "function",
+        }
+      `);
+    });
+
+    it('creates a filter for the time range', () => {
+      expect(constructQueryOptions({ from: 'now-1M', to: 'now' }).filter).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "cases.attributes.created_at",
+                },
+                "gte",
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "now-1M",
+                },
+              ],
+              "function": "range",
+              "type": "function",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "cases.attributes.created_at",
+                },
+                "lte",
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "now",
+                },
+              ],
+              "function": "range",
+              "type": "function",
+            },
+          ],
+          "function": "and",
+          "type": "function",
+        }
+      `);
+    });
+
+    it('sets filter to undefined when no options were passed', () => {
+      expect(constructQueryOptions({}).filter).toBeUndefined();
+    });
+
+    it('creates a filter with tags and reporters', () => {
+      expect(constructQueryOptions({ tags: ['tag1', 'tag2'], reporters: 'sam' }).filter)
+        .toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [
+            Object {
+              "arguments": Array [
+                Object {
+                  "arguments": Array [
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "cases.attributes.tags",
+                    },
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "tag1",
+                    },
+                  ],
+                  "function": "is",
+                  "type": "function",
+                },
+                Object {
+                  "arguments": Array [
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "cases.attributes.tags",
+                    },
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "tag2",
+                    },
+                  ],
+                  "function": "is",
+                  "type": "function",
+                },
+              ],
+              "function": "or",
+              "type": "function",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "cases.attributes.created_by.username",
+                },
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "sam",
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+          ],
+          "function": "and",
+          "type": "function",
         }
       `);
     });

@@ -17,8 +17,8 @@ import type {
 } from '../../types';
 import { agentPolicyService } from '../agent_policy';
 import { outputService } from '../output';
-import { dataTypes, outputType } from '../../../common';
-import type { FullAgentPolicyOutputPermissions } from '../../../common';
+import { dataTypes, outputType } from '../../../common/constants';
+import type { FullAgentPolicyOutputPermissions } from '../../../common/types';
 import { getSettings } from '../settings';
 import { DEFAULT_OUTPUT } from '../../constants';
 
