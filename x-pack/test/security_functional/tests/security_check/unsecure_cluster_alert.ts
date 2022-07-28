@@ -13,7 +13,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const esArchiver = getService('esArchiver');
 
-  describe('Unsecure Cluster Alert', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/137456
+  describe.skip('Unsecure Cluster Alert', function () {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
