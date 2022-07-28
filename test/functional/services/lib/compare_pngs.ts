@@ -63,19 +63,19 @@ export async function comparePngs(
   const sessionDescriptor = toDescriptor(sessionInfo);
   const baselineDescriptor = toDescriptor(baselineInfo);
 
-  let sesstionTestPath: string = sessionDescriptor.path;
+  let sessionTestPath: string = sessionDescriptor.path;
   let baselineTestPath: string = baselineDescriptor.path;
 
-  log.debug(`comparePngs: ${sesstionTestPath} vs ${baselineTestPath}`);
+  log.debug(`comparePngs: ${sessionTestPath} vs ${baselineTestPath}`);
 
   const { instance: session, metadata: sessionMetadata } = await getSharpInstance(
-    sessionDescriptor.buffer ?? sesstionTestPath
+    sessionDescriptor.buffer ?? sessionTestPath
   );
   const sessionWidth = sessionMetadata.width ?? 0;
   const sessionHeight = sessionMetadata.height ?? 0;
 
   const { instance: baseline, metadata: baselineMetadata } = await getSharpInstance(
-    sessionDescriptor.buffer ?? sesstionTestPath
+    baselineDescriptor.buffer ?? baselineTestPath
   );
   const baselineWidth = baselineMetadata.width ?? 0;
   const baselineHeight = baselineMetadata.height ?? 0;
@@ -85,9 +85,9 @@ export async function comparePngs(
   const testHeight = Math.min(sessionHeight, baselineHeight);
   log.debug('baseline height ' + baselineHeight + ' and width ' + baselineWidth);
   log.debug('session height ' + sessionHeight + ' and width ' + sessionWidth);
+  log.debug('test height ' + testHeight + ' and width ' + testWidth);
   if (sessionWidth !== baselineWidth || sessionHeight !== baselineHeight) {
-    log.debug('resize height ' + testHeight + ' and width ' + testWidth);
-    sesstionTestPath = join(
+    sessionTestPath = join(
       sessionDirectory,
       `${parse(sessionDescriptor.path).name}-session-resized.png`
     );
@@ -95,7 +95,7 @@ export async function comparePngs(
       sessionDirectory,
       `${parse(baselineDescriptor.path).name}-baseline-resized.png`
     );
-    await session.resize(testWidth, testHeight).png().toFile(sesstionTestPath);
+    await session.resize(testWidth, testHeight).png().toFile(sessionTestPath);
     await baseline.resize(testWidth, testHeight).png().toFile(baselineTestPath);
   }
 
@@ -105,8 +105,7 @@ export async function comparePngs(
   // will still show up as diffs, but upping this will not help that.  Instead we keep the threshold low, and expect
   // some the diffCount to be lower than our own threshold value.
   const THRESHOLD = 0.1;
-
-  const sessionTestImg = PNG.sync.read(await fs.readFile(sesstionTestPath));
+  const sessionTestImg = PNG.sync.read(await fs.readFile(sessionTestPath));
   const baselineTestImg = PNG.sync.read(await fs.readFile(baselineTestPath));
   const diff = new PNG({ width: testWidth, height: testHeight });
   const mismatchedPixels = pixelmatch(
