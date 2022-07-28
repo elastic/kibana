@@ -52,7 +52,7 @@ const FlyoutHeaderComponent: React.FC<{
             <EuiIcon type={icon} size="m" data-test-subj="edit-connector-flyout-header-icon" />
           </EuiFlexItem>
         ) : null}
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           {isPreconfigured ? (
             <>
               <EuiTitle size="s">

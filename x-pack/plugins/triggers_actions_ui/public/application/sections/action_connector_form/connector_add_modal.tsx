@@ -142,7 +142,7 @@ const ConnectorAddModal = ({
                 <EuiIcon type={actionTypeModel.iconClass} size="xl" />
               </EuiFlexItem>
             ) : null}
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiTitle size="s">
                 <h3 id="flyoutTitle">
                   <FormattedMessage

@@ -45,7 +45,7 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
             <EuiIcon type={icon} size="xl" />
           </EuiFlexItem>
         ) : null}
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           {actionTypeName && actionTypeMessage ? (
             <>
               <EuiTitle size="s">
