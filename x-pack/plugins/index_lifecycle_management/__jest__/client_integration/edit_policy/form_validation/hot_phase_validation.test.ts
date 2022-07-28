@@ -36,12 +36,12 @@ describe('<EditPolicy /> hot phase validation', () => {
   });
 
   describe('rollover', () => {
-    test(`doesn't allow no max primary shard size, no max index size, no max age, no max docs`, async () => {
+    test(`doesn't allow no max primary shard size, no max primary docs, no max age, no max docs, no max index size`, async () => {
       await actions.rollover.toggleDefault();
       expect(actions.rollover.hasSettingRequiredCallout()).toBeFalsy();
 
       await actions.rollover.setMaxPrimaryShardSize('');
-      await actions.rollover.setMaxPrimaryShardSize('');
+      await actions.rollover.setMaxPrimaryShardDocs('');
       await actions.rollover.setMaxAge('');
       await actions.rollover.setMaxDocs('');
       await actions.rollover.setMaxSize('');

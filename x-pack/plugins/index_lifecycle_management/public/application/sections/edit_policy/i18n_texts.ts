@@ -110,7 +110,7 @@ export const i18nTexts = {
     maxPrimaryShardDocsLabel: i18n.translate(
       'xpack.indexLifecycleMgmt.hotPhase.maximumPrimaryShardDocsLabel',
       {
-        defaultMessage: 'Maximum primary shard documents',
+        defaultMessage: 'Maximum docs in the primary shard',
       }
     ),
     maxPrimaryShardSizeUnitsLabel: i18n.translate(
