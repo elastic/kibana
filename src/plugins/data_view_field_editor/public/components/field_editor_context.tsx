@@ -49,6 +49,7 @@ export interface Context {
   existingConcreteFields: Array<{ name: string; type: string }>;
   field?: Field;
   setSubfields: (newValue: Record<string, RuntimePrimitiveTypes>) => void;
+  subfields?: Record<string, RuntimePrimitiveTypes>;
 }
 
 const fieldEditorContext = createContext<Context | undefined>(undefined);
@@ -77,9 +78,6 @@ export const FieldEditorProvider: FunctionComponent<FieldEditorProviderProps> = 
         {}
       )
     : undefined;
-
-  // might need to move this elsehwere
-  console.log('Render FieldEditorProvider');
 
   const [subfields, setSubfields] = React.useState<
     Record<string, RuntimePrimitiveTypes> | undefined

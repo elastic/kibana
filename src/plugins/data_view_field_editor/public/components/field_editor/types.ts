@@ -11,3 +11,8 @@ import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { RuntimeType } from '../../shared_imports';
 
 export type TypeSelection = Array<EuiComboBoxOptionOption<RuntimeType>>;
+
+export interface FieldTypeInfo {
+  name: string;
+  type: string;
+}

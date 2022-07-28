@@ -99,7 +99,6 @@ const FieldEditorFlyoutContentComponent = ({
   }, [isFormModified]);
 
   const onClickSave = useCallback(async () => {
-    console.log('onClickSave');
     const { isValid, data: updatedField } = await submit();
 
     if (!isMounted.current) {
@@ -117,7 +116,7 @@ const FieldEditorFlyoutContentComponent = ({
           confirmChangeNameOrType: true,
         });
       } else {
-        if (updatedField.type === 'composite') {
+        if (updatedField.type === 'composite' && subfields) {
           updatedField.fields = fieldTypeMapToRuntimeSpecFormat(subfields);
         }
         onSave(updatedField);

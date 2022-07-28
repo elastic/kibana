@@ -8,7 +8,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { get, isEqual } from 'lodash';
+import { get, isEqual, differenceWith } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut } from '@elastic/eui';
 
 import {
@@ -20,7 +20,6 @@ import {
   UseField,
   TextField,
   RuntimeType,
-  RuntimeFieldSubField,
   RuntimePrimitiveTypes,
 } from '../../shared_imports';
 import { Field } from '../../types';
@@ -33,7 +32,7 @@ import { getNameFieldConfig } from './lib';
 import { TypeField } from './form_fields';
 import { FieldDetail } from './field_detail';
 import { CompositeEditor } from './composite_editor';
-import { TypeSelection } from './types';
+import { TypeSelection, FieldTypeInfo } from './types';
 
 export interface FieldEditorFormState {
   isValid: boolean | undefined;
@@ -43,6 +42,7 @@ export interface FieldEditorFormState {
 }
 
 export interface FieldFormInternal extends Omit<Field, 'type' | 'internalType' | 'fields'> {
+  // todo - remove? Had trouble with this
   // fields?: Array<{ name: string; type: TypeSelection }>;
   type: TypeSelection;
   __meta__: {
@@ -106,7 +106,7 @@ const formSerializer = (field: FieldFormInternal): Field => {
 
 const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) => {
   // todo see if we can reduce renders
-  const { namesNotAllowed, fieldTypeToProcess, subfields, setSubfields } = useFieldEditorContext();
+  const { namesNotAllowed, fieldTypeToProcess, setSubfields } = useFieldEditorContext();
   const {
     params: { update: updatePreviewParams },
     fields,
@@ -119,6 +119,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
     deserializer: formDeserializer,
     serializer: formSerializer,
   });
+  const [fieldTypeInfo, setFieldTypeInfo] = useState<FieldTypeInfo[]>();
   const { submit, isValid: isFormValid, isSubmitted, getFields, isSubmitting } = form;
 
   // loading from saved field
@@ -130,12 +131,13 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
     {}
   );
 
-  // todo - non composite
   const [fieldsAndTypes, setFieldsAndTypes] = useState(savedSubfieldTypes);
 
+  /*
   useEffect(() => {
     setSubfields(fieldsAndTypes);
   }, [fieldsAndTypes, setSubfields]);
+  */
 
   const nameFieldConfig = getNameFieldConfig(namesNotAllowed, field);
 
@@ -162,37 +164,50 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
   const typeHasChanged = (Boolean(field?.type) && typeField?.isModified) ?? false;
 
   const isValueVisible = get(formData, '__meta__.isValueVisible');
-  // const isRuntimeSubfield = field?.script.
-  // form.setFieldValue('fields', [{ name: 'a', value: [{ label: 'keyword', type: 'keyword' }] }]);
-  // form.setFieldValue('fields', { a: { type: 'keyword' } });
-  // console.log('RENDER FORM', form.getFields());
 
   useEffect(() => {
-    if (!isLoadingPreview && initialPreviewComplete) {
-      console.log('useEffect PREVIEW', fieldsAndTypes, fields);
-
-      // previously saved - subfields
-      // preview to fieldTypeMap
-      /**
-      const fixedFormat = fields.reduce<Record<string, RuntimePrimitiveTypes>>((col, item) => {
-        col[item.key] = item.type as RuntimePrimitiveTypes;
-        return col;
-      }, {});
-      setSubfields(fixedFormat);
-      */
-
-      const updated = fields.reduce((col, item) => {
-        const parsedKey = item.key.slice(item.key.search('\\.') + 1);
-        col[parsedKey] = fieldsAndTypes[parsedKey] || item.type;
-        return col;
-      }, {});
-
-      // this looks at each preview field, grabs the existing type OR gets the preview type
-      if (!isEqual(updated, fieldsAndTypes)) {
-        setFieldsAndTypes(updated);
-      }
+    if (isLoadingPreview || initialPreviewComplete) {
+      return;
     }
-  }, [fields, setSubfields, isLoadingPreview, initialPreviewComplete, fieldsAndTypes]);
+    // Take preview info, remove unneeded info for updating types, comparison
+    const fieldTypeInfoUpdate = fields
+      .reverse()
+      // sometimes we get null types, remove them
+      .filter((item) => item.type !== undefined)
+      .map<FieldTypeInfo>((item) => {
+        const key = item.key.slice(item.key.search('\\.') + 1);
+        return { name: key, type: item.type! };
+      });
+
+    const update = differenceWith(fieldTypeInfoUpdate, fieldTypeInfo || [], isEqual).reduce<
+      Record<string, string>
+    >((col, item) => {
+      col[item.name] = item.type;
+      return col;
+    }, {});
+
+    const hasUpdates = Object.keys(update).length > 0;
+
+    // todo ensure works on opening saved field
+    // skip first update from initial preview, only update when there's a difference
+    // if (fieldTypeInfo === undefined || !isEqual(fieldTypeInfoUpdate, fieldTypeInfo)) {
+
+    // todo does this get fired with key removal?
+    if (hasUpdates) {
+      // form.updateFieldValues({ subfields: { ...fieldsAndTypes, ...update } });
+      const updatedFieldsAndTypes = { ...fieldsAndTypes, ...update };
+      setFieldsAndTypes(updatedFieldsAndTypes);
+      setFieldTypeInfo(fieldTypeInfoUpdate);
+      setSubfields(updatedFieldsAndTypes as Record<string, RuntimePrimitiveTypes>);
+    }
+  }, [
+    fields,
+    isLoadingPreview,
+    initialPreviewComplete,
+    fieldsAndTypes,
+    fieldTypeInfo,
+    setSubfields /* , form */,
+  ]);
 
   useEffect(() => {
     if (onChange) {
@@ -210,14 +225,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
           : { source: updatedScript!.source },
       format: updatedFormat?.id !== undefined ? updatedFormat : null,
     });
-  }, [
-    updatedName,
-    updatedType,
-    updatedScript?.source,
-    isValueVisible,
-    updatedFormat,
-    updatePreviewParams,
-  ]);
+  }, [updatedName, updatedType, updatedScript, isValueVisible, updatedFormat, updatePreviewParams]);
 
   useEffect(() => {
     if (onFormModifiedChange) {
@@ -289,6 +297,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
       {updatedType && updatedType[0].value !== 'composite' ? (
         <FieldDetail />
       ) : (
+        // todo rename these subfields
         <CompositeEditor value={fieldsAndTypes} setValue={setFieldsAndTypes} />
       )}
     </Form>
