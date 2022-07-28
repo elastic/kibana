@@ -15,7 +15,8 @@ import {
 } from '../../file_share_service/errors';
 import type { FilesRouter, FilesRequestHandler } from '../types';
 import { FilePublicDownloadHttpEndpoint, FILES_API_ROUTES } from '../api_routes';
-import { getDownloadHeadersForFile, fileNameSchema } from '../common';
+import { getDownloadHeadersForFile } from '../common';
+import { fileNameWithExt } from '../common_schemas';
 
 const method = 'get' as const;
 
@@ -24,7 +25,7 @@ const querySchema = schema.object({
 });
 
 export const paramsSchema = schema.object({
-  fileName: schema.maybe(fileNameSchema),
+  fileName: schema.maybe(fileNameWithExt),
 });
 
 type Query = Ensure<FilePublicDownloadHttpEndpoint['inputs']['query'], TypeOf<typeof querySchema>>;

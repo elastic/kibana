@@ -7,7 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
-const ALPHA_NUMERIC_WITH_SPACES_REGEX = /^[a-zA-Z0-9\s]+$/;
+const ALPHA_NUMERIC_WITH_SPACES_REGEX = /^[a-z0-9\s]+$/i;
+const ALPHA_NUMERIC_WITH_SPACES_EXT_REGEX = /^[a-z0-9\s\.]+$/i;
 
 function alphanumericValidation(v: string) {
   return ALPHA_NUMERIC_WITH_SPACES_REGEX.test(v)
@@ -15,10 +16,22 @@ function alphanumericValidation(v: string) {
     : 'Only alphanumeric characters are allowed as file names';
 }
 
+function alphanumericWithExtValidation(v: string) {
+  return ALPHA_NUMERIC_WITH_SPACES_EXT_REGEX.test(v)
+    ? undefined
+    : 'Only alphanumeric characters, spaces (" ") and dots (".") are allowed';
+}
+
 export const fileName = schema.string({
   minLength: 1,
   maxLength: 256,
   validate: alphanumericValidation,
+});
+
+export const fileNameWithExt = schema.string({
+  minLength: 1,
+  maxLength: 256,
+  validate: alphanumericWithExtValidation,
 });
 
 export const fileAlt = schema.maybe(

@@ -9,7 +9,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { Ensure } from '@kbn/utility-types';
 import type { CreateFileKindHttpEndpoint } from '../../../common/api_routes';
 import type { FileKindsRequestHandler } from './types';
-import * as commonSchemas from './common_schemas';
+import * as commonSchemas from '../common_schemas';
 
 export const method = 'post' as const;
 
