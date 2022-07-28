@@ -1628,7 +1628,7 @@
         "signature": [
           "{ getSampleDatasets: () => ",
           "Writable",
-          "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; iconPath?: string | undefined; statusMsg?: string | undefined; } & { id: string; name: string; description: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; defaultIndex: string; previewImagePath: string; overviewDashboard: string; dataIndices: Readonly<{} & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: ",
+          "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; iconPath?: string | undefined; statusMsg?: string | undefined; } & { id: string; name: string; description: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; defaultIndex: string; dataIndices: Readonly<{} & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: ",
           "SavedObject",
           "<unknown>[]) => void; addAppLinksToSampleDataset: (id: string, appLinks: ",
           {
@@ -1662,7 +1662,7 @@
         "signature": [
           "() => ",
           "Writable",
-          "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; iconPath?: string | undefined; statusMsg?: string | undefined; } & { id: string; name: string; description: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; defaultIndex: string; previewImagePath: string; overviewDashboard: string; dataIndices: Readonly<{} & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>"
+          "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; iconPath?: string | undefined; statusMsg?: string | undefined; } & { id: string; name: string; description: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; defaultIndex: string; dataIndices: Readonly<{} & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>"
         ],
         "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
         "deprecated": false,
@@ -2021,7 +2021,7 @@
           "signature": [
             "{ getSampleDatasets: () => ",
             "Writable",
-            "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; iconPath?: string | undefined; statusMsg?: string | undefined; } & { id: string; name: string; description: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; defaultIndex: string; previewImagePath: string; overviewDashboard: string; dataIndices: Readonly<{} & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: ",
+            "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; iconPath?: string | undefined; statusMsg?: string | undefined; } & { id: string; name: string; description: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; defaultIndex: string; dataIndices: Readonly<{} & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: ",
             "SavedObject",
             "<unknown>[]) => void; addAppLinksToSampleDataset: (id: string, appLinks: ",
             {
