@@ -171,19 +171,19 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     if (hasDataViewId) {
       const dv = await data.dataViews.get(hasDataViewId);
       setDataViewIndexPatterns(dv);
-    }  else {
+    } else {
       return null;
     }
-  }, [
-    hasDataViewId,
-    data.dataViews,
-    setDataViewIndexPatterns
-  ]);
+  }, [hasDataViewId, data.dataViews, setDataViewIndexPatterns]);
 
-  const [isIndexPatternLoading, { indexPatterns: indexIndexPatterns }] =
-    useFetchIndex(hasDataViewId ? [] : memoRuleIndices);
+  const [isIndexPatternLoading, { indexPatterns: indexIndexPatterns }] = useFetchIndex(
+    hasDataViewId ? [] : memoRuleIndices
+  );
 
-  const indexPattern = useMemo((): DataViewBase | null => hasDataViewId ? dataViewIndexPatterns : indexIndexPatterns, [hasDataViewId, dataViewIndexPatterns, indexIndexPatterns])
+  const indexPattern = useMemo(
+    (): DataViewBase | null => (hasDataViewId ? dataViewIndexPatterns : indexIndexPatterns),
+    [hasDataViewId, dataViewIndexPatterns, indexIndexPatterns]
+  );
 
   const handleBuilderOnChange = useCallback(
     ({
