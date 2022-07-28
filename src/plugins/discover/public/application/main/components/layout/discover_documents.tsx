@@ -93,7 +93,7 @@ function DiscoverDocumentsComponent({
       const grid = { ...(state.grid || {}) };
       const newColumns = { ...(grid.columns || {}) };
       newColumns[colSettings.columnId] = {
-        width: colSettings.width,
+        width: Math.round(colSettings.width),
       };
       const newGrid = { ...grid, columns: newColumns };
       stateContainer.setAppState({ grid: newGrid });
