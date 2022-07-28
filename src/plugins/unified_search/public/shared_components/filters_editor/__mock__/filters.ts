@@ -34,7 +34,6 @@ export const getFiltersMock = () =>
     {
       meta: {
         params: {
-          conditionalType: 'or',
           filters: [
             {
               meta: {
