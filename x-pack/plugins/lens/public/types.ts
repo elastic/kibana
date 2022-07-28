@@ -262,8 +262,7 @@ export interface Datasource<T = unknown, P = unknown> {
     savedObjectReferences?: SavedObjectReference[],
     initialContext?: VisualizeFieldContext | VisualizeEditorContext,
     indexPatternRefs?: IndexPatternRef[],
-    indexPatterns?: IndexPatternMap,
-    options?: InitializationOptions
+    indexPatterns?: IndexPatternMap
   ) => T;
 
   // Given the current state, which parts should be saved?

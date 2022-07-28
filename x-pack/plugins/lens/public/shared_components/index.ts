@@ -12,11 +12,6 @@ export { PalettePicker } from './palette_picker';
 export { FieldPicker, LensFieldIcon, TruncatedLabel } from './field_picker';
 export type { FieldOption, FieldOptionValue } from './field_picker';
 export { ChangeIndexPattern, fieldExists, fieldContainsData } from './dataview_picker';
-export {
-  NewBucketButton,
-  DraggableBucketContainer,
-  DragDropBuckets,
-} from './drag_drop_bucket/buckets';
 export { RangeInputField } from './range_input_field';
 export {
   BucketAxisBoundsControl,

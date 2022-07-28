@@ -15,18 +15,13 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  DragDropBuckets,
-  NewBucketButton,
-  TooltipWrapper,
-  useDebouncedValue,
-} from '../../../../shared_components';
+import { ExistingFieldsMap, IndexPattern } from '../../../../types';
+import { TooltipWrapper, useDebouncedValue } from '../../../../shared_components';
 import { FieldSelect } from '../../../dimension_panel/field_select';
 import type { TermsIndexPatternColumn } from './types';
-import type { IndexPatternPrivateState } from '../../../types';
 import type { OperationSupportMatrix } from '../../../dimension_panel';
 import { supportedTypes } from './constants';
-import type { IndexPattern } from '../../../../editor_frame_service/types';
+import { DragDropBuckets, NewBucketButton } from '../shared_components';
 
 const generateId = htmlIdGenerator();
 export const MAX_MULTI_FIELDS_SIZE = 3;
@@ -34,7 +29,7 @@ export const MAX_MULTI_FIELDS_SIZE = 3;
 export interface FieldInputsProps {
   column: TermsIndexPatternColumn;
   indexPattern: IndexPattern;
-  existingFields: IndexPatternPrivateState['existingFields'];
+  existingFields: ExistingFieldsMap;
   invalidFields?: string[];
   operationSupportMatrix: Pick<OperationSupportMatrix, 'operationByField'>;
   onChange: (newValues: string[]) => void;
@@ -100,7 +95,7 @@ export function FieldInputs({
         <FieldSelect
           fieldIsInvalid={Boolean(invalidFields?.[0])}
           currentIndexPattern={indexPattern}
-          existingFields={existingFields}
+          existingFields={existingFields[indexPattern.title]}
           operationByField={operationSupportMatrix.operationByField}
           selectedOperationType={column?.operationType}
           selectedField={value}
@@ -190,7 +185,7 @@ export function FieldInputs({
                     <FieldSelect
                       fieldIsInvalid={shouldShowError}
                       currentIndexPattern={indexPattern}
-                      existingFields={existingFields}
+                      existingFields={existingFields[indexPattern.title]}
                       operationByField={filteredOperationByField}
                       selectedOperationType={column.operationType}
                       selectedField={value}

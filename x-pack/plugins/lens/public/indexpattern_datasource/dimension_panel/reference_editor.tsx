@@ -27,13 +27,13 @@ import {
 } from '../operations';
 import { FieldChoiceWithOperationType, FieldSelect } from './field_select';
 import { hasField } from '../pure_utils';
+import type { IndexPatternLayer } from '../types';
 import type {
+  ExistingFieldsMap,
   IndexPattern,
   IndexPatternField,
-  IndexPatternLayer,
-  IndexPatternPrivateState,
-} from '../types';
-import type { ParamEditorCustomProps } from '../../types';
+  ParamEditorCustomProps,
+} from '../../types';
 import type { IndexPatternDimensionEditorProps } from './dimension_panel';
 import { FormRow } from '../operations/definitions/shared_components';
 
@@ -82,7 +82,7 @@ export interface ReferenceEditorProps {
   fieldLabel?: string;
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
   isInline?: boolean;
-  existingFields: IndexPatternPrivateState['existingFields'];
+  existingFields: ExistingFieldsMap;
   dateRange: DateRange;
   labelAppend?: EuiFormRowProps['labelAppend'];
   isFullscreen: boolean;
@@ -305,7 +305,7 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
           <FieldSelect
             fieldIsInvalid={showFieldInvalid || showFieldMissingInvalid}
             currentIndexPattern={currentIndexPattern}
-            existingFields={existingFields}
+            existingFields={existingFields[currentIndexPattern.title]}
             operationByField={operationSupportMatrix.operationByField}
             selectedOperationType={
               // Allows operation to be selected before creating a valid column

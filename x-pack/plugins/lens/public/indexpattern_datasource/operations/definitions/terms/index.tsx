@@ -40,7 +40,7 @@ import {
   getErrorMessage,
 } from '../../../dimension_panel/field_input';
 import type { TermsIndexPatternColumn } from './types';
-import type { IndexPatternField } from '../../../types';
+import type { IndexPatternField } from '../../../../types';
 import {
   getDisallowedTermsMessage,
   getMultiTermsScriptedFieldErrorMessage,

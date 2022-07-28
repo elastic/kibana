@@ -28,7 +28,6 @@ import type {
   DatasourceDataPanelProps,
   DatasourceLayerPanelProps,
   PublicAPIProps,
-  InitializationOptions,
   OperationDescriptor,
   FramePublicAPI,
   IndexPatternField,
@@ -148,8 +147,7 @@ export function getIndexPatternDatasource({
       references?: SavedObjectReference[],
       initialContext?: VisualizeFieldContext | VisualizeEditorContext,
       indexPatternRefs?: IndexPatternRef[],
-      indexPatterns?: Record<string, IndexPattern>,
-      options?: InitializationOptions
+      indexPatterns?: Record<string, IndexPattern>
     ) {
       return loadInitialState({
         persistedState,

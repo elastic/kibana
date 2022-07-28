@@ -8,7 +8,7 @@
 import type { DragDropIdentifier } from '../drag_drop/providers';
 import type { IncompleteColumn, GenericIndexPatternColumn } from './operations';
 import type { DragDropOperation } from '../types';
-import type { IndexPattern, IndexPatternField } from '../editor_frame_service/types';
+import type { IndexPattern, IndexPatternField } from '../types';
 
 export type {
   GenericIndexPatternColumn,

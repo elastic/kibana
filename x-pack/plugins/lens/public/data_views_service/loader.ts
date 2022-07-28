@@ -28,7 +28,7 @@ export function getFieldByNameFactory(newFields: IndexPatternField[]) {
 
 export function convertDataViewIntoLensIndexPattern(
   dataView: DataView,
-  restrictionRemapper: (name: string) => string
+  restrictionRemapper: (name: string) => string = onRestrictionMapping
 ): IndexPattern {
   const newFields = dataView.fields
     .filter((field) => !isNestedField(field) && (!!field.aggregatable || !!field.scripted))
