@@ -100,6 +100,7 @@ const CaseContainerComponent: React.FC = () => {
           owner: [APP_ID],
           features: {
             metrics: ['alerts.count', 'alerts.users', 'alerts.hosts', 'connectors', 'lifespan'],
+            alerts: { isExperimental: true },
           },
           refreshRef,
           onComponentInitialized,
