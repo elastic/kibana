@@ -587,7 +587,8 @@ export default function (providerContext: FtrProviderContext) {
         );
       });
 
-      it('should return a 200 if updating monitoring_enabled on a policy', async () => {
+      // Skipped as cannot force install the system and agent integrations as part of policy creation https://github.com/elastic/kibana/issues/137450
+      it.skip('should return a 200 if updating monitoring_enabled on a policy', async () => {
         const fetchPackageList = async () => {
           const response = await supertest
             .get('/api/fleet/epm/packages')
