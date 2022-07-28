@@ -45,12 +45,12 @@ export const getClustersQuery = (query: QueryDslQueryContainer, pitId: string): 
   aggs: {
     aggs_by_cluster_id: {
       terms: {
-        field: 'cluster_id.keyword',
+        field: 'cluster_id',
       },
       aggs: {
         benchmarks: {
           terms: {
-            field: 'rule.benchmark.name.keyword',
+            field: 'rule.benchmark.name',
           },
         },
         timestamps: {
