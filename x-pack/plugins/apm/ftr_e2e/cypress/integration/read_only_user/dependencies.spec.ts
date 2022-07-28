@@ -16,7 +16,7 @@ const timeRange = {
   rangeTo: end,
 };
 
-describe('Dependencies', () => {
+describe.skip('Dependencies', () => {
   before(async () => {
     await synthtrace.index(
       opbeans({

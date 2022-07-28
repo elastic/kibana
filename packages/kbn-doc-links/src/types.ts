@@ -101,7 +101,12 @@ export interface DocLinks {
     readonly webCrawlerReference: string;
   };
   readonly enterpriseSearch: {
+    readonly bulkApi: string;
     readonly configuration: string;
+    readonly crawlerGettingStarted: string;
+    readonly crawlerManaging: string;
+    readonly crawlerOverview: string;
+    readonly languageAnalyzers: string;
     readonly licenseManagement: string;
     readonly mailService: string;
     readonly troubleshootSetup: string;
@@ -370,6 +375,7 @@ export interface DocLinks {
     datastreamsNamingScheme: string;
     installElasticAgent: string;
     installElasticAgentStandalone: string;
+    packageSignatures: string;
     upgradeElasticAgent: string;
     learnMoreBlog: string;
     apiKeysLearnMore: string;

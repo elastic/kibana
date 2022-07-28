@@ -17,7 +17,7 @@ import { DataDocuments$ } from '../../hooks/use_saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { DiscoverDocuments } from './discover_documents';
-import { indexPatternMock } from '../../../../__mocks__/index_pattern';
+import { dataViewMock } from '../../../../__mocks__/data_view';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
 import { EsHitRecord } from '../../../../types';
@@ -32,12 +32,12 @@ function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
 
   const documents$ = new BehaviorSubject({
     fetchStatus,
-    result: hits.map((hit) => buildDataTableRecord(hit, indexPatternMock)),
+    result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
   }) as DataDocuments$;
 
   const props = {
     expandedDoc: undefined,
-    indexPattern: indexPatternMock,
+    dataView: dataViewMock,
     onAddFilter: jest.fn(),
     savedSearch: savedSearchMock,
     documents$,
