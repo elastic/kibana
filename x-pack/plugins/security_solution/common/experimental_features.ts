@@ -39,11 +39,6 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsConsoleEnabled: true,
 
   /**
-   * Enables the cloud security posture navigation inside the security solution
-   */
-  cloudSecurityPostureNavigation: false,
-
-  /**
    * Enables the insights module for related alerts by process ancestry
    */
   insightsRelatedAlertsByProcessAncestry: false,

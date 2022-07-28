@@ -247,6 +247,9 @@ const mockV2MigrationOptions = () => {
 };
 
 const mockOptions = () => {
+  const mockedClient = elasticsearchClientMock.createElasticsearchClient();
+  (mockedClient as any).child = jest.fn().mockImplementation(() => mockedClient);
+
   const options: MockedOptions = {
     logger: loggingSystemMock.create().get(),
     kibanaVersion: '8.2.3',
@@ -284,7 +287,7 @@ const mockOptions = () => {
       skip: false,
       retryAttempts: 20,
     },
-    client: elasticsearchClientMock.createElasticsearchClient(),
+    client: mockedClient,
     docLinks: docLinksServiceMock.createSetupContract(),
   };
   return options;
