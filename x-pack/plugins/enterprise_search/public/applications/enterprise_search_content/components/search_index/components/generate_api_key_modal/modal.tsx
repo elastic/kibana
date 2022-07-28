@@ -61,7 +61,7 @@ export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexN
                   "Before you can start posting documents to your Elasticsearch index you'll need to create at least one API key.",
               })}
               &nbsp;
-              <EuiLink href={/* TODO link to docs */ '#'} external>
+              <EuiLink href={docLinks.apiKeys} external>
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.overview.generateApiKeyModal.learnMore',
                   { defaultMessage: 'Learn more about API keys' }
