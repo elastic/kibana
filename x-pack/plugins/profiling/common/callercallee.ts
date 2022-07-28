@@ -30,6 +30,8 @@ export interface CallerCalleeIntermediateNode {
   callees: Map<FrameGroupID, CallerCalleeIntermediateNode>;
   frameMetadata: Set<StackFrameMetadata>;
   samples: number;
+  countInclusive: number;
+  countExclusive: number;
 }
 
 export function createCallerCalleeIntermediateNode(
@@ -42,6 +44,8 @@ export function createCallerCalleeIntermediateNode(
     callees: new Map<FrameGroupID, CallerCalleeIntermediateNode>(),
     frameMetadata: new Set<StackFrameMetadata>([frameMetadata]),
     samples,
+    countInclusive: 0,
+    countExclusive: 0,
   };
 }
 
@@ -132,6 +136,7 @@ export function createCallerCalleeIntermediateRoot(
   // root by the count of that trace. Walk "up" the trace (through the callers)
   // and add the count of the trace to each caller. Then walk "down" the trace
   // (through the callees) and add the count of the trace to each callee.
+
   for (const traceHash of relevantTracesSorted) {
     const trace = relevantTraces.get(traceHash)!;
 
@@ -156,9 +161,20 @@ export function createCallerCalleeIntermediateRoot(
       } else {
         node.samples += samples;
       }
+
+      node.countInclusive += samples;
+
+      if (i === 0) {
+        // Leaf frame: sum up counts for exclusive CPU.
+        node.countExclusive += samples;
+      }
       currentNode = node;
     }
   }
+
+  root.countExclusive = 0;
+  root.countInclusive = root.samples;
+
   return root;
 }
 
@@ -177,6 +193,8 @@ export interface CallerCalleeNode {
   SourceFilename: string;
   SourceLine: number;
   Samples: number;
+  CountInclusive: number;
+  CountExclusive: number;
 }
 
 export function createCallerCalleeNode(options: Partial<CallerCalleeNode> = {}): CallerCalleeNode {
@@ -196,6 +214,8 @@ export function createCallerCalleeNode(options: Partial<CallerCalleeNode> = {}):
   node.SourceFilename = options.SourceFilename ?? '';
   node.SourceLine = options.SourceLine ?? 0;
   node.Samples = options.Samples ?? 0;
+  node.CountInclusive = options.CountInclusive ?? 0;
+  node.CountExclusive = options.CountExclusive ?? 0;
 
   return node;
 }
@@ -251,7 +271,11 @@ function sortNodes(
 export function fromCallerCalleeIntermediateNode(
   root: CallerCalleeIntermediateNode
 ): CallerCalleeNode {
-  const node = createCallerCalleeNode({ Samples: root.samples });
+  const node = createCallerCalleeNode({
+    Samples: root.samples,
+    CountInclusive: root.countInclusive,
+    CountExclusive: root.countExclusive,
+  });
 
   // Populate the other fields with data from the root node. Selectors are not supposed
   // to be able to fail.

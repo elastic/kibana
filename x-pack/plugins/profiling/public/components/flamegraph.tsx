@@ -120,54 +120,47 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({ id, height }) => {
     chartPaddings: { left: 0, right: 0, top: 0, bottom: 0 },
   };
 
+  const totalSamples = columnarData.value[0];
+
   return (
     <>
       {columnarData.label.length > 0 && (
-        <div
-          onDoubleClick={() => {
-            console.log('onDoubleClick');
-          }}
-          onClick={() => {
-            console.log('onClick');
-          }}
-        >
-          <Chart size={['100%', height]}>
-            <Settings
-              theme={theme}
-              tooltip={{
-                customTooltip: (props) => {
-                  if (!ctx) {
-                    return <></>;
-                  }
+        <Chart size={['100%', height]}>
+          <Settings
+            theme={theme}
+            tooltip={{
+              customTooltip: (props) => {
+                if (!ctx) {
+                  return <></>;
+                }
 
-                  const valueIndex = props.values[0].valueAccessor as number;
-                  const label = ctx.Label[valueIndex];
-                  const samples = ctx.Value[valueIndex];
-                  const countInclusive = ctx.CountInclusive[valueIndex];
-                  const countExclusive = ctx.CountExclusive[valueIndex];
+                const valueIndex = props.values[0].valueAccessor as number;
+                const label = ctx.Label[valueIndex];
+                const samples = ctx.Value[valueIndex];
+                const countInclusive = ctx.CountInclusive[valueIndex];
+                const countExclusive = ctx.CountExclusive[valueIndex];
 
-                  return (
-                    <FlameGraphTooltip
-                      label={label}
-                      samples={samples}
-                      countInclusive={countInclusive}
-                      countExclusive={countExclusive}
-                      totalSamples={Math.max(1, countInclusive)}
-                    />
-                  );
-                },
-              }}
-            />
-            <Flame
-              id={id}
-              columnarData={columnarData}
-              valueAccessor={(d: Datum) => d.value as number}
-              valueFormatter={(value) => `${value}`}
-              animation={{ duration: 100 }}
-              controlProviderCallback={{}}
-            />
-          </Chart>
-        </div>
+                return (
+                  <FlameGraphTooltip
+                    label={label}
+                    samples={samples}
+                    countInclusive={countInclusive}
+                    countExclusive={countExclusive}
+                    totalSamples={totalSamples}
+                  />
+                );
+              },
+            }}
+          />
+          <Flame
+            id={id}
+            columnarData={columnarData}
+            valueAccessor={(d: Datum) => d.value as number}
+            valueFormatter={(value) => `${value}`}
+            animation={{ duration: 100 }}
+            controlProviderCallback={{}}
+          />
+        </Chart>
       )}
     </>
   );

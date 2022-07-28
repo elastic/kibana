@@ -175,8 +175,8 @@ export class FlameGraph {
       columnar.Y.push(depth);
       columnar.Color.push(frameTypeToRGB(node.FrameType, x));
 
-      columnar.CountInclusive.push(0);
-      columnar.CountExclusive.push(0);
+      columnar.CountInclusive.push(node.CountInclusive);
+      columnar.CountExclusive.push(node.CountExclusive);
 
       node.Callees.sort((a: CallerCalleeNode, b: CallerCalleeNode) => b.Samples - a.Samples);
 
