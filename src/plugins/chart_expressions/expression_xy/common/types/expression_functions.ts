@@ -327,7 +327,7 @@ export type XYExtendedLayerConfigResult =
   | ExtendedAnnotationLayerConfigResult
   | ReferenceLineConfigResult;
 
-  export type XYExtendedLayerConfigResultWithTable =
+export type XYExtendedLayerConfigResultWithTable =
   | ExtendedDataLayerConfigResult
   | ReferenceLineLayerConfigResult;
 
