@@ -43,7 +43,7 @@ export const initialState: LensAppState = {
     indexPatternRefs: [],
     indexPatterns: {},
     existingFields: {},
-    isFirstExistenceFetch: false,
+    isFirstExistenceFetch: true,
   },
 };
 
