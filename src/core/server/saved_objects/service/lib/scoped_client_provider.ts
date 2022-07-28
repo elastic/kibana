@@ -7,8 +7,8 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { PriorityCollection } from './priority_collection';
-import { SavedObjectsClientContract } from '../../types';
 import { SavedObjectsRepositoryFactory } from '../../saved_objects_service';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 

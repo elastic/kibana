@@ -7,7 +7,7 @@
 
 import { uniq, mapValues } from 'lodash';
 import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
-import type { Datatable } from '@kbn/expressions-plugin';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { euiLightVars } from '@kbn/ui-theme';
 import {
   defaultAnnotationColor,

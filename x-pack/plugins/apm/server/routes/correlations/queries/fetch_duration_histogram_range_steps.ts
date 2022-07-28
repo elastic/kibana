@@ -9,13 +9,10 @@ import { scaleLog } from 'd3-scale';
 
 import { isFiniteNumber } from '@kbn/observability-plugin/common/utils/is_finite_number';
 import { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
-import {
-  SPAN_DURATION,
-  TRANSACTION_DURATION,
-} from '../../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../../common/processor_event';
+import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
+import { getDurationField, getEventType } from '../utils';
 
 const getHistogramRangeSteps = (min: number, max: number, steps: number) => {
   // A d3 based scale function as a helper to get equally distributed bins on a log scale.
@@ -27,29 +24,34 @@ const getHistogramRangeSteps = (min: number, max: number, steps: number) => {
 };
 
 export const fetchDurationHistogramRangeSteps = async ({
-  eventType,
+  chartType,
   setup,
   start,
   end,
   environment,
   kuery,
   query,
+  searchMetrics,
 }: CommonCorrelationsQueryParams & {
-  eventType: ProcessorEvent;
+  chartType: LatencyDistributionChartType;
   setup: Setup;
+  searchMetrics: boolean;
 }): Promise<number[]> => {
   const { apmEventClient } = setup;
 
   const steps = 100;
+  const durationField = getDurationField(chartType, searchMetrics);
 
-  const durationField =
-    eventType === ProcessorEvent.span ? SPAN_DURATION : TRANSACTION_DURATION;
+  // when using metrics data, ensure we filter by docs with the appropriate duration field
+  const filteredQuery = searchMetrics
+    ? { bool: { filter: [query, { exists: { field: durationField } }] } }
+    : query;
 
   const resp = await apmEventClient.search(
     'get_duration_histogram_range_steps',
     {
       apm: {
-        events: [eventType],
+        events: [getEventType(chartType, searchMetrics)],
       },
       body: {
         size: 0,
@@ -58,7 +60,7 @@ export const fetchDurationHistogramRangeSteps = async ({
           end,
           environment,
           kuery,
-          query,
+          query: filteredQuery,
         }),
         aggs: {
           duration_min: { min: { field: durationField } },
