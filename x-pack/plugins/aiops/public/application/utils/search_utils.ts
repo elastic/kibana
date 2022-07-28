@@ -188,7 +188,7 @@ export function getEsQueryFromSavedSearch({
 
   // If no saved search available, use user's query and filters
   if (!savedSearchData && userQuery) {
-    if (filterManager && userFilters) filterManager.setFilters(userFilters);
+    if (filterManager && userFilters) filterManager.addFilters(userFilters);
 
     const combinedQuery = createMergedEsQuery(
       userQuery,
@@ -207,16 +207,16 @@ export function getEsQueryFromSavedSearch({
   // If saved search available, merge saved search with latest user query or filters
   // which might differ from extracted saved search data
   if (savedSearchData) {
-    // @ts-ignore property does not exist on type never
+    const globalFilters = filterManager?.getGlobalFilters();
     const currentQuery = userQuery ?? savedSearchData?.query;
-    // @ts-ignore property does not exist on type never
     const currentFilters = userFilters ?? savedSearchData?.filter;
 
     if (filterManager) filterManager.setFilters(currentFilters);
+    if (globalFilters) filterManager?.addFilters(globalFilters);
 
     const combinedQuery = createMergedEsQuery(
       currentQuery,
-      Array.isArray(currentFilters) ? currentFilters : [],
+      filterManager ? filterManager?.getFilters() : currentFilters,
       dataView,
       uiSettings
     );
