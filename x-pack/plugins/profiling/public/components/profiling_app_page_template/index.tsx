@@ -17,7 +17,6 @@ import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
-import { SettingsFlyout } from '../settings_flyout';
 
 export function ProfilingAppPageTemplate({
   children,
@@ -29,7 +28,7 @@ export function ProfilingAppPageTemplate({
   const {
     path,
     query,
-    query: { rangeFrom, rangeTo, n, kuery },
+    query: { rangeFrom, rangeTo, kuery },
   } = useProfilingParams('/*');
 
   const {
@@ -81,25 +80,6 @@ export function ProfilingAppPageTemplate({
           defaultMessage: 'Profiling',
         }),
         tabs,
-        rightSideItems: [
-          <SettingsFlyout
-            title={i18n.translate('xpack.profiling.appPageTemplate.settingsTitle', {
-              defaultMessage: 'Settings',
-            })}
-            values={{
-              n,
-            }}
-            onChange={(values) => {
-              profilingRouter.push(routePath, {
-                path,
-                query: {
-                  ...query,
-                  n: values.n,
-                },
-              });
-            }}
-          />,
-        ],
       }}
       pageBodyProps={{
         paddingSize: 'none',

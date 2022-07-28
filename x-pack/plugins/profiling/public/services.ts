@@ -16,7 +16,6 @@ export interface Services {
     type: string;
     timeFrom: number;
     timeTo: number;
-    n: number;
     kuery: string;
   }) => Promise<TopNSamples>;
   fetchTopNFunctions: (params: {
@@ -29,7 +28,6 @@ export interface Services {
   fetchElasticFlamechart: (params: {
     timeFrom: number;
     timeTo: number;
-    n: number;
     kuery: string;
   }) => Promise<ElasticFlameGraph>;
 }
@@ -38,12 +36,11 @@ export function getServices(core: CoreStart): Services {
   const paths = getRoutePaths();
 
   return {
-    fetchTopN: async ({ type, timeFrom, timeTo, n, kuery }) => {
+    fetchTopN: async ({ type, timeFrom, timeTo, kuery }) => {
       try {
         const query: HttpFetchQuery = {
           timeFrom,
           timeTo,
-          n,
           kuery,
         };
         return await core.http.get(`${paths.TopN}/${type}`, { query });
@@ -82,19 +79,16 @@ export function getServices(core: CoreStart): Services {
     fetchElasticFlamechart: async ({
       timeFrom,
       timeTo,
-      n,
       kuery,
     }: {
       timeFrom: number;
       timeTo: number;
-      n: number;
       kuery: string;
     }) => {
       try {
         const query: HttpFetchQuery = {
           timeFrom,
           timeTo,
-          n,
           kuery,
         };
         return await core.http.get(paths.FlamechartElastic, { query });
