@@ -243,9 +243,8 @@ export async function fetchRuleAlertsAggByTimeRange({
               // We add the background bar even if there is alerts in this day, but we calculate the delta.
               { ...totalDayAlerts, count: totalAlerts - dayAlerts.doc_count },
             ];
-          } else {
-            return [...acc, { ...totalDayAlerts }];
           }
+          return [...acc, { ...totalDayAlerts }];
         },
         []
       ),
