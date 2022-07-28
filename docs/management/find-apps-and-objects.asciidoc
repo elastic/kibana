@@ -1,0 +1,41 @@
+[[kibana-navigation-search]]
+== Find apps and objects
+
+To quickly find apps and the objects you create, use the search field in the global header.
+Search suggestions include deep links into applications,
+allowing you to directly navigate to the views you need most.
+
+[role="screenshot"]
+image::images/app-navigation-search.png[Example of searching for apps]
+
+You can search for objects by type, name, and tag.
+To get the most from the search feature, follow these tips:
+
+* Use the keyboard shortcut&mdash;Ctrl+/ on Windows and Linux, Command+/ on MacOS&mdash;to focus on the input at any time.
+
+* Use the provided syntax keywords.
++
+[cols=2*]
+|===
+|Search by type
+|`type:dashboard`
+
+Available types: `application`, `canvas-workpad`, `dashboard`, `data-view`, `lens`, `maps`, `query`, `search`, `visualization`
+
+|Search by tag
+|`tag:mytagname` +
+`tag:"tag name with spaces"`
+
+|Search by type and name
+|`type:dashboard my_dashboard_title`
+
+|Advanced&nbsp;searches
+|`tag:(tagname1 or tagname2) my_dashboard_title` +
+`type:lens tag:(tagname1 or tagname2)` +
+`type:(dashboard or canvas-workpad) logs` +
+|===
+
+This example searches for visualizations with the tag `design` .
+
+[role="screenshot"]
+image::images/tags-search.png[Example of searching for tags]

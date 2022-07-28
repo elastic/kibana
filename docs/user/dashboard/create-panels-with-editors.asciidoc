@@ -1,11 +1,11 @@
 [[aggregation-reference]]
-== Create panels with editors
+=== Create panels with editors
 
 {kib} provides several editors that you can use to create panels of your data. Each editor supports different features and {ref}/search-aggregations.html[{es} aggregations]. To choose the best editor for your data, review the following information.
 
 [float]
 [[chart-types]]
-=== Supported panel types
+==== Supported panel types
 
 [options="header"]
 |===
@@ -93,7 +93,7 @@
 
 [float]
 [[xy-features]]
-=== Bar, line, and area chart features
+==== Bar, line, and area chart features
 
 [options="header"]
 |===
@@ -146,7 +146,7 @@
 
 [float]
 [[other-features]]
-=== Advanced features
+==== Advanced features
 
 [options="header"]
 |===
@@ -205,7 +205,7 @@
 
 [float]
 [[table-features]]
-=== Table features
+==== Table features
 
 [options="header"]
 |===
@@ -236,7 +236,7 @@
 
 [float]
 [[custom-functions]]
-=== Functions
+==== Functions
 
 [options="header"]
 |===
@@ -247,15 +247,15 @@
 | &check;
 | &check;
 
-| <<tsvb-function-reference, Filter ratio>>
-| Use <<lens-formulas, formula>>
+|  tsvb-function-reference, Filter ratio>>
+| Use  lens-formulas, formula>>
 | &check;
 
-| <<tsvb-function-reference, Positive only>>
+|  tsvb-function-reference, Positive only>>
 |
 | &check;
 
-| <<tsvb-function-reference, Series agg>>
+|  tsvb-function-reference, Series agg>>
 |
 | &check;
 
@@ -267,7 +267,7 @@
 
 [float]
 [[metrics-aggregations]]
-=== Metrics aggregations
+==== Metrics aggregations
 
 Metric aggregations are calculated from the values in the aggregated documents. The values are extracted from the document fields.
 
@@ -342,7 +342,7 @@ For information about {es} metrics aggregations, refer to {ref}/search-aggregati
 
 [float]
 [[bucket-aggregations]]
-=== Bucket aggregations
+==== Bucket aggregations
 
 Bucket aggregations group, or bucket, documents based on the aggregation type. To define the document buckets, bucket aggregations compute and return the number of documents for each bucket.
 
@@ -416,7 +416,7 @@ For information about {es} bucket aggregations, refer to {ref}/search-aggregatio
 
 [float]
 [[pipeline-aggregations]]
-=== Pipeline aggregations
+==== Pipeline aggregations
 
 Pipeline aggregations are dependent on the outputs calculated from other aggregations. Parent pipeline aggregations are provided with the output of the parent aggregation, and compute new buckets or aggregations that are added to existing buckets. Sibling pipeline aggregations are provided with the output of a sibling aggregation, and compute new aggregations for the same level as the sibling aggregation.
 
@@ -426,7 +426,7 @@ Pipeline aggregations are dependent on the outputs calculated from other aggrega
 | Aggregation | *Lens* | *TSVB* | *Aggregation-based* | *Vega*
 
 | Avg bucket  
-| <<lens-formulas, `overall_average` formula>>
+|  lens-formulas, `overall_average` formula>>
 | &check;
 | &check;
 | &check;
@@ -438,19 +438,19 @@ Pipeline aggregations are dependent on the outputs calculated from other aggrega
 | &check;
 
 | Max bucket   
-| <<lens-formulas, `overall_max` formula>>
+|  lens-formulas, `overall_max` formula>>
 | &check;
 | &check;
 | &check;
 
 | Min bucket   
-| <<lens-formulas, `overall_min` formula>>
+|  lens-formulas, `overall_min` formula>>
 | &check;
 | &check;
 | &check;
 
 | Sum bucket  
-| <<lens-formulas, `overall_sum` formula>>
+|  lens-formulas, `overall_sum` formula>>
 | &check;
 | &check;
 | &check;

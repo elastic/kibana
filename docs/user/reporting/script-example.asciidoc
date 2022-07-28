@@ -15,7 +15,7 @@ curl \
 
 <1> The required `POST` method.
 <2> The user credentials for a user with permission to access {kib} and {report-features}.
-<3> The required `kbn-xsrf` header for all `POST` requests to {kib}. For more information, refer to <<api-request-headers, API Request Headers>>.
+<3> The required `kbn-xsrf` header for all `POST` requests to {kib}. For more information, refer to  api-request-headers, API Request Headers>>.
 <4> The POST URL. You can copy and paste the URL for any report.
 
 An example response for a successfully queued report:

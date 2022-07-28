@@ -7,7 +7,7 @@
 * Please include an explanation of your changes in your PR description.
 * Links to relevant issues, external resources, or related PRs are very important and useful.
 * Please update any tests that pertain to your code, and add new tests where appropriate.
-* Update or add docs when appropriate. Read more about <<development-documentation>>.
+* Update or add docs when appropriate. Read more about  development-documentation>>.
 
 [discrete]
 === Submitting a Pull Request
@@ -28,5 +28,5 @@ Then sit back and wait. There will probably be discussion about the Pull Request
 Most PRs go through several iterations of feedback and updates. Depending on the scope and complexity of the PR, the process can take weeks. Please
 be patient and understand we hold our code base to a high standard.
 
-Check out our <<pr-review>> for our general philosophy for pull request reviews.
+Check out our  pr-review>> for our general philosophy for pull request reviews.
 

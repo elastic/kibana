@@ -17,7 +17,7 @@ Retrieves a list of all connector types.
 [discrete]
 === {api-prereq-title}
 
-You do not need any <<kibana-feature-privileges,{kib} feature privileges>> to
+You do not need any {kib} privileges to
 run this API.
 
 [[list-connector-types-api-path-params]]

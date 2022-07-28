@@ -48,7 +48,7 @@ as uiSettings within the code.
 |Register add-data cards
 
 
-|<<kibana-dashboard-plugin>>
+| kibana-dashboard-plugin>>
 |- Registers the dashboard application.
 - Adds a dashboard embeddable that can be used in other applications.
 
@@ -86,7 +86,7 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 |Contains the Discover application and the saved search embeddable.
 
 
-|<<embeddable-plugin>>
+| embeddable-plugin>>
 |Embeddables are re-usable widgets that can be rendered on dashboard, but also in other apps. Developers can embed them directly in their plugin. End users can dynamically add them to embeddable _containers_.
 
 
@@ -138,7 +138,7 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 |Expression Reveal Image plugin adds a revealImage function to the expression plugin and an associated renderer. The renderer will display the given percentage of a given image.
 
 
-|<<kibana-expressions-plugin>>
+| kibana-expressions-plugin>>
 |Expression pipeline is a chain of functions that *pipe* its output to the
 input of the next function. Functions can be configured using arguments provided
 by the user. The final output of the expression pipeline can be rendered using
@@ -271,7 +271,7 @@ generating deep links to other apps using locators, and creating short URLs.
 |This plugin adds the Advanced Settings section for the Usage and Security Data collection (aka Telemetry).
 
 
-|<<uiactions-plugin>>
+| uiactions-plugin>>
 |UI Actions plugins provides API to manage *triggers* and *actions*.
 
 *Trigger* is an abstract description of user's intent to perform an action
@@ -420,7 +420,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 |You can run a local cluster and simulate a remote cluster within a single Kibana directory.
 
 
-|<<dashboard-enhanced-plugin>>
+| dashboard-enhanced-plugin>>
 |Adds drilldown capabilities to dashboard.  Owned by the Kibana App team.
 
 
@@ -432,7 +432,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 |Contains the enhancements to the OSS discover app.
 
 
-|<<enhanced-embeddables-plugin>>
+| enhanced-embeddables-plugin>>
 |Enhances Embeddables by registering a custom factory provider. The enhanced factory provider
 adds dynamic actions to every embeddables state, in order to support drilldowns.
 
@@ -651,7 +651,7 @@ Documentation: https://www.elastic.co/guide/en/kibana/master/task-manager-produc
 |This plugin provides access to the transforms features provided by Elastic.
 
 
-|<<translations-plugin>>
+| translations-plugin>>
 |Contains Elastic-supported translations. Owned by the Localizations team.
 For adding localizations and instrument a ui to support translated content, see https://github.com/elastic/kibana/tree/main/packages/kbn-i18n
 

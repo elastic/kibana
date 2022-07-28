@@ -75,7 +75,7 @@ The APM app in {kib} enables you to monitors software services and applications 
 collect unhandled errors and exceptions, and automatically pick up basic host-level metrics
 and agent specific metrics.
 
-To get started with the APM app, see <<apm-ui,Set up the APM app>>.
+To get started with the APM app, see  apm-ui,Set up the APM app>>.
 
 [role="screenshot"]
 image::observability/images/apm-app.png[APM app in {kib}]

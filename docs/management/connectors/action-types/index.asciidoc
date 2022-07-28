@@ -132,21 +132,21 @@ completely in a future release.
 ==================================================
 
 To use this connector, set the 
-<<action-settings, `xpack.actions.preconfiguredAlertHistoryEsIndex`>> 
+ action-settings, `xpack.actions.preconfiguredAlertHistoryEsIndex`>> 
 configuration to `true`.
 
 ```js
   xpack.actions.preconfiguredAlertHistoryEsIndex: true
 ```
 
-When creating a new rule, add an <<index-action-type, Index action>> and select 
+When creating a new rule, add an  index-action-type, Index action>> and select 
 the `Alert history Elasticsearch index (preconfigured)` connector.
 
 [role="screenshot"]
 image::images/pre-configured-alert-history-connector.png[Select pre-configured alert history connectors]
 
 Documents are indexed using a preconfigured schema that captures the 
-<<defining-rules-actions-variables, action variables>> available for the rule. 
+ defining-rules-actions-variables, action variables>> available for the rule. 
 By default, these documents are indexed into the `kibana-alert-history-default` 
 index, but you can specify a different index. Index names must start with 
 `kibana-alert-history-` to take advantage of the preconfigured alert history 
@@ -156,7 +156,7 @@ index template.
 ==============================================
 To write documents to the preconfigured index, you must have `all` or `write` 
 privileges to the `kibana-alert-history-*` indices. Refer to 
-<<kibana-role-management>> for more information.
+{kib} role management for more information.
 ==============================================
 
 [NOTE]

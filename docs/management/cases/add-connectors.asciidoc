@@ -13,14 +13,14 @@ management systems:
 * {swimlane}
 
 NOTE: To create connectors and send cases to external systems, you must have the
-appropriate {kib} feature privileges. Refer to <<setup-cases>>.
+appropriate {kib} feature privileges. Refer to  setup-cases>>.
 
 [discrete]
 [[create-case-connectors]]
 == Create connectors
 
 You can create connectors in *Management > {stack-manage-app} > {rules-ui}*, as
-described in <<action-types>>. Alternatively, you can create them in
+described in Action and connector types. Alternatively, you can create them in
 *Management > {stack-manage-app} > Cases*:
 
 . Click *Edit external connection*.
@@ -32,9 +32,9 @@ image::images/cases-connectors.png[]
 
 . Select an external incident management system.
 
-. Enter your required settings. Refer to <<resilient-action-type>>,
-<<jira-action-type>>, <<servicenow-action-type>>, <<servicenow-sir-action-type>>,
-or <<swimlane-action-type>> for connector configuration details.
+. Enter your required settings. Refer to  resilient-action-type>>,
+ jira-action-type>>,  servicenow-action-type>>,  servicenow-sir-action-type>>,
+or  swimlane-action-type>> for connector configuration details.
 
 . Click *Save*.
 

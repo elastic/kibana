@@ -14,7 +14,7 @@ The Webhook connector uses https://github.com/axios/axios[axios] to send a POST 
 Webhook connectors have the following configuration properties.
 
 Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
-URL::       The request URL. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
+URL::       The request URL. If you are using the  action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
 Method::    HTTP request method, either `post`(default) or `put`.
 Headers::   A set of key-value pairs sent as headers with the request
 Require authentication:: If true, a username and password for login type authentication must be provided.
@@ -25,7 +25,7 @@ Password::  Password for HTTP basic authentication.
 [[webhook-connector-networking-configuration]]
 ==== Connector networking configuration
 
-Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+Use the  action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
 [float]
 [[Preconfigured-webhook-configuration]]
@@ -56,7 +56,7 @@ Config defines information for the connector type.
 Secrets defines sensitive information for the connector type.
 
 `user`:: A string that corresponds to *User*. Required if `hasAuth` is set to `true`.
-`password`:: A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>. Required if `hasAuth` is set to `true`.
+`password`:: A string that corresponds to *Password*. Should be stored in the  creating-keystore, {kib} keystore>>. Required if `hasAuth` is set to `true`.
 
 [float]
 [[define-webhook-ui]]
@@ -91,4 +91,4 @@ Body::      A JSON payload sent to the request URL. For example:
 
 Mustache template variables (the text enclosed in double braces, for example, `context.rule.name`) have
 their values escaped, so that the final JSON will be valid (escaping double quote characters).
-For more information on Mustache template variables, refer to <<defining-rules-actions-details>>.
+For more information on Mustache template variables, refer to  defining-rules-actions-details>>.

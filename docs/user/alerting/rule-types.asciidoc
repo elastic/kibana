@@ -2,8 +2,8 @@
 [[rule-types]]
 == Rule types
 
-A rule is a set of <<alerting-concepts-conditions, conditions>>, <<alerting-concepts-scheduling, schedules>>, and <<alerting-concepts-actions, actions>> that enable notifications. {kib} provides rules built into the Elastic Stack and rules registered by one of the {kib} apps.
-You can create most rules types in <<create-and-manage-rules,Stack Management > Rules and Connectors>>. For information on creating security rules, refer to {security-guide}/rules-ui-create.html[Create a detection rule].
+A rule is a set of  alerting-concepts-conditions, conditions>>,  alerting-concepts-scheduling, schedules>>, and  alerting-concepts-actions, actions>> that enable notifications. {kib} provides rules built into the Elastic Stack and rules registered by one of the {kib} apps.
+You can create most rules types in Stack Management > Rules and Connectors. For information on creating security rules, refer to {security-guide}/rules-ui-create.html[Create a detection rule].
 
 [NOTE]
 ==============================================
@@ -16,21 +16,21 @@ see {subscriptions}[the subscription page].
 [[stack-rules]]
 === Stack rules
 
-<<create-and-manage-rules, Stack rules>> are built into {kib}. To access the *Stack Rules* feature and create and edit rules, users require the `all` privilege. See <<kibana-feature-privileges, feature privileges>> for more information.
+Stack rules are built into {kib}. To access the *Stack Rules* feature and create and edit rules, users require the `all` privilege. See {kib} privileges for more information.
 
 [cols="2*<"]
 |===
 
-| <<rule-type-es-query>>
+| {es} query
 | Run a user-configured {es} query, compare the number of matches to a configured threshold, and schedule actions to run when the threshold condition is met.
 
-| <<rule-type-index-threshold>>
+|  rule-type-index-threshold>>
 | Aggregate field values from documents using {es} queries, compare them to threshold values, and schedule actions to run when the thresholds are met.
 
 | {ref}/transform-alerts.html[{transform-cap} rules]
 | beta:[] Run scheduled checks on a {ctransform} to check its health. If a {ctransform} meets the conditions, an alert is created and the associated action is triggered.
 
-| <<geo-alerting, Tracking containment>>
+|  geo-alerting, Tracking containment>>
 | Run an {es} query to determine if any documents are currently contained in any boundaries from a specified boundary index and generate alerts when a rule's conditions are met.
 
 |===
@@ -51,7 +51,7 @@ If you create a rule in the {observability} app, its alerts are not visible in
 |===
 
 
-| <<apm-alerts, APM and User Experience>>
+|  apm-alerts, APM and User Experience>>
 | Detect complex conditions in *APM* data and trigger built-in actions when the conditions are met.
 
 | {observability-guide}/create-alerts.html[Logs rules]
@@ -60,7 +60,7 @@ If you create a rule in the {observability} app, its alerts are not visible in
 | {observability-guide}/create-alerts.html[Metrics rules]
 | Detect complex conditions in the *Metrics* app.
 
-| <<kibana-alerts,Stack Monitoring>>
+|  kibana-alerts,Stack Monitoring>>
 | Provide {kib} Alerting rules out-of-the box to notify you of potential issues in the Elastic Stack.
 
 | {observability-guide}/create-alerts.html[Uptime rules]

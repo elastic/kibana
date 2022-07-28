@@ -22,7 +22,7 @@ Alert when the number of errors in a service exceeds a defined threshold
 image::apm/images/apm-alert.png[Create an alert in the APM app]
 
 For a complete walkthrough of the **Create rule** flyout panel, including detailed information on each configurable property,
-see Kibana's <<create-edit-rules,create and edit rules>>.
+see Kibana's  create-edit-rules,create and edit rules>>.
 
 Below, we'll walk through the creation of two APM rules.
 
@@ -107,7 +107,7 @@ From this page, you can disable, mute, and delete APM alerts.
 [[apm-alert-more-info]]
 === More information
 
-See {kibana-ref}/alerting-getting-started.html[Alerting] for more information.
+See Alerting for more information.
 
 NOTE: If you are using an **on-premise** Elastic Stack deployment with security,
 communication between Elasticsearch and Kibana must have TLS configured.

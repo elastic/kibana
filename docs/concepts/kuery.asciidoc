@@ -6,10 +6,10 @@ free text search or field-based search. KQL is only used for filtering data, and
 no role in sorting or aggregating the data.
 
 KQL is able to suggest field names, values, and operators as you type.
-The performance of the suggestions is controlled by <<settings, {kib} settings>>.
+The performance of the suggestions is controlled by {kib} settings.
 
-KQL has a different set of features than the <<lucene-query>>. KQL is able to query
-nested fields and <<scripted-fields, scripted fields>>. KQL does not support regular expressions
+KQL has a different set of features than the  lucene-query>>. KQL is able to query
+nested fields and  scripted-fields, scripted fields>>. KQL does not support regular expressions
 or searching with fuzzy terms.
 
 [discrete]
@@ -125,7 +125,7 @@ account_number >= 100 and items_sold <= 200
 [discrete]
 === Date range queries
 
-Typically, Kibana's <<set-time-filter,time filter>> is sufficient for setting a time range,
+Typically, Kibana's  set-time-filter,time filter>> is sufficient for setting a time range,
 but in some cases you might need to search on dates. Include the date range in quotes.
 
 [source,yaml]
@@ -176,7 +176,7 @@ Existence is defined by {es} and includes all values, including empty text.
 
 Wildcards queries can be used to *search by a term prefix* or to *search multiple fields*.
 The default settings of {kib} *prevent leading wildcards* for performance reasons,
-but this can be allowed with an <<query-allowleadingwildcards, advanced setting>>.
+but this can be allowed with an advanced setting.
 
 To match documents where `machine.os` starts with `win`, such
 as "windows 7" and "windows 10":

@@ -21,14 +21,14 @@ the `consumer` and `rule_type_id` of the rule you're updating. For example, the
 features, *{observability}*, or *Security* features. If the rule has
 `actions`, you must also have `read` privileges for the *Management* >
 *Actions and Connectors* feature. For more details, refer to
-<<kibana-feature-privileges>>.
+{kib} privileges.
 
 === {api-description-title}
 
 [WARNING]
 ====
 * This API supports only
-<<token-api-authentication,token-based authentication>>.
+ token-api-authentication,token-based authentication>>.
 * When you update a rule, it identifies which roles you have at that point in time.
 Thereafter, when the rule performs queries, it uses those security privileges.
 If you have different privileges than the user that created or most recently
@@ -68,7 +68,7 @@ types of alerts. If you don't need this, set the value to `default`.
 
 `params`:::
 (Required, object) The map to the `params` that the
-<<action-types,connector type>> will receive. The `params` are handled as
+connector type will receive. The `params` are handled as
 Mustache templates and passed a default set of context.
 =====
 

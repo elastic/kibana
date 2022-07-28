@@ -25,10 +25,10 @@ In general, there are three types of privileges you'll work with:
 
 Select your use-case to get started:
 
-* <<apm-app-reader>>
-* <<apm-app-annotation-user-create>>
-* <<apm-app-central-config-user>>
-* <<apm-app-api-user>>
+*  apm-app-reader>>
+*  apm-app-annotation-user-create>>
+*  apm-app-central-config-user>>
+*  apm-app-api-user>>
 
 ////
 ***********************************  ***********************************
@@ -127,7 +127,7 @@ Here are two examples:
 
 NOTE: By default, the `viewer` and `editor` built-in roles provide read access to Observability annotations.
 You only need to create an annotation user to write to the annotations index
-(<<apm-settings-kb,`xpack.observability.annotations.index`>>).
+( apm-settings-kb,`xpack.observability.annotations.index`>>).
 
 [[apm-app-annotation-user]]
 ==== Annotation user
@@ -151,15 +151,15 @@ and assign the following privileges:
 |====
 +
 ^1^ +\{ANNOTATION_INDEX\}+ should be the index name you've defined in
-<<apm-settings-kb,`xpack.observability.annotations.index`>>.
+ apm-settings-kb,`xpack.observability.annotations.index`>>.
 
 . Assign the `annotation_user` created previously, and the roles and privileges necessary to create
-a <<apm-app-reader-full,full>> or <<apm-app-reader-partial,partial>> APM reader to any users that need to view annotations in the APM app
+a  apm-app-reader-full,full>> or  apm-app-reader-partial,partial>> APM reader to any users that need to view annotations in the APM app
 
 [[apm-app-annotation-api]]
 ==== Annotation API
 
-See <<apm-app-api-user>>.
+See  apm-app-api-user>>.
 
 ////
 ***********************************  ***********************************
@@ -229,7 +229,7 @@ and the following Kibana feature privileges to anyone who needs to read central 
 [[apm-app-central-config-api]]
 ==== Central configuration API
 
-See <<apm-app-api-user>>.
+See  apm-app-api-user>>.
 
 ////
 ***********************************  ***********************************
@@ -317,4 +317,4 @@ and the following Kibana feature privileges to any annotation API users:
 |====
 
 //LEARN MORE
-//Learn more about <<kibana-feature-privileges,feature privileges>>.
+//Learn more about {kib} privileges.

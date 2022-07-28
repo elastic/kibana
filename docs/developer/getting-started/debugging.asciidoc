@@ -1,7 +1,7 @@
 [[kibana-debugging]]
 == Debugging {kib}
 
-For information about how to debug unit tests, refer to <<debugging-unit-tests>>.
+For information about how to debug unit tests, refer to  debugging-unit-tests>>.
 
 [discrete]
 === Server Code

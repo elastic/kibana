@@ -14,10 +14,10 @@ performance.
 
 If you enable monitoring across the {stack}, each {es} node, {ls} node, {kib} 
 instance, and Beat is considered unique based on its persistent
-UUID, which is written to the <<settings,`path.data`>> directory when the node
+UUID, which is written to the `path.data` directory when the node
 or instance starts. 
 
-For more information, see <<configuring-monitoring>> and 
+For more information, see  configuring-monitoring>> and 
 {ref}/monitor-elasticsearch-cluster.html[Monitor a cluster].  
 
 --

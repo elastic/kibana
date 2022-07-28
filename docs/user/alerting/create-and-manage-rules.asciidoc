@@ -2,27 +2,27 @@
 [[create-and-manage-rules]]
 == Create and manage rules
 
-The *Rules* UI provides a cross-app view of alerting. Different {kib} apps like {observability-guide}/create-alerts.html[*Observability*], {security-guide}/prebuilt-rules.html[*Security*], <<geo-alerting, *Maps*>> and <<xpack-ml, *Machine Learning*>> can offer their own rules. The *Rules* UI provides a central place to:
+The *Rules* UI provides a cross-app view of alerting. Different {kib} apps like {observability-guide}/create-alerts.html[*Observability*], {security-guide}/prebuilt-rules.html[*Security*],  geo-alerting, *Maps*>> and *Machine Learning* can offer their own rules. The *Rules* UI provides a central place to:
 
-* <<create-edit-rules, Create and edit>> rules
-* <<controlling-rules, Manage rules>> including enabling/disabling, muting/unmuting, and deleting
-* Drill-down to <<rule-details, rule details>>
+*  create-edit-rules, Create and edit>> rules
+*  controlling-rules, Manage rules>> including enabling/disabling, muting/unmuting, and deleting
+* Drill-down to  rule-details, rule details>>
 
 [role="screenshot"]
 image:images/rules-and-connectors-ui.png[Example rule listing in the Rules and Connectors UI]
 
-For more information on alerting concepts and the types of rules and connectors available, see <<alerting-getting-started>>.
+For more information on alerting concepts and the types of rules and connectors available, see Alerting.
 
 [float]
 === Required permissions
 
-Access to rules is granted based on your privileges to alerting-enabled features. See <<alerting-security, Alerting Security>> for more information.
+Access to rules is granted based on your privileges to alerting-enabled features. See  alerting-security, Alerting Security>> for more information.
 
 [float]
 [[create-edit-rules]]
 === Create and edit rules
 
-Many rules must be created within the context of a {kib} app like <<metrics-app, Metrics>>, <<xpack-apm, APM>>, or <<uptime-app, Uptime>>, but others are generic. Generic rule types can be created in the *Rules* management UI by clicking the *Create* button. This will launch a flyout that guides you through selecting a rule type and configuring its conditions and action type. Refer to <<stack-rules, Stack rules>> for details on what types of rules are available and how to configure them.
+Many rules must be created within the context of a {kib} app like  metrics-app, Metrics>>,  xpack-apm, APM>>, or  uptime-app, Uptime>>, but others are generic. Generic rule types can be created in the *Rules* management UI by clicking the *Create* button. This will launch a flyout that guides you through selecting a rule type and configuring its conditions and action type. Refer to  stack-rules, Stack rules>> for details on what types of rules are available and how to configure them.
 
 After a rule is created, you can re-open the flyout and change a rule's properties by clicking the *Edit* button shown on each row of the rule listing.
 
@@ -34,8 +34,8 @@ All rules share the following four properties.
 
 Name::      The name of the rule. While this name does not have to be unique, the name can be referenced in actions and also appears in the searchable rule listing in the *Management* UI. A distinctive name can help identify and find a rule.
 Tags::      A list of tag names that can be applied to a rule. Tags can help you organize and find rules, because tags appear in the rule listing in the *Management* UI, which is searchable by tag.
-Check every::      This value determines how frequently the rule conditions are checked. Note that the timing of background rule checks is not guaranteed, particularly for intervals of less than 10 seconds. See <<alerting-production-considerations, Alerting production considerations>> for more information.
-Notify::      This value limits how often actions are repeated when an alert remains active across rule checks. See <<alerting-concepts-suppressing-duplicate-notifications>> for more information. +
+Check every::      This value determines how frequently the rule conditions are checked. Note that the timing of background rule checks is not guaranteed, particularly for intervals of less than 10 seconds. See  alerting-production-considerations, Alerting production considerations>> for more information.
+Notify::      This value limits how often actions are repeated when an alert remains active across rule checks. See  alerting-concepts-suppressing-duplicate-notifications>> for more information. +
 - **Only on status change**: Actions are not repeated when an alert remains active across checks. Actions run only when the alert status changes.
 - **Every time alert is active**: Actions are repeated when an alert remains active across checks.
 - **On a custom action interval**: Actions are suppressed for the throttle interval, but repeat when an alert remains active across checks for a duration longer than the throttle interval.
@@ -85,14 +85,14 @@ To receive notifications when a rule meets the defined conditions, you must add 
 [role="screenshot"]
 image::images/rule-flyout-connector-type-selection.png[UI for selecting an action type]
 
-Each action must specify a <<alerting-concepts-connectors, connector>> instance. If no connectors exist for the selected type, click **Add connector** to create one.
+Each action must specify a  alerting-concepts-connectors, connector>> instance. If no connectors exist for the selected type, click **Add connector** to create one.
 
 [role="screenshot"]
 image::images/rule-flyout-action-no-connector.png[UI for adding connector]
 
 Once you have selected a connector, use the **Run When** dropdown to choose the action group to associate with this action. When a rule meets the defined condition, it is marked as **Active** and alerts are created and assigned to an action group. In addition to the action groups defined by the selected rule type, each rule also has a **Recovered** action group that is assigned when a rule's conditions are no longer detected.
 
-Each action type exposes different properties. For example, an email action allows you to set the recipients, the subject, and a message body in markdown format. See <<action-types>> for details on the types of actions provided by {kib} and their properties.
+Each action type exposes different properties. For example, an email action allows you to set the recipients, the subject, and a message body in markdown format. See Action and connector types for details on the types of actions provided by {kib} and their properties.
 
 [role="screenshot"]
 image::images/rule-flyout-action-details.png[UI for defining an email action]
@@ -111,16 +111,16 @@ Using the https://mustache.github.io/[Mustache] template syntax `{{variable name
 `alert.actionGroup`:: The ID of the action group of the alert that scheduled the action.
 `alert.actionSubgroup`:: The action subgroup of the alert that scheduled the action.
 `alert.actionGroupName`:: The name of the action group of the alert that scheduled the action.
-`kibanaBaseUrl`:: The configured <<server-publicBaseUrl, `server.publicBaseUrl`>>. If not configured, this will be empty.
+`kibanaBaseUrl`:: The configured  server-publicBaseUrl, `server.publicBaseUrl`>>. If not configured, this will be empty.
 
 [role="screenshot"]
 image::images/rule-flyout-action-variables.png[Passing rule values to an action]
 
 Some cases exist where the variable values will be "escaped", when used in a context where escaping is needed:
 
-- For the <<email-action-type, Email>> connector, the `message` action configuration property escapes any characters that would be interpreted as Markdown.
-- For the <<slack-action-type, Slack>> connector, the `message` action configuration property escapes any characters that would be interpreted as Slack Markdown.
-- For the <<webhook-action-type, Webhook>> connector, the `body` action configuration property escapes any characters that are invalid in JSON string values.
+- For the  email-action-type, Email>> connector, the `message` action configuration property escapes any characters that would be interpreted as Markdown.
+- For the  slack-action-type, Slack>> connector, the `message` action configuration property escapes any characters that would be interpreted as Slack Markdown.
+- For the  webhook-action-type, Webhook>> connector, the `body` action configuration property escapes any characters that are invalid in JSON string values.
 
 Mustache also supports "triple braces" of the form `{{{variable name}}}`, which indicates no escaping should be done at all.  Care should be used when using this form, as it could end up rendering the variable content in such a way as to make the resulting parameter invalid or formatted incorrectly.
 
@@ -135,7 +135,7 @@ image::images/rule-flyout-add-action.png[You can add multiple actions on a rule]
 
 [NOTE]
 ==============================================
-Actions are not required on rules. You can run a rule without actions to understand its behavior, and then <<action-settings, configure actions>> later.
+Actions are not required on rules. You can run a rule without actions to understand its behavior, and then  action-settings, configure actions>> later.
 ==============================================
 
 [float]
@@ -171,7 +171,7 @@ A rule can have one of the following statuses:
 [[importing-and-exporting-rules]]
 === Import and export rules
 
-To import and export rules, use the <<managing-saved-objects, Saved Objects Management UI>>.
+To import and export rules, use the  managing-saved-objects, Saved Objects Management UI>>.
 
 [NOTE]
 ==============================================
@@ -179,7 +179,7 @@ Some rule types cannot be exported through this interface:
 
 **Security rules** can be imported and exported using the {security-guide}/rules-ui-management.html#import-export-rules-ui[Security UI].
 
-**Stack monitoring rules** are <<kibana-alerts, automatically created>> for you and therefore cannot be managed via the Saved Objects Management UI.
+**Stack monitoring rules** are  kibana-alerts, automatically created>> for you and therefore cannot be managed via the Saved Objects Management UI.
 ==============================================
 
 Rules are disabled on export. You are prompted to re-enable rule on successful import.

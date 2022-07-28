@@ -1,10 +1,7 @@
 [role="xpack"]
 [[reporting-getting-started]]
-= Reporting and sharing
+== Share your findings
 
-[partintro]
-
---
 
 :keywords: analyst, concept, task, reporting
 :description: {kib} provides you with several options to share *Discover* saved searches, dashboards, *Visualize Library* visualizations, and *Canvas* workpads with others, or on a website.
@@ -33,7 +30,7 @@ change Kibana sizing, {ess-console}[edit the deployment].
 
 [float]
 [[manually-generate-reports]]
-== Create reports
+=== Create reports
 
 Create and download PDF, PNG, or CSV reports of saved searches, dashboards, visualizations, and workpads.
 
@@ -78,7 +75,7 @@ more about {ilm-init} policies, refer to the {es}
 
 [float]
 [[share-a-direct-link]]
-== Share a direct link
+=== Share a direct link
 
 Share a direct link to a saved search, dashboard, or visualization. To access the shared object, authentication is required.
 
@@ -99,13 +96,13 @@ Share a direct link to a saved search, dashboard, or visualization. To access th
 [role="screenshot"]
 image::images/permalink-public-url.png[Permalink share menu with Public URL option highlighted]
 +
-NOTE: *Public URL* is available only when anonymous access is configured and your anonymous service account has privileges to access what you want to share. For more information, refer to <<anonymous-authentication,Anonymous authentication>>.
+NOTE: *Public URL* is available only when anonymous access is configured and your anonymous service account has privileges to access what you want to share. For more information, refer to  anonymous-authentication,Anonymous authentication>>.
 
 . Click *Copy link*.
 
 [float]
 [[download-as-json]]
-== Create a JSON file
+=== Create a JSON file
 
 Create a JSON file for a workpad.
 
@@ -117,7 +114,7 @@ Create a JSON file for a workpad.
 
 [float]
 [[add-workpad-website]]
-== Share workpads on a website
+=== Share workpads on a website
 
 beta[] *Canvas* allows you to create _shareables_, which are workpads that you download and securely share on a website.
 To customize the behavior of the workpad on your website, you can choose to autoplay the pages or hide the workpad toolbar.
@@ -140,11 +137,11 @@ NOTE: Shareable workpads encode the current state of the workpad in a JSON file.
 
 [float]
 [[embed-code]]
-== Embed code
+=== Embed code
 
 Display your dashboard or visualization on an internal company website or personal web page with an iframe. Embedding other {kib} objects is generally supported, but you might need to manually craft the proper HTML code.
 
-Some users might not have access to the dashboard or visualization. For more information, refer to <<anonymous-access-and-embedding>> and <<embedded-content-authentication>>.
+Some users might not have access to the dashboard or visualization. For more information, refer to  anonymous-access-and-embedding>> and  embedded-content-authentication>>.
 
 . Open the main menu, then open the dashboard or visualization you want to share.
 
@@ -165,11 +162,9 @@ Some users might not have access to the dashboard or visualization. For more inf
 [role="screenshot"]
 image::images/embed-code-public-url.png[Embed code share menu with Public URL option highlighted]
 +
-NOTE: *Public URL* is available only when anonymous access is configured and your anonymous service account has privileges to access what you want to embed. For more information, refer to <<anonymous-authentication,Anonymous authentication>>.
+NOTE: *Public URL* is available only when anonymous access is configured and your anonymous service account has privileges to access what you want to embed. For more information, refer to  anonymous-authentication,Anonymous authentication>>.
 
 . Click *Copy iFrame code*.
-
---
 
 include::automating-report-generation.asciidoc[]
 include::reporting-troubleshooting.asciidoc[]

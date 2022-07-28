@@ -1,5 +1,5 @@
 [[create-a-dashboard-of-panels-with-web-server-data]]
-== Create your first dashboard
+=== Create your first dashboard
 
 Learn the most common ways to create a dashboard from your own data.
 The tutorial will use sample data from the perspective of an analyst looking
@@ -10,11 +10,11 @@ When you're done, you'll have a complete overview of the sample web logs data.
 [role="screenshot"]
 image::images/lens_logsDashboard_8.3.png[Logs dashboard]
 
-Before you begin, you should be familiar with the <<kibana-concepts-analysts>>.
+Before you begin, you should be familiar with the  kibana-concepts-analysts>>.
 
 [discrete]
 [[add-the-data-and-create-the-dashboard]]
-=== Add the data and create the dashboard
+==== Add the data and create the dashboard
 
 Add the sample web logs data, and create and set up the dashboard.
 
@@ -28,11 +28,11 @@ Create the dashboard where you'll display the visualization panels.
 
 . Click *Create dashboard*.
 
-. Set the <<set-time-filter,time filter>> to *Last 90 days*.
+. Set the  set-time-filter,time filter>> to *Last 90 days*.
 
 [float]
 [[open-and-set-up-lens]]
-=== Open the visualization editor and get familiar with the data
+==== Open the visualization editor and get familiar with the data
 
 Open the visualization editor, then make sure the correct fields appear.
 
@@ -59,7 +59,7 @@ To see the most frequent values in a field, hover over the field name, then clic
 
 [discrete]
 [[view-the-number-of-website-visitors]]
-=== Create your first visualization
+==== Create your first visualization
 
 Pick a field you want to analyze, such as *clientip*. To analyze only the *clientip* field, use the *Metric* visualization to display the field as a number.
 
@@ -89,7 +89,7 @@ In the layer pane, *Unique count of clientip* appears because the editor automat
 
 [discrete]
 [[mixed-multiaxis]]
-=== View a metric over time
+==== View a metric over time
 
 There are two shortcuts you can use to view metrics over time. 
 When you drag a numeric field to the workspace, the visualization editor adds the default
@@ -121,7 +121,7 @@ To increase the minimum time interval:
 
 . Change the *Minimum interval* to *1d*, then click *Close*.
 +
-You can increase and decrease the minimum interval, but you are unable to decrease the interval below the configured <<advanced-options,*Advanced Settings*>>. 
+You can increase and decrease the minimum interval, but you are unable to decrease the interval below the configured *Advanced Settings*. 
 
 To save space on the dashboard, hide the axis labels.
 
@@ -145,7 +145,7 @@ Since you removed the axis labels, add a panel title:
 
 [discrete]
 [[view-the-distribution-of-visitors-by-operating-system]]
-=== View the top values of a field
+==== View the top values of a field
 
 Create a visualization that displays the most frequent values of *request.keyword* on your website, ranked by the unique visitors.
 To create the visualization, use *Top values of request.keyword* ranked by *Unique count of clientip*, instead of being ranked by *Count of records*.
@@ -191,7 +191,7 @@ Since the table columns are labeled, you do not need to add a panel title.
 
 [discrete]
 [[custom-ranges]]
-=== Compare a subset of documents to all documents
+==== Compare a subset of documents to all documents
 
 Create a proportional visualization that helps you determine if your users transfer more bytes from documents under 10KB versus documents over 10Kb.
 
@@ -246,7 +246,7 @@ Add a panel title:
 
 [discrete]
 [[histogram]]
-=== View the distribution of a number field
+==== View the distribution of a number field
 
 The distribution of a number can help you find patterns. For example, you can analyze the website traffic per hour to find the best time for routine maintenance.
 
@@ -279,7 +279,7 @@ Add a panel title:
 
 [discrete]
 [[treemap]]
-=== Create a multi-level chart
+==== Create a multi-level chart
 
 *Table* and *Proportion* visualizations support multiple functions. For example, to create visualizations that break down the data by website traffic sources and user geography, apply the *Filters* and *Top values* functions.
 
@@ -343,7 +343,7 @@ Add a panel title:
 
 [float]
 [[arrange-the-lens-panels]]
-=== Arrange the dashboard panels
+==== Arrange the dashboard panels
 
 Resize and move the panels so they all appear on the dashboard without scrolling.
 
@@ -361,7 +361,7 @@ Decrease the size of the following panels, then move the panels to the first row
 image::images/lens_logsDashboard_8.3.png[Logs dashboard]
 
 [discrete]
-=== Save the dashboard
+==== Save the dashboard
 
 Now that you have a complete overview of your web server data, save the dashboard.
 

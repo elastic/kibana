@@ -68,7 +68,7 @@ Html report is available in target/kibana-coverage/jest/path/to/plugin
 [discrete]
 === Running browser automation tests
 
-Check out <<development-functional-tests>> to learn more about how you can run
+Check out  development-functional-tests>> to learn more about how you can run
 and develop functional tests for {kib} core and plugins.
 
 You can also look into the {kib-repo}tree/{branch}/scripts/README.md[Scripts README.md]
@@ -79,10 +79,10 @@ to learn more about using the node scripts we provide for building
 [discrete]
 ==== More testing information:
 
-* <<development-functional-tests>>
-* <<development-unit-tests>>
-* <<development-accessibility-tests>>
-* <<development-package-tests>>
+*  development-functional-tests>>
+*  development-unit-tests>>
+*  development-accessibility-tests>>
+*  development-package-tests>>
 
 include::development-functional-tests.asciidoc[leveloffset=+1]
 

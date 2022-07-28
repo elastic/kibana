@@ -1,6 +1,6 @@
 [role="xpack"]
 [[vector-layer]]
-== Vector layer
+=== Vector layer
 
 Vector layers display points, lines, and polygons.
 
@@ -40,7 +40,7 @@ must use a `lat_long` function. Go to
 *Point to point*:: Aggregated data paths between the source and destination.
 The index must contain at least 2 fields mapped as {ref}/geo-point.html[geo_point], source and destination.
 
-*Top hits per entity*:: The layer displays the <<maps-top-hits-aggregation, most relevant documents per entity>>.
+*Top hits per entity*:: The layer displays the  maps-top-hits-aggregation, most relevant documents per entity>>.
 The index must contain at least one field mapped as {ref}/geo-point.html[geo_point] or {ref}/geo-shape.html[geo_shape].
 
 *Tracks*:: Create lines from points.

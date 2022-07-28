@@ -7,7 +7,7 @@ We use functional tests to make sure the {kib} UI works as expected. It replaces
 === Running functional tests
 
 The `FunctionalTestRunner` (FTR) is very bare bones and gets most of its functionality from its config file. The {kib} repo contains many FTR config files which use slightly different configurations for the {kib} server or {es}, have different test files, and potentially other config differences. You can find a manifest of all the FTR config files in `.buildkite/ftr_configs.yml`. If you’re writing a plugin outside the {kib} repo, you will have your own config file.
- See <<external-plugin-functional-tests>> for more info.
+ See  external-plugin-functional-tests>> for more info.
 
 There are three ways to run the tests depending on your goals:
 
@@ -128,7 +128,7 @@ The `FunctionalTestRunner` automatically transpiles functional tests using babel
 
 **Provider:**
 
-Code run by the `FunctionalTestRunner` is wrapped in a function so it can be passed around via config files and be parameterized. Any of these Provider functions may be asynchronous and should return/resolve-to the value they are meant to _provide_. Provider functions will always be called with a single argument: a provider API (see the <<functional_test_runner_provider_api,Provider API Section>>).
+Code run by the `FunctionalTestRunner` is wrapped in a function so it can be passed around via config files and be parameterized. Any of these Provider functions may be asynchronous and should return/resolve-to the value they are meant to _provide_. Provider functions will always be called with a single argument: a provider API (see the  functional_test_runner_provider_api,Provider API Section>>).
 
 A config provider:
 

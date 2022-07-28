@@ -1,8 +1,8 @@
 [[upgrade-migrations-rolling-back]]
 === Roll back to a previous version of {kib}
 
-If you've followed <<preventing-migration-failures, preparing for migration>>
-and <<resolve-migrations-failures, resolving migration failures>>, and
+If you've followed  preventing-migration-failures, preparing for migration>>
+and  resolve-migrations-failures, resolving migration failures>>, and
 {kib} is still unable to successfully upgrade, rollback {kib} until
 you're able to identify and fix the root cause.
 

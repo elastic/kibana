@@ -18,7 +18,7 @@ Runs a connector by ID.
 
 You must have `read` privileges for the *Actions and Connectors* feature in the
 *Management* section of the
-<<kibana-feature-privileges,{kib} feature privileges>>.
+{kib} privileges.
 
 If you use an index connector, you must also have `all`, `create`, `index`, or
 `write` {ref}/security-privileges.html[indices privileges].
@@ -26,7 +26,7 @@ If you use an index connector, you must also have `all`, `create`, `index`, or
 [[execute-connector-api-desc]]
 === {api-description-title}
 
-You can use this API to test an <<alerting-concepts-actions,action>> that 
+You can use this API to test an  alerting-concepts-actions,action>> that 
 involves interaction with Kibana services or integrations with third-party
 systems.
 
@@ -47,7 +47,7 @@ the URL, the default space is used.
 `params`::
 (Required, object) The parameters of the connector. Parameter properties vary
 depending on the connector type. For information about the parameter properties,
-refer to <<action-types>>.
+refer to Action and connector types.
 +
 --
 .Index connectors

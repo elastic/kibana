@@ -1,5 +1,5 @@
 [[show-field-statistics]]
-== View field statistics
+=== View field statistics
 
 beta::[]
 
@@ -12,7 +12,7 @@ look like when one of the containers is down on a Sunday?
 for the data and its cardinality?
 
 This example explores the fields in
-the <<gs-get-data-into-kibana, sample web logs data>>, or you can use your own data.
+the  gs-get-data-into-kibana, sample web logs data>>, or you can use your own data.
 
 . Open the main menu, and click *Discover*.
 

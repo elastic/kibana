@@ -12,7 +12,7 @@ When you assign a user multiple roles, the user receives a union of the roles’
 There are two approaches to supporting multi-tenancy in {kib}:
 
 1. *Recommended:* Create a space and a limited role for each tenant, and configure each user with the appropriate role. See
-<<tutorial-secure-access-to-kibana, Securing access to {kib}>> for more details.
+Secure access to {kib} for more details.
 2. deprecated:[7.13.0,"In 8.0 and later, the `kibana.index` setting will no longer be supported."] Set up separate {kib} instances to work
 with a single {es} cluster by changing the `kibana.index` setting in your `kibana.yml` file.
 +
@@ -38,7 +38,7 @@ The `manage_security` {ref}/security-privileges.html#privileges-list-cluster[clu
 [[adding_cluster_privileges]]
 ==== Cluster privileges
 
-Cluster privileges grant access to monitoring and management features in {es}. They also enable <<management, Stack Management>> capabilities in {kib}.
+Cluster privileges grant access to monitoring and management features in {es}. They also enable  management, Stack Management>> capabilities in {kib}.
 
 Refer to {ref}/security-privileges.html#privileges-list-cluster[cluster privileges] for a complete description of available options.
 
@@ -117,7 +117,7 @@ image::security/images/create-space-privilege.png[Add {kib} privilege]
 
 ==== Feature availability
 
-Features are available to users when their roles grant access to the features, **and** those features are visible in their current space. The following matrix explains when features are available to users when controlling access via <<spaces-managing, spaces>> and role-based access control:
+Features are available to users when their roles grant access to the features, **and** those features are visible in their current space. The following matrix explains when features are available to users when controlling access via  spaces-managing, spaces>> and role-based access control:
 
 |===
 |**Spaces config** |**Role config** |**Result**

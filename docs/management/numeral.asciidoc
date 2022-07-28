@@ -8,10 +8,10 @@ they are now maintained by {kib}.
 
 Numeral formatting patterns are used in multiple places in {kib}, including:
 
-* <<advanced-options, Advanced settings>>
-* <<field-formatters-numeric, Data view formatters>>
-* <<tsvb, *TSVB*>>
-* <<canvas, *Canvas*>>
+* Advanced settings
+* Data view formatters
+*  tsvb, *TSVB*>>
+*  canvas, *Canvas*>>
 
 The simplest pattern format is `0`, and the default {kib} pattern is `0,0.[000]`.
 The numeral pattern syntax expresses:
@@ -25,7 +25,7 @@ thousands using a locale-specific separator. The separator is most often `,` or 
 and sometimes ` `.
 Accounting notation:: Putting parentheses around your format like `(0.00)` will use accounting notation to show negative numbers.
 
-The display of these patterns is affected by the <<kibana-general-settings, advanced setting>> `format:number:defaultLocale`.
+The display of these patterns is affected by the  kibana-general-settings, advanced setting>> `format:number:defaultLocale`.
 The default locale is `en`, but some examples will specify that they are using an alternate locale.
 
 Most basic examples:

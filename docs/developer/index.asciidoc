@@ -8,14 +8,14 @@ NOTE: This is our legacy developer guide, and while we strive to keep it accurat
 Contributing to {kib} can be daunting at first, but it doesn't have to be. The following sections should get you up and
 running in no time. If you have any problems, file an issue in the https://github.com/elastic/kibana/issues[Kibana repo].
 
-* <<development-getting-started>>
-* <<development-best-practices>>
-* <<contributing>>
-* <<external-plugin-development>>
-* <<kibana-architecture>>
-* <<advanced>>
-* <<plugin-list>>
-* <<development-telemetry>>
+*  development-getting-started>>
+*  development-best-practices>>
+*  contributing>>
+* Plugins
+*  kibana-architecture>>
+*  advanced>>
+*  plugin-list>>
+*  development-telemetry>>
 
 --
 

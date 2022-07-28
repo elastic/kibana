@@ -12,10 +12,10 @@ To get started, open the main menu,
 then click *Stack Management > Watcher*.
 With this UI, you can:
 
-* <<watcher-create-threshold-alert, Create a simple threshold watch>>
-* <<watcher-getting-started, View your watch history and action status>>
-* <<watcher-deactivate, Deactivate and delete a watch>>
-* <<watcher-create-advanced-watch, Create an advanced watch using API syntax>>
+*  watcher-create-threshold-alert, Create a simple threshold watch>>
+*  watcher-getting-started, View your watch history and action status>>
+*  watcher-deactivate, Deactivate and delete a watch>>
+*  watcher-create-advanced-watch, Create an advanced watch using API syntax>>
 
 [role="screenshot"]
 image:management/watcher-ui/images/watches.png["Watcher list"]
@@ -44,7 +44,7 @@ and either of these watcher roles:
 * `watcher_user`. You can view watches, but not create or edit them.
 
 To manage roles, open the main menu, then click *Stack Management > Roles*, or use the
-<<role-management-api, Kibana Role Management API>>. Watches are shared between
+Kibana Role Management API. Watches are shared between
 all users with the same role.
 
 NOTE: If you are creating a threshold watch, you must also have the `view_index_metadata` index privilege. See

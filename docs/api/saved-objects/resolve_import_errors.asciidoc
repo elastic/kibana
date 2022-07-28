@@ -4,7 +4,7 @@
 <titleabbrev>Resolve import errors</titleabbrev>
 ++++
 
-experimental[] Resolve errors from the <<saved-objects-api-import,Import objects API>>.
+experimental[] Resolve errors from the  saved-objects-api-import,Import objects API>>.
 
 To resolve errors, you can:
 
@@ -25,7 +25,7 @@ To resolve errors, you can:
 ==== Path parameters
 
 `space_id`::
-  (Optional, string) An identifier for the <<xpack-spaces,space>>. When `space_id` is unspecified in the URL, the default space is used.
+  (Optional, string) An identifier for the  xpack-spaces,space>>. When `space_id` is unspecified in the URL, the default space is used.
 
 [[saved-objects-api-resolve-import-errors-query-params]]
 ==== Query parameters
@@ -83,7 +83,7 @@ NOTE: One object can result in multiple errors, which requires separate steps to
   (Optional, array) Indicates the objects that are successfully imported, with any metadata if applicable.
 +
 NOTE: Objects are only created when all resolvable errors are addressed, including conflict and missing references. To resolve errors, refer
-to the <<saved-objects-api-resolve-import-errors-example, examples>>.
+to the  saved-objects-api-resolve-import-errors-example, examples>>.
 
 [[saved-objects-api-resolve-import-errors-codes]]
 ==== Response code
@@ -97,7 +97,7 @@ to the <<saved-objects-api-resolve-import-errors-example, examples>>.
 [[saved-objects-api-resolve-import-errors-example-1]]
 ===== Resolve conflict errors
 
-This example builds upon the <<saved-objects-api-import-example-3,Import objects API example with conflict errors>>.
+This example builds upon the  saved-objects-api-import-example-3,Import objects API example with conflict errors>>.
 
 Resolve conflict errors for {a-data-source}, visualization, and *Canvas* workpad by overwriting the existing saved objects:
 
@@ -171,7 +171,7 @@ that were returned in the `successResults` array. In this example, we retried im
 [[saved-objects-api-resolve-import-errors-example-2]]
 ===== Resolve missing reference errors
 
-This example builds upon the <<saved-objects-api-import-example-4,Import objects API example with missing reference errors>>.
+This example builds upon the  saved-objects-api-import-example-4,Import objects API example with missing reference errors>>.
 
 Resolve a missing reference error for a visualization by replacing the {data-source} with another, and resolve a missing reference error for
 a search by ignoring it:

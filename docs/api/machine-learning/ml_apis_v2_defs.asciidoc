@@ -1,12 +1,12 @@
 [[Machine_learning_APIs-definitions]]
 == Definitions
 
-* <<MLSyncResponse>>
-* <<MLSyncResponse-Datafeeds>>
-* <<MLSyncResponse-Jobs>>
-* <<MLSyncResponse-Models>>
-* <<MLSyncResponse-SavedObjectsCreated>>
-* <<MLSyncResponse-SavedObjectsDeleted>>
+*  MLSyncResponse>>
+*  MLSyncResponse-Datafeeds>>
+*  MLSyncResponse-Jobs>>
+*  MLSyncResponse-Models>>
+*  MLSyncResponse-SavedObjectsCreated>>
+*  MLSyncResponse-SavedObjectsDeleted>>
 
 [[MLSyncResponse]]
 === `MLSyncResponse`
@@ -16,19 +16,19 @@ The sync machine learning saved objects API returns this list of machine learnin
 
 ==== Properties
 
-`datafeedsAdded` (++map[string,++<<MLSyncResponse-Datafeeds,`MLSyncResponse-Datafeeds`>>++]++)::
+`datafeedsAdded` (++map[string,++ MLSyncResponse-Datafeeds,`MLSyncResponse-Datafeeds`>>++]++)::
 If a saved object for an anomaly detection job is missing a datafeed identifier, it is added when you run the sync machine learning saved objects API.
 
 
-`datafeedsRemoved` (++map[string,++<<MLSyncResponse-Datafeeds,`MLSyncResponse-Datafeeds`>>++]++)::
+`datafeedsRemoved` (++map[string,++ MLSyncResponse-Datafeeds,`MLSyncResponse-Datafeeds`>>++]++)::
 If a saved object for an anomaly detection job references a datafeed that no longer exists, it is deleted when you run the sync machine learning saved objects API.
 
 
-`savedObjectsCreated` (<<MLSyncResponse-SavedObjectsCreated,`MLSyncResponse-SavedObjectsCreated`>>)::
+`savedObjectsCreated` ( MLSyncResponse-SavedObjectsCreated,`MLSyncResponse-SavedObjectsCreated`>>)::
 If saved objects are missing for machine learning jobs or trained models, they are created when you run the sync machine learning saved objects API.
 
 
-`savedObjectsDeleted` (<<MLSyncResponse-SavedObjectsDeleted,`MLSyncResponse-SavedObjectsDeleted`>>)::
+`savedObjectsDeleted` ( MLSyncResponse-SavedObjectsDeleted,`MLSyncResponse-SavedObjectsDeleted`>>)::
 If saved objects exist for machine learning jobs or trained models that no longer exist, they are deleted when you run the sync machine learning saved objects API.
 
 
@@ -159,15 +159,15 @@ If saved objects are missing for machine learning jobs or trained models, they a
 
 ==== Properties
 
-`anomaly-detector` (++map[string,++<<MLSyncResponse-Jobs,`MLSyncResponse-Jobs`>>++]++)::
+`anomaly-detector` (++map[string,++ MLSyncResponse-Jobs,`MLSyncResponse-Jobs`>>++]++)::
 This object is present if there are anomaly detection jobs affected by the synchronization.
 
 
-`data-frame-analytics` (++map[string,++<<MLSyncResponse-Jobs,`MLSyncResponse-Jobs`>>++]++)::
+`data-frame-analytics` (++map[string,++ MLSyncResponse-Jobs,`MLSyncResponse-Jobs`>>++]++)::
 This object is present if there are data frame analytics jobs affected by the synchronization.
 
 
-`trained-model` (++map[string,++<<MLSyncResponse-Models,`MLSyncResponse-Models`>>++]++)::
+`trained-model` (++map[string,++ MLSyncResponse-Models,`MLSyncResponse-Models`>>++]++)::
 This object is present if there are trained models affected by the synchronization.
 
 
@@ -203,15 +203,15 @@ If saved objects exist for machine learning jobs or trained models that no longe
 
 ==== Properties
 
-`anomaly-detector` (++map[string,++<<MLSyncResponse-Jobs,`MLSyncResponse-Jobs`>>++]++)::
+`anomaly-detector` (++map[string,++ MLSyncResponse-Jobs,`MLSyncResponse-Jobs`>>++]++)::
 This object is present if there are anomaly detection jobs affected by the synchronization.
 
 
-`data-frame-analytics` (++map[string,++<<MLSyncResponse-Jobs,`MLSyncResponse-Jobs`>>++]++)::
+`data-frame-analytics` (++map[string,++ MLSyncResponse-Jobs,`MLSyncResponse-Jobs`>>++]++)::
 This object is present if there are data frame analytics jobs affected by the synchronization.
 
 
-`trained-model` (++map[string,++<<MLSyncResponse-Models,`MLSyncResponse-Models`>>++]++)::
+`trained-model` (++map[string,++ MLSyncResponse-Models,`MLSyncResponse-Models`>>++]++)::
 This object is present if there are trained models affected by the synchronization.
 
 

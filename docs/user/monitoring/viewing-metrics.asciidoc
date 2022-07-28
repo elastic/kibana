@@ -41,7 +41,7 @@ see {ref}/how-monitoring-works.html[How monitoring works] and
 
 . Verify that `monitoring.ui.enabled` is set to `true`, which is the
 default value, in the `kibana.yml` file. For more information, see
-<<monitoring-settings-kb>>.
+ monitoring-settings-kb>>.
 
 . If the Elastic {security-features} are enabled on the monitoring cluster, you
 must provide a user ID and password so {kib} can retrieve the data.
@@ -56,7 +56,7 @@ If these settings are omitted, {kib} uses the `elasticsearch.username` and
 information, see {kibana-ref}/using-kibana-with-security.html[Configuring security in {kib}].
 
 . (Optional) Configure {kib} to encrypt communications between the {kib} server
-and the monitoring cluster. See <<configuring-tls>>.
+and the monitoring cluster. See  configuring-tls>>.
 
 . If the Elastic {security-features} are enabled on the {kib} server, only users
 that have the authority to access {kib} indices and to read the monitoring indices
@@ -96,9 +96,9 @@ cluster.
 You'll see cluster alerts
 that require your attention and a summary of the available monitoring metrics
 for {es}, Logstash, {kib}, and Beats. To view additional information, click the
-Overview, Nodes, Indices, or Instances links.  See <<xpack-monitoring>>.
+Overview, Nodes, Indices, or Instances links.  See  xpack-monitoring>>.
 
 [role="screenshot"]
 image::images/monitoring-dashboard.png[Monitoring dashboard]
 
-If you encounter problems, see <<monitor-troubleshooting,Troubleshooting monitoring>>.
+If you encounter problems, see  monitor-troubleshooting,Troubleshooting monitoring>>.

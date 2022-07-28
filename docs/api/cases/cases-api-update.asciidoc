@@ -16,7 +16,7 @@ Updates one or more cases.
 
 You must have `all` privileges for the *Cases* feature in the *Management*,
 *{observability}*, or *Security* section of the
-<<kibana-feature-privileges,{kib} feature privileges>>, depending on the
+{kib} privileges, depending on the
 `owner` of the cases you're updating.
 
 === {api-path-parms-title}
@@ -114,7 +114,7 @@ For {swimlane} connectors, specify:
 
 `id`::
 (Required, string) The identifier for the connector. To remove the connector,
-use `none`. To retrieve connector IDs, use <<cases-api-find-connectors>>).
+use `none`. To retrieve connector IDs, use  cases-api-find-connectors>>).
 
 `name`::
 (Required, string) The name of the connector. To remove the connector, use
@@ -160,7 +160,7 @@ and `open`.
 
 `version`::
 (Required, string) The current version of the case. To determine this value, use
-<<cases-api-get-case>> or <<cases-api-find-cases>>.
+ cases-api-get-case>> or  cases-api-find-cases>>.
 ====
 
 === {api-response-codes-title}

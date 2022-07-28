@@ -1,16 +1,16 @@
 [[search]]
-== Search your data
+=== Search your data
 
 You can search your data in any app that has a query bar, or by clicking on
 elements in a visualization.  A search matches indices in the current
-<<data-views, data view>> and in the current <<set-time-filter,time frame>>.
+ data-views, data view>> and in the current  set-time-filter,time frame>>.
 
 
 [float]
-=== Search with KQL
+==== Search with KQL
 
 By default, you search using
-{kib}'s <<kuery-query, standard query language>> (KQL), which
+{kib}'s  kuery-query, standard query language>> (KQL), which
 features autocomplete and a simple, easy-to-use syntax. If you prefer to use
 {kib}'s legacy query
 language, based on the
@@ -22,7 +22,7 @@ JSON-based {ref}/query-dsl.html[Elasticsearch Query DSL].
 
 [float]
 [[autorefresh]]
-=== Refresh search results
+==== Refresh search results
 As more documents are added to the indices you're searching, the search results get stale.
 Using the time filter, you can
 configure a refresh interval to periodically resubmit your searches to
@@ -39,8 +39,8 @@ clicking the *Refresh* button.
 include::kuery.asciidoc[]
 
 [[lucene-query]]
-=== Lucene query syntax
-Lucene query syntax is available to {kib} users who opt out of the <<kuery-query>>.
+==== Lucene query syntax
+Lucene query syntax is available to {kib} users who opt out of the  kuery-query>>.
 Full documentation for this syntax is available as part of {es}
 {ref}/query-dsl-query-string-query.html#query-string-syntax[query string syntax].
 
@@ -92,22 +92,22 @@ status:[400 TO 499] AND (extension:php OR extension:html)
 
 
 [[save-open-search]]
-=== Save a search
+==== Save a search
 A saved search persists your current view of Discover for later retrieval and reuse. You can reload a saved search into Discover, add it to a dashboard, and use it as the basis for a visualization.
 
 A saved search includes the query text, filters, and optionally, the time filter. A saved search also includes the selected columns in the document table, the sort order, and the current index pattern.
 
 [role="xpack"]
 [[discover-read-only-access]]
-==== Read-only access
+===== Read-only access
 When you have insufficient privileges to save searches, the following indicator in Kibana will be
 displayed and the *Save* button won't be visible. For more information on granting access to
-Kibana see <<xpack-security-authorization>>.
+Kibana see Granting access to {kib}.
 
 [role="screenshot"]
 image::discover/images/read-only-badge.png[Example of Discover's read only access indicator in Kibana's header]
 
-==== Save a search
+===== Save a search
 To save the current search:
 
 . Click *Save* in the toolbar.
@@ -116,7 +116,7 @@ To save the current search:
 To import, export, and delete saved searches, open the main menu,
 then click *Stack Management > Saved Objects*.
 
-==== Open a saved search
+===== Open a saved search
 To load a saved search into Discover:
 
 . Click *Open* in the toolbar.
@@ -127,20 +127,20 @@ selected, opening the saved search changes the selected index pattern. The query
 used for the saved search will also be automatically selected.
 
 [[save-load-delete-query]]
-=== Save a query
-A saved query is a portable collection of query text and filters that you can reuse in <<discover, Discover>> and <<dashboard, Dashboard>>. Save a query when you want to:
+==== Save a query
+A saved query is a portable collection of query text and filters that you can reuse in  discover, Discover>> and  dashboard, Dashboard>>. Save a query when you want to:
 
 * Retrieve results from the same query at a later time without having to reenter the query text, add the filters or set the time filter
 * View the results of the same query in multiple apps
 * Share your query
 
-Saved queries don't include information specific to Discover, such as the currently selected columns in the document table, the sort order, and the index pattern. If you want to save your current view of Discover for later retrieval and reuse, create a <<save-open-search, saved search>> instead.
+Saved queries don't include information specific to Discover, such as the currently selected columns in the document table, the sort order, and the index pattern. If you want to save your current view of Discover for later retrieval and reuse, create a  save-open-search, saved search>> instead.
 
 [role="xpack"]
-==== Read-only access
-If you have insufficient privileges to save queries, the *Save current query* button isn't visible in the saved query management popover. For more information, see <<xpack-security-authorization, Granting access to Kibana>>
+===== Read-only access
+If you have insufficient privileges to save queries, the *Save current query* button isn't visible in the saved query management popover. For more information, see Granting access to Kibana.
 
-==== Save a query
+===== Save a query
 To save the current query text, filters, and time filter:
 
 . Click *#* in the search bar, next to the query text input.
@@ -155,7 +155,7 @@ image::discover/images/saved-query-management-component-all-privileges.png["Exam
 image::discover/images/saved-query-save-form-default-filters.png["Example of the saved query management save form with the filters option included and the time filter option excluded",width="80%"]
 . Click *Save*.
 
-==== Load a query
+===== Load a query
 To load a saved query into Discover or Dashboard:
 
 . Click *#* in the search bar, next to the query text input.
@@ -181,13 +181,13 @@ To save the changes to the current query:
 . Enter a description, and then select the filter options that you want to include.
 . Click *Save*.
 
-==== Clear a query
+===== Clear a query
 To clear a query that is currently loaded in an application:
 
 . Click *#* in the search bar.
 . Click *Clear* in the popover.
 
-==== Delete a query
+===== Delete a query
 To completely delete a query:
 
 . Click *#* in the search bar, next to the query text input.
@@ -197,6 +197,6 @@ To completely delete a query:
 [role="screenshot"]
 image::discover/images/saved-query-management-component-delete-query-button.png["Example of the saved query management popover when a query is hovered over and we are about to delete a query",width="80%"]
 
-You can import, export, and delete saved queries from <<managing-saved-objects, Saved Objects in Management>>.
+You can import, export, and delete saved queries from  managing-saved-objects, Saved Objects in Management>>.
 
 include::search-sessions.asciidoc[]

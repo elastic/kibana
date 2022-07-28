@@ -75,7 +75,7 @@ yarn kbn bootstrap --force-install
 (You can also run `yarn kbn` to see the other available commands. For
 more info about this tool, see
 {kib-repo}tree/{branch}/packages/kbn-pm[{kib-repo}tree/{branch}/packages/kbn-pm]. If you want more 
-information about how to actively develop over packages please read <<monorepo-packages>>)
+information about how to actively develop over packages please read  monorepo-packages>>)
 
 When switching branches which use different versions of npm packages you
 may need to run:
@@ -123,7 +123,7 @@ yarn es snapshot --license trial
 
 `trial` will give you access to all capabilities.
 
-Read about more options for <<running-elasticsearch>>, like connecting to a remote host, running from source,
+Read about more options for  running-elasticsearch>>, like connecting to a remote host, running from source,
 preserving data inbetween runs, running remote cluster, etc.
 
 [discrete]
@@ -138,7 +138,7 @@ yarn start --run-examples
 
 View all available options by running `yarn start --help`
 
-Read about more advanced options for <<running-kibana-advanced>>.
+Read about more advanced options for  running-kibana-advanced>>.
 
 [discrete]
 === Install pre-commit hook (optional)
@@ -163,15 +163,15 @@ cause the {kib} server to reboot.
 [discrete]
 === More information
 
-* <<running-kibana-advanced>>
+*  running-kibana-advanced>>
 
-* <<sample-data>>
+*  sample-data>>
 
-* <<kibana-debugging>>
+*  kibana-debugging>>
 
-* <<building-kibana>>
+*  building-kibana>>
 
-* <<development-plugin-resources>>
+*  development-plugin-resources>>
 
 include::running-kibana-advanced.asciidoc[leveloffset=+1]
 

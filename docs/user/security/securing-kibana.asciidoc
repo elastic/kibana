@@ -35,12 +35,12 @@ as the encryption key.
 xpack.security.encryptionKey: "something_at_least_32_characters"
 ----
 
-For more information, see <<security-settings-kb,Security settings in {kib}>>.
+For more information, see Security settings in {kib}.
 --
 
-. Optional: <<xpack-security-session-management,Configure {kib}'s session expiration settings>>.
+. Optional:  xpack-security-session-management,Configure {kib}'s session expiration settings>>.
 
-. Optional: <<elasticsearch-mutual-tls,Configure {kib} to authenticate to {es} with a client certificate>>.
+. Optional:  elasticsearch-mutual-tls,Configure {kib} to authenticate to {es} with a client certificate>>.
 
 . Restart {kib}.
 
@@ -79,7 +79,7 @@ POST /_security/user/jacknich
 --------------------------------------------------------------------------------
 // CONSOLE
 
-TIP: For more information on Basic Authentication and additional methods of authenticating {kib} users, see <<kibana-authentication>>.
+TIP: For more information on Basic Authentication and additional methods of authenticating {kib} users, see {kib} authentication.
 --
 
 . Grant users access to the indices that they will be working with in {kib}.
@@ -96,7 +96,7 @@ on specific data views. For more information, see
 . Log out of {kib} and verify that you can log in as a normal user. If you are running {kib} locally, go to `https://localhost:5601` and
 enter the credentials for a user you've assigned a {kib} user role. For example, you could log in as the user `jacknich`.
 +
-NOTE: This must be a user who has been assigned <<kibana-privileges, Kibana privileges>>. {kib} server credentials (the built-in
+NOTE: This must be a user who has been assigned  kibana-privileges, Kibana privileges>>. {kib} server credentials (the built-in
 `kibana_system` user) should only be used internally by the {kib} server.
 
 include::authentication/index.asciidoc[]

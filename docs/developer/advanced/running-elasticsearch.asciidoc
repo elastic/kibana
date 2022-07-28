@@ -7,7 +7,7 @@ There are many ways to run {es} while you are developing.
 
 === By snapshot
 
-This will run a snapshot of {es} that is usually built nightly. Read more about <<development-es-snapshots>>.
+This will run a snapshot of {es} that is usually built nightly. Read more about  development-es-snapshots>>.
 
 [source,bash]
 ----
@@ -16,7 +16,7 @@ yarn es snapshot
 By default, two users are added to Elasticsearch:
 
   - A superuser with username: `elastic` and password: `changeme`, which can be used to log into Kibana with.
-  - A user with username: `kibana_system` and password `changeme`. This account is used by the Kibana server to authenticate itself to Elasticsearch, and to perform certain actions on behalf of the end user. These credentials should be specified in your kibana.yml as described in <<using-kibana-with-security>>
+  - A user with username: `kibana_system` and password `changeme`. This account is used by the Kibana server to authenticate itself to Elasticsearch, and to perform certain actions on behalf of the end user. These credentials should be specified in your kibana.yml as described in  using-kibana-with-security>>
 
 See all available options, like how to specify a specific license, with the `--help` flag.
 
@@ -60,7 +60,7 @@ Each of these will run {es} with a basic license. Additional options are availab
 
 You can save some system resources, and the effort of generating sample data, if you have a remote {es} cluster to connect to. (Elasticians: you do! Check with your team about where to find credentials)
 
-You'll need to create a kibana.dev.yml (<<customize-kibana-yml>>) and add the following to it:
+You'll need to create a kibana.dev.yml ( customize-kibana-yml>>) and add the following to it:
 
 [source,bash]
 ----
@@ -111,4 +111,4 @@ PUT _cluster/settings
 }
 ----
 
-Follow the cross-cluster search instructions for setting up index patterns to search across clusters (<<management-cross-cluster-search>>).
+Follow the cross-cluster search instructions for setting up index patterns to search across clusters ( management-cross-cluster-search>>).

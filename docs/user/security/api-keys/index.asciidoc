@@ -25,7 +25,7 @@ image:images/api-keys.png["API Keys UI"]
 
 You must have the `manage_security`, `manage_api_key`, or the `manage_own_api_key` 
 cluster privileges to use API keys in {kib}. To manage roles, open the main menu, then click 
-*Stack Management > Roles*, or use the <<role-management-api, {kib} Role Management API>>. 
+*Stack Management > Roles*, or use the {kib} Role Management API. 
 
 
 [float]

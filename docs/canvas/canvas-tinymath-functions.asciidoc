@@ -15,7 +15,7 @@ Any function can be wrapped by another function as long as the return type
 of the inner function matches the acceptable parameter type of the outer function.
 
 [float]
-=== abs( a )
+==== abs( a )
 
 Calculates the absolute value of a number. For arrays, the function will be
 applied index-wise to each element.

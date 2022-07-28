@@ -17,19 +17,19 @@ connector for cases.
 
 You must have `all` privileges for the *Cases* feature in the *Management*,
 *{observability}*, or *Security* section of the
-<<kibana-feature-privileges,{kib} feature privileges>>, depending on the
+{kib} privileges, depending on the
 `owner` of the case configuration.
 
 === {api-description-title}
 
 Connectors are used to interface with external systems. You must create a
-connector before you can it in your cases. Refer to <<add-case-connectors>>.
+connector before you can it in your cases. Refer to  add-case-connectors>>.
 
 === {api-path-parms-title}
 
 `<configuration_id>`::
 The identifier for the configuration. To retrieve the configuration IDs, use
-<<cases-get-configuration>>.
+ cases-get-configuration>>.
 
 `<space_id>`::
 (Optional, string) An identifier for the space. If it is not specified, the
@@ -63,7 +63,7 @@ propagated to individual cases, therefore it is recommended to set it to `null`.
 
 `id`::
 (Required, string) The identifier for the connector. To retrieve connector IDs,
-use <<cases-api-find-connectors>>.
+use  cases-api-find-connectors>>.
 
 `name`::
 (Required, string) The name of the connector.
@@ -75,7 +75,7 @@ use <<cases-api-find-connectors>>.
 
 `version`::
 (Required, string) The version of the connector. To retrieve the version value,
-use <<cases-get-configuration>>.
+use  cases-get-configuration>>.
 
 === Response code
 

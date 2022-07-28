@@ -4,7 +4,7 @@
 <titleabbrev>Legacy Create connector</titleabbrev>
 ++++
 
-deprecated::[7.13.0,Use <<create-connector-api>> instead.]
+deprecated::[7.13.0,Use  create-connector-api>> instead.]
 
 Creates a connector.
 
@@ -32,13 +32,13 @@ Creates a connector.
 
 `config`::
   (Required, object) The configuration for the connector. Configuration properties vary depending on
-  the connector type. For information about the configuration properties, refer to <<action-types,Action and connector types>>.
+  the connector type. For information about the configuration properties, refer to Action and connector types.
 
 `secrets`::
   (Required, object) The secrets configuration for the connector. Secrets configuration properties vary
-  depending on the connector type. For information about the secrets configuration properties, refer to <<action-types,Action and connector types>>.
+  depending on the connector type. For information about the secrets configuration properties, refer to Action and connector types.
 +
-WARNING: Remember these values. You must provide them each time you call the <<actions-and-connectors-legacy-api-update, update>> API.
+WARNING: Remember these values. You must provide them each time you call the  actions-and-connectors-legacy-api-update, update>> API.
 
 [[actions-and-connectors-legacy-api-create-request-codes]]
 ===== Response code

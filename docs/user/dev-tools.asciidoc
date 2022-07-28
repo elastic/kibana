@@ -10,20 +10,20 @@ with your data.
 [cols="2"]
 |===
 
-a| <<console-kibana, Console>>
+a|  console-kibana, Console>>
 
 | Interact with the REST APIs of {es} and {kib}, including sending requests
 and viewing API documentation.
 
-a| <<xpack-profiler, {searchprofiler}>>
+a|  xpack-profiler, {searchprofiler}>>
 
 | Inspect and analyze your search queries.
 
-a| <<xpack-grokdebugger, Grok&nbsp;Debugger&nbsp;&nbsp;&nbsp;>>
+a|  xpack-grokdebugger, Grok&nbsp;Debugger&nbsp;&nbsp;&nbsp;>>
 
 | Build and debug grok patterns before you use them in your data processing pipelines.
 
-a| <<painlesslab, Painless&nbsp;Lab>>
+a|  painlesslab, Painless&nbsp;Lab>>
 
 | beta:[] Test and debug Painless scripts in real-time.
 |===

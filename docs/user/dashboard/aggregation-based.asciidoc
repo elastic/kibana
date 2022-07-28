@@ -1,5 +1,5 @@
 [[add-aggregation-based-visualization-panels]]
-=== Aggregation-based
+==== Aggregation-based
 
 Aggregation-based visualizations are the core {kib} panels, and are not optimized for a specific use case.
 
@@ -7,7 +7,7 @@ With aggregation-based visualizations, you can:
 
 * Split charts up to three aggregation levels, which is more than *Lens* and *TSVB*
 * Create visualization with non-time series data
-* Use a <<save-open-search,saved search>> as an input
+* Use a  save-open-search,saved search>> as an input
 * Sort data tables and use the summary row and percentage column features
 * Assign colors to data series
 * Extend features with plugins
@@ -114,7 +114,7 @@ Choose the type of visualization you want to create, then use the editor to conf
 +
 NOTE: There is no performance impact on the data source you select. For example, *Discover* saved searches perform the same as {data-sources}. 
 
-. Add the <<aggregation-reference,aggregations>> you want to visualize using the editor, then click *Update*. 
+. Add the  aggregation-reference,aggregations>> you want to visualize using the editor, then click *Update*. 
 +
 NOTE: For the *Date Histogram* to use an *auto interval*, the date field must match the primary time field of the {data-source}.
 
@@ -155,13 +155,13 @@ Open the *Aggregation based* editor and change the time range.
 
 . On the dashboard, click *All types > Aggregation based*, select *Vertical bar*, then select *kibana_sample_data_logs*.
 
-. Make sure the <<set-time-filter, time filter>>> is *Last 7 days*.
+. Make sure the  set-time-filter, time filter>>> is *Last 7 days*.
 
 [float]
 [[tutorial-configure-the-bar-chart]]
 ===== Create the bar chart
 
-To create the bar chart, add a <<bucket-aggregations,bucket aggregation>>, then add the terms sub-aggregation to display the top values.
+To create the bar chart, add a  bucket-aggregations,bucket aggregation>>, then add the terms sub-aggregation to display the top values.
 
 . Add a *Buckets* aggregation.
 
@@ -199,7 +199,7 @@ To save the panel to the *Visualize Library*:
 
 . Click *Save to library*.
 
-. Enter the *Title* and add any applicable <<managing-tags,*Tags*>>.
+. Enter the *Title* and add any applicable  managing-tags,*Tags*>>.
 
 . Make sure that *Add to Dashboard after saving* is selected.
 

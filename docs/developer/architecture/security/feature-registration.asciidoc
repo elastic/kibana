@@ -51,12 +51,12 @@ of features within the management screens.
 
 |`privileges` (required)
 |{kib-repo}blob/{branch}/x-pack/plugins/features/common/feature.ts[`KibanaFeatureConfig`].
-|See <<example-1-canvas,Example 1>> and <<example-2-dev-tools,Example 2>>
+|See  example-1-canvas,Example 1>> and  example-2-dev-tools,Example 2>>
 |The set of privileges this feature requires to function.
 
 |`subFeatures` (optional)
 |{kib-repo}blob/{branch}/x-pack/plugins/features/common/feature.ts[`KibanaFeatureConfig`].
-|See <<example-3-discover,Example 3>>
+|See  example-3-discover,Example 3>>
 |The set of subfeatures that enables finer access control than the `all` and `read` feature privileges. These options are only available in the Gold subscription level and higher.
 
 |===

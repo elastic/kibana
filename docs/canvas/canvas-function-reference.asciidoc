@@ -1,29 +1,29 @@
 [role="xpack"]
 [[canvas-function-reference]]
-== Canvas function reference
+=== Canvas function reference
 
 Behind the scenes, Canvas is driven by a powerful expression language,
 with dozens of functions and other capabilities, including table transforms,
 type casting, and sub-expressions.
 
-The Canvas expression language also supports <<canvas-tinymath-functions>>, which
+The Canvas expression language also supports  canvas-tinymath-functions>>, which
 perform complex math calculations.
 
 A *** denotes a required argument.
 
 A † denotes an argument can be passed multiple times.
 
-<<a_fns>> | B | <<c_fns>> | <<d_fns>> | <<e_fns>> | <<f_fns>> | <<g_fns>> | <<h_fns>> | <<i_fns>> | <<j_fns>> | <<k_fns>> | <<l_fns>> | <<m_fns>> | <<n_fns>> | O | <<p_fns>> | Q | <<r_fns>> | <<s_fns>> | <<t_fns>> | <<u_fns>> | <<v_fns>> | W | X | Y | Z
+ a_fns>> | B |  c_fns>> |  d_fns>> |  e_fns>> |  f_fns>> |  g_fns>> |  h_fns>> |  i_fns>> |  j_fns>> |  k_fns>> |  l_fns>> |  m_fns>> |  n_fns>> | O |  p_fns>> | Q |  r_fns>> |  s_fns>> |  t_fns>> |  u_fns>> |  v_fns>> | W | X | Y | Z
 
 [float]
 [[a_fns]]
-== A
+=== A
 
 [float]
 [[all_fn]]
 === `all`
 
-Returns `true` if all of the conditions are met. See also <<any_fn>>.
+Returns `true` if all of the conditions are met. See also  any_fn>>.
 
 *Expression syntax*
 [source,js]
@@ -72,7 +72,7 @@ Alias: `condition`
 [[alterColumn_fn]]
 === `alterColumn`
 
-Converts between core types, including `string`, `number`, `null`, `boolean`, and `date`, and renames columns. See also <<mapColumn_fn>>, <<mathColumn_fn>>, and <<staticColumn_fn>>.
+Converts between core types, including `string`, `number`, `null`, `boolean`, and `date`, and renames columns. See also  mapColumn_fn>>,  mathColumn_fn>>, and  staticColumn_fn>>.
 
 *Expression syntax*
 [source,js]
@@ -121,7 +121,7 @@ Alias: `column`
 [[any_fn]]
 === `any`
 
-Returns `true` if at least one of the conditions is met. See also <<all_fn>>.
+Returns `true` if at least one of the conditions is met. See also  all_fn>>.
 
 *Expression syntax*
 [source,js]
@@ -165,7 +165,7 @@ Alias: `condition`
 [[as_fn]]
 === `as`
 
-Creates a `datatable` with a single value. See also <<getCell_fn>>.
+Creates a `datatable` with a single value. See also  getCell_fn>>.
 
 *Expression syntax*
 [source,js]
@@ -249,7 +249,7 @@ Alias: `id`
 [[axisConfig_fn]]
 === `axisConfig`
 
-Configures the axis of a visualization. Only used with <<plot_fn>>.
+Configures the axis of a visualization. Only used with  plot_fn>>.
 
 *Expression syntax*
 [source,js]
@@ -314,7 +314,7 @@ Default: `true`
 [[case_fn]]
 === `case`
 
-Builds a <<case_fn>>, including a condition and a result, to pass to the <<switch_fn>> function.
+Builds a  case_fn>>, including a condition and a result, to pass to the  switch_fn>> function.
 
 *Expression syntax*
 [source,js]
@@ -461,7 +461,7 @@ Alias: `include`
 [[compare_fn]]
 === `compare`
 
-Compares the _context_ to specified value to determine `true` or `false`. Usually used in combination with `<<if_fn>>` or <<case_fn>>. This only works with primitive types, such as `number`, `string`, `boolean`, `null`. See also <<eq_fn>>, <<gt_fn>>, <<gte_fn>>, <<lt_fn>>, <<lte_fn>>, <<neq_fn>>
+Compares the _context_ to specified value to determine `true` or `false`. Usually used in combination with ` if_fn>>` or  case_fn>>. This only works with primitive types, such as `number`, `string`, `boolean`, `null`. See also  eq_fn>>,  gt_fn>>,  gte_fn>>,  lt_fn>>,  lte_fn>>,  neq_fn>>
 
 *Expression syntax*
 [source,js]
@@ -630,7 +630,7 @@ Using the `context` function allows us to pass the output, or _context_, of the 
 [[createTable_fn]]
 === `createTable`
 
-Creates a datatable with a list of columns, and 1 or more empty rows. To populate the rows, use <<mapColumn_fn>> or <<mathColumn_fn>>.
+Creates a datatable with a list of columns, and 1 or more empty rows. To populate the rows, use  mapColumn_fn>> or  mathColumn_fn>>.
 
 *Expression syntax*
 [source,js]
@@ -1598,7 +1598,7 @@ Alias: `value`
 [[head_fn]]
 === `head`
 
-Retrieves the first N rows from the `datatable`. See also <<tail_fn>>.
+Retrieves the first N rows from the `datatable`. See also  tail_fn>>.
 
 *Accepts:* `datatable`
 
@@ -1747,7 +1747,7 @@ Gets kibana global context
 [[location_fn]]
 === `location`
 
-Find your current location using the Geolocation API of the browser. Performance can vary, but is fairly accurate. See https://developer.mozilla.org/en-US/docs/Web/API/Navigator/geolocation. Don’t use <<location_fn>> if you plan to generate PDFs as this function requires user input.
+Find your current location using the Geolocation API of the browser. Performance can vary, but is fairly accurate. See https://developer.mozilla.org/en-US/docs/Web/API/Navigator/geolocation. Don’t use  location_fn>> if you plan to generate PDFs as this function requires user input.
 
 *Accepts:* `null`
 
@@ -1833,7 +1833,7 @@ Returns an object with the center coordinates and zoom level of the map.
 [[mapColumn_fn]]
 === `mapColumn`
 
-Adds a column calculated as the result of other columns. Changes are made only when you provide arguments.See also <<alterColumn_fn>> and <<staticColumn_fn>>.
+Adds a column calculated as the result of other columns. Changes are made only when you provide arguments.See also  alterColumn_fn>> and  staticColumn_fn>>.
 
 *Accepts:* `datatable`
 
@@ -1873,7 +1873,7 @@ Default: `null`
 [[markdown_fn]]
 === `markdown`
 
-Adds an element that renders Markdown text. TIP: Use the <<markdown_fn>> function for single numbers, metrics, and paragraphs of text.
+Adds an element that renders Markdown text. TIP: Use the  markdown_fn>> function for single numbers, metrics, and paragraphs of text.
 
 *Accepts:* `datatable`, `null`
 
@@ -2245,7 +2245,7 @@ Subdivides a `datatable` by the unique values of the specified columns, and pass
 
 Aliases: `exp`, `fn`, `function`
 |`datatable`
-|An expression to pass each resulting `datatable` into. Tips: Expressions must return a `datatable`. Use <<as_fn>> to turn literals into `datatable`s. Multiple expressions must return the same number of rows.If you need to return a different row count, pipe into another instance of <<ply_fn>>. If multiple expressions returns the columns with the same name, the last one wins.
+|An expression to pass each resulting `datatable` into. Tips: Expressions must return a `datatable`. Use  as_fn>> to turn literals into `datatable`s. Multiple expressions must return the same number of rows.If you need to return a different row count, pipe into another instance of  ply_fn>>. If multiple expressions returns the columns with the same name, the last one wins.
 |===
 
 *Returns:* `datatable`
@@ -2404,7 +2404,7 @@ Renders the _context_ as a specific element and sets element level options, such
 
 |`as`
 |`string`
-|The element type to render. You probably want a specialized function instead, such as <<plot_fn>> or <<shape_fn>>.
+|The element type to render. You probably want a specialized function instead, such as  plot_fn>> or  shape_fn>>.
 
 |`containerStyle`
 |`containerStyle`
@@ -2558,7 +2558,7 @@ Alias: `format`
 [[rowCount_fn]]
 === `rowCount`
 
-Returns the number of rows. Pairs with <<ply_fn>> to get the count of unique column values, or combinations of unique column values.
+Returns the number of rows. Pairs with  ply_fn>> to get the count of unique column values, or combinations of unique column values.
 
 *Accepts:* `datatable`
 
@@ -2606,7 +2606,7 @@ Default: `false`
 [[seriesStyle_fn]]
 === `seriesStyle`
 
-Creates an object used for describing the properties of a series on a chart. Use <<seriesStyle_fn>> inside of a charting function, like <<plot_fn>> or <<pie_fn>>.
+Creates an object used for describing the properties of a series on a chart. Use  seriesStyle_fn>> inside of a charting function, like  plot_fn>> or  pie_fn>>.
 
 *Accepts:* `null`
 
@@ -2734,7 +2734,7 @@ Default: `false`
 [[staticColumn_fn]]
 === `staticColumn`
 
-Adds a column with the same static value in every row. See also <<alterColumn_fn>>, <<mapColumn_fn>>, and <<mathColumn_fn>>
+Adds a column with the same static value in every row. See also  alterColumn_fn>>,  mapColumn_fn>>, and  mathColumn_fn>>
 
 *Accepts:* `datatable`
 
@@ -2784,7 +2784,7 @@ Alias: `value`
 [[switch_fn]]
 === `switch`
 
-Performs conditional logic with multiple conditions. See also <<case_fn>>, which builds a `case` to pass to the <<switch_fn>> function.
+Performs conditional logic with multiple conditions. See also  case_fn>>, which builds a `case` to pass to the  switch_fn>> function.
 
 *Accepts:* `any`
 
@@ -2855,7 +2855,7 @@ Default: `true`
 [[tail_fn]]
 === `tail`
 
-Retrieves the last N rows from the end of a `datatable`. See also <<head_fn>>.
+Retrieves the last N rows from the end of a `datatable`. See also  head_fn>>.
 
 *Accepts:* `datatable`
 
@@ -3076,7 +3076,7 @@ Alias: `parameter`
 [[urlparam_fn]]
 === `urlparam`
 
-Retrieves a URL parameter to use in an expression. The <<urlparam_fn>> function always returns a `string`. For example, you can retrieve the value `"20"` from the parameter `myVar` from the URL `https://localhost:5601/app/canvas?myVar=20`.
+Retrieves a URL parameter to use in an expression. The  urlparam_fn>> function always returns a `string`. For example, you can retrieve the value `"20"` from the parameter `myVar` from the URL `https://localhost:5601/app/canvas?myVar=20`.
 
 *Accepts:* `null`
 

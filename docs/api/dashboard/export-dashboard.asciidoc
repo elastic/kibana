@@ -4,7 +4,7 @@
 <titleabbrev>Export dashboard</titleabbrev>
 ++++
 
-deprecated::[7.15.0,Use <<saved-objects-api-export>> instead.]
+deprecated::[7.15.0,Use Export objects API.]
 
 Export dashboards and corresponding saved objects.
 
@@ -26,7 +26,7 @@ Export dashboards and corresponding saved objects.
 ==== Response body
 
 `objects`::
-  (array) A top level property that includes the saved objects. The order of the objects is not guaranteed. Use the exact response body as the request body for the corresponding <<dashboard-import-api, Import dashboard API>>.
+  (array) A top level property that includes the saved objects. The order of the objects is not guaranteed. Use the exact response body as the request body for the corresponding  dashboard-import-api, Import dashboard API>>.
 
 [[dashboard-api-export-codes]]
 ==== Response code

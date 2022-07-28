@@ -1,12 +1,12 @@
 [[advanced]]
 == Advanced
 
-* <<running-elasticsearch>>
-* <<development-es-snapshots>>
-* <<development-basepath>>
-* <<upgrading-nodejs>>
-* <<sharing-saved-objects>>
-* <<legacy-url-aliases>>
+*  running-elasticsearch>>
+*  development-es-snapshots>>
+*  development-basepath>>
+*  upgrading-nodejs>>
+*  sharing-saved-objects>>
+*  legacy-url-aliases>>
 
 include::development-es-snapshots.asciidoc[leveloffset=+1]
 

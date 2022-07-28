@@ -1,6 +1,6 @@
 [role="xpack"]
 [[maps-aggregations]]
-== Plot big data without plotting too much data
+=== Plot big data without plotting too much data
 
 ++++
 <titleabbrev>Plot big data</titleabbrev>
@@ -11,7 +11,7 @@ Use {ref}/search-aggregations.html[aggregations] to plot large data sets without
 When using aggregations, the documents stay in Elasticsearch and only the calculated values for each group are returned to your computer.
 
 Aggregations group your documents into buckets and calculate metrics for each bucket.
-Use metric aggregations for <<maps-vector-style-data-driven, data driven styling>>. For example, use the count aggregation to shade world countries by web log traffic.
+Use metric aggregations for  maps-vector-style-data-driven, data driven styling>>. For example, use the count aggregation to shade world countries by web log traffic.
 
 You can add the following metric aggregations:
 
@@ -35,27 +35,27 @@ Use aggregated layers with document layers to show aggregated views when the map
 amounts of the globe and individual documents when the map shows smaller regions.
 
 In the following example, the Grid aggregation layer is only visible when the map is at zoom levels 0 through 5. The Documents layer is only visible when the map is at zoom levels 4 through 24.
-See the <<maps-add-elasticsearch-layer, Getting started>> tutorial for more details on configuring the layers.
+See the  maps-add-elasticsearch-layer, Getting started>> tutorial for more details on configuring the layers.
 
 [role="screenshot"]
 image::maps/images/grid_to_docs.gif[]
 
 [role="xpack"]
 [[maps-grid-aggregation]]
-=== Clusters
+==== Clusters
 
 Clusters use {ref}/search-aggregations-bucket-geotilegrid-aggregation.html[Geotile grid aggregation] or {ref}/search-aggregations-bucket-geohexgrid-aggregation.html[Geohex grid aggregation] to group your documents into grids. You can calculate metrics for each gridded cell.
 
 Symbolize cluster metrics as:
 
-*Clusters*:: Uses {ref}/search-aggregations-bucket-geotilegrid-aggregation.html[Geotile grid aggregation] to group your documents into grids. Creates a <<vector-layer, vector layer>> with a cluster symbol for each gridded cell.
+*Clusters*:: Uses {ref}/search-aggregations-bucket-geotilegrid-aggregation.html[Geotile grid aggregation] to group your documents into grids. Creates a  vector-layer, vector layer>> with a cluster symbol for each gridded cell.
 The cluster location is the weighted centroid for all documents in the gridded cell.
 
-*Grids*:: Uses {ref}/search-aggregations-bucket-geotilegrid-aggregation.html[Geotile grid aggregation] to group your documents into grids. Creates a <<vector-layer, vector layer>> with a bounding box polygon for each gridded cell.
+*Grids*:: Uses {ref}/search-aggregations-bucket-geotilegrid-aggregation.html[Geotile grid aggregation] to group your documents into grids. Creates a  vector-layer, vector layer>> with a bounding box polygon for each gridded cell.
 
-*Heat map*:: Uses {ref}/search-aggregations-bucket-geotilegrid-aggregation.html[Geotile grid aggregation] to group your documents into grids. Creates a <<heatmap-layer, heat map layer>> that clusters the weighted centroids for each gridded cell.
+*Heat map*:: Uses {ref}/search-aggregations-bucket-geotilegrid-aggregation.html[Geotile grid aggregation] to group your documents into grids. Creates a  heatmap-layer, heat map layer>> that clusters the weighted centroids for each gridded cell.
 
-*Hexbins*:: Uses {ref}/search-aggregations-bucket-geohexgrid-aggregation.html[Geohex grid aggregation] to group your documents into H3 hexagon grids. Creates a <<vector-layer, vector layer>> with a hexagon polygon for each gridded cell.
+*Hexbins*:: Uses {ref}/search-aggregations-bucket-geohexgrid-aggregation.html[Geohex grid aggregation] to group your documents into H3 hexagon grids. Creates a  vector-layer, vector layer>> with a hexagon polygon for each gridded cell.
 
 To enable a clusters layer:
 
@@ -70,7 +70,7 @@ To enable a blended layer that dynamically shows clusters or documents:
 
 [role="xpack"]
 [[maps-top-hits-aggregation]]
-=== Display the most relevant documents per entity
+==== Display the most relevant documents per entity
 
 Use *Top hits per entity* to display the most relevant documents per entity, for example, the most recent GPS tracks per flight route.
 To get this data, {es} first groups your data using a {ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation],
@@ -90,7 +90,7 @@ image::maps/images/top_hits.png[]
 
 [role="xpack"]
 [[point-to-point]]
-=== Point to point
+==== Point to point
 
 A point-to-point connection plots aggregated data paths between the source and the destination.
 Thicker, darker lines symbolize more connections between a source and destination, and thinner, lighter lines symbolize less connections.
@@ -110,19 +110,19 @@ image::maps/images/point_to_point.png[]
 
 [role="xpack"]
 [[terms-join]]
-=== Term join
+==== Term join
 
-Use term joins to augment vector features with properties for <<maps-vector-style-data-driven, data driven styling>> and richer tooltip content.
+Use term joins to augment vector features with properties for  maps-vector-style-data-driven, data driven styling>> and richer tooltip content.
 
-Term joins are available for the following <<vector-layer, vector layers>>:
+Term joins are available for the following  vector-layer, vector layers>>:
 
 * Configured GeoJSON
 * Documents
 * EMS Boundaries
 
-==== Example term join
+===== Example term join
 
-The <<maps-add-choropleth-layer, choropleth layer example>> uses a term join to shade world countries by web log traffic.
+The  maps-add-choropleth-layer, choropleth layer example>> uses a term join to shade world countries by web log traffic.
 Darker shades symbolize countries with more web log traffic, and lighter shades symbolize countries with less traffic.
 
 [role="screenshot"]
@@ -228,7 +228,7 @@ The following shows an example terms aggregation response. Note the *key* proper
 }
 --------------------------------------------------
 
-==== Augment the left source with metrics from the right source
+===== Augment the left source with metrics from the right source
 
 The join adds metrics for each terms aggregation bucket to the world country feature with the corresponding ISO 3166-1 alpha-2 code. Features that do not have a corresponding terms aggregation bucket are not visible on the map.
 

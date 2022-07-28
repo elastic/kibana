@@ -1,5 +1,5 @@
 [[xpack-graph]]
-== Graphing connections in your data
+== Show patterns and relationships in your data
 
 The {kib} {graph-features} enable you to discover how items in an
 Elasticsearch index are related. You can explore the connections between

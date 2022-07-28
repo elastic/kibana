@@ -34,7 +34,7 @@ image::apm/images/lambda-cold-start-trace.png[lambda cold start trace]
 [[apm-lambda-cold-start-latency]]
 ===== Latency distribution correlation
 
-The <<correlations-latency,latency correlations>> feature can be used to visualize the impact of Lambda cold starts on latency--just select the `faas.coldstart` field.
+The  correlations-latency,latency correlations>> feature can be used to visualize the impact of Lambda cold starts on latency--just select the `faas.coldstart` field.
 
 [role="screenshot"]
 image::apm/images/lambda-correlations.png[lambda correlations example]

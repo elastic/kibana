@@ -50,7 +50,7 @@ Sets the amount of event loop delay during a task execution which will cause a w
 [[task-manager-health-settings]]
 ==== Task Manager Health settings
 
-Settings that configure the <<task-manager-health-monitoring>> endpoint.
+Settings that configure the  task-manager-health-monitoring>> endpoint.
 
 `xpack.task_manager.monitored_task_execution_thresholds`::
 Configures the threshold of failed task executions at which point the `warn` or

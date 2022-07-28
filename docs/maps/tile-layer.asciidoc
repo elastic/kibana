@@ -1,6 +1,6 @@
 [role="xpack"]
 [[tile-layer]]
-== Tile layer
+=== Tile layer
 
 Tile layers display image tiles served from a tile server.
 
@@ -10,7 +10,7 @@ image::maps/images/tile_layer.png[]
 To add a tile layer to your map, click *Add layer*, then select one of the following:
 
 *Configured Tile Map Service*:: Tile map service configured in kibana.yml.
-See map.tilemap.url in <<settings>> for details.
+See map.tilemap.url in {kib} Settings for details.
 
 *EMS Basemaps*:: Tile map service from https://www.elastic.co/elastic-maps-service[Elastic Maps Service].
 

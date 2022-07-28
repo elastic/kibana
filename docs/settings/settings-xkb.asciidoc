@@ -8,7 +8,7 @@
 
 include::{asciidoc-dir}/../../shared/settings.asciidoc[]
 
-For more {kib} configuration settings, see <<settings>>.
+For more {kib} configuration settings, see {kib} Settings.
 
 include::alert-action-settings.asciidoc[]
 include::apm-settings.asciidoc[]

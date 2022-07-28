@@ -1,7 +1,7 @@
 [[testing-kibana-plugin]]
 == Testing {kib} Plugins
 === Writing tests
-Learn about <<development-tests, recommended testing approaches >>.
+Learn about  development-tests, recommended testing approaches >>.
 
 === Mock {kib} Core services in tests
 

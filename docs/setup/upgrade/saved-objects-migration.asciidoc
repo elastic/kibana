@@ -1,7 +1,7 @@
 [[saved-object-migrations]]
 === Migrate saved objects
 
-Each time you upgrade {kib}, an upgrade migration is performed to ensure that all <<managing-saved-objects,saved objects>> are compatible with the new version.
+Each time you upgrade {kib}, an upgrade migration is performed to ensure that all  managing-saved-objects,saved objects>> are compatible with the new version.
 
 NOTE: To help you prepare for the upgrade to 8.0.0, 7.17.0 includes an https://www.elastic.co/guide/en/kibana/7.17/upgrade-assistant.html[*Upgrade Assistant*].
 To access the assistant, go to *Stack Management > Upgrade Assistant*.

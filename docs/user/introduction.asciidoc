@@ -58,7 +58,7 @@ your organization from threats before damage and loss occur.
 [[visualize-and-analyze]]
 === Analyze
 
-With {kib} <<get-started,*Analytics*>>, you can quickly search through large amounts
+With {kib}  get-started,*Analytics*>>, you can quickly search through large amounts
 of data, explore fields and values,
 and then use the drag-and-drop interface to rapidly build charts, tables, metrics, and more.
 
@@ -70,31 +70,31 @@ image::images/visualization-journey.png[User data analysis journey]
 |===
 
 | *1*
-| *Add data.* The best way to add data to the Elastic Stack is to use one of our many <<connect-to-elasticsearch,integrations>>.
+| *Add data.* The best way to add data to the Elastic Stack is to use one of our many integrations.
 Alternatively, you can add a sample data set or upload a file. All three options are available
 on the home page.
 
 | *2*
-| *Explore.* With <<discover,*Discover*>>, you can search your data for hidden
+| *Explore.* With  discover,*Discover*>>, you can search your data for hidden
 insights and relationships. Ask your questions, and then filter the results to just the data you want.
 You can limit your results to the most recent documents added to {es}.
 
 | *3*
 | *Visualize.* {kib} provides many options to create visualizations of your data, from
 aggregation-based data to time series data to geo data.
-<<dashboard, *Dashboard*>> is your starting point to create visualizations,
+ dashboard, *Dashboard*>> is your starting point to create visualizations,
 and then pulling them together to show your data from multiple perspectives.
-Use <<canvas, *Canvas*>>,
+Use  canvas, *Canvas*>>,
 to give your data
 the “wow” factor for display on a big screen. Use *Graph* to explore patterns and relationships.
 
 | *4*
 | *Model data behavior.*
-Use <<xpack-ml, *{ml-cap}*>> to model the behavior of your data&mdash;forecast unusual behavior and
+Use *{ml-cap}* to model the behavior of your data&mdash;forecast unusual behavior and
 perform outlier detection, regression, and classification analysis.
 
 | *5*
-| *Share.* Ready to <<reporting-getting-started, share>> your findings with a larger audience? {kib} offers many options&mdash;embed
+| *Share.* Ready to  reporting-getting-started, share>> your findings with a larger audience? {kib} offers many options&mdash;embed
 a dashboard, share a link, export to PDF, and more.
 |===
 
@@ -109,7 +109,7 @@ a dashboard, share a link, export to PDF, and more.
 * Roll up data from one or more indices into a new, compact index.
 * Replicate indices on a remote cluster and copy them to a local cluster.
 
-For a full list of data management UIs, refer to <<management, *Stack Management*>>.
+For a full list of data management UIs, refer to  management, *Stack Management*>>.
 
 [role="screenshot"]
 image::images/stack-management.png[Index Management view in Stack Management]
@@ -127,7 +127,7 @@ When the alert triggers, you can send a notification to a system that is part of
 email, Slack, PagerDuty, ServiceNow, and other third party integrations.
 
 A dedicated view for creating, searching,
-and editing rules is in <<create-and-manage-rules,*Rules and Connectors*>>.
+and editing rules is in *Rules and Connectors*.
 
 [role="screenshot"]
 image::images/rules-and-connectors.png[Rules and Connectors view]
@@ -144,7 +144,7 @@ You might be managing tens, hundreds, or even thousands of dashboards, visualiza
 [[organize-in-spaces]]
 ==== Collect related items in a space
 
-{kib} provides <<xpack-spaces, spaces>> for organizing your visualizations, dashboards, {data-sources}, and more.
+{kib} provides  xpack-spaces, spaces>> for organizing your visualizations, dashboards, {data-sources}, and more.
 Think of a space as its own mini {kib} installation&mdash;it’s isolated from all other spaces,
 so you can tailor it to your specific needs without impacting others.
 
@@ -160,7 +160,7 @@ For example, if you tag objects with “design”, you can search and
 filter on the tag to see all related objects.
 Tags are also good for grouping content into categories within a space.
 
-Don’t worry if you have hundreds of dashboards that need to be tagged. Use <<managing-tags,*Tags*>>
+Don’t worry if you have hundreds of dashboards that need to be tagged. Use  managing-tags,*Tags*>>
 in *Stack Management* to create your tags, then assign and delete
 them in bulk operations.
 
@@ -171,11 +171,11 @@ them in bulk operations.
 {kib} offers a range of security features for you to control who has access to what.
 {ref}/configuring-stack-security.html[Security is enabled automatically] when you enroll {kib} with a secured {es} cluster.
 For a description of all available configuration options,
-refer to <<security-settings-kb,Security settings in {kib}>>.
+refer to Security settings in {kib}.
 
 [float]
 ==== Log in
-{kib} supports several <<kibana-authentication,authentication providers>>,
+{kib} supports several authentication providers,
 allowing you to login using {es}’s built-in realms, or with your own single sign-on provider.
 
 [role="screenshot"]
@@ -197,7 +197,7 @@ have privileges to create and edit visualizations and dashboards,
 while analysts or executives might have *Dashboard* and *Canvas* with read-only privileges.
 
 {kib}’s role management interface allows you to describe these various access
-levels, or you can automate role creation via our <<role-management-api,API>>.
+levels, or you can automate role creation via our API.
 
 [role="screenshot"]
 image::spaces/images/spaces-roles.png[{kib privileges}]
@@ -208,51 +208,7 @@ image::spaces/images/spaces-roles.png[{kib privileges}]
 Once you have your users and roles configured, you might want to maintain a
 record of who did what, when. The {kib} audit log will record this information for you,
 which can then be correlated with {es} audit logs to gain more insights into your
-users’ behavior. For more information, see <<xpack-security-audit-logging,{kib} audit logging>>.
-
-[float]
-[[kibana-navigation-search]]
-=== Find apps and objects
-
-To quickly find apps and the objects you create, use the search field in the global header.
-Search suggestions include deep links into applications,
-allowing you to directly navigate to the views you need most.
-
-[role="screenshot"]
-image::images/app-navigation-search.png[Example of searching for apps]
-
-You can search for objects by type, name, and tag.
-To get the most from the search feature, follow these tips:
-
-* Use the keyboard shortcut&mdash;Ctrl+/ on Windows and Linux, Command+/ on MacOS&mdash;to focus on the input at any time.
-
-* Use the provided syntax keywords.
-+
-[cols=2*]
-|===
-|Search by type
-|`type:dashboard`
-
-Available types: `application`, `canvas-workpad`, `dashboard`, `data-view`, `lens`, `maps`, `query`, `search`, `visualization`
-
-|Search by tag
-|`tag:mytagname` +
-`tag:"tag name with spaces"`
-
-|Search by type and name
-|`type:dashboard my_dashboard_title`
-
-|Advanced&nbsp;searches
-|`tag:(tagname1 or tagname2) my_dashboard_title` +
-`type:lens tag:(tagname1 or tagname2)` +
-`type:(dashboard or canvas-workpad) logs` +
-|===
-
-This example searches for visualizations with the tag `design` .
-
-[role="screenshot"]
-image::images/tags-search.png[Example of searching for tags]
-
+users’ behavior. For more information, see {kib} audit logging.
 
 [float]
 === View all {kib} has to offer
@@ -267,3 +223,777 @@ Click image:images/intro-help-icon.png[Help icon in navigation bar]
 for help with questions or to provide feedback.
 
 To keep up with what’s new and changed in Elastic, click the celebration icon in the global header.
+
+//Kibana concepts
+
+[[kibana-concepts-analysts]]
+=== {kib} concepts
+**_Learn the shared concepts for analyzing and visualizing your data_**
+
+As an analyst, you will use a combination of {kib} apps to analyze and
+visualize your data. {kib} contains both general-purpose apps and apps for the
+https://www.elastic.co/guide/en/enterprise-search/current/index.html[*Enterprise Search*],
+{observability-guide}/observability-introduction.html[*Elastic Observability*],
+and {security-guide}/es-overview.html[*Elastic Security*] solutions.
+These apps share a common set of concepts.
+
+[float]
+==== Three things to know about {es}
+
+You don't need to know everything about {es} to use {kib}, but the most important concepts follow:
+
+* *{es} makes JSON documents searchable and aggregatable.* The documents are
+stored in an {ref}/documents-indices.html[index] or {ref}/data-streams.html[data stream], which represent one type of data.
+
+* **_Searchable_ means that you can filter the documents for conditions.**
+For example, you can filter for data "within the last 7 days" or data that "contains the word {kib}".
+{kib} provides many ways for you to construct filters, which are also called queries or search terms.
+
+* **_Aggregatable_ means that you can extract summaries from matching documents.**
+The simplest aggregation is *count*, and it is frequently used in combination
+with the *date histogram*, to see count over time. The *terms* aggregation shows the most frequent values.
+
+[float]
+==== Finding your apps and objects
+
+{kib} offers a  kibana-navigation-search,global search bar>> on every page that you can use to find any app or saved object.
+Open the search bar using the keyboard shortcut Ctrl+/ on Windows and Linux, Command+/ on MacOS.
+
+[role="screenshot"]
+image:concepts/images/global-search.png["Global search showing matches to apps and saved objects for the word visualize"]
+
+[float]
+==== Accessing data with data views
+
+{kib} requires a data view to tell it which {es} data you want to access,
+and whether the data is time-based. A data view can point to one or more {es}
+data streams, indices, or index aliases by name.
+
+Data views are typically created by an administrator when sending data to {es}.
+You can  data-views,create or update data views>> in *Stack Management*, or by using a script
+that accesses the {kib} API.
+
+{kib} uses the data view to show you a list of fields, such as
+`event.duration`. You can customize the display name and format for each field.
+For example, you can tell {kib} to display `event.duration` in seconds.
+{kib} has  managing-fields,field formatters>> for strings,
+dates, geopoints, and numbers.
+
+[float]
+[[kibana-concepts-searching-your-data]]
+==== Searching your data
+
+{kib} provides you several ways to build search queries,
+which will reduce the number of document matches that you get from {es}.
+{kib} apps provide a time filter, and most apps also include semi-structured search and extra filters.
+
+[role="screenshot"]
+image:concepts/images/top-bar.png["Time filter, semi-structured search, and filters in a {kib} app"]
+
+If you frequently use any of the search options, click
+image:concepts/images/saved-query-icon.png["save icon", width=20px] next to the
+semi-structured search to save or load a previously saved query.
+The saved query always contains the semi-structured search query,
+and optionally the time filter and extra filters.
+
+[float]
+===== Time filter
+
+The  set-time-filter, global time filter>> limits the time range of data displayed.
+In most cases, the time filter applies to the time field in the data view,
+but some apps allow you to use a different time field.
+
+Using the time filter, you can configure a refresh rate to periodically
+resubmit your searches.
+
+[role="screenshot"]
+image:concepts/images/refresh-every.png["section of time filter where you can configure a refresh rate", width=75%]
+
+To manually resubmit a search, click the *Refresh* button.
+This is useful when you use {kib} to view the underlying data.
+
+[float]
+[[semi-structured-search]]
+===== Semi-structured search
+
+Combine free text search with field-based search using the Kibana Query Language (KQL).
+Type a search term to match across all fields, or start typing a field name to
+get suggestions for field names and operators that you can use to build a structured query.
+The semi-structured search will filter documents for matches, and only return matching documents.
+
+Following are some example KQL queries.  For more detailed examples, refer to  kuery-query,Kibana Query Language>>.
+
+[cols=2*]
+|===
+| Exact phrase query
+| `http.response.body.content.text:"quick brown fox"`
+
+| Terms query
+| http.response.status_code:400 401 404
+
+| Boolean query
+| `response:200 or extension:php`
+
+| Range query
+| `account_number >= 100 and items_sold <= 200`
+
+| Wildcard query
+| `machine.os:win*`
+|===
+
+[float]
+[[autocomplete-suggestions]]
+
+[float]
+===== Additional filters with AND
+
+Structured filters are a more interactive way to create {es} queries,
+and are commonly used when building dashboards that are shared by multiple analysts.
+Each filter can be disabled, inverted, or pinned across all apps.
+Each of the structured
+filters is combined with AND logic on the rest of the query.
+
+[role="screenshot"]
+image:concepts/images/add-filter-popup.png["Add filter popup"]
+
+
+[float]
+==== Saving objects
+{kib} lets you save objects for your own future use or for sharing with others.
+Each  managing-saved-objects,saved object>> type has different abilities. For example, you can save
+your search queries made with *Discover*, which lets you:
+
+* Share a link to your search
+* Download the full search results in CSV form
+* Start an aggregated visualization using the same search query
+* Embed the *Discover* search results into a dashboard
+* Embed the *Discover* search results into a Canvas workpad
+
+For organization, every saved object can have a name,  kibana-navigation-search,tags>>, and type.
+Use the global search to quickly open a saved object.
+
+[float]
+==== What's next?
+
+* Try the {kib}  get-started,Quick start>>, which shows you how to put these concepts into action.
+* Go to  discover, Discover>> for instructions on searching your data.
+
+//Create a data view
+
+[[data-views]]
+==== Create a {data-source}
+
+{kib} requires a {data-source} to access the {es} data that you want to explore.
+A {data-source} selects the data to use and allows you to define properties of the fields.
+
+A {data-source} can point to one or more indices, {ref}/data-streams.html[data streams], or {ref}/alias.html[index aliases].
+For example, a {data-source} can point to your log data from yesterday,
+or all indices that contain your data.
+
+[float]
+[[data-views-read-only-access]]
+==== Required permissions
+
+* Access to *Data Views* requires the {kib} privilege.
+`Data View Management`.
+
+* To create a {data-source}, you must have the {es} privilege.
+`view_index_metadata`.
+
+* If a read-only indicator appears in {kib}, you have insufficient privileges
+to create or save {data-sources}. The buttons to create {data-sources} or
+save existing {data-sources} are not visible. For more information,
+refer to Granting access to {kib}.
+
+[float]
+[[settings-create-pattern]]
+==== Create a data view
+
+If you collected data using one of the {kib} ingest options,
+uploaded a file, or added sample data,
+you get a {data-source} for free, and can start exploring your data.
+If you loaded your own data, follow these steps to create a {data-source}.
+
+. Open the main menu, then click *Stack Management > Data Views*.
+
+. Click *Create {data-source}*.
+
+. Start typing in the *name* field, and {kib} looks for the names of
+indices, data streams, and aliases that match your input.
++
+[role="screenshot"]
+image:management/index-patterns/images/create-data-view.png["Create data view"]
++
+** To match multiple sources, use a wildcard (*). For example, `filebeat-*` matches
+`filebeat-apache-a`, `filebeat-apache-b`, and so on.
++
+** To match multiple single sources, enter their names,
+separated by a comma.  Do not include a space after the comma.
+`filebeat-a,filebeat-b` matches two indices, but does not match `filebeat-c`.
++
+** To exclude a source, use a minus sign (-), for example, `-test3`.
+
+. If {kib} detects an index with a timestamp, expand the *Timestamp field* menu,
+and then select the default field for filtering your data by time.
++
+** If your index doesn’t have time-based data, choose *I don’t want to use the time filter*.
++
+** If you don’t set a default time field, you can't use
+global time filters on your dashboards. This is useful if
+you have multiple time fields and want to create dashboards that combine visualizations
+based on different timestamps.
+
+. To display all indices, click *Show advanced settings*, then select *Allow hidden and system indices*.
+
+. To specify your own {data-source} name, click *Show advanced settings*, then enter the name in the *Custom {data-source} ID* field. For example, enter your {es} index alias name.
+
+. Click *Create {data-source}*.
++
+[[reload-fields]] {kib} is now configured to use your {es} data. When a new field is added to an index,
+the {data-source} field list is updated
+the next time the {data-source} is loaded, for example, when you load the page or
+move between {kib} apps.
+
+. Select this {data-source} when you search and visualize your data.
+
+[float]
+[[rollup-data-view]]
+===== Create a data view for rolled up data
+
+A {data-source} can match one rollup index.  For a combination rollup
+{data-source} with both raw and rolled up data, use the standard notation:
+
+```ts
+rollup_logstash,kibana_sample_data_logs
+```
+For an example, refer to Create and visualize rolled up data.
+
+[float]
+[[management-cross-cluster-search]]
+===== Create a data view that searches across clusters
+
+If your {es} clusters are configured for {ref}/modules-cross-cluster-search.html[{ccs}],
+you can create a {data-source} to search across the clusters of your choosing.
+You specify data streams, indices, and aliases in a remote cluster using the
+following syntax:
+
+```ts
+<remote_cluster_name>:<target>
+```
+
+To query {ls} indices across two {es} clusters
+that you set up for {ccs}, named `cluster_one` and `cluster_two`:
+
+```ts
+ cluster_one:logstash-*,cluster_two:logstash-*
+```
+
+Use wildcards in your cluster names
+to match any number of clusters. To search {ls} indices across
+clusters named `cluster_foo`, `cluster_bar`, and so on:
+
+```ts
+cluster_*:logstash-*
+```
+
+To query across all {es} clusters that have been configured for {ccs},
+use a standalone wildcard for your cluster name:
+
+```ts
+*:logstash-*
+```
+
+To match indices starting with `logstash-`, but exclude those starting with `logstash-old`, from
+all clusters having a name starting with `cluster_`:
+
+```ts
+`cluster_*:logstash-*,cluster_*:-logstash-old*`
+```
+
+To exclude a cluster having a name starting with `cluster_`:
+
+```ts
+`cluster_*:logstash-*,cluster_one:-*`
+```
+
+Once you configure a {data-source} to use the {ccs} syntax, all searches and
+aggregations using that {data-source} in {kib} take advantage of {ccs}.
+
+[float]
+[[delete-data-view]]
+==== Delete {data-sources}
+
+When you delete a {data-source}, you cannot recover the associated field formatters, runtime fields, source filters,
+and field popularity data. Deleting a {data-source} does not remove any indices or data documents from {es}.
+
+WARNING: Deleting a {data-source} breaks all visualizations, saved searches, and other saved objects that reference the data view.
+
+. Open the main menu, then click *Stack Management > Data Views*.
+
+. Find the {data-source} that you want to delete, and then
+click (image:management/index-patterns/images/delete.png[Delete icon]) in the *Actions* column.
+
+
+//Set time filter
+
+[[set-time-filter]]
+==== Set the time range
+Display data within a
+specified time range when your index contains time-based events, and a time-field is configured for the
+selected  data-views, {data-source}>>.
+The default time range is 15 minutes, but you can customize
+it in Advanced Settings.
+
+. Click image:concepts/images/time-filter-icon.png[calendar icon, width=36px].
+
+. Choose one of the following:
+
+* *Quick select*. Set a time based on the last or next number of seconds, minutes, hours, or other time unit.
+
+* *Commonly used*. Select a time range from options such as *Last 15 minutes*,
+  *Today*, and *Week to date*.
+
+* *Recently used date ranges*. Use a previously selected data range.
+
+* *Refresh every*. Specify an automatic refresh rate.
++
+[role="screenshot"]
+image::concepts/images/time-filter.png["Time filter menu", width=75%]
+
+. To set start and end times, click the bar next to the time filter.
+In the popup, select *Absolute*, *Relative* or *Now*, then specify the required
+options.
++
+[role="screenshot"]
+image::concepts/images/time-relative.png["Time filter showing relative time", width=75%]
+
+//KQL
+
+[[kuery-query]]
+==== Kibana Query Language
+
+The Kibana Query Language (KQL) is a simple syntax for filtering {es} data using
+free text search or field-based search. KQL is only used for filtering data, and has
+no role in sorting or aggregating the data.
+
+KQL is able to suggest field names, values, and operators as you type.
+The performance of the suggestions is controlled by {kib} settings.
+
+KQL has a different set of features than the  lucene-query>>. KQL is able to query
+nested fields and  scripted-fields, scripted fields>>. KQL does not support regular expressions
+or searching with fuzzy terms.
+
+[discrete]
+==== Terms query
+
+A terms query uses *exact search terms*. Spaces separate each search term, and only one term
+is required to match the document. Use quotation marks to indicate a *phrase match*.
+
+To query using *exact search terms*, enter the field name followed by `:` and
+then the values separated by spaces:
+
+[source,yaml]
+-------------------
+http.response.status_code:400 401 404
+-------------------
+
+For text fields, this will match any value regardless of order:
+
+[source,yaml]
+-------------------
+http.response.body.content.text:quick brown fox
+-------------------
+
+To query for an *exact phrase*, use quotation marks around the values:
+
+[source,yaml]
+-------------------
+http.response.body.content.text:"quick brown fox"
+-------------------
+
+Field names are not required by KQL. When a field name is not provided, terms
+will be matched by the default fields in your index settings. To search across fields:
+
+[source,yaml]
+-------------------
+"quick brown fox"
+-------------------
+
+[discrete]
+==== Boolean queries
+
+KQL supports `or`, `and`, and `not`. By default, `and` has a higher precedence than `or`.
+To override the default precedence, group operators in parentheses. These operators can
+be upper or lower case.
+
+To match documents where response is `200`, extension is `php`, or both:
+
+[source,yaml]
+-------------------
+response:200 or extension:php
+-------------------
+
+To match documents where response is `200` and extension is `php`:
+
+[source,yaml]
+-------------------
+response:200 and extension:php
+-------------------
+
+To match documents where response is `200` or `404`.
+
+[source,yaml]
+-------------------
+response:(200 or 404)
+-------------------
+
+To match documents where response is `200` and extension is either `php` or `css`:
+
+[source,yaml]
+-------------------
+response:200 and (extension:php or extension:css)
+-------------------
+
+To match documents where `response` is 200 and `extension` is
+`php` or extension is `css`, and response is anything:
+
+[source,yaml]
+-------------------
+response:200 and extension:php or extension:css
+-------------------
+
+To match documents where response is not `200`:
+
+[source,yaml]
+-------------------
+not response:200
+-------------------
+
+To match documents where response is `200` but extension is not `php` or `css`.
+
+[source,yaml]
+-------------------
+response:200 and not (extension:php or extension:css)
+-------------------
+
+To match multi-value fields that contain a list of terms:
+
+[source,yaml]
+-------------------
+tags:(success and info and security)
+-------------------
+
+[discrete]
+==== Range queries
+
+KQL supports `>`, `>=`, `<`, and `<=` on numeric and date types.
+
+[source,yaml]
+-------------------
+account_number >= 100 and items_sold <= 200
+-------------------
+
+[discrete]
+==== Date range queries
+
+Typically, Kibana's  set-time-filter,time filter>> is sufficient for setting a time range,
+but in some cases you might need to search on dates. Include the date range in quotes.
+
+[source,yaml]
+-------------------
+@timestamp < "2021-01-02T21:55:59"
+-------------------
+
+[source,yaml]
+-------------------
+@timestamp < "2021-01"
+-------------------
+
+[source,yaml]
+-------------------
+@timestamp < "2021"
+-------------------
+
+KQL supports date math expressions.
+
+[source,yaml]
+-------------------
+@timestamp < now-1d
+-------------------
+
+[source,yaml]
+-------------------
+updated_at > 2022-02-17||+1M/d
+-------------------
+
+Check the
+{ref}/common-options.html#date-math[date math documentation] for more examples.
+
+[discrete]
+==== Exist queries
+
+An exist query matches documents that contain any value for a field, in this case,
+response:
+
+[source,yaml]
+-------------------
+response:*
+-------------------
+
+Existence is defined by {es} and includes all values, including empty text.
+
+[discrete]
+==== Wildcard queries
+
+Wildcards queries can be used to *search by a term prefix* or to *search multiple fields*.
+The default settings of {kib} *prevent leading wildcards* for performance reasons,
+but this can be allowed with an advanced setting.
+
+To match documents where `machine.os` starts with `win`, such
+as "windows 7" and "windows 10":
+
+[source,yaml]
+-------------------
+machine.os:win*
+-------------------
+
+To match multiple fields:
+
+[source,yaml]
+-------------------
+machine.os*:windows 10
+-------------------
+
+This syntax is handy when you have text and keyword
+versions of a field. The query checks machine.os and machine.os.keyword
+for the term
+`windows 10`.
+
+
+[discrete]
+==== Nested field queries
+
+A main consideration for querying {ref}/nested.html[nested fields] is how to
+match parts of the nested query to the individual nested documents.
+You can:
+
+* *Match parts of the query to a single nested document only.* This is what most users want when querying on a nested field.
+* *Match parts of the query to different nested documents.* This is how a regular object field works.
+ This query is generally less useful than matching to a single document.
+
+In the following document, `items` is a nested field. Each document in the nested
+field contains a name, stock, and category.
+
+[source,json]
+----------------------------------
+{
+  "grocery_name": "Elastic Eats",
+  "items": [
+    {
+      "name": "banana",
+      "stock": "12",
+      "category": "fruit"
+    },
+    {
+      "name": "peach",
+      "stock": "10",
+      "category": "fruit"
+    },
+    {
+      "name": "carrot",
+      "stock": "9",
+      "category": "vegetable"
+    },
+    {
+      "name": "broccoli",
+      "stock": "5",
+      "category": "vegetable"
+    }
+  ]
+}
+----------------------------------
+
+[discrete]
+===== Match a single document
+
+To match stores that have more than 10 bananas in stock:
+
+[source,yaml]
+-------------------
+items:{ name:banana and stock > 10 }
+-------------------
+
+`items` is the nested path. Everything inside the curly braces (the nested group)
+must match a single nested document.
+
+The following query does not return any matches because no single nested
+document has bananas with a stock of 9.
+
+[source,yaml]
+-------------------
+items:{ name:banana and stock:9 }
+-------------------
+
+[discrete]
+===== Match different documents
+
+The following subqueries are in separate nested groups
+and can match different nested documents:
+
+[source,yaml]
+-------------------
+items:{ name:banana } and items:{ stock:9 }
+-------------------
+
+`name:banana` matches the first document in the array and `stock:9`
+matches the third document in the array.
+
+[discrete]
+===== Match single and different documents
+
+To find a store with more than 10
+bananas that *also* stocks vegetables:
+
+[source,yaml]
+-------------------
+items:{ name:banana and stock > 10 } and items:{ category:vegetable }
+-------------------
+
+The first nested group (`name:banana and stock > 10`) must match a single document, but the `category:vegetables`
+subquery can match a different nested document because it is in a separate group.
+
+[discrete]
+===== Nested fields inside other nested fields
+
+KQL supports nested fields inside other nested fields&mdash;you have to
+specify the full path. In this document,
+`level1` and `level2` are nested fields:
+
+[source,json]
+----------------------------------
+{
+  "level1": [
+    {
+      "level2": [
+        {
+          "prop1": "foo",
+          "prop2": "bar"
+        },
+        {
+          "prop1": "baz",
+          "prop2": "qux"
+        }
+      ]
+    }
+  ]
+}
+----------------------------------
+
+To match on a single nested document:
+
+[source,yaml]
+-------------------
+level1.level2:{ prop1:foo and prop2:bar }
+-------------------
+
+//Lucene
+
+[[lucene-query]]
+==== Lucene query syntax
+Lucene query syntax is available to {kib} users who opt out of the  kuery-query>>.
+Full documentation for this syntax is available as part of {es}
+{ref}/query-dsl-query-string-query.html#query-string-syntax[query string syntax].
+
+The main reason to use the Lucene query syntax in {kib} is for advanced
+Lucene features, such as regular expressions or fuzzy term matching. However,
+Lucene syntax is not able to search nested objects or scripted fields.
+
+To use the Lucene syntax, open the *Saved query* menu,
+and then select *Language: KQL* > *Lucene*.
+
+[role="screenshot"]
+image:concepts/images/lucene.png[Click the circle icon for the saved query menu, click Language: KQL, and then click Lucene]
+
+To perform a free text search, simply enter a text string. For example, if
+you're searching web server logs, you could enter `safari` to search all
+fields:
+
+[source,yaml]
+-------------------
+safari
+-------------------
+
+To search for a value in a specific field, prefix the value with the name
+of the field:
+
+[source,yaml]
+-------------------
+status:200
+-------------------
+
+To search for a range of values, use the bracketed range syntax,
+`[START_VALUE TO END_VALUE]`. For example, to find entries that have 4xx
+status codes, you could enter `status:[400 TO 499]`.
+
+[source,yaml]
+-------------------
+status:[400 TO 499]
+-------------------
+
+For an open range, use a wildcard:
+
+[source,yaml]
+-------------------
+status:[400 TO *]
+-------------------
+
+To specify more complex search criteria, use the boolean operators
+`AND`, `OR`, and `NOT`. For example, to find entries that have 4xx status
+codes and have an extension of `php` or `html`:
+
+[source,yaml]
+-------------------
+status:[400 TO 499] AND (extension:php OR extension:html)
+-------------------
+
+
+//Save query
+
+[[save-load-delete-query]]
+==== Save a query
+
+Have you ever built a query that you wanted to reuse?
+With saved queries, you can save your query text, filters, and time range for
+reuse anywhere a query bar is present.
+
+For example, suppose you're in *Discover*, and you've put time into building
+a query that includes query input text, multiple filters, and a specific time range.
+Save this query, and you can embed the search results in dashboards,
+use them as a foundation for building a visualization,
+and share them in a link or CVS form.
+
+Saved queries are different than  save-open-search,saved searches>>,
+which include the *Discover* configuration&mdash;selected columns in the document table, sort order, and
+{data-source}&mdash;in addition to the query.
+Saved searches are primarily used for adding search results to a dashboard.
+
+[role="xpack"]
+===== Read-only access
+If you have insufficient privileges to save queries,
+the *Save* button isn't visible in the saved query management popover.
+For more information, see Granting access to Kibana.
+
+===== Save a query
+
+. Once you’ve built a query worth saving, click the save query icon image:concepts/images/saved-query-icon.png[save query icon, width=24px].
+. In the menu, select the item to save the query.
+. Enter a unique name.
+. Choose whether to include or exclude filters and a time range.
+By default, filters are automatically included, but the time filter is not.
+. Save the query.
+. To load a saved query, select it in the *Saved query* menu.
++
+The query text, filters, and time range are updated and your data refreshed.
+If you’re loading a saved query that did not include the filters or time range, those components remain as-is.
+. To add filters and clear saved queries, use the *Saved query* menu.
+

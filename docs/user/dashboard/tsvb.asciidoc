@@ -1,14 +1,14 @@
 [[tsvb]]
-=== TSVB
+==== TSVB
 
 *TSVB* is a set of visualization types that you configure and display on dashboards.
 
 With *TSVB*, you can:
 
-* Combine an infinite number of <<aggregation-reference,aggregations>> to display your data.
+* Combine an infinite number of  aggregation-reference,aggregations>> to display your data.
 * Annotate time series data with timestamped events from an {es} index.
 * View the data in several types of visualizations, including charts, data tables, and markdown panels.
-* Display multiple <<data-views, data views>> in each visualization.
+* Display multiple  data-views, data views>> in each visualization.
 * Use custom functions and some math on aggregations.
 * Customize the data with labels and colors.
 
@@ -17,7 +17,7 @@ image::images/tsvb-screenshot.png[TSVB overview]
 
 [float]
 [[tsvb-data-view-mode]]
-==== Open and set up TSVB
+===== Open and set up TSVB
 
 Open *TSVB*, then configure the required settings. You can create *TSVB* visualizations with only {data-sources}, or {es} index strings. 
 
@@ -33,7 +33,7 @@ When you use only {data-sources}, you are able to:
 
 [[tsvb-index-pattern-mode]]
 
-IMPORTANT: Creating *TSVB* visualizations with an {es} index string is deprecated and will be removed in a future release. By default, you create *TSVB* visualizations with only {data-sources}. To use an {es} index string, contact your administrator, or go to <<advanced-options, Advanced Settings>> and set `metrics:allowStringIndices` to `true`.
+IMPORTANT: Creating *TSVB* visualizations with an {es} index string is deprecated and will be removed in a future release. By default, you create *TSVB* visualizations with only {data-sources}. To use an {es} index string, contact your administrator, or go to Advanced Settings and set `metrics:allowStringIndices` to `true`.
 
 . On the dashboard, click *Select type*, then select *TSVB*.
 
@@ -49,11 +49,11 @@ IMPORTANT: Creating *TSVB* visualizations with an {es} index string is deprecate
 +
 By default, *TSVB* drops the last bucket because the time filter intersects the time range of the last bucket. To view the partial data, select *No*.
 
-. To view a filtered set of documents, enter <<kuery-query, KQL filters>> in the *Panel filter* field.
+. To view a filtered set of documents, enter  kuery-query, KQL filters>> in the *Panel filter* field.
 
 [float]
 [[tsvb-function-reference]]
-==== Configure the series
+===== Configure the series
 
 Each *TSVB* visualization shares the same options to create a *Series*. Each series can be thought of as a separate {es} aggregation. 
 The *Options* control the styling and {es} options, and are inherited from *Panel options*.
@@ -94,7 +94,7 @@ To configure the value of each series, select the function, then configure the f
 
 [float]
 [[configure-the-visualizations]]
-==== TSVB visualization options
+===== TSVB visualization options
 
 The configuration options differ for each *TSVB* visualization.
 
@@ -140,7 +140,7 @@ Open and edit your Time Series *TSVB* visualizations in *Lens*, which is the dra
 
 To get started, click *Edit visualization in Lens* in the toolbar.
 
-For more information, check out <<lens,Create visualizations with Lens>>.
+For more information, check out  lens,Create visualizations with Lens>>.
 
 [float]
 [[view-data-and-requests-tsvb]]
@@ -162,7 +162,7 @@ To save the panel to the *Visualize Library*:
 
 . Click *Save to library*.
 
-. Enter the *Title* and add any applicable <<managing-tags,*Tags*>>.
+. Enter the *Title* and add any applicable  managing-tags,*Tags*>>.
 
 . Make sure that *Add to Dashboard after saving* is selected.
 
@@ -256,7 +256,7 @@ current time is 9:41, *TSVB* displays only the last 10 minutes &mdash; from 9:30
 [%collapsible]
 ====
 
-Performing math across data series is unsupported in *TSVB*. To calculate the difference between two data series, use <<timelion, *Timelion*>> or <<vega, *Vega*>>.
+Performing math across data series is unsupported in *TSVB*. To calculate the difference between two data series, use  timelion, *Timelion*>> or  vega, *Vega*>>.
 ====
 
 [discrete]
@@ -285,7 +285,7 @@ The ability to calculate a month over month change is not fully supported in *TS
 time filter is set to 3 months or more _and_ the *Interval* is `1m`. Use the *Derivative* to get the absolute monthly change. To convert to a percent, 
 add the *Math* function with the `params.current / (params.current - params.derivative)` formula, then select *Percent* from the *Data Formatter* dropdown.
 
-For other types of month over month calculations, use <<timelion, *Timelion*>> or <<vega, *Vega*>>.
+For other types of month over month calculations, use  timelion, *Timelion*>> or  vega, *Vega*>>.
 ====
 
 [discrete]

@@ -32,7 +32,7 @@ files of your own.
 [role="xpack"]
 === Create and set up a map
 
-. <<maps-create, Create a new map>>.
+.  maps-create, Create a new map>>.
 . Zoom in on the New England area in the northeast United States.
 +
 You're adding flight paths to this area, and this
@@ -64,10 +64,10 @@ were successful.
 
 . Click *Add layer*.
 
-. In *Layer settings*, adjust settings and <<maps-vector-style-properties, properties>> as needed.
+. In *Layer settings*, adjust settings and  maps-vector-style-properties, properties>> as needed.
 . Click *Save & close*.
 . Once you've added all of the sample files,
-<<maps-save, save your map>>.
+ maps-save, save your map>>.
 +
 At this point, you could consider the map complete,
 but there are a few additions and tweaks that you can make to tell a
@@ -128,7 +128,7 @@ you might make:
 * Adjust the layer order
 * Decide which layers to show at different zoom levels
 
-When you've finished, again be sure to <<maps-save, save your work >>.
+When you've finished, again be sure to  maps-save, save your work >>.
 
 Your final map might look like this:
 

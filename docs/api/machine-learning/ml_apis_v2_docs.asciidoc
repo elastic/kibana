@@ -1,8 +1,8 @@
 [[Machine_learning_APIs]]
 == Machine learning APIs
 
-* <<ml-sync-default>>
-* <<ml-sync>>
+*  ml-sync-default>>
+*  ml-sync>>
 
 [[ml-sync-default]]
 === Sync machine learning saved objects in the default space
@@ -27,7 +27,7 @@ Synchronizes Kibana saved objects for machine learning jobs and trained models i
 `200`::
 +
 --
-(<<MLSyncResponse,`MLSyncResponse`>>)
+( MLSyncResponse,`MLSyncResponse`>>)
 
 Indicates a successful call.
 
@@ -71,7 +71,7 @@ Synchronizes Kibana saved objects for machine learning jobs and trained models. 
 `200`::
 +
 --
-(<<MLSyncResponse,`MLSyncResponse`>>)
+( MLSyncResponse,`MLSyncResponse`>>)
 
 Indicates a successful call.
 

@@ -42,7 +42,7 @@ experimental[] Create multiple {kib} saved objects.
   (Optional, array) Objects with `name`, `id`, and `type` properties that describe the other saved objects in the referenced object. To refer to the other saved object, use `name` in the attributes. Never use `id` to refer to the other saved object. `id` can be automatically updated during migrations, import, or export.
 
 `initialNamespaces`::
-  (Optional, string array) Identifiers for the <<xpack-spaces,spaces>> in which this object is created. If this is provided, the
+  (Optional, string array) Identifiers for the  xpack-spaces,spaces>> in which this object is created. If this is provided, the
   object is created only in the explicitly defined spaces. If this is not provided, the object is created in the current space
   (default behavior).
 * For shareable object types (registered with `namespaceType: 'multiple'`): this option can be used to specify one or more spaces, including
@@ -136,6 +136,6 @@ attempting to create an object:
   exists in a different space, and it cannot be overridden with the given parameters. To successfully overwrite this object, you must do so
   in at least one space where it exists. You can specify that using the `space_id` path parameter _or_ the `initialNamespaces` parameter.
 * *Alias conflict*: This is a 409 error with a `spacesWithConflictingAliases` string array in its metadata. It means a conflicting
-  <<legacy-url-aliases,legacy URL alias>> for this type/ID exists in the space(s) where you attempted to create this object. A conflicting
+   legacy-url-aliases,legacy URL alias>> for this type/ID exists in the space(s) where you attempted to create this object. A conflicting
   legacy URL alias is one that points to a different type/ID. To successfully create this object, you need to first use the
-  <<spaces-api-disable-legacy-url-aliases,`_disable_legacy_url_aliases`>> API to disable the problematic legacy URL alias(es).
+   spaces-api-disable-legacy-url-aliases,`_disable_legacy_url_aliases`>> API to disable the problematic legacy URL alias(es).

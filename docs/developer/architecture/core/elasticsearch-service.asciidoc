@@ -8,7 +8,7 @@ NOTE: The Elasticsearch service is only available server side. You can use the {
 
 - `kibana_system` user via `elasticsearch.client.asInternalUser.*` methods.
 - a current end-user via `elasticsearch.client.asCurrentUser.*` methods. In this case Elasticsearch client should be given the current user credentials.
-See <<scoped-services>> and <<development-security>>.
+See  scoped-services>> and  development-security>>.
 
 {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.elasticsearchservicestart.md[Elasticsearch service API docs]
 

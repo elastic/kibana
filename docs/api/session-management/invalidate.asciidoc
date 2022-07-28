@@ -30,7 +30,7 @@ To use the invalidate user sessions API, you must be a `superuser`.
 [%collapsible%open]
 =====
 `provider` :::
-(Required, object) Describes the <<authentication-security-settings, authentication providers>> for which to invalidate sessions.
+(Required, object) Describes the  authentication-security-settings, authentication providers>> for which to invalidate sessions.
 
 `type` ::::
 (Required, string) The authentication provider `type`.
@@ -55,7 +55,7 @@ To use the invalidate user sessions API, you must be a `superuser`.
   Indicates a successful call.
 
 `403`::
-  Indicates that the user may not be authorized to invalidate sessions for other users. Refer to <<session-management-api-invalidate-prereqs, prerequisites>>.
+  Indicates that the user may not be authorized to invalidate sessions for other users. Refer to  session-management-api-invalidate-prereqs, prerequisites>>.
 
 ==== Examples
 
@@ -70,7 +70,7 @@ $ curl -X POST api/security/session/_invalidate
 --------------------------------------------------
 // KIBANA
 
-Invalidate sessions that were created by any <<saml, SAML authentication provider>>:
+Invalidate sessions that were created by any  saml, SAML authentication provider>>:
 
 [source,sh]
 --------------------------------------------------
@@ -84,7 +84,7 @@ $ curl -X POST api/security/session/_invalidate
 --------------------------------------------------
 // KIBANA
 
-Invalidate sessions that were created by the <<saml, SAML authentication provider>> with the name `saml1`:
+Invalidate sessions that were created by the  saml, SAML authentication provider>> with the name `saml1`:
 
 [source,sh]
 --------------------------------------------------
@@ -98,7 +98,7 @@ $ curl -X POST api/security/session/_invalidate
 --------------------------------------------------
 // KIBANA
 
-Invalidate sessions that were created by any <<oidc, OpenID Connect authentication provider>> for the user with the username `user@my-oidc-sso.com`:
+Invalidate sessions that were created by any  oidc, OpenID Connect authentication provider>> for the user with the username `user@my-oidc-sso.com`:
 
 [source,sh]
 --------------------------------------------------

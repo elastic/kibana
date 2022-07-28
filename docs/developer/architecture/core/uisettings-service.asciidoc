@@ -5,16 +5,16 @@ NOTE: The UI settings service is available both server and client side.
 
 === Overview
 
-UI settings are configurable from the Advanced Settings page in Management and control the behavior of {kib}. uiSettings are stored in a config saved object and, as such, conform to the same conditions as other <<saved-objects-service, Saved Objects>>.
+UI settings are configurable from the Advanced Settings page in Management and control the behavior of {kib}. uiSettings are stored in a config saved object and, as such, conform to the same conditions as other  saved-objects-service, Saved Objects>>.
 
 There are several ways to configure an advanced setting:
 
-- <<advanced-settings-ui, Through the Advanced Settings UI>>
-- <<uisettings-overrides, Locked via kibana.yml's uiSettings.overrides>>
-- <<client-side-usage, Through the client-side uiSettings Service>>
-- <<server-side-usage, Through the server-side uiSettings Service>>
+-  advanced-settings-ui, Through the Advanced Settings UI>>
+-  uisettings-overrides, Locked via kibana.yml's uiSettings.overrides>>
+-  client-side-usage, Through the client-side uiSettings Service>>
+-  server-side-usage, Through the server-side uiSettings Service>>
 
-Keep in mind that once you add a new advanced setting, you cannot change or remove it without <<uisettings-migrations, registering a migration in core>>.
+Keep in mind that once you add a new advanced setting, you cannot change or remove it without  uisettings-migrations, registering a migration in core>>.
 
 [[advanced-settings-ui]]
 === Configuration with Advanced Settings UI
@@ -168,5 +168,5 @@ export const migrations = {
 
 [TIP]
 ==============================================
-Plugins can leverage the optional deprecation parameter on registration for handling deprecation notices and renames. The deprecation warnings are rendered in the Advanced Settings UI and should also be added to the <<settings,Configure Kibana>> guide.
+Plugins can leverage the optional deprecation parameter on registration for handling deprecation notices and renames. The deprecation warnings are rendered in the Advanced Settings UI and should also be added to the Configure Kibana guide.
 ==============================================

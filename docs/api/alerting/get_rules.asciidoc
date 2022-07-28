@@ -21,7 +21,7 @@ the `consumer` and `rule_type_id` of the rules you're seeking. For example, the
 features, *{observability}*, and *Security* features. To get rules associated
 with the *{stack-monitor-app}* feature, use the `monitoring_user` built-in role.
 
-For more details, refer to <<kibana-feature-privileges>>.
+For more details, refer to {kib} privileges.
 
 [[get-rule-api-params]]
 === {api-path-parms-title}

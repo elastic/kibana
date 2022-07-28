@@ -17,16 +17,16 @@ default connector for cases.
 
 You must have `all` privileges for the *Cases* feature in the *Management*,
 *{observability}*, or *Security* section of the
-<<kibana-feature-privileges,{kib} feature privileges>>, depending on the
+{kib} privileges, depending on the
 `owner` of the case configuration.
 
 === {api-description-title}
 
 Connectors are used to interface with external systems. You must create a
-connector before you can use it in your cases. Refer to <<add-case-connectors>>.
+connector before you can use it in your cases. Refer to  add-case-connectors>>.
 
 If you set a default connector, it is automatically selected when you create
-cases in {kib}. If you use the <<cases-api-create,create case API>>, however,
+cases in {kib}. If you use the  cases-api-create,create case API>>, however,
 you must still specify all of the connector details.
 
 === {api-path-parms-title}
@@ -65,12 +65,12 @@ propagated to individual cases, therefore it is recommended to set it to `null`.
 `id`::
 (Required, string) The identifier for the connector. If you do not want a
 default connector, use `none`. To retrieve connector IDs, use
-<<cases-api-find-connectors>>.
+ cases-api-find-connectors>>.
 
 `name`::
 (Required, string) The name of the connector. If you do not want a default
 connector, use `none`. To retrieve connector names, use
-<<cases-api-find-connectors>>.
+ cases-api-find-connectors>>.
 
 `type`::
 (Required, string) The type of the connector. Valid values are: `.jira`, `.none`,

@@ -4,7 +4,7 @@
 <titleabbrev>Disable legacy URL aliases</titleabbrev>
 ++++
 
-experimental[] Disable a <<legacy-url-aliases,legacy URL alias>> in {kib}.
+experimental[] Disable a  legacy-url-aliases,legacy URL alias>> in {kib}.
 
 [[spaces-api-disable-legacy-url-aliases-request]]
 ==== {api-request-title}

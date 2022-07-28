@@ -1,0 +1,6 @@
+[[console-view-api]]
+== View API docs
+
+To view the documentation for an API endpoint, click
+the action icon (image:dev-tools/console/images/wrench.png[]) and select
+*Open documentation*.

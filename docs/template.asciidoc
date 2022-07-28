@@ -16,9 +16,9 @@ For easy navigation, include the links to the key sections in a bulleted
 list. This way, users can click exactly where they want to go instead of 
 scrolling down the page:
 
-* <<task-section-description, Task section title>>
-* <<section2-description, Task section title>>
-* <<section3-description, Task section title>>
+*  task-section-description, Task section title>>
+*  section2-description, Task section title>>
+*  section3-description, Task section title>>
 
 TIP: Keep lists to 5-7 items, plus or minus 2 when absolutely necessary.
 
@@ -26,8 +26,8 @@ Provide a screenshot or video.
 //Screenshots must be 16:9 ratio.
 
 TIP: Need introduction inspiration? Here are some good examples:
-* <<dashboard, Dashboard>>
-* <<canvas, Canvas>>
+*  dashboard, Dashboard>>
+*  canvas, Canvas>>
 
 [float]
 [[concept-section-description]]
@@ -36,8 +36,8 @@ TIP: Need introduction inspiration? Here are some good examples:
 Include content that further describes the feature and its capabilities.
 
 TIP: Need concept inspiration? Here are some good examples:
-* <<elasticsearch-version, Elasticsearch version>>
-* <<getting-started, Sample data>>
+*  elasticsearch-version, Elasticsearch version>>
+*  getting-started, Sample data>>
 
 --
 
@@ -49,7 +49,7 @@ For task section titles, do not use gerunds. For example, instead of `Creating a
 ////
 
 Provide an example or walkthrough of how to use the feature. Whenever possible, 
-use the <<add-sample-data, sample data>>.
+use the  add-sample-data, sample data>>.
 
 [float]
 [[section2-description]]

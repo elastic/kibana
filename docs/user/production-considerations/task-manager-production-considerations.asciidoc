@@ -25,7 +25,7 @@ If you lose this index, all scheduled alerts and actions are lost.
 
 {kib} background tasks are managed as follows:
 
-* An {es} task index is polled for overdue tasks at 3-second intervals. You can change this interval using the <<task-manager-settings, `xpack.task_manager.poll_interval`>> setting.
+* An {es} task index is polled for overdue tasks at 3-second intervals. You can change this interval using the  task-manager-settings, `xpack.task_manager.poll_interval`>> setting.
 * Tasks are claimed by updating them in the {es} index, using optimistic concurrency control to prevent conflicts. Each {kib} instance can run a maximum of 10 concurrent tasks, so a maximum of 10 tasks are claimed each interval. 
 * Tasks are run on the {kib} server. 
 * Task Manager ensures that tasks:
@@ -41,9 +41,9 @@ This is usually a symptom of the specific usage or scaling strategy of the clust
 
 To address these issues, tweak the {kib} Task Manager settings or the cluster scaling strategy to better suit the unique use case.
 
-For details on the settings that can influence the performance and throughput of Task Manager, see <<task-manager-settings-kb, Task Manager Settings>>.
+For details on the settings that can influence the performance and throughput of Task Manager, see  task-manager-settings-kb, Task Manager Settings>>.
 
-For detailed troubleshooting guidance, see <<task-manager-troubleshooting>>.
+For detailed troubleshooting guidance, see  task-manager-troubleshooting>>.
 ==============================================
 
 [float]
@@ -68,9 +68,9 @@ This means that you can expect a single {kib} instance to support up to 200 _tas
 
 In practice, a {kib} instance will only achieve the upper bound of `200/tpm` if the duration of task execution is below the polling rate of 3 seconds. For the most part, the duration of tasks is below that threshold, but it can vary greatly as {es} and {kib} usage grow and task complexity increases (such as alerts executing heavy queries across large datasets).
 
-By <<task-manager-rough-throughput-estimation, estimating a rough throughput requirement>>, you can estimate the number of {kib} instances required to reliably execute tasks in a timely manner. An appropriate number of {kib} instances can be estimated to match the required scale.
+By  task-manager-rough-throughput-estimation, estimating a rough throughput requirement>>, you can estimate the number of {kib} instances required to reliably execute tasks in a timely manner. An appropriate number of {kib} instances can be estimated to match the required scale.
 
-For details on monitoring the health of {kib} Task Manager, follow the guidance in <<task-manager-health-monitoring>>.
+For details on monitoring the health of {kib} Task Manager, follow the guidance in  task-manager-health-monitoring>>.
 
 [float]
 [[task-manager-scaling-horizontally]]
@@ -85,9 +85,9 @@ By default, each additional {kib} instance will add an additional 10 tasks that 
 
 Other times it, might be preferable to increase the throughput of individual {kib} instances.
 
-Tweak the *Max Workers* via the <<task-manager-settings,`xpack.task_manager.max_workers`>> setting, which allows each {kib} to pull a higher number of tasks per interval. This could impact the performance of each {kib} instance as the workload will be higher.
+Tweak the *Max Workers* via the  task-manager-settings,`xpack.task_manager.max_workers`>> setting, which allows each {kib} to pull a higher number of tasks per interval. This could impact the performance of each {kib} instance as the workload will be higher.
 
-Tweak the *Poll Interval* via the <<task-manager-settings,`xpack.task_manager.poll_interval`>> setting, which allows each {kib} to pull scheduled tasks at a higher rate.  This could impact the performance of the {es} cluster as the workload will be higher.
+Tweak the *Poll Interval* via the  task-manager-settings,`xpack.task_manager.poll_interval`>> setting, which allows each {kib} to pull scheduled tasks at a higher rate.  This could impact the performance of the {es} cluster as the workload will be higher.
 
 [float]
 [[task-manager-choosing-scaling-strategy]]
@@ -100,15 +100,15 @@ Scaling {kib} instances horizontally requires a higher degree of coordination, w
 
 A recommended strategy is to follow these steps:
 
-1. Produce a <<task-manager-rough-throughput-estimation,rough throughput estimate>> as a guide to provisioning as many {kib} instances as needed. Include any growth in tasks that you predict experiencing in the near future, and a buffer to better address ad-hoc tasks.
-2. After provisioning a deployment, assess whether the provisioned {kib} instances achieve the required throughput by evaluating the <<task-manager-health-monitoring>> as described in <<task-manager-theory-insufficient-throughput, Insufficient throughput to handle the scheduled workload>>.
-3. If the throughput is insufficient, and {kib} instances exhibit low resource usage, incrementally scale vertically while <<kibana-page,monitoring>> the impact of these changes.
+1. Produce a  task-manager-rough-throughput-estimation,rough throughput estimate>> as a guide to provisioning as many {kib} instances as needed. Include any growth in tasks that you predict experiencing in the near future, and a buffer to better address ad-hoc tasks.
+2. After provisioning a deployment, assess whether the provisioned {kib} instances achieve the required throughput by evaluating the  task-manager-health-monitoring>> as described in  task-manager-theory-insufficient-throughput, Insufficient throughput to handle the scheduled workload>>.
+3. If the throughput is insufficient, and {kib} instances exhibit low resource usage, incrementally scale vertically while  kibana-page,monitoring>> the impact of these changes.
 4. If the throughput is insufficient, and {kib} instances are exhibiting high resource usage, incrementally scale horizontally by provisioning new {kib} instances and reassess.
 
 Task Manager, like the rest of the Elastic Stack, is designed to scale horizontally. Take advantage of this ability to ensure mission critical services, such as Alerting, Actions, and Reporting, always have the capacity they need.
 
 Scaling horizontally requires a higher degree of coordination between {kib} instances. One way Task Manager coordinates with other instances is by delaying its polling schedule to avoid conflicts with other instances.
-By using <<task-manager-health-monitoring, health monitoring>> to evaluate the <<task-manager-health-evaluate-the-runtime,date of the `last_polling_delay`>> across a deployment, you can estimate the frequency at which Task Manager resets its delay mechanism.
+By using  task-manager-health-monitoring, health monitoring>> to evaluate the  task-manager-health-evaluate-the-runtime,date of the `last_polling_delay`>> across a deployment, you can estimate the frequency at which Task Manager resets its delay mechanism.
 A higher frequency suggests {kib} instances conflict at a high rate, which you can address by scaling vertically rather than horizontally, reducing the required coordination.
 
 [float]
@@ -127,7 +127,7 @@ A default {kib} instance can support up to `200/tpm`.
 
 experimental[]
 
-As demonstrated in <<task-manager-health-evaluate-the-capacity-estimation, Evaluate your capacity estimation>>, the Task Manager <<task-manager-health-monitoring, health monitoring>> performs these estimations automatically.
+As demonstrated in  task-manager-health-evaluate-the-capacity-estimation, Evaluate your capacity estimation>>, the Task Manager  task-manager-health-monitoring, health monitoring>> performs these estimations automatically.
 
 These estimates are based on historical data and should not be used as predictions, but can be used as a rough guide when scaling the system.
 
@@ -147,7 +147,7 @@ When evaluating the proposed {kib} instance number under `proposed.provisioned_k
 [float]
 ===== Manual estimation
 
-By <<task-manager-health-evaluate-the-workload,evaluating the workload>>, you can make a rough estimate as to the required throughput as a _tasks per minute_ measurement.
+By  task-manager-health-evaluate-the-workload,evaluating the workload>>, you can make a rough estimate as to the required throughput as a _tasks per minute_ measurement.
 
 For example, suppose your current workload reveals a required throughput of `440/tpm`.  You can address this scale by provisioning 3 {kib} instances, with an upper throughput of `600/tpm`. This scale would provide approximately 25% additional capacity to handle ad-hoc non-recurring tasks and potential growth in recurring tasks.
 
@@ -159,7 +159,7 @@ For that reason, don't include non-recurring tasks in your _tasks per minute_ ca
 
 A recurring task requires as many executions as its cadence can fit in a minute. A recurring task with a `10s` schedule will require `6/tpm`, as it will execute 6 times per minute. A recurring task with a `20m` schedule only executes 3 times per hour and only requires a throughput of `0.05/tpm`, a number so small it that is difficult to take it into account.
 
-For this reason, we recommend grouping tasks by _tasks per minute_ and _tasks per hour_, as demonstrated in <<task-manager-health-evaluate-the-workload,Evaluate your workload>>, averaging the _per hour_ measurement across all minutes.
+For this reason, we recommend grouping tasks by _tasks per minute_ and _tasks per hour_, as demonstrated in  task-manager-health-evaluate-the-workload,Evaluate your workload>>, averaging the _per hour_ measurement across all minutes.
 
 It is highly recommended that you maintain at least 20% additional capacity, beyond your expected workload, as spikes in ad-hoc tasks is possible at times of high activity (such as a spike in actions in response to an active alert).
 
@@ -168,4 +168,4 @@ As a default, a {kib} instance provides a throughput of `200/tpm`. A good starti
 
 Although this is a _rough_ estimate, the  _tasks per minute_ provides the lower bound needed to execute tasks on time.
 
-Once you estimate  _tasks per minute_ , add a buffer for non-recurring tasks. How much of a buffer is required largely depends on your use case. Ensure enough of a buffer is provisioned by <<task-manager-health-evaluate-the-workload,evaluating your workload>> as it grows and tracking the ratio of recurring to non-recurring tasks by <<task-manager-health-evaluate-the-runtime,evaluating your runtime>>.
+Once you estimate  _tasks per minute_ , add a buffer for non-recurring tasks. How much of a buffer is required largely depends on your use case. Ensure enough of a buffer is provisioned by  task-manager-health-evaluate-the-workload,evaluating your workload>> as it grows and tracking the ratio of recurring to non-recurring tasks by  task-manager-health-evaluate-the-runtime,evaluating your runtime>>.

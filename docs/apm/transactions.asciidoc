@@ -50,7 +50,7 @@ It's important to note that if you have asynchronous spans, the sum of all span 
 
 *Cold start rate*::
 Only applicable to serverless transactions, this chart displays the percentage of requests that trigger a cold start of a serverless function.
-See <<apm-lambda-cold-start-info>> for more information.
+See  apm-lambda-cold-start-info>> for more information.
 
 [discrete]
 [[transactions-table]]
@@ -66,7 +66,7 @@ image::apm/images/apm-transactions-table.png[Example view of the transactions ta
 By default, transaction groups are sorted by _Impact_.
 Impact helps show the most used and slowest endpoints in your service - in other words,
 it's the collective amount of pain a specific endpoint is causing your users.
-If there's a particular endpoint you're worried about, you can click on it to view the <<transaction-details, transaction details>>.
+If there's a particular endpoint you're worried about, you can click on it to view the  transaction-details, transaction details>>.
 
 [IMPORTANT]
 ====
@@ -138,7 +138,7 @@ for easier problem isolation and troubleshooting.
 [role="screenshot"]
 image::apm/images/apm-transaction-sample.png[Example view of transactions sample]
 
-NOTE: More information on timeline waterfalls is available in <<spans, spans>>.
+NOTE: More information on timeline waterfalls is available in  spans, spans>>.
 
 *Trace sample metadata*
 
@@ -176,7 +176,7 @@ image::apm/images/apm-logs-tab.png[APM logs tab]
 ==== Correlations
 
 Correlations surface attributes of your data that are potentially correlated with high-latency or erroneous transactions.
-To learn more, see <<correlations>>.
+To learn more, see  correlations>>.
 
 [role="screenshot"]
 image::apm/images/correlations-hover.png[APM lattency correlations]

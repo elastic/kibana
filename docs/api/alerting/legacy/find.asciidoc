@@ -4,7 +4,7 @@
 <titleabbrev>Legacy find alerts</titleabbrev>
 ++++
 
-deprecated::[7.13.0,Use <<find-rules-api>> instead.]
+deprecated::[7.13.0,Use  find-rules-api>> instead.]
 
 Retrieve a paginated set of alerts based on condition.
 
@@ -57,7 +57,7 @@ NOTE: Alert `params` are stored as a {ref}/flattened.html[flattened field type] 
   (Optional, object) Filters the alerts that have a relations with the reference objects with the specific "type" and "ID".
 
 `filter`::
-  (Optional, string) A <<kuery-query, KQL>> string that you filter with an attribute from your saved object.
+  (Optional, string) A  kuery-query, KQL>> string that you filter with an attribute from your saved object.
   It should look like savedObjectType.attributes.title: "myTitle". However, If you used a direct attribute of a saved object, such as `updatedAt`,
   you will have to define your filter, for example, savedObjectType.updatedAt > 2018-12-22.
 

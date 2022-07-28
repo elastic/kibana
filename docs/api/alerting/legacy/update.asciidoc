@@ -4,7 +4,7 @@
 <titleabbrev>Legacy update alert</titleabbrev>
 ++++
 
-deprecated::[7.13.0,Use <<update-rule-api>> instead.]
+deprecated::[7.13.0,Use  update-rule-api>> instead.]
 
 Update the attributes for an existing alert.
 
@@ -67,10 +67,10 @@ Example: `{ interval: "10s" }`, `{ interval: "5m" }`, `{ interval: "1h" }`, `{ i
     (Required, string) The ID of the action that saved object executes.
 
   `actionTypeId`:::
-    (Required, string) The id of the <<action-types,action type>>.
+    (Required, string) The id of the action type.
 
   `params`:::
-    (Required, object) The map to the `params` that the <<action-types,action type>> will receive. `params` are handled as Mustache templates and passed a default set of context.
+    (Required, object) The map to the `params` that the action type will receive. `params` are handled as Mustache templates and passed a default set of context.
 =====
 
 

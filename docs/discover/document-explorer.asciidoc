@@ -1,5 +1,5 @@
 [[document-explorer]]
-== Explore your documents
+=== Explore your documents
 
 
 *Discover* displays your documents in table format, so you can
@@ -23,7 +23,7 @@ data-type="inline"
 
 [float]
 [[document-explorer-columns]]
-=== Reorder and resize columns
+==== Reorder and resize columns
 
 Use drag and drop to organize the columns and improve the view of the data.
 
@@ -39,7 +39,7 @@ Column widths are stored with a saved search.  When you visualize saved searches
 
 [float]
 [[document-explorer-row-height]]
-=== Adjust row height
+==== Adjust row height
 
 To set the row height to 1 or more lines, or automatically
 adjust the height to fit the contents, click the row height icon
@@ -51,7 +51,7 @@ image::images/document-explorer-row-height.png[Row height settings for the docum
 
 [float]
 [[document-explorer-sort-data]]
-=== Sort data
+==== Sort data
 
 Sort your data by one or more fields, in ascending or descending order.
 The default sort is based on the time field, from new to old.
@@ -78,7 +78,7 @@ image::images/document-explorer-multi-field.png[Multi field sort in the document
 
 [float]
 [[document-explorer-compare-data]]
-=== Compare data
+==== Compare data
 
 Narrow your results to a subset of documents to easily
 compare the data of interest.
@@ -92,7 +92,7 @@ image::images/document-explorer-compare-data.png[Compare data in the document ta
 
 [float]
 [[document-explorer-expand-documents]]
-=== Expand documents
+==== Expand documents
 
 Dive into an individual document to inspect its fields, set filters, and view
 the documents that occurred before and after it.
@@ -124,7 +124,7 @@ to:
 image::images/discover-view-single-document.png[Discover single document view]
 +
 The link is valid for the time the document is available in Elasticsearch. To create a customized view of the document,
-you can create <<external-plugin-development, your own plugin>>.
+you can create your own plugin.
 
 . To view documents that occurred before or after the event you are looking at, click **Surrounding documents**.
 +
@@ -138,7 +138,7 @@ image::images/discover-context.png[Image showing context view feature, with anch
 
 [float]
 [[document-explorer-full-screen]]
-=== View documents in fullscreen
+==== View documents in fullscreen
 
 To view as much data as possible and eliminate distractions, click the fullscreen icon
 image:images/fullscreen-icon.png[icon to display the document table in fullscreen mode]
@@ -146,7 +146,7 @@ in the document table.
 
 [float]
 [[document-explorer-configure-table]]
-=== Configure the number of documents displayed
+==== Configure the number of documents displayed
 
 By default, the document table displays 100 rows per page. To change this number,
 click *Rows per page*.

@@ -10,12 +10,12 @@
 
 Review important information about the {kib} 8.0.0 releases.
 
-* <<release-notes-8.0.0>>
-* <<release-notes-8.0.0-rc2>>
-* <<release-notes-8.0.0-rc1>>
-* <<release-notes-8.0.0-beta1>>
-* <<release-notes-8.0.0-alpha2>>
-* <<release-notes-8.0.0-alpha1>>
+*  release-notes-8.0.0>>
+*  release-notes-8.0.0-rc2>>
+*  release-notes-8.0.0-rc1>>
+*  release-notes-8.0.0-beta1>>
+*  release-notes-8.0.0-alpha2>>
+*  release-notes-8.0.0-alpha1>>
 
 --
 [[release-notes-8.0.0]]
@@ -49,8 +49,8 @@ Before you upgrade to 8.0.0, remove `console.ssl` from kibana.yml.
 
 To review the breaking changes in previous versions, refer to the following: 
 
-<<breaking-changes-8.0.0-rc2,8.0.0-rc2>> | <<breaking-changes-8.0.0-rc1,8.0.0-rc1>> | <<breaking-changes-8.0.0-beta1,8.0.0-beta1>> | <<breaking-changes-8.0.0-alpha2,8.0.0-alpha2>> | 
-<<breaking-changes-8.0.0-alpha1,8.0.0-alpha1>>
+ breaking-changes-8.0.0-rc2,8.0.0-rc2>> |  breaking-changes-8.0.0-rc1,8.0.0-rc1>> |  breaking-changes-8.0.0-beta1,8.0.0-beta1>> |  breaking-changes-8.0.0-alpha2,8.0.0-alpha2>> | 
+ breaking-changes-8.0.0-alpha1,8.0.0-alpha1>>
 
 [float]
 [[deprecations-8.0.0]]
@@ -74,7 +74,7 @@ Before you upgrade to 8.0.0, remove `monitoring.cluster_alerts.allowedSpaces` fr
 
 To review the deprecations in previous versions, refer to the following:
 
-<<deprecations-8.0.0-rc1,8.0.0-rc1>> | <<deprecations-8.0.0-alpha1,8.0.0-alpha1>>
+ deprecations-8.0.0-rc1,8.0.0-rc1>> |  deprecations-8.0.0-alpha1,8.0.0-alpha1>>
 
 [float]
 [[known-issue-8.0.0]]
@@ -93,7 +93,7 @@ conditions are true:
 * You are importing saved objects into multiple spaces, _OR_ you are copying saved objects into another space
 * Before you upgraded to 8.0.0, the saved objects did not already exist in the destinations
 
-In 8.0.0 and later, weak links break because <<saved-object-ids-impact-when-using-import-and-copy,saved object IDs can change during import or copy>>.
+In 8.0.0 and later, weak links break because  saved-object-ids-impact-when-using-import-and-copy,saved object IDs can change during import or copy>>.
 This applies to both the UI and the API.
 This issue will be fixed 8.0.1 and 8.1.0. For more information, refer to {kibana-issue}123550[#123550].
 
@@ -107,14 +107,14 @@ implemented to preserve the weak links.
 [float]
 [[features-8.0.0]]
 === Features
-For information about the features introduced in 8.0.0, refer to <<whats-new,What's new in 8.0>>.
+For information about the features introduced in 8.0.0, refer to  whats-new,What's new in 8.0>>.
 
 Elastic Security::
 For the Elastic Security 8.0.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 
 To review the features in previous versions, refer to the following: 
 
-<<features-8.0.0-rc2,8.0.0-rc2>> | <<features-8.0.0-rc1,8.0.0-rc1>> | <<features-8.0.0-beta1,8.0.0-beta1>> | <<features-8.0.0-alpha2,8.0.0-alpha2>>
+ features-8.0.0-rc2,8.0.0-rc2>> |  features-8.0.0-rc1,8.0.0-rc1>> |  features-8.0.0-beta1,8.0.0-beta1>> |  features-8.0.0-alpha2,8.0.0-alpha2>>
 
 [[enhancements-and-bug-fixes-v8.0.0]]
 === Enhancements and bug fixes
@@ -177,8 +177,8 @@ When you configure `elasticsearch.username: elastic`, {kib} fails.
 
 To review the breaking changes in previous versions, refer to the following: 
 
-<<breaking-changes-8.0.0-rc1,8.0.0-rc1>> | <<breaking-changes-8.0.0-beta1,8.0.0-beta1>> | <<breaking-changes-8.0.0-alpha2,8.0.0-alpha2>> | 
-<<breaking-changes-8.0.0-alpha1,8.0.0-alpha1>>
+ breaking-changes-8.0.0-rc1,8.0.0-rc1>> |  breaking-changes-8.0.0-beta1,8.0.0-beta1>> |  breaking-changes-8.0.0-alpha2,8.0.0-alpha2>> | 
+ breaking-changes-8.0.0-alpha1,8.0.0-alpha1>>
 
 [float]
 [[features-8.0.0-rc2]]
@@ -236,7 +236,7 @@ Observability::
 [[release-notes-8.0.0-rc1]]
 == {kib} 8.0.0-rc1
 
-Review the {kib} 8.0.0-rc1 changes, then use the <<upgrade-assistant,Upgrade Assistant>> to complete the upgrade.
+Review the {kib} 8.0.0-rc1 changes, then use the  upgrade-assistant,Upgrade Assistant>> to complete the upgrade.
 
 [float]
 [[breaking-changes-8.0.0-rc1]]
@@ -327,8 +327,8 @@ When you upgrade to 8.0.0, you are unable to use references to the deprecated fi
 
 To review the breaking changes in previous versions, refer to the following: 
 
-<<breaking-changes-8.0.0-beta1,8.0.0-beta1>> | <<breaking-changes-8.0.0-alpha2,8.0.0-alpha2>> | 
-<<breaking-changes-8.0.0-alpha1,8.0.0-alpha1>>
+ breaking-changes-8.0.0-beta1,8.0.0-beta1>> |  breaking-changes-8.0.0-alpha2,8.0.0-alpha2>> | 
+ breaking-changes-8.0.0-alpha1,8.0.0-alpha1>>
 
 [float]
 [[deprecations-8.0.0-rc1]]
@@ -393,7 +393,7 @@ For more information, refer to {fleet-guide}/fleet-api-docs.html[Fleet APIs].
 
 ====
 
-To review the deprecations in previous versions, refer to the <<deprecations-8.0.0-alpha1,8.0.0-alpha1 release notes>>. 
+To review the deprecations in previous versions, refer to the  deprecations-8.0.0-alpha1,8.0.0-alpha1 release notes>>. 
 
 
 [float]
@@ -529,7 +529,7 @@ Fixes an issue where PDF and PNG reports break on Windows operating systems when
 [[release-notes-8.0.0-beta1]]
 == {kib} 8.0.0-beta1
 
-Review the {kib} 8.0.0-beta1 changes, then use the <<upgrade-assistant,Upgrade Assistant>> to complete the upgrade.
+Review the {kib} 8.0.0-beta1 changes, then use the  upgrade-assistant,Upgrade Assistant>> to complete the upgrade.
 
 [float]
 [[breaking-changes-8.0.0-beta1]]
@@ -539,7 +539,7 @@ Breaking changes can prevent your application from optimal operation and perform
 
 To review the breaking changes in previous versions, refer to the following: 
 
-<<breaking-changes-8.0.0-alpha2,8.0.0-alpha2>> | <<breaking-changes-8.0.0-alpha1,8.0.0-alpha1>>
+ breaking-changes-8.0.0-alpha2,8.0.0-alpha2>> |  breaking-changes-8.0.0-alpha1,8.0.0-alpha1>>
 
 [float]
 [[alerting-breaking-changes-8.0.0-beta1]]
@@ -685,7 +685,7 @@ To use index patterns and {es} indices in *TSVB* visualizations:
 The deprecated `xpack.infra.sources.default.logAlias` and `xpack.infra.sources.default.logAlias` settings have been removed. For more information, refer to {kibana-pull}115974[#115974].
 
 *Impact* +
-Before you upgrade, remove the settings from kibana.yml, then configure the settings in <<logs-app,Logs>>.
+Before you upgrade, remove the settings from kibana.yml, then configure the settings in Logs.
 ====
 
 [discrete]
@@ -713,7 +713,7 @@ Configure the settings in https://www.elastic.co/guide/en/ecs/current/ecs-refere
 Machine learning features are included as base privileges. For more information, refer to {kibana-pull}115444[#115444].
 
 *Impact* +
-If you do not want to grant users privileges to machine learning features, update <<xpack-security,*Users* and *Roles*>>.
+If you do not want to grant users privileges to machine learning features, update  xpack-security,*Users* and *Roles*>>.
 ====
 
 [float]
@@ -729,7 +729,7 @@ If you do not want to grant users privileges to machine learning features, updat
 The `map.proxyElasticMapsServiceInMaps` setting has been removed. For more information, refer to {kibana-pull}116184[#116184].
 
 *Impact* +
-Install the on-prem version of the <<maps-connect-to-ems,Elastic Maps Service>>, which is a Docker service that resides in the Elastic Docker registry, in an accessible location on your internal network. When you complete the installation, update kibana.yml to point to the service.
+Install the on-prem version of the  maps-connect-to-ems,Elastic Maps Service>>, which is a Docker service that resides in the Elastic Docker registry, in an accessible location on your internal network. When you complete the installation, update kibana.yml to point to the service.
 ====
 
 [float]
@@ -811,7 +811,7 @@ The `xpack.security.enabled` setting has been removed. For more information, ref
 *Impact* +
 Before you upgrade to 8.0.0:
 
-* Remove `{plugin_name}.enabled` from kibana.yml. If you use the setting to control user access to {kib} applications, use <<tutorial-secure-access-to-kibana,*Features* controls>> instead.
+* Remove `{plugin_name}.enabled` from kibana.yml. If you use the setting to control user access to {kib} applications, use *Features* controls instead.
 * Replace `xpack.security.enabled` with {ref}/security-settings.html#general-security-settings[`xpack.security.enabled`] in elasticsearch.yml.
 ====
 
@@ -901,7 +901,7 @@ Enable link:https://www.elastic.co/guide/en/elasticsearch/reference/master/modul
 The `kibana.index`, `xpack.reporting.index`, and `xpack.task_manager.index` settings have been removed. For more information, refer to {kibana-pull}112773[#112773].
 
 *Impact* +
-Use spaces, cross-cluster replication, or cross-cluster search. To migrate to <<xpack-spaces,spaces>>, export your <<managing-saved-objects, saved objects>> from a tenant into the default space. For more details, refer to link:https://github.com/elastic/kibana/issues/82020[#82020].
+Use spaces, cross-cluster replication, or cross-cluster search. To migrate to  xpack-spaces,spaces>>, export your  managing-saved-objects, saved objects>> from a tenant into the default space. For more details, refer to link:https://github.com/elastic/kibana/issues/82020[#82020].
 ====
   
 [discrete]
@@ -913,7 +913,7 @@ Use spaces, cross-cluster replication, or cross-cluster search. To migrate to <<
 The logging configuration and log output format has changed. For more information, refer to {kibana-pull}112305[#112305].
 
 *Impact* +
-Use the new <<logging-configuration, logging system configuration>>. 
+Use the new  logging-configuration, logging system configuration>>. 
 ====
 
 [float]
@@ -971,7 +971,7 @@ Use `/api/stats`.
 The legacy audit logger has been removed. For more information, refer to {kibana-pull}116191[#116191].
 
 *Impact* +
-Audit logs will be written to the default location in the new ECS format. To change the output file, filter events, and more, use the <<audit-logging-settings, audit logging settings>>.
+Audit logs will be written to the default location in the new ECS format. To change the output file, filter events, and more, use the  audit-logging-settings, audit logging settings>>.
 ====
 
 [float]
@@ -980,7 +980,7 @@ Audit logs will be written to the default location in the new ECS format. To cha
 
 Deprecated functionality does not have an immediate impact on your application, but we strongly recommend you make the necessary updates after you complete the upgrade.
 
-To review the 8.0.0 depcrecations, refer to the <<deprecations-8.0.0-alpha1,8.0.0-alpha1 release notes>>. 
+To review the 8.0.0 depcrecations, refer to the  deprecations-8.0.0-alpha1,8.0.0-alpha1 release notes>>. 
   
 [float]
 [[features-8.0.0-beta1]]
@@ -1039,7 +1039,7 @@ Querying & Filtering::
 [[release-notes-8.0.0-alpha2]]
 == {kib} 8.0.0-alpha2
 
-Review the {kib} 8.0.0-alpha2 changes, then use the <<upgrade-assistant,Upgrade Assistant>> to complete the upgrade.
+Review the {kib} 8.0.0-alpha2 changes, then use the  upgrade-assistant,Upgrade Assistant>> to complete the upgrade.
 
 [float]
 [[breaking-changes-8.0.0-alpha2]]
@@ -1047,7 +1047,7 @@ Review the {kib} 8.0.0-alpha2 changes, then use the <<upgrade-assistant,Upgrade 
 
 Breaking changes can prevent your application from optimal operation and performance. Review the following breaking changes, then mitigate the impact to your application.
 
-To review the breaking changes in the previous version, refer to <<breaking-changes-8.0.0-alpha1,8.0.0-alpha1>>.
+To review the breaking changes in the previous version, refer to  breaking-changes-8.0.0-alpha1,8.0.0-alpha1>>.
 
 [discrete]
 [[breaking-110830]]
@@ -1086,7 +1086,7 @@ If you have maps that use `map.regionmap` layers:
 
 . Remove the `map.regionmap` layer.
 
-. To recreate the choropleth layer, use <<import-geospatial-data,GeoJSON upload>> to index your static vector data into {es}. 
+. To recreate the choropleth layer, use  import-geospatial-data,GeoJSON upload>> to index your static vector data into {es}. 
 
 . Create a choropleth layer from the indexed vector data. 
 ====
@@ -1100,7 +1100,7 @@ If you have maps that use `map.regionmap` layers:
 The deprecated `kibana.defaultAppId` setting in kibana.yml, which is also available as `kibana_legacy.defaultAppId`, has been removed. For more information, refer to {kibana-pull}109798[#109798].
 
 *Impact* +
-When you upgrade, remove `kibana.defaultAppId` from your kibana.yml file. To configure the default route for users when they enter a space, use the <<defaultroute,`defaultRoute`>> in *Advanced Settings*.
+When you upgrade, remove `kibana.defaultAppId` from your kibana.yml file. To configure the default route for users when they enter a space, use the  defaultroute,`defaultRoute`>> in *Advanced Settings*.
 ====
       
 [discrete]
@@ -1136,7 +1136,7 @@ When you upgrade, remove `xpack.task_manager.index` from your kibana.yml file.
 The legacy dashboard-only mode has been removed. For more information, refer to {kibana-pull}108103[#108103].
 
 *Impact* +
-To grant users access to only dashboards, create a new role, then assign only the *Dashboard* feature privilege. For more information, refer to <<kibana-feature-privileges,{kib} privileges>>.
+To grant users access to only dashboards, create a new role, then assign only the *Dashboard* feature privilege. For more information, refer to {kib} privileges.
 ====
      
 [discrete]
@@ -1157,7 +1157,7 @@ When you upgrade, remove `xpack.maps.showMapVisualizationTypes` from your kibana
 
 Deprecated functionality does not have an immediate impact on your application, but we strongly recommend you make the necessary updates after you complete the upgrade.
 
-To review the 8.0.0 depcrecations, refer to the <<deprecations-8.0.0-alpha1,8.0.0-alpha1 release notes>>. 
+To review the 8.0.0 depcrecations, refer to the  deprecations-8.0.0-alpha1,8.0.0-alpha1 release notes>>. 
       
 [float]
 [[features-8.0.0-alpha2]]
@@ -1180,7 +1180,7 @@ Security::
 [[release-notes-8.0.0-alpha1]]
 == {kib} 8.0.0-alpha1
 
-Review the {kib} 8.0.0-alpha1 changes, then use the <<upgrade-assistant,Upgrade Assistant>> to complete the upgrade.
+Review the {kib} 8.0.0-alpha1 changes, then use the  upgrade-assistant,Upgrade Assistant>> to complete the upgrade.
 
 [float]
 [[breaking-changes-8.0.0-alpha1]]

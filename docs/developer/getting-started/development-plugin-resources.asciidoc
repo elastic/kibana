@@ -5,12 +5,12 @@ Here are some resources that are helpful for getting started with plugin develop
 
 [discrete]
 === Some light reading
-If you haven't already, start with <<development-getting-started>>. If you are planning to add your plugin to the {kib} repo, read the <<contributing>> guide, if you are building a plugin externally, read <<external-plugin-development>>. In both cases, read up on our recommended <<development-best-practices>>.
+If you haven't already, start with  development-getting-started>>. If you are planning to add your plugin to the {kib} repo, read the  contributing>> guide, if you are building a plugin externally, read Plugins. In both cases, read up on our recommended  development-best-practices>>.
 
 [discrete]
 === Creating an empty plugin
 
-You can use the <<automatic-plugin-generator>> to get a basic structure for a new plugin. Plugins that are not part of the
+You can use the  automatic-plugin-generator>> to get a basic structure for a new plugin. Plugins that are not part of the
 {kib} repo should be developed inside the `plugins` folder.  If you are building a new plugin to check in to the {kib} repo,
 you will choose between a few locations:
 
@@ -51,12 +51,12 @@ but not in the distributable version of {kib}. If you use the
 [discrete]
 === {kib} platform migration guide
 
-<<migrating-legacy-plugins, This guide>>
+ migrating-legacy-plugins, This guide>>
 provides an action plan for moving a legacy plugin to the new platform.
-<<migrating-legacy-plugins-examples, Provides>> migration examples for the legacy core services.
+ migrating-legacy-plugins-examples, Provides>> migration examples for the legacy core services.
 
 [discrete]
 === Externally developed plugins
 
-If you are building a plugin outside of the {kib} repo, read <<external-plugin-development>>.
+If you are building a plugin outside of the {kib} repo, read Plugins.
 

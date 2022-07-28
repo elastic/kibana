@@ -1,6 +1,6 @@
 [role="xpack"]
 [[maps-troubleshooting]]
-== Troubleshoot Maps
+=== Troubleshoot Maps
 
 ++++
 <titleabbrev>Troubleshoot</titleabbrev>
@@ -10,7 +10,7 @@
 Use the information in this section to inspect Elasticsearch requests and find solutions to common problems.
 
 [float]
-=== Inspect Elasticsearch requests
+==== Inspect Elasticsearch requests
 
 Maps uses the {ref}/search-vector-tile-api.html[{es} vector tile search API] and the {ref}/search-search.html[{es} search API] to get documents and aggregation results from {es}. Use *Vector tiles* inspector to view {es} vector tile search API requests. Use *Requests* inspector to view {es} search API requests.
 
@@ -21,24 +21,24 @@ image::maps/images/vector_tile_inspector.png[]
 image::maps/images/requests_inspector.png[]
 
 [float]
-=== Solutions to common problems
+==== Solutions to common problems
 
 [float]
-==== Data view not listed when adding layer
+===== Data view not listed when adding layer
 
 * Verify your geospatial data is correctly mapped as {ref}/geo-point.html[geo_point] or {ref}/geo-shape.html[geo_shape].
-  ** Run `GET myIndexName/_field_caps?fields=myGeoFieldName` in <<console-kibana, Console>>, replacing `myIndexName` and `myGeoFieldName` with your index and geospatial field name.
+  ** Run `GET myIndexName/_field_caps?fields=myGeoFieldName` in  console-kibana, Console>>, replacing `myIndexName` and `myGeoFieldName` with your index and geospatial field name.
   ** Ensure response specifies `type` as `geo_point` or `geo_shape`.
-* Verify your geospatial data is correctly mapped in your <<managing-fields, data view>>.
-  ** Open your data view in <<management, Stack Management>>.
+* Verify your geospatial data is correctly mapped in your  managing-fields, data view>>.
+  ** Open your data view in  management, Stack Management>>.
   ** Ensure your geospatial field type is `geo_point` or `geo_shape`.
   ** Ensure your geospatial field is searchable and aggregatable.
   ** If your geospatial field type does not match your Elasticsearch mapping, click the *Refresh* button to refresh the field list from Elasticsearch.
 * Data views with thousands of fields can exceed the default maximum payload size.
-Increase <<settings, `server.maxPayload`>> for large data views.
+Increase `server.maxPayload` for large data views.
 
 [float]
-==== Features are not displayed
+===== Features are not displayed
 
 * Use Inspector to view {es} responses. Ensure the response is not empty.
 * Ensure geometry uses the correct latitude and longitude ordering.
@@ -47,10 +47,10 @@ Increase <<settings, `server.maxPayload`>> for large data views.
 * Ensure fill color and border color are distinguishable from map tiles. It's hard to see white features on a white background.
 
 [float]
-==== Elastic Maps Service basemaps are not displayed
-*Maps* uses tile and vector data from Elastic Maps Service by default. See <<maps-connect-to-ems, Connect to Elastic Maps Service>> for more info.
+===== Elastic Maps Service basemaps are not displayed
+*Maps* uses tile and vector data from Elastic Maps Service by default. See  maps-connect-to-ems, Connect to Elastic Maps Service>> for more info.
 
 [float]
-==== Custom tiles are not displayed
+===== Custom tiles are not displayed
 * When using a custom tile service, ensure your tile server has configured https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS[Cross-Origin Resource Sharing (CORS)] so tile requests from your {kib} domain have permission to access your tile server domain.
 * Ensure custom vector and tile services have the required coordinate system. Vector data must use EPSG:4326 and tiles must use EPSG:3857.

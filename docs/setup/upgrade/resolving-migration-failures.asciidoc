@@ -13,7 +13,7 @@ fix a failed migration. Unlike previous versions, {kib} 7.12.0 and later does no
 indices to release a failed migration lock.
 
 If upgrade migrations fail repeatedly, refer to
-<<preventing-migration-failures, preparing for migration>>.
+ preventing-migration-failures, preparing for migration>>.
 When you address the root cause for the migration failure,
 {kib} automatically retries the migration.
 If you're unable to resolve a failed migration, contact Support.
@@ -158,7 +158,7 @@ In the CLONE_TEMP_TO_TARGET or CREATE_REINDEX_TEMP steps, you might see a log en
 The process is waiting for a yellow index status. There are two known causes:
 
 * Cluster hits the low watermark for disk usage
-* Cluster has <<routing-allocation-disabled,routing allocation disabled>>
+* Cluster has  routing-allocation-disabled,routing allocation disabled>>
 
 Before retrying the migration, inspect the output of the `_cluster/allocation/explain?index=${targetIndex}` API to identify why the index isn't yellow:
 

@@ -8,7 +8,7 @@
 
 In 6.4 and later, you can use {metricbeat} to collect data about {kib}
 and ship it to the monitoring cluster, rather than routing it through the
-production cluster as described in <<monitoring-kibana>>.
+production cluster as described in  monitoring-kibana>>.
 
 image::user/monitoring/images/metricbeat.png[Example monitoring architecture]
 
@@ -31,10 +31,10 @@ monitoring.kibana.collection.enabled: false
 Leave the `monitoring.enabled` set to its default value (`true`).
 // end::disable-kibana-collection[]
 For more information, see
-<<monitoring-settings-kb,Monitoring settings in {kib}>>.
+ monitoring-settings-kb,Monitoring settings in {kib}>>.
 --
 
-. <<start-stop,Start {kib}>>.
+.  start-stop,Start {kib}>>.
 
 . Set the `xpack.monitoring.collection.enabled` setting to `true` on
 each node in the production cluster. By default, it is disabled (`false`).
@@ -211,4 +211,4 @@ For more information about these configuration options, see
 
 . {metricbeat-ref}/metricbeat-starting.html[Start {metricbeat}].
 
-. <<monitoring-data,View the monitoring data in {kib}>>.
+.  monitoring-data,View the monitoring data in {kib}>>.

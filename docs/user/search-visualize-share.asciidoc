@@ -1,0 +1,57 @@
+[[search-visualize-share-data]]
+= Search, visualize, and share your data
+
+[partintro]
+--
+Quickly search through large amounts of data, explore fields and values, and then use the drag-and-drop interface to rapidly build charts, tables, metrics, and more.
+
+[role="screenshot"]
+image::images/visualization-journey.png[User data analysis journey]
+
+[float]
+[[analytics-journey]]
+[cols=2*]
+|===
+
+| *1*
+| *Add data.* The best way to add data to the Elastic Stack is to use one of our many integrations.
+Alternatively, you can add a sample data set or upload a file. All three options are available
+on the home page.
+
+| *2*
+| *<<discover,Explore.>>* With *Discover*, you can search your data for hidden
+insights and relationships. Ask your questions, and then filter the results to just the data you want.
+You can limit your results to the most recent documents added to {es}.
+
+| *3*
+| *<<dashboard,Visualize.>>* {kib} provides many options to create visualizations of your data, from
+aggregation-based data to time series data to geo data.
+ *Dashboard* is your starting point to create visualizations,
+and then pulling them together to show your data from multiple perspectives.
+Use  *Canvas*, to give your data the “wow” factor for display on a big screen. Use *Graph* to explore patterns and relationships.
+
+| *4*
+| *Model data behavior.*
+Use *{ml-cap}* to model the behavior of your data&mdash;forecast unusual behavior and
+perform outlier detection, regression, and classification analysis.
+
+| *5*
+| *<<reporting-getting-started,Share.>>* Ready to share your findings with a larger audience? {kib} offers many options&mdash;embed
+a dashboard, share a link, export to PDF, and more.
+|===
+
+--
+
+include::{kib-repo-dir}/getting-started/quick-start-guide.asciidoc[]
+
+include::discover.asciidoc[]
+
+include::dashboard/dashboard.asciidoc[]
+
+include::{kib-repo-dir}/maps/index.asciidoc[]
+
+include::canvas.asciidoc[]
+
+include::reporting/index.asciidoc[]
+
+include::graph/index.asciidoc[]

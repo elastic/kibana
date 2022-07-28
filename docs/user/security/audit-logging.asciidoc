@@ -18,7 +18,7 @@ Audit logs are **disabled** by default. To enable this functionality, you must
 set `xpack.security.audit.enabled` to `true` in `kibana.yml`.
 
 You can optionally configure audit logs location, file/rolling file appenders and 
-ignore filters using <<audit-logging-settings>>.
+ignore filters using  audit-logging-settings>>.
 ============================================================================
 
 [[xpack-security-ecs-audit-logging]]
@@ -26,11 +26,11 @@ ignore filters using <<audit-logging-settings>>.
 
 Refer to the table of events that can be logged for auditing purposes. 
 
-Each event is broken down into <<field-event-category, category>>, <<field-event-type, type>>, <<field-event-action, action>> and
-<<field-event-outcome, outcome>> fields to make it easy to filter, query and aggregate the resulting logs. The <<field-trace-id, trace.id>>
+Each event is broken down into  field-event-category, category>>,  field-event-type, type>>,  field-event-action, action>> and
+ field-event-outcome, outcome>> fields to make it easy to filter, query and aggregate the resulting logs. The  field-trace-id, trace.id>>
 field can be used to correlate multiple events that originate from the same request.
 
-Refer to <<xpack-security-ecs-audit-schema>> for a table of fields that get logged with audit event. 
+Refer to  xpack-security-ecs-audit-schema>> for a table of fields that get logged with audit event. 
 
 [NOTE]
 ============================================================================
@@ -289,7 +289,7 @@ Example: `2016-05-23T08:05:34.853Z`
 | [[field-event-action]] `event.action`
 | The action captured by the event.
 
-Refer to <<xpack-security-ecs-audit-logging>> for a table of possible actions. 
+Refer to  xpack-security-ecs-audit-logging>> for a table of possible actions. 
 
 | [[field-event-category]] `event.category`
 | High level category associated with the event.

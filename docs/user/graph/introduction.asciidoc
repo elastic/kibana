@@ -91,7 +91,7 @@ NOTE: By default, when you submit a search query Graph searches all available fi
 [float]
 === Where to go next
 
-<<graph-getting-started, Getting Started>> :: Install the Graph plugin and Kibana app to start
+ graph-getting-started, Getting Started>> :: Install the Graph plugin and Kibana app to start
 exploring relationships in your data.
 
 [float]

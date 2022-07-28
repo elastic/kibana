@@ -8,13 +8,13 @@ WARNING: Do not directly access the `.logstash` index. The structure of the `.lo
 
 The following Logstash configuration management APIs are available:
 
-* <<logstash-configuration-management-api-delete, Delete Logstash pipeline API>> to delete a centrally-managed Logstash pipeline
+*  logstash-configuration-management-api-delete, Delete Logstash pipeline API>> to delete a centrally-managed Logstash pipeline
 
-* <<logstash-configuration-management-api-list, List Logstash pipeline API>> to list all centrally-managed Logstash pipelines
+*  logstash-configuration-management-api-list, List Logstash pipeline API>> to list all centrally-managed Logstash pipelines
 
-* <<logstash-configuration-management-api-create, Create Logstash pipeline API>> to create a centrally-managed Logstash pipeline, or update an existing pipeline
+*  logstash-configuration-management-api-create, Create Logstash pipeline API>> to create a centrally-managed Logstash pipeline, or update an existing pipeline
 
-* <<logstash-configuration-management-api-retrieve, Retrieve pipeline API>> to retrieve a centrally-managed Logstash pipeline
+*  logstash-configuration-management-api-retrieve, Retrieve pipeline API>> to retrieve a centrally-managed Logstash pipeline
 
 include::logstash-configuration-management/delete-pipeline.asciidoc[]
 include::logstash-configuration-management/list-pipeline.asciidoc[]

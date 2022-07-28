@@ -20,7 +20,7 @@ You must have `all` privileges for the appropriate {kib} features, depending on
 the `consumer` and `rule_type_id` of the rules you're disabling. For example,
 the *Management* > *Stack Rules* feature, *Analytics* > *Discover* and *{ml-app}*
 features, *{observability}*, and *Security* features. For more details, refer to
-<<kibana-feature-privileges>>.
+{kib} privileges.
 
 [[disable-rule-api-path-params]]
 === {api-path-parms-title}

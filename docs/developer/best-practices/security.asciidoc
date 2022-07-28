@@ -34,11 +34,11 @@ https://owasp.org/www-community/attacks/csrf[_OWASP reference for CSRF_]
 CSRF is a class of attacks where a user is forced to execute an action on a vulnerable website that they're logged into, usually without
 their knowledge. {kib} defends against this by requiring
 https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#use-of-custom-request-headers[custom
-request headers] for API endpoints. For more information, see <<api-request-headers, API Request Headers>>.
+request headers] for API endpoints. For more information, see  api-request-headers, API Request Headers>>.
 
 *Best practices*
 
-* Ensure all HTTP routes are registered with the <<http-service, {kib} HTTP service>> to take advantage of the custom request header
+* Ensure all HTTP routes are registered with the  http-service, {kib} HTTP service>> to take advantage of the custom request header
 security control.
 ** Note that HTTP GET requests do *not* require the custom request header; any routes that change data should
 https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods[adhere to the HTTP specification and use a different method (PUT, POST, etc.)]

@@ -28,11 +28,11 @@ don't forget to check our other troubleshooting guides or discussion forum:
 [[troubleshooting-apm-app]]
 == Troubleshoot common APM app problems
 
-* <<no-apm-data-found>>
-* <<troubleshooting-too-many-transactions>>
-* <<troubleshooting-unknown-route>>
-* <<troubleshooting-fields-unsearchable>>
-* <<service-map-rum-connections>>
+*  no-apm-data-found>>
+*  troubleshooting-too-many-transactions>>
+*  troubleshooting-unknown-route>>
+*  troubleshooting-fields-unsearchable>>
+*  service-map-rum-connections>>
 
 [float]
 [[no-apm-data-found]]
@@ -101,7 +101,7 @@ You can always add additional metadata to your transactions using {apm-guide-ref
 After ensuring you've correctly named your transactions,
 you might still see an error in the APM app related to too many transaction names.
 If this is the case, you can increase the default number of transaction groups displayed in the APM app by configuring
-<<apm-settings-kb,`xpack.apm.ui.transactionGroupBucketSize`>>.
+ apm-settings-kb,`xpack.apm.ui.transactionGroupBucketSize`>>.
 
 **More information**
 
@@ -158,7 +158,7 @@ To fix this, navigate to the APM app in {kib} and select *Add data*.
 In the APM tutorial, click *Load Kibana objects* to create the APM data view.
 
 If creating an APM data view doesn't solve the problem,
-see <<no-apm-data-found>> for further troubleshooting.
+see  no-apm-data-found>> for further troubleshooting.
 
 *Ensure a field is searchable*
 There are two things you can do to if you'd like to ensure a field is searchable:

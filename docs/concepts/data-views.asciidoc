@@ -12,22 +12,22 @@ or all indices that contain your data.
 [[data-views-read-only-access]]
 === Required permissions
 
-* Access to *Data Views* requires the <<kibana-role-management, {kib} privilege>>
+* Access to *Data Views* requires the {kib} privilege.
 `Data View Management`.
 
-* To create a {data-source}, you must have the <<kibana-role-management,{es} privilege>>
+* To create a {data-source}, you must have the {es} privilege.
 `view_index_metadata`.
 
 * If a read-only indicator appears in {kib}, you have insufficient privileges
 to create or save {data-sources}. The buttons to create {data-sources} or
 save existing {data-sources} are not visible. For more information,
-refer to <<xpack-security-authorization,Granting access to {kib}>>.
+refer to Granting access to {kib}.
 
 [float]
 [[settings-create-pattern]]
 === Create a data view
 
-If you collected data using one of the {kib} <<connect-to-elasticsearch,ingest options>>,
+If you collected data using one of the {kib} ingest options,
 uploaded a file, or added sample data,
 you get a {data-source} for free, and can start exploring your data.
 If you loaded your own data, follow these steps to create a {data-source}.
@@ -84,7 +84,7 @@ A {data-source} can match one rollup index.  For a combination rollup
 ```ts
 rollup_logstash,kibana_sample_data_logs
 ```
-For an example, refer to <<rollup-data-tutorial,Create and visualize rolled up data>>.
+For an example, refer to Create and visualize rolled up data.
 
 [float]
 [[management-cross-cluster-search]]

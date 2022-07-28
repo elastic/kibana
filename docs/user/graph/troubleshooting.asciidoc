@@ -1,12 +1,12 @@
 [role="xpack"]
 [[graph-troubleshooting]]
-== Graph troubleshooting and limitations
+=== Graph troubleshooting and limitations
 ++++
 <titleabbrev>Troubleshooting and limitations</titleabbrev>
 ++++
 
 [discrete]
-=== Why are results missing?
+==== Why are results missing?
 
 The default settings in Graph API requests are configured to tune out noisy
 results by using the following strategies:
@@ -30,7 +30,7 @@ of any statistical correlation with the sample.
 required to assert a relationship.
 
 [discrete]
-=== What can I do to improve performance?
+==== What can I do to improve performance?
 
 With the default setting of `use_significance` set to `true`, the Graph API
 performs a background frequency check of the terms it discovers as part of
@@ -59,7 +59,7 @@ the information that's lost tends to be associated with lower-quality documents
 with lower-frequency terms, which can be an acceptable trade-off.
 
 [discrete]
-=== Limited support for multiple indices
+==== Limited support for multiple indices
 The graph API can explore multiple indices, types, or aliases in a
 single API request, but the assumption is that each "hop" it performs
 is querying the same set of indices. Currently, it is not possible to

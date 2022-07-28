@@ -22,7 +22,7 @@ rule types associated with the *Management* > *Stack Rules* feature,
 *Security* features. To get rule types associated with the
 *{stack-monitor-app}* feature, use the `monitoring_user` built-in role.
 
-For more details, refer to <<kibana-feature-privileges>>.
+For more details, refer to {kib} privileges.
 
 === {api-description-title}
 

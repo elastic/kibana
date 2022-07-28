@@ -7,59 +7,59 @@ Connectors provide a central place to store connection information for services 
 [cols="2"]
 |===
 
-a| <<email-action-type, Email>>
+a|  email-action-type, Email>>
 
 | Send email from your server.
 
-a| <<resilient-action-type, IBM Resilient>>
+a|  resilient-action-type, IBM Resilient>>
 
 | Create an incident in IBM Resilient.
 
-a| <<index-action-type, Index>>
+a|  index-action-type, Index>>
 
 | Index data into Elasticsearch.
 
-a| <<jira-action-type, Jira>>
+a|  jira-action-type, Jira>>
 
 | Create an incident in Jira.
 
-a| <<teams-action-type, Microsoft Teams>>
+a|  teams-action-type, Microsoft Teams>>
 
 | Send a message to a Microsoft Teams channel.
 
-a| <<pagerduty-action-type, PagerDuty>>
+a|  pagerduty-action-type, PagerDuty>>
 
 | Send an event in PagerDuty.
 
-a| <<server-log-action-type, ServerLog>>
+a|  server-log-action-type, ServerLog>>
 
 | Add a message to a Kibana log.
 
-a| <<servicenow-action-type, ServiceNow ITSM>>
+a|  servicenow-action-type, ServiceNow ITSM>>
 
 | Create an incident in ServiceNow.
 
-a| <<servicenow-sir-action-type, ServiceNow SecOps>>
+a|  servicenow-sir-action-type, ServiceNow SecOps>>
 
 | Create a security incident in ServiceNow.
 
-a| <<servicenow-itom-action-type, ServiceNow ITOM>>
+a|  servicenow-itom-action-type, ServiceNow ITOM>>
 
 | Create an event in ServiceNow.
 
-a| <<slack-action-type, Slack>>
+a|  slack-action-type, Slack>>
 
 | Send a message to a Slack channel or user.
 
-a| <<swimlane-action-type, Swimlane>>
+a|  swimlane-action-type, Swimlane>>
 
 | Create an incident in Swimlane.
 
-a| <<webhook-action-type, Webhook>>
+a|  webhook-action-type, Webhook>>
 
 | Send a request to a web service.
 
-a| <<xmatters-action-type,xMatters>>
+a|  xmatters-action-type,xMatters>>
 
 | Send actionable alerts to on-call xMatters resources.
 |===
@@ -77,7 +77,7 @@ see https://www.elastic.co/subscriptions[the subscription page].
 
 Rules use *Connectors* to route actions to different destinations like log files, ticketing systems, and messaging tools. While each {kib} app can offer their own types of rules, they typically share connectors. The *Connectors* tab offers a central place to view and manage all the connectors in the current space.
 
-For more information on connectors and the types of actions available see <<action-types>>.
+For more information on connectors and the types of actions available see Action and connector types.
 
 [role="screenshot"]
 image::images/connector-listing.png[Example connector listing in the Rules and Connectors UI]
@@ -85,12 +85,12 @@ image::images/connector-listing.png[Example connector listing in the Rules and C
 [float]
 === Required permissions
 
-Access to connectors is granted based on your privileges to alerting-enabled features. See <<alerting-security, Alerting Security>> for more information.
+Access to connectors is granted based on your privileges to alerting-enabled features. See  alerting-security, Alerting Security>> for more information.
 
 [float]
 === Connector networking configuration
 
-Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+Use the  action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
 [float]
 [[connectors-list]]
@@ -122,7 +122,7 @@ When this happens the action will fail to execute, and appear as errors in the {
 [[creating-new-connector]]
 === Creating a new connector
 
-New connectors can be created by clicking the *Create connector* button, which will guide you to select the type of connector and configure its properties. Refer to <<action-types>> for the types of connectors available and how to configure them. Once you create a connector it will be made available to you anytime you set up an action in the current space.
+New connectors can be created by clicking the *Create connector* button, which will guide you to select the type of connector and configure its properties. Refer to Action and connector types for the types of connectors available and how to configure them. Once you create a connector it will be made available to you anytime you set up an action in the current space.
 
 [role="screenshot"]
 image::images/connector-select-type.png[Connector select type]
@@ -131,7 +131,7 @@ image::images/connector-select-type.png[Connector select type]
 [[importing-and-exporting-connectors]]
 === Importing and exporting connectors
 
-To import and export connectors, use the <<managing-saved-objects, Saved Objects Management UI>>.
+To import and export connectors, use the  managing-saved-objects, Saved Objects Management UI>>.
 After a successful import, the proper banner is displayed:
 [role="screenshot"]
 image::images/coonectors-import-banner.png[Connectors import banner, width=50%]
@@ -144,17 +144,17 @@ image::images/connectors-with-missing-secrets.png[Connectors with missing secret
 [[create-connectors]]
 === Preconfigured connectors
 
-For out-of-the-box and standardized connectors, you can <<preconfigured-connector-example, preconfigure connectors>>
+For out-of-the-box and standardized connectors, you can  preconfigured-connector-example, preconfigure connectors>>
 before {kib} starts.
 
 [float]
 [[montoring-connectors]]
 === Monitoring connectors
 
-The <<task-manager-health-monitoring,Task Manager health API>> helps you understand the performance of all tasks in your environment.
+The  task-manager-health-monitoring,Task Manager health API>> helps you understand the performance of all tasks in your environment.
 However, if connectors fail to execute, they will report as successful to Task Manager. The failure stats will not
 accurately depict the performance of connectors.
 
-For more information on connector successes and failures, refer to the <<event-log-index,Event log index>>.
+For more information on connector successes and failures, refer to the  event-log-index,Event log index>>.
 
 include::connectors/index.asciidoc[]

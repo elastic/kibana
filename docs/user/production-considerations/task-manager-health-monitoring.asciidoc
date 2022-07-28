@@ -29,7 +29,7 @@ Monitoring the `_health` endpoint of each {kib} instance in the cluster is the r
 
 The health monitoring API monitors the performance of Task Manager out of the box.  However, certain performance considerations are deployment specific and you can configure them.
 
-A health threshold is the threshold for failed task executions.  Once a task exceeds this threshold, a status of `warn` or `error` is set on the task type execution. To configure a health threshold, use the <<task-manager-health-settings,`xpack.task_manager.monitored_task_execution_thresholds`>> setting.  You can apply this this setting to all task types in the system, or to a custom task type. 
+A health threshold is the threshold for failed task executions.  Once a task exceeds this threshold, a status of `warn` or `error` is set on the task type execution. To configure a health threshold, use the  task-manager-health-settings,`xpack.task_manager.monitored_task_execution_thresholds`>> setting.  You can apply this this setting to all task types in the system, or to a custom task type. 
 
 By default, this setting marks the health of every task type as `warning` when it exceeds 80% failed executions, and as `error` at 90%.
 Set this value to a number between 0 to 100. The threshold is hit when the value *exceeds* this number.
@@ -73,12 +73,12 @@ logging:
         level: debug
 ----
 
-These stats are logged based on the number of milliseconds set in your <<task-manager-settings,`xpack.task_manager.poll_interval`>> setting, which could add substantial noise to your logs. Only enable this level of logging temporarily.
+These stats are logged based on the number of milliseconds set in your  task-manager-settings,`xpack.task_manager.poll_interval`>> setting, which could add substantial noise to your logs. Only enable this level of logging temporarily.
 
 *Automatic logging*
 
 By default, the health API runs at a regular cadence, and each time it runs, it attempts to self evaluate its performance. If this self evaluation yields a potential problem,
-a message will log to the {kib} server log. In addition, the health API will look at how long tasks have waited to start (from when they were scheduled to start). If this number exceeds a configurable threshold (<<task-manager-settings,`xpack.task_manager.monitored_stats_health_verbose_log.warn_delayed_task_start_in_seconds`>>), the same message as above will log to the {kib} server log.
+a message will log to the {kib} server log. In addition, the health API will look at how long tasks have waited to start (from when they were scheduled to start). If this number exceeds a configurable threshold ( task-manager-settings,`xpack.task_manager.monitored_stats_health_verbose_log.warn_delayed_task_start_in_seconds`>>), the same message as above will log to the {kib} server log.
 
 This message looks like:
 
@@ -88,7 +88,7 @@ Detected potential performance issue with Task Manager. Set 'xpack.task_manager.
 ----
 
 
-If this message appears, set <<task-manager-settings,`xpack.task_manager.monitored_stats_health_verbose_log.enabled`>> to `true` in your `kibana.yml`. This will start logging the health metrics at either a `warn` or `error` log level, depending on the detected severity of the potential problem.
+If this message appears, set  task-manager-settings,`xpack.task_manager.monitored_stats_health_verbose_log.enabled`>> to `true` in your `kibana.yml`. This will start logging the health metrics at either a `warn` or `error` log level, depending on the detected severity of the potential problem.
 
 [float]
 [[making-sense-of-task-manager-health-stats]]
@@ -114,7 +114,7 @@ a| Runtime
 
 a| Capacity Estimation
 
-| This section provides a rough estimate about the sufficiency of its capacity. As the name suggests, these are estimates based on historical data and should not be used as predictions. Use these estimations when following the Task Manager <<task-manager-scaling-guidance>>.
+| This section provides a rough estimate about the sufficiency of its capacity. As the name suggests, these are estimates based on historical data and should not be used as predictions. Use these estimations when following the Task Manager  task-manager-scaling-guidance>>.
 
 |===
 
@@ -122,14 +122,14 @@ Each section has a `timestamp` and a `status` that indicates when the last updat
 
 The root `status` indicates the `status` of the system overall.
 
-The Runtime `status` indicates whether task executions have exceeded any of the <<task-manager-configuring-health-monitoring,configured health thresholds>>. An `OK` status means none of the threshold have been exceeded. A `Warning` status means that at least one warning threshold has been exceeded. An `Error` status means that at least one error threshold has been exceeded.
+The Runtime `status` indicates whether task executions have exceeded any of the  task-manager-configuring-health-monitoring,configured health thresholds>>. An `OK` status means none of the threshold have been exceeded. A `Warning` status means that at least one warning threshold has been exceeded. An `Error` status means that at least one error threshold has been exceeded.
 
 [IMPORTANT]
 ==============================================
-Some tasks (such as <<action-types,connectors>>) will incorrectly report their status as successful even if the task failed.
+Some tasks (such as Action and connector types) will incorrectly report their status as successful even if the task failed.
 The runtime and workload block will return data about success and failures and will not take this into consideration.
 
-To get a better sense of action failures, please refer to the <<event-log-index,Event log index>> for more accurate context into failures and successes.
+To get a better sense of action failures, please refer to the  event-log-index,Event log index>> for more accurate context into failures and successes.
 ==============================================
 
 The Capacity Estimation `status` indicates the sufficiency of the observed capacity. An `OK` status means capacity is sufficient. A `Warning` status means that capacity is sufficient for the scheduled recurring tasks, but non-recurring tasks often cause the cluster to exceed capacity. An `Error` status means that there is insufficient capacity across all types of tasks.

@@ -42,7 +42,7 @@ curl -X POST \
 <4> The `service.version` to be displayed in the annotation
 <5> A custom message to be displayed in the annotation
 
-See the <<apm-annotation-api,annotation API>> reference for more information.
+See the  apm-annotation-api,annotation API>> reference for more information.
 
 
 NOTE: If custom annotations have been created for the selected time period, any derived annotations, i.e., those created automatically when `service.version` changes, will not be shown.

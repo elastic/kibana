@@ -22,14 +22,14 @@ the `consumer` and `rule_type_id` of the rules you're creating. For example, the
 features, *{observability}*, and *Security* features. If the rule has `actions`,
 you must also have `read` privileges for the *Management* >
 *Actions and Connectors* feature. For more details, refer to
-<<kibana-feature-privileges>>.
+{kib} privileges.
 
 === {api-description-title}
 
 [WARNING]
 ====
 * This API supports only
-<<token-api-authentication,token-based authentication>>.
+ token-api-authentication,token-based authentication>>.
 * When you create a rule, it identifies which roles you have at that point in time.
 Thereafter, when the rule performs queries, it uses those security privileges.
 If a user with different privileges updates the rule, its behavior might change.
@@ -66,7 +66,7 @@ types of alerts. If you don't need this, set this value to `default`.
 
 `params`:::
 (Required, object) The map to the `params` that the
-<<action-types,connector type>> will receive. ` params` are handled as Mustache
+connector type will receive. ` params` are handled as Mustache
 templates and passed a default set of context.
 =====
 
@@ -95,7 +95,7 @@ value. This will also validate against the rule type params validator, if define
 is scheduled to run. For example, `.es-query`, `.index-threshold`,
 `logs.alert.document.count`, `monitoring_alert_cluster_health`,
 `siem.thresholdRule`, or `xpack.ml.anomaly_detection_alert`. For more
-information, refer to <<rule-types>>.
+information, refer to  rule-types>>.
 
 `schedule`::
 (Required, object) The schedule specifying when this rule should be run, using

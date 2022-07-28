@@ -1,5 +1,5 @@
 [[console-kibana]]
-== Run API requests
+= Run API requests
 
 Interact with the REST APIs of {es} and {kib} with *Console*. With *Console*, you can:
 
@@ -14,7 +14,7 @@ image::dev-tools/console/images/console.png["Console"]
 
 [float]
 [[console-api]]
-=== Write requests
+== Write requests
 
 *Console* understands commands in a cURL-like syntax.
 For example, the following is a `GET` request to the {es} `_search` API.
@@ -58,7 +58,7 @@ for the calls to work from external environments.
 
 [float]
 [[console-autocomplete]]
-==== Autocomplete
+=== Autocomplete
 
 When you're typing a command, *Console* makes context-sensitive suggestions.
 These suggestions show you the parameters for each API and speed up your typing.
@@ -67,7 +67,7 @@ To configure your preferences for autocomplete, go to
 
 [float]
 [[auto-formatting]]
-==== Auto-formatting
+=== Auto-formatting
 The auto-formatting
 capability can help you format requests. Select one or more requests that you
 want to format, click the action icon (image:dev-tools/console/images/wrench.png[]),
@@ -92,7 +92,7 @@ This is helpful when working with the {es} {ref}/docs-bulk.html[bulk APIs].
 
 [float]
 [[console-request]]
-=== Submit requests
+== Submit requests
 
 When you're ready to submit the request to {es}, click the
 green triangle.
@@ -106,7 +106,7 @@ combinations in multiple scenarios.
 
 [float]
 [[console-view-api]]
-=== View API docs
+== View API docs
 
 To view the documentation for an API endpoint, click
 the action icon (image:dev-tools/console/images/wrench.png[]) and select
@@ -114,7 +114,7 @@ the action icon (image:dev-tools/console/images/wrench.png[]) and select
 
 [float]
 [[console-history]]
-=== Get your request history
+== Get your request history
 
 *Console* maintains a list of the last 500 requests that {es} successfully executed.
 To view your most recent requests, click *History*. If you select a request
@@ -122,7 +122,7 @@ and click *Apply*, {kib} adds it to the editor at the current cursor position.
 
 [float]
 [[configuring-console]]
-=== Configure Console settings
+== Configure Console settings
 
 You can configure the *Console* font size, JSON syntax,
 and autocomplete suggestions in *Settings*.
@@ -132,14 +132,14 @@ image::dev-tools/console/images/console-settings.png["Console Settings", width=6
 
 [float]
 [[keyboard-shortcuts]]
-=== Get keyboard shortcuts
+== Get keyboard shortcuts
 
 For a list of available keyboard
 shortcuts, click *Help*.
 
 [float]
 [[console-settings]]
-=== Disable Console
+== Disable Console
 
 If you don’t want to use *Console*, you can disable it by setting `console.ui.enabled`
 to `false` in your `kibana.yml` configuration file. Changing this setting

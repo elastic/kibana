@@ -11,14 +11,14 @@ to create {sn} security incidents.
 [float]
 [[servicenow-sir-connector-prerequisites]]
 === Prerequisites
-After upgrading from {stack} version 7.15.0 or earlier to version 7.16.0 or later, you must complete the following within your {sn} instance before creating a new {sn-sir} connector or <<servicenow-sir-connector-update, updating an existing one>>:
+After upgrading from {stack} version 7.15.0 or earlier to version 7.16.0 or later, you must complete the following within your {sn} instance before creating a new {sn-sir} connector or  servicenow-sir-connector-update, updating an existing one>>:
 
 . Install https://store.servicenow.com/sn_appstore_store.do#!/store/application/2f0746801baeb01019ae54e4604bcb0f[Elastic for Security Operations (SecOps)] from the {sn} Store.
-. <<servicenow-sir-connector-prerequisites-integration-user,Create a {sn} integration user and assign it the appropriate roles>>.
-. <<servicenow-sir-connector-prerequisites-cors-rule,Create a Cross-Origin Resource Sharing (CORS) rule>>.
+.  servicenow-sir-connector-prerequisites-integration-user,Create a {sn} integration user and assign it the appropriate roles>>.
+.  servicenow-sir-connector-prerequisites-cors-rule,Create a Cross-Origin Resource Sharing (CORS) rule>>.
 . If you use open authorization (OAuth), you must also:
-.. <<servicenow-sir-connector-prerequisites-rsa-key,Create an RSA keypair and add an X.509 Certificate>>.
-.. <<servicenow-sir-connector-prerequisites-endpoint,Create an OAuth JWT API endpoint for external clients with a JWT Verifiers Map>>.
+..  servicenow-sir-connector-prerequisites-rsa-key,Create an RSA keypair and add an X.509 Certificate>>.
+..  servicenow-sir-connector-prerequisites-endpoint,Create an OAuth JWT API endpoint for external clients with a JWT Verifiers Map>>.
 
 [float]
 [[servicenow-sir-connector-prerequisites-integration-user]]
@@ -78,7 +78,7 @@ include::servicenow.asciidoc[tag=servicenow-endpoint]
 [role="screenshot"]
 image::management/connectors/images/servicenow-sir-update-connector.png[Shows deprecated ServiceNow connectors]
 
-IMPORTANT: Deprecated connectors will continue to function with the rules they were added to and can be assigned to new rules. However, it is strongly recommended to update deprecated connectors or <<creating-new-connector, create new ones>> to ensure you have access to connector enhancements, such as updating incidents.
+IMPORTANT: Deprecated connectors will continue to function with the rules they were added to and can be assigned to new rules. However, it is strongly recommended to update deprecated connectors or  creating-new-connector, create new ones>> to ensure you have access to connector enhancements, such as updating incidents.
 
 To update a deprecated connector:
 
@@ -86,7 +86,7 @@ To update a deprecated connector:
 . Select the deprecated connector to open the *Edit connector* flyout.
 . In the warning message, click *Update this connector*.
 . Complete the guided steps in the *Edit connector* flyout.
-.. Install https://store.servicenow.com/sn_appstore_store.do#!/store/application/2f0746801baeb01019ae54e4604bcb0f[Elastic for Security Operations (SecOps)] from the {sn} Store and complete the <<servicenow-sir-connector-prerequisites, required prerequisites>>.
+.. Install https://store.servicenow.com/sn_appstore_store.do#!/store/application/2f0746801baeb01019ae54e4604bcb0f[Elastic for Security Operations (SecOps)] from the {sn} Store and complete the  servicenow-sir-connector-prerequisites, required prerequisites>>.
 .. Enter the URL of your {sn} instance.
 .. Enter the username and password of your {sn} instance.
 . Click *Update*.
@@ -113,7 +113,7 @@ Private Key Password:: The password for the RSA private key generated during set
 [[servicenow-sir-connector-networking-configuration]]
 === Connector networking configuration
 
-Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+Use the  action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
 [float]
 [[Preconfigured-servicenow-sir-configuration]]
@@ -166,7 +166,7 @@ NOTE: If `usesTableApi` is set to false, the Elastic application should be insta
 Secrets defines sensitive information for the connector type.
 
 `username`:: A string that corresponds to *Username*. Required if `isOAuth` is set to `false`.
-`password`::  A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>. Required if `isOAuth` is set to `false`.
+`password`::  A string that corresponds to *Password*. Should be stored in the  creating-keystore, {kib} keystore>>. Required if `isOAuth` is set to `false`.
 `clientSecret`:: A string that corresponds to *Client Secret*. Required if `isOAuth` is set to `true`.
 `privateKey`:: A string that corresponds to *Private Key*. Required if `isOAuth` is set to `true`.
 `privateKeyPassword`:: A string that corresponds to *Private Key Password*.

@@ -20,18 +20,18 @@ Gets a comment or all comments for a case.
 
 You must have `read` privileges for the *Cases* feature in the *Management*,
 *{observability}*, or *Security* section of the
-<<kibana-feature-privileges,{kib} feature privileges>>, depending on the
+{kib} privileges, depending on the
 `owner` of the cases with the comments you're seeking.
 
 === {api-path-parms-title}
 
 `<case_id>`::
 (Required, string) The identifier for the case. To retrieve case IDs, use 
-<<cases-api-find-cases>>.
+ cases-api-find-cases>>.
 
 `<comment_id>`::
 (Optional, string) The identifier for the comment. To retrieve comment IDs, use
-<<cases-api-get-case>>.
+ cases-api-get-case>>.
 +
 If it is not specified, all comments are retrieved.
 deprecated:[8.1.0,The comment identifier will no longer be optional.]

@@ -58,7 +58,7 @@ The application is created by concatenating the prefix of `kibana-` with the val
 [[development-rbac-assigning-privileges]]
 === Assigning {kib} Privileges
 
-{kib} privileges are assigned to specific roles using the `applications` element. For example, the following role assigns the <<kibana-privileges-all, all>> privilege at `*` `resources` (which will in the future be used to secure spaces) to the default {kib} `application`:
+{kib} privileges are assigned to specific roles using the `applications` element. For example, the following role assigns the  kibana-privileges-all, all>> privilege at `*` `resources` (which will in the future be used to secure spaces) to the default {kib} `application`:
 
 [source,js]
 ----------------------------------
@@ -77,7 +77,7 @@ The application is created by concatenating the prefix of `kibana-` with the val
  }
 ----------------------------------
 
-Roles that grant <<kibana-privileges>> should be managed using the <<role-management-api>> or the *Management -> Security -> Roles* page, not directly using the {es} {ref}/security-api.html#security-role-apis[role management API]. This role can then be assigned to users using the {es}
+Roles that grant  kibana-privileges>> should be managed using the role management API or the *Management -> Security -> Roles* page, not directly using the {es} {ref}/security-api.html#security-role-apis[role management API]. This role can then be assigned to users using the {es}
 {ref}/security-api.html#security-user-apis[user management APIs].
 
 [[development-rbac-authorization]]
@@ -104,6 +104,6 @@ Authorization: Basic foo_read_only_user password
 }
 ----------------------------------
 
-{es} checks if the user is granted a specific action. If the user is assigned a role that grants a privilege, {es} uses the <<development-rbac-privileges, {kib} privileges>> definition to associate this with the actions, which makes authorizing users more intuitive and flexible programmatically.
+{es} checks if the user is granted a specific action. If the user is assigned a role that grants a privilege, {es} uses the  development-rbac-privileges, {kib} privileges>> definition to associate this with the actions, which makes authorizing users more intuitive and flexible programmatically.
 
 Once we have authorized the user to perform a specific action, we can execute the request using `callWithInternalUser`.

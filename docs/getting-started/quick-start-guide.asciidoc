@@ -1,18 +1,18 @@
 [[get-started]]
-== Quick start
+== Get started
 
 To quickly get up and running with {kib}, set up on Cloud, then add a sample data set that you can explore and analyze.
 
 When you've finished, you'll know how to:
 
-* <<explore-the-data,Explore the data with *Discover*.>>
+*  explore-the-data,Explore the data with *Discover*.>>
 
-* <<view-and-analyze-the-data,Analyze the data with *Dashboard*.>>
+*  view-and-analyze-the-data,Analyze the data with *Dashboard*.>>
 
 [float]
 === Required privileges
 You must have `read`, `write`, and `manage` privileges on the `kibana_sample_data_*` indices.
-Learn how to <<tutorial-secure-access-to-kibana, secure access to {kib}>>, or refer to {ref}/security-privileges.html[Security privileges] for more information.
+Learn how to Secure access to {kib}, or refer to {ref}/security-privileges.html[Security privileges] for more information.
 
 [float]
 [[set-up-on-cloud]]
@@ -41,12 +41,12 @@ image::images/addData_sampleDataCards_7.15.0.png[Add data UI for the sample data
 
 . Open the main menu, then click *Discover*.
 
-. Change the <<set-time-filter, time filter>> to *Last 7 days*.
+. Change the  set-time-filter, time filter>> to *Last 7 days*.
 +
 [role="screenshot"]
 image::images/tutorial-discover-2.png[Time filter menu with Last 7 days filter configured]
 
-. To view the sales orders for women's clothing that are $60 or more, use the <<kuery-query,*KQL*>> search field:
+. To view the sales orders for women's clothing that are $60 or more, use the  kuery-query,*KQL*>> search field:
 +
 [source,text]
 products.taxless_price >= 60 and category : Women's Clothing
@@ -138,10 +138,10 @@ image::images/dashboard_sampleDataAddFilter_7.15.0.png[The [eCommerce] Revenue D
 [[quick-start-whats-next]]
 == What's next?
 
-*Add your own data.* Ready to add your own data? Go to {observability-guide}/ingest-logs-metrics-uptime.html[Ingest logs, metrics, and uptime data with {agent}], or go to <<connect-to-elasticsearch,Add data to {kib}>> and learn about all the other ways you can add data.
+*Add your own data.* Ready to add your own data? Go to {observability-guide}/ingest-logs-metrics-uptime.html[Ingest logs, metrics, and uptime data with {agent}], or go to Add data to {kib} and learn about all the other ways you can add data.
 
-*Explore your own data in Discover.* Ready to learn more about exploring your data in *Discover*? Go to <<discover, Discover>>.
+*Explore your own data in Discover.* Ready to learn more about exploring your data in *Discover*? Go to  discover, Discover>>.
 
-*Create a dashboard with your own data.* Ready to learn more about analyzing your data in *Dashboard*? Go to <<dashboard, Dashboard>>.
+*Create a dashboard with your own data.* Ready to learn more about analyzing your data in *Dashboard*? Go to  dashboard, Dashboard>>.
 
 *Try out the {ml-features}.* Ready to analyze the sample data sets and generate models for its patterns of behavior? Go to {ml-docs}/ml-getting-started.html[Getting started with {ml}].

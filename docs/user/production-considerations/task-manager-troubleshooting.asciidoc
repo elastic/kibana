@@ -6,7 +6,7 @@
 <titleabbrev>Troubleshooting</titleabbrev>
 ++++
 
-Task Manager is used by a wide range of services in {kib}, such as <<alerting-production-considerations, Alerting>>, Actions, Reporting, and Telemetry.
+Task Manager is used by a wide range of services in {kib}, such as  alerting-production-considerations, Alerting>>, Actions, Reporting, and Telemetry.
 Unexpected behavior in these services might be a downstream issue originating in Task Manager.
 
 This page describes how to resolve common problems you might encounter with Task Manager.
@@ -26,9 +26,9 @@ Tasks are scheduled to run every 2 seconds, but seem to be running late.
 
 *Solution*:
 
-Task Manager polls for tasks at the cadence specified by the <<task-manager-settings,`xpack.task_manager.poll_interval`>> setting, which is 3 seconds by default. This means that a task could run late if it uses a schedule that is smaller than this setting.
+Task Manager polls for tasks at the cadence specified by the  task-manager-settings,`xpack.task_manager.poll_interval`>> setting, which is 3 seconds by default. This means that a task could run late if it uses a schedule that is smaller than this setting.
 
-You can adjust the <<task-manager-settings,`xpack.task_manager.poll_interval`>> setting.  However, this will add additional load to both {kib} and {es} instances in the cluster, as they will perform more queries.
+You can adjust the  task-manager-settings,`xpack.task_manager.poll_interval`>> setting.  However, this will add additional load to both {kib} and {es} instances in the cluster, as they will perform more queries.
 
 [float]
 [[task-manager-health-tasks-run-late]]
@@ -52,29 +52,29 @@ For example:
 * If drift is caused by *an excess of concurrent tasks* relative to the available capacity of {kib} instances in the cluster, expand the throughput of the cluster.
 * If drift is caused by *long running tasks* that overrun their scheduled cadence,  reconfigure the tasks in question.
 
-Refer to <<task-manager-diagnosing-root-cause>> for step-by-step instructions on identifying the correct resolution.
+Refer to  task-manager-diagnosing-root-cause>> for step-by-step instructions on identifying the correct resolution.
 
 _Drift_ is often addressed by adjusting the scaling the deployment to better suit your usage.
-For details on scaling Task Manager, see <<task-manager-scaling-guidance>>.
+For details on scaling Task Manager, see  task-manager-scaling-guidance>>.
 
 [[task-manager-diagnosing-root-cause]]
 ==== Diagnose a root cause for drift
 
 experimental[]
 
-The following guide helps you identify a root cause for _drift_ by making sense of the output from the <<task-manager-health-monitoring>> endpoint.
+The following guide helps you identify a root cause for _drift_ by making sense of the output from the  task-manager-health-monitoring>> endpoint.
 
 By analyzing the different sections of the output, you can evaluate different theories that explain the drift in a deployment.
 
-* <<task-manager-health-evaluate-the-configuration,Evaluate the Configuration>>
-** <<task-manager-theory-reduced-polling-rate,{kib} is configured to poll for tasks at a reduced rate>>
-* <<task-manager-health-evaluate-the-runtime,Evaluate the Runtime>>
-** <<task-manager-theory-actual-polling-frequently,{kib} is not actually polling as frequently as it should>>
-** <<task-manager-theory-insufficient-throughput,{kib} is polling as frequently as it should, but that isn't often enough to keep up with the workload>>
-** <<task-manager-theory-long-running-tasks,Tasks run for too long, overrunning their schedule>>
-** <<task-manager-theory-high-fail-rate,Tasks take multiple attempts to succeed>>
-* <<task-manager-health-evaluate-the-workload,Evaluate the Workload>>
-* <<task-manager-health-evaluate-the-capacity-estimation,Evaluate the Capacity Estimation>>
+*  task-manager-health-evaluate-the-configuration,Evaluate the Configuration>>
+**  task-manager-theory-reduced-polling-rate,{kib} is configured to poll for tasks at a reduced rate>>
+*  task-manager-health-evaluate-the-runtime,Evaluate the Runtime>>
+**  task-manager-theory-actual-polling-frequently,{kib} is not actually polling as frequently as it should>>
+**  task-manager-theory-insufficient-throughput,{kib} is polling as frequently as it should, but that isn't often enough to keep up with the workload>>
+**  task-manager-theory-long-running-tasks,Tasks run for too long, overrunning their schedule>>
+**  task-manager-theory-high-fail-rate,Tasks take multiple attempts to succeed>>
+*  task-manager-health-evaluate-the-workload,Evaluate the Workload>>
+*  task-manager-health-evaluate-the-capacity-estimation,Evaluate the Capacity Estimation>>
 
 Retrieve the latest monitored health stats of a {kib} instance Task Manager:
 
@@ -344,7 +344,7 @@ You can infer from this output that the {kib} instance only polls for work once 
 There are two possible reasons for such a configuration:
 
 * These settings have been configured manually, which can be resolved by reconfiguring these settings.
-For details, see <<task-manager-settings-kb, Task Manager Settings>>.
+For details, see  task-manager-settings-kb, Task Manager Settings>>.
 
 * {kib} has reduced its own throughput in reaction to excessive load on the {es} cluster.
 +
@@ -442,7 +442,7 @@ You can infer from this output that Task Manager is not healthy, as the failure 
 Analyzing the {kib} Server Log should reveal the underlying issue causing the high error rate and capacity issues.
 
 The high `NoAvailableWorkers` rate of 20% suggests that there are many tasks running for durations longer than the `poll_interval`.
-For details on analyzing long task execution durations, see the <<task-manager-theory-long-running-tasks,long running tasks>> theory.
+For details on analyzing long task execution durations, see the  task-manager-theory-long-running-tasks,long running tasks>> theory.
 
 [[task-manager-theory-insufficient-throughput]]
 *Theory*:
@@ -501,14 +501,14 @@ This assessment is based on the following:
 * The `p90` of `load` is at 100%, and `p50` is also quite high at 80%. This means that there is little to no room for maneuvering, and a spike of work might cause Task Manager to exceed its capacity. 
 * Tasks run soon after their scheduled time, which is to be expected. A `poll_interval` of `3000` milliseconds would often experience a consistent drift of somewhere between `0` and `3000` milliseconds. A `p50 drift` of `2999` suggests that there is room for improvement, and you could benefit from a higher throughput.
 
-For details on achieving higher throughput by adjusting your scaling strategy, see <<task-manager-scaling-guidance>>.
+For details on achieving higher throughput by adjusting your scaling strategy, see  task-manager-scaling-guidance>>.
 
 [[task-manager-theory-long-running-tasks]]
 *Theory*:
 Tasks run for too long, overrunning their schedule
 
 *Diagnosis*:
-The <<task-manager-theory-insufficient-throughput,Insufficient throughput to handle the scheduled workload>> theory analyzed a hypothetical scenario where both drift and load were unusually high.
+The  task-manager-theory-insufficient-throughput,Insufficient throughput to handle the scheduled workload>> theory analyzed a hypothetical scenario where both drift and load were unusually high.
 
 Suppose an alternate scenario, where `drift` is high, but `load` is not, such as the following:
 
@@ -690,8 +690,8 @@ Keep in mind that these stats give you a glimpse at a moment in time, and even t
 
 Predicting the required throughput a deployment might need to support Task Manager is difficult, as features can schedule an unpredictable number of tasks at a variety of scheduled cadences.
 
-<<task-manager-health-monitoring>> provides statistics that make it easier to monitor the adequacy of the existing throughput.
-By evaluating the workload, the required throughput can be estimated, which is used when following the Task Manager <<task-manager-scaling-guidance>>.
+ task-manager-health-monitoring>> provides statistics that make it easier to monitor the adequacy of the existing throughput.
+By evaluating the workload, the required throughput can be estimated, which is used when following the Task Manager  task-manager-scaling-guidance>>.
 
 Evaluating the preceding health stats in the previous example, you see the following output under `stats.workload.value`:
 
@@ -753,7 +753,7 @@ Evaluating the preceding health stats in the previous example, you see the follo
 <7> There are no overdue non-recurring tasks. Non-recurring tasks are usually scheduled to execute immediately, so overdue non-recurring tasks are often a symptom of a congested system.
 <8> There are no overdue tasks, which means that all tasks that *should* have run by now *have* run.
 <9> This histogram shows the tasks scheduled to run throughout the upcoming 20 polling cycles. The histogram represents the entire deployment, rather than just this {kib} instance.
-<10> The capacity required to handle the recurring tasks in the system. These are buckets, rather than aggregated sums, and we recommend <<task-manager-health-evaluate-the-capacity-estimation,evaluating the Capacity Estimation>> section, rather than evaluating these buckets  yourself.
+<10> The capacity required to handle the recurring tasks in the system. These are buckets, rather than aggregated sums, and we recommend  task-manager-health-evaluate-the-capacity-estimation,evaluating the Capacity Estimation>> section, rather than evaluating these buckets  yourself.
 
 The `workload` section summarizes the work load across the cluster, listing the tasks in the system, their types, schedules, and current status.
 
@@ -844,7 +844,7 @@ These rough calculations give you a lower bound to the required throughput, whic
 
 Given these inferred attributes, it would be safe to assume that a single {kib} instance with default settings **would not** provide the required throughput. It is possible that scaling horizontally by adding a couple more {kib} instances will.
 
-For details on scaling Task Manager, see <<task-manager-scaling-guidance>>.
+For details on scaling Task Manager, see  task-manager-scaling-guidance>>.
 
 
 [[task-manager-health-evaluate-the-capacity-estimation]]
@@ -852,9 +852,9 @@ For details on scaling Task Manager, see <<task-manager-scaling-guidance>>.
 
 Task Manager is constantly evaluating its runtime operations and workload. This enables Task Manager to make rough estimates about the sufficiency of its capacity.
 
-As the name suggests, these are estimates based on historical data and should not be used as predictions. These estimations should be evaluated alongside the detailed <<task-manager-health-monitoring>> stats before making changes to infrastructure. These estimations assume all {kib} instances are configured identically.
+As the name suggests, these are estimates based on historical data and should not be used as predictions. These estimations should be evaluated alongside the detailed  task-manager-health-monitoring>> stats before making changes to infrastructure. These estimations assume all {kib} instances are configured identically.
 
-We recommend using these estimations when following the Task Manager <<task-manager-scaling-guidance>>.
+We recommend using these estimations when following the Task Manager  task-manager-scaling-guidance>>.
 
 Evaluating the health stats in the previous example, you can see the following output under `stats.capacity_estimation.value`:
 
@@ -936,7 +936,7 @@ Evaluating by these estimates, we can infer some interesting attributes of our s
 
 You can infer from these estimates that the capacity in the current system is insufficient and at least one additional {kib} instance is required to keep up with the workload.
 
-For details on scaling Task Manager, see <<task-manager-scaling-guidance>>.
+For details on scaling Task Manager, see  task-manager-scaling-guidance>>.
 
 [float]
 [[task-manager-cannot-operate-when-inline-scripts-are-disabled]]

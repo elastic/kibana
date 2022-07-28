@@ -77,7 +77,7 @@ view its fields and metrics, and optionally import it into {es}.
 In the *Integrations* view, search for *Upload a file*, and then drop your file on the target.
 
 By default, you can upload a file up to 100 MB. This value is configurable up to 1 GB in
-<<fileupload-maxfilesize,Advanced Settings>>.
+ fileupload-maxfilesize,Advanced Settings>>.
 
 NOTE: The upload feature is not intended for use as part of a repeated production
 process, but rather for the initial exploration of your data.
@@ -99,6 +99,6 @@ You can manage your roles, privileges, and spaces in **{stack-manage-app}**.
 === What's next?
 
 To take your investigation
-to a deeper level, use <<discover, **Discover**>> and quickly gain insight to your data:
+to a deeper level, use  discover, **Discover**>> and quickly gain insight to your data:
 search and filter your data, get information about the structure of the fields,
 and analyze your findings in a visualization.

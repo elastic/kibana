@@ -4,19 +4,19 @@
 Whether you want to fix a bug, implement a feature, add an improvement, or add APIs, the following sections will 
 guide you on the process. After committing your code, check out the link:https://www.elastic.co/community/contributor[Elastic Contributor Program] where you can earn points and rewards for your contributions.
 
-Read <<development-getting-started>> to get your environment up and running, then read <<development-best-practices>>.
+Read  development-getting-started>> to get your environment up and running, then read  development-best-practices>>.
 
-* <<development-tests>>
-* <<development-github>>
-* <<interpreting-ci-failures>>
-* <<ci-metrics>>
-* <<development-documentation>>
-* <<development-pull-request>>
-* <<kibana-issue-reporting>>
-* <<signing-contributor-agreement>>
-* <<kibana-localization>>
-* <<kibana-release-notes-process>>
-* <<kibana-linting>>
+*  development-tests>>
+*  development-github>>
+*  interpreting-ci-failures>>
+*  ci-metrics>>
+*  development-documentation>>
+*  development-pull-request>>
+*  kibana-issue-reporting>>
+*  signing-contributor-agreement>>
+*  kibana-localization>>
+*  kibana-release-notes-process>>
+*  kibana-linting>>
 
 [discrete]
 [[signing-contributor-agreement]]
@@ -28,7 +28,7 @@ Please make sure you have signed the [Contributor License Agreement](http://www.
 [[kibana-localization]]
 === Localization
 
-Read <<kibana-localization-best-practices>> for details on our localization practices.
+Read  kibana-localization-best-practices>> for details on our localization practices.
 
 Note that we cannot support accepting contributions to the translations from any source other than the translators we have engaged in doing the work.
 We are yet to develop a proper process to accept any contributed translations. We certainly appreciate that people care enough about the localization effort to want to help improve the quality. We aim to build out a more comprehensive localization process for the future and will notify you once Kibana supports external contributions. Still, for the time being, we cannot incorporate suggestions.

@@ -16,7 +16,7 @@ Returns information about the users who opened cases.
 
 You must have `read` privileges for the *Cases* feature in the *Management*,
 *{observability}*, or *Security* section of the
-<<kibana-feature-privileges,{kib} feature privileges>>, depending on the
+{kib} privileges, depending on the
 `owner` of the cases.
 
 === {api-description-title}

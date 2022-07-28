@@ -7,8 +7,8 @@
 ++++
 
 You can drill down into the status of your {es} cluster in {kib} by clicking
-the <<cluster-overview-page, Overview>>, <<nodes-page, Nodes>>, 
-<<indices-overview-page, Indices>> and <<logs-monitor-page,Logs>> links on the
+the  cluster-overview-page, Overview>>,  nodes-page, Nodes>>, 
+ indices-overview-page, Indices>> and  logs-monitor-page,Logs>> links on the
 *Stack Monitoring* page.
 
 [role="screenshot"]
@@ -132,4 +132,4 @@ If you click *Logs*, you can see the most recent logs for the cluster.
 
 TIP: By default, up to 10 log entries are shown. You can show up to 50 log
 entries by changing the
-<<monitoring-ui-settings,`monitoring.ui.elasticsearch.logFetchCount` setting>>.
+ monitoring-ui-settings,`monitoring.ui.elasticsearch.logFetchCount` setting>>.

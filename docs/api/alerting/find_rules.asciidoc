@@ -21,7 +21,7 @@ the `consumer` and `rule_type_id` of the rules you're seeking. For example, the
 features, *{observability}*, and *Security* features. To find rules associated
 with the *{stack-monitor-app}* feature, use the `monitoring_user` built-in role.
 
-For more details, refer to <<kibana-feature-privileges>>.
+For more details, refer to {kib} privileges.
 
 === {api-description-title}
 
@@ -51,7 +51,7 @@ default is 'OR'.
 response.
 
 `filter`::
-(Optional, string) A <<kuery-query, KQL>> string that you filter with an
+(Optional, string) A  kuery-query, KQL>> string that you filter with an
 attribute from your saved object. It should look like
 `savedObjectType.attributes.title: "myTitle"`. However, If you used a direct
 attribute of a saved object, such as `updatedAt`, you will have to define your

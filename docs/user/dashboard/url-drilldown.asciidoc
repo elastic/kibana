@@ -182,7 +182,7 @@ You can access the full list of variables available for the current panel and se
 |
 | context.panel.filters
 | List of {kib} filters applied to a panel. +
-Tip: Use in combination with <<helpers, rison>> helper for
+Tip: Use in combination with  helpers, rison>> helper for
 internal {kib} navigations with carrying over current filters.
 
 |
@@ -197,7 +197,7 @@ internal {kib} navigations with carrying over current filters.
 | context.panel.timeRange.from +
 context.panel.timeRange.to
 | Current time picker values. +
-Tip: Use in combination with <<helpers, date>> helper to format date.
+Tip: Use in combination with  helpers, date>> helper to format date.
 
 |
 | context.panel.indexPatternId +
@@ -257,7 +257,7 @@ Note:
 | event.from +
 event.to
 | `from` and `to` values of the selected range as numbers. +
-Tip: Consider using <<helpers, date>> helper for date formatting.
+Tip: Consider using  helpers, date>> helper for date formatting.
 
 |
 | event.key

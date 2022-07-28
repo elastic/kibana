@@ -6,7 +6,7 @@
 
 Enable a rule.
 
-WARNING: This API supports <<token-api-authentication>> only.
+WARNING: This API supports  token-api-authentication>> only.
 
 [[enable-rule-api-request]]
 === {api-request-title}
@@ -21,7 +21,7 @@ You must have `all` privileges for the appropriate {kib} features, depending on
 the `consumer` and `rule_type_id` of the rules you're enabling. For example, the
 *Management* > *Stack Rules* feature, *Analytics* > *Discover* and *{ml-app}*
 features, *{observability}*, and *Security* features. For more details, refer to
-<<kibana-feature-privileges>>.
+{kib} privileges.
 
 [[enable-rule-api-path-params]]
 === {api-path-parms-title}

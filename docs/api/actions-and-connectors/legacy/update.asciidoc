@@ -4,7 +4,7 @@
 <titleabbrev>Legacy Update connector</titleabbrev>
 ++++
 
-deprecated::[7.13.0,Use <<update-connector-api>> instead.]
+deprecated::[7.13.0,Use  update-connector-api>> instead.]
 
 Updates the attributes for an existing connector.
 
@@ -31,10 +31,10 @@ Updates the attributes for an existing connector.
   (Required, string) The new name of the connector.
 
 `config`::
-  (Required, object) The new connector configuration. Configuration properties vary depending on the connector type. For information about the configuration properties, refer to <<action-types,Action and connector types>>.
+  (Required, object) The new connector configuration. Configuration properties vary depending on the connector type. For information about the configuration properties, refer to Action and connector types.
 
 `secrets`::
-  (Required, object) The updated secrets configuration for the connector. Secrets properties vary depending on the connector type. For information about the secrets configuration properties, refer to <<action-types,Action and connector types>>.
+  (Required, object) The updated secrets configuration for the connector. Secrets properties vary depending on the connector type. For information about the secrets configuration properties, refer to Action and connector types.
 
 [[actions-and-connectors-legacy-api-update-codes]]
 ===== Response code

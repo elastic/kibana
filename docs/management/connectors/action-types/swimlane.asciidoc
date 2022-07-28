@@ -77,7 +77,7 @@ Config defines information for the connector type.
 
 Secrets defines sensitive information for the connector type.
 
-`apiToken`:: A string that corresponds to *API Token*. Should be stored in the <<creating-keystore, {kib} keystore>>.
+`apiToken`:: A string that corresponds to *API Token*. Should be stored in the  creating-keystore, {kib} keystore>>.
 
 [float]
 [[define-swimlane-ui]]

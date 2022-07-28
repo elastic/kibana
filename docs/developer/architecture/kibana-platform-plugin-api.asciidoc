@@ -343,5 +343,5 @@ functions can only access the APIs that are exposed _during_ that lifecycle.
 === Migrating legacy plugins
 
 In Kibana 7.10, support for legacy plugins was removed. See
-<<migrating-legacy-plugins>> for detailed information on how to convert existing
+ migrating-legacy-plugins>> for detailed information on how to convert existing
 legacy plugins to this new API.

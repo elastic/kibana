@@ -1,6 +1,6 @@
 [role="xpack"]
 [[canvas-present-workpad]]
-== Present your workpad
+=== Present your workpad
 
 When you are ready to present your workpad, use and enable the presentation options.
 
@@ -18,7 +18,7 @@ When you are ready to present your workpad, use and enable the presentation opti
 
 [float]
 [[zoom-in-out]]
-=== Use the zoom options
+==== Use the zoom options
 
 To get a closer look at a portion of your workpad, use the zoom options.
 
@@ -28,7 +28,7 @@ To get a closer look at a portion of your workpad, use the zoom options.
 
 [float]
 [[configure-auto-refresh-interval]]
-=== Change the auto-refresh interval
+==== Change the auto-refresh interval
 
 Change how often the data refreshes on your workpad.
 

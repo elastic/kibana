@@ -23,7 +23,7 @@ API token::  Jira API authentication token for HTTP Basic authentication.
 [[jira-connector-networking-configuration]]
 ==== Connector networking configuration
 
-Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+Use the  action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
 [float]
 [[Preconfigured-jira-configuration]]
@@ -50,7 +50,7 @@ Config defines information for the connector type.
 Secrets defines sensitive information for the connector type.
 
 `email`:: A string that corresponds to *Email*.
-`apiToken`:: A string that corresponds to *API Token*. Should be stored in the <<creating-keystore, {kib} keystore>>.
+`apiToken`:: A string that corresponds to *API Token*. Should be stored in the  creating-keystore, {kib} keystore>>.
 
 [float]
 [[define-jira-ui]]

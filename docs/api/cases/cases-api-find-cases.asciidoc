@@ -16,7 +16,7 @@ Retrieves a paginated subset of cases.
 
 You must have `read` privileges for the *Cases* feature in the *Management*,
 *{observability}*, or *Security* section of the
-<<kibana-feature-privileges,{kib} feature privileges>>, depending on the
+{kib} privileges, depending on the
 `owner` of the cases you're seeking.
 
 === {api-path-parms-title}
@@ -35,7 +35,7 @@ Defaults to `OR`.
 (Optional, array of strings) The fields in the entity to return in the response.
 
 `from`::
-(Optional, string) Returns only cases that were created after a specific date. The date must be specified as a <<kuery-query,KQL>> data range or date match expression.  preview:[]
+(Optional, string) Returns only cases that were created after a specific date. The date must be specified as a  kuery-query,KQL>> data range or date match expression.  preview:[]
 
 `owner`::
 (Optional, string or array of strings) A filter to limit the retrieved cases to
@@ -86,7 +86,7 @@ Defaults to `desc`.
 (Optional, string or array of strings) Filters the returned cases by tags.
 
 `to`::
-(Optional, string) Returns only cases that were created before a specific date. The date must be specified as a <<kuery-query,KQL>> data range or date match expression.  preview:[]
+(Optional, string) Returns only cases that were created before a specific date. The date must be specified as a  kuery-query,KQL>> data range or date match expression.  preview:[]
 
 === {api-response-codes-title}
 

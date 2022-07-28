@@ -4,7 +4,7 @@
 This section lists all prebuilt packs available for Osquery Manager. 
 Each pack is also available as a saved object, with the name `Pack: <pack-name>`.
 
-For more information, refer to <<osquery-prebuilt-packs>>.
+For more information, refer to  osquery-prebuilt-packs>>.
 
 
 |===

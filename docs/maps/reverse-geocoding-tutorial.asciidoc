@@ -1,6 +1,6 @@
 [role="xpack"]
 [[reverse-geocoding-tutorial]]
-== Map custom regions with reverse geocoding
+=== Map custom regions with reverse geocoding
 
 *Maps* comes with https://maps.elastic.co/#file[predefined regions] that allow you to quickly visualize regions by metrics. *Maps* also offers the ability to map your own regions. You can use any region data you'd like, as long as your source data contains an identifier for the corresponding region. 
 
@@ -21,10 +21,10 @@ image::maps/images/reverse-geocoding-tutorial/csa_regions_by_web_traffic.png[]
 
 
 [float]
-=== Step 1: Index web traffic data
+==== Step 1: Index web traffic data
 GeoIP is a common way of transforming an IP address to a longitude and latitude. GeoIP is roughly accurate on the city level globally and neighborhood level in selected countries. It’s not as good as an actual GPS location from your phone, but it’s much more precise than just a country, state, or province.
 
-You’ll use the <<get-started, web logs sample data set>> that comes with Kibana for this tutorial. Web logs sample data set has longitude and latitude. If your web log data does not contain longitude and latitude, use {ref}/geoip-processor.html[GeoIP processor] to transform an IP address into a {ref}/geo-point.html[geo_point] field.
+You’ll use the  get-started, web logs sample data set>> that comes with Kibana for this tutorial. Web logs sample data set has longitude and latitude. If your web log data does not contain longitude and latitude, use {ref}/geoip-processor.html[GeoIP processor] to transform an IP address into a {ref}/geo-point.html[geo_point] field.
 
 To install web logs sample data set:
 
@@ -33,7 +33,7 @@ To install web logs sample data set:
 
 
 [float]
-=== Step 2: Index Combined Statistical Area (CSA) regions
+==== Step 2: Index Combined Statistical Area (CSA) regions
 GeoIP level of detail is very useful for driving decision-making. For example, say you want to spin up a marketing campaign based on the locations of your users or show executive stakeholders which metro areas are experiencing an uptick of traffic.
 
 That kind of scale in the United States is often captured with what the Census Bureau calls the Combined Statistical Area (CSA). Combined Statistical Area is roughly equivalent with how people intuitively think of which urban area they live in. It does not necessarily coincide with state or city boundaries.
@@ -66,7 +66,7 @@ Looking at the map, you get a sense of what constitutes a metro area in the eyes
 image::maps/images/reverse-geocoding-tutorial/csa_regions.jpeg[]
 
 [float]
-=== Step 3: Reverse geocoding
+==== Step 3: Reverse geocoding
 To visualize CSA regions by web log traffic, the web log traffic must contain a CSA region identifier. You'll use {es} {ref}/enrich-processor.html[enrich processor] to add CSA region identifiers to the web logs sample data set. You can skip this step if your source data already contains region identifiers.
 
 . Open the main menu, then click *Dev Tools*.
@@ -142,7 +142,7 @@ PUT kibana_sample_data_logs/_settings
 
 . Open the main menu, and click *Discover*.
 . Set the data view to *kibana_sample_data_logs*.
-. Open the <<set-time-filter, time filter>>, and set the time range to the last 30 days.
+. Open the  set-time-filter, time filter>>, and set the time range to the last 30 days.
 . Scan through the list of *Available fields* until you find the `csa.GEOID` field. You can also search for the field by name.
 . Click image:images/reverse-geocoding-tutorial/add-icon.png[Add icon] to toggle the field into the document table.
 . Find the 'csa.NAME' field and add it to your document table.
@@ -153,7 +153,7 @@ Your web log data now contains `csa.GEOID` and `csa.NAME` fields from the matchi
 image::maps/images/reverse-geocoding-tutorial/discover_enriched_web_log.png[]
 
 [float]
-=== Step 4: Visualize Combined Statistical Area (CSA) regions by web traffic
+==== Step 4: Visualize Combined Statistical Area (CSA) regions by web traffic
 Now that our web traffic contains CSA region identifiers, you'll visualize CSA regions by web traffic.
 
 . Open the main menu, and click *Maps*.

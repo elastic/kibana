@@ -1,0 +1,11 @@
+[[console-request]]
+== Submit requests
+
+When you're ready to submit the request to {es}, click the
+green triangle.
+
+You can select multiple requests and submit them together.
+*Console* sends the requests to {es} one by one and shows the output
+in the response pane. Submitting multiple requests is helpful
+when you're debugging an issue or trying query
+combinations in multiple scenarios.

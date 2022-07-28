@@ -16,7 +16,7 @@ Pushes a case to an external service.
 
 You must have `all` privileges for the *Actions and Connectors* feature in the
 *Management* section of the
-<<kibana-feature-privileges,{kib} feature privileges>>. You must also have `all`
+{kib} privileges. You must also have `all`
 privileges for the *Cases* feature in the *Management*, *{observability}*, or
 *Security* section of the {kib} feature privileges, depending on the
 `owner` of the case you're pushing.
@@ -25,11 +25,11 @@ privileges for the *Cases* feature in the *Management*, *{observability}*, or
 
 `<case_id>`::
 (Required, string) The identifier for the case. To retrieve case IDs, use
-<<cases-api-find-cases>>.
+ cases-api-find-cases>>.
 
 `<connector_id>`::
 (Required, string) The identifier for the connector. To retrieve connector IDs,
-use <<cases-api-find-connectors>>.
+use  cases-api-find-connectors>>.
 
 <space_id>::
 (Optional, string) An identifier for the space. If it is not specified, the

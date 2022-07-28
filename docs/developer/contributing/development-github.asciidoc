@@ -135,4 +135,4 @@ Assuming you've successfully rebased and you're happy with the code, you should 
 [discrete]
 === Creating a pull request
 
-See <<development-pull-request>> for the next steps on getting your code changes merged into {kib}.
+See  development-pull-request>> for the next steps on getting your code changes merged into {kib}.

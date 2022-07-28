@@ -457,7 +457,7 @@ router.get(
 
 In the Legacy Platform, the `ui/chrome` import contained APIs for a very
 wide range of features. In the {kib} Platform, some of these APIs have
-changed or moved elsewhere. See <<client-side-core-migration-table>>.
+changed or moved elsewhere. See  client-side-core-migration-table>>.
 
 ==== Updating an application navlink
 
@@ -1121,7 +1121,7 @@ const client = getService('es');
 
 Apart from the API format change, accessing the client from within a
 route handler did not change. As it was done for the legacy client, a
-preconfigured <<scoped-services, scoped client>> bound to an incoming request is accessible using
+preconfigured  scoped-services, scoped client>> bound to an incoming request is accessible using
 the `core` context provider:
 
 [source,typescript]
@@ -1144,7 +1144,7 @@ router.get(
 ==== Accessing the client from a collector's `fetch` method
 
 At the moment, the `fetch` method's context receives preconfigured
-<<scoped-services, scoped clients>> for Elasticsearch and SavedObjects.
+ scoped-services, scoped clients>> for Elasticsearch and SavedObjects.
 To help in the transition, both, the legacy (`callCluster`) and new clients are provided,
 but we strongly discourage using the deprecated legacy ones for any new implementation.
 

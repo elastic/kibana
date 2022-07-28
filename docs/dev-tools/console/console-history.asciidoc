@@ -1,0 +1,6 @@
+[[console-history]]
+== Get your request history
+
+*Console* maintains a list of the last 500 requests that {es} successfully executed.
+To view your most recent requests, click *History*. If you select a request
+and click *Apply*, {kib} adds it to the editor at the current cursor position.

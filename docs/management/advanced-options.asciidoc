@@ -21,7 +21,7 @@ image::images/settings-read-only-badge.png[Example of Advanced Settings Manageme
 
 To add the privilege, open the main menu, then click *Stack Management > Roles*.
 
-For more information on granting access to {kib}, refer to <<xpack-security-authorization>>.
+For more information on granting access to {kib}, refer to Granting access to {kib}.
 
 [float]
 [[kibana-settings-reference]]
@@ -102,23 +102,23 @@ Set this property to `true` to make filters have a global state (be pinned) by
 default.
 
 [[format-bytes-defaultpattern]]`format:bytes:defaultPattern`::
-The default <<numeral, numeral pattern>> format for the "bytes" format.
+The default  numeral, numeral pattern>> format for the "bytes" format.
 
 [[format-currency-defaultpattern]]`format:currency:defaultPattern`::
-The default <<numeral, numeral pattern>> format for the "currency" format.
+The default  numeral, numeral pattern>> format for the "currency" format.
 
 [[format-defaulttypemap]]`format:defaultTypeMap`::
 A map of the default format name for each field type. Field types that are not
 explicitly mentioned use "\_default_".
 
 [[format-number-defaultlocale]]`format:number:defaultLocale`::
-The <<numeral, numeral pattern>> locale.
+The  numeral, numeral pattern>> locale.
 
 [[format-number-defaultpattern]]`format:number:defaultPattern`::
-The <<numeral, numeral pattern>> for the "number" format.
+The  numeral, numeral pattern>> for the "number" format.
 
 [[format-percent-defaultpattern]]`format:percent:defaultPattern`::
-The <<numeral, numeral pattern>> for the "percent" format.
+The  numeral, numeral pattern>> for the "percent" format.
 
 [[histogram-bartarget]]`histogram:barTarget`::
 When date histograms use the `auto` interval, Kibana attempts to generate this
@@ -163,9 +163,9 @@ The number of objects to show on each page of the list of saved objects. The
 default is 5.
 
 [[search-querylanguage]]`search:queryLanguage`::
-The query language to use in the query bar. Choices are <<kuery-query, KQL>>, a
+The query language to use in the query bar. Choices are  kuery-query, KQL>>, a
 language built specifically for {kib}, and the
-<<lucene-query, Lucene query syntax>>.
+ lucene-query, Lucene query syntax>>.
 
 [[shortdots-enable]]`shortDots:enable`::
 Set this property to `true` to shorten long field names in visualizations. For
@@ -215,7 +215,7 @@ When enabled, provides access to the experimental *Labs* features for *Canvas*.
 
 [[labs-dashboard-defer-below-fold]]`labs:dashboard:deferBelowFold`::
 When enabled, the panels that appear below the fold are loaded when they become visible on the dashboard.
-_Below the fold_ refers to panels that are not immediately visible when you open a dashboard, but become visible as you scroll. For additional information, refer to <<dashboard-troubleshooting,Improve dashboard loading time>>.
+_Below the fold_ refers to panels that are not immediately visible when you open a dashboard, but become visible as you scroll. For additional information, refer to  dashboard-troubleshooting,Improve dashboard loading time>>.
 
 [[labs-dashboard-enable-ui]]`labs:dashboard:enable_ui`::
 When enabled, provides access to the experimental *Labs* features for *Dashboard*.
@@ -261,8 +261,8 @@ the `xpack.banners.backgroundColor` configuration property.
 
 [horizontal]
 [[xpackdashboardmode-roles]]`xpackDashboardMode:roles`::
-**Deprecated. Use <<kibana-feature-privileges,feature privileges>> instead.**
-The roles that belong to <<xpack-dashboard-only-mode, dashboard only mode>>.
+**Deprecated. Use <{kib} privileges instead.**
+The roles that belong to  xpack-dashboard-only-mode, dashboard only mode>>.
 
 [float]
 [[kibana-discover-settings]]

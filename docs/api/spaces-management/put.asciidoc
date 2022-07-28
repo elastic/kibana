@@ -24,7 +24,7 @@ experimental[] Update an existing {kib} space.
   (Optional, string) The description for the space.
 
 `disabledFeatures`::
-  (Optional, string array) The list of disabled features for the space. To get a list of available feature IDs, use the <<features-api-get, Features API>>.
+  (Optional, string array) The list of disabled features for the space. To get a list of available feature IDs, use the  features-api-get, Features API>>.
 
 `initials`::
   (Optional, string) Specifies the initials shown in the space avatar. By default, the initials are automatically generated from the space name. Initials must be 1 or 2 characters.

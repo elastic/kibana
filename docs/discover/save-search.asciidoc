@@ -1,5 +1,5 @@
 [[save-open-search]]
-== Save a search for reuse
+=== Save a search for reuse
 
 A saved search is a convenient way to reuse a search
 that you've created in *Discover*.
@@ -9,20 +9,20 @@ and can also serve as a foundation for building visualizations.
 A saved search stores the query text, filters, and
 current view of *Discover*, including the columns selected in the document table,
 the sort order, and the {data-source}.
-Saved searches are different from <<save-load-delete-query,saved queries>>, which
+Saved searches are different from  save-load-delete-query,saved queries>>, which
 are for storing query text and are available in any app with a query bar.
 
 [role="xpack"]
 [[discover-read-only-access]]
 [float]
-=== Read-only access
+==== Read-only access
 If you don't have sufficient privileges to save searches, the following indicator is
-displayed and the *Save* button is not visible. For more information, refer to <<xpack-security-authorization>>.
+displayed and the *Save* button is not visible. For more information, refer to Granting access to {kib}.
 
 [role="screenshot"]
 image::discover/images/read-only-badge.png[Example of Discover's read only access indicator in Kibana's header]
 [float]
-=== Save a search
+==== Save a search
 
 . Once you've created a search worth saving in *Discover*, click *Save* in the toolbar.
 . Enter a name for the search and click *Save*.

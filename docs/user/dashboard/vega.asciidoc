@@ -1,11 +1,11 @@
 [[vega]]
-=== Vega
+==== Vega
 
 *Vega* and *Vega-Lite* are both grammars for creating custom visualizations. They are recommended for advanced users who are comfortable writing {es} queries manually.
 *Vega-Lite* is a good starting point for users who are new to both grammars, but they are not compatible.
 
 *Vega* and *Vega-Lite* panels can display one or more data sources, including {es}, Elastic Map Service,
-URL, or static data, and support <<reference-for-kibana-extensions,{kib} extensions>> that allow you to embed the panels on your dashboard and add interactive tools.
+URL, or static data, and support  reference-for-kibana-extensions,{kib} extensions>> that allow you to embed the panels on your dashboard and add interactive tools.
 
 Use *Vega* or *Vega-Lite* when you want to create visualizations with:
 
@@ -57,7 +57,7 @@ Open *Vega-Lite* and change the time range.
 +
 A pre-populated line chart displays the total number of documents. 
 
-. Make sure the <<set-time-filter,time filter>> is *Last 7 days*.
+. Make sure the  set-time-filter,time filter>> is *Last 7 days*.
 
 [float]
 [[vega-tutorial-create-a-stacked-area-chart]]
@@ -84,7 +84,7 @@ To add the data fields from the *kibana_sample_data_ecommerce* {data-source}, re
 
 To create the stacked area chart, add the aggregations. 
 
-To check your work, open and use the <<console-kibana,*Console*>> on a separate browser tab.
+To check your work, open and use the  console-kibana,*Console*>> on a separate browser tab.
 
 . Open {kib} on a new tab. 
 
@@ -213,7 +213,7 @@ In the *Vega-Lite* spec, enter the aggregations, then click *Update*:
   }
 ```
 
-For information about the queries, refer to <<vega-queries, reference for writing {es} queries in Vega>>. 
+For information about the queries, refer to  vega-queries, reference for writing {es} queries in Vega>>. 
 
 [float]
 ===== Debug the warning

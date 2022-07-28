@@ -17,7 +17,7 @@ With Osquery in {kib}, you can:
  * Save queries and build a library of queries for specific use cases
 
 Osquery in {kib} is powered by the *Osquery Manager* integration.
-For information on how to set up *Osquery Manager*, refer to <<manage-osquery-integration>>.
+For information on how to set up *Osquery Manager*, refer to  manage-osquery-integration>>.
 
 [float]
 == Required privileges
@@ -48,7 +48,7 @@ and you'll get suggestions for agents by name, ID, platform, and policy.
 [role="screenshot"]
 image::images/enter-query.png[Select saved query dropdown name showing query name and description]
 
-. (Optional) Expand the **Advanced** section to view or set <<osquery-map-fields,mapped ECS fields>> included in the results from the live query.
+. (Optional) Expand the **Advanced** section to view or set  osquery-map-fields,mapped ECS fields>> included in the results from the live query.
 
 . Click **Submit**.
 
@@ -56,7 +56,7 @@ image::images/enter-query.png[Select saved query dropdown name showing query nam
 or to the drag-and-drop *Lens* editor to create visualizations.
 . To view more information about the request, such as failures, open the *Status* tab.
 . To save the query for future use, click *Save for later* and define the ID,
-description, and other <<osquery-manage-query,details>>.
+description, and other  osquery-manage-query,details>>.
 
 [float]
 [[osquery-view-history]]
@@ -67,7 +67,7 @@ Each query has the following options:
 
 * Click image:images/play-icon.png[Right-pointing triangle] to rerun a query.
 
-* Click image:images/table-icon.png[Table icon] to view the query <<osquery-results,results>> and <<osquery-status,status>>.
+* Click image:images/table-icon.png[Table icon] to view the query  osquery-results,results>> and  osquery-status,status>>.
 +
 [role="screenshot"]
 image::images/live-query-check-results.png[Results of OSquery]
@@ -98,7 +98,7 @@ You can schedule packs to run for one or more agent policies. When scheduled, qu
 * To add a query to the pack, click *Add query*, and then either add a saved query or enter a new query.
 Each query must include a unique query ID and the interval at which it should run.
 Optionally, set the minimum Osquery version and platform,
-or <<osquery-map-fields,map ECS fields>>. When you add a saved query to a pack, this adds a copy of the query. A connection is not maintained between saved queries and packs.
+or  osquery-map-fields,map ECS fields>>. When you add a saved query to a pack, this adds a copy of the query. A connection is not maintained between saved queries and packs.
 
 * To upload queries from a `.conf` query pack, drag the pack to the drop zone under the query table. To explore the community packs that Osquery publishes, click *Example packs*.
 
@@ -118,7 +118,7 @@ If there are errors, expand the row to view the details, including an option to 
 [role="screenshot"]
 image::images/scheduled-pack.png[Shows queries in the pack and details about each query, including the last time it ran, how many results were returned, the number of agents it ran against, and if there are errors]
 
-. View scheduled query results in <<discover,*Discover*>> or the drag-and-drop <<lens,*Lens*>> editor.
+. View scheduled query results in  discover,*Discover*>> or the drag-and-drop  lens,*Lens*>> editor.
 
 [float]
 [[osquery-manage-query]]
@@ -140,7 +140,7 @@ Once you save a query, you can only edit it from the *Saved queries* tab:
 
 * The SQL query (required). Osquery supports multi-line queries.
 
-* The <<osquery-map-fields,ECS fields>> to populate when the query is run (optional). These fields are also copied in when you add this query to a pack.
+* The  osquery-map-fields,ECS fields>> to populate when the query is run (optional). These fields are also copied in when you add this query to a pack.
 
 * The defaults to set when you add the query to a pack.
 
@@ -184,7 +184,7 @@ Once added, you can then activate and schedule the packs.
 
 You can modify the scheduled agent policies for a prebuilt pack, but you cannot edit queries in the pack. To edit the queries, you must first create a copy of the pack.
 
-For information about the prebuilt packs that are available, refer to <<prebuilt-packs>>.
+For information about the prebuilt packs that are available, refer to  prebuilt-packs>>.
 
 [float]
 [[load-prebuilt-packs]]

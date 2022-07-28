@@ -2,7 +2,7 @@
 [[apm-spaces]]
 === Control access to APM data
 
-Starting in version 8.2.0, the APM app is <<xpack-spaces,{kib} Space>> aware.
+Starting in version 8.2.0, the APM app is  xpack-spaces,{kib} Space>> aware.
 This allows you to separate your data--and access to that data--by team, use case, service environment,
 or any other filter that you choose.
 
@@ -28,7 +28,7 @@ This guide assumes that you:
 * Have configured the `environment` variable in your APM agent configurations.
 This variable sets the `service.environment` field in APM documents.
 You should have documents where `service.environment: production` and `service.environment: staging`.
-If this field is empty, see <<environment-selector,service environment filter>> to learn how to set this value.
+If this field is empty, see  environment-selector,service environment filter>> to learn how to set this value.
 
 [float]
 ==== Step 1: Create filtered aliases
@@ -251,7 +251,7 @@ Next, you'll need to create a {Kib} space for each service environment.
 To create these spaces, navigate to **Stack Management** > **Spaces** > **Create a space**.
 For this guide, we've created two Kibana spaces, one named `production` and one named `staging`.
 
-See <<spaces-managing>> for more information on creating a space.
+See  spaces-managing>> for more information on creating a space.
 
 [float]
 ==== Step 3: Update APM index settings in each space
@@ -372,7 +372,7 @@ The last thing to do is assign users to the newly created roles above.
 Users will only have access to the data within the spaces that they are granted.
 
 For information on how to create users and assign them roles with the {kib} UI,
-see <<tutorial-secure-access-to-kibana>>.
+see Secure access to {kib}.
 
 Alternatively, you can use the
 {es} {ref}/security-api-put-user.html[Create or update users API].

@@ -20,7 +20,7 @@ image::user/ml/images/ml-data-visualizer-sample.jpg[{data-viz} for sample flight
 You can also upload a CSV, NDJSON, or log file. The *{data-viz}*
 identifies the file format and field mappings. You can then optionally import
 that data into an {es} index. To change the default file size limit, see
-<<kibana-general-settings, fileUpload:maxFileSize advanced settings>>.
+ kibana-general-settings, fileUpload:maxFileSize advanced settings>>.
 
 If {stack-security-features} are enabled, users must have the necessary
 privileges to use {ml-features}. Refer to

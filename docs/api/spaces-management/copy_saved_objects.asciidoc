@@ -11,7 +11,7 @@ It also allows you to automatically copy related objects, so when you copy a `da
 associated visualizations, {data-sources}, and saved searches, as required.
 
 You can request to overwrite any objects that already exist in the target space if they share an ID, or you can use the
-<<spaces-api-resolve-copy-saved-objects-conflicts, Resolve copy saved objects conflicts API>> to do this on a per-object basis.
+ spaces-api-resolve-copy-saved-objects-conflicts, Resolve copy saved objects conflicts API>> to do this on a per-object basis.
 
 [[spaces-api-copy-saved-objects-request]]
 ==== {api-request-title}
@@ -101,7 +101,7 @@ NOTE: One object may result in multiple errors, which requires separate steps to
 =======
       `type`::::
         (string) The type of error. For example, `conflict`, `ambiguous_conflict`, `missing_references`, `unsupported_type`, or `unknown`.
-        Errors marked as `conflict` or `ambiguous_conflict` may be resolved by using the <<spaces-api-resolve-copy-saved-objects-conflicts,
+        Errors marked as `conflict` or `ambiguous_conflict` may be resolved by using the  spaces-api-resolve-copy-saved-objects-conflicts,
         Resolve copy saved objects conflicts API>>.
       `destinationId`::::
         (Optional, string) The destination ID that was used during the copy attempt. This is only present on `conflict` error types.
@@ -115,7 +115,7 @@ NOTE: One object may result in multiple errors, which requires separate steps to
     (Optional, array) Indicates successfully copied objects, with any applicable metadata.
 +
 NOTE: Objects are created when all resolvable errors are addressed, including conflict and missing references errors. For more information,
-refer to the <<spaces-api-copy-saved-objects-example,examples>>.
+refer to the  spaces-api-copy-saved-objects-example,examples>>.
 
 =====
 [[spaces-api-copy-saved-objects-example]]
@@ -396,7 +396,7 @@ describes the other workpads which caused the conflict. When a shareable object 
 where an object of the same origin exists, the conflict error occurs. To resolve, pick a destination object to overwrite, or skip the
 object.
 
-Objects are created when the error is resolved using the <<spaces-api-resolve-copy-saved-objects-conflicts-example-1,Resolve copy conflicts
+Objects are created when the error is resolved using the  spaces-api-resolve-copy-saved-objects-conflicts-example-1,Resolve copy conflicts
 API>>.
 
 [[spaces-api-copy-saved-objects-example-4]]
@@ -472,5 +472,5 @@ The API returns the following:
 
 The result indicates an unsuccessful copy because the visualization resulted in a missing references error.
 
-Objects are created when the errors are resolved using the <<spaces-api-resolve-copy-saved-objects-conflicts-example-2,Resolve copy
+Objects are created when the errors are resolved using the  spaces-api-resolve-copy-saved-objects-conflicts-example-2,Resolve copy
 conflicts API>>.

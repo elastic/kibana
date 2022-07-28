@@ -9,19 +9,19 @@
 
 {kib} supports the following authentication mechanisms:
 
-- <<multiple-authentication-providers>>
-- <<basic-authentication>>
-- <<token-authentication>>
-- <<pki-authentication>>
-- <<saml>>
-- <<oidc>>
-- <<kerberos>>
-- <<anonymous-authentication>>
-- <<http-authentication>>
-- <<embedded-content-authentication>>
+-  multiple-authentication-providers>>
+-  basic-authentication>>
+-  token-authentication>>
+-  pki-authentication>>
+-  saml>>
+-  oidc>>
+-  kerberos>>
+-  anonymous-authentication>>
+-  http-authentication>>
+-  embedded-content-authentication>>
 
 
-For an introduction to {kib}'s security features, including the login process, refer to <<tutorial-secure-access-to-kibana>>.
+For an introduction to {kib}'s security features, including the login process, refer to Secure access to {kib}.
 
 [[multiple-authentication-providers]]
 ==== Multiple authentication providers
@@ -63,7 +63,7 @@ xpack.security.authc.providers:
 [role="screenshot"]
 image::security/images/kibana-login.png["Login Selector UI"]
 
-For more information, refer to <<authentication-security-settings, authentication security settings>>.
+For more information, refer to  authentication-security-settings, authentication security settings>>.
 
 TIP: If you have multiple authentication providers configured, you can use the `auth_provider_hint` URL query parameter to create a deep
 link to any provider and bypass the Login Selector UI. Using the `kibana.yml` above as an example, you can add `?auth_provider_hint=basic1`
@@ -99,7 +99,7 @@ xpack.security.authc.providers:
     order: 0
 --------------------------------------------------------------------------------
 
-Switching to the token authentication provider from basic one will make {kib} to reject requests from applications like `curl` that usually use `Authorization` request header with the `Basic` scheme for authentication. If you still want to support such applications you'll have to either switch to using `Bearer` scheme with the tokens {ref}/security-api-get-token.html[created by {es} token API] or add `Basic` scheme to the list of supported schemes for the <<http-authentication,HTTP authentication>>.
+Switching to the token authentication provider from basic one will make {kib} to reject requests from applications like `curl` that usually use `Authorization` request header with the `Basic` scheme for authentication. If you still want to support such applications you'll have to either switch to using `Bearer` scheme with the tokens {ref}/security-api-get-token.html[created by {es} token API] or add `Basic` scheme to the list of supported schemes for the  http-authentication,HTTP authentication>>.
 
 [[pki-authentication]]
 ==== Public key infrastructure (PKI) authentication
@@ -117,7 +117,7 @@ access tokens. All subsequent requests to {es} APIs on behalf of users will be a
 
 Prior to configuring {kib}, ensure that the PKI realm is enabled in {es} and configured to permit delegation. See {ref}/configuring-pki-realm.html[Configuring a PKI realm] for more information.
 
-To enable the PKI authentication provider in {kib}, you must first <<configuring-tls,configure {kib} to encrypt communications between the browser and {kib} server>>. You must also enable TLS client authentication and include the certificate authority (CA) used to sign client certificates into a list of CAs trusted by {kib} in your `kibana.yml`:
+To enable the PKI authentication provider in {kib}, you must first  configuring-tls,configure {kib} to encrypt communications between the browser and {kib} server>>. You must also enable TLS client authentication and include the certificate authority (CA) used to sign client certificates into a list of CAs trusted by {kib} in your `kibana.yml`:
 
 NOTE: You can configure only one PKI provider per {kib} instance.
 
@@ -199,7 +199,7 @@ xpack.security.authc.providers:
 
 Basic authentication is supported _only_ if the `basic` authentication provider is explicitly declared in `xpack.security.authc.providers` setting, in addition to `saml`.
 
-To support basic authentication for the applications like `curl` or when the `Authorization: Basic base64(username:password)` HTTP header is included in the request (for example, by reverse proxy), add `Basic` scheme to the list of supported schemes for the <<http-authentication,HTTP authentication>>.
+To support basic authentication for the applications like `curl` or when the `Authorization: Basic base64(username:password)` HTTP header is included in the request (for example, by reverse proxy), add `Basic` scheme to the list of supported schemes for the  http-authentication,HTTP authentication>>.
 
 [[oidc]]
 ==== OpenID Connect single sign-on
@@ -253,19 +253,19 @@ xpack.security.authc.providers:
 
 Basic authentication is supported _only_ if the `basic` authentication provider is explicitly declared in `xpack.security.authc.providers` setting, in addition to `oidc`.
 
-To support basic authentication for the applications like `curl` or when the `Authorization: Basic base64(username:password)` HTTP header is included in the request (for example, by reverse proxy), add `Basic` scheme to the list of supported schemes for the <<http-authentication,HTTP authentication>>.
+To support basic authentication for the applications like `curl` or when the `Authorization: Basic base64(username:password)` HTTP header is included in the request (for example, by reverse proxy), add `Basic` scheme to the list of supported schemes for the  http-authentication,HTTP authentication>>.
 
 [float]
 ==== Single sign-on provider details
 
-The following sections apply both to <<saml>> and <<oidc>>
+The following sections apply both to  saml>> and  oidc>>
 
 [float]
 ===== Access and refresh tokens
 
 Once the user logs in to {kib} with SSO, either using SAML or OpenID Connect, {es} issues access and refresh tokens
 that {kib} encrypts and stores as a part of its own session. This way, the user isn't redirected to the Identity Provider
-for every request that requires authentication. It also means that the {kib} session depends on the <<security-session-and-cookie-settings,
+for every request that requires authentication. It also means that the {kib} session depends on the  security-session-and-cookie-settings,
 `xpack.security.session.idleTimeout` and `xpack.security.session.lifespan`>> settings, and the user is automatically logged
 out if the session expires. An access token that is stored in the session can expire, in which case {kib} will
 automatically renew it with a one-time-use refresh token and store it in the same session.
@@ -372,15 +372,15 @@ xpack.security.authc.providers:
 One of the most popular use cases for anonymous access is when you embed {kib} into other applications and don't want to force your users to log in to view it.
 If you configured {kib} to use anonymous access as the sole authentication mechanism, you don't need to do anything special while embedding {kib}.
 
-For information on how to embed, refer to <<embedding, Embed {kib} content in a web page>>.
+For information on how to embed, refer to  embedding, Embed {kib} content in a web page>>.
 
 [float]
 [[anonymous-access-session]]
 ===== Anonymous access session
 
-{kib} maintains a separate <<xpack-security-session-management, session>> for every anonymous user, as it does for all other authentication mechanisms.
+{kib} maintains a separate  xpack-security-session-management, session>> for every anonymous user, as it does for all other authentication mechanisms.
 
-You can configure <<session-idle-timeout, session idle timeout>> and <<session-lifespan, session lifespan>> for anonymous sessions the same as you do for any other session with the exception that idle timeout is explicitly disabled for anonymous sessions by default. The global <<security-session-and-cookie-settings, `xpack.security.session.idleTimeout`>> setting doesn't affect anonymous sessions. To change the idle timeout for anonymous sessions, you must configure the provider-level <<anonymous-authentication-provider-settings, `xpack.security.authc.providers.anonymous.<provider-name>.session.idleTimeout`>> setting.
+You can configure  session-idle-timeout, session idle timeout>> and  session-lifespan, session lifespan>> for anonymous sessions the same as you do for any other session with the exception that idle timeout is explicitly disabled for anonymous sessions by default. The global  security-session-and-cookie-settings, `xpack.security.session.idleTimeout`>> setting doesn't affect anonymous sessions. To change the idle timeout for anonymous sessions, you must configure the provider-level  anonymous-authentication-provider-settings, `xpack.security.authc.providers.anonymous.<provider-name>.session.idleTimeout`>> setting.
 
 [[http-authentication]]
 ==== HTTP authentication
@@ -400,7 +400,7 @@ API keys are intended for programatic access to {kib} and {es). Do not use API k
 ============================================================================
 
 
-By default {kib} supports <<api-keys, `ApiKey`>> authentication scheme _and_ any scheme supported by the currently enabled authentication provider. For example, `Basic` authentication scheme is automatically supported when basic authentication provider is enabled, or `Bearer` scheme when any of the token based authentication providers is enabled (Token, SAML, OpenID Connect, PKI or Kerberos). But it's also possible to add support for any other authentication scheme in the `kibana.yml` configuration file, as follows:
+By default {kib} supports  api-keys, `ApiKey`>> authentication scheme _and_ any scheme supported by the currently enabled authentication provider. For example, `Basic` authentication scheme is automatically supported when basic authentication provider is enabled, or `Bearer` scheme when any of the token based authentication providers is enabled (Token, SAML, OpenID Connect, PKI or Kerberos). But it's also possible to add support for any other authentication scheme in the `kibana.yml` configuration file, as follows:
 
 NOTE: Don't forget to explicitly specify the default `apikey` and `bearer` schemes when you just want to add a new one to the list.
 
@@ -420,14 +420,14 @@ Once you create a dashboard or a visualization, you might want to share it with 
 [[embedding-cookies]]
 To minimize security risk, embedding with iframes requires careful consideration. By default, modern web browsers enforce the
 https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy[same-origin policy] to restrict the behavior of framed pages. When
-{stack-security-features} are enabled on your cluster, make sure the browsers can transmit session cookies to a {kib} server. The setting you need to be aware of is <<xpack-security-sameSiteCookies, `xpack.security.sameSiteCookies`>>. To support modern browsers, you must set it to `None`:
+{stack-security-features} are enabled on your cluster, make sure the browsers can transmit session cookies to a {kib} server. The setting you need to be aware of is  xpack-security-sameSiteCookies, `xpack.security.sameSiteCookies`>>. To support modern browsers, you must set it to `None`:
 
 [source,yaml]
 --
 xpack.security.sameSiteCookies: "None"
 --
 
-For more information about possible values and implications, refer to <<xpack-security-sameSiteCookies, xpack.security.sameSiteCookies>>.
+For more information about possible values and implications, refer to  xpack-security-sameSiteCookies, xpack.security.sameSiteCookies>>.
 For more information about iframe and cookies, refer to https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe[iframe] and https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite[SameSite cookies].
 
 If you're embedding {kib} in a website that supports single sign-on (SSO) with SAML, OpenID Connect, Kerberos, or PKI, it's highly advisable to configure {kib} as a part of the SSO setup. Operating in a single and properly configured security domain provides you with the most secure and seamless user experience.
@@ -448,4 +448,4 @@ To make this iframe leverage anonymous access automatically, you will need to mo
 
 NOTE: `auth_provider_hint` query string parameter goes *before* the hash URL fragment.
 
-For more information, refer to <<embed-code, Embed code>>.
+For more information, refer to  embed-code, Embed code>>.

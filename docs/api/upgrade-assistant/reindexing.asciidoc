@@ -47,8 +47,8 @@ The API returns the following:
 --------------------------------------------------
 
 <1> The name of the new index.
-<2> The reindex status. For more information, refer to <<status-code,Status codes>>.
-<3> The last successfully completed step of the reindex. For more information, refer to <<step-code,Step codes>>.
+<2> The reindex status. For more information, refer to  status-code,Status codes>>.
+<3> The last successfully completed step of the reindex. For more information, refer to  step-code,Step codes>>.
 <4> The task ID of the {ref}/docs-reindex.html[reindex] task in {es}. Appears when the reindexing starts.
 <5> The progress of the {ref}/docs-reindex.html[reindexing] task in {es}. Appears in decimal form, from 0 to 1.
 <6> The error that caused the reindex to fail, if it failed.

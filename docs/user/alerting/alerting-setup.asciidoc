@@ -14,13 +14,13 @@ configuration.
 If you are using an *on-premises* Elastic Stack deployment:
 
 * In the kibana.yml configuration file, add the 
-<<general-alert-action-settings,`xpack.encryptedSavedObjects.encryptionKey`>> 
+ general-alert-action-settings,`xpack.encryptedSavedObjects.encryptionKey`>> 
 setting.
 * For emails to have a footer with a link back to {kib}, set the 
-<<server-publicBaseUrl, `server.publicBaseUrl`>> configuration setting.
+ server-publicBaseUrl, `server.publicBaseUrl`>> configuration setting.
 
 If you are using an *on-premises* Elastic Stack deployment with 
-<<using-kibana-with-security, *security*>>:
+ using-kibana-with-security, *security*>>:
 
 * If you are unable to access {kib} Alerting, ensure that you have not 
 {ref}/security-settings.html#api-key-service-settings[explicitly disabled API keys].
@@ -35,9 +35,9 @@ The alerting framework uses queries that require the
 
 When relying on alerting and actions as mission critical services, make sure you 
 follow the 
-<<alerting-production-considerations,Alerting production considerations>>.
+ alerting-production-considerations,Alerting production considerations>>.
 
-See <<alerting-scaling-guidance>> for more information on the scalability of 
+See  alerting-scaling-guidance>> for more information on the scalability of 
 Alerting.
 
 [float]
@@ -48,14 +48,14 @@ To access alerting in a space, a user must have access to one of the following
 features:
 
 * Alerting
-* <<xpack-apm,*APM*>>
-* <<logs-app,*Logs*>>
-* <<xpack-ml,*{ml-cap}*>>
-* <<metrics-app,*Metrics*>>
-* <<xpack-siem,*Security*>>
-* <<uptime-app,*Uptime*>>
+* *APM*
+* *Logs*
+* *{ml-cap}*
+* *Metrics*
+* *Security*
+* *Uptime*
 
-See <<kibana-feature-privileges, feature privileges>> for more information on 
+See {kib} privileges for more information on 
 configuring roles that provide access to these features.
 Also note that a user will need +read+ privileges for the 
 *Actions and Connectors* feature to attach actions to a rule or to edit a rule 
@@ -66,8 +66,8 @@ that has an action attached to it.
 ==== Restrict actions
 
 For security reasons you may wish to limit the extent to which {kib} can connect 
-to external services. <<action-settings>> allows you to disable certain 
-<<action-types>> and allowlist the hostnames that {kib} can connect with.
+to external services.  action-settings>> allows you to disable certain 
+Action and connector types and allowlist the hostnames that {kib} can connect with.
 
 [float]
 [[alerting-spaces]]
@@ -80,7 +80,7 @@ A rule or connector created in one space will not be visible in another.
 [[alerting-authorization]]
 === Authorization
 
-Rules are authorized using an <<api-keys,API key>> associated with the last user 
+Rules are authorized using an  api-keys,API key>> associated with the last user 
 to edit the rule. This API key captures a snapshot of the user's privileges at 
 the time of the edit. They are subsequently used to run all background tasks 
 associated with the rule, including condition checks like {es} queries and 

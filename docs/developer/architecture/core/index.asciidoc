@@ -29,10 +29,10 @@ export class MyPlugin {
 
 The services that core provides are:
 
-* <<application-service, Application service>>
-* <<configuration-service, Configuration service>>
-* <<elasticsearch-service, Elasticsearch service>>
-* <<http-service, HTTP service>>
-* <<logging-service, Logging service>>
-* <<saved-objects-service, Saved Objects service>>
-* <<ui-settings-service, UI settings service>>
+*  application-service, Application service>>
+*  configuration-service, Configuration service>>
+*  elasticsearch-service, Elasticsearch service>>
+*  http-service, HTTP service>>
+*  logging-service, Logging service>>
+*  saved-objects-service, Saved Objects service>>
+*  ui-settings-service, UI settings service>>

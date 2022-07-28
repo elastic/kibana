@@ -14,9 +14,9 @@ message text is sent as both plain text and html text.
 [NOTE]
 ====
 * For emails to have a footer with a link back to {kib}, set the 
-<<server-publicBaseUrl, `server.publicBaseUrl`>> configuration setting.
+ server-publicBaseUrl, `server.publicBaseUrl`>> configuration setting.
 * When the 
-<<action-config-email-domain-allowlist,`xpack.actions.email.domain_allowlist`>> 
+ action-config-email-domain-allowlist,`xpack.actions.email.domain_allowlist`>> 
 configuration setting is used, the email addresses used for all of the Sender 
 (from), To, CC, and BCC properties must have email domains specified in the 
 configuration setting.
@@ -50,7 +50,7 @@ disabled for modification. If `service` is `MS Exchange Server`, the `host`,
 
 Host::
 Host name of the service provider. If you are using the 
-<<action-settings, `xpack.actions.allowedHosts`>> setting, make sure this 
+ action-settings, `xpack.actions.allowedHosts`>> setting, make sure this 
 hostname is added to the allowed hosts.
 
 Port::
@@ -91,7 +91,7 @@ Password for login type authentication.
 [[email-connector-networking-configuration]]
 ==== Connector networking configuration
 
-Use the <<action-settings, Action configuration settings>> to customize 
+Use the  action-settings, Action configuration settings>> to customize 
 connector networking configurations, such as proxies, certificates, or TLS 
 settings. You can set configurations that apply to all your connectors or use 
 `xpack.actions.customHostSettings` to set per-host configurations.
@@ -161,11 +161,11 @@ A string that corresponds to *Username*. Required if `hasAuth` is set to `true`.
 
 `password`::
 A string that corresponds to *Password*. Should be stored in the 
-<<creating-keystore, {kib} keystore>>. Required if `hasAuth` is set to `true`.
+ creating-keystore, {kib} keystore>>. Required if `hasAuth` is set to `true`.
 
 `clientSecret`::
 A string that corresponds to *Client Secret*. Should be stored in the 
-<<creating-keystore, {kib} keystore>>. Required if `service` is set to 
+ creating-keystore, {kib} keystore>>. Required if `service` is set to 
 `exchange_server`, which uses OAuth 2.0 Client Credentials Authentication.
 
 [float]
@@ -209,11 +209,11 @@ the Microsoft Exchange Graph API.
 For more information about configuring the email connector to work with 
 different email systems, refer to:
 
-* <<elasticcloud>>
-* <<gmail>>
-* <<outlook>>
-* <<amazon-ses>>
-* <<exchange>>
+*  elasticcloud>>
+*  gmail>>
+*  outlook>>
+*  amazon-ses>>
+*  exchange>>
 
 For other email servers, you can check the list of well-known services that 
 Nodemailer supports in the JSON file 

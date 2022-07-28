@@ -31,7 +31,7 @@ Saved objects can only be imported into the same version, a newer minor on the s
 ==== Path parameters
 
 `space_id`::
-  (Optional, string) An identifier for the <<xpack-spaces,space>>. If `space_id` is not provided in the URL, the default space is used.
+  (Optional, string) An identifier for the  xpack-spaces,space>>. If `space_id` is not provided in the URL, the default space is used.
 
 [[saved-objects-api-import-query-params]]
 ==== Query parameters
@@ -56,9 +56,9 @@ The request body must include the multipart/form-data type.
 `file`::
   A file exported using the export API.
 +
-NOTE: The <<savedObjects-maxImportExportSize, `savedObjects.maxImportExportSize`>> configuration setting
+NOTE: The  savedObjects-maxImportExportSize, `savedObjects.maxImportExportSize`>> configuration setting
 limits the number of saved objects which may be included in this file. Similarly, the
-<<savedObjects-maxImportPayloadBytes, `savedObjects.maxImportPayloadBytes`>> setting limits the overall
+ savedObjects-maxImportPayloadBytes, `savedObjects.maxImportPayloadBytes`>> setting limits the overall
 size of the file that can be imported.
 
 [[saved-objects-api-import-response-body]]
@@ -81,7 +81,7 @@ NOTE: One object may result in multiple errors, which requires separate steps to
   (Optional, array) Indicates the objects that are successfully imported, with any metadata if applicable.
 +
 NOTE: Objects are only created when all resolvable errors are addressed, including conflicts and missing references. For information on how
-to resolve errors, refer to the <<saved-objects-api-import-example,examples>>.
+to resolve errors, refer to the  saved-objects-api-import-example,examples>>.
 
 [[saved-objects-api-import-codes]]
 ==== Response code
@@ -293,7 +293,7 @@ or skip the object.
 
 * A visualization with a different ID, but the same origin already exists, which resulted in a conflict error. The `destinationId` field
 contains the `id` of the other visualization, which caused the conflict. The behavior is added to make sure that new objects that can be
-shared between <<xpack-spaces,spaces>> behave in a similar way as legacy non-shareable objects. When a shareable object is exported and then
+shared between  xpack-spaces,spaces>> behave in a similar way as legacy non-shareable objects. When a shareable object is exported and then
 imported into a new space, it retains its origin so that the conflicts are encountered as expected. To resolve, overwrite the specified
 destination object, or skip the object.
 
@@ -302,7 +302,7 @@ describes the other workpads which caused the conflict. When a shareable object 
 another space where an object of the same origin exists, the conflict error occurs. To resolve, pick a destination object to overwrite, or
 skip the object.
 
-Objects are created when the error is resolved using the <<saved-objects-api-resolve-import-errors-example-1,Resolve import errors API>>.
+Objects are created when the error is resolved using the  saved-objects-api-resolve-import-errors-example-1,Resolve import errors API>>.
 
 [[saved-objects-api-import-example-4]]
 ===== Failed import with missing reference errors
@@ -384,4 +384,4 @@ The API returns the following:
 
 The result indicates an unsuccessful import because the visualization and search resulted in a missing references error.
 
-Objects are created when the errors are resolved using the <<saved-objects-api-resolve-import-errors-example-2,Resolve import errors API>>.
+Objects are created when the errors are resolved using the  saved-objects-api-resolve-import-errors-example-2,Resolve import errors API>>.

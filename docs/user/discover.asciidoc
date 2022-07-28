@@ -1,8 +1,6 @@
 [[discover]]
-= Discover
+== Search your data
 
-[partintro]
---
 You have questions about your data.
 What pages on your website contain a
 specific word or phrase? What events were logged most recently?
@@ -37,9 +35,9 @@ data in *Discover*.
 
 - If you don’t already have {kib}, set it up with https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial].
 - You must have data in {es}.  This tutorial uses the
-<<gs-get-data-into-kibana,ecommerce sample data set>>, but you can use your own data.
+ gs-get-data-into-kibana,ecommerce sample data set>>, but you can use your own data.
 - You should have an understanding of {ref}/documents-indices.html[{es} documents and indices]
-and <<kibana-concepts-analysts, {kib} concepts>>.
+and  kibana-concepts-analysts, {kib} concepts>>.
 
 
 [float]
@@ -52,7 +50,7 @@ Tell {kib} where to find the data you want to explore, and then specify the time
 
 . Select the data you want to work with.
 +
-{kib} uses a <<data-views,{data-source}>> to tell it where to find
+{kib} uses a  data-views,{data-source}>> to tell it where to find
 your {es} data.
 To view the ecommerce sample data, open the {data-source} menu, and select **kibana_sample_data_ecommerce**.
 +
@@ -61,9 +59,9 @@ image::images/discover-data-view.png[How to set the {data-source} in Discover, w
 +
 To create a data view for your own data,
 click *Create a data view*.
-For details, refer to <<data-views, Create a data view.>>
+For details, refer to  data-views, Create a data view.>>
 
-. Adjust the <<set-time-filter,time range>> to view data for the *Last 7 days*.
+. Adjust the  set-time-filter,time range>> to view data for the *Last 7 days*.
 +
 The range selection is based on the default time field in your data.
 If you are using the sample data, this value was set when you added the data.
@@ -150,7 +148,7 @@ emit(doc['customer_last_name.keyword'].value + ", " + ch1);
 image:images/customer.png[Customer last name, first initial in the document table]
 +
 For more information on adding fields and Painless scripting language examples,
-refer to <<runtime-fields, Explore your data with runtime fields>>.
+refer to  runtime-fields, Explore your data with runtime fields>>.
 
 
 [float]
@@ -166,7 +164,7 @@ image:images/discover-search-field.png[Search field in Discover]
 
 
 To search particular fields and
-build more complex queries, use the <<kuery-query,Kibana Query language>>.
+build more complex queries, use the  kuery-query,Kibana Query language>>.
 As you type, KQL prompts you with the fields you can search and the operators
 you can use to build a structured query.
 
@@ -271,7 +269,7 @@ image:images/discover-maps.png[Map containing documents]
 === Share your findings
 
 To share your findings with a larger audience, click *Share* in the *Discover* toolbar.
-For detailed information about the sharing options, refer to <<reporting-getting-started,Reporting>>.
+For detailed information about the sharing options, refer to  reporting-getting-started,Reporting>>.
 
 [float]
 [[alert-from-Discover]]
@@ -285,25 +283,24 @@ query, and filters fetch the data for which you want an alert.
 . In the toolbar, click *Alerts > Create search threshold rule*.
 +
 The *Create rule* form is pre-filled with the latest query sent to {es}.
-. <<rule-type-es-query, Configure your query>> and <<action-types, select a connector type>>.
+. Configure your query and select a connector type.
 
 . Click *Save*.
 
-For more about this and other rules provided in {kib} {alert-features}, go to <<alerting-getting-started>>.
+For more about this and other rules provided in {kib} {alert-features}, go to Alerting.
 
 
 [float]
 === What’s next?
 
-* <<kuery-query, Learn more about the structure of a KQL query>>.
+*  kuery-query, Learn more about the structure of a KQL query>>.
 
-* <<discover-search-for-relevance, Search for relevance>>.
+*  discover-search-for-relevance, Search for relevance>>.
 
-* <<kibana-discover-settings, Configure Discover>> to better meet your needs.
+* Configure Discover to better meet your needs.
 Go to **Advanced Settings** to configure the number of documents to show,
 the table columns that display by default, and more.
 
---
 include::{kib-repo-dir}/discover/document-explorer.asciidoc[]
 
 include::{kib-repo-dir}/discover/search-for-relevance.asciidoc[]

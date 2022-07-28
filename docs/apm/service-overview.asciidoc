@@ -2,7 +2,7 @@
 [[service-overview]]
 === Service overview
 
-Selecting a <<services,*service*>> brings you to the *Service overview*.
+Selecting a  services,*service*>> brings you to the *Service overview*.
 The *Service overview* contains a wide variety of charts and tables that provide
 high-level visibility into how a service is performing across your infrastructure:
 
@@ -69,7 +69,7 @@ Transactions that share the same name are grouped, and only one entry is display
 
 By default, transaction groups are sorted by _Impact_ to show the most used and slowest endpoints in your
 service. If there is a particular endpoint you are interested in, click *View transactions* to view a
-list of similar transactions on the <<transactions, transactions overview>> page.
+list of similar transactions on the  transactions, transactions overview>> page.
 
 [role="screenshot"]
 image::apm/images/traffic-transactions.png[Traffic and transactions]
@@ -112,7 +112,7 @@ application code and not in database or external requests.
 The *Dependencies* table displays a list of downstream services or external connections relevant
 to the service at the selected time range. The table displays latency, throughput, failed transaction rate, and the impact of
 each dependency. By default, dependencies are sorted by _Impact_ to show the most used and the slowest dependency.
-If there is a particular dependency you are interested in, click *<<dependencies,View dependencies>>* to learn more about it.
+If there is a particular dependency you are interested in, click * dependencies,View dependencies>>* to learn more about it.
 
 NOTE: Displaying dependencies for services instrumented with the Real User Monitoring (RUM) agent
 requires an agent version ≥ v5.6.3.
@@ -126,7 +126,7 @@ image::apm/images/spans-dependencies.png[Span type duration and dependencies]
 
 The cold start rate chart is specific to serverless services.
 It displays the percentage of requests that trigger a cold start of a serverless function.
-See <<apm-lambda-cold-start-info>> for more information.
+See  apm-lambda-cold-start-info>> for more information.
 
 [role="screenshot"]
 image::apm/images/lambda-cold-start.png[lambda cold start graph]

@@ -1,6 +1,6 @@
 [role="xpack"]
 [[vector-style]]
-=== Vector styling
+==== Vector styling
 
 When styling a vector layer, you can customize your data by property, such as size and color.
 For each property, you can specify whether to use a constant or data driven value for the style.
@@ -8,11 +8,11 @@ For each property, you can specify whether to use a constant or data driven valu
 
 [float]
 [[maps-vector-style-static]]
-==== Static styling
+===== Static styling
 
 Use static styling to specify a constant value for a style property.
 
-This image shows an example of static styling using the <<add-sample-data, Kibana sample web logs>> data set.
+This image shows an example of static styling using the  add-sample-data, Kibana sample web logs>> data set.
 The *kibana_sample_data_logs* layer uses static styling for all properties.
 
 [role="screenshot"]
@@ -21,12 +21,12 @@ image::maps/images/vector_style_static.png[]
 
 [float]
 [[maps-vector-style-data-driven]]
-==== Data driven styling
+===== Data driven styling
 
 Use data driven styling to symbolize features by property values.
 To enable data driven styling for a style property, change the selected value from *Fixed* or *Solid* to *By value*.
 
-This image shows an example of data driven styling using the <<add-sample-data, Kibana sample web logs>> data set.
+This image shows an example of data driven styling using the  add-sample-data, Kibana sample web logs>> data set.
 The *kibana_sample_data_logs* layer uses data driven styling for fill color and symbol size style properties.
 
 * The `hour_of_day` property determines the fill color for each feature based on where the value fits on a linear scale.
@@ -41,12 +41,12 @@ image::maps/images/vector_style_dynamic.png[]
 
 [float]
 [[maps-vector-style-quantitative-data-driven]]
-==== Quantitative data driven styling
+===== Quantitative data driven styling
 
 Quantitative data driven styling symbolizes features from a range of numeric property values.
 
 Property values are fit from the domain range to the style range on a linear scale.
-For example, let's symbolize <<add-sample-data, Kibana sample web log>> documents by size.
+For example, let's symbolize  add-sample-data, Kibana sample web log>> documents by size.
 The sample web logs `bytes` field ranges from 0 to 18,000. This is the domain range.
 The smallest feature has a symbol radius of 1, and the largest feature has a symbol radius of 24. This is the style range.
 The `bytes` property value for each feature will fit on a linear scale from the range of 0 to 18,000 to the style range of 1 to 24.
@@ -71,7 +71,7 @@ When the symbol range minimum and maximum are the same and there is no range:
 
 [float]
 [[maps-vector-style-qualitative-data-driven]]
-==== Qualitative data driven styling
+===== Qualitative data driven styling
 
 Qualitative data driven styling symbolizes properties, such as strings and IP addresses, by category.
 
@@ -83,7 +83,7 @@ Qualitative data driven styling is available for the following styling propertie
 * *Label color*
 * *Label border color*
 
-This image shows an example of quantitative data driven styling using the <<add-sample-data, Kibana sample web logs>> data set.
+This image shows an example of quantitative data driven styling using the  add-sample-data, Kibana sample web logs>> data set.
 The `machine.os.keyword` property determines the color of each symbol based on category.
 
 [role="screenshot"]
@@ -92,12 +92,12 @@ image::maps/images/quantitative_data_driven_styling.png[]
 
 [float]
 [[maps-vector-style-class]]
-==== Class styling
+===== Class styling
 
 Class styling symbolizes features by class and requires multiple layers.
-Use <<maps-layer-based-filtering, layer filtering>> to define the class for each layer, and <<maps-vector-style-static, static styling>> to symbolize each class.
+Use  maps-layer-based-filtering, layer filtering>> to define the class for each layer, and  maps-vector-style-static, static styling>> to symbolize each class.
 
-This image shows an example of class styling using the <<add-sample-data, Kibana sample web logs>> data set.
+This image shows an example of class styling using the  add-sample-data, Kibana sample web logs>> data set.
 
 * The *Mac OS requests* layer applies the filter `machine.os : osx` so the layer only contains Mac OS requests.
 The fill color is a static value of green.

@@ -17,7 +17,7 @@ If you have previously configured legacy collection methods, you should migrate
 to using {metricbeat} collection methods. Use either {metricbeat} collection or
 legacy collection methods; do not use both.
 
-For the recommended method, refer to <<monitoring-metricbeat>>.
+For the recommended method, refer to  monitoring-metricbeat>>.
 =========================
 
 The following method involves sending the metrics to the production cluster,
@@ -76,7 +76,7 @@ and {ref}/cluster-update-settings.html[Cluster update settings].
 . Verify that `monitoring.enabled` and
 `monitoring.kibana.collection.enabled` are set to `true` in the
 `kibana.yml` file. These are the default values. For
-more information, see <<monitoring-settings-kb,Monitoring settings in {kib}>>.
+more information, see  monitoring-settings-kb,Monitoring settings in {kib}>>.
 
 . Identify where to send monitoring data. {kib} automatically
 sends metrics to the {es} cluster specified in the `elasticsearch.hosts` setting
@@ -105,8 +105,8 @@ valid user ID and password in the `elasticsearch.username` and
 `elasticsearch.password` settings in the `kibana.yml` file. These values are
 used when {kib} sends monitoring data to the production cluster.
 
-.. <<configuring-tls-kib-es,Configure encryption for traffic between {kib} and {es}>>.
+..  configuring-tls-kib-es,Configure encryption for traffic between {kib} and {es}>>.
 
-. <<start-stop,Start {kib}>>.
+.  start-stop,Start {kib}>>.
 
-. <<monitoring-data,View the monitoring data in {kib}>>.
+.  monitoring-data,View the monitoring data in {kib}>>.

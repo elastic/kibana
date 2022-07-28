@@ -15,7 +15,7 @@ this role.
 You can adjust how monitoring data is
 collected from {kib} and displayed in {kib} by configuring settings in the
 `kibana.yml` file. There are also `monitoring.ui.elasticsearch.*` settings,
-which support the same values as <<settings,{kib} configuration settings>>.
+which support the same values as {kib} configuration settings.
 
 To control how data is collected from your {es} nodes, you configure
 {ref}/monitoring-settings.html[`xpack.monitoring.collection`
@@ -43,7 +43,7 @@ Set to `true` (default) to enable {ref}/modules-cross-cluster-search.html[cross-
 `monitoring.ui.elasticsearch.hosts`::
 Specifies the location of the {es} cluster where your monitoring data is stored.
 +
-By default, this is the same as <<elasticsearch-hosts, `elasticsearch.hosts`>>. This setting enables
+By default, this is the same as  elasticsearch-hosts, `elasticsearch.hosts`>>. This setting enables
 you to use a single {kib} instance to search and visualize data in your
 production cluster as well as monitor data sent to a dedicated monitoring
 cluster.
@@ -57,7 +57,7 @@ All other requests performed by *{stack-monitor-app}* to the monitoring {es}
 cluster uses the authenticated user's credentials, which must be the same on
 both the {es} monitoring cluster and the {es} production cluster.
 +
-If not set, {kib} uses the value of the <<elasticsearch-user-passwd, `elasticsearch.username`>> setting.
+If not set, {kib} uses the value of the  elasticsearch-user-passwd, `elasticsearch.username`>> setting.
 
 `monitoring.ui.elasticsearch.password`::
 Specifies the password used by {kib} monitoring to establish a persistent connection
@@ -68,18 +68,18 @@ All other requests performed by *{stack-monitor-app}* to the monitoring {es}
 cluster use the authenticated user's credentials, which must be the same on
 both the {es} monitoring cluster and the {es} production cluster.
 +
-If not set, {kib} uses the value of the <<elasticsearch-user-passwd, `elasticsearch.password`>> setting.
+If not set, {kib} uses the value of the  elasticsearch-user-passwd, `elasticsearch.password`>> setting.
 
 `monitoring.ui.elasticsearch.serviceAccountToken`::
 Specifies a {ref}/security-api-create-service-token.html[service account token] for the {es} cluster where your monitoring data is stored when using `monitoring.ui.elasticsearch.hosts`.  This setting is an alternative to using `monitoring.ui.elasticsearch.username` and `monitoring.ui.elasticsearch.password`.
 
 `monitoring.ui.elasticsearch.pingTimeout`::
 Specifies the time in milliseconds to wait for {es} to respond to internal
-health checks. By default, it matches the <<elasticsearch-pingTimeout, `elasticsearch.pingTimeout`>> setting,
+health checks. By default, it matches the  elasticsearch-pingTimeout, `elasticsearch.pingTimeout`>> setting,
 which has a default value of `30000`.
 
 `monitoring.ui.elasticsearch.ssl`::
-Shares the same configuration as <<elasticsearch-ssl-cert-key, `elasticsearch.ssl`>>. These settings configure encrypted communication between {kib} and the monitoring cluster.
+Shares the same configuration as  elasticsearch-ssl-cert-key, `elasticsearch.ssl`>>. These settings configure encrypted communication between {kib} and the monitoring cluster.
 
 [float]
 [[monitoring-collection-settings]]
@@ -116,7 +116,7 @@ cluster. Defaults to `true`.
 
 `monitoring.ui.logs.index`::
 Specifies the name of the indices that are shown on the
-<<logs-monitor-page,*Logs*>> page in *{stack-monitor-app}*. The default value
+ logs-monitor-page,*Logs*>> page in *{stack-monitor-app}*. The default value
 is `filebeat-*`.
 
 `monitoring.ui.metricbeat.index`::

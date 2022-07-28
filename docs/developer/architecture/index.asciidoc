@@ -10,7 +10,7 @@ to the high rate of change.
 
 To begin plugin development, we recommend reading our overview of how plugins work:
 
-* <<kibana-platform-plugin-api>>
+*  kibana-platform-plugin-api>>
 
 Our developer services are changing all the time. One of the best ways to discover and learn about them is to read the available
 READMEs inside our plugins folders: {kib-repo}tree/{branch}/src/plugins[src/plugins] and
@@ -20,11 +20,11 @@ A few services also automatically generate api documentation which can be browse
 
 A few notable services are called out below.
 
-* <<kibana-platform-api>>
-* <<development-security>>
-* <<add-data-tutorials>>
-* <<development-visualize-index>>
-* <<reporting-integration>>
+*  kibana-platform-api>>
+*  development-security>>
+*  add-data-tutorials>>
+*  development-visualize-index>>
+*  reporting-integration>>
 
 include::kibana-platform-plugin-api.asciidoc[leveloffset=+1]
 

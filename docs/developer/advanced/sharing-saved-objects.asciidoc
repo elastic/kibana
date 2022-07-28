@@ -7,13 +7,13 @@ This guide describes the "Sharing saved objects" effort, and the breaking change
 [[sharing-saved-objects-overview]]
 === Overview
 
-<<saved-objects-service, Saved objects>> (hereinafter "objects") are used to store all sorts of things in {kib}, from Dashboards to Index
+ saved-objects-service, Saved objects>> (hereinafter "objects") are used to store all sorts of things in {kib}, from Dashboards to Index
 Patterns to Machine Learning Jobs. The effort to make objects shareable can be summarized in a single picture:
 
 image::images/sharing-saved-objects-overview.png["Sharing Saved Objects overview"]
 
 Each plugin can register different object types to be used in {kib}. Historically, objects could be _isolated_ (existing in a single
-<<xpack-spaces, space>>) or _global_ (existing in all spaces), there was no in-between. As of the 7.12 release, {kib} now supports two
+ xpack-spaces, space>>) or _global_ (existing in all spaces), there was no in-between. As of the 7.12 release, {kib} now supports two
 additional types of objects:
 
 |======================================================================================================
@@ -25,20 +25,20 @@ additional types of objects:
 |======================================================================================================
 
 Ideally, most types of objects in {kib} will eventually be _shareable_; however, we have also introduced
-<<sharing-saved-objects-faq-share-capable-vs-shareable,_share-capable_ objects>> as a stepping stone for plugin developers to fully support
+ sharing-saved-objects-faq-share-capable-vs-shareable,_share-capable_ objects>> as a stepping stone for plugin developers to fully support
 this feature.
 
 Implementing a shareable saved object type is done in two phases:
 
 - **Phase 1**: Convert an existing isolated object type into a share-capable one. Keep reading!
 - **Phase 2**: Switch an existing share-capable object type into a shareable one, _or_ create a new shareable object type. Jump to the
-  <<sharing-saved-objects-phase-2>>!
+   sharing-saved-objects-phase-2>>!
 
 [[sharing-saved-objects-breaking-changes]]
 === Breaking changes
 
 To implement this feature, we had to make a key change to how objects are serialized into raw {es} documents. As a result,
-<<sharing-saved-objects-faq-changing-object-ids,some existing object IDs need to be changed>>, and this will cause some breaking changes to
+ sharing-saved-objects-faq-changing-object-ids,some existing object IDs need to be changed>>, and this will cause some breaking changes to
 the way that consumers (plugin developers) interact with objects. We have implemented mitigations so that *these changes will not affect
 end-users _if_ consumers implement the required steps below.*
 
@@ -46,13 +46,13 @@ Existing, isolated object types will need to go through a special _conversion pr
 version 8.0. Once objects are converted, they can easily be switched to become fully shareable in any future release. This conversion will
 change the IDs of any existing objects that are not in the Default space. Changing object IDs itself has several knock-on effects:
 
-* Nonstandard links to other objects can break - _mitigated by <<sharing-saved-objects-step-1>>_
-* "Deep link" pages (URLs) to objects can break - _mitigated by <<sharing-saved-objects-step-2>> and <<sharing-saved-objects-step-3>>_
-* Encrypted objects may not be able to be decrypted - _mitigated by <<sharing-saved-objects-step-5>>_
+* Nonstandard links to other objects can break - _mitigated by  sharing-saved-objects-step-1>>_
+* "Deep link" pages (URLs) to objects can break - _mitigated by  sharing-saved-objects-step-2>> and  sharing-saved-objects-step-3>>_
+* Encrypted objects may not be able to be decrypted - _mitigated by  sharing-saved-objects-step-5>>_
 
 *To be perfectly clear: these effects will all be mitigated _if and only if_ you follow the steps below!*
 
-TIP: External plugins can also convert their objects, but <<sharing-saved-objects-faq-external-plugins,they don't have to do so before the
+TIP: External plugins can also convert their objects, but  sharing-saved-objects-faq-external-plugins,they don't have to do so before the
 8.0 release>>.
 
 [[sharing-saved-objects-phase-1]]
@@ -83,7 +83,7 @@ continue functioning after the 8.0 upgrade.
 
 > *Ensure all object links use the root-level `references` field*
 
-If you answered "Yes" to <<sharing-saved-objects-q1>>, you need to make sure that your object links are _only_ stored in the root-level
+If you answered "Yes" to  sharing-saved-objects-q1>>, you need to make sure that your object links are _only_ stored in the root-level
 `references` field. When a given object's ID is changed, this field will be updated accordingly for other objects.
 
 The image below shows two different examples of object links from a "case" object to an "action" object. The top shows the incorrect way to
@@ -91,7 +91,7 @@ link to another object, and the bottom shows the correct way.
 
 image::images/sharing-saved-objects-step-1.png["Sharing Saved Objects step 1"]
 
-If your objects _do not_ use the root-level `references` field, you'll need to <<saved-objects-service-writing-migrations,add a migration>>
+If your objects _do not_ use the root-level `references` field, you'll need to  saved-objects-service-writing-migrations,add a migration>>
 _before the 8.0 release_ to fix that. Here's a migration function for the example above:
 
 ```ts
@@ -132,7 +132,7 @@ critical to ensure that these URLs continue working. The image below shows an ex
 
 image::images/sharing-saved-objects-q2.png["Sharing Saved Objects deep link example"]
 
-Note that some URLs may contain <<sharing-saved-objects-faq-multiple-deep-link-objects,deep links to multiple objects>>, for example, a
+Note that some URLs may contain  sharing-saved-objects-faq-multiple-deep-link-objects,deep links to multiple objects>>, for example, a
 Dashboard _and_ a filter for an Index Pattern.
 
 [[sharing-saved-objects-step-2]]
@@ -142,9 +142,9 @@ Dashboard _and_ a filter for an Index Pattern.
 
 > *Update your code to use the new SavedObjectsClient `resolve()` method instead of `get()`*
 
-If you answered "Yes" to <<sharing-saved-objects-q2>>, you need to make sure that when you use the SavedObjectsClient to fetch an object
+If you answered "Yes" to  sharing-saved-objects-q2>>, you need to make sure that when you use the SavedObjectsClient to fetch an object
 using its ID, you use a different API to do so. The existing `get()` function will only find an object using its current ID. To make sure
-your existing deep link URLs don't break, you should use the new `resolve()` function; <<sharing-saved-objects-faq-legacy-url-alias,this
+your existing deep link URLs don't break, you should use the new `resolve()` function;  sharing-saved-objects-faq-legacy-url-alias,this
 attempts to find an object using its old ID _and_ its current ID>>.
 
 In a nutshell, if your deep link page had something like this before:
@@ -176,7 +176,7 @@ The SavedObjectsClient is available both on the server-side and the client-side.
 custom HTTP route, or you may be fetching it on the client-side directly. Either way, the `outcome` and `alias_target_id` fields need to be
 passed to your client-side code, and you should update your UI accordingly in the next step.
 
-NOTE: You don't need to use `resolve()` everywhere, <<sharing-saved-objects-faq-resolve-instead-of-get,you should only use it for deep
+NOTE: You don't need to use `resolve()` everywhere,  sharing-saved-objects-faq-resolve-instead-of-get,you should only use it for deep
 links>>!
 
 [[sharing-saved-objects-step-3]]
@@ -189,7 +189,7 @@ links>>!
 The Spaces plugin API exposes React components and functions that you should use to render your UI in a consistent manner for end-users.
 Your UI will need to use the Core HTTP service and the Spaces plugin API to do this.
 
-Your page should change <<sharing-saved-objects-faq-resolve-outcomes,according to the outcome>>:
+Your page should change  sharing-saved-objects-faq-resolve-outcomes,according to the outcome>>:
 
 image::images/sharing-saved-objects-step-3.png["Sharing Saved Objects resolve outcomes overview"]
 
@@ -304,7 +304,7 @@ NOTE: Reminder, don't forget to add unit tests and functional tests!
 
 > *Update your _server-side code_ to convert these objects to become "share-capable"*
 
-After <<sharing-saved-objects-step-3>> is complete, you can add the code to convert your objects.
+After  sharing-saved-objects-step-3>> is complete, you can add the code to convert your objects.
 
 WARNING: The previous steps can be backported to the 7.x branch, but this step -- the conversion itself -- can only take place in 8.0!
 You should use a separate pull request for this.
@@ -324,7 +324,7 @@ NOTE: Reminder, don't forget to add integration tests!
 
 > *Are these objects encrypted?*
 
-Saved objects can optionally be <<xpack-security-secure-saved-objects,encrypted>> by using the Encrypted Saved Objects plugin. Very few
+Saved objects can optionally be  xpack-security-secure-saved-objects,encrypted>> by using the Encrypted Saved Objects plugin. Very few
 object types are encrypted, so most plugin developers will not be affected.
 
 [[sharing-saved-objects-step-5]]
@@ -334,7 +334,7 @@ object types are encrypted, so most plugin developers will not be affected.
 
 > *Update your _server-side code_ to add an Encrypted Saved Object (ESO) migration for these objects*
 
-If you answered "Yes" to <<sharing-saved-objects-q3>>, you need to take additional steps to make sure that your objects can still be
+If you answered "Yes" to  sharing-saved-objects-q3>>, you need to take additional steps to make sure that your objects can still be
 decrypted after the conversion process. Encrypted saved objects use some fields as part of "additionally authenticated data" (AAD) to defend
 against different types of cryptographic attacks. The object ID is part of this AAD, and so it follows that the after the object's ID is
 changed, the object will not be able to be decrypted with the standard process.
@@ -386,7 +386,7 @@ const warningMessage =
   ) : null;
 ```
 
-The <<data-views,Data Views page>> in <<management>> uses a
+The  data-views,Data Views page>> in  management>> uses a
 https://github.com/elastic/kibana/blob/{branch}/src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx[similar
 approach] to show a warning in its delete confirmation modal:
 
@@ -425,7 +425,7 @@ return (
 Second, display a https://github.com/elastic/kibana/blob/{branch}/x-pack/plugins/spaces/public/space_list/types.ts[list of spaces] for an
 object, and third, show a
 https://github.com/elastic/kibana/blob/{branch}/x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts[flyout] for the user to
-edit the object's assigned spaces. You may want to follow the example of the <<data-views,Data Views page>> and
+edit the object's assigned spaces. You may want to follow the example of the  data-views,Data Views page>> and
 https://github.com/elastic/kibana/blob/{branch}/src/plugins/data_view_management/public/components/index_pattern_table/spaces_list.tsx[combine
 these into a single component] so that the space list can be clicked to show the flyout:
 +
@@ -472,9 +472,9 @@ return (
     the space list is rendered outside of any particular space, so the active space is included in the list. On the other hand, when using a
     `"within-space"` behavior context, the space list is rendered within the active space, so the active space is excluded from the list.
 
-2. Allow users to access your objects in the <<managing-saved-objects,Saved Objects Management page>> in <<management>>. You can do this by
+2. Allow users to access your objects in the  managing-saved-objects,Saved Objects Management page>> in  management>>. You can do this by
    ensuring that your objects are marked as
-   https://github.com/elastic/kibana/blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectstypemanagementdefinition.md[importable and exportable] in your <<saved-objects-type-registration,saved object type registration>>:
+   https://github.com/elastic/kibana/blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectstypemanagementdefinition.md[importable and exportable] in your  saved-objects-type-registration,saved object type registration>>:
 +
 ```ts
 name: 'my-object-type',
@@ -483,7 +483,7 @@ management: {
 },
 ...
 ```
-If you do this, then your objects will be visible in the <<managing-saved-objects,Saved Objects Management page>>, where users can assign
+If you do this, then your objects will be visible in the  managing-saved-objects,Saved Objects Management page>>, where users can assign
 them to multiple spaces.
 
 [[sharing-saved-objects-faq]]
@@ -525,10 +525,10 @@ image::images/sharing-saved-objects-faq-changing-object-ids-2.png["Sharing Saved
 [[sharing-saved-objects-faq-multiple-deep-link-objects]]
 ==== 3. What if one page has deep links to multiple objects?
 
-As mentioned in <<sharing-saved-objects-q2>>, some URLs may contain multiple object IDs, effectively deep linking to multiple objects.
+As mentioned in  sharing-saved-objects-q2>>, some URLs may contain multiple object IDs, effectively deep linking to multiple objects.
 These should be handled on a case-by-case basis at the plugin owner's discretion. A good rule of thumb is:
 
-* The "primary" object on the page should always handle the three `resolve()` outcomes as described in <<sharing-saved-objects-step-3>>.
+* The "primary" object on the page should always handle the three `resolve()` outcomes as described in  sharing-saved-objects-step-3>>.
 * Any "secondary" objects on the page may handle the outcomes differently. If the secondary object ID is not important (for example, it just
   functions as a page anchor), it may make more sense to ignore the different outcomes. If the secondary object _is_ important but it is not
   directly represented in the UI, it may make more sense to throw a descriptive error when a `'conflict'` outcome is encountered.
@@ -536,7 +536,7 @@ These should be handled on a case-by-case basis at the plugin owner's discretion
 +
 image::images/sharing-saved-objects-faq-multiple-deep-link-objects-1.png["Sharing Saved Objects embeddable legacy URL conflict"]
 Viewing details shows the user how to disable the alias and fix the problem using the
-<<spaces-api-disable-legacy-url-aliases,_disable_legacy_url_aliases API>>:
+ spaces-api-disable-legacy-url-aliases,_disable_legacy_url_aliases API>>:
 +
 image::images/sharing-saved-objects-faq-multiple-deep-link-objects-2.png["Sharing Saved Objects embeddable legacy URL conflict (showing details)"]
   - If the secondary object is resolved by an external service (such as the index pattern service), the service should simply make the full
@@ -550,7 +550,7 @@ necessary. However, such handling of secondary objects is not considered critica
 ==== 4. What is a "legacy URL alias"?
 
 As depicted above, when an object is converted to become share-capable, if it exists in a non-Default space, its ID gets changed. To
-preserve its old ID, we also create a special object called a <<legacy-url-aliases,_legacy URL alias_>> ("alias" for short); this alias
+preserve its old ID, we also create a special object called a  legacy-url-aliases,_legacy URL alias_>> ("alias" for short); this alias
 retains the target object's old ID (_sourceId_), and it contains a pointer to the target object's new ID (_targetId_).
 
 Aliases are meant to be mostly invisible to end-users by design. There is no UI to manage them directly. Our vision is that aliases will be
@@ -621,4 +621,4 @@ specific release. The only thing you need to know is that your plugin cannot con
 
 ==== 8. How will users be impacted?
 
-Refer to <<saved-object-ids,Saved Object IDs>> documentation for more details how users should expect to be impacted.
+Refer to  saved-object-ids,Saved Object IDs>> documentation for more details how users should expect to be impacted.

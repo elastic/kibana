@@ -10,7 +10,7 @@
 
 To secure your {kib} installation in production, consider these high-priority topics to ensure
 that only authorized users can access {kib}.
-For more information on {kib}'s security controls, see <<using-kibana-with-security, Configure security>>.
+For more information on {kib}'s security controls, see  using-kibana-with-security, Configure security>>.
 
 [float]
 [[enabling-ssl]]
@@ -30,14 +30,14 @@ You can use {stack} {security-features} to control what {es} data users can
 access through {kib}.
 
 When {security-features} are enabled, {kib} users have to log in. They must
-have a role granting <<kibana-privileges, {kib} privileges>> and access
+have a role granting  kibana-privileges, {kib} privileges>> and access
 to the indices that they will be working with in {kib}.
 
 If a user loads a {kib} dashboard that accesses data in an index that they
 are not authorized to view, they get an error that indicates the index does
 not exist.
 
-For more information on granting access to {kib}, see <<xpack-security-authorization>>.
+For more information on granting access to {kib}, see Granting access to {kib}.
 
 [float]
 [[configuring-security-headers]]
@@ -47,7 +47,7 @@ The {kib} server can instruct browsers to enable additional security controls us
 
 1. Enable HTTP Strict-Transport-Security.
 +
-Use <<server-securityResponseHeaders-strictTransportSecurity,`strictTransportSecurity`>> to ensure that browsers will only attempt
+Use  server-securityResponseHeaders-strictTransportSecurity,`strictTransportSecurity`>> to ensure that browsers will only attempt
 to access {kib} with SSL/TLS encryption. This is designed to prevent manipulator-in-the-middle attacks.
 To configure this with a lifetime of one
 year in your `kibana.yml`:
@@ -62,7 +62,7 @@ using different ports or paths, all of them will be affected.
 
 2. Disable embedding.
 +
-Use <<server-securityResponseHeaders-disableEmbedding, `disableEmbedding`>> to ensure
+Use  server-securityResponseHeaders-disableEmbedding, `disableEmbedding`>> to ensure
 that {kib} cannot be embedded in other websites.
 To configure this in your `kibana.yml`:
 +

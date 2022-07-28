@@ -1,11 +1,9 @@
 [[dashboard]]
-= Dashboard and visualizations
+== Visualize your data
 
-[partintro]
---
 **_Visualize your data with dashboards._**
 
-The best way to understand your data is to visualize it. With dashboards, you can turn your data from one or more <<data-views, data views>> into a collection of panels 
+The best way to understand your data is to visualize it. With dashboards, you can turn your data from one or more  data-views, data views>> into a collection of panels 
 that bring clarity to your data, tell a story about your data, and allow you to focus on only the data that's important to you. 
 
 [role="screenshot"]
@@ -16,52 +14,52 @@ Panels display your data in charts, tables, maps, and more, which allow you to c
 [cols="2"]
 |===
 
-| <<aggregation-reference,Editors>>
+|  aggregation-reference,Editors>>
 | Use one of the editors to create visualizations of your data. Each editor varies in capabilities for all levels of analysts.
 
-| <<maps,Maps>>
+|  maps,Maps>>
 | Create beautiful displays of your geographical data.
 
-| <<xpack-ml-anomalies,Anomaly swim lane>>
+| Anomaly swim lane
 | Display the results from machine learning anomaly detection jobs.
 
-| <<xpack-ml-anomalies,Anomaly chart>>
+| Anomaly chart
 | Display an anomaly chart from the *Anomaly Explorer*.
 
-| <<logs-app,Log stream>>
+| Log stream
 | Display a table of live streaming logs.
 
-| <<add-controls,Tools>>
+|  add-controls,Tools>>
 | Add interactive filters with *Controls* panels.
 
-| <<add-text,Text>>
+|  add-text,Text>>
 | Add context to your panels with *Text*.
 
 |===
 
 [float]
 [[create-dashboards]]
-== Create dashboards
+=== Create dashboards
 
 Dashboards provide you with the space where you add panels of your data.
 
 [float]
 [[dashboard-minimum-requirements]]
-=== Minimum requirements
+==== Minimum requirements
 
 To create dashboards, you must meet the minimum requirements. 
 
 * If you need to set up {kib}, use https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial].
 
-* Make sure you have {ref}/getting-started-index.html[data indexed into {es}] and a <<data-views, data view>>.
+* Make sure you have {ref}/getting-started-index.html[data indexed into {es}] and a  data-views, data view>>.
 
 * When the read-only indicator appears, you have insufficient privileges
 to create or save dashboards, and the options to create and save dashboards are not visible. For more information,
-refer to <<xpack-security-authorization,Granting access to {kib}>>.
+refer to Granting access to {kib}.
 
 [float]
 [[open-the-dashboard]]
-=== Open the dashboard
+==== Open the dashboard
 
 Begin with an empty dashboard, or open an existing dashboard.
 
@@ -79,9 +77,9 @@ When you open an existing dashboard, you are in view mode. To make changes to th
 
 [float]
 [[create-panels-with-lens]]
-=== Create and add panels
+==== Create and add panels
 
-You create panels using the editors, which you can access from the dashboard toolbar or the *Visualize Library*, or add panels that are saved in the *Visualize Library*, or search results from <<save-your-search,*Discover*>>.
+You create panels using the editors, which you can access from the dashboard toolbar or the *Visualize Library*, or add panels that are saved in the *Visualize Library*, or search results from  save-your-search,*Discover*>>.
 
 To create panels from the dashboard toolbar, use one of the following options:
 
@@ -109,13 +107,13 @@ When you add search results from *Discover* to dashboards, the results are not a
 
 [float]
 [[save-panels]]
-=== Save and add panels
+==== Save and add panels
 
 Consider where you want to save and add the panel in {kib}.
 
 [float]
 [[save-to-visualize-library]]
-==== Save to the Visualize Library
+===== Save to the Visualize Library
 
 To use the panel on other dashboards and *Canvas* workpads, save the panel to the *Visualize Library*. When panels are saved in the *Visualize Library*, image:dashboard/images/visualize-library-icon.png[Visualize Library icon] appears in the panel header.
 
@@ -123,7 +121,7 @@ If you created the panel from the dashboard:
 
 . In the editor, click *Save to library*.
 
-. Enter the *Title* and add any applicable <<managing-tags,*Tags*>>.
+. Enter the *Title* and add any applicable  managing-tags,*Tags*>>.
 
 . Make sure that *Add to Dashboard after saving* is selected.
 
@@ -137,13 +135,13 @@ If you created the panel from the *Visualize Library*:
 
 . Choose one of the following options:
 
-* To save the panel to a dashboard and the *Visualize Library*, select *Add to library*, add any applicable <<managing-tags,*Tags*>>, then click *Save and go to Dashboard*.
+* To save the panel to a dashboard and the *Visualize Library*, select *Add to library*, add any applicable  managing-tags,*Tags*>>, then click *Save and go to Dashboard*.
 
-* To save the panel only to the *Visualize Library*, select *None*, add any applicable <<managing-tags,*Tags*>>, then click *Save and add to library*.
+* To save the panel only to the *Visualize Library*, select *None*, add any applicable  managing-tags,*Tags*>>, then click *Save and add to library*.
 
 [float]
 [[save-to-the-dashboard]]
-==== Save to the dashboard
+===== Save to the dashboard
 
 Return to the dashboard and add the panel without specifying the save options or adding the panel to the *Visualize Library*. 
 
@@ -179,7 +177,7 @@ To add unsaved dashboard panels to the *Visualize Library*:
 
 [float]
 [[add-text]]
-== Add context to panels
+=== Add context to panels
 
 To provide context to your dashboard panels, add *Text* panels that display important information, instructions, images, and more. You create *Text* panels using GitHub-flavored Markdown text.
 
@@ -211,7 +209,7 @@ For detailed information about writing on GitHub, click *Help*.
 
 [float]
 [[save-the-markdown-panel]]
-=== Save and add the panel
+==== Save and add the panel
 
 Save the panel to the *Visualize Library* and add it to the dashboard, or add it to the dashboard without saving.
 
@@ -219,7 +217,7 @@ To save the panel to the *Visualize Library*:
 
 . Click *Save to library*.
 
-. Enter the *Title* and add any applicable <<managing-tags,*Tags*>>.
+. Enter the *Title* and add any applicable  managing-tags,*Tags*>>.
 
 . Make sure that *Add to Dashboard after saving* is selected.
 
@@ -241,7 +239,7 @@ To save the panel to the dashboard:
 [[arrange-panels]]
 [[moving-containers]]
 [[resizing-containers]]
-== Arrange panels
+=== Arrange panels
 
 Compare the data in your panels side-by-side, organize panels by priority, resize the panels so they all appear immediately on the dashboard, and more.
 
@@ -255,7 +253,7 @@ In the toolbar, click *Edit*, then use the following options:
 
 [float]
 [[edit-panels]]
-== Edit panels
+=== Edit panels
 
 To make changes to the panel, use the panel menu options.
 
@@ -279,14 +277,14 @@ If you want to use the panel later, make sure that you save the panel to the *Vi
 
 [float]
 [[duplicate-panels]]
-== Duplicate panels
+=== Duplicate panels
 
 To duplicate a panel and the configured functionality, use the clone and copy panel options. Cloned and copied panels replicate all of the functionality from the original panel, 
 including renaming, editing, and cloning. 
 
 [float]
 [[clone-panels]]
-=== Clone panels
+==== Clone panels
 
 Cloned panels appear next to the original panel, and move the other panels to provide a space on the dashboard.
 
@@ -298,7 +296,7 @@ When cloned panels are saved in the *Visualize Library*, image:dashboard/images/
 
 [float]
 [[copy-to-dashboard]]
-=== Copy panels
+==== Copy panels
 
 Copy panels from one dashboard to another dashboard.
 
@@ -308,12 +306,12 @@ Copy panels from one dashboard to another dashboard.
 
 [float]
 [[search-or-filter-your-data]]
-== Search and filter your data
+=== Search and filter your data
 
 {kib} supports several ways to search your data and apply {es} filters. You can combine the filters with any panel
 filter to display the data want to you see.
 
-For more information about {kib} and {es} filters, refer to <<kibana-concepts-analysts,{kib} concepts>>.
+For more information about {kib} and {es} filters, refer to  kibana-concepts-analysts,{kib} concepts>>.
 
 To apply a panel-level time filter:
 
@@ -323,7 +321,7 @@ To apply a panel-level time filter:
 
 [float]
 [[apply-design-options]]
-== Apply design options
+=== Apply design options
 
 Apply a set of design options to the entire dashboard.
 
@@ -341,7 +339,7 @@ Apply a set of design options to the entire dashboard.
 
 [float]
 [[save-dashboards]]
-== Save dashboards
+=== Save dashboards
 
 When you've finished making changes to the dashboard, save it.
 
@@ -351,7 +349,7 @@ If you are saving a new dashboard:
 
 . On the *Save dashboard* window, enter the *Title* and an optional *Description*.
 
-. Add any applicable <<managing-tags,*Tags*>>. 
+. Add any applicable  managing-tags,*Tags*>>. 
 
 . To save the time filter to the dashboard, select *Store time with dashboard*.
 
@@ -363,7 +361,7 @@ To exit *Edit* mode, click *Switch to view mode*.
 
 [float]
 [[download-csv]]
-== View the panel data and requests
+=== View the panel data and requests
 
 View the data in visualizations and the requests that collect the data. 
 
@@ -391,17 +389,16 @@ When you download visualization panels with multiple layers, each layer produces
 
 [float]
 [[share-the-dashboard]]
-== Share dashboards
+=== Share dashboards
 
-To share the dashboard with a larger audience, click *Share* in the toolbar. For detailed information about the sharing options, refer to <<reporting-getting-started,Reporting>>.
+To share the dashboard with a larger audience, click *Share* in the toolbar. For detailed information about the sharing options, refer to  reporting-getting-started,Reporting>>.
 
 [float]
 [[import-dashboards]]
-== Export dashboards
+=== Export dashboards
 
-To automate {kib}, you can export dashboards as NDJSON using the <<saved-objects-api-export, Export objects API>>. It is important to export dashboards with all necessary references.
+To automate {kib}, you can export dashboards as NDJSON using the Export objects APIs. It is important to export dashboards with all necessary references.
 
---
 include::tutorial-create-a-dashboard-of-lens-panels.asciidoc[]
 
 include::lens-advanced.asciidoc[]

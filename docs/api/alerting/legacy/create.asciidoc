@@ -4,7 +4,7 @@
 <titleabbrev>Legacy create alert</titleabbrev>
 ++++
 
-deprecated::[7.13.0,Use <<create-rule-api>> instead.]
+deprecated::[7.13.0,Use  create-rule-api>> instead.]
 
 Create {kib} alerts.
 
@@ -78,10 +78,10 @@ There are plans to support multiple other schedule formats in the near future.
     (Required, string) The ID of the action saved object to execute.
 
   `actionTypeId`:::
-    (Required, string) The ID of the <<action-types,action type>>.
+    (Required, string) The ID of the action type.
 
   `params`:::
-    (Required, object) The map to the `params` that the <<action-types,action type>> will receive. ` params` are handled as Mustache templates and passed a default set of context.
+    (Required, object) The map to the `params` that the action type will receive. ` params` are handled as Mustache templates and passed a default set of context.
 =====
 
 

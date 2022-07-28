@@ -8,12 +8,12 @@ The purpose of this guide is to give a high-level overview of available tools an
 
 This guide covers following topics:
 
-* <<deep-linking>>
-* <<navigating-between-kibana-apps>>
-* <<routing>>
-* <<history-and-location>>
-* <<state-sync>>
-* <<preserve-state>>
+*  deep-linking>>
+*  navigating-between-kibana-apps>>
+*  routing>>
+*  history-and-location>>
+*  state-sync>>
+*  preserve-state>>
 
 [[deep-linking]]
 === Deep-linking into {kib} apps
@@ -205,14 +205,14 @@ Those query params follow the convention:
 * `_g` (*global*) - global UI state that should be shared and synced across multiple apps. common example from Analyze group apps: time range, refresh interval, *pinned* filters.
 * `_a` (*application*) - UI state scoped to current app.
 
-NOTE: After migrating to KP platform we got navigations without page reloads. Since then there is no real need to follow `_g` and `_a` separation anymore. It's up you to decide if you want to follow this pattern or if you prefer a single query param or something else. The need for this separation earlier is explained in <<preserve-state>>. 
+NOTE: After migrating to KP platform we got navigations without page reloads. Since then there is no real need to follow `_g` and `_a` separation anymore. It's up you to decide if you want to follow this pattern or if you prefer a single query param or something else. The need for this separation earlier is explained in  preserve-state>>. 
 
 There are utils to help you to implement such kind of state syncing.
 
 **When you should consider using state syncing utils:**
 
 * You want to sync your application state with URL in similar manner Analyze group applications do.
-* You want to follow platform's <<history-and-location, working with browser history and location best practices>> out of the box. 
+* You want to follow platform's  history-and-location, working with browser history and location best practices>> out of the box. 
 * You want to support `state:storeInSessionStore` escape hatch for URL overflowing out of the box.
 * You should also consider using them if you'd like to serialize state to different (not `rison`) format. Utils are composable, and you can implement your own `storage`.
 * In case you want to sync part of your state with URL, but other part of it with browser storage. 
@@ -244,7 +244,7 @@ you'd notice that state is stored inside that link, and it also gets updated whe
 [role="screenshot"]
 image:images/state_inside_the_link.png[State is stored inside the navigation link]
 
-This is where <<query-params, separation>> into `_a` and `_g` query params comes into play. What is considered a *global* state gets constantly updated in those navigation links. In the example above it was a time filter.
+This is where  query-params, separation>> into `_a` and `_g` query params comes into play. What is considered a *global* state gets constantly updated in those navigation links. In the example above it was a time filter.
 This is backed by {kib-repo}tree/{branch}/src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts#L57[KbnUrlTracker] util. You can use it to achieve similar behavior.
 
 NOTE: After migrating to KP navigation works without page reloads and all plugins are loaded simultaneously.

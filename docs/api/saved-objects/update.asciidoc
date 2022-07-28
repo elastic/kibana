@@ -49,7 +49,7 @@ WARNING: When you update, attributes are not validated, which allows you to pass
     Indicates the object was not found.
 
 `409`::
-    Indicates a <<saved-objects-api-update-conflict-errors,conflict error>>.
+    Indicates a  saved-objects-api-update-conflict-errors,conflict error>>.
 
 [[saved-objects-api-update-example]]
 ==== Example
@@ -86,4 +86,4 @@ The API returns the following:
 
 Starting in {kib} 8.0, saved objects can exist in multiple spaces. As a result, you may encounter a 409 *alias conflict* error when using
 the `upsert` option. The Update API response is limited and does not include additional metadata. You can get more details about this error
-by using the <<saved-objects-api-bulk-create,Bulk create API>> instead.
+by using the  saved-objects-api-bulk-create,Bulk create API>> instead.

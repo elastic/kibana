@@ -27,4 +27,4 @@ delete, and modify case connectors and to send updates to external systems.
 
 |=== 
 
-For more details, refer to <<kibana-privileges>>.
+For more details, refer to  kibana-privileges>>.

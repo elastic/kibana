@@ -17,7 +17,7 @@ GeoJSON is the most commonly used and flexible option.
 
 === Upload a GeoJSON file
 Follow these instructions to upload a GeoJSON data file, or try the
-<<indexing-geojson-data-tutorial, end-to-end integrated example>>.
+ indexing-geojson-data-tutorial, end-to-end integrated example>>.
 
 . Open the main menu, click *Maps*, and then click *Add layer*.
 . Click *Uploaded GeoJSON*.
@@ -40,5 +40,5 @@ appears on the map. The geospatial data on the map
 should be identical to the locally-previewed data, but now it's indexed data from Elasticsearch.
 
 . To continue adding data to the map, click *Add layer*.
-. In *Layer settings*, adjust any settings or <<maps-vector-style-properties, properties>> as needed.
+. In *Layer settings*, adjust any settings or  maps-vector-style-properties, properties>> as needed.
 . Click *Save & close*.

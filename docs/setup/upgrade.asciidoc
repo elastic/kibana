@@ -12,7 +12,7 @@ Upgrading while older {kib} instances are running can cause data loss or upgrade
 
 [WARNING]
 ====
-When required, {kib} automatically migrates <<saved-object-migrations, saved objects>>.
+When required, {kib} automatically migrates  saved-object-migrations, saved objects>>.
 In case of an upgrade failure, you can roll back to an
 earlier version of {kib}. To roll back, you **must** have a
 {ref}/snapshot-restore.html[backup snapshot] that includes the `kibana` feature
@@ -66,7 +66,7 @@ Ensure that all {kib} instances are running the same version, configuration, and
 Be sure to have a {ref}/snapshot-restore.html[snapshot] of all your data before attempting a migration.
 If something goes wrong during migration, you can restore from the snapshot and try again.
 
-Review the <<resolve-migrations-failures,common causes of {kib} upgrade failures>> and how to prevent them.
+Review the  resolve-migrations-failures,common causes of {kib} upgrade failures>> and how to prevent them.
 
 
 include::upgrade/saved-objects-migration.asciidoc[]

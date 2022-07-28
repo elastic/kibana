@@ -1,0 +1,5 @@
+[[keyboard-shortcuts]]
+== Get keyboard shortcuts
+
+For a list of available keyboard
+shortcuts, click *Help*.

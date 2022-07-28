@@ -4,11 +4,11 @@
 <titleabbrev>Find connectors</titleabbrev>
 ++++
 
-Retrieves information about <<action-types,connectors>>.
+Retrieves information about connectors.
 
 In particular, only the connectors that are supported for use in cases are
 returned. Refer to the list of supported external incident management systems in
-<<add-case-connectors>>.
+ add-case-connectors>>.
 
 === {api-request-title}
 
@@ -20,7 +20,7 @@ returned. Refer to the list of supported external incident management systems in
 
 You must have `read` privileges for the *Actions and Connectors* feature in the
 *Management* section of the
-<<kibana-feature-privileges,{kib} feature privileges>>.
+{kib} privileges.
 
 === {api-path-parms-title}
 

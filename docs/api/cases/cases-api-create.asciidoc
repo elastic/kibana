@@ -16,7 +16,7 @@ Creates a case.
 
 You must have `all` privileges for the *Cases* feature in the *Management*,
 *{observability}*, or *Security* section of the
-<<kibana-feature-privileges,{kib} feature privileges>>, depending on the
+{kib} privileges, depending on the
 `owner` of the case you're creating.
 
 === {api-path-parms-title}
@@ -108,7 +108,7 @@ For {swimlane} connectors, specify:
 `id`::
 (Required, string) The identifier for the connector. To create a case without a
 connector, use `none`. To retrieve connector IDs, use
-<<cases-api-find-connectors>>.
+ cases-api-find-connectors>>.
 
 `name`::
 (Required, string) The name of the connector. To create a case without a

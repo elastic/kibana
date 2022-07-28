@@ -12,10 +12,10 @@ to create {sn} events.
 [[servicenow-itom-connector-prerequisites]]
 === Prerequisites
 
-. <<servicenow-itom-connector-prerequisites-integration-user,Create a {sn} integration user and assign it the appropriate roles.>>
+.  servicenow-itom-connector-prerequisites-integration-user,Create a {sn} integration user and assign it the appropriate roles.>>
 . If you use open authorization (OAuth), you must also:
-.. <<servicenow-itom-connector-prerequisites-rsa-key,Create an RSA keypair and add an X.509 Certificate>>.
-.. <<servicenow-itom-connector-prerequisites-endpoint,Create an OAuth JWT API endpoint for external clients with a JWT Verifiers Map>>.
+..  servicenow-itom-connector-prerequisites-rsa-key,Create an RSA keypair and add an X.509 Certificate>>.
+..  servicenow-itom-connector-prerequisites-endpoint,Create an OAuth JWT API endpoint for external clients with a JWT Verifiers Map>>.
 
 [float]
 [[servicenow-itom-connector-prerequisites-integration-user]]
@@ -70,7 +70,7 @@ Private Key Password:: The password for the RSA private key generated during set
 [[servicenow-itom-connector-networking-configuration]]
 === Connector networking configuration
 
-Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+Use the  action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
 [float]
 [[Preconfigured-servicenow-itom-configuration]]
@@ -118,7 +118,7 @@ Config defines information for the connector type.
 Secrets defines sensitive information for the connector type.
 
 `username`:: A string that corresponds to *Username*. Required if `isOAuth` is set to `false`.
-`password`::  A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>. Required if `isOAuth` is set to `false`.
+`password`::  A string that corresponds to *Password*. Should be stored in the  creating-keystore, {kib} keystore>>. Required if `isOAuth` is set to `false`.
 `clientSecret`:: A string that corresponds to *Client Secret*. Required if `isOAuth` is set to `true`.
 `privateKey`:: A string that corresponds to *Private Key*. Required if `isOAuth` is set to `true`.
 `privateKeyPassword`:: A string that corresponds to *Private Key Password*.

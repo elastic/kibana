@@ -11,7 +11,7 @@ based on your specific APM data.
 Custom links can be filtered to only appear in the APM app for relevant services,
 environments, transaction types, or transaction names.
 
-Ready to dive in? Jump straight to the <<custom-links-examples,examples>>.
+Ready to dive in? Jump straight to the  custom-links-examples,examples>>.
 
 [float]
 [[custom-links-create]]

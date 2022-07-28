@@ -1,16 +1,9 @@
 [[setup]]
-= Set up
+= Set up {kib}
 
 [partintro]
 --
-This section includes information on how to setup Kibana and get it running,
-including:
-
-* Downloading
-* Installing
-* Starting
-* Configuring
-* Upgrading
+Set up Kibana and get it running.
 
 [[supported-platforms]]
 [float]
@@ -45,30 +38,5 @@ Kibana 5.0.0 and Elasticsearch 5.0.1) is generally supported, though we
 encourage users to run the same versions of Kibana and Elasticsearch down to
 the patch version.
 --
-
-include::{kib-repo-dir}/setup/install.asciidoc[]
-
-include::{kib-repo-dir}/setup/settings.asciidoc[]
-
-include::{kib-repo-dir}/setup/start-stop.asciidoc[]
-
-include::{kib-repo-dir}/setup/access.asciidoc[]
-
-include::security/tutorials/how-to-secure-access-to-kibana.asciidoc[]
-
-include::{kib-repo-dir}/setup/connect-to-elasticsearch.asciidoc[]
-
-include::{kib-repo-dir}/setup/upgrade.asciidoc[]
-
-include::security/securing-kibana.asciidoc[]
-
-include::{kib-repo-dir}/setup/configuring-reporting.asciidoc[]
-
-include::{kib-repo-dir}/setup/configuring-logging.asciidoc[]
-
-include::monitoring/configuring-monitoring.asciidoc[leveloffset=+1]
-include::monitoring/monitoring-metricbeat.asciidoc[leveloffset=+2]
-include::monitoring/viewing-metrics.asciidoc[leveloffset=+2]
-include::monitoring/monitoring-kibana.asciidoc[leveloffset=+2]
 
 include::commands/cli-commands.asciidoc[]

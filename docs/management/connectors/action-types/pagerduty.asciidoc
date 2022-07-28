@@ -14,14 +14,14 @@ The PagerDuty connector uses the https://v2.developer.pagerduty.com/docs/events-
 PagerDuty connectors have the following configuration properties.
 
 Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
-API URL::   An optional PagerDuty event URL. Defaults to `https://events.pagerduty.com/v2/enqueue`. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
+API URL::   An optional PagerDuty event URL. Defaults to `https://events.pagerduty.com/v2/enqueue`. If you are using the  action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
 Integration Key::   A 32 character PagerDuty Integration Key for an integration on a service, also referred to as the routing key.
 
 [float]
 [[pagerduty-connector-networking-configuration]]
 ==== Connector networking configuration
 
-Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+Use the  action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
 [float]
 [[Preconfigured-pagerduty-configuration]]
@@ -112,7 +112,7 @@ Then, select the *Integrations* tab and click the *New Integration* button.
 go to
 https://support.pagerduty.com/docs/services-and-integrations#section-configuring-services-and-integrations[Configuring Services and Integrations]
 and follow the steps outlined in the *Create a New Service* section, selecting *Elastic Alerts* as the *Integration Type* in step 4.
-Continue with the <<pagerduty-in-elastic, In Elastic>> section once you have finished these steps.
+Continue with the  pagerduty-in-elastic, In Elastic>> section once you have finished these steps.
 
 . Enter an *Integration Name* in the format Elastic-service-name (for example, Elastic-Alerting or Kibana-APM-Alerting)
 and select *Elastic Alerts* from the *Integration Type* menu.
@@ -136,8 +136,8 @@ section of the rule configuration and selecting *Add new*.
 
 . Configure the connector by giving it a name and entering the Integration Key, optionally entering a custom API URL.
 +
-See <<pagerduty-in-pagerduty, In PagerDuty>> for how to obtain the endpoint and key information from PagerDuty and
-<<pagerduty-connector-configuration, Connector configuration>> for more details.
+See  pagerduty-in-pagerduty, In PagerDuty>> for how to obtain the endpoint and key information from PagerDuty and
+ pagerduty-connector-configuration, Connector configuration>> for more details.
 
 . Save the Connector.
 
@@ -151,5 +151,5 @@ See <<pagerduty-in-pagerduty, In PagerDuty>> for how to obtain the endpoint and 
 Depending on your custom needs, assign them variables from the rule context.
 To see the available context variables, click on the *Add variable* icon next
 to each corresponding field. For more details on these parameters, see the
-<<pagerduty-action-configuration, Actions Configuration>> and the PagerDuty
+ pagerduty-action-configuration, Actions Configuration>> and the PagerDuty
 https://v2.developer.pagerduty.com/v2/docs/send-an-event-events-api-v2[API v2 documentation].

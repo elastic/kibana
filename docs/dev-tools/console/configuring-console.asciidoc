@@ -1,0 +1,8 @@
+[[configuring-console]]
+== Configure Console settings
+
+You can configure the *Console* font size, JSON syntax,
+and autocomplete suggestions in *Settings*.
+
+[role="screenshot"]
+image::dev-tools/console/images/console-settings.png["Console Settings", width=60%]

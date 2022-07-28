@@ -87,7 +87,7 @@ image::apm/images/apm-service-map-anomaly.png[Example view of anomaly scores on 
 If an anomaly has been detected, click *view anomalies* to view the anomaly detection metric viewer in the Machine learning app.
 This time series analysis will display additional details on the severity and time of the detected anomalies.
 
-To learn how to create a machine learning job, see <<machine-learning-integration,machine learning integration>>.
+To learn how to create a machine learning job, see  machine-learning-integration,machine learning integration>>.
 
 [float]
 [[service-maps-legend]]

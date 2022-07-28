@@ -7,7 +7,7 @@
 
 experimental[] Rotate the encryption key for encrypted saved objects.
 
-If a saved object cannot be decrypted using the primary encryption key, then {kib} will attempt to decrypt it using the specified <<xpack-encryptedSavedObjects-keyRotation-decryptionOnlyKeys, decryption-only keys>>. In most of the cases this overhead is negligible, but if you're dealing with a large number of saved objects and experiencing performance issues, you may want to rotate the encryption key.
+If a saved object cannot be decrypted using the primary encryption key, then {kib} will attempt to decrypt it using the specified  xpack-encryptedSavedObjects-keyRotation-decryptionOnlyKeys, decryption-only keys>>. In most of the cases this overhead is negligible, but if you're dealing with a large number of saved objects and experiencing performance issues, you may want to rotate the encryption key.
 
 [IMPORTANT]
 ============================================================================
@@ -49,7 +49,7 @@ NOTE: In most cases, `total` will be greater than `successful` even if `failed` 
 Indicates a successful call.
 
 `400`::
-Indicates that either query parameters are wrong or <<xpack-encryptedSavedObjects-keyRotation-decryptionOnlyKeys, decryption-only keys>> aren't configured.
+Indicates that either query parameters are wrong or  xpack-encryptedSavedObjects-keyRotation-decryptionOnlyKeys, decryption-only keys>> aren't configured.
 
 `429`::
 Indicates that key rotation is already in progress.

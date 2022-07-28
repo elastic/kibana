@@ -5,16 +5,16 @@
 ++++
 
 
-The RPM for Kibana can be <<install-rpm,downloaded from our website>>
-or from our <<rpm-repo,RPM repository>>. It can be used to install
+The RPM for Kibana can be  install-rpm,downloaded from our website>>
+or from our  rpm-repo,RPM repository>>. It can be used to install
 Kibana on any RPM-based system such as OpenSuSE, SLES, Red Hat,
 and Oracle Enterprise.
 
 NOTE: RPM install is not supported on distributions with old versions of RPM,
-such as SLES 11. Refer to <<targz>> instead.
+such as SLES 11. Refer to  targz>> instead.
 
 This package contains both free and subscription features.
-<<managing-licenses,Start a 30-day trial>> to try out all of the features.
+ managing-licenses,Start a 30-day trial>> to try out all of the features.
 
 The latest stable version of Kibana can be found on the
 link:/downloads/kibana[Download Kibana] page. Other versions can
@@ -173,7 +173,7 @@ locations for an RPM-based system:
 | config
   | Configuration files including `kibana.yml`
   | /etc/kibana
-  | <<settings,KBN_PATH_CONF>>
+  | KBN_PATH_CONF
 
 | data
   | The location of the data files written to disk by Kibana and its plugins

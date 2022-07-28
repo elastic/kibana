@@ -46,7 +46,7 @@ If you haven't already, start {kib} and connect it to {es} using the
 --
 {kib} uses the client certificate and corresponding private key when connecting to {es}.
 
-NOTE: This is not the same as the <<configuring-tls-browser-kib,server certificate>> that {kib} will present to web browsers.
+NOTE: This is not the same as the  configuring-tls-browser-kib,server certificate>> that {kib} will present to web browsers.
 
 You may choose to generate a client certificate and private key using the {ref}/certutil.html[`elasticsearch-certutil`] tool. If you followed the {es} documentation for {ref}/security-basic-setup.html#generate-certificates[generating the certificates authority], then you already have a certificate authority (CA) to sign
 the {es} server certificate. You may choose to use the same CA to sign the {kib}
@@ -115,7 +115,7 @@ certificate's DN attribute:
 [role="screenshot"]
 image:security/images/mutual-tls-role-mapping.png["Role mapping for the {kib} client certificate"]
 
-For more information, see <<role-mappings,role mappings>>.
+For more information, see  role-mappings,role mappings>>.
 --
 
 . Configure {kib} to use the client certificate and private key.
@@ -132,7 +132,7 @@ Specify your PKCS#12 file in `kibana.yml`:
 elasticsearch.ssl.keystore.path: "/path/to/kibana-client.p12"
 ----
 
-If your PKCS#12 file is encrypted, add the decryption password to your <<secure-settings,{kib} keystore>>:
+If your PKCS#12 file is encrypted, add the decryption password to your  secure-settings,{kib} keystore>>:
 
 [source,yaml]
 ----
@@ -154,7 +154,7 @@ elasticsearch.ssl.certificate: "/path/to/kibana-client.crt"
 elasticsearch.ssl.key: "/path/to/kibana-client.key"
 ----
 
-If your private key is encrypted, add the decryption password to your <<secure-settings,{kib} keystore>>:
+If your private key is encrypted, add the decryption password to your  secure-settings,{kib} keystore>>:
 
 [source,yaml]
 ----
@@ -170,5 +170,5 @@ attempt to use them to authenticate to {es} via the native realm.
 . Restart {kib}.
 
 These steps enable {kib} to authenticate to {es} using a certificate. However, end users will only be able to authenticate to
-{kib} with a username and password. To allow end users to authenticate to {kib} using a client certificate, see <<pki-authentication,{kib}
+{kib} with a username and password. To allow end users to authenticate to {kib} using a client certificate, see  pki-authentication,{kib}
 PKI authentication>>.

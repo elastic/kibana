@@ -16,7 +16,7 @@ The goal of this document is to guide developers through the recommended
 process of migrating at a high level. Every plugin is different, so
 developers should tweak this plan based on their unique requirements.
 
-First, we recommend you read <<kibana-platform-plugin-api>> to get an overview
+First, we recommend you read  kibana-platform-plugin-api>> to get an overview
 of how plugins work in the {kib} Platform. Then continue here to follow our
 generic plan of action that can be applied to any legacy plugin.
 
@@ -110,7 +110,7 @@ must be architected to use the new plugin system. This greatly
 simplifies the plan of action for migrating server-side plugins.
 The main challenge here is to de-couple plugin logic from hapi.js server and request objects.
 
-For migration examples, see <<migrating-legacy-plugins-examples>>.
+For migration examples, see  migrating-legacy-plugins-examples>>.
 
 === Browser-side plan of action
 
@@ -127,7 +127,7 @@ Because the usage of Angular and `ui/public` modules varies widely between
 legacy plugins, there is no `one size fits all` solution to migrating
 your browser-side code to the {kib} Platform.
 
-For migration examples, see <<migrating-legacy-plugins-examples>>.
+For migration examples, see  migrating-legacy-plugins-examples>>.
 
 === Frequently asked questions
 
@@ -281,7 +281,7 @@ its own routing].
 |{kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.chromedoctitle.md[`core.chrome.docTitle`]
 
 |`uiExports/injectedVars` / `chrome.getInjected`
-|<<configuration-service, Configuration service>>. Can only be used to expose configuration properties
+| configuration-service, Configuration service>>. Can only be used to expose configuration properties
 |===
 
 _See also:
@@ -295,7 +295,7 @@ application services, which are not technically part of `core`, but are
 often used in {kib} plugins.
 
 This table maps some of the most commonly used legacy items to their {kib}
-Platform locations. For the API provided by {kib} Plugins see <<plugin-list, the plugin list>>.
+Platform locations. For the API provided by {kib} Plugins see  plugin-list, the plugin list>>.
 
 [width="100%",cols="15,85",options="header"]
 |===
@@ -383,16 +383,16 @@ or `kbnServer.newPlatform`:
 |===
 |Legacy Platform |{kib} Platform
 |`server.config()`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.plugininitializercontext.config.md[`initializerContext.config.create()`]. Must also define schema. See <<config-migration>>
+|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.plugininitializercontext.config.md[`initializerContext.config.create()`]. Must also define schema. See  config-migration>>
 
 |`server.route`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.httpservicesetup.createrouter.md[`core.http.createRouter`]. See <<http-routes-migration, HTTP routes migration>>.
+|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.httpservicesetup.createrouter.md[`core.http.createRouter`]. See  http-routes-migration, HTTP routes migration>>.
 
 |`server.renderApp()`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.httpresourcesservicetoolkit.rendercoreapp.md[`response.renderCoreApp()`]. See <<render-html-migration, Render HTML migration>>.
+|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.httpresourcesservicetoolkit.rendercoreapp.md[`response.renderCoreApp()`]. See  render-html-migration, Render HTML migration>>.
 
 |`server.renderAppWithDefaultConfig()`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.httpresourcesservicetoolkit.renderanonymouscoreapp.md[`response.renderAnonymousCoreApp()`]. See <<render-html-migration, Render HTML migration>>.
+|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.httpresourcesservicetoolkit.renderanonymouscoreapp.md[`response.renderAnonymousCoreApp()`]. See  render-html-migration, Render HTML migration>>.
 
 |`request.getBasePath()`
 |{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.httpservicesetup.basepath.md[`core.http.basePath.get`]
@@ -426,19 +426,19 @@ or `kbnServer.newPlatform`:
 |{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.iuisettingsclient.md[`context.core.uiSettings.client`]
 
 |`kibana.Plugin.deprecations`
-|<<handle-plugin-configuration-deprecations, Handle plugin configuration deprecations>> and {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.pluginconfigdescriptor.md[`PluginConfigDescriptor.deprecations`]. Deprecations from {kib} Platform are not applied to legacy configuration
+| handle-plugin-configuration-deprecations, Handle plugin configuration deprecations>> and {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.pluginconfigdescriptor.md[`PluginConfigDescriptor.deprecations`]. Deprecations from {kib} Platform are not applied to legacy configuration
 
 |`kibana.Plugin.savedObjectSchemas`
 |{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]
 
 |`kibana.Plugin.mappings`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]. Learn more in <<saved-objects-migration, SavedObjects migration>>.
+|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]. Learn more in  saved-objects-migration, SavedObjects migration>>.
 
 |`kibana.Plugin.migrations`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]. Learn more in <<saved-objects-migration, SavedObjects migration>>.
+|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]. Learn more in  saved-objects-migration, SavedObjects migration>>.
 
 |`kibana.Plugin.savedObjectsManagement`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]. Learn more in <<saved-objects-migration, SavedObjects migration>>.
+|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]. Learn more in  saved-objects-migration, SavedObjects migration>>.
 |===
 
 _See also:
@@ -504,7 +504,7 @@ Platform.
 |{kib-repo}blob/{branch}/x-pack/plugins/index_management/README.md[`index management plugin`]
 
 |`injectDefaultVars`
-|`N/A`. Plugins will only be able to allow config values for the frontend. See<<configuration-service>>
+|`N/A`. Plugins will only be able to allow config values for the frontend. See configuration-service>>
 
 |`inspectorViews`
 |{kib-repo}blob/{branch}/src/plugins/inspector/README.md[`inspector plugin`]
@@ -588,10 +588,10 @@ Platform.
 |{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md[`manifest.configPath`]
 
 |`config`
-|<<configuration-service>>
+| configuration-service>>
 
 |`deprecations`
-|<<configuration-service>>
+| configuration-service>>
 
 |`uiExports`
 |`N/A`. Use platform & plugin public contracts
@@ -600,9 +600,9 @@ Platform.
 |`N/A`. {kib} Platform serves static assets from `/public/assets` folder under `/plugins/{id}/assets/{path*}` URL.
 
 |`preInit`, `init`, `postInit`
-|`N/A`. Use {kib} Platform <<plugin-lifecycles,plugin-lifecycles>>
+|`N/A`. Use {kib} Platform  plugin-lifecycles,plugin-lifecycles>>
 |===
 
 === See also
 
-For examples on how to migrate from specific legacy APIs, see <<migrating-legacy-plugins-examples>>.
+For examples on how to migrate from specific legacy APIs, see  migrating-legacy-plugins-examples>>.

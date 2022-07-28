@@ -6,7 +6,7 @@ This page describes legacy URL aliases: what they are, where they come from, and
 [[legacy-url-aliases-overview]]
 === Overview
 
-Many saved object types were converted in {kib} 8.0, so they can eventually be shared across <<xpack-spaces,spaces>>. Before 8.0, you could
+Many saved object types were converted in {kib} 8.0, so they can eventually be shared across  xpack-spaces,spaces>>. Before 8.0, you could
 have two objects with the same type and same ID in two different spaces. Part of this conversion is to make sure all object IDs of a given
 type are *globally unique across all spaces*.
 
@@ -19,7 +19,7 @@ type are *globally unique across all spaces*.
 Consider the following scenario:
 
 You have {kib} 7.16, and you create a new dashboard.The ID of this dashboard is "123". You create a new space called "Bill's space" and
-<<managing-saved-objects-copy-to-space,copy>> your dashboard to the other space. Now you have two different dashboards that can be accessed
+ managing-saved-objects-copy-to-space,copy>> your dashboard to the other space. Now you have two different dashboards that can be accessed
 at the following URLs:
 
 * *Default space*: `http://localhost:5601/app/dashboards#/view/123`
@@ -42,4 +42,4 @@ you might want to disable the legacy URL alias completely. This leaves the saved
 won't be able to use the old URL to access that saved object.
 
 To disable a legacy URL alias, you need three pieces of information: the `targetSpace`, the `targetType`, and the `sourceId`. Then use the
-<<spaces-api-disable-legacy-url-aliases,`_disable_legacy_url_aliases`>> API to disable the problematic legacy URL alias.
+ spaces-api-disable-legacy-url-aliases,`_disable_legacy_url_aliases`>> API to disable the problematic legacy URL alias.

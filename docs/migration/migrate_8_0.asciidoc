@@ -7,10 +7,10 @@
 This section discusses the changes that you need to be aware of when migrating
 your application to Kibana 8.0.
 
-See also <<whats-new>> and <<release-notes>>.
+See also  whats-new>> and  release-notes>>.
 
-* <<breaking_80_index_pattern_changes>>
-* <<breaking_80_setting_changes>>
+*  breaking_80_index_pattern_changes>>
+*  breaking_80_setting_changes>>
 
 //NOTE: The notable-breaking-changes tagged regions are re-used in the
 //Installation and Upgrade Guide

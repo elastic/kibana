@@ -8,10 +8,10 @@
 
 Some APM app features are provided via a REST API:
 
-* <<agent-config-api>>
-* <<apm-annotation-api>>
-* <<rum-sourcemap-api>>
-* <<agent-key-api>>
+*  agent-config-api>>
+*  apm-annotation-api>>
+*  rum-sourcemap-api>>
+*  agent-key-api>>
 
 [float]
 [[apm-api-example]]
@@ -35,14 +35,14 @@ where `{credentials}` is the base64 encoding of `id` and `api_key` joined by a c
 Alternatively, you can create a user and use their username and password to authenticate API access: `-u $USER:$PASSWORD`.
 +
 Whether using `Authorization: ApiKey {credentials}`, or `-u $USER:$PASSWORD`,
-users interacting with APM APIs must have <<apm-app-api-user,sufficient privileges>>.
+users interacting with APM APIs must have  apm-app-api-user,sufficient privileges>>.
 
 `kbn-xsrf: true`::
   By default, you must use `kbn-xsrf` for all API calls, except in the following scenarios:
 
 * The API endpoint uses the `GET` or `HEAD` operations
-* The path is allowed using the <<settings-xsrf-allowlist, `server.xsrf.allowlist`>> setting
-* XSRF protections are disabled using the <<settings-xsrf-disableProtection, `server.xsrf.disableProtection`>> setting
+* The path is allowed using the  settings-xsrf-allowlist, `server.xsrf.allowlist`>> setting
+* XSRF protections are disabled using the  settings-xsrf-disableProtection, `server.xsrf.disableProtection`>> setting
 
 `Content-Type: application/json`::
   Applicable only when you send a payload in the API request.
@@ -75,7 +75,7 @@ curl -X POST \
 [[kibana-api]]
 === Kibana API
 
-In addition to the APM specific API endpoints, Kibana provides its own <<api,REST API>>
+In addition to the APM specific API endpoints, Kibana provides its own  api,REST API>>
 which you can use to automate certain aspects of configuring and deploying Kibana.
 
 ////
@@ -92,10 +92,10 @@ without needing to redeploy your application.
 
 The following Agent configuration APIs are available:
 
-* <<apm-update-config>> to create or update an Agent configuration
-* <<apm-delete-config>> to delete an Agent configuration.
-* <<apm-list-config>> to list all Agent configurations.
-* <<apm-search-config>> to search for an Agent configuration.
+*  apm-update-config>> to create or update an Agent configuration
+*  apm-delete-config>> to delete an Agent configuration.
+*  apm-list-config>> to list all Agent configurations.
+*  apm-search-config>> to search for an Agent configuration.
 
 [float]
 [[use-agent-config-api]]
@@ -362,14 +362,14 @@ allowing you to easily see how these events are impacting the performance of you
 
 By default, annotations are stored in a newly created `observability-annotations` index.
 The name of this index can be changed in your `config.yml` by editing `xpack.observability.annotations.index`.
-If you change the default index name, you'll also need to <<apm-app-annotation-user-create,update your user privileges>> accordingly.
+If you change the default index name, you'll also need to  apm-app-annotation-user-create,update your user privileges>> accordingly.
 
 The following APIs are available:
 
-* <<apm-annotation-create>> to create an annotation for APM.
-// * <<obs-annotation-create>> POST /api/observability/annotation
-// * <<obs-annotation-get>> GET /api/observability/annotation/:id
-// * <<obs-annotation-delete>> DELETE /api/observability/annotation/:id
+*  apm-annotation-create>> to create an annotation for APM.
+// *  obs-annotation-create>> POST /api/observability/annotation
+// *  obs-annotation-get>> GET /api/observability/annotation/:id
+// *  obs-annotation-delete>> DELETE /api/observability/annotation/:id
 
 [float]
 [[use-annotation-api]]
@@ -499,9 +499,9 @@ errors must occur again for source mapping to occur.
 
 The following APIs are available:
 
-* <<rum-sourcemap-post>>
-* <<rum-sourcemap-get>>
-* <<rum-sourcemap-delete>>
+*  rum-sourcemap-post>>
+*  rum-sourcemap-get>>
+*  rum-sourcemap-delete>>
 
 [float]
 [[use-sourcemap-api]]
@@ -526,7 +526,7 @@ Create or update a source map for a specific service and version.
 ===== Privileges
 
 The user accessing this endpoint requires `All` Kibana privileges for the {beat_kib_app} feature.
-For more information, see <<kibana-privileges>>.
+For more information, see  kibana-privileges>>.
 
 [[apm-sourcemap-post-req]]
 ===== Request
@@ -603,7 +603,7 @@ Returns an array of Fleet artifacts, including source map uploads.
 ===== Privileges
 
 The user accessing this endpoint requires `Read` or `All` Kibana privileges for the {beat_kib_app} feature.
-For more information, see <<kibana-privileges>>.
+For more information, see  kibana-privileges>>.
 
 [[apm-sourcemap-get-req]]
 ===== Request
@@ -682,7 +682,7 @@ Delete a previously uploaded source map.
 ===== Privileges
 
 The user accessing this endpoint requires `All` Kibana privileges for the {beat_kib_app} feature.
-For more information, see <<kibana-privileges>>.
+For more information, see  kibana-privileges>>.
 
 [[apm-sourcemap-delete-req]]
 ===== Request
@@ -723,7 +723,7 @@ The Agent Key API allows you to configure agent keys to authorize requests from 
 
 The following Agent key APIs are available:
 
-* <<apm-create-agent-key>> to create an agent key
+*  apm-create-agent-key>> to create an agent key
 
 [float]
 [[use-agent-key-api]]
@@ -752,7 +752,7 @@ and the APM application-level privileges that it wishes to grant.
 
 ====== Example role
 
-The example below uses the Kibana <<role-management-api,role management API>> to create a role named `apm_agent_key_user`.
+The example below uses the Kibana role management API to create a role named `apm_agent_key_user`.
 Create and assign this role to a user that wishes to create APM agent API keys.
 
 [source,js]

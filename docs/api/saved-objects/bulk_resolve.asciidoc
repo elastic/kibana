@@ -40,7 +40,7 @@ object can be retrieved via the Bulk Resolve API using either its new ID or its 
 
 Saved objects that {kib} fails to find are replaced with an error object and an "exactMatch" outcome. The rationale behind the outcome is
 that "exactMatch" is the default outcome, and the outcome only changes if an alias is found. This behavior is unique to `_bulk_resolve`; the
-<<saved-objects-api-resolve,regular `resolve` API>> will return only an HTTP error instead.
+ saved-objects-api-resolve,regular `resolve` API>> will return only an HTTP error instead.
 
 [[saved-objects-api-bulk-resolve-body-codes]]
 ==== Response code
@@ -120,7 +120,7 @@ In addition to `saved_object`, several fields can be returned:
   `alias_purpose` field. This indicates why the alias was created, and it can be used to change the client behavior accordingly. One of the
   following values: `"savedObjectConversion"`, `"savedObjectImport"`
 
-Client-side code uses these fields to behave differently depending on the `outcome` -- <<sharing-saved-objects-step-3,learn more>>.
+Client-side code uses these fields to behave differently depending on the `outcome` --  sharing-saved-objects-step-3,learn more>>.
 ====
 
 Retrieve a dashboard object in the `testspace` by ID:

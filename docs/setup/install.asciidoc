@@ -21,7 +21,7 @@ the easiest choice for getting started with Kibana.
 +
 The `zip` package is the only supported package for Windows.
 +
-<<targz>> or <<windows>>
+ targz>> or  windows>>
 
 `deb`::
 
@@ -29,7 +29,7 @@ The `deb` package is suitable for Debian, Ubuntu, and other Debian-based
 systems.  Debian packages may be downloaded from the Elastic website or from
 our Debian repository.
 +
-<<deb>>
+ deb>>
 
 `rpm`::
 
@@ -37,14 +37,14 @@ The `rpm` package is suitable for installation on Red Hat, SLES,
 OpenSuSE and other RPM-based systems.  RPMs may be downloaded from the
 Elastic website or from our RPM repository.
 +
-<<rpm>>
+ rpm>>
 
 `docker`::
 
 Images are available for running Kibana as a Docker container. They may be
 downloaded from the Elastic Docker Registry.
 +
-<<docker,Running Kibana on Docker>>
+ docker,Running Kibana on Docker>>
 
 IMPORTANT: If your Elasticsearch installation is protected by
 {ref}/elasticsearch-security.html[{stack-security-features}] see

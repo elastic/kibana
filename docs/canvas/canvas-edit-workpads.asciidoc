@@ -1,12 +1,12 @@
 [role="xpack"]
 [[edit-workpads]]
-== Edit workpads
+=== Edit workpads
 
 To create the look and feel that you want, apply format settings to the entire workpad, or individual elements.
 
 [float]
 [[create-variables]]
-=== Create variables
+==== Create variables
 
 When you frequently use copy and paste, create variables to easily reuse strings and patterns. For example, when you clone a large workpad and need to connect your elements to a new index, use variables to update 
 each element instead of updating them manually.
@@ -35,7 +35,7 @@ image::images/copy_variable_syntax.png[Copied variable syntax pasted in the Expr
 
 [float]
 [[apply-changes-to-the-entire-workpad]]
-=== Apply changes to the entire workpad
+==== Apply changes to the entire workpad
 
 With stylesheets, you can change the look of the entire workpad, including fonts, colors, layout, and more.
 
@@ -52,13 +52,13 @@ background-color: #3990e6;
 
 [float]
 [[change-the-element-settings]]
-=== Change the element settings
+==== Change the element settings
 
 Element settings enable you to change the display options at the element level. For example, use the element settings to change the dimensions, style, or location of an element.
 
 [float]
 [[change-the-display-options]]
-==== Change the display options
+===== Change the display options
 
 Choose the display options for your elements. The options available depend on the element you select. 
 
@@ -80,14 +80,14 @@ text.align: center;
 
 [float]
 [[clone-elements]]
-==== Clone elements
+===== Clone elements
 To use an element with the same functionality and appearance in multiple places, clone the element.
 
 Select the element, then click *Edit > Clone*. 
 
 [float]
 [[move-and-resize-elements]]
-==== Move and resize elements
+===== Move and resize elements
 
 Canvas provides you with many options to move and resize the elements on your workpad.
 
@@ -101,7 +101,7 @@ Canvas provides you with many options to move and resize the elements on your wo
 
 [float]
 [[edit-elements]]
-==== Edit elements
+===== Edit elements
 
 The element editing options allow you to arrange and organize the elements on your workpad page.
 
@@ -125,7 +125,7 @@ To reorder elements:
 
 [float]
 [[delete-elements]]
-==== Delete elements
+===== Delete elements
 
 When you no longer need an element, delete it from your workpad.
 

@@ -7,7 +7,7 @@
 Kibana can be installed on Windows using the `.zip` package.
 
 This package contains both free and subscription features.
-<<managing-licenses,Start a 30-day trial>> to try out all of the features.
+ managing-licenses,Start a 30-day trial>> to try out all of the features.
 
 The latest stable version of Kibana can be found on the
 link:/downloads/kibana[Download Kibana] page.
@@ -84,7 +84,7 @@ important data later on.
 | config
   | Configuration files including `kibana.yml`
   | $KIBANA_HOME\config
-  | <<settings,KBN_PATH_CONF>>
+  | KBN_PATH_CONF
  d|
 
 | data
