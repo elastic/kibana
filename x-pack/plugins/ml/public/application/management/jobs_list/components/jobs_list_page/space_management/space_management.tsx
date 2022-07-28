@@ -127,8 +127,7 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
         <EuiSpacer size="m" />
         {items === undefined ? null : (
           <>
-            <EuiFlexGroup>
-              <EuiFlexItem />
+            <EuiFlexGroup justifyContent={'flexEnd'} gutterSize={'none'}>
               <EuiFlexItem grow={false}>
                 <RefreshButton
                   onRefreshClick={refresh.bind(null, currentTabId)}
@@ -212,6 +211,9 @@ export const RefreshButton: FC<{ onRefreshClick: () => void; isRefreshing: boole
     data-test-subj={`mlRefreshJobListButton${isRefreshing ? ' loading' : ' loaded'}`}
     onClick={onRefreshClick}
     isLoading={isRefreshing}
+    iconType={'refresh'}
+    iconSide={'left'}
+    iconSize={'m'}
   >
     <FormattedMessage id="xpack.ml.management.list.refreshButtonLabel" defaultMessage="Refresh" />
   </EuiButtonEmpty>
