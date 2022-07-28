@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import cuid from 'cuid';
 
+import cuid from 'cuid';
+import * as cborx from 'cbor-x';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -13,8 +14,6 @@ import { defaults } from 'lodash';
 import { Duplex, Writable, Readable } from 'stream';
 
 import type { FileChunkDocument } from '../mappings';
-
-import * as cborx from './cborx';
 
 /**
  * @note The Elasticsearch `http.max_content_length` is including the whole POST body.
@@ -126,7 +125,7 @@ export class ContentStream extends Duplex {
       }
       const buffer = Buffer.concat(chunks);
       const source: undefined | FileChunkDocument = buffer.byteLength
-        ? cborx.decode<{ _source?: FileChunkDocument }>(Buffer.concat(chunks))?._source
+        ? cborx.decode(Buffer.concat(chunks))?._source
         : undefined;
 
       const dataBuffer = source?.data as unknown as Buffer;

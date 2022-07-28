@@ -8,10 +8,10 @@
 import type { Logger } from '@kbn/core/server';
 import { set } from 'lodash';
 import { Readable } from 'stream';
+import { encode } from 'cbor-x';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ContentStream, ContentStreamEncoding, ContentStreamParameters } from './content_stream';
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
-import { encode } from './cborx';
 
 describe('ContentStream', () => {
   let client: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
