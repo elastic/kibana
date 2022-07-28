@@ -54,7 +54,7 @@ interface UseRiskScore<T> extends UseRiskScoreParams {
   featureEnabled: boolean;
 }
 
-const initialResult: Omit<
+export const initialResult: Omit<
   StrategyResponseType<RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore>,
   'rawResponse'
 > = {

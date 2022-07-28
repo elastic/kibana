@@ -29,7 +29,7 @@ export const buildUserNamesFilter = (userNames: string[]) => {
 
 export enum RiskQueries {
   hostsRiskScore = 'hostsRiskScore',
-  usersRiskScore = 'usesrsRiskScore',
+  usersRiskScore = 'usersRiskScore',
   kpiRiskScore = 'kpiRiskScore',
 }
 
