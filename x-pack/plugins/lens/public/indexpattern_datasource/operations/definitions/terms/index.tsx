@@ -926,7 +926,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                 <EuiTitle size="xxs">
                   <h5>
                     <EuiTextColor color={euiTheme.colors.primary}>
-                      {i18n.translate('xpack.lens.indexPattern.advancedSettings', {
+                      {i18n.translate('xpack.lens.indexPattern.terms.advancedSettingss', {
                         defaultMessage: 'Advanced',
                       })}
                     </EuiTextColor>
