@@ -256,6 +256,8 @@ export class TaskRunner<
       updatedAt,
       enabled,
       actions,
+      muteAll,
+      snoozeSchedule,
     } = rule;
     const {
       params: { alertId: ruleId, spaceId },
@@ -372,8 +374,53 @@ export class TaskRunner<
                 notifyWhen,
               },
               logger: this.logger,
-            })
-          );
+              canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
+            }),
+            shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
+            shouldStopExecution: () => this.cancelled,
+          },
+          params,
+          state: ruleTypeState as RuleState,
+          startedAt: this.taskInstance.startedAt!,
+          previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
+          spaceId,
+          namespace,
+          name,
+          tags,
+          createdBy,
+          updatedBy,
+          rule: {
+            name,
+            tags,
+            consumer,
+            producer: ruleType.producer,
+            ruleTypeId: rule.alertTypeId,
+            ruleTypeName: ruleType.name,
+            enabled,
+            schedule,
+            actions,
+            createdBy,
+            updatedBy,
+            createdAt,
+            updatedAt,
+            throttle,
+            notifyWhen,
+            muteAll,
+            snoozeSchedule,
+          },
+        })
+      );
+    } catch (err) {
+      this.alertingEventLogger.setExecutionFailed(
+        `rule execution failure: ${ruleLabel}`,
+        err.message
+      );
+      this.logger.error(err, {
+        tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
+        error: { stack_trace: err.stack },
+      });
+      throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Execute, err);
+    }
 
           // Rule type execution has successfully completed
           // Check that the rule type either never requested the max alerts limit

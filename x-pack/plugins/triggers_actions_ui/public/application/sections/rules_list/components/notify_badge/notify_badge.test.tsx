@@ -10,11 +10,11 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import moment from 'moment';
 
-import { RuleTableItem } from '../../../../types';
+import { RuleTableItem } from '../../../../../types';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { RulesListNotifyBadge } from './rules_list_notify_badge';
+import { RulesListNotifyBadge } from './notify_badge';
 
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../../common/lib/kibana');
 
 const onClick = jest.fn();
 const onClose = jest.fn();

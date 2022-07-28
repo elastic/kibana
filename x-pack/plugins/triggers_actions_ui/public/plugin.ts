@@ -62,7 +62,7 @@ import type {
   RuleEventLogListProps,
   RuleEventLogListOptions,
   RulesListProps,
-  RulesListNotifyBadgeProps,
+  RulesListNotifyBadgePropsWithApi,
   AlertsTableConfigurationRegistry,
   CreateConnectorFlyoutProps,
   EditConnectorFlyoutProps,
@@ -124,8 +124,8 @@ export interface TriggersAndActionsUIPublicPluginStart {
   ) => ReactElement<RuleEventLogListProps<T>>;
   getRulesList: (props: RulesListProps) => ReactElement;
   getRulesListNotifyBadge: (
-    props: RulesListNotifyBadgeProps
-  ) => ReactElement<RulesListNotifyBadgeProps>;
+    props: RulesListNotifyBadgePropsWithApi
+  ) => ReactElement<RulesListNotifyBadgePropsWithApi>;
   getRuleDefinition: (props: RuleDefinitionProps) => ReactElement<RuleDefinitionProps>;
   getRuleStatusPanel: (props: RuleStatusPanelProps) => ReactElement<RuleStatusPanelProps>;
   getAlertSummaryWidget: (props: AlertSummaryWidgetProps) => ReactElement<AlertSummaryWidgetProps>;
@@ -406,7 +406,7 @@ export class Plugin
       getRuleEventLogList: <T extends RuleEventLogListOptions>(props: RuleEventLogListProps<T>) => {
         return getRuleEventLogListLazy(props);
       },
-      getRulesListNotifyBadge: (props: RulesListNotifyBadgeProps) => {
+      getRulesListNotifyBadge: (props: RulesListNotifyBadgePropsWithApi) => {
         return getRulesListNotifyBadgeLazy(props);
       },
       getRulesList: (props: RulesListProps) => {
