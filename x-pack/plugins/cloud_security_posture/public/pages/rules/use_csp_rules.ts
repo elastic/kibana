@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useQuery, useMutation, useQueryClient } from 'react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FunctionKeys } from 'utility-types';
 import type { SavedObjectsFindOptions, SimpleSavedObject } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';

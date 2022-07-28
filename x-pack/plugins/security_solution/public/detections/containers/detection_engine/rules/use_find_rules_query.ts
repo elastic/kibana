@@ -6,8 +6,8 @@
  */
 
 import { useCallback } from 'react';
-import type { UseQueryOptions } from 'react-query';
-import { useQuery, useQueryClient } from 'react-query';
+import type { UseQueryOptions } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { fetchRules } from './api';
 import * as i18n from './translations';
@@ -78,7 +78,7 @@ export const useInvalidateRules = () => {
      * Invalidate all queries that start with FIND_RULES_QUERY_KEY. This
      * includes the in-memory query cache and paged query cache.
      */
-    queryClient.invalidateQueries(FIND_RULES_QUERY_KEY, {
+    queryClient.invalidateQueries([FIND_RULES_QUERY_KEY], {
       refetchActive: true,
       refetchInactive: false,
     });
@@ -103,16 +103,13 @@ export const useUpdateRulesCache = () => {
    */
   return useCallback(
     (newRules: Rule[]) => {
-      queryClient.setQueriesData<ReturnType<typeof useFindRulesQuery>['data']>(
-        FIND_RULES_QUERY_KEY,
-        (currentData) =>
-          currentData
-            ? {
-                rules: updateRules(currentData.rules, newRules),
-                total: currentData.total,
-              }
-            : undefined
-      );
+      queryClient.setQueriesData<ReturnType<typeof useFindRulesQuery>['data']>([FIND_RULES_QUERY_KEY], (currentData) =>
+        currentData
+          ? {
+              rules: updateRules(currentData.rules, newRules),
+              total: currentData.total,
+            }
+          : undefined);
     },
     [queryClient]
   );

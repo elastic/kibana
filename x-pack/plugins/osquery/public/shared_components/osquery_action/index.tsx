@@ -7,7 +7,7 @@
 
 import { EuiErrorBoundary, EuiLoadingContent, EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { QueryClientProvider } from 'react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import type { CoreStart } from '@kbn/core/public';
 import {
   AGENT_STATUS_ERROR,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation, useQueryClient } from 'react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '../common/lib/kibana';

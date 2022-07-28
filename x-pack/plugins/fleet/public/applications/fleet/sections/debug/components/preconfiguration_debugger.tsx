@@ -17,7 +17,7 @@ import {
   EuiLink,
   EuiConfirmModal,
 } from '@elastic/eui';
-import { useMutation, useQuery } from 'react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -54,10 +54,7 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
   const [isResetModalVisible, setIsResetModalVisible] = useState(false);
   const [isResetAllModalVisible, setIsResetAllModalVisible] = useState(false);
 
-  const preconfiguredPolicies = useQuery(
-    'debug-preconfigured-policies',
-    fetchPreconfiguredPolicies
-  );
+  const preconfiguredPolicies = useQuery(['debug-preconfigured-policies'], fetchPreconfiguredPolicies);
 
   const comboBoxOptions =
     preconfiguredPolicies.data?.map((policy) => ({

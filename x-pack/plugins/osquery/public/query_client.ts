@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-empty-function */
 
-import { QueryClient, setLogger } from 'react-query';
+import { QueryClient, setLogger } from '@tanstack/react-query';
 
 setLogger({
   log: () => {},

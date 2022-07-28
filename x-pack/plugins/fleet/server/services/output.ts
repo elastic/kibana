@@ -50,10 +50,8 @@ const fakeRequest = {
 
 // differentiate
 function isUUID(val: string) {
-  return (
-    typeof val === 'string' &&
-    val.match(/[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}/)
-  );
+  return typeof val === 'string' &&
+  val.match(/[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}/);
 }
 
 export function outputIdToUuid(id: string) {

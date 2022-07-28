@@ -26,19 +26,17 @@ function isValidIndexNameLength(indexName: string) {
 // rules taken from
 // https://github.com/elastic/elasticsearch/blob/master/docs/reference/indices/create-index.asciidoc
 export function isValidIndexName(indexName: string) {
-  return (
-    typeof indexName === 'string' &&
-    // Lowercase only
-    indexName === indexName.toLowerCase() &&
-    // Cannot include \, /, *, ?, ", <, >, |, space character, comma, #, :
-    /^[^\*\\/\?"<>|\s,#:]+$/.test(indexName) &&
-    // Cannot start with -, _, +
-    /^[^-_\+]+$/.test(indexName.charAt(0)) &&
-    // Cannot be . or ..
-    indexName !== '.' &&
-    indexName !== '..' &&
-    // Cannot be longer than 255 bytes (note it is bytes,
-    // so multi-byte characters will count towards the 255 limit faster)
-    isValidIndexNameLength(indexName)
-  );
+  return typeof indexName === 'string' &&
+  // Lowercase only
+  indexName === indexName.toLowerCase() &&
+  // Cannot include \, /, *, ?, ", <, >, |, space character, comma, #, :
+  /^[^\*\\/\?"<>|\s,#:]+$/.test(indexName) &&
+  // Cannot start with -, _, +
+  /^[^-_\+]+$/.test(indexName.charAt(0)) &&
+  // Cannot be . or ..
+  indexName !== '.' &&
+  indexName !== '..' &&
+  // Cannot be longer than 255 bytes (note it is bytes,
+  // so multi-byte characters will count towards the 255 limit faster)
+  isValidIndexNameLength(indexName);
 }

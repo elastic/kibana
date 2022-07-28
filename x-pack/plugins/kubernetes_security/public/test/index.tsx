@@ -8,7 +8,7 @@
 import React, { memo, ReactNode, useMemo } from 'react';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
-import { QueryClient, QueryClientProvider, setLogger } from 'react-query';
+import { QueryClient, QueryClientProvider, setLogger } from '@tanstack/react-query';
 import { Router } from 'react-router-dom';
 import { History } from 'history';
 import useObservable from 'react-use/lib/useObservable';

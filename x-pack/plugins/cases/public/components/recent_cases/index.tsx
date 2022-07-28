@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText, EuiTitle } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { QueryClientProvider } from 'react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import * as i18n from './translations';
 import { LinkAnchor } from '../links';
 import { RecentCasesFilters } from './filters';

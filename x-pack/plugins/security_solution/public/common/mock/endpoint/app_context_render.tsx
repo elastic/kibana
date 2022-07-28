@@ -13,7 +13,7 @@ import type { RenderOptions, RenderResult } from '@testing-library/react';
 import { render as reactRender } from '@testing-library/react';
 import type { Action, Reducer, Store } from 'redux';
 import type { AppDeepLink } from '@kbn/core/public';
-import { QueryClient, QueryClientProvider, setLogger } from 'react-query';
+import { QueryClient, QueryClientProvider, setLogger } from '@tanstack/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import type { RenderHookOptions, RenderHookResult } from '@testing-library/react-hooks';
@@ -22,7 +22,7 @@ import type {
   ReactHooksRenderer,
   WrapperComponent,
 } from '@testing-library/react-hooks/src/types/react';
-import type { UseBaseQueryResult } from 'react-query/types/react/types';
+import type { UseBaseQueryResult } from '@tanstack/react-query/types/react/types';
 import ReactDOM from 'react-dom';
 import { ConsoleManager } from '../../../management/components/console';
 import type { StartPlugins, StartServices } from '../../../types';

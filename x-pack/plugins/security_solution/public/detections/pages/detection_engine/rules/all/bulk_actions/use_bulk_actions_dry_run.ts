@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { UseMutateAsyncFunction } from 'react-query';
-import { useMutation } from 'react-query';
+import type { UseMutateAsyncFunction } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 
 import type {
   BulkAction,

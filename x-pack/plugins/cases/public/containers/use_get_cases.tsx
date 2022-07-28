@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery, UseQueryResult } from 'react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { CASE_LIST_CACHE_KEY, DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from './constants';
 import { Cases, FilterOptions, QueryParams, SortFieldCase, StatusAll, SeverityAll } from './types';
 import { useToasts } from '../common/lib/kibana';

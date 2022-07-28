@@ -117,53 +117,51 @@ export const AppRoutes = memo(() => {
   const flyoutContext = useFlyoutContext();
   const fleetStatus = useFleetStatus();
 
-  return (
-    <>
-      <Switch>
-        <Route path={INTEGRATIONS_ROUTING_PATHS.integrations}>
-          <EPMApp />
-        </Route>
-        <Route
-          render={({ location }) => {
-            // BWC < 7.15 Fleet was using a hash router: redirect old routes using hash
-            const shouldRedirectHash = location.pathname === '' && location.hash.length > 0;
-            if (!shouldRedirectHash) {
-              return <Redirect to={pagePathGetters.integrations_all({})[1]} />;
-            }
-            const pathname = location.hash.replace(/^#/, '');
+  return <>
+    <Switch>
+      <Route path={INTEGRATIONS_ROUTING_PATHS.integrations}>
+        <EPMApp />
+      </Route>
+      <Route
+        render={({ location }) => {
+          // BWC < 7.15 Fleet was using a hash router: redirect old routes using hash
+          const shouldRedirectHash = location.pathname === '' && location.hash.length > 0;
+          if (!shouldRedirectHash) {
+            return <Redirect to={pagePathGetters.integrations_all({})[1]} />;
+          }
+          const pathname = location.hash.replace(/^#/, '');
 
-            return (
-              <Redirect
-                to={{
-                  ...location,
-                  pathname,
-                  hash: undefined,
-                }}
-              />
-            );
-          }}
+          return (
+            <Redirect
+              to={{
+                ...location,
+                pathname,
+                hash: undefined,
+              }}
+            />
+          );
+        }}
+      />
+    </Switch>
+
+    {flyoutContext.isEnrollmentFlyoutOpen && (
+      <EuiPortal>
+        <AgentEnrollmentFlyout
+          defaultMode={
+            fleetStatus.isReady && fleetStatus.missingRequirements?.includes('fleet_server')
+              ? 'managed'
+              : 'standalone'
+          }
+          isIntegrationFlow={true}
+          onClose={() => flyoutContext.closeEnrollmentFlyout()}
         />
-      </Switch>
+      </EuiPortal>
+    )}
 
-      {flyoutContext.isEnrollmentFlyoutOpen && (
-        <EuiPortal>
-          <AgentEnrollmentFlyout
-            defaultMode={
-              fleetStatus.isReady && fleetStatus.missingRequirements?.includes('fleet_server')
-                ? 'managed'
-                : 'standalone'
-            }
-            isIntegrationFlow={true}
-            onClose={() => flyoutContext.closeEnrollmentFlyout()}
-          />
-        </EuiPortal>
-      )}
-
-      {flyoutContext.isFleetServerFlyoutOpen && (
-        <EuiPortal>
-          <FleetServerFlyout onClose={() => flyoutContext.closeFleetServerFlyout()} />
-        </EuiPortal>
-      )}
-    </>
-  );
+    {flyoutContext.isFleetServerFlyoutOpen && (
+      <EuiPortal>
+        <FleetServerFlyout onClose={() => flyoutContext.closeFleetServerFlyout()} />
+      </EuiPortal>
+    )}
+  </>;
 });
