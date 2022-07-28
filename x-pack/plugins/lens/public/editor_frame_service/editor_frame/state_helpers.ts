@@ -175,6 +175,7 @@ export async function initializeSources(
       initialContext,
       indexPatternRefs,
       indexPatterns,
+      references,
     }),
   };
 }
