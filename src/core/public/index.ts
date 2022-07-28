@@ -220,13 +220,11 @@ export type {
   ResolveDeprecationResponse,
 } from '@kbn/core-deprecations-browser';
 
-export type { PublicUiSettingsParams } from '@kbn/core-ui-settings-common';
+export type { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
 
 export type {
-  MountPoint,
   MountWrapperComponent,
   MountWrapperComponentProps,
-  UnmountCallback,
   OverlayRef,
 } from '@kbn/core-mount-utils-browser';
 
