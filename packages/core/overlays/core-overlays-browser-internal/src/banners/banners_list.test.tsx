@@ -12,7 +12,7 @@ import { mount } from 'enzyme';
 
 import { BannersList } from './banners_list';
 import { BehaviorSubject } from 'rxjs';
-import { type OverlayBanner } from './banners_service';
+import type { OverlayBanner } from './banners_service';
 
 describe('BannersList', () => {
   test('renders null if no banners', () => {
