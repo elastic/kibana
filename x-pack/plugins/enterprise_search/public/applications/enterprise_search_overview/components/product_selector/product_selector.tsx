@@ -154,7 +154,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
                     defaultMessage: 'Search UI for Elasticsearch',
                   }
                 ),
-                to: 'https://docs.elastic.co/search-ui/tutorials/elasticsearch',
+                to: docLinks.searchUIElasticsearch,
               },
             ]}
             url={ELASTICSEARCH_PLUGIN.URL}
@@ -205,7 +205,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
                       defaultMessage: 'Search UI for App Search',
                     }
                   ),
-                  to: 'https://docs.elastic.co/search-ui/tutorials/app-search',
+                  to: docLinks.searchUIAppSearch,
                 },
                 {
                   label: i18n.translate(

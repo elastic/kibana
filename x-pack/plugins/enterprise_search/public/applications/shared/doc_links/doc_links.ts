@@ -68,6 +68,8 @@ class DocLinks {
   public licenseManagement: string;
   public pluginsIngestAttachment: string;
   public queryDsl: string;
+  public searchUIAppSearch: string;
+  public searchUIElasticsearch: string;
   public start: string;
   public workplaceSearchApiKeys: string;
   public workplaceSearchBox: string;
@@ -166,6 +168,8 @@ class DocLinks {
     this.licenseManagement = '';
     this.pluginsIngestAttachment = '';
     this.queryDsl = '';
+    this.searchUIAppSearch = '';
+    this.searchUIElasticsearch = '';
     this.start = '';
     this.workplaceSearchApiKeys = '';
     this.workplaceSearchBox = '';
@@ -266,6 +270,8 @@ class DocLinks {
     this.licenseManagement = docLinks.links.enterpriseSearch.licenseManagement;
     this.pluginsIngestAttachment = docLinks.links.plugins.ingestAttachment;
     this.queryDsl = docLinks.links.query.queryDsl;
+    this.searchUIAppSearch = docLinks.links.searchUI.appSearch;
+    this.searchUIElasticsearch = docLinks.links.searchUI.elasticsearch;
     this.start = docLinks.links.enterpriseSearch.start;
     this.workplaceSearchApiKeys = docLinks.links.workplaceSearch.apiKeys;
     this.workplaceSearchBox = docLinks.links.workplaceSearch.box;
