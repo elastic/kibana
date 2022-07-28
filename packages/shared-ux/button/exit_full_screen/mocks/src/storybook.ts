@@ -14,6 +14,10 @@ import type {
 } from '@kbn/shared-ux-button-exit-full-screen-types';
 
 type PropArguments = Pick<Props, 'toggleChrome'>;
+
+/**
+ * Argument parameters for the `ExitFullScreenButton` Storybook mock.
+ */
 export type Params = ArgumentParams<PropArguments>;
 
 /**

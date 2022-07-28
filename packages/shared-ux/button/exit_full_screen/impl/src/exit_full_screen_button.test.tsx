@@ -32,6 +32,7 @@ export const kibanaMount = (element: JSX.Element) =>
       {element}
     </ExitFullScreenButtonKibanaProvider>
   );
+
 describe('<ExitFullScreenButton />', () => {
   afterEach(() => {
     jest.resetAllMocks();
@@ -64,24 +65,24 @@ describe('<ExitFullScreenButton />', () => {
       });
 
       test('is called when the button is pressed', () => {
-        expect(componentServices.setIsFullscreen).toHaveBeenLastCalledWith(false);
+        expect(componentServices.setIsFullscreen).toHaveBeenLastCalledWith(true);
 
         component.find('button').simulate('click');
         expect(onExitHandler).toHaveBeenCalledTimes(1);
 
         component.unmount();
-        expect(componentServices.setIsFullscreen).toHaveBeenLastCalledWith(true);
+        expect(componentServices.setIsFullscreen).toHaveBeenLastCalledWith(false);
       });
 
       test('is called when the ESC key is pressed', () => {
-        expect(componentServices.setIsFullscreen).toHaveBeenLastCalledWith(false);
+        expect(componentServices.setIsFullscreen).toHaveBeenLastCalledWith(true);
 
         const escapeKeyEvent = new KeyboardEvent('keydown', { key: keys.ESCAPE } as any);
         document.dispatchEvent(escapeKeyEvent);
         expect(onExitHandler).toHaveBeenCalledTimes(1);
 
         component.unmount();
-        expect(componentServices.setIsFullscreen).toHaveBeenLastCalledWith(true);
+        expect(componentServices.setIsFullscreen).toHaveBeenLastCalledWith(false);
       });
     });
   });

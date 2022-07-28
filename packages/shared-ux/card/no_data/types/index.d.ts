@@ -53,7 +53,7 @@ interface KibanaDependencies {
 export type NoDataCardKibanaDependencies = KibanaDependencies & RedirectAppLinksKibanaDependencies;
 
 /**
- * Props for the `NoDataDataCard` pure component.
+ * Props for the `NoDataCard` pure component.
  */
 export type NoDataCardComponentProps = Partial<
   Omit<EuiCardProps, 'layout' | 'isDisabled' | 'button' | 'onClick' | 'description'>
@@ -77,6 +77,6 @@ export type NoDataCardComponentProps = Partial<
 };
 
 /**
- * Props for the `NoDataDataCard` sevice-connected component.
+ * Props for the `NoDataCard` sevice-connected component.
  */
 export type NoDataCardProps = Omit<NoDataCardComponentProps, 'canAccessFleet'>;

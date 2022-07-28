@@ -7,13 +7,12 @@
  */
 
 import React from 'react';
-import {
-  ExitFullScreenButtonStorybookMock,
-  ExitFullScreenButtonStorybookParams,
-} from '@kbn/shared-ux-button-exit-full-screen-mocks';
+import { ExitFullScreenButtonStorybookMock } from '@kbn/shared-ux-button-exit-full-screen-mocks';
+import type { ExitFullScreenButtonStorybookParams } from '@kbn/shared-ux-button-exit-full-screen-mocks';
 
 import { ExitFullScreenButtonProvider } from './services';
 import { ExitFullScreenButton as Component } from './exit_full_screen_button';
+
 import mdx from '../README.mdx';
 
 export default {

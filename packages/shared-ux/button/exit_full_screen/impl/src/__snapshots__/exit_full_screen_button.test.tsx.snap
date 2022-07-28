@@ -211,7 +211,7 @@ exports[`<ExitFullScreenButton /> with manual services is rendered 1`] = `
     [MockFunction] {
       "calls": Array [
         Array [
-          false,
+          true,
         ],
       ],
       "results": Array [

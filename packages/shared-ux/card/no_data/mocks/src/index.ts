@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { getServicesMock as getNoDataCardServicesMock } from './jest';
+export {
+  getServicesMock as getNoDataCardServicesMock,
+  getKibanaDependenciesMock as getNoDataCardKibanaDependenciesMock,
+} from './jest';
 
 export { StorybookMock as NoDataCardStorybookMock } from './storybook';
 export type { Params as NoDataCardStorybookParams } from './storybook';

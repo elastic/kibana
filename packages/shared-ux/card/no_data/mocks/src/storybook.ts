@@ -23,7 +23,7 @@ export type Params = Record<keyof Arguments, any>;
 const redirectMock = new RedirectAppLinksStorybookMock();
 
 /**
- * Storybook mocks for the `NoDataDataCard` component.
+ * Storybook mocks for the `NoDataCard` component.
  */
 export class StorybookMock extends AbstractStorybookMock<
   NoDataCardProps,

@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { RedirectAppLinksServices } from '@kbn/shared-ux-link-redirect-app-types';
+import { Subject } from 'rxjs';
+
+import {
+  RedirectAppLinksServices,
+  RedirectAppLinksKibanaDependencies,
+} from '@kbn/shared-ux-link-redirect-app-types';
 
 /**
  * Returns the Jest-compatible service abstractions for the `NoDataCard` Provider.
@@ -18,4 +23,15 @@ export const getRedirectAppLinksServicesMock = () => {
   };
 
   return services;
+};
+
+export const getRedirectAppLinksKibanaDependenciesMock = (): RedirectAppLinksKibanaDependencies => {
+  return {
+    coreStart: {
+      application: {
+        currentAppId$: new Subject<string>(),
+        navigateToUrl: jest.fn(),
+      },
+    },
+  };
 };

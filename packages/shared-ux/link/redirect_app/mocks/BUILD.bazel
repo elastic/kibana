@@ -38,6 +38,7 @@ NPM_MODULE_EXTRA_FILES = [
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
   "@npm//@storybook/addon-actions",
+  "@npm//rxjs",
   "//packages/shared-ux/storybook/mock",
 ]
 
@@ -52,6 +53,7 @@ RUNTIME_DEPS = [
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
   "@npm//@storybook/addon-actions",
+  "@npm//rxjs",
   "//packages/shared-ux/link/redirect_app/types",
   "//packages/shared-ux/storybook/mock:npm_module_types",
 ]

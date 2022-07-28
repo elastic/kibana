@@ -38,6 +38,7 @@ NPM_MODULE_EXTRA_FILES = [
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
   "@npm//@storybook/addon-actions",
+  "@npm//deepmerge",
   "//packages/shared-ux/link/redirect_app/mocks",
   "//packages/shared-ux/storybook/mock",
 ]
@@ -55,6 +56,7 @@ TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
   "@npm//@storybook/addon-actions",
+  "@npm//deepmerge",
   "//packages/shared-ux/storybook/mock:npm_module_types",
   "//packages/shared-ux/link/redirect_app/mocks:npm_module_types",
   "//packages/shared-ux/card/no_data/types:npm_module_types",

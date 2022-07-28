@@ -7,8 +7,8 @@
  */
 
 export {
-  getExitFullScreenButtonKibanaDependenciesMock,
-  getExitFullScreenButtonServicesMock,
+  getKibanaDependenciesMock as getExitFullScreenButtonKibanaDependenciesMock,
+  getServicesMock as getExitFullScreenButtonServicesMock,
 } from './jest';
 
 export { StorybookMock as ExitFullScreenButtonStorybookMock } from './storybook';
