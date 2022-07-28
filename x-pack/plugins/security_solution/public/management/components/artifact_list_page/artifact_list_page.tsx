@@ -111,7 +111,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
 
     useEffect(() => {
       if (!isLoading && error) {
-        toasts.addDanger((error.body as ServerApiError).message || error.message);
+        toasts.addDanger((error?.body as ServerApiError)?.message || error.message);
       }
     }, [error, toasts, isLoading]);
 
