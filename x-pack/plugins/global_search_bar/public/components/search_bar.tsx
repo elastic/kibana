@@ -294,6 +294,7 @@ export const SearchBar: FC<SearchBarProps> = ({
       isPreFiltered
       onChange={onChange}
       options={options}
+      className="kbnSearchBar"
       popoverButtonBreakpoints={['xs', 's']}
       singleSelection={true}
       renderOption={(option) => euiSelectableTemplateSitewideRenderOptions(option, searchTerm)}
@@ -303,7 +304,6 @@ export const SearchBar: FC<SearchBarProps> = ({
         'data-test-subj': 'nav-search-input',
         inputRef: setSearchRef,
         compressed: true,
-        className: 'kbnSearchBar',
         'aria-label': placeholderText,
         placeholder: placeholderText,
         onFocus: () => {
@@ -312,7 +312,7 @@ export const SearchBar: FC<SearchBarProps> = ({
           setShowAppend(false);
         },
         onBlur: () => {
-          setShowAppend(true);
+          setShowAppend(!searchValue.length);
         },
         fullWidth: true,
         append: showAppend ? (
