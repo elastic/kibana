@@ -12,7 +12,7 @@ import * as esKuery from '@kbn/es-query';
 
 type KueryNode = any;
 
-import { ALL_NAMESPACES_STRING, DEFAULT_NAMESPACE_STRING } from '../utils';
+import { ALL_NAMESPACES_STRING, DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
 import { getQueryParams } from './query_params';
 
