@@ -15,8 +15,8 @@ import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
+import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import { ErrorToast } from './error_toast';
-import { mountReactNode } from '../../utils';
 
 /**
  * Allowed fields for {@link ToastInput}.

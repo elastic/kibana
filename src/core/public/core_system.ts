@@ -27,6 +27,7 @@ import { UiSettingsService } from '@kbn/core-ui-settings-browser-internal';
 import { DeprecationsService } from '@kbn/core-deprecations-browser-internal';
 import { IntegrationsService } from '@kbn/core-integrations-browser-internal';
 import { OverlayService } from '@kbn/core-overlays-browser-internal';
+import { KBN_LOAD_MARKS } from '@kbn/core-mount-utils-browser-internal';
 import { CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
 import { NotificationsService } from './notifications';
@@ -37,7 +38,6 @@ import { SavedObjectsService } from './saved_objects';
 import { CoreApp } from './core_app';
 import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
-import { KBN_LOAD_MARKS } from './utils';
 
 interface Params {
   rootDomElement: HTMLElement;
