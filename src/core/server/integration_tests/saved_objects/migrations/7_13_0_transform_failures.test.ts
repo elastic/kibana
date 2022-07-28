@@ -18,7 +18,7 @@ import { Root } from '../../../root';
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { getMigrationDocLink } from './test_utils';
 
-const migrationDocLink = getMigrationDocLink();
+const migrationDocLink = getMigrationDocLink().resolveMigrationFailures;
 const logFilePath = Path.join(__dirname, '7_13_corrupt_transform_failures.log');
 
 const asyncUnlink = Util.promisify(Fs.unlink);

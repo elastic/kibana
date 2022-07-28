@@ -13,7 +13,7 @@ import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '../../../root';
 import { getMigrationDocLink } from './test_utils';
 
-const migrationDocLink = getMigrationDocLink();
+const migrationDocLink = getMigrationDocLink().resolveMigrationFailures;
 const logFilePath = Path.join(__dirname, 'collects_corrupt_docs.log');
 
 const asyncUnlink = Util.promisify(Fs.unlink);
