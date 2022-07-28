@@ -25,7 +25,7 @@ function getAllowedOriginsRt() {
                 context,
                 i18n.translate(
                   'xpack.apm.fleet_integration.settings.rum.allowedHeadersValidation',
-                  { defaultMessage: 'Invalid value. Array is not allowed' }
+                  { defaultMessage: 'Square brackets not allowed' }
                 )
               )
             : t.success(inputAsString);
