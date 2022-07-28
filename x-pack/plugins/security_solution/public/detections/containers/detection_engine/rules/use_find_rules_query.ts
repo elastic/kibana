@@ -79,8 +79,7 @@ export const useInvalidateRules = () => {
      * includes the in-memory query cache and paged query cache.
      */
     queryClient.invalidateQueries([FIND_RULES_QUERY_KEY], {
-      refetchActive: true,
-      refetchInactive: false,
+      refetchType: 'active',
     });
   }, [queryClient]);
 };

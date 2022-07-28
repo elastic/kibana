@@ -9,8 +9,8 @@ import { QueryClient } from '@tanstack/react-query';
 
 export const queryClient = new QueryClient({
   logger: {
-    log: () => {},
-    warn: () => {},
-    error: () => {},
+    log: () => null,
+    warn: () => null,
+    error: () => null,
   },
 });

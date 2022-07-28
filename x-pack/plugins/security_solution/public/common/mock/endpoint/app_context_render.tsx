@@ -89,7 +89,6 @@ export type WaitForReactHookState =
       | 'isSuccess'
       | 'isLoading'
       | 'isError'
-      | 'isIdle'
       | 'isLoadingError'
       | 'isStale'
       | 'isFetched'

@@ -63,8 +63,7 @@ export const useInvalidatePrePackagedRulesStatus = () => {
 
   return useCallback(() => {
     queryClient.invalidateQueries([PRE_PACKAGED_RULES_STATUS_QUERY_KEY], {
-      refetchActive: true,
-      refetchInactive: false,
+      refetchType: 'active',
     });
   }, [queryClient]);
 };
