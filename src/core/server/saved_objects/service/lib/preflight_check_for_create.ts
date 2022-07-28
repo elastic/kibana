@@ -17,8 +17,11 @@ import {
   SavedObjectsErrorHelpers,
   ALL_NAMESPACES_STRING,
 } from '@kbn/core-saved-objects-utils-server';
-import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
-import type { SavedObjectsSerializer } from '../../serialization';
+import {
+  LEGACY_URL_ALIAS_TYPE,
+  type LegacyUrlAlias,
+  type SavedObjectsSerializer,
+} from '@kbn/core-saved-objects-base-server-internal';
 import { findLegacyUrlAliases } from './legacy_url_aliases';
 import { Either, rawDocExistsInNamespaces } from './internal_utils';
 import { getObjectKey, isLeft, isRight } from './internal_utils';

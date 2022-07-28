@@ -70,16 +70,21 @@ import {
   FIND_DEFAULT_PER_PAGE,
   SavedObjectsUtils,
 } from '@kbn/core-saved-objects-utils-server';
-import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
+import {
+  SavedObjectsSerializer,
+  SavedObjectsTypeValidator,
+  decodeRequestVersion,
+  encodeVersion,
+  encodeHitVersion,
+  getRootPropertiesObjects,
+  LEGACY_URL_ALIAS_TYPE,
+  type IndexMapping,
+} from '@kbn/core-saved-objects-base-server-internal';
 import { PointInTimeFinder } from './point_in_time_finder';
 import { createRepositoryEsClient, RepositoryEsClient } from './repository_es_client';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
-import { decodeRequestVersion, encodeVersion, encodeHitVersion } from '../../version';
 import { IKibanaMigrator } from '../../migrations';
-import { SavedObjectsSerializer } from '../../serialization';
-import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
-import { SavedObjectsTypeValidator } from '../../validation';
 import { internalBulkResolve, InternalBulkResolveError } from './internal_bulk_resolve';
 import { validateConvertFilterToKueryNode } from './filter_utils';
 import { validateAndConvertAggregations } from './aggregations';

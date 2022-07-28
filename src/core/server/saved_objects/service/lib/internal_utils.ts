@@ -18,7 +18,10 @@ import {
   SavedObjectsUtils,
   ALL_NAMESPACES_STRING,
 } from '@kbn/core-saved-objects-utils-server';
-import { decodeRequestVersion, encodeHitVersion } from '../../version';
+import {
+  decodeRequestVersion,
+  encodeHitVersion,
+} from '@kbn/core-saved-objects-base-server-internal';
 
 /**
  * Discriminated union (TypeScript approximation of an algebraic data type); this design pattern is used for internal repository operations.

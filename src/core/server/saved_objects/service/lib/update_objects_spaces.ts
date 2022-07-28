@@ -27,8 +27,10 @@ import {
   ALL_NAMESPACES_STRING,
   type DecoratedError,
 } from '@kbn/core-saved-objects-utils-server';
-import type { IndexMapping } from '../../mappings';
-import type { SavedObjectsSerializer } from '../../serialization';
+import type {
+  IndexMapping,
+  SavedObjectsSerializer,
+} from '@kbn/core-saved-objects-base-server-internal';
 import {
   getBulkOperationError,
   getExpectedVersionProperties,
