@@ -55,8 +55,8 @@ import type {
   SavedObjectsMappingProperties,
   SavedObjectsTypeMappingDefinition,
 } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsRepository } from './repository';
-import { SavedObjectsErrorHelpers } from './errors';
 import { PointInTimeFinder } from './point_in_time_finder';
 import { ALL_NAMESPACES_STRING } from './utils';
 import { loggerMock } from '@kbn/logging-mocks';

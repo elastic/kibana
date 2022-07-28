@@ -58,9 +58,9 @@ import type {
   SavedObjectMigrationFn,
   SavedObjectMigrationMap,
 } from '@kbn/core-saved-objects-server';
+import { DEFAULT_NAMESPACE_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { MigrationLogger } from './migration_logger';
 import { TransformSavedObjectDocumentError } from '.';
-import { DEFAULT_NAMESPACE_STRING, SavedObjectsUtils } from '../../service/lib/utils';
 import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 
 const DEFAULT_MINIMUM_CONVERT_VERSION = '8.0.0';

@@ -18,12 +18,12 @@ import type {
   SavedObjectsBulkResolveObject,
   SavedObjectsBaseOptions,
 } from '@kbn/core-saved-objects-api-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 import { SavedObjectsSerializer } from '../../serialization';
-import { SavedObjectsErrorHelpers } from './errors';
 import { internalBulkResolve, InternalBulkResolveParams } from './internal_bulk_resolve';
-import { SavedObjectsUtils } from './utils';
 import { normalizeNamespace } from './internal_utils';
 
 const VERSION_PROPS = { _seq_no: 1, _primary_term: 1 };

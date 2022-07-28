@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { SavedObjectsClientProvider } from './lib';
-export type { SavedObjectsRepository, ISavedObjectsClientProvider } from './lib';
-export { SavedObjectsClient } from './saved_objects_client';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/saved-objects/core-saved-objects-utils-server'],
+};

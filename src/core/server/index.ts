@@ -388,6 +388,11 @@ export type {
   ISavedObjectsSerializer,
   SavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server';
+export {
+  SavedObjectsErrorHelpers,
+  SavedObjectsUtils,
+  mergeSavedObjectMigrationMaps,
+} from '@kbn/core-saved-objects-utils-server';
 
 export type {
   SavedObjectsRepository,
@@ -398,11 +403,8 @@ export type {
 } from './saved_objects';
 export {
   SavedObjectsClient,
-  SavedObjectsErrorHelpers,
   SavedObjectsSerializer,
   SavedObjectTypeRegistry,
-  SavedObjectsUtils,
-  mergeSavedObjectMigrationMaps,
 } from './saved_objects';
 
 export type {

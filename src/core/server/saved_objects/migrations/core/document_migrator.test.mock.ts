@@ -7,8 +7,9 @@
  */
 
 const mockGetConvertedObjectId = jest.fn().mockReturnValue('uuidv5');
-jest.mock('../../service/lib/utils', () => {
-  const actual = jest.requireActual('../../service/lib/utils');
+
+jest.mock('@kbn/core-saved-objects-utils-server', () => {
+  const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
   return {
     ...actual,
     SavedObjectsUtils: {

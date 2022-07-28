@@ -3359,6 +3359,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-saved-objects-utils-server@link:bazel-bin/packages/core/saved-objects/core-saved-objects-utils-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-test-helpers-http-setup-browser@link:bazel-bin/packages/core/test-helpers/core-test-helpers-http-setup-browser":
   version "0.0.0"
   uid ""
@@ -7136,6 +7140,10 @@
   uid ""
 
 "@types/kbn__core-saved-objects-server@link:bazel-bin/packages/core/saved-objects/core-saved-objects-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-saved-objects-utils-server@link:bazel-bin/packages/core/saved-objects/core-saved-objects-utils-server/npm_module_types":
   version "0.0.0"
   uid ""
 

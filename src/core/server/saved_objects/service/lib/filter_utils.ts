@@ -9,7 +9,7 @@
 import { set } from '@elastic/safer-lodash-set';
 import { get, cloneDeep } from 'lodash';
 import * as esKuery from '@kbn/es-query';
-import { SavedObjectsErrorHelpers } from './errors';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 import { IndexMapping } from '../../mappings';
 
 type KueryNode = any;

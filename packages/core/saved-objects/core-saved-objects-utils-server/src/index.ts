@@ -6,6 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { SavedObjectsClientProvider } from './lib';
-export type { SavedObjectsRepository, ISavedObjectsClientProvider } from './lib';
-export { SavedObjectsClient } from './saved_objects_client';
+export { mergeSavedObjectMigrationMaps } from './merge_migration_maps';
+export { SavedObjectsErrorHelpers, type DecoratedError } from './saved_objects_error_helpers';
+export {
+  SavedObjectsUtils,
+  ALL_NAMESPACES_STRING,
+  DEFAULT_NAMESPACE_STRING,
+  FIND_DEFAULT_PAGE,
+  FIND_DEFAULT_PER_PAGE,
+} from './saved_objects_utils';

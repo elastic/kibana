@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 import type { InternalUiSettingsRouter } from '../internal_types';
-import { SavedObjectsErrorHelpers } from '../../saved_objects';
 
 export function registerGetRoute(router: InternalUiSettingsRouter) {
   router.get(
