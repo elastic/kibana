@@ -22,6 +22,8 @@ interface ColumnarCallerCallee {
   X: number[];
   Y: number[];
   Color: number[];
+  CountInclusive: number[];
+  CountExclusive: number[];
 }
 
 export interface ElasticFlameGraph {
@@ -30,6 +32,8 @@ export interface ElasticFlameGraph {
   Position: number[];
   Size: number[];
   Color: number[];
+  CountInclusive: number[];
+  CountExclusive: number[];
 }
 
 /*
@@ -153,6 +157,8 @@ export class FlameGraph {
       X: [],
       Y: [],
       Color: [],
+      CountInclusive: [],
+      CountExclusive: [],
     };
     const queue = [{ x: 0, depth: 1, node: root }];
 
@@ -168,6 +174,9 @@ export class FlameGraph {
       columnar.X.push(x);
       columnar.Y.push(depth);
       columnar.Color.push(frameTypeToRGB(node.FrameType, x));
+
+      columnar.CountInclusive.push(0);
+      columnar.CountExclusive.push(0);
 
       node.Callees.sort((a: CallerCalleeNode, b: CallerCalleeNode) => b.Samples - a.Samples);
 
@@ -194,10 +203,14 @@ export class FlameGraph {
       Position: [],
       Size: [],
       Color: [],
+      CountInclusive: [],
+      CountExclusive: [],
     };
 
     graph.Label = columnar.Label;
     graph.Value = columnar.Value;
+    graph.CountInclusive = columnar.CountInclusive;
+    graph.CountExclusive = columnar.CountExclusive;
 
     const maxX = columnar.Value[0];
     const maxY = columnar.Y.reduce((max, n) => (n > max ? n : max), 0);
