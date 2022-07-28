@@ -6,16 +6,11 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type {
-  CreateExceptionListSchema,
-  ExceptionListSchema,
-  ExceptionListType,
-} from '@kbn/securitysolution-io-ts-list-types';
 import { exceptionListSchema, ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 
-import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { addRuleExceptionsSchema, AddRuleExceptionSchemaDecoded } from '../../../../../common/detection_engine/schemas/request';
+import type { AddRuleExceptionSchemaDecoded } from '../../../../../common/detection_engine/schemas/request';
+import { addRuleExceptionsSchema } from '../../../../../common/detection_engine/schemas/request';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
@@ -33,10 +28,9 @@ export const addRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) => 
         query: buildRouteValidation<typeof queryRulesSchema, QueryRulesSchemaDecoded>(
           queryRulesSchema
         ),
-        body: buildRouteValidation<
-          typeof addRuleExceptionsSchema,
-          AddRuleExceptionSchemaDecoded
-        >(addRuleExceptionsSchema),
+        body: buildRouteValidation<typeof addRuleExceptionsSchema, AddRuleExceptionSchemaDecoded>(
+          addRuleExceptionsSchema
+        ),
       },
       options: {
         tags: ['access:securitySolution'],
@@ -80,7 +74,6 @@ export const addRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) => 
 
         if (ruleHasDefaultList) {
           // update items to include list_id
-
         } else {
           // create the default list
           const exceptionListAssociatedToRule = await listsClient?.createExceptionList({

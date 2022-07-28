@@ -8,14 +8,17 @@
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-import type { addRuleExceptions, AddRuleExceptionSchema } from './add_rule_exception_schema';
+import { addRuleExceptions } from './add_rule_exception_schema';
+import type { AddRuleExceptionSchema } from './add_rule_exception_schema';
 
-import { getCreateExceptionListItemSchemaMock, getCreateExceptionListItemMinimalSchemaMockWithoutId } from '../../../../../lists/common/schemas/request/create_exception_list_item_schema.mock';
+import {
+  getCreateExceptionListItemSchemaMock,
+  getCreateExceptionListItemMinimalSchemaMockWithoutId,
+} from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
 
 describe('addRuleExceptions', () => {
   test('empty objects do not validate', () => {
-    const payload: AddRuleExceptionSchema =
-      {} as AddRuleExceptionSchema;
+    const payload: AddRuleExceptionSchema = {} as AddRuleExceptionSchema;
 
     const decoded = addRuleExceptions.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -36,7 +39,10 @@ describe('addRuleExceptions', () => {
 
   test('all values validate', () => {
     const payload: AddRuleExceptionSchema = {
-      items: [getCreateExceptionListItemSchemaMock(), getCreateExceptionListItemMinimalSchemaMockWithoutId()],
+      items: [
+        getCreateExceptionListItemSchemaMock(),
+        getCreateExceptionListItemMinimalSchemaMockWithoutId(),
+      ],
     };
 
     const decoded = addRuleExceptions.decode(payload);
