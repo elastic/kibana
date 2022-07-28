@@ -65,7 +65,12 @@ export const AnomalyDetectionJobIdLink = (props: AnomalyDetectionJobIdLinkProps)
     );
   } else {
     return (
-      <EuiLink key={props.id} href={href} css={{ overflow: 'hidden', 'text-overflow': 'ellipsis' }}>
+      <EuiLink
+        key={props.id}
+        href={href}
+        css={{ overflow: 'hidden', 'text-overflow': 'ellipsis' }}
+        title={props.id}
+      >
         {props.id}
       </EuiLink>
     );
