@@ -282,7 +282,7 @@
             "label": "enterpriseSearch",
             "description": [],
             "signature": [
-              "{ readonly configuration: string; readonly licenseManagement: string; readonly mailService: string; readonly troubleshootSetup: string; readonly usersAccess: string; }"
+              "{ readonly bulkApi: string; readonly configuration: string; readonly crawlerGettingStarted: string; readonly crawlerManaging: string; readonly crawlerOverview: string; readonly languageAnalyzers: string; readonly licenseManagement: string; readonly mailService: string; readonly troubleshootSetup: string; readonly usersAccess: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false
@@ -510,7 +510,7 @@
             "label": "securitySolution",
             "description": [],
             "signature": [
-              "{ readonly trustedApps: string; readonly eventFilters: string; readonly blocklist: string; readonly policyResponseTroubleshooting: { full_disk_access: string; macos_system_ext: string; }; }"
+              "{ readonly trustedApps: string; readonly eventFilters: string; readonly blocklist: string; readonly policyResponseTroubleshooting: { full_disk_access: string; macos_system_ext: string; linux_deadlock: string; }; readonly threatIntelInt: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false
@@ -770,7 +770,7 @@
             "label": "fleet",
             "description": [],
             "signature": [
-              "{ readonly beatsAgentComparison: string; readonly guide: string; readonly fleetServer: string; readonly fleetServerAddFleetServer: string; readonly settings: string; readonly settingsFleetServerHostSettings: string; readonly settingsFleetServerProxySettings: string; readonly troubleshooting: string; readonly elasticAgent: string; readonly datastreams: string; readonly datastreamsILM: string; readonly datastreamsNamingScheme: string; readonly installElasticAgent: string; readonly installElasticAgentStandalone: string; readonly upgradeElasticAgent: string; readonly learnMoreBlog: string; readonly apiKeysLearnMore: string; readonly onPremRegistry: string; readonly secureLogstash: string; readonly agentPolicy: string; }"
+              "{ readonly beatsAgentComparison: string; readonly guide: string; readonly fleetServer: string; readonly fleetServerAddFleetServer: string; readonly settings: string; readonly settingsFleetServerHostSettings: string; readonly settingsFleetServerProxySettings: string; readonly troubleshooting: string; readonly elasticAgent: string; readonly datastreams: string; readonly datastreamsILM: string; readonly datastreamsNamingScheme: string; readonly installElasticAgent: string; readonly installElasticAgentStandalone: string; readonly packageSignatures: string; readonly upgradeElasticAgent: string; readonly learnMoreBlog: string; readonly apiKeysLearnMore: string; readonly onPremRegistry: string; readonly secureLogstash: string; readonly agentPolicy: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false

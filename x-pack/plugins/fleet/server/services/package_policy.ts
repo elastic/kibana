@@ -9,8 +9,9 @@ import { omit, partition, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import { getFlattenedObject } from '@kbn/std';
-import type { KibanaRequest } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type {
+  KibanaRequest,
   ElasticsearchClient,
   RequestHandlerContext,
   SavedObjectsClientContract,
@@ -484,7 +485,19 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
           throw new PackagePolicyRestrictionRelatedError(`Cannot delete package policy ${id}`);
         }
 
-        if (!options?.skipUnassignFromAgentPolicies) {
+        const agentPolicy = await agentPolicyService
+          .get(soClient, packagePolicy.policy_id)
+          .catch((err) => {
+            if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+              appContextService
+                .getLogger()
+                .warn(`Agent policy ${packagePolicy.policy_id} not found`);
+              return null;
+            }
+            throw err;
+          });
+
+        if (agentPolicy && !options?.skipUnassignFromAgentPolicies) {
           await agentPolicyService.unassignPackagePolicies(
             soClient,
             esClient,
@@ -1331,6 +1344,7 @@ export interface PackagePolicyServiceInterface {
     id: string
   ): Promise<{ packagePolicy: PackagePolicy; packageInfo: PackageInfo }>;
 }
+
 export const packagePolicyService: PackagePolicyServiceInterface = new PackagePolicyService();
 
 export type { PackagePolicyService };
