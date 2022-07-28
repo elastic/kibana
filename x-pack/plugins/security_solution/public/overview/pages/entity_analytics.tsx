@@ -5,13 +5,17 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../app/types';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { HeaderPage } from '../../common/components/header_page';
 import { LandingPageComponent } from '../../common/components/landing_page';
+import * as i18n from './translations';
+
+import { EntityAnalyticsHostRiskScores } from '../components/entity_analytics/host_risk_score';
 
 const EntityAnalyticsComponent = () => {
   const { indicesExist, indexPattern, loading: isSourcererLoading } = useSourcererDataView();
@@ -19,17 +23,23 @@ const EntityAnalyticsComponent = () => {
     <>
       {indicesExist ? (
         <>
-          <SecuritySolutionPageWrapper data-test-subj="detectionResponsePage">
-            <HeaderPage title={'olaaar'} />
+          <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsPage">
+            <HeaderPage title={i18n.ENTITY_ANALYTICS_TITLE} />
 
             {isSourcererLoading ? (
-              <EuiLoadingSpinner size="l" data-test-subj="detectionResponseLoader" />
+              <EuiLoadingSpinner size="l" data-test-subj="entityAnalyticsLoader" />
             ) : (
-              <EuiFlexGroup direction="column" data-test-subj="detectionResponseSections">
+              <EuiFlexGroup direction="column" data-test-subj="entityAnalyticsSections">
                 <EuiFlexItem>
-                  <EuiFlexGroup>
-                    <EuiFlexItem>{'oi'}</EuiFlexItem>
-                  </EuiFlexGroup>
+                  <EntityAnalyticsHeader />
+                </EuiFlexItem>
+
+                <EuiFlexItem>
+                  <EntityAnalyticsHostRiskScores />
+                </EuiFlexItem>
+
+                <EuiFlexItem>
+                  <EntityAnalyticsUserRiskScores />
                 </EuiFlexItem>
               </EuiFlexGroup>
             )}
@@ -43,5 +53,11 @@ const EntityAnalyticsComponent = () => {
     </>
   );
 };
+
+const EntityAnalyticsHeader = () => (
+  <EuiPanel hasBorder>{'60 Critica Hosts 90 Critical Users'}</EuiPanel>
+);
+
+const EntityAnalyticsUserRiskScores = () => <EuiPanel hasBorder>{'User Risk Scores'}</EuiPanel>;
 
 export const EntityAnalyticsPage = React.memo(EntityAnalyticsComponent);
