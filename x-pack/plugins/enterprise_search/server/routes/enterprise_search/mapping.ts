@@ -13,7 +13,7 @@ import { RouteDependencies } from '../../plugin';
 export function registerMappingRoute({ router }: RouteDependencies) {
   router.get(
     {
-      path: '/internal/enterprise_search/{index_name}/mapping',
+      path: '/internal/enterprise_search/mappings/{index_name}',
       validate: {
         params: schema.object({
           index_name: schema.string(),
@@ -30,8 +30,8 @@ export function registerMappingRoute({ router }: RouteDependencies) {
         });
       } catch (error) {
         return response.customError({
-          statusCode: 502,
           body: 'Error fetching data from Enterprise Search',
+          statusCode: 502,
         });
       }
     }

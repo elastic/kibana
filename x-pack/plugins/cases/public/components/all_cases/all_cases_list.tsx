@@ -244,6 +244,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           availableSolutions={hasOwner ? [] : availableSolutions}
           initial={{
             search: filterOptions.search,
+            searchFields: filterOptions.searchFields,
             reporters: filterOptions.reporters,
             tags: filterOptions.tags,
             status: filterOptions.status,

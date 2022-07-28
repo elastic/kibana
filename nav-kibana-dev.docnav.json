@@ -534,6 +534,12 @@
             },
             {
               "id": "kibDevDocsOpsDevCliRunner"
+            },
+            {
+              "id": "kibDevDocsOpsGetRepoFiles"
+            },
+            {
+              "id": "kibDevDocsOpsRepoSourceClassifier"
             }
           ]
         }

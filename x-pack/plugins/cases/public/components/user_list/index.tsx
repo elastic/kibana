@@ -32,6 +32,7 @@ interface UserListProps {
   headline: string;
   loading?: boolean;
   users: ElasticUser[];
+  dataTestSubj?: string;
 }
 
 const MyAvatar = styled(EuiAvatar)`
@@ -78,33 +79,44 @@ const renderUsers = (
     </MyFlexGroup>
   ));
 
-export const UserList = React.memo(({ email, headline, loading, users }: UserListProps) => {
-  const handleSendEmail = useCallback(
-    (emailAddress: string | undefined | null) => {
-      if (emailAddress && emailAddress != null) {
-        window.open(`mailto:${emailAddress}?subject=${email.subject}&body=${email.body}`, '_blank');
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [email.subject]
-  );
-  return users.filter(({ username }) => username != null && username !== '').length > 0 ? (
-    <EuiText>
-      <h4>{headline}</h4>
-      <EuiHorizontalRule margin="xs" />
-      {loading && (
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiLoadingSpinner />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-      {renderUsers(
-        users.filter(({ username }) => username != null && username !== ''),
-        handleSendEmail
-      )}
-    </EuiText>
-  ) : null;
-});
+export const UserList: React.FC<UserListProps> = React.memo(
+  ({ email, headline, loading, users, dataTestSubj }) => {
+    const handleSendEmail = useCallback(
+      (emailAddress: string | undefined | null) => {
+        if (emailAddress && emailAddress != null) {
+          window.open(
+            `mailto:${emailAddress}?subject=${email.subject}&body=${email.body}`,
+            '_blank'
+          );
+        }
+      },
+      [email.body, email.subject]
+    );
+
+    const filteredUsers = users.filter(({ username }) => username != null && username !== '');
+
+    if (filteredUsers.length === 0) {
+      return null;
+    }
+
+    return (
+      <EuiText data-test-subj={dataTestSubj}>
+        <h4>{headline}</h4>
+        <EuiHorizontalRule margin="xs" />
+        {loading && (
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiLoadingSpinner />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+        {renderUsers(
+          users.filter(({ username }) => username != null && username !== ''),
+          handleSendEmail
+        )}
+      </EuiText>
+    );
+  }
+);
 
 UserList.displayName = 'UserList';
