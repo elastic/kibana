@@ -9,11 +9,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const find = getService('find');
   const PageObjects = getPageObjects(['common']);
-  const esArchiver = getService('esArchiver');
+  const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
+  const esArchiver = getService('esArchiver')
 
-  describe('Unsecure Cluster Alert', function () {
+  describe('Insecure Cluster Warning', function () {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
@@ -26,10 +27,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('will display when ES Security Plugin is disabled and there is at least one user created index with data', async () => {
       await PageObjects.common.navigateToUrl('home');
 
-      const toastMessage: string = await (await find.byClassName('euiToast')).getVisibleText();
+      await browser.refresh();
+
+      const toastMessage: string = await (await testSubjects.find('insecureClusterAlertText')).getVisibleText();
 
       await expect(toastMessage).to.equal(
-        "Your data is not secure\nDon’t lose one bit. Enable our free security features.\nDon't show again\nEnable security\nDismiss"
+        'Don’t lose one bit. Enable our free security features.\nDon\'t show again\nEnable security\nDismiss'
       );
     });
   });
