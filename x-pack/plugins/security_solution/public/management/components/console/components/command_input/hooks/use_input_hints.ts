@@ -82,6 +82,8 @@ export const useInputHints = () => {
           type: 'updateFooterContent',
           payload: { value: hint },
         });
+
+        dispatch({ type: 'setInputState', payload: { value: undefined } });
       } else {
         dispatch({
           type: 'updateFooterContent',
