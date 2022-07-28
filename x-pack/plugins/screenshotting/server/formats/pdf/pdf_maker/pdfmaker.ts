@@ -83,12 +83,15 @@ export class PdfMaker {
   private addPageContents(contents: Content[]) {
     this.content.push(
       // Insert a page break after each content item
-      [
-        {
-          text: '',
-          pageBreak: 'after',
-        } as ContentText as Content,
-      ].concat(contents)
+      (this.content.length > 1
+        ? [
+            {
+              text: '',
+              pageBreak: 'after',
+            } as ContentText as Content,
+          ]
+        : []
+      ).concat(contents)
     );
   }
 
