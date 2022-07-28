@@ -94,14 +94,16 @@ const NetworkDetailsComponent: React.FC = () => {
   const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
   const ip = decodeIpv6(detailName);
 
-  const networkDetailsPageFilters: Filter[] = useMemo(() => getNetworkDetailsPageFilter(ip), [ip]);
-  const getFilters = () => [...networkDetailsPageFilters, ...filters];
+  const queryFilters = useMemo(
+    () => [...getNetworkDetailsPageFilter(ip), ...filters],
+    [filters, ip]
+  );
 
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config: getEsQueryConfig(uiSettings),
     indexPattern,
     queries: [query],
-    filters: getFilters(),
+    filters: queryFilters,
   });
 
   useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
