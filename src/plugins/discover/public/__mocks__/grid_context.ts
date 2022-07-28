@@ -7,7 +7,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { indexPatternMock } from './index_pattern';
+import { dataViewMock } from './data_view';
 import { dataViewComplexMock } from './data_view_complex';
 import { esHits } from './es_hits';
 import { esHitsComplex } from './es_hits_complex';
@@ -27,7 +27,7 @@ const buildGridContext = (dataView: DataView, rows: EsHitRecord[]): GridContext 
     setExpanded: jest.fn(),
     rows: usedRows,
     onFilter: jest.fn(),
-    indexPattern: dataView,
+    dataView,
     isDarkMode: false,
     selectedDocs: [],
     setSelectedDocs: jest.fn(),
@@ -43,6 +43,6 @@ const buildGridContext = (dataView: DataView, rows: EsHitRecord[]): GridContext 
   };
 };
 
-export const discoverGridContextMock = buildGridContext(indexPatternMock, esHits);
+export const discoverGridContextMock = buildGridContext(dataViewMock, esHits);
 
 export const discoverGridContextComplexMock = buildGridContext(dataViewComplexMock, esHitsComplex);

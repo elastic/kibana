@@ -16,11 +16,11 @@ import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/serv
 import type { FleetRequestHandlerContext } from '@kbn/fleet-plugin/server';
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import type { ListsApiRequestHandlerContext, ExceptionListClient } from '@kbn/lists-plugin/server';
-import type { IRuleDataService } from '@kbn/rule-registry-plugin/server';
+import type { IRuleDataService, AlertsClient } from '@kbn/rule-registry-plugin/server';
 
 import { AppClient } from './client';
 import type { ConfigType } from './config';
-import type { IRuleExecutionLogForRoutes } from './lib/detection_engine/rule_execution_log';
+import type { IRuleExecutionLogForRoutes } from './lib/detection_engine/rule_monitoring';
 import type { FrameworkRequest } from './lib/framework';
 import type { EndpointAuthz } from '../common/endpoint/types/authz';
 import type {
@@ -39,6 +39,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getSpaceId: () => string;
   getRuleDataService: () => IRuleDataService;
   getRuleExecutionLog: () => IRuleExecutionLogForRoutes;
+  getRacClient: (req: KibanaRequest) => Promise<AlertsClient>;
   getExceptionListClient: () => ExceptionListClient | null;
   getInternalFleetServices: () => EndpointInternalFleetServicesInterface;
   getScopedFleetServices: (req: KibanaRequest) => EndpointScopedFleetServicesInterface;

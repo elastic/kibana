@@ -72,7 +72,7 @@ import {
 } from 'rxjs/operators';
 import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { buildEsQuery, Filter } from '@kbn/es-query';
+import { buildEsQuery, Filter, isOfQueryType } from '@kbn/es-query';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -261,7 +261,11 @@ export class SearchSource {
       filters = this.getFilters(originalFilters);
     }
 
-    const queryString = Array.isArray(query) ? query.map((q) => q.query) : query?.query;
+    const queryString = Array.isArray(query)
+      ? query.map((q) => q.query)
+      : isOfQueryType(query)
+      ? query?.query
+      : undefined;
 
     const indexPatternFromQuery =
       typeof queryString === 'string'
@@ -380,7 +384,6 @@ export class SearchSource {
   /**
    * Fetch this source and reject the returned Promise on error
    * @deprecated Use the `fetch$` method instead
-   * @removeBy 8.1
    */
   fetch(options: ISearchOptions = {}) {
     return lastValueFrom(this.fetch$(options)).then((r) => {
