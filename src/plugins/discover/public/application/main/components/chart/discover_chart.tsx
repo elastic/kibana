@@ -46,6 +46,7 @@ export function DiscoverChart({
   setDiscoverViewMode,
   hideChart,
   interval,
+  isTimeBased,
 }: {
   resetSavedSearch: () => void;
   savedSearch: SavedSearch;
@@ -55,10 +56,10 @@ export function DiscoverChart({
   indexPattern: DataView;
   viewMode: VIEW_MODE;
   setDiscoverViewMode: (viewMode: VIEW_MODE) => void;
+  isTimeBased: boolean;
   hideChart?: boolean;
   interval?: string;
 }) {
-  const isTimeBased = indexPattern.isTimeBased();
   const { uiSettings, data, storage } = useDiscoverServices();
   const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
   const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
