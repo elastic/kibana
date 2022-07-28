@@ -12,11 +12,14 @@ import {
   EuiDataGridColumnVisibility,
   EuiDataGridProps,
   EuiDataGridRefProps,
+  EuiDataGridStyle,
 } from '@elastic/eui';
+import { useSelector } from '@xstate/react';
 import classnames from 'classnames';
 import React, { useCallback, useRef } from 'react';
-import { GRID_STYLE } from '../../../../components/discover_grid/constants';
 import { LOG_EXPLORER_VIRTUAL_GRID_ROWS } from '../../constants';
+import { useStateMachineContext } from '../../hooks/query_data/use_state_machine';
+import { selectLoadedEntries } from '../../state_machines/data_access_state_machine';
 import { LogExplorerCell } from './log_explorer_grid_cell';
 
 type GridOnItemsRenderedProps = Parameters<
@@ -26,32 +29,41 @@ type GridOnItemsRenderedProps = Parameters<
 const EuiDataGridMemoized = React.memo(EuiDataGrid);
 
 export function LogExplorerGrid() {
-  const imperativeGridRef = useRef<EuiDataGridRefProps>();
+  const imperativeGridRef = useRef<EuiDataGridRefProps | null>(null);
+
+  const { startRowIndex, endRowIndex, chunkBoundaryRowIndex } = useSelector(
+    useStateMachineContext(),
+    selectLoadedEntries
+  );
 
   const onItemsRendered = useCallback(
     ({ visibleRowStartIndex, visibleRowStopIndex }: GridOnItemsRenderedProps) => {
+      if (startRowIndex == null || endRowIndex == null) {
+        return;
+      }
+
       // TODO: trigger position update in state machine
-      // if (visibleRowStartIndex === 0 && visibleRowStartIndex < startRowIndex) {
-      //   // scroll to initial position
-      //   imperativeGridRef.current?.scrollToItem?.({
-      //     rowIndex: Math.floor((startRowIndex + endRowIndex) / 2),
-      //     align: 'start',
-      //   });
-      // } else if (visibleRowStartIndex < startRowIndex) {
-      //   // block scrolling outside of loaded area
-      //   imperativeGridRef.current?.scrollToItem?.({
-      //     rowIndex: startRowIndex,
-      //     align: 'start',
-      //   });
-      // } else if (visibleRowStopIndex > endRowIndex) {
-      //   // block scrolling outside of loaded area
-      //   imperativeGridRef.current?.scrollToItem?.({
-      //     rowIndex: endRowIndex,
-      //     align: 'end',
-      //   });
-      // }
+      if (visibleRowStartIndex === 0 && visibleRowStartIndex < startRowIndex) {
+        // scroll to initial position
+        imperativeGridRef.current?.scrollToItem?.({
+          rowIndex: chunkBoundaryRowIndex,
+          align: 'start',
+        });
+      } else if (visibleRowStartIndex < startRowIndex) {
+        // block scrolling outside of loaded area
+        imperativeGridRef.current?.scrollToItem?.({
+          rowIndex: startRowIndex,
+          align: 'start',
+        });
+      } else if (visibleRowStopIndex > endRowIndex) {
+        // block scrolling outside of loaded area
+        imperativeGridRef.current?.scrollToItem?.({
+          rowIndex: endRowIndex,
+          align: 'end',
+        });
+      }
     },
-    []
+    [chunkBoundaryRowIndex, endRowIndex, startRowIndex]
   );
 
   return (
@@ -62,9 +74,16 @@ export function LogExplorerGrid() {
           columns={columns}
           columnVisibility={columnVisibility}
           data-test-subj="logExplorerGrid"
-          gridStyle={GRID_STYLE}
+          gridStyle={gridStyle}
+          ref={imperativeGridRef}
           rowCount={LOG_EXPLORER_VIRTUAL_GRID_ROWS}
+          rowHeightsOptions={{
+            defaultHeight: 34,
+          }}
           renderCellValue={LogExplorerCell}
+          virtualizationOptions={{
+            onItemsRendered,
+          }}
         />
       </div>
     </span>
@@ -83,4 +102,11 @@ const columns: EuiDataGridColumn[] = [
 const columnVisibility: EuiDataGridColumnVisibility = {
   setVisibleColumns: () => {},
   visibleColumns: ['@timestamp', 'message'],
+};
+
+const gridStyle: EuiDataGridStyle = {
+  border: 'all',
+  fontSize: 'm',
+  cellPadding: 'm',
+  rowHover: 'none',
 };

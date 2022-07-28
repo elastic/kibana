@@ -31,7 +31,7 @@ export function LogExplorerCell({ rowIndex, columnId }: EuiDataGridCellValueElem
   );
 
   if (entry == null) {
-    return '';
+    return ' ';
   }
 
   return JSON.stringify({ entry });

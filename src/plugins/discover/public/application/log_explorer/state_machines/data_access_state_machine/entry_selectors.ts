@@ -14,12 +14,14 @@ export const selectLoadedEntries = (
   state: DataAccessService['state']
 ): {
   startRowIndex: number | undefined;
+  chunkBoundaryRowIndex: number | undefined;
   endRowIndex: number | undefined;
   entries: LogExplorerEntry[];
 } => {
   if (selectIsReloading(state)) {
     return {
       startRowIndex: undefined,
+      chunkBoundaryRowIndex: undefined,
       endRowIndex: undefined,
       entries: [],
     };
@@ -28,7 +30,8 @@ export const selectLoadedEntries = (
   const { topChunk, bottomChunk } = state.context;
 
   // TODO: the zero fallback should never happen, but the typestate is not strict enough
-  const startRowIndex = topChunk.status !== 'uninitialized' ? topChunk.rowIndex : 0;
+  const startRowIndex = topChunk.status === 'uninitialized' ? 0 : topChunk.rowIndex;
+  const chunkBoundaryRowIndex = bottomChunk.status === 'uninitialized' ? 0 : bottomChunk.rowIndex;
   const endRowIndex =
     bottomChunk.status === 'uninitialized'
       ? 0
@@ -38,6 +41,7 @@ export const selectLoadedEntries = (
 
   return {
     startRowIndex,
+    chunkBoundaryRowIndex,
     endRowIndex,
     entries: [
       ...(topChunk.status === 'loaded' ? topChunk.entries : []),
