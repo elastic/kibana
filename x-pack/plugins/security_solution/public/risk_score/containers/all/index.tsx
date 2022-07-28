@@ -8,11 +8,7 @@
 import { useEffect, useMemo } from 'react';
 
 import { createFilter } from '../../../common/containers/helpers';
-import type {
-  HostsRiskScore,
-  UsersRiskScore,
-  RiskScoreSortField,
-} from '../../../../common/search_strategy';
+import type { RiskScoreSortField, StrategyResponseType } from '../../../../common/search_strategy';
 import {
   getHostRiskIndex,
   RiskQueries,
@@ -30,11 +26,7 @@ import { useSpaceId } from '../common';
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
 
 export interface RiskScoreState<T extends RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore> {
-  data?: T extends RiskQueries.hostsRiskScore
-    ? HostsRiskScore[] | undefined
-    : T extends RiskQueries.usersRiskScore
-    ? UsersRiskScore[] | undefined
-    : never;
+  data: undefined | StrategyResponseType<T>['data'];
   inspect: InspectResponse;
   isInspected: boolean;
   refetch: inputsModel.Refetch;
@@ -42,10 +34,7 @@ export interface RiskScoreState<T extends RiskQueries.hostsRiskScore | RiskQueri
   isModuleEnabled: boolean | undefined;
 }
 
-interface UseRiskScore<T> {
-  defaultIndex: string | undefined;
-  factoryQueryType: T;
-  featureEnabled: boolean;
+export interface UseRiskScoreParams {
   filterQuery?: ESQuery | string;
   onlyLatest?: boolean;
   pagination?:
@@ -59,24 +48,22 @@ interface UseRiskScore<T> {
   timerange?: { to: string; from: string };
 }
 
-type UseHostRiskScore = Omit<
-  UseRiskScore<RiskQueries.hostsRiskScore>,
-  'featureEnabled' | 'defaultIndex'
->;
+interface UseRiskScore<T> extends UseRiskScoreParams {
+  defaultIndex: string | undefined;
+  factoryQueryType: T;
+  featureEnabled: boolean;
+}
 
-type UseUserRiskScore = Omit<
-  UseRiskScore<RiskQueries.usersRiskScore>,
-  'featureEnabled' | 'defaultIndex'
->;
+const initialResult: Omit<
+  StrategyResponseType<RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore>,
+  'rawResponse'
+> = {
+  totalCount: 0,
+  data: undefined,
+};
 
-export const useHostRiskScore = ({
-  timerange,
-  onlyLatest,
-  filterQuery,
-  sort,
-  skip = false,
-  pagination,
-}: UseHostRiskScore) => {
+export const useHostRiskScore = (params?: UseRiskScoreParams) => {
+  const { timerange, onlyLatest, filterQuery, sort, skip = false, pagination } = params ?? {};
   const spaceId = useSpaceId();
   const defaultIndex = spaceId ? getHostRiskIndex(spaceId, onlyLatest) : undefined;
   const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
@@ -93,14 +80,8 @@ export const useHostRiskScore = ({
   });
 };
 
-export const useUserRiskScore = ({
-  timerange,
-  onlyLatest,
-  filterQuery,
-  sort,
-  skip = false,
-  pagination,
-}: UseUserRiskScore) => {
+export const useUserRiskScore = (params?: UseRiskScoreParams) => {
+  const { timerange, onlyLatest, filterQuery, sort, skip = false, pagination } = params ?? {};
   const spaceId = useSpaceId();
   const defaultIndex = spaceId ? getUserRiskIndex(spaceId, onlyLatest) : undefined;
 
@@ -118,7 +99,7 @@ export const useUserRiskScore = ({
   });
 };
 
-export const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore>({
+const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore>({
   timerange,
   filterQuery,
   sort,
@@ -127,7 +108,7 @@ export const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.
   featureEnabled,
   defaultIndex,
   factoryQueryType,
-}: UseRiskScore<T>) => {
+}: UseRiskScore<T>): [boolean, RiskScoreState<T>] => {
   const { querySize, cursorStart } = pagination || {};
 
   const { addError } = useAppToasts();
@@ -141,10 +122,7 @@ export const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.
     error,
   } = useSearchStrategy<RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore>({
     factoryQueryType,
-    initialResult: {
-      totalCount: 0,
-      data: undefined,
-    },
+    initialResult,
     abort: skip,
     showErrorToast: false,
   });
@@ -163,7 +141,7 @@ export const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.
 
   const riskScoreRequest = useMemo(
     () =>
-      defaultIndex && timerange?.to && timerange?.from
+      defaultIndex
         ? {
             defaultIndex: [defaultIndex],
             factoryQueryType,

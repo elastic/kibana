@@ -7,6 +7,10 @@
 
 import { RISKY_HOSTS_INDEX_PREFIX, RISKY_USERS_INDEX_PREFIX } from '../../../../constants';
 
+/**
+ * Make sure this aligns with the index in step 6, 9 in
+ * prebuilt_dev_tool_content/console_templates/enable_host_risk_score.console
+ */
 export const getHostRiskIndex = (spaceId: string, onlyLatest: boolean = true): string => {
   return `${RISKY_HOSTS_INDEX_PREFIX}${onlyLatest ? 'latest_' : ''}${spaceId}`;
 };
