@@ -168,6 +168,7 @@ export function ColorRangeItem({
 
   const styles = useMemo(
     () => css`
+      display: block;
       min-width: ${euiTheme.size.xl};
       text-align: center;
     `,
