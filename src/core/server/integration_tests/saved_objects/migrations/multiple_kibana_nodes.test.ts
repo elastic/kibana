@@ -10,9 +10,9 @@ import Path from 'path';
 import del from 'del';
 import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
 import { kibanaPackageJson as pkg } from '@kbn/utils';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { SavedObjectsType } from '../../../saved_objects/types';
 import type { Root } from '../../../root';
 
 const LOG_FILE_PREFIX = 'migration_test_multiple_kibana_nodes';

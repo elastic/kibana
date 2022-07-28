@@ -11,9 +11,9 @@ import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import { errors } from '@elastic/elasticsearch';
 import type { TaskEither } from 'fp-ts/lib/TaskEither';
-import type { ElasticsearchClient } from '../../../..';
+import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import * as kbnTestServer from '../../../../../test_helpers/kbn_server';
-import type { SavedObjectsRawDoc } from '../../../../saved_objects/serialization';
 import {
   bulkOverwriteTransformedDocuments,
   closePit,

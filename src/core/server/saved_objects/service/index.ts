@@ -6,13 +6,5 @@
  * Side Public License, v 1.
  */
 export { SavedObjectsErrorHelpers, SavedObjectsClientProvider, SavedObjectsUtils } from './lib';
-export type {
-  SavedObjectsRepository,
-  ISavedObjectsClientProvider,
-  SavedObjectsClientProviderOptions,
-  SavedObjectsClientWrapperFactory,
-  SavedObjectsClientWrapperOptions,
-  SavedObjectsClientFactory,
-  SavedObjectsClientFactoryProvider,
-} from './lib';
+export type { SavedObjectsRepository, ISavedObjectsClientProvider } from './lib';
 export { SavedObjectsClient } from './saved_objects_client';

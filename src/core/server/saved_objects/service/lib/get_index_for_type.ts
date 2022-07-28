@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 
 interface GetIndexForTypeOptions {
   type: string;

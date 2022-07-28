@@ -46,5 +46,5 @@ export type {
   DeprecationsGetResponse,
 } from '@kbn/core-deprecations-common';
 export type { ExternalUrlConfig } from '@kbn/core-http-server-internal';
+export type { SavedObjectStatusMeta } from '@kbn/core-saved-objects-server';
 export * from './ui_settings/types';
-export type { SavedObjectStatusMeta } from './saved_objects/types';

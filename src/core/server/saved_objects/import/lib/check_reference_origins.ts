@@ -7,8 +7,8 @@
  */
 
 import pMap from 'p-map';
-import { SavedObjectsClientContract } from '../../types';
-import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import type { ImportStateMap, ImportStateValue } from './types';
 import { getObjectKey, parseObjectKey } from '../../service/lib/internal_utils';
 import { createOriginQuery } from './utils';

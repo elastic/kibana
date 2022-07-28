@@ -5,26 +5,27 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import typeDetect from 'type-detect';
-import { LEGACY_URL_ALIAS_TYPE } from '../object_types';
-import { decodeVersion, encodeVersion } from '../version';
-import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import { SavedObjectsUtils } from '../service';
-import {
+import type {
+  ISavedObjectTypeRegistry,
+  ISavedObjectsSerializer,
   SavedObjectsRawDoc,
   SavedObjectSanitizedDoc,
   SavedObjectsRawDocParseOptions,
-} from './types';
+} from '@kbn/core-saved-objects-server';
+import { LEGACY_URL_ALIAS_TYPE } from '../object_types';
+import { decodeVersion, encodeVersion } from '../version';
+import { SavedObjectsUtils } from '../service';
 
 /**
- * A serializer that can be used to manually convert {@link SavedObjectsRawDoc | raw} or
- * {@link SavedObjectSanitizedDoc | sanitized} documents to the other kind.
+ * Core internal implementation of {@link ISavedObjectsSerializer}
  *
  * @remarks Serializer instances should only be created and accessed by calling {@link SavedObjectsServiceStart.createSerializer}
  *
- * @public
+ * @internal
  */
-export class SavedObjectsSerializer {
+export class SavedObjectsSerializer implements ISavedObjectsSerializer {
   private readonly registry: ISavedObjectTypeRegistry;
 
   /**
@@ -33,6 +34,7 @@ export class SavedObjectsSerializer {
   constructor(registry: ISavedObjectTypeRegistry) {
     this.registry = registry;
   }
+
   /**
    * Determines whether or not the raw document can be converted to a saved object.
    *

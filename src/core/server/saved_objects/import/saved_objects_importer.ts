@@ -7,40 +7,16 @@
  */
 
 import type { SavedObjectsImportResponse } from '@kbn/core-saved-objects-common';
-import { SavedObjectsClientContract } from '../types';
-import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import { importSavedObjectsFromStream } from './import_saved_objects';
-import { resolveSavedObjectsImportErrors } from './resolve_import_errors';
-import {
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type {
+  ISavedObjectTypeRegistry,
+  ISavedObjectsImporter,
   SavedObjectsImportOptions,
   SavedObjectsResolveImportErrorsOptions,
   SavedObjectsImportHook,
-} from './types';
-
-/**
- * Utility class used to import savedObjects.
- *
- * @public
- */
-export interface ISavedObjectsImporter {
-  /**
-   * Import saved objects from given stream. See the {@link SavedObjectsImportOptions | options} for more
-   * detailed information.
-   *
-   * @throws SavedObjectsImportError
-   */
-  import(options: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
-
-  /**
-   * Resolve and return saved object import errors.
-   * See the {@link SavedObjectsResolveImportErrorsOptions | options} for more detailed information.
-   *
-   * @throws SavedObjectsImportError
-   */
-  resolveImportErrors(
-    options: SavedObjectsResolveImportErrorsOptions
-  ): Promise<SavedObjectsImportResponse>;
-}
+} from '@kbn/core-saved-objects-server';
+import { importSavedObjectsFromStream } from './import_saved_objects';
+import { resolveSavedObjectsImportErrors } from './resolve_import_errors';
 
 /**
  * @internal

@@ -14,7 +14,7 @@ import type {
   SavedObjectsImportRetry,
 } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { getObjectKey } from '../../service/lib/internal_utils';
 import type { ImportStateMap } from './types';
 import { createOriginQuery } from './utils';

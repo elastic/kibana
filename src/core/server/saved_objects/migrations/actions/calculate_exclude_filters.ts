@@ -11,8 +11,8 @@ import { withTimeout } from '@kbn/std';
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { SavedObjectTypeExcludeFromUpgradeFilterHook } from '@kbn/core-saved-objects-server';
 import type { RetryableEsClientError } from '.';
-import type { SavedObjectTypeExcludeFromUpgradeFilterHook } from '../../types';
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 
 export interface CalculateExcludeFiltersParams {

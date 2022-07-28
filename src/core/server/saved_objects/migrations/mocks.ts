@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectMigrationContext } from './types';
-import { SavedObjectsMigrationLogger } from './core';
+import type {
+  SavedObjectMigrationContext,
+  SavedObjectsMigrationLogger,
+} from '@kbn/core-saved-objects-server';
 
 export const createSavedObjectsMigrationLoggerMock =
   (): jest.Mocked<SavedObjectsMigrationLogger> => {

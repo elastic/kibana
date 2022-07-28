@@ -7,11 +7,4 @@
  */
 
 export { SavedObjectsImporter } from './saved_objects_importer';
-export type { ISavedObjectsImporter } from './saved_objects_importer';
-export type {
-  SavedObjectsImportOptions,
-  SavedObjectsResolveImportErrorsOptions,
-  SavedObjectsImportHook,
-  SavedObjectsImportHookResult,
-} from './types';
 export { SavedObjectsImportError } from './errors';
