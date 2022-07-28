@@ -167,7 +167,7 @@ export class ControlGroupContainer extends Container<
   ) {
     super(
       initialInput,
-      { dataViewIds: [], loading: false, embeddableLoaded: {}, filters: [] },
+      { dataViewIds: [], embeddableLoaded: {}, filters: [] },
       pluginServices.getServices().controls.getControlFactory,
       parent,
       ControlGroupChainingSystems[initialInput.chainingSystem]?.getContainerSettings(initialInput)

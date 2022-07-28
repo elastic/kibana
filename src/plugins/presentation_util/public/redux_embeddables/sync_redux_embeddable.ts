@@ -75,13 +75,13 @@ export const syncReduxEmbeddable = <
     const { explicitInput: reduxExplicitInput } = store.getState();
 
     // store only explicit input in the store
-    const embeddableExplictiInput = embeddable.getExplicitInput() as Writeable<
+    const embeddableExplictInput = embeddable.getExplicitInput() as Writeable<
       ReduxEmbeddableStateType['explicitInput']
     >;
 
-    if (!inputEqual(reduxExplicitInput, embeddableExplictiInput)) {
+    if (!inputEqual(reduxExplicitInput, embeddableExplictInput)) {
       store.dispatch(
-        actions.updateEmbeddableReduxInput(cleanInputForRedux(embeddableExplictiInput))
+        actions.updateEmbeddableReduxInput(cleanInputForRedux(embeddableExplictInput))
       );
     }
     embeddableToReduxInProgress = false;
