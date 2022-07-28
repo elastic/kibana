@@ -613,7 +613,7 @@ class AgentPolicyService {
     id: string,
     packagePolicyIds: string[],
     options?: { user?: AuthenticatedUser; force?: boolean }
-  ): Promise<AgentPolicy> {
+  ) {
     const oldAgentPolicy = await this.get(soClient, id, false);
 
     if (!oldAgentPolicy) {

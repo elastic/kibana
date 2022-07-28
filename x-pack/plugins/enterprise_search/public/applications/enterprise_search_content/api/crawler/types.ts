@@ -5,6 +5,10 @@
  * 2.0.
  */
 import { Meta } from '../../../../../common/types';
+import { CrawlerStatus } from '../../../../../common/types/crawler';
+
+// TODO remove this proxy export, which will affect a lot of files
+export { CrawlerStatus };
 
 export enum CrawlerPolicies {
   allow = 'allow',
@@ -51,19 +55,6 @@ export type CrawlerDomainValidationStepName =
   | 'networkConnectivity'
   | 'indexingRestrictions'
   | 'contentVerification';
-// See SharedTogo::Crawler::Status for details on how these are generated
-export enum CrawlerStatus {
-  Pending = 'pending',
-  Suspended = 'suspended',
-  Starting = 'starting',
-  Running = 'running',
-  Suspending = 'suspending',
-  Canceling = 'canceling',
-  Success = 'success',
-  Failed = 'failed',
-  Canceled = 'canceled',
-  Skipped = 'skipped',
-}
 
 export type CrawlEventStage = 'crawl' | 'process';
 

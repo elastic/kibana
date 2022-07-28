@@ -241,3 +241,15 @@ export interface ActionsStepRuleJson {
   throttle?: string | null;
   meta?: unknown;
 }
+
+export interface AdvancedPreviewForm {
+  interval: string;
+  lookback: string;
+}
+
+export interface AdvancedPreviewOptions {
+  timeframeStart: moment.Moment;
+  timeframeEnd: moment.Moment;
+  interval: string;
+  lookback: string;
+}
