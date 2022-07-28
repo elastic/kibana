@@ -9,7 +9,7 @@
 import React, { useState } from 'react';
 import { storiesOf } from '@storybook/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { getIndexPatternMock } from '../../../../../__mocks__/__storybook_mocks__/get_index_pattern_mock';
+import { getDataViewMock } from '../../../../../__mocks__/__storybook_mocks__/get_data_view_mock';
 import { withDiscoverServices } from '../../../../../__mocks__/__storybook_mocks__/with_discover_services';
 import { getDocumentsLayoutProps, getPlainRecordLayoutProps } from './get_layout_props';
 import { DiscoverLayout } from '../discover_layout';
@@ -45,7 +45,7 @@ storiesOf('components/layout/DiscoverLayout', module).add(
   'Data view with timestamp',
   withDiscoverServices(() => (
     <IntlProvider locale="en">
-      <DiscoverLayoutStory {...getDocumentsLayoutProps(getIndexPatternMock(true))} />
+      <DiscoverLayoutStory {...getDocumentsLayoutProps(getDataViewMock(true))} />
     </IntlProvider>
   ))
 );
@@ -54,7 +54,7 @@ storiesOf('components/layout/DiscoverLayout', module).add(
   'Data view without timestamp',
   withDiscoverServices(() => (
     <IntlProvider locale="en">
-      <DiscoverLayoutStory {...getDocumentsLayoutProps(getIndexPatternMock(false))} />
+      <DiscoverLayoutStory {...getDocumentsLayoutProps(getDataViewMock(false))} />
     </IntlProvider>
   ))
 );
@@ -63,7 +63,7 @@ storiesOf('components/layout/DiscoverLayout', module).add(
   'SQL view',
   withDiscoverServices(() => (
     <IntlProvider locale="en">
-      <DiscoverLayoutStory {...getPlainRecordLayoutProps(getIndexPatternMock(false))} />
+      <DiscoverLayoutStory {...getPlainRecordLayoutProps(getDataViewMock(false))} />
     </IntlProvider>
   ))
 );
