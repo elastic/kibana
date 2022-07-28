@@ -23,6 +23,8 @@ export const getColorSeries = ({ seriesKeys }: XYChartSeriesIdentifier) => {
       return LIGHT_THEME.colors.vizColors[1];
     case 'recovered':
       return LIGHT_THEME.colors.vizColors[2];
+    case 'total':
+      return '#f5f7fa';
     default:
       return null;
   }
