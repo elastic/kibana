@@ -50,7 +50,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       guide: `${KIBANA_DOCS}canvas.html`,
     },
     cloud: {
-      indexManagement: `${ELASTIC_WEBSITE_URL}/guide/en/cloud/current/ec-configure-index-management.html`,
+      indexManagement: `${ELASTIC_WEBSITE_URL}guide/en/cloud/current/ec-configure-index-management.html`,
     },
     console: {
       guide: `${KIBANA_DOCS}console-kibana.html`,
