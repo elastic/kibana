@@ -11,3 +11,7 @@
 export async function loadSharingDataHelpers() {
   return await import('./get_sharing_data');
 }
+
+export { getSort, getSortArray } from './get_sort';
+export { getSortForSearchSource } from './get_sort_for_search_source';
+export { getDefaultSort } from './get_default_sort';

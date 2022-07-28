@@ -32,7 +32,7 @@ import { DataDocuments$, DataDocumentsMsg, RecordRawType } from '../../hooks/use
 import { AppState, GetStateReturn } from '../../services/discover_state';
 import { useDataState } from '../../hooks/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
-import { SortPairArr } from '../../../../components/doc_table/utils/get_sort';
+import { SortPairArr } from '../../../../utils/get_sort';
 import { DocumentExplorerCallout } from '../document_explorer_callout';
 import { DocumentExplorerUpdateCallout } from '../document_explorer_callout/document_explorer_update_callout';
 import { DiscoverTourProvider } from '../../../../components/discover_tour';

@@ -48,8 +48,8 @@ import { handleSourceColumnState } from '../utils/state_helpers';
 import { DiscoverGridProps } from '../components/discover_grid/discover_grid';
 import { DiscoverGridSettings } from '../components/discover_grid/types';
 import { DocTableProps } from '../components/doc_table/doc_table_wrapper';
-import { getDefaultSort } from '../components/doc_table';
-import { SortOrder } from '../components/doc_table/components/table_header/helpers';
+import { getDefaultSort, getSortArray } from '../utils';
+import type { SortOrder } from '../components/doc_table/components/table_header/helpers';
 import { VIEW_MODE } from '../components/view_mode_toggle';
 import { updateSearchSource } from './utils/update_search_source';
 import { FieldStatisticsTable } from '../application/main/components/field_stats_table';
@@ -278,10 +278,13 @@ export class SavedSearchEmbeddable
     }
   };
 
-  private getDefaultSort(dataView?: DataView) {
-    const defaultSortOrder = this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc');
-    const hidingTimeColumn = this.services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false);
-    return getDefaultSort(dataView, defaultSortOrder, hidingTimeColumn);
+  private getSort(sort: SortOrder[] | undefined, dataView?: DataView) {
+    if (!sort || !sort.length || !dataView) {
+      const defaultSortOrder = this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc');
+      const hidingTimeColumn = this.services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false);
+      return getDefaultSort(dataView, defaultSortOrder, hidingTimeColumn);
+    }
+    return getSortArray(sort, dataView);
   }
 
   private initializeSearchEmbeddableProps() {
@@ -293,15 +296,11 @@ export class SavedSearchEmbeddable
       return;
     }
 
-    if (!this.savedSearch.sort || !this.savedSearch.sort.length) {
-      this.savedSearch.sort = this.getDefaultSort(dataView);
-    }
-
     const props: SearchProps = {
       columns: this.savedSearch.columns,
       dataView,
       isLoading: false,
-      sort: this.getDefaultSort(dataView),
+      sort: this.getSort(this.savedSearch.sort, dataView),
       rows: [],
       searchDescription: this.savedSearch.description,
       description: this.savedSearch.description,
@@ -396,11 +395,12 @@ export class SavedSearchEmbeddable
     if (!searchProps) {
       return false;
     }
+    const sort = this.getSort(this.input.sort || this.savedSearch.sort, this.searchProps?.dataView);
     return (
       !onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
       !isEqual(this.prevQuery, this.input.query) ||
       !isEqual(this.prevTimeRange, this.input.timeRange) ||
-      !isEqual(searchProps.sort, this.input.sort || this.savedSearch.sort) ||
+      !isEqual(searchProps.sort, sort) ||
       this.prevSearchSessionId !== this.input.searchSessionId
     );
   }
@@ -424,12 +424,11 @@ export class SavedSearchEmbeddable
       { columns: this.input.columns || this.savedSearch.columns },
       this.services.core.uiSettings
     ).columns;
+    searchProps.sort = this.getSort(
+      this.input.sort || this.savedSearch.sort,
+      this.searchProps?.dataView
+    );
 
-    const savedSearchSort =
-      this.savedSearch.sort && this.savedSearch.sort.length
-        ? this.savedSearch.sort
-        : this.getDefaultSort(this.searchProps?.dataView);
-    searchProps.sort = this.input.sort || savedSearchSort;
     searchProps.sharedItemTitle = this.panelTitle;
     searchProps.rowHeightState = this.input.rowHeight || this.savedSearch.rowHeight;
     searchProps.rowsPerPageState = this.input.rowsPerPage || this.savedSearch.rowsPerPage;

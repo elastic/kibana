@@ -19,8 +19,8 @@ import {
 import { SavedSearch } from '../../../services/saved_searches';
 
 import { AppState } from '../services/discover_state';
-import { getDefaultSort, getSortArray } from '../../../components/doc_table';
 import { CHART_HIDDEN_KEY } from '../components/chart/discover_chart';
+import {getDefaultSort, getSortArray} from "@kbn/discover-plugin/public/utils";
 
 function getDefaultColumns(savedSearch: SavedSearch, config: IUiSettingsClient) {
   if (savedSearch.columns && savedSearch.columns.length > 0) {

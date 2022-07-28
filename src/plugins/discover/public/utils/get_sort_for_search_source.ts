@@ -8,7 +8,7 @@
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { EsQuerySortValue } from '@kbn/data-plugin/public';
-import { SortOrder } from '../components/table_header/helpers';
+import { SortOrder } from '../components/doc_table/components/table_header/helpers';
 import { getSort } from './get_sort';
 
 /**

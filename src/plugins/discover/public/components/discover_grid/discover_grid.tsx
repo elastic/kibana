@@ -43,7 +43,7 @@ import {
   SHOW_MULTIFIELDS,
 } from '../../../common';
 import { DiscoverGridDocumentToolbarBtn } from './discover_grid_document_selection';
-import { SortPairArr } from '../doc_table/utils/get_sort';
+import { SortPairArr } from '../../utils/get_sort';
 import { getFieldsToShow } from '../../utils/get_fields_to_show';
 import type { DataTableRecord, ValueToStringConverter } from '../../types';
 import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';

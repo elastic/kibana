@@ -32,7 +32,7 @@ import { useSearchSession } from './use_search_session';
 import { useDataState } from './use_data_state';
 import { FetchStatus } from '../../types';
 import { getDataViewAppState } from '../utils/get_switch_data_view_app_state';
-import { SortPairArr } from '../../../components/doc_table/utils/get_sort';
+import { SortPairArr } from '../../../utils/get_sort';
 import { DataTableRecord } from '../../../types';
 
 const MAX_NUM_OF_COLUMNS = 50;
