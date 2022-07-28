@@ -17,11 +17,11 @@ import { DataRefetch$, SavedSearchData } from '../../hooks/use_saved_search';
 import { SavedSearch } from '../../../../services/saved_searches';
 
 export interface DiscoverLayoutProps {
-  indexPattern: DataView;
-  indexPatternList: DataViewListItem[];
+  dataView: DataView;
+  dataViewList: DataViewListItem[];
   inspectorAdapters: { requests: RequestAdapter };
   navigateTo: (url: string) => void;
-  onChangeIndexPattern: (id: string) => void;
+  onChangeDataView: (id: string) => void;
   onUpdateQuery: (
     payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
     isUpdate?: boolean

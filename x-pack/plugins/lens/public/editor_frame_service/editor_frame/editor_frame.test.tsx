@@ -360,6 +360,7 @@ describe('editor_frame', () => {
         getVisualDefaults: jest.fn(),
         getSourceId: jest.fn(),
         getFilters: jest.fn(),
+        getMaxPossibleNumValues: jest.fn(),
       };
       mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
 

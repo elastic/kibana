@@ -48,9 +48,9 @@ export interface DiscoverSidebarResponsiveProps {
    */
   documents$: DataDocuments$;
   /**
-   * List of available index patterns
+   * List of available data views
    */
-  indexPatternList: DataViewListItem[];
+  dataViewList: DataViewListItem[];
   /**
    * Has been toggled closed
    */
@@ -64,18 +64,18 @@ export interface DiscoverSidebarResponsiveProps {
    */
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
   /**
-   * Callback function when changing an index pattern
+   * Callback function when changing an data view
    */
-  onChangeIndexPattern: (id: string) => void;
+  onChangeDataView: (id: string) => void;
   /**
    * Callback function when removing a field
    * @param fieldName
    */
   onRemoveField: (fieldName: string) => void;
   /**
-   * Currently selected index pattern
+   * Currently selected data view
    */
-  selectedIndexPattern?: DataView;
+  selectedDataView?: DataView;
   /**
    * Discover App state
    */
@@ -111,7 +111,7 @@ export interface DiscoverSidebarResponsiveProps {
 /**
  * Component providing 2 different renderings for the sidebar depending on available screen space
  * Desktop: Sidebar view, all elements are visible
- * Mobile: Index pattern selector is visible and a button to trigger a flyout with all elements
+ * Mobile: Data view selector is visible and a button to trigger a flyout with all elements
  */
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
   const services = useDiscoverServices();
@@ -119,7 +119,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     () => getRawRecordType(props.state.query) === RecordRawType.PLAIN,
     [props.state.query]
   );
-  const { selectedIndexPattern, onFieldEdited, onDataViewCreated } = props;
+  const { selectedDataView, onFieldEdited, onDataViewCreated } = props;
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   /**
@@ -127,10 +127,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
    */
   const fieldCounts = useRef<Record<string, number> | null>(null);
   if (fieldCounts.current === null) {
-    fieldCounts.current = calcFieldCounts(
-      props.documents$.getValue().result!,
-      selectedIndexPattern
-    );
+    fieldCounts.current = calcFieldCounts(props.documents$.getValue().result!, selectedDataView);
   }
 
   const [documentState, setDocumentState] = useState(props.documents$.getValue());
@@ -138,19 +135,19 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     const subscription = props.documents$.subscribe((next) => {
       if (next.fetchStatus !== documentState.fetchStatus) {
         if (next.result) {
-          fieldCounts.current = calcFieldCounts(next.result, selectedIndexPattern!);
+          fieldCounts.current = calcFieldCounts(next.result, selectedDataView!);
         }
         setDocumentState({ ...documentState, ...next });
       }
     });
     return () => subscription.unsubscribe();
-  }, [props.documents$, selectedIndexPattern, documentState, setDocumentState]);
+  }, [props.documents$, selectedDataView, documentState, setDocumentState]);
 
   useEffect(() => {
-    // when index pattern changes fieldCounts needs to be cleaned up to prevent displaying
-    // fields of the previous index pattern
+    // when data view changes fieldCounts needs to be cleaned up to prevent displaying
+    // fields of the previous data view
     fieldCounts.current = {};
-  }, [selectedIndexPattern]);
+  }, [selectedDataView]);
 
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
@@ -204,7 +201,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     // Using columns.length here instead of columns to avoid array reference changing
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
-      selectedIndexPattern,
+      selectedDataView,
       availableFields$,
       fieldCounts.current,
       documentState.result,
@@ -214,11 +211,11 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
 
   const editField = useMemo(
     () =>
-      !isPlainRecord && canEditDataView && selectedIndexPattern
+      !isPlainRecord && canEditDataView && selectedDataView
         ? (fieldName?: string) => {
             const ref = dataViewFieldEditor.openEditor({
               ctx: {
-                dataView: selectedIndexPattern,
+                dataView: selectedDataView,
               },
               fieldName,
               onSave: async () => {
@@ -236,8 +233,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     [
       isPlainRecord,
       canEditDataView,
-      selectedIndexPattern,
       dataViewFieldEditor,
+      selectedDataView,
       setFieldEditorRef,
       closeFlyout,
       onFieldEdited,
@@ -264,7 +261,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     [canEditDataView, dataViewEditor, setDataViewEditorRef, closeFlyout, onDataViewCreated]
   );
 
-  if (!selectedIndexPattern) {
+  if (!selectedDataView) {
     return null;
   }
 

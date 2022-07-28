@@ -22,7 +22,7 @@ import {
   getSavedSearchFullPathUrl,
 } from '../../services/saved_searches';
 import { getState } from './services/discover_state';
-import { loadIndexPattern, resolveIndexPattern } from './utils/resolve_index_pattern';
+import { loadDataView, resolveDataView } from './utils/resolve_data_view';
 import { DiscoverMainApp } from './discover_main_app';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
@@ -47,7 +47,7 @@ export function DiscoverMainRoute(props: Props) {
   const {
     core,
     chrome,
-    uiSettings: config,
+    uiSettings,
     data,
     toastNotifications,
     http: { basePath },
@@ -55,8 +55,8 @@ export function DiscoverMainRoute(props: Props) {
   } = services;
   const [error, setError] = useState<Error>();
   const [savedSearch, setSavedSearch] = useState<SavedSearch>();
-  const indexPattern = savedSearch?.searchSource?.getField('index');
-  const [indexPatternList, setIndexPatternList] = useState<DataViewListItem[]>([]);
+  const dataView = savedSearch?.searchSource?.getField('index');
+  const [dataViewList, setDataViewList] = useState<DataViewListItem[]>([]);
   const [hasESData, setHasESData] = useState(false);
   const [hasUserDataView, setHasUserDataView] = useState(false);
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
@@ -68,7 +68,7 @@ export function DiscoverMainRoute(props: Props) {
     id: id || 'new',
   });
 
-  const loadDefaultOrCurrentIndexPattern = useCallback(
+  const loadDefaultOrCurrentDataView = useCallback(
     async (searchSource: ISearchSource) => {
       try {
         const hasUserDataViewValue = await data.dataViews.hasData
@@ -91,24 +91,20 @@ export function DiscoverMainRoute(props: Props) {
           return;
         }
 
-        const { appStateContainer } = getState({ history, uiSettings: config });
+        const { appStateContainer } = getState({ history, uiSettings });
         const { index } = appStateContainer.getState();
-        const ip = await loadIndexPattern(index || '', data.dataViews);
-        if (!ip.loaded) {
-          // note that this should be caught in at the start of this function
-          throw new Error('No data views found');
-        }
+        const ip = await loadDataView(index || '', data.dataViews);
 
-        const dataView = resolveIndexPattern(ip, searchSource, toastNotifications);
-        await data.dataViews.refreshFields(ip.loaded);
-        setIndexPatternList(ip.list);
+        const actualDataView = resolveDataView(ip, searchSource, toastNotifications);
+        await data.dataViews.refreshFields(ip.loaded!);
+        setDataViewList(ip.list);
 
-        return dataView;
+        return actualDataView;
       } catch (e) {
         setError(e);
       }
     },
-    [config, data.dataViews, history, isDev, toastNotifications]
+    [uiSettings, data.dataViews, history, isDev, toastNotifications]
   );
 
   const loadSavedSearch = useCallback(async () => {
@@ -119,16 +115,14 @@ export function DiscoverMainRoute(props: Props) {
         spaces: services.spaces,
       });
 
-      const loadedIndexPattern = await loadDefaultOrCurrentIndexPattern(
-        currentSavedSearch.searchSource
-      );
+      const currentDataView = await loadDefaultOrCurrentDataView(currentSavedSearch.searchSource);
 
-      if (!loadedIndexPattern) {
+      if (!currentDataView) {
         return;
       }
 
       if (!currentSavedSearch.searchSource.getField('index')) {
-        currentSavedSearch.searchSource.setField('index', loadedIndexPattern);
+        currentSavedSearch.searchSource.setField('index', currentDataView);
       }
 
       setSavedSearch(currentSavedSearch);
@@ -170,7 +164,7 @@ export function DiscoverMainRoute(props: Props) {
     core.savedObjects.client,
     core.application.navigateToApp,
     core.theme,
-    loadDefaultOrCurrentIndexPattern,
+    loadDefaultOrCurrentDataView,
     chrome.recentlyAccessed,
     history,
     basePath,
@@ -178,8 +172,8 @@ export function DiscoverMainRoute(props: Props) {
   ]);
 
   const onDataViewCreated = useCallback(
-    async (dataView: unknown) => {
-      if (dataView) {
+    async (nextDataView: unknown) => {
+      if (nextDataView) {
         setShowNoDataPage(false);
         setError(undefined);
         await loadSavedSearch();
@@ -228,9 +222,9 @@ export function DiscoverMainRoute(props: Props) {
     return <DiscoverError error={error} />;
   }
 
-  if (!indexPattern || !savedSearch) {
+  if (!dataView || !savedSearch) {
     return <LoadingIndicator type="elastic" />;
   }
 
-  return <DiscoverMainAppMemoized indexPatternList={indexPatternList} savedSearch={savedSearch} />;
+  return <DiscoverMainAppMemoized dataViewList={dataViewList} savedSearch={savedSearch} />;
 }

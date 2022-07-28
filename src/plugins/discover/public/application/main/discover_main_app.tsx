@@ -21,9 +21,9 @@ const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
 export interface DiscoverMainProps {
   /**
-   * List of available index patterns
+   * List of available data views
    */
-  indexPatternList: DataViewListItem[];
+  dataViewList: DataViewListItem[];
   /**
    * Current instance of SavedSearch
    */
@@ -31,7 +31,7 @@ export interface DiscoverMainProps {
 }
 
 export function DiscoverMainApp(props: DiscoverMainProps) {
-  const { savedSearch, indexPatternList } = props;
+  const { savedSearch, dataViewList } = props;
   const services = useDiscoverServices();
   const { chrome, docLinks, uiSettings: config, data, spaces, history } = services;
   const usedHistory = useHistory();
@@ -48,9 +48,9 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
    */
   const {
     data$,
-    indexPattern,
+    dataView,
     inspectorAdapters,
-    onChangeIndexPattern,
+    onChangeDataView,
     onUpdateQuery,
     refetch$,
     resetSavedSearch,
@@ -62,7 +62,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     history: usedHistory,
     savedSearch,
     setExpandedDoc,
-    dataViewList: indexPatternList,
+    dataViewList,
   });
 
   /**
@@ -97,11 +97,11 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
 
   return (
     <DiscoverLayoutMemoized
-      indexPattern={indexPattern}
-      indexPatternList={indexPatternList}
+      dataView={dataView}
+      dataViewList={dataViewList}
       inspectorAdapters={inspectorAdapters}
       expandedDoc={expandedDoc}
-      onChangeIndexPattern={onChangeIndexPattern}
+      onChangeDataView={onChangeDataView}
       onUpdateQuery={onUpdateQuery}
       resetSavedSearch={resetCurrentSavedSearch}
       setExpandedDoc={setExpandedDoc}

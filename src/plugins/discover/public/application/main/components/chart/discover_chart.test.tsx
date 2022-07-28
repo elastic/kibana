@@ -90,7 +90,7 @@ async function mountComponent(isTimeBased: boolean = false) {
   }) as DataCharts$;
 
   const props = {
-    indexPattern: {
+    dataView: {
       isTimeBased: () => isTimeBased,
       id: '123',
       getFieldByName: () => ({ type: 'date', name: 'timefield', visualizable: true }),

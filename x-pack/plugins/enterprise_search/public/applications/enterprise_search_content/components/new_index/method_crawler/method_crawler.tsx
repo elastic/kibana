@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-/**
- * TODO:
- * - Need to add documentation URLs (search for `#`s)
- * - Port over existing Crawler view from App Search to the panel below.
- */
-
 import React from 'react';
 
 import { useValues, useActions } from 'kea';
 
 import { EuiSteps, EuiText } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
 import { Status } from '../../../../../../common/types/api';
+import { docLinks } from '../../../../shared/doc_links';
 import { CreateCrawlerIndexApiLogic } from '../../../api/crawler/create_crawler_index_api_logic';
 import { NewSearchIndexTemplate } from '../new_search_index_template';
 
@@ -41,6 +37,7 @@ export const MethodCrawler: React.FC = () => {
       type="crawler"
       onSubmit={(indexName, language) => makeRequest({ indexName, language })}
       buttonLoading={status === Status.LOADING}
+      docsUrl={docLinks.crawlerOverview}
     >
       <EuiSteps
         steps={[
@@ -96,7 +93,7 @@ export const MethodCrawler: React.FC = () => {
               <EuiText size="s">
                 <p>
                   {i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.steps.buildSearchExperience.content',
+                    'xpack.enterpriseSearch.content.newIndex.crawler.steps.buildSearchExperience.content',
                     {
                       defaultMessage:
                         'Connect your newly created Elasticsearch index to an App Search engine to build a cusomtizable search experience.',
