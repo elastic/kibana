@@ -7,6 +7,7 @@
 import { EuiPageHeaderContentProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { Redirect } from 'react-router-dom';
 import { TopNFunctions } from '../../../common/functions';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
@@ -52,6 +53,10 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
       href: profilingRouter.link('/functions/differential', { query }),
     },
   ];
+
+  if (routePath === '/functions') {
+    return <Redirect to="/functions/topn" />;
+  }
 
   return (
     <ProfilingAppPageTemplate tabs={tabs}>

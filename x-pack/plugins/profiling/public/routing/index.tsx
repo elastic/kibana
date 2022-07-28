@@ -99,9 +99,6 @@ const routes = {
                   </RouteBreadcrumb>
                 ),
               },
-              '/flamegraphs': {
-                element: <Redirect to="/flamegraphs/flamegraph" />,
-              },
             },
           },
           '/functions': {
@@ -141,9 +138,6 @@ const routes = {
                     <Outlet />
                   </RouteBreadcrumb>
                 ),
-              },
-              '/functions': {
-                element: <Redirect to="/functions/topn" />,
               },
             },
           },

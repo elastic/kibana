@@ -7,6 +7,7 @@
 import { EuiPageHeaderContentProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { Redirect } from 'react-router-dom';
 import { ElasticFlameGraph } from '../../../common/flamegraph';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
@@ -52,6 +53,10 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
       href: profilingRouter.link('/flamegraphs/differential', { query }),
     },
   ];
+
+  if (routePath === '/flamegraphs') {
+    return <Redirect to="/flamegraphs/flamegraph" />;
+  }
 
   return (
     <ProfilingAppPageTemplate tabs={tabs}>
