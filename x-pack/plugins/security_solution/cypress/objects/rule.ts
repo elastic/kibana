@@ -495,6 +495,9 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RulesSchema>
     risk_score: riskScore,
     severity,
     query,
+    tags,
+    timeline_id: timelineId,
+    timeline_title: timelineTitle,
   } = ruleResponse.body;
 
   // NOTE: Order of the properties in this object matters for the tests to work.
@@ -505,7 +508,7 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RulesSchema>
     created_at: createdAt,
     created_by: 'elastic',
     name,
-    tags: [],
+    tags,
     interval: '100m',
     enabled: false,
     description,
@@ -534,6 +537,8 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RulesSchema>
     query,
     throttle: 'no_actions',
     actions: [],
+    timeline_id: timelineId,
+    timeline_title: timelineTitle,
   };
 
   // NOTE: Order of the properties in this object matters for the tests to work.
