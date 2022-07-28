@@ -92,17 +92,21 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('downloading', async () => {
-        await Promise.all([
-          supertestUnauth
-            .get('/api/reporting/jobs/download/kraz0qle154g0763b569zz83')
-            .auth('test_user', 'changeme'),
-          supertestUnauth
-            .get('/api/reporting/jobs/download/kraz0vj4154g0763b5curq51')
-            .auth('test_user', 'changeme'),
-          supertestUnauth
-            .get('/api/reporting/jobs/download/k9a9rq1i0gpe1457b17s7yc6')
-            .auth('test_user', 'changeme'),
-        ]);
+        try {
+          await Promise.all([
+            supertestUnauth
+              .get('/api/reporting/jobs/download/kraz0qle154g0763b569zz83')
+              .auth('test_user', 'changeme'),
+            supertestUnauth
+              .get('/api/reporting/jobs/download/kraz0vj4154g0763b5curq51')
+              .auth('test_user', 'changeme'),
+            supertestUnauth
+              .get('/api/reporting/jobs/download/k9a9rq1i0gpe1457b17s7yc6')
+              .auth('test_user', 'changeme'),
+          ]);
+        } catch (error) {
+          log.error(error);
+        }
 
         log.info(`waiting on internal stats aggregation...`);
         await waitOnAggregation();
@@ -116,10 +120,15 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('deleting', async () => {
         log.info(`sending 1 delete request...`);
-        await supertestUnauth
-          .delete('/api/reporting/jobs/delete/krazcyw4156m0763b503j7f9')
-          .auth('test_user', 'changeme')
-          .set('kbn-xsrf', 'xxx');
+
+        try {
+          await supertestUnauth
+            .delete('/api/reporting/jobs/delete/krazcyw4156m0763b503j7f9')
+            .auth('test_user', 'changeme')
+            .set('kbn-xsrf', 'xxx');
+        } catch (error) {
+          log.error(error);
+        }
         log.info(`delete request completed.`);
 
         log.info(`waiting on internal stats aggregation...`);
