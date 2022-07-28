@@ -9,16 +9,18 @@
 import type { AnalyticsClient } from '@kbn/analytics-client';
 import { type MetricEvent, METRIC_EVENT_SCHEMA } from './schema';
 
-const METRIC_EVENT_TYPE = 'metric';
+const PERFORMANCE_METRIC_EVENT_TYPE = 'performance_metric';
 
 /**
  * Register the `metrics` event type
  * @param analytics The {@link AnalyticsClient} during the setup phase (it has the method `registerEventType`)
  * @private To be called only by core's Analytics Service
  */
-export function registerMetricEventType(analytics: Pick<AnalyticsClient, 'registerEventType'>) {
+export function registerPerformanceMetricEventType(
+  analytics: Pick<AnalyticsClient, 'registerEventType'>
+) {
   analytics.registerEventType<MetricEvent>({
-    eventType: METRIC_EVENT_TYPE,
+    eventType: PERFORMANCE_METRIC_EVENT_TYPE,
     schema: METRIC_EVENT_SCHEMA,
   });
 }
@@ -28,9 +30,9 @@ export function registerMetricEventType(analytics: Pick<AnalyticsClient, 'regist
  * @param analytics The {@link AnalyticsClient} to report the events.
  * @param eventData The data to send, conforming the structure of a {@link MetricEvent}.
  */
-export function reportMetricEvent(
+export function reportPerformanceMetricEvent(
   analytics: Pick<AnalyticsClient, 'reportEvent'>,
   eventData: MetricEvent
 ) {
-  analytics.reportEvent(METRIC_EVENT_TYPE, eventData);
+  analytics.reportEvent(PERFORMANCE_METRIC_EVENT_TYPE, eventData);
 }

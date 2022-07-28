@@ -8,13 +8,13 @@
 
 import { createAnalytics, type AnalyticsClient } from '@kbn/analytics-client';
 import { loggerMock } from '@kbn/logging-mocks';
-import { registerMetricEventType, reportMetricEvent } from './helpers';
+import { registerPerformanceMetricEventType, reportPerformanceMetricEvent } from './helpers';
 import { METRIC_EVENT_SCHEMA } from './schema';
 
 describe('metric event helpers', () => {
   let analyticsClient: AnalyticsClient;
 
-  describe('registerMetricEventType', () => {
+  describe('registerPerformanceMetricEventType', () => {
     beforeEach(() => {
       analyticsClient = createAnalytics({
         isDev: true, // Explicitly setting `true` to ensure we have event validation to make sure the events sent pass our validation.
@@ -23,34 +23,34 @@ describe('metric event helpers', () => {
       });
     });
 
-    test('registers the `metrics` eventType to the analytics client', () => {
+    test('registers the `performance_metric` eventType to the analytics client', () => {
       const registerEventTypeSpy = jest.spyOn(analyticsClient, 'registerEventType');
 
-      expect(() => registerMetricEventType(analyticsClient)).not.toThrow();
+      expect(() => registerPerformanceMetricEventType(analyticsClient)).not.toThrow();
 
       expect(registerEventTypeSpy).toHaveBeenCalledWith({
-        eventType: 'metric',
+        eventType: 'performance_metric',
         schema: METRIC_EVENT_SCHEMA,
       });
     });
   });
 
-  describe('reportMetricEvent', () => {
+  describe('reportPerformanceMetricEvent', () => {
     beforeEach(() => {
       analyticsClient = createAnalytics({
         isDev: true, // Explicitly setting `true` to ensure we have event validation to make sure the events sent pass our validation.
         sendTo: 'staging',
         logger: loggerMock.create(),
       });
-      registerMetricEventType(analyticsClient);
+      registerPerformanceMetricEventType(analyticsClient);
     });
 
     test('reports the minimum allowed event', () => {
-      reportMetricEvent(analyticsClient, { eventName: 'test-event' });
+      reportPerformanceMetricEvent(analyticsClient, { eventName: 'test-event', duration: 1000 });
     });
 
     test('reports all the allowed fields in the event', () => {
-      reportMetricEvent(analyticsClient, {
+      reportPerformanceMetricEvent(analyticsClient, {
         eventName: 'test-event',
         meta: { my: { custom: { fields: 'here' } }, another_field: true },
         status: 'something',
@@ -70,26 +70,28 @@ describe('metric event helpers', () => {
 
     test('should fail if eventName is missing', () => {
       expect(() =>
-        reportMetricEvent(
+        reportPerformanceMetricEvent(
           analyticsClient,
           // @ts-expect-error
           {}
         )
       ).toThrowErrorMatchingInlineSnapshot(`
-        "Failed to validate payload coming from \\"Event Type 'metric'\\":
-        	- [eventName]: {\\"expected\\":\\"string\\",\\"actual\\":\\"undefined\\",\\"value\\":\\"undefined\\"}"
+        "Failed to validate payload coming from \\"Event Type 'performance_metric'\\":
+        	- [eventName]: {\\"expected\\":\\"string\\",\\"actual\\":\\"undefined\\",\\"value\\":\\"undefined\\"}
+        	- [duration]: {\\"expected\\":\\"number\\",\\"actual\\":\\"undefined\\",\\"value\\":\\"undefined\\"}"
       `);
     });
 
     test('should fail if any additional unknown keys are added', () => {
       expect(() =>
-        reportMetricEvent(analyticsClient, {
+        reportPerformanceMetricEvent(analyticsClient, {
           eventName: 'test-event',
+          duration: 1000,
           // @ts-expect-error
           an_unknown_field: 'blah',
         })
       ).toThrowErrorMatchingInlineSnapshot(`
-        "Failed to validate payload coming from \\"Event Type 'metric'\\":
+        "Failed to validate payload coming from \\"Event Type 'performance_metric'\\":
         	- []: excess key 'an_unknown_field' found"
       `);
     });

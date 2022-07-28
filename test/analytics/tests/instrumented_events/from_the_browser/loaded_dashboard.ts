@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     const getEvents = async (count: number, options?: GetEventsOptions) =>
       ebtUIHelper.getEvents(count, {
-        eventTypes: ['metric'],
+        eventTypes: ['performance_metric'],
         fromTimestamp,
         withTimeoutMs: 1000,
         filters: { 'properties.eventName': { eq: DASHBOARD_LOADED_EVENT } },
@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const events = await getEvents(Number.MAX_SAFE_INTEGER, options);
       expect(events.length).to.be(1);
       const event = events[0];
-      expect(event.event_type).to.eql('metric');
+      expect(event.event_type).to.eql('performance_metric');
       expect(event.properties.eventName).to.eql(DASHBOARD_LOADED_EVENT);
       expect(event.context.applicationId).to.be('dashboards');
       expect(event.context.page).to.be('app');

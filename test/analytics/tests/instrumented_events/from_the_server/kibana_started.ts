@@ -32,10 +32,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should emit the "kibana_started" metric event', async () => {
       const [event] = await ebtServerHelper.getEvents(1, {
-        eventTypes: ['metric'],
+        eventTypes: ['performance_metric'],
         filters: { 'properties.eventName': { eq: 'kibana_started' } },
       });
-      expect(event.event_type).to.eql('metric');
+      expect(event.event_type).to.eql('performance_metric');
       expect(event.properties.eventName).to.eql('kibana_started');
       expect(event.properties.duration).to.be.a('number');
       expect(event.properties.key1).to.eql('time_to_constructor');

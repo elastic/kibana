@@ -21,8 +21,8 @@ describe('AnalyticsService', () => {
   test('should register the context provider `build info` on creation', async () => {
     expect(analyticsClientMock.registerContextProvider).toHaveBeenCalledTimes(1);
     await expect(
-      firstValueFrom(analyticsClientMock.registerContextProvider.mock.calls[0][0].context$)
-    ).resolves.toMatchInlineSnapshot(`
+      await firstValueFrom(analyticsClientMock.registerContextProvider.mock.calls[0][0].context$)
+    ).toMatchInlineSnapshot(`
             Object {
               "branch": "main",
               "buildNum": 9007199254740991,

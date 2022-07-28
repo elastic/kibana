@@ -287,7 +287,7 @@ describe('#start()', () => {
   it('reports the metric event kibana-loaded and clears marks', async () => {
     await startCore();
     expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledTimes(2);
-    expect(analyticsServiceStartMock.reportEvent).toHaveBeenNthCalledWith(2, 'metric', {
+    expect(analyticsServiceStartMock.reportEvent).toHaveBeenNthCalledWith(2, 'performance_metric', {
       eventName: KIBANA_LOADED_EVENT,
       meta: {
         kibana_version: '1.2.3',
@@ -320,7 +320,7 @@ describe('#start()', () => {
     await startCore();
 
     expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledTimes(2);
-    expect(analyticsServiceStartMock.reportEvent).toHaveBeenNthCalledWith(2, 'metric', {
+    expect(analyticsServiceStartMock.reportEvent).toHaveBeenNthCalledWith(2, 'performance_metric', {
       eventName: KIBANA_LOADED_EVENT,
       meta: {
         kibana_version: '1.2.3',

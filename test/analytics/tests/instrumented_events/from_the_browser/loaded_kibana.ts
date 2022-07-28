@@ -31,12 +31,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should emit the new kibana-loaded events', async () => {
       const [event] = await ebtUIHelper.getEvents(1, {
-        eventTypes: ['metric'],
+        eventTypes: ['performance_metric'],
         filters: { 'properties.eventName': { eq: 'kibana_loaded' } },
       });
 
       // New event
-      expect(event.event_type).to.eql('metric');
+      expect(event.event_type).to.eql('performance_metric');
       expect(event.properties.eventName).to.eql('kibana_loaded');
 
       // meta

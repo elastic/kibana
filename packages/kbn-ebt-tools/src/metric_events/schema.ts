@@ -25,7 +25,7 @@ export interface MetricEvent {
    * @group Standardized fields
    * The time (in milliseconds) it took to run the entire action.
    */
-  duration?: number;
+  duration: number;
   /**
    * @group Standardized fields
    * A status relevant to the action (i.e.: `failed`, `succeeded`).
@@ -110,7 +110,7 @@ export const METRIC_EVENT_SCHEMA: RootSchema<MetricEvent> = {
   },
   duration: {
     type: 'integer',
-    _meta: { description: 'The main event duration in ms', optional: true },
+    _meta: { description: 'The main event duration in ms' },
   },
   status: {
     type: 'keyword',

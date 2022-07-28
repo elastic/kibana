@@ -9,7 +9,7 @@
 import { of } from 'rxjs';
 import type { AnalyticsClient } from '@kbn/analytics-client';
 import { createAnalytics } from '@kbn/analytics-client';
-import { registerMetricEventType } from '@kbn/ebt-tools';
+import { registerPerformanceMetricEventType } from '@kbn/ebt-tools';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type {
   AnalyticsServiceSetup,
@@ -31,7 +31,7 @@ export class AnalyticsService {
 
     this.registerBuildInfoAnalyticsContext(core);
     // Register special `metrics` type
-    registerMetricEventType(this.analyticsClient);
+    registerPerformanceMetricEventType(this.analyticsClient);
   }
 
   public preboot(): AnalyticsServicePreboot {

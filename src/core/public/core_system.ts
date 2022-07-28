@@ -26,7 +26,7 @@ import { HttpService } from '@kbn/core-http-browser-internal';
 import { UiSettingsService } from '@kbn/core-ui-settings-browser-internal';
 import { DeprecationsService } from '@kbn/core-deprecations-browser-internal';
 import { IntegrationsService } from '@kbn/core-integrations-browser-internal';
-import { reportMetricEvent } from '@kbn/ebt-tools';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 import { CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
@@ -164,7 +164,7 @@ export class CoreSystem {
     });
 
     const timing = this.getLoadMarksInfo();
-    reportMetricEvent(analytics, {
+    reportPerformanceMetricEvent(analytics, {
       eventName: KIBANA_LOADED_EVENT,
       meta: {
         kibana_version: this.coreContext.env.packageInfo.version,

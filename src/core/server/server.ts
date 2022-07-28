@@ -24,7 +24,7 @@ import {
 import { NodeService, nodeConfig } from '@kbn/core-node-server-internal';
 import { AnalyticsService } from '@kbn/core-analytics-server-internal';
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-server';
-import { reportMetricEvent } from '@kbn/ebt-tools';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { EnvironmentService, pidConfig } from '@kbn/core-environment-server-internal';
 import {
   ExecutionContextService,
@@ -570,7 +570,7 @@ export class Server {
 
     const toMs = (sec: number) => Math.round(sec * 1000);
     // Report the metric-shaped KIBANA_STARTED_EVENT.
-    reportMetricEvent(analyticsStart, {
+    reportPerformanceMetricEvent(analyticsStart, {
       eventName: KIBANA_STARTED_EVENT,
       duration: toMs(ups.start!.end - ups.constructor!.start),
       key1: 'time_to_constructor',
