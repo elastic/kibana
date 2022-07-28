@@ -30,7 +30,6 @@ describe('useCreateAttachments', () => {
     {
       comment: 'a comment',
       type: CommentType.user as const,
-      owner: SECURITY_SOLUTION_OWNER,
     },
   ];
   const updateCaseCallback = jest.fn();
@@ -64,6 +63,7 @@ describe('useCreateAttachments', () => {
 
       result.current.createAttachments({
         caseId: basicCaseId,
+        caseOwner: SECURITY_SOLUTION_OWNER,
         data: samplePost,
         updateCase: updateCaseCallback,
       });
@@ -84,6 +84,7 @@ describe('useCreateAttachments', () => {
 
       result.current.createAttachments({
         caseId: basicCaseId,
+        caseOwner: SECURITY_SOLUTION_OWNER,
         data: samplePost,
         updateCase: updateCaseCallback,
       });
@@ -101,6 +102,7 @@ describe('useCreateAttachments', () => {
       await waitForNextUpdate();
       result.current.createAttachments({
         caseId: basicCaseId,
+        caseOwner: SECURITY_SOLUTION_OWNER,
         data: samplePost,
         updateCase: updateCaseCallback,
       });
@@ -121,6 +123,7 @@ describe('useCreateAttachments', () => {
       await waitForNextUpdate();
       result.current.createAttachments({
         caseId: basicCaseId,
+        caseOwner: SECURITY_SOLUTION_OWNER,
         data: samplePost,
         updateCase: updateCaseCallback,
       });
@@ -142,6 +145,7 @@ describe('useCreateAttachments', () => {
       await waitForNextUpdate();
       result.current.createAttachments({
         caseId: basicCaseId,
+        caseOwner: SECURITY_SOLUTION_OWNER,
         data: samplePost,
         updateCase: updateCaseCallback,
       });
@@ -172,6 +176,7 @@ describe('useCreateAttachments', () => {
       async function test() {
         await result.current.createAttachments({
           caseId: basicCaseId,
+          caseOwner: SECURITY_SOLUTION_OWNER,
           data: samplePost,
           updateCase: updateCaseCallback,
           throwOnError: true,

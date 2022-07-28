@@ -53,7 +53,7 @@ import type {
   ControlColumnProps,
   RowRenderer,
 } from '@kbn/timelines-plugin/common';
-import { CaseAttachments } from '@kbn/cases-plugin/public';
+import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { CommentType } from '@kbn/cases-plugin/common';
 import { getAlertsPermissions } from '../../../../hooks/use_alert_permission';
 
@@ -175,13 +175,12 @@ export function ObservabilityActions({
   const userCasesPermissions = useGetUserCasesPermissions();
   const ruleId = alert.fields['kibana.alert.rule.uuid'] ?? null;
   const linkToRule = ruleId ? http.basePath.prepend(paths.observability.ruleDetails(ruleId)) : null;
-  const caseAttachments: CaseAttachments = useMemo(() => {
+  const caseAttachments: CaseAttachmentsWithoutOwner = useMemo(() => {
     return ecsData?._id
       ? [
           {
             alertId: ecsData?._id ?? '',
             index: ecsData?._index ?? '',
-            owner: observabilityFeatureId,
             type: CommentType.alert,
             rule: cases.helpers.getRuleIdFromEvent({ ecs: ecsData, data: data ?? [] }),
           },

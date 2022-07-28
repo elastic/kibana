@@ -43,7 +43,7 @@ const permissions = {
   push: true,
 };
 
-const attachments = [{ type: CommentType.user as const, comment: 'test', owner: 'cases' }];
+const attachments = [{ type: CommentType.user as const, comment: 'test' }];
 
 const CasesFixtureAppWithContext: React.FC<CasesFixtureAppDeps> = (props) => {
   const { cases } = props;
@@ -59,14 +59,26 @@ const CasesFixtureAppWithContext: React.FC<CasesFixtureAppDeps> = (props) => {
             <EuiTitle>
               <h2>Cases attachment hooks</h2>
             </EuiTitle>
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+            <EuiFlexGroup
+              gutterSize="m"
+              alignItems="center"
+              responsive={false}
+              wrap
+              style={{ marginTop: '5px' }}
+            >
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={() => createCaseFlyout.open({ attachments })}>
+                <EuiButton
+                  onClick={() => createCaseFlyout.open({ attachments })}
+                  data-test-subj="case-fixture-attach-to-new-case"
+                >
                   {'Attach to a new case'}
                 </EuiButton>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={() => selectCaseModal.open({ attachments })}>
+                <EuiButton
+                  onClick={() => selectCaseModal.open({ attachments })}
+                  data-test-subj="case-fixture-attach-to-existing-case"
+                >
                   {'Attach to an existing case'}
                 </EuiButton>
               </EuiFlexItem>
