@@ -106,6 +106,9 @@ export interface DocLinks {
   readonly enterpriseSearch: {
     readonly bulkApi: string;
     readonly configuration: string;
+    readonly crawlerGettingStarted: string;
+    readonly crawlerManaging: string;
+    readonly crawlerOverview: string;
     readonly languageAnalyzers: string;
     readonly licenseManagement: string;
     readonly mailService: string;
