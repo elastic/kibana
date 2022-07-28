@@ -12,7 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver')
+  const esArchiver = getService('esArchiver');
 
   describe('Insecure Cluster Warning', function () {
     before(async () => {
@@ -29,10 +29,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await browser.refresh();
 
-      const toastMessage: string = await (await testSubjects.find('insecureClusterAlertText')).getVisibleText();
+      const toastMessage: string = await (
+        await testSubjects.find('insecureClusterAlertText')
+      ).getVisibleText();
 
       await expect(toastMessage).to.equal(
-        'Don’t lose one bit. Enable our free security features.\nDon\'t show again\nEnable security\nDismiss'
+        "Don’t lose one bit. Enable our free security features.\nDon't show again\nEnable security\nDismiss"
       );
     });
   });

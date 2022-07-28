@@ -15,15 +15,14 @@ export const createClusterDataCheck = () => {
       try {
         const { indices = {} } = await esClient.indices.stats({
           index: '*',
-          metric: 'docs'
+          metric: 'docs',
         });
 
         const indexIds = Object.keys(indices);
 
         clusterHasUserData = indexIds.some((indexId: string) => {
           // Check index to see if it starts with known internal prefixes
-          const isInternalIndex =
-            indexId.startsWith('.') || indexId.startsWith('kibana_sample_');
+          const isInternalIndex = indexId.startsWith('.') || indexId.startsWith('kibana_sample_');
 
           // Check index to see if it has any docs
           const hasDocs = (indices[indexId].primaries?.docs?.count || 0) > 0;
