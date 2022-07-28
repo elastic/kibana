@@ -18,7 +18,6 @@ import { useOsqueryContextActionItem } from '../../osquery/use_osquery_context_a
 import { OsqueryFlyout } from '../../osquery/osquery_flyout';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { buildGetAlertByIdQuery } from '../../../../common/components/exceptions/helpers';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { EventsTdContent } from '../../../../timelines/components/timeline/styles';
 import type { Ecs } from '../../../../../common/ecs';
 import type { AddExceptionFlyoutProps } from '../../../../common/components/exceptions/add_exception_flyout';
@@ -81,23 +80,9 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     ariaLabel: ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
   });
 
-  const { loading: canAccessEndpointManagementLoading, canAccessEndpointManagement } =
-    useUserPrivileges().endpointPrivileges;
-  const canCreateEndpointEventFilters = useMemo(
-    () => !canAccessEndpointManagementLoading && canAccessEndpointManagement,
-    [canAccessEndpointManagement, canAccessEndpointManagementLoading]
-  );
+  const isEvent = useMemo(() => indexOf(ecsRowData.event?.kind, 'event') !== -1, [ecsRowData]);
 
   const alertStatus = get(0, ecsRowData?.kibana?.alert?.workflow_status) as Status | undefined;
-
-  const isEvent = useMemo(() => indexOf(ecsRowData.event?.kind, 'event') !== -1, [ecsRowData]);
-  const isAgentEndpoint = useMemo(() => ecsRowData.agent?.type?.includes('endpoint'), [ecsRowData]);
-
-  const isEndpointEvent = useMemo(() => isEvent && isAgentEndpoint, [isEvent, isAgentEndpoint]);
-  const timelineIdAllowsAddEndpointEventFilter = useMemo(
-    () => timelineId === TimelineId.hostsPageEvents || timelineId === TimelineId.usersPageEvents,
-    [timelineId]
-  );
 
   const onButtonClick = useCallback(() => {
     setPopover(!isPopoverOpen);
@@ -183,11 +168,9 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   });
   const { eventFilterActionItems } = useEventFilterAction({
     onAddEventFilterClick: handleOnAddEventFilterClick,
-    disabled:
-      !isEndpointEvent || !canCreateEndpointEventFilters || !timelineIdAllowsAddEndpointEventFilter,
-    tooltipMessage: !timelineIdAllowsAddEndpointEventFilter
-      ? i18n.ACTION_ADD_EVENT_FILTER_DISABLED_TOOLTIP
-      : undefined,
+    ecsRowData,
+    timelineId,
+    tooltipMessage: i18n.ACTION_ADD_EVENT_FILTER_DISABLED_TOOLTIP,
   });
   const agentId = useMemo(() => get(0, ecsRowData?.agent?.id), [ecsRowData]);
 
@@ -196,7 +179,10 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     setPopover(false);
   }, []);
 
-  const { osqueryActionItems } = useOsqueryContextActionItem({ handleClick: handleOnOsqueryClick });
+  const { osqueryActionItems } = useOsqueryContextActionItem({
+    handleClick: handleOnOsqueryClick,
+    agentId,
+  });
 
   const items: React.ReactElement[] = useMemo(
     () =>
@@ -205,20 +191,15 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
             ...addToCaseActionItems,
             ...statusActionItems,
             ...exceptionActionItems,
-            ...(agentId ? osqueryActionItems : []),
+            ...osqueryActionItems,
           ]
-        : [
-            ...addToCaseActionItems,
-            ...eventFilterActionItems,
-            ...(agentId ? osqueryActionItems : []),
-          ],
+        : [...addToCaseActionItems, ...eventFilterActionItems, ...osqueryActionItems],
     [
       isEvent,
       ruleId,
       addToCaseActionItems,
       statusActionItems,
       exceptionActionItems,
-      agentId,
       osqueryActionItems,
       eventFilterActionItems,
     ]

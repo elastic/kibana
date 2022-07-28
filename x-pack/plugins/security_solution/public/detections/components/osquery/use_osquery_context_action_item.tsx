@@ -11,17 +11,26 @@ import { useKibana } from '../../../common/lib/kibana';
 
 interface IProps {
   handleClick: () => void;
+  agentId?: string;
 }
 
-export const useOsqueryContextActionItem = ({ handleClick }: IProps) => {
+export const useOsqueryContextActionItem = ({ handleClick, agentId }: IProps) => {
   const osqueryActionItem = useMemo(
     () => <OsqueryActionItem handleClick={handleClick} />,
     [handleClick]
   );
-  const permissions = useKibana().services.application.capabilities.osquery;
+  const {
+    osquery,
+    application: {
+      capabilities: { osquery: permissions },
+    },
+  } = useKibana().services;
+  const osqueryAvailable = osquery?.isOsqueryAvailable({
+    agentId: agentId ?? '',
+  });
+  const hasPermissions = permissions?.writeLiveQueries || permissions?.runSavedQueries;
 
   return {
-    osqueryActionItems:
-      permissions?.writeLiveQueries || permissions?.runSavedQueries ? [osqueryActionItem] : [],
+    osqueryActionItems: osqueryAvailable && hasPermissions ? [osqueryActionItem] : [],
   };
 };

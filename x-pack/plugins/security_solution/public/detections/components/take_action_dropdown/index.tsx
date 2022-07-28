@@ -21,11 +21,8 @@ import { getFieldValue } from '../host_isolation/helpers';
 import type { Ecs } from '../../../../common/ecs';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { isAlertFromEndpointAlert } from '../../../common/utils/endpoint_alert_check';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useAddToCaseActions } from '../alerts_table/timeline_actions/use_add_to_case_actions';
-import { useKibana } from '../../../common/lib/kibana';
-import { OsqueryActionItem } from '../osquery/osquery_action_item';
+import { useOsqueryContextActionItem } from '../osquery/use_osquery_context_action_item';
 
 interface ActionsData {
   alertStatus: Status;
@@ -67,16 +64,6 @@ export const TakeActionDropdown = React.memo(
     timelineId,
     onOsqueryClick,
   }: TakeActionDropdownProps) => {
-    const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
-    const { loading: canAccessEndpointManagementLoading, canAccessEndpointManagement } =
-      useUserPrivileges().endpointPrivileges;
-
-    const canCreateEndpointEventFilters = useMemo(
-      () => !canAccessEndpointManagementLoading && canAccessEndpointManagement,
-      [canAccessEndpointManagement, canAccessEndpointManagementLoading]
-    );
-    const { osquery } = useKibana().services;
-
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
     const actionsData = useMemo(
@@ -161,7 +148,8 @@ export const TakeActionDropdown = React.memo(
 
     const { eventFilterActionItems } = useEventFilterAction({
       onAddEventFilterClick: handleOnAddEventFilterClick,
-      disabled: !isEndpointEvent || !canCreateEndpointEventFilters,
+      ecsRowData: ecsData,
+      timelineId,
     });
 
     const onMenuItemClick = useCallback(() => {
@@ -182,22 +170,15 @@ export const TakeActionDropdown = React.memo(
       onInvestigateInTimelineAlertClick: closePopoverHandler,
     });
 
-    const osqueryAvailable = osquery?.isOsqueryAvailable({
-      agentId,
-    });
-
     const handleOnOsqueryClick = useCallback(() => {
       onOsqueryClick(agentId);
       setIsPopoverOpen(false);
     }, [onOsqueryClick, setIsPopoverOpen, agentId]);
 
-    const osqueryActionItem = useMemo(
-      () =>
-        OsqueryActionItem({
-          handleClick: handleOnOsqueryClick,
-        }),
-      [handleOnOsqueryClick]
-    );
+    const { osqueryActionItems } = useOsqueryContextActionItem({
+      handleClick: handleOnOsqueryClick,
+      agentId,
+    });
 
     const alertsActionItems = useMemo(
       () =>
@@ -226,21 +207,19 @@ export const TakeActionDropdown = React.memo(
 
     const items: React.ReactElement[] = useMemo(
       () => [
-        ...(tGridEnabled ? addToCaseActionItems : []),
+        ...addToCaseActionItems,
         ...alertsActionItems,
         ...hostIsolationActionItems,
         ...endpointResponseActionsConsoleItems,
-        ...(osqueryAvailable ? [osqueryActionItem] : []),
+        ...osqueryActionItems,
         ...investigateInTimelineActionItems,
       ],
       [
-        tGridEnabled,
         addToCaseActionItems,
         alertsActionItems,
         hostIsolationActionItems,
         endpointResponseActionsConsoleItems,
-        osqueryAvailable,
-        osqueryActionItem,
+        osqueryActionItems,
         investigateInTimelineActionItems,
       ]
     );
