@@ -19223,7 +19223,6 @@
     "xpack.ml.jobsList.nodeAvailableWarning.unavailableCreateOrRunJobsDescription": "Vous ne pourrez ni créer ni exécuter de tâches.",
     "xpack.ml.jobsList.noJobsFoundLabel": "Aucune tâche n'a été trouvée",
     "xpack.ml.jobsList.processedRecordsLabel": "Enregistrements traités",
-    "xpack.ml.jobsList.refreshButtonLabel": "Actualiser",
     "xpack.ml.jobsList.resetActionStatusText": "réinitialiser",
     "xpack.ml.jobsList.resetJobErrorMessage": "Impossible de réinitialiser les tâches",
     "xpack.ml.jobsList.resetJobModal.cancelButtonLabel": "Annuler",
