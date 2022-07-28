@@ -5,9 +5,18 @@
  * 2.0.
  */
 
+import fs from 'fs/promises';
+
 import { uniq } from 'lodash';
+import semverGte from 'semver/functions/gte';
+import semverGt from 'semver/functions/gt';
+import semverCoerce from 'semver/functions/coerce';
 import { type RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
+
+import { appContextService } from '../../services';
+
+const MINIMUM_SUPPORTED_VERSION = '7.17.0';
 
 import type {
   GetAgentsResponse,
@@ -17,6 +26,7 @@ import type {
   PostBulkAgentReassignResponse,
   PostBulkUpdateAgentTagsResponse,
   GetAgentTagsResponse,
+  GetAvailableVersionsResponse,
 } from '../../../common/types';
 import type {
   GetAgentsRequestSchema,
@@ -317,3 +327,37 @@ export const getAgentDataHandler: RequestHandler<
 function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
 }
+
+// Read a static file generated at build time
+export const getAvailableVersionsHandler: RequestHandler = async (context, request, response) => {
+  const versionsFile = 'build/kibana/x-pack/plugins/fleet/target/agent_versions_list.txt';
+  let versionsToDisplay: string[] = [];
+  const kibanaVersion = appContextService.getKibanaVersion();
+
+  try {
+    const file = await fs.readFile(versionsFile);
+
+    // Exclude versions older than MINIMUM_SUPPORTED_VERSION and pre-release versions (SNAPSHOT, rc..)
+    // De-dup and sort in descending order
+    if (file) {
+      const versions = file
+        .toString()
+        .split(',')
+        .map((item: any) => semverCoerce(item)?.version || '')
+        .filter((v: any) => semverGte(v, MINIMUM_SUPPORTED_VERSION))
+        .sort((a: any, b: any) => (semverGt(a, b) ? -1 : 1));
+      const parsedVersions = uniq(versions);
+
+      // Add current version if not already present
+      const hasCurrentVersion = parsedVersions.some((v) => v === kibanaVersion);
+      versionsToDisplay = !hasCurrentVersion
+        ? [kibanaVersion].concat(parsedVersions)
+        : parsedVersions;
+    }
+
+    const body: GetAvailableVersionsResponse = { items: versionsToDisplay };
+    return response.ok({ body });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};

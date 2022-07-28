@@ -90,6 +90,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await run(Tasks.CleanEmptyFolders);
     await run(Tasks.FleetDownloadElasticGpgKey);
     await run(Tasks.BundleFleetPackages);
+    await run(Tasks.FetchAgentVersionsList);
   }
 
   /**
