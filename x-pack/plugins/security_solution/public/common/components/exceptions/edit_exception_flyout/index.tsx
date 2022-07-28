@@ -150,13 +150,15 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
   const hasDataViewId = dataViewId || maybeRule?.data_view_id || null;
   const [dataViewIndexPatterns, setDataViewIndexPatterns] = useState<DataViewBase | null>(null);
 
-  useCallback(async () => {
-    if (hasDataViewId) {
-      const dv = await data.dataViews.get(hasDataViewId);
-      setDataViewIndexPatterns(dv);
-    } else {
-      return null;
-    }
+  useEffect(() => {
+    const fetchSingleDataView = async () => {
+      if (hasDataViewId) {
+        const dv = await data.dataViews.get(hasDataViewId);
+        setDataViewIndexPatterns(dv);
+      }
+    };
+
+    fetchSingleDataView();
   }, [hasDataViewId, data.dataViews, setDataViewIndexPatterns]);
 
   // Don't fetch indices if rule has data view id (currently rule can technically have
