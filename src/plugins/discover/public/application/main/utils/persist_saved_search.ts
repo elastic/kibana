@@ -20,14 +20,14 @@ import { saveSavedSearch } from '../../../services/saved_searches';
 export async function persistSavedSearch(
   savedSearch: SavedSearch,
   {
-    indexPattern,
+    dataView,
     onError,
     onSuccess,
     services,
     saveOptions,
     state,
   }: {
-    indexPattern: DataView;
+    dataView: DataView;
     onError: (error: Error, savedSearch: SavedSearch) => void;
     onSuccess: (id: string) => void;
     saveOptions: SavedObjectSaveOpts;
@@ -36,7 +36,7 @@ export async function persistSavedSearch(
   }
 ) {
   updateSearchSource(savedSearch.searchSource, true, {
-    indexPattern,
+    dataView,
     services,
     sort: state.sort as SortOrder[],
     useNewFieldsApi: false,

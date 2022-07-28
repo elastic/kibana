@@ -12,19 +12,19 @@ import { SortOrder } from '../components/table_header/helpers';
 
 /**
  * use in case the user didn't manually sort.
- * the default sort is returned depending of the index pattern
+ * the default sort is returned depending of the data view
  */
 export function getDefaultSort(
-  indexPattern: DataView | undefined,
+  dataView: DataView | undefined,
   defaultSortOrder: string = 'desc',
   hidingTimeColumn: boolean = false
 ): SortOrder[] {
   if (
-    indexPattern?.timeFieldName &&
-    isSortable(indexPattern.timeFieldName, indexPattern) &&
+    dataView?.timeFieldName &&
+    isSortable(dataView.timeFieldName, dataView) &&
     !hidingTimeColumn
   ) {
-    return [[indexPattern.timeFieldName, defaultSortOrder]];
+    return [[dataView.timeFieldName, defaultSortOrder]];
   } else {
     return [];
   }

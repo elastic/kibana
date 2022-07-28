@@ -94,7 +94,7 @@ export function fetchAll(
     if (recordRawType === RecordRawType.DOCUMENT) {
       // Update the base searchSource, base for all child fetches
       updateSearchSource(searchSource, false, {
-        indexPattern: dataView,
+        dataView,
         services,
         sort: sort as SortOrder[],
         useNewFieldsApi,
@@ -113,7 +113,7 @@ export function fetchAll(
     // Start fetching all required requests
     const documents =
       useSql && query
-        ? fetchSql(query, services.indexPatterns, data, services.expressions)
+        ? fetchSql(query, services.dataViews, data, services.expressions)
         : fetchDocuments(searchSource.createCopy(), fetchDeps);
     const charts =
       isChartVisible && !useSql ? fetchChart(searchSource.createCopy(), fetchDeps) : undefined;

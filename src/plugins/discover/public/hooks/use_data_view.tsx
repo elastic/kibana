@@ -8,20 +8,20 @@
 import { useEffect, useState } from 'react';
 import { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 
-export const useIndexPattern = (indexPatterns: DataViewsContract, indexPatternId: string) => {
-  const [indexPattern, setIndexPattern] = useState<DataView | undefined>(undefined);
+export const useDataView = (dataViews: DataViewsContract, dataViewId: string) => {
+  const [dataView, setDataView] = useState<DataView | undefined>(undefined);
   const [error, setError] = useState();
 
   useEffect(() => {
-    async function loadIndexPattern() {
+    async function loadDataView() {
       try {
-        const item = await indexPatterns.get(indexPatternId);
-        setIndexPattern(item);
+        const item = await dataViews.get(dataViewId);
+        setDataView(item);
       } catch (e) {
         setError(e);
       }
     }
-    loadIndexPattern();
-  }, [indexPatternId, indexPatterns]);
-  return { indexPattern, error };
+    loadDataView();
+  }, [dataViewId, dataViews]);
+  return { dataView, error };
 };

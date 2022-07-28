@@ -7,7 +7,7 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/public';
-import { buildDataViewMock } from './index_pattern';
+import { buildDataViewMock } from './data_view';
 
 const fields = [
   {
@@ -52,7 +52,7 @@ const fields = [
   },
 ] as DataView['fields'];
 
-export const indexPatternWithTimefieldMock = buildDataViewMock({
+export const dataViewWithTimefieldMock = buildDataViewMock({
   name: 'index-pattern-with-timefield',
   fields,
   timeFieldName: 'timestamp',

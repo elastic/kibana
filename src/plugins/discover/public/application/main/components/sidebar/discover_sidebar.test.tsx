@@ -17,7 +17,7 @@ import { SavedObject } from '@kbn/core/types';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebarComponent as DiscoverSidebar } from './discover_sidebar';
 import { discoverServiceMock as mockDiscoverServices } from '../../../../__mocks__/services';
-import { stubLogstashIndexPattern } from '@kbn/data-plugin/common/stubs';
+import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { BehaviorSubject } from 'rxjs';
@@ -35,10 +35,10 @@ jest.mock('../../../../kibana_services', () => ({
 }));
 
 function getCompProps(): DiscoverSidebarProps {
-  const indexPattern = stubLogstashIndexPattern;
-  const hits = getDataTableRecords(indexPattern);
+  const dataView = stubLogstashDataView;
+  const hits = getDataTableRecords(dataView);
 
-  const indexPatternList = [
+  const dataViewList = [
     { id: '0', attributes: { title: 'b' } } as SavedObject<DataViewAttributes>,
     { id: '1', attributes: { title: 'a' } } as SavedObject<DataViewAttributes>,
     { id: '2', attributes: { title: 'c' } } as SavedObject<DataViewAttributes>,
@@ -60,12 +60,12 @@ function getCompProps(): DiscoverSidebarProps {
     columns: ['extension'],
     fieldCounts,
     documents: hits,
-    indexPatternList,
-    onChangeIndexPattern: jest.fn(),
+    dataViewList,
+    onChangeDataView: jest.fn(),
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
-    selectedIndexPattern: indexPattern,
+    selectedDataView: dataView,
     state: {},
     trackUiMetric: jest.fn(),
     fieldFilter: getDefaultFieldFilter(),
@@ -111,7 +111,7 @@ describe('discover sidebar', function () {
   });
 
   it('should render "Add a field" button', () => {
-    const addFieldButton = findTestSubject(comp, 'indexPattern-add-field_btn');
+    const addFieldButton = findTestSubject(comp, 'dataView-add-field_btn');
     expect(addFieldButton.length).toBe(1);
     addFieldButton.simulate('click');
     expect(props.editField).toHaveBeenCalledWith();
@@ -131,7 +131,7 @@ describe('discover sidebar', function () {
         <DiscoverSidebar {...props} editField={undefined} />
       </KibanaContextProvider>
     );
-    const addFieldButton = findTestSubject(compInViewerMode, 'indexPattern-add-field_btn');
+    const addFieldButton = findTestSubject(compInViewerMode, 'dataView-add-field_btn');
     expect(addFieldButton.length).toBe(0);
     findTestSubject(comp, 'field-bytes').simulate('click');
     const editFieldButton = findTestSubject(compInViewerMode, 'discoverFieldListPanelEdit-bytes');
@@ -145,7 +145,7 @@ describe('discover sidebar', function () {
       </KibanaContextProvider>
     );
     // open data view picker
-    findTestSubject(compWithPicker, 'indexPattern-switch-link').simulate('click');
+    findTestSubject(compWithPicker, 'dataView-switch-link').simulate('click');
     expect(findTestSubject(compWithPicker, 'changeDataViewPopover').length).toBe(1);
     // click "Add a field"
     const addFieldButtonInDataViewPicker = findTestSubject(
@@ -174,12 +174,12 @@ describe('discover sidebar', function () {
       </KibanaContextProvider>
     );
     // open data view picker
-    findTestSubject(compWithPickerInViewerMode, 'indexPattern-switch-link').simulate('click');
+    findTestSubject(compWithPickerInViewerMode, 'dataView-switch-link').simulate('click');
     expect(findTestSubject(compWithPickerInViewerMode, 'changeDataViewPopover').length).toBe(1);
     // check that buttons are not present
     const addFieldButtonInDataViewPicker = findTestSubject(
       compWithPickerInViewerMode,
-      'indexPattern-add-field'
+      'dataView-add-field'
     );
     expect(addFieldButtonInDataViewPicker.length).toBe(0);
     const createDataViewButton = findTestSubject(compWithPickerInViewerMode, 'dataview-create-new');

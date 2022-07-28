@@ -9,12 +9,12 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { DocViewerTab } from './doc_viewer_tab';
-import { indexPatternMock } from '../../../../__mocks__/index_pattern';
+import { dataViewMock } from '../../../../__mocks__/data_view';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
 
 describe('DocViewerTab', () => {
   test('changing columns triggers an update', () => {
-    const hit = buildDataTableRecord({ _index: 'test', _id: '1' }, indexPatternMock);
+    const hit = buildDataTableRecord({ _index: 'test', _id: '1' }, dataViewMock);
     const props = {
       title: 'test',
       component: jest.fn(),
@@ -23,7 +23,7 @@ describe('DocViewerTab', () => {
       renderProps: {
         hit,
         columns: ['test'],
-        indexPattern: indexPatternMock,
+        dataView: dataViewMock,
       },
     };
 
@@ -34,7 +34,7 @@ describe('DocViewerTab', () => {
       renderProps: {
         hit,
         columns: ['test2'],
-        indexPattern: indexPatternMock,
+        dataView: dataViewMock,
       },
     };
 

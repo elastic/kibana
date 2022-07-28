@@ -64,22 +64,22 @@ export function moveColumn(columns: string[], columnName: string, newIndex: numb
 export function getStateColumnActions({
   capabilities,
   config,
-  indexPattern,
-  indexPatterns,
+  dataView,
+  dataViews,
   useNewFieldsApi,
   setAppState,
   state,
 }: {
   capabilities: Capabilities;
   config: IUiSettingsClient;
-  indexPattern: DataView;
-  indexPatterns: DataViewsContract;
+  dataView: DataView;
+  dataViews: DataViewsContract;
   useNewFieldsApi: boolean;
   setAppState: DiscoverGetStateReturn['setAppState'] | ContextGetStateReturn['setAppState'];
   state: DiscoverState | ContextState;
 }) {
   function onAddColumn(columnName: string) {
-    popularizeField(indexPattern, columnName, indexPatterns, capabilities);
+    popularizeField(dataView, columnName, dataViews, capabilities);
     const columns = addColumn(state.columns || [], columnName, useNewFieldsApi);
     const defaultOrder = config.get(SORT_DEFAULT_ORDER_SETTING);
     const sort =
@@ -88,7 +88,7 @@ export function getStateColumnActions({
   }
 
   function onRemoveColumn(columnName: string) {
-    popularizeField(indexPattern, columnName, indexPatterns, capabilities);
+    popularizeField(dataView, columnName, dataViews, capabilities);
     const columns = removeColumn(state.columns || [], columnName, useNewFieldsApi);
     // The state's sort property is an array of [sortByColumn,sortDirection]
     const sort =
@@ -106,7 +106,7 @@ export function getStateColumnActions({
   function onSetColumns(columns: string[], hideTimeColumn: boolean) {
     // The next line should gone when classic table will be removed
     const actualColumns =
-      !hideTimeColumn && indexPattern.timeFieldName && indexPattern.timeFieldName === columns[0]
+      !hideTimeColumn && dataView.timeFieldName && dataView.timeFieldName === columns[0]
         ? columns.slice(1)
         : columns;
 

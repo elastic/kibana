@@ -19,7 +19,7 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 const applicationMock = createStartContractMock();
 const savedSearch = savedSearchMock;
-const indexPatterns = [] as DataView[];
+const dataViews = [] as DataView[];
 const services = discoverServiceMock;
 const filterManager = createFilterManagerMock();
 const searchInput = {
@@ -38,7 +38,7 @@ const embeddableConfig = {
   savedSearch,
   editUrl: '',
   editPath: '',
-  indexPatterns,
+  dataViews,
   editable: true,
   filterManager,
   services,

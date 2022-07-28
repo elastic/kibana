@@ -186,7 +186,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('a11y test for adding a field from side bar', async () => {
-      await testSubjects.click('indexPattern-add-field_btn');
+      await testSubjects.click('dataView-add-field_btn');
       await a11y.testAppSnapshot();
     });
   });

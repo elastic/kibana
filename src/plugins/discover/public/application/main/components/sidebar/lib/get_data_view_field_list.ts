@@ -10,18 +10,15 @@ import { difference } from 'lodash';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { isNestedFieldParent } from '../../../utils/nested_fields';
 
-export function getIndexPatternFieldList(
-  indexPattern?: DataView,
-  fieldCounts?: Record<string, number>
-) {
-  if (!indexPattern || !fieldCounts) return [];
+export function getDataViewFieldList(dataView?: DataView, fieldCounts?: Record<string, number>) {
+  if (!dataView || !fieldCounts) return [];
 
   const fieldNamesInDocs = Object.keys(fieldCounts);
-  const fieldNamesInIndexPattern = indexPattern.fields.getAll().map((fld) => fld.name);
+  const fieldNamesInDataView = dataView.fields.getAll().map((fld) => fld.name);
   const unknownFields: DataViewField[] = [];
 
-  difference(fieldNamesInDocs, fieldNamesInIndexPattern).forEach((unknownFieldName) => {
-    if (isNestedFieldParent(unknownFieldName, indexPattern)) {
+  difference(fieldNamesInDocs, fieldNamesInDataView).forEach((unknownFieldName) => {
+    if (isNestedFieldParent(unknownFieldName, dataView)) {
       unknownFields.push({
         displayName: String(unknownFieldName),
         name: String(unknownFieldName),
@@ -36,5 +33,5 @@ export function getIndexPatternFieldList(
     }
   });
 
-  return [...indexPattern.fields.getAll(), ...unknownFields];
+  return [...dataView.fields.getAll(), ...unknownFields];
 }

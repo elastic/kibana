@@ -235,7 +235,7 @@ export class DiscoverPlugin
         defaultMessage: 'JSON',
       }),
       order: 20,
-      component: ({ hit, indexPattern }) => (
+      component: ({ hit, dataView }) => (
         <React.Suspense
           fallback={
             <DeferredSpinner>
@@ -246,7 +246,7 @@ export class DiscoverPlugin
           <SourceViewer
             index={hit.raw._index}
             id={hit.raw._id}
-            indexPattern={indexPattern}
+            dataView={dataView}
             hasLineNumbers
           />
         </React.Suspense>
@@ -287,7 +287,7 @@ export class DiscoverPlugin
           this.locator!
         );
 
-        // make sure the index pattern list is up to date
+        // make sure the data view list is up to date
         await discoverStartPlugins.data.indexPatterns.clearCache();
 
         const { renderApp } = await import('./application');

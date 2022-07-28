@@ -28,8 +28,8 @@ import { fetchDocuments } from './fetch_documents';
 import { fetchSql } from './fetch_sql';
 import { fetchChart } from './fetch_chart';
 import { fetchTotalHits } from './fetch_total_hits';
-import { indexPatternMock } from '../../../__mocks__/index_pattern';
 import { buildDataTableRecord } from '../../../utils/build_data_record';
+import { dataViewMock } from '../../../__mocks__/data_view';
 
 jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),
@@ -123,7 +123,7 @@ describe('test fetchAll', () => {
       { _id: '1', _index: 'logs' },
       { _id: '2', _index: 'logs' },
     ];
-    const documents = hits.map((hit) => buildDataTableRecord(hit, indexPatternMock));
+    const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     mockFetchDocuments.mockResolvedValue(documents);
     await fetchAll(subjects, searchSource, false, deps);
     expect(await collect()).toEqual([
@@ -144,7 +144,7 @@ describe('test fetchAll', () => {
       { _id: '2', _index: 'logs' },
     ];
     searchSource.getField('index')!.isTimeBased = () => false;
-    const documents = hits.map((hit) => buildDataTableRecord(hit, indexPatternMock));
+    const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     mockFetchDocuments.mockResolvedValue(documents);
 
     mockFetchTotalHits.mockResolvedValue(42);
@@ -194,7 +194,7 @@ describe('test fetchAll', () => {
     searchSource.getField('index')!.isTimeBased = () => false;
     mockFetchTotalHits.mockRejectedValue({ msg: 'Oh noes!' });
     const hits = [{ _id: '1', _index: 'logs' }];
-    const documents = hits.map((hit) => buildDataTableRecord(hit, indexPatternMock));
+    const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     mockFetchDocuments.mockResolvedValue(documents);
     await fetchAll(subjects, searchSource, false, deps);
     expect(await collectTotalHits()).toEqual([
@@ -240,7 +240,7 @@ describe('test fetchAll', () => {
       { _id: '1', _index: 'logs' },
       { _id: '2', _index: 'logs' },
     ];
-    const documents = hits.map((hit) => buildDataTableRecord(hit, indexPatternMock));
+    const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     mockFetchSQL.mockResolvedValue(documents);
     deps = {
       appStateContainer: {

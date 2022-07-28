@@ -18,7 +18,7 @@ import { persistSavedSearch } from '../../utils/persist_saved_search';
 import { DOC_TABLE_LEGACY } from '../../../../../common';
 
 async function saveDataSource({
-  indexPattern,
+  dataView,
   navigateTo,
   savedSearch,
   saveOptions,
@@ -26,7 +26,7 @@ async function saveDataSource({
   state,
   navigateOrReloadSavedSearch,
 }: {
-  indexPattern: DataView;
+  dataView: DataView;
   navigateTo: (url: string) => void;
   savedSearch: SavedSearch;
   saveOptions: SaveSavedSearchOptions;
@@ -78,7 +78,7 @@ async function saveDataSource({
     });
   }
   return persistSavedSearch(savedSearch, {
-    indexPattern,
+    dataView,
     onError,
     onSuccess,
     saveOptions,
@@ -88,7 +88,7 @@ async function saveDataSource({
 }
 
 export async function onSaveSearch({
-  indexPattern,
+  dataView,
   navigateTo,
   savedSearch,
   services,
@@ -96,7 +96,7 @@ export async function onSaveSearch({
   onClose,
   onSaveCb,
 }: {
-  indexPattern: DataView;
+  dataView: DataView;
   navigateTo: (path: string) => void;
   savedSearch: SavedSearch;
   services: DiscoverServices;
@@ -132,7 +132,7 @@ export async function onSaveSearch({
     };
     const navigateOrReloadSavedSearch = !Boolean(onSaveCb);
     const response = await saveDataSource({
-      indexPattern,
+      dataView,
       saveOptions,
       services,
       navigateTo,
