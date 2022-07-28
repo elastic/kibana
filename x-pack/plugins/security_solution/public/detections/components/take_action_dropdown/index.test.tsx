@@ -458,7 +458,7 @@ describe('take action dropdown', () => {
         expect(consoleButton.prop('toolTipContent')).toEqual(NOT_FROM_ENDPOINT_HOST_TOOLTIP);
       });
 
-      it.only('should disable the button if host status is unenrolled', async () => {
+      it('should disable the button if host status is unenrolled', async () => {
         setAlertDetailsDataMockToEndpointAgent();
         const getApiResponse = apiMocks.responseProvider.metadataDetails.getMockImplementation();
         apiMocks.responseProvider.metadataDetails.mockImplementation(() => {
