@@ -28,7 +28,7 @@ import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { LicenseStatus } from '../../common/types/license_status';
 import { WatchStatusPage } from './sections/watch_status_page';
 import { WatchEdit } from './sections/watch_edit/components/watch_edit';
-import { WatchList } from './sections/watch_list/components/watch_list';
+import { WatchListPage } from './sections/watch_list_page';
 import { registerRouter } from './lib/navigation';
 import { AppContextProvider } from './app_context';
 import { useExecutionContext } from './shared_imports';
@@ -107,7 +107,7 @@ export const App = (deps: AppDeps) => {
 // Export this so we can test it with a different router.
 export const AppWithoutRouter = () => (
   <Switch>
-    <Route exact path="/watches" component={WatchList} />
+    <Route exact path="/watches" component={WatchListPage} />
     <Route exact path="/watches/watch/:id/status" component={WatchStatusPage} />
     <Route exact path="/watches/watch/:id/edit" component={WatchEdit} />
     <Route exact path="/watches/new-watch/:type(json|threshold)" component={WatchEdit} />

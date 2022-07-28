@@ -14,7 +14,7 @@ import {
   AsyncTestBedConfig,
 } from '@kbn/test-jest-helpers';
 import { HttpSetup } from '@kbn/core/public';
-import { WatchList } from '../../../public/application/sections/watch_list/components/watch_list';
+import { WatchListPage } from '../../../public/application/sections/watch_list_page';
 import { ROUTES, REFRESH_INTERVALS } from '../../../common/constants';
 import { WithAppDependencies } from './setup_environment';
 
@@ -35,7 +35,7 @@ export interface WatchListTestBed extends TestBed<WatchListTestSubjects> {
 }
 
 export const setup = async (httpSetup: HttpSetup): Promise<WatchListTestBed> => {
-  const initTestBed = registerTestBed(WithAppDependencies(WatchList, httpSetup), testBedConfig);
+  const initTestBed = registerTestBed(WithAppDependencies(WatchListPage, httpSetup), testBedConfig);
   const testBed = await initTestBed();
 
   /**
