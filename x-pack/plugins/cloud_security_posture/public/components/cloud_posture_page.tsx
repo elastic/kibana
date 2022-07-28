@@ -166,7 +166,7 @@ export const CloudPosturePage = <TData, TError>({
       return defaultErrorRenderer(getSetupStatus.error);
     }
 
-    if (getSetupStatus.isLoading || getSetupStatus.isIdle) {
+    if (getSetupStatus.isLoading) {
       return defaultLoadingRenderer();
     }
 
@@ -182,7 +182,7 @@ export const CloudPosturePage = <TData, TError>({
       return errorRender(query.error);
     }
 
-    if (query.isLoading || query.isIdle) {
+    if (query.isLoading) {
       return loadingRender();
     }
 

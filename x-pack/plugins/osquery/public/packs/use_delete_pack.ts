@@ -36,7 +36,7 @@ export const useDeletePack = ({ packId, withRedirect }: UseDeletePackProps) => {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(PACKS_ID);
+      queryClient.invalidateQueries([PACKS_ID]);
       if (withRedirect) {
         navigateToApp(PLUGIN_ID, { path: pagePathGetters.packs() });
       }

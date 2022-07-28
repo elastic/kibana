@@ -55,7 +55,7 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
   const { isLoading, mutateAsync } = useUpdatePack({
     options: {
       onSuccess: (response) => {
-        queryClient.invalidateQueries(PACKS_ID);
+        queryClient.invalidateQueries([PACKS_ID]);
         setErrorToast();
         toasts.addSuccess(
           response?.data?.attributes.enabled

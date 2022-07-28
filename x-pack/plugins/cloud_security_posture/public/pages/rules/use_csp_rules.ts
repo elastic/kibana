@@ -74,10 +74,7 @@ export const useBulkUpdateCspRules = () => {
       },
       onSettled: () =>
         // Invalidate all queries for simplicity
-        queryClient.invalidateQueries({
-          queryKey: CSP_RULE_SAVED_OBJECT_TYPE,
-          exact: false,
-        }),
+        queryClient.invalidateQueries([CSP_RULE_SAVED_OBJECT_TYPE]),
     }
   );
 };

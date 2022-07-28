@@ -38,7 +38,7 @@ export const useCreatePack = ({ withRedirect }: UseCreatePackProps) => {
         setErrorToast(error, { title: error.body.error, toastMessage: error.body.message });
       },
       onSuccess: (payload) => {
-        queryClient.invalidateQueries(PACKS_ID);
+        queryClient.invalidateQueries([PACKS_ID]);
         if (withRedirect) {
           navigateToApp(PLUGIN_ID, { path: pagePathGetters.packs() });
         }

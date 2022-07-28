@@ -41,7 +41,7 @@ export const useCreateSavedQuery = ({ withRedirect }: UseCreateSavedQueryProps) 
         });
       },
       onSuccess: (response) => {
-        queryClient.invalidateQueries(SAVED_QUERIES_ID);
+        queryClient.invalidateQueries([SAVED_QUERIES_ID]);
         if (withRedirect) {
           navigateToApp(PLUGIN_ID, { path: pagePathGetters.saved_queries() });
         }

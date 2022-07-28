@@ -28,7 +28,7 @@ export const Findings = () => {
   if (!hasFindings) return <NoFindingsStates />;
 
   let queryForCloudPosturePage: UseQueryResult = dataViewQuery;
-  if (pitQuery.isError || pitQuery.isLoading || pitQuery.isIdle) {
+  if (pitQuery.isError || pitQuery.isLoading) {
     queryForCloudPosturePage = pitQuery;
   }
 
