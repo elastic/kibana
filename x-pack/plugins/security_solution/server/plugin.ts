@@ -14,6 +14,7 @@ import {
   EQL_RULE_TYPE_ID,
   SAVED_QUERY_RULE_TYPE_ID,
   THRESHOLD_RULE_TYPE_ID,
+  NEW_TERMS_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
 
 import type { Logger } from '@kbn/core/server';
@@ -54,7 +55,6 @@ import {
   DEFAULT_ALERTS_INDEX,
 } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
-import { registerResolverRoutes } from './endpoint/routes/resolver';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { registerActionRoutes } from './endpoint/routes/actions';
 import { EndpointArtifactClient, ManifestManager } from './endpoint/services';
@@ -275,7 +275,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
     registerEndpointRoutes(router, endpointContext);
     registerLimitedConcurrencyRoutes(core);
-    registerResolverRoutes(router);
     registerPolicyRoutes(router, endpointContext);
     registerActionRoutes(router, endpointContext);
 
@@ -287,6 +286,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       QUERY_RULE_TYPE_ID,
       SAVED_QUERY_RULE_TYPE_ID,
       THRESHOLD_RULE_TYPE_ID,
+      NEW_TERMS_RULE_TYPE_ID,
     ];
 
     plugins.features.registerKibanaFeature(getKibanaPrivilegesFeaturePrivileges(ruleTypes));

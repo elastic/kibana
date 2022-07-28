@@ -8,7 +8,7 @@
 
 import type { Filter } from '@kbn/es-query';
 import type { TimeRange, RefreshInterval } from './timefilter/types';
-import type { Query } from './types';
+import type { Query, AggregateQuery } from './types';
 
 /**
  * All query state service state
@@ -22,5 +22,5 @@ export type QueryState = {
   time?: TimeRange;
   refreshInterval?: RefreshInterval;
   filters?: Filter[];
-  query?: Query;
+  query?: Query | AggregateQuery;
 };
