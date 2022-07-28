@@ -128,7 +128,7 @@ export default function ({ getService }: FtrProviderContext) {
             }
           }
 
-          await ml.testExecution.logTestStep('displays the swimlanes');
+          await ml.testExecution.logTestStep('displays the swim lanes');
           await ml.anomalyExplorer.assertOverallSwimlaneExists();
           await ml.anomalyExplorer.assertSwimlaneViewByExists();
 
@@ -167,11 +167,11 @@ export default function ({ getService }: FtrProviderContext) {
           ]);
           await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'y', [
             'AAL',
-            'VRD',
             'EGF',
+            'VRD',
             'SWR',
-            'AMX',
             'JZA',
+            'AMX',
             'TRS',
             'ACA',
             'BAW',
@@ -311,13 +311,13 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.swimLane.waitForSwimLanesToLoad();
 
           await ml.swimLane.assertSelection(viewBySwimLaneTestSubj, {
-            x: [1454817600000, 1454846400000],
-            y: ['AAL', 'VRD'],
+            x: [1454817600000, 1454860800000],
+            y: ['AAL', 'EGF'],
           });
 
-          await ml.anomaliesTable.assertTableRowsCount(2);
+          await ml.anomaliesTable.assertTableRowsCount(3);
           await ml.anomalyExplorer.assertInfluencerFieldListLength('airline', 2);
-          await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(2);
+          await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(3);
 
           await ml.testExecution.logTestStep('clears the selection');
           await ml.anomalyExplorer.clearSwimLaneSelection();
@@ -342,7 +342,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('adds swim lane embeddable to a dashboard', async () => {
           // should be the last step because it navigates away from the Anomaly Explorer page
           await ml.testExecution.logTestStep(
-            'should allow to attach anomaly swimlane embeddable to the dashboard'
+            'should allow to attach anomaly swim lane embeddable to the dashboard'
           );
           await ml.anomalyExplorer.openAddToDashboardControl();
           await ml.anomalyExplorer.addAndEditSwimlaneInDashboard('ML Test');
