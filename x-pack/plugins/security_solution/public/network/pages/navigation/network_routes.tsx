@@ -18,11 +18,13 @@ import {
   DnsQueryTabBody,
   HttpQueryTabBody,
   IPsQueryTabBody,
-  NetworkAlertsQueryTabBody,
   TlsQueryTabBody,
 } from '.';
-import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
+import { EventsQueryTabBody } from '../../../common/components/events_tab';
 import { AnomaliesNetworkTable } from '../../../common/components/ml/tables/anomalies_network_table';
+import { filterNetworkExternalAlertData } from '../../../common/components/visualization_actions/utils';
+import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
+import { TimelineId } from '../../../../common/types';
 import { ConditionalFlexGroup } from './conditional_flex_group';
 import type { NetworkRoutesProps } from './types';
 import { NetworkRouteType } from './types';
@@ -154,7 +156,11 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
           />
         </Route>
         <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.alerts})`}>
-          <NetworkAlertsQueryTabBody {...tabProps} />
+          <EventsQueryTabBody
+            pageFilters={filterNetworkExternalAlertData}
+            timelineId={TimelineId.networkPageEvents}
+            {...tabProps}
+          />
         </Route>
       </Switch>
     );

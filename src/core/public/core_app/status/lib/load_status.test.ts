@@ -9,7 +9,7 @@
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import type { StatusResponse } from '../../../../types/status';
 import { notificationServiceMock } from '../../../notifications/notifications_service.mock';
-import { mocked } from '../../../../server/metrics/event_loop_delays/event_loop_delays_monitor.mocks';
+import { mocked } from '@kbn/core-metrics-collectors-server-mocks';
 import { loadStatus } from './load_status';
 
 const mockedResponse: StatusResponse = {
