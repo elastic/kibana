@@ -17,15 +17,22 @@ import {
   errors,
   validateAxes,
 } from './validate';
-import { appendLayerIds, getDataLayers } from '../helpers';
+import { appendLayerIds, getDataLayers, getLayersWithTable } from '../helpers';
 
 export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers) => {
   const layers = appendLayerIds(args.layers ?? [], 'layers');
   const dataLayers = getDataLayers(layers);
+  const layersWithTable = getLayersWithTable(layers);
 
-  // for visialize we should log one datable for all layers
-  if (dataLayers.every((l) => l.table === dataLayers[0].table)) {
-    logDatatable(data, layers, handlers, args.splitColumnAccessor, args.splitRowAccessor);
+  // if layers have the same table should log only one
+  if (layersWithTable.every((l) => l.table === layersWithTable[0].table)) {
+    logDatatable(
+      layersWithTable[0].table,
+      layers,
+      handlers,
+      args.splitColumnAccessor,
+      args.splitRowAccessor
+    );
   } else {
     logDatatables(layers, handlers, args.splitColumnAccessor, args.splitRowAccessor);
   }

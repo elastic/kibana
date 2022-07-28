@@ -327,6 +327,10 @@ export type XYExtendedLayerConfigResult =
   | ExtendedAnnotationLayerConfigResult
   | ReferenceLineConfigResult;
 
+  export type XYExtendedLayerConfigResultWithTable =
+  | ExtendedDataLayerConfigResult
+  | ReferenceLineLayerConfigResult;
+
 export interface ExtendedReferenceLineDecorationConfig extends ReferenceLineArgs {
   type: typeof EXTENDED_REFERENCE_LINE_DECORATION_CONFIG;
 }
