@@ -8,7 +8,7 @@
 import type { UseQueryResult } from '@tanstack/react-query';
 
 interface CreateReactQueryResponseInput<TData = unknown, TError = unknown> {
-  status?: UseQueryResult['status'];
+  status?: UseQueryResult['status'] | 'idle';
   data?: TData;
   error?: TError;
 }
@@ -35,12 +35,12 @@ export const createReactQueryResponse = <TData = unknown, TError = unknown>({
 
   if (status === 'idle') {
     return {
-      status,
+      status: 'loading',
       data: undefined,
       isSuccess: false,
-      isLoading: false,
+      isLoading: true,
       isError: false,
-      isIdle: true,
+      fetchStatus: 'idle',
     };
   }
 
