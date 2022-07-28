@@ -11,13 +11,13 @@ import stringify from 'json-stable-stringify';
 import { createPromiseFromStreams, createMapStream, createConcatStream } from '@kbn/utils';
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { InternalCoreUsageDataSetup } from '../../core_usage_data';
-import { SavedObjectConfig } from '../saved_objects_config';
-import {
+import type {
   SavedObjectsExportByTypeOptions,
   SavedObjectsExportByObjectOptions,
-  SavedObjectsExportError,
-} from '../export';
+} from '@kbn/core-saved-objects-server';
+import { InternalCoreUsageDataSetup } from '../../core_usage_data';
+import { SavedObjectConfig } from '../saved_objects_config';
+import { SavedObjectsExportError } from '../export';
 import type { InternalSavedObjectRouter } from '../internal_types';
 import { validateTypes, validateObjects, catchAndReturnBoomErrors } from './utils';
 
