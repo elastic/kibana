@@ -47,6 +47,7 @@ import {
   CREATE_NEW_RULE,
   RESPONSE_ACTIONS,
   THREAT_INTELLIGENCE,
+  ENTITY_ANALYTICS,
 } from '../translations';
 import {
   OVERVIEW_PATH,
@@ -72,6 +73,7 @@ import {
   RULES_CREATE_PATH,
   RESPONSE_ACTIONS_PATH,
   THREAT_INTELLIGENCE_PATH,
+  ENTITY_ANALYTICS_PATH,
 } from '../../../common/constants';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { hasCapabilities, subscribeAppLinks } from '../../common/links';
@@ -166,6 +168,17 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
       {
         ...getSecuritySolutionLink<SecurityPageName>('dashboard'),
         features: [FEATURE.general],
+      },
+      {
+        id: SecurityPageName.entityAnalytics,
+        title: ENTITY_ANALYTICS,
+        path: ENTITY_ANALYTICS_PATH,
+        features: [FEATURE.general],
+        keywords: [
+          i18n.translate('xpack.securitySolution.search.entityAnalytics', {
+            defaultMessage: 'Entity Analytics',
+          }),
+        ],
       },
     ],
   },

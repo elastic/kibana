@@ -18,7 +18,7 @@ import * as i18n from './translations';
 import { EntityAnalyticsHostRiskScores } from '../components/entity_analytics/host_risk_score';
 
 const EntityAnalyticsComponent = () => {
-  const { indicesExist, indexPattern, loading: isSourcererLoading } = useSourcererDataView();
+  const { indicesExist, loading: isSourcererLoading } = useSourcererDataView();
   return (
     <>
       {indicesExist ? (

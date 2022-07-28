@@ -183,6 +183,7 @@ export const APP_HOST_ISOLATION_EXCEPTIONS_PATH =
 export const APP_BLOCKLIST_PATH = `${APP_PATH}${BLOCKLIST_PATH}` as const;
 export const APP_RESPONSE_ACTIONS_PATH = `${APP_PATH}${RESPONSE_ACTIONS_PATH}` as const;
 export const APP_THREAT_INTELLIGENCE_PATH = `${APP_PATH}${THREAT_INTELLIGENCE_PATH}` as const;
+export const APP_ENTITY_ANALYTICS_PATH = `${APP_PATH}${ENTITY_ANALYTICS_PATH}` as const;
 
 // cloud logs to exclude from default index pattern
 export const EXCLUDE_ELASTIC_CLOUD_INDICES = ['-*elastic-cloud-logs-*'];
