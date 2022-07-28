@@ -79,18 +79,6 @@ interface XDomain {
   minInterval?: number;
 }
 
-const isEndzoneBucket = (
-  value: number,
-  { min, max, minInterval }: XDomain | undefined = {}
-) => {
-  return (
-    (min !== undefined && min > value) ||
-    (max !== undefined &&
-      minInterval !== undefined &&
-      max - minInterval < value)
-  );
-};
-
 const END_ZONE_LABEL = i18n.translate('xpack.apm.timeseries.endzone', {
   defaultMessage:
     'The selected time range does not include this entire bucket. It might contain partial data.',
@@ -151,7 +139,6 @@ export function TimeseriesChart({
     );
 
   const xValues = timeseries.flatMap(({ data }) => data.map(({ x }) => x));
-  const interval = (xValues[1] ?? 0) - (xValues[0] ?? 0);
 
   const xValuesExpectedBounds =
     anomalyChartTimeseries?.boundaries?.flatMap(({ data }) =>
@@ -204,13 +191,7 @@ export function TimeseriesChart({
             showNullValues: false,
             headerFormatter: ({ value }) => {
               const formattedValue = xFormatter(value);
-              if (
-                isEndzoneBucket(value, {
-                  min,
-                  max,
-                  minInterval: interval,
-                })
-              ) {
+              if (max === value) {
                 return (
                   <>
                     <EuiFlexGroup
