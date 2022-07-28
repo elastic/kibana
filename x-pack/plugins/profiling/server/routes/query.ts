@@ -13,12 +13,10 @@ export interface ProjectTimeQuery {
 }
 
 export function createCommonFilter({
-  projectID,
   kuery,
   timeFrom,
   timeTo,
 }: {
-  projectID: string;
   kuery: string;
   timeFrom: string;
   timeTo: string;
@@ -26,11 +24,6 @@ export function createCommonFilter({
   return {
     bool: {
       filter: [
-        {
-          term: {
-            ProjectID: projectID,
-          },
-        },
         ...kqlQuery(kuery),
         {
           range: {
@@ -47,7 +40,7 @@ export function createCommonFilter({
   };
 }
 
-export function autoHistogramSumCountOnGroupByField(searchField: string, topNItems: number) {
+export function autoHistogramSumCountOnGroupByField(searchField: string) {
   return {
     auto_date_histogram: {
       field: '@timestamp',
@@ -61,7 +54,7 @@ export function autoHistogramSumCountOnGroupByField(searchField: string, topNIte
           // ordering of Elasticsearch: by default this will be the descending count
           // of matched documents. This is not equal to the ordering by sum of Count field,
           // but it's a good-enough approximation given the distribution of Count.
-          size: topNItems,
+          size: 100,
           // 'execution_hint: map' skips the slow building of ordinals that we don't need.
           // Especially with high cardinality fields, this setting speeds up the aggregation.
           execution_hint: 'map',

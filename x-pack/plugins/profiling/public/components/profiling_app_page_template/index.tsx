@@ -12,11 +12,11 @@ import { compact } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useHistory } from 'react-router-dom';
+import { INDEX_EVENTS } from '../../../common';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
-import { SettingsFlyout } from '../settings_flyout';
 
 export function ProfilingAppPageTemplate({
   children,
@@ -28,7 +28,7 @@ export function ProfilingAppPageTemplate({
   const {
     path,
     query,
-    query: { rangeFrom, rangeTo, n, projectID, index, kuery },
+    query: { rangeFrom, rangeTo, kuery },
   } = useProfilingParams('/*');
 
   const {
@@ -58,10 +58,10 @@ export function ProfilingAppPageTemplate({
   useEffect(() => {
     dataViews
       .create({
-        title: index,
+        title: INDEX_EVENTS,
       })
       .then((nextDataView) => setDataView(nextDataView));
-  }, [index, dataViews]);
+  }, [dataViews]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -80,29 +80,6 @@ export function ProfilingAppPageTemplate({
           defaultMessage: 'Profiling',
         }),
         tabs,
-        rightSideItems: [
-          <SettingsFlyout
-            title={i18n.translate('xpack.profiling.appPageTemplate.settingsTitle', {
-              defaultMessage: 'Settings',
-            })}
-            values={{
-              index,
-              projectID,
-              n,
-            }}
-            onChange={(values) => {
-              profilingRouter.push(routePath, {
-                path,
-                query: {
-                  ...query,
-                  index: values.index,
-                  projectID: values.projectID,
-                  n: values.n,
-                },
-              });
-            }}
-          />,
-        ],
       }}
       pageBodyProps={{
         paddingSize: 'none',

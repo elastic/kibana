@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { chunk } from 'lodash';
 import LRUCache from 'lru-cache';
+import { INDEX_EXECUTABLES, INDEX_FRAMES, INDEX_TRACES } from '../../common';
 import {
   ProfilingExecutable,
   ProfilingStackFrame,
@@ -153,13 +154,7 @@ export function decodeStackTrace(input: EncodedStackTrace): StackTrace {
     } else {
       const buf = Buffer.from(fileIDChunk, 'base64url');
 
-      // We have to manually append '==' since we use the FileID string for
-      // comparing / looking up the FileID strings in the ES indices, which have
-      // the '==' appended.
-      //
-      // We may want to remove '==' in the future to reduce the uncompressed
-      // storage size by 10%.
-      fileIDs[j] = buf.toString('base64url', 0, 16) + '==';
+      fileIDs[j] = buf.toString('base64url', 0, 16);
       fileIDChunkToFileIDCache.set(fileIDChunk, fileIDs[j]);
     }
   }
@@ -260,7 +255,7 @@ export async function mgetStackTraces({
         return client.mget<Pick<ProfilingStackTrace, 'FrameID' | 'Type'>>(
           'mget_stacktraces_chunk',
           {
-            index: 'profiling-stacktraces',
+            index: INDEX_TRACES,
             ids,
             realtime: false,
             _source_includes: ['FrameID', 'Type'],
@@ -332,7 +327,7 @@ export async function mgetStackFrames({
   }
 
   const resStackFrames = await client.mget<ProfilingStackFrame>('mget_stackframes', {
-    index: 'profiling-stackframes',
+    index: INDEX_FRAMES,
     ids: [...stackFrameIDs],
     realtime: false,
   });
@@ -378,7 +373,7 @@ export async function mgetExecutables({
   }
 
   const resExecutables = await client.mget<ProfilingExecutable>('mget_executables', {
-    index: 'profiling-executables',
+    index: INDEX_EXECUTABLES,
     ids: [...executableIDs],
     _source_includes: ['FileName'],
   });

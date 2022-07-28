@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { RouteRegisterParameters } from '.';
-import { fromMapToRecord, getRoutePaths } from '../../common';
+import { fromMapToRecord, getRoutePaths, INDEX_EVENTS } from '../../common';
 import { groupStackFrameMetadataByStackTrace, StackTraceID } from '../../common/profiling';
 import { getFieldNameForTopNType, TopNType } from '../../common/stack_traces';
 import { createTopNSamples } from '../../common/topn';
@@ -22,33 +22,27 @@ import { mgetExecutables, mgetStackFrames, mgetStackTraces } from './stacktrace'
 export async function topNElasticSearchQuery({
   client,
   logger,
-  index,
-  projectID,
   timeFrom,
   timeTo,
-  n,
   searchField,
   response,
   kuery,
 }: {
   client: ProfilingESClient;
   logger: Logger;
-  index: string;
-  projectID: string;
   timeFrom: string;
   timeTo: string;
-  n: number;
   searchField: string;
   response: KibanaResponseFactory;
   kuery: string;
 }) {
-  const filter = createCommonFilter({ projectID, timeFrom, timeTo, kuery });
+  const filter = createCommonFilter({ timeFrom, timeTo, kuery });
   const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
 
   const eventsIndex = await findDownsampledIndex({
     logger,
     client,
-    index,
+    index: INDEX_EVENTS,
     filter,
     sampleSize: targetSampleSize,
   });
@@ -58,7 +52,7 @@ export async function topNElasticSearchQuery({
     size: 0,
     query: filter,
     aggs: {
-      histogram: autoHistogramSumCountOnGroupByField(searchField, n),
+      histogram: autoHistogramSumCountOnGroupByField(searchField),
     },
     // Adrien and Dario found out this is a work-around for some bug in 8.1.
     // It reduces the query time by avoiding unneeded searches.
@@ -134,28 +128,22 @@ export function queryTopNCommon(
       path: pathName,
       validate: {
         query: schema.object({
-          index: schema.string(),
-          projectID: schema.string(),
           timeFrom: schema.string(),
           timeTo: schema.string(),
-          n: schema.number(),
           kuery: schema.string(),
         }),
       },
     },
     async (context, request, response) => {
-      const { index, projectID, timeFrom, timeTo, n, kuery } = request.query;
+      const { timeFrom, timeTo, kuery } = request.query;
       const client = await getClient(context);
 
       try {
         return await topNElasticSearchQuery({
           client: createProfilingEsClient({ request, esClient: client }),
           logger,
-          index,
-          projectID,
           timeFrom,
           timeTo,
-          n,
           searchField,
           response,
           kuery,
