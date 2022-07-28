@@ -13,7 +13,7 @@
  */
 export interface EcsBase {
   ['@timestamp']: string;
-  labels?: Record<string, unknown>;
+  labels?: Record<string, string>;
   message?: string;
   tags?: string[];
 }
