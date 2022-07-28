@@ -31,7 +31,7 @@ GET /_search
 
 Here is the equivalent command in cURL:
 
-[source,js]
+[source,bash]
 ----------------------------------
 curl -XGET "http://localhost:9200/_search" -d'
 {
@@ -43,9 +43,9 @@ curl -XGET "http://localhost:9200/_search" -d'
 
 Prepend requests to a {kib} API endpoint with `kbn:`
 
-[source,js]
+[source,bash]
 --------------------------------------------------
-`GET kbn:/api/index_management/indices`
+GET kbn:/api/index_management/indices
 --------------------------------------------------
 
 When you paste the command into *Console*, {kib} automatically converts it
