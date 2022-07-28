@@ -91,6 +91,7 @@ const dfaColumns: Array<EuiBasicTableColumn<AnalyticsManagementItems>> = [
     truncateText: true,
     'data-test-subj': 'mlSpaceManagementTableColumnId',
     scope: 'row',
+    width: '200px',
     render: (id: string) => <DFAnalyticsJobIdLink jobId={id} />,
   },
   {
@@ -110,6 +111,7 @@ const dfaColumns: Array<EuiBasicTableColumn<AnalyticsManagementItems>> = [
     sortable: true,
     truncateText: true,
     'data-test-subj': 'mlSpaceManagementTableColumnSourceIndex',
+    width: '200px',
   },
   {
     field: 'dest_index',
@@ -119,6 +121,7 @@ const dfaColumns: Array<EuiBasicTableColumn<AnalyticsManagementItems>> = [
     sortable: true,
     truncateText: true,
     'data-test-subj': 'mlSpaceManagementTableColumnDestIndex',
+    width: '200px',
   },
   {
     field: 'job_type',
@@ -128,6 +131,7 @@ const dfaColumns: Array<EuiBasicTableColumn<AnalyticsManagementItems>> = [
     sortable: true,
     truncateText: true,
     'data-test-subj': 'mlSpaceManagementTableColumnJobType',
+    width: '150px',
   },
   {
     field: 'state',
@@ -137,6 +141,7 @@ const dfaColumns: Array<EuiBasicTableColumn<AnalyticsManagementItems>> = [
     sortable: true,
     truncateText: true,
     'data-test-subj': 'mlSpaceManagementTableColumnState',
+    width: '100px',
   },
 ];
 
