@@ -77,7 +77,7 @@ const adColumns: Array<EuiBasicTableColumn<AnomalyDetectionManagementItems>> = [
     sortable: true,
     truncateText: true,
     'data-test-subj': 'mlSpaceManagementTableColumnDatafeedState',
-    width: '120px',
+    width: '150px',
   },
 ];
 
