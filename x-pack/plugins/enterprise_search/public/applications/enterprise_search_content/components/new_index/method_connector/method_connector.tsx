@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-/**
- * TODO:
- * - Need to add documentation URLs (search for `#`s)
- * - Port over Connector views from App Search to the panel below.
- */
-
 import React from 'react';
 
 import { useActions, useValues } from 'kea';
