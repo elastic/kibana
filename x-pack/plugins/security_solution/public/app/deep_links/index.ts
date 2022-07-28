@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { getSecuritySolutionLink } from '@kbn/cloud-security-posture-plugin/public';
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import {
@@ -162,6 +163,10 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
           }),
         ],
       },
+      {
+        ...getSecuritySolutionLink<SecurityPageName>('dashboard'),
+        features: [FEATURE.general],
+      },
     ],
   },
   {
@@ -220,11 +225,17 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
     ],
   },
   {
+    ...getSecuritySolutionLink<SecurityPageName>('findings'),
+    features: [FEATURE.general],
+    navLinkStatus: AppNavLinkStatus.visible,
+    order: 9002,
+  },
+  {
     id: SecurityPageName.exploreLanding,
     title: EXPLORE,
     path: HOSTS_PATH,
     navLinkStatus: AppNavLinkStatus.visible,
-    order: 9004,
+    order: 9005,
     searchable: false,
     features: [FEATURE.general],
     keywords: [
@@ -264,13 +275,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
               defaultMessage: 'Events',
             }),
             path: `${HOSTS_PATH}/events`,
-          },
-          {
-            id: SecurityPageName.hostsExternalAlerts,
-            title: i18n.translate('xpack.securitySolution.search.hosts.externalAlerts', {
-              defaultMessage: 'External Alerts',
-            }),
-            path: `${HOSTS_PATH}/externalAlerts`,
           },
           {
             id: SecurityPageName.hostsRisk,
@@ -319,13 +323,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
               defaultMessage: 'TLS',
             }),
             path: `${NETWORK_PATH}/tls`,
-          },
-          {
-            id: SecurityPageName.networkExternalAlerts,
-            title: i18n.translate('xpack.securitySolution.search.network.externalAlerts', {
-              defaultMessage: 'External Alerts',
-            }),
-            path: `${NETWORK_PATH}/external-alerts`,
           },
           {
             id: SecurityPageName.networkAnomalies,
@@ -377,13 +374,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
             }),
             path: `${USERS_PATH}/events`,
           },
-          {
-            id: SecurityPageName.usersExternalAlerts,
-            title: i18n.translate('xpack.securitySolution.search.users.externalAlerts', {
-              defaultMessage: 'External Alerts',
-            }),
-            path: `${USERS_PATH}/externalAlerts`,
-          },
         ],
       },
       {
@@ -426,7 +416,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         title: TIMELINES,
         path: TIMELINES_PATH,
         navLinkStatus: AppNavLinkStatus.visible,
-        order: 9002,
+        order: 9003,
         features: [FEATURE.general],
         keywords: [
           i18n.translate('xpack.securitySolution.search.timelines', {
@@ -448,7 +438,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         extend: {
           [SecurityPageName.case]: {
             navLinkStatus: AppNavLinkStatus.visible,
-            order: 9003,
+            order: 9004,
             features: [FEATURE.casesRead],
           },
           [SecurityPageName.caseConfigure]: {
@@ -468,7 +458,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
     path: ENDPOINTS_PATH,
     features: [FEATURE.general],
     navLinkStatus: AppNavLinkStatus.visible,
-    order: 9005,
+    order: 9006,
     searchable: false,
     keywords: [
       i18n.translate('xpack.securitySolution.search.manage', {
@@ -506,6 +496,10 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         id: SecurityPageName.blocklist,
         title: BLOCKLIST,
         path: BLOCKLIST_PATH,
+      },
+      {
+        ...getSecuritySolutionLink<SecurityPageName>('benchmarks'),
+        deepLinks: [getSecuritySolutionLink<SecurityPageName>('rules')],
       },
       {
         id: SecurityPageName.responseActions,

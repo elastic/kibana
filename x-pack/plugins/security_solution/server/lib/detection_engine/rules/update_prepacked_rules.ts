@@ -16,7 +16,7 @@ import type { RuleParams } from '../schemas/rule_schemas';
 import { legacyMigrate } from './utils';
 import { deleteRules } from './delete_rules';
 import { PrepackagedRulesError } from '../routes/rules/add_prepackaged_rules_route';
-import type { IRuleExecutionLogForRoutes } from '../rule_execution_log';
+import type { IRuleExecutionLogForRoutes } from '../rule_monitoring';
 import { createRules } from './create_rules';
 import { transformAlertToRuleAction } from '../../../../common/detection_engine/transform_actions';
 
