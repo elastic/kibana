@@ -91,7 +91,7 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
     let index = values.findIndex((option) => option.isGroupLabel);
     if (index === -1) {
       const length = values.push({
-        label: i18n.translate('xpack.security.userProfilesSelectable.suggestedLabel', {
+        label: i18n.translate('userProfileComponents.userProfilesSelectable.suggestedLabel', {
           defaultMessage: 'Suggested',
         }),
         isGroupLabel: true,
@@ -204,7 +204,7 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
           <EuiPanel hasShadow={false} paddingSize="s">
             <EuiFieldSearch
               placeholder={i18n.translate(
-                'xpack.security.userProfilesSelectable.searchPlaceholder',
+                'userProfileComponents.userProfilesSelectable.searchPlaceholder',
                 {
                   defaultMessage: 'Search',
                 }
@@ -219,7 +219,7 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued">
                   <FormattedMessage
-                    id="xpack.security.userProfilesSelectable.selectedStatus"
+                    id="userProfileComponents.userProfilesSelectable.selectedStatus"
                     defaultMessage="{count, plural, one {# assignee} other {# assignees}}"
                     values={{ count: selectedCount }}
                   />
@@ -234,7 +234,7 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
                     style={{ height: '1rem' }}
                   >
                     <FormattedMessage
-                      id="xpack.security.userProfilesSelectable.clearButton"
+                      id="userProfileComponents.userProfilesSelectable.clearButton"
                       defaultMessage="Remove all assignees"
                     />
                   </EuiButtonEmpty>
