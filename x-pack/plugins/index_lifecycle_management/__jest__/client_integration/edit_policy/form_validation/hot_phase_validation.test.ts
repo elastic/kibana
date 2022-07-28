@@ -74,7 +74,7 @@ describe('<EditPolicy /> hot phase validation', () => {
     describe('max primary docs size', () => {
       test(`doesn't allow -1`, async () => {
         await actions.rollover.toggleDefault();
-        await actions.rollover.setMaxPrimaryDocsSize('-1');
+        await actions.rollover.setMaxPrimaryShardDocs('-1');
 
         actions.errors.waitForValidation();
 
@@ -83,7 +83,7 @@ describe('<EditPolicy /> hot phase validation', () => {
 
       test(`doesn't allow 0`, async () => {
         await actions.rollover.toggleDefault();
-        await actions.rollover.setMaxPrimaryDocsSize('0');
+        await actions.rollover.setMaxPrimaryShardDocs('0');
 
         actions.errors.waitForValidation();
 
@@ -92,7 +92,7 @@ describe('<EditPolicy /> hot phase validation', () => {
 
       test(`doesn't allow decimals`, async () => {
         await actions.rollover.toggleDefault();
-        await actions.rollover.setMaxPrimaryDocsSize('5.5');
+        await actions.rollover.setMaxPrimaryShardDocs('5.5');
 
         actions.errors.waitForValidation();
 
