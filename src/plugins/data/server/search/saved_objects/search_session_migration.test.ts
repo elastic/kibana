@@ -14,7 +14,7 @@ import {
   SearchSessionSavedObjectAttributesPre$8$5$0,
 } from './search_session_migration';
 import { SavedObject } from '@kbn/core/types';
-import { SEARCH_SESSION_TYPE, SearchSessionStatus } from '../../../common';
+import { SEARCH_SESSION_TYPE, SearchSessionStatus, SearchStatus } from '../../../common';
 import { SavedObjectMigrationContext } from '@kbn/core/server';
 
 describe('7.12.0 -> 7.13.0', () => {
@@ -371,14 +371,14 @@ describe('8.0.0 -> 8.5.0', () => {
       created: '2021-03-26T00:00:00.000Z',
       expires: '2021-03-30T00:00:00.000Z',
       idMapping: {
-        search1: { id: 'id1', strategy: 'ese', status: SearchSessionStatus.COMPLETE },
+        search1: { id: 'id1', strategy: 'ese', status: SearchStatus.COMPLETE },
         search2: {
           id: 'id2',
           strategy: 'sql',
-          status: SearchSessionStatus.ERROR,
+          status: SearchStatus.ERROR,
           error: 'error',
         },
-        search3: { id: 'id3', strategy: 'es', status: SearchSessionStatus.EXPIRED },
+        search3: { id: 'id3', strategy: 'es', status: SearchStatus.COMPLETE },
       },
       initialState: {},
       locatorId: undefined,

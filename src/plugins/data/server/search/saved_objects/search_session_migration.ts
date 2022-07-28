@@ -126,13 +126,12 @@ export const searchSessionSavedObjectMigrations: SavedObjectMigrationMap = {
 
     const attributes: SearchSessionSavedObjectAttributesLatest = {
       ...otherAttrs,
-      idMapping: Object.entries(idMapping).reduce(
-        (res, [searchHash, { status: searchStatus, error, ...otherSearchAttrs }]) => {
-          res[searchHash] = otherSearchAttrs;
-          return res;
-        },
-        {} as SearchSessionSavedObjectAttributesLatest['idMapping']
-      ),
+      idMapping: Object.entries(idMapping).reduce<
+        SearchSessionSavedObjectAttributesLatest['idMapping']
+      >((res, [searchHash, { status: searchStatus, error, ...otherSearchAttrs }]) => {
+        res[searchHash] = otherSearchAttrs;
+        return res;
+      }, {}),
     };
 
     if (status === SearchSessionStatus.CANCELLED) {
