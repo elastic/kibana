@@ -80,21 +80,16 @@ export class PdfMaker {
     );
   }
 
-  _addContents(contents: Content[]) {
-    const groupCount = this.content.length;
-
-    // inject a page break for every 2 groups on the page
-    // TODO: Remove this code since we are now using Chromium to drive this
-    // layout via native print functionality.
-    if (groupCount > 0 && groupCount % this.layout.groupCount === 0) {
-      contents = [
+  private addPageContents(contents: Content[]) {
+    this.content.push(
+      // Insert a page break after each content item
+      [
         {
           text: '',
           pageBreak: 'after',
         } as ContentText as Content,
-      ].concat(contents);
-    }
-    this.content.push(contents);
+      ].concat(contents)
+    );
   }
 
   addBrandedImage(img: ContentImage, { title = '', description = '' }) {
@@ -127,7 +122,7 @@ export class PdfMaker {
 
     contents.push(wrappedImg);
 
-    this._addContents(contents);
+    this.addPageContents(contents);
   }
 
   addImage(
@@ -151,7 +146,7 @@ export class PdfMaker {
       return this.addBrandedImage(img, opts);
     }
 
-    this._addContents([img]);
+    this.addPageContents([img]);
   }
 
   setTitle(title: string) {
