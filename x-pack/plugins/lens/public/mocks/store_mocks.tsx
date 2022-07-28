@@ -58,6 +58,12 @@ export const defaultState = {
     activeId: 'testVis',
   },
   datasourceStates: mockDatasourceStates(),
+  dataViews: {
+    indexPatterns: {},
+    indexPatternRefs: [],
+    existingFields: {},
+    isFirstExistenceFetch: false,
+  },
 };
 
 export function makeLensStore({

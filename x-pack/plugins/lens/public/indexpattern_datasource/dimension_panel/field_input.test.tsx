@@ -120,14 +120,13 @@ function getDefaultOperationSupportMatrix(
   return getOperationSupportMatrix({
     state: {
       layers: { layer1: layer },
-      indexPatterns: {
-        [defaultProps.indexPattern.id]: defaultProps.indexPattern,
-      },
-      existingFields,
     } as unknown as IndexPatternPrivateState,
     layerId: 'layer1',
     filterOperations: () => true,
     columnId,
+    indexPatterns: {
+      [defaultProps.indexPattern.id]: defaultProps.indexPattern,
+    },
   });
 }
 

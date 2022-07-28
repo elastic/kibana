@@ -171,16 +171,7 @@ type DataViewBaseState = Omit<
   'indexPatternRefs' | 'indexPatterns' | 'existingFields' | 'isFirstExistenceFetch'
 >;
 
-function enrichBaseState(baseState: DataViewBaseState): IndexPatternPrivateState {
-  return {
-    currentIndexPatternId: baseState.currentIndexPatternId,
-    layers: baseState.layers,
-    indexPatterns: expectedIndexPatterns,
-    indexPatternRefs: [],
-    existingFields: {},
-    isFirstExistenceFetch: false,
-  };
-}
+const indexPatterns = expectedIndexPatterns;
 
 describe('IndexPattern Data Source', () => {
   let baseState: Omit<
@@ -275,9 +266,7 @@ describe('IndexPattern Data Source', () => {
 
   describe('#getPersistedState', () => {
     it('should persist from saved state', async () => {
-      const state = enrichBaseState(baseState);
-
-      expect(indexPatternDatasource.getPersistableState(state)).toEqual({
+      expect(indexPatternDatasource.getPersistableState(baseState)).toEqual({
         state: {
           layers: {
             first: {
@@ -310,8 +299,8 @@ describe('IndexPattern Data Source', () => {
 
   describe('#toExpression', () => {
     it('should generate an empty expression when no columns are selected', async () => {
-      const state = await indexPatternDatasource.initialize();
-      expect(indexPatternDatasource.toExpression(state, 'first')).toEqual(null);
+      const state = indexPatternDatasource.initialize();
+      expect(indexPatternDatasource.toExpression(state, 'first', indexPatterns)).toEqual(null);
     });
 
     it('should create a table when there is a formula without aggs', async () => {
@@ -334,8 +323,7 @@ describe('IndexPattern Data Source', () => {
           },
         },
       };
-      const state = enrichBaseState(queryBaseState);
-      expect(indexPatternDatasource.toExpression(state, 'first')).toEqual({
+      expect(indexPatternDatasource.toExpression(queryBaseState, 'first', indexPatterns)).toEqual({
         chain: [
           {
             function: 'createTable',
@@ -382,9 +370,8 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const state = enrichBaseState(queryBaseState);
-
-      expect(indexPatternDatasource.toExpression(state, 'first')).toMatchInlineSnapshot(`
+      expect(indexPatternDatasource.toExpression(queryBaseState, 'first', indexPatterns))
+        .toMatchInlineSnapshot(`
         Object {
           "chain": Array [
             Object {
@@ -558,9 +545,11 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const state = enrichBaseState(queryBaseState);
-
-      const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+      const ast = indexPatternDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns
+      ) as Ast;
       expect(ast.chain[1].arguments.timeFields).toEqual(['timestamp', 'another_datefield']);
     });
 
@@ -595,9 +584,11 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const state = enrichBaseState(queryBaseState);
-
-      const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+      const ast = indexPatternDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns
+      ) as Ast;
       expect((ast.chain[1].arguments.aggs[1] as Ast).chain[0].arguments.timeShift).toEqual(['1d']);
     });
 
@@ -644,9 +635,11 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const state = enrichBaseState(queryBaseState);
-
-      const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+      const ast = indexPatternDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns
+      ) as Ast;
       expect(ast.chain[1].arguments.aggs[0]).toMatchInlineSnapshot(`
         Object {
           "chain": Array [
@@ -770,9 +763,11 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const state = enrichBaseState(queryBaseState);
-
-      const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+      const ast = indexPatternDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns
+      ) as Ast;
       const timeScaleCalls = ast.chain.filter((fn) => fn.function === 'lens_time_scale');
       const formatCalls = ast.chain.filter((fn) => fn.function === 'lens_format_column');
       expect(timeScaleCalls).toHaveLength(1);
@@ -855,9 +850,11 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const state = enrichBaseState(queryBaseState);
-
-      const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+      const ast = indexPatternDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns
+      ) as Ast;
       const formatIndex = ast.chain.findIndex((fn) => fn.function === 'lens_format_column');
       const calculationIndex = ast.chain.findIndex((fn) => fn.function === 'moving_average');
       expect(calculationIndex).toBeLessThan(formatIndex);
@@ -905,8 +902,11 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const state = enrichBaseState(queryBaseState);
-      const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+      const ast = indexPatternDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns
+      ) as Ast;
       expect(ast.chain[1].arguments.metricsAtAllLevels).toEqual([false]);
       expect(JSON.parse(ast.chain[2].arguments.idMap[0] as string)).toEqual({
         'col-0-0': [expect.objectContaining({ id: 'bucket1' })],
@@ -945,9 +945,11 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const state = enrichBaseState(queryBaseState);
-
-      const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+      const ast = indexPatternDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns
+      ) as Ast;
       expect(ast.chain[1].arguments.timeFields).toEqual(['timestamp']);
       expect(ast.chain[1].arguments.timeFields).not.toContain('timefield');
     });
@@ -1001,11 +1003,9 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const state = enrichBaseState(queryBaseState);
-
       const optimizeMock = jest.spyOn(operationDefinitionMap.percentile, 'optimizeEsAggs');
 
-      indexPatternDatasource.toExpression(state, 'first');
+      indexPatternDatasource.toExpression(queryBaseState, 'first', indexPatterns);
 
       expect(operationDefinitionMap.percentile.optimizeEsAggs).toHaveBeenCalledTimes(1);
 
@@ -1066,8 +1066,6 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const state = enrichBaseState(queryBaseState);
-
       const optimizeMock = jest
         .spyOn(operationDefinitionMap.percentile, 'optimizeEsAggs')
         .mockImplementation((aggs, esAggsIdMap) => {
@@ -1075,7 +1073,11 @@ describe('IndexPattern Data Source', () => {
           return { aggs: aggs.reverse(), esAggsIdMap };
         });
 
-      const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+      const ast = indexPatternDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns
+      ) as Ast;
 
       expect(operationDefinitionMap.percentile.optimizeEsAggs).toHaveBeenCalledTimes(1);
 
@@ -1126,9 +1128,11 @@ describe('IndexPattern Data Source', () => {
           },
         };
 
-        const state = enrichBaseState(queryBaseState);
-
-        const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+        const ast = indexPatternDatasource.toExpression(
+          queryBaseState,
+          'first',
+          indexPatterns
+        ) as Ast;
         // @ts-expect-error we can't isolate just the reference type
         expect(operationDefinitionMap.testReference.toExpression).toHaveBeenCalled();
         expect(ast.chain[3]).toEqual('mock');
@@ -1161,9 +1165,11 @@ describe('IndexPattern Data Source', () => {
           },
         };
 
-        const state = enrichBaseState(queryBaseState);
-
-        const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+        const ast = indexPatternDatasource.toExpression(
+          queryBaseState,
+          'first',
+          indexPatterns
+        ) as Ast;
 
         expect(JSON.parse(ast.chain[2].arguments.idMap[0] as string)).toEqual({
           'col-0-0': [
@@ -1250,9 +1256,11 @@ describe('IndexPattern Data Source', () => {
           },
         };
 
-        const state = enrichBaseState(queryBaseState);
-
-        const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+        const ast = indexPatternDatasource.toExpression(
+          queryBaseState,
+          'first',
+          indexPatterns
+        ) as Ast;
         const chainLength = ast.chain.length;
         expect(ast.chain[chainLength - 2].arguments.name).toEqual(['math']);
         expect(ast.chain[chainLength - 1].arguments.id).toEqual(['formula']);
@@ -1333,10 +1341,6 @@ describe('IndexPattern Data Source', () => {
     it('should list the current layers', () => {
       expect(
         indexPatternDatasource.getLayers({
-          indexPatternRefs: [],
-          existingFields: {},
-          isFirstExistenceFetch: false,
-          indexPatterns: expectedIndexPatterns,
           layers: {
             first: {
               indexPatternId: '1',
@@ -1359,10 +1363,10 @@ describe('IndexPattern Data Source', () => {
     let publicAPI: DatasourcePublicAPI;
 
     beforeEach(async () => {
-      const initialState = enrichBaseState(baseState);
       publicAPI = indexPatternDatasource.getPublicAPI({
-        state: initialState,
+        state: baseState,
         layerId: 'first',
+        indexPatterns,
       });
     });
 
@@ -1378,7 +1382,7 @@ describe('IndexPattern Data Source', () => {
       it('should skip columns that are being referenced', () => {
         publicAPI = indexPatternDatasource.getPublicAPI({
           state: {
-            ...enrichBaseState(baseState),
+            ...baseState,
             layers: {
               first: {
                 indexPatternId: '1',
@@ -1407,6 +1411,7 @@ describe('IndexPattern Data Source', () => {
             },
           },
           layerId: 'first',
+          indexPatterns,
         });
 
         expect(publicAPI.getTableSpec()).toEqual([expect.objectContaining({ columnId: 'col2' })]);
@@ -1415,7 +1420,7 @@ describe('IndexPattern Data Source', () => {
       it('should collect all fields (also from referenced columns)', () => {
         publicAPI = indexPatternDatasource.getPublicAPI({
           state: {
-            ...enrichBaseState(baseState),
+            ...baseState,
             layers: {
               first: {
                 indexPatternId: '1',
@@ -1444,6 +1449,7 @@ describe('IndexPattern Data Source', () => {
             },
           },
           layerId: 'first',
+          indexPatterns,
         });
         // The cumulative sum column has no field, but it references a sum column (hidden) which has it
         // The getTableSpec() should walk the reference tree and assign all fields to the root column
@@ -1453,7 +1459,7 @@ describe('IndexPattern Data Source', () => {
       it('should collect and organize fields per visible column', () => {
         publicAPI = indexPatternDatasource.getPublicAPI({
           state: {
-            ...enrichBaseState(baseState),
+            ...baseState,
             layers: {
               first: {
                 indexPatternId: '1',
@@ -1494,6 +1500,7 @@ describe('IndexPattern Data Source', () => {
             },
           },
           layerId: 'first',
+          indexPatterns,
         });
 
         // col1 is skipped as referenced but its field gets inherited by col2
@@ -1522,7 +1529,7 @@ describe('IndexPattern Data Source', () => {
       it('should return null for referenced columns', () => {
         publicAPI = indexPatternDatasource.getPublicAPI({
           state: {
-            ...enrichBaseState(baseState),
+            ...baseState,
             layers: {
               first: {
                 indexPatternId: '1',
@@ -1551,6 +1558,7 @@ describe('IndexPattern Data Source', () => {
             },
           },
           layerId: 'first',
+          indexPatterns,
         });
         expect(publicAPI.getOperationForColumnId('col1')).toEqual(null);
       });
@@ -1566,7 +1574,7 @@ describe('IndexPattern Data Source', () => {
       it('should return all filters in metrics, grouped by language', () => {
         publicAPI = indexPatternDatasource.getPublicAPI({
           state: {
-            ...enrichBaseState(baseState),
+            ...baseState,
             layers: {
               first: {
                 indexPatternId: '1',
@@ -1595,6 +1603,7 @@ describe('IndexPattern Data Source', () => {
             },
           },
           layerId: 'first',
+          indexPatterns,
         });
         expect(publicAPI.getFilters()).toEqual({
           enabled: {
@@ -1607,7 +1616,7 @@ describe('IndexPattern Data Source', () => {
       it('should ignore empty filtered metrics', () => {
         publicAPI = indexPatternDatasource.getPublicAPI({
           state: {
-            ...enrichBaseState(baseState),
+            ...baseState,
             layers: {
               first: {
                 indexPatternId: '1',
@@ -1627,6 +1636,7 @@ describe('IndexPattern Data Source', () => {
             },
           },
           layerId: 'first',
+          indexPatterns,
         });
         expect(publicAPI.getFilters()).toEqual({
           enabled: { kuery: [], lucene: [] },
@@ -1636,7 +1646,7 @@ describe('IndexPattern Data Source', () => {
       it('shuold collect top values fields as kuery existence filters if no data is provided', () => {
         publicAPI = indexPatternDatasource.getPublicAPI({
           state: {
-            ...enrichBaseState(baseState),
+            ...baseState,
             layers: {
               first: {
                 indexPatternId: '1',
@@ -1672,6 +1682,7 @@ describe('IndexPattern Data Source', () => {
             },
           },
           layerId: 'first',
+          indexPatterns,
         });
         expect(publicAPI.getFilters()).toEqual({
           enabled: {
@@ -1690,7 +1701,7 @@ describe('IndexPattern Data Source', () => {
       it('shuold collect top values fields and terms as kuery filters if data is provided', () => {
         publicAPI = indexPatternDatasource.getPublicAPI({
           state: {
-            ...enrichBaseState(baseState),
+            ...baseState,
             layers: {
               first: {
                 indexPatternId: '1',
@@ -1726,6 +1737,7 @@ describe('IndexPattern Data Source', () => {
             },
           },
           layerId: 'first',
+          indexPatterns,
         });
         const data = {
           first: {
@@ -1760,7 +1772,7 @@ describe('IndexPattern Data Source', () => {
       it('shuold collect top values fields and terms and carefully handle empty string values', () => {
         publicAPI = indexPatternDatasource.getPublicAPI({
           state: {
-            ...enrichBaseState(baseState),
+            ...baseState,
             layers: {
               first: {
                 indexPatternId: '1',
@@ -1796,6 +1808,7 @@ describe('IndexPattern Data Source', () => {
             },
           },
           layerId: 'first',
+          indexPatterns,
         });
         const data = {
           first: {
@@ -1830,7 +1843,7 @@ describe('IndexPattern Data Source', () => {
       it('should ignore top values fields if other/missing option is enabled', () => {
         publicAPI = indexPatternDatasource.getPublicAPI({
           state: {
-            ...enrichBaseState(baseState),
+            ...baseState,
             layers: {
               first: {
                 indexPatternId: '1',
@@ -1867,6 +1880,7 @@ describe('IndexPattern Data Source', () => {
             },
           },
           layerId: 'first',
+          indexPatterns,
         });
         expect(publicAPI.getFilters()).toEqual({
           enabled: { kuery: [], lucene: [] },
@@ -1876,7 +1890,7 @@ describe('IndexPattern Data Source', () => {
       it('should collect custom ranges as kuery filters', () => {
         publicAPI = indexPatternDatasource.getPublicAPI({
           state: {
-            ...enrichBaseState(baseState),
+            ...baseState,
             layers: {
               first: {
                 indexPatternId: '1',
@@ -1912,6 +1926,7 @@ describe('IndexPattern Data Source', () => {
             },
           },
           layerId: 'first',
+          indexPatterns,
         });
         expect(publicAPI.getFilters()).toEqual({
           enabled: {
@@ -1930,7 +1945,7 @@ describe('IndexPattern Data Source', () => {
       it('should collect custom ranges as kuery filters as partial', () => {
         publicAPI = indexPatternDatasource.getPublicAPI({
           state: {
-            ...enrichBaseState(baseState),
+            ...baseState,
             layers: {
               first: {
                 indexPatternId: '1',
@@ -1974,6 +1989,7 @@ describe('IndexPattern Data Source', () => {
             },
           },
           layerId: 'first',
+          indexPatterns,
         });
         expect(publicAPI.getFilters()).toEqual({
           enabled: {
@@ -1989,7 +2005,7 @@ describe('IndexPattern Data Source', () => {
       it('should collect filters within filters operation grouped by language', () => {
         publicAPI = indexPatternDatasource.getPublicAPI({
           state: {
-            ...enrichBaseState(baseState),
+            ...baseState,
             layers: {
               first: {
                 indexPatternId: '1',
@@ -2035,6 +2051,7 @@ describe('IndexPattern Data Source', () => {
             },
           },
           layerId: 'first',
+          indexPatterns,
         });
         expect(publicAPI.getFilters()).toEqual({
           enabled: {
@@ -2059,7 +2076,7 @@ describe('IndexPattern Data Source', () => {
       it('should ignore filtered metrics if at least one metric is unfiltered', () => {
         publicAPI = indexPatternDatasource.getPublicAPI({
           state: {
-            ...enrichBaseState(baseState),
+            ...baseState,
             layers: {
               first: {
                 indexPatternId: '1',
@@ -2087,6 +2104,7 @@ describe('IndexPattern Data Source', () => {
             },
           },
           layerId: 'first',
+          indexPatterns,
         });
         expect(publicAPI.getFilters()).toEqual({
           enabled: { kuery: [], lucene: [] },
@@ -2096,7 +2114,7 @@ describe('IndexPattern Data Source', () => {
       it('should ignore filtered metrics if at least one metric is unfiltered in formula', () => {
         publicAPI = indexPatternDatasource.getPublicAPI({
           state: {
-            ...enrichBaseState(baseState),
+            ...baseState,
             layers: {
               first: {
                 indexPatternId: '1',
@@ -2159,6 +2177,7 @@ describe('IndexPattern Data Source', () => {
             },
           },
           layerId: 'first',
+          indexPatterns,
         });
         expect(publicAPI.getFilters()).toEqual({
           enabled: { kuery: [], lucene: [] },
@@ -2168,7 +2187,7 @@ describe('IndexPattern Data Source', () => {
       it('should support complete scenarios', () => {
         publicAPI = indexPatternDatasource.getPublicAPI({
           state: {
-            ...enrichBaseState(baseState),
+            ...baseState,
             layers: {
               first: {
                 indexPatternId: '1',
@@ -2225,6 +2244,7 @@ describe('IndexPattern Data Source', () => {
             },
           },
           layerId: 'first',
+          indexPatterns,
         });
         expect(publicAPI.getFilters()).toEqual({
           enabled: {
@@ -2254,7 +2274,7 @@ describe('IndexPattern Data Source', () => {
       it('should avoid duplicate filters when formula has a global filter', () => {
         publicAPI = indexPatternDatasource.getPublicAPI({
           state: {
-            ...enrichBaseState(baseState),
+            ...baseState,
             layers: {
               first: {
                 indexPatternId: '1',
@@ -2319,6 +2339,7 @@ describe('IndexPattern Data Source', () => {
             },
           },
           layerId: 'first',
+          indexPatterns,
         });
         expect(publicAPI.getFilters()).toEqual({
           enabled: {
@@ -2360,10 +2381,6 @@ describe('IndexPattern Data Source', () => {
       (getErrorMessages as jest.Mock).mockClear();
       (getErrorMessages as jest.Mock).mockReturnValueOnce(['error 1', 'error 2']);
       const state: IndexPatternPrivateState = {
-        indexPatternRefs: [],
-        existingFields: {},
-        isFirstExistenceFetch: false,
-        indexPatterns: expectedIndexPatterns,
         layers: {
           first: {
             indexPatternId: '1',
@@ -2373,7 +2390,7 @@ describe('IndexPattern Data Source', () => {
         },
         currentIndexPatternId: '1',
       };
-      expect(indexPatternDatasource.getErrorMessages(state)).toEqual([
+      expect(indexPatternDatasource.getErrorMessages(state, indexPatterns)).toEqual([
         { longMessage: 'error 1', shortMessage: '' },
         { longMessage: 'error 2', shortMessage: '' },
       ]);
@@ -2384,10 +2401,6 @@ describe('IndexPattern Data Source', () => {
       (getErrorMessages as jest.Mock).mockClear();
       (getErrorMessages as jest.Mock).mockReturnValueOnce(['error 1', 'error 2']);
       const state: IndexPatternPrivateState = {
-        indexPatternRefs: [],
-        existingFields: {},
-        isFirstExistenceFetch: false,
-        indexPatterns: expectedIndexPatterns,
         layers: {
           first: {
             indexPatternId: '1',
@@ -2402,7 +2415,7 @@ describe('IndexPattern Data Source', () => {
         },
         currentIndexPatternId: '1',
       };
-      expect(indexPatternDatasource.getErrorMessages(state)).toEqual([
+      expect(indexPatternDatasource.getErrorMessages(state, indexPatterns)).toEqual([
         { longMessage: 'Layer 1 error: error 1', shortMessage: '' },
         { longMessage: 'Layer 1 error: error 2', shortMessage: '' },
       ]);
@@ -2431,10 +2444,6 @@ describe('IndexPattern Data Source', () => {
       };
 
       state = {
-        indexPatternRefs: [],
-        existingFields: {},
-        isFirstExistenceFetch: false,
-        indexPatterns: expectedIndexPatterns,
         layers: {
           first: {
             indexPatternId: '1',
@@ -2570,10 +2579,6 @@ describe('IndexPattern Data Source', () => {
       (getErrorMessages as jest.Mock).mockReturnValueOnce(['error 1', 'error 2']);
 
       state = {
-        indexPatternRefs: [],
-        existingFields: {},
-        isFirstExistenceFetch: false,
-        indexPatterns: expectedIndexPatterns,
         layers: {
           first: {
             indexPatternId: '1',
@@ -2589,7 +2594,7 @@ describe('IndexPattern Data Source', () => {
         currentIndexPatternId: '1',
       };
 
-      expect(indexPatternDatasource.getErrorMessages(state)).toEqual([
+      expect(indexPatternDatasource.getErrorMessages(state, indexPatterns)).toEqual([
         { longMessage: 'Layer 1 error: error 1', shortMessage: '' },
         { longMessage: 'Layer 1 error: error 2', shortMessage: '' },
       ]);
@@ -2602,10 +2607,6 @@ describe('IndexPattern Data Source', () => {
       expect(
         indexPatternDatasource.updateStateOnCloseDimension!({
           state: {
-            indexPatternRefs: [],
-            existingFields: {},
-            isFirstExistenceFetch: false,
-            indexPatterns: expectedIndexPatterns,
             layers: {
               first: {
                 indexPatternId: '1',
@@ -2632,10 +2633,6 @@ describe('IndexPattern Data Source', () => {
 
     it('should clear all incomplete columns', () => {
       const state = {
-        indexPatternRefs: [],
-        existingFields: {},
-        isFirstExistenceFetch: false,
-        indexPatterns: expectedIndexPatterns,
         layers: {
           first: {
             indexPatternId: '1',
@@ -2670,7 +2667,7 @@ describe('IndexPattern Data Source', () => {
   });
   describe('#isTimeBased', () => {
     it('should return true if date histogram exists in any layer', () => {
-      let state = enrichBaseState({
+      const state = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -2722,18 +2719,16 @@ describe('IndexPattern Data Source', () => {
             },
           },
         },
-      });
-      state = {
-        ...state,
-        indexPatterns: {
-          ...state.indexPatterns,
-          '1': { ...state.indexPatterns['1'], timeFieldName: undefined },
-        },
-      };
-      expect(indexPatternDatasource.isTimeBased(state)).toEqual(true);
+      } as IndexPatternPrivateState;
+      expect(
+        indexPatternDatasource.isTimeBased(state, {
+          ...indexPatterns,
+          '1': { ...indexPatterns['1'], timeFieldName: undefined },
+        })
+      ).toEqual(true);
     });
     it('should return false if date histogram exists but is detached from global time range in every layer', () => {
-      let state = enrichBaseState({
+      const state = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -2786,18 +2781,16 @@ describe('IndexPattern Data Source', () => {
             },
           },
         },
-      });
-      state = {
-        ...state,
-        indexPatterns: {
-          ...state.indexPatterns,
-          '1': { ...state.indexPatterns['1'], timeFieldName: undefined },
-        },
-      };
-      expect(indexPatternDatasource.isTimeBased(state)).toEqual(false);
+      } as IndexPatternPrivateState;
+      expect(
+        indexPatternDatasource.isTimeBased(state, {
+          ...indexPatterns,
+          '1': { ...indexPatterns['1'], timeFieldName: undefined },
+        })
+      ).toEqual(false);
     });
     it('should return false if date histogram does not exist in any layer', () => {
-      let state = enrichBaseState({
+      const state = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -2814,18 +2807,16 @@ describe('IndexPattern Data Source', () => {
             },
           },
         },
-      });
-      state = {
-        ...state,
-        indexPatterns: {
-          ...state.indexPatterns,
-          '1': { ...state.indexPatterns['1'], timeFieldName: undefined },
-        },
-      };
-      expect(indexPatternDatasource.isTimeBased(state)).toEqual(false);
+      } as IndexPatternPrivateState;
+      expect(
+        indexPatternDatasource.isTimeBased(state, {
+          ...indexPatterns,
+          '1': { ...indexPatterns['1'], timeFieldName: undefined },
+        })
+      ).toEqual(false);
     });
     it('should return true if the index pattern is time based even if date histogram does not exist in any layer', () => {
-      const state = enrichBaseState({
+      const state = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -2842,14 +2833,14 @@ describe('IndexPattern Data Source', () => {
             },
           },
         },
-      });
-      expect(indexPatternDatasource.isTimeBased(state)).toEqual(true);
+      } as IndexPatternPrivateState;
+      expect(indexPatternDatasource.isTimeBased(state, indexPatterns)).toEqual(true);
     });
   });
 
   describe('#initializeDimension', () => {
     it('should return the same state if no static value is passed', () => {
-      const state = enrichBaseState({
+      const state = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -2866,9 +2857,9 @@ describe('IndexPattern Data Source', () => {
             },
           },
         },
-      });
+      } as IndexPatternPrivateState;
       expect(
-        indexPatternDatasource.initializeDimension!(state, 'first', {
+        indexPatternDatasource.initializeDimension!(state, 'first', indexPatterns, {
           columnId: 'newStatic',
           groupId: 'a',
         })
@@ -2876,7 +2867,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should add a new static value column if a static value is passed', () => {
-      const state = enrichBaseState({
+      const state = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -2893,9 +2884,9 @@ describe('IndexPattern Data Source', () => {
             },
           },
         },
-      });
+      } as IndexPatternPrivateState;
       expect(
-        indexPatternDatasource.initializeDimension!(state, 'first', {
+        indexPatternDatasource.initializeDimension!(state, 'first', indexPatterns, {
           columnId: 'newStatic',
           groupId: 'a',
           staticValue: 0, // use a falsy value to check also this corner case

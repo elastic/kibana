@@ -206,7 +206,7 @@ export const getXyVisualization = ({
       return state;
     }
     const newLayers = [...state.layers];
-    newLayers[layerIndex] = { ...layer, indexPatternId };
+    newLayers[layerIndex] = { ...layer };
     return {
       ...state,
       layers: newLayers,

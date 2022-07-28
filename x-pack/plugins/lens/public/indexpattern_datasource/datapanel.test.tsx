@@ -27,6 +27,9 @@ import { getFieldByNameFactory } from './pure_helpers';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { TermsIndexPatternColumn } from './operations';
 import { DOCUMENT_FIELD_NAME } from '../../common';
+import { createIndexPatternServiceMock } from '../mocks/data_views_service_mock';
+import { createMockFramePublicAPI } from '../mocks';
+import { DataViewsState } from '../state_management';
 
 const fieldsOne = [
   {
@@ -153,8 +156,6 @@ const fieldsThree = [
 ];
 
 const initialState: IndexPatternPrivateState = {
-  indexPatternRefs: [],
-  existingFields: {},
   currentIndexPatternId: '1',
   layers: {
     first: {
@@ -212,7 +213,11 @@ const initialState: IndexPatternPrivateState = {
       },
     },
   },
-  indexPatterns: {
+};
+
+function getFrameAPIMock({ indexPatterns, existingFields, ...rest }: Partial<DataViewsState> = {}) {
+  const frameAPI = createMockFramePublicAPI();
+  const defaultIndexPatterns = {
     '1': {
       id: '1',
       title: 'idx1',
@@ -237,9 +242,18 @@ const initialState: IndexPatternPrivateState = {
       fields: fieldsThree,
       getFieldByName: getFieldByNameFactory(fieldsThree),
     },
-  },
-  isFirstExistenceFetch: false,
-};
+  };
+  return {
+    ...frameAPI,
+    dataViews: {
+      ...frameAPI.dataViews,
+      indexPatterns: indexPatterns ?? defaultIndexPatterns,
+      existingFields: existingFields ?? {},
+      isFirstExistenceFetch: false,
+      ...rest,
+    },
+  };
+}
 
 const dslQuery = { bool: { must: [], filter: [], should: [], must_not: [] } };
 
@@ -255,17 +269,14 @@ describe('IndexPattern Data Panel', () => {
   beforeEach(() => {
     core = coreMock.createStart();
     defaultProps = {
-      indexPatternRefs: [],
-      existingFields: {},
       data: dataPluginMock.createStartContract(),
       dataViews: dataViewPluginMocks.createStartContract(),
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
       indexPatternFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
-      onUpdateIndexPattern: jest.fn(),
+      onChangeIndexPattern: jest.fn(),
+      onIndexPatternRefresh: jest.fn(),
       dragDropContext: createMockedDragDropContext(),
       currentIndexPatternId: '1',
-      indexPatterns: initialState.indexPatterns,
-      onChangeIndexPattern: jest.fn(),
       core,
       dateRange: {
         fromDate: 'now-7d',
@@ -278,6 +289,8 @@ describe('IndexPattern Data Panel', () => {
       dropOntoWorkspace: jest.fn(),
       hasSuggestionForField: jest.fn(() => false),
       uiActions: uiActionsPluginMock.createStartContract(),
+      indexPatternService: createIndexPatternServiceMock(),
+      frame: getFrameAPIMock(),
     };
   });
 
@@ -313,7 +326,6 @@ describe('IndexPattern Data Panel', () => {
         state={{
           ...initialState,
           currentIndexPatternId: '',
-          indexPatterns: {},
         }}
         setState={jest.fn()}
         dragDropContext={{
@@ -321,6 +333,7 @@ describe('IndexPattern Data Panel', () => {
           dragging: { id: '1', humanData: { label: 'Label' } },
         }}
         changeIndexPattern={jest.fn()}
+        frame={createMockFramePublicAPI()}
       />
     );
     expect(wrapper.find('[data-test-subj="indexPattern-no-indexpatterns"]')).toHaveLength(1);
@@ -623,12 +636,14 @@ describe('IndexPattern Data Panel', () => {
     beforeEach(() => {
       props = {
         ...defaultProps,
-        existingFields: {
-          idx1: {
-            bytes: true,
-            memory: true,
+        frame: getFrameAPIMock({
+          existingFields: {
+            idx1: {
+              bytes: true,
+              memory: true,
+            },
           },
-        },
+        }),
       };
     });
     it('should list all supported fields in the pattern sorted alphabetically in groups', async () => {
@@ -658,22 +673,24 @@ describe('IndexPattern Data Panel', () => {
       const wrapper = mountWithIntl(
         <InnerIndexPatternDataPanel
           {...props}
-          indexPatterns={{
-            '1': {
-              ...props.indexPatterns['1'],
-              fields: [
-                ...props.indexPatterns['1'].fields,
-                {
-                  name: '_id',
-                  displayName: '_id',
-                  meta: true,
-                  type: 'string',
-                  searchable: true,
-                  aggregatable: true,
-                },
-              ],
+          frame={getFrameAPIMock({
+            indexPatterns: {
+              '1': {
+                ...props.frame.dataViews.indexPatterns['1'],
+                fields: [
+                  ...props.frame.dataViews.indexPatterns['1'].fields,
+                  {
+                    name: '_id',
+                    displayName: '_id',
+                    meta: true,
+                    type: 'string',
+                    searchable: true,
+                    aggregatable: true,
+                  },
+                ],
+              },
             },
-          }}
+          })}
         />
       );
       wrapper
@@ -692,7 +709,10 @@ describe('IndexPattern Data Panel', () => {
 
     it('should display NoFieldsCallout when all fields are empty', async () => {
       const wrapper = mountWithIntl(
-        <InnerIndexPatternDataPanel {...defaultProps} existingFields={{ idx1: {} }} />
+        <InnerIndexPatternDataPanel
+          {...defaultProps}
+          frame={getFrameAPIMock({ existingFields: { idx1: {} } })}
+        />
       );
       expect(wrapper.find(NoFieldsCallout).length).toEqual(2);
       expect(
@@ -726,7 +746,10 @@ describe('IndexPattern Data Panel', () => {
 
     it('should not allow field details when error', () => {
       const wrapper = mountWithIntl(
-        <InnerIndexPatternDataPanel {...props} existenceFetchFailed={true} />
+        <InnerIndexPatternDataPanel
+          {...props}
+          frame={getFrameAPIMock({ existenceFetchFailed: true })}
+        />
       );
 
       expect(wrapper.find(FieldList).prop('fieldGroups')).toEqual(
@@ -738,7 +761,10 @@ describe('IndexPattern Data Panel', () => {
 
     it('should allow field details when timeout', () => {
       const wrapper = mountWithIntl(
-        <InnerIndexPatternDataPanel {...props} existenceFetchTimeout={true} />
+        <InnerIndexPatternDataPanel
+          {...props}
+          frame={getFrameAPIMock({ existenceFetchTimeout: true })}
+        />
       );
 
       expect(wrapper.find(FieldList).prop('fieldGroups')).toEqual(

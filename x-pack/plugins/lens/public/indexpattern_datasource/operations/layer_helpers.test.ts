@@ -38,7 +38,7 @@ import {
 } from './definitions';
 import { TinymathAST } from '@kbn/tinymath';
 import { CoreStart } from '@kbn/core/public';
-import { IndexPattern } from '../../editor_frame_service/types';
+import { IndexPattern } from '../../types';
 
 jest.mock('.');
 jest.mock('../../id_generator');

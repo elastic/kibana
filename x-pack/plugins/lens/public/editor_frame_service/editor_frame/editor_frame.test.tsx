@@ -49,6 +49,8 @@ import { mockDataPlugin, mountWithProvider } from '../../mocks';
 import { setState } from '../../state_management';
 import { getLensInspectorService } from '../../lens_inspector_service';
 import { toExpression } from '@kbn/interpreter';
+import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 function generateSuggestion(state = {}): DatasourceSuggestion {
   return {
@@ -80,10 +82,12 @@ function getDefaultProps() {
       data: mockDataPlugin(),
       expressions: expressionsPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
+      dataViews: dataViewPluginMocks.createStartContract(),
     },
     palettes: chartPluginMock.createPaletteRegistry(),
     lensInspector: getLensInspectorService(inspectorPluginMock.createStartContract()),
     showNoDataPopover: jest.fn(),
+    indexPatternService: createIndexPatternServiceMock(),
   };
   return defaultProps;
 }

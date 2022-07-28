@@ -7,14 +7,19 @@
 
 import type { PaletteOutput } from '@kbn/coloring';
 import { getSuggestions, getTopSuggestionForField } from './suggestion_helpers';
-import { createMockVisualization, createMockDatasource, DatasourceMock } from '../../mocks';
+import {
+  createMockVisualization,
+  createMockDatasource,
+  DatasourceMock,
+  createMockFramePublicAPI,
+} from '../../mocks';
 import {
   TableSuggestion,
   DatasourceSuggestion,
   Visualization,
   VisualizeEditorContext,
 } from '../../types';
-import { DatasourceStates } from '../../state_management';
+import { DatasourceStates, DataViewsState } from '../../state_management';
 
 const generateSuggestion = (state = {}, layerId: string = 'first'): DatasourceSuggestion => ({
   state,
@@ -29,6 +34,7 @@ const generateSuggestion = (state = {}, layerId: string = 'first'): DatasourceSu
 
 let datasourceMap: Record<string, DatasourceMock>;
 let datasourceStates: DatasourceStates;
+let dataViews: DataViewsState;
 
 beforeEach(() => {
   datasourceMap = {
@@ -41,6 +47,8 @@ beforeEach(() => {
       state: {},
     },
   };
+
+  dataViews = createMockFramePublicAPI().dataViews;
 });
 
 describe('suggestion helpers', () => {
@@ -69,6 +77,7 @@ describe('suggestion helpers', () => {
       visualizationState: {},
       datasourceMap,
       datasourceStates,
+      dataViews,
     });
     expect(suggestions).toHaveLength(1);
     expect(suggestions[0].visualizationState).toBe(suggestedState);
@@ -116,6 +125,7 @@ describe('suggestion helpers', () => {
       visualizationState: {},
       datasourceMap,
       datasourceStates,
+      dataViews,
     });
     expect(suggestions).toHaveLength(3);
   });
@@ -133,6 +143,7 @@ describe('suggestion helpers', () => {
       datasourceMap,
       datasourceStates,
       field: droppedField,
+      dataViews,
     });
     expect(datasourceMap.mock.getDatasourceSuggestionsForField).toHaveBeenCalledWith(
       datasourceStates.mock.state,
@@ -168,6 +179,7 @@ describe('suggestion helpers', () => {
       datasourceMap: multiDatasourceMap,
       datasourceStates: multiDatasourceStates,
       field: droppedField,
+      dataViews,
     });
     expect(multiDatasourceMap.mock.getDatasourceSuggestionsForField).toHaveBeenCalledWith(
       multiDatasourceStates.mock.state,
@@ -201,6 +213,7 @@ describe('suggestion helpers', () => {
         indexPatternId: '1',
         fieldName: 'test',
       },
+      dataViews,
     });
     expect(datasourceMap.mock.getDatasourceSuggestionsForVisualizeField).toHaveBeenCalledWith(
       datasourceStates.mock.state,
@@ -240,6 +253,7 @@ describe('suggestion helpers', () => {
       datasourceMap: multiDatasourceMap,
       datasourceStates: multiDatasourceStates,
       visualizeTriggerFieldContext: visualizeTriggerField,
+      dataViews,
     });
     expect(multiDatasourceMap.mock.getDatasourceSuggestionsForVisualizeField).toHaveBeenCalledWith(
       multiDatasourceStates.mock.state,
@@ -320,6 +334,7 @@ describe('suggestion helpers', () => {
       datasourceMap,
       datasourceStates,
       visualizeTriggerFieldContext: triggerContext,
+      dataViews,
     });
     expect(datasourceMap.mock.getDatasourceSuggestionsForVisualizeCharts).toHaveBeenCalledWith(
       datasourceStates.mock.state,
@@ -402,6 +417,7 @@ describe('suggestion helpers', () => {
       datasourceMap: multiDatasourceMap,
       datasourceStates: multiDatasourceStates,
       visualizeTriggerFieldContext: triggerContext,
+      dataViews,
     });
     expect(multiDatasourceMap.mock.getDatasourceSuggestionsForVisualizeCharts).toHaveBeenCalledWith(
       datasourceStates.mock.state,
@@ -458,6 +474,7 @@ describe('suggestion helpers', () => {
       visualizationState: {},
       datasourceMap,
       datasourceStates,
+      dataViews,
     });
     expect(suggestions[0].score).toBe(0.8);
     expect(suggestions[1].score).toBe(0.6);
@@ -493,6 +510,7 @@ describe('suggestion helpers', () => {
       visualizationState: {},
       datasourceMap,
       datasourceStates,
+      dataViews,
     });
     expect(mockVisualization1.getSuggestions.mock.calls[0][0].table).toEqual(table1);
     expect(mockVisualization1.getSuggestions.mock.calls[1][0].table).toEqual(table2);
@@ -553,6 +571,7 @@ describe('suggestion helpers', () => {
       visualizationState: {},
       datasourceMap,
       datasourceStates,
+      dataViews,
     });
     expect(suggestions[0].datasourceState).toBe(tableState1);
     expect(suggestions[0].datasourceId).toBe('mock');
@@ -582,6 +601,7 @@ describe('suggestion helpers', () => {
       visualizationState: {},
       datasourceMap,
       datasourceStates,
+      dataViews,
     });
     expect(mockVisualization1.getSuggestions).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -614,6 +634,7 @@ describe('suggestion helpers', () => {
       datasourceMap,
       datasourceStates,
       mainPalette,
+      dataViews,
     });
     expect(mockVisualization1.getSuggestions).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -647,6 +668,7 @@ describe('suggestion helpers', () => {
       visualizationState: {},
       datasourceMap,
       datasourceStates,
+      dataViews,
     });
     expect(mockVisualization1.getMainPalette).toHaveBeenCalledWith({});
     expect(mockVisualization2.getSuggestions).toHaveBeenCalledWith(
@@ -716,6 +738,7 @@ describe('suggestion helpers', () => {
         { testVis: mockVisualization1 },
         datasourceMap.mock,
         { id: 'myfield', humanData: { label: 'myfieldLabel' } },
+        dataViews,
       ];
     });
 

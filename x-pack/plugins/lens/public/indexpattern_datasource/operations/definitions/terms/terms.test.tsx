@@ -34,7 +34,7 @@ import { DateHistogramIndexPatternColumn } from '../date_histogram';
 import { getOperationSupportMatrix } from '../../../dimension_panel/operation_support';
 import { FieldSelect } from '../../../dimension_panel/field_select';
 import { ReferenceEditor } from '../../../dimension_panel/reference_editor';
-import { IndexPattern } from '../../../../editor_frame_service/types';
+import { IndexPattern } from '../../../../types';
 import { cloneDeep } from 'lodash';
 import { IncludeExcludeRow } from './include_exclude_options';
 
@@ -1174,14 +1174,13 @@ describe('terms', () => {
       return getOperationSupportMatrix({
         state: {
           layers: { layer1: layer },
-          indexPatterns: {
-            [defaultProps.indexPattern.id]: defaultProps.indexPattern,
-          },
-          existingFields,
         } as unknown as IndexPatternPrivateState,
         layerId: 'layer1',
         filterOperations: () => true,
         columnId,
+        indexPatterns: {
+          [defaultProps.indexPattern.id]: defaultProps.indexPattern,
+        },
       });
     }
 

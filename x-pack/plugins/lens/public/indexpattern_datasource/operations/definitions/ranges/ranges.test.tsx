@@ -25,9 +25,9 @@ import {
   SLICES,
 } from './constants';
 import { RangePopover } from './advanced_editor';
-import { DragDropBuckets } from '../../../../shared_components';
+import { DragDropBuckets } from '../shared_components';
 import { getFieldByNameFactory } from '../../../pure_helpers';
-import { IndexPattern } from '../../../../editor_frame_service/types';
+import { IndexPattern } from '../../../../types';
 
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {
