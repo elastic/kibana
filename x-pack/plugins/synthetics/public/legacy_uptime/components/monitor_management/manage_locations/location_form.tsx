@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect } from 'react';
+import React from 'react';
 import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
@@ -15,25 +15,14 @@ import { PolicyHostsField } from './policy_hosts';
 import { selectAgentPolicies } from '../../../state/private_locations';
 
 export const LocationForm = ({
-  setFormData,
   privateLocations,
 }: {
-  setFormData: (val: Partial<PrivateLocation>) => void;
   onDiscard?: () => void;
   privateLocations: PrivateLocation[];
 }) => {
   const { data } = useSelector(selectAgentPolicies);
-  const { control, getValues, register } = useFormContext<PrivateLocation>();
+  const { control, register } = useFormContext<PrivateLocation>();
   const { errors } = useFormState();
-
-  const label = getValues('label');
-  const agentPolicyId = getValues('agentPolicyId');
-
-  useEffect(() => {
-    if (label && agentPolicyId) {
-      setFormData({ label, agentPolicyId });
-    }
-  }, [label, agentPolicyId, setFormData]);
 
   return (
     <>

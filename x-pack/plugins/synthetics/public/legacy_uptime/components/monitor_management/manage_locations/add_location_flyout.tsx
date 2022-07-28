@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { FormProvider } from 'react-hook-form';
 import {
   EuiButtonEmpty,
@@ -39,7 +39,6 @@ export const AddLocationFlyout = ({
   setIsOpen: (val: boolean) => void;
   privateLocations: PrivateLocation[];
 }) => {
-  const [setFormData] = useState<Partial<PrivateLocation>>();
   const form = useFormWrapped({
     mode: 'onSubmit',
     reValidateMode: 'onChange',
@@ -80,7 +79,7 @@ export const AddLocationFlyout = ({
           )}
 
           <EuiSpacer />
-          <LocationForm privateLocations={privateLocations} setFormData={setFormData} />
+          <LocationForm privateLocations={privateLocations} />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
