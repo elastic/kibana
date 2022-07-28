@@ -401,11 +401,7 @@ export type {
   SavedObjectsImporter,
   SavedObjectsImportError,
 } from './saved_objects';
-export {
-  SavedObjectsClient,
-  SavedObjectsSerializer,
-  SavedObjectTypeRegistry,
-} from './saved_objects';
+export { SavedObjectsClient, SavedObjectTypeRegistry } from './saved_objects';
 
 export type {
   IUiSettingsClient,
