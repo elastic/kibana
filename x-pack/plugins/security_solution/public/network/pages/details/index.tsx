@@ -11,7 +11,6 @@ import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import type { Filter } from '@kbn/es-query';
 
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { LastEventIndexKey } from '../../../../common/search_strategy';
