@@ -17,6 +17,7 @@ export interface DefaultSideNavItem {
   description?: string;
   items?: DefaultSideNavItem[];
   categories?: LinkCategories;
+  isBeta?: boolean;
 }
 
 export interface CustomSideNavItem {
