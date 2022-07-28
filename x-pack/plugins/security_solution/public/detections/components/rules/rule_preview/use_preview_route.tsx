@@ -55,10 +55,11 @@ export const usePreviewRoute = ({
 }: PreviewRouteParams) => {
   const [isRequestTriggered, setIsRequestTriggered] = useState(false);
 
-  const { isLoading, showInvocationCountWarning, response, rule, setRule } = usePreviewRule({
-    timeframe: timeFrame,
-    advancedOptions,
-  });
+  const { isLoading, isInvalidInterval, showInvocationCountWarning, response, rule, setRule } =
+    usePreviewRule({
+      timeframe: timeFrame,
+      advancedOptions,
+    });
   const [logs, setLogs] = useState<RulePreviewLogs[]>(response.logs ?? []);
   const [isAborted, setIsAborted] = useState<boolean>(!!response.isAborted);
   const [hasNoiseWarning, setHasNoiseWarning] = useState<boolean>(false);
@@ -154,5 +155,6 @@ export const usePreviewRoute = ({
     logs,
     isAborted,
     showInvocationCountWarning,
+    isInvalidInterval,
   };
 };

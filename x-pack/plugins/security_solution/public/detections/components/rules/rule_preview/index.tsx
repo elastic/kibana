@@ -192,6 +192,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     hasNoiseWarning,
     isAborted,
     showInvocationCountWarning,
+    isInvalidInterval,
   } = usePreviewRoute({
     index,
     isDisabled,
@@ -257,6 +258,18 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
           <EuiSpacer />
         </>
       )}
+      {showAdvancedOptions && isInvalidInterval && (
+        <>
+          <EuiCallOut
+            color="danger"
+            title={i18n.QUERY_PREVIEW_INVALID_INTERVAL_ERROR_TITLE}
+            data-test-subj="previewInvalidIntervalError"
+          >
+            {i18n.QUERY_PREVIEW_INVALID_INTERVAL_ERROR_MESSAGE}
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
+      )}
       <EuiFormRow
         label={i18n.QUERY_PREVIEW_LABEL}
         helpText={HelpTextComponent}
@@ -292,7 +305,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
             <PreviewButton
               fill
               isLoading={isPreviewRequestInProgress}
-              isDisabled={isDisabled || !areRelaventMlJobsRunning}
+              isDisabled={isDisabled || !areRelaventMlJobsRunning || isInvalidInterval}
               onClick={handlePreviewClick}
               data-test-subj="queryPreviewButton"
             >
