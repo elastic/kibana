@@ -38,6 +38,7 @@ export default function ({ getService }) {
       const archives = [
         'x-pack/test/api_integration/apis/monitoring/es_archives/_health/monitoring_es_8',
         'x-pack/test/api_integration/apis/monitoring/es_archives/_health/monitoring_beats_8',
+        'x-pack/test/api_integration/apis/monitoring/es_archives/_health/metricbeat_8',
       ];
       const { setup, tearDown } = getLifecycleMethods(getService);
 
@@ -46,7 +47,9 @@ export default function ({ getService }) {
       });
 
       after('unload archive', () => {
-        return tearDown();
+        return tearDown([
+          'x-pack/test/api_integration/apis/monitoring/es_archives/_health/metricbeat_8',
+        ]);
       });
 
       it('returns the state of the monitoring documents', async () => {
