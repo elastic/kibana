@@ -122,7 +122,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(response.body.events[0].security_status).to.eql('partial failure');
       expect(
         response.body.events[0].security_message.startsWith(
-          'Check privileges failed to execute ResponseError: index_not_found_exception: [index_not_found_exception] Reason: no such index [no-name-index]'
+          'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["no-name-index"] was found.'
         )
       ).to.eql(true);
     });
