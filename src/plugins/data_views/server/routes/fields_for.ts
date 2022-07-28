@@ -36,6 +36,7 @@ interface IQuery {
   type?: string;
   rollup_index?: string;
   allow_no_index?: boolean;
+  filter: estypes.QueryDslQueryContainer;
 }
 
 const validate: RouteValidatorFullConfig<{}, IQuery, IBody> = {
@@ -47,6 +48,7 @@ const validate: RouteValidatorFullConfig<{}, IQuery, IBody> = {
     type: schema.maybe(schema.string()),
     rollup_index: schema.maybe(schema.string()),
     allow_no_index: schema.maybe(schema.boolean()),
+    filter: schema.maybe(schema.any()),
   }),
   // not available to get request
   body: schema.maybe(schema.object({ index_filter: schema.any() })),
@@ -60,10 +62,11 @@ const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, resp
     type,
     rollup_index: rollupIndex,
     allow_no_index: allowNoIndex,
+    filter: queryFilter,
   } = request.query;
 
   // not available to get request
-  const filter = request.body?.index_filter;
+  const filter = queryFilter ? queryFilter : request.body?.index_filter;
 
   let parsedFields: string[] = [];
   try {
