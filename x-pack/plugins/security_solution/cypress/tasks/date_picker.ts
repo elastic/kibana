@@ -30,6 +30,8 @@ export const setStartDate = (date: string) => {
   cy.get(DATE_PICKER_ABSOLUTE_TAB).first().click({ force: true });
 
   cy.get(DATE_PICKER_ABSOLUTE_INPUT).click().clear().type(date);
+
+  cy.get(DATE_PICKER_APPLY_BUTTON).click();
 };
 
 export const setTimelineEndDate = (date: string) => {
