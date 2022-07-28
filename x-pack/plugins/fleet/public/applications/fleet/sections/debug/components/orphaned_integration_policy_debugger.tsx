@@ -83,7 +83,7 @@ export const OrphanedIntegrationPolicyDebugger: React.FunctionComponent = () => 
         defaultMessage: 'Successfully deleted orphaned policy',
       })
     );
-    queryClient.invalidateQueries('debug-orphaned-policies');
+    queryClient.invalidateQueries(['debug-orphaned-policies']);
     setSelectedPolicyId(undefined);
     setIsDeleteModalVisible(false);
 
@@ -112,7 +112,7 @@ export const OrphanedIntegrationPolicyDebugger: React.FunctionComponent = () => 
         defaultMessage: 'Successfully deleted all orphaned policies',
       })
     );
-    queryClient.invalidateQueries('debug-orphaned-policies');
+    queryClient.invalidateQueries(['debug-orphaned-policies']);
     setSelectedPolicyId(undefined);
     setIsDeleteAllModalVisible(false);
 

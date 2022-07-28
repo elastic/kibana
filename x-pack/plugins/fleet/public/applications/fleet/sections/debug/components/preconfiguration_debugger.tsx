@@ -54,7 +54,10 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
   const [isResetModalVisible, setIsResetModalVisible] = useState(false);
   const [isResetAllModalVisible, setIsResetAllModalVisible] = useState(false);
 
-  const preconfiguredPolicies = useQuery(['debug-preconfigured-policies'], fetchPreconfiguredPolicies);
+  const preconfiguredPolicies = useQuery(
+    ['debug-preconfigured-policies'],
+    fetchPreconfiguredPolicies
+  );
 
   const comboBoxOptions =
     preconfiguredPolicies.data?.map((policy) => ({
@@ -88,7 +91,7 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
         defaultMessage: 'Successfully reset policy',
       })
     );
-    queryClient.invalidateQueries('debug-preconfigured-policies');
+    queryClient.invalidateQueries(['debug-preconfigured-policies']);
     setSelectedPolicyId(undefined);
     setIsResetModalVisible(false);
 
@@ -113,7 +116,7 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
         defaultMessage: 'Successfully reset policies',
       })
     );
-    queryClient.invalidateQueries('debug-preconfigured-policies');
+    queryClient.invalidateQueries(['debug-preconfigured-policies']);
     setSelectedPolicyId(undefined);
     setIsResetAllModalVisible(false);
 

@@ -86,7 +86,7 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
     setSelectedIntegrationId(undefined);
     setIsUninstallModalVisible(false);
 
-    queryClient.invalidateQueries('debug-integrations');
+    queryClient.invalidateQueries(['debug-integrations']);
 
     return response.data;
   });
@@ -132,7 +132,7 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
     setSelectedIntegrationId(undefined);
     setIsReinstallModalVisible(false);
 
-    queryClient.invalidateQueries('debug-integrations');
+    queryClient.invalidateQueries(['debug-integrations']);
 
     return installResponse.data;
   });

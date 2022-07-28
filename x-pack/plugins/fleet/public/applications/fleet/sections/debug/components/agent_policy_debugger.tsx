@@ -68,7 +68,7 @@ export const AgentPolicyDebugger: React.FunctionComponent = () => {
 
   const onDelete = () => {
     setSelectedPolicyId(undefined);
-    queryClient.invalidateQueries('debug-agent-policies');
+    queryClient.invalidateQueries(['debug-agent-policies']);
   };
 
   if (status === 'error') {
