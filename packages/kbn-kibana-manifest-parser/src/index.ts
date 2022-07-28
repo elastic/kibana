@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-require('../src/setup_node_env/no_transpilation');
-require('@kbn/managed-vscode-config-cli');
+export { parseKibanaJsonc, readKibanaJsonc, validateKibanaJsonc } from './parse_kibana_jsonc';
+export { KibanaPackageManifest } from './kibana_jsonc_manifest'

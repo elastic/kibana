@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/kibana-json-schema",
+  "name": "@kbn/kibana-manifest-schema",
   "private": true,
   "version": "1.0.0",
   "main": "./target_node/index.js",

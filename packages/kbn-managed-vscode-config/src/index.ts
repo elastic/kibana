@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './update_vscode_config_cli';
+export { MANAGED_CONFIG_FILES, MANAGED_CONFIG_KEYS } from './managed_config_keys';
+export { updateVscodeConfig } from './update_vscode_config';
