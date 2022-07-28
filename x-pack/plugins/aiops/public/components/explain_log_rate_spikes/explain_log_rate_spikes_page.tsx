@@ -22,7 +22,7 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
-import { Filter, Query } from '@kbn/es-query';
+import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedSearch } from '@kbn/discover-plugin/public';
 
@@ -125,14 +125,20 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
     ? overallDocStats.totalCount + selectedDocStats.totalCount
     : overallDocStats.totalCount;
 
-  useEffect(() => {
-    return () => {
-      // When navigating away from the index pattern
-      // Reset all previously set filters
-      // to make sure new page doesn't have unrelated filters
-      dataService.query.filterManager.removeAll();
-    };
-  }, [dataView.id, dataService.query.filterManager]);
+  useEffect(
+    // TODO: Consolidate this hook/function with with Data visualizer's
+    function clearFiltersOnLeave() {
+      return () => {
+        // We want to clear all filters that have not been pinned globally
+        // when navigating to other pages
+        dataService.query.filterManager
+          .getFilters()
+          .filter((f) => f.$state?.store === FilterStateStore.APP_STATE)
+          .forEach((f) => dataService.query.filterManager.removeFilter(f));
+      };
+    },
+    [dataService.query.filterManager]
+  );
 
   const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
 
