@@ -34,7 +34,7 @@ import {
   ExpressionRenderError,
   IExpressionLoaderParams,
 } from '@kbn/expressions-plugin/public';
-import type { RenderMode } from '@kbn/expressions-plugin';
+import type { RenderMode } from '@kbn/expressions-plugin/common';
 import { VisualizationMissedDataViewError } from '../components/visualization_missed_data_view_error';
 import VisualizationError from '../components/visualization_error';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';

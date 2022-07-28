@@ -13,7 +13,7 @@ import { debounce, compact, get, each, cloneDeep, last, map } from 'lodash';
 import { useResizeObserver } from '@elastic/eui';
 import { RangeFilterParams } from '@kbn/es-query';
 
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DEFAULT_TIME_FORMAT } from '../../common/lib';
 

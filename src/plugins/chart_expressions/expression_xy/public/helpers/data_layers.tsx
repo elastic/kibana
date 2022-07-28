@@ -24,7 +24,7 @@ import {
   IFieldFormat,
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
-import { Datatable } from '@kbn/expressions-plugin';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import {
   getFormatByAccessor,
   getAccessorByDimension,

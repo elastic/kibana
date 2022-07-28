@@ -11,7 +11,7 @@ import React, { useEffect } from 'react';
 import classNames from 'classnames';
 
 import { CoreStart } from '@kbn/core/public';
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { TableVisConfig, TableVisData } from '../types';

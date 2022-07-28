@@ -15,7 +15,7 @@ import {
   Render,
   Style,
   Range,
-} from '@kbn/expressions-plugin';
+} from '@kbn/expressions-plugin/common';
 import { Datasource, Model, Transform, View } from '../public/expression_types';
 import { AssetType } from './assets';
 import { CanvasWorkpad, Sidebar } from './canvas';

@@ -7,7 +7,7 @@
 
 // @ts-expect-error untyped lib
 import pluralize from 'pluralize';
-import { ExpressionFunction, ExpressionFunctionParameter } from '@kbn/expressions-plugin';
+import { ExpressionFunction, ExpressionFunctionParameter } from '@kbn/expressions-plugin/common';
 import { isValidDataUrl } from '@kbn/presentation-util-plugin/public';
 import { functions as browserFunctions } from '../../../canvas_plugin_src/functions/browser';
 import { functions as serverFunctions } from '../../../canvas_plugin_src/functions/server';

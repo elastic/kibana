@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Datatable } from '@kbn/expressions-plugin';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { extractUniqTermsMap } from './sort_predicate';
 
 describe('#extractUniqTermsMap', () => {
