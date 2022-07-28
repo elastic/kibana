@@ -6,6 +6,7 @@
  */
 
 // copied this solution from fleet due to time constraints
+// x-pack/fleet/common/services/decode_cloud_id.ts
 // decodeCloudId decodes the c.id into c.esURL and c.kibURL
 export function decodeCloudId(cid: string):
   | {

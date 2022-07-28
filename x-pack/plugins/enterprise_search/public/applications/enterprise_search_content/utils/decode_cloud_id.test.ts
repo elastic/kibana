@@ -8,6 +8,7 @@
 import { decodeCloudId } from './decode_cloud_id';
 
 // Copied from Fleet's solution
+// x-pack/fleet/common/services/decode_cloud_id.test.ts
 describe('Enterprise Search - decodeCloudId', () => {
   it('parses various CloudID formats', () => {
     const tests = [
