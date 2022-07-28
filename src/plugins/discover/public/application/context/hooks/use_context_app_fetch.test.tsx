@@ -24,7 +24,10 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
-const mockFilterManager = createFilterManagerMock();
+const mockFilterManager = {
+  ...createFilterManagerMock(),
+  getFilters: jest.fn(() => []),
+};
 
 jest.mock('../services/context', () => {
   const originalModule = jest.requireActual('../services/context');
