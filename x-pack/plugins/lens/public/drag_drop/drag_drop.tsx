@@ -11,6 +11,7 @@ import type { KeyboardEvent, ReactElement } from 'react';
 import classNames from 'classnames';
 import { keys, EuiScreenReaderOnly, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
+import { trackUiCounterEvents } from '../lens_ui_telemetry';
 import {
   DragDropIdentifier,
   DropIdentifier,
@@ -384,6 +385,7 @@ const DragInner = memo(function DragInner({
 
   const dropToActiveDropTarget = () => {
     if (activeDropTarget) {
+      trackUiCounterEvents('drop_total');
       const { dropType, humanData, onDrop: onTargetDrop } = activeDropTarget;
       setTimeout(() => setA11yMessage(announce.dropped(value.humanData, humanData, dropType)));
       onTargetDrop(value, dropType);
@@ -951,6 +953,7 @@ const ReorderableDrop = memo(function ReorderableDrop(
     setKeyboardMode(false);
 
     if (onDrop && dragging) {
+      trackUiCounterEvents('drop_total');
       onDrop(dragging, 'reorder');
       // setTimeout ensures it will run after dragEnd messaging
       setTimeout(() =>

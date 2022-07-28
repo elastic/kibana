@@ -6,14 +6,12 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  SPAN_DURATION,
-  TRANSACTION_DURATION,
-} from '../../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../../common/processor_event';
+import { sumBy } from 'lodash';
+import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 import { Environment } from '../../../../common/environment_rt';
+import { getDurationField, getEventType } from '../utils';
 
 export const fetchDurationRanges = async ({
   rangeSteps,
@@ -23,7 +21,8 @@ export const fetchDurationRanges = async ({
   environment,
   kuery,
   query,
-  eventType,
+  chartType,
+  searchMetrics,
 }: {
   rangeSteps: number[];
   setup: Setup;
@@ -32,9 +31,19 @@ export const fetchDurationRanges = async ({
   environment: Environment;
   kuery: string;
   query: estypes.QueryDslQueryContainer;
-  eventType: ProcessorEvent;
-}): Promise<Array<{ key: number; doc_count: number }>> => {
+  chartType: LatencyDistributionChartType;
+  searchMetrics: boolean;
+}): Promise<{
+  totalDocCount: number;
+  durationRanges: Array<{ key: number; doc_count: number }>;
+}> => {
   const { apmEventClient } = setup;
+  const durationField = getDurationField(chartType, searchMetrics);
+
+  // when using metrics data, ensure we filter by docs with the appropriate duration field
+  const filteredQuery = searchMetrics
+    ? { bool: { filter: [query, { exists: { field: durationField } }] } }
+    : query;
 
   const ranges = rangeSteps.reduce(
     (p, to) => {
@@ -50,7 +59,7 @@ export const fetchDurationRanges = async ({
 
   const resp = await apmEventClient.search('get_duration_ranges', {
     apm: {
-      events: [eventType],
+      events: [getEventType(chartType, searchMetrics)],
     },
     body: {
       size: 0,
@@ -59,15 +68,12 @@ export const fetchDurationRanges = async ({
         end,
         environment,
         kuery,
-        query,
+        query: filteredQuery,
       }),
       aggs: {
         logspace_ranges: {
           range: {
-            field:
-              eventType === ProcessorEvent.span
-                ? SPAN_DURATION
-                : TRANSACTION_DURATION,
+            field: getDurationField(chartType, searchMetrics),
             ranges,
           },
         },
@@ -75,7 +81,7 @@ export const fetchDurationRanges = async ({
     },
   });
 
-  return (
+  const durationRanges =
     resp.aggregations?.logspace_ranges.buckets
       .map((d) => ({
         key: d.from,
@@ -83,6 +89,10 @@ export const fetchDurationRanges = async ({
       }))
       .filter(
         (d): d is { key: number; doc_count: number } => d.key !== undefined
-      ) ?? []
-  );
+      ) ?? [];
+
+  return {
+    totalDocCount: sumBy(durationRanges, 'doc_count'),
+    durationRanges,
+  };
 };

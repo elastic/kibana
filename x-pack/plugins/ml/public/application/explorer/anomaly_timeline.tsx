@@ -215,7 +215,10 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             </EuiFlexItem>
 
             {menuItems.length > 0 && (
-              <EuiFlexItem grow={false} style={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
+              <EuiFlexItem
+                grow={false}
+                css={{ 'margin-left': 'auto !important', 'align-self': 'baseline' }}
+              >
                 <EuiPopover
                   button={
                     <EuiButtonIcon
@@ -262,7 +265,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               </>
             )}
 
-            <EuiFlexItem grow={true}>
+            <EuiFlexItem grow={true} css={{ 'max-width': '500px' }}>
               <SeverityControl
                 value={severityUpdate ?? 0}
                 onChange={useCallback((update) => {
@@ -298,7 +301,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                 )}
               </EuiText>
             </EuiFlexItem>
-            <EuiFlexItem grow={false} style={{ visibility: selectedCells ? 'visible' : 'hidden' }}>
+            <EuiFlexItem grow={false} css={{ visibility: selectedCells ? 'visible' : 'hidden' }}>
               <EuiButtonEmpty
                 size="xs"
                 onClick={setSelectedCells.bind(anomalyTimelineStateService, undefined)}

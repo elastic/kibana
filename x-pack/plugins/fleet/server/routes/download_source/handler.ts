@@ -19,7 +19,7 @@ import type {
   DeleteDownloadSourceResponse,
   PutDownloadSourceResponse,
   GetDownloadSourceResponse,
-} from '../../../common';
+} from '../../../common/types';
 import { downloadSourceService } from '../../services/download_source';
 import { defaultIngestErrorHandler } from '../../errors';
 import { agentPolicyService } from '../../services';
