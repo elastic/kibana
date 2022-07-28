@@ -8,7 +8,11 @@
 import React, { memo, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { ActionDetails } from '../../../../common/endpoint/types';
+import { ActionSuccess } from './action_success';
+import type {
+  ActionDetails,
+  SuspendProcessActionOutputContent,
+} from '../../../../common/endpoint/types';
 import { useGetActionDetails } from '../../hooks/endpoint/use_get_action_details';
 import type { EndpointCommandDefinitionMeta } from './types';
 import { useSendSuspendProcessRequest } from '../../hooks/endpoint/use_send_suspend_process_endpoint_request';
@@ -23,7 +27,7 @@ export const SuspendProcessActionResult = memo<
     {
       actionId?: string;
       actionRequestSent?: boolean;
-      completedActionDetails?: ActionDetails;
+      completedActionDetails?: ActionDetails<SuspendProcessActionOutputContent>;
       apiError?: IHttpFetchError;
     },
     EndpointCommandDefinitionMeta
@@ -37,10 +41,13 @@ export const SuspendProcessActionResult = memo<
 
   const { mutate, data, isSuccess, error } = useSendSuspendProcessRequest();
 
-  const { data: actionDetails } = useGetActionDetails(actionId ?? '-', {
-    enabled: Boolean(actionId) && isPending,
-    refetchInterval: isPending ? ACTION_DETAILS_REFRESH_INTERVAL : false,
-  });
+  const { data: actionDetails } = useGetActionDetails<SuspendProcessActionOutputContent>(
+    actionId ?? '-',
+    {
+      enabled: Boolean(actionId) && isPending,
+      refetchInterval: isPending ? ACTION_DETAILS_REFRESH_INTERVAL : false,
+    }
+  );
 
   // Send Suspend request if not yet done
   useEffect(() => {
@@ -100,7 +107,7 @@ export const SuspendProcessActionResult = memo<
   }
 
   // Show nothing if still pending
-  if (isPending) {
+  if (isPending || !completedActionDetails) {
     return <ResultComponent showAs="pending" />;
   }
 
@@ -109,13 +116,19 @@ export const SuspendProcessActionResult = memo<
     return (
       <ActionError
         dataTestSubj={'suspendProcessErrorCallout'}
-        errors={completedActionDetails?.errors}
+        action={completedActionDetails}
         ResultComponent={ResultComponent}
       />
     );
   }
 
   // Show Success
-  return <ResultComponent data-test-subj="suspendProcessSuccessCallout" />;
+  return (
+    <ActionSuccess
+      action={completedActionDetails}
+      ResultComponent={ResultComponent}
+      data-test-subj="suspendProcessSuccessCallout"
+    />
+  );
 });
 SuspendProcessActionResult.displayName = 'SuspendProcessActionResult';

@@ -8,7 +8,11 @@
 import React, { memo, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { ActionDetails } from '../../../../common/endpoint/types';
+import { ActionSuccess } from './action_success';
+import type {
+  ActionDetails,
+  KillProcessActionOutputContent,
+} from '../../../../common/endpoint/types';
 import { useGetActionDetails } from '../../hooks/endpoint/use_get_action_details';
 import type { EndpointCommandDefinitionMeta } from './types';
 import { useSendKillProcessRequest } from '../../hooks/endpoint/use_send_kill_process_endpoint_request';
@@ -23,7 +27,7 @@ export const KillProcessActionResult = memo<
     {
       actionId?: string;
       actionRequestSent?: boolean;
-      completedActionDetails?: ActionDetails;
+      completedActionDetails?: ActionDetails<KillProcessActionOutputContent>;
       apiError?: IHttpFetchError;
     },
     EndpointCommandDefinitionMeta
@@ -37,10 +41,13 @@ export const KillProcessActionResult = memo<
 
   const { mutate, data, isSuccess, error } = useSendKillProcessRequest();
 
-  const { data: actionDetails } = useGetActionDetails(actionId ?? '-', {
-    enabled: Boolean(actionId) && isPending,
-    refetchInterval: isPending ? ACTION_DETAILS_REFRESH_INTERVAL : false,
-  });
+  const { data: actionDetails } = useGetActionDetails<KillProcessActionOutputContent>(
+    actionId ?? '-',
+    {
+      enabled: Boolean(actionId) && isPending,
+      refetchInterval: isPending ? ACTION_DETAILS_REFRESH_INTERVAL : false,
+    }
+  );
 
   // Send Kill request if not yet done
   useEffect(() => {
@@ -86,11 +93,6 @@ export const KillProcessActionResult = memo<
     }
   }, [actionDetails?.data, setStatus, setStore, isPending]);
 
-  // Show nothing if still pending
-  if (isPending) {
-    return <ResultComponent showAs="pending" />;
-  }
-
   // Show API errors if perform action fails
   if (isError && apiError) {
     return (
@@ -104,18 +106,29 @@ export const KillProcessActionResult = memo<
     );
   }
 
+  // Show nothing if still pending
+  if (isPending || !completedActionDetails) {
+    return <ResultComponent showAs="pending" />;
+  }
+
   // Show errors
   if (completedActionDetails?.errors) {
     return (
       <ActionError
         dataTestSubj={'killProcessErrorCallout'}
-        errors={completedActionDetails?.errors}
+        action={completedActionDetails}
         ResultComponent={ResultComponent}
       />
     );
   }
 
   // Show Success
-  return <ResultComponent showAs="success" data-test-subj="killProcessSuccessCallout" />;
+  return (
+    <ActionSuccess
+      action={completedActionDetails}
+      ResultComponent={ResultComponent}
+      data-test-subj="killProcessSuccessCallout"
+    />
+  );
 });
 KillProcessActionResult.displayName = 'KillProcessActionResult';

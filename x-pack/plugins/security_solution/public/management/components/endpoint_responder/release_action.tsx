@@ -39,7 +39,7 @@ export const ReleaseActionResult = memo<ActionRequestComponentProps>(
       return (
         <ActionError
           dataTestSubj={'releaseErrorCallout'}
-          errors={completedActionDetails?.errors}
+          action={completedActionDetails}
           ResultComponent={ResultComponent}
         />
       );

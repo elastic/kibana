@@ -38,7 +38,7 @@ export const IsolateActionResult = memo<ActionRequestComponentProps>(
       return (
         <ActionError
           dataTestSubj={'isolateErrorCallout'}
-          errors={completedActionDetails?.errors}
+          action={completedActionDetails}
           ResultComponent={ResultComponent}
         />
       );
