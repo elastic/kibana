@@ -81,6 +81,9 @@ export function LogExplorerGrid() {
             defaultHeight: 34,
           }}
           renderCellValue={LogExplorerCell}
+          toolbarVisibility={{
+            showDisplaySelector: false,
+          }}
           virtualizationOptions={{
             onItemsRendered,
           }}
