@@ -94,7 +94,7 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
     const getNestedEntriesContent = useCallback(
       (type: string, nestedEntries: NonEmptyNestedEntriesArray) => {
         if (type === 'nested' && nestedEntries.length) {
-          return nestedEntries.map((entry, index) => {
+          return nestedEntries.map((entry) => {
             const { field: nestedField, type: nestedType, operator: nestedOperator } = entry;
             const nestedValue = 'value' in entry ? entry.value : '';
 
