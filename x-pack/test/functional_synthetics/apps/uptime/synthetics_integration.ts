@@ -54,6 +54,7 @@ export default function (providerContext: FtrProviderContext) {
         },
         id: `${getSyntheticsPolicy(agentFullPolicy)?.streams?.[0]?.id}`,
         name,
+        origin: 'ui',
         type: monitorType,
         enabled: true,
         processors: [
