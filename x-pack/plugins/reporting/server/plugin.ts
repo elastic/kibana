@@ -73,7 +73,7 @@ export class ReportingPlugin
     registerReportingUsageCollector(reportingCore, plugins.usageCollection);
 
     // Routes
-    registerRoutes(reportingCore, this.logger);
+    registerRoutes(reportingCore, this.logger, core.docLinks);
 
     // async background setup
     (async () => {

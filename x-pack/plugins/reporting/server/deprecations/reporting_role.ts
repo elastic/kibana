@@ -12,6 +12,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type {
   DeprecationsDetails,
+  DocLinksServiceSetup,
   ElasticsearchClient,
   GetDeprecationsContext,
 } from '@kbn/core/server';
@@ -27,11 +28,12 @@ const getDocumentationUrl = (branch: string) => {
 
 interface ExtraDependencies {
   reportingCore: ReportingCore;
+  docLinks: DocLinksServiceSetup;
 }
 
 export async function getDeprecationsInfo(
   { esClient }: GetDeprecationsContext,
-  { reportingCore }: ExtraDependencies
+  { reportingCore, docLinks }: ExtraDependencies
 ): Promise<DeprecationsDetails[]> {
   const client = esClient.asCurrentUser;
   const { security } = reportingCore.getPluginSetupDeps();
@@ -45,15 +47,16 @@ export async function getDeprecationsInfo(
   const deprecatedRoles = config.get('roles', 'allow') || ['reporting_user'];
 
   return [
-    ...(await getUsersDeprecations(client, reportingCore, deprecatedRoles)),
-    ...(await getRoleMappingsDeprecations(client, reportingCore, deprecatedRoles)),
+    ...(await getUsersDeprecations(client, reportingCore, deprecatedRoles, docLinks)),
+    ...(await getRoleMappingsDeprecations(client, reportingCore, deprecatedRoles, docLinks)),
   ];
 }
 
 async function getUsersDeprecations(
   client: ElasticsearchClient,
   reportingCore: ReportingCore,
-  deprecatedRoles: string[]
+  deprecatedRoles: string[],
+  docLinks: DocLinksServiceSetup
 ): Promise<DeprecationsDetails[]> {
   const usingDeprecatedConfig = !reportingCore.getContract().usesUiCapabilities();
   const strings = {
@@ -112,7 +115,7 @@ async function getUsersDeprecations(
           ` unexpected error: ${deprecations.getDetailedErrorMessage(err)}.`
       );
     }
-    return deprecations.deprecationError(strings.title, err);
+    return deprecations.deprecationError(strings.title, err, docLinks);
   }
 
   const reportingUsers = Object.entries(users).reduce((userSet, current) => {
@@ -140,7 +143,8 @@ async function getUsersDeprecations(
 async function getRoleMappingsDeprecations(
   client: ElasticsearchClient,
   reportingCore: ReportingCore,
-  deprecatedRoles: string[]
+  deprecatedRoles: string[],
+  docLinks: DocLinksServiceSetup
 ): Promise<DeprecationsDetails[]> {
   const usingDeprecatedConfig = !reportingCore.getContract().usesUiCapabilities();
   const strings = {
@@ -199,7 +203,7 @@ async function getRoleMappingsDeprecations(
           ` unexpected error: ${deprecations.getDetailedErrorMessage(err)}.`
       );
     }
-    return deprecations.deprecationError(strings.title, err);
+    return deprecations.deprecationError(strings.title, err, docLinks);
   }
 
   const roleMappingsWithReportingRole: string[] = Object.entries(roleMappings).reduce(

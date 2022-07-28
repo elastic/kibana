@@ -6,7 +6,7 @@
  */
 
 import { GetDeprecationsContext, IScopedClusterClient } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { docLinksServiceMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { ReportingCore } from '..';
 import {
   createMockConfigSchema,
@@ -18,6 +18,7 @@ import { getDeprecationsInfo } from './reporting_role';
 let reportingCore: ReportingCore;
 let context: GetDeprecationsContext;
 let esClient: jest.Mocked<IScopedClusterClient>;
+const docLinks = docLinksServiceMock.createSetupContract();
 
 beforeEach(async () => {
   reportingCore = await createMockReportingCore(
@@ -34,7 +35,9 @@ beforeEach(async () => {
 });
 
 test('logs no deprecations when setup has no issues', async () => {
-  expect(await getDeprecationsInfo(context, { reportingCore })).toMatchInlineSnapshot(`Array []`);
+  expect(await getDeprecationsInfo(context, { reportingCore, docLinks })).toMatchInlineSnapshot(
+    `Array []`
+  );
 });
 
 describe('users assigned to a deprecated role', () => {
@@ -48,7 +51,7 @@ describe('users assigned to a deprecated role', () => {
 
     reportingCore = await createMockReportingCore(createMockConfigSchema());
 
-    expect(await getDeprecationsInfo(context, { reportingCore })).toMatchSnapshot();
+    expect(await getDeprecationsInfo(context, { reportingCore, docLinks })).toMatchSnapshot();
   });
 
   test('logs a deprecation when a user was found with a deprecated custom role from the roles.allow setting', async () => {
@@ -59,7 +62,7 @@ describe('users assigned to a deprecated role', () => {
       reportron: { username: 'reportron', roles: ['kibana_admin', 'my_test_reporting_user'] },
     });
 
-    expect(await getDeprecationsInfo(context, { reportingCore })).toMatchSnapshot();
+    expect(await getDeprecationsInfo(context, { reportingCore, docLinks })).toMatchSnapshot();
   });
 
   test('includes steps to remove the incompatible config, when applicable', async () => {
@@ -74,7 +77,7 @@ describe('users assigned to a deprecated role', () => {
       createMockConfigSchema({ roles: { enabled: true } })
     );
 
-    expect(await getDeprecationsInfo(context, { reportingCore })).toMatchSnapshot();
+    expect(await getDeprecationsInfo(context, { reportingCore, docLinks })).toMatchSnapshot();
   });
 });
 
@@ -86,7 +89,7 @@ describe('roles mapped to a deprecated role', () => {
 
     reportingCore = await createMockReportingCore(createMockConfigSchema());
 
-    expect(await getDeprecationsInfo(context, { reportingCore })).toMatchSnapshot();
+    expect(await getDeprecationsInfo(context, { reportingCore, docLinks })).toMatchSnapshot();
   });
 
   test('logs a deprecation when a role was found that maps to a deprecated custom role from the roles.allow setting', async () => {
@@ -97,7 +100,7 @@ describe('roles mapped to a deprecated role', () => {
       .fn()
       .mockResolvedValue({ dungeon_master: { roles: ['my_test_reporting_user'] } });
 
-    expect(await getDeprecationsInfo(context, { reportingCore })).toMatchSnapshot();
+    expect(await getDeprecationsInfo(context, { reportingCore, docLinks })).toMatchSnapshot();
   });
 
   test('includes steps to remove the incompatible config, when applicable', async () => {
@@ -112,7 +115,7 @@ describe('roles mapped to a deprecated role', () => {
       createMockConfigSchema({ roles: { enabled: true } })
     );
 
-    expect(await getDeprecationsInfo(context, { reportingCore })).toMatchSnapshot();
+    expect(await getDeprecationsInfo(context, { reportingCore, docLinks })).toMatchSnapshot();
   });
 });
 
@@ -122,7 +125,9 @@ describe('check deprecations when security is disabled', () => {
       createMockConfigSchema({ roles: { enabled: false } }),
       createMockPluginSetup({ security: null })
     );
-    expect(await getDeprecationsInfo(context, { reportingCore })).toMatchInlineSnapshot(`Array []`);
+    expect(await getDeprecationsInfo(context, { reportingCore, docLinks })).toMatchInlineSnapshot(
+      `Array []`
+    );
   });
 
   test('logs no deprecations: roles enabled', async () => {
@@ -132,7 +137,9 @@ describe('check deprecations when security is disabled', () => {
       createMockPluginSetup({ security: null })
     );
 
-    expect(await getDeprecationsInfo(context, { reportingCore })).toMatchInlineSnapshot(`Array []`);
+    expect(await getDeprecationsInfo(context, { reportingCore, docLinks })).toMatchInlineSnapshot(
+      `Array []`
+    );
   });
 });
 
@@ -142,7 +149,7 @@ it('insufficient permissions', async () => {
   esClient.asCurrentUser.security.getUser = jest.fn().mockRejectedValue(permissionsError);
   esClient.asCurrentUser.security.getRoleMapping = jest.fn().mockRejectedValue(permissionsError);
 
-  expect(await getDeprecationsInfo(context, { reportingCore })).toMatchInlineSnapshot(`
+  expect(await getDeprecationsInfo(context, { reportingCore, docLinks })).toMatchInlineSnapshot(`
     Array [
       Object {
         "correctiveActions": Object {
@@ -151,7 +158,7 @@ it('insufficient permissions', async () => {
           ],
         },
         "deprecationType": "feature",
-        "documentationUrl": "https://www.elastic.co/guide/en/kibana/current/xpack-security.html#_required_permissions_7",
+        "documentationUrl": "https://www.elastic.co/guide/en/kibana/test-branch/xpack-security.html#_required_permissions_7",
         "level": "fetch_error",
         "message": "You do not have enough permissions to fix this deprecation.",
         "title": "The \\"reporting_user\\" role is deprecated: check user roles",
@@ -163,7 +170,7 @@ it('insufficient permissions', async () => {
           ],
         },
         "deprecationType": "feature",
-        "documentationUrl": "https://www.elastic.co/guide/en/kibana/current/xpack-security.html#_required_permissions_7",
+        "documentationUrl": "https://www.elastic.co/guide/en/kibana/test-branch/xpack-security.html#_required_permissions_7",
         "level": "fetch_error",
         "message": "You do not have enough permissions to fix this deprecation.",
         "title": "The \\"reporting_user\\" role is deprecated: check role mappings",
