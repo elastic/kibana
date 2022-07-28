@@ -568,7 +568,7 @@ export class Server {
 
     const ups = this.uptimePerStep;
 
-    const toMs = (sec: number) => Math.round(sec * 100);
+    const toMs = (sec: number) => Math.round(sec * 1000);
     // Report the metric-shaped KIBANA_STARTED_EVENT.
     reportMetricEvent(analyticsStart, {
       eventName: KIBANA_STARTED_EVENT,
