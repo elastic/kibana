@@ -16,12 +16,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Insecure Cluster Warning', function () {
     before(async () => {
-      await es.indices.create({index: 'my-index-001'});
-      await es.index({index: 'my-index-001', body: {foo: 'bar'}});
+      await es.indices.create({ index: 'my-index-001' });
+      await es.index({ index: 'my-index-001', body: { foo: 'bar' } });
     });
 
     after(async () => {
-      await es.indices.delete({index: 'my-index-001'});
+      await es.indices.delete({ index: 'my-index-001' });
     });
 
     it('will display when ES Security Plugin is disabled and there is at least one user created index with data', async () => {
@@ -29,10 +29,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await browser.refresh();
 
-      const toastMessage: string = await (await testSubjects.find('insecureClusterAlertText')).getVisibleText();
+      const toastMessage: string = await (
+        await testSubjects.find('insecureClusterAlertText')
+      ).getVisibleText();
 
       await expect(toastMessage).to.equal(
-        'Don’t lose one bit. Enable our free security features.\nDon\'t show again\nEnable security\nDismiss'
+        "Don’t lose one bit. Enable our free security features.\nDon't show again\nEnable security\nDismiss"
       );
     });
   });
