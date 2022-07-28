@@ -38,6 +38,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
     cases: [APP_ID],
     privileges: {
       all: {
+        api: ['casesSuggestAssignees'],
         cases: {
           create: [APP_ID],
           read: [APP_ID],
