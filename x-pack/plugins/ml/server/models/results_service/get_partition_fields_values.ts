@@ -158,7 +158,7 @@ export const getPartitionFieldsValuesFactory = (mlClient: MlClient) =>
    * @param latestMs
    * @param fieldsConfig
    */
-  (async function getPartitionFieldsValues(
+  async function getPartitionFieldsValues(
     jobId: string,
     searchTerm: SearchTerm = {},
     criteriaFields: CriteriaField[],
@@ -254,4 +254,4 @@ export const getPartitionFieldsValuesFactory = (mlClient: MlClient) =>
         ...getFieldObject(key, body.aggregations!),
       };
     }, {});
-  });
+  };

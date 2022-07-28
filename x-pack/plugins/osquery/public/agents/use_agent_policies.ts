@@ -18,18 +18,19 @@ export const useAgentPolicies = (policyIds: string[] = []) => {
   const setErrorToast = useErrorToast();
 
   const agentResponse = useQueries({
-    queries: policyIds.map(policyId => ({
+    queries: policyIds.map((policyId) => ({
       queryKey: ['agentPolicy', policyId],
       queryFn: () => http.get(`/internal/osquery/fleet_wrapper/agent_policies/${policyId}`),
       enabled: policyIds.length > 0,
       onSuccess: () => setErrorToast(),
 
-      onError: (error: Error) => setErrorToast(error, {
-        title: i18n.translate('xpack.osquery.action_policy_details.fetchError', {
-          defaultMessage: 'Error while fetching policy details'
-        })
-      })
-    }))
+      onError: (error: Error) =>
+        setErrorToast(error, {
+          title: i18n.translate('xpack.osquery.action_policy_details.fetchError', {
+            defaultMessage: 'Error while fetching policy details',
+          }),
+        }),
+    })),
   }) as Array<UseQueryResult<GetOneAgentPolicyResponse>>;
 
   const agentPoliciesLoading = agentResponse.some((p) => p.isLoading);

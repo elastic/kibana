@@ -103,13 +103,16 @@ export const useUpdateRulesCache = () => {
    */
   return useCallback(
     (newRules: Rule[]) => {
-      queryClient.setQueriesData<ReturnType<typeof useFindRulesQuery>['data']>([FIND_RULES_QUERY_KEY], (currentData) =>
-        currentData
-          ? {
-              rules: updateRules(currentData.rules, newRules),
-              total: currentData.total,
-            }
-          : undefined);
+      queryClient.setQueriesData<ReturnType<typeof useFindRulesQuery>['data']>(
+        [FIND_RULES_QUERY_KEY],
+        (currentData) =>
+          currentData
+            ? {
+                rules: updateRules(currentData.rules, newRules),
+                total: currentData.total,
+              }
+            : undefined
+      );
     },
     [queryClient]
   );
