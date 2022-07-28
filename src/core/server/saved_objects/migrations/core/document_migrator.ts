@@ -51,12 +51,15 @@ import type {
   SavedObjectsMigrationVersion,
   SavedObjectsNamespaceType,
 } from '@kbn/core-saved-objects-common';
-import { SavedObjectUnsanitizedDoc } from '../../serialization';
-import { SavedObjectsType } from '../../types';
+import type {
+  SavedObjectUnsanitizedDoc,
+  SavedObjectsType,
+  ISavedObjectTypeRegistry,
+  SavedObjectMigrationFn,
+  SavedObjectMigrationMap,
+} from '@kbn/core-saved-objects-server';
 import { MigrationLogger } from './migration_logger';
 import { TransformSavedObjectDocumentError } from '.';
-import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import { SavedObjectMigrationFn, SavedObjectMigrationMap } from '../types';
 import { DEFAULT_NAMESPACE_STRING, SavedObjectsUtils } from '../../service/lib/utils';
 import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 

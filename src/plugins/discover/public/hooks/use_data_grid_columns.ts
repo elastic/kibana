@@ -23,8 +23,8 @@ import { getStateColumnActions } from '../components/doc_table/actions/columns';
 interface UseColumnsProps {
   capabilities: Capabilities;
   config: IUiSettingsClient;
-  indexPattern: DataView;
-  indexPatterns: DataViewsContract;
+  dataView: DataView;
+  dataViews: DataViewsContract;
   useNewFieldsApi: boolean;
   setAppState: DiscoverGetStateReturn['setAppState'] | ContextGetStateReturn['setAppState'];
   state: DiscoverState | ContextState;
@@ -33,8 +33,8 @@ interface UseColumnsProps {
 export const useColumns = ({
   capabilities,
   config,
-  indexPattern,
-  indexPatterns,
+  dataView,
+  dataViews,
   setAppState,
   state,
   useNewFieldsApi,
@@ -44,13 +44,13 @@ export const useColumns = ({
       getStateColumnActions({
         capabilities,
         config,
-        indexPattern,
-        indexPatterns,
+        dataView,
+        dataViews,
         setAppState,
         state,
         useNewFieldsApi,
       }),
-    [capabilities, config, indexPattern, indexPatterns, setAppState, state, useNewFieldsApi]
+    [capabilities, config, dataView, dataViews, setAppState, state, useNewFieldsApi]
   );
 
   const columns = useMemo(() => {
