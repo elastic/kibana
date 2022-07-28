@@ -14,6 +14,9 @@ import { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { FetchDeps } from './fetch_all';
 import { fetchTotalHits } from './fetch_total_hits';
+import type { EsHitRecord } from '../../../types';
+import { buildDataTableRecord } from '../../../utils/build_data_record';
+import { dataViewMock } from '../../../__mocks__/data_view';
 
 const getDeps = () =>
   ({
@@ -30,10 +33,11 @@ describe('test fetchDocuments', () => {
     const hits = [
       { _id: '1', foo: 'bar' },
       { _id: '2', foo: 'baz' },
-    ];
+    ] as unknown as EsHitRecord[];
+    const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     savedSearchMock.searchSource.fetch$ = () =>
       of({ rawResponse: { hits: { hits } } } as unknown as IKibanaSearchResponse<SearchResponse>);
-    expect(fetchDocuments(savedSearchMock.searchSource, getDeps())).resolves.toEqual(hits);
+    expect(fetchDocuments(savedSearchMock.searchSource, getDeps())).resolves.toEqual(documents);
   });
 
   test('rejects on query failure', () => {
