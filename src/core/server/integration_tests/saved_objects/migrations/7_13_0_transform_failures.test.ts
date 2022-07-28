@@ -28,8 +28,7 @@ async function removeLogFile() {
   await asyncUnlink(logFilePath).catch(() => void 0);
 }
 
-// FAILING ON 8.4: https://github.com/elastic/kibana/issues/137329
-describe.skip('migration v2', () => {
+describe('migration v2', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
 
