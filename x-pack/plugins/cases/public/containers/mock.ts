@@ -228,6 +228,7 @@ export const basicCase: Case = {
   settings: {
     syncAlerts: true,
   },
+  assignees: [],
 };
 
 export const caseWithAlerts = {
@@ -329,6 +330,7 @@ export const mockCase: Case = {
   settings: {
     syncAlerts: true,
   },
+  assignees: [],
 };
 
 export const basicCasePost: Case = {

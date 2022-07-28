@@ -5,6 +5,18 @@
  * 2.0.
  */
 
+import { schema, TypeOf } from '@kbn/config-schema';
+import { PluginInitializerContext } from '@kbn/core/server';
 import { FixturePlugin } from './plugin';
 
-export const plugin = () => new FixturePlugin();
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new FixturePlugin(initializerContext);
+
+export const INTERNAL_USER_PROFILES_BULK_GET = '/internal/sec_fixture/user_profiles/_bulk_get';
+
+export const UserProfilesBulkGetSchema = schema.object({
+  uids: schema.arrayOf(schema.string()),
+  dataPath: schema.string(),
+});
+
+export type UserProfilesBulkGetParams = TypeOf<typeof UserProfilesBulkGetSchema>;

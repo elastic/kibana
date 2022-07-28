@@ -156,6 +156,10 @@ export const CasePostRequestRt = rt.intersection([
      * creating this case must also be granted access to that plugin's feature.
      */
     owner: rt.string,
+    /**
+     * The users assigned to the case
+     */
+    assignees: CaseAssigneesRt,
   }),
   rt.partial({
     /**
@@ -163,7 +167,6 @@ export const CasePostRequestRt = rt.intersection([
      * default it to "low" if not provided.
      */
     severity: CaseSeverityRt,
-    assignees: CaseAssigneesRt,
   }),
 ]);
 
@@ -181,9 +184,9 @@ export const CasesFindRequestRt = rt.partial({
    */
   severity: CaseSeverityRt,
   /**
-   * The users assigned to the case
+   * The uids of the user profiles to filter by
    */
-  assignees: CaseAssigneesRt,
+  assignees: rt.union([rt.array(rt.string), rt.string]),
   /**
    * The reporters to filter by
    */

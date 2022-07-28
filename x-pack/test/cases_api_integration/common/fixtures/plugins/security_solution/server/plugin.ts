@@ -5,11 +5,20 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup } from '@kbn/core/server';
+import {
+  Plugin,
+  CoreSetup,
+  PluginInitializerContext,
+  Logger,
+  IRouter,
+  RequestHandlerContext,
+  CoreStart,
+} from '@kbn/core/server';
 
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { INTERNAL_USER_PROFILES_BULK_GET, UserProfilesBulkGetSchema } from '.';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
@@ -21,9 +30,58 @@ export interface FixtureStartDeps {
 }
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
-  public setup(core: CoreSetup<FixtureStartDeps>, deps: FixtureSetupDeps) {
-    const { features } = deps;
+  private readonly logger: Logger;
 
+  private securityStart?: SecurityPluginStart;
+  constructor(initContext: PluginInitializerContext) {
+    this.logger = initContext.logger.get();
+  }
+
+  public setup(core: CoreSetup<FixtureStartDeps>, deps: FixtureSetupDeps) {
+    const router = core.http.createRouter();
+    this.registerRoutes(router);
+
+    const { features } = deps;
+    this.registerFeatures(features);
+  }
+
+  public start(core: CoreStart, plugins: FixtureStartDeps) {
+    this.securityStart = plugins.security;
+  }
+
+  public stop() {}
+
+  private registerRoutes(router: IRouter<RequestHandlerContext>) {
+    router.post(
+      {
+        path: INTERNAL_USER_PROFILES_BULK_GET,
+        validate: {
+          body: UserProfilesBulkGetSchema,
+        },
+      },
+      async (context, request, response) => {
+        try {
+          if (!this.securityStart) {
+            throw new Error('securityStart was undefined');
+          }
+
+          const userProfiles = await this.securityStart.userProfiles.bulkGet({
+            uids: new Set(request.body.uids),
+            dataPath: request.body.dataPath,
+          });
+
+          return response.ok({
+            body: userProfiles,
+          });
+        } catch (error) {
+          this.logger.error(`SecuritySolutionFixture failure: ${error}`);
+          throw error;
+        }
+      }
+    );
+  }
+
+  private registerFeatures(features: FeaturesPluginSetup) {
     features.registerKibanaFeature({
       id: 'securitySolutionFixture',
       name: 'SecuritySolutionFixture',
@@ -118,6 +176,4 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       },
     });
   }
-  public start() {}
-  public stop() {}
 }

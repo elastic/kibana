@@ -27,6 +27,14 @@ export const createCaseSavedObjectType = (
   convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
     properties: {
+      assignees: {
+        type: 'nested',
+        properties: {
+          uid: {
+            type: 'keyword',
+          },
+        },
+      },
       closed_at: {
         type: 'date',
       },
