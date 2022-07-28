@@ -13,7 +13,11 @@ import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 
 import { withSecuritySpan } from '../../../utils/with_security_span';
 import { buildTimeRangeFilter } from './build_events_query';
-import type { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from './types';
+import type {
+  SearchAfterAndBulkCreateParams,
+  SearchAfterAndBulkCreateReturnType,
+  SignalSource,
+} from './types';
 import { createSearchAfterReturnType } from './utils';
 
 // search_after through grouped documents and re-index using bulk endpoint.
@@ -86,16 +90,31 @@ export const groupAndBulkCreate = async ({
       });
     };
 
-    const getEventsByGroup = async (_baseQuery: estypes.SearchRequest, bucketSize: number) => {
+    const getEventsByGroup = async (
+      _baseQuery: estypes.SearchRequest,
+      bucketSize: number,
+      topHitsSize: number,
+      sort: estypes.Sort
+    ) => {
       return services.scopedClusterClient.asCurrentUser.search({
         ..._baseQuery,
         body: {
           ..._baseQuery.body,
-          aggregations: {
-            eventGroup: {
+          track_total_hits: true,
+          aggs: {
+            eventGroups: {
               terms: {
+                // TODO: typing
                 field: (completeRule.ruleParams as unknown as { groupBy: string[] }).groupBy[0],
                 size: bucketSize,
+              },
+              aggs: {
+                topHits: {
+                  top_hits: {
+                    sort: [],
+                    size: topHitsSize,
+                  },
+                },
               },
             },
           },
@@ -111,20 +130,50 @@ export const groupAndBulkCreate = async ({
     // Calculate top_hits size
     const topHitsSize = Math.max(tuple.maxSignals / cardinalityValue, 1);
 
+    const sort: estypes.Sort = [];
+    sort.push({
+      [primaryTimestamp]: {
+        order: sortOrder ?? 'asc',
+        unmapped_type: 'date',
+      },
+    });
+    if (secondaryTimestamp) {
+      sort.push({
+        [secondaryTimestamp]: {
+          order: sortOrder ?? 'asc',
+          unmapped_type: 'date',
+        },
+      });
+    }
+
+    const bucketSize = Math.min(cardinalityValue, 10000);
+
     // Get aggregated results
-    const aggResult = await getEventsByGroup(baseQuery, Math.min(cardinalityValue, 10000));
+    const aggResults = await getEventsByGroup(baseQuery, bucketSize, topHitsSize, sort);
 
-    const bucketsToIndex = {};
-    const exceptionsWithLargeValueLists = exceptionsList.filter((item) =>
-      hasLargeValueList(item.entries)
-    );
-    // (item): item is ExceptionItemWithLargeValueLists => hasLargeValueList(item.entries)
-    // );
+    const buckets = aggResults.aggregations?.eventGroups.buckets;
+    const numBuckets = buckets.length;
 
-    // TODO
-    // Intialize bucketsToIndex = {}
-    //   For each exception list entry
-    //      For each bucket mod cardinalityValue, create and index alerts 
+    // Index
+    const toIndex: Array<estypes.SearchHit<SignalSource>> = [];
+
+    let i = 0;
+    let j = 0;
+    while (toIndex.length < Math.min(tuple.maxSignals, aggResults.hits.total?.value ?? 0)) {
+      const hits = buckets[i].topHits.hits.hits;
+      const event = hits[j];
+
+      if (event != null) {
+        toIndex.push(event);
+      }
+
+      i = (i + 1) % numBuckets;
+      if (i === 0) {
+        j += 1;
+      }
+    }
+
+    // TODO: bulk create
 
     return toReturn;
   });
