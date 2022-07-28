@@ -86,6 +86,7 @@ export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
 export type { AppCategory } from '../types';
 export type {
   UiSettingsParams,
+  PublicUiSettingsParams,
   UserProvidedValues,
   UiSettingsType,
 } from '@kbn/core-ui-settings-common';
@@ -220,9 +221,9 @@ export type {
   ResolveDeprecationResponse,
 } from '@kbn/core-deprecations-browser';
 
-export type { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
-
 export type {
+  MountPoint,
+  UnmountCallback,
   MountWrapperComponent,
   MountWrapperComponentProps,
   OverlayRef,
