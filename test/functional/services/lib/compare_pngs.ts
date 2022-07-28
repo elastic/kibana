@@ -7,10 +7,12 @@
  */
 
 import { parse, join } from 'path';
-import Jimp from 'jimp';
+import sharp from 'sharp';
+import pixelmatch from 'pixelmatch';
 import { ToolingLog } from '@kbn/tooling-log';
 import { promises as fs } from 'fs';
 import path from 'path';
+import { PNG } from 'pngjs';
 
 interface PngDescriptor {
   path: string;
@@ -31,11 +33,14 @@ const toDescriptor = (imageInfo: string | PngDescriptor): PngDescriptor => {
 };
 
 /**
- * Override Jimp types that expect to be mapped to either string or buffer even though Jimp
- * accepts both https://www.npmjs.com/package/jimp#basic-usage.
+ * Use sharp to open the image and get the metadata
  */
-const toJimp = (imageInfo: string | Buffer): Promise<Jimp> => {
-  return (Jimp.read as (value: string | Buffer) => Promise<Jimp>)(imageInfo);
+const getSharpInstance = async (
+  imageInfo: string | Buffer
+): Promise<{ instance: sharp.Sharp; metadata: sharp.Metadata }> => {
+  const instance = sharp(imageInfo).png({ quality: 100, progressive: true }).clone();
+  const metadata = await instance.metadata();
+  return { instance, metadata };
 };
 
 /**
@@ -46,7 +51,7 @@ const toJimp = (imageInfo: string | Buffer): Promise<Jimp> => {
  * @param diffPath
  * @param sessionDirectory
  * @param log
- * @returns Percent
+ * @returns diffRatio
  */
 export async function comparePngs(
   sessionInfo: string | PngDescriptor,
@@ -58,30 +63,41 @@ export async function comparePngs(
   const sessionDescriptor = toDescriptor(sessionInfo);
   const baselineDescriptor = toDescriptor(baselineInfo);
 
-  log.debug(`comparePngs: ${sessionDescriptor.path} vs ${baselineDescriptor.path}`);
+  let sesstionTestPath: string = sessionDescriptor.path;
+  let baselineTestPath: string = baselineDescriptor.path;
 
-  const session = (await toJimp(sessionDescriptor.buffer ?? sessionDescriptor.path)).clone();
-  const baseline = (await toJimp(baselineDescriptor.buffer ?? baselineDescriptor.path)).clone();
+  log.debug(`comparePngs: ${sesstionTestPath} vs ${baselineTestPath}`);
 
-  if (
-    session.bitmap.width !== baseline.bitmap.width ||
-    session.bitmap.height !== baseline.bitmap.height
-  ) {
-    // eslint-disable-next-line no-console
-    console.log(
-      'expected height ' + baseline.bitmap.height + ' and width ' + baseline.bitmap.width
+  const { instance: session, metadata: sessionMetadata } = await getSharpInstance(
+    sessionDescriptor.buffer ?? sesstionTestPath
+  );
+  const sessionWidth = sessionMetadata.width ?? 0;
+  const sessionHeight = sessionMetadata.height ?? 0;
+
+  const { instance: baseline, metadata: baselineMetadata } = await getSharpInstance(
+    sessionDescriptor.buffer ?? sesstionTestPath
+  );
+  const baselineWidth = baselineMetadata.width ?? 0;
+  const baselineHeight = baselineMetadata.height ?? 0;
+
+  // Adjust screenshot size
+  const testWidth = Math.min(sessionWidth, baselineWidth);
+  const testHeight = Math.min(sessionHeight, baselineHeight);
+  log.debug('baseline height ' + baselineHeight + ' and width ' + baselineWidth);
+  log.debug('session height ' + sessionHeight + ' and width ' + sessionWidth);
+  if (sessionWidth !== baselineWidth || sessionHeight !== baselineHeight) {
+    log.debug('resize height ' + testHeight + ' and width ' + testWidth);
+    sesstionTestPath = join(
+      sessionDirectory,
+      `${parse(sessionDescriptor.path).name}-session-resized.png`
     );
-    // eslint-disable-next-line no-console
-    console.log('actual height ' + session.bitmap.height + ' and width ' + session.bitmap.width);
-
-    const width = Math.min(session.bitmap.width, baseline.bitmap.width);
-    const height = Math.min(session.bitmap.height, baseline.bitmap.height);
-    session.resize(width, height); // , Jimp.HORIZONTAL_ALIGN_LEFT | Jimp.VERTICAL_ALIGN_TOP);
-    baseline.resize(width, height); // , Jimp.HORIZONTAL_ALIGN_LEFT | Jimp.VERTICAL_ALIGN_TOP);
+    baselineTestPath = join(
+      sessionDirectory,
+      `${parse(baselineDescriptor.path).name}-baseline-resized.png`
+    );
+    await session.resize(testWidth, testHeight).png().toFile(sesstionTestPath);
+    await baseline.resize(testWidth, testHeight).png().toFile(baselineTestPath);
   }
-
-  session.quality(60);
-  baseline.quality(60);
 
   log.debug(`calculating diff pixels...`);
   // Note that this threshold value only affects color comparison from pixel to pixel. It won't have
@@ -89,20 +105,29 @@ export async function comparePngs(
   // will still show up as diffs, but upping this will not help that.  Instead we keep the threshold low, and expect
   // some the diffCount to be lower than our own threshold value.
   const THRESHOLD = 0.1;
-  const { image, percent } = Jimp.diff(session, baseline, THRESHOLD);
-  log.debug(`percent different: ${percent}`);
-  if (percent > 0) {
-    image.write(diffPath);
 
-    // For debugging purposes it'll help to see the resized images and how they compare.
-    session.write(
-      join(sessionDirectory, `${parse(sessionDescriptor.path).name}-session-resized.png`)
-    );
-    baseline.write(
-      join(sessionDirectory, `${parse(baselineDescriptor.path).name}-baseline-resized.png`)
-    );
+  const sessionTestImg = PNG.sync.read(await fs.readFile(sesstionTestPath));
+  const baselineTestImg = PNG.sync.read(await fs.readFile(baselineTestPath));
+  const diff = new PNG({ width: testWidth, height: testHeight });
+  const mismatchedPixels = pixelmatch(
+    sessionTestImg.data,
+    baselineTestImg.data,
+    diff.data,
+    testWidth,
+    testHeight,
+    {
+      threshold: THRESHOLD,
+    }
+  );
+
+  const diffRatio = mismatchedPixels / (testWidth * testHeight);
+
+  log.debug(`percent different (ratio): ${diffRatio}`);
+  if (diffRatio > 0) {
+    const buffer = PNG.sync.write(diff);
+    await fs.writeFile(diffPath, buffer);
   }
-  return percent;
+  return diffRatio;
 }
 
 export async function checkIfPngsMatch(
