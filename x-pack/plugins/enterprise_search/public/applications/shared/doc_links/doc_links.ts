@@ -8,6 +8,7 @@
 import { DocLinksStart } from '@kbn/core/public';
 
 class DocLinks {
+  public appSearchAdaptiveRelevance: string;
   public appSearchApiClients: string;
   public appSearchApiKeys: string;
   public appSearchApis: string;
@@ -17,6 +18,7 @@ class DocLinks {
   public appSearchDuplicateDocuments: string;
   public appSearchElasticsearchIndexedEngines: string;
   public appSearchEntryPoints: string;
+  public appSearchGettingStarted: string;
   public appSearchGuide: string;
   public appSearchIndexingDocs: string;
   public appSearchIndexingDocsSchema: string;
@@ -54,6 +56,9 @@ class DocLinks {
   public clientsRubyOverview: string;
   public clientsRustOverview: string;
   public cloudIndexManagement: string;
+  public crawlerGettingStarted: string;
+  public crawlerManaging: string;
+  public crawlerOverview: string;
   public elasticsearchCreateIndex: string;
   public elasticsearchGettingStarted: string;
   public elasticsearchMapping: string;
@@ -66,11 +71,15 @@ class DocLinks {
   public licenseManagement: string;
   public pluginsIngestAttachment: string;
   public queryDsl: string;
+  public searchUIAppSearch: string;
+  public searchUIElasticsearch: string;
+  public start: string;
   public workplaceSearchApiKeys: string;
   public workplaceSearchBox: string;
   public workplaceSearchConfluenceCloud: string;
   public workplaceSearchConfluenceCloudConnectorPackage: string;
   public workplaceSearchConfluenceServer: string;
+  public workplaceSearchContentSources: string;
   public workplaceSearchCustomConnectorPackage: string;
   public workplaceSearchCustomSourcePermissions: string;
   public workplaceSearchCustomSources: string;
@@ -89,6 +98,7 @@ class DocLinks {
   public workplaceSearchOneDrive: string;
   public workplaceSearchOutlook: string;
   public workplaceSearchPermissions: string;
+  public workplaceSearchPrivateSourcePermissions: string;
   public workplaceSearchSalesforce: string;
   public workplaceSearchSecurity: string;
   public workplaceSearchServiceNow: string;
@@ -101,6 +111,7 @@ class DocLinks {
   public workplaceSearchZoom: string;
 
   constructor() {
+    this.appSearchAdaptiveRelevance = '';
     this.appSearchApis = '';
     this.appSearchApiClients = '';
     this.appSearchApiKeys = '';
@@ -110,6 +121,7 @@ class DocLinks {
     this.appSearchDuplicateDocuments = '';
     this.appSearchEntryPoints = '';
     this.appSearchElasticsearchIndexedEngines = '';
+    this.appSearchGettingStarted = '';
     this.appSearchGuide = '';
     this.appSearchIndexingDocs = '';
     this.appSearchIndexingDocsSchema = '';
@@ -147,6 +159,9 @@ class DocLinks {
     this.clientsRubyOverview = '';
     this.clientsRustOverview = '';
     this.cloudIndexManagement = '';
+    this.crawlerGettingStarted = '';
+    this.crawlerManaging = '';
+    this.crawlerOverview = '';
     this.elasticsearchCreateIndex = '';
     this.elasticsearchGettingStarted = '';
     this.elasticsearchMapping = '';
@@ -159,11 +174,15 @@ class DocLinks {
     this.licenseManagement = '';
     this.pluginsIngestAttachment = '';
     this.queryDsl = '';
+    this.searchUIAppSearch = '';
+    this.searchUIElasticsearch = '';
+    this.start = '';
     this.workplaceSearchApiKeys = '';
     this.workplaceSearchBox = '';
     this.workplaceSearchConfluenceCloud = '';
     this.workplaceSearchConfluenceCloudConnectorPackage = '';
     this.workplaceSearchConfluenceServer = '';
+    this.workplaceSearchContentSources = '';
     this.workplaceSearchCustomConnectorPackage = '';
     this.workplaceSearchCustomSources = '';
     this.workplaceSearchCustomSourcePermissions = '';
@@ -182,6 +201,7 @@ class DocLinks {
     this.workplaceSearchOneDrive = '';
     this.workplaceSearchOutlook = '';
     this.workplaceSearchPermissions = '';
+    this.workplaceSearchPrivateSourcePermissions = '';
     this.workplaceSearchSalesforce = '';
     this.workplaceSearchSecurity = '';
     this.workplaceSearchServiceNow = '';
@@ -195,6 +215,7 @@ class DocLinks {
   }
 
   public setDocLinks(docLinks: DocLinksStart): void {
+    this.appSearchAdaptiveRelevance = docLinks.links.appSearch.adaptiveRelevance;
     this.appSearchApis = docLinks.links.appSearch.apiRef;
     this.appSearchApiClients = docLinks.links.appSearch.apiClients;
     this.appSearchApiKeys = docLinks.links.appSearch.apiKeys;
@@ -205,6 +226,7 @@ class DocLinks {
     this.appSearchElasticsearchIndexedEngines =
       docLinks.links.appSearch.elasticsearchIndexedEngines;
     this.appSearchEntryPoints = docLinks.links.appSearch.entryPoints;
+    this.appSearchGettingStarted = docLinks.links.appSearch.gettingStarted;
     this.appSearchGuide = docLinks.links.appSearch.guide;
     this.appSearchIndexingDocs = docLinks.links.appSearch.indexingDocuments;
     this.appSearchIndexingDocsSchema = docLinks.links.appSearch.indexingDocumentsSchema;
@@ -242,6 +264,9 @@ class DocLinks {
     this.clientsRubyOverview = docLinks.links.clients.rubyOverview;
     this.clientsRustOverview = docLinks.links.clients.rustOverview;
     this.cloudIndexManagement = docLinks.links.cloud.indexManagement;
+    this.crawlerGettingStarted = docLinks.links.enterpriseSearch.crawlerGettingStarted;
+    this.crawlerManaging = docLinks.links.enterpriseSearch.crawlerManaging;
+    this.crawlerOverview = docLinks.links.enterpriseSearch.crawlerOverview;
     this.elasticsearchCreateIndex = docLinks.links.elasticsearch.createIndex;
     this.elasticsearchGettingStarted = docLinks.links.elasticsearch.gettingStarted;
     this.elasticsearchMapping = docLinks.links.elasticsearch.mapping;
@@ -254,12 +279,16 @@ class DocLinks {
     this.licenseManagement = docLinks.links.enterpriseSearch.licenseManagement;
     this.pluginsIngestAttachment = docLinks.links.plugins.ingestAttachment;
     this.queryDsl = docLinks.links.query.queryDsl;
+    this.searchUIAppSearch = docLinks.links.searchUI.appSearch;
+    this.searchUIElasticsearch = docLinks.links.searchUI.elasticsearch;
+    this.start = docLinks.links.enterpriseSearch.start;
     this.workplaceSearchApiKeys = docLinks.links.workplaceSearch.apiKeys;
     this.workplaceSearchBox = docLinks.links.workplaceSearch.box;
     this.workplaceSearchConfluenceCloud = docLinks.links.workplaceSearch.confluenceCloud;
     this.workplaceSearchConfluenceCloudConnectorPackage =
       docLinks.links.workplaceSearch.confluenceCloudConnectorPackage;
     this.workplaceSearchConfluenceServer = docLinks.links.workplaceSearch.confluenceServer;
+    this.workplaceSearchContentSources = docLinks.links.workplaceSearch.contentSources;
     this.workplaceSearchCustomConnectorPackage =
       docLinks.links.workplaceSearch.customConnectorPackage;
     this.workplaceSearchCustomSources = docLinks.links.workplaceSearch.customSources;
@@ -280,6 +309,8 @@ class DocLinks {
     this.workplaceSearchNetworkDrive = docLinks.links.workplaceSearch.networkDrive;
     this.workplaceSearchOneDrive = docLinks.links.workplaceSearch.oneDrive;
     this.workplaceSearchPermissions = docLinks.links.workplaceSearch.permissions;
+    this.workplaceSearchPrivateSourcePermissions =
+      docLinks.links.workplaceSearch.privateSourcePermissions;
     this.workplaceSearchSalesforce = docLinks.links.workplaceSearch.salesforce;
     this.workplaceSearchSecurity = docLinks.links.workplaceSearch.security;
     this.workplaceSearchServiceNow = docLinks.links.workplaceSearch.serviceNow;

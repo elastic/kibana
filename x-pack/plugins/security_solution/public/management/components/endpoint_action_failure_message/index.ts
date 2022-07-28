@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { RefreshJobsListButton } from './refresh_jobs_list_button';
+export { EndpointActionFailureMessage } from './endpoint_action_failure_message';
