@@ -13,6 +13,8 @@ import { Scenario } from '../cli/scenario';
 
 const ENVIRONMENT = __filename;
 
+const ENVIRONMENT = __filename;
+
 function generateExternalSpanLinks() {
   // randomly creates external span links 0 - 10
   return Array(Math.floor(Math.random() * 11))

@@ -15,6 +15,8 @@ import { RunOptions } from '../cli/utils/parse_run_cli_flags';
 
 const ENVIRONMENT = __filename;
 
+const ENVIRONMENT = __filename;
+
 const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   const logger = getLogger(runOptions);
 
