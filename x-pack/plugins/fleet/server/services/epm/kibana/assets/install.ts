@@ -174,6 +174,7 @@ export async function installKibanaAssetsAndReferences({
       savedObjectTagClient,
       kibanaAssets,
       pkgTitle,
+      pkgName,
     })
   );
 

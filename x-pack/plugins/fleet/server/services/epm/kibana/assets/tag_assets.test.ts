@@ -33,22 +33,30 @@ describe('tagKibanaAssets', () => {
       savedObjectTagClient,
       kibanaAssets,
       pkgTitle: 'System',
+      pkgName: 'system',
     });
 
-    expect(savedObjectTagClient.create).toHaveBeenCalledWith({
-      name: 'Managed',
-      description: '',
-      color: '#FFFFFF',
-    });
-    expect(savedObjectTagClient.create).toHaveBeenCalledWith({
-      name: 'System',
-      description: '',
-      color: '#FFFFFF',
-    });
+    expect(savedObjectTagClient.create).toHaveBeenCalledWith(
+      {
+        name: 'Managed',
+        description: '',
+        color: '#FFFFFF',
+      },
+      { id: 'managed', overwrite: true, refresh: false }
+    );
+    expect(savedObjectTagClient.create).toHaveBeenCalledWith(
+      {
+        name: 'System',
+        description: '',
+        color: '#FFFFFF',
+      },
+      { id: 'system', overwrite: true, refresh: false }
+    );
     expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledWith({
       tags: ['managed', 'system'],
       assign: kibanaAssets.dashboard,
       unassign: [],
+      refresh: false,
     });
   });
 
@@ -64,6 +72,7 @@ describe('tagKibanaAssets', () => {
       savedObjectTagClient,
       kibanaAssets,
       pkgTitle: 'System',
+      pkgName: 'system',
     });
 
     expect(savedObjectTagClient.create).not.toHaveBeenCalled();
@@ -71,6 +80,7 @@ describe('tagKibanaAssets', () => {
       tags: ['managed', 'system'],
       assign: kibanaAssets.dashboard,
       unassign: [],
+      refresh: false,
     });
   });
 
@@ -90,12 +100,14 @@ describe('tagKibanaAssets', () => {
       savedObjectTagClient,
       kibanaAssets,
       pkgTitle: 'System',
+      pkgName: 'system',
     });
 
     expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledWith({
       tags: ['managed', 'system'],
       assign: [...kibanaAssets.dashboard, ...kibanaAssets.visualization],
       unassign: [],
+      refresh: false,
     });
   });
 
@@ -107,6 +119,7 @@ describe('tagKibanaAssets', () => {
       savedObjectTagClient,
       kibanaAssets,
       pkgTitle: 'System',
+      pkgName: 'system',
     });
 
     expect(savedObjectTagAssignmentService.updateTagAssignments).not.toHaveBeenCalled();
