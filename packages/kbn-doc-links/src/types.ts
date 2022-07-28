@@ -12,6 +12,7 @@
 export interface DocLinksMeta {
   version: string;
   elasticWebsiteUrl: string;
+  docsWebsiteUrl: string;
 }
 
 /**
@@ -76,6 +77,7 @@ export interface DocLinks {
     readonly start: string;
   };
   readonly appSearch: {
+    readonly adaptiveRelevance: string;
     readonly apiRef: string;
     readonly apiClients: string;
     readonly apiKeys: string;
@@ -85,6 +87,7 @@ export interface DocLinks {
     readonly duplicateDocuments: string;
     readonly elasticsearchIndexedEngines: string;
     readonly entryPoints: string;
+    readonly gettingStarted: string;
     readonly guide: string;
     readonly indexingDocuments: string;
     readonly indexingDocumentsSchema: string;
@@ -109,6 +112,7 @@ export interface DocLinks {
     readonly languageAnalyzers: string;
     readonly licenseManagement: string;
     readonly mailService: string;
+    readonly start: string;
     readonly troubleshootSetup: string;
     readonly usersAccess: string;
   };
@@ -118,6 +122,7 @@ export interface DocLinks {
     readonly confluenceCloud: string;
     readonly confluenceCloudConnectorPackage: string;
     readonly confluenceServer: string;
+    readonly contentSources: string;
     readonly customConnectorPackage: string;
     readonly customSources: string;
     readonly customSourcePermissions: string;
@@ -135,6 +140,7 @@ export interface DocLinks {
     readonly networkDrive: string;
     readonly oneDrive: string;
     readonly permissions: string;
+    readonly privateSourcePermissions: string;
     readonly salesforce: string;
     readonly security: string;
     readonly serviceNow: string;
@@ -425,5 +431,9 @@ export interface DocLinks {
     readonly repeatedTimeoutRequests: string;
     readonly routingAllocationDisabled: string;
     readonly clusterShardLimitExceeded: string;
+  };
+  readonly searchUI: {
+    readonly appSearch: string;
+    readonly elasticsearch: string;
   };
 }
