@@ -26,15 +26,17 @@ interface StartDeps {
 
 export class UserProfilesPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   public setup(core: CoreSetup<StartDeps>, deps: SetupDeps) {
-    console.log('setup', deps);
-
     // Register an application into the side navigation menu
     core.application.register({
       id: 'userProfileExamples',
       title: 'User profile components',
       async mount({ element }: AppMountParameters) {
-        // const [coreStart, depsStart] = await core.getStartServices();
-        // const { bulkGet, suggest } = depsStart.security.userProfiles;
+        // Feth user suggestions
+        // const [, depsStart] = await core.getStartServices();
+        // depsStart.security.userProfiles.suggest('/internal/user_profiles_examples/_suggest', {
+        //   name: 'a',
+        // });
+
         ReactDOM.render(
           <EuiPageTemplate
             pageHeader={{

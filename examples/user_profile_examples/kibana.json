@@ -9,6 +9,6 @@
     "githubTeam": "kibana-app-services"
   },
   "description": "Demo of how to implement a suggest user functionality",
-  "requiredPlugins": ["developerExamples", "security"],
+  "requiredPlugins": ["developerExamples", "security", "spaces"],
   "optionalPlugins": []
 }

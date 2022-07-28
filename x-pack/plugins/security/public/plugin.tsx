@@ -21,10 +21,8 @@ import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/pu
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
-import type { UserProfile, UserProfileData, UserProfileWithSecurity } from '../common';
 import type { SecurityLicense } from '../common/licensing';
 import { SecurityLicenseService } from '../common/licensing';
-import type { UserProfileBulkGetParams, UserProfileGetCurrentParams, UserProfileSuggestParams } from './account_management';
 import { accountManagementApp, UserProfileAPIClient } from './account_management';
 import { AnalyticsService } from './analytics';
 import { AnonymousAccessService } from './anonymous_access';
@@ -235,42 +233,7 @@ export interface SecurityPluginStart {
   /**
    * A set of methods to work with Kibana user profiles.
    */
-  userProfiles: {
-    /**
-     * Retrieves the user profile of the current user. If the profile isn't available, e.g. for the anonymous users or
-     * users authenticated via authenticating proxies, the `null` value is returned.
-     * @param [params] Get current user profile operation parameters.
-     * @param params.dataPath By default `getCurrent()` returns user information, but does not return any user data. The
-     * optional "dataPath" parameter can be used to return personal data for this user.
-     */
-    getCurrent<D extends UserProfileData>(
-      params?: UserProfileGetCurrentParams
-    ): Promise<UserProfileWithSecurity<D> | null>;
-
-    /**
-     * Retrieves multiple user profiles by their identifiers.
-     * @param params Bulk get operation parameters.
-     * @param params.uids List of user profile identifiers.
-     * @param params.dataPath By default Elasticsearch returns user information, but does not return any user data. The
-     * optional "dataPath" parameter can be used to return personal data for the requested user profiles.
-     */
-    bulkGet<D extends UserProfileData>(
-      params: UserProfileBulkGetParams
-    ): Promise<Array<UserProfile<D>>>;
-
-    /**
-     * Retrieves multiple user profiles by search criteria.
-     * @param path Path to suggest endpoint.
-     * @param params Suggest operation parameters.
-     * @param params.name Query string used to match name-related fields in user profiles. The following fields are treated as name-related: username, full_name and email.
-     * @param params.size Desired number of suggestion to return. The default value is 10.
-     * @param params.dataPath By default, suggest API returns user information, but does not return any user data. The optional "dataPath" parameter can be used to return personal data for this user (within `kibana` namespace only).
-     * @param params.requiredPrivileges The set of the privileges that users associated with the suggested user profile should have in the specified space. If not specified, privileges check isn't performed and all matched profiles are returned irrespective to the privileges of the associated users.
-     */
-    suggest<D extends UserProfileData>(
-      path: string, params: UserProfileSuggestParams
-    ): Promise<Array<UserProfile<D>>>;
-  };
+  userProfiles: Pick<UserProfileAPIClient, 'getCurrent' | 'bulkGet' | 'suggest'>;
 
   /**
    * Exposes UI components that will be loaded asynchronously.

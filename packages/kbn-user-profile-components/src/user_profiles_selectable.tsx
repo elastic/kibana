@@ -197,6 +197,7 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
       height={height}
       singleSelection={singleSelection}
       isPreFiltered
+      listProps={{ onFocusBadge: false }}
     >
       {(list) => (
         <>

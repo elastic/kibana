@@ -15,22 +15,20 @@ import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/s
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { schema } from '@kbn/config-schema';
 
-export interface PluginSetupDependencies {
+export interface SetupDeps {
   features: FeaturesPluginSetup;
   security: SecurityPluginSetup;
   spaces: SpacesPluginSetup;
 }
 
-export interface PluginStartDependencies {
+export interface StartDeps {
   features: FeaturesPluginStart;
   security: SecurityPluginStart;
   spaces: SpacesPluginStart;
 }
 
-export class UserProfilesPlugin
-  implements Plugin<void, void, PluginSetupDependencies, PluginStartDependencies>
-{
-  setup(core: CoreSetup<PluginStartDependencies>) {
+export class UserProfilesPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
+  setup(core: CoreSetup<StartDeps>) {
     const router = core.http.createRouter();
     router.post(
       {
@@ -39,26 +37,37 @@ export class UserProfilesPlugin
           body: schema.object({
             name: schema.string(),
             dataPath: schema.maybe(schema.string()),
-            requiredAppPrivileges: schema.maybe(schema.arrayOf(schema.string())),
           }),
         },
+        /**
+         * Important: You must restrict access to this endpoint using access `tags`.
+         */
+        options: { tags: ['access:suggestUserProfiles'] },
       },
       async (context, request, response) => {
         const [, pluginDeps] = await core.getStartServices();
+
+        /**
+         * Important: `requiredPrivileges` must be hard-coded server-side and cannot be exposed as a
+         * param client-side.
+         *
+         * If your app requires suggestions based on different privileges you must expose separate
+         * endpoints for each use-case.
+         *
+         * In this example we ensure that suggested users have access to the current space and are
+         * able to login but in your app you will want to change that to something more relevant.
+         */
         const profiles = await pluginDeps.security.userProfiles.suggest({
           name: request.body.name,
           dataPath: request.body.dataPath,
-          requiredPrivileges: request.body.requiredAppPrivileges
-            ? {
-                spaceId: pluginDeps.spaces.spacesService.getSpaceId(request),
-                privileges: {
-                  kibana: request.body.requiredAppPrivileges.map((appPrivilege) =>
-                    pluginDeps.security.authz.actions.app.get(appPrivilege)
-                  ),
-                },
-              }
-            : undefined,
+          requiredPrivileges: {
+            spaceId: pluginDeps.spaces.spacesService.getSpaceId(request),
+            privileges: {
+              kibana: [pluginDeps.security.authz.actions.login],
+            },
+          },
         });
+
         return response.ok({ body: profiles });
       }
     );
