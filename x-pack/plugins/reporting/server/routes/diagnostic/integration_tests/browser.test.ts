@@ -6,7 +6,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { docLinksServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { setupServer } from '@kbn/core/server/test_utils';
 import supertest from 'supertest';
 import { ReportingCore } from '../../..';
@@ -28,6 +28,7 @@ describe('POST /diagnose/browser', () => {
   jest.setTimeout(6000);
   const reportingSymbol = Symbol('reporting');
   const mockLogger = loggingSystemMock.createLogger();
+  const docLinks = docLinksServiceMock.createSetupContract();
 
   let server: SetupServerReturn['server'];
   let httpSetup: SetupServerReturn['httpSetup'];
@@ -64,7 +65,7 @@ describe('POST /diagnose/browser', () => {
   });
 
   it('returns a 200 when successful', async () => {
-    registerDiagnoseBrowser(core, mockLogger);
+    registerDiagnoseBrowser(core, mockLogger, docLinks);
 
     await server.start();
 
@@ -81,7 +82,7 @@ describe('POST /diagnose/browser', () => {
 
   it('returns logs when browser crashes + helpful links', async () => {
     const logs = `Could not find the default font`;
-    registerDiagnoseBrowser(core, mockLogger);
+    registerDiagnoseBrowser(core, mockLogger, docLinks);
 
     await server.start();
     screenshotting.diagnose.mockReturnValue(Rx.of(logs));
@@ -93,7 +94,7 @@ describe('POST /diagnose/browser', () => {
         expect(body).toMatchInlineSnapshot(`
           Object {
             "help": Array [
-              "The browser couldn't locate a default font. Please see https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies to fix this issue.",
+              "The browser couldn't locate a default font. Please see https://www.elastic.co/guide/en/kibana/test-branch/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies to fix this issue.",
             ],
             "logs": "Could not find the default font",
             "success": false,
@@ -103,7 +104,7 @@ describe('POST /diagnose/browser', () => {
   });
 
   it('logs a message when the browser starts, but then has problems later', async () => {
-    registerDiagnoseBrowser(core, mockLogger);
+    registerDiagnoseBrowser(core, mockLogger, docLinks);
 
     await server.start();
     screenshotting.diagnose.mockReturnValue(Rx.of(`${devtoolMessage}\n${fontNotFoundMessage}`));
@@ -115,7 +116,7 @@ describe('POST /diagnose/browser', () => {
         expect(body).toMatchInlineSnapshot(`
           Object {
             "help": Array [
-              "The browser couldn't locate a default font. Please see https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies to fix this issue.",
+              "The browser couldn't locate a default font. Please see https://www.elastic.co/guide/en/kibana/test-branch/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies to fix this issue.",
             ],
             "logs": "DevTools listening on (ws://localhost:4000)
           Could not find the default font",
