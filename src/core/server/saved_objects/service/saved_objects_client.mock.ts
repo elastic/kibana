@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientContract } from '../types';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from './lib/errors';
 import { savedObjectsPointInTimeFinderMock } from './lib/point_in_time_finder.mock';
 
