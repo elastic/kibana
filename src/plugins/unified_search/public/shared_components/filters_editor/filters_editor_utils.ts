@@ -14,7 +14,7 @@ import { ConditionTypes } from './filters_editor_condition_types';
 const PATH_SEPARATOR = '.';
 
 /** to: @kbn/es-query **/
-const buildConditionalFilter = (conditionalType: 'or' | 'and', filters: Filter[]) => {
+const buildOrFilter = (filters: Filter[]) => {
   const filter = buildEmptyFilter(false);
 
   return {
@@ -23,7 +23,6 @@ const buildConditionalFilter = (conditionalType: 'or' | 'and', filters: Filter[]
       ...filter.meta,
       params: {
         ...filter.meta.params,
-        conditionalType,
         filters,
       },
     },
@@ -31,7 +30,7 @@ const buildConditionalFilter = (conditionalType: 'or' | 'and', filters: Filter[]
 };
 
 /** to: @kbn/es-query **/
-export const isOrFilter = (filter: Filter) => Boolean(filter.meta?.params.filters);
+export const isOrFilter = (filter: Filter) => Boolean(filter.meta?.params?.filters);
 
 export const getConditionalOperationType = (filter: Filter | Filter[]) => {
   if (Array.isArray(filter)) {
@@ -43,24 +42,28 @@ export const getConditionalOperationType = (filter: Filter | Filter[]) => {
 
 export const getPathInArray = (path: string) => path.split(PATH_SEPARATOR).map((i) => +i);
 
-const doForFilterByPath = <T>(filters: Filter[], path: string, action: (filter: Filter) => T) => {
+const doForFilterByPath = <T>(
+  filters: Filter[],
+  path: string,
+  action: (filter: Filter | Filter[]) => T
+) => {
   const pathArray = getPathInArray(path);
-  let f: Filter = filters[pathArray[0]];
+  let f = filters[pathArray[0]];
   for (let i = 1, depth = pathArray.length; i < depth; i++) {
-    f = f?.meta?.params?.filters?.[+pathArray[i]] ?? f;
+    f = (Array.isArray(f) ? f : f?.meta?.params?.filters)?.[+pathArray[i]];
   }
   return action(f);
 };
 
 const getContainerMetaByPath = (filters: Filter[], pathInArray: number[]) => {
-  let targetArray: Filter[] = filters;
-  let parentFilter: Filter | undefined;
+  let targetArray: Array<Filter | Filter[]> = filters;
+  let parentFilter: Filter | Array<Filter | Filter[]> | undefined;
   let parentConditionType = ConditionTypes.AND;
 
   if (pathInArray.length > 1) {
     parentFilter = getFilterByPath(filters, getParentFilterPath(pathInArray));
     parentConditionType = getConditionalOperationType(parentFilter) ?? parentConditionType;
-    targetArray = parentFilter.meta.params.filters;
+    targetArray = Array.isArray(parentFilter) ? parentFilter : parentFilter.meta.params.filters;
   }
 
   return {
@@ -76,32 +79,44 @@ const getParentFilterPath = (pathInArray: number[]) =>
 const normalizeFilters = (filters: Filter[]): Filter[] =>
   filters
     .map((filter: Filter) => {
-      if (getConditionalOperationType(filter)) {
-        const f = normalizeFilters(filter.meta.params.filters);
-        if (f) {
-          if (f.length === 1) {
-            return f[0];
+      if (Array.isArray(filter)) {
+        const normalized = normalizeFilters(filter);
+
+        if (normalized.length === 1) {
+          return normalized[0];
+        }
+        if (normalized.length === 0) {
+          return undefined;
+        }
+      }
+
+      if (isOrFilter(filter)) {
+        const normalized = normalizeFilters(filter.meta.params.filters);
+        if (normalized) {
+          if (normalized.length === 1) {
+            return normalized[0];
           }
-          if (f.length === 0) {
+          if (normalized.length === 0) {
             return undefined;
           }
-        }
-        return {
-          ...filter,
-          meta: {
-            ...filter.meta,
-            params: {
-              ...filter.meta.params,
-              filters: f,
+
+          return {
+            ...filter,
+            meta: {
+              ...filter.meta,
+              params: {
+                ...filter.meta.params,
+                filters: normalized,
+              },
             },
-          },
-        };
+          };
+        }
       }
       return filter;
     })
     .filter(Boolean) as Filter[];
 
-export const getFilterByPath = (filters: Filter[], path: string): Filter =>
+export const getFilterByPath = (filters: Filter[], path: string) =>
   doForFilterByPath(filters, path, (f) => f);
 
 export const addFilter = (
@@ -113,17 +128,15 @@ export const addFilter = (
   const newFilters = [...filters];
   const pathInArray = getPathInArray(path);
   const { targetArray, parentConditionType } = getContainerMetaByPath(newFilters, pathInArray);
-
   const selector = pathInArray[pathInArray.length - 1];
 
   if (parentConditionType !== conditionalType) {
     targetArray.splice(
       selector,
       1,
-      buildConditionalFilter(conditionalType === ConditionTypes.AND ? 'and' : 'or', [
-        targetArray[selector],
-        filter,
-      ])
+      conditionalType === ConditionTypes.AND
+        ? [...targetArray[selector], filter]
+        : buildOrFilter([targetArray[selector], filter])
     );
   } else {
     targetArray.splice(selector + 1, 0, filter);
