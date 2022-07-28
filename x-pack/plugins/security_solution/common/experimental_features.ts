@@ -17,7 +17,7 @@ export const allowedExperimentalValues = Object.freeze({
   excludePoliciesInFilterEnabled: false,
   kubernetesEnabled: true,
   disableIsolationUIPendingStatuses: false,
-  riskyHostsEnabled: false,
+  riskyHostsEnabled: true,
   riskyUsersEnabled: false,
   pendingActionResponsesWithAck: true,
   policyListEnabled: true,
