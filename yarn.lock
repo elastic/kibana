@@ -11003,10 +11003,10 @@ cbor-extract@^2.0.2:
     "@cbor-extract/cbor-extract-linux-x64" "2.0.0"
     "@cbor-extract/cbor-extract-win32-x64" "2.0.0"
 
-cbor-x@^1.3.1:
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/cbor-x/-/cbor-x-1.3.1.tgz#c325936a6319041b0d3ae7db4b8acf8f59a17bc5"
-  integrity sha512-SqCzL9r7Q5QpIgvlr2vla/Y23lPQehftVtUTGNEEMGNpWg0embqg9dxi8dfhuiPWTsQTcT09LgJ9xf2/nZUMZA==
+cbor-x@^1.3.2:
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/cbor-x/-/cbor-x-1.3.2.tgz#280a56d93390e01583ad92d78302152beb250421"
+  integrity sha512-sntNPdI5OaOC+MWfQVHwXmvNJmbNYvwwRPWhoGjISz9yeGYgh7oLsQdo+RMmgLkD+aGsx7z2xHDyrBaBLFNT9w==
   optionalDependencies:
     cbor-extract "^2.0.2"
 
