@@ -9,6 +9,6 @@
 import { Observable } from 'rxjs';
 
 export interface SharedUxApplicationService {
-  navigateToUrl: (url: string) => Promise<void>;
+  navigateToUrl: (url: string) => Promise<void> | void;
   currentAppId$: Observable<string | undefined>;
 }
