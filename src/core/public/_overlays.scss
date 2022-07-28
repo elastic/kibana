@@ -1,9 +1,3 @@
-.kbnGlobalBannerList__item + .kbnGlobalBannerList__item {
-  margin-top: $euiSizeS;
-}
+@import './banners_list';
 
-.kbnOverlayMountWrapper {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
+@import './mount_wrapper';
