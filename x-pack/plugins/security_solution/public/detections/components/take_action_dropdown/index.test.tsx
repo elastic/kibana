@@ -458,7 +458,7 @@ describe('take action dropdown', () => {
         expect(consoleButton.prop('toolTipContent')).toEqual(NOT_FROM_ENDPOINT_HOST_TOOLTIP);
       });
 
-      it('should disable the button if host status is unenrolled', async () => {
+      it.only('should disable the button if host status is unenrolled', async () => {
         setAlertDetailsDataMockToEndpointAgent();
         const getApiResponse = apiMocks.responseProvider.metadataDetails.getMockImplementation();
         apiMocks.responseProvider.metadataDetails.mockImplementation(() => {
@@ -476,12 +476,12 @@ describe('take action dropdown', () => {
           expect(apiMocks.responseProvider.metadataDetails).toHaveBeenCalled();
         });
 
-        wrapper.update();
-
         expect(findLaunchResponderButton().first().prop('disabled')).toBe(true);
-        expect(findLaunchResponderButton().first().prop('toolTipContent')).toEqual(
-          HOST_ENDPOINT_UNENROLLED_TOOLTIP
-        );
+        await waitFor(() => {
+          expect(findLaunchResponderButton().first().prop('toolTipContent')).toEqual(
+            HOST_ENDPOINT_UNENROLLED_TOOLTIP
+          );
+        });
       });
     });
   });
