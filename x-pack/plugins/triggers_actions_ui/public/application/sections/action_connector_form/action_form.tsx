@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -13,29 +13,35 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiTitle,
-  EuiSpacer,
   EuiKeyPadMenuItem,
-  EuiToolTip,
   EuiLink,
+  EuiSpacer,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
-import { ActionGroup, RuleActionParam } from '@kbn/alerting-plugin/common';
+import {
+  ActionGroup,
+  NotifyWhen,
+  RuleActionParam,
+  SummaryOf,
+  ThrottleUnit,
+} from '@kbn/alerting-plugin/common';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
 import {
-  ActionTypeModel,
-  RuleAction,
-  ActionTypeIndex,
   ActionConnector,
   ActionType,
-  ActionVariables,
+  ActionTypeIndex,
+  ActionTypeModel,
   ActionTypeRegistryContract,
+  ActionVariables,
+  RuleAction,
 } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
 import { ActionTypeForm } from './action_type_form';
 import { AddConnectorInline } from './connector_add_inline';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
-import { VIEW_LICENSE_OPTIONS_LINK, DEFAULT_HIDDEN_ACTION_TYPES } from '../../../common/constants';
+import { DEFAULT_HIDDEN_ACTION_TYPES, VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
 import { DefaultActionParamsGetter } from '../../lib/get_defaults_for_action_params';
 import { ConnectorAddModal } from '.';
@@ -65,6 +71,11 @@ export interface ActionAccordionFormProps {
   actionTypeRegistry: ActionTypeRegistryContract;
   getDefaultActionParams?: DefaultActionParamsGetter;
   isActionGroupDisabledForActionType?: (actionGroupId: string, actionTypeId: string) => boolean;
+  setActionProperty: <Key extends keyof RuleAction>(
+    key: keyof RuleAction,
+    value: RuleAction[Key],
+    index: number
+  ) => void;
 }
 
 interface ActiveActionConnectorState {
@@ -89,6 +100,7 @@ export const ActionForm = ({
   actionTypeRegistry,
   getDefaultActionParams,
   isActionGroupDisabledForActionType,
+  setActionProperty,
 }: ActionAccordionFormProps) => {
   const {
     http,
@@ -212,6 +224,11 @@ export const ActionForm = ({
         actionTypeId: actionTypeModel.id,
         group: defaultActionGroupId,
         params: {},
+        isSummary: false,
+        summaryOf: SummaryOf.SINGLE_RUN,
+        notifyWhen: NotifyWhen.ONCE,
+        actionThrottle: 1,
+        actionThrottleUnit: ThrottleUnit.HOUR,
       });
       setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1);
     }
@@ -223,6 +240,11 @@ export const ActionForm = ({
         actionTypeId: actionTypeModel.id,
         group: defaultActionGroupId,
         params: {},
+        isSummary: false,
+        summaryOf: SummaryOf.SINGLE_RUN,
+        notifyWhen: NotifyWhen.ONCE,
+        actionThrottle: 1,
+        actionThrottleUnit: ThrottleUnit.HOUR,
       });
       setActionIdByIndex(actions.length.toString(), actions.length - 1);
       setEmptyActionsIds([...emptyActionsIds, actions.length.toString()]);
@@ -369,6 +391,7 @@ export const ActionForm = ({
               defaultParams={getDefaultActionParams?.(actionItem.actionTypeId, actionItem.group)}
               isActionGroupDisabledForActionType={isActionGroupDisabledForActionType}
               setActionGroupIdByIndex={setActionGroupIdByIndex}
+              setActionProperty={setActionProperty}
               onAddConnector={() => {
                 setActiveActionItem({ actionTypeId: actionItem.actionTypeId, indices: [index] });
                 setAddModalVisibility(true);

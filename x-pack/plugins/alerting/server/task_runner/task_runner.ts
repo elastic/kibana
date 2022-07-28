@@ -474,7 +474,6 @@ export class TaskRunner<
       consumer,
       schedule,
       throttle,
-      notifyWhen,
       name,
       tags,
       createdBy,
@@ -588,7 +587,6 @@ export class TaskRunner<
             createdAt,
             updatedAt,
             throttle,
-            notifyWhen,
           },
         })
       );

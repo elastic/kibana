@@ -18,7 +18,6 @@ function createRule(overrides = {}): InitialRule {
     },
     actions: [],
     tags: [],
-    notifyWhen: 'onActionGroupChange',
     ...overrides,
   };
 }

@@ -13,11 +13,21 @@ const transformAction: RewriteRequestCase<RuleAction> = ({
   id,
   connector_type_id: actionTypeId,
   params,
+  is_summary: isSummary,
+  summary_of: summaryOf,
+  notify_when: notifyWhen,
+  action_throttle: actionThrottle,
+  action_throttle_unit: actionThrottleUnit,
 }) => ({
   group,
   id,
   params,
   actionTypeId,
+  isSummary,
+  summaryOf,
+  notifyWhen,
+  actionThrottle,
+  actionThrottleUnit,
 });
 
 const transformExecutionStatus: RewriteRequestCase<RuleExecutionStatus> = ({

@@ -12,7 +12,7 @@ import { RuleActionParam, IntervalSchedule } from '@kbn/alerting-plugin/common';
 import { Rule, RuleAction } from '../../../types';
 
 export type InitialRule = Partial<Rule> &
-  Pick<Rule, 'params' | 'consumer' | 'schedule' | 'actions' | 'tags' | 'notifyWhen'>;
+  Pick<Rule, 'params' | 'consumer' | 'schedule' | 'actions' | 'tags'>;
 
 interface CommandType<
   T extends

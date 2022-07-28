@@ -32,7 +32,6 @@ describe('rule_actions_popover', () => {
       updatedAt: new Date(),
       apiKeyOwner: null,
       throttle: null,
-      notifyWhen: null,
       muteAll: false,
       mutedInstanceIds: [],
       executionStatus: {

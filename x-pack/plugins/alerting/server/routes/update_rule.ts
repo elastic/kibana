@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import { ILicenseState, RuleTypeDisabledError, validateDurationSchema } from '../lib';
-import { RuleNotifyWhenType } from '../../common';
 import { UpdateOptions } from '../rules_client';
 import {
   verifyAccessAndContext,
@@ -20,7 +19,6 @@ import {
   RuleTypeParams,
   AlertingRequestHandlerContext,
   BASE_ALERTING_API_PATH,
-  validateNotifyWhenType,
   PartialRule,
 } from '../types';
 
@@ -41,19 +39,30 @@ const bodySchema = schema.object({
       group: schema.string(),
       id: schema.string(),
       params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+      is_summary: schema.boolean(),
+      summary_of: schema.string(),
+      action_throttle: schema.number(),
+      action_throttle_unit: schema.string(),
+      notify_when: schema.string(),
     }),
     { defaultValue: [] }
   ),
-  notify_when: schema.string({ validate: validateNotifyWhenType }),
 });
 
 const rewriteBodyReq: RewriteRequestCase<UpdateOptions<RuleTypeParams>> = (result) => {
-  const { notify_when: notifyWhen, ...rest } = result.data;
+  const { actions, ...rest } = result.data;
   return {
     ...result,
     data: {
       ...rest,
-      notifyWhen,
+      actions: actions.map((action) => ({
+        ...action,
+        isSummary: action.is_summary,
+        summaryOf: action.summary_of,
+        notifyWhen: action.notify_when,
+        actionThrottle: action.action_throttle,
+        actionThrottleUnit: action.action_throttle_unit,
+      })),
     },
   };
 };
@@ -66,7 +75,6 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
   createdAt,
   updatedAt,
   apiKeyOwner,
-  notifyWhen,
   muteAll,
   mutedInstanceIds,
   executionStatus,
@@ -84,7 +92,6 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
   ...(scheduledTaskId ? { scheduled_task_id: scheduledTaskId } : {}),
   ...(createdAt ? { created_at: createdAt } : {}),
   ...(updatedAt ? { updated_at: updatedAt } : {}),
-  ...(notifyWhen ? { notify_when: notifyWhen } : {}),
   ...(muteAll !== undefined ? { mute_all: muteAll } : {}),
   ...(mutedInstanceIds ? { muted_alert_ids: mutedInstanceIds } : {}),
   ...(executionStatus
@@ -98,12 +105,29 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
     : {}),
   ...(actions
     ? {
-        actions: actions.map(({ group, id, actionTypeId, params }) => ({
-          group,
-          id,
-          params,
-          connector_type_id: actionTypeId,
-        })),
+        actions: actions.map(
+          ({
+            group,
+            id,
+            actionTypeId,
+            params,
+            isSummary,
+            summaryOf,
+            actionThrottle,
+            actionThrottleUnit,
+            notifyWhen,
+          }) => ({
+            group,
+            id,
+            params,
+            connector_type_id: actionTypeId,
+            is_summary: isSummary,
+            summary_of: summaryOf,
+            action_throttle: actionThrottle,
+            action_throttle_unit: actionThrottleUnit,
+            notify_when: notifyWhen,
+          })
+        ),
       }
     : {}),
 });
@@ -130,10 +154,8 @@ export const updateRuleRoute = (
             const alertRes = await rulesClient.update(
               rewriteBodyReq({
                 id,
-                data: {
-                  ...rule,
-                  notify_when: rule.notify_when as RuleNotifyWhenType,
-                },
+                // @ts-ignore
+                data: rule,
               })
             );
             return res.ok({

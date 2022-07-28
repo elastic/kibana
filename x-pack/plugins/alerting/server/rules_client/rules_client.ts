@@ -48,7 +48,6 @@ import {
   RuleTaskState,
   AlertSummary,
   RuleExecutionStatusValues,
-  RuleNotifyWhenType,
   RuleTypeParams,
   ResolvedSanitizedRule,
   RuleWithLegacyId,
@@ -61,7 +60,6 @@ import {
 import {
   validateRuleTypeParams,
   ruleExecutionStatusFromRaw,
-  getRuleNotifyWhenType,
   validateMutatedRuleTypeParams,
   convertRuleIdsToKueryNode,
   getRuleSnoozeEndTime,
@@ -216,10 +214,7 @@ export interface FindOptions extends IndexType {
   filter?: string | KueryNode;
 }
 
-export type BulkEditFields = keyof Pick<
-  Rule,
-  'actions' | 'tags' | 'schedule' | 'throttle' | 'notifyWhen'
->;
+export type BulkEditFields = keyof Pick<Rule, 'actions' | 'tags' | 'schedule' | 'throttle'>;
 
 export type BulkEditOperation =
   | {
@@ -241,11 +236,6 @@ export type BulkEditOperation =
       operation: 'set';
       field: Extract<BulkEditFields, 'throttle'>;
       value: Rule['throttle'];
-    }
-  | {
-      operation: 'set';
-      field: Extract<BulkEditFields, 'notifyWhen'>;
-      value: Rule['notifyWhen'];
     };
 
 type RuleParamsModifier<Params extends RuleTypeParams> = (params: Params) => Promise<Params>;
@@ -336,7 +326,6 @@ export interface UpdateOptions<Params extends RuleTypeParams> {
     actions: NormalizedAlertAction[];
     params: Params;
     throttle: string | null;
-    notifyWhen: RuleNotifyWhenType | null;
   };
 }
 
@@ -513,7 +502,6 @@ export class RulesClient {
 
     const createTime = Date.now();
     const legacyId = Semver.lt(this.kibanaVersion, '8.0.0') ? id : null;
-    const notifyWhen = getRuleNotifyWhenType(data.notifyWhen, data.throttle);
 
     const rawRule: RawRule = {
       ...data,
@@ -529,7 +517,6 @@ export class RulesClient {
       params: updatedParams as RawRule['params'],
       muteAll: false,
       mutedInstanceIds: [],
-      notifyWhen,
       executionStatus: getRuleExecutionStatusPending(new Date().toISOString()),
       monitoring: getDefaultRuleMonitoring(),
     };
@@ -1382,7 +1369,6 @@ export class RulesClient {
     }
 
     const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
-    const notifyWhen = getRuleNotifyWhenType(data.notifyWhen, data.throttle);
 
     let updatedObject: SavedObject<RawRule>;
     const createAttributes = this.updateMeta({
@@ -1391,7 +1377,6 @@ export class RulesClient {
       ...apiKeyAttributes,
       params: updatedParams as RawRule['params'],
       actions,
-      notifyWhen,
       updatedBy: username,
       updatedAt: new Date().toISOString(),
     });
@@ -1728,18 +1713,11 @@ export class RulesClient {
               });
             }
 
-            // get notifyWhen
-            const notifyWhen = getRuleNotifyWhenType(
-              attributes.notifyWhen,
-              attributes.throttle ?? null
-            );
-
             const updatedAttributes = this.updateMeta({
               ...attributes,
               ...apiKeyAttributes,
               params: updatedParams as RawRule['params'],
               actions: rawAlertActions,
-              notifyWhen,
               updatedBy: username,
               updatedAt: new Date().toISOString(),
             });
@@ -2751,7 +2729,6 @@ export class RulesClient {
       createdAt,
       updatedAt,
       meta,
-      notifyWhen,
       legacyId,
       scheduledTaskId,
       params,
@@ -2779,7 +2756,6 @@ export class RulesClient {
 
     const rule = {
       id,
-      notifyWhen,
       ...omit(partialRawRule, excludeFromPublicApi ? [...this.fieldsToExcludeFromPublicApi] : ''),
       // we currently only support the Interval Schedule type
       // Once we support additional types, this type signature will likely change

@@ -569,6 +569,13 @@ export const RuleForm = ({
             setActions={setActions}
             setActionParamsProperty={setActionParamsProperty}
             actionTypeRegistry={actionTypeRegistry}
+            setActionProperty={<Key extends keyof RuleAction>(
+              key: keyof RuleAction,
+              value: RuleAction[Key],
+              index: number
+            ) => {
+              setActionProperty(key, value, index);
+            }}
           />
         </>
       ) : null}

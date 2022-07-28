@@ -15,7 +15,7 @@ import { CreateOptions } from '../rules_client';
 import { rulesClientMock } from '../rules_client.mock';
 import { RuleTypeDisabledError } from '../lib';
 import { AsApiContract } from './lib';
-import { SanitizedRule } from '../types';
+import { NotifyWhen, SanitizedRule, SummaryOf, ThrottleUnit } from '../types';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 
@@ -51,6 +51,11 @@ describe('createRuleRoute', () => {
         params: {
           foo: true,
         },
+        isSummary: false,
+        summaryOf: SummaryOf.SINGLE_RUN,
+        actionThrottle: 1,
+        actionThrottleUnit: ThrottleUnit.HOUR,
+        notifyWhen: NotifyWhen.ONCE,
       },
     ],
     enabled: true,
@@ -78,6 +83,11 @@ describe('createRuleRoute', () => {
         group: mockedAlert.actions[0].group,
         id: mockedAlert.actions[0].id,
         params: mockedAlert.actions[0].params,
+        is_summary: mockedAlert.actions[0].isSummary,
+        summary_of: mockedAlert.actions[0].summaryOf,
+        action_throttle: mockedAlert.actions[0].actionThrottle,
+        action_throttle_unit: mockedAlert.actions[0].actionThrottleUnit,
+        notify_when: mockedAlert.actions[0].notifyWhen,
       },
     ],
   };

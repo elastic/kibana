@@ -8,6 +8,7 @@
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { RuleUpdates } from '../../../types';
 import { createRule } from './create';
+import { NotifyWhen, SummaryOf, ThrottleUnit } from '@kbn/alerting-plugin/common';
 
 const http = httpServiceMock.createStartContract();
 
@@ -71,7 +72,6 @@ describe('createRule', () => {
       enabled: true,
       throttle: null,
       ruleTypeId: '.index-threshold',
-      notifyWhen: 'onActionGroupChange',
       actions: [
         {
           group: 'threshold met',
@@ -82,6 +82,11 @@ describe('createRule', () => {
               "alert '{{alertName}}' is active for group '{{context.group}}':\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}",
           },
           actionTypeId: '.server-log',
+          summaryOf: SummaryOf.SINGLE_RUN,
+          isSummary: false,
+          actionThrottleUnit: ThrottleUnit.HOUR,
+          actionThrottle: 1,
+          notifyWhen: NotifyWhen.ONCE,
         },
       ],
       createdAt: new Date('2021-04-01T21:33:13.247Z'),
@@ -116,7 +121,6 @@ describe('createRule', () => {
       muteAll: undefined,
       mutedInstanceIds: undefined,
       name: 'test',
-      notifyWhen: 'onActionGroupChange',
       params: {
         aggType: 'count',
         groupBy: 'all',

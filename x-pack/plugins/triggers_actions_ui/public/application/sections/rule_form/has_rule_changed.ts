@@ -10,7 +10,7 @@ import { pick } from 'lodash';
 import { RuleTypeParams } from '../../../types';
 import { InitialRule } from './rule_reducer';
 
-const DEEP_COMPARE_FIELDS = ['tags', 'schedule', 'actions', 'notifyWhen'];
+const DEEP_COMPARE_FIELDS = ['tags', 'schedule', 'actions'];
 
 function getNonNullCompareFields(rule: InitialRule) {
   const { name, ruleTypeId, throttle } = rule;

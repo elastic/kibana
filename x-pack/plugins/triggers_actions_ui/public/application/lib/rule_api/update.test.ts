@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Rule, RuleNotifyWhenType } from '../../../types';
+import { Rule } from '../../../types';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { updateRule } from './update';
 
@@ -27,7 +27,6 @@ describe('updateRule', () => {
       updatedAt: new Date('1970-01-01T00:00:00.000Z'),
       apiKey: null,
       apiKeyOwner: null,
-      notifyWhen: 'onThrottleInterval' as RuleNotifyWhenType,
     };
     const resolvedValue: Rule = {
       ...ruleToUpdate,

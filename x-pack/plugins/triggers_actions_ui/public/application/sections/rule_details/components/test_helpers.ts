@@ -25,7 +25,6 @@ export function mockRule(overloads: Partial<Rule> = {}): Rule {
     updatedAt: new Date(),
     apiKeyOwner: null,
     throttle: null,
-    notifyWhen: null,
     muteAll: false,
     mutedInstanceIds: [],
     executionStatus: {

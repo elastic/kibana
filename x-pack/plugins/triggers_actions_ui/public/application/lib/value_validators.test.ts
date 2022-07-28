@@ -14,6 +14,7 @@ import {
 } from './value_validators';
 import uuid from 'uuid';
 import { Rule, IErrorObject, UserConfiguredActionConnector } from '../../types';
+import { NotifyWhen, SummaryOf, ThrottleUnit } from '@kbn/alerting-plugin/common';
 
 describe('throwIfAbsent', () => {
   test('throws if value is absent', () => {
@@ -271,7 +272,6 @@ describe('getRuleWithInvalidatedFields', () => {
         status: 'ok',
         lastExecutionDate: new Date(),
       },
-      notifyWhen: 'onActionGroupChange',
       throttle: '',
       updatedAt: new Date(),
       updatedBy: '',
@@ -309,7 +309,6 @@ describe('getRuleWithInvalidatedFields', () => {
         status: 'ok',
         lastExecutionDate: new Date(),
       },
-      notifyWhen: 'onActionGroupChange',
       throttle: '',
       updatedAt: new Date(),
       updatedBy: '',
@@ -345,6 +344,11 @@ describe('getRuleWithInvalidatedFields', () => {
               field: {},
             },
           },
+          notifyWhen: NotifyWhen.ONCE,
+          isSummary: false,
+          actionThrottle: 1,
+          actionThrottleUnit: ThrottleUnit.HOUR,
+          summaryOf: SummaryOf.SINGLE_RUN,
         },
       ],
       tags: [],
@@ -358,7 +362,6 @@ describe('getRuleWithInvalidatedFields', () => {
         status: 'ok',
         lastExecutionDate: new Date(),
       },
-      notifyWhen: 'onActionGroupChange',
       throttle: '',
       updatedAt: new Date(),
       updatedBy: '',
@@ -390,6 +393,11 @@ describe('getRuleWithInvalidatedFields', () => {
               field: {},
             },
           },
+          notifyWhen: NotifyWhen.ONCE,
+          isSummary: false,
+          actionThrottle: 1,
+          actionThrottleUnit: ThrottleUnit.HOUR,
+          summaryOf: SummaryOf.SINGLE_RUN,
         },
         {
           actionTypeId: 'test',
@@ -402,6 +410,11 @@ describe('getRuleWithInvalidatedFields', () => {
               },
             },
           },
+          notifyWhen: NotifyWhen.ONCE,
+          isSummary: false,
+          actionThrottle: 1,
+          actionThrottleUnit: ThrottleUnit.HOUR,
+          summaryOf: SummaryOf.SINGLE_RUN,
         },
       ],
       tags: [],
@@ -415,7 +428,6 @@ describe('getRuleWithInvalidatedFields', () => {
         status: 'ok',
         lastExecutionDate: new Date(),
       },
-      notifyWhen: 'onActionGroupChange',
       throttle: '',
       updatedAt: new Date(),
       updatedBy: '',

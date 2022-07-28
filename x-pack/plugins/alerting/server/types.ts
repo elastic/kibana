@@ -32,7 +32,6 @@ import {
   RuleExecutionStatuses,
   RuleExecutionStatusErrorReasons,
   RuleExecutionStatusWarningReasons,
-  RuleNotifyWhenType,
   ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
@@ -246,7 +245,6 @@ export interface RawRule extends SavedObjectAttributes {
   apiKey: string | null;
   apiKeyOwner: string | null;
   throttle: string | null;
-  notifyWhen: RuleNotifyWhenType | null;
   muteAll: boolean;
   mutedInstanceIds: string[];
   meta?: RuleMeta;

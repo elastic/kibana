@@ -16,18 +16,32 @@ type RuleCreateBody = Omit<
 >;
 const rewriteBodyRequest: RewriteResponseCase<RuleCreateBody> = ({
   ruleTypeId,
-  notifyWhen,
   actions,
   ...res
 }): any => ({
   ...res,
   rule_type_id: ruleTypeId,
-  notify_when: notifyWhen,
-  actions: actions.map(({ group, id, params }) => ({
-    group,
-    id,
-    params,
-  })),
+  actions: actions.map(
+    ({
+      group,
+      id,
+      params,
+      isSummary,
+      summaryOf,
+      actionThrottle,
+      actionThrottleUnit,
+      notifyWhen,
+    }) => ({
+      group,
+      id,
+      params,
+      is_summary: isSummary,
+      summary_of: summaryOf,
+      action_throttle: actionThrottle,
+      action_throttle_unit: actionThrottleUnit,
+      notify_when: notifyWhen,
+    })
+  ),
 });
 
 export async function createRule({

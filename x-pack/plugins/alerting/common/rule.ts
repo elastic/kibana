@@ -11,7 +11,6 @@ import {
   SavedObjectsResolveResponse,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '@kbn/core/server';
-import { RuleNotifyWhenType } from './rule_notify_when_type';
 import { RuleSnooze } from './rule_snooze_type';
 
 export type RuleTypeState = Record<string, unknown>;
@@ -65,12 +64,35 @@ export interface RuleExecutionStatus {
 export type RuleActionParams = SavedObjectAttributes;
 export type RuleActionParam = SavedObjectAttribute;
 
+export enum SummaryOf {
+  TIME_SPAN = 'TimeSpan',
+  SINGLE_RUN = 'SingleRun',
+}
+
+export enum NotifyWhen {
+  ONCE = 'Once',
+  ON_EVERY_RUN = 'OnEveryRun',
+  ON_INTERVAL = 'OnInterval',
+}
+
+export enum ThrottleUnit {
+  SECOND = 's',
+  MINUTE = 'm',
+  HOUR = 'h',
+  DAY = 'd',
+}
+
 export interface RuleAction {
   group: string;
   id: string;
   actionTypeId: string;
   params: RuleActionParams;
   ref?: string;
+  isSummary: boolean;
+  summaryOf: SummaryOf;
+  notifyWhen: NotifyWhen;
+  actionThrottle: number;
+  actionThrottleUnit: ThrottleUnit;
 }
 
 export interface RuleAggregations {
@@ -108,7 +130,6 @@ export interface Rule<Params extends RuleTypeParams = never> {
   apiKeyOwner: string | null;
   throttle: string | null;
   muteAll: boolean;
-  notifyWhen: RuleNotifyWhenType | null;
   mutedInstanceIds: string[];
   executionStatus: RuleExecutionStatus;
   monitoring?: RuleMonitoring;
@@ -134,7 +155,6 @@ export type SanitizedRuleConfig = Pick<
   | 'createdAt'
   | 'updatedAt'
   | 'throttle'
-  | 'notifyWhen'
 > & {
   producer: string;
   ruleTypeId: string;

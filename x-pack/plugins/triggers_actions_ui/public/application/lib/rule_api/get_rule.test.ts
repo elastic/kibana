@@ -80,7 +80,6 @@ describe('loadRule', () => {
       createdAt: '2021-04-01T20:29:18.652Z',
       updatedAt: '2021-04-01T20:33:38.260Z',
       apiKeyOwner: 'elastic',
-      notifyWhen: 'onThrottleInterval',
       muteAll: false,
       mutedInstanceIds: [],
       ruleTypeId: '.index-threshold',
