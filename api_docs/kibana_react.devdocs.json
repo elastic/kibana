@@ -1929,18 +1929,6 @@
             "path": "x-pack/plugins/apm/public/components/routing/app_root.tsx"
           },
           {
-            "plugin": "cloudSecurityPosture",
-            "path": "x-pack/plugins/cloud_security_posture/public/application/app.tsx"
-          },
-          {
-            "plugin": "cloudSecurityPosture",
-            "path": "x-pack/plugins/cloud_security_posture/public/application/app.tsx"
-          },
-          {
-            "plugin": "cloudSecurityPosture",
-            "path": "x-pack/plugins/cloud_security_posture/public/application/app.tsx"
-          },
-          {
             "plugin": "indexLifecycleManagement",
             "path": "x-pack/plugins/index_lifecycle_management/public/shared_imports.ts"
           },
