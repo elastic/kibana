@@ -28,13 +28,14 @@ export const SearchIndexRouter: React.FC = () => {
   const indexNameLogic = IndexNameLogic({ indexName });
   const { setIndexName } = useActions(indexNameLogic);
   useEffect(() => {
-    const unmount = indexNameLogic.mount();
-    return unmount();
+    const unmountName = indexNameLogic.mount();
+    const unmountView = IndexViewLogic.mount();
+    return () => {
+      unmountName();
+      unmountView();
+    };
   }, []);
-  useEffect(() => {
-    const unmount = IndexViewLogic.mount();
-    return unmount;
-  }, []);
+  useEffect(() => {}, []);
 
   useEffect(() => {
     setIndexName(indexName);

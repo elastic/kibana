@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import { useParams } from 'react-router-dom';
 
@@ -36,7 +36,6 @@ import { SearchIndexDomainManagement } from './crawler/domain_management/domain_
 import { SearchIndexDocuments } from './documents';
 import { SearchIndexIndexMappings } from './index_mappings';
 import { IndexNameLogic } from './index_name_logic';
-import { IndexViewLogic } from './index_view_logic';
 import { SearchIndexOverview } from './overview';
 
 export enum SearchIndexTabId {
@@ -59,10 +58,6 @@ export const SearchIndex: React.FC = () => {
   }>();
 
   const { indexName } = useValues(IndexNameLogic);
-  useEffect(() => {
-    const unmount = IndexViewLogic.mount();
-    return unmount;
-  }, []);
 
   const ALL_INDICES_TABS: EuiTabbedContentTab[] = [
     {
