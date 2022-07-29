@@ -7,5 +7,4 @@
  */
 
 export type { MountPoint, UnmountCallback } from './mount_point';
-export type { MountWrapperComponent, MountWrapperComponentProps } from './mount_wrapper';
 export type { OverlayRef } from './overlay_ref';

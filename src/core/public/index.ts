@@ -221,13 +221,7 @@ export type {
   ResolveDeprecationResponse,
 } from '@kbn/core-deprecations-browser';
 
-export type {
-  MountPoint,
-  UnmountCallback,
-  MountWrapperComponent,
-  MountWrapperComponentProps,
-  OverlayRef,
-} from '@kbn/core-mount-utils-browser';
+export type { MountPoint, UnmountCallback, OverlayRef } from '@kbn/core-mount-utils-browser';
 
 export { URL_MAX_LENGTH } from './core_app';
 

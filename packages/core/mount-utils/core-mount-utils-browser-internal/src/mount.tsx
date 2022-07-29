@@ -9,9 +9,19 @@
 import React, { useEffect, useRef } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { MountPoint, MountWrapperComponent } from '@kbn/core-mount-utils-browser';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 
 const defaultWrapperClass = 'kbnMountWrapper';
+interface MountWrapperComponentProps {
+  mount: MountPoint;
+  className?: string;
+}
+
+/**
+ * MountWrapper is a react component to mount a {@link MountPoint} inside a react tree.
+ * @internal
+ */
+type MountWrapperComponent = React.FunctionComponent<MountWrapperComponentProps>;
 
 /**
  * MountWrapper is a react component to mount a {@link MountPoint} inside a react tree.
