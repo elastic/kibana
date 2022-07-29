@@ -27,6 +27,7 @@ import { getFieldByNameFactory } from './pure_helpers';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { TermsIndexPatternColumn } from './operations';
 import { DOCUMENT_FIELD_NAME } from '../../common';
+import { DataViewField, FieldSpec } from '@kbn/data-views-plugin/common';
 
 const fieldsOne = [
   {
@@ -327,20 +328,39 @@ describe('IndexPattern Data Panel', () => {
   });
 
   describe('loading existence data', () => {
+    const getFieldsForIndexPattern = jest.fn(async () => {
+      return Promise.resolve(['field_1', 'field_2'].map((name) => ({ name } as FieldSpec)));
+    });
     function testProps() {
       const setState = jest.fn();
-      core.http.post.mockImplementation(async (path) => {
-        const parts = (path as unknown as string).split('/');
-        const indexPatternTitle = parts[parts.length - 1];
-        return {
-          indexPatternTitle: `${indexPatternTitle}_testtitle`,
-          existingFieldNames: ['field_1', 'field_2'].map(
-            (fieldName) => `${indexPatternTitle}_${fieldName}`
-          ),
-        };
-      });
+      const fields = [{ name: 'field_1' } as DataViewField, { name: 'field_2' } as DataViewField];
+      const indexPatterns = {
+        a: {
+          id: 'a',
+          title: 'aaa',
+          timeFieldName: 'atime',
+          fields,
+          getFieldByName: getFieldByNameFactory([]),
+          hasRestrictions: false,
+        },
+        b: {
+          id: 'b',
+          title: 'bbb',
+          timeFieldName: 'btime',
+          fields,
+          getFieldByName: getFieldByNameFactory([]),
+          hasRestrictions: false,
+        },
+      };
       return {
         ...defaultProps,
+        dataViews: {
+          ...defaultProps.dataViews,
+          getFieldsForIndexPattern,
+          get: (id: string) => {
+            return Promise.resolve(indexPatterns[id]);
+          },
+        },
         changeIndexPattern: jest.fn(),
         setState,
         dragDropContext: {
@@ -353,24 +373,7 @@ describe('IndexPattern Data Panel', () => {
           existingFields: {},
           isFirstExistenceFetch: false,
           currentIndexPatternId: 'a',
-          indexPatterns: {
-            a: {
-              id: 'a',
-              title: 'aaa',
-              timeFieldName: 'atime',
-              fields: [],
-              getFieldByName: getFieldByNameFactory([]),
-              hasRestrictions: false,
-            },
-            b: {
-              id: 'b',
-              title: 'bbb',
-              timeFieldName: 'btime',
-              fields: [],
-              getFieldByName: getFieldByNameFactory([]),
-              hasRestrictions: false,
-            },
-          },
+          indexPatterns,
           layers: {
             1: {
               indexPatternId: 'a',
@@ -420,9 +423,9 @@ describe('IndexPattern Data Panel', () => {
       });
 
       expect(nextState.existingFields).toEqual({
-        a_testtitle: {
-          a_field_1: true,
-          a_field_2: true,
+        aaa: {
+          field_1: true,
+          field_2: true,
         },
       });
     });
@@ -437,13 +440,13 @@ describe('IndexPattern Data Panel', () => {
       });
 
       expect(nextState.existingFields).toEqual({
-        a_testtitle: {
-          a_field_1: true,
-          a_field_2: true,
+        aaa: {
+          field_1: true,
+          field_2: true,
         },
-        b_testtitle: {
-          b_field_1: true,
-          b_field_2: true,
+        bbb: {
+          field_1: true,
+          field_2: true,
         },
       });
     });
@@ -463,22 +466,12 @@ describe('IndexPattern Data Panel', () => {
       });
 
       expect(setState).toHaveBeenCalledTimes(2);
-      expect(core.http.post).toHaveBeenCalledTimes(2);
 
-      expect(core.http.post).toHaveBeenCalledWith('/api/lens/existing_fields/a', {
+      expect(getFieldsForIndexPattern).toHaveBeenCalledWith('/api/lens/existing_fields/a', {
         body: JSON.stringify({
           dslQuery,
           fromDate: '2019-01-01',
           toDate: '2020-01-01',
-          timeFieldName: 'atime',
-        }),
-      });
-
-      expect(core.http.post).toHaveBeenCalledWith('/api/lens/existing_fields/a', {
-        body: JSON.stringify({
-          dslQuery,
-          fromDate: '2019-01-01',
-          toDate: '2020-01-02',
           timeFieldName: 'atime',
         }),
       });
@@ -488,9 +481,9 @@ describe('IndexPattern Data Panel', () => {
       });
 
       expect(nextState.existingFields).toEqual({
-        a_testtitle: {
-          a_field_1: true,
-          a_field_2: true,
+        aaa: {
+          field_1: true,
+          field_2: true,
         },
       });
     });

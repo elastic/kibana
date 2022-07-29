@@ -72,3 +72,5 @@ export function getEditPath(id: string | undefined, timeRange?: TimeRange) {
 export function getFullPath(id?: string) {
   return `/app/${PLUGIN_ID}${id ? getEditPath(id) : getBasePath()}`;
 }
+
+export const FIELD_EXISTENCE_SETTING = 'lens:useFieldExistenceSampling';

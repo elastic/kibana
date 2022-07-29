@@ -23,7 +23,8 @@ import {
   UiActionsStart,
   VisualizeFieldContext,
 } from '@kbn/ui-actions-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
+import { FIELD_EXISTENCE_SETTING } from '../../common';
 import { fetchFieldExistence } from './existing_fields';
 import type {
   DatasourceDataPanelProps,
@@ -458,6 +459,8 @@ export async function syncExistingFields({
       timeFieldName: pattern.timeFieldName,
       dataViewsService: dataViews,
       uiSettingsClient: core.uiSettings,
+      includeFrozen: core.uiSettings.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
+      useSampling: core.uiSettings.get(FIELD_EXISTENCE_SETTING),
     }) as Promise<ExistingFields>;
   });
 

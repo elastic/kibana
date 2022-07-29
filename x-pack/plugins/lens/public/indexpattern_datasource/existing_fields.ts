@@ -65,8 +65,8 @@ export async function fetchFieldExistence({
 
   const metaFields: string[] = await uiSettingsClient.get(UI_SETTINGS.META_FIELDS);
   const allFields = buildFieldList(dataView, metaFields);
+  console.log({allFields, dataView});
   const filter = toQuery(timeFieldName, fromDate, toDate, dslQuery);
-  debugger;
   const existingFieldList = await dataViewsService.getFieldsForIndexPattern(dataView, {
     // filled in by data views service
     pattern: '',
@@ -239,7 +239,6 @@ function toQuery(
  */
 export function existingFields(filteredFields: FieldSpec[], allFields: Field[]): string[] {
   const filteredFieldsSet = new Set(filteredFields.map((f) => f.name));
-
   return allFields
     .filter((field) => field.isScript || field.runtimeField || filteredFieldsSet.has(field.name))
     .map((f) => f.name);

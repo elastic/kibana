@@ -9,8 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
 import { UiSettingsParams } from '@kbn/core/server';
-
-export const FIELD_EXISTENCE_SETTING = 'lens:useFieldExistenceSampling';
+import { FIELD_EXISTENCE_SETTING } from '../common';
 
 export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
   [FIELD_EXISTENCE_SETTING]: {
