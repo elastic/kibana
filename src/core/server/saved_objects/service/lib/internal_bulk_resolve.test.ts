@@ -23,7 +23,7 @@ import {
   SavedObjectsSerializer,
   LEGACY_URL_ALIAS_TYPE,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
+import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { internalBulkResolve, InternalBulkResolveParams } from './internal_bulk_resolve';
 import { normalizeNamespace } from './internal_utils';
 

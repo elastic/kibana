@@ -16,7 +16,7 @@ import {
   ALL_NAMESPACES_STRING,
   DEFAULT_NAMESPACE_STRING,
 } from '@kbn/core-saved-objects-utils-server';
-import { SavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
+import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 import { getQueryParams } from './query_params';
 
 const registerTypes = (registry: SavedObjectTypeRegistry) => {

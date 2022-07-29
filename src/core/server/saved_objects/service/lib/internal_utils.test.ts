@@ -9,7 +9,7 @@
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { encodeHitVersion } from '@kbn/core-saved-objects-base-server-internal';
-import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
+import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import {
   getBulkOperationError,
   getCurrentTime,

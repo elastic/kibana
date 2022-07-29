@@ -19,7 +19,7 @@ import {
   SavedObjectsSerializer,
   LEGACY_URL_ALIAS_TYPE,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
+import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import type { CreatePointInTimeFinderFn } from './point_in_time_finder';
 import {
   ALIAS_SEARCH_PER_PAGE,

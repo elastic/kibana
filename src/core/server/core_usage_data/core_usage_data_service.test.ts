@@ -25,7 +25,7 @@ import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.
 
 import { CoreUsageDataService } from './core_usage_data_service';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { typeRegistryMock } from '../saved_objects/saved_objects_type_registry.mock';
+import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { CORE_USAGE_STATS_TYPE } from './constants';
 import { CoreUsageStatsClient } from './core_usage_stats_client';
 

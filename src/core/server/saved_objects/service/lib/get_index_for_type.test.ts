@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { getIndexForType } from './get_index_for_type';
-import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 
 describe('getIndexForType', () => {
   const kibanaVersion = '8.0.0';
