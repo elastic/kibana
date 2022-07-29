@@ -194,7 +194,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
     // if (fieldTypeInfo === undefined || !isEqual(fieldTypeInfoUpdate, fieldTypeInfo)) {
 
     // todo does this get fired with key removal?
-    console.log('hasUpdates',hasUpdates);
+    console.log('hasUpdates', hasUpdates);
     if (hasUpdates) {
       // form.updateFieldValues({ subfields: { ...fieldsAndTypes, ...update } });
       const updatedFieldsAndTypes = { ...fieldsAndTypes, ...update };
