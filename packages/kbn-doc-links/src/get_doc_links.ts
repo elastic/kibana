@@ -486,7 +486,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     reporting: {
       cloudMinimumRequirements: `${KIBANA_DOCS}reporting-getting-started.html#reporting-on-cloud-resource-requirements`,
-      browserSystemDependencies: `${KIBANA_DOCS}reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies`,
+      browserSystemDependencies: `${KIBANA_DOCS}secure-reporting.html#install-reporting-packages`,
       browserSandboxDependencies: `${KIBANA_DOCS}reporting-troubleshooting.html#reporting-troubleshooting-sandbox-dependency`,
     },
     security: {
