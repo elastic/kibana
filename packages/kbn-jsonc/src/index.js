@@ -12,10 +12,12 @@ const { stripJsonComments } = require('./strip_json_comments');
  * @param {string} jsonWithComments
  */
 function parse(jsonWithComments) {
-  return JSON.parse(stripJsonComments(jsonWithComments, {
-    whitespace: false,
-    trailingCommas: true
-  }));
+  return JSON.parse(
+    stripJsonComments(jsonWithComments, {
+      whitespace: false,
+      trailingCommas: true,
+    })
+  );
 }
 
 module.exports = { parse };
