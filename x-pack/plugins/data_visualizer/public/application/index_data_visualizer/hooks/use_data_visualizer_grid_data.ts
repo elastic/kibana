@@ -26,7 +26,7 @@ import {
   NON_AGGREGATABLE_FIELD_TYPES,
   OMIT_FIELDS,
 } from '../../../../common/constants';
-import type { FieldRequestConfig, JobFieldType } from '../../../../common/types';
+import type { FieldRequestConfig, SupportedFieldType } from '../../../../common/types';
 import { kbnTypeToJobType } from '../../common/util/field_types_utils';
 import { getActions } from '../../common/components/field_data_row/action_menu';
 import { DataVisualizerGridInput } from '../embeddables/grid_embeddable/grid_embeddable';
@@ -90,6 +90,7 @@ export const useDataVisualizerGridData = (
 
   /** Prepare required params to pass to search strategy **/
   const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
+    const filterManager = data.query.filterManager;
     const searchData = getEsQueryFromSavedSearch({
       dataView: currentDataView,
       uiSettings,
@@ -101,7 +102,10 @@ export const useDataVisualizerGridData = (
 
     if (searchData === undefined || dataVisualizerListState.searchString !== '') {
       if (dataVisualizerListState.filters) {
-        data.query.filterManager.setFilters(dataVisualizerListState.filters);
+        const globalFilters = filterManager?.getGlobalFilters();
+
+        if (filterManager) filterManager.setFilters(dataVisualizerListState.filters);
+        if (globalFilters) filterManager?.addFilters(globalFilters);
       }
       return {
         searchQuery: dataVisualizerListState.searchQuery,
@@ -428,7 +432,7 @@ export const useDataVisualizerGridData = (
       } else {
         // Add a flag to indicate that this is one of the 'other' Kibana
         // field types that do not yet have a specific card type.
-        nonMetricConfig.type = field.type as JobFieldType;
+        nonMetricConfig.type = field.type as SupportedFieldType;
         nonMetricConfig.isUnsupportedType = true;
       }
 

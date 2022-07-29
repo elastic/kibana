@@ -100,7 +100,7 @@ describe('useSecuritySolutionNavigation', () => {
       { wrapper: TestProviders }
     );
 
-    expect(result?.current?.items?.[3].items?.[2].id).toEqual(SecurityPageName.users);
+    expect(result?.current?.items?.[4].items?.[2].id).toEqual(SecurityPageName.users);
   });
 
   // TODO: [kubernetes] remove when no longer experimental
@@ -110,7 +110,7 @@ describe('useSecuritySolutionNavigation', () => {
       () => useSecuritySolutionNavigation(),
       { wrapper: TestProviders }
     );
-    expect(result?.current?.items?.[1].items?.[2].id).toEqual(SecurityPageName.kubernetes);
+    expect(result?.current?.items?.[1].items?.[3].id).toEqual(SecurityPageName.kubernetes);
   });
 
   it('should omit host isolation exceptions if hook reports false', () => {
@@ -138,7 +138,7 @@ describe('useSecuritySolutionNavigation', () => {
           { wrapper: TestProviders }
         );
 
-        const caseNavItem = (result.current?.items || [])[4].items?.find(
+        const caseNavItem = (result.current?.items || [])[5].items?.find(
           (item) => item['data-test-subj'] === 'navigation-cases'
         );
         expect(caseNavItem).toMatchInlineSnapshot(`

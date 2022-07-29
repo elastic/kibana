@@ -20,7 +20,7 @@ import { onSaveSearch } from './on_save_search';
 
 export type DiscoverTopNavProps = Pick<
   DiscoverLayoutProps,
-  'indexPattern' | 'navigateTo' | 'savedSearch' | 'searchSource'
+  'dataView' | 'navigateTo' | 'savedSearch' | 'searchSource'
 > & {
   onOpenInspector: () => void;
   query?: Query | AggregateQuery;
@@ -31,14 +31,14 @@ export type DiscoverTopNavProps = Pick<
   ) => void;
   stateContainer: GetStateReturn;
   resetSavedSearch: () => void;
-  onChangeIndexPattern: (indexPattern: string) => void;
+  onChangeDataView: (dataView: string) => void;
   isPlainRecord: boolean;
   textBasedLanguageModeErrors?: Error;
   onFieldEdited: () => void;
 };
 
 export const DiscoverTopNav = ({
-  indexPattern,
+  dataView,
   onOpenInspector,
   query,
   savedQuery,
@@ -48,7 +48,7 @@ export const DiscoverTopNav = ({
   navigateTo,
   savedSearch,
   resetSavedSearch,
-  onChangeIndexPattern,
+  onChangeDataView,
   isPlainRecord,
   textBasedLanguageModeErrors,
   onFieldEdited,
@@ -56,8 +56,8 @@ export const DiscoverTopNav = ({
   const history = useHistory();
 
   const showDatePicker = useMemo(
-    () => indexPattern.isTimeBased() && indexPattern.type !== DataViewType.ROLLUP,
-    [indexPattern]
+    () => dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP,
+    [dataView]
   );
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data, uiSettings } = services;
@@ -96,11 +96,11 @@ export const DiscoverTopNav = ({
     () =>
       canEditDataView
         ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
-            if (indexPattern?.id) {
-              const indexPatternInstance = await data.dataViews.get(indexPattern.id);
+            if (dataView?.id) {
+              const dataViewInstance = await data.dataViews.get(dataView.id);
               closeFieldEditor.current = dataViewFieldEditor.openEditor({
                 ctx: {
-                  dataView: indexPatternInstance,
+                  dataView: dataViewInstance,
                 },
                 fieldName,
                 onSave: async () => {
@@ -110,7 +110,7 @@ export const DiscoverTopNav = ({
             }
           }
         : undefined,
-    [canEditDataView, indexPattern?.id, data.dataViews, dataViewFieldEditor, onFieldEdited]
+    [canEditDataView, dataView?.id, data.dataViews, dataViewFieldEditor, onFieldEdited]
   );
 
   const addField = useMemo(
@@ -123,21 +123,21 @@ export const DiscoverTopNav = ({
       canEditDataView
         ? () => {
             closeDataViewEditor.current = dataViewEditor.openEditor({
-              onSave: async (dataView) => {
-                if (dataView.id) {
-                  onChangeIndexPattern(dataView.id);
+              onSave: async (dataViewToSave) => {
+                if (dataViewToSave.id) {
+                  onChangeDataView(dataViewToSave.id);
                 }
               },
             });
           }
         : undefined,
-    [canEditDataView, dataViewEditor, onChangeIndexPattern]
+    [canEditDataView, dataViewEditor, onChangeDataView]
   );
 
   const topNavMenu = useMemo(
     () =>
       getTopNavLinks({
-        indexPattern,
+        dataView,
         navigateTo,
         savedSearch,
         services,
@@ -148,7 +148,7 @@ export const DiscoverTopNav = ({
         isPlainRecord,
       }),
     [
-      indexPattern,
+      dataView,
       navigateTo,
       savedSearch,
       services,
@@ -183,14 +183,14 @@ export const DiscoverTopNav = ({
   }
   const dataViewPickerProps = {
     trigger: {
-      label: indexPattern?.getName() || '',
+      label: dataView?.getName() || '',
       'data-test-subj': 'discover-dataView-switch-link',
-      title: indexPattern?.title || '',
+      title: dataView?.title || '',
     },
-    currentDataViewId: indexPattern?.id,
+    currentDataViewId: dataView?.id,
     onAddField: addField,
     onDataViewCreated: createNewDataView,
-    onChangeDataView: onChangeIndexPattern,
+    onChangeDataView,
     textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
   };
 
@@ -199,21 +199,21 @@ export const DiscoverTopNav = ({
       await onSaveSearch({
         savedSearch,
         services,
-        indexPattern,
+        dataView,
         navigateTo,
         state: stateContainer,
         onClose: onCancel,
         onSaveCb: onSave,
       });
     },
-    [indexPattern, navigateTo, savedSearch, services, stateContainer]
+    [dataView, navigateTo, savedSearch, services, stateContainer]
   );
 
   return (
     <AggregateQueryTopNavMenu
       appName="discover"
       config={topNavMenu}
-      indexPatterns={[indexPattern]}
+      indexPatterns={[dataView]}
       onQuerySubmit={updateQuery}
       onSavedQueryIdChange={updateSavedQueryId}
       query={query}
