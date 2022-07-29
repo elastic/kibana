@@ -444,6 +444,7 @@ export type AlertTableFlyoutComponent =
 export interface AlertsTableFlyoutBaseProps {
   alert: EcsFieldsResponse;
   isLoading: boolean;
+  id?: string;
 }
 
 export interface BulkActionsConfig {
