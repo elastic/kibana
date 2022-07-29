@@ -61,8 +61,8 @@ import { SignalHit } from '@kbn/security-solution-plugin/server/lib/detection_en
 import { ActionResult, FindActionResult } from '@kbn/actions-plugin/server/types';
 import { ESCasesConfigureAttributes } from '@kbn/cases-plugin/server/services/configure/types';
 import { ESCaseAttributes } from '@kbn/cases-plugin/server/services/cases/types';
-import { SavedObjectsRawDocSource } from '@kbn/core/server/saved_objects/serialization';
 import type { SavedObjectsRawDocSource } from '@kbn/core/server';
+import { UserProfileService } from '@kbn/cases-plugin/server/services';
 import { User } from './authentication/types';
 import { superUser } from './authentication/users';
 import { getPostCaseRequest, postCaseReq } from './mock';
