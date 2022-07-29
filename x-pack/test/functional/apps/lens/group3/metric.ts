@@ -13,27 +13,45 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
   const findService = getService('find');
   const testSubjects = getService('testSubjects');
+  const filterBar = getService('filterBar');
+
+  const getMetricTiles = () =>
+    findService.allByCssSelector('[data-test-subj="mtrVis"] .echChart li');
+
+  const getTextIfExists = async (selector: string, container: WebElementWrapper) =>
+    (await findService.descendantExistsByCssSelector(selector, container))
+      ? await (await container.findByCssSelector(selector)).getVisibleText()
+      : '';
+
+  const getMetricDatum = async (tile: WebElementWrapper) => ({
+    title: await getTextIfExists('h2', tile),
+    subtitle: await getTextIfExists('.echMetricText__subtitle', tile),
+    extraText: await getTextIfExists('.echMetricText__extra', tile),
+    value: await getTextIfExists('.echMetricText__value', tile),
+  });
 
   const getMetricData = async () => {
-    const lis = await findService.allByCssSelector('[data-test-subj="mtrVis"] .echChart li');
+    const tiles = await getMetricTiles();
     const showingBar = Boolean(await findService.existsByCssSelector('.echSingleMetricProgress'));
 
-    const getTextIfExists = async (selector: string, container: WebElementWrapper) =>
-      (await findService.descendantExistsByCssSelector(selector, container))
-        ? await (await container.findByCssSelector(selector)).getVisibleText()
-        : '';
-
     const metricData = [];
-    for (const li of lis) {
+    for (const tile of tiles) {
       metricData.push({
-        title: await getTextIfExists('h2', li),
-        subtitle: await getTextIfExists('.echMetricText__subtitle', li),
-        extraText: await getTextIfExists('.echMetricText__extra', li),
-        value: await getTextIfExists('.echMetricText__value', li),
+        ...(await getMetricDatum(tile)),
         showingBar,
       });
     }
     return metricData;
+  };
+
+  const clickMetric = async (title: string) => {
+    const tiles = await getMetricTiles();
+    for (const tile of tiles) {
+      const datum = await getMetricDatum(tile);
+      if (datum.title === title) {
+        tile.click();
+      }
+    }
   };
 
   describe('lens metric', () => {
@@ -118,7 +136,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect((await getMetricData())[0].showingBar).to.be(true);
     });
-    it('should filter by click', async () => {});
+
+    it('should filter by click', async () => {
+      expect((await filterBar.getFiltersLabel()).length).to.be(0);
+      const title = '93.28.27.24';
+      await clickMetric(title);
+      const labels = await filterBar.getFiltersLabel();
+      expect(labels.length).to.be(1);
+      expect(labels[0]).to.be(`ip: ${title}`);
+      await filterBar.removeAllFilters();
+    });
     it('applies static color', async () => {});
     it('applies dynamic color', async () => {});
     it('converts color stops to number', async () => {});
