@@ -19,12 +19,17 @@ const buildData = (alerts: EcsFieldsResponse): ObservabilityActionsProps['data']
 const fakeSetEventsDeleted = () => [];
 export const getRowActions = (observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry) => {
   return () => ({
-    renderCustomActionsRow: (alert: EcsFieldsResponse, setFlyoutAlert: (data: unknown) => void) => {
+    renderCustomActionsRow: (
+      alert: EcsFieldsResponse,
+      setFlyoutAlert: (data: unknown, id?: string) => void,
+      id?: string
+    ) => {
       return (
         <ObservabilityActions
           data={buildData(alert)}
           eventId={alert._id}
           ecsData={{ _id: alert._id, _index: alert._index }}
+          id={id}
           observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
           setEventsDeleted={fakeSetEventsDeleted}
           setFlyoutAlert={setFlyoutAlert}

@@ -419,6 +419,7 @@ export interface AlertsTableProps {
   flyoutSize?: EuiFlyoutSize;
   pageSize: number;
   pageSizeOptions: number[];
+  id?: string;
   leadingControlColumns: EuiDataGridControlColumn[];
   showExpandToDetails: boolean;
   trailingControlColumns: EuiDataGridControlColumn[];
@@ -469,7 +470,8 @@ export interface AlertsTableConfigurationRegistry {
   useActionsColumn?: () => {
     renderCustomActionsRow: (
       alert: EcsFieldsResponse,
-      setFlyoutAlert: (data: unknown) => void
+      setFlyoutAlert: (data: unknown) => void,
+      id?: string
     ) => JSX.Element;
     width?: number;
   };

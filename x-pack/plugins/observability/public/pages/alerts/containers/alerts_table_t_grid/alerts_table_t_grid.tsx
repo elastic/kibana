@@ -70,6 +70,7 @@ import { addDisplayNames } from './add_display_names';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from './translations';
 import { ObservabilityAppServices } from '../../../../application/types';
 import { useBulkAddToCaseActions } from '../../../../hooks/use_alert_bulk_case_actions';
+import { RULE_DETAILS_PAGE_ID } from '../../../rule_details/types';
 
 interface AlertsTableTGridProps {
   indexNames: string[];
@@ -88,6 +89,7 @@ export type ObservabilityActionsProps = Pick<
 > & {
   setFlyoutAlert: React.Dispatch<React.SetStateAction<TopAlert | undefined>>;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
+  id?: string;
 };
 
 const EventsThContent = styled.div.attrs(({ className = '' }) => ({
@@ -150,6 +152,7 @@ export function ObservabilityActions({
   data,
   eventId,
   ecsData,
+  id,
   observabilityRuleTypeRegistry,
   setFlyoutAlert,
 }: ObservabilityActionsProps) {
@@ -168,13 +171,16 @@ export function ObservabilityActions({
     setActionsPopover(null);
   }, []);
 
-  const toggleActionsPopover = useCallback((id) => {
-    setActionsPopover((current) => (current ? null : id));
+  const toggleActionsPopover = useCallback((currentId) => {
+    setActionsPopover((current) => (current ? null : currentId));
   }, []);
 
   const userCasesPermissions = useGetUserCasesPermissions();
   const ruleId = alert.fields['kibana.alert.rule.uuid'] ?? null;
-  const linkToRule = ruleId ? http.basePath.prepend(paths.observability.ruleDetails(ruleId)) : null;
+  const linkToRule =
+    id !== RULE_DETAILS_PAGE_ID && ruleId
+      ? http.basePath.prepend(paths.observability.ruleDetails(ruleId))
+      : null;
   const caseAttachments: CaseAttachments = useMemo(() => {
     return ecsData?._id
       ? [
