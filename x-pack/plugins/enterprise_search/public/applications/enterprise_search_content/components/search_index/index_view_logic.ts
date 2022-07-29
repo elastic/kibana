@@ -104,12 +104,14 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
     ],
     values: [FetchIndexApiLogic, ['data'], IndexNameLogic, ['indexName']],
   },
-  events: ({ actions }) => ({
+  events: ({ actions, values }) => ({
     afterMount: () => {
       actions.startFetchIndexPoll();
     },
     beforeUnmount: () => {
-      actions.stopFetchIndexPoll();
+      if (values.fetchIndexTimeoutId) {
+        clearTimeout(values.fetchIndexTimeoutId);
+      }
     },
   }),
   listeners: ({ actions, values }) => ({

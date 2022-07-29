@@ -27,10 +27,12 @@ export const SearchIndexRouter: React.FC = () => {
 
   const indexNameLogic = IndexNameLogic({ indexName });
   const { setIndexName } = useActions(indexNameLogic);
+  const { stopFetchIndexPoll } = useActions(IndexViewLogic);
   useEffect(() => {
     const unmountName = indexNameLogic.mount();
     const unmountView = IndexViewLogic.mount();
     return () => {
+      stopFetchIndexPoll();
       unmountName();
       unmountView();
     };
