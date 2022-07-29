@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { Redirect, Switch } from 'react-router-dom';
+import { Redirect, Switch, useLocation, useParams, useRouteMatch } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 
 import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
@@ -20,6 +20,7 @@ import { MlNetworkConditionalContainer } from '../../common/components/ml/condit
 import { NETWORK_PATH } from '../../../common/constants';
 import { FlowTarget } from '../../../common/search_strategy';
 import { networkDetailsPagePath, networkDetailsTabPath } from './constants';
+import { severity } from '@kbn/securitysolution-io-ts-alerting-types';
 
 const NetworkContainerComponent = () => {
   const capabilities = useMlCapabilities();
@@ -35,7 +36,7 @@ const NetworkContainerComponent = () => {
 
   const getPathWithFlowType = useCallback(
     (detailName: string) =>
-      `${NETWORK_PATH}/${detailName}/${NetworkRouteType.flows}/${FlowTarget.source}`,
+      `${NETWORK_PATH}/ip/${detailName}/${FlowTarget.source}/${NetworkRouteType.flows}`,
     []
   );
 
@@ -61,23 +62,6 @@ const NetworkContainerComponent = () => {
       <Route path={networkDetailsTabPath}>
         <NetworkDetails />
       </Route>
-      <Route
-        // For now we are allowing the old route to exist but redirect to the new structure
-        path={`${NETWORK_PATH}/ip/:detailName`}
-        render={({
-          match: {
-            params: { detailName },
-          },
-          location: { search = '' },
-        }) => (
-          <Redirect
-            to={{
-              pathname: getPathWithFlowType(detailName),
-              search,
-            }}
-          />
-        )}
-      />
       <Route
         path={networkDetailsPagePath}
         render={({

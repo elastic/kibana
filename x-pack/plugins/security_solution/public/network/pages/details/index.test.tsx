@@ -107,7 +107,7 @@ jest.mock('../../../common/components/query_bar', () => ({
 const getMockHistory = (ip: string) => ({
   length: 2,
   location: {
-    pathname: `/network/${ip}`,
+    pathname: `/network/ip/${ip}`,
     search: '',
     state: '',
     hash: '',

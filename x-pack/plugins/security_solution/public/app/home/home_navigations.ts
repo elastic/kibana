@@ -120,13 +120,6 @@ export const navTabs: SecurityNav = {
     disabled: false,
     urlKey: 'cases',
   },
-  [SecurityPageName.administration]: {
-    id: SecurityPageName.administration,
-    name: i18n.ADMINISTRATION,
-    href: APP_MANAGEMENT_PATH,
-    disabled: false,
-    urlKey: 'administration',
-  },
   [SecurityPageName.endpoints]: {
     id: SecurityPageName.endpoints,
     name: i18n.ENDPOINTS,

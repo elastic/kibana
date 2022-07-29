@@ -6,11 +6,12 @@
  */
 
 import { NETWORK_PATH } from '../../../common/constants';
+import { FlowTargetSourceDest } from '../../../common/search_strategy';
 import { NetworkDetailsRouteType } from './details/types';
 import { NetworkRouteType } from './navigation/types';
 
 export const networkTabPath = `${NETWORK_PATH}/:tabName(${NetworkRouteType.flows}|${NetworkRouteType.http}|${NetworkRouteType.tls}|${NetworkRouteType.anomalies}|${NetworkRouteType.events})`;
 
-export const networkDetailsPagePath = `${NETWORK_PATH}/:detailName`;
+export const networkDetailsPagePath = `${NETWORK_PATH}/ip/:detailName`;
 
-export const networkDetailsTabPath = `${networkDetailsPagePath}/:tabName(${NetworkDetailsRouteType.flows}|${NetworkDetailsRouteType.http}|${NetworkDetailsRouteType.tls}|${NetworkDetailsRouteType.anomalies}|${NetworkDetailsRouteType.events}|${NetworkDetailsRouteType.users})/:flowTarget`;
+export const networkDetailsTabPath = `${networkDetailsPagePath}/:flowTarget(${FlowTargetSourceDest.source}|${FlowTargetSourceDest.destination})/:tabName(${NetworkDetailsRouteType.flows}|${NetworkDetailsRouteType.http}|${NetworkDetailsRouteType.tls}|${NetworkDetailsRouteType.anomalies}|${NetworkDetailsRouteType.events}|${NetworkDetailsRouteType.users})`;

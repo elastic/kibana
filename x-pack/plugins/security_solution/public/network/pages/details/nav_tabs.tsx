@@ -15,7 +15,7 @@ const getTabsOnNetworkDetailsUrl = (
   ipAddress: string,
   tabName: NetworkDetailsRouteType,
   flowTarget: FlowTargetSourceDest
-) => `${NETWORK_PATH}/${ipAddress}/${tabName}/${flowTarget}`;
+) => `${NETWORK_PATH}/ip/${ipAddress}/${flowTarget}/${tabName}`;
 
 export const navTabsNetworkDetails = (
   ipAddress: string,

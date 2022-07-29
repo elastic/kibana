@@ -257,7 +257,7 @@ describe('Navigation Breadcrumbs', () => {
           networkBreadcrumb,
           {
             text: ipv4,
-            href: `securitySolutionUI/network/${ipv4}/flows/source`,
+            href: `securitySolutionUI/network/ip/${ipv4}/source/flows`,
           },
           { text: 'Flows', href: '' },
         ]);
@@ -274,7 +274,7 @@ describe('Navigation Breadcrumbs', () => {
           networkBreadcrumb,
           {
             text: ipv6,
-            href: `securitySolutionUI/network/${ipv6Encoded}/flows/source`,
+            href: `securitySolutionUI/network/ip/${ipv6Encoded}/source/flows`,
           },
           { text: 'Flows', href: '' },
         ]);
@@ -574,7 +574,7 @@ describe('Navigation Breadcrumbs', () => {
           networkBreadcrumb,
           {
             text: ipv4,
-            href: `securitySolutionUI/network/${ipv4}/flows/source`,
+            href: `securitySolutionUI/network/ip/${ipv4}/source/flows`,
           },
           { text: 'Flows', href: '' },
         ]);
@@ -592,7 +592,7 @@ describe('Navigation Breadcrumbs', () => {
           networkBreadcrumb,
           {
             text: ipv6,
-            href: `securitySolutionUI/network/${ipv6Encoded}/flows/source`,
+            href: `securitySolutionUI/network/ip/${ipv6Encoded}/source/flows`,
           },
           { text: 'Flows', href: '' },
         ]);
