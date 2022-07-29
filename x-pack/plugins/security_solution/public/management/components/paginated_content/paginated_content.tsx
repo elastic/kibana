@@ -188,6 +188,9 @@ export const PaginatedContent = memo(
 
     const generatedBodyItemContent = useMemo(() => {
       if (error) {
+        if (error instanceof Error) {
+          return <ErrorMessage message={error.message} data-test-subj={getTestId('error')} />;
+        }
         return 'string' === typeof error ? (
           <ErrorMessage message={error} data-test-subj={getTestId('error')} />
         ) : (
