@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { painlessErrorToMonacoMarker } from './serialization';
+export { painlessErrorToMonacoMarker, deserializeField } from './serialization';
 
 export { getLinks } from './documentation';
 
