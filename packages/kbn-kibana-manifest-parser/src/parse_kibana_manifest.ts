@@ -112,7 +112,7 @@ export function validateKibanaManifest(parsed: unknown): KibanaPackageManifest {
   }
 
   if (!isValidPkgType(type)) {
-    throw err(`invalid package "type", options are [${Object.keys(PACKAGE_TYPES).join(', ')}]`);
+    throw err(`invalid package "type", options are [${PACKAGE_TYPES.join(', ')}]`);
   }
 
   if (typeof id !== 'string' || !id.startsWith('@kbn/')) {
