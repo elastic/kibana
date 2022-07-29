@@ -148,7 +148,8 @@ describe('suggestion helpers', () => {
     expect(datasourceMap.mock.getDatasourceSuggestionsForField).toHaveBeenCalledWith(
       datasourceStates.mock.state,
       droppedField,
-      expect.any(Function)
+      expect.any(Function),
+      dataViews.indexPatterns
     );
   });
 
@@ -184,12 +185,14 @@ describe('suggestion helpers', () => {
     expect(multiDatasourceMap.mock.getDatasourceSuggestionsForField).toHaveBeenCalledWith(
       multiDatasourceStates.mock.state,
       droppedField,
-      expect.any(Function)
+      expect.any(Function),
+      dataViews.indexPatterns
     );
     expect(multiDatasourceMap.mock2.getDatasourceSuggestionsForField).toHaveBeenCalledWith(
       multiDatasourceStates.mock2.state,
       droppedField,
-      expect.any(Function)
+      expect.any(Function),
+      dataViews.indexPatterns
     );
     expect(multiDatasourceMap.mock3.getDatasourceSuggestionsForField).not.toHaveBeenCalled();
   });
@@ -218,7 +221,8 @@ describe('suggestion helpers', () => {
     expect(datasourceMap.mock.getDatasourceSuggestionsForVisualizeField).toHaveBeenCalledWith(
       datasourceStates.mock.state,
       '1',
-      'test'
+      'test',
+      dataViews.indexPatterns
     );
   });
 
@@ -258,12 +262,14 @@ describe('suggestion helpers', () => {
     expect(multiDatasourceMap.mock.getDatasourceSuggestionsForVisualizeField).toHaveBeenCalledWith(
       multiDatasourceStates.mock.state,
       '1',
-      'test'
+      'test',
+      dataViews.indexPatterns
     );
     expect(multiDatasourceMap.mock2.getDatasourceSuggestionsForVisualizeField).toHaveBeenCalledWith(
       multiDatasourceStates.mock2.state,
       '1',
-      'test'
+      'test',
+      dataViews.indexPatterns
     );
     expect(
       multiDatasourceMap.mock3.getDatasourceSuggestionsForVisualizeField
@@ -338,7 +344,8 @@ describe('suggestion helpers', () => {
     });
     expect(datasourceMap.mock.getDatasourceSuggestionsForVisualizeCharts).toHaveBeenCalledWith(
       datasourceStates.mock.state,
-      triggerContext.layers
+      triggerContext.layers,
+      dataViews.indexPatterns
     );
   });
 
@@ -421,12 +428,17 @@ describe('suggestion helpers', () => {
     });
     expect(multiDatasourceMap.mock.getDatasourceSuggestionsForVisualizeCharts).toHaveBeenCalledWith(
       datasourceStates.mock.state,
-      triggerContext.layers
+      triggerContext.layers,
+      dataViews.indexPatterns
     );
 
     expect(
       multiDatasourceMap.mock2.getDatasourceSuggestionsForVisualizeCharts
-    ).toHaveBeenCalledWith(multiDatasourceStates.mock2.state, triggerContext.layers);
+    ).toHaveBeenCalledWith(
+      multiDatasourceStates.mock2.state,
+      triggerContext.layers,
+      dataViews.indexPatterns
+    );
     expect(
       multiDatasourceMap.mock3.getDatasourceSuggestionsForVisualizeCharts
     ).not.toHaveBeenCalled();
@@ -753,7 +765,8 @@ describe('suggestion helpers', () => {
             label: 'myfieldLabel',
           },
         },
-        expect.any(Function)
+        expect.any(Function),
+        dataViews.indexPatterns
       );
     });
 

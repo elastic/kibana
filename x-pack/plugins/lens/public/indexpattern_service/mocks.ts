@@ -12,6 +12,7 @@ import {
   createMockedRestrictedIndexPattern,
 } from '../indexpattern_datasource/mocks';
 import { IndexPattern } from '../types';
+import { getFieldByNameFactory } from './loader';
 
 export function loadInitialDataViews() {
   const indexPattern = createMockedIndexPattern();
@@ -113,7 +114,9 @@ const indexPattern1 = {
     },
     documentField,
   ],
+  getFieldByName: jest.fn(),
 } as unknown as IndexPattern;
+indexPattern1.getFieldByName = getFieldByNameFactory(indexPattern1.fields);
 
 const sampleIndexPatternsFromService = {
   '1': createMockedIndexPattern(),
@@ -186,6 +189,7 @@ const indexPattern2 = {
     documentField,
   ],
 } as unknown as IndexPattern;
+indexPattern2.getFieldByName = getFieldByNameFactory(indexPattern2.fields);
 
 export const sampleIndexPatterns = {
   '1': indexPattern1,

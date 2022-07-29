@@ -65,6 +65,17 @@ function generateSuggestion(state = {}): DatasourceSuggestion {
   };
 }
 
+function wrapDataViewsContract() {
+  const dataViewsContract = dataViewPluginMocks.createStartContract();
+  return {
+    ...dataViewsContract,
+    getIdsWithTitle: jest.fn(async () => [
+      { id: '1', title: 'IndexPatternTitle' },
+      { id: '2', title: 'OtherIndexPatternTitle' },
+    ]),
+  };
+}
+
 function getDefaultProps() {
   const defaultProps = {
     store: {
@@ -82,7 +93,7 @@ function getDefaultProps() {
       data: mockDataPlugin(),
       expressions: expressionsPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
-      dataViews: dataViewPluginMocks.createStartContract(),
+      dataViews: wrapDataViewsContract(),
     },
     palettes: chartPluginMock.createPaletteRegistry(),
     lensInspector: getLensInspectorService(inspectorPluginMock.createStartContract()),
@@ -418,6 +429,7 @@ describe('editor_frame', () => {
       expect(mockDatasource.getPublicAPI).toHaveBeenCalledWith({
         state: datasourceState,
         layerId: 'first',
+        indexPatterns: {},
       });
     });
   });

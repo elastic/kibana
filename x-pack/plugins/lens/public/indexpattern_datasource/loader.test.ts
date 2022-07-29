@@ -38,9 +38,9 @@ const indexPatternRefs = [
 
 describe('loader', () => {
   describe('loadInitialState', () => {
-    it('should load a default state', async () => {
+    it('should load a default state', () => {
       const storage = createMockStorage();
-      const state = await loadInitialState({
+      const state = loadInitialState({
         indexPatterns: sampleIndexPatterns,
         indexPatternRefs,
         storage,
@@ -55,9 +55,9 @@ describe('loader', () => {
       });
     });
 
-    it('should load a default state without loading the indexPatterns when embedded', async () => {
+    it('should load a default state without loading the indexPatterns when embedded', () => {
       const storage = createMockStorage();
-      const state = await loadInitialState({
+      const state = loadInitialState({
         storage,
         indexPatterns: {},
         indexPatternRefs: [],
@@ -71,9 +71,9 @@ describe('loader', () => {
       expect(storage.set).not.toHaveBeenCalled();
     });
 
-    it('should load a default state when lastUsedIndexPatternId is not found in indexPatternRefs', async () => {
+    it('should load a default state when lastUsedIndexPatternId is not found in indexPatternRefs', () => {
       const storage = createMockStorage({ indexPatternId: 'c' });
-      const state = await loadInitialState({
+      const state = loadInitialState({
         storage,
         indexPatternRefs,
         indexPatterns: sampleIndexPatterns,
@@ -88,8 +88,8 @@ describe('loader', () => {
       });
     });
 
-    it('should load lastUsedIndexPatternId if in localStorage', async () => {
-      const state = await loadInitialState({
+    it('should load lastUsedIndexPatternId if in localStorage', () => {
+      const state = loadInitialState({
         storage: createMockStorage({ indexPatternId: '2' }),
         indexPatternRefs,
         indexPatterns: sampleIndexPatterns,
@@ -101,9 +101,9 @@ describe('loader', () => {
       });
     });
 
-    it('should use the default index pattern id, if provided', async () => {
+    it('should use the default index pattern id, if provided', () => {
       const storage = createMockStorage();
-      const state = await loadInitialState({
+      const state = loadInitialState({
         defaultIndexPatternId: '2',
         storage,
         indexPatternRefs,
@@ -119,9 +119,9 @@ describe('loader', () => {
       });
     });
 
-    it('should use the indexPatternId of the visualize trigger field, if provided', async () => {
+    it('should use the indexPatternId of the visualize trigger field, if provided', () => {
       const storage = createMockStorage();
-      const state = await loadInitialState({
+      const state = loadInitialState({
         storage,
         initialContext: {
           indexPatternId: '1',
@@ -140,9 +140,9 @@ describe('loader', () => {
       });
     });
 
-    it('should use the indexPatternId of the visualize trigger chart context, if provided', async () => {
+    it('should use the indexPatternId of the visualize trigger chart context, if provided', () => {
       const storage = createMockStorage();
-      const state = await loadInitialState({
+      const state = loadInitialState({
         storage,
         initialContext: {
           layers: [
@@ -185,7 +185,7 @@ describe('loader', () => {
       });
     });
 
-    it('should initialize all the embeddable references without local storage', async () => {
+    it('should initialize all the embeddable references without local storage', () => {
       const savedState: IndexPatternPersistedState = {
         layers: {
           layerb: {
@@ -213,7 +213,7 @@ describe('loader', () => {
         },
       };
       const storage = createMockStorage({});
-      const state = await loadInitialState({
+      const state = loadInitialState({
         persistedState: savedState,
         references: [
           { name: 'indexpattern-datasource-layer-layerb', id: '2', type: 'index-pattern' },
@@ -233,7 +233,7 @@ describe('loader', () => {
       expect(storage.set).not.toHaveBeenCalled();
     });
 
-    it('should initialize from saved state', async () => {
+    it('should initialize from saved state', () => {
       const savedState: IndexPatternPersistedState = {
         layers: {
           layerb: {
@@ -261,7 +261,7 @@ describe('loader', () => {
         },
       };
       const storage = createMockStorage({ indexPatternId: '1' });
-      const state = await loadInitialState({
+      const state = loadInitialState({
         persistedState: savedState,
         references: [
           { name: 'indexpattern-datasource-layer-layerb', id: '2', type: 'index-pattern' },
@@ -277,13 +277,6 @@ describe('loader', () => {
 
       expect(state).toMatchObject({
         currentIndexPatternId: '2',
-        indexPatternRefs: [
-          { id: '1', title: sampleIndexPatterns['1'].title },
-          { id: '2', title: sampleIndexPatterns['2'].title },
-        ],
-        indexPatterns: {
-          '2': sampleIndexPatterns['2'],
-        },
         layers: { layerb: { ...savedState.layers.layerb, indexPatternId: '2' } },
       });
 
@@ -489,6 +482,7 @@ describe('loader', () => {
         layerId: 'l1',
         storage,
         indexPatterns: sampleIndexPatterns,
+        replaceIfPossible: true,
       });
 
       expect(newState).toMatchObject({

@@ -52,7 +52,7 @@ describe('loader', () => {
         dataViews: mockDataViewsService(),
       });
 
-      expect(cache).toMatchObject(sampleIndexPatterns);
+      expect(cache).toEqual(sampleIndexPatterns);
     });
 
     it('should allow scripted, but not full text fields', async () => {
@@ -62,7 +62,7 @@ describe('loader', () => {
         dataViews: mockDataViewsService(),
       });
 
-      expect(cache).toMatchObject(sampleIndexPatterns);
+      expect(cache).toEqual(sampleIndexPatterns);
     });
 
     it('should apply field restrictions from typeMeta', async () => {
@@ -259,7 +259,7 @@ describe('loader', () => {
         dataViews: mockDataViewsService(),
         onError,
       });
-      expect(cache).toMatchObject({ 2: sampleIndexPatterns['2'] });
+      expect(cache).toEqual({ 2: expect.anything() });
       expect(onError).not.toHaveBeenCalled();
     });
   });

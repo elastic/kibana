@@ -96,9 +96,9 @@ export function convertDataViewIntoLensIndexPattern(
 }
 
 export async function loadIndexPatternRefs(
-  indexPatternsService: MinimalDataViewsContract
+  dataViews: MinimalDataViewsContract
 ): Promise<IndexPatternRef[]> {
-  const indexPatterns = await indexPatternsService.getIdsWithTitle();
+  const indexPatterns = await dataViews.getIdsWithTitle();
 
   return indexPatterns.sort((a, b) => {
     return a.title.localeCompare(b.title);
