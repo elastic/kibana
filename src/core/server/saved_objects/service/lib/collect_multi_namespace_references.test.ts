@@ -18,8 +18,8 @@ import type {
   SavedObjectsCollectMultiNamespaceReferencesOptions,
 } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
-import { SavedObjectsSerializer } from '../../serialization';
 import {
   ALIAS_OR_SHARED_ORIGIN_SEARCH_PER_PAGE,
   CollectMultiNamespaceReferencesParams,

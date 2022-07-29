@@ -10,8 +10,8 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import * as Option from 'fp-ts/Option';
 import type { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
+import { SavedObjectsMigrationConfigType } from '@kbn/core-saved-objects-base-server-internal';
 import { loggingSystemMock } from '../../mocks';
-import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
 import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { createInitialState } from './initial_state';
 

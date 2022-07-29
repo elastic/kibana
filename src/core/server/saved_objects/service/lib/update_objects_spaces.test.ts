@@ -21,8 +21,8 @@ import {
   SavedObjectsErrorHelpers,
   ALL_NAMESPACES_STRING,
 } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
-import { SavedObjectsSerializer } from '../../serialization';
 import type { UpdateObjectsSpacesParams } from './update_objects_spaces';
 import { updateObjectsSpaces } from './update_objects_spaces';
 
