@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { WatchStatusModel } from './watch_status_model';
+export {
+  WatchStatusUpstreamJson,
+  ServerWatchStatusModel,
+  DeserializedActionStatusModel,
+} from './status_types';

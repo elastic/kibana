@@ -5,41 +5,31 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
+// These values are returned by the API and depended upon in both server-side
+// and client-side logic. TS will use these values to determine correctness.
+// If we were to translate them for the runtime, we would lose the correctness
+// guarantee. Therefore, we shouldn't translate them. Translation should occur
+// in the UI layer as a separate step, e.g. keying off these values and
+// rendering an internationalized string.
 export const ACTION_STATES: { [key: string]: string } = {
   // Action is not being executed because conditions haven't been met
-  OK: i18n.translate('xpack.watcher.constants.actionStates.okStateText', {
-    defaultMessage: 'OK',
-  }),
+  OK: 'OK',
 
   // Action has been acknowledged by user
-  ACKNOWLEDGED: i18n.translate('xpack.watcher.constants.actionStates.acknowledgedStateText', {
-    defaultMessage: 'Acked',
-  }),
+  ACKNOWLEDGED: 'Acked',
 
   // Action has been throttled (time-based) by the system
-  THROTTLED: i18n.translate('xpack.watcher.constants.actionStates.throttledStateText', {
-    defaultMessage: 'Throttled',
-  }),
+  THROTTLED: 'Throttled',
 
   // Action has been completed
-  FIRING: i18n.translate('xpack.watcher.constants.actionStates.firingStateText', {
-    defaultMessage: 'Firing',
-  }),
+  FIRING: 'Firing',
 
   // Action has failed
-  ERROR: i18n.translate('xpack.watcher.constants.actionStates.errorStateText', {
-    defaultMessage: 'Error',
-  }),
+  ERROR: 'Error',
 
   // Action has a configuration error
-  CONFIG_ERROR: i18n.translate('xpack.watcher.constants.actionStates.configErrorStateText', {
-    defaultMessage: 'Config error',
-  }),
+  CONFIG_ERROR: 'Config error',
 
   // Action status is unknown; we should never end up in this state
-  UNKNOWN: i18n.translate('xpack.watcher.constants.actionStates.unknownStateText', {
-    defaultMessage: 'Unknown',
-  }),
+  UNKNOWN: 'Unknown',
 };

@@ -5,12 +5,4 @@
  * 2.0.
  */
 
-import moment from 'moment';
-
-export function getMoment(date) {
-  if (!date) {
-    return null;
-  }
-
-  return moment(date);
-}
+export { getMoment } from './get_moment';
