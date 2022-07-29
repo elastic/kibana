@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { IOverlayBannersStart, OverlayBannersService } from './banners_service';
+import { InternalOverlayBannersStart, OverlayBannersService } from './banners_service';
 import { take } from 'rxjs/operators';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 describe('OverlayBannersService', () => {
-  let service: IOverlayBannersStart;
+  let service: InternalOverlayBannersStart;
   beforeEach(() => {
     service = new OverlayBannersService().start({
       i18n: i18nServiceMock.createStartContract(),

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { IOverlayBannersStart } from './banners_service';
+import type { InternalOverlayBannersStart } from './banners_service';
 
 // internal duplicate of public mock for `createStartContractMock`
 export const createStartContractMock = () => {
-  const startContract: jest.Mocked<IOverlayBannersStart> = {
+  const startContract: jest.Mocked<InternalOverlayBannersStart> = {
     add: jest.fn(),
     remove: jest.fn(),
     replace: jest.fn(),

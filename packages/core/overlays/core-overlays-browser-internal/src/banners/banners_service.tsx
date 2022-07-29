@@ -23,7 +23,7 @@ interface StartDeps {
   uiSettings: IUiSettingsClient;
 }
 
-export interface IOverlayBannersStart extends OverlayBannersStart {
+export interface InternalOverlayBannersStart extends OverlayBannersStart {
   /** @internal */
   get$(): Observable<OverlayBanner[]>;
 }
@@ -39,12 +39,12 @@ export interface OverlayBanner {
 export class OverlayBannersService {
   private readonly userBanner = new UserBannerService();
 
-  public start({ i18n, uiSettings }: StartDeps): IOverlayBannersStart {
+  public start({ i18n, uiSettings }: StartDeps): InternalOverlayBannersStart {
     let uniqueId = 0;
     const genId = () => `${uniqueId++}`;
     const banners$ = new BehaviorSubject(new PriorityMap<string, OverlayBanner>());
 
-    const service: IOverlayBannersStart = {
+    const service: InternalOverlayBannersStart = {
       add: (mount, priority = 0) => {
         const id = genId();
         const nextBanner: OverlayBanner = { id, mount, priority };

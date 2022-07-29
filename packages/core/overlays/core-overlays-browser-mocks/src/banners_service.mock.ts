@@ -8,12 +8,12 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
-  type IOverlayBannersStart,
+  type InternalOverlayBannersStart,
   OverlayBannersService,
 } from '@kbn/core-overlays-browser-internal';
 
 const createStartContractMock = () => {
-  const startContract: jest.Mocked<IOverlayBannersStart> = {
+  const startContract: jest.Mocked<InternalOverlayBannersStart> = {
     add: jest.fn(),
     remove: jest.fn(),
     replace: jest.fn(),
