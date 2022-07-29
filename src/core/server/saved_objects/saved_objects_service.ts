@@ -27,16 +27,16 @@ import type {
   SavedObjectsClientWrapperFactory,
   ISavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-server';
-import { SavedObjectsClient, SavedObjectsClientProvider } from './service';
-import { KibanaMigrator, IKibanaMigrator } from './migrations';
-import { InternalCoreUsageDataSetup } from '../core_usage_data';
-import { InternalDeprecationsServiceSetup } from '../deprecations';
 import {
   SavedObjectConfig,
   SavedObjectsSerializer,
   type SavedObjectsConfigType,
   type SavedObjectsMigrationConfigType,
 } from '@kbn/core-saved-objects-base-server-internal';
+import { SavedObjectsClient, SavedObjectsClientProvider } from './service';
+import { KibanaMigrator, IKibanaMigrator } from './migrations';
+import { InternalCoreUsageDataSetup } from '../core_usage_data';
+import { InternalDeprecationsServiceSetup } from '../deprecations';
 import { SavedObjectsRepository } from './service/lib/repository';
 import { SavedObjectTypeRegistry } from './saved_objects_type_registry';
 import { SavedObjectsExporter } from './export';
