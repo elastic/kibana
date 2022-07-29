@@ -59,6 +59,7 @@ import { defaultSortField, isCommentRequestTypeExternalReferenceSO } from '../..
 import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import { injectPersistableReferencesToSO } from '../../attachment_framework/so_references';
 import { IndexRefresh } from '../types';
+import { isStringArray } from './type_guards';
 
 interface GetCaseUserActionArgs extends ClientArgs {
   caseId: string;
@@ -131,7 +132,7 @@ export class CaseUserActionService {
       return [];
     }
 
-    if (field === ActionTypes.tags) {
+    if (field === ActionTypes.tags && isStringArray(originalValue) && isStringArray(newValue)) {
       const tagsUserActionBuilder = this.builderFactory.getBuilder(ActionTypes.tags);
       const compareValues = arraysDifference(originalValue, newValue);
       const userActions = [];
