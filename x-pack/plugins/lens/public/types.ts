@@ -45,7 +45,7 @@ import {
 } from './datatable_visualization/components/constants';
 import type { LensInspector } from './lens_inspector_service';
 import { DataViewsState } from './state_management/types';
-import { IndexPatternServiceAPI } from './data_views_service/service';
+import { IndexPatternServiceAPI } from './indexpattern_service/service';
 
 export interface IndexPatternRef {
   id: string;

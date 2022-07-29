@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IndexPatternServiceAPI } from '../data_views_service/service';
+import type { IndexPatternServiceAPI } from '../indexpattern_service/service';
 
 export function createIndexPatternServiceMock(): IndexPatternServiceAPI {
   return {

@@ -28,7 +28,7 @@ import {
   selectVisualization,
 } from '../../state_management';
 import type { LensInspector } from '../../lens_inspector_service';
-import { IndexPatternServiceAPI } from '../../data_views_service/service';
+import { IndexPatternServiceAPI } from '../../indexpattern_service/service';
 
 export interface EditorFrameProps {
   datasourceMap: DatasourceMap;

@@ -10,7 +10,7 @@ import { createFormulaPublicApi, FormulaPublicApi } from './formula_public_api';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DateHistogramIndexPatternColumn, PersistedIndexPatternLayer } from '../../../types';
-import { convertDataViewIntoLensIndexPattern } from '../../../../data_views_service/loader';
+import { convertDataViewIntoLensIndexPattern } from '../../../../indexpattern_service/loader';
 
 jest.mock('./parse', () => ({
   insertOrReplaceFormulaColumn: jest.fn().mockReturnValue({}),

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { DateRange } from '../../common';
 import type { IndexPattern, IndexPatternMap, IndexPatternRef } from '../types';
 import {
-  loadIndexPattern,
+  ensureIndexPattern,
   loadIndexPatternRefs,
   loadIndexPatterns,
   syncExistingFields,
@@ -103,7 +103,8 @@ export function createIndexPatternService({
         ...args,
       });
     },
-    ensureIndexPattern: (args) => loadIndexPattern({ onError: onChangeError, dataViews, ...args }),
+    ensureIndexPattern: (args) =>
+      ensureIndexPattern({ onError: onChangeError, dataViews, ...args }),
     refreshExistingFields: (args) =>
       syncExistingFields({
         updateIndexPatterns,

@@ -390,7 +390,7 @@ describe('editor_frame', () => {
   describe('datasource public api communication', () => {
     it('should give access to the datasource state in the datasource factory function', async () => {
       const datasourceState = {};
-      mockDatasource.initialize.mockResolvedValue(datasourceState);
+      mockDatasource.initialize.mockReturnValue(datasourceState);
       mockDatasource.getLayers.mockReturnValue(['first']);
 
       const props = {
@@ -503,7 +503,7 @@ describe('editor_frame', () => {
 
     it('should call datasource render with new state on switch', async () => {
       const initialState = {};
-      mockDatasource2.initialize.mockResolvedValue(initialState);
+      mockDatasource2.initialize.mockReturnValue(initialState);
 
       instance.find('button[data-test-subj="datasource-switch"]').simulate('click');
 

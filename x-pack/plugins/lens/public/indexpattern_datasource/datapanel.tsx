@@ -47,7 +47,7 @@ import { Loader } from '../loader';
 import { LensFieldIcon } from '../shared_components/field_picker/lens_field_icon';
 import { FieldGroups, FieldList } from './field_list';
 import { fieldContainsData, fieldExists } from '../shared_components';
-import { IndexPatternServiceAPI } from '../data_views_service/service';
+import { IndexPatternServiceAPI } from '../indexpattern_service/service';
 
 export type Props = Omit<
   DatasourceDataPanelProps<IndexPatternPrivateState>,

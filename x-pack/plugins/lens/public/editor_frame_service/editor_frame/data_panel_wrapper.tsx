@@ -29,7 +29,7 @@ import {
   selectDatasourceStates,
 } from '../../state_management';
 import { initializeSources } from './state_helpers';
-import type { IndexPatternServiceAPI } from '../../data_views_service/service';
+import type { IndexPatternServiceAPI } from '../../indexpattern_service/service';
 import { changeIndexPattern } from '../../state_management/lens_slice';
 
 interface DataPanelWrapperProps {

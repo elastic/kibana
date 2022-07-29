@@ -15,6 +15,7 @@ import { BASE_API_URL, DateRange, ExistingFields } from '../../common';
 import { DataViewsState } from '../state_management';
 
 type ErrorHandler = (err: Error) => void;
+type MinimalDataViewsContract = Pick<DataViewsContract, 'get' | 'getIdsWithTitle'>;
 
 /**
  * All these functions will be used by the Embeddable instance too,
@@ -84,6 +85,7 @@ export function convertDataViewIntoLensIndexPattern(
       Object.fromEntries(
         Object.entries(fieldFormatMap).map(([id, format]) => [
           id,
+          // @ts-ignore
           'toJSON' in format ? format.toJSON() : format,
         ])
       ),
@@ -94,7 +96,7 @@ export function convertDataViewIntoLensIndexPattern(
 }
 
 export async function loadIndexPatternRefs(
-  indexPatternsService: DataViewsContract
+  indexPatternsService: MinimalDataViewsContract
 ): Promise<IndexPatternRef[]> {
   const indexPatterns = await indexPatternsService.getIdsWithTitle();
 
@@ -122,7 +124,7 @@ export async function loadIndexPatterns({
   cache,
   onIndexPatternRefresh,
 }: {
-  dataViews: DataViewsContract;
+  dataViews: MinimalDataViewsContract;
   patterns: string[];
   notUsedPatterns?: string[];
   cache: Record<string, IndexPattern>;
@@ -167,7 +169,7 @@ export async function loadIndexPatterns({
   return indexPatternsObject;
 }
 
-export async function loadIndexPattern({
+export async function ensureIndexPattern({
   id,
   onError,
   dataViews,
@@ -175,7 +177,7 @@ export async function loadIndexPattern({
 }: {
   id: string;
   onError: ErrorHandler;
-  dataViews: DataViewsContract;
+  dataViews: MinimalDataViewsContract;
   cache?: IndexPatternMap;
 }) {
   const indexPatterns = await loadIndexPatterns({
@@ -288,13 +290,13 @@ export async function syncExistingFields({
 
   updateIndexPatterns(
     {
-      isFirstExistenceFetch: status !== 200,
       existingFields: newExistingFields,
       ...(result
-        ? {}
+        ? { isFirstExistenceFetch: status !== 200 }
         : {
-            existenceFetchFailed: status !== 418,
-            existenceFetchTimeout: status === 418,
+            isFirstExistenceFetch,
+            existenceFetchFailed: status !== 408,
+            existenceFetchTimeout: status === 408,
           }),
     },
     { applyImmediately: true }

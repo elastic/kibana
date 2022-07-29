@@ -77,7 +77,7 @@ export function injectReferences(
   };
 }
 
-export function createStateFromPersisted({
+function createStateFromPersisted({
   persistedState,
   references,
 }: {
@@ -87,7 +87,7 @@ export function createStateFromPersisted({
   return persistedState && references ? injectReferences(persistedState, references) : undefined;
 }
 
-export function getUsedIndexPatterns({
+function getUsedIndexPatterns({
   state,
   indexPatternRefs,
   storage,

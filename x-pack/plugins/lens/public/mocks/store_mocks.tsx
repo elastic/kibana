@@ -84,7 +84,7 @@ export function makeLensStore({
       resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
       ...preloadedState,
     },
-  } as PreloadedState<LensState>);
+  } as unknown as PreloadedState<LensState>);
 
   const origDispatch = store.dispatch;
   store.dispatch = jest.fn(dispatch || origDispatch);
