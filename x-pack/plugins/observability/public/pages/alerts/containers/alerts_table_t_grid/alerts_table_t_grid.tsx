@@ -171,8 +171,8 @@ export function ObservabilityActions({
     setActionsPopover(null);
   }, []);
 
-  const toggleActionsPopover = useCallback((currentId) => {
-    setActionsPopover((current) => (current ? null : currentId));
+  const toggleActionsPopover = useCallback((eventId) => {
+    setActionsPopover((current) => (current ? null : eventId));
   }, []);
 
   const userCasesPermissions = useGetUserCasesPermissions();

@@ -32,6 +32,7 @@ import { translations, paths } from '../../../../config';
 import { AlertStatusIndicator } from '../../../../components/shared/alert_status_indicator';
 import { FlyoutProps } from './types';
 
+// eslint-disable-next-line import/no-default-export
 export default function AlertsFlyoutBody({ alert, id }: FlyoutProps) {
   const { services } = useKibana();
   const { http } = services;
