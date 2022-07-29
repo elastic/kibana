@@ -228,7 +228,13 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   );
 
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
-
+  const updateSelectedPolicyTab = useCallback(
+    (selectedTab) => {
+      setSelectedPolicyTab(selectedTab);
+      setPolicyValidation(selectedTab, newAgentPolicy);
+    },
+    [setSelectedPolicyTab, newAgentPolicy]
+  );
   // Update package policy validation
   const updatePackagePolicyValidation = useCallback(
     (newPackagePolicy?: NewPackagePolicy) => {
@@ -451,7 +457,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         validation={validation}
         packageInfo={packageInfo}
         setHasAgentPolicyError={setHasAgentPolicyError}
-        updateSelectedTab={setSelectedPolicyTab}
+        updateSelectedTab={updateSelectedPolicyTab}
         selectedAgentPolicyId={queryParamsPolicyId}
       />
     ),
@@ -463,7 +469,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       updateNewAgentPolicy,
       validation,
       withSysMonitoring,
-      setSelectedPolicyTab,
+      updateSelectedPolicyTab,
       queryParamsPolicyId,
     ]
   );
