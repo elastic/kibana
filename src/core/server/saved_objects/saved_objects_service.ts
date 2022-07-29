@@ -30,6 +30,7 @@ import type {
 import {
   SavedObjectConfig,
   SavedObjectsSerializer,
+  SavedObjectTypeRegistry,
   type SavedObjectsConfigType,
   type SavedObjectsMigrationConfigType,
 } from '@kbn/core-saved-objects-base-server-internal';
@@ -38,7 +39,6 @@ import { KibanaMigrator, IKibanaMigrator } from './migrations';
 import { InternalCoreUsageDataSetup } from '../core_usage_data';
 import { InternalDeprecationsServiceSetup } from '../deprecations';
 import { SavedObjectsRepository } from './service/lib/repository';
-import { SavedObjectTypeRegistry } from './saved_objects_type_registry';
 import { SavedObjectsExporter } from './export';
 import { SavedObjectsImporter } from './import';
 import { registerRoutes } from './routes';
