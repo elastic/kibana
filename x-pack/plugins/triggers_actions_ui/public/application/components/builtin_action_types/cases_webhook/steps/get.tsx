@@ -121,7 +121,7 @@ export const GetStep: FunctionComponent<Props> = ({ display, readOnly }) => (
       </EuiFlexItem>
       <EuiFlexItem>
         <UseField
-          path="config.incidentViewUrl"
+          path="config.viewIncidentUrl"
           config={{
             label: i18n.EXTERNAL_INCIDENT_VIEW_URL,
             validations: [
@@ -136,9 +136,9 @@ export const GetStep: FunctionComponent<Props> = ({ display, readOnly }) => (
           componentProps={{
             euiFieldProps: {
               readOnly,
-              'data-test-subj': 'incidentViewUrlText',
+              'data-test-subj': 'viewIncidentUrlText',
               messageVariables: urlVarsExt,
-              paramsProperty: 'incidentViewUrl',
+              paramsProperty: 'viewIncidentUrl',
               buttonTitle: i18n.ADD_CASES_VARIABLE,
               showButtonTitle: true,
             },
