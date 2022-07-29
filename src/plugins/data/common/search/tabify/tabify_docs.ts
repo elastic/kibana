@@ -11,40 +11,8 @@ import { isPlainObject } from 'lodash';
 import { Datatable, DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
-type ValidMetaFieldNames = keyof Pick<
-  estypes.SearchHit,
-  | '_id'
-  | '_ignored'
-  | '_index'
-  | '_node'
-  | '_primary_term'
-  | '_routing'
-  | '_score'
-  | '_seq_no'
-  | '_shard'
-  | '_source'
-  | '_version'
->;
-const VALID_META_FIELD_NAMES: ValidMetaFieldNames[] = [
-  '_id',
-  '_ignored',
-  '_index',
-  '_node',
-  '_primary_term',
-  '_routing',
-  '_score',
-  '_seq_no',
-  '_shard',
-  '_source',
-  '_version',
-];
-
-function isValidMetaFieldName(field: string): field is ValidMetaFieldNames {
-  // Since the array above is more narrowly typed than string[], we cannot use
-  // string to find a value in here. We manually cast it to wider string[] type
-  // so we're able to use `includes` on it.
-  return (VALID_META_FIELD_NAMES as string[]).includes(field);
-}
+// meta fields we won't merge with our result hit
+const EXCLUDED_META_FIELDS: string[] = ['_type', '_source'];
 
 interface TabifyDocsOptions {
   shallow?: boolean;
@@ -138,12 +106,12 @@ export function flattenHit(hit: Hit, indexPattern?: DataView, params?: TabifyDoc
   }
 
   // Merge all valid meta fields into the flattened object
-  // expect for _source (in case that was specified as a meta field)
-  indexPattern?.metaFields?.forEach((metaFieldName) => {
-    if (!isValidMetaFieldName(metaFieldName) || metaFieldName === '_source') {
+  indexPattern?.metaFields?.forEach((fieldName) => {
+    const isExcludedMetaField = EXCLUDED_META_FIELDS.includes(fieldName) || fieldName.at(0) !== '_';
+    if (isExcludedMetaField) {
       return;
     }
-    flat[metaFieldName] = hit[metaFieldName];
+    flat[fieldName] = hit[fieldName as keyof estypes.SearchHit];
   });
 
   // Use a proxy to make sure that keys are always returned in a specific order,
