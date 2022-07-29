@@ -21,5 +21,4 @@ export type {
   InternalSavedObjectsServiceSetup,
 } from './saved_objects_service';
 
-export { SavedObjectTypeRegistry } from './saved_objects_type_registry';
 export { CoreSavedObjectsRouteHandlerContext } from './saved_objects_route_handler_context';

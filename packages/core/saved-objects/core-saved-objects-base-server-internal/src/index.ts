@@ -26,3 +26,4 @@ export {
   type SavedObjectsConfigType,
   type SavedObjectsMigrationConfigType,
 } from './saved_objects_config';
+export { SavedObjectTypeRegistry } from './saved_objects_type_registry';
