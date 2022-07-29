@@ -6,22 +6,41 @@
  * Side Public License, v 1.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
 
 export const getValidFilters = (dataView: DataView, filters: Filter[]): Filter[] => {
-  // We need to disable scripted filters that are not part of this data view
-  // since we can't guarantee they'll succeed for the current data view and
-  // can lead to runtime errors
   return filters.map((filter) => {
-    return {
-      ...filter,
-      meta: {
-        ...filter.meta,
-        disabled:
-          filter.meta.disabled ||
-          (filter.meta.index !== dataView.id && Boolean(filter.query?.script)),
-      },
-    };
+    const meta = { ...filter.meta };
+
+    if (filter.query?.script) {
+      const field = dataView.fields.find((f) => f.name === meta.key);
+
+      // We need to disable scripted filters that are invalid for this data view
+      // since we can't guarantee they'll succeed for the current data view and
+      // can lead to runtime errors
+      if (isValidScriptedFilter(filter, field)) {
+        meta.index = dataView.id;
+      } else {
+        meta.disabled = true;
+      }
+    } else {
+      meta.index = dataView.id;
+    }
+
+    return { ...filter, meta };
   });
+};
+
+const isValidScriptedFilter = (filter: Filter, field: DataViewField | undefined) => {
+  const filterScript = filter.query?.script.script;
+
+  if (!field?.scripted || !filterScript) {
+    return false;
+  }
+
+  const languagesMatch = filterScript.lang === field.lang;
+  const sourceIncludesFieldScript = Boolean(filterScript.source?.includes(field.script));
+
+  return languagesMatch && sourceIncludesFieldScript;
 };
