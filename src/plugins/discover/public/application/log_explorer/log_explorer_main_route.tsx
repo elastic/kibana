@@ -59,9 +59,7 @@ export function DiscoverLogExplorerRoute({ isDev }: Props) {
   const [error, setError] = useState<Error>();
   const [savedSearch, setSavedSearch] = useState<SavedSearch>();
   const dataView = savedSearch?.searchSource?.getField('index');
-  const [dataViewList, setdataViewList] = useState<Array<SavedObject<DataViewAttributes>>>(
-    []
-  );
+  const [dataViewList, setdataViewList] = useState<Array<SavedObject<DataViewAttributes>>>([]);
   const [hasESData, setHasESData] = useState(false);
   const [hasUserDataView, setHasUserDataView] = useState(false);
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
@@ -129,9 +127,7 @@ export function DiscoverLogExplorerRoute({ isDev }: Props) {
         spaces: services.spaces,
       });
 
-      const loadeddataView = await loadDefaultOrCurrentdataView(
-        currentSavedSearch.searchSource
-      );
+      const loadeddataView = await loadDefaultOrCurrentdataView(currentSavedSearch.searchSource);
 
       if (!loadeddataView) {
         return;
@@ -242,7 +238,5 @@ export function DiscoverLogExplorerRoute({ isDev }: Props) {
     return <LoadingIndicator type="elastic" />;
   }
 
-  return (
-    <LogExplorerMainAppMemoized dataViewList={dataViewList} savedSearch={savedSearch} />
-  );
+  return <LogExplorerMainAppMemoized dataViewList={dataViewList} savedSearch={savedSearch} />;
 }

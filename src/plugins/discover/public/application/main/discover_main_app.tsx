@@ -17,7 +17,6 @@ import { useUrl } from './hooks/use_url';
 import { SavedSearch, useSavedSearchAliasMatchRedirect } from '../../services/saved_searches';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DataTableRecord } from '../../types';
-import { useSavedSearch } from './hooks/use_saved_search';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
