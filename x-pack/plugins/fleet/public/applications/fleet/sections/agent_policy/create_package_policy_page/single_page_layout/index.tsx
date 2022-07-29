@@ -96,6 +96,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   } = useConfig();
   const { params } = useRouteMatch<AddToPolicyParams>();
   const [agentPolicy, setAgentPolicy] = useState<AgentPolicy | undefined>();
+
   const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>({
     name: 'Agent policy 1',
     description: '',
@@ -227,7 +228,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     [setNewAgentPolicy, newAgentPolicy, selectedPolicyTab]
   );
 
-  const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
   const updateSelectedPolicyTab = useCallback(
     (selectedTab) => {
       setSelectedPolicyTab(selectedTab);
@@ -235,6 +235,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     },
     [setSelectedPolicyTab, newAgentPolicy]
   );
+
+  const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
   // Update package policy validation
   const updatePackagePolicyValidation = useCallback(
     (newPackagePolicy?: NewPackagePolicy) => {
