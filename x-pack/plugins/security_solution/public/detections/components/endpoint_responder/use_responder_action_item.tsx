@@ -15,8 +15,6 @@ import {
 import { ResponderContextMenuItem } from './responder_context_menu_item';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { getFieldValue } from '../host_isolation/helpers';
-import { useHostIsolationStatus } from '../../containers/detection_engine/alerts/use_host_isolation_status';
-import { HostStatus } from '../../../../common/endpoint/types';
 
 export const useResponderActionItem = (
   eventDetailsData: TimelineEventsDetailsItem[] | null,
@@ -41,18 +39,10 @@ export const useResponderActionItem = (
     [eventDetailsData]
   );
 
-  const { agentStatus } = useHostIsolationStatus({ agentId: endpointId });
-
   return useMemo(() => {
     const actions: JSX.Element[] = [];
 
-    if (
-      isResponseActionsConsoleEnabled &&
-      !isAuthzLoading &&
-      agentStatus !== HostStatus.UNENROLLED &&
-      canAccessResponseConsole &&
-      isAlert
-    ) {
+    if (isResponseActionsConsoleEnabled && !isAuthzLoading && canAccessResponseConsole && isAlert) {
       actions.push(
         <ResponderContextMenuItem
           endpointId={isEndpointAlert ? endpointId : ''}
@@ -63,7 +53,6 @@ export const useResponderActionItem = (
 
     return actions;
   }, [
-    agentStatus,
     canAccessResponseConsole,
     endpointId,
     isAlert,
