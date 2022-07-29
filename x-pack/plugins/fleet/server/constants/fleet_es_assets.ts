@@ -77,7 +77,7 @@ export const FLEET_COMPONENT_TEMPLATES = [
   },
 ];
 
-export const FLEET_FINAL_PIPELINE_VERSION = 2;
+export const FLEET_FINAL_PIPELINE_VERSION = 3;
 
 // If the content is updated you probably need to update the FLEET_FINAL_PIPELINE_VERSION too to allow upgrade of the pipeline
 export const FLEET_FINAL_PIPELINE_CONTENT = `---
@@ -88,14 +88,14 @@ _meta:
 description: >
   Final pipeline for processing all incoming Fleet Agent documents.
 processors:
-  - set:
-      description: Add time when event was ingested.
-      field: event.ingested
-      copy_from: _ingest.timestamp
-  - script:
-      description: Remove sub-seconds from event.ingested to improve storage efficiency.
+  - date:
+      description: Add time when event was ingested (and remove sub-seconds to improve storage efficiency)
       tag: truncate-subseconds-event-ingested
-      source: ctx.event.ingested = ctx.event.ingested.withNano(0).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+      field: _ingest.timestamp
+      target_field: event.ingested
+      formats:
+        - ISO8601
+      output_format: date_time_no_millis
       ignore_failure: true
   - remove:
       description: Remove any pre-existing untrusted values.
