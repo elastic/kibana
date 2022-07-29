@@ -155,7 +155,7 @@ export async function getPackageInfo({
   // otherwise build it from the archive
   let paths: string[];
   let packageInfo: RegistryPackage | ArchivePackage | undefined = skipArchive
-    ? await Registry.fetchInfo(pkgName, pkgVersion).catch(() => undefined)
+    ? await Registry.fetchInfo(pkgName, resolvedPkgVersion).catch(() => undefined)
     : undefined;
 
   if (packageInfo) {
