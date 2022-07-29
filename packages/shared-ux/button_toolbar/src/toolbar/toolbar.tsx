@@ -12,16 +12,25 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { IconButtonGroup, PrimaryButton } from '../buttons';
 import { ToolbarPopover } from '../popover';
 
+/** Specific type for the toolbar children in its props */
 interface NamedSlots {
   primaryButton: ReactElement<typeof PrimaryButton | typeof ToolbarPopover>;
   iconButtonGroup?: ReactElement<typeof IconButtonGroup>;
   extraButtons?: Array<ReactElement<typeof PrimaryButton | typeof ToolbarPopover> | undefined>;
 }
 
+/**
+ * Props for a generic toolbar component
+ */
 export interface Props {
   children: NamedSlots;
 }
 
+/**
+ *
+ * @param children of the toolbar such as a popover or button
+ * @returns Toolbar component
+ */
 export const Toolbar = ({ children }: Props) => {
   const { primaryButton, iconButtonGroup, extraButtons = [] } = children;
 
@@ -34,7 +43,7 @@ export const Toolbar = ({ children }: Props) => {
   );
 
   return (
-    <EuiFlexGroup id={`kbnPresentationToolbar__solutionToolbar`} gutterSize="s">
+    <EuiFlexGroup gutterSize="s">
       <EuiFlexItem grow={false}>{primaryButton}</EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup wrap={true} responsive={false} alignItems="center" gutterSize="xs">
