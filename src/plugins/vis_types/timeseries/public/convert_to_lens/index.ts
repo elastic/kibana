@@ -12,7 +12,7 @@ import { ConvertTsvbToLensVisualization } from './types';
 
 const getConvertFnByType = (
   type: PANEL_TYPES
-): Promise<ConvertTsvbToLensVisualization | undefined> => {
+): Promise<ConvertTsvbToLensVisualization> | undefined => {
   const convertionFns: { [key in PANEL_TYPES]?: () => Promise<ConvertTsvbToLensVisualization> } = {
     [PANEL_TYPES.TIMESERIES]: async () => {
       const { convertToLens } = await import('./timeseries');
