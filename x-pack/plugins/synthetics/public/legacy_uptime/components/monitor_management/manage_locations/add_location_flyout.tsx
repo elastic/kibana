@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
+import { FormProvider } from 'react-hook-form';
 import {
   EuiButtonEmpty,
   EuiCallOut,
@@ -27,6 +28,7 @@ import {
 } from './manage_locations_flyout';
 import { usePrivateLocationPermissions } from '../hooks/use_private_location_permission';
 import { LocationForm } from './location_form';
+import { useFormWrapped } from '../../../../hooks/use_form_wrapped';
 
 export const AddLocationFlyout = ({
   onSubmit,
@@ -37,7 +39,23 @@ export const AddLocationFlyout = ({
   setIsOpen: (val: boolean) => void;
   privateLocations: PrivateLocation[];
 }) => {
-  const [formData, setFormData] = useState<Partial<PrivateLocation>>();
+  const form = useFormWrapped({
+    mode: 'onSubmit',
+    reValidateMode: 'onChange',
+    shouldFocusError: true,
+    defaultValues: {
+      label: '',
+      agentPolicyId: '',
+      id: '',
+      geo: {
+        lat: 0,
+        lon: 0,
+      },
+      concurrentMonitors: 1,
+    },
+  });
+
+  const { handleSubmit } = form;
 
   const { canReadAgentPolicies } = usePrivateLocationPermissions();
 
@@ -46,45 +64,39 @@ export const AddLocationFlyout = ({
   };
 
   return (
-    <EuiFlyout onClose={closeFlyout} style={{ width: 540 }}>
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2>{ADD_PRIVATE_LOCATION}</h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        {!canReadAgentPolicies && (
-          <EuiCallOut title={NEED_PERMISSIONS} color="warning" iconType="help">
-            <p>{NEED_FLEET_READ_AGENT_POLICIES_PERMISSION}</p>
-          </EuiCallOut>
-        )}
+    <FormProvider {...form}>
+      <EuiFlyout onClose={closeFlyout} style={{ width: 540 }}>
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="m">
+            <h2>{ADD_PRIVATE_LOCATION}</h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          {!canReadAgentPolicies && (
+            <EuiCallOut title={NEED_PERMISSIONS} color="warning" iconType="help">
+              <p>{NEED_FLEET_READ_AGENT_POLICIES_PERMISSION}</p>
+            </EuiCallOut>
+          )}
 
-        <EuiSpacer />
-        <LocationForm privateLocations={privateLocations} setFormData={setFormData} />
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
-              {CANCEL_LABEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              onClick={() => {
-                if (formData) {
-                  onSubmit(formData as PrivateLocation);
-                  closeFlyout();
-                }
-              }}
-            >
-              {SAVE_LABEL}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
+          <EuiSpacer />
+          <LocationForm privateLocations={privateLocations} />
+        </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+                {CANCEL_LABEL}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton fill onClick={handleSubmit(onSubmit)}>
+                {SAVE_LABEL}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </EuiFlyout>
+    </FormProvider>
   );
 };
 
@@ -100,5 +112,5 @@ const CANCEL_LABEL = i18n.translate('xpack.synthetics.monitorManagement.cancelLa
 });
 
 const SAVE_LABEL = i18n.translate('xpack.synthetics.monitorManagement.saveLabel', {
-  defaultMessage: 'save',
+  defaultMessage: 'Save',
 });

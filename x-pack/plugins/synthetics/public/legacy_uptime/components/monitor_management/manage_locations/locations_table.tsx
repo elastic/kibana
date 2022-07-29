@@ -29,7 +29,7 @@ export const PrivateLocationsTable = ({
 
   const columns = [
     {
-      field: 'name',
+      field: 'label',
       name: LOCATION_NAME_LABEL,
     },
     {
