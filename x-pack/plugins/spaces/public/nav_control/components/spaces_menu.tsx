@@ -56,19 +56,14 @@ class SpacesMenuUI extends Component<Props> {
       </EuiText>
     );
 
-    const panelProps = {
-      id: this.props.id,
-      className: 'spcMenu',
-      title: this.props.intl.formatMessage({
-        id: 'xpack.spaces.navControl.spacesMenu.changeCurrentSpaceTitle',
-        defaultMessage: 'Change current space',
-      }),
-    };
-
     return (
       <>
         <EuiSelectable
-          {...panelProps}
+          id={this.props.id}
+          className={'spcMenu'}
+          title={i18n.translate('xpack.spaces.navControl.spacesMenu.changeCurrentSpaceTitle', {
+            defaultMessage: 'Change current space',
+          })}
           searchable={this.props.spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD}
           searchProps={
             this.props.spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD

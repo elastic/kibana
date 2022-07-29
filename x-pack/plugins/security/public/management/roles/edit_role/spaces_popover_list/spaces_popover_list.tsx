@@ -75,16 +75,12 @@ export class SpacesPopoverList extends Component<Props, State> {
       </EuiText>
     );
 
-    const panelProps = {
-      className: 'spcMenu',
-      title: i18n.translate('xpack.security.management.editRole.spacesPopoverList.popoverTitle', {
-        defaultMessage: 'Spaces',
-      }),
-    };
-
     return (
       <EuiSelectable
-        {...panelProps}
+        className={'spcMenu'}
+        title={i18n.translate('xpack.security.management.editRole.spacesPopoverList.popoverTitle', {
+          defaultMessage: 'Spaces',
+        })}
         searchable={this.props.spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD}
         searchProps={
           this.props.spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD

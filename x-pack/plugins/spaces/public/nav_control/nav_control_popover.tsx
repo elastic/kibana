@@ -109,7 +109,7 @@ export class NavControlPopover extends Component<Props, State> {
         anchorPosition={this.props.anchorPosition}
         panelPaddingSize="none"
         repositionOnScroll
-        ownFocus={true}
+        ownFocus
       >
         {element}
       </EuiPopover>

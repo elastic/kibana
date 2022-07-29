@@ -12,8 +12,9 @@ import type { FC } from 'react';
 import React from 'react';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 
-import { getSpacesFeatureDescription, getSpacesLoadingMessage } from '../../constants';
+import { getSpacesFeatureDescription } from '../../constants';
 import { ManageSpacesButton } from './manage_spaces_button';
 
 interface Props {
@@ -31,10 +32,14 @@ export const SpacesDescription: FC<Props> = (props: Props) => {
     title: 'Spaces',
   };
 
+  const spacesLoadingMessage = i18n.translate('xpack.spaces.navControl.loadingMessage', {
+    defaultMessage: 'Loading...',
+  });
+
   return (
     <EuiContextMenuPanel {...panelProps}>
       <EuiText className="spcDescription__text">
-        <p>{props.isLoading ? getSpacesLoadingMessage() : getSpacesFeatureDescription()}</p>
+        <p>{props.isLoading ? spacesLoadingMessage : getSpacesFeatureDescription()}</p>
       </EuiText>
       <div key="manageSpacesButton" className="spcDescription__manageButtonWrapper">
         <ManageSpacesButton
