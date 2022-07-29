@@ -47,9 +47,7 @@ export default function ({ getService }) {
       });
 
       after('unload archive', () => {
-        return tearDown([
-          'x-pack/test/api_integration/apis/monitoring/es_archives/_health/metricbeat_8',
-        ]);
+        return tearDown();
       });
 
       it('returns the state of the monitoring documents', async () => {

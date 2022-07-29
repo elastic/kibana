@@ -25,32 +25,32 @@ export const fetchMetricbeatErrors = async ({
   logger,
 }: FetchParameters & {
   metricbeatIndex: string;
-}): Promise<MetricbeatResponse | null> => {
-  const { aggregations, timed_out: timedOut } = await search({
-    index: metricbeatIndex,
-    body: metricbeatErrorsQuery({
-      timeRange,
-      timeout,
-      products: [
-        MonitoredProduct.Beats,
-        MonitoredProduct.Elasticsearch,
-        MonitoredProduct.EnterpriseSearch,
-        MonitoredProduct.Kibana,
-        MonitoredProduct.Logstash,
-      ],
-    }),
-    size: 0,
-    ignore_unavailable: true,
-  });
-
-  const buckets = aggregations?.errors_aggregation?.buckets ?? [];
+}): Promise<MetricbeatResponse> => {
   try {
+    const { aggregations, timed_out: timedOut } = await search({
+      index: metricbeatIndex,
+      body: metricbeatErrorsQuery({
+        timeRange,
+        timeout,
+        products: [
+          MonitoredProduct.Beats,
+          MonitoredProduct.Elasticsearch,
+          MonitoredProduct.EnterpriseSearch,
+          MonitoredProduct.Kibana,
+          MonitoredProduct.Logstash,
+        ],
+      }),
+      size: 0,
+      ignore_unavailable: true,
+    });
+
+    const buckets = aggregations?.errors_aggregation?.buckets ?? [];
     return {
       products: buildMetricbeatErrors(buckets),
       execution: { timedOut: false, errors: [] },
     };
   } catch (err) {
-    logger.error(`fetchMonitoredClusters: failed to fetch:\n${err.stack}`);
+    logger.error(`fetchMetricbeatErrors: failed to fetch:\n${err.stack}`);
     return {
       execution: { timedOut: Boolean(timedOut), errors: !!err.message ? [err.message] : [] },
     };

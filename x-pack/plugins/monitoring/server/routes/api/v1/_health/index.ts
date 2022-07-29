@@ -69,6 +69,7 @@ export function registerV1HealthRoute(server: MonitoringCore) {
           metricbeatIndex: server.config.ui.metricbeat.index,
         }).catch((err: Error) => {
           logger.error(`_health: failed to retrieve metricbeat data:\n${err.stack}`);
+          return { error: err.message };
         });
 
       const [monitoredClusters, metricbeatErrors] = await Promise.all([

@@ -27,8 +27,8 @@ export const getLifecycleMethods = (getService: FtrProviderContext['getService']
       await esArchiver.load(archive, { useCreate: true });
     },
 
-    async tearDown(archives: string[] = []) {
-      await Promise.all(archives.map((archive) => esArchiver.unload(archive)));
+    async tearDown() {
+      await deleteDataStream('metricbeat-*');
       await deleteDataStream('.monitoring-*');
     },
   };
