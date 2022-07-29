@@ -8,7 +8,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { OverlayFlyoutStart } from '@kbn/core-overlays-browser';
-import { FlyoutService } from '@kbn/core-overlays-browser-internal';
+import type { FlyoutService } from '@kbn/core-overlays-browser-internal';
 
 const createStartContractMock = () => {
   const startContract: jest.Mocked<OverlayFlyoutStart> = {

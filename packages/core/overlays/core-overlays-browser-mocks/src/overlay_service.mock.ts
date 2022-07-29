@@ -8,7 +8,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import { OverlayService } from '@kbn/core-overlays-browser-internal';
+import type { OverlayService } from '@kbn/core-overlays-browser-internal';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { overlayBannersServiceMock } from './banners_service.mock';
 import { overlayFlyoutServiceMock } from './flyout_service.mock';

@@ -8,7 +8,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { OverlayModalStart } from '@kbn/core-overlays-browser';
-import { ModalService } from '@kbn/core-overlays-browser-internal';
+import type { ModalService } from '@kbn/core-overlays-browser-internal';
 
 const createStartContractMock = () => {
   const startContract: jest.Mocked<OverlayModalStart> = {

@@ -9,7 +9,7 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   type InternalOverlayBannersStart,
-  OverlayBannersService,
+  type OverlayBannersService,
 } from '@kbn/core-overlays-browser-internal';
 
 const createStartContractMock = () => {
