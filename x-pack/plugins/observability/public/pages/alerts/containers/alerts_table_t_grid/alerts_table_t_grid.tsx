@@ -152,7 +152,7 @@ export function ObservabilityActions({
   data,
   eventId,
   ecsData,
-  id,
+  id: pageId,
   observabilityRuleTypeRegistry,
   setFlyoutAlert,
 }: ObservabilityActionsProps) {
@@ -171,14 +171,14 @@ export function ObservabilityActions({
     setActionsPopover(null);
   }, []);
 
-  const toggleActionsPopover = useCallback((eventId) => {
-    setActionsPopover((current) => (current ? null : eventId));
+  const toggleActionsPopover = useCallback((id) => {
+    setActionsPopover((current) => (current ? null : id));
   }, []);
 
   const userCasesPermissions = useGetUserCasesPermissions();
   const ruleId = alert.fields['kibana.alert.rule.uuid'] ?? null;
   const linkToRule =
-    id !== RULE_DETAILS_PAGE_ID && ruleId
+    pageId !== RULE_DETAILS_PAGE_ID && ruleId
       ? http.basePath.prepend(paths.observability.ruleDetails(ruleId))
       : null;
   const caseAttachments: CaseAttachments = useMemo(() => {
