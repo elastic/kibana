@@ -18,6 +18,7 @@ import {
 } from '../../../test_helpers';
 import type { ReportingRequestHandlerContext } from '../../../types';
 import { registerDiagnoseBrowser } from '../browser';
+import { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -28,7 +29,15 @@ describe('POST /diagnose/browser', () => {
   jest.setTimeout(6000);
   const reportingSymbol = Symbol('reporting');
   const mockLogger = loggingSystemMock.createLogger();
-  const docLinks = docLinksServiceMock.createSetupContract();
+  const docLinks = {
+    ...docLinksServiceMock.createSetupContract(),
+    links: {
+      reporting: {
+        browserSystemDependencies:
+          'https://www.elastic.co/guide/en/kibana/test-branch/secure-reporting.html#install-reporting-packages',
+      },
+    },
+  } as DocLinksServiceSetup;
 
   let server: SetupServerReturn['server'];
   let httpSetup: SetupServerReturn['httpSetup'];
@@ -94,7 +103,7 @@ describe('POST /diagnose/browser', () => {
         expect(body).toMatchInlineSnapshot(`
           Object {
             "help": Array [
-              "The browser couldn't locate a default font. Please see  to fix this issue.",
+              "The browser couldn't locate a default font. Please see https://www.elastic.co/guide/en/kibana/test-branch/secure-reporting.html#install-reporting-packages to fix this issue.",
             ],
             "logs": "Could not find the default font",
             "success": false,
@@ -116,7 +125,7 @@ describe('POST /diagnose/browser', () => {
         expect(body).toMatchInlineSnapshot(`
           Object {
             "help": Array [
-              "The browser couldn't locate a default font. Please see  to fix this issue.",
+              "The browser couldn't locate a default font. Please see https://www.elastic.co/guide/en/kibana/test-branch/secure-reporting.html#install-reporting-packages to fix this issue.",
             ],
             "logs": "DevTools listening on (ws://localhost:4000)
           Could not find the default font",
