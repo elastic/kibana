@@ -4,16 +4,8 @@
     padding: $euiSizeM;
   }
 
-  &__grabIcon {
-    margin-right: $euiSizeS;
-  }
-
   &__removeButton {
     margin-left: $euiSizeS;
-  }
-
-  &__errorIcon {
-    margin-left: -$euiSizeXL;
   }
 
   &__item {
@@ -25,4 +17,12 @@
   &__labelContainer {
     margin-bottom: $euiSizeXS;
   }
+}
+
+.pipelineProcessorsEditor__form__dragAndDropList__grabIcon {
+  height: $euiSizeXL;
+  width: $euiSizeXL;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
