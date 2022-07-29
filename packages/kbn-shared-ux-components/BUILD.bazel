@@ -54,10 +54,10 @@ RUNTIME_DEPS = [
   "//packages/kbn-shared-ux-storybook",
   "//packages/kbn-shared-ux-utility",
   "//packages/shared-ux/avatar/solution",
-  "//packages/shared-ux/card/no_data",
-  "//packages/shared-ux/link/redirect_app",
+  "//packages/shared-ux/card/no_data/impl",
+  "//packages/shared-ux/link/redirect_app/impl",
   "//packages/shared-ux/page/solution_nav",
-  "//packages/shared-ux/prompt/no_data_views",
+  "//packages/shared-ux/prompt/no_data_views/impl",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -86,10 +86,10 @@ TYPES_DEPS = [
   "//packages/kbn-shared-ux-storybook:npm_module_types",
   "//packages/kbn-shared-ux-utility:npm_module_types",
   "//packages/shared-ux/avatar/solution:npm_module_types",
-  "//packages/shared-ux/card/no_data:npm_module_types",
-  "//packages/shared-ux/link/redirect_app:npm_module_types",
+  "//packages/shared-ux/card/no_data/impl:npm_module_types",
+  "//packages/shared-ux/link/redirect_app/impl:npm_module_types",
   "//packages/shared-ux/page/solution_nav:npm_module_types",
-  "//packages/shared-ux/prompt/no_data_views:npm_module_types",
+  "//packages/shared-ux/prompt/no_data_views/impl:npm_module_types",
 ]
 
 jsts_transpiler(
