@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { createMockPackagePolicy } from './__mocks__';
+import {createMockPackagePolicy} from './__mocks__';
 import {
   LIST_DETECTION_RULE_EXCEPTION,
   LIST_ENDPOINT_EXCEPTION,
@@ -21,10 +21,11 @@ import {
   isPackagePolicyList,
   templateExceptionList,
   addDefaultAdvancedPolicyConfigSettings,
+  metricsResponseToValueListMetaData,
 } from './helpers';
-import type { ESClusterInfo, ESLicense, ExceptionListItem } from './types';
-import type {PolicyConfig, PolicyData } from '../../../common/endpoint/types';
-import { cloneDeep } from 'lodash';
+import type {ESClusterInfo, ESLicense, ExceptionListItem} from './types';
+import type {PolicyConfig, PolicyData} from '../../../common/endpoint/types';
+import {cloneDeep} from 'lodash';
 
 describe('test diagnostic telemetry scheduled task timing helper', () => {
   test('test -5 mins is returned when there is no previous task run', async () => {
@@ -143,10 +144,10 @@ describe('list telemetry schema', () => {
     cluster_uuid: 'stub_cluster',
     cluster_name: 'stub_cluster',
   } as ESClusterInfo;
-  const licenseInfo = { uid: 'stub_license' } as ESLicense;
+  const licenseInfo = {uid: 'stub_license'} as ESLicense;
 
   test('detection rules document is correctly formed', () => {
-    const data = [{ id: 'test_1' }] as ExceptionListItem[];
+    const data = [{id: 'test_1'}] as ExceptionListItem[];
     const templatedItems = templateExceptionList(
       data,
       clusterInfo,
@@ -161,7 +162,7 @@ describe('list telemetry schema', () => {
   });
 
   test('detection rules document is correctly formed with multiple entries', () => {
-    const data = [{ id: 'test_2' }, { id: 'test_2' }] as ExceptionListItem[];
+    const data = [{id: 'test_2'}, {id: 'test_2'}] as ExceptionListItem[];
     const templatedItems = templateExceptionList(
       data,
       clusterInfo,
@@ -177,7 +178,7 @@ describe('list telemetry schema', () => {
   });
 
   test('trusted apps document is correctly formed', () => {
-    const data = [{ id: 'test_1' }] as ExceptionListItem[];
+    const data = [{id: 'test_1'}] as ExceptionListItem[];
     const templatedItems = templateExceptionList(
       data,
       clusterInfo,
@@ -192,7 +193,7 @@ describe('list telemetry schema', () => {
   });
 
   test('trusted apps document is correctly formed with multiple entries', () => {
-    const data = [{ id: 'test_2' }, { id: 'test_2' }] as ExceptionListItem[];
+    const data = [{id: 'test_2'}, {id: 'test_2'}] as ExceptionListItem[];
     const templatedItems = templateExceptionList(
       data,
       clusterInfo,
@@ -208,7 +209,7 @@ describe('list telemetry schema', () => {
   });
 
   test('endpoint exception document is correctly formed', () => {
-    const data = [{ id: 'test_3' }] as ExceptionListItem[];
+    const data = [{id: 'test_3'}] as ExceptionListItem[];
     const templatedItems = templateExceptionList(
       data,
       clusterInfo,
@@ -223,7 +224,7 @@ describe('list telemetry schema', () => {
   });
 
   test('endpoint exception document is correctly formed with multiple entries', () => {
-    const data = [{ id: 'test_4' }, { id: 'test_4' }, { id: 'test_4' }] as ExceptionListItem[];
+    const data = [{id: 'test_4'}, {id: 'test_4'}, {id: 'test_4'}] as ExceptionListItem[];
     const templatedItems = templateExceptionList(
       data,
       clusterInfo,
@@ -240,7 +241,7 @@ describe('list telemetry schema', () => {
   });
 
   test('endpoint event filters document is correctly formed', () => {
-    const data = [{ id: 'test_5' }] as ExceptionListItem[];
+    const data = [{id: 'test_5'}] as ExceptionListItem[];
     const templatedItems = templateExceptionList(
       data,
       clusterInfo,
@@ -255,7 +256,7 @@ describe('list telemetry schema', () => {
   });
 
   test('endpoint event filters document is correctly formed with multiple entries', () => {
-    const data = [{ id: 'test_6' }, { id: 'test_6' }] as ExceptionListItem[];
+    const data = [{id: 'test_6'}, {id: 'test_6'}] as ExceptionListItem[];
     const templatedItems = templateExceptionList(
       data,
       clusterInfo,
@@ -793,5 +794,102 @@ describe('test advanced policy config overlap ', () => {
     const endpointPolicyConfig = addDefaultAdvancedPolicyConfigSettings(stubPolicyConfigWithAdvancedSettings);
     expect(endpointPolicyConfig).toEqual(stubPolicyConfigWithAdvancedSettingsResponse);
   });
+});
+
+describe('test metrics response to value list meta data', () => {
+  test('can succeed when metrics response is fully populated', async () => {
+    const stubMetricResponses = {
+      listMetricsResponse: {
+        aggregations: {
+          total_value_list_count: 5,
+          type_breakdown: {
+            buckets: [{
+              key: 'keyword',
+              doc_count: 5
+            }, {
+              key: 'ip',
+              doc_count: 3
+            }, {
+              key: 'ip_range',
+              doc_count: 2
+            }, {
+              key: 'text',
+              doc_count: 1
+            }]
+          }
+        }
+      },
+      itemMetricsResponse: {
+        aggregations: {
+          value_list_item_count: {
+            buckets: [{
+              key: 'vl-test1',
+              doc_count: 23
+            }, {
+              key: 'vl-test2',
+              doc_count: 45
+            }]
+          }
+        }
+      },
+      exceptionListMetricsResponse: {
+        aggregations: {
+          vl_included_in_exception_lists_count: {value: 24}
+        }
+      },
+      indicatorMatchMetricsResponse: {
+        aggregations: {
+          vl_used_in_indicator_match_rule_count: {value: 6}
+        }
+      }
+    };
+    const response = metricsResponseToValueListMetaData(stubMetricResponses);
+    expect(response).toEqual({
+      total_list_count: 5,
+      types: [
+        {
+          type: 'keyword',
+          count: 5
+        }, {
+          type: 'ip',
+          count: 3
+        }, {
+          type: 'ip_range',
+          count: 2
+        }, {
+          type: 'text',
+          count: 1
+        }
+      ],
+      lists: [
+        {
+          id: 'vl-test1',
+          count: 23
+        }, {
+          id: 'vl-test2',
+          count: 45
+        }
+      ],
+      included_in_exception_lists_count: 24,
+      used_in_indicator_match_rule_count: 6
+    })
+  });
+  test('can succeed when metrics response has no aggregation response', async () => {
+    const stubMetricResponses = {
+      listMetricsResponse: {},
+      itemMetricsResponse: {},
+      exceptionListMetricsResponse: {},
+      indicatorMatchMetricsResponse: {}
+    };
+    // @ts-ignore
+    const response = metricsResponseToValueListMetaData(stubMetricResponses);
+    expect(response).toEqual({
+      total_list_count: 0,
+      types: [],
+      lists: [],
+      included_in_exception_lists_count: 0,
+      used_in_indicator_match_rule_count: 0
+    });
+  })
 });
 
