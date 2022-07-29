@@ -174,7 +174,6 @@ export async function inspectSearchParams(
         },
       }
     ) as APMConfig,
-    uiFilters: {},
     indices: {
       sourcemap: 'myIndex',
       error: 'myIndex',

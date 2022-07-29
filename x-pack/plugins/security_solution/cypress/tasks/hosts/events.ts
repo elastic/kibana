@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { drag, drop } from '../common';
 import {
   EVENTS_VIEWER_FIELDS_BUTTON,
   FIELDS_BROWSER_CONTAINER,
@@ -14,7 +13,6 @@ import {
   INSPECT_QUERY,
   SERVER_SIDE_EVENT_COUNT,
 } from '../../screens/hosts/events';
-import { DATAGRID_HEADERS } from '../../screens/timeline';
 
 export const addsHostGeoCityNameToHeader = () => {
   cy.get(HOST_GEO_CITY_NAME_CHECKBOX).check({
@@ -43,23 +41,4 @@ export const opensInspectQueryModal = () => {
 
 export const waitsForEventsToBeLoaded = () => {
   cy.get(SERVER_SIDE_EVENT_COUNT).should('not.have.text', '0');
-};
-
-export const dragAndDropColumn = ({
-  column,
-  newPosition,
-}: {
-  column: number;
-  newPosition: number;
-}) => {
-  cy.get(DATAGRID_HEADERS).first().should('exist');
-  cy.get(DATAGRID_HEADERS)
-    .eq(column)
-    .then((header) => drag(header));
-
-  cy.get(DATAGRID_HEADERS)
-    .eq(newPosition)
-    .then((targetPosition) => {
-      drop(targetPosition);
-    });
 };

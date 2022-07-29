@@ -72,8 +72,13 @@ export function TransactionDistribution({
   const markerCurrentEvent =
     waterfall.entryWaterfallTransaction?.doc.transaction.duration.us;
 
-  const { chartData, hasData, percentileThresholdValue, status } =
-    useTransactionDistributionChartData();
+  const {
+    chartData,
+    hasData,
+    percentileThresholdValue,
+    status,
+    totalDocCount,
+  } = useTransactionDistributionChartData();
 
   return (
     <HeightRetainer>
@@ -85,6 +90,7 @@ export function TransactionDistribution({
           status={status}
           markerCurrentEvent={markerCurrentEvent}
           chartData={chartData}
+          totalDocCount={totalDocCount}
           hasData={hasData}
           percentileThresholdValue={percentileThresholdValue}
           eventType={ProcessorEvent.transaction}

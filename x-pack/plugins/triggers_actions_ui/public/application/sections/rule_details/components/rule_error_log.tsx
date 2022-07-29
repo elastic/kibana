@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react'
 import { i18n } from '@kbn/i18n';
 import datemath from '@kbn/datemath';
 import {
+  EuiFieldSearch,
   EuiFlexItem,
   EuiFlexGroup,
   EuiProgress,
@@ -24,7 +25,6 @@ import { IExecutionErrors } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 
 import { RefineSearchPrompt } from '../refine_search_prompt';
-import { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
 import { Rule } from '../../../../types';
 import {
   ComponentOpts as RuleApis,
@@ -46,6 +46,13 @@ const API_FAILED_MESSAGE = i18n.translate(
   }
 );
 
+const SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleDetails.errorLogColumn.searchPlaceholder',
+  {
+    defaultMessage: 'Search error log message',
+  }
+);
+
 const updateButtonProps = {
   iconOnly: true,
   fill: false,
@@ -53,23 +60,15 @@ const updateButtonProps = {
 
 const MAX_RESULTS = 1000;
 
-const sortErrorLog = (
-  a: IExecutionErrors,
-  b: IExecutionErrors,
-  direction: 'desc' | 'asc' = 'desc'
-) =>
-  direction === 'desc'
-    ? new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-    : new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
-
 export type RuleErrorLogProps = {
   rule: Rule;
+  runId?: string;
   refreshToken?: number;
   requestRefresh?: () => Promise<void>;
-} & Pick<RuleApis, 'loadExecutionLogAggregations'>;
+} & Pick<RuleApis, 'loadActionErrorLog'>;
 
 export const RuleErrorLog = (props: RuleErrorLogProps) => {
-  const { rule, loadExecutionLogAggregations, refreshToken } = props;
+  const { rule, runId, loadActionErrorLog, refreshToken } = props;
 
   const { uiSettings, notifications } = useKibana().services;
 
@@ -84,6 +83,9 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
     field: 'timestamp',
     direction: 'desc',
   });
+
+  const [searchText, setSearchText] = useState<string>('');
+  const [search, setSearch] = useState<string>('');
 
   // Date related states
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -111,18 +113,32 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
     return (pageIndex + 1) * pageSize >= MAX_RESULTS;
   }, [pagination]);
 
+  const formattedSort = useMemo(() => {
+    if (!sort) {
+      return;
+    }
+    const { field, direction } = sort;
+    return [
+      {
+        [field]: {
+          order: direction,
+        },
+      },
+    ];
+  }, [sort]);
+
   const loadEventLogs = async () => {
     setIsLoading(true);
     try {
-      const result = await loadExecutionLogAggregations({
+      const result = await loadActionErrorLog({
         id: rule.id,
-        sort: {
-          [sort?.field || 'timestamp']: { order: sort?.direction || 'desc' },
-        } as unknown as LoadExecutionLogAggregationsProps['sort'],
+        runId,
+        message: searchText,
         dateStart: getParsedDate(dateStart),
         dateEnd: getParsedDate(dateEnd),
-        page: 0,
-        perPage: 1,
+        page: pagination.pageIndex,
+        perPage: pagination.pageSize,
+        sort: formattedSort,
       });
       setLogs(result.errors);
       setPagination({
@@ -148,6 +164,25 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
       setDateEnd(end);
     },
     [setDateStart, setDateEnd]
+  );
+
+  const onSearchChange = useCallback(
+    (e) => {
+      if (e.target.value === '') {
+        setSearchText('');
+      }
+      setSearch(e.target.value);
+    },
+    [setSearchText, setSearch]
+  );
+
+  const onKeyUp = useCallback(
+    (e) => {
+      if (e.key === 'Enter') {
+        setSearchText(search);
+      }
+    },
+    [search, setSearchText]
   );
 
   const onRefresh = () => {
@@ -192,16 +227,18 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
     [dateFormat]
   );
 
-  const logList = useMemo(() => {
-    const start = pagination.pageIndex * pagination.pageSize;
-    const logsSortDesc = logs.sort((a, b) => sortErrorLog(a, b, sort?.direction));
-    return logsSortDesc.slice(start, start + pagination.pageSize);
-  }, [logs, pagination.pageIndex, pagination.pageSize, sort?.direction]);
-
   useEffect(() => {
     loadEventLogs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dateStart, dateEnd]);
+  }, [
+    dateStart,
+    dateEnd,
+    formattedSort,
+    pagination.pageIndex,
+    pagination.pageSize,
+    searchText,
+    runId,
+  ]);
 
   useEffect(() => {
     if (isInitialized.current) {
@@ -215,6 +252,18 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
     <div>
       <EuiSpacer />
       <EuiFlexGroup>
+        {runId && (
+          <EuiFlexItem grow={false}>
+            <EuiFieldSearch
+              fullWidth
+              isClearable
+              value={search}
+              onChange={onSearchChange}
+              onKeyUp={onKeyUp}
+              placeholder={SEARCH_PLACEHOLDER}
+            />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <EuiSuperDatePicker
             data-test-subj="ruleEventLogListDatePicker"
@@ -237,7 +286,7 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
       <EuiBasicTable
         data-test-subj="RuleErrorLog"
         loading={isLoading}
-        items={logList ?? []}
+        items={logs ?? []}
         columns={columns}
         sorting={{ sort }}
         pagination={pagination}

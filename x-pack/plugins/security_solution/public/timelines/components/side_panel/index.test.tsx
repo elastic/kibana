@@ -23,10 +23,11 @@ import type { TimelineExpandedDetail } from '../../../../common/types/timeline';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { EventDetailsPanel } from './event_details';
-import { useKibana } from '../../../common/lib/kibana';
-import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
+import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/containers/use_search_strategy', () => ({
+  useSearchStrategy: jest.fn(),
+}));
 
 describe('Details Panel Component', () => {
   const state: State = {
@@ -98,34 +99,11 @@ describe('Details Panel Component', () => {
     timelineId: 'test',
   };
 
-  const mockSearchStrategy = jest.fn();
+  const mockUseSearchStrategy = useSearchStrategy as jest.Mock;
 
   describe('DetailsPanel: rendering', () => {
     beforeEach(() => {
       store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-      (useKibana as jest.Mock).mockReturnValue({
-        services: {
-          data: {
-            search: {
-              searchStrategyClient: jest.fn(),
-              search: mockSearchStrategy.mockReturnValue({
-                unsubscribe: jest.fn(),
-                subscribe: jest.fn(),
-              }),
-            },
-            query: jest.fn(),
-          },
-          uiSettings: {
-            get: jest.fn().mockReturnValue([]),
-          },
-          application: {
-            navigateToApp: jest.fn(),
-          },
-          cases: {
-            ui: { getCasesContext: () => mockCasesContext },
-          },
-        },
-      });
     });
 
     test('it should not render the DetailsPanel if no expanded detail has been set in the reducer', () => {
@@ -247,10 +225,26 @@ describe('Details Panel Component', () => {
 
   describe('DetailsPanel:HostDetails: rendering', () => {
     beforeEach(() => {
+      mockUseSearchStrategy.mockReturnValue({
+        loading: true,
+        result: {
+          hostDetails: {
+            host: {},
+          },
+        },
+        error: undefined,
+        search: jest.fn(),
+        refetch: jest.fn(),
+        inspect: {},
+      });
       const mockState = { ...state };
       mockState.timeline.timelineById[TimelineId.active].expandedDetail = hostExpandedDetail;
       mockState.timeline.timelineById.test.expandedDetail = hostExpandedDetail;
       store = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    });
+
+    afterEach(() => {
+      mockUseSearchStrategy.mockReset();
     });
 
     test('it should render the Host Details view in the Details Panel when the panelView is hostDetail and the hostName is set', () => {
@@ -266,10 +260,23 @@ describe('Details Panel Component', () => {
 
   describe('DetailsPanel:NetworkDetails: rendering', () => {
     beforeEach(() => {
+      mockUseSearchStrategy.mockReturnValue({
+        loading: true,
+        result: {
+          networkDetails: {},
+        },
+        search: jest.fn(),
+        refetch: jest.fn(),
+        inspect: {},
+      });
       const mockState = { ...state };
       mockState.timeline.timelineById[TimelineId.active].expandedDetail = networkExpandedDetail;
       mockState.timeline.timelineById.test.expandedDetail = networkExpandedDetail;
       store = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    });
+
+    afterEach(() => {
+      mockUseSearchStrategy.mockReset();
     });
 
     test('it should render the Network Details view in the Details Panel when the panelView is networkDetail and the ip is set', () => {

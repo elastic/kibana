@@ -39,8 +39,8 @@ describe('AlertsTreemap', () => {
       expect(screen.getByTestId('treemap').querySelector('.echChart')).toBeInTheDocument();
     });
 
-    test('it renders the legend', () => {
-      expect(screen.getByTestId('draggable-legend')).toBeInTheDocument();
+    test('it renders the legend with the expected overflow-y style', () => {
+      expect(screen.getByTestId('draggable-legend')).toHaveClass('eui-yScroll');
     });
   });
 
