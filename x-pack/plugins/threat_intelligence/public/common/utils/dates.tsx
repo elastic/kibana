@@ -9,9 +9,12 @@ import moment from 'moment';
 moment.suppressDeprecationWarnings = true;
 import { EMPTY_VALUE } from '../../../common/constants';
 
-const FULL_DATE = 'MMMM Do YYYY @ HH:mm:ss';
-
-export const fullDateFormatter = (date: string | moment.Moment): string => {
-  const momentDate: moment.Moment = typeof date === 'string' ? moment(date) : date;
-  return momentDate.isValid() ? momentDate.format(FULL_DATE) : EMPTY_VALUE;
+export const dateFormatter = (
+  date: string | moment.Moment,
+  timeZone: string,
+  format?: string
+): string => {
+  const momentDate: moment.Moment =
+    typeof date === 'string' ? moment.tz(date, timeZone) : date.tz(timeZone);
+  return momentDate.isValid() ? momentDate.format(format) : EMPTY_VALUE;
 };
