@@ -232,7 +232,7 @@ export async function fetchRuleAlertsAggByTimeRange({
           };
 
           if (dayAlerts.doc_count > 0) {
-            // If there are alerts in this day, we construct the chart data and add the totalAlerts to it
+            // If there are alerts in this day, we construct the chart data.
             return [
               ...acc,
               ...dayAlerts.alertStatus.buckets.map((alert) => ({
@@ -240,8 +240,6 @@ export async function fetchRuleAlertsAggByTimeRange({
                 count: alert.doc_count,
                 status: alert.key,
               })),
-              // We add the background bar even if there is alerts in this day, but we calculate the delta.
-              { ...totalDayAlerts, count: totalAlerts - dayAlerts.doc_count },
             ];
           }
           return [...acc, { ...totalDayAlerts }];

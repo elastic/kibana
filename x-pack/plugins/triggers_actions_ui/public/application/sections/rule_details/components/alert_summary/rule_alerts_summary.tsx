@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { BarSeries, Chart, ScaleType, Settings, TooltipType } from '@elastic/charts';
+import {
+  BarSeries,
+  Chart,
+  FilterPredicate,
+  ScaleType,
+  Settings,
+  TooltipType,
+} from '@elastic/charts';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -67,7 +74,7 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
 
   if (isLoadingRuleAlertsAggs) return <EuiLoadingSpinner />;
   if (errorRuleAlertsAggs) return <EuiFlexItem>Error</EuiFlexItem>;
-
+  const isVisibleFunction: FilterPredicate = (series) => series.splitAccessors.get('g') !== 'total';
   return (
     <EuiPanel hasShadow={false} hasBorder>
       <EuiFlexGroup direction="column">
@@ -145,7 +152,7 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <Chart size={{ height: 50 }}>
-        <Settings tooltip={TooltipType.None} theme={theme} />
+        <Settings tooltip={TooltipType.VerticalCursor} theme={theme} />
         <BarSeries
           id="bars"
           xScaleType={ScaleType.Time}
@@ -156,6 +163,7 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
           splitSeriesAccessors={G_ACCESSORS}
           color={getColorSeries}
           data={chartData}
+          filterSeriesInTooltip={isVisibleFunction}
         />
       </Chart>
     </EuiPanel>
