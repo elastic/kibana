@@ -50,6 +50,7 @@ export const useTreeView = ({ globalFilter, indexPattern }: UseTreeViewProps) =>
   useEffect(() => {
     if (!!treeNavSelection[KubernetesCollection.cluster]) {
       setHasSelection(true);
+      setTreeNavSelection(treeNavSelection);
     }
   }, [treeNavSelection]);
 
