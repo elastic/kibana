@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewListItem, DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { ISearchSource } from '@kbn/data-plugin/public';
 import type { SavedObject, ToastsStart } from '@kbn/core/public';
-export type IndexPatternSavedObject = SavedObject & { title: string };
+export type DataViewSavedObject = SavedObject & { title: string };
 
 interface DataViewData {
   /**
@@ -18,21 +18,21 @@ interface DataViewData {
    */
   list: DataViewListItem[];
   /**
-   * Loaded index pattern (might be default index pattern if requested was not found)
+   * Loaded data view (might be default data view if requested was not found)
    */
   loaded: DataView | null;
   /**
-   * Id of the requested index pattern
+   * Id of the requested data view
    */
   stateVal: string;
   /**
-   * Determines if requested index pattern was found
+   * Determines if requested data view was found
    */
   stateValFound: boolean;
 }
 
 /**
- * Function to load the given index pattern by id, providing a fallback if it doesn't exist
+ * Function to load the given data view by id, providing a fallback if it doesn't exist
  */
 export async function loadDataView(
   id: string,
@@ -57,22 +57,23 @@ export async function loadDataView(
 
 /**
  * Function used in the discover controller to message the user about the state of the current
- * index pattern
+ * data view
  */
 export function resolveDataView(
   ip: DataViewData,
   searchSource: ISearchSource,
   toastNotifications: ToastsStart
 ) {
-  const { loaded: loadedIndexPattern, stateVal, stateValFound } = ip;
+  const { loaded: loadedDataView, stateVal, stateValFound } = ip;
 
-  const ownIndexPattern = searchSource.getOwnField('index');
-  if (!loadedIndexPattern) {
+  if (!loadedDataView) {
     return;
   }
 
-  if (ownIndexPattern && !stateVal) {
-    return ownIndexPattern;
+  const ownDataView = searchSource.getOwnField('index');
+
+  if (ownDataView && !stateVal) {
+    return ownDataView;
   }
 
   if (stateVal && !stateValFound) {
@@ -83,19 +84,18 @@ export function resolveDataView(
       },
     });
 
-    if (ownIndexPattern) {
+    if (ownDataView) {
       toastNotifications.addWarning({
         title: warningTitle,
         text: i18n.translate('discover.showingSavedDataViewWarningDescription', {
-          defaultMessage:
-            'Showing the saved data view: "{ownIndexPatternTitle}" ({ownIndexPatternId})',
+          defaultMessage: 'Showing the saved data view: "{ownDataViewTitle}" ({ownDataViewId})',
           values: {
-            ownIndexPatternTitle: ownIndexPattern.title,
-            ownIndexPatternId: ownIndexPattern.id,
+            ownDataViewTitle: ownDataView.title,
+            ownDataViewId: ownDataView.id,
           },
         }),
       });
-      return ownIndexPattern;
+      return ownDataView;
     }
 
     toastNotifications.addWarning({
@@ -104,11 +104,12 @@ export function resolveDataView(
         defaultMessage:
           'Showing the default data view: "{loadedDataViewTitle}" ({loadedDataViewId})',
         values: {
-          loadedIndexPatternTitle: loadedIndexPattern.title,
-          loadedIndexPatternId: loadedIndexPattern.id,
+          loadedDataViewTitle: loadedDataView.title,
+          loadedDataViewId: loadedDataView.id,
         },
       }),
     });
   }
-  return loadedIndexPattern;
+
+  return loadedDataView;
 }
