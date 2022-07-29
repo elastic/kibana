@@ -8,14 +8,13 @@
 
 import { PayloadAction } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/types/types-external';
-
-import { TimeSliderControlEmbeddableInput } from '../../../common/control_types/time_slider/types';
+import { TimeSliderReduxState } from './types';
 
 export const timeSliderReducers = {
   selectRange: (
-    state: WritableDraft<TimeSliderControlEmbeddableInput>,
+    state: WritableDraft<TimeSliderReduxState>,
     action: PayloadAction<[number | null, number | null]>
   ) => {
-    state.value = action.payload;
+    state.explicitInput.value = action.payload;
   },
 };

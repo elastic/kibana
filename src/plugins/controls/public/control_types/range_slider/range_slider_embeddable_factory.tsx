@@ -9,6 +9,8 @@
 import deepEqual from 'fast-deep-equal';
 
 import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
+import { lazyLoadReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
+
 import { ControlEmbeddable, DataControlField, IEditableControlFactory } from '../../types';
 import { RangeSliderEmbeddableInput, RANGE_SLIDER_CONTROL } from './types';
 import {
@@ -26,8 +28,11 @@ export class RangeSliderEmbeddableFactory
   constructor() {}
 
   public async create(initialInput: RangeSliderEmbeddableInput, parent?: IContainer) {
+    const reduxEmbeddablePackage = await lazyLoadReduxEmbeddablePackage();
     const { RangeSliderEmbeddable } = await import('./range_slider_embeddable');
-    return Promise.resolve(new RangeSliderEmbeddable(initialInput, {}, parent));
+    return Promise.resolve(
+      new RangeSliderEmbeddable(reduxEmbeddablePackage, initialInput, {}, parent)
+    );
   }
 
   public presaveTransformFunction = (

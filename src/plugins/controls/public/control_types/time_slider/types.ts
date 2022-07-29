@@ -9,26 +9,22 @@
 import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
 
 import { ControlOutput } from '../../types';
-import {
-  OptionsListEmbeddableInput,
-  OptionsListField,
-} from '../../../common/control_types/options_list/types';
+import { TimeSliderControlEmbeddableInput } from '../../../common/control_types/time_slider/types';
 
-export * from '../../../common/control_types/options_list/types';
+export * from '../../../common/control_types/time_slider/types';
 
 // Component state is only used by public components.
-export interface OptionsListComponentState {
-  field?: OptionsListField;
-  totalCardinality?: number;
-  availableOptions?: string[];
-  invalidSelections?: string[];
-  validSelections?: string[];
-  searchString: string;
+export interface TimeSliderSubjectState {
+  range?: {
+    min?: number;
+    max?: number;
+  };
+  loading: boolean;
 }
 
 // public only - redux embeddable state type
-export type OptionsListReduxState = ReduxEmbeddableState<
-  OptionsListEmbeddableInput,
+export type TimeSliderReduxState = ReduxEmbeddableState<
+  TimeSliderControlEmbeddableInput,
   ControlOutput,
-  OptionsListComponentState
+  TimeSliderSubjectState
 >;

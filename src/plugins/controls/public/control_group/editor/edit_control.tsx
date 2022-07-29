@@ -14,7 +14,7 @@ import { OverlayRef } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { EmbeddableFactoryNotFoundError } from '@kbn/embeddable-plugin/public';
 import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
-import { ControlGroupInput } from '../types';
+import { ControlGroupReduxState } from '../types';
 import { ControlEditor } from './control_editor';
 import { pluginServices } from '../../services';
 import { ControlGroupStrings } from '../control_group_strings';
@@ -41,7 +41,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
 
   // Redux embeddable container Context
   const reduxContainerContext = useReduxContainerContext<
-    ControlGroupInput,
+    ControlGroupReduxState,
     typeof controlGroupReducers
   >();
   const {
@@ -53,7 +53,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
   const dispatch = useEmbeddableDispatch();
 
   // current state
-  const { panels } = useEmbeddableSelector((state) => state);
+  const panels = useEmbeddableSelector((state) => state.explicitInput.panels);
 
   // keep up to date ref of latest panel state for comparison when closing editor.
   const latestPanelState = useRef(panels[embeddableId]);

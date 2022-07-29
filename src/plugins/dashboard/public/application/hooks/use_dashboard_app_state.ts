@@ -14,7 +14,6 @@ import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
 import { DashboardConstants } from '../..';
 import { ViewMode } from '../../services/embeddable';
 import { useKibana } from '../../services/kibana_react';
-import { DataView } from '../../services/data_views';
 import { getNewDashboardTitle } from '../../dashboard_strings';
 import { IKbnUrlStateStorage } from '../../services/kibana_utils';
 import { setDashboardState, useDashboardDispatch, useDashboardSelector } from '../state';
@@ -255,11 +254,14 @@ export const useDashboardAppState = ({
       const dataViewsSubscription = syncDashboardDataViews({
         dashboardContainer,
         dataViews: dashboardBuildContext.dataViews,
-        onUpdateDataViews: (newDataViews: DataView[]) => {
-          if (newDataViews.length > 0 && newDataViews[0].id) {
-            dashboardContainer.controlGroup?.setRelevantDataViewId(newDataViews[0].id);
+        onUpdateDataViews: async (newDataViewIds: string[]) => {
+          if (newDataViewIds?.[0]) {
+            dashboardContainer.controlGroup?.setRelevantDataViewId(newDataViewIds[0]);
           }
-          setDashboardAppState((s) => ({ ...s, dataViews: newDataViews }));
+
+          // fetch all data views. These should be cached locally at this time so we will not need to query ES.
+          const allDataViews = await Promise.all(newDataViewIds.map((id) => dataViews.get(id)));
+          setDashboardAppState((s) => ({ ...s, dataViews: allDataViews }));
         },
       });
 
