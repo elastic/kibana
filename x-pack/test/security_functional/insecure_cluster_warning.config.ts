@@ -20,13 +20,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('../../../test/functional/config.base.js')
   );
 
-  const kbnTestServerArgOverrides = [
-    ...kibanaCommonConfig
-      .get('kbnTestServer.serverArgs')
-      .filter((arg: string) => !arg.startsWith('--security.showInsecureClusterWarning')),
-  ];
-
-  kbnTestServerArgOverrides.push('--security.showInsecureClusterWarning=true');
+  const kbnTestServerArgOverrides = kibanaCommonConfig
+    .get('kbnTestServer.serverArgs')
+    .filter((arg: string) => !arg.startsWith('--security.showInsecureClusterWarning'));
 
   return {
     testFiles: [resolve(__dirname, './tests/insecure_cluster_warning')],
