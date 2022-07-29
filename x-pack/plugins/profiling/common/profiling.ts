@@ -64,8 +64,6 @@ export interface StackFrameMetadata {
   FileID: FileID;
   // StackTrace.Type
   FrameType: FrameType;
-  // stringified FrameType -- FrameType.String()
-  FrameTypeString: string;
 
   // StackFrame.LineNumber?
   AddressOrLine: number;
@@ -102,7 +100,6 @@ export function createStackFrameMetadata(
 
   metadata.FileID = options.FileID ?? '';
   metadata.FrameType = options.FrameType ?? 0;
-  metadata.FrameTypeString = options.FrameTypeString ?? '';
   metadata.AddressOrLine = options.AddressOrLine ?? 0;
   metadata.FunctionName = options.FunctionName ?? '';
   metadata.FunctionOffset = options.FunctionOffset ?? 0;
