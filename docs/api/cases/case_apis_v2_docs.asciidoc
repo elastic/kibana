@@ -1,0 +1,49 @@
+[[Case_APIs]]
+== Case APIs
+
+* <<getCasesByAlert>>
+
+[[getCasesByAlert]]
+=== Get cases by alert
+
+Returns the cases associated with a specific alert. You must have `read` privileges for the *Cases* feature in the *Management*, *Observability*, or *Security* section of the Kibana feature privileges, depending on the owner of the cases you&#39;re seeking.
+
+
+==== Request
+
+`GET /s/{spaceId}/api/cases/alerts/{alertId}`
+
+==== Path parameters
+
+[options="header"]
+|==========
+|Name |Type |Required |Description
+|`alertId` |+string+ |Y |An identifier for the alert.
+
+|`spaceId` |+string+ |Y |An identifier for the space.
+
+|==========
+==== Query parameters
+
+[options="header"]
+|==========
+|Name |Type |Required |Description
+|`owner` |+string+ |N |A filter to limit the response to a specific set of applications. If this parameter is omitted, the response contains information about all the cases that the user has access to read.
+
+|==========
+==== Responses
+
+`200`::
++
+--
+Indicates a successful call.
+
+--
+
+==== Request example
+
+[source,json]
+--------
+curl -XGET https://localhost:5601/s/{spaceId}/api/cases/alerts/{alertId} \
+-u USER:PASSWORD
+--------
