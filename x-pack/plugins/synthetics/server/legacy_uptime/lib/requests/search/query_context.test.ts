@@ -8,7 +8,7 @@
 import { QueryContext } from './query_context';
 import { CursorPagination } from './types';
 import { CursorDirection, SortOrder } from '../../../../../common/runtime_types';
-import { getUptimeESMockClient } from '../helper';
+import { getUptimeESMockClient } from '../test_helpers';
 
 describe(QueryContext, () => {
   // 10 minute range

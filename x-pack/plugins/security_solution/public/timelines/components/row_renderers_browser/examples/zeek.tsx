@@ -7,6 +7,7 @@
 
 import React from 'react';
 
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { mockTimelineData } from '../../../../common/mock/mock_timeline_data';
 import { zeekRowRenderer } from '../../timeline/body/renderers/zeek/zeek_row_renderer';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';

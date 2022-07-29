@@ -11,7 +11,7 @@ import {
   AvailabilityKey,
   getMonitorAvailability,
 } from './get_monitor_availability';
-import { getUptimeESMockClient, setupMockEsCompositeQuery } from './helper';
+import { getUptimeESMockClient, setupMockEsCompositeQuery } from './test_helpers';
 import { GetMonitorAvailabilityParams, makePing, Ping } from '../../../../common/runtime_types';
 
 interface AvailabilityTopHit {

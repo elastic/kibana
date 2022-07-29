@@ -13,7 +13,6 @@ import {
   EuiOutsideClickDetector,
 } from '@elastic/eui';
 import type { Geometry } from 'geojson';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { ITooltipProperty } from '@kbn/maps-plugin/public/classes/tooltips/tooltip_property';
 import type { MapToolTipProps } from '../types';
 import { ToolTipFooter } from './tooltip_footer';

@@ -6,4 +6,5 @@
  */
 
 export { MountWithReduxProvider } from './helper';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 export * from './helper/enzyme_helpers';

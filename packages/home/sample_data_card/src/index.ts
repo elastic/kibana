@@ -20,5 +20,6 @@ export {
   getStoryArgTypes as getSampleDataCardStoryArgTypes,
   getStoryServices as getSampleDataCardStoryServices,
   getMockDataSet as getSampleDataCardMockDataSet,
+  // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 } from './mocks';
 export type { Params as SampleDataCardStorybookParams } from './mocks';

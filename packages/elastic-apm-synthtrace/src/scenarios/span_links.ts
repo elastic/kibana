@@ -9,7 +9,7 @@
 import { compact, shuffle } from 'lodash';
 import { apm, ApmFields, EntityArrayIterable, timerange } from '..';
 import { generateLongId, generateShortId } from '../lib/utils/generate_id';
-import { Scenario } from '../scripts/scenario';
+import { Scenario } from '../cli/scenario';
 
 const ENVIRONMENT = __filename;
 

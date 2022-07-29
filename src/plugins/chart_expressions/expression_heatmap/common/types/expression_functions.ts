@@ -15,7 +15,7 @@ import {
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 
 import { CustomPaletteState } from '@kbn/charts-plugin/common';
-import { LegendSize } from '@kbn/visualizations-plugin/public';
+import type { LegendSize } from '@kbn/visualizations-plugin/public';
 import {
   EXPRESSION_HEATMAP_NAME,
   EXPRESSION_HEATMAP_LEGEND_NAME,

@@ -7,6 +7,7 @@
 
 import React from 'react';
 
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { mockEndgameFileCreateEvent } from '../../../../common/mock/mock_endgame_ecs_data';
 import { createFimRowRenderer } from '../../timeline/body/renderers/system/generic_row_renderer';
 import { CREATED_FILE } from '../../timeline/body/renderers/system/translations';

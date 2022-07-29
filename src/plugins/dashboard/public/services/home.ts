@@ -7,4 +7,4 @@
  */
 
 export type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-export { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
+export type { FeatureCatalogueCategory } from '@kbn/home-plugin/public';

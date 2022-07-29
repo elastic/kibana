@@ -6,7 +6,6 @@
  */
 
 import type { IRouter, Logger, CustomRequestHandlerContext } from '@kbn/core/server';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';

@@ -7,9 +7,9 @@
  */
 
 import { observer, timerange } from '..';
-import { Scenario } from '../scripts/scenario';
-import { getLogger } from '../scripts/utils/get_common_services';
-import { RunOptions } from '../scripts/utils/parse_run_cli_flags';
+import { Scenario } from '../cli/scenario';
+import { getLogger } from '../cli/utils/get_common_services';
+import { RunOptions } from '../cli/utils/parse_run_cli_flags';
 import { AgentConfigFields } from '../lib/agent_config/agent_config_fields';
 
 const scenario: Scenario<AgentConfigFields> = async (runOptions: RunOptions) => {

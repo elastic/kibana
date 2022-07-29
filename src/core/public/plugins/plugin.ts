@@ -7,7 +7,7 @@
  */
 
 import { firstValueFrom, Subject } from 'rxjs';
-import { DiscoveredPlugin, PluginOpaqueId } from '../../server';
+import type { DiscoveredPlugin, PluginOpaqueId } from '../../server';
 import { PluginInitializerContext } from './plugin_context';
 import { read } from './plugin_reader';
 import { CoreStart, CoreSetup } from '..';

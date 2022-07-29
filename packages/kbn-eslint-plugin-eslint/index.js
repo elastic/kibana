@@ -10,7 +10,6 @@ module.exports = {
   rules: {
     'require-license-header': require('./rules/require_license_header'),
     'disallow-license-headers': require('./rules/disallow_license_headers'),
-    'no-restricted-paths': require('./rules/no_restricted_paths'),
     module_migration: require('./rules/module_migration'),
     no_export_all: require('./rules/no_export_all'),
     no_async_promise_body: require('./rules/no_async_promise_body'),

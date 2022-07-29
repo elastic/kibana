@@ -15,7 +15,6 @@ import type { ReactNode } from 'react';
 import React from 'react';
 
 import type { IBasePath } from '@kbn/core/server';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Fonts } from '@kbn/core/server/rendering/views/fonts';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';

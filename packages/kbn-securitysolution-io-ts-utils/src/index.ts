@@ -10,5 +10,6 @@ export * from './format_errors';
 export * from './parse_schedule_dates';
 export * from './exact_check';
 export * from './format_errors';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 export * from './test_utils';
 export * from './validate';

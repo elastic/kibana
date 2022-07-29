@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { staticColumn } from '../../../canvas_plugin_src/functions/common/staticColumn';
+import type { staticColumn } from '../../../canvas_plugin_src/functions/common/staticColumn';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 

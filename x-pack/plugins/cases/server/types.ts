@@ -11,7 +11,6 @@ import {
   ActionTypeSecrets,
   ActionTypeParams,
   ActionType,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '@kbn/actions-plugin/server/types';
 import { CasesClient } from './client';
 import { AttachmentFramework } from './attachment_framework/types';

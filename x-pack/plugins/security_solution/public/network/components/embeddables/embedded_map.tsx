@@ -14,7 +14,6 @@ import styled, { css } from 'styled-components';
 import type { Filter, Query } from '@kbn/es-query';
 import type { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { MapEmbeddable } from '@kbn/maps-plugin/public/embeddable';
 import { Loader } from '../../../common/components/loader';
 import { displayErrorToast, useStateToaster } from '../../../common/components/toasters';

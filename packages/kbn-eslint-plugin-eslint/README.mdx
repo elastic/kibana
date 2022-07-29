@@ -83,47 +83,6 @@ Disallows the usage of `this` into class property initializers and enforce to de
 
 Disables the usage of a trailing slash in a node module import.
 
-## no-restricted-paths
-
-Defines a set of import paths valid to be imported for a given group of files.
-
-```
-module.exports = {
-  overrides: [
-    {    
-      files: ['**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        '@kbn/eslint/no-restricted-paths': [
-          'error',
-          {
-            basePath: __dirname,
-            zones: [
-              {
-                target: [
-                  '(src|x-pack)/plugins/**/(public|server)/**/*',
-                  'examples/**/*',
-                  '!(src|x-pack)/**/*.test.*',
-                  '!(x-pack/)?test/**/*',
-                ],
-                from: [
-                  '(src|x-pack)/plugins/**/(public|server)/**/*',
-                  '!(src|x-pack)/plugins/**/(public|server)/mocks/index.{js,mjs,ts}',
-                  '!(src|x-pack)/plugins/**/(public|server)/(index|mocks).{js,mjs,ts,tsx}',
-                  '!(src|x-pack)/plugins/**/__stories__/index.{js,mjs,ts,tsx}',
-                  '!(src|x-pack)/plugins/**/__fixtures__/index.{js,mjs,ts,tsx}',
-                ],
-                allowSameFolder: true,
-                errorMessage: 'Plugins may only import from top-level public and server modules.',
-              },
-            ],
-          },
-        ],
-      },
-    }
-  ]    
-}
-```
-
 ## require-license-header
 
 Requires a given license header text on a group of files.

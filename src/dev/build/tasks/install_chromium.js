@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { install, paths } from '@kbn/screenshotting-plugin/server/utils';
 
 export const InstallChromium = {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { MonitoringConfig } from '../server/config';
 
 /**

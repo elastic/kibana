@@ -10,7 +10,7 @@ import fn from './trim';
 
 import _ from 'lodash';
 import expect from '@kbn/expect';
-import invoke from './helpers/invoke_series_fn';
+import invoke from './test_helpers/invoke_series_fn';
 
 describe('trim.js', () => {
   let seriesList;

@@ -22,7 +22,6 @@ import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { DeepPartial } from 'utility-types';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';

@@ -25,7 +25,7 @@ import {
 } from '../../common/technical_rule_data_field_names';
 import { createRuleDataClientMock } from '../rule_data_client/rule_data_client.mock';
 import { createLifecycleExecutor } from './create_lifecycle_executor';
-import { createDefaultAlertExecutorOptions } from './rule_executor_test_utils';
+import { createDefaultAlertExecutorOptions } from './rule_executor.test_helpers';
 
 describe('createLifecycleExecutor', () => {
   it('wraps and unwraps the original executor state', async () => {

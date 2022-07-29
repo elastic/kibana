@@ -97,7 +97,10 @@ export class RepoSourceClassifier {
       }
 
       const subRoot = dirs.slice(0, 2).join('/');
-      if (subRoot === 'functions/external' || subRoot === 'functions/server') {
+      if (subRoot === 'functions/external') {
+        return 'common package';
+      }
+      if (subRoot === 'functions/server') {
         return 'server package';
       }
 

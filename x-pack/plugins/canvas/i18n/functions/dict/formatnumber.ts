@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { formatnumber } from '../../../canvas_plugin_src/functions/common/formatnumber';
+import type { formatnumber } from '../../../canvas_plugin_src/functions/common/formatnumber';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { NUMERALJS } from '../../constants';

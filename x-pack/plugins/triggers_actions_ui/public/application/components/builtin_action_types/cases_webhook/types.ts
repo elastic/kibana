@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable @kbn/eslint/no-restricted-paths */
-
-import {
+import type {
   CasesWebhookPublicConfigurationType,
   CasesWebhookSecretConfigurationType,
   ExecutorSubActionPushParams,

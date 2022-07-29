@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { escount } from '../../../canvas_plugin_src/functions/browser/escount';
+import type { escount } from '../../../canvas_plugin_src/functions/browser/escount';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { ELASTICSEARCH, LUCENE } from '../../constants';
