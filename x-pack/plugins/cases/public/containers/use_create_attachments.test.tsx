@@ -26,12 +26,18 @@ describe('useCreateAttachments', () => {
   });
 
   const abortCtrl = new AbortController();
-  const samplePost = [
+  const attachmentsWithoutOwner = [
     {
       comment: 'a comment',
       type: CommentType.user as const,
     },
   ];
+
+  const attachmentsWithOwner = attachmentsWithoutOwner.map((attachment) => ({
+    ...attachment,
+    owner: SECURITY_SOLUTION_OWNER,
+  }));
+
   const updateCaseCallback = jest.fn();
   beforeEach(() => {
     jest.clearAllMocks();
@@ -64,11 +70,16 @@ describe('useCreateAttachments', () => {
       result.current.createAttachments({
         caseId: basicCaseId,
         caseOwner: SECURITY_SOLUTION_OWNER,
-        data: samplePost,
+        data: attachmentsWithoutOwner,
         updateCase: updateCaseCallback,
       });
+
       await waitForNextUpdate();
-      expect(spyOnBulkCreateAttachments).toBeCalledWith(samplePost, basicCaseId, abortCtrl.signal);
+      expect(spyOnBulkCreateAttachments).toBeCalledWith(
+        attachmentsWithOwner,
+        basicCaseId,
+        abortCtrl.signal
+      );
       expect(toastErrorMock).not.toHaveBeenCalled();
     });
   });
@@ -85,11 +96,16 @@ describe('useCreateAttachments', () => {
       result.current.createAttachments({
         caseId: basicCaseId,
         caseOwner: SECURITY_SOLUTION_OWNER,
-        data: samplePost,
+        data: attachmentsWithoutOwner,
         updateCase: updateCaseCallback,
       });
+
       await waitForNextUpdate();
-      expect(spyOnBulkCreateAttachments).toBeCalledWith(samplePost, basicCaseId, abortCtrl.signal);
+      expect(spyOnBulkCreateAttachments).toBeCalledWith(
+        attachmentsWithOwner,
+        basicCaseId,
+        abortCtrl.signal
+      );
       expect(toastErrorMock).not.toHaveBeenCalled();
     });
   });
@@ -99,13 +115,15 @@ describe('useCreateAttachments', () => {
       const { result, waitForNextUpdate } = renderHook<string, UseCreateAttachments>(() =>
         useCreateAttachments()
       );
+
       await waitForNextUpdate();
       result.current.createAttachments({
         caseId: basicCaseId,
         caseOwner: SECURITY_SOLUTION_OWNER,
-        data: samplePost,
+        data: attachmentsWithoutOwner,
         updateCase: updateCaseCallback,
       });
+
       await waitForNextUpdate();
       expect(result.current).toEqual({
         isLoading: false,
@@ -120,11 +138,12 @@ describe('useCreateAttachments', () => {
       const { result, waitForNextUpdate } = renderHook<string, UseCreateAttachments>(() =>
         useCreateAttachments()
       );
+
       await waitForNextUpdate();
       result.current.createAttachments({
         caseId: basicCaseId,
         caseOwner: SECURITY_SOLUTION_OWNER,
-        data: samplePost,
+        data: attachmentsWithoutOwner,
         updateCase: updateCaseCallback,
       });
 
@@ -142,11 +161,12 @@ describe('useCreateAttachments', () => {
       const { result, waitForNextUpdate } = renderHook<string, UseCreateAttachments>(() =>
         useCreateAttachments()
       );
+
       await waitForNextUpdate();
       result.current.createAttachments({
         caseId: basicCaseId,
         caseOwner: SECURITY_SOLUTION_OWNER,
-        data: samplePost,
+        data: attachmentsWithoutOwner,
         updateCase: updateCaseCallback,
       });
 
@@ -172,12 +192,14 @@ describe('useCreateAttachments', () => {
       const { result, waitForNextUpdate } = renderHook<string, UseCreateAttachments>(() =>
         useCreateAttachments()
       );
+
       await waitForNextUpdate();
+
       async function test() {
         await result.current.createAttachments({
           caseId: basicCaseId,
           caseOwner: SECURITY_SOLUTION_OWNER,
-          data: samplePost,
+          data: attachmentsWithoutOwner,
           updateCase: updateCaseCallback,
           throwOnError: true,
         });

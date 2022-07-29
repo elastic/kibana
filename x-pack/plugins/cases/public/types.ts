@@ -148,6 +148,7 @@ export interface CasesUiStart {
 
 export type SupportedCaseAttachment = CommentRequestAlertType | CommentRequestUserType;
 export type CaseAttachments = SupportedCaseAttachment[];
-export type CaseAttachmentsWithoutOwner = Array<DistributiveOmit<SupportedCaseAttachment, 'owner'>>;
+export type CaseAttachmentWithoutOwner = DistributiveOmit<SupportedCaseAttachment, 'owner'>;
+export type CaseAttachmentsWithoutOwner = CaseAttachmentWithoutOwner[];
 
 export type ServerError = IHttpFetchError<ResponseErrorBody>;
