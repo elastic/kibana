@@ -36,14 +36,18 @@ blah blah blah
 async function process({ flags, log }) {
   log.info('\n### Running runCheckOwnTestsRanCli()');
 
+  const isTestWith = isTest(
+    testDirectoryRegexes('src/dev/own_tests_ran/test_roots.yml')
+  );
+
   from(flags.mock ? mockData() : await getPrChanges())
     .pipe(
       pluck('filename'),
-      filter(isTest(testDirectoryRegexes('src/dev/own_tests_ran/test_roots.yml'))),
+      filter(isTestWith),
       mergeMap(async (x) => await findConfigFile(x))
     )
     .subscribe({
-      next: (x) => console.log(`\n### x2: \n\t${x}`),
+      next: (x) => console.log(`\n### Config: \n\t${x}`),
       // next: noop,
       error: (x) => console.error(`\n### x: \n\t${x}`),
       complete: () => console.log('\n### Complete'),
@@ -53,7 +57,7 @@ async function process({ flags, log }) {
 function mockData() {
   return [
     {
-      filename: 'test/functional/apps/context/classic/_filters.ts',
+      filename: 'x-pack/test/functional/apps/discover/feature_controls/discover_spaces.ts',
     },
     {
       filename:
