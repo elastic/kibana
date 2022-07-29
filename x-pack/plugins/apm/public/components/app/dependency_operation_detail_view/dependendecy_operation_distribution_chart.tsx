@@ -93,6 +93,7 @@ export function DependencyOperationDistributionChart() {
   return (
     <DurationDistributionChartWithScrubber
       chartData={chartData}
+      totalDocCount={data?.allSpansDistribution.totalDocCount}
       eventType={ProcessorEvent.span}
       hasData={hasData}
       onChartSelection={selectSampleFromChartSelection}

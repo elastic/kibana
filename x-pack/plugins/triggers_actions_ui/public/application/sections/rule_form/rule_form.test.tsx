@@ -232,7 +232,7 @@ describe('rule_form', () => {
   describe('rule_form create rule', () => {
     let wrapper: ReactWrapper<any>;
 
-    async function setup(enforceMinimum = false, schedule = '1m') {
+    async function setup(enforceMinimum = false, schedule = '1m', featureId = 'alerting') {
       const mocks = coreMock.createSetup();
       const { useLoadRuleTypes } = jest.requireMock('../../hooks/use_load_rule_types');
       const ruleTypes: RuleType[] = [
@@ -333,6 +333,7 @@ describe('rule_form', () => {
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
+          connectorFeatureId={featureId}
         />
       );
 
@@ -387,7 +388,15 @@ describe('rule_form', () => {
     it('renders registered action types', async () => {
       await setup();
       const ruleTypeSelectOptions = wrapper.find(
-        '[data-test-subj=".server-log-ActionTypeSelectOption"]'
+        '[data-test-subj=".server-log-alerting-ActionTypeSelectOption"]'
+      );
+      expect(ruleTypeSelectOptions.exists()).toBeFalsy();
+    });
+
+    it('renders uses feature id to load action types', async () => {
+      await setup(false, '1m', 'anotherFeature');
+      const ruleTypeSelectOptions = wrapper.find(
+        '[data-test-subj=".server-log-anotherFeature-ActionTypeSelectOption"]'
       );
       expect(ruleTypeSelectOptions.exists()).toBeFalsy();
     });

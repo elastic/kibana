@@ -5,20 +5,24 @@
  * 2.0.
  */
 
-import { getServiceLocations } from '../../synthetics_service/get_service_locations';
-import { UMRestApiRouteFactory } from '../../legacy_uptime/routes';
+import { getAllLocations } from '../../synthetics_service/get_all_locations';
+import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes';
 import { API_URLS } from '../../../common/constants';
 
-export const getServiceLocationsRoute: UMRestApiRouteFactory = () => ({
+export const getServiceLocationsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: API_URLS.SERVICE_LOCATIONS,
   validate: {},
-  handler: async ({ server }): Promise<any> => {
-    if (server.syntheticsService.locations.length > 0) {
-      const { throttling, locations } = server.syntheticsService;
-      return { throttling, locations };
-    }
+  handler: async ({ server, savedObjectsClient, syntheticsMonitorClient }): Promise<any> => {
+    const { publicLocations, privateLocations, throttling } = await getAllLocations(
+      server,
+      syntheticsMonitorClient,
+      savedObjectsClient
+    );
 
-    return getServiceLocations(server);
+    return {
+      locations: [...publicLocations, ...privateLocations],
+      throttling,
+    };
   },
 });

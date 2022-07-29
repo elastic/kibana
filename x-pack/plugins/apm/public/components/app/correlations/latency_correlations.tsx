@@ -35,6 +35,7 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 
 import { DurationDistributionChart } from '../../shared/charts/duration_distribution_chart';
+import { TotalDocCountLabel } from '../../shared/charts/duration_distribution_chart/total_doc_count_label';
 import { push } from '../../shared/links/url_helpers';
 
 import { CorrelationsTable } from './correlations_table';
@@ -337,8 +338,15 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
           </EuiTitle>
         </EuiFlexItem>
 
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <ChartTitleToolTip />
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <TotalDocCountLabel
+            eventType={ProcessorEvent.transaction}
+            totalDocCount={response.totalDocCount}
+          />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>

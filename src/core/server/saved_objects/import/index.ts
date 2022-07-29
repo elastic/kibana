@@ -7,23 +7,4 @@
  */
 
 export { SavedObjectsImporter } from './saved_objects_importer';
-export type { ISavedObjectsImporter } from './saved_objects_importer';
-export type {
-  SavedObjectsImportResponse,
-  SavedObjectsImportSuccess,
-  SavedObjectsImportFailure,
-  SavedObjectsImportOptions,
-  SavedObjectsImportConflictError,
-  SavedObjectsImportAmbiguousConflictError,
-  SavedObjectsImportMissingReferencesError,
-  SavedObjectsImportUnknownError,
-  SavedObjectsImportUnsupportedTypeError,
-  SavedObjectsResolveImportErrorsOptions,
-  SavedObjectsImportRetry,
-  SavedObjectsImportHook,
-  SavedObjectsImportHookResult,
-  SavedObjectsImportSimpleWarning,
-  SavedObjectsImportActionRequiredWarning,
-  SavedObjectsImportWarning,
-} from './types';
 export { SavedObjectsImportError } from './errors';
