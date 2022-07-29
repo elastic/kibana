@@ -635,11 +635,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should correctly remove timeline', async () => {
         const ruleId = 'ruleId';
-        await createRule(supertest, log, {
-          ...getSimpleRule(ruleId),
-          timeline_id: 'test-id',
-          timeline_title: 'Test timeline template',
-        });
+        await createRule(supertest, log, getSimpleRule(ruleId));
 
         const { body } = await postBulkAction()
           .send({
