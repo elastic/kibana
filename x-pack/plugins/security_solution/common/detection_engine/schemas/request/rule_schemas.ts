@@ -110,7 +110,11 @@ const patchSchema = <
   ]);
 };
 
-const responseSchema = <
+type OrUndefined<P extends t.Props> = {
+  [K in keyof P]: P[K] | t.UndefinedC;
+};
+
+export const responseSchema = <
   Required extends t.Props,
   Optional extends t.Props,
   Defaultable extends t.Props
@@ -119,9 +123,13 @@ const responseSchema = <
   optionalFields: Optional,
   defaultableFields: Defaultable
 ) => {
+  const optionalWithUndefined = Object.keys(optionalFields).reduce<t.Props>((acc, key) => {
+    acc[key] = t.union([optionalFields[key], t.undefined]);
+    return acc;
+  }, {}) as OrUndefined<Optional>;
   return t.intersection([
     t.exact(t.type(requiredFields)),
-    t.exact(t.partial(optionalFields)),
+    t.exact(t.type(optionalWithUndefined)),
     t.exact(t.type(defaultableFields)),
   ]);
 };
