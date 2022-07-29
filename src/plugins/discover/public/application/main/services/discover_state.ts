@@ -61,7 +61,7 @@ export interface AppState {
    */
   hideChart?: boolean;
   /**
-   * id of the used index pattern
+   * id of the used data view
    */
   index?: string;
   /**
@@ -145,7 +145,7 @@ export interface GetStateReturn {
    * Initialize state with filters and query,  start state syncing
    */
   initializeAndSync: (
-    indexPattern: DataView,
+    dataView: DataView,
     filterManager: FilterManager,
     data: DataPublicPluginStart
   ) => () => void;
@@ -286,13 +286,13 @@ export function getState({
     isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
     pauseAutoRefreshInterval,
     initializeAndSync: (
-      indexPattern: DataView,
+      dataView: DataView,
       filterManager: FilterManager,
       data: DataPublicPluginStart
     ) => {
-      if (appStateContainer.getState().index !== indexPattern.id) {
-        // used index pattern is different than the given by url/state which is invalid
-        setState(appStateContainerModified, { index: indexPattern.id });
+      if (appStateContainer.getState().index !== dataView.id) {
+        // used data view is different than the given by url/state which is invalid
+        setState(appStateContainerModified, { index: dataView.id });
       }
       // sync initial app filters from state to filterManager
       const filters = appStateContainer.getState().filters;
@@ -430,7 +430,7 @@ function createUrlGeneratorState({
   const appState = appStateContainer.get();
   return {
     filters: data.query.filterManager.getFilters(),
-    indexPatternId: appState.index,
+    dataViewId: appState.index,
     query: appState.query,
     savedSearchId: getSavedSearchId(),
     timeRange: shouldRestoreSearchSession
