@@ -598,7 +598,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(setIndexRule.index).to.eql(['initial-index-*']);
       });
 
-      it.only('should not delete data view in a rule when delete index pattern action applied', async () => {
+      it('should not delete data view in a rule when delete index pattern action applied', async () => {
         const ruleId = 'ruleId';
         const dataViewId = 'index1-*';
         const simpleRule = {
