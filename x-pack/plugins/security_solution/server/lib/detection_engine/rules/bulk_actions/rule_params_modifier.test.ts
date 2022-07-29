@@ -105,7 +105,7 @@ describe('ruleParamsModifier', () => {
           overwriteDataViews: true,
         },
       ]);
-      expect(editedRuleParams).toHaveProperty('index', ['index']);
+      expect(editedRuleParams).toHaveProperty('dataViewId', undefined);
     });
 
     test('should set dataViewId to undefined if overwriteDataViews=true on add_index_patterns action', () => {
@@ -117,7 +117,7 @@ describe('ruleParamsModifier', () => {
           overwriteDataViews: true,
         },
       ]);
-      expect(editedRuleParams).toHaveProperty('index', ['index']);
+      expect(editedRuleParams).toHaveProperty('dataViewId', undefined);
     });
 
     test('should throw error on adding index pattern if rule is of machine learning type', () => {
