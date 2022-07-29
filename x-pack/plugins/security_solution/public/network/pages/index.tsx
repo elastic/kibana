@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { Redirect, Switch, useLocation, useParams, useRouteMatch } from 'react-router-dom';
+import { Redirect, Switch } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 
 import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
@@ -20,7 +20,6 @@ import { MlNetworkConditionalContainer } from '../../common/components/ml/condit
 import { NETWORK_PATH } from '../../../common/constants';
 import { FlowTarget } from '../../../common/search_strategy';
 import { networkDetailsPagePath, networkDetailsTabPath } from './constants';
-import { severity } from '@kbn/securitysolution-io-ts-alerting-types';
 
 const NetworkContainerComponent = () => {
   const capabilities = useMlCapabilities();
