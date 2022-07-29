@@ -6,5 +6,9 @@
  * Side Public License, v 1.
  */
 
-export { parseKibanaManifest, readKibanaManifest, validateKibanaManifest } from './parse_kibana_manifest';
-export { KibanaPackageManifest } from './kibana_manifest'
+export {
+  parseKibanaManifest,
+  readKibanaManifest,
+  validateKibanaManifest,
+} from './parse_kibana_manifest';
+export { KibanaPackageManifest } from './kibana_manifest';
