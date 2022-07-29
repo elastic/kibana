@@ -14,6 +14,7 @@ import {
   TooltipType,
 } from '@elastic/charts';
 import {
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -72,7 +73,32 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
   }, [rule, ruleTypes]);
 
   if (isLoadingRuleAlertsAggs) return <EuiLoadingSpinner />;
-  if (errorRuleAlertsAggs) return <EuiFlexItem>Error</EuiFlexItem>;
+  if (errorRuleAlertsAggs)
+    return (
+      <EuiEmptyPrompt
+        iconType="alert"
+        color="danger"
+        title={
+          <h5>
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.errorLoadingTitle"
+              defaultMessage="Unable to load the alerts summary"
+            />
+          </h5>
+        }
+        body={
+          <p>
+            {
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.errorLoadingBody"
+                defaultMessage=" There was an error loading the alerts summary. Contact your
+                administrator for help."
+              />
+            }
+          </p>
+        }
+      />
+    );
   const isVisibleFunction: FilterPredicate = (series) => series.splitAccessors.get('g') !== 'total';
   return (
     <EuiPanel hasShadow={false} hasBorder>
