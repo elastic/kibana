@@ -330,23 +330,24 @@ function isStringArray(arr: unknown | string[]): arr is string[] {
 
 // Read a static file generated at build time
 export const getAvailableVersionsHandler: RequestHandler = async (context, request, response) => {
-  const versionsFile = 'build/kibana/x-pack/plugins/fleet/target/agent_versions_list.txt';
+  const versionsFile = 'build/kibana/x-pack/plugins/fleet/target/agent_versions_list.json';
   let versionsToDisplay: string[] = [];
   const kibanaVersion = appContextService.getKibanaVersion();
 
   try {
-    const file = await fs.readFile(versionsFile);
+    const file = await fs.readFile(versionsFile, 'utf-8');
+    const data = JSON.parse(file);
 
     // Exclude versions older than MINIMUM_SUPPORTED_VERSION and pre-release versions (SNAPSHOT, rc..)
     // De-dup and sort in descending order
-    if (file) {
-      const versions = file
+    if (data) {
+      const versions = data.versions
         .toString()
         .split(',')
         .map((item: any) => semverCoerce(item)?.version || '')
         .filter((v: any) => semverGte(v, MINIMUM_SUPPORTED_VERSION))
         .sort((a: any, b: any) => (semverGt(a, b) ? -1 : 1));
-      const parsedVersions = uniq(versions);
+      const parsedVersions = uniq(versions) as string[];
 
       // Add current version if not already present
       const hasCurrentVersion = parsedVersions.some((v) => v === kibanaVersion);
