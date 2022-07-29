@@ -674,6 +674,9 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 /src/plugins/home/server/*.ts @elastic/shared-ux
 /src/plugins/home/server/services/ @elastic/shared-ux
 
+# Landing page for guided onboarding in Home plugin
+/src/plugins/home/public/application/components/guided_onboarding @elastic/platform-onboarding
+
 ### Overview Plugin and Packages
 /src/plugins/kibana_overview/ @elastic/shared-ux
 
