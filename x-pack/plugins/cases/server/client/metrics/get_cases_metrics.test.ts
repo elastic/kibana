@@ -27,7 +27,9 @@ describe('getCasesMetrics', () => {
 
   describe('MTTR', () => {
     beforeEach(() => {
-      mockServices.caseService.executeAggregations.mockResolvedValue({ mttr: { value: 5 } });
+      mockServices.services.caseService.executeAggregations.mockResolvedValue({
+        mttr: { value: 5 },
+      });
     });
 
     it('returns the mttr metric', async () => {
@@ -46,7 +48,8 @@ describe('getCasesMetrics', () => {
         client,
         clientArgs
       );
-      expect(mockServices.caseService.executeAggregations.mock.calls[0][0]).toMatchInlineSnapshot(`
+      expect(mockServices.services.caseService.executeAggregations.mock.calls[0][0])
+        .toMatchInlineSnapshot(`
         Object {
           "aggregationBuilders": Array [
             AverageDuration {},
