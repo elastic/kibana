@@ -8765,12 +8765,8 @@
           "[] | undefined; query?: ",
           "Query",
           " | ",
-          "AggregateQuery",
-          " | (",
           "Query",
-          " | ",
-          "AggregateQuery",
-          ")[] | undefined; timeRange?: ",
+          "[] | undefined; timeRange?: ",
           {
             "pluginId": "data",
             "scope": "common",
