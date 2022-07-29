@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiFormRow, EuiComboBox } from '@elastic/eui';
 
-import { UseField } from '../../../shared_imports';
+import { UseField, RuntimeType } from '../../../shared_imports';
 import { RUNTIME_FIELD_OPTIONS, RUNTIME_FIELD_OPTIONS_PRIMITIVE } from '../constants';
 import { TypeSelection } from '../types';
 
@@ -20,6 +20,7 @@ interface Props {
   includeComposite?: boolean;
   path: string;
   defaultValue?: TypeSelection;
+  onChange?: (value: RuntimeType) => void;
 }
 
 export const TypeField = ({
@@ -27,6 +28,7 @@ export const TypeField = ({
   includeComposite,
   path,
   defaultValue = { label: 'Keyword', value: 'keyword' },
+  onChange = () => {},
 }: Props) => {
   return (
     <UseField<TypeSelection> path={path}>
@@ -53,6 +55,7 @@ export const TypeField = ({
                     return;
                   }
                   setValue(newValue);
+                  onChange(newValue[0].value!);
                 }}
                 isClearable={false}
                 isDisabled={isDisabled}

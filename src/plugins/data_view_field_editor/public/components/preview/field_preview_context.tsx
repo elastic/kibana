@@ -345,26 +345,28 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     (compositeName: string | null, compositeValues: Record<string, unknown[]>) => {
       const updatedFieldsInScript: string[] = [];
 
-      const fields = Object.entries(compositeValues).map(([key, values]) => {
-        // The Painless _execute API returns the composite field values under a map.
-        // Each of the key is prefixed with "composite_field." (e.g. "composite_field.field1: ['value']")
-        const { 1: fieldName } = key.split('composite_field.');
-        updatedFieldsInScript.push(fieldName);
+      const fields = Object.entries(compositeValues)
+        .map(([key, values]) => {
+          // The Painless _execute API returns the composite field values under a map.
+          // Each of the key is prefixed with "composite_field." (e.g. "composite_field.field1: ['value']")
+          const { 1: fieldName } = key.split('composite_field.');
+          updatedFieldsInScript.push(fieldName);
 
-        const [value] = values;
-        const formattedValue = valueFormatter(value);
+          const [value] = values;
+          const formattedValue = valueFormatter(value);
 
-        return {
-          key: `${compositeName ?? ''}.${fieldName}`,
-          value,
-          formattedValue,
-          type: valueTypeToSelectedType(value),
-        };
-      });
+          return {
+            key: `${compositeName ?? ''}.${fieldName}`,
+            value,
+            formattedValue,
+            type: valueTypeToSelectedType(value),
+          };
+        })
+        // ...and sort alphabetically
+        .sort((a, b) => a.key.localeCompare(b.key));
 
       setPreviewResponse({
-        // Reverse fields to put them in alphabetical order
-        fields: fields.reverse(),
+        fields,
         error: null,
       });
 

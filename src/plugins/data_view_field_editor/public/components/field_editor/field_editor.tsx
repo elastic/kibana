@@ -120,7 +120,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
     deserializer: formDeserializer,
     serializer: formSerializer,
   });
-  const [fieldTypeInfo, setFieldTypeInfo] = useState<FieldTypeInfo[]>();
+  const [previousPreviewTypes, setPreviousPreviewTypes] = useState<FieldTypeInfo[]>();
   const { submit, isValid: isFormValid, isSubmitted, getFields, isSubmitting } = form;
 
   // loading from saved field
@@ -135,6 +135,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
   const [fieldsAndTypes, setFieldsAndTypes] = useState(savedSubfieldTypes);
 
   // todo - likely factor out
+
   useEffect(() => {
     setSubfields(fieldsAndTypes);
   }, [fieldsAndTypes, setSubfields]);
@@ -166,27 +167,29 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
   const isValueVisible = get(formData, '__meta__.isValueVisible');
 
   useEffect(() => {
-    if (isLoadingPreview || !initialPreviewComplete) {
+    if (isLoadingPreview || !initialPreviewComplete || form.getFormData().type !== 'composite') {
       return;
     }
-    // Take preview info, remove unneeded info for updating types, comparison
-    const fieldTypeInfoUpdate = fields
-      .reverse()
-      // sometimes we get null types, remove them
-      .filter((item) => item.type !== undefined)
-      .map<FieldTypeInfo>((item) => {
-        const key = item.key.slice(item.key.search('\\.') + 1);
-        return { name: key, type: item.type! };
-      });
 
-    const update = differenceWith(fieldTypeInfoUpdate, fieldTypeInfo || [], isEqual).reduce<
+    // sometimes we get null types, remove them
+    const fieldsFitlered = fields.filter((item) => item.type !== undefined);
+
+    // Take preview info, remove unneeded info for updating types, comparison
+    const fieldTypeInfoUpdate = fieldsFitlered.map<FieldTypeInfo>((item) => {
+      const key = item.key.slice(item.key.search('\\.') + 1);
+      return { name: key, type: item.type! };
+    });
+
+    const update = differenceWith(fieldTypeInfoUpdate, previousPreviewTypes || [], isEqual).reduce<
       Record<string, string>
     >((col, item) => {
       col[item.name] = item.type;
       return col;
     }, {});
 
-    const hasUpdates = Object.keys(update).length > 0;
+    const hasUpdates =
+      Object.keys(fieldsAndTypes).length !== fieldsFitlered.length ||
+      Object.keys(update).length > 0;
 
     // todo ensure works on opening saved field
     // skip first update from initial preview, only update when there's a difference
@@ -196,17 +199,31 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
     console.log('hasUpdates', hasUpdates);
     if (hasUpdates) {
       // form.updateFieldValues({ subfields: { ...fieldsAndTypes, ...update } });
-      const updatedFieldsAndTypes = { ...fieldsAndTypes, ...update };
-      setFieldsAndTypes(updatedFieldsAndTypes);
-      setFieldTypeInfo(fieldTypeInfoUpdate);
-      setSubfields(updatedFieldsAndTypes as Record<string, RuntimePrimitiveTypes>);
+
+      // const updatedFieldsAndTypes = { ...fieldsAndTypes, ...update };
+
+      const updatedFieldsAndTypes = fieldTypeInfoUpdate.reduce((col, item) => {
+        col[item.name] = update[item.name] || fieldsAndTypes[item.name];
+        return col;
+      }, {} as Record<string, string>);
+      // { ...fieldsAndTypes, ...update };
+
+      // preview state
+      setPreviousPreviewTypes(fieldTypeInfoUpdate);
+      if (previousPreviewTypes !== undefined) {
+        // actual form state
+        setFieldsAndTypes(updatedFieldsAndTypes);
+
+        // updates what gets saved
+        setSubfields(updatedFieldsAndTypes as Record<string, RuntimePrimitiveTypes>);
+      }
     }
   }, [
     fields,
     isLoadingPreview,
     initialPreviewComplete,
     fieldsAndTypes,
-    fieldTypeInfo,
+    previousPreviewTypes,
     setSubfields /* , form */,
   ]);
 
@@ -267,6 +284,14 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
             isDisabled={fieldTypeToProcess === 'concrete'}
             includeComposite={true}
             path="type"
+            onChange={(type) => {
+              // reset preview type info when type changes
+              if (type === 'composite') {
+                setPreviousPreviewTypes([]);
+              } else {
+                setPreviousPreviewTypes(undefined);
+              }
+            }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
