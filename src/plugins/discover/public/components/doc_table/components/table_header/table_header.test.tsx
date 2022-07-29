@@ -14,7 +14,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../../common';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
-import {SortOrder} from "@kbn/discover-plugin/public/types";
+import { SortOrder } from '../../../../types';
 
 const defaultUiSettings = {
   get: (key: string) => {

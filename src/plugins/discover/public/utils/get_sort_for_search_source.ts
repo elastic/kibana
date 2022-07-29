@@ -8,8 +8,8 @@
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { EsQuerySortValue } from '@kbn/data-plugin/public';
+import { SortOrder } from '../types';
 import { getSort } from './get_sort';
-import {SortOrder} from "@kbn/discover-plugin/public/types";
 
 /**
  * Prepares sort for search source, that's sending the request to ES
