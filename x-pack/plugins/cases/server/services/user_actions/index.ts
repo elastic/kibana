@@ -131,6 +131,8 @@ export class CaseUserActionService {
       return [];
     }
 
+    // TODO: add diff of objects for assignees
+
     if (field === ActionTypes.tags) {
       const tagsUserActionBuilder = this.builderFactory.getBuilder(ActionTypes.tags);
       const compareValues = isTwoArraysDifference(originalValue, newValue);

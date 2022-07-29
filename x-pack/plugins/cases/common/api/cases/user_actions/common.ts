@@ -9,6 +9,7 @@ import * as rt from 'io-ts';
 import { UserRT } from '../../user';
 
 export const ActionTypes = {
+  assignees: 'assignees',
   comment: 'comment',
   connector: 'connector',
   description: 'description',
