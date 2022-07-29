@@ -15,7 +15,8 @@ import {
   getUrlPrefix,
   ObjectRemover,
 } from '../../../../../common/lib';
-import { createEsDocuments, createDataStream, deleteDataStream } from './create_test_data';
+import { createEsDocuments } from './create_test_data';
+import { createDataStream, deleteDataStream } from '../lib/create_test_data';
 
 const RULE_TYPE_ID = '.index-threshold';
 const CONNECTOR_TYPE_ID = '.index';
