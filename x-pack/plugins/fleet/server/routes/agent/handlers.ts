@@ -328,37 +328,65 @@ function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
 }
 
-// Read a static file generated at build time
+interface VersionsType {
+  versions: string[];
+}
+
+// Read a static file generated at build time and cache it for subsequent calls
 export const getAvailableVersionsHandler: RequestHandler = async (context, request, response) => {
   const versionsFile = 'build/kibana/x-pack/plugins/fleet/target/agent_versions_list.json';
   let versionsToDisplay: string[] = [];
   const kibanaVersion = appContextService.getKibanaVersion();
+  const kibanaVersionCoerced = semverCoerce(kibanaVersion)?.version;
 
-  try {
-    const file = await fs.readFile(versionsFile, 'utf-8');
-    const data = JSON.parse(file);
-
-    // Exclude versions older than MINIMUM_SUPPORTED_VERSION and pre-release versions (SNAPSHOT, rc..)
-    // De-dup and sort in descending order
-    if (data) {
-      const versions = data.versions
-        .toString()
-        .split(',')
-        .map((item: any) => semverCoerce(item)?.version || '')
-        .filter((v: any) => semverGte(v, MINIMUM_SUPPORTED_VERSION))
-        .sort((a: any, b: any) => (semverGt(a, b) ? -1 : 1));
-      const parsedVersions = uniq(versions) as string[];
-
-      // Add current version if not already present
-      const hasCurrentVersion = parsedVersions.some((v) => v === kibanaVersion);
-      versionsToDisplay = !hasCurrentVersion
-        ? [kibanaVersion].concat(parsedVersions)
-        : parsedVersions;
+  if (!getCachedVersionFile('versions')) {
+    try {
+      const file = await fs.readFile(versionsFile, 'utf-8');
+      if (file) {
+        setCachedFile('versions', file);
+      }
+    } catch (error) {
+      return defaultIngestErrorHandler({ error, response });
     }
+  }
 
+  // Exclude versions older than MINIMUM_SUPPORTED_VERSION and pre-release versions (SNAPSHOT, rc..)
+  // De-dup and sort in descending order
+  const cachedFile = getCachedVersionFile('versions');
+  if (cachedFile) {
+    const data: VersionsType = JSON.parse(cachedFile);
+    const versions = data.versions
+      .toString()
+      .split(',')
+      .map((item: any) => semverCoerce(item)?.version || '')
+      .filter((v: any) => semverGte(v, MINIMUM_SUPPORTED_VERSION))
+      .sort((a: any, b: any) => (semverGt(a, b) ? -1 : 1));
+    const parsedVersions = uniq(versions) as string[];
+
+    // Add current version if not already present
+    const hasCurrentVersion = parsedVersions.some((v) => v === kibanaVersionCoerced);
+    versionsToDisplay = !hasCurrentVersion
+      ? [kibanaVersionCoerced].concat(parsedVersions)
+      : parsedVersions;
     const body: GetAvailableVersionsResponse = { items: versionsToDisplay };
     return response.ok({ body });
-  } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+  } else {
+    return response.ok({ body: {} });
   }
+};
+
+// TODO: Move below stuff to separate file
+type CacheKey = string;
+const versionFileCache: Map<CacheKey, string> = new Map();
+
+export const getCachedVersionFile = (key: CacheKey) => {
+  return versionFileCache.get(key);
+};
+
+export const setCachedFile = (key: CacheKey, fileContent: string) => {
+  return versionFileCache.set(key, fileContent);
+};
+
+export const clearVersionFileCache = (key: CacheKey) => {
+  versionFileCache.delete(key);
 };
