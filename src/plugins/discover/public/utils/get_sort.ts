@@ -8,6 +8,9 @@
 
 import { isPlainObject } from 'lodash';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../common';
+import { getDefaultSort } from './get_default_sort';
 
 export type SortPairObj = Record<string, string>;
 export type SortPairArr = [string, string];
@@ -70,4 +73,23 @@ export function getSortArray(sort: SortPair[], dataView: DataView): SortPairArr[
     }
     return acc;
   }, []);
+}
+
+/**
+ * sorting for embeddable, like getSortArray,but returning a default in the case the given sort or dataView is not valid
+ */
+export function getSortForEmbeddable(
+  sort?: SortPair[],
+  dataView?: DataView,
+  uiSettings?: IUiSettingsClient
+): SortPairArr[] {
+  if (!sort || !sort.length || !dataView) {
+    if (!uiSettings) {
+      return [];
+    }
+    const defaultSortOrder = uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc');
+    const hidingTimeColumn = uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false);
+    return getDefaultSort(dataView, defaultSortOrder, hidingTimeColumn);
+  }
+  return getSortArray(sort, dataView);
 }

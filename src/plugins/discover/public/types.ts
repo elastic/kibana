@@ -38,3 +38,5 @@ export interface DataTableRecord {
    */
   isAnchor?: boolean;
 }
+
+export type SortOrder = [string, string];

@@ -15,7 +15,7 @@ import {
 import type { Filter, TimeRange, Query } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '../services/saved_searches';
-import { SortOrder } from '../components/doc_table/components/table_header/helpers';
+import {SortOrder} from "@kbn/discover-plugin/public/types";
 
 export interface SearchInput extends EmbeddableInput {
   timeRange: TimeRange;

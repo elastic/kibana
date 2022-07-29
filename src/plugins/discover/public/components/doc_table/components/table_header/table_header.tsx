@@ -10,10 +10,11 @@ import React, { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { TableHeaderColumn } from './table_header_column';
-import { SortOrder, getDisplayedColumns } from './helpers';
+import { getDisplayedColumns } from './helpers';
 import { getDefaultSort } from '../../../../utils/get_default_sort';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
+import {SortOrder} from "@kbn/discover-plugin/public/types";
 
 interface Props {
   columns: string[];

@@ -27,9 +27,10 @@ import { ISearchSource } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { getSortForEmbeddable, SortPair } from '../utils/get_sort';
 import { RecordRawType } from '../application/main/hooks/use_saved_search';
 import { buildDataTableRecord } from '../utils/build_data_record';
-import { DataTableRecord } from '../types';
+import { DataTableRecord, SortOrder } from '../types';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SavedSearch } from '../services/saved_searches';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
@@ -48,8 +49,6 @@ import { handleSourceColumnState } from '../utils/state_helpers';
 import { DiscoverGridProps } from '../components/discover_grid/discover_grid';
 import { DiscoverGridSettings } from '../components/discover_grid/types';
 import { DocTableProps } from '../components/doc_table/doc_table_wrapper';
-import { getDefaultSort, getSortArray } from '../utils';
-import type { SortOrder } from '../components/doc_table/components/table_header/helpers';
 import { VIEW_MODE } from '../components/view_mode_toggle';
 import { updateSearchSource } from './utils/update_search_source';
 import { FieldStatisticsTable } from '../application/main/components/field_stats_table';
@@ -278,13 +277,8 @@ export class SavedSearchEmbeddable
     }
   };
 
-  private getSort(sort: SortOrder[] | undefined, dataView?: DataView) {
-    if (!sort || !sort.length || !dataView) {
-      const defaultSortOrder = this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc');
-      const hidingTimeColumn = this.services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false);
-      return getDefaultSort(dataView, defaultSortOrder, hidingTimeColumn);
-    }
-    return getSortArray(sort, dataView);
+  private getSort(sort: SortPair[] | undefined, dataView?: DataView) {
+    return getSortForEmbeddable(sort, dataView, this.services.uiSettings);
   }
 
   private initializeSearchEmbeddableProps() {
