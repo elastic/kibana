@@ -93,8 +93,6 @@ export interface StackFrameMetadata {
   SourcePackageURL: string;
   // unused atm due to lack of symbolization metadata
   SourceType: number;
-
-  Index: number;
 }
 
 export function createStackFrameMetadata(
@@ -117,7 +115,6 @@ export function createStackFrameMetadata(
   metadata.SourcePackageHash = options.SourcePackageHash ?? '';
   metadata.SourcePackageURL = options.SourcePackageURL ?? '';
   metadata.SourceType = options.SourceType ?? 0;
-  metadata.Index = options.Index ?? 0;
 
   return metadata;
 }
@@ -174,7 +171,6 @@ export function groupStackFrameMetadataByStackTrace(
         FunctionOffset: frame.FunctionOffset,
         SourceLine: frame.LineNumber,
         ExeFileName: executable.FileName,
-        Index: i,
       });
 
       frameMetadata.push(metadata);
