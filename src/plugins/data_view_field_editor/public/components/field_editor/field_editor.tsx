@@ -134,11 +134,10 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
 
   const [fieldsAndTypes, setFieldsAndTypes] = useState(savedSubfieldTypes);
 
-  /*
+  // todo - likely factor out
   useEffect(() => {
     setSubfields(fieldsAndTypes);
   }, [fieldsAndTypes, setSubfields]);
-  */
 
   const nameFieldConfig = getNameFieldConfig(namesNotAllowed, field);
 
@@ -194,7 +193,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
     // if (fieldTypeInfo === undefined || !isEqual(fieldTypeInfoUpdate, fieldTypeInfo)) {
 
     // todo does this get fired with key removal?
-    console.log('hasUpdates',hasUpdates);
+    console.log('hasUpdates', hasUpdates);
     if (hasUpdates) {
       // form.updateFieldValues({ subfields: { ...fieldsAndTypes, ...update } });
       const updatedFieldsAndTypes = { ...fieldsAndTypes, ...update };

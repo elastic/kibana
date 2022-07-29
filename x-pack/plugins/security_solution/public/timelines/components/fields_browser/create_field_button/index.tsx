@@ -16,6 +16,7 @@ import * as i18n from './translations';
 const StyledButton = styled(EuiButton)`
   margin-left: ${({ theme }) => theme.eui.euiSizeM};
 `;
+
 export interface UseCreateFieldButtonProps {
   isAllowed: boolean;
   loading: boolean;

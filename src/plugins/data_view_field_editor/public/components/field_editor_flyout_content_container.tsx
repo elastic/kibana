@@ -147,6 +147,7 @@ export const FieldEditorFlyoutContentContainer = ({
         dataView.addRuntimeField(updatedField.name, {
           type: updatedField.type as RuntimeType,
           script,
+          fields: updatedField.fields,
         });
       } else {
         try {

@@ -722,7 +722,6 @@ export class DataViewsService {
         }
       };
 
-      console.log('initFromSavedObject', runtimeFieldMap);
       // CREATE RUNTIME FIELDS
       for (const [name, runtimeField] of Object.entries(runtimeFieldMap || {})) {
         // do not create runtime field if mapped field exists
@@ -772,11 +771,6 @@ export class DataViewsService {
 
     const indexPattern = await this.create(spec, true);
     indexPattern.resetOriginalSavedObjectBody();
-    console.log(
-      '************** initFromSavedObject',
-      indexPattern,
-      indexPattern.fields.getByName('a.a')
-    );
     return indexPattern;
   };
 
