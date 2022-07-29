@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { KibanaPackageType } from './kibana_jsonc_manifest';
+import { KibanaPackageType } from './kibana_manifest';
 
 export const ID_PATTERN = /^[a-z][a-zA-Z_]*$/;
 
