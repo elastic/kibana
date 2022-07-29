@@ -26,6 +26,7 @@ export interface UpdateTagAssignmentsOptions {
   tags: string[];
   assign: ObjectReference[];
   unassign: ObjectReference[];
+  refresh?: boolean | 'wait_for';
 }
 
 export interface FindAssignableObjectsOptions {

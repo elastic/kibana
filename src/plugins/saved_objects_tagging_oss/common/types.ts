@@ -23,8 +23,14 @@ export interface GetAllTagsOptions {
   asSystemRequest?: boolean;
 }
 
+export interface CreateTagOptions {
+  id?: string;
+  overwrite?: boolean;
+  refresh?: boolean | 'wait_for';
+}
+
 export interface ITagsClient {
-  create(attributes: TagAttributes): Promise<Tag>;
+  create(attributes: TagAttributes, options?: CreateTagOptions): Promise<Tag>;
   get(id: string): Promise<Tag>;
   getAll(options?: GetAllTagsOptions): Promise<Tag[]>;
   delete(id: string): Promise<void>;
