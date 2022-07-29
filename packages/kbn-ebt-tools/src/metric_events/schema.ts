@@ -26,26 +26,6 @@ export interface MetricEvent {
    * The time (in milliseconds) it took to run the entire action.
    */
   duration: number;
-  /**
-   * @group Standardized fields
-   * A status relevant to the action (i.e.: `failed`, `succeeded`).
-   */
-  status?: string;
-  /**
-   * @group Standardized fields
-   * performance.memory.jsHeapSizeLimit
-   */
-  jsHeapSizeLimit?: number;
-  /**
-   * @group Standardized fields
-   * performance.memory.totalJSHeapSize
-   */
-  totalJSHeapSize?: number;
-  /**
-   * @group Standardized fields
-   * performance.memory.usedJSHeapSize
-   */
-  usedJSHeapSize?: number;
 
   /**
    * @group Free fields for custom metrics (searchable and aggregateable)
@@ -111,22 +91,6 @@ export const METRIC_EVENT_SCHEMA: RootSchema<MetricEvent> = {
   duration: {
     type: 'integer',
     _meta: { description: 'The main event duration in ms' },
-  },
-  status: {
-    type: 'keyword',
-    _meta: { description: 'A status', optional: true },
-  },
-  jsHeapSizeLimit: {
-    type: 'long',
-    _meta: { description: 'performance.memory.jsHeapSizeLimit', optional: true },
-  },
-  totalJSHeapSize: {
-    type: 'long',
-    _meta: { description: 'performance.memory.totalJSHeapSize', optional: true },
-  },
-  usedJSHeapSize: {
-    type: 'long',
-    _meta: { description: 'performance.memory.usedJSHeapSize', optional: true },
   },
   key1: {
     type: 'keyword',

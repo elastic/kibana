@@ -169,9 +169,9 @@ export class CoreSystem {
       meta: {
         kibana_version: this.coreContext.env.packageInfo.version,
         protocol: window.location.protocol,
+        ...fetchOptionalMemoryInfo(),
       },
       duration: timing[LOAD_FIRST_NAV],
-      ...fetchOptionalMemoryInfo(),
       key1: LOAD_START,
       value1: timing[LOAD_START],
       key2: LOAD_BOOTSTRAP_START,

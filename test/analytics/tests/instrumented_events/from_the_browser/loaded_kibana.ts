@@ -64,12 +64,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       if (browser.isChromium) {
         // Kibana Loaded memory
-        expect(event.properties).to.have.property('jsHeapSizeLimit');
-        expect(event.properties.jsHeapSizeLimit).to.be.a('number');
-        expect(event.properties).to.have.property('totalJSHeapSize');
-        expect(event.properties.totalJSHeapSize).to.be.a('number');
-        expect(event.properties).to.have.property('usedJSHeapSize');
-        expect(event.properties.usedJSHeapSize).to.be.a('number');
+        expect(event.meta).to.have.property('jsHeapSizeLimit');
+        expect(event.meta.jsHeapSizeLimit).to.be.a('string');
+        expect(event.meta).to.have.property('totalJSHeapSize');
+        expect(event.meta.totalJSHeapSize).to.be.a('string');
+        expect(event.meta).to.have.property('usedJSHeapSize');
+        expect(event.meta.usedJSHeapSize).to.be.a('string');
       }
     });
   });

@@ -63,13 +63,6 @@ describe('AnalyticsService', () => {
               },
               "type": "keyword",
             },
-            "jsHeapSizeLimit": Object {
-              "_meta": Object {
-                "description": "performance.memory.jsHeapSizeLimit",
-                "optional": true,
-              },
-              "type": "long",
-            },
             "key1": Object {
               "_meta": Object {
                 "description": "Performance metric label 1",
@@ -111,27 +104,6 @@ describe('AnalyticsService', () => {
                 "optional": true,
               },
               "type": "pass_through",
-            },
-            "status": Object {
-              "_meta": Object {
-                "description": "A status",
-                "optional": true,
-              },
-              "type": "keyword",
-            },
-            "totalJSHeapSize": Object {
-              "_meta": Object {
-                "description": "performance.memory.totalJSHeapSize",
-                "optional": true,
-              },
-              "type": "long",
-            },
-            "usedJSHeapSize": Object {
-              "_meta": Object {
-                "description": "performance.memory.usedJSHeapSize",
-                "optional": true,
-              },
-              "type": "long",
             },
             "value1": Object {
               "_meta": Object {

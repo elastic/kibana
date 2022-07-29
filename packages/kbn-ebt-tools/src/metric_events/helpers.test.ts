@@ -52,8 +52,7 @@ describe('metric event helpers', () => {
     test('reports all the allowed fields in the event', () => {
       reportPerformanceMetricEvent(analyticsClient, {
         eventName: 'test-event',
-        meta: { my: { custom: { fields: 'here' } }, another_field: true },
-        status: 'something',
+        meta: { my: { custom: { fields: 'here' } }, another_field: true, status: 'something' },
         duration: 10,
         key1: 'something',
         value1: 10,
