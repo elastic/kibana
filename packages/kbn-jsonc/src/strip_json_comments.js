@@ -3,7 +3,7 @@
 /**
  * @notice
  *
- * Vendored copy of `strip-json-comments` so that we can use it before npm modules are available.
+ * Vendored copy of `strip-json-comments` so that we can use it when npm modules are not available.
  * https://github.com/sindresorhus/strip-json-comments/tree/34b79cb0f1129aa85ef4b5c3292e8bc546984ef9
  *
  * MIT License
