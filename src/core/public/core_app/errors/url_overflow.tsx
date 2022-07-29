@@ -14,7 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { IBasePath } from '@kbn/core-http-browser';
 
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { mountReactNode } from '../../utils';
+import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import { IToasts } from '../../notifications';
 
 const IE_REGEX = /(; ?MSIE |Edge\/\d|Trident\/[\d+\.]+;.*rv:*11\.\d+)/;

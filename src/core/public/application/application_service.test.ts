@@ -19,7 +19,7 @@ import { mount, shallow } from 'enzyme';
 
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
-import { overlayServiceMock } from '../overlays/overlay_service.mock';
+import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { MockLifecycle } from './test_types';
 import { ApplicationService } from './application_service';
 import { App, AppDeepLink, AppNavLinkStatus, AppStatus, AppUpdater, PublicAppInfo } from './types';

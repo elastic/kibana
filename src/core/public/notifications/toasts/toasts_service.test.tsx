@@ -10,7 +10,7 @@ import { mockReactDomRender, mockReactDomUnmount } from './toasts_service.test.m
 
 import { ToastsService } from './toasts_service';
 import { ToastsApi } from './toasts_api';
-import { overlayServiceMock } from '../../overlays/overlay_service.mock';
+import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 

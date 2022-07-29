@@ -11,7 +11,7 @@ import { mount, ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
 import { HeaderActionMenu } from './header_action_menu';
-import { MountPoint, UnmountCallback } from '../../../types';
+import type { MountPoint, UnmountCallback } from '@kbn/core-mount-utils-browser';
 
 type MockedUnmount = jest.MockedFunction<UnmountCallback>;
 

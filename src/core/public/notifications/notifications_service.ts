@@ -12,8 +12,8 @@ import { Subscription } from 'rxjs';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { ToastsService, ToastsSetup, ToastsStart } from './toasts';
-import { OverlayStart } from '../overlays';
 
 export interface SetupDeps {
   uiSettings: IUiSettingsClient;
