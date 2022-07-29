@@ -6,31 +6,33 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UiCounterMetricType } from '@kbn/analytics';
 import {
-  EuiTitle,
-  EuiHideFor,
-  EuiShowFor,
-  EuiButton,
   EuiBadge,
-  EuiFlyoutHeader,
+  EuiButton,
   EuiFlyout,
+  EuiFlyoutHeader,
+  EuiHideFor,
   EuiIcon,
   EuiLink,
   EuiPortal,
+  EuiShowFor,
+  EuiTitle,
 } from '@elastic/eui';
-import type { DataViewField, DataView, DataViewAttributes } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewAttributes, DataViewField } from '@kbn/data-views-plugin/public';
 import { SavedObject } from '@kbn/core/types';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
 import { AppState } from '../../services/discover_state';
+import { RecordRawType } from '../../hooks/use_saved_search';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
 import type { DataTableRecord } from '../../../../types';
+import { getRawRecordType } from '../../utils/get_raw_record_type';
 
 export interface DiscoverSidebarResponsiveProps {
   /**
@@ -50,9 +52,9 @@ export interface DiscoverSidebarResponsiveProps {
    */
   fieldCounts?: Record<string, number>;
   /**
-   * List of available index patterns
+   * List of available data views
    */
-  indexPatternList: Array<SavedObject<DataViewAttributes>>;
+  dataViewList: Array<SavedObject<DataViewAttributes>>;
   /**
    * Has been toggled closed
    */
@@ -64,20 +66,20 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * Callback function when adding a filter from sidebar
    */
-  onAddFilter: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
   /**
-   * Callback function when changing an index pattern
+   * Callback function when changing an data view
    */
-  onChangeIndexPattern: (id: string) => void;
+  onChangeDataView: (id: string) => void;
   /**
    * Callback function when removing a field
    * @param fieldName
    */
   onRemoveField: (fieldName: string) => void;
   /**
-   * Currently selected index pattern
+   * Currently selected data view
    */
-  selectedIndexPattern?: DataView;
+  selectedDataView?: DataView;
   /**
    * Discover App state
    */
@@ -109,11 +111,15 @@ export interface DiscoverSidebarResponsiveProps {
 /**
  * Component providing 2 different renderings for the sidebar depending on available screen space
  * Desktop: Sidebar view, all elements are visible
- * Mobile: Index pattern selector is visible and a button to trigger a flyout with all elements
+ * Mobile: Data view selector is visible and a button to trigger a flyout with all elements
  */
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
   const services = useDiscoverServices();
-  const { documents, fieldCounts, selectedIndexPattern, onFieldEdited, onDataViewCreated } = props;
+  const isPlainRecord = useMemo(
+    () => getRawRecordType(props.state.query) === RecordRawType.PLAIN,
+    [props.state.query]
+  );
+  const { documents, fieldCounts, selectedDataView, onFieldEdited, onDataViewCreated } = props;
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const closeFieldEditor = useRef<() => void | undefined>();
@@ -152,11 +158,11 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
 
   const editField = useMemo(
     () =>
-      canEditDataView && selectedIndexPattern
+      !isPlainRecord && canEditDataView && selectedDataView
         ? (fieldName?: string) => {
             const ref = dataViewFieldEditor.openEditor({
               ctx: {
-                dataView: selectedIndexPattern,
+                dataView: selectedDataView,
               },
               fieldName,
               onSave: async () => {
@@ -172,11 +178,12 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           }
         : undefined,
     [
+      isPlainRecord,
       canEditDataView,
-      closeFlyout,
       dataViewFieldEditor,
-      selectedIndexPattern,
+      selectedDataView,
       setFieldEditorRef,
+      closeFlyout,
       onFieldEdited,
     ]
   );
@@ -201,7 +208,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     [canEditDataView, dataViewEditor, setDataViewEditorRef, closeFlyout, onDataViewCreated]
   );
 
-  if (!selectedIndexPattern) {
+  if (!selectedDataView) {
     return null;
   }
 

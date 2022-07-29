@@ -92,6 +92,17 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
 
   const [visibleColumns, setVisibleColumns] = useState(props.visibleColumns);
 
+  // TODO when every solution is using this table, we will be able to simplify it by just passing the alert index
+  const handleFlyoutAlert = useCallback(
+    (alert) => {
+      const idx = alerts.findIndex((a) =>
+        (a as any)[ALERT_UUID].includes(alert.fields[ALERT_UUID])
+      );
+      setFlyoutAlertIndex(idx);
+    },
+    [alerts, setFlyoutAlertIndex]
+  );
+
   const onChangeVisibleColumns = useCallback(
     (newColumns: string[]) => {
       setVisibleColumns(newColumns);
@@ -144,7 +155,8 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
                     </EuiToolTip>
                   </EuiFlexItem>
                 )}
-                {renderCustomActionsRow && renderCustomActionsRow(alerts[visibleRowIndex])}
+                {renderCustomActionsRow &&
+                  renderCustomActionsRow(alerts[visibleRowIndex], handleFlyoutAlert)}
               </EuiFlexGroup>
             );
           },
@@ -161,6 +173,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   }, [
     actionsColumnWidth,
     alerts,
+    handleFlyoutAlert,
     getBulkActionsLeadingControlColumn,
     isBulkActionsColumnActive,
     props.leadingControlColumns,
@@ -178,17 +191,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   }, [flyoutAlertIndex, pagination.pageIndex, pagination.pageSize]);
 
   const handleFlyoutClose = useCallback(() => setFlyoutAlertIndex(-1), [setFlyoutAlertIndex]);
-
-  // TODO when every solution is using this table, we will be able to simplify it by just passing the alert index
-  const handleFlyoutAlert = useCallback(
-    (alert) => {
-      const idx = alerts.findIndex((a) =>
-        (a as any)[ALERT_UUID].includes(alert.fields[ALERT_UUID])
-      );
-      setFlyoutAlertIndex(idx);
-    },
-    [alerts, setFlyoutAlertIndex]
-  );
 
   const basicRenderCellValue = ({
     data,
@@ -218,7 +220,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       const alert = alerts[_props.rowIndex - pagination.pageSize * pagination.pageIndex];
       const data: Array<{ field: string; value: string[] }> = [];
       Object.entries(alert ?? {}).forEach(([key, value]) => {
-        data.push({ field: key, value });
+        data.push({ field: key, value: value as string[] });
       });
       return renderCellValue({
         ..._props,

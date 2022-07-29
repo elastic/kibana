@@ -8,6 +8,7 @@
 import { FilterStateStore } from '@kbn/es-query';
 import type { Rule } from '../../../../../containers/detection_engine/rules';
 import type { AboutStepRule, ActionsStepRule, DefineStepRule, ScheduleStepRule } from '../../types';
+import { DataSourceType } from '../../types';
 import type { FieldValueQueryBar } from '../../../../../components/rules/query_bar';
 import { fillEmptySeverityMappings } from '../../helpers';
 import { getThreatMock } from '../../../../../../../common/detection_engine/schemas/types/threat.mock';
@@ -216,6 +217,7 @@ export const mockDefineStepRule = (): DefineStepRule => ({
     },
   },
   eqlOptions: {},
+  dataSourceType: DataSourceType.IndexPatterns,
   newTermsFields: ['host.ip'],
   historyWindowSize: '7d',
 });

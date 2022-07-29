@@ -3,6 +3,7 @@
   max-width: 100%;
   height: 100%;
   overflow: hidden;
+  border-radius: $euiBorderRadius;
 
   .euiDataGrid__controls {
     border: none;
@@ -14,12 +15,16 @@
     padding: 0;
   }
 
+  .dscDiscoverGrid__textLanguageMode .euiDataGridRowCell.euiDataGridRowCell--firstColumn {
+    padding: $euiSizeXS;
+  }
+
   .euiDataGridRowCell.euiDataGridRowCell--lastColumn {
     border-right: none;
   }
 
-  .euiDataGridRowCell:first-of-type,
-  .euiDataGrid--headerShade.euiDataGrid--bordersAll .euiDataGridHeaderCell:first-of-type {
+  .dscDiscoverGrid__documentsMode .euiDataGridRowCell:first-of-type,
+  .dscDiscoverGrid__documentsMode .euiDataGrid--headerShade.euiDataGrid--bordersAll .euiDataGridHeaderCell:first-of-type {
     border-left: none;
     border-right: none;
   }

@@ -16,7 +16,7 @@ import type {
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { SavedObjectsRawDocSource } from '../../serialization';
+import type { SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
 import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,
@@ -44,8 +44,9 @@ export interface UnknownDocsFound {
 }
 
 /**
- * Performs a search in ES, aggregating documents by type,
- * retrieving a bunch of documents for each type.
+ * Performs a search in ES, aggregating documents by type, retrieving a bunch
+ * of documents for each type.
+ *
  * @internal
  * @param esClient The ES client to perform the search query
  * @param targetIndices The ES indices to target
