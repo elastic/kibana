@@ -11,4 +11,4 @@ export {
   readKibanaManifest,
   validateKibanaManifest,
 } from './parse_kibana_manifest';
-export { KibanaPackageManifest } from './kibana_manifest';
+export type { KibanaPackageManifest } from './kibana_manifest';
