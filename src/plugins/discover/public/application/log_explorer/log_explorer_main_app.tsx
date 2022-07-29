@@ -12,12 +12,11 @@ import type { SavedObject } from '@kbn/data-plugin/public';
 import { LogExplorerLayout } from './components/layout/log_explorer_layout';
 import { setBreadcrumbsTitle } from '../../utils/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
-import { useDiscoverState } from '../main/hooks/use_discover_state';
+import { useDiscoverState } from './hooks/use_discover_state';
 import { useUrl } from '../main/hooks/use_url';
 import { SavedSearch, useSavedSearchAliasMatchRedirect } from '../../services/saved_searches';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DataTableRecord } from '../../types';
-import { useQueryData } from './hooks/query_data/use_query_data';
 import { StateMachineProvider as QueryDataProvider } from './hooks/query_data/use_state_machine';
 import { LOG_EXPLORER_VIRTUAL_GRID_ROWS } from './constants';
 
@@ -27,7 +26,7 @@ export interface LogExplorerMainAppProps {
   /**
    * List of available index patterns
    */
-  indexPatternList: Array<SavedObject<DataViewAttributes>>;
+  dataViewList: Array<SavedObject<DataViewAttributes>>;
   /**
    * Current instance of SavedSearch
    */
@@ -35,7 +34,7 @@ export interface LogExplorerMainAppProps {
 }
 
 export function LogExplorerMainApp(props: LogExplorerMainAppProps) {
-  const { savedSearch, indexPatternList } = props;
+  const { savedSearch, dataViewList } = props;
   const services = useDiscoverServices();
   const { chrome, docLinks, uiSettings: config, data, spaces, history } = services;
   const usedHistory = useHistory();
@@ -55,9 +54,8 @@ export function LogExplorerMainApp(props: LogExplorerMainAppProps) {
    */
   const {
     data$,
-    indexPattern,
     inspectorAdapters,
-    onChangeIndexPattern,
+    onChangeDataView,
     onUpdateQuery,
     refetch$,
     resetSavedSearch,
@@ -69,7 +67,6 @@ export function LogExplorerMainApp(props: LogExplorerMainAppProps) {
     history: usedHistory,
     savedSearch,
     setExpandedDoc,
-    dataFetchingHook: useQueryData,
   });
 
   /**
@@ -110,11 +107,11 @@ export function LogExplorerMainApp(props: LogExplorerMainAppProps) {
       searchSource={searchSource}
     >
       <LogExplorerLayoutMemoized
-        indexPattern={indexPattern}
-        indexPatternList={indexPatternList}
+        dataView={dataView}
+        dataViewList={dataViewList}
         inspectorAdapters={inspectorAdapters}
         expandedDoc={expandedDoc}
-        onChangeIndexPattern={onChangeIndexPattern}
+        onChangeDataView={onChangeDataView}
         onUpdateQuery={onUpdateQuery}
         resetSavedSearch={resetCurrentSavedSearch}
         setExpandedDoc={setExpandedDoc}

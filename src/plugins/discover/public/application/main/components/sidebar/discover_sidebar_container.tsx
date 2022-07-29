@@ -33,12 +33,12 @@ type DiscoverSidebarContainerProps = ContainerProps & DiscoverSidebarResponsiveP
  * Container component for DiscoverSidebarResponsive
  */
 export function DiscoverSidebarContainer(props: DiscoverSidebarContainerProps) {
-  const { documents$, availableFields$, selectedIndexPattern, columns } = props;
+  const { documents$, availableFields$, selectedDataView, columns } = props;
 
   const sidebarData = useSidebarData({
     documents$,
     availableFields$,
-    selectedIndexPattern,
+    selectedDataView,
     columns,
   });
 

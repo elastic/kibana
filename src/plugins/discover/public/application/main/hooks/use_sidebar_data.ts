@@ -15,7 +15,7 @@ import { calcFieldCounts } from '../utils/calc_field_counts';
 interface Props {
   documents$: DataDocuments$;
   availableFields$: AvailableFields$;
-  selectedIndexPattern?: DataView;
+  selectedDataView?: DataView;
   columns: string[];
 }
 
@@ -25,7 +25,7 @@ interface Props {
 export const useSidebarData = ({
   documents$,
   availableFields$,
-  selectedIndexPattern,
+  selectedDataView,
   columns,
 }: Props) => {
   const [documentState, setDocumentState] = useState(documents$.getValue());
@@ -36,26 +36,26 @@ export const useSidebarData = ({
   const fieldCounts = useRef<Record<string, number> | null>(null);
 
   if (fieldCounts.current === null) {
-    fieldCounts.current = calcFieldCounts(documents$.getValue().result!, selectedIndexPattern);
+    fieldCounts.current = calcFieldCounts(documents$.getValue().result!, selectedDataView);
   }
 
   useEffect(() => {
     const subscription = documents$.subscribe((next) => {
       if (next.fetchStatus !== documentState.fetchStatus) {
         if (next.result) {
-          fieldCounts.current = calcFieldCounts(next.result, selectedIndexPattern!);
+          fieldCounts.current = calcFieldCounts(next.result, selectedDataView!);
         }
         setDocumentState({ ...documentState, ...next });
       }
     });
     return () => subscription.unsubscribe();
-  }, [documents$, selectedIndexPattern, documentState, setDocumentState]);
+  }, [documents$, selectedDataView, documentState, setDocumentState]);
 
   useEffect(() => {
     // when index pattern changes fieldCounts needs to be cleaned up to prevent displaying
     // fields of the previous index pattern
     fieldCounts.current = {};
-  }, [selectedIndexPattern]);
+  }, [selectedDataView]);
 
   useEffect(
     () => {
@@ -73,13 +73,7 @@ export const useSidebarData = ({
     },
     // Using columns.length here instead of columns to avoid array reference changing
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      selectedIndexPattern,
-      availableFields$,
-      fieldCounts.current,
-      documentState.result,
-      columns.length,
-    ]
+    [selectedDataView, availableFields$, fieldCounts.current, documentState.result, columns.length]
   );
 
   return {

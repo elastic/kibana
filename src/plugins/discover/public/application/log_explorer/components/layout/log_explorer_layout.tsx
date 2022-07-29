@@ -7,6 +7,7 @@
  */
 import '../../../main/components/layout/discover_layout.scss';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { isOfQueryType } from '@kbn/es-query';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -42,6 +43,8 @@ import { SavedSearchURLConflictCallout } from '../../../../services/saved_search
 import { hasActiveFilter } from '../../../main/components/layout/utils';
 import { LogExplorer } from './log_explorer';
 import { useStateMachineContext } from '../../hooks/query_data/use_state_machine';
+import { RecordRawType } from '../../../main/hooks/use_saved_search';
+import { getRawRecordType } from '../../../main/utils/get_raw_record_type';
 
 /**
  * Local storage key for sidebar persistence state
@@ -52,12 +55,12 @@ const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
 
 export function LogExplorerLayout({
-  indexPattern,
-  indexPatternList,
+  dataView,
+  dataViewList,
   inspectorAdapters,
   expandedDoc,
   navigateTo,
-  onChangeIndexPattern,
+  onChangeDataView,
   onUpdateQuery,
   setExpandedDoc,
   savedSearchRefetch$,
@@ -71,7 +74,7 @@ export function LogExplorerLayout({
   const {
     trackUiMetric,
     capabilities,
-    indexPatterns,
+    dataViews,
     data,
     uiSettings,
     filterManager,
@@ -93,12 +96,23 @@ export function LogExplorerLayout({
   // representation of those documents does not have the time field that _field_caps
   // reports us.
   const isTimeBased = useMemo(() => {
-    return indexPattern.type !== DataViewType.ROLLUP && indexPattern.isTimeBased();
-  }, [indexPattern]);
+    return dataView.type !== DataViewType.ROLLUP && dataView.isTimeBased();
+  }, [dataView]);
 
   const initialSidebarClosed = Boolean(storage.get(SIDEBAR_CLOSED_KEY));
   const [isSidebarClosed, setIsSidebarClosed] = useState(initialSidebarClosed);
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
+
+  const isPlainRecord = useMemo(
+    () => getRawRecordType(state.query) === RecordRawType.PLAIN,
+    [state.query]
+  );
+
+  const textBasedLanguageModeErrors = useMemo(() => {
+    if (isPlainRecord) {
+      return dataState.error;
+    }
+  }, [dataState.error, isPlainRecord]);
 
   // const resultState = useMemo(
   //   () => getResultState(dataState.fetchStatus, dataState.foundDocuments!),
@@ -126,8 +140,8 @@ export function LogExplorerLayout({
   const { columns, onAddColumn, onRemoveColumn } = useColumns({
     capabilities,
     config: uiSettings,
-    indexPattern,
-    indexPatterns,
+    dataView,
+    dataViews,
     setAppState: stateContainer.setAppState,
     state,
     useNewFieldsApi,
@@ -136,14 +150,14 @@ export function LogExplorerLayout({
   const onAddFilter = useCallback(
     (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
       const fieldName = typeof field === 'string' ? field : field.name;
-      popularizeField(indexPattern, fieldName, indexPatterns, capabilities);
-      const newFilters = generateFilters(filterManager, field, values, operation, indexPattern);
+      popularizeField(dataView, fieldName, dataViews, capabilities);
+      const newFilters = generateFilters(filterManager, field, values, operation, dataView);
       if (trackUiMetric) {
         trackUiMetric(METRIC_TYPE.CLICK, 'filter_added');
       }
       return filterManager.addFilters(newFilters);
     },
-    [filterManager, indexPattern, indexPatterns, trackUiMetric, capabilities]
+    [filterManager, dataView, dataViews, trackUiMetric, capabilities]
   );
 
   const onFieldEdited = useCallback(() => {
@@ -167,10 +181,10 @@ export function LogExplorerLayout({
   const onDataViewCreated = useCallback(
     (dataView: DataView) => {
       if (dataView.id) {
-        onChangeIndexPattern(dataView.id);
+        onChangeDataView(dataView.id);
       }
     },
-    [onChangeIndexPattern]
+    [onChangeDataView]
   );
 
   const savedSearchTitle = useRef<HTMLHeadingElement>(null);
@@ -199,7 +213,7 @@ export function LogExplorerLayout({
             })}
       </h1>
       <TopNavMemoized
-        indexPattern={indexPattern}
+        dataView={dataView}
         onOpenInspector={onOpenInspector}
         query={state.query}
         navigateTo={navigateTo}
@@ -209,8 +223,10 @@ export function LogExplorerLayout({
         stateContainer={stateContainer}
         updateQuery={onUpdateQuery}
         resetSavedSearch={resetSavedSearch}
-        onChangeIndexPattern={onChangeIndexPattern}
+        onChangeDataView={onChangeDataView}
         onFieldEdited={onFieldEdited}
+        isPlainRecord={isPlainRecord}
+        textBasedLanguageModeErrors={textBasedLanguageModeErrors}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <SavedSearchURLConflictCallout
@@ -222,12 +238,12 @@ export function LogExplorerLayout({
           <EuiFlexItem grow={false}>
             <SidebarMemoized
               columns={columns}
-              indexPatternList={indexPatternList}
+              dataViewList={dataViewList}
               onAddField={onAddColumn}
               onAddFilter={onAddFilter}
               onRemoveField={onRemoveColumn}
-              onChangeIndexPattern={onChangeIndexPattern}
-              selectedIndexPattern={indexPattern}
+              onChangeDataView={onChangeDataView}
+              selectedDataView={dataView}
               state={state}
               isClosed={isSidebarClosed}
               trackUiMetric={trackUiMetric}
@@ -278,7 +294,7 @@ export function LogExplorerLayout({
                   isTimeBased={isTimeBased}
                   data={data}
                   error={dataState.error}
-                  hasQuery={!!state.query?.query}
+                  hasQuery={isOfQueryType(state.query) && !!state.query?.query}
                   hasFilters={hasActiveFilter(state.filters)}
                   onDisableFilters={onDisableFilters}
                 />
@@ -297,7 +313,7 @@ export function LogExplorerLayout({
                   <LogExplorer
                     stateMachine={stateMachine}
                     expandedDoc={expandedDoc}
-                    indexPattern={indexPattern}
+                    dataView={dataView}
                     navigateTo={navigateTo}
                     onAddFilter={onAddFilter as DocViewFilterFn}
                     savedSearch={savedSearch}

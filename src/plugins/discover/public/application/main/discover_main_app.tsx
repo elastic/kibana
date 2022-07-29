@@ -64,7 +64,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     history: usedHistory,
     savedSearch,
     setExpandedDoc,
-    dataFetchingHook: useSavedSearch,
   });
 
   /**

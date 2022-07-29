@@ -26,7 +26,7 @@ import {
   getSavedSearchFullPathUrl,
 } from '../../services/saved_searches';
 import { getState } from '../main/services/discover_state';
-import { loadIndexPattern, resolveIndexPattern } from '../main/utils/resolve_index_pattern';
+import { loadDataView, resolveDataView } from '../main/utils/resolve_data_view';
 import { LogExplorerMainApp } from './log_explorer_main_app';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
@@ -58,8 +58,8 @@ export function DiscoverLogExplorerRoute({ isDev }: Props) {
   } = services;
   const [error, setError] = useState<Error>();
   const [savedSearch, setSavedSearch] = useState<SavedSearch>();
-  const indexPattern = savedSearch?.searchSource?.getField('index');
-  const [indexPatternList, setIndexPatternList] = useState<Array<SavedObject<DataViewAttributes>>>(
+  const dataView = savedSearch?.searchSource?.getField('index');
+  const [dataViewList, setdataViewList] = useState<Array<SavedObject<DataViewAttributes>>>(
     []
   );
   const [hasESData, setHasESData] = useState(false);
@@ -81,7 +81,7 @@ export function DiscoverLogExplorerRoute({ isDev }: Props) {
     return xstateInspector?.disconnect;
   }, []);
 
-  const loadDefaultOrCurrentIndexPattern = useCallback(
+  const loadDefaultOrCurrentdataView = useCallback(
     async (searchSource: ISearchSource) => {
       try {
         const hasUserDataViewValue = await data.dataViews.hasData
@@ -106,14 +106,14 @@ export function DiscoverLogExplorerRoute({ isDev }: Props) {
 
         const { appStateContainer } = getState({ history, uiSettings: config });
         const { index } = appStateContainer.getState();
-        const ip = await loadIndexPattern(index || '', data.dataViews, config);
+        const ip = await loadDataView(index || '', data.dataViews, config);
 
         const ipList = ip.list as Array<SavedObject<DataViewAttributes>>;
-        const indexPatternData = resolveIndexPattern(ip, searchSource, toastNotifications);
+        const dataViewData = resolveDataView(ip, searchSource, toastNotifications);
 
-        setIndexPatternList(ipList);
+        setdataViewList(ipList);
 
-        return indexPatternData;
+        return dataViewData;
       } catch (e) {
         setError(e);
       }
@@ -129,16 +129,16 @@ export function DiscoverLogExplorerRoute({ isDev }: Props) {
         spaces: services.spaces,
       });
 
-      const loadedIndexPattern = await loadDefaultOrCurrentIndexPattern(
+      const loadeddataView = await loadDefaultOrCurrentdataView(
         currentSavedSearch.searchSource
       );
 
-      if (!loadedIndexPattern) {
+      if (!loadeddataView) {
         return;
       }
 
       if (!currentSavedSearch.searchSource.getField('index')) {
-        currentSavedSearch.searchSource.setField('index', loadedIndexPattern);
+        currentSavedSearch.searchSource.setField('index', loadeddataView);
       }
 
       setSavedSearch(currentSavedSearch);
@@ -180,7 +180,7 @@ export function DiscoverLogExplorerRoute({ isDev }: Props) {
     core.savedObjects.client,
     core.application.navigateToApp,
     core.theme,
-    loadDefaultOrCurrentIndexPattern,
+    loadDefaultOrCurrentdataView,
     chrome.recentlyAccessed,
     history,
     basePath,
@@ -238,11 +238,11 @@ export function DiscoverLogExplorerRoute({ isDev }: Props) {
     return <DiscoverError error={error} />;
   }
 
-  if (!indexPattern || !savedSearch) {
+  if (!dataView || !savedSearch) {
     return <LoadingIndicator type="elastic" />;
   }
 
   return (
-    <LogExplorerMainAppMemoized indexPatternList={indexPatternList} savedSearch={savedSearch} />
+    <LogExplorerMainAppMemoized dataViewList={dataViewList} savedSearch={savedSearch} />
   );
 }
