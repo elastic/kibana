@@ -26,7 +26,7 @@ export const fetchMetricbeatErrors = async ({
 }: FetchParameters & {
   metricbeatIndex: string;
 }): Promise<MetricbeatResponse> => {
-  try {
+  const getMetricbeatErrors = async () => {
     const { aggregations, timed_out: timedOut } = await search({
       index: metricbeatIndex,
       body: metricbeatErrorsQuery({
@@ -43,16 +43,25 @@ export const fetchMetricbeatErrors = async ({
       size: 0,
       ignore_unavailable: true,
     });
-
     const buckets = aggregations?.errors_aggregation?.buckets ?? [];
+    return { products: buildMetricbeatErrors(buckets), timedOut: Boolean(timedOut) };
+  };
+
+  try {
+    const { products, timedOut } = await getMetricbeatErrors();
     return {
-      products: buildMetricbeatErrors(buckets),
-      execution: { timedOut: false, errors: [] },
+      products,
+      execution: {
+        timedOut,
+        errors: [],
+      },
     };
   } catch (err) {
-    logger.error(`fetchMetricbeatErrors: failed to fetch:\n${err.stack}`);
     return {
-      execution: { timedOut: Boolean(timedOut), errors: !!err.message ? [err.message] : [] },
+      execution: {
+        timedOut: false,
+        errors: [err.message],
+      },
     };
   }
 };
