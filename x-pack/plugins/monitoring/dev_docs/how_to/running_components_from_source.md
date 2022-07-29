@@ -68,7 +68,7 @@ http://localhost:9200/_security/user/kibana_system/_password -d'{"password": "ch
 To start the second server (in another terminal from the same directory), first copy the config and export the new location as `ES_PATH_CONF`
 
 ```shell
-export ES_PATH_CONF=config2
+export ES_PATH_CONF=config-secondary
 mkdir -p "${ES_PATH_CONF}"
 cp -r config/* "${ES_PATH_CONF}"
 ```
@@ -82,7 +82,7 @@ echo changeme | ./bin/elasticsearch-keystore add xpack.monitoring.exporters.id0.
 And finally start the server
 
 ```shell
-./bin/elasticsearch -E cluster.name=secondary -E http.port=9201 -E transport.port=9301 -E path.data=data2 -E xpack.license.self_generated.type=trial \
+./bin/elasticsearch -E cluster.name=secondary -E http.port=9210 -E transport.port=9310 -E path.data=data-secondary -E xpack.license.self_generated.type=trial \
                     -E xpack.monitoring.collection.enabled=true \
                     -E xpack.monitoring.exporters.id0.type=http -E xpack.monitoring.exporters.id0.host=http://localhost:9200 \
                     -E xpack.monitoring.exporters.id0.auth.username=elastic \
@@ -93,9 +93,9 @@ You'll likely want to reset the passwords for the secondary cluster as well:
 
 ```shell
 curl -k -u elastic:'PASSWORD' -H 'Content-Type: application/json' \
-  http://localhost:9201/_security/user/elastic/_password -d'{"password": "changeme"}'
+  http://localhost:9210/_security/user/elastic/_password -d'{"password": "changeme"}'
 curl -k -u elastic:changeme -H 'Content-Type: application/json' \
-  http://localhost:9201/_security/user/kibana_system/_password -d'{"password": "changeme"}'
+  http://localhost:9210/_security/user/kibana_system/_password -d'{"password": "changeme"}'
 ```
 
 For metricbeat collection, omit the monitoring settings, provide both cluster hosts to the elasticsearch metricbeat module config (see [metricbeat](#metricbeat) section below), and remove the exporter password from the keychain:
@@ -110,14 +110,14 @@ Once you have two clusters going you can use something like this to configure th
 
 ```
 curl -u elastic:changeme -H 'Content-Type: application/json' \
-  -XPUT -d'{"persistent": {"cluster": {"remote": {"secondary": {"seeds": ["127.0.0.1:9301"]}}}}}' \
+  -XPUT -d'{"persistent": {"cluster": {"remote": {"secondary": {"seeds": ["127.0.0.1:9310"]}}}}}' \
   http://localhost:9200/_cluster/settings
 ```
 
 Create an index on the secondary cluster:
 
 ```
-curl -XPOST -H'Content-Type: application/json' -d'{"some": "stuff"}' -u elastic:changeme http://localhost:9201/stuff/_doc
+curl -XPOST -H'Content-Type: application/json' -d'{"some": "stuff"}' -u elastic:changeme http://localhost:9210/stuff/_doc
 ```
 
 Then use the "Cross-Cluster Replication" kibana UI to set up a follower index (`stuff-replica`) in the main cluster.
@@ -330,7 +330,7 @@ metricbeat.modules:
       # main
       - "localhost:9200"
       # secondary
-      - "localhost:9201"
+      - "localhost:9210"
     username: "elastic"
     password: "changeme"
 
