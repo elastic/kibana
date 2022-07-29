@@ -110,7 +110,9 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
       }
 
       // Value list meta data
-      const valueListMetaData = await receiver.fetchValueListMetaData(FETCH_VALUE_LIST_META_DATA_INTERVAL_IN_HOURS);
+      const valueListMetaData = await receiver.fetchValueListMetaData(
+        FETCH_VALUE_LIST_META_DATA_INTERVAL_IN_HOURS
+      );
       await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, [valueListMetaData]);
 
       return count;

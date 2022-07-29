@@ -369,7 +369,7 @@ export interface ValueListMetaData {
   types: Array<{
     type: string;
     count: number;
-  }>,
+  }>;
   lists: Array<{
     id: string;
     count: number;

@@ -21,7 +21,7 @@ import {
   isPackagePolicyList,
   templateExceptionList,
   addDefaultAdvancedPolicyConfigSettings,
-  metricsResponseToValueListMetaData
+  metricsResponseToValueListMetaData,
 } from './helpers';
 import type { ESClusterInfo, ESLicense, ExceptionListItem } from './types';
 import type { PolicyConfig, PolicyData } from '../../../common/endpoint/types';
@@ -806,45 +806,53 @@ describe('test metrics response to value list meta data', () => {
         aggregations: {
           total_value_list_count: 5,
           type_breakdown: {
-            buckets: [{
-              key: 'keyword',
-              doc_count: 5
-            }, {
-              key: 'ip',
-              doc_count: 3
-            }, {
-              key: 'ip_range',
-              doc_count: 2
-            }, {
-              key: 'text',
-              doc_count: 1
-            }]
-          }
-        }
+            buckets: [
+              {
+                key: 'keyword',
+                doc_count: 5,
+              },
+              {
+                key: 'ip',
+                doc_count: 3,
+              },
+              {
+                key: 'ip_range',
+                doc_count: 2,
+              },
+              {
+                key: 'text',
+                doc_count: 1,
+              },
+            ],
+          },
+        },
       },
       itemMetricsResponse: {
         aggregations: {
           value_list_item_count: {
-            buckets: [{
-              key: 'vl-test1',
-              doc_count: 23
-            }, {
-              key: 'vl-test2',
-              doc_count: 45
-            }]
-          }
-        }
+            buckets: [
+              {
+                key: 'vl-test1',
+                doc_count: 23,
+              },
+              {
+                key: 'vl-test2',
+                doc_count: 45,
+              },
+            ],
+          },
+        },
       },
       exceptionListMetricsResponse: {
         aggregations: {
-          vl_included_in_exception_lists_count: {value: 24}
-        }
+          vl_included_in_exception_lists_count: { value: 24 },
+        },
       },
       indicatorMatchMetricsResponse: {
         aggregations: {
-          vl_used_in_indicator_match_rule_count: {value: 6}
-        }
-      }
+          vl_used_in_indicator_match_rule_count: { value: 6 },
+        },
+      },
     };
     const response = metricsResponseToValueListMetaData(stubMetricResponses);
     expect(response).toEqual({
@@ -852,37 +860,41 @@ describe('test metrics response to value list meta data', () => {
       types: [
         {
           type: 'keyword',
-          count: 5
-        }, {
+          count: 5,
+        },
+        {
           type: 'ip',
-          count: 3
-        }, {
+          count: 3,
+        },
+        {
           type: 'ip_range',
-          count: 2
-        }, {
+          count: 2,
+        },
+        {
           type: 'text',
-          count: 1
-        }
+          count: 1,
+        },
       ],
       lists: [
         {
           id: 'vl-test1',
-          count: 23
-        }, {
+          count: 23,
+        },
+        {
           id: 'vl-test2',
-          count: 45
-        }
+          count: 45,
+        },
       ],
       included_in_exception_lists_count: 24,
-      used_in_indicator_match_rule_count: 6
-    })
+      used_in_indicator_match_rule_count: 6,
+    });
   });
   test('can succeed when metrics response has no aggregation response', async () => {
     const stubMetricResponses = {
       listMetricsResponse: {},
       itemMetricsResponse: {},
       exceptionListMetricsResponse: {},
-      indicatorMatchMetricsResponse: {}
+      indicatorMatchMetricsResponse: {},
     };
     // @ts-ignore
     const response = metricsResponseToValueListMetaData(stubMetricResponses);
@@ -891,7 +903,7 @@ describe('test metrics response to value list meta data', () => {
       types: [],
       lists: [],
       included_in_exception_lists_count: 0,
-      used_in_indicator_match_rule_count: 0
+      used_in_indicator_match_rule_count: 0,
     });
-  })
+  });
 });

@@ -831,7 +831,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
             terms: {
               field: 'type',
             },
-          }
+          },
         },
       },
     };
@@ -846,7 +846,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
             terms: {
               field: 'list_id',
             },
-          }
+          },
         },
       },
     };
@@ -858,10 +858,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       body: {
         query: {
           bool: {
-              must : [
-                { match : {'exception-list.entries.type' : 'list'} },
-                { match : {'exception-list.entries.operator' : 'included'} }
-              ]
+            must: [
+              { match: { 'exception-list.entries.type': 'list' } },
+              { match: { 'exception-list.entries.operator': 'included' } },
+            ],
           },
         },
         aggs: {
@@ -869,7 +869,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
             cardinality: {
               field: 'exception-list.entries.list.id',
             },
-          }
+          },
         },
       },
     };
@@ -881,9 +881,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       body: {
         query: {
           bool: {
-            must: [
-              { prefix : {'alert.params.threatIndex' : '.items'} },
-            ],
+            must: [{ prefix: { 'alert.params.threatIndex': '.items' } }],
           },
         },
         aggs: {
@@ -891,25 +889,28 @@ export class TelemetryReceiver implements ITelemetryReceiver {
             cardinality: {
               field: 'alert.params.ruleId',
             },
-          }
+          },
         },
       },
     };
-    const [listMetrics, itemMetrics, exceptionListMetrics, indicatorMatchMetrics] = await Promise.all([
-      this.esClient.search(listQuery),
-      this.esClient.search(itemQuery),
-      this.esClient.search(exceptionListQuery),
-      this.esClient.search(indicatorMatchRuleQuery)
-    ]);
+    const [listMetrics, itemMetrics, exceptionListMetrics, indicatorMatchMetrics] =
+      await Promise.all([
+        this.esClient.search(listQuery),
+        this.esClient.search(itemQuery),
+        this.esClient.search(exceptionListQuery),
+        this.esClient.search(indicatorMatchRuleQuery),
+      ]);
     const listMetricsResponse = listMetrics as unknown as ValueListResponseAggregation;
     const itemMetricsResponse = itemMetrics as unknown as ValueListItemsResponseAggregation;
-    const exceptionListMetricsResponse = exceptionListMetrics as unknown as ValueListExceptionListResponseAggregation;
-    const indicatorMatchMetricsResponse = indicatorMatchMetrics as unknown as ValueListIndicatorMatchResponseAggregation;
+    const exceptionListMetricsResponse =
+      exceptionListMetrics as unknown as ValueListExceptionListResponseAggregation;
+    const indicatorMatchMetricsResponse =
+      indicatorMatchMetrics as unknown as ValueListIndicatorMatchResponseAggregation;
     return metricsResponseToValueListMetaData({
       listMetricsResponse,
       itemMetricsResponse,
       exceptionListMetricsResponse,
-      indicatorMatchMetricsResponse
+      indicatorMatchMetricsResponse,
     });
   }
 
