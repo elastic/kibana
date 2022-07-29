@@ -13,7 +13,7 @@ import type { FullResponseSchema } from '@kbn/security-solution-plugin/common/de
  */
 export const removeServerGeneratedProperties = (
   rule: FullResponseSchema
-): Partial<FullResponseSchema> => {
+): Omit<FullResponseSchema, 'id' | 'created_at' | 'updated_at'> => {
   const {
     /* eslint-disable @typescript-eslint/naming-convention */
     id,

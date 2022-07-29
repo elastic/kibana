@@ -18,7 +18,7 @@ import { patchRules } from '../../rules/patch_rules';
 import { buildSiemResponse } from '../utils';
 
 import { getIdError } from './utils';
-import { transformValidate } from './validate';
+import { newTransformValidate } from './validate';
 import { readRules } from '../../rules/read_rules';
 import { legacyMigrate } from '../../rules/utils';
 
@@ -83,7 +83,7 @@ export const patchRulesRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
         if (rule != null && rule.enabled != null && rule.name != null) {
           const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
 
-          const [validated, errors] = transformValidate(rule, ruleExecutionSummary);
+          const [validated, errors] = newTransformValidate(rule, ruleExecutionSummary);
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });
           } else {

@@ -7,8 +7,8 @@
 
 import * as t from 'io-ts';
 
-import { rulesSchema } from './rules_schema';
+import { fullResponseSchema } from '../request';
 import { errorSchema } from './error_schema';
 
-export const rulesBulkSchema = t.array(t.union([rulesSchema, errorSchema]));
+export const rulesBulkSchema = t.array(t.union([fullResponseSchema, errorSchema]));
 export type RulesBulkSchema = t.TypeOf<typeof rulesBulkSchema>;

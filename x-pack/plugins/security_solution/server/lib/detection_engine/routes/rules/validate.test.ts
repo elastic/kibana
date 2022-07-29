@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { transformValidate, transformValidateBulkError } from './validate';
+import { newTransformValidate, transformValidateBulkError } from './validate';
 import type { BulkError } from '../utils';
-import type { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
 import { getRuleMock } from '../__mocks__/request_responses';
 import { ruleExecutionSummaryMock } from '../../../../../common/detection_engine/rule_monitoring/mocks';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+import type { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
 
-export const ruleOutput = (): RulesSchema => ({
+export const ruleOutput = (): FullResponseSchema => ({
   actions: [],
   author: ['Elastic'],
   building_block_type: 'default',
@@ -73,7 +73,7 @@ describe('validate', () => {
   describe('transformValidate', () => {
     test('it should do a validation correctly of a partial alert', () => {
       const ruleAlert = getRuleMock(getQueryRuleParams());
-      const [validated, errors] = transformValidate(ruleAlert, null);
+      const [validated, errors] = newTransformValidate(ruleAlert, null);
       expect(validated).toEqual(ruleOutput());
       expect(errors).toEqual(null);
     });
@@ -82,7 +82,7 @@ describe('validate', () => {
       const ruleAlert = getRuleMock(getQueryRuleParams());
       // @ts-expect-error
       delete ruleAlert.name;
-      const [validated, errors] = transformValidate(ruleAlert, null);
+      const [validated, errors] = newTransformValidate(ruleAlert, null);
       expect(validated).toEqual(null);
       expect(errors).toEqual('Invalid value "undefined" supplied to "name"');
     });
@@ -114,7 +114,7 @@ describe('validate', () => {
       const rule = getRuleMock(getQueryRuleParams());
       const ruleExecutionSumary = ruleExecutionSummaryMock.getSummarySucceeded();
       const validatedOrError = transformValidateBulkError('rule-1', rule, ruleExecutionSumary);
-      const expected: RulesSchema = {
+      const expected: FullResponseSchema = {
         ...ruleOutput(),
         execution_summary: ruleExecutionSumary,
       };

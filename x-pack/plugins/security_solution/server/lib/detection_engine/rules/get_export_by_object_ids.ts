@@ -11,7 +11,6 @@ import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 import type { Logger } from '@kbn/core/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { RulesClient, RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import type { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
 
@@ -22,10 +21,11 @@ import { getRuleExceptionsForExport } from './get_export_rule_exceptions';
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetBulkRuleActionsSavedObject } from '../rule_actions/legacy_get_bulk_rule_actions_saved_object';
 import { internalRuleToAPIResponse } from '../schemas/rule_converters';
+import type { FullResponseSchema } from '../../../../common/detection_engine/schemas/request';
 
 interface ExportSuccessRule {
   statusCode: 200;
-  rule: Partial<RulesSchema>;
+  rule: FullResponseSchema;
 }
 
 interface ExportFailedRule {
@@ -36,7 +36,7 @@ interface ExportFailedRule {
 export interface RulesErrors {
   exportedCount: number;
   missingRules: Array<{ rule_id: string }>;
-  rules: Array<Partial<RulesSchema>>;
+  rules: FullResponseSchema[];
 }
 
 export const getExportByObjectIds = async (

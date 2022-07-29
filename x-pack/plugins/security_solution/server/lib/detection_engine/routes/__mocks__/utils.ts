@@ -8,9 +8,9 @@
 import { Readable } from 'stream';
 
 import type { HapiReadableStream } from '../../rules/types';
-import type { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
+import type { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
 
 /**
  * Given a string, builds a hapi stream as our
@@ -34,10 +34,7 @@ export const buildHapiStream = (string: string, filename = 'file.ndjson'): HapiR
   return stream;
 };
 
-export const getOutputRuleAlertForRest = (): Omit<
-  RulesSchema,
-  'machine_learning_job_id' | 'anomaly_threshold'
-> => ({
+export const getOutputRuleAlertForRest = (): FullResponseSchema => ({
   author: ['Elastic'],
   actions: [],
   building_block_type: 'default',

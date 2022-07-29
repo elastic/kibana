@@ -22,10 +22,7 @@ import type {
   FullResponseSchema,
   PreviewResponse,
 } from '../../../../../common/detection_engine/schemas/request';
-import type {
-  RulesSchema,
-  GetInstalledIntegrationsResponse,
-} from '../../../../../common/detection_engine/schemas/response';
+import type { GetInstalledIntegrationsResponse } from '../../../../../common/detection_engine/schemas/response';
 
 import type {
   UpdateRulesProps,
@@ -70,8 +67,8 @@ export const createRule = async ({ rule, signal }: CreateRulesProps): Promise<Fu
  *
  * @throws An error if response is not OK
  */
-export const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<RulesSchema> =>
-  KibanaServices.get().http.fetch<RulesSchema>(DETECTION_ENGINE_RULES_URL, {
+export const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<FullResponseSchema> =>
+  KibanaServices.get().http.fetch<FullResponseSchema>(DETECTION_ENGINE_RULES_URL, {
     method: 'PUT',
     body: JSON.stringify(rule),
     signal,
@@ -88,8 +85,11 @@ export const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<Ru
  *
  * @throws An error if response is not OK
  */
-export const patchRule = async ({ ruleProperties, signal }: PatchRuleProps): Promise<RulesSchema> =>
-  KibanaServices.get().http.fetch<RulesSchema>(DETECTION_ENGINE_RULES_URL, {
+export const patchRule = async ({
+  ruleProperties,
+  signal,
+}: PatchRuleProps): Promise<FullResponseSchema> =>
+  KibanaServices.get().http.fetch<FullResponseSchema>(DETECTION_ENGINE_RULES_URL, {
     method: 'PATCH',
     body: JSON.stringify(ruleProperties),
     signal,

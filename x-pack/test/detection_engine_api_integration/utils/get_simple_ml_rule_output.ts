@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import type { RulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/response/rules_schema';
-import { getSimpleRuleOutput } from './get_simple_rule_output';
+import type { MachineLearningResponseSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { getBaseSimpleRuleOutput } from './get_simple_rule_output';
 
-export const getSimpleMlRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> => {
-  const rule = getSimpleRuleOutput(ruleId);
-  const { query, language, index, ...rest } = rule;
-
+export const getSimpleMlRuleOutput = (ruleId = 'rule-1'): MachineLearningResponseSchema => {
   return {
-    ...rest,
+    ...getBaseSimpleRuleOutput(ruleId),
     name: 'Simple ML Rule',
     description: 'Simple Machine Learning Rule',
     anomaly_threshold: 44,

@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import type { RulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/response/rules_schema';
-
 /**
  * This will return a complex rule with all the outputs possible
  * @param ruleId The ruleId to set which is optional and defaults to rule-1
  */
-export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> => ({
+export const getComplexRuleOutput = (ruleId = 'rule-1') => ({
   actions: [],
   author: [],
   created_by: 'elastic',

@@ -6,13 +6,12 @@
  */
 
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../constants';
+import type { FullResponseSchema } from '../request';
 import { getListArrayMock } from '../types/lists.mock';
-
-import type { RulesSchema } from './rules_schema';
 
 export const ANCHOR_DATE = '2020-02-20T03:57:54.037Z';
 
-export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchema => ({
+const getResponseBaseParams = (anchorDate: string = ANCHOR_DATE) => ({
   author: [],
   id: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
   created_at: new Date(anchorDate).toISOString(),
@@ -24,45 +23,52 @@ export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchem
   from: 'now-6m',
   immutable: false,
   name: 'Query with a rule id',
-  query: 'user.name: root or user.name: admin',
   references: ['test 1', 'test 2'],
-  severity: 'high',
+  severity: 'high' as const,
   severity_mapping: [],
   updated_by: 'elastic_kibana',
   tags: ['some fake tag 1', 'some fake tag 2'],
   to: 'now',
-  type: 'query',
   threat: [],
   version: 1,
   output_index: '.siem-signals-default',
   max_signals: 100,
   risk_score: 55,
   risk_score_mapping: [],
-  language: 'kuery',
   rule_id: 'query-rule-id',
   interval: '5m',
   exceptions_list: getListArrayMock(),
   related_integrations: [],
   required_fields: [],
   setup: '',
+  throttle: 'no_actions',
+  actions: [],
 });
 
-export const getRulesMlSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchema => {
-  const basePayload = getRulesSchemaMock(anchorDate);
-  const { filters, index, query, language, ...rest } = basePayload;
+export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): FullResponseSchema => ({
+  ...getResponseBaseParams(anchorDate),
+  query: 'user.name: root or user.name: admin',
+  type: 'query',
+  language: 'kuery',
+});
 
+export const getRulesMlSchemaMock = (anchorDate: string = ANCHOR_DATE): FullResponseSchema => {
   return {
-    ...rest,
+    ...getResponseBaseParams(anchorDate),
     type: 'machine_learning',
     anomaly_threshold: 59,
     machine_learning_job_id: 'some_machine_learning_job_id',
   };
 };
 
-export const getThreatMatchingSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchema => {
+export const getThreatMatchingSchemaMock = (
+  anchorDate: string = ANCHOR_DATE
+): FullResponseSchema => {
   return {
-    ...getRulesSchemaMock(anchorDate),
+    ...getResponseBaseParams(anchorDate),
     type: 'threat_match',
+    query: 'user.name: root or user.name: admin',
+    language: 'kuery',
     threat_index: ['index-123'],
     threat_mapping: [{ entries: [{ field: 'host.name', type: 'mapping', value: 'host.name' }] }],
     threat_query: '*:*',
@@ -91,7 +97,9 @@ export const getThreatMatchingSchemaMock = (anchorDate: string = ANCHOR_DATE): R
  * Useful for e2e backend tests where it doesn't have date time and other
  * server side properties attached to it.
  */
-export const getThreatMatchingSchemaPartialMock = (enabled = false): Partial<RulesSchema> => {
+export const getThreatMatchingSchemaPartialMock = (
+  enabled = false
+): Partial<FullResponseSchema> => {
   return {
     author: [],
     created_by: 'elastic',
@@ -160,9 +168,9 @@ export const getThreatMatchingSchemaPartialMock = (enabled = false): Partial<Rul
   };
 };
 
-export const getRulesEqlSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchema => {
+export const getRulesEqlSchemaMock = (anchorDate: string = ANCHOR_DATE): FullResponseSchema => {
   return {
-    ...getRulesSchemaMock(anchorDate),
+    ...getResponseBaseParams(anchorDate),
     language: 'eql',
     type: 'eql',
     query: 'process where true',

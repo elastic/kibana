@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { RulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/response/rules_schema';
+import type { FullResponseSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { removeServerGeneratedProperties } from './remove_server_generated_properties';
 
 /**
  * This is the typical output of a simple rule that Kibana will output with all the defaults
  * except for the server generated properties.  Useful for testing end to end tests.
  */
-export const getSimpleRuleOutput = (ruleId = 'rule-1', enabled = false): Partial<RulesSchema> => ({
+export const getBaseSimpleRuleOutput = (ruleId = 'rule-1', enabled = false) => ({
   actions: [],
   author: [],
   created_by: 'elastic',
@@ -20,10 +21,8 @@ export const getSimpleRuleOutput = (ruleId = 'rule-1', enabled = false): Partial
   false_positives: [],
   from: 'now-6m',
   immutable: false,
-  index: ['auditbeat-*'],
   interval: '5m',
   rule_id: ruleId,
-  language: 'kuery',
   output_index: '',
   max_signals: 100,
   related_integrations: [],
@@ -31,17 +30,30 @@ export const getSimpleRuleOutput = (ruleId = 'rule-1', enabled = false): Partial
   risk_score: 1,
   risk_score_mapping: [],
   name: 'Simple Rule Query',
-  query: 'user.name: root or user.name: admin',
   references: [],
   setup: '',
-  severity: 'high',
+  severity: 'high' as const,
   severity_mapping: [],
   updated_by: 'elastic',
   tags: [],
   to: 'now',
-  type: 'query',
   threat: [],
   throttle: 'no_actions',
   exceptions_list: [],
   version: 1,
+  id: 'id',
+  updated_at: '2020-07-08T16:36:32.377Z',
+  created_at: '2020-07-08T16:36:32.377Z',
 });
+
+const getQueryRuleOutput = (ruleId = 'rule-1', enabled = false): FullResponseSchema => ({
+  ...getBaseSimpleRuleOutput(ruleId, enabled),
+  index: ['auditbeat-*'],
+  language: 'kuery',
+  query: 'user.name: root or user.name: admin',
+  type: 'query',
+});
+
+export const getSimpleRuleOutput = (ruleId = 'rule-1', enabled = false) => {
+  return removeServerGeneratedProperties(getQueryRuleOutput(ruleId, enabled));
+};
