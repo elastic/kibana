@@ -263,3 +263,7 @@ export const TIMELINE_TAB_CONTENT_GRAPHS_NOTES =
 export const TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN = '[data-test-subj="more-actions-@timestamp"]';
 
 export const USER_KPI = '[data-test-subj="siem-timeline-user-kpi"]';
+
+export const EDIT_TIMELINE_BTN = '[data-test-subj="save-timeline-button-icon"]';
+
+export const EDIT_TIMELINE_TOOLTIP = '[data-test-subj="save-timeline-btn-tooltip"]';

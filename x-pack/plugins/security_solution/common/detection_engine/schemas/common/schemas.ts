@@ -14,6 +14,7 @@ import {
   PositiveInteger,
   PositiveIntegerGreaterThanZero,
   UUID,
+  LimitedSizeArray,
 } from '@kbn/securitysolution-io-ts-types';
 import * as t from 'io-ts';
 
@@ -192,35 +193,11 @@ export type QueryFilterOrUndefined = t.TypeOf<typeof queryFilterOrUndefined>;
 export const references = t.array(t.string);
 export type References = t.TypeOf<typeof references>;
 
-export const per_page = PositiveInteger;
-export type PerPage = t.TypeOf<typeof per_page>;
-
-export const perPageOrUndefined = t.union([per_page, t.undefined]);
-export type PerPageOrUndefined = t.TypeOf<typeof perPageOrUndefined>;
-
-export const page = PositiveIntegerGreaterThanZero;
-export type Page = t.TypeOf<typeof page>;
-
-export const pageOrUndefined = t.union([page, t.undefined]);
-export type PageOrUndefined = t.TypeOf<typeof pageOrUndefined>;
-
 export const signal_ids = t.array(t.string);
 export type SignalIds = t.TypeOf<typeof signal_ids>;
 
 // TODO: Can this be more strict or is this is the set of all Elastic Queries?
 export const signal_status_query = t.object;
-
-export const sort_field = t.string;
-export type SortField = t.TypeOf<typeof sort_field>;
-
-export const sortFieldOrUndefined = t.union([sort_field, t.undefined]);
-export type SortFieldOrUndefined = t.TypeOf<typeof sortFieldOrUndefined>;
-
-export const sort_order = t.keyof({ asc: null, desc: null });
-export type SortOrder = t.TypeOf<typeof sort_order>;
-
-export const sortOrderOrUndefined = t.union([sort_order, t.undefined]);
-export type SortOrderOrUndefined = t.TypeOf<typeof sortOrderOrUndefined>;
 
 export const tags = t.array(t.string);
 export type Tags = t.TypeOf<typeof tags>;
@@ -280,6 +257,13 @@ export const thresholdWithCardinality = t.intersection([
   ),
 ]);
 export type ThresholdWithCardinality = t.TypeOf<typeof thresholdWithCardinality>;
+
+// New terms rule type currently only supports a single term, but should support more in the future
+export const newTermsFields = LimitedSizeArray({ codec: t.string, minSize: 1, maxSize: 1 });
+export type NewTermsFields = t.TypeOf<typeof newTermsFields>;
+
+export const historyWindowStart = NonEmptyString;
+export type HistoryWindowStart = t.TypeOf<typeof historyWindowStart>;
 
 export const created_at = IsoDateString;
 

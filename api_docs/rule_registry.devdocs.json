@@ -1143,7 +1143,7 @@
                 "label": "resourceType",
                 "description": [],
                 "signature": [
-                  "\"index\" | \"namespace\""
+                  "\"namespace\" | \"index\""
                 ],
                 "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/errors.ts",
                 "deprecated": false,
@@ -1748,7 +1748,7 @@
               "\nID of the Kibana feature associated with the index.\nUsed by alerts-as-data RBAC.\n\nNote from @dhurley14\nThe purpose of the `feature` param is to force the user to update\nthe data structure which contains the mapping of consumers to alerts\nas data indices. The idea is it is typed such that it forces the\nuser to go to the code and modify it. At least until a better system\nis put in place or we move the alerts as data client out of rule registry.\n"
             ],
             "signature": [
-              "\"logs\" | \"apm\" | \"infrastructure\" | \"observability\" | \"uptime\" | \"siem\""
+              "\"logs\" | \"apm\" | \"uptime\" | \"siem\" | \"infrastructure\" | \"observability\""
             ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/index_options.ts",
             "deprecated": false
@@ -2723,6 +2723,16 @@
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.PersistenceAlertServiceResult.alertsWereTruncated",
+            "type": "boolean",
+            "tags": [],
+            "label": "alertsWereTruncated",
+            "description": [],
+            "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -2745,7 +2755,7 @@
             "label": "alertWithPersistence",
             "description": [],
             "signature": [
-              "<T>(alerts: { _id: string; _source: T; }[], refresh: boolean | \"wait_for\") => Promise<",
+              "<T>(alerts: { _id: string; _source: T; }[], refresh: boolean | \"wait_for\", maxAlerts?: number | undefined) => Promise<",
               {
                 "pluginId": "ruleRegistry",
                 "scope": "server",
@@ -2781,6 +2791,19 @@
                 "description": [],
                 "signature": [
                   "boolean | \"wait_for\""
+                ],
+                "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "ruleRegistry",
+                "id": "def-server.PersistenceServices.alertWithPersistence.$3",
+                "type": "number",
+                "tags": [],
+                "label": "maxAlerts",
+                "description": [],
+                "signature": [
+                  "number | undefined"
                 ],
                 "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
                 "deprecated": false
@@ -3248,7 +3271,7 @@
         "label": "PersistenceAlertService",
         "description": [],
         "signature": [
-          "<T>(alerts: { _id: string; _source: T; }[], refresh: boolean | \"wait_for\") => Promise<",
+          "<T>(alerts: { _id: string; _source: T; }[], refresh: boolean | \"wait_for\", maxAlerts?: number | undefined) => Promise<",
           {
             "pluginId": "ruleRegistry",
             "scope": "server",
@@ -3284,6 +3307,19 @@
             "description": [],
             "signature": [
               "boolean | \"wait_for\""
+            ],
+            "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.PersistenceAlertService.$3",
+            "type": "number",
+            "tags": [],
+            "label": "maxAlerts",
+            "description": [],
+            "signature": [
+              "number | undefined"
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
             "deprecated": false

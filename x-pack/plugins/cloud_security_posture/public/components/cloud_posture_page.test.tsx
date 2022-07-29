@@ -6,7 +6,6 @@
  */
 
 import Chance from 'chance';
-import { useCisKubernetesIntegration } from '../common/api/use_cis_kubernetes_integration';
 import {
   DEFAULT_NO_DATA_TEST_SUBJECT,
   ERROR_STATE_TEST_SUBJECT,
@@ -22,19 +21,22 @@ import React, { ComponentProps } from 'react';
 import { UseQueryResult } from 'react-query';
 import { CloudPosturePage } from './cloud_posture_page';
 import { NoDataPage } from '@kbn/kibana-react-plugin/public';
+import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
+import { useCISIntegrationLink } from '../common/navigation/use_navigate_to_cis_integration';
 
 const chance = new Chance();
-jest.mock('../common/api/use_cis_kubernetes_integration');
+jest.mock('../common/api/use_setup_status_api');
+jest.mock('../common/navigation/use_navigate_to_cis_integration');
 
 describe('<CloudPosturePage />', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    // if package installation status is 'not_installed', CloudPosturePage will render a noDataConfig prompt
-    (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({
-      isSuccess: true,
-      isLoading: false,
-      data: { item: { status: 'installed' } },
-    }));
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: { status: 'indexed' },
+      })
+    );
   });
 
   const renderCloudPosturePage = (
@@ -61,7 +63,7 @@ describe('<CloudPosturePage />', () => {
     );
   };
 
-  it('renders children if integration is installed', () => {
+  it('renders children if setup status is indexed', () => {
     const children = chance.sentence();
     renderCloudPosturePage({ children });
 
@@ -72,11 +74,13 @@ describe('<CloudPosturePage />', () => {
   });
 
   it('renders integrations installation prompt if integration is not installed', () => {
-    (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({
-      isSuccess: true,
-      isLoading: false,
-      data: { item: { status: 'not_installed' } },
-    }));
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: { status: 'not-installed' },
+      })
+    );
+    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
 
     const children = chance.sentence();
     renderCloudPosturePage({ children });
@@ -88,7 +92,7 @@ describe('<CloudPosturePage />', () => {
   });
 
   it('renders default loading state when the integration query is loading', () => {
-    (useCisKubernetesIntegration as jest.Mock).mockImplementation(
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(
       () =>
         createReactQueryResponse({
           status: 'loading',
@@ -105,7 +109,7 @@ describe('<CloudPosturePage />', () => {
   });
 
   it('renders default error state when the integration query has an error', () => {
-    (useCisKubernetesIntegration as jest.Mock).mockImplementation(
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(
       () =>
         createReactQueryResponse({
           status: 'error',

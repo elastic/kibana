@@ -6,11 +6,7 @@
  */
 import { Ast } from '@kbn/interpreter';
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
-import type {
-  CoreSetup,
-  SavedObjectReference,
-  SavedObjectsResolveResponse,
-} from '@kbn/core/public';
+import type { CoreSetup, SavedObjectReference, ResolvedSimpleSavedObject } from '@kbn/core/public';
 import type { PaletteOutput } from '@kbn/coloring';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import type { MutableRefObject } from 'react';
@@ -354,6 +350,10 @@ export interface Datasource<T = unknown, P = unknown> {
     references2: SavedObjectReference[]
   ) => boolean;
   /**
+   * Get RenderEventCounters events for telemetry
+   */
+  getRenderEventCounters?: (state: T) => string[];
+  /**
    * Get the used DataView value from state
    */
   getUsedDataView: (state: T, layerId: string) => string;
@@ -394,6 +394,13 @@ export interface DatasourcePublicAPI {
           lucene: Query[][];
         }
       >;
+
+  /**
+   * Returns the maximum possible number of values for this column when it can be known, otherwise null
+   * (e.g. with a top 5 values operation, we can be sure that there will never be more than 5 values returned
+   *       or 6 if the "Other" bucket is enabled)
+   */
+  getMaxPossibleNumValues: (columnId: string) => number | null;
 }
 
 export interface DatasourceDataPanelProps<T = unknown> {
@@ -618,6 +625,7 @@ export interface VisualizationDimensionChangeProps<T> {
   prevState: T;
   frame: FramePublicAPI;
 }
+
 export interface Suggestion {
   visualizationId: string;
   datasourceState?: unknown;
@@ -720,6 +728,7 @@ export interface FramePublicAPI {
    */
   activeData?: Record<string, Datatable>;
 }
+
 export interface FrameDatasourceAPI extends FramePublicAPI {
   query: Query;
   filters: Filter[];
@@ -758,6 +767,11 @@ export interface VisualizationType {
    * Indicates if visualization is in the experimental stage.
    */
   showExperimentalBadge?: boolean;
+}
+
+export interface VisualizationDisplayOptions {
+  noPanelTitle?: boolean;
+  noPadding?: boolean;
 }
 
 export interface Visualization<T = unknown> {
@@ -956,6 +970,16 @@ export interface Visualization<T = unknown> {
    * On Edit events the frame will call this to know what's going to be the next visualization state
    */
   onEditAction?: (state: T, event: LensEditEvent<LensEditSupportedActions>) => T;
+
+  /**
+   * Gets custom display options for showing the visualization.
+   */
+  getDisplayOptions?: () => VisualizationDisplayOptions;
+
+  /**
+   * Get RenderEventCounters events for telemetry
+   */
+  getRenderEventCounters?: (state: T) => string[];
 }
 
 // Use same technique as TriggerContext
@@ -1020,9 +1044,9 @@ export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandle
 }
 
 export interface SharingSavedObjectProps {
-  outcome?: SavedObjectsResolveResponse['outcome'];
-  aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
-  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
+  outcome?: ResolvedSimpleSavedObject['outcome'];
+  aliasTargetId?: ResolvedSimpleSavedObject['alias_target_id'];
+  aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
   sourceId?: string;
 }
 

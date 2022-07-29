@@ -16,7 +16,6 @@ import type {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import type { ListClient } from '@kbn/lists-plugin/server';
-import type { Logger } from '@kbn/core/server';
 import type { EcsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 import type { TypeOfFieldMap } from '@kbn/rule-registry-plugin/common/field_map';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -27,7 +26,6 @@ import type {
   SearchTypes,
   EqlSequence,
 } from '../../../../common/detection_engine/types';
-import type { BuildRuleMessage } from './rule_messages';
 import type { ITelemetryEventsSender } from '../../telemetry/sender';
 import type {
   CompleteRule,
@@ -43,6 +41,7 @@ import type {
   DetectionAlert,
   WrappedFieldsLatest,
 } from '../../../../common/detection_engine/schemas/alerts';
+import type { IRuleExecutionLogForExecutors } from '../rule_monitoring';
 
 export interface ThresholdResult {
   terms?: Array<{
@@ -241,7 +240,8 @@ export type BulkResponseErrorAggregation = Record<string, { count: number; statu
 export type SignalsEnrichment = (signals: SignalSourceHit[]) => Promise<SignalSourceHit[]>;
 
 export type BulkCreate = <T extends BaseFieldsLatest>(
-  docs: Array<WrappedFieldsLatest<T>>
+  docs: Array<WrappedFieldsLatest<T>>,
+  maxAlerts?: number
 ) => Promise<GenericBulkCreateResponse<T>>;
 
 export type SimpleHit = BaseHit<{ '@timestamp'?: string }>;
@@ -269,13 +269,11 @@ export interface SearchAfterAndBulkCreateParams {
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   listClient: ListClient;
   exceptionsList: ExceptionListItemSchema[];
-  logger: Logger;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
   eventsTelemetry: ITelemetryEventsSender | undefined;
-  id: string;
   inputIndexPattern: string[];
   pageSize: number;
   filter: estypes.QueryDslQueryContainer;
-  buildRuleMessage: BuildRuleMessage;
   buildReasonMessage: BuildReasonMessage;
   enrichment?: SignalsEnrichment;
   bulkCreate: BulkCreate;

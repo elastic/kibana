@@ -21,6 +21,8 @@ import { prebootServiceMock } from '@kbn/core-preboot-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
+import { capabilitiesServiceMock } from '@kbn/core-capabilities-server-mocks';
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -36,8 +38,6 @@ import { typeRegistryMock as savedObjectsTypeRegistryMock } from './saved_object
 import { renderingMock } from './rendering/rendering_service.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { SharedGlobalConfig } from './plugins';
-import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
-import { metricsServiceMock } from './metrics/metrics_service.mock';
 import { statusServiceMock } from './status/status_service.mock';
 import { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
 import { i18nServiceMock } from './i18n/i18n_service.mock';
@@ -54,11 +54,11 @@ export { savedObjectsClientMock } from './saved_objects/service/saved_objects_cl
 export { migrationMocks } from './saved_objects/migrations/mocks';
 export { typeRegistryMock as savedObjectsTypeRegistryMock } from './saved_objects/saved_objects_type_registry.mock';
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
-export { metricsServiceMock } from './metrics/metrics_service.mock';
+export { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
 export { renderingMock } from './rendering/rendering_service.mock';
 export { statusServiceMock } from './status/status_service.mock';
 export { contextServiceMock } from '@kbn/core-http-context-server-mocks';
-export { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
+export { capabilitiesServiceMock } from '@kbn/core-capabilities-server-mocks';
 export { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
 export { i18nServiceMock } from './i18n/i18n_service.mock';
 export { deprecationsServiceMock } from './deprecations/deprecations_service.mock';

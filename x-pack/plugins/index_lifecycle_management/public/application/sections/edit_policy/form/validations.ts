@@ -86,6 +86,9 @@ export const rolloverThresholdsValidator: ValidationFunc = ({ form, path }) => {
       case ROLLOVER_FORM_PATHS.maxPrimaryShardSize:
         errorToReturn.message = i18nTexts.editPolicy.errors.maximumPrimaryShardSizeRequiredMessage;
         break;
+      case ROLLOVER_FORM_PATHS.maxPrimaryShardDocs:
+        errorToReturn.message = i18nTexts.editPolicy.errors.maximumPrimaryShardDocsRequiredMessage;
+        break;
       default:
         errorToReturn.message = i18nTexts.editPolicy.errors.maximumSizeRequiredMessage;
     }

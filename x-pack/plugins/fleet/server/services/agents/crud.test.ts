@@ -11,8 +11,7 @@ import type { Agent } from '../../types';
 
 import { errorsToResults, getAgentsByKuery, getAgentTags, processAgentsInBatches } from './crud';
 
-jest.mock('../../../common', () => ({
-  ...jest.requireActual('../../../common'),
+jest.mock('../../../common/services/is_agent_upgradeable', () => ({
   isAgentUpgradeable: jest.fn().mockImplementation((agent: Agent) => agent.id.includes('up')),
 }));
 
@@ -49,9 +48,17 @@ describe('Agents CRUD test', () => {
         },
       });
 
-      const result = await getAgentTags(esClientMock);
+      const result = await getAgentTags(esClientMock, { showInactive: false });
 
       expect(result).toEqual(['tag1', 'tag2']);
+      expect(searchMock).toHaveBeenCalledWith({
+        aggs: { tags: { terms: { field: 'tags', size: 10000 } } },
+        body: {
+          query: { bool: { minimum_should_match: 1, should: [{ match: { active: true } }] } },
+        },
+        index: '.fleet-agents',
+        size: 0,
+      });
     });
 
     it('should return empty list if no agent tags', async () => {
@@ -61,7 +68,7 @@ describe('Agents CRUD test', () => {
         },
       });
 
-      const result = await getAgentTags(esClientMock);
+      const result = await getAgentTags(esClientMock, { showInactive: false });
 
       expect(result).toEqual([]);
     });
@@ -69,9 +76,42 @@ describe('Agents CRUD test', () => {
     it('should return empty list if no agent index', async () => {
       searchMock.mockRejectedValueOnce(new errors.ResponseError({ statusCode: 404 } as any));
 
-      const result = await getAgentTags(esClientMock);
+      const result = await getAgentTags(esClientMock, { showInactive: false });
 
       expect(result).toEqual([]);
+    });
+
+    it('should pass query when called with kuery', async () => {
+      searchMock.mockResolvedValueOnce({
+        aggregations: {
+          tags: { buckets: [{ key: 'tag1' }, { key: 'tag2' }] },
+        },
+      });
+
+      await getAgentTags(esClientMock, {
+        showInactive: true,
+        kuery: 'fleet-agents.policy_id: 123',
+      });
+
+      expect(searchMock).toHaveBeenCalledWith({
+        aggs: { tags: { terms: { field: 'tags', size: 10000 } } },
+        body: {
+          query: {
+            bool: {
+              minimum_should_match: 1,
+              should: [
+                {
+                  match: {
+                    policy_id: '123',
+                  },
+                },
+              ],
+            },
+          },
+        },
+        index: '.fleet-agents',
+        size: 0,
+      });
     });
   });
 
