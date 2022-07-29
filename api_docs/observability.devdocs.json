@@ -7760,6 +7760,34 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-common.syntheticsEditMonitorLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "syntheticsEditMonitorLocatorID",
+        "description": [],
+        "signature": [
+          "\"SYNTHETICS_EDIT_MONITOR_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.syntheticsMonitorDetailLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "syntheticsMonitorDetailLocatorID",
+        "description": [],
+        "signature": [
+          "\"SYNTHETICS_MONITOR_DETAIL_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-common.TimeUnitChar",
         "type": "Type",
         "tags": [],
