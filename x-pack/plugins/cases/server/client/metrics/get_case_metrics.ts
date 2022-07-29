@@ -52,7 +52,10 @@ const checkAuthorization = async (
   params: SingleCaseMetricsRequest,
   clientArgs: CasesClientArgs
 ) => {
-  const { caseService, authorization } = clientArgs;
+  const {
+    services: { caseService },
+    authorization,
+  } = clientArgs;
 
   const caseInfo = await caseService.getCase({
     id: params.caseId,

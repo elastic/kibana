@@ -23,18 +23,22 @@ import {
 import { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 import { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 
+export interface CasesServices {
+  alertsService: AlertService;
+  caseService: CasesService;
+  caseConfigureService: CaseConfigureService;
+  connectorMappingsService: ConnectorMappingsService;
+  userActionService: CaseUserActionService;
+  attachmentService: AttachmentService;
+}
+
 /**
  * Parameters for initializing a cases client
  */
 export interface CasesClientArgs {
-  readonly caseConfigureService: CaseConfigureService;
-  readonly caseService: CasesService;
-  readonly connectorMappingsService: ConnectorMappingsService;
+  readonly services: CasesServices;
   readonly user: User;
   readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
-  readonly userActionService: CaseUserActionService;
-  readonly alertsService: AlertService;
-  readonly attachmentService: AttachmentService;
   readonly logger: Logger;
   readonly lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
   readonly authorization: PublicMethodsOf<Authorization>;

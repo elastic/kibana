@@ -11,10 +11,9 @@
   "kibanaVersion":"kibana",
   "optionalPlugins":[
     "home",
-     "security",
-     "spaces",
-     "taskManager",
-     "usageCollection"
+    "security",
+    "taskManager",
+    "usageCollection"
   ],
   "owner":{
      "githubTeam":"response-ops",
@@ -30,7 +29,8 @@
      "kibanaReact",
      "kibanaUtils",
      "triggersActionsUi",
-     "management"
+     "management",
+     "spaces"
   ],
   "requiredBundles": [
     "savedObjects"
