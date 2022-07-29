@@ -20,20 +20,20 @@ import { getSort } from './get_sort';
  */
 export function getSortForSearchSource(
   sort?: SortOrder[],
-  indexPattern?: DataView,
+  dataView?: DataView,
   defaultDirection: string = 'desc'
 ): EsQuerySortValue[] {
-  if (!sort || !indexPattern || (Array.isArray(sort) && sort.length === 0)) {
-    if (indexPattern?.timeFieldName) {
+  if (!sort || !dataView || (Array.isArray(sort) && sort.length === 0)) {
+    if (dataView?.timeFieldName) {
       // sorting by index order
       return [{ _doc: defaultDirection } as EsQuerySortValue];
     } else {
       return [{ _score: defaultDirection } as EsQuerySortValue];
     }
   }
-  const { timeFieldName } = indexPattern;
-  return getSort(sort, indexPattern).map((sortPair: Record<string, string>) => {
-    if (indexPattern.isTimeNanosBased() && timeFieldName && sortPair[timeFieldName]) {
+  const { timeFieldName } = dataView;
+  return getSort(sort, dataView).map((sortPair: Record<string, string>) => {
+    if (dataView.isTimeNanosBased() && timeFieldName && sortPair[timeFieldName]) {
       return {
         [timeFieldName]: {
           order: sortPair[timeFieldName],
