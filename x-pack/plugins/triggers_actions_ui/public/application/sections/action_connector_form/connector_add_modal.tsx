@@ -143,26 +143,30 @@ const ConnectorAddModal = ({
               </EuiFlexItem>
             ) : null}
             <EuiFlexItem grow={false}>
-              <EuiTitle size="s">
-                <h3 id="flyoutTitle">
-                  <FormattedMessage
-                    defaultMessage="{actionTypeName} connector"
-                    id="xpack.triggersActionsUI.sections.addModalConnectorForm.flyoutTitle"
-                    values={{
-                      actionTypeName: actionType.name,
-                    }}
-                  />
-                </h3>
-              </EuiTitle>
+              <EuiFlexGroup gutterSize="s" justifyContent="center" alignItems="center">
+                <EuiFlexItem>
+                  <EuiTitle size="s">
+                    <h3 id="flyoutTitle">
+                      <FormattedMessage
+                        defaultMessage="{actionTypeName} connector"
+                        id="xpack.triggersActionsUI.sections.addModalConnectorForm.flyoutTitle"
+                        values={{
+                          actionTypeName: actionType.name,
+                        }}
+                      />
+                    </h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+                {actionTypeModel && actionTypeModel.isExperimental && (
+                  <EuiFlexItem className="betaBadgeFlexItem" grow={false}>
+                    <EuiBetaBadge
+                      label={betaBadgeProps.label}
+                      tooltipContent={betaBadgeProps.tooltipContent}
+                    />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
             </EuiFlexItem>
-            {actionTypeModel && actionTypeModel.isExperimental && (
-              <EuiFlexItem className="betaBadgeFlexItem" grow={false}>
-                <EuiBetaBadge
-                  label={betaBadgeProps.label}
-                  tooltipContent={betaBadgeProps.tooltipContent}
-                />
-              </EuiFlexItem>
-            )}
           </EuiFlexGroup>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
