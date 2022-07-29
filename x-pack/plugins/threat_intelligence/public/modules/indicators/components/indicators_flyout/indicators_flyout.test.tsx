@@ -9,11 +9,12 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { IndicatorsFlyout, SUBTITLE_TEST_ID, TITLE_TEST_ID } from './indicators_flyout';
 import { generateMockIndicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
+import { EMPTY_VALUE } from '../../../../../common/constants';
+import { dateFormatter } from '../../../../common/utils/dates';
+import { mockUiSetting } from '../../../../common/mocks/mock_kibana_ui_setting';
+import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
 import { unwrapValue } from '../../lib/unwrap_value';
 import { displayValue } from '../../lib/display_value';
-import { EMPTY_VALUE } from '../../../../../common/constants';
-import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
-import { fullDateFormatter } from '../../../../common/utils/dates';
 
 const mockIndicator = generateMockIndicator();
 
@@ -29,8 +30,10 @@ describe('<IndicatorsFlyout />', () => {
       `Indicator: ${displayValue(mockIndicator)}`
     );
     expect(getByTestId(SUBTITLE_TEST_ID).innerHTML).toContain(
-      `First seen: ${fullDateFormatter(
-        unwrapValue(mockIndicator, RawIndicatorFieldId.FirstSeen) as string
+      `First seen: ${dateFormatter(
+        unwrapValue(mockIndicator, RawIndicatorFieldId.FirstSeen) as string,
+        mockUiSetting('dateFormat:tz') as string,
+        mockUiSetting('dateFormat') as string
       )}`
     );
   });

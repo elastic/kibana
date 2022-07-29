@@ -6,33 +6,39 @@
  */
 
 import moment from 'moment-timezone';
-import { fullDateFormatter } from './dates';
+import { dateFormatter } from './dates';
 import { EMPTY_VALUE } from '../../../common/constants';
 
 const mockValidStringDate = '1 Jan 2022 00:00:00 GMT';
 const mockInvalidStringDate = 'invalid date';
+const mockTimeZone = 'Europe/London';
+const mockDateFormat = 'MMM Do YY';
 
 moment.suppressDeprecationWarnings = true;
-moment.tz.setDefault('UTC');
 
 describe('dates', () => {
   describe('fullDateFormatter', () => {
-    it('should return date string in FULL_DATE format for valid string date', () => {
-      expect(fullDateFormatter(mockValidStringDate)).toEqual('January 1st 2022 @ 00:00:00');
+    it('should return date string for valid string date', () => {
+      expect(dateFormatter(mockValidStringDate, mockTimeZone)).toEqual('2022-01-01T00:00:00Z');
     });
 
-    it('should return date string in FULL_DATE format for valid moment date', () => {
+    it('should return date string for valid moment date', () => {
       const date = moment(mockValidStringDate);
-      expect(fullDateFormatter(date)).toEqual('January 1st 2022 @ 00:00:00');
+      expect(dateFormatter(date, mockTimeZone)).toEqual('2022-01-01T00:00:00Z');
+    });
+
+    it(`should return date string in ${mockDateFormat} format`, () => {
+      const date = moment(mockValidStringDate);
+      expect(dateFormatter(date, mockTimeZone, mockDateFormat)).toEqual('Jan 1st 22');
     });
 
     it('should return EMPTY_VALUE for invalid string date', () => {
-      expect(fullDateFormatter(mockInvalidStringDate)).toEqual(EMPTY_VALUE);
+      expect(dateFormatter(mockInvalidStringDate, mockTimeZone)).toEqual(EMPTY_VALUE);
     });
 
     it('should return EMPTY_VALUE for invalid moment date', () => {
       const date = moment(mockInvalidStringDate);
-      expect(fullDateFormatter(date)).toEqual(EMPTY_VALUE);
+      expect(dateFormatter(date, mockTimeZone)).toEqual(EMPTY_VALUE);
     });
   });
 });
