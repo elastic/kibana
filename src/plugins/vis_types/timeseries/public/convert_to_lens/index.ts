@@ -10,7 +10,7 @@ import type { Panel } from '../../common/types';
 import { PANEL_TYPES } from '../../common/enums';
 import { ConvertTsvbToLensVisualization } from './types';
 
-const getConvertFnByType = async (
+const getConvertFnByType = (
   type: PANEL_TYPES
 ): Promise<ConvertTsvbToLensVisualization | undefined> => {
   const convertionFns: { [key in PANEL_TYPES]?: () => Promise<ConvertTsvbToLensVisualization> } = {
@@ -20,7 +20,7 @@ const getConvertFnByType = async (
     },
   };
 
-  return await convertionFns[type]?.();
+  return convertionFns[type]?.();
 };
 
 /*

@@ -13,6 +13,6 @@ export const getFieldType = async (
   dataViews: DataViewsPublicPluginStart
 ) => {
   const dataView = await dataViews.get(indexPatternId);
-  const field = await dataView.getFieldByName(fieldName);
+  const field = dataView.getFieldByName(fieldName);
   return field?.type;
 };
