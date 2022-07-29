@@ -14,12 +14,12 @@ import { buildDataTableRecord } from '../../../utils/build_data_record';
 
 export async function fetchAnchor(
   anchorId: string,
-  indexPattern: DataView,
+  dataView: DataView,
   searchSource: ISearchSource,
   sort: EsQuerySortValue[],
   useNewFieldsApi: boolean = false
 ): Promise<DataTableRecord> {
-  updateSearchSource(searchSource, anchorId, sort, useNewFieldsApi, indexPattern);
+  updateSearchSource(searchSource, anchorId, sort, useNewFieldsApi, dataView);
   const { rawResponse } = await lastValueFrom(await searchSource.fetch$());
   const doc = rawResponse.hits?.hits?.[0];
 
@@ -30,7 +30,7 @@ export async function fetchAnchor(
       })
     );
   }
-  return buildDataTableRecord(doc, indexPattern, true);
+  return buildDataTableRecord(doc, dataView, true);
 }
 
 export function updateSearchSource(
@@ -38,11 +38,11 @@ export function updateSearchSource(
   anchorId: string,
   sort: EsQuerySortValue[],
   useNewFieldsApi: boolean,
-  indexPattern: DataView
+  dataView: DataView
 ) {
   searchSource
     .setParent(undefined)
-    .setField('index', indexPattern)
+    .setField('index', dataView)
     .setField('version', true)
     .setField('size', 1)
     .setField('query', {
