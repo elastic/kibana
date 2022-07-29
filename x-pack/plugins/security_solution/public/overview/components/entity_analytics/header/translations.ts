@@ -8,8 +8,15 @@
 import { i18n } from '@kbn/i18n';
 
 export const CRITICAL_HOSTS = i18n.translate(
-  'xpack.securitySolution.hostsRiskDashboard.header.criticalHosts',
+  'xpack.securitySolution.entityAnalytics.header.criticalHosts',
   {
     defaultMessage: 'Critical Hosts',
+  }
+);
+
+export const CRITICAL_USERS = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.header.criticalUsers',
+  {
+    defaultMessage: 'Critical Users',
   }
 );

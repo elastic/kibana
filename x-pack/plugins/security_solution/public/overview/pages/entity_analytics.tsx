@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../app/types';
@@ -17,6 +17,7 @@ import * as i18n from './translations';
 
 import { EntityAnalyticsHostRiskScores } from '../components/entity_analytics/host_risk_score';
 import { EntityAnalyticsHeader } from '../components/entity_analytics/header';
+import { EntityAnalyticsUserRiskScores } from '../components/entity_analytics/user_risk_score';
 
 const EntityAnalyticsComponent = () => {
   const { indicesExist, loading: isSourcererLoading } = useSourcererDataView();
@@ -54,7 +55,5 @@ const EntityAnalyticsComponent = () => {
     </>
   );
 };
-
-const EntityAnalyticsUserRiskScores = () => <EuiPanel hasBorder>{'User Risk Scores'}</EuiPanel>;
 
 export const EntityAnalyticsPage = React.memo(EntityAnalyticsComponent);
