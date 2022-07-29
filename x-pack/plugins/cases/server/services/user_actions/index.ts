@@ -52,7 +52,7 @@ import {
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
 } from '../../common/constants';
 import { findConnectorIdReference } from '../transform';
-import { buildFilter, combineFilters, isTwoArraysDifference } from '../../client/utils';
+import { buildFilter, combineFilters, arraysDifference } from '../../client/utils';
 import { BuilderParameters, BuilderReturnValue, CommonArguments, CreateUserAction } from './types';
 import { BuilderFactory } from './builder_factory';
 import { defaultSortField, isCommentRequestTypeExternalReferenceSO } from '../../common/utils';
@@ -133,7 +133,7 @@ export class CaseUserActionService {
 
     if (field === ActionTypes.tags) {
       const tagsUserActionBuilder = this.builderFactory.getBuilder(ActionTypes.tags);
-      const compareValues = isTwoArraysDifference(originalValue, newValue);
+      const compareValues = arraysDifference(originalValue, newValue);
       const userActions = [];
 
       if (compareValues && compareValues.addedItems.length > 0) {
