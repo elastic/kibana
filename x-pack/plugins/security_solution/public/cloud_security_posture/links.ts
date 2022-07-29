@@ -11,7 +11,7 @@ import cloudSecurityPostureDashboardImage from '../common/images/cloud_security_
 import type { LinkCategories, LinkItem } from '../common/links/types';
 import { IconExceptionLists } from '../management/icons/exception_lists';
 
-const commonLinkProperties: Partial<LinkItem> = {
+const commonLinkProperties: Pick<LinkItem, 'hideTimeline' | 'capabilities'> = {
   hideTimeline: true,
   capabilities: [`${SERVER_APP_ID}.show`],
 };
