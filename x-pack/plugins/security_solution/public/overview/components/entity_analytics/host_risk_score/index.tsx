@@ -9,10 +9,11 @@ import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui
 import type { ShapeTreeNode } from '@elastic/charts';
 import styled from 'styled-components';
 import { sum } from 'lodash/fp';
+import { useDispatch } from 'react-redux';
 import { SeverityFilterGroup } from '../../../../common/components/severity/severity_filter_group';
 import { LinkAnchor, LinkButton } from '../../../../common/components/links';
 import { getTabsOnHostsUrl } from '../../../../common/components/link_to/redirect_to_hosts';
-import { HostsTableType } from '../../../../hosts/store/model';
+import { HostsTableType, HostsType } from '../../../../hosts/store/model';
 import { useNavigation } from '../../../../common/lib/kibana';
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { getHostRiskScoreColumns } from './columns';
@@ -35,6 +36,7 @@ import { useQueryInspector } from '../../../../common/components/page/manage_que
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import { hostsActions } from '../../../../hosts/store';
 
 const TABLE_QUERY_ID = 'hostRiskDashboardTable';
 const DONUT_HEIGHT = 120;
@@ -62,6 +64,7 @@ export const EntityAnalyticsHostRiskScores = () => {
   const [selectedSeverity, setSelectedSeverity] = useState<RiskSeverity[]>([]);
   const { formatUrl, search } = useFormatUrl(SecurityPageName.hosts);
   const { navigateTo } = useNavigation();
+  const dispatch = useDispatch();
 
   const severityFilter = useMemo(() => {
     const [filter] = generateSeverityFilter(selectedSeverity);
@@ -110,15 +113,25 @@ export const EntityAnalyticsHostRiskScores = () => {
         deepLinkId: SecurityPageName.hosts,
         path: getTabsOnHostsUrl(HostsTableType.risk, search),
       });
+
+      dispatch(
+        hostsActions.updateHostRiskScoreSeverityFilter({
+          severitySelection: [],
+          hostsType: HostsType.page,
+        })
+      );
     },
-    [navigateTo, search]
+    [navigateTo, search, dispatch]
   );
 
   useEffect(() => {
     setUpdatedAt(Date.now());
   }, [isTableLoading, isKpiLoading]); // Update the time when data loads
 
-  const hostRiskTabUrl = formatUrl(getTabsOnHostsUrl(HostsTableType.risk));
+  const hostRiskTabUrl = useMemo(
+    () => formatUrl(getTabsOnHostsUrl(HostsTableType.risk)),
+    [formatUrl]
+  );
   return (
     <InspectButtonContainer>
       <EuiPanel hasBorder>

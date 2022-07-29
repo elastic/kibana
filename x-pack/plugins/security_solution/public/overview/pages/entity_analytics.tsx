@@ -16,6 +16,7 @@ import { LandingPageComponent } from '../../common/components/landing_page';
 import * as i18n from './translations';
 
 import { EntityAnalyticsHostRiskScores } from '../components/entity_analytics/host_risk_score';
+import { EntityAnalyticsHeader } from '../components/entity_analytics/header';
 
 const EntityAnalyticsComponent = () => {
   const { indicesExist, loading: isSourcererLoading } = useSourcererDataView();
@@ -53,10 +54,6 @@ const EntityAnalyticsComponent = () => {
     </>
   );
 };
-
-const EntityAnalyticsHeader = () => (
-  <EuiPanel hasBorder>{'60 Critica Hosts 90 Critical Users'}</EuiPanel>
-);
 
 const EntityAnalyticsUserRiskScores = () => <EuiPanel hasBorder>{'User Risk Scores'}</EuiPanel>;
 
