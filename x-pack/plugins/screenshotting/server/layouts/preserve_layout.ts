@@ -17,7 +17,6 @@ const ZOOM: number = 2;
 
 export class PreserveLayout extends BaseLayout implements Layout {
   public readonly selectors: LayoutSelectorDictionary;
-  public readonly groupCount = 1;
   public readonly height: number;
   public readonly width: number;
   private readonly scaledHeight: number;

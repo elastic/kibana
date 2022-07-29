@@ -19,7 +19,6 @@ export const getPrintLayoutSelectors: () => LayoutSelectorDictionary = () => ({
 
 export class PrintLayout extends BaseLayout implements Layout {
   public readonly selectors = getPrintLayoutSelectors();
-  public readonly groupCount = 2;
   private readonly viewport = DEFAULT_VIEWPORT;
   private zoom: number;
 
