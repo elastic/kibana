@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useState, useEffect, useRef } from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   UseField,
   useFormData,

@@ -6,17 +6,13 @@
  */
 
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import type { BaseHit } from '../../../../../../common/detection_engine/types';
 import type { ConfigType } from '../../../../../config';
 import type { BuildReasonMessage } from '../../../signals/reason_formatters';
 import { getMergeStrategy } from '../../../signals/source_fields_merging/strategies';
-import type {
-  BaseSignalHit,
-  SignalSource,
-  SignalSourceHit,
-  SimpleHit,
-} from '../../../signals/types';
+import type { BaseSignalHit, SignalSource, SignalSourceHit } from '../../../signals/types';
 import { additionalAlertFields, buildAlert } from './build_alert';
 import { filterSource } from './filter_source';
 import type { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
@@ -50,7 +46,7 @@ const buildEventTypeAlert = (doc: BaseSignalHit): object => {
 export const buildBulkBody = (
   spaceId: string | null | undefined,
   completeRule: CompleteRule<RuleParams>,
-  doc: SimpleHit,
+  doc: estypes.SearchHit<SignalSource>,
   mergeStrategy: ConfigType['alertMergeStrategy'],
   ignoreFields: ConfigType['alertIgnoreFields'],
   applyOverrides: boolean,

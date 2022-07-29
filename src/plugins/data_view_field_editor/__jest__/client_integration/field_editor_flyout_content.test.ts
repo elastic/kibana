@@ -36,7 +36,7 @@ describe('<FieldEditorFlyoutContent />', () => {
     expect(find('flyoutTitle').text()).toBe('Create field');
   });
 
-  test('should allow a field to be provided', async () => {
+  test('should allow an existing field to be provided', async () => {
     const field = {
       name: 'foo',
       type: 'ip' as const,
@@ -45,12 +45,29 @@ describe('<FieldEditorFlyoutContent />', () => {
       },
     };
 
-    const { find } = await setup({ field });
+    const { find } = await setup({ fieldToEdit: field });
 
     expect(find('flyoutTitle').text()).toBe(`Edit field 'foo'`);
     expect(find('nameField.input').props().value).toBe(field.name);
     expect(find('typeField').props().value).toBe(field.type);
     expect(find('scriptField').props().value).toBe(field.script.source);
+  });
+
+  test('should allow a new field to be created with initial configuration', async () => {
+    const fieldToCreate = {
+      name: 'demotestfield',
+      type: 'boolean' as const,
+      script: { source: 'emit(true)' },
+      customLabel: 'cool demo test field',
+      format: { id: 'boolean' },
+    };
+
+    const { find } = await setup({ fieldToCreate });
+
+    expect(find('flyoutTitle').text()).toBe(`Create field`);
+    expect(find('nameField.input').props().value).toBe(fieldToCreate.name);
+    expect(find('typeField').props().value).toBe(fieldToCreate.type);
+    expect(find('scriptField').props().value).toBe(fieldToCreate.script.source);
   });
 
   test('should accept an "onSave" prop', async () => {
@@ -61,7 +78,7 @@ describe('<FieldEditorFlyoutContent />', () => {
     };
     const onSave: jest.Mock<Props['onSave']> = jest.fn();
 
-    const { find, actions } = await setup({ onSave, field });
+    const { find, actions } = await setup({ onSave, fieldToEdit: field });
 
     await act(async () => {
       find('fieldSaveButton').simulate('click');

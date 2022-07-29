@@ -225,7 +225,7 @@ describe('Field editor Preview panel', () => {
       // We open the editor with a field to edit the empty prompt should not be there
       // as we have a script and we'll load the preview.
       await act(async () => {
-        testBed = await setup({ field });
+        testBed = await setup({ fieldToEdit: field });
       });
 
       const { exists, component } = testBed;
@@ -245,7 +245,7 @@ describe('Field editor Preview panel', () => {
       };
 
       await act(async () => {
-        testBed = await setup({ field });
+        testBed = await setup({ fieldToEdit: field });
       });
 
       const { exists, component } = testBed;

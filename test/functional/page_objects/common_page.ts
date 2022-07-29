@@ -265,6 +265,20 @@ export class CommonPageObject extends FtrService {
           await this.testSubjects.find('kibanaChrome');
         }
 
+        // If navigating to the `home` app, and we want to skip the Welcome page, but the chrome is still hidden,
+        // set the relevant localStorage key to skip the Welcome page and throw an error to try to navigate again.
+        if (
+          appName === 'home' &&
+          currentUrl.includes('app/home') &&
+          disableWelcomePrompt &&
+          (await this.isChromeHidden())
+        ) {
+          await this.browser.setLocalStorageItem('home:welcome:show', 'false');
+          const msg = `Failed to skip the Welcome page when navigating the app ${appName}`;
+          this.log.debug(msg);
+          throw new Error(msg);
+        }
+
         currentUrl = (await this.browser.getCurrentUrl()).replace(/\/\/\w+:\w+@/, '//');
 
         const navSuccessful = currentUrl

@@ -76,6 +76,7 @@ describe('getLayerMetaInfo', () => {
       getTableSpec: jest.fn(),
       getVisualDefaults: jest.fn(),
       getSourceId: jest.fn(),
+      getMaxPossibleNumValues: jest.fn(),
       getFilters: jest.fn(),
     };
     mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
@@ -93,6 +94,7 @@ describe('getLayerMetaInfo', () => {
       getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
       getVisualDefaults: jest.fn(),
       getSourceId: jest.fn(),
+      getMaxPossibleNumValues: jest.fn(),
       getFilters: jest.fn(() => ({ error: 'filters error' })),
     };
     mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
@@ -149,6 +151,7 @@ describe('getLayerMetaInfo', () => {
       getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
       getVisualDefaults: jest.fn(),
       getSourceId: jest.fn(),
+      getMaxPossibleNumValues: jest.fn(),
       getFilters: jest.fn(() => ({
         enabled: {
           kuery: [[{ language: 'kuery', query: 'memory > 40000' }]],

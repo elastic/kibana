@@ -80,11 +80,13 @@ export const LandingLinksImages: React.FC<LandingImagesProps> = ({ items }) => (
   </EuiFlexGroup>
 );
 
+const CARD_WIDTH = 320;
 const LandingImageCardItem = styled(EuiFlexItem)`
-  max-width: 364px;
+  max-width: ${CARD_WIDTH}px;
 `;
 
-const LandingCardDescripton = styled(EuiText)`
+const LandingCardDescription = styled.span`
+  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   padding-top: ${({ theme }) => theme.eui.euiSizeXS};
 `;
 
@@ -111,7 +113,7 @@ export const LandingImageCards: React.FC<LandingImagesProps> = React.memo(({ ite
               <EuiImage
                 data-test-subj="LandingImageCard-image"
                 role="presentation"
-                size={364}
+                size={CARD_WIDTH}
                 alt={title}
                 src={image}
               />
@@ -122,11 +124,7 @@ export const LandingImageCards: React.FC<LandingImagesProps> = React.memo(({ ite
               <h2>{title}</h2>
             </PrimaryEuiTitle>
           }
-          description={
-            <LandingCardDescripton size="xs" color="text">
-              {description}
-            </LandingCardDescripton>
-          }
+          description={<LandingCardDescription>{description}</LandingCardDescription>}
         />
       </LandingImageCardItem>
     ))}

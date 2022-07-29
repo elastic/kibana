@@ -7,7 +7,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { ErrorLike } from '@kbn/expressions-plugin';
+import { ErrorLike } from '@kbn/expressions-plugin/common';
 import { Adapters } from '../types';
 import { IContainer } from '../containers/i_container';
 import { EmbeddableInput } from '../../../common/types';

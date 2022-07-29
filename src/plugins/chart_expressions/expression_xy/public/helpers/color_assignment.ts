@@ -7,7 +7,7 @@
  */
 
 import { mapValues } from 'lodash';
-import { DatatableRow } from '@kbn/expressions-plugin';
+import { DatatableRow } from '@kbn/expressions-plugin/common';
 import { euiLightVars } from '@kbn/ui-theme';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';

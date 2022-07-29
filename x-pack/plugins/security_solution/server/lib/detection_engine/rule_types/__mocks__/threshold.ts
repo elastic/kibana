@@ -36,48 +36,6 @@ import {
   ALERT_THRESHOLD_RESULT,
 } from '../../../../../common/field_maps/field_names';
 
-export const mockThresholdResults = {
-  rawResponse: {
-    body: {
-      is_partial: false,
-      is_running: false,
-      took: 527,
-      timed_out: false,
-      hits: {
-        total: {
-          value: 0,
-          relation: 'eq',
-        },
-        hits: [],
-      },
-      aggregations: {
-        'threshold_0:source.ip': {
-          buckets: [
-            {
-              key: '127.0.0.1',
-              doc_count: 5,
-              'threshold_1:host.name': {
-                buckets: [
-                  {
-                    key: 'tardigrade',
-                    doc_count: 3,
-                    max_timestamp: {
-                      value_as_string: '2020-04-20T21:26:30.000Z',
-                    },
-                    cardinality_count: {
-                      value: 3,
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      },
-    },
-  },
-};
-
 export const sampleThresholdAlert = {
   _id: 'b3ad77a4-65bd-4c4e-89cf-13c46f54bc4d',
   _index: 'some-index',

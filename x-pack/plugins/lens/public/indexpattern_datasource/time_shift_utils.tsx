@@ -10,7 +10,7 @@ import React from 'react';
 import { uniq } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
-import { Datatable } from '@kbn/expressions-plugin';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { search } from '@kbn/data-plugin/public';
 import { parseTimeShift } from '@kbn/data-plugin/common';
 import {

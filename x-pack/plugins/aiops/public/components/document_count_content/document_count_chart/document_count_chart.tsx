@@ -20,13 +20,16 @@ import {
   XYChartElementEvent,
   XYBrushEvent,
 } from '@elastic/charts';
+import { EuiBadge } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { DualBrush, DualBrushAnnotation } from '@kbn/aiops-components';
 import { getWindowParameters } from '@kbn/aiops-utils';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
+import type { ChangePoint } from '@kbn/ml-agg-utils';
 
 import { useAiOpsKibana } from '../../../kibana_context';
 
@@ -36,12 +39,15 @@ export interface DocumentCountChartPoint {
 }
 
 interface DocumentCountChartProps {
-  brushSelectionUpdateHandler: (d: WindowParameters) => void;
+  brushSelectionUpdateHandler: (d: WindowParameters, force: boolean) => void;
   width?: number;
   chartPoints: DocumentCountChartPoint[];
+  chartPointsSplit?: DocumentCountChartPoint[];
   timeRangeEarliest: number;
   timeRangeLatest: number;
   interval: number;
+  changePoint?: ChangePoint;
+  isBrushCleared: boolean;
 }
 
 const SPEC_ID = 'document_count';
@@ -65,9 +71,12 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   brushSelectionUpdateHandler,
   width,
   chartPoints,
+  chartPointsSplit,
   timeRangeEarliest,
   timeRangeLatest,
   interval,
+  changePoint,
+  isBrushCleared,
 }) => {
   const {
     services: { data, uiSettings, fieldFormats, charts },
@@ -79,9 +88,21 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   const xAxisFormatter = fieldFormats.deserialize({ id: 'date' });
   const useLegacyTimeAxis = uiSettings.get('visualization:useLegacyTimeAxis', false);
 
-  const seriesName = i18n.translate('xpack.aiops.dataGrid.field.documentCountChart.seriesLabel', {
-    defaultMessage: 'document count',
-  });
+  const overallSeriesName = i18n.translate(
+    'xpack.aiops.dataGrid.field.documentCountChart.seriesLabel',
+    {
+      defaultMessage: 'document count',
+    }
+  );
+
+  const overallSeriesNameWithSplit = i18n.translate(
+    'xpack.aiops.dataGrid.field.documentCountChartSplit.seriesLabel',
+    {
+      defaultMessage: 'other document count',
+    }
+  );
+
+  const splitSeriesName = `${changePoint?.fieldName}:${changePoint?.fieldValue}`;
 
   // TODO Let user choose between ZOOM and BRUSH mode.
   const [viewMode] = useState<VIEW_MODE>(VIEW_MODE.BRUSH);
@@ -106,6 +127,26 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
     return chartPoints;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chartPoints, timeRangeEarliest, timeRangeLatest, interval]);
+
+  const adjustedChartPointsSplit = useMemo(() => {
+    // Display empty chart when no data in range
+    if (!Array.isArray(chartPointsSplit) || chartPointsSplit.length < 1)
+      return [{ time: timeRangeEarliest, value: 0 }];
+
+    // If chart has only one bucket
+    // it won't show up correctly unless we add an extra data point
+    if (chartPointsSplit.length === 1) {
+      return [
+        ...chartPointsSplit,
+        {
+          time: interval ? Number(chartPointsSplit[0].time) + interval : timeRangeEarliest,
+          value: 0,
+        },
+      ];
+    }
+    return chartPointsSplit;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chartPointsSplit, timeRangeEarliest, timeRangeLatest, interval]);
 
   const timefilterUpdateHandler = useCallback(
     (ranges: { from: number; to: number }) => {
@@ -150,7 +191,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
         );
         setOriginalWindowParameters(wp);
         setWindowParameters(wp);
-        brushSelectionUpdateHandler(wp);
+        brushSelectionUpdateHandler(wp, true);
       }
     }
   };
@@ -161,10 +202,21 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
     WindowParameters | undefined
   >();
   const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
+  const [windowParametersAsPixels, setWindowParametersAsPixels] = useState<
+    WindowParameters | undefined
+  >();
 
-  function onWindowParametersChange(wp: WindowParameters) {
+  useEffect(() => {
+    if (isBrushCleared && originalWindowParameters !== undefined) {
+      setOriginalWindowParameters(undefined);
+      setWindowParameters(undefined);
+    }
+  }, [isBrushCleared, originalWindowParameters]);
+
+  function onWindowParametersChange(wp: WindowParameters, wpPx: WindowParameters) {
     setWindowParameters(wp);
-    brushSelectionUpdateHandler(wp);
+    setWindowParametersAsPixels(wpPx);
+    brushSelectionUpdateHandler(wp, false);
   }
 
   const [mlBrushWidth, setMlBrushWidth] = useState<number>();
@@ -184,17 +236,56 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
     <>
       {isBrushVisible && (
         <div className="aiopsHistogramBrushes">
-          <DualBrush
-            windowParameters={originalWindowParameters}
-            min={timeRangeEarliest}
-            max={timeRangeLatest + interval}
-            onChange={onWindowParametersChange}
-            marginLeft={mlBrushMarginLeft}
-            width={mlBrushWidth}
-          />
+          <div
+            css={{
+              position: 'absolute',
+              'margin-left': `${
+                mlBrushMarginLeft + (windowParametersAsPixels?.baselineMin ?? 0)
+              }px`,
+            }}
+          >
+            <EuiBadge>
+              <FormattedMessage
+                id="xpack.aiops.documentCountChart.baselineBadgeContent"
+                defaultMessage="Baseline"
+              />
+            </EuiBadge>
+          </div>
+          <div
+            css={{
+              position: 'absolute',
+              'margin-left': `${
+                mlBrushMarginLeft + (windowParametersAsPixels?.deviationMin ?? 0)
+              }px`,
+            }}
+          >
+            <EuiBadge>
+              <FormattedMessage
+                id="xpack.aiops.documentCountChart.deviationBadgeContent"
+                defaultMessage="Deviation"
+              />
+            </EuiBadge>
+          </div>
+          <div
+            css={{
+              position: 'relative',
+              clear: 'both',
+              'padding-top': '20px',
+              'margin-bottom': '-4px',
+            }}
+          >
+            <DualBrush
+              windowParameters={originalWindowParameters}
+              min={timeRangeEarliest}
+              max={timeRangeLatest + interval}
+              onChange={onWindowParametersChange}
+              marginLeft={mlBrushMarginLeft}
+              width={mlBrushWidth}
+            />
+          </div>
         </div>
       )}
-      <div style={{ width: width ?? '100%' }} data-test-subj="aiopsDocumentCountChart">
+      <div css={{ width: width ?? '100%' }} data-test-subj="aiopsDocumentCountChart">
         <Chart
           size={{
             width: '100%',
@@ -223,14 +314,29 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
           <Axis id="left" position={Position.Left} />
           <BarSeries
             id={SPEC_ID}
-            name={seriesName}
+            name={chartPointsSplit ? overallSeriesNameWithSplit : overallSeriesName}
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
             xAccessor="time"
             yAccessors={['value']}
             data={adjustedChartPoints}
+            stackAccessors={[0]}
             timeZone={timeZone}
           />
+          {chartPointsSplit && (
+            <BarSeries
+              id={`${SPEC_ID}_split`}
+              name={splitSeriesName}
+              xScaleType={ScaleType.Time}
+              yScaleType={ScaleType.Linear}
+              xAccessor="time"
+              yAccessors={['value']}
+              data={adjustedChartPointsSplit}
+              stackAccessors={[0]}
+              timeZone={timeZone}
+              color={['orange']}
+            />
+          )}
           {windowParameters && (
             <>
               <DualBrushAnnotation

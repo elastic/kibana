@@ -10,8 +10,8 @@ import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { errors as esErrors } from '@elastic/elasticsearch';
-import { ElasticsearchClient } from '../../../elasticsearch';
-import type { SavedObjectsRawDoc } from '../../serialization';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,

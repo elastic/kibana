@@ -52,7 +52,7 @@ export default function (providerContext: FtrProviderContext) {
           id: 'fleet-default-download-source',
           name: 'Elastic Artifacts',
           is_default: true,
-          host: 'https://artifacts.elastic.co/downloads/beats/elastic-agent',
+          host: 'https://artifacts.elastic.co/downloads/',
         });
       });
     });
@@ -68,7 +68,7 @@ export default function (providerContext: FtrProviderContext) {
             id: 'fleet-default-download-source',
             name: 'Elastic Artifacts',
             is_default: true,
-            host: 'https://artifacts.elastic.co/downloads/beats/elastic-agent',
+            host: 'https://artifacts.elastic.co/downloads/',
           },
         });
       });

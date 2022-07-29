@@ -9,44 +9,23 @@
 import type { Readable } from 'stream';
 import { createListStream } from '@kbn/utils';
 import type { Logger } from '@kbn/logging';
-import { SavedObject, SavedObjectsClientContract } from '../types';
-import { SavedObjectsFindResult } from '../service';
-import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import { sortObjects } from './sort_objects';
-import {
+import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type {
+  SavedObjectsClientContract,
+  SavedObjectsFindResult,
+} from '@kbn/core-saved-objects-api-server';
+import type {
+  ISavedObjectsExporter,
+  ISavedObjectTypeRegistry,
   SavedObjectsExportResultDetails,
   SavedObjectExportBaseOptions,
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportByTypeOptions,
-} from './types';
+} from '@kbn/core-saved-objects-server';
+import { sortObjects } from './sort_objects';
 import { SavedObjectsExportError } from './errors';
 import { collectExportedObjects } from './collect_exported_objects';
 import { byIdAscComparator, getPreservedOrderComparator, SavedObjectComparator } from './utils';
-
-/**
- * Utility class used to export savedObjects.
- *
- * @public
- */
-export interface ISavedObjectsExporter {
-  /**
-   * Generates an export stream for given types.
-   *
-   * See the {@link SavedObjectsExportByTypeOptions | options} for more detailed information.
-   *
-   * @throws SavedObjectsExportError
-   */
-  exportByTypes(options: SavedObjectsExportByTypeOptions): Promise<Readable>;
-
-  /**
-   * Generates an export stream for given object references.
-   *
-   * See the {@link SavedObjectsExportByObjectOptions | options} for more detailed information.
-   *
-   * @throws SavedObjectsExportError
-   */
-  exportByObjects(options: SavedObjectsExportByObjectOptions): Promise<Readable>;
-}
 
 /**
  * @internal

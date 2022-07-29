@@ -6,33 +6,47 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { CoreStart, OverlayRef } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-
-import {
-  createKibanaReactContext,
-  toMountPoint,
-  DataViewField,
+import React from 'react';
+import { FieldEditorLoader } from './components/field_editor_loader';
+import { euiFlyoutClassname } from './constants';
+import type { ApiService } from './lib/api';
+import type {
   DataPublicPluginStart,
   DataView,
   UsageCollectionStart,
   RuntimeType,
   DataViewsPublicPluginStart,
   FieldFormatsStart,
+  DataViewField,
 } from './shared_imports';
+import { createKibanaReactContext, toMountPoint } from './shared_imports';
+import type { CloseEditor, Field, InternalFieldType, PluginStart } from './types';
 
-import type { PluginStart, InternalFieldType, CloseEditor, Field } from './types';
-import type { ApiService } from './lib/api';
-import { euiFlyoutClassname } from './constants';
-import { FieldEditorLoader } from './components/field_editor_loader';
-
+/**
+ * Options for opening the field editor
+ * @public
+ */
 export interface OpenFieldEditorOptions {
+  /**
+   * context containing the data view the field belongs to
+   */
   ctx: {
     dataView: DataView;
   };
+  /**
+   * action to take after field is saved
+   */
   onSave?: (field: DataViewField[]) => void;
+  /**
+   * field to edit, for existing field
+   */
   fieldName?: string;
+  /**
+   * pre-selectable options for new field creation
+   */
+  fieldToCreate?: Field;
 }
 
 interface Dependencies {
@@ -75,7 +89,8 @@ export const getFieldEditorOpener =
 
     const openEditor = ({
       onSave,
-      fieldName,
+      fieldName: fieldNameToEdit,
+      fieldToCreate,
       ctx: { dataView },
     }: OpenFieldEditorOptions): CloseEditor => {
       const closeEditor = () => {
@@ -106,22 +121,22 @@ export const getFieldEditorOpener =
 
       // todo this is sloppy
       // todo types
-      const dataViewField = fieldName
-        ? dataView.getFieldByName(fieldName) || getRuntimeField(fieldName)
+      const dataViewField = fieldNameToEdit
+        ? dataView.getFieldByName(fieldNameToEdit) || getRuntimeField(fieldNameToEdit)
         : undefined;
 
       console.log('loaded field', dataViewField);
 
-      if (fieldName && !dataViewField) {
+      if (fieldNameToEdit && !dataViewField) {
         const err = i18n.translate('indexPatternFieldEditor.noSuchFieldName', {
           defaultMessage: "Field named '{fieldName}' not found on index pattern",
-          values: { fieldName },
+          values: { fieldName: fieldNameToEdit },
         });
         notifications.toasts.addDanger(err);
         return closeEditor;
       }
 
-      const isNewRuntimeField = !fieldName;
+      const isNewRuntimeField = !fieldNameToEdit;
       console.log('IS RUNTIME FIELD', dataViewField);
       const isExistingRuntimeField =
         dataViewField &&
@@ -134,6 +149,7 @@ export const getFieldEditorOpener =
             !dataViewField?.type));
             */
         (dataViewField.runtimeField.type !== ('composite' as RuntimeType) || !dataViewField.type);
+
       const fieldTypeToProcess: InternalFieldType =
         isNewRuntimeField || isExistingRuntimeField ? 'runtime' : 'concrete';
 
@@ -143,7 +159,7 @@ export const getFieldEditorOpener =
         if (isExistingRuntimeField && dataViewField.runtimeField!.type === 'composite') {
           // We are editing a composite runtime **subField**.
           // We need to access the parent composite.
-          const [compositeName] = fieldName!.split('.');
+          const [compositeName] = fieldNameToEdit!.split('.');
           field = {
             name: compositeName,
             ...dataView.getRuntimeField(compositeName)!,
@@ -151,17 +167,17 @@ export const getFieldEditorOpener =
         } else if (isExistingRuntimeField) {
           // Runtime field
           field = {
-            name: fieldName!,
-            ...dataView.getRuntimeField(fieldName!)!,
+            name: fieldNameToEdit!,
+            ...dataView.getRuntimeField(fieldNameToEdit!)!,
           };
         } else {
           // Concrete field
           field = {
-            name: fieldName!,
+            name: fieldNameToEdit!,
             type: (dataViewField?.esTypes ? dataViewField.esTypes[0] : 'keyword') as RuntimeType,
             customLabel: dataViewField.customLabel,
             popularity: dataViewField.count,
-            format: dataView.getFormatterForFieldNoDefault(fieldName!)?.toJSON(),
+            format: dataView.getFormatterForFieldNoDefault(fieldNameToEdit!)?.toJSON(),
             parentName: dataViewField.spec.parentName,
             // parent: dataViewField.runtimeField?.parent,
           };
@@ -175,7 +191,8 @@ export const getFieldEditorOpener =
               onCancel={closeEditor}
               onMounted={onMounted}
               docLinks={docLinks}
-              field={field}
+              fieldToEdit={dataViewField}
+              fieldToCreate={fieldToCreate}
               fieldTypeToProcess={fieldTypeToProcess}
               dataView={dataView}
               search={search}
@@ -203,7 +220,7 @@ export const getFieldEditorOpener =
             : i18n.translate('indexPatternFieldEditor.editField.flyoutAriaLabel', {
                 defaultMessage: 'Edit {fieldName} field',
                 values: {
-                  fieldName,
+                  fieldName: fieldNameToEdit,
                 },
               }),
           onClose: (flyout) => {

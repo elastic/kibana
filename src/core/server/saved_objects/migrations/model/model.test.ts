@@ -8,6 +8,7 @@
 
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
+import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type {
   FatalState,
   State,
@@ -41,7 +42,6 @@ import type {
   CheckUnknownDocumentsState,
   CalculateExcludeFiltersState,
 } from '../state';
-import { SavedObjectsRawDoc } from '../../serialization';
 import { TransformErrorObjects, TransformSavedObjectDocumentError } from '../core';
 import { AliasAction, RetryableEsClientError } from '../actions';
 import { ResponseType } from '../next';
@@ -596,10 +596,10 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
-      test('LEGACY_CREATE_REINDEX_TARGET -> LEGACY_CREATE_REINDEX_TARGET if action fails with index_not_yellow_timeout', () => {
+      test('LEGACY_CREATE_REINDEX_TARGET -> LEGACY_CREATE_REINDEX_TARGET if action fails with index_not_green_timeout', () => {
         const res: ResponseType<'LEGACY_CREATE_REINDEX_TARGET'> = Either.left({
-          message: '[index_not_yellow_timeout] Timeout waiting for ...',
-          type: 'index_not_yellow_timeout',
+          message: '[index_not_green_timeout] Timeout waiting for ...',
+          type: 'index_not_green_timeout',
         });
         const newState = model(legacyCreateReindexTargetState, res);
         expect(newState.controlState).toEqual('LEGACY_CREATE_REINDEX_TARGET');
@@ -608,7 +608,7 @@ describe('migrations v2 model', () => {
         expect(newState.logs[0]).toMatchInlineSnapshot(`
           Object {
             "level": "error",
-            "message": "Action failed with '[index_not_yellow_timeout] Timeout waiting for ... Refer to repeatedTimeoutRequests for information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
+            "message": "Action failed with '[index_not_green_timeout] Timeout waiting for ... Refer to repeatedTimeoutRequests for information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
           }
         `);
       });
@@ -1049,10 +1049,10 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
-      it('CREATE_REINDEX_TEMP -> CREATE_REINDEX_TEMP if action fails with index_not_yellow_timeout', () => {
+      it('CREATE_REINDEX_TEMP -> CREATE_REINDEX_TEMP if action fails with index_not_green_timeout', () => {
         const res: ResponseType<'CREATE_REINDEX_TEMP'> = Either.left({
-          message: '[index_not_yellow_timeout] Timeout waiting for ...',
-          type: 'index_not_yellow_timeout',
+          message: '[index_not_green_timeout] Timeout waiting for ...',
+          type: 'index_not_green_timeout',
         });
         const newState = model(state, res);
         expect(newState.controlState).toEqual('CREATE_REINDEX_TEMP');
@@ -1061,7 +1061,7 @@ describe('migrations v2 model', () => {
         expect(newState.logs[0]).toMatchInlineSnapshot(`
           Object {
             "level": "error",
-            "message": "Action failed with '[index_not_yellow_timeout] Timeout waiting for ... Refer to repeatedTimeoutRequests for information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
+            "message": "Action failed with '[index_not_green_timeout] Timeout waiting for ... Refer to repeatedTimeoutRequests for information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
           }
         `);
       });
@@ -1434,10 +1434,10 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toBe(0);
         expect(newState.retryDelay).toBe(0);
       });
-      it('CLONE_TEMP_TO_TARGET -> CLONE_TEMP_TO_TARGET if action fails with index_not_yellow_timeout', () => {
+      it('CLONE_TEMP_TO_TARGET -> CLONE_TEMP_TO_TARGET if action fails with index_not_green_timeout', () => {
         const res: ResponseType<'CLONE_TEMP_TO_TARGET'> = Either.left({
-          message: '[index_not_yellow_timeout] Timeout waiting for ...',
-          type: 'index_not_yellow_timeout',
+          message: '[index_not_green_timeout] Timeout waiting for ...',
+          type: 'index_not_green_timeout',
         });
         const newState = model(state, res);
         expect(newState.controlState).toEqual('CLONE_TEMP_TO_TARGET');
@@ -1446,7 +1446,7 @@ describe('migrations v2 model', () => {
         expect(newState.logs[0]).toMatchInlineSnapshot(`
           Object {
             "level": "error",
-            "message": "Action failed with '[index_not_yellow_timeout] Timeout waiting for ... Refer to repeatedTimeoutRequests for information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
+            "message": "Action failed with '[index_not_green_timeout] Timeout waiting for ... Refer to repeatedTimeoutRequests for information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
           }
         `);
       });
@@ -1963,10 +1963,10 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
-      test('CREATE_NEW_TARGET -> CREATE_NEW_TARGET if action fails with index_not_yellow_timeout', () => {
+      test('CREATE_NEW_TARGET -> CREATE_NEW_TARGET if action fails with index_not_green_timeout', () => {
         const res: ResponseType<'CREATE_NEW_TARGET'> = Either.left({
-          message: '[index_not_yellow_timeout] Timeout waiting for ...',
-          type: 'index_not_yellow_timeout',
+          message: '[index_not_green_timeout] Timeout waiting for ...',
+          type: 'index_not_green_timeout',
         });
         const newState = model(createNewTargetState, res);
         expect(newState.controlState).toEqual('CREATE_NEW_TARGET');

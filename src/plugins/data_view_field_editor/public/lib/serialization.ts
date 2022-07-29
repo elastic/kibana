@@ -6,7 +6,23 @@
  * Side Public License, v 1.
  */
 import { monaco } from '@kbn/monaco';
-import type { RuntimeFieldPainlessError } from '../types';
+import { DataViewField, DataView, RuntimeType } from '../shared_imports';
+import type { Field, RuntimeFieldPainlessError } from '../types';
+
+export const deserializeField = (dataView: DataView, field?: DataViewField): Field | undefined => {
+  if (field === undefined) {
+    return undefined;
+  }
+
+  return {
+    name: field.name,
+    type: field?.esTypes ? (field.esTypes[0] as RuntimeType) : ('keyword' as const),
+    script: field.runtimeField ? field.runtimeField.script : undefined,
+    customLabel: field.customLabel,
+    popularity: field.count,
+    format: dataView.getFormatterForFieldNoDefault(field.name)?.toJSON(),
+  };
+};
 
 export const painlessErrorToMonacoMarker = (
   { reason }: RuntimeFieldPainlessError,

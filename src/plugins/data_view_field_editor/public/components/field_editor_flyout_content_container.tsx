@@ -18,10 +18,11 @@ import {
   UsageCollectionStart,
   DataViewsPublicPluginStart,
   FieldFormatsStart,
+  RuntimeType,
 } from '../shared_imports';
 import type { Field, PluginStart, InternalFieldType } from '../types';
 import { pluginName } from '../constants';
-import { getLinks, ApiService } from '../lib';
+import { getLinks, ApiService, deserializeField } from '../lib';
 import {
   FieldEditorFlyoutContent,
   Props as FieldEditorFlyoutContentProps,
@@ -42,7 +43,9 @@ export interface Props {
   /** The Kibana field type of the field to create or edit (default: "runtime") */
   fieldTypeToProcess: InternalFieldType;
   /** Optional field to edit */
-  field?: Field;
+  fieldToEdit?: DataViewField;
+  /** Optional initial configuration for new field */
+  fieldToCreate?: Field;
   /** Services */
   dataViews: DataViewsPublicPluginStart;
   notifications: NotificationsStart;
@@ -63,7 +66,8 @@ export interface Props {
  */
 
 export const FieldEditorFlyoutContentContainer = ({
-  field,
+  fieldToEdit,
+  fieldToCreate,
   onSave,
   onCancel,
   onMounted,
@@ -99,7 +103,7 @@ export const FieldEditorFlyoutContentContainer = ({
 
     fields
       .filter((fld) => {
-        const isFieldBeingEdited = field?.name === fld.name;
+        const isFieldBeingEdited = fieldToEdit?.name === fld.name;
         return !isFieldBeingEdited && fld.isMapped;
       })
       .forEach((fld) => {
@@ -110,7 +114,7 @@ export const FieldEditorFlyoutContentContainer = ({
       });
 
     return existing;
-  }, [fields, field]);
+  }, [fields, fieldToEdit]);
 
   const services = useMemo(
     () => ({
@@ -123,20 +127,37 @@ export const FieldEditorFlyoutContentContainer = ({
 
   const updateRuntimeField = useCallback(
     (updatedField: Field): DataViewField[] => {
-      const nameHasChanged = Boolean(field) && field!.name !== updatedField.name;
-      const typeHasChanged = Boolean(field) && field!.type !== updatedField.type;
+      const nameHasChanged = Boolean(fieldToEdit) && fieldToEdit!.name !== updatedField.name;
+      const typeHasChanged = Boolean(fieldToEdit) && fieldToEdit!.type !== updatedField.type;
       const hasChangeToOrFromComposite =
-        typeHasChanged && (field!.type === 'composite' || updatedField.type === 'composite');
+        typeHasChanged && (fieldToEdit!.type === 'composite' || updatedField.type === 'composite');
 
-      if (nameHasChanged || hasChangeToOrFromComposite) {
-        // Rename an existing runtime field or the type has changed from being a "composite"
-        // to any other type or from any other type to "composite"
-        dataView.removeRuntimeField(field!.name);
+      const { script } = updatedField;
+
+      if (fieldTypeToProcess === 'runtime') {
+        try {
+          usageCollection.reportUiCounter(pluginName, METRIC_TYPE.COUNT, 'save_runtime');
+          // eslint-disable-next-line no-empty
+        } catch {}
+        // rename an existing runtime field
+        if (nameHasChanged || hasChangeToOrFromComposite) {
+          dataView.removeRuntimeField(fieldToEdit!.name);
+        }
+
+        dataView.addRuntimeField(updatedField.name, {
+          type: updatedField.type as RuntimeType,
+          script,
+        });
+      } else {
+        try {
+          usageCollection.reportUiCounter(pluginName, METRIC_TYPE.COUNT, 'save_concrete');
+          // eslint-disable-next-line no-empty
+        } catch {}
       }
 
       return dataView.addRuntimeField(updatedField.name, updatedField);
     },
-    [field, dataView]
+    [fieldToEdit, dataView, fieldTypeToProcess, usageCollection]
   );
 
   const updateConcreteField = useCallback(
@@ -230,14 +251,15 @@ export const FieldEditorFlyoutContentContainer = ({
       fieldFormats={fieldFormats}
       namesNotAllowed={namesNotAllowed}
       existingConcreteFields={existingConcreteFields}
-      field={field}
+      field={fieldToEdit}
     >
       <FieldPreviewProvider>
         <FieldEditorFlyoutContent
           onSave={saveField}
           onCancel={onCancel}
           onMounted={onMounted}
-          field={field}
+          fieldToCreate={fieldToCreate}
+          fieldToEdit={deserializeField(dataView, fieldToEdit)}
           isSavingField={isSaving}
         />
       </FieldPreviewProvider>
