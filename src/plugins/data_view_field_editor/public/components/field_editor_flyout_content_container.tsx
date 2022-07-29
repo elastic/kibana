@@ -22,7 +22,7 @@ import {
 } from '../shared_imports';
 import type { Field, PluginStart, InternalFieldType } from '../types';
 import { pluginName } from '../constants';
-import { getLinks, ApiService, deserializeField } from '../lib';
+import { getLinks, ApiService } from '../lib';
 import {
   FieldEditorFlyoutContent,
   Props as FieldEditorFlyoutContentProps,
@@ -43,7 +43,7 @@ export interface Props {
   /** The Kibana field type of the field to create or edit (default: "runtime") */
   fieldTypeToProcess: InternalFieldType;
   /** Optional field to edit */
-  fieldToEdit?: DataViewField;
+  fieldToEdit?: Field;
   /** Optional initial configuration for new field */
   fieldToCreate?: Field;
   /** Services */
@@ -260,7 +260,7 @@ export const FieldEditorFlyoutContentContainer = ({
           onCancel={onCancel}
           onMounted={onMounted}
           fieldToCreate={fieldToCreate}
-          fieldToEdit={deserializeField(dataView, fieldToEdit)}
+          fieldToEdit={fieldToEdit}
           isSavingField={isSaving}
         />
       </FieldPreviewProvider>

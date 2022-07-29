@@ -125,8 +125,6 @@ export const getFieldEditorOpener =
         ? dataView.getFieldByName(fieldNameToEdit) || getRuntimeField(fieldNameToEdit)
         : undefined;
 
-      console.log('loaded field', dataViewField);
-
       if (fieldNameToEdit && !dataViewField) {
         const err = i18n.translate('indexPatternFieldEditor.noSuchFieldName', {
           defaultMessage: "Field named '{fieldName}' not found on index pattern",
@@ -137,7 +135,6 @@ export const getFieldEditorOpener =
       }
 
       const isNewRuntimeField = !fieldNameToEdit;
-      console.log('IS RUNTIME FIELD', dataViewField);
       const isExistingRuntimeField =
         dataViewField &&
         dataViewField.runtimeField &&
@@ -154,7 +151,6 @@ export const getFieldEditorOpener =
         isNewRuntimeField || isExistingRuntimeField ? 'runtime' : 'concrete';
 
       let field: Field | undefined;
-      console.log('HERE HERE');
       if (dataViewField) {
         if (isExistingRuntimeField && dataViewField.runtimeField!.type === 'composite') {
           // We are editing a composite runtime **subField**.
@@ -191,7 +187,7 @@ export const getFieldEditorOpener =
               onCancel={closeEditor}
               onMounted={onMounted}
               docLinks={docLinks}
-              fieldToEdit={dataViewField}
+              fieldToEdit={field}
               fieldToCreate={fieldToCreate}
               fieldTypeToProcess={fieldTypeToProcess}
               dataView={dataView}
