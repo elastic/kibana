@@ -6,24 +6,21 @@
  * Side Public License, v 1.
  */
 
-import {run} from '@kbn/dev-cli-runner';
+import { run } from '@kbn/dev-cli-runner';
 // import { createFlagError, createFailError } from '@kbn/dev-cli-errors';
-import {REPO_ROOT} from '@kbn/utils';
-import yaml from 'js-yaml';
-import {readFileSync} from 'fs';
-import {resolve} from 'path';
-import {getPrChanges} from '../../../.buildkite/pipeline-utils';
-import {filter, from} from 'rxjs';
-import {pluck} from 'rxjs/operators';
+import { getPrChanges } from '../../../.buildkite/pipeline-utils';
+import { filter, from, mergeMap } from 'rxjs';
+import { pluck } from 'rxjs/operators';
+import { testDirectoryRegexes, isTest } from './helpers';
+import { findConfigFile } from './find_config_file';
 
 const flags = {
   string: ['path'],
+  boolean: ['mock'],
   help: `
 --path             Required, ...
         `,
 };
-
-const resolveRoot = resolve.bind(null, REPO_ROOT);
 
 export function runCheckOwnTestsRanCli() {
   run(process, {
@@ -36,39 +33,31 @@ blah blah blah
   });
 }
 
-const roots = () =>
-  yaml
-    .load(
-      readFileSync(
-        resolveRoot('src/dev/own_tests_ran/test_roots.yml'), 'utf8'
-      )
-    )
-    .general;
-
-const isTest = (regexes) => (filePath) =>
-  regexes
-    .some((re) => re.test(filePath));
-
-async function process({flags, log}) {
+async function process({ flags, log }) {
   log.info('\n### Running runCheckOwnTestsRanCli()');
 
-  console.log(`\n### flags: \n${JSON.stringify(flags, null, 2)}`);
-
-  // TODO-TRE: Next, we need access to the log output, from ci.
-  // TODO-TRE: We prolly can use the fileNames above, find the test(s) file(s)
-  // TODO-TRE: , find their configs and use the configs and see where they are used in
-  // TODO-TRE: , the "pick test group run order" output.
-  // TODO-TRE: From there, we should be able to stream through the ouput.
-  // TODO-TRE: This link mentions it's possible: https://buildkite.com/docs/apis/rest-api/jobs#get-a-jobs-log-output
-
-  const $ = from(await getPrChanges());
-  $.pipe(
-    pluck('filename'),
-    filter(isTest(roots().map((x) => new RegExp(x)))))
+  from(flags.mock ? mockData() : await getPrChanges())
+    .pipe(
+      pluck('filename'),
+      filter(isTest(testDirectoryRegexes('src/dev/own_tests_ran/test_roots.yml'))),
+      mergeMap(async (x) => await findConfigFile(x))
+    )
     .subscribe({
       next: (x) => console.log(`\n### x2: \n\t${x}`),
       // next: noop,
       error: (x) => console.error(`\n### x: \n\t${x}`),
       complete: () => console.log('\n### Complete'),
     });
+}
+
+function mockData() {
+  return [
+    {
+      filename: 'test/functional/apps/context/classic/_filters.ts',
+    },
+    {
+      filename:
+        'x-pack/test/functional/apps/advanced_settings/feature_controls/advanced_settings_security.ts',
+    },
+  ];
 }
