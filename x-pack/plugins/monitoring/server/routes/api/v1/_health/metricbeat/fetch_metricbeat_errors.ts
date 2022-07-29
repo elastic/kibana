@@ -57,6 +57,7 @@ export const fetchMetricbeatErrors = async ({
       },
     };
   } catch (err) {
+    logger.error(`fetchMetricbeatErrors: failed to fetch:\n${err.stack}`);
     return {
       execution: {
         timedOut: false,
