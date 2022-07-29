@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { validateKibanaJsonc } from './parse_kibana_jsonc';
+import { validateKibanaManifest } from './parse_kibana_manifest';
 
 const BASE_FIELDS = {
   id: '@kbn/foo',
@@ -15,16 +15,16 @@ const BASE_FIELDS = {
   runtimeDeps: [],
 };
 
-describe('validateKibanaJsonc', () => {
+describe('validateKibanaManifest', () => {
   it('requires valid type', () => {
-    expect(() => validateKibanaJsonc({})).toThrowErrorMatchingInlineSnapshot(
+    expect(() => validateKibanaManifest({})).toThrowErrorMatchingInlineSnapshot(
       `"invalid package \\"type\\", options are [functional-tests, plugin-browser, plugin-server, shared-browser, shared-common, shared-server, test-helper]"`
     );
   });
 
   it('requires valid id', () => {
     expect(() =>
-      validateKibanaJsonc({
+      validateKibanaManifest({
         type: 'plugin-browser',
       })
     ).toThrowErrorMatchingInlineSnapshot(
@@ -34,7 +34,7 @@ describe('validateKibanaJsonc', () => {
 
   it('requires valid owner', () => {
     expect(() =>
-      validateKibanaJsonc({
+      validateKibanaManifest({
         type: 'plugin-browser',
         id: '@kbn/foo',
       })
@@ -45,7 +45,7 @@ describe('validateKibanaJsonc', () => {
 
   it('requires valid typeDeps', () => {
     expect(() =>
-      validateKibanaJsonc({
+      validateKibanaManifest({
         type: 'plugin-browser',
         id: '@kbn/foo',
         owner: '@elastic/kibana-operations',
@@ -53,7 +53,7 @@ describe('validateKibanaJsonc', () => {
     ).toThrowErrorMatchingInlineSnapshot(`"invalid \\"typeDeps\\", must be an array of strings"`);
 
     expect(() =>
-      validateKibanaJsonc({
+      validateKibanaManifest({
         type: 'plugin-browser',
         id: '@kbn/foo',
         owner: '@elastic/kibana-operations',
@@ -62,7 +62,7 @@ describe('validateKibanaJsonc', () => {
     ).toThrowErrorMatchingInlineSnapshot(`"invalid \\"typeDeps\\", must be an array of strings"`);
 
     expect(() =>
-      validateKibanaJsonc({
+      validateKibanaManifest({
         type: 'plugin-browser',
         id: '@kbn/foo',
         owner: '@elastic/kibana-operations',
@@ -73,7 +73,7 @@ describe('validateKibanaJsonc', () => {
 
   it('requires valid runtimeDeps', () => {
     expect(() =>
-      validateKibanaJsonc({
+      validateKibanaManifest({
         type: 'plugin-browser',
         id: '@kbn/foo',
         owner: '@elastic/kibana-operations',
@@ -84,7 +84,7 @@ describe('validateKibanaJsonc', () => {
     );
 
     expect(() =>
-      validateKibanaJsonc({
+      validateKibanaManifest({
         type: 'plugin-browser',
         id: '@kbn/foo',
         owner: '@elastic/kibana-operations',
@@ -96,7 +96,7 @@ describe('validateKibanaJsonc', () => {
     );
 
     expect(() =>
-      validateKibanaJsonc({
+      validateKibanaManifest({
         type: 'plugin-browser',
         id: '@kbn/foo',
         owner: '@elastic/kibana-operations',
@@ -110,7 +110,7 @@ describe('validateKibanaJsonc', () => {
 
   it('validates base types', () => {
     expect(
-      validateKibanaJsonc({
+      validateKibanaManifest({
         type: 'shared-server',
         ...BASE_FIELDS,
       })
@@ -125,7 +125,7 @@ describe('validateKibanaJsonc', () => {
       }
     `);
     expect(
-      validateKibanaJsonc({
+      validateKibanaManifest({
         type: 'functional-tests',
         ...BASE_FIELDS,
       })
@@ -140,7 +140,7 @@ describe('validateKibanaJsonc', () => {
       }
     `);
     expect(
-      validateKibanaJsonc({
+      validateKibanaManifest({
         type: 'test-helper',
         ...BASE_FIELDS,
       })
@@ -159,7 +159,7 @@ describe('validateKibanaJsonc', () => {
   describe('plugin-* types', () => {
     it('requires valid plugin for plugin-* types', () => {
       expect(() =>
-        validateKibanaJsonc({
+        validateKibanaManifest({
           type: 'plugin-browser',
           id: '@kbn/foo',
           owner: '@elastic/kibana-operations',
@@ -171,7 +171,7 @@ describe('validateKibanaJsonc', () => {
 
     it('requires "id" in plugins', () => {
       expect(() =>
-        validateKibanaJsonc({
+        validateKibanaManifest({
           type: 'plugin-browser',
           id: '@kbn/foo',
           owner: '@elastic/kibana-operations',
@@ -184,7 +184,7 @@ describe('validateKibanaJsonc', () => {
       );
 
       expect(() =>
-        validateKibanaJsonc({
+        validateKibanaManifest({
           type: 'plugin-browser',
           id: '@kbn/foo',
           owner: '@elastic/kibana-operations',
@@ -199,7 +199,7 @@ describe('validateKibanaJsonc', () => {
       );
 
       expect(
-        validateKibanaJsonc({
+        validateKibanaManifest({
           type: 'plugin-browser',
           id: '@kbn/foo',
           owner: '@elastic/kibana-operations',
