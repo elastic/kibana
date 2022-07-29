@@ -16,10 +16,10 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-
   describe('fleet_agent_policies', () => {
     skipIfNoDockerRegistry(providerContext);
     describe('POST /api/fleet/agent_policies', () => {
+      let systemPkgVersion;
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
         await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
@@ -27,6 +27,9 @@ export default function (providerContext: FtrProviderContext) {
       setupFleetAndAgents(providerContext);
       let packagePoliciesToDeleteIds: string[] = [];
       after(async () => {
+        if (systemPkgVersion) {
+          await supertest.delete(`/api/fleet/epm/packages/system-${systemPkgVersion}`);
+        }
         if (packagePoliciesToDeleteIds.length > 0) {
           await kibanaServer.savedObjects.bulkDelete({
             objects: packagePoliciesToDeleteIds.map((id) => ({
@@ -175,10 +178,14 @@ export default function (providerContext: FtrProviderContext) {
         // load a bunch of fake system integration policy
         const policyIds = new Array(10).fill(null).map((_, i) => `package-policy-test-${i}`);
         packagePoliciesToDeleteIds = packagePoliciesToDeleteIds.concat(policyIds);
-
+        const getPkRes = await supertest
+          .get(`/api/fleet/epm/packages/system`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+        systemPkgVersion = getPkRes.body.item.version;
         // we must first force install the system package to override package verification error on policy create
         const installPromise = supertest
-          .post(`/api/fleet/epm/packages/system-1.19.0`)
+          .post(`/api/fleet/epm/packages/system-${systemPkgVersion}`)
           .set('kbn-xsrf', 'xxxx')
           .send({ force: true })
           .expect(200);
