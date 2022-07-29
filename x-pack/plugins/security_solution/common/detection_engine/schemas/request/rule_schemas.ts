@@ -123,6 +123,12 @@ export const responseSchema = <
   optionalFields: Optional,
   defaultableFields: Defaultable
 ) => {
+  // This bit of logic is to force all fields to be accounted for in conversions from the internal
+  // rule schema to the response schema. Rather than use `t.partial`, which makes each field optional,
+  // we make each field required but possibly undefined. The result is that if a field is forgotten in
+  // the conversion from internal schema to response schema TS will report an error. If we just used t.partial
+  // instead, then optional fields can be accidentally omitted from the conversion - and any actual values
+  // in those fields internally will be stripped in the response.
   const optionalWithUndefined = Object.keys(optionalFields).reduce<t.Props>((acc, key) => {
     acc[key] = t.union([optionalFields[key], t.undefined]);
     return acc;
