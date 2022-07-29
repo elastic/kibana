@@ -73,9 +73,10 @@ describe('ruleParamsModifier', () => {
       expect(editedRuleParams).toHaveProperty('index', ['initial-index-*']);
     });
 
-    test('should return undefined index patterns on remove action if it was not defined in rule', () => {
+    test("should return undefined index patterns on remove action if rule has dataViewId only", () => {
+      const testDataViewId = 'test-data-view-id';
       const editedRuleParams = ruleParamsModifier(
-        { } as RuleAlertType['params'],
+        { dataViewId:  testDataViewId} as RuleAlertType['params'],
         [
           {
             type: BulkActionEditType.delete_index_patterns,
@@ -84,6 +85,7 @@ describe('ruleParamsModifier', () => {
         ]
       );
       expect(editedRuleParams).toHaveProperty('index', undefined);
+      expect(editedRuleParams).toHaveProperty('dataViewId',  testDataViewId );
     });
 
     test('should rewrite index pattern in rule', () => {
