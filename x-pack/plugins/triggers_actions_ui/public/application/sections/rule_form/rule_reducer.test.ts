@@ -7,7 +7,7 @@
 
 import { ruleReducer } from './rule_reducer';
 import { Rule } from '../../../types';
-import { NotifyWhen, SummaryOf, ThrottleUnit } from '@kbn/alerting-plugin/common';
+import { NotifyWhen } from '@kbn/alerting-plugin/common';
 
 describe('rule reducer', () => {
   let initialRule: Rule;
@@ -113,9 +113,10 @@ describe('rule reducer', () => {
       params: {},
       notifyWhen: NotifyWhen.ONCE,
       isSummary: false,
-      actionThrottle: 1,
-      actionThrottleUnit: ThrottleUnit.HOUR,
-      summaryOf: SummaryOf.SINGLE_RUN,
+      actionThrottle: null,
+      actionThrottleUnit: null,
+      summaryOf: null,
+      lastTriggerDate: null,
     });
     const updatedRule = ruleReducer(
       { rule: initialRule },
@@ -158,9 +159,10 @@ describe('rule reducer', () => {
       },
       notifyWhen: NotifyWhen.ONCE,
       isSummary: false,
-      actionThrottle: 1,
-      actionThrottleUnit: ThrottleUnit.HOUR,
-      summaryOf: SummaryOf.SINGLE_RUN,
+      actionThrottle: null,
+      actionThrottleUnit: null,
+      summaryOf: null,
+      lastTriggerDate: null,
     });
     const updatedRule = ruleReducer(
       { rule: initialRule },
@@ -184,9 +186,10 @@ describe('rule reducer', () => {
       params: {},
       notifyWhen: NotifyWhen.ONCE,
       isSummary: false,
-      actionThrottle: 1,
-      actionThrottleUnit: ThrottleUnit.HOUR,
-      summaryOf: SummaryOf.SINGLE_RUN,
+      actionThrottle: null,
+      actionThrottleUnit: null,
+      summaryOf: null,
+      lastTriggerDate: null,
     });
     const updatedRule = ruleReducer(
       { rule: initialRule },

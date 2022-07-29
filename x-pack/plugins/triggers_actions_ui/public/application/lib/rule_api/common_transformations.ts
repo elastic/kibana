@@ -18,6 +18,7 @@ const transformAction: RewriteRequestCase<RuleAction> = ({
   notify_when: notifyWhen,
   action_throttle: actionThrottle,
   action_throttle_unit: actionThrottleUnit,
+  last_trigger_date: lastTriggerDate,
 }) => ({
   group,
   id,
@@ -28,6 +29,7 @@ const transformAction: RewriteRequestCase<RuleAction> = ({
   notifyWhen,
   actionThrottle,
   actionThrottleUnit,
+  lastTriggerDate,
 });
 
 const transformExecutionStatus: RewriteRequestCase<RuleExecutionStatus> = ({

@@ -12,7 +12,7 @@ import { act } from 'react-dom/test-utils';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { RuleTableItem, RuleTypeModel } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
-import { NotifyWhen, SummaryOf, ThrottleUnit } from '@kbn/alerting-plugin/common';
+import { NotifyWhen } from '@kbn/alerting-plugin/common';
 jest.mock('../../../../common/lib/kibana');
 
 const onRuleChanged = jest.fn();
@@ -68,9 +68,10 @@ describe('CollapsedItemActions', () => {
           params: { message: 'test' },
           notifyWhen: NotifyWhen.ONCE,
           isSummary: false,
-          actionThrottle: 1,
-          actionThrottleUnit: ThrottleUnit.HOUR,
-          summaryOf: SummaryOf.SINGLE_RUN,
+          actionThrottle: null,
+          actionThrottleUnit: null,
+          summaryOf: null,
+          lastTriggerDate: null,
         },
       ],
       params: { name: 'test rule type name' },

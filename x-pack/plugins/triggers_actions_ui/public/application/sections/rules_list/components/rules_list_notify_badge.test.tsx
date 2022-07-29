@@ -13,7 +13,7 @@ import moment from 'moment';
 import { RuleTableItem } from '../../../../types';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { RulesListNotifyBadge } from './rules_list_notify_badge';
-import { NotifyWhen, SummaryOf, ThrottleUnit } from '@kbn/alerting-plugin/common';
+import { NotifyWhen } from '@kbn/alerting-plugin/common';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -40,9 +40,10 @@ const getRule = (overrides = {}): RuleTableItem => ({
       params: { message: 'test' },
       notifyWhen: NotifyWhen.ONCE,
       isSummary: false,
-      actionThrottle: 1,
-      actionThrottleUnit: ThrottleUnit.HOUR,
-      summaryOf: SummaryOf.SINGLE_RUN,
+      actionThrottle: null,
+      actionThrottleUnit: null,
+      summaryOf: null,
+      lastTriggerDate: null,
     },
   ],
   params: { name: 'test rule type name' },

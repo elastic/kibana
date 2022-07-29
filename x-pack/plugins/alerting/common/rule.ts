@@ -89,11 +89,11 @@ export interface RuleAction {
   params: RuleActionParams;
   ref?: string;
   isSummary: boolean;
-  summaryOf: SummaryOf;
+  summaryOf: SummaryOf | null;
   notifyWhen: NotifyWhen;
-  actionThrottle: number;
-  actionThrottleUnit: ThrottleUnit;
-  lastTriggerDate: string;
+  actionThrottle: number | null;
+  actionThrottleUnit: ThrottleUnit | null;
+  lastTriggerDate: string | null;
 }
 
 export interface RuleAggregations {

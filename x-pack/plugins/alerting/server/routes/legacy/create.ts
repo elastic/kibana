@@ -40,10 +40,11 @@ export const bodySchema = schema.object({
       actionTypeId: schema.maybe(schema.string()),
       params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
       is_summary: schema.boolean(),
-      summary_of: schema.string(),
-      action_throttle: schema.number(),
-      action_throttle_unit: schema.string(),
+      summary_of: schema.nullable(schema.string()),
+      action_throttle: schema.nullable(schema.number()),
+      action_throttle_unit: schema.nullable(schema.string()),
       notify_when: schema.string(),
+      last_trigger_date: schema.nullable(schema.string()),
     }),
     { defaultValue: [] }
   ),
@@ -95,6 +96,7 @@ export const createAlertRoute = ({ router, licenseState, usageCounter }: RouteOp
                   notifyWhen: act.notify_when as NotifyWhen,
                   actionThrottle: act.action_throttle as number,
                   actionThrottleUnit: act.action_throttle_unit as ThrottleUnit,
+                  lastTriggerDate: act.last_trigger_date as string,
                 };
               }),
             },

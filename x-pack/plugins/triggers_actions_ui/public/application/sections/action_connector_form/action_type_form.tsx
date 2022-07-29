@@ -353,7 +353,7 @@ export const ActionTypeForm = ({
               <EuiFlexItem grow={2}>
                 <EuiSelect
                   prepend="Of"
-                  value={summaryOf}
+                  value={summaryOf as string}
                   options={[
                     {
                       value: SummaryOf.TIME_SPAN,
@@ -375,7 +375,7 @@ export const ActionTypeForm = ({
                 <EuiFieldNumber
                   fullWidth
                   min={1}
-                  value={actionThrottle}
+                  value={actionThrottle as number}
                   name="throttle"
                   data-test-subj="throttleInput"
                   prepend="Every"
@@ -387,7 +387,7 @@ export const ActionTypeForm = ({
               <EuiFlexItem grow={1}>
                 <EuiSelect
                   data-test-subj="throttleUnitInput"
-                  value={actionThrottleUnit}
+                  value={actionThrottleUnit as string}
                   options={[
                     {
                       text: 'Seconds',

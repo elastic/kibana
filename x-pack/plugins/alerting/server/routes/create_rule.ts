@@ -42,10 +42,11 @@ export const bodySchema = schema.object({
       id: schema.string(),
       params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
       is_summary: schema.boolean(),
-      summary_of: schema.string(),
-      action_throttle: schema.number(),
-      action_throttle_unit: schema.string(),
+      summary_of: schema.nullable(schema.string()),
+      action_throttle: schema.nullable(schema.number()),
+      action_throttle_unit: schema.nullable(schema.string()),
       notify_when: schema.string(),
+      last_trigger_date: schema.nullable(schema.string()),
     }),
     { defaultValue: [] }
   ),
@@ -67,6 +68,7 @@ const rewriteBodyReq: RewriteRequestCase<CreateOptions<RuleTypeParams>['data']> 
     notifyWhen: action.notify_when,
     actionThrottle: action.action_throttle,
     actionThrottleUnit: action.action_throttle_unit,
+    lastTriggerDate: null,
   })),
 });
 const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
@@ -121,6 +123,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
       action_throttle: actionThrottle,
       action_throttle_unit: actionThrottleUnit,
       notify_when: notifyWhen,
+      last_trigger_date: null,
     })
   ),
 });
@@ -166,6 +169,7 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
                       notify_when: act.notify_when as NotifyWhen,
                       action_throttle: act.action_throttle as number,
                       action_throttle_unit: act.action_throttle_unit as ThrottleUnit,
+                      last_trigger_date: null,
                     };
                   }),
                 }),

@@ -19,13 +19,7 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import {
-  ActionGroup,
-  NotifyWhen,
-  RuleActionParam,
-  SummaryOf,
-  ThrottleUnit,
-} from '@kbn/alerting-plugin/common';
+import { ActionGroup, NotifyWhen, RuleActionParam } from '@kbn/alerting-plugin/common';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
 import {
   ActionConnector,
@@ -224,11 +218,12 @@ export const ActionForm = ({
         actionTypeId: actionTypeModel.id,
         group: defaultActionGroupId,
         params: {},
-        isSummary: false,
-        summaryOf: SummaryOf.SINGLE_RUN,
         notifyWhen: NotifyWhen.ONCE,
-        actionThrottle: 1,
-        actionThrottleUnit: ThrottleUnit.HOUR,
+        isSummary: false,
+        actionThrottle: null,
+        actionThrottleUnit: null,
+        summaryOf: null,
+        lastTriggerDate: null,
       });
       setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1);
     }
@@ -240,11 +235,12 @@ export const ActionForm = ({
         actionTypeId: actionTypeModel.id,
         group: defaultActionGroupId,
         params: {},
-        isSummary: false,
-        summaryOf: SummaryOf.SINGLE_RUN,
         notifyWhen: NotifyWhen.ONCE,
-        actionThrottle: 1,
-        actionThrottleUnit: ThrottleUnit.HOUR,
+        isSummary: false,
+        actionThrottle: null,
+        actionThrottleUnit: null,
+        summaryOf: null,
+        lastTriggerDate: null,
       });
       setActionIdByIndex(actions.length.toString(), actions.length - 1);
       setEmptyActionsIds([...emptyActionsIds, actions.length.toString()]);
