@@ -37,11 +37,6 @@ const ParamsSchema = schema.object({
     ],
     { defaultValue: 'info' }
   ),
-  isSummary: schema.boolean(),
-  notifyWhen: schema.string(),
-  actionThrottle: schema.number(),
-  actionThrottleUnit: schema.string(),
-  lastExecutionDate: schema.string(),
 });
 
 export const ActionTypeId = '.server-log';

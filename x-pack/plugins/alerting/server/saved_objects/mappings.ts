@@ -52,6 +52,21 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
         actionTypeId: {
           type: 'keyword',
         },
+        isSummary: {
+          type: 'boolean',
+        },
+        summaryOf: {
+          type: 'keyword',
+        },
+        notifyWhen: {
+          type: 'keyword',
+        },
+        actionThrottle: {
+          type: 'integer',
+        },
+        actionThrottleUnit: {
+          type: 'keyword',
+        },
         params: {
           enabled: false,
           type: 'object',

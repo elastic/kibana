@@ -11,10 +11,11 @@ import { validateDurationSchema } from '../../lib';
 import { handleDisabledApiKeysError } from '../lib/error_handler';
 import {
   SanitizedRule,
-  RuleNotifyWhenType,
   RuleTypeParams,
   LEGACY_BASE_ALERT_API_PATH,
-  validateNotifyWhenType,
+  SummaryOf,
+  NotifyWhen,
+  ThrottleUnit,
 } from '../../types';
 import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
 import { RouteOptions } from '..';
@@ -38,10 +39,14 @@ export const bodySchema = schema.object({
       id: schema.string(),
       actionTypeId: schema.maybe(schema.string()),
       params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+      is_summary: schema.boolean(),
+      summary_of: schema.string(),
+      action_throttle: schema.number(),
+      action_throttle_unit: schema.string(),
+      notify_when: schema.string(),
     }),
     { defaultValue: [] }
   ),
-  notifyWhen: schema.nullable(schema.string({ validate: validateNotifyWhenType })),
 });
 
 export const createAlertRoute = ({ router, licenseState, usageCounter }: RouteOptions) => {
@@ -67,7 +72,6 @@ export const createAlertRoute = ({ router, licenseState, usageCounter }: RouteOp
         const rulesClient = (await context.alerting).getRulesClient();
         const alert = req.body;
         const params = req.params;
-        const notifyWhen = alert?.notifyWhen ? (alert.notifyWhen as RuleNotifyWhenType) : null;
 
         trackLegacyRouteUsage('create', usageCounter);
 
@@ -79,7 +83,21 @@ export const createAlertRoute = ({ router, licenseState, usageCounter }: RouteOp
 
         try {
           const alertRes: SanitizedRule<RuleTypeParams> = await rulesClient.create<RuleTypeParams>({
-            data: { ...alert, notifyWhen },
+            data: {
+              ...alert,
+              actions: alert.actions.map((act) => {
+                return {
+                  group: act.group,
+                  params: act.params,
+                  id: act.id,
+                  isSummary: act.is_summary as boolean,
+                  summaryOf: act.summary_of as SummaryOf,
+                  notifyWhen: act.notify_when as NotifyWhen,
+                  actionThrottle: act.action_throttle as number,
+                  actionThrottleUnit: act.action_throttle_unit as ThrottleUnit,
+                };
+              }),
+            },
             options: { id: params?.id },
           });
           return res.ok({

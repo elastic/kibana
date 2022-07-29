@@ -93,6 +93,7 @@ export interface RuleAction {
   notifyWhen: NotifyWhen;
   actionThrottle: number;
   actionThrottleUnit: ThrottleUnit;
+  lastTriggerDate: string;
 }
 
 export interface RuleAggregations {

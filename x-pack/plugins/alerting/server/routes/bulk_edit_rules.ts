@@ -16,6 +16,11 @@ const ruleActionSchema = schema.object({
   group: schema.string(),
   id: schema.string(),
   params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+  isSummary: schema.boolean(),
+  summaryOf: schema.string(),
+  notifyWhen: schema.string(),
+  actionThrottle: schema.number(),
+  actionThrottleUnit: schema.string(),
 });
 
 const operationsSchema = schema.arrayOf(
@@ -43,17 +48,6 @@ const operationsSchema = schema.arrayOf(
       operation: schema.literal('set'),
       field: schema.literal('throttle'),
       value: schema.nullable(schema.string()),
-    }),
-    schema.object({
-      operation: schema.literal('set'),
-      field: schema.literal('notifyWhen'),
-      value: schema.nullable(
-        schema.oneOf([
-          schema.literal('onActionGroupChange'),
-          schema.literal('onActiveAlert'),
-          schema.literal('onThrottleInterval'),
-        ])
-      ),
     }),
   ]),
   { minSize: 1 }
@@ -89,6 +83,7 @@ const buildBulkEditRulesRoute = ({ licenseState, path, router }: BuildBulkEditRu
             const bulkEditResults = await rulesClient.bulkEdit({
               filter,
               ids: ids as string[],
+              // @ts-ignore
               operations,
             });
             return res.ok({

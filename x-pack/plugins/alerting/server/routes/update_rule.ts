@@ -20,6 +20,9 @@ import {
   AlertingRequestHandlerContext,
   BASE_ALERTING_API_PATH,
   PartialRule,
+  SummaryOf,
+  NotifyWhen,
+  ThrottleUnit,
 } from '../types';
 
 const paramSchema = schema.object({
@@ -56,7 +59,9 @@ const rewriteBodyReq: RewriteRequestCase<UpdateOptions<RuleTypeParams>> = (resul
     data: {
       ...rest,
       actions: actions.map((action) => ({
-        ...action,
+        group: action.group,
+        id: action.id,
+        params: action.params,
         isSummary: action.is_summary,
         summaryOf: action.summary_of,
         notifyWhen: action.notify_when,
@@ -66,6 +71,7 @@ const rewriteBodyReq: RewriteRequestCase<UpdateOptions<RuleTypeParams>> = (resul
     },
   };
 };
+
 const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
   actions,
   alertTypeId,
@@ -155,7 +161,21 @@ export const updateRuleRoute = (
               rewriteBodyReq({
                 id,
                 // @ts-ignore
-                data: rule,
+                data: {
+                  ...rule,
+                  actions: rule.actions.map((act) => {
+                    return {
+                      group: act.group,
+                      params: act.params,
+                      id: act.id,
+                      is_summary: act.is_summary as boolean,
+                      summary_of: act.summary_of as SummaryOf,
+                      notify_when: act.notify_when as NotifyWhen,
+                      action_throttle: act.action_throttle as number,
+                      action_throttle_unit: act.action_throttle_unit as ThrottleUnit,
+                    };
+                  }),
+                },
               })
             );
             return res.ok({

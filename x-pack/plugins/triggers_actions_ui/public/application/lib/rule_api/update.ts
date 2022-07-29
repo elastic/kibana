@@ -31,11 +31,11 @@ const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({ actions, ...
       group,
       id,
       params,
-      isSummary,
-      notifyWhen,
-      summaryOf,
-      actionThrottle,
-      actionThrottleUnit,
+      is_summary: isSummary,
+      notify_when: notifyWhen,
+      summary_of: summaryOf,
+      action_throttle: actionThrottle,
+      action_throttle_unit: actionThrottleUnit,
     })
   ),
 });

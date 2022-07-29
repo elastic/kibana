@@ -729,7 +729,6 @@ const BaseRule: SanitizedRule<{ bar: boolean }> = {
   tags: [],
   consumer: 'rule-consumer',
   throttle: null,
-  notifyWhen: null,
   muteAll: false,
   mutedInstanceIds: [],
   params: { bar: true },

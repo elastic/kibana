@@ -116,7 +116,7 @@ import { isSnoozeExpired } from '../lib';
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
 }
-type NormalizedAlertAction = Omit<RuleAction, 'actionTypeId'>;
+export type NormalizedAlertAction = Omit<RuleAction, 'actionTypeId'>;
 export type CreateAPIKeyResult =
   | { apiKeysEnabled: false }
   | { apiKeysEnabled: true; result: SecurityPluginGrantAPIKeyResult };
@@ -492,7 +492,6 @@ export class RulesClient {
         `Error creating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval.value}`
       );
     }
-
     // Extract saved object references for this rule
     const {
       references,
@@ -2789,7 +2788,6 @@ export class RulesClient {
     if (actions.length === 0) {
       return;
     }
-
     // check for actions using connectors with missing secrets
     const actionsClient = await this.getActionsClient();
     const actionIds = [...new Set(actions.map((action) => action.id))];

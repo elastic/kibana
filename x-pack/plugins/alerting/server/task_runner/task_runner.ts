@@ -27,26 +27,27 @@ import {
   ErrorWithReason,
   executionStatusFromError,
   executionStatusFromState,
-  ruleExecutionStatusToRaw,
   isRuleSnoozed,
   processAlerts,
+  ruleExecutionStatusToRaw,
 } from '../lib';
 import {
-  RuleExecutionStatus,
-  RuleExecutionStatusErrorReasons,
+  ActionsCompletion,
+  ActionsStore,
   IntervalSchedule,
+  NotifyWhen,
   RawAlertInstance,
   RawRule,
   RawRuleExecutionStatus,
+  RuleAction,
+  RuleExecutionStatus,
+  RuleExecutionStatusErrorReasons,
   RuleMonitoring,
   RuleMonitoringHistory,
+  RulesClientApi,
   RuleTaskState,
   RuleTypeRegistry,
   SanitizedRule,
-  RulesClientApi,
-  RuleAction,
-  ActionsCompletion,
-  ActionsStore,
 } from '../types';
 import { asErr, asOk, map, promiseResult, resolveErr, Resultable } from '../lib/result_type';
 import { getExecutionDurationPercentiles, getExecutionSuccessRatio } from '../lib/monitoring';
@@ -57,20 +58,20 @@ import { partiallyUpdateAlert } from '../saved_objects';
 import {
   AlertInstanceContext,
   AlertInstanceState,
+  parseDuration,
   RuleTypeParams,
   RuleTypeState,
-  parseDuration,
   WithoutReservedActionGroups,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
-import { InMemoryMetrics, IN_MEMORY_METRICS } from '../monitoring';
+import { IN_MEMORY_METRICS, InMemoryMetrics } from '../monitoring';
 import {
   GenerateNewAndRecoveredAlertEventsParams,
   LogActiveAndRecoveredAlertsParams,
+  RuleRunResult,
   RuleTaskInstance,
   RuleTaskRunResult,
-  RuleRunResult,
   RuleTaskStateAndMetrics,
 } from './types';
 import { createWrappedScopedClusterClientFactory } from '../lib/wrap_scoped_cluster_client';
@@ -889,7 +890,7 @@ export class TaskRunner<
       actions.map(async (action) => {
         const enqueueOptions = {
           id: action.id,
-          params: { ...action.params, lastExecutionDate: new Date().toISOString() },
+          params: action.params,
           spaceId,
           apiKey: apiKey ?? null,
           consumer: this.ruleConsumer!,
@@ -956,22 +957,19 @@ export class TaskRunner<
     const actionsToTrigger: RuleAction[] = [];
 
     for (const action of rule.actions) {
-      if (action.group === actionGroup || action.params.isSummary) {
-        if (action.params.isSummary && actionsStore[action.ref!] !== undefined) {
+      if (action.group === actionGroup || action.isSummary) {
+        if (action.isSummary && actionsStore[action.ref!] !== undefined) {
           this.logger.info(
             `Action "${action.ref}" of "${ruleType.id}" is a summary and already in the list to trigger`
           );
           continue;
         }
         if (
-          action.params.notifyWhen === 'interval' &&
-          action.params.lastExecutionDate &&
+          action.notifyWhen === NotifyWhen.ON_INTERVAL &&
+          action.lastTriggerDate &&
           // @ts-ignore
-          moment(String(action.params.lastExecutionDate))
-            .add(
-              parseInt(String(action.params.actionThrottle), 10),
-              action.params.actionThrottleUnit
-            )
+          moment(String(action.lastTriggerDate))
+            .add(parseInt(String(action.actionThrottle), 10), action.actionThrottleUnit)
             .isAfter(moment())
         ) {
           this.logger.info(`Action "${action.ref}" of "${ruleType.id}/${rule.name}" is throttled`);
@@ -1008,7 +1006,7 @@ export class TaskRunner<
         ruleRunMetricsStore.incrementNumberOfTriggeredActions();
         ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(action.actionTypeId);
 
-        actionsStore[action.ref!] = { isSummary: Boolean(action.params.isSummary) };
+        actionsStore[action.ref!] = { isSummary: Boolean(action.isSummary) };
 
         actionsToTrigger.push({
           ...action,

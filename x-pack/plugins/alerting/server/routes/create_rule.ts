@@ -17,10 +17,11 @@ import {
 } from './lib';
 import {
   SanitizedRule,
-  validateNotifyWhenType,
   RuleTypeParams,
   BASE_ALERTING_API_PATH,
-  RuleNotifyWhenType,
+  SummaryOf,
+  NotifyWhen,
+  ThrottleUnit,
 } from '../types';
 import { RouteOptions } from '.';
 
@@ -40,20 +41,33 @@ export const bodySchema = schema.object({
       group: schema.string(),
       id: schema.string(),
       params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+      is_summary: schema.boolean(),
+      summary_of: schema.string(),
+      action_throttle: schema.number(),
+      action_throttle_unit: schema.string(),
+      notify_when: schema.string(),
     }),
     { defaultValue: [] }
   ),
-  notify_when: schema.string({ validate: validateNotifyWhenType }),
 });
 
 const rewriteBodyReq: RewriteRequestCase<CreateOptions<RuleTypeParams>['data']> = ({
   rule_type_id: alertTypeId,
-  notify_when: notifyWhen,
+  actions,
   ...rest
 }) => ({
   ...rest,
   alertTypeId,
-  notifyWhen,
+  actions: actions.map((action) => ({
+    group: action.group,
+    id: action.id,
+    params: action.params,
+    isSummary: action.is_summary,
+    summaryOf: action.summary_of,
+    notifyWhen: action.notify_when,
+    actionThrottle: action.action_throttle,
+    actionThrottleUnit: action.action_throttle_unit,
+  })),
 });
 const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
   actions,
@@ -64,7 +78,6 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
   createdAt,
   updatedAt,
   apiKeyOwner,
-  notifyWhen,
   muteAll,
   mutedInstanceIds,
   snoozeSchedule,
@@ -80,7 +93,6 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
   created_at: createdAt,
   updated_at: updatedAt,
   api_key_owner: apiKeyOwner,
-  notify_when: notifyWhen,
   mute_all: muteAll,
   muted_alert_ids: mutedInstanceIds,
   execution_status: {
@@ -88,12 +100,29 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
     last_execution_date: lastExecutionDate,
     last_duration: lastDuration,
   },
-  actions: actions.map(({ group, id, actionTypeId, params }) => ({
-    group,
-    id,
-    params,
-    connector_type_id: actionTypeId,
-  })),
+  actions: actions.map(
+    ({
+      group,
+      id,
+      actionTypeId,
+      params,
+      isSummary,
+      summaryOf,
+      actionThrottle,
+      actionThrottleUnit,
+      notifyWhen,
+    }) => ({
+      group,
+      id,
+      params,
+      connector_type_id: actionTypeId,
+      is_summary: isSummary,
+      summary_of: summaryOf,
+      action_throttle: actionThrottle,
+      action_throttle_unit: actionThrottleUnit,
+      notify_when: notifyWhen,
+    })
+  ),
 });
 
 export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOptions) => {
@@ -127,7 +156,18 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
               await rulesClient.create<RuleTypeParams>({
                 data: rewriteBodyReq({
                   ...rule,
-                  notify_when: rule.notify_when as RuleNotifyWhenType,
+                  actions: rule.actions.map((act) => {
+                    return {
+                      group: act.group,
+                      params: act.params,
+                      id: act.id,
+                      is_summary: act.is_summary as boolean,
+                      summary_of: act.summary_of as SummaryOf,
+                      notify_when: act.notify_when as NotifyWhen,
+                      action_throttle: act.action_throttle as number,
+                      action_throttle_unit: act.action_throttle_unit as ThrottleUnit,
+                    };
+                  }),
                 }),
                 options: { id: params?.id },
               });
