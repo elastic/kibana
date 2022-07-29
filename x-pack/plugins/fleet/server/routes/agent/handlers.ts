@@ -43,6 +43,8 @@ import type {
 import { defaultIngestErrorHandler } from '../../errors';
 import * as AgentService from '../../services/agents';
 
+import { setCachedFile, getCachedVersionFile } from './utils';
+
 export const getAgentHandler: RequestHandler<
   TypeOf<typeof GetOneAgentRequestSchema.params>
 > = async (context, request, response) => {
@@ -373,20 +375,4 @@ export const getAvailableVersionsHandler: RequestHandler = async (context, reque
   } else {
     return response.ok({ body: {} });
   }
-};
-
-// TODO: Move below stuff to separate file
-type CacheKey = string;
-const versionFileCache: Map<CacheKey, string> = new Map();
-
-export const getCachedVersionFile = (key: CacheKey) => {
-  return versionFileCache.get(key);
-};
-
-export const setCachedFile = (key: CacheKey, fileContent: string) => {
-  return versionFileCache.set(key, fileContent);
-};
-
-export const clearVersionFileCache = (key: CacheKey) => {
-  versionFileCache.delete(key);
 };
