@@ -47,7 +47,7 @@ export function ResetSessionPage({
             defaultMessage="Log in as different user"
           />
         </EuiButton>,
-        <EuiButtonEmpty id="goBackButton">
+        <EuiButtonEmpty id="goBackButton" data-test-subj="GoBackButton">
           <FormattedMessage
             id="xpack.security.resetSession.goBackButtonLabel"
             defaultMessage="Go back"
