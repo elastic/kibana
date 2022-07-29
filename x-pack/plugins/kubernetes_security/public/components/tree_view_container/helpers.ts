@@ -5,15 +5,22 @@
  * 2.0.
  */
 
-import { DEFAULT_QUERY } from '../../../common/constants';
+import {
+  CLOUD_INSTANCE_NAME,
+  CONTAINER_IMAGE_NAME,
+  DEFAULT_QUERY,
+  ORCHESTRATOR_CLUSTER_ID,
+  ORCHESTRATOR_NAMESPACE,
+  ORCHESTRATOR_RESOURCE_ID,
+} from '../../../common/constants';
 import { KubernetesCollection, QueryDslQueryContainerBool, TreeNavSelection } from '../../types';
 
 export const KUBERNETES_COLLECTION_FIELDS = {
-  [KubernetesCollection.cluster]: 'orchestrator.cluster.name',
-  [KubernetesCollection.namespace]: 'orchestrator.namespace',
-  [KubernetesCollection.node]: 'cloud.instance.name',
-  [KubernetesCollection.pod]: 'orchestrator.resource.name',
-  [KubernetesCollection.containerImage]: 'container.image.name',
+  [KubernetesCollection.cluster]: ORCHESTRATOR_CLUSTER_ID,
+  [KubernetesCollection.namespace]: ORCHESTRATOR_NAMESPACE,
+  [KubernetesCollection.node]: CLOUD_INSTANCE_NAME,
+  [KubernetesCollection.pod]: ORCHESTRATOR_RESOURCE_ID,
+  [KubernetesCollection.containerImage]: CONTAINER_IMAGE_NAME,
 };
 
 export const addTreeNavSelectionToFilterQuery = (

@@ -309,7 +309,7 @@ const DynamicTreeViewItem = ({
           />
         )}
         <EuiIcon {...tree[depth].iconProps} css={styles.labelIcon} />
-        <span className="euiTreeView__nodeLabel">{aggData.key}</span>
+        <span className="euiTreeView__nodeLabel">{aggData.key_as_string || aggData.key}</span>
       </button>
       <div
         onKeyDown={(event: React.KeyboardEvent) => onChildrenKeydown(event, aggData.key.toString())}
