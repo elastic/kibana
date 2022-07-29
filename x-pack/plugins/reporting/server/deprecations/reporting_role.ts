@@ -35,7 +35,7 @@ export async function getDeprecationsInfo(
   { reportingCore }: ExtraDependencies
 ): Promise<DeprecationsDetails[]> {
   const client = esClient.asCurrentUser;
-  const { security } = reportingCore.getPluginSetupDeps();
+  const { security, docLinks } = reportingCore.getPluginSetupDeps();
 
   // Nothing to do if security is disabled
   if (!security?.license.isEnabled()) {
@@ -44,7 +44,6 @@ export async function getDeprecationsInfo(
 
   const config = reportingCore.getConfig();
   const deprecatedRoles = config.get('roles', 'allow') || ['reporting_user'];
-  const { docLinks } = reportingCore.getPluginSetupDeps();
 
   return [
     ...(await getUsersDeprecations(client, reportingCore, deprecatedRoles, docLinks)),
