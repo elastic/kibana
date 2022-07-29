@@ -24,31 +24,28 @@ export class SyntheticsPrivateLocation {
     this.server = _server;
   }
 
-  getSpaceId() {
-    if (!this.server.currentRequest) {
-      return '';
-    }
-
-    return this.server.spaces.spacesService.getSpaceId(this.server.currentRequest);
+  getSpaceId(request: KibanaRequest) {
+    return this.server.spaces.spacesService.getSpaceId(request);
   }
 
-  getPolicyId(config: HeartbeatConfig, { id: locId }: PrivateLocation) {
+  getPolicyId(config: HeartbeatConfig, { id: locId }: PrivateLocation, request: KibanaRequest) {
     if (config[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT) {
       return `${config.id}-${locId}`;
     }
-    return `${config.id}-${locId}-${this.getSpaceId()}`;
+    return `${config.id}-${locId}-${this.getSpaceId(request)}`;
   }
 
   async generateNewPolicy(
     config: HeartbeatConfig,
-    privateLocation: PrivateLocation
+    privateLocation: PrivateLocation,
+    request: KibanaRequest
   ): Promise<NewPackagePolicy | null> {
     if (!this.server.authSavedObjectsClient) {
       throw new Error('Could not find authSavedObjectsClient');
     }
 
     const { label: locName } = privateLocation;
-    const spaceId = this.getSpaceId();
+    const spaceId = this.getSpaceId(request);
 
     try {
       const newPolicy = await this.server.fleet.packagePolicyService.buildPackagePolicyFromPackage(
@@ -124,7 +121,7 @@ export class SyntheticsPrivateLocation {
         );
       }
 
-      const newPolicy = await this.generateNewPolicy(config, location);
+      const newPolicy = await this.generateNewPolicy(config, location, request);
 
       if (!newPolicy) {
         throw new Error(
@@ -135,7 +132,7 @@ export class SyntheticsPrivateLocation {
       }
 
       try {
-        await this.createPolicy(newPolicy, this.getPolicyId(config, location));
+        await this.createPolicy(newPolicy, this.getPolicyId(config, location, request));
       } catch (e) {
         this.server.logger.error(e);
         throw new Error(
@@ -165,11 +162,11 @@ export class SyntheticsPrivateLocation {
 
     for (const privateLocation of allPrivateLocations) {
       const hasLocation = monitorPrivateLocations?.some((loc) => loc.id === privateLocation.id);
-      const currId = this.getPolicyId(config, privateLocation);
+      const currId = this.getPolicyId(config, privateLocation, request);
       const hasPolicy = await this.getMonitor(currId);
       try {
         if (hasLocation) {
-          const newPolicy = await this.generateNewPolicy(config, privateLocation);
+          const newPolicy = await this.generateNewPolicy(config, privateLocation, request);
 
           if (!newPolicy) {
             throw new Error(
@@ -273,7 +270,7 @@ export class SyntheticsPrivateLocation {
             await this.server.fleet.packagePolicyService.delete(
               soClient,
               esClient,
-              [this.getPolicyId(config, location)],
+              [this.getPolicyId(config, location, request)],
               {
                 force: true,
               }
