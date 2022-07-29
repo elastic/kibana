@@ -10,6 +10,8 @@ export const DASHBOARDS = '[data-test-subj="groupedNavItemLink-dashboards"]';
 
 export const ALERTS = '[data-test-subj="groupedNavItemLink-alerts"]';
 
+export const CSP_FINDINGS = '[data-test-subj="groupedNavItemLink-cloud_security_posture-findings"]';
+
 export const CASES = '[data-test-subj="groupedNavItemLink-cases"]';
 
 export const TIMELINES = '[data-test-subj="groupedNavItemLink-timelines"]';
@@ -23,17 +25,31 @@ export const OVERVIEW = '[data-test-subj="groupedNavPanelLink-overview"]';
 
 export const DETECTION_RESPONSE = '[data-test-subj="groupedNavPanelLink-detection_response"]';
 
+export const KUBERNETES = '[data-test-subj="groupedNavPanelLink-kubernetes"]';
+
+export const CSP_DASHBOARD =
+  '[data-test-subj="groupedNavPanelLink-cloud_security_posture-dashboard"]';
+
 export const HOSTS = '[data-test-subj="groupedNavPanelLink-hosts"]';
 
 export const ENDPOINTS = '[data-test-subj="groupedNavPanelLink-endpoints"]';
+
+export const POLICIES = '[data-test-subj="groupedNavPanelLink-policy"]';
 
 export const TRUSTED_APPS = '[data-test-subj="groupedNavPanelLink-trusted_apps"]';
 
 export const EVENT_FILTERS = '[data-test-subj="groupedNavPanelLink-event_filters"]';
 
+export const BLOCKLIST = '[data-test-subj="groupedNavPanelLink-blocklist"]';
+
+export const CSP_BENCHMARKS =
+  '[data-test-subj="groupedNavPanelLink-cloud_security_posture-benchmarks"]';
+
 export const NETWORK = '[data-test-subj="groupedNavPanelLink-network"]';
 
 export const USERS = '[data-test-subj="groupedNavPanelLink-users"]';
+
+export const THREAT_INTELLIGENCE = '[data-test-subj="groupedNavPanelLink-threat-intelligence"]';
 
 export const RULES = '[data-test-subj="groupedNavPanelLink-rules"]';
 
@@ -53,13 +69,16 @@ export const openNavigationPanelFor = (page: string) => {
   let panel;
   switch (page) {
     case OVERVIEW:
-    case DETECTION_RESPONSE: {
+    case DETECTION_RESPONSE:
+    case KUBERNETES:
+    case CSP_DASHBOARD: {
       panel = DASHBOARDS;
       break;
     }
     case HOSTS:
     case NETWORK:
-    case USERS: {
+    case USERS:
+    case THREAT_INTELLIGENCE: {
       panel = EXPLORE;
       break;
     }
@@ -67,7 +86,10 @@ export const openNavigationPanelFor = (page: string) => {
     case TRUSTED_APPS:
     case EVENT_FILTERS:
     case RULES:
-    case EXCEPTIONS: {
+    case POLICIES:
+    case EXCEPTIONS:
+    case BLOCKLIST:
+    case CSP_BENCHMARKS: {
       panel = MANAGE;
       break;
     }

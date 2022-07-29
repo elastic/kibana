@@ -11,6 +11,9 @@ export const DASHBOARDS_PAGE =
 export const ALERTS_PAGE =
   '[data-test-subj="collapsibleNavGroup-securitySolution"] [title="Alerts"]';
 
+export const FINDINGS_PAGE =
+  '[data-test-subj="collapsibleNavGroup-securitySolution"] [title="Findings"]';
+
 export const TIMELINES_PAGE =
   '[data-test-subj="collapsibleNavGroup-securitySolution"] [title="Timelines"]';
 
