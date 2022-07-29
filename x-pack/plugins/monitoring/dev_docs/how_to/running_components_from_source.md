@@ -40,7 +40,7 @@ For multi-cluster tests its best to create a package first:
 Then move into the distro path:
 
 ```shell
-cd build/distribution/local/*
+cd "$(ls -1dt build/distribution/local/elasticsearch-* | head -n1)"
 ```
 
 Then start the server (for example with internal collection enabled):
