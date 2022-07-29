@@ -26,9 +26,7 @@ import { RegisterManagementAppArgs, ManagementAppMountParams } from '@kbn/manage
 
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { LicenseStatus } from '../../common/types/license_status';
-import { WatchStatusPage } from './sections/watch_status_page';
-import { WatchEditPage } from './sections/watch_edit_page';
-import { WatchListPage } from './sections/watch_list_page';
+import { WatchListPage, WatchEditPage, WatchStatusPage } from './sections';
 import { registerRouter } from './lib/navigation';
 import { AppContextProvider } from './app_context';
 import { useExecutionContext } from './shared_imports';

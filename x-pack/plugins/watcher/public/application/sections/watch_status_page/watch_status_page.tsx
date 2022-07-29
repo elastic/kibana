@@ -25,8 +25,9 @@ import { getPageErrorCode, PageError, SectionLoading, DeleteWatchesModal } from 
 
 import { ActionStatusesPanel, ExecutionHistoryPanel } from './components';
 import { WatchDetailsContext } from './watch_details_context';
+
 interface WatchStatusTab {
-  id: string;
+  id: 'executionHistoryTab' | 'actionStatusesTab';
   name: string;
 }
 
@@ -63,7 +64,7 @@ export const WatchStatusPage = ({
     isLoading: isWatchDetailLoading,
   } = useLoadWatchDetail(id);
 
-  const [selectedTab, setSelectedTab] = useState<string>('executionHistoryTab');
+  const [selectedTab, setSelectedTab] = useState<WatchStatusTab['id']>('executionHistoryTab');
   const [isActivated, setIsActivated] = useState<boolean | undefined>(undefined);
   const [watchesToDelete, setWatchesToDelete] = useState<string[]>([]);
   const [isTogglingActivation, setIsTogglingActivation] = useState<boolean>(false);
@@ -144,6 +145,13 @@ export const WatchStatusPage = ({
       setIsActivated(!isActivated);
     };
 
+    const selectedPanel =
+      selectedTab === 'executionHistoryTab' ? (
+        <ExecutionHistoryPanel />
+      ) : selectedTab === 'actionStatusesTab' ? (
+        <ActionStatusesPanel />
+      ) : undefined;
+
     return (
       <WatchDetailsContext.Provider value={{ watchDetailError, watchDetail, isWatchDetailLoading }}>
         <>
@@ -221,11 +229,7 @@ export const WatchStatusPage = ({
 
           <EuiSpacer size="l" />
 
-          {selectedTab === 'executionHistoryTab' ? (
-            <ExecutionHistoryPanel />
-          ) : (
-            <ActionStatusesPanel />
-          )}
+          {selectedPanel}
 
           <DeleteWatchesModal
             callback={(deleted?: string[]) => {
