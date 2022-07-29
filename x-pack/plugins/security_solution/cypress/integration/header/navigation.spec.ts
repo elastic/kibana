@@ -27,6 +27,8 @@ import {
   CSP_BENCHMARKS,
   CSP_FINDINGS,
   POLICIES,
+  EXPLORE,
+  MANAGE,
 } from '../../screens/security_header';
 
 import { login, visit } from '../../tasks/login';
@@ -81,7 +83,7 @@ describe('top-level navigation common to all pages in the Security app', () => {
     visit(TIMELINES_URL);
   });
 
-  it('navigates to the Dashboards page', () => {
+  it('navigates to the Dashboards landing page', () => {
     navigateFromHeaderTo(DASHBOARDS);
     cy.url().should('include', DASHBOARDS_URL);
   });
@@ -121,6 +123,11 @@ describe('top-level navigation common to all pages in the Security app', () => {
     cy.url().should('include', TIMELINES_URL);
   });
 
+  it('navigates to the Explore landing page', () => {
+    navigateFromHeaderTo(EXPLORE);
+    cy.url().should('include', EXPLORE_URL);
+  });
+
   it('navigates to the Hosts page', () => {
     navigateFromHeaderTo(HOSTS);
     cy.url().should('include', HOSTS_URL);
@@ -154,6 +161,11 @@ describe('top-level navigation common to all pages in the Security app', () => {
   it('navigates to the Cases page', () => {
     navigateFromHeaderTo(CASES);
     cy.url().should('include', CASES_URL);
+  });
+
+  it('navigates to the Manage landing page', () => {
+    navigateFromHeaderTo(MANAGE);
+    cy.url().should('include', MANAGE_URL);
   });
 
   it('navigates to the Endpoints page', () => {
