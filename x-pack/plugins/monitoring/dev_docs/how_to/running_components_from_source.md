@@ -136,6 +136,166 @@ You can create job using the machine learning UI in kibana. Select (or create) a
 
 Once the job is created push the "Start job running in real time". This will help exercise the active-job state in Stack Monitoring UI.
 
+### Multi-node configuration
+
+This is a little trickier, but possible.
+
+As noted [in the public docs](https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-discovery-bootstrap-cluster.html) be careful about the presence of any old `data*` or `config*` directories. The commands below should work on the first run, but if you have previously started any other clusters with the same paths, they might fail. Elasticsearch won't start if it detects the possibility of data loss due to incorrect cluster bootstrapping.
+
+Here's an example setting up a 3-node `main` cluster across 3 terminal windows, assuming you've already started an initial cluster and set `xpack.security.http.ssl` set to false in the config as above.
+
+Note that the first two nodes will pause after initial setup, waiting for the last one to become available.
+
+In the first terminal run this for node main-0:
+
+```
+export ES_PATH_CONF=config-main-0
+mkdir -p "${ES_PATH_CONF}"
+cp -r config/* "${ES_PATH_CONF}"
+
+./bin/elasticsearch -E cluster.name=main -Enode.name=main-0 \
+  -E http.port=9200 -E transport.port=9300 -E path.data=data-main-0 \
+  -Ediscovery.seed_hosts=127.0.0.1:9300,127.0.0.1:9301,127.0.0.1:9302 \
+  -Ecluster.initial_master_nodes=127.0.0.1:9300,127.0.0.1:9301,127.0.0.1:9302
+```
+
+This will hold waiting for a second node.
+
+In the second terminal run this for node main-1:
+
+```
+export ES_PATH_CONF=config-main-1
+mkdir -p "${ES_PATH_CONF}"
+cp -r config/* "${ES_PATH_CONF}"
+
+./bin/elasticsearch -E cluster.name=main -Enode.name=main-1 \
+  -E http.port=9201 -E transport.port=9301 -E path.data=data-main-1 \
+  -Ediscovery.seed_hosts=127.0.0.1:9300,127.0.0.1:9301,127.0.0.1:9302 \
+  -Ecluster.initial_master_nodes=127.0.0.1:9300,127.0.0.1:9301,127.0.0.1:9302
+```
+
+At this point, the 2 nodes will elect a master which will print out the password for the `elastic` user. You can use this to then reset the password on any of the nodes, the same as above, like so:
+
+```
+curl -u elastic:'PASSWORD' -H 'Content-Type: application/json' \
+http://localhost:9200/_security/user/elastic/_password -d'{"password": "changeme"}'
+curl -u elastic:changeme -H 'Content-Type: application/json' \
+http://localhost:9200/_security/user/kibana_system/_password -d'{"password": "changeme"}'
+```
+
+Then in the third terminal run this for node main-2:
+
+```
+export ES_PATH_CONF=config-main-2
+mkdir -p "${ES_PATH_CONF}"
+cp -r config/* "${ES_PATH_CONF}"
+
+./bin/elasticsearch -E cluster.name=main -Enode.name=main-2 \
+  -E http.port=9202 -E transport.port=9302 -E path.data=data-main-2 \
+  -Ediscovery.seed_hosts=127.0.0.1:9300,127.0.0.1:9301,127.0.0.1:9302 \
+  -Ecluster.initial_master_nodes=127.0.0.1:9300,127.0.0.1:9301,127.0.0.1:9302
+```
+
+One the third node is booted you should be able to see all 3 in the nodes list of any instance. You can confirm this with:
+
+```
+curl -u elastic:changeme localhost:9200/_cat/nodes
+```
+
+Starting a 3 node secondary cluster is a similar process, included here for easy copy-paste.
+
+In a terminal for secondary-0 run:
+
+```
+export ES_PATH_CONF=config-secondary-0
+mkdir -p "${ES_PATH_CONF}"
+cp -r config/* "${ES_PATH_CONF}"
+
+./bin/elasticsearch -E cluster.name=secondary -Enode.name=secondary-0 \
+  -E http.port=9210 -E transport.port=9310 -E path.data=data-secondary-0 \
+  -Ediscovery.seed_hosts=127.0.0.1:9310,127.0.0.1:9311,127.0.0.1:9312 \
+  -Ecluster.initial_master_nodes=127.0.0.1:9310,127.0.0.1:9311,127.0.0.1:9312
+```
+
+For secondary-1 run:
+
+```
+export ES_PATH_CONF=config-secondary-1
+mkdir -p "${ES_PATH_CONF}"
+cp -r config/* "${ES_PATH_CONF}"
+
+./bin/elasticsearch -E cluster.name=secondary -Enode.name=secondary-1 \
+  -E http.port=9211 -E transport.port=9311 -E path.data=data-secondary-1 \
+  -Ediscovery.seed_hosts=127.0.0.1:9310,127.0.0.1:9311,127.0.0.1:9312 \
+  -Ecluster.initial_master_nodes=127.0.0.1:9310,127.0.0.1:9311,127.0.0.1:9312
+```
+
+At this point you can reset the password via port 9210:
+
+```
+curl -u elastic:'PASSWORD' -H 'Content-Type: application/json' \
+http://localhost:9210/_security/user/elastic/_password -d'{"password": "changeme"}'
+curl -u elastic:changeme -H 'Content-Type: application/json' \
+http://localhost:9210/_security/user/kibana_system/_password -d'{"password": "changeme"}'
+```
+
+Then for secondary-2 run:
+
+```
+export ES_PATH_CONF=config-secondary-2
+mkdir -p "${ES_PATH_CONF}"
+cp -r config/* "${ES_PATH_CONF}"
+
+./bin/elasticsearch -E cluster.name=secondary -Enode.name=secondary-2 \
+  -E http.port=9212 -E transport.port=9312 -E path.data=data-secondary-2 \
+  -Ediscovery.seed_hosts=127.0.0.1:9310,127.0.0.1:9311,127.0.0.1:9312 \
+  -Ecluster.initial_master_nodes=127.0.0.1:9310,127.0.0.1:9311,127.0.0.1:9312
+```
+
+Note that all 6 notes will need to be in the metricbeat config if you want to run the Stack Monitoring UI as well. Here's an example `metricbeat.multinode.yaml` you can use as a starting point:
+
+```yaml
+http.enabled: true
+
+metricbeat.modules:
+  - module: system
+
+  - module: elasticsearch
+    xpack.enabled: true
+    period: 10s
+    hosts:
+      # main
+      - "localhost:9200"
+      - "localhost:9201"
+      - "localhost:9202"
+      # secondary
+      - "localhost:9210"
+      - "localhost:9211"
+      - "localhost:9212"
+    username: "elastic"
+    password: "changeme"
+
+  - module: kibana
+    xpack.enabled: true
+    basepath: "/ftw"
+    period: 10s
+    hosts: [ "localhost:5601" ]
+    username: "elastic"
+    password: "changeme"
+
+  - module: beat
+    xpack.enabled: true
+    period: 10s
+    hosts:
+      # filebeat
+      - "http://localhost:5068"
+
+output.elasticsearch:
+  hosts: [ "localhost:9200" ]
+  username: "elastic"
+  password: "changeme"
+```
+
 ## Kibana
 
 See the [local setup](local_setup.md) guide for running from source.
