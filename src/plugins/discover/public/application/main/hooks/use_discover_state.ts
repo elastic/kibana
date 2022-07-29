@@ -263,13 +263,10 @@ export function useDiscoverState({
    * non-time series data or rollups since we don't show the date picker
    */
   useEffect(() => {
-    if (
-      indexPattern &&
-      (!indexPattern.isTimeBased() || indexPattern.type === DataViewType.ROLLUP)
-    ) {
+    if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
       stateContainer.pauseAutoRefreshInterval();
     }
-  }, [indexPattern, stateContainer]);
+  }, [dataView, stateContainer]);
 
   const getResultColumns = useCallback(() => {
     if (documentState.result?.length && documentState.fetchStatus === FetchStatus.COMPLETE) {
