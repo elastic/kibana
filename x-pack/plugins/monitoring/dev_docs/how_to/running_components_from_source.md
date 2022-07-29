@@ -425,8 +425,8 @@ filebeat.modules:
     server:
       enabled: true
       var.paths:
-        - ../../elasticsearch/build/distribution/local/elasticsearch-8.1.0-SNAPSHOT/logs/*.log
-        - ../../elasticsearch/build/distribution/local/elasticsearch-8.1.0-SNAPSHOT/logs/*_server.json
+        - ../../elasticsearch/build/distribution/local/elasticsearch-*-SNAPSHOT/logs/*.log
+        - ../../elasticsearch/build/distribution/local/elasticsearch-*-SNAPSHOT/logs/*_server.json
 
 output.elasticsearch:
   hosts: [ "http://localhost:9200" ]
