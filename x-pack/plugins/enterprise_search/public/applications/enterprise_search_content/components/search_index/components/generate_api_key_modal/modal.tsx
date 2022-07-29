@@ -30,6 +30,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { docLinks } from '../../../../../shared/doc_links';
+
 import { ApiKey } from '../../../api_key/api_key';
 
 import { GenerateApiKeyModalLogic } from './generate_api_key_modal.logic';
@@ -61,7 +63,7 @@ export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexN
                   "Before you can start posting documents to your Elasticsearch index you'll need to create at least one API key.",
               })}
               &nbsp;
-              <EuiLink href={/* TODO link to docs */ '#'} external>
+              <EuiLink href={docLinks.apiKeys} external>
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.overview.generateApiKeyModal.learnMore',
                   { defaultMessage: 'Learn more about API keys' }

@@ -31,6 +31,7 @@ const formatNavLinkItems = (appLinks: AppLinkItems): NavLinkItem[] =>
     ...(link.landingIcon != null ? { icon: link.landingIcon } : {}),
     ...(link.landingImage != null ? { image: link.landingImage } : {}),
     ...(link.skipUrlState != null ? { skipUrlState: link.skipUrlState } : {}),
+    ...(link.isBeta != null ? { isBeta: link.isBeta } : {}),
     ...(link.links && link.links.length
       ? {
           links: formatNavLinkItems(link.links),
