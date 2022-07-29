@@ -29,7 +29,7 @@ describe('AnalyticsService', () => {
               "buildSha": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
               "isDev": true,
               "isDistributable": false,
-              "version": "8.4.0",
+              "version": "8.5.0",
             }
           `);
   });
@@ -39,12 +39,11 @@ describe('AnalyticsService', () => {
     expect(analyticsClientMock.registerEventType.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "eventType": "metric",
+          "eventType": "performance_metric",
           "schema": Object {
             "duration": Object {
               "_meta": Object {
                 "description": "The main event duration in ms",
-                "optional": true,
               },
               "type": "integer",
             },
