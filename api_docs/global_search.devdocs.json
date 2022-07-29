@@ -614,13 +614,7 @@
               "{ savedObjects: { client: ",
               "SavedObjectsClientContract",
               "; typeRegistry: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.ISavedObjectTypeRegistry",
-                "text": "ISavedObjectTypeRegistry"
-              },
+              "ISavedObjectTypeRegistry",
               "; }; uiSettings: { client: ",
               {
                 "pluginId": "core",
