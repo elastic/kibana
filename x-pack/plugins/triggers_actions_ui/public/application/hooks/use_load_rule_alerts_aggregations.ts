@@ -218,7 +218,7 @@ export async function fetchRuleAlertsAggByTimeRange({
             doc_count: number;
             alertStatus: {
               buckets: Array<{
-                key: string;
+                key: 'active' | 'recovered';
                 doc_count: number;
               }>;
             };
@@ -232,17 +232,27 @@ export async function fetchRuleAlertsAggByTimeRange({
           };
 
           if (dayAlerts.doc_count > 0) {
+            const localAlertChartData = acc;
             // If there are alerts in this day, we construct the chart data.
-            return [
-              ...acc,
-              ...dayAlerts.alertStatus.buckets.map((alert) => ({
+            let countOfRecoveredActiveAlerts = 0;
+            dayAlerts.alertStatus.buckets.forEach((alert) => {
+              countOfRecoveredActiveAlerts += alert.doc_count;
+              localAlertChartData.push({
                 date: dayAlerts.key_as_string,
                 count: alert.doc_count,
                 status: alert.key,
-              })),
-            ];
+              });
+            });
+            if (totalAlerts - countOfRecoveredActiveAlerts > 0) {
+              localAlertChartData.push({
+                date: dayAlerts.key_as_string,
+                count: totalAlerts - countOfRecoveredActiveAlerts,
+                status: 'total',
+              });
+            }
+            return localAlertChartData;
           }
-          return [...acc, { ...totalDayAlerts }];
+          return [...acc, totalDayAlerts];
         },
         []
       ),
