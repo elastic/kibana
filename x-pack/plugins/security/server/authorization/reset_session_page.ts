@@ -57,7 +57,7 @@ export default function ({
       });
     expect(container.innerHTML).toMatchInlineSnapshot();
     //check if a message is shown 
-    it("should render a 'You do not have permission to access the requested page'", () => {
+    it("should render a 'You do not have permission to access the requested page' message", () => {
       act(() => {
         render(<ResetSessionPage/>, container);
     });
