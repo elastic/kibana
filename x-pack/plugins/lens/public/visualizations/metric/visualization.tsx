@@ -11,9 +11,11 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { render } from 'react-dom';
 import { Ast, AstFunction } from '@kbn/interpreter';
 import { PaletteOutput, PaletteRegistry, CUSTOM_PALETTE, CustomPaletteParams } from '@kbn/coloring';
+import { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { LayoutDirection } from '@elastic/charts';
 import { euiLightVars } from '@kbn/ui-theme';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { LayerType } from '../../../common';
 import { getSuggestions } from './suggestions';
 import { LensIconChartMetric } from '../../assets/chart_metric';
@@ -155,8 +157,10 @@ const metricGroupLabel = i18n.translate('xpack.lens.metric.groupLabel', {
 
 export const getMetricVisualization = ({
   paletteService,
+  theme,
 }: {
   paletteService: PaletteRegistry;
+  theme: ThemeServiceStart;
 }): Visualization<MetricVisualizationState> => ({
   id: LENS_METRIC_ID,
 
@@ -384,18 +388,22 @@ export const getMetricVisualization = ({
 
   renderToolbar(domElement, props) {
     render(
-      <I18nProvider>
-        <Toolbar {...props} />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <I18nProvider>
+          <Toolbar {...props} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domElement
     );
   },
 
   renderDimensionEditor(domElement, props) {
     render(
-      <I18nProvider>
-        <DimensionEditor {...props} paletteService={paletteService} />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <I18nProvider>
+          <DimensionEditor {...props} paletteService={paletteService} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domElement
     );
   },

@@ -8,6 +8,8 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
+import { ThemeServiceStart } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { Ast } from '@kbn/interpreter';
 import { DatatableRow } from '@kbn/expressions-plugin/common';
@@ -43,6 +45,7 @@ const groupLabelForGauge = i18n.translate('xpack.lens.metric.groupLabel', {
 
 interface GaugeVisualizationDeps {
   paletteService: PaletteRegistry;
+  theme: ThemeServiceStart;
 }
 
 export const isNumericMetric = (op: OperationMetadata) =>
@@ -159,6 +162,7 @@ const toExpression = (
 
 export const getGaugeVisualization = ({
   paletteService,
+  theme,
 }: GaugeVisualizationDeps): Visualization<GaugeVisualizationState> => ({
   id: LENS_GAUGE_ID,
 
@@ -365,18 +369,22 @@ export const getGaugeVisualization = ({
 
   renderDimensionEditor(domElement, props) {
     render(
-      <I18nProvider>
-        <GaugeDimensionEditor {...props} paletteService={paletteService} />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <I18nProvider>
+          <GaugeDimensionEditor {...props} paletteService={paletteService} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domElement
     );
   },
 
   renderToolbar(domElement, props) {
     render(
-      <I18nProvider>
-        <GaugeToolbar {...props} />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <I18nProvider>
+          <GaugeToolbar {...props} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domElement
     );
   },
