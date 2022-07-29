@@ -7,7 +7,7 @@
 
 import Hapi from '@hapi/hapi';
 import type {
-  DocsLinksServiceSetup,
+  DocLinksServiceSetup,
   IBasePath,
   IClusterClient,
   Logger,
@@ -58,7 +58,7 @@ export interface ReportingInternalSetup {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
   status: StatusServiceSetup;
-  docLinks: DocsLinksServiceSetup;
+  docLinks: DocLinksServiceSetup;
 }
 
 export interface ReportingInternalStart {
