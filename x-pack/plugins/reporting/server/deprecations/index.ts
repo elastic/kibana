@@ -21,10 +21,7 @@ export const registerDeprecations = ({
     getDeprecations: async (ctx) => {
       return [
         ...(await getIlmPolicyDeprecationsInfo(ctx, { reportingCore })),
-        ...(await getReportingRoleDeprecationsInfo(ctx, {
-          reportingCore,
-          docLinks: core.docLinks,
-        })),
+        ...(await getReportingRoleDeprecationsInfo(ctx, { reportingCore })),
       ];
     },
   });

@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import type { DocLinksServiceSetup, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { ReportingCore } from '../../core';
 import { registerDiagnoseBrowser } from './browser';
 import { registerDiagnoseScreenshot } from './screenshot';
 
-export const registerDiagnosticRoutes = (
-  reporting: ReportingCore,
-  logger: Logger,
-  docLinks: DocLinksServiceSetup
-) => {
-  registerDiagnoseBrowser(reporting, logger, docLinks);
+export const registerDiagnosticRoutes = (reporting: ReportingCore, logger: Logger) => {
+  registerDiagnoseBrowser(reporting, logger);
   registerDiagnoseScreenshot(reporting, logger);
 };
 

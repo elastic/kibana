@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DocLinksServiceSetup, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { API_USAGE_COUNTER_TYPE } from '../../common/constants';
 import { ReportingCore } from '..';
@@ -28,13 +28,9 @@ export function incrementApiUsageCounter(
   });
 }
 
-export function registerRoutes(
-  reporting: ReportingCore,
-  logger: Logger,
-  docLinks: DocLinksServiceSetup
-) {
+export function registerRoutes(reporting: ReportingCore, logger: Logger) {
   registerDeprecationsRoutes(reporting, logger);
-  registerDiagnosticRoutes(reporting, logger, docLinks);
+  registerDiagnosticRoutes(reporting, logger);
   registerGenerateCsvFromSavedObjectImmediate(reporting, logger);
   registerJobGenerationRoutes(reporting, logger);
   registerJobInfoRoutes(reporting);

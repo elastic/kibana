@@ -12,6 +12,7 @@ import _ from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import {
   coreMock,
+  docLinksServiceMock,
   elasticsearchServiceMock,
   loggingSystemMock,
   statusServiceMock,
@@ -43,6 +44,7 @@ export const createMockPluginSetup = (
     taskManager: taskManagerMock.createSetup(),
     logger: loggingSystemMock.createLogger(),
     status: statusServiceMock.createSetupContract(),
+    docLinks: docLinksServiceMock.createSetupContract(),
     ...setupMock,
   };
 };

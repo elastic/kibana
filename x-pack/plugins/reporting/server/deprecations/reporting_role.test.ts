@@ -6,7 +6,7 @@
  */
 
 import { GetDeprecationsContext, IScopedClusterClient } from '@kbn/core/server';
-import { docLinksServiceMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { ReportingCore } from '..';
 import {
   createMockConfigSchema,
@@ -18,7 +18,6 @@ import { getDeprecationsInfo } from './reporting_role';
 let reportingCore: ReportingCore;
 let context: GetDeprecationsContext;
 let esClient: jest.Mocked<IScopedClusterClient>;
-const docLinks = docLinksServiceMock.createSetupContract();
 
 beforeEach(async () => {
   reportingCore = await createMockReportingCore(
@@ -35,9 +34,7 @@ beforeEach(async () => {
 });
 
 test('logs no deprecations when setup has no issues', async () => {
-  expect(await getDeprecationsInfo(context, { reportingCore, docLinks })).toMatchInlineSnapshot(
-    `Array []`
-  );
+  expect(await getDeprecationsInfo(context, { reportingCore })).toMatchInlineSnapshot(`Array []`);
 });
 
 describe('users assigned to a deprecated role', () => {
@@ -51,7 +48,7 @@ describe('users assigned to a deprecated role', () => {
 
     reportingCore = await createMockReportingCore(createMockConfigSchema());
 
-    expect(await getDeprecationsInfo(context, { reportingCore, docLinks })).toMatchSnapshot();
+    expect(await getDeprecationsInfo(context, { reportingCore })).toMatchSnapshot();
   });
 
   test('logs a deprecation when a user was found with a deprecated custom role from the roles.allow setting', async () => {
@@ -62,7 +59,7 @@ describe('users assigned to a deprecated role', () => {
       reportron: { username: 'reportron', roles: ['kibana_admin', 'my_test_reporting_user'] },
     });
 
-    expect(await getDeprecationsInfo(context, { reportingCore, docLinks })).toMatchSnapshot();
+    expect(await getDeprecationsInfo(context, { reportingCore })).toMatchSnapshot();
   });
 
   test('includes steps to remove the incompatible config, when applicable', async () => {
@@ -77,7 +74,7 @@ describe('users assigned to a deprecated role', () => {
       createMockConfigSchema({ roles: { enabled: true } })
     );
 
-    expect(await getDeprecationsInfo(context, { reportingCore, docLinks })).toMatchSnapshot();
+    expect(await getDeprecationsInfo(context, { reportingCore })).toMatchSnapshot();
   });
 });
 
@@ -89,7 +86,7 @@ describe('roles mapped to a deprecated role', () => {
 
     reportingCore = await createMockReportingCore(createMockConfigSchema());
 
-    expect(await getDeprecationsInfo(context, { reportingCore, docLinks })).toMatchSnapshot();
+    expect(await getDeprecationsInfo(context, { reportingCore })).toMatchSnapshot();
   });
 
   test('logs a deprecation when a role was found that maps to a deprecated custom role from the roles.allow setting', async () => {
@@ -100,7 +97,7 @@ describe('roles mapped to a deprecated role', () => {
       .fn()
       .mockResolvedValue({ dungeon_master: { roles: ['my_test_reporting_user'] } });
 
-    expect(await getDeprecationsInfo(context, { reportingCore, docLinks })).toMatchSnapshot();
+    expect(await getDeprecationsInfo(context, { reportingCore })).toMatchSnapshot();
   });
 
   test('includes steps to remove the incompatible config, when applicable', async () => {
@@ -115,7 +112,7 @@ describe('roles mapped to a deprecated role', () => {
       createMockConfigSchema({ roles: { enabled: true } })
     );
 
-    expect(await getDeprecationsInfo(context, { reportingCore, docLinks })).toMatchSnapshot();
+    expect(await getDeprecationsInfo(context, { reportingCore })).toMatchSnapshot();
   });
 });
 
@@ -125,9 +122,7 @@ describe('check deprecations when security is disabled', () => {
       createMockConfigSchema({ roles: { enabled: false } }),
       createMockPluginSetup({ security: null })
     );
-    expect(await getDeprecationsInfo(context, { reportingCore, docLinks })).toMatchInlineSnapshot(
-      `Array []`
-    );
+    expect(await getDeprecationsInfo(context, { reportingCore })).toMatchInlineSnapshot(`Array []`);
   });
 
   test('logs no deprecations: roles enabled', async () => {
@@ -137,9 +132,7 @@ describe('check deprecations when security is disabled', () => {
       createMockPluginSetup({ security: null })
     );
 
-    expect(await getDeprecationsInfo(context, { reportingCore, docLinks })).toMatchInlineSnapshot(
-      `Array []`
-    );
+    expect(await getDeprecationsInfo(context, { reportingCore })).toMatchInlineSnapshot(`Array []`);
   });
 });
 
@@ -149,7 +142,7 @@ it('insufficient permissions', async () => {
   esClient.asCurrentUser.security.getUser = jest.fn().mockRejectedValue(permissionsError);
   esClient.asCurrentUser.security.getRoleMapping = jest.fn().mockRejectedValue(permissionsError);
 
-  expect(await getDeprecationsInfo(context, { reportingCore, docLinks })).toMatchInlineSnapshot(`
+  expect(await getDeprecationsInfo(context, { reportingCore })).toMatchInlineSnapshot(`
     Array [
       Object {
         "correctiveActions": Object {

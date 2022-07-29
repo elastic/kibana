@@ -65,6 +65,7 @@ export class ReportingPlugin
       basePath: http.basePath,
       router: http.createRouter<ReportingRequestHandlerContext>(),
       usageCounter,
+      docLinks: core.docLinks,
       ...plugins,
     });
 
@@ -73,7 +74,7 @@ export class ReportingPlugin
     registerReportingUsageCollector(reportingCore, plugins.usageCollection);
 
     // Routes
-    registerRoutes(reportingCore, this.logger, core.docLinks);
+    registerRoutes(reportingCore, this.logger);
 
     // async background setup
     (async () => {

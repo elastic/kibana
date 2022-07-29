@@ -28,12 +28,11 @@ const getDocumentationUrl = (branch: string) => {
 
 interface ExtraDependencies {
   reportingCore: ReportingCore;
-  docLinks: DocLinksServiceSetup;
 }
 
 export async function getDeprecationsInfo(
   { esClient }: GetDeprecationsContext,
-  { reportingCore, docLinks }: ExtraDependencies
+  { reportingCore }: ExtraDependencies
 ): Promise<DeprecationsDetails[]> {
   const client = esClient.asCurrentUser;
   const { security } = reportingCore.getPluginSetupDeps();
@@ -45,6 +44,7 @@ export async function getDeprecationsInfo(
 
   const config = reportingCore.getConfig();
   const deprecatedRoles = config.get('roles', 'allow') || ['reporting_user'];
+  const { docLinks } = reportingCore.getPluginSetupDeps();
 
   return [
     ...(await getUsersDeprecations(client, reportingCore, deprecatedRoles, docLinks)),

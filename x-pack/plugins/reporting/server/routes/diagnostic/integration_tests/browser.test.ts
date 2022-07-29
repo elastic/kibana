@@ -18,7 +18,6 @@ import {
 } from '../../../test_helpers';
 import type { ReportingRequestHandlerContext } from '../../../types';
 import { registerDiagnoseBrowser } from '../browser';
-import { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -29,15 +28,6 @@ describe('POST /diagnose/browser', () => {
   jest.setTimeout(6000);
   const reportingSymbol = Symbol('reporting');
   const mockLogger = loggingSystemMock.createLogger();
-  const docLinks = {
-    ...docLinksServiceMock.createSetupContract(),
-    links: {
-      reporting: {
-        browserSystemDependencies:
-          'https://www.elastic.co/guide/en/kibana/test-branch/secure-reporting.html#install-reporting-packages',
-      },
-    },
-  } as DocLinksServiceSetup;
 
   let server: SetupServerReturn['server'];
   let httpSetup: SetupServerReturn['httpSetup'];
@@ -57,11 +47,22 @@ describe('POST /diagnose/browser', () => {
       () => ({ usesUiCapabilities: () => false })
     );
 
+    const docLinksSetupMock = docLinksServiceMock.createSetupContract();
     core = await createMockReportingCore(
       config,
       createMockPluginSetup({
         router: httpSetup.createRouter(''),
         security: null,
+        docLinks: {
+          ...docLinksSetupMock,
+          links: {
+            ...docLinksSetupMock.links,
+            reporting: {
+              browserSystemDependencies:
+                'https://www.elastic.co/guide/en/kibana/test-branch/secure-reporting.html#install-reporting-packages',
+            },
+          },
+        },
       })
     );
 
@@ -74,7 +75,7 @@ describe('POST /diagnose/browser', () => {
   });
 
   it('returns a 200 when successful', async () => {
-    registerDiagnoseBrowser(core, mockLogger, docLinks);
+    registerDiagnoseBrowser(core, mockLogger);
 
     await server.start();
 
@@ -91,7 +92,7 @@ describe('POST /diagnose/browser', () => {
 
   it('returns logs when browser crashes + helpful links', async () => {
     const logs = `Could not find the default font`;
-    registerDiagnoseBrowser(core, mockLogger, docLinks);
+    registerDiagnoseBrowser(core, mockLogger);
 
     await server.start();
     screenshotting.diagnose.mockReturnValue(Rx.of(logs));
@@ -113,7 +114,7 @@ describe('POST /diagnose/browser', () => {
   });
 
   it('logs a message when the browser starts, but then has problems later', async () => {
-    registerDiagnoseBrowser(core, mockLogger, docLinks);
+    registerDiagnoseBrowser(core, mockLogger);
 
     await server.start();
     screenshotting.diagnose.mockReturnValue(Rx.of(`${devtoolMessage}\n${fontNotFoundMessage}`));
