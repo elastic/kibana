@@ -19310,7 +19310,6 @@
     "xpack.ml.jobsList.nodeAvailableWarning.unavailableCreateOrRunJobsDescription": "ジョブの作成または実行はできません。",
     "xpack.ml.jobsList.noJobsFoundLabel": "ジョブが見つかりません",
     "xpack.ml.jobsList.processedRecordsLabel": "処理済みレコード",
-    "xpack.ml.jobsList.refreshButtonLabel": "更新",
     "xpack.ml.jobsList.resetActionStatusText": "リセット",
     "xpack.ml.jobsList.resetJobErrorMessage": "ジョブのリセットに失敗しました",
     "xpack.ml.jobsList.resetJobModal.cancelButtonLabel": "キャンセル",
