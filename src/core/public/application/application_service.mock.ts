@@ -9,7 +9,7 @@
 import { History } from 'history';
 import { BehaviorSubject, Subject } from 'rxjs';
 
-import type { MountPoint } from '../types';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { scopedHistoryMock } from './scoped_history.mock';
