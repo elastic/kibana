@@ -1,4 +1,4 @@
 # @kbn/core-saved-objects-base-server-internal
 
-This package contains base sub-domains and utilities used by the internal implementation 
-of Core's server-side savedObjects domain. 
+This package contains the base parts of the server-side savedObjects internal implementation, 
+used by all the other internal server-side savedObjects packages. 
