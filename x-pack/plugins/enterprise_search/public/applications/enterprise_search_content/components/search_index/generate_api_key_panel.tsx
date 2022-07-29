@@ -21,6 +21,8 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { useCloudDetails } from '../../../shared/cloud_details/cloud_details';
+import { decodeCloudId } from '../../utils/decode_cloud_id';
+
 import { DOCUMENTS_API_JSON_EXAMPLE } from '../new_index/constants';
 
 import { ClientLibrariesPopover } from './components/client_libraries_popover/popover';
@@ -29,21 +31,15 @@ import { ManageKeysPopover } from './components/manage_api_keys_popover/popover'
 
 import { OverviewLogic } from './overview.logic';
 
-const getDeploymentUrls = (cloudId: string) => {
-  const [host, kibanaHost, elasticHost] = window.atob(cloudId);
-  return {
-    elasticUrl: `https://${elasticHost}.${host}`,
-    kibanaUrl: `https://${kibanaHost}.${host}`,
-  };
-};
 export const GenerateApiKeyPanel: React.FC = () => {
   const { apiKey, isGenerateModalOpen, indexData } = useValues(OverviewLogic);
   const { closeGenerateModal } = useActions(OverviewLogic);
 
   const cloudContext = useCloudDetails();
-  const searchIndexApiUrl = cloudContext.cloudId
-    ? getDeploymentUrls(cloudContext.cloudId).elasticUrl
-    : '<elasticsearch-host>:<elasticsearch-port>/';
+
+  const DEFAULT_URL = '<ELASTICSEARCH-HOST>:<ELASTICSEARCH-PORT>';
+  const searchIndexApiUrl =
+    (cloudContext.cloudId && decodeCloudId(cloudContext.cloudId)?.elasticsearchUrl) || DEFAULT_URL;
 
   const apiKeyExample = apiKey || '<Create an API Key>';
 
@@ -88,7 +84,7 @@ export const GenerateApiKeyPanel: React.FC = () => {
                   <EuiFlexItem>
                     <EuiCodeBlock language="bash" fontSize="m" isCopyable>
                       {`\
-curl -X POST '${searchIndexApiUrl}${indexData?.name}/_doc' \\
+curl -X POST '${searchIndexApiUrl}/${indexData?.name}/_doc' \\
   -H 'Content-Type: application/json' \\
   -H 'Authorization: ApiKey ${apiKeyExample}' \\
   -d '${JSON.stringify(DOCUMENTS_API_JSON_EXAMPLE, null, 2)}'
