@@ -8,7 +8,9 @@
 
 import deepEqual from 'fast-deep-equal';
 
+import { lazyLoadReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
+
 import { OptionsListEditorOptions } from './options_list_editor_options';
 import { ControlEmbeddable, DataControlField, IEditableControlFactory } from '../../types';
 import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from './types';
@@ -27,8 +29,11 @@ export class OptionsListEmbeddableFactory
   constructor() {}
 
   public async create(initialInput: OptionsListEmbeddableInput, parent?: IContainer) {
+    const reduxEmbeddablePackage = await lazyLoadReduxEmbeddablePackage();
     const { OptionsListEmbeddable } = await import('./options_list_embeddable');
-    return Promise.resolve(new OptionsListEmbeddable(initialInput, {}, parent));
+    return Promise.resolve(
+      new OptionsListEmbeddable(reduxEmbeddablePackage, initialInput, {}, parent)
+    );
   }
 
   public presaveTransformFunction = (
