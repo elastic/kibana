@@ -16,4 +16,5 @@ export {
   getMockServices as getNoDataCardMockServices,
   getStoryArgTypes as getNoDataCardStoryArgTypes,
   getStoryServices as getNoDataCardStoryServices,
+  // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 } from './mocks';

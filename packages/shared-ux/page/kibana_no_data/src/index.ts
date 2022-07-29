@@ -15,4 +15,5 @@ export {
   getStoryArgTypes as getKibanaNoDataPageStoryArgTypes,
   getStoryServices as getKibanaNoDataPageStoryMock,
   getMockServices as getKibanaNoDataPageMockServices,
+  // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 } from './mocks';

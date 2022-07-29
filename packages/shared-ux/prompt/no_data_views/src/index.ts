@@ -15,4 +15,5 @@ export {
   getMockServices as getNoDataViewsPromptMockServices,
   getStoryArgTypes as getNoDataViewsPromptStoryArgTypes,
   getStoryServices as getNoDataViewsPromptStorybookServices,
+  // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 } from './mocks';
