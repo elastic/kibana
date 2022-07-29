@@ -24,6 +24,7 @@ export const deserializeField = (dataView: DataView, field?: DataViewField): Fie
     customLabel: field.customLabel,
     popularity: field.count,
     format: dataView.getFormatterForFieldNoDefault(field.name)?.toJSON(),
+    fields: field.runtimeField?.fields,
   };
 };
 
