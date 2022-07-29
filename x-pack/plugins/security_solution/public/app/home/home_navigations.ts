@@ -19,6 +19,7 @@ import {
   APP_NETWORK_PATH,
   APP_TIMELINES_PATH,
   APP_CASES_PATH,
+  APP_MANAGEMENT_PATH,
   APP_ENDPOINTS_PATH,
   APP_POLICIES_PATH,
   APP_TRUSTED_APPS_PATH,
@@ -34,7 +35,7 @@ import {
   APP_PATH,
 } from '../../../common/constants';
 
-export const navTabs: Omit<SecurityNav, 'administration'> = {
+export const navTabs: SecurityNav = {
   [SecurityPageName.landing]: {
     id: SecurityPageName.landing,
     name: i18n.GETTING_STARTED,
@@ -118,6 +119,13 @@ export const navTabs: Omit<SecurityNav, 'administration'> = {
     href: APP_CASES_PATH,
     disabled: false,
     urlKey: 'cases',
+  },
+  [SecurityPageName.administration]: {
+    id: SecurityPageName.administration,
+    name: i18n.ADMINISTRATION,
+    href: APP_MANAGEMENT_PATH,
+    disabled: false,
+    urlKey: 'administration',
   },
   [SecurityPageName.endpoints]: {
     id: SecurityPageName.endpoints,

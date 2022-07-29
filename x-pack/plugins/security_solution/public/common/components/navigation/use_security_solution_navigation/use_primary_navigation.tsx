@@ -25,10 +25,14 @@ export const usePrimaryNavigation = ({
   tabName,
 }: PrimaryNavigationProps): KibanaPageTemplateProps['solutionNav'] => {
   const isGroupedNavigationEnabled = useIsGroupedNavigationEnabled();
-  const mapLocationToTab = useCallback(
-    (): string => (navTabs[pageName] || (tabName && navTabs[tabName]))?.id ?? '',
-    [pageName, tabName, navTabs]
-  );
+  const mapLocationToTab = useCallback((): string => {
+    if (pageName === 'administration') {
+      // revist with ticket #137625. consider using tab Ids instead of tab Name for matching
+      return ((tabName && navTabs[tabName]) || navTabs[pageName])?.id ?? '';
+    } else {
+      return (navTabs[pageName] || (tabName && navTabs[tabName]))?.id ?? '';
+    }
+  }, [pageName, tabName, navTabs]);
 
   const [selectedTabId, setSelectedTabId] = useState(mapLocationToTab());
 
