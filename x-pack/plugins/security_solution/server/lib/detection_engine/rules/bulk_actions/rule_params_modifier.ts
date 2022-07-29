@@ -62,7 +62,7 @@ const applyBulkActionEditToRuleParams = (
       if (action.overwriteDataViews) {
         ruleParams.dataViewId = undefined;
       }
-      
+
       ruleParams.index = action.value;
       break;
 
