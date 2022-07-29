@@ -11,7 +11,8 @@ import { useGetUrlSearch, useGetUrlStateQueryString } from '../navigation/use_ge
 import { navTabs } from '../../../app/home/home_navigations';
 import { useAppUrl } from '../../lib/kibana/hooks';
 import type { SecurityNavKey } from '../navigation/types';
-import { SecurityPageName } from '../../../app/types';
+import type { SecurityPageName } from '../../../app/types';
+import { needsUrlState } from '../../links';
 
 export { getDetectionEngineUrl, getRuleDetailsUrl } from './redirect_to_detection_engine';
 export { getHostDetailsUrl, getTabsOnHostDetailsUrl, getHostsUrl } from './redirect_to_hosts';
@@ -88,18 +89,29 @@ function formatPath(path: string, search: string, skipSearch?: boolean) {
 }
 
 // TODO: migrate to links.needsUrlState
-function needsUrlState(pageId: SecurityPageName) {
-  return (
-    pageId !== SecurityPageName.dashboardsLanding &&
-    pageId !== SecurityPageName.exploreLanding &&
-    pageId !== SecurityPageName.administration &&
-    pageId !== SecurityPageName.rules &&
-    pageId !== SecurityPageName.exceptions &&
-    pageId !== SecurityPageName.endpoints &&
-    pageId !== SecurityPageName.policies &&
-    pageId !== SecurityPageName.trustedApps &&
-    pageId !== SecurityPageName.eventFilters &&
-    pageId !== SecurityPageName.blocklist &&
-    pageId !== SecurityPageName.hostIsolationExceptions
-  );
-}
+// function needsUrlState(pageId: SecurityPageName) {
+//   return (
+//     pageId !== SecurityPageName.dashboardsLanding &&
+//     pageId !== SecurityPageName.exploreLanding &&
+//     pageId !== SecurityPageName.administration &&
+//     pageId !== SecurityPageName.rules &&
+//     pageId !== SecurityPageName.exceptions &&
+//     pageId !== SecurityPageName.endpoints &&
+//     pageId !== SecurityPageName.policies &&
+//     pageId !== SecurityPageName.trustedApps &&
+//     pageId !== SecurityPageName.eventFilters &&
+//     pageId !== SecurityPageName.blocklist &&
+//     pageId !== SecurityPageName.hostIsolationExceptions
+//   );
+// }
+// dashboards
+// explore
+// get_started
+// administration
+// rules-create
+// endpoints
+// policy
+// trusted_apps
+// event_filters
+// host_isolation_exceptions
+// blocklist

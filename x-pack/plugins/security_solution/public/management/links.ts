@@ -123,6 +123,8 @@ export const links: LinkItem = {
       }),
       landingIcon: IconExceptionLists,
       path: EXCEPTIONS_PATH,
+      skipUrlState: true,
+      hideTimeline: true,
       globalSearchKeywords: [
         i18n.translate('xpack.securitySolution.appLinks.exceptions', {
           defaultMessage: 'Exception lists',
