@@ -159,8 +159,12 @@ function isPreconfiguredOutputDifferentFromCurrent(
     existingOutput.type !== preconfiguredOutput.type ||
     (preconfiguredOutput.hosts &&
       !isEqual(
-        existingOutput.hosts?.map(normalizeHostsForAgents),
-        preconfiguredOutput.hosts.map(normalizeHostsForAgents)
+        existingOutput?.type === 'elasticsearch'
+          ? existingOutput.hosts?.map(normalizeHostsForAgents)
+          : existingOutput.hosts,
+        preconfiguredOutput.type === 'elasticsearch'
+          ? preconfiguredOutput.hosts.map(normalizeHostsForAgents)
+          : preconfiguredOutput.hosts
       )) ||
     (preconfiguredOutput.ssl && !isEqual(preconfiguredOutput.ssl, existingOutput.ssl)) ||
     existingOutput.ca_sha256 !== preconfiguredOutput.ca_sha256 ||
