@@ -56,7 +56,7 @@ interface DualBrushProps {
   windowParameters: WindowParameters;
   min: number;
   max: number;
-  onChange?: (windowParameters: WindowParameters) => void;
+  onChange?: (windowParameters: WindowParameters, windowPxParameters: WindowParameters) => void;
   marginLeft: number;
   width: number;
 }
@@ -129,6 +129,12 @@ export function DualBrush({
             deviationMin: px2ts(deviationSelection[0]),
             deviationMax: px2ts(deviationSelection[1]),
           };
+          const newBrushPx = {
+            baselineMin: baselineSelection[0],
+            baselineMax: baselineSelection[1],
+            deviationMin: deviationSelection[0],
+            deviationMax: deviationSelection[1],
+          };
 
           if (
             id === 'deviation' &&
@@ -141,6 +147,8 @@ export function DualBrush({
 
             newWindowParameters.deviationMin = px2ts(newDeviationMin);
             newWindowParameters.deviationMax = px2ts(newDeviationMax);
+            newBrushPx.deviationMin = newDeviationMin;
+            newBrushPx.deviationMax = newDeviationMax;
 
             d3.select(this)
               .transition()
@@ -158,6 +166,8 @@ export function DualBrush({
 
             newWindowParameters.baselineMin = px2ts(newBaselineMin);
             newWindowParameters.baselineMax = px2ts(newBaselineMax);
+            newBrushPx.baselineMin = newBaselineMin;
+            newBrushPx.baselineMax = newBaselineMax;
 
             d3.select(this)
               .transition()
@@ -172,7 +182,7 @@ export function DualBrush({
           brushes.current[1].end = newWindowParameters.deviationMax;
 
           if (onChange) {
-            onChange(newWindowParameters);
+            onChange(newWindowParameters, newBrushPx);
           }
           drawBrushes();
         }

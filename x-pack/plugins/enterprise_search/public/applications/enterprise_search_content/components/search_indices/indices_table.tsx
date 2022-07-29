@@ -11,7 +11,6 @@ import { generatePath } from 'react-router-dom';
 
 import {
   CriteriaWithPagination,
-  EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiIcon,
@@ -22,10 +21,16 @@ import { FormattedRelative } from '@kbn/i18n-react';
 
 import { Meta } from '../../../../../common/types';
 import { EuiLinkTo, EuiButtonIconTo } from '../../../shared/react_router_helpers';
+import { EuiBadgeTo } from '../../../shared/react_router_helpers/eui_components';
 import { convertMetaToPagination } from '../../../shared/table_pagination';
 import { SEARCH_INDEX_PATH } from '../../routes';
-
-import { ViewSearchIndex, IngestionMethod, IngestionStatus } from './indices_logic';
+import { ElasticsearchViewIndex, IngestionMethod } from '../../types';
+import { crawlerStatusToColor, crawlerStatusToText } from '../../utils/crawler_status_helpers';
+import { ingestionMethodToText, isCrawlerIndex } from '../../utils/indices';
+import {
+  ingestionStatusToColor,
+  ingestionStatusToText,
+} from '../../utils/ingestion_status_helpers';
 
 const healthColorsMap = {
   green: 'success',
@@ -34,29 +39,7 @@ const healthColorsMap = {
   yellow: 'warning',
 };
 
-function ingestionMethodToText(ingestionMethod: IngestionMethod) {
-  if (ingestionMethod === IngestionMethod.CONNECTOR) {
-    return i18n.translate(
-      'xpack.enterpriseSearch.content.searchIndices.ingestionMethod.connector.label',
-      {
-        defaultMessage: 'Connector',
-      }
-    );
-  }
-  if (ingestionMethod === IngestionMethod.CRAWLER) {
-    return i18n.translate(
-      'xpack.enterpriseSearch.content.searchIndices.ingestionMethod.crawler.label',
-      {
-        defaultMessage: 'Crawler',
-      }
-    );
-  }
-  return i18n.translate('xpack.enterpriseSearch.content.searchIndices.ingestionMethod.api.label', {
-    defaultMessage: 'API',
-  });
-}
-
-const columns: Array<EuiBasicTableColumn<ViewSearchIndex>> = [
+const columns: Array<EuiBasicTableColumn<ElasticsearchViewIndex>> = [
   {
     field: 'name',
     name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.name.columnTitle', {
@@ -137,51 +120,34 @@ const columns: Array<EuiBasicTableColumn<ViewSearchIndex>> = [
     truncateText: true,
   },
   {
-    field: 'ingestionStatus',
     name: i18n.translate(
       'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.columnTitle',
       {
         defaultMessage: 'Ingestion status',
       }
     ),
-    render: (ingestionStatus: IngestionStatus) => {
-      const getBadge = (status: string, text: string) => {
-        return <EuiBadge color={status}>{text}</EuiBadge>;
-      };
-      if (ingestionStatus === IngestionStatus.CONNECTED) {
-        return getBadge(
-          'success',
-          i18n.translate(
-            'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.connected.label',
-            { defaultMessage: 'Connected' }
-          )
+    render: (index: ElasticsearchViewIndex) => {
+      const overviewPath = generatePath(SEARCH_INDEX_PATH, { indexName: index.name });
+      if (isCrawlerIndex(index)) {
+        const label = crawlerStatusToText(index.crawler?.most_recent_crawl_request_status);
+
+        return (
+          <EuiBadgeTo
+            to={overviewPath}
+            label={label}
+            color={crawlerStatusToColor(index.crawler?.most_recent_crawl_request_status)}
+          />
+        );
+      } else {
+        const label = ingestionStatusToText(index.ingestionStatus);
+        return (
+          <EuiBadgeTo
+            to={overviewPath}
+            label={label}
+            color={ingestionStatusToColor(index.ingestionStatus)}
+          />
         );
       }
-      if (ingestionStatus === IngestionStatus.ERROR) {
-        return getBadge(
-          'error',
-          i18n.translate(
-            'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.connectorError.label',
-            { defaultMessage: 'Connector failure' }
-          )
-        );
-      }
-      if (ingestionStatus === IngestionStatus.SYNC_ERROR) {
-        return getBadge(
-          'error',
-          i18n.translate(
-            'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.syncError.label',
-            { defaultMessage: 'Sync failure' }
-          )
-        );
-      }
-      return getBadge(
-        'warning',
-        i18n.translate(
-          'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.incomplete.label',
-          { defaultMessage: 'Incomplete' }
-        )
-      );
     },
     truncateText: true,
   },
@@ -207,10 +173,10 @@ const columns: Array<EuiBasicTableColumn<ViewSearchIndex>> = [
 ];
 
 interface IndicesTableProps {
-  indices: ViewSearchIndex[];
+  indices: ElasticsearchViewIndex[];
   isLoading: boolean;
   meta: Meta;
-  onChange: (criteria: CriteriaWithPagination<ViewSearchIndex>) => void;
+  onChange: (criteria: CriteriaWithPagination<ElasticsearchViewIndex>) => void;
 }
 
 export const IndicesTable: React.FC<IndicesTableProps> = ({

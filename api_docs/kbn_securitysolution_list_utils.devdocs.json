@@ -415,6 +415,44 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-list-utils",
+        "id": "def-common.buildMatchWildcardClause",
+        "type": "Function",
+        "tags": [],
+        "label": "buildMatchWildcardClause",
+        "description": [],
+        "signature": [
+          "(entry: { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; }) => ",
+          {
+            "pluginId": "@kbn/securitysolution-list-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionListUtilsPluginApi",
+            "section": "def-common.BooleanFilter",
+            "text": "BooleanFilter"
+          }
+        ],
+        "path": "packages/kbn-securitysolution-list-utils/src/build_exception_filter/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-utils",
+            "id": "def-common.buildMatchWildcardClause.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "entry",
+            "description": [],
+            "signature": [
+              "{ field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; }"
+            ],
+            "path": "packages/kbn-securitysolution-list-utils/src/build_exception_filter/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-utils",
         "id": "def-common.buildNestedClause",
         "type": "Function",
         "tags": [],
@@ -3164,6 +3202,27 @@
     "misc": [
       {
         "parentPluginId": "@kbn/securitysolution-list-utils",
+        "id": "def-common.ALL_OPERATORS",
+        "type": "Array",
+        "tags": [],
+        "label": "ALL_OPERATORS",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/securitysolution-list-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionListUtilsPluginApi",
+            "section": "def-common.OperatorOption",
+            "text": "OperatorOption"
+          },
+          "[]"
+        ],
+        "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-utils",
         "id": "def-common.BuilderEntry",
         "type": "Type",
         "tags": [],
@@ -3245,10 +3304,10 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-list-utils",
-        "id": "def-common.EVENT_FILTERS_OPERATORS",
+        "id": "def-common.DETECTION_ENGINE_EXCEPTION_OPERATORS",
         "type": "Array",
         "tags": [],
-        "label": "EVENT_FILTERS_OPERATORS",
+        "label": "DETECTION_ENGINE_EXCEPTION_OPERATORS",
         "description": [],
         "signature": [
           {
@@ -3266,10 +3325,10 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-list-utils",
-        "id": "def-common.EXCEPTION_OPERATORS",
+        "id": "def-common.EVENT_FILTERS_OPERATORS",
         "type": "Array",
         "tags": [],
-        "label": "EXCEPTION_OPERATORS",
+        "label": "EVENT_FILTERS_OPERATORS",
         "description": [],
         "signature": [
           {
@@ -3486,6 +3545,67 @@
           {
             "parentPluginId": "@kbn/securitysolution-list-utils",
             "id": "def-common.doesNotExistOperator.value",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-utils",
+        "id": "def-common.doesNotMatchOperator",
+        "type": "Object",
+        "tags": [],
+        "label": "doesNotMatchOperator",
+        "description": [],
+        "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-utils",
+            "id": "def-common.doesNotMatchOperator.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-list-utils",
+            "id": "def-common.doesNotMatchOperator.operator",
+            "type": "string",
+            "tags": [],
+            "label": "operator",
+            "description": [],
+            "signature": [
+              "ListOperatorEnum",
+              ".EXCLUDED"
+            ],
+            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-list-utils",
+            "id": "def-common.doesNotMatchOperator.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "ListOperatorTypeEnum",
+              ".WILDCARD"
+            ],
+            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-list-utils",
+            "id": "def-common.doesNotMatchOperator.value",
             "type": "string",
             "tags": [],
             "label": "value",

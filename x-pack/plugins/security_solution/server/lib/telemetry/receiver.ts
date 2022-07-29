@@ -40,12 +40,8 @@ import {
   metricsResponseToValueListMetaData,
 } from './helpers';
 import { Fetcher } from '../../endpoint/routes/resolver/tree/utils/fetch';
-import type { TreeOptions } from '../../endpoint/routes/resolver/tree/utils/fetch';
-import type {
-  ResolverNode,
-  SafeEndpointEvent,
-  ResolverSchema,
-} from '../../../common/endpoint/types';
+import type { TreeOptions, TreeResponse } from '../../endpoint/routes/resolver/tree/utils/fetch';
+import type { SafeEndpointEvent, ResolverSchema } from '../../../common/endpoint/types';
 import type {
   TelemetryEvent,
   EnhancedAlertEvent,
@@ -148,7 +144,7 @@ export interface ITelemetryReceiver {
     type: string;
   };
 
-  fetchPrebuiltRuleAlerts(): Promise<TelemetryEvent[]>;
+  fetchPrebuiltRuleAlerts(): Promise<{ events: TelemetryEvent[]; count: number }>;
 
   fetchTimelineEndpointAlerts(
     interval: number
@@ -159,7 +155,7 @@ export interface ITelemetryReceiver {
     resolverSchema: ResolverSchema,
     startOfDay: string,
     endOfDay: string
-  ): Promise<ResolverNode[]>;
+  ): TreeResponse;
 
   fetchTimelineEvents(
     nodeIds: string[]
@@ -658,6 +654,13 @@ export class TelemetryReceiver implements ITelemetryReceiver {
             ],
           },
         },
+        aggs: {
+          prebuilt_rule_alert_count: {
+            cardinality: {
+              field: 'event.id',
+            },
+          },
+        },
       },
     };
 
@@ -668,7 +671,11 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       h._source != null ? ([h._source] as TelemetryEvent[]) : []
     );
 
-    return telemetryEvents;
+    const aggregations = response.body?.aggregations as unknown as {
+      prebuilt_rule_alert_count: { value: number };
+    };
+
+    return { events: telemetryEvents, count: aggregations?.prebuilt_rule_alert_count.value ?? 0 };
   }
 
   public async fetchTimelineEndpointAlerts(interval: number) {
@@ -718,6 +725,13 @@ export class TelemetryReceiver implements ITelemetryReceiver {
             ],
           },
         },
+        aggs: {
+          endpoint_alert_count: {
+            cardinality: {
+              field: 'event.id',
+            },
+          },
+        },
       },
     };
 
@@ -729,7 +743,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     resolverSchema: ResolverSchema,
     startOfDay: string,
     endOfDay: string
-  ): Promise<ResolverNode[]> {
+  ): TreeResponse {
     if (this.processTreeFetcher === undefined || this.processTreeFetcher === null) {
       throw Error(
         'resolver tree builder is unavailable: cannot build encoded endpoint event graph'

@@ -1155,6 +1155,18 @@
           {
             "plugin": "osquery",
             "path": "x-pack/plugins/osquery/public/components/empty_state.tsx"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/home.tsx"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/home.tsx"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/home.tsx"
           }
         ],
         "children": [
@@ -1917,18 +1929,6 @@
             "path": "x-pack/plugins/apm/public/components/routing/app_root.tsx"
           },
           {
-            "plugin": "cloudSecurityPosture",
-            "path": "x-pack/plugins/cloud_security_posture/public/application/app.tsx"
-          },
-          {
-            "plugin": "cloudSecurityPosture",
-            "path": "x-pack/plugins/cloud_security_posture/public/application/app.tsx"
-          },
-          {
-            "plugin": "cloudSecurityPosture",
-            "path": "x-pack/plugins/cloud_security_posture/public/application/app.tsx"
-          },
-          {
             "plugin": "indexLifecycleManagement",
             "path": "x-pack/plugins/index_lifecycle_management/public/shared_imports.ts"
           },
@@ -2067,6 +2067,26 @@
           {
             "plugin": "home",
             "path": "src/plugins/home/public/application/components/add_data/add_data.tsx"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/manage_data/manage_data.tsx"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/manage_data/manage_data.tsx"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/manage_data/manage_data.tsx"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/manage_data/manage_data.tsx"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/manage_data/manage_data.tsx"
           }
         ],
         "children": [

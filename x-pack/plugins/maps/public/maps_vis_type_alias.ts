@@ -7,8 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { VisualizationsSetup, VisualizationStage } from '@kbn/visualizations-plugin/public';
-import type { SimpleSavedObject } from '@kbn/core/public';
-import type { SavedObject } from '@kbn/core/types/saved_objects';
+import type { SimpleSavedObject, SavedObject } from '@kbn/core/public';
 import type { MapSavedObjectAttributes } from '../common/map_saved_object_type';
 import {
   APP_ID,

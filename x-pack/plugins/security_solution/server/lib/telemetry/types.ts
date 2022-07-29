@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
 import type { AlertEvent, ResolverNode, SafeResolverEvent } from '../../../common/endpoint/types';
 
 type BaseSearchTypes = string | number | boolean | object;
@@ -291,18 +289,6 @@ export interface EndpointMetadataDocument {
     };
   };
 }
-
-// List HTTP Types
-
-export const GetTrustedAppsRequestSchema = {
-  query: schema.object({
-    page: schema.maybe(schema.number({ defaultValue: 1, min: 1 })),
-    per_page: schema.maybe(schema.number({ defaultValue: 20, min: 1 })),
-    kuery: schema.maybe(schema.string()),
-  }),
-};
-
-export type GetEndpointListRequest = TypeOf<typeof GetTrustedAppsRequestSchema.query>;
 
 export interface GetEndpointListResponse {
   per_page: number;

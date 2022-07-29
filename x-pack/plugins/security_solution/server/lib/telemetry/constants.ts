@@ -37,10 +37,10 @@ export const DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS = {
   linux: {
     advanced: {
       agent: {
-        connection_delay: null
+        connection_delay: null,
       },
       alerts: {
-        require_user_artifacts: null
+        require_user_artifacts: null,
       },
       artifacts: {
         global: {
@@ -48,62 +48,62 @@ export const DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS = {
           manifest_relative_url: null,
           public_key: null,
           interval: null,
-          ca_cert: null
+          ca_cert: null,
         },
         user: {
           public_key: null,
           ca_cert: null,
           base_url: null,
-          interval: null
-        }
+          interval: null,
+        },
       },
       elasticsearch: {
         delay: null,
         tls: {
           verify_peer: null,
           verify_hostname: null,
-          ca_cert: null
-        }
+          ca_cert: null,
+        },
       },
       fanotify: {
         ignore_unknown_filesystems: null,
         monitored_filesystems: null,
-        ignored_filesystems: null
+        ignored_filesystems: null,
       },
       logging: {
         file: null,
         stdout: null,
         stderr: null,
-        syslog: null
+        syslog: null,
       },
       diagnostic: {
-        enabled: null
+        enabled: null,
       },
       malware: {
-        quarantine: null
+        quarantine: null,
       },
       memory_protection: {
         memory_scan_collect_sample: null,
-        memory_scan: null
+        memory_scan: null,
       },
       kernel: {
-        capture_mode: null
+        capture_mode: null,
       },
       event_filter: {
-        default: null
+        default: null,
       },
       utilization_limits: {
-        cpu: null
+        cpu: null,
       },
       logstash: {
-        delay: null
-      }
-    }
+        delay: null,
+      },
+    },
   },
   mac: {
     advanced: {
       agent: {
-        connection_delay: null
+        connection_delay: null,
       },
       artifacts: {
         global: {
@@ -111,35 +111,35 @@ export const DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS = {
           manifest_relative_url: null,
           public_key: null,
           interval: null,
-          ca_cert: null
+          ca_cert: null,
         },
         user: {
           public_key: null,
           ca_cert: null,
           base_url: null,
-          interval: null
-        }
+          interval: null,
+        },
       },
       elasticsearch: {
         delay: null,
         tls: {
           verify_peer: null,
           verify_hostname: null,
-          ca_cert: null
-        }
+          ca_cert: null,
+        },
       },
       logging: {
         file: null,
         stdout: null,
         stderr: null,
-        syslog: null
+        syslog: null,
       },
       logstash: {
-        delay: null
+        delay: null,
       },
       malware: {
         quarantine: null,
-        threshold: null
+        threshold: null,
       },
       kernel: {
         connect: null,
@@ -149,14 +149,14 @@ export const DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS = {
         network: null,
         network_extension: {
           enable_content_filtering: null,
-          enable_packet_filtering: null
-        }
+          enable_packet_filtering: null,
+        },
       },
       harden: {
-        self_protect: null
+        self_protect: null,
       },
       diagnostic: {
-        enabled: null
+        enabled: null,
       },
       alerts: {
         cloud_lookup: null,
@@ -165,17 +165,17 @@ export const DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS = {
       },
       memory_protection: {
         memory_scan_collect_sample: false,
-        memory_scan: null
+        memory_scan: null,
       },
       event_filter: {
-        default: null
-      }
-    }
+        default: null,
+      },
+    },
   },
   windows: {
     advanced: {
       agent: {
-        connection_delay: null
+        connection_delay: null,
       },
       artifacts: {
         global: {
@@ -183,32 +183,32 @@ export const DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS = {
           manifest_relative_url: null,
           public_key: null,
           interval: null,
-          ca_cert: null
+          ca_cert: null,
         },
         user: {
           public_key: null,
           ca_cert: null,
           base_url: null,
-          interval: null
-        }
+          interval: null,
+        },
       },
       elasticsearch: {
         delay: null,
         tls: {
           verify_peer: null,
           verify_hostname: null,
-          ca_cert: null
-        }
+          ca_cert: null,
+        },
       },
       logging: {
         file: null,
         stdout: null,
         stderr: null,
-        syslog: null
+        syslog: null,
       },
       malware: {
         quarantine: null,
-        threshold: null
+        threshold: null,
       },
       kernel: {
         connect: null,
@@ -222,20 +222,20 @@ export const DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS = {
         registry: null,
         fileaccess: null,
         registryaccess: null,
-        process_handle: null
+        process_handle: null,
       },
       diagnostic: {
         enabled: null,
-        rollback_telemetry_enabled: null
+        rollback_telemetry_enabled: null,
       },
       alerts: {
         cloud_lookup: null,
         cloud_lookup_url: null,
-        require_user_artifacts: null
+        require_user_artifacts: null,
       },
       ransomware: {
         mbr: null,
-        canary: null
+        canary: null,
       },
       memory_protection: {
         context_manipulation_detection: null,
@@ -244,16 +244,14 @@ export const DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS = {
         shellcode_collect_sample: null,
         memory_scan_collect_sample: null,
         shellcode_enhanced_pe_parsing: null,
-        shellcode_trampoline_detection: null
+        shellcode_trampoline_detection: null,
       },
       event_filter: {
-        default: null
+        default: null,
       },
       utilization_limits: {
-        cpu: null
-      }
-    }
-  }
+        cpu: null,
+      },
+    },
+  },
 };
-
-

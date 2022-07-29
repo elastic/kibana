@@ -6,11 +6,11 @@
  */
 
 import moment from 'moment';
-import type {ExceptionListItemSchema} from '@kbn/securitysolution-io-ts-list-types';
-import type {PackagePolicy} from '@kbn/fleet-plugin/common/types/models/package_policy';
-import {merge} from 'lodash';
-import {copyAllowlistedFields, exceptionListAllowlistFields} from './filterlists';
-import type {PolicyConfig, PolicyData} from '../../../common/endpoint/types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
+import { merge } from 'lodash';
+import { copyAllowlistedFields, exceptionListAllowlistFields } from './filterlists';
+import type { PolicyConfig, PolicyData } from '../../../common/endpoint/types';
 import type {
   ExceptionListItem,
   ESClusterInfo,

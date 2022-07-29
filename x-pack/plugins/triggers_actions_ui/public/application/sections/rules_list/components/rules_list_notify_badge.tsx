@@ -56,6 +56,7 @@ export interface RulesListNotifyBadgeProps {
   snoozeRule: (schedule: SnoozeSchedule, muteAll?: boolean) => Promise<void>;
   unsnoozeRule: (scheduleIds?: string[]) => Promise<void>;
   showTooltipInline?: boolean;
+  showOnHover?: boolean;
 }
 
 const openSnoozePanelAriaLabel = i18n.translate(
@@ -93,6 +94,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     onRuleChanged,
     snoozeRule,
     unsnoozeRule,
+    showOnHover = false,
     showTooltipInline = false,
   } = props;
 
@@ -208,6 +210,10 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   }, [formattedSnoozeText, isLoading, isEditable, onClick]);
 
   const unsnoozedButton = useMemo(() => {
+    // This show on hover is needed because we need style sheets to achieve the
+    // show on hover effect in the rules list. However we don't want this to be
+    // a default behaviour of this component.
+    const showOnHoverClass = showOnHover ? 'ruleSidebarItem__action' : '';
     return (
       <EuiButtonIcon
         size="s"
@@ -216,12 +222,12 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         display={isLoading ? 'base' : 'empty'}
         data-test-subj="rulesListNotifyBadge-unsnoozed"
         aria-label={openSnoozePanelAriaLabel}
-        className={isOpen || isLoading ? '' : 'ruleSidebarItem__action'}
+        className={isOpen || isLoading ? '' : showOnHoverClass}
         iconType="bell"
         onClick={onClick}
       />
     );
-  }, [isOpen, isLoading, isEditable, onClick]);
+  }, [isOpen, isLoading, isEditable, showOnHover, onClick]);
 
   const indefiniteSnoozeButton = useMemo(() => {
     return (
@@ -322,6 +328,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         interval={futureTimeToInterval(isSnoozedUntil)}
         showCancel={isSnoozed}
         scheduledSnoozes={rule.snoozeSchedule ?? []}
+        activeSnoozes={rule.activeSnoozes ?? []}
         inPopover
       />
     </EuiPopover>

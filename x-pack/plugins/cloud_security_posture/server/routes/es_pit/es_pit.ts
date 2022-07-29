@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ES_PIT_ROUTE_PATH } from '../../../common/constants';
-import type { CspAppContext } from '../../plugin';
 import type { CspRouter } from '../../types';
 
 export const DEFAULT_PIT_KEEP_ALIVE = '1m';
@@ -18,7 +17,7 @@ export const esPitInputSchema = schema.object({
   keep_alive: schema.string({ defaultValue: DEFAULT_PIT_KEEP_ALIVE }),
 });
 
-export const defineEsPitRoute = (router: CspRouter, cspContext: CspAppContext): void =>
+export const defineEsPitRoute = (router: CspRouter): void =>
   router.post(
     {
       path: ES_PIT_ROUTE_PATH,
@@ -28,13 +27,14 @@ export const defineEsPitRoute = (router: CspRouter, cspContext: CspAppContext): 
       },
     },
     async (context, request, response) => {
+      const cspContext = await context.csp;
+
       if (!(await context.fleet).authz.fleet.all) {
         return response.forbidden();
       }
 
       try {
-        const coreContext = await context.core;
-        const esClient = coreContext.elasticsearch.client.asCurrentUser;
+        const esClient = cspContext.esClient.asCurrentUser;
         const { id } = await esClient.openPointInTime({
           index: request.query.index_name,
           keep_alive: request.query.keep_alive,
