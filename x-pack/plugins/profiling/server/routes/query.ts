@@ -42,22 +42,22 @@ export function createCommonFilter({
 
 export function autoHistogramSumCountOnGroupByField(searchField: string) {
   return {
-    auto_date_histogram: {
-      field: '@timestamp',
-      buckets: 50,
+    terms: {
+      field: searchField,
+      // We remove the ordering since we will rely directly on the natural
+      // ordering of Elasticsearch: by default this will be the descending count
+      // of matched documents. This is not equal to the ordering by sum of Count field,
+      // but it's a good-enough approximation given the distribution of Count.
+      size: 100,
+      // 'execution_hint: map' skips the slow building of ordinals that we don't need.
+      // Especially with high cardinality fields, this setting speeds up the aggregation.
+      execution_hint: 'map',
     },
     aggs: {
       group_by: {
-        terms: {
-          field: searchField,
-          // We remove the ordering since we will rely directly on the natural
-          // ordering of Elasticsearch: by default this will be the descending count
-          // of matched documents. This is not equal to the ordering by sum of Count field,
-          // but it's a good-enough approximation given the distribution of Count.
-          size: 100,
-          // 'execution_hint: map' skips the slow building of ordinals that we don't need.
-          // Especially with high cardinality fields, this setting speeds up the aggregation.
-          execution_hint: 'map',
+        auto_date_histogram: {
+          field: '@timestamp',
+          buckets: 50,
         },
         aggs: {
           count: {
