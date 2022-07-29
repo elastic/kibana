@@ -48,7 +48,9 @@ const applyBulkActionEditToRuleParams = (
         "Index patterns can't be deleted. Machine learning rule doesn't have index patterns property"
       );
 
-      ruleParams.index = ruleParams.index ? deleteItemsFromArray(ruleParams.index, action.value): ruleParams.index;
+      if (ruleParams.index) {
+        ruleParams.index = deleteItemsFromArray(ruleParams.index, action.value);
+      }
       break;
 
     case BulkActionEditType.set_index_patterns:
