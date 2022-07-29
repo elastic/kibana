@@ -6,11 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 
-import { fetchConnectors } from '../../lib/connectors/fetch_connectors';
-import { fetchCrawlers } from '../../lib/crawler/fetch_crawlers';
+import { fetchConnectorByIndexName, fetchConnectors } from '../../lib/connectors/fetch_connectors';
+import { fetchCrawlerByIndexName, fetchCrawlers } from '../../lib/crawler/fetch_crawlers';
 
 import { createApiIndex } from '../../lib/indices/create_index';
 import { fetchIndex } from '../../lib/indices/fetch_index';
@@ -26,7 +27,7 @@ export function registerIndexRoutes({ router }: RouteDependencies) {
     async (context, _, response) => {
       const { client } = (await context.core).elasticsearch;
       try {
-        const indices = await fetchIndices(client, '*', false);
+        const indices = await fetchIndices(client, '*', false, true);
         return response.ok({
           body: indices,
           headers: { 'content-type': 'application/json' },
@@ -61,7 +62,7 @@ export function registerIndexRoutes({ router }: RouteDependencies) {
       const { client } = (await context.core).elasticsearch;
       try {
         const indexPattern = searchQuery ? `*${searchQuery}*` : '*';
-        const totalIndices = await fetchIndices(client, indexPattern, !!returnHiddenIndices);
+        const totalIndices = await fetchIndices(client, indexPattern, !!returnHiddenIndices, false);
         const totalResults = totalIndices.length;
         const totalPages = Math.ceil(totalResults / size) || 1;
         const startIndex = (page - 1) * size;
@@ -199,6 +200,52 @@ export function registerIndexRoutes({ router }: RouteDependencies) {
       const { ['index_name']: indexName, language } = request.body;
       const { client } = (await context.core).elasticsearch;
       try {
+        const indexExists = await client.asCurrentUser.indices.exists({
+          index: request.body.index_name,
+        });
+        if (indexExists) {
+          return createError({
+            errorCode: ErrorCode.INDEX_ALREADY_EXISTS,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.createApiIndex.indexExistsError',
+              {
+                defaultMessage: 'This index already exists',
+              }
+            ),
+            response,
+            statusCode: 409,
+          });
+        }
+        const crawler = await fetchCrawlerByIndexName(client, request.body.index_name);
+        if (crawler) {
+          return createError({
+            errorCode: ErrorCode.CRAWLER_ALREADY_EXISTS,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.createApiIndex.crawlerExistsError',
+              {
+                defaultMessage: 'A crawler for this index already exists',
+              }
+            ),
+            response,
+            statusCode: 409,
+          });
+        }
+
+        const connector = await fetchConnectorByIndexName(client, request.body.index_name);
+
+        if (connector) {
+          return createError({
+            errorCode: ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.createApiIndex.connectorExistsError',
+              {
+                defaultMessage: 'A connector for this index already exists',
+              }
+            ),
+            response,
+            statusCode: 409,
+          });
+        }
         const createIndexResponse = await createApiIndex(client, indexName, language);
         return response.ok({
           body: createIndexResponse,
