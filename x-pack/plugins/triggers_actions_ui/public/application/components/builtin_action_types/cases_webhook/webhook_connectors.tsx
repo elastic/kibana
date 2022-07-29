@@ -42,7 +42,7 @@ const fields = {
     'config.getIncidentResponseExternalTitleKey',
     'config.getIncidentResponseCreatedDateKey',
     'config.getIncidentResponseUpdatedDateKey',
-    'config.incidentViewUrl',
+    'config.viewIncidentUrl',
   ],
   step4: [
     'config.updateIncidentMethod',

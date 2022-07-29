@@ -76,7 +76,7 @@ export default ({ getService }: FtrProviderContext): void => {
             getIncidentResponseUpdatedDateKey: 'fields.updated',
             hasAuth: true,
             headers: { [`content-type`]: 'application/json' },
-            incidentViewUrl: 'http://some.non.existent.com/browse/{{{external.system.title}}}',
+            viewIncidentUrl: 'http://some.non.existent.com/browse/{{{external.system.title}}}',
             getIncidentUrl: 'http://some.non.existent.com/{{{external.system.id}}}',
             updateIncidentJson:
               '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',

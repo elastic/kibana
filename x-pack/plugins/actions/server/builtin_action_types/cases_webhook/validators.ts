@@ -20,7 +20,7 @@ const validateConfig = (
   const {
     createCommentUrl,
     createIncidentUrl,
-    incidentViewUrl,
+    viewIncidentUrl,
     getIncidentUrl,
     updateIncidentUrl,
   } = configObject;
@@ -28,7 +28,7 @@ const validateConfig = (
   const urls = [
     createIncidentUrl,
     createCommentUrl,
-    incidentViewUrl,
+    viewIncidentUrl,
     getIncidentUrl,
     updateIncidentUrl,
   ];
