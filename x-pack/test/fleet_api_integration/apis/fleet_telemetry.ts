@@ -16,7 +16,7 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   let agentCount = 0;
-  let pkgVersion;
+  let pkgVersion: string;
   describe('fleet_telemetry', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {

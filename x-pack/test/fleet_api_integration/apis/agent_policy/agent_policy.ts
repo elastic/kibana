@@ -19,7 +19,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('fleet_agent_policies', () => {
     skipIfNoDockerRegistry(providerContext);
     describe('POST /api/fleet/agent_policies', () => {
-      let systemPkgVersion;
+      let systemPkgVersion: string;
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
         await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
