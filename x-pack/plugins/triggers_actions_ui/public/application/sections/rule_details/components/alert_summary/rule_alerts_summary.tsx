@@ -16,7 +16,6 @@ import {
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
@@ -89,12 +88,20 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
                   />
                 </h5>
               </EuiTitle>
+              <EuiSpacer size="s" />
+              <EuiText size="s" color="subdued">
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.last30days"
+                  defaultMessage="Last 30 days"
+                />
+              </EuiText>
             </EuiFlexItem>
+
             <EuiPanel hasShadow={false}>
               <EuiFlexGroup gutterSize="s" alignItems="center">
                 <EuiFlexGroup direction="row">
                   <EuiFlexItem>
-                    <EuiText size="s" color="subdued">
+                    <EuiText size="xs" color="subdued">
                       <FormattedMessage
                         id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.allAlertsLabel"
                         defaultMessage="All alerts"
@@ -107,7 +114,7 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
                 </EuiFlexGroup>
                 <EuiFlexGroup direction="row">
                   <EuiFlexItem>
-                    <EuiText size="s" color="subdued">
+                    <EuiText size="xs" color="subdued">
                       <FormattedMessage
                         id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.activeLabel"
                         defaultMessage="Active"
@@ -120,7 +127,7 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
                 </EuiFlexGroup>
                 <EuiFlexGroup direction="row">
                   <EuiFlexItem>
-                    <EuiText size="s" color="subdued">
+                    <EuiText size="xs" color="subdued">
                       <FormattedMessage
                         id="xpack.triggersActionsUI.sections.ruleDetails.rule.ruleSummary.recoveredLabel"
                         defaultMessage="Recovered"
@@ -135,7 +142,6 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
                 </EuiFlexGroup>
               </EuiFlexGroup>
             </EuiPanel>
-            <EuiHorizontalRule margin="none" />
           </EuiFlexGroup>
         </EuiFlexItem>
 
