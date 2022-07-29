@@ -65,7 +65,7 @@ export async function fetchFieldExistence({
 
   const metaFields: string[] = await uiSettingsClient.get(UI_SETTINGS.META_FIELDS);
   const allFields = buildFieldList(dataView, metaFields);
-  console.log({allFields, dataView});
+  console.log({ allFields, dataView });
   const filter = toQuery(timeFieldName, fromDate, toDate, dslQuery);
   const existingFieldList = await dataViewsService.getFieldsForIndexPattern(dataView, {
     // filled in by data views service
