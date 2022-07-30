@@ -96,7 +96,7 @@ export function FilterItem({
   const onHandleParamsUpdate = (params: Filter['meta']['params']) => {
     dispatch({
       type: 'updateFilter',
-      payload: { path, field, params },
+      payload: { path, field, operator, params },
     });
   };
 
