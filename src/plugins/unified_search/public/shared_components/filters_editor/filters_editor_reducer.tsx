@@ -16,9 +16,8 @@ import {
   addFilter,
   moveFilter,
   removeFilter,
-  updateFilterField,
-  updateFilterOperator,
-  updateFilterParams,
+  updateFilter,
+
 } from './filters_editor_utils';
 
 /** @internal **/
@@ -34,21 +33,10 @@ export interface AddFilterPayload {
 }
 
 /** @internal **/
-export interface UpdateFilterOperatorPayload {
+export interface UpdateFilterPayload {
+  path: string;
+  field?: DataViewField;
   operator?: Operator | undefined;
-  path: string;
-}
-
-/** @internal **/
-export interface UpdateFilterFieldPayload {
-  field?: DataViewField;
-  path: string;
-}
-
-/** @internal **/
-export interface UpdateFilterParamsPayload {
-  field?: DataViewField;
-  path: string;
   params?: Filter['meta']['params'] | undefined;
 }
 
@@ -69,9 +57,7 @@ export type FiltersEditorActions =
   | { type: 'addFilter'; payload: AddFilterPayload }
   | { type: 'removeFilter'; payload: RemoveFilterPayload }
   | { type: 'moveFilter'; payload: MoveFilterPayload }
-  | { type: 'updateFilterOperator'; payload: UpdateFilterOperatorPayload }
-  | { type: 'updateFilterField'; payload: UpdateFilterFieldPayload }
-  | { type: 'updateFilterParams'; payload: UpdateFilterParamsPayload };
+  | { type: 'updateFilter'; payload: UpdateFilterPayload };
 
 export const filtersEditorReducer: Reducer<FiltersEditorState, FiltersEditorActions> = (
   state,
@@ -102,20 +88,16 @@ export const filtersEditorReducer: Reducer<FiltersEditorState, FiltersEditorActi
           action.payload.conditionalType
         ),
       };
-    case 'updateFilterField':
+    case 'updateFilter':
       return {
         ...state,
-        filters: updateFilterField(state.filters, action.payload.path, action.payload.field),
-      };
-    case 'updateFilterOperator':
-      return {
-        ...state,
-        filters: updateFilterOperator(state.filters, action.payload.path, action.payload.operator),
-      };
-    case 'updateFilterParams':
-      return {
-        ...state,
-        filters: updateFilterParams(state.filters, action.payload.path, action.payload.field),
+        filters: updateFilter(
+          state.filters,
+          action.payload.path,
+          action.payload.field,
+          action.payload.operator,
+          action.payload.params
+        ),
       };
     default:
       throw new Error('wrong action');

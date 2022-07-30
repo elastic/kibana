@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { buildEmptyFilter, FieldFilter, Filter, getFilterParams } from '@kbn/es-query';
 import { DataViewField } from '@kbn/data-views-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { FieldInput } from './filters_editor_filter_item_field_input';
 import { OperatorInput } from './filters_editor_filter_item_operator_input';
 import { ParamsEditor } from './filters_editor_filter_item_params_editor';
@@ -34,7 +35,6 @@ import {
   getOperatorFromFilter,
 } from '../../../filter_bar/filter_editor/lib/filter_editor_utils';
 import { Operator } from '../../../filter_bar/filter_editor/lib/filter_operators';
-import { i18n } from '@kbn/i18n';
 // @todo: {end}
 
 export interface FilterItemProps {
@@ -73,29 +73,29 @@ export function FilterItem({
 
   const onHandleField = (field: DataViewField) => {
     dispatch({
-      type: 'updateFilterField',
-      payload: { field, path },
+      type: 'updateFilter',
+      payload: { path, field },
     });
   };
 
   const onHandleOperator = (operator: Operator) => {
     dispatch({
-      type: 'updateFilterOperator',
-      payload: { operator, path },
+      type: 'updateFilter',
+      payload: { path, field, operator },
     });
   };
 
   const onHandleParamsChange = (params: Filter['meta']['params']) => {
     dispatch({
-      type: 'updateFilterParams',
-      payload: { field, params, path },
+      type: 'updateFilter',
+      payload: { path, operator, field, params },
     });
   };
 
   const onHandleParamsUpdate = (params: Filter['meta']['params']) => {
     dispatch({
-      type: 'updateFilterParams',
-      payload: { field, params, path },
+      type: 'updateFilter',
+      payload: { path, field, params },
     });
   };
 

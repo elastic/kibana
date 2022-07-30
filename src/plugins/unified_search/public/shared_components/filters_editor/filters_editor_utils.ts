@@ -184,73 +184,51 @@ export const moveFilter = (
   }
 };
 
-export const updateFilterField = (filters: Filter[], path: string, field?: DataViewField) => {
-  const newFilters = [...filters];
-  const changedFilter = getFilterByPath(newFilters, path) as Filter;
-  let filter = Object.assign({}, changedFilter);
-
-  filter = {
-    ...filter,
-    meta: {
-      ...filter.meta,
-      key: field?.name,
-      params: { query: undefined },
-      value: undefined,
-      type: undefined,
-    },
-    query: undefined,
-  };
-
-  const pathInArray = getPathInArray(path);
-  const { targetArray } = getContainerMetaByPath(newFilters, pathInArray);
-  const selector = pathInArray[pathInArray.length - 1];
-  targetArray.splice(selector, 1, filter);
-
-  return newFilters;
-};
-
-export const updateFilterOperator = (filters: Filter[], path: string, operator?: Operator) => {
-  const newFilters = [...filters];
-  const changedFilter = getFilterByPath(newFilters, path) as Filter;
-  let filter = Object.assign({}, changedFilter);
-
-  filter = {
-    ...filter,
-    meta: {
-      ...filter.meta,
-      negate: operator?.negate,
-      type: operator?.type,
-      params: { ...filter.meta.params, query: undefined },
-      value: undefined,
-    },
-    query: { match_phrase: { ...filter!.query?.match_phrase, [filter.meta.key!]: undefined } },
-  };
-
-  const pathInArray = getPathInArray(path);
-  const { targetArray } = getContainerMetaByPath(newFilters, pathInArray);
-  const selector = pathInArray[pathInArray.length - 1];
-  targetArray.splice(selector, 1, filter);
-
-  return newFilters;
-};
-
-export const updateFilterParams = (
+export const updateFilter = (
   filters: Filter[],
   path: string,
+  field?: DataViewField,
+  operator?: Operator,
   params?: Filter['meta']['params']
 ) => {
   const newFilters = [...filters];
   const changedFilter = getFilterByPath(newFilters, path) as Filter;
   let filter = Object.assign({}, changedFilter);
 
-  filter = {
-    ...filter,
-    meta: {
-      ...filter.meta,
-      params: { ...filter.meta.params, query: params },
-    },
-    query: { match_phrase: { ...filter!.query?.match_phrase, [filter.meta.key!]: params } },
-  };
+  if (field && operator && params) {
+    filter = {
+      ...filter,
+      meta: {
+        ...filter.meta,
+        params: { ...filter.meta.params, query: params },
+      },
+      query: { match_phrase: { ...filter!.query?.match_phrase, [filter.meta.key!]: params } },
+    };
+  } else if (field && operator) {
+    filter = {
+      ...filter,
+      meta: {
+        ...filter.meta,
+        negate: operator?.negate,
+        type: operator?.type,
+        params: { ...filter.meta.params, query: undefined },
+        value: undefined,
+      },
+      query: { match_phrase: { ...filter!.query?.match_phrase, [filter.meta.key!]: undefined } },
+    };
+  } else {
+    filter = {
+      ...filter,
+      meta: {
+        ...filter.meta,
+        key: field?.name,
+        params: { query: undefined },
+        value: undefined,
+        type: undefined,
+      },
+      query: undefined,
+    };
+  }
 
   const pathInArray = getPathInArray(path);
   const { targetArray } = getContainerMetaByPath(newFilters, pathInArray);
