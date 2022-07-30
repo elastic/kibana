@@ -15,7 +15,6 @@ import type {
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
 import { parseDuration } from '@kbn/alerting-plugin/common';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { ExecutorType } from '@kbn/alerting-plugin/server/types';
 import type { Alert } from '@kbn/alerting-plugin/server';
 import type { StartPlugins, SetupPlugins } from '../../../../plugin';
