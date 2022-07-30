@@ -63,7 +63,7 @@ class PhraseValueInputUI extends PhraseSuggestorUI<PhraseValueInputProps> {
     const options = value ? uniq([valueAsStr, ...suggestions]) : suggestions;
     return (
       <StringComboBox
-        disabled={this.props.disabled}
+        isDisabled={this.props.disabled}
         fullWidth={fullWidth}
         compressed={this.props.compressed}
         placeholder={intl.formatMessage({
