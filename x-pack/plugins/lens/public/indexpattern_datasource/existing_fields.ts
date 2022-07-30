@@ -62,16 +62,15 @@ export async function fetchFieldExistence({
       includeFrozen,
     });
   }
-
   const metaFields: string[] = await uiSettingsClient.get(UI_SETTINGS.META_FIELDS);
   const allFields = buildFieldList(dataView, metaFields);
-  console.log({ allFields, dataView });
   const filter = toQuery(timeFieldName, fromDate, toDate, dslQuery);
   const existingFieldList = await dataViewsService.getFieldsForIndexPattern(dataView, {
     // filled in by data views service
     pattern: '',
     filter,
   });
+
   return {
     indexPatternTitle: dataView.title,
     existingFieldNames: existingFields(existingFieldList, allFields),

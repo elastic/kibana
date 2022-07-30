@@ -28,6 +28,7 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { TermsIndexPatternColumn } from './operations';
 import { DOCUMENT_FIELD_NAME } from '../../common';
 import { DataViewField, FieldSpec } from '@kbn/data-views-plugin/common';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
 const fieldsOne = [
   {
@@ -255,6 +256,11 @@ describe('IndexPattern Data Panel', () => {
 
   beforeEach(() => {
     core = coreMock.createStart();
+    core.uiSettings.get.mockImplementation((id) => {
+      if (id === UI_SETTINGS.META_FIELDS) {
+        return ['_index'];
+      }
+    });
     defaultProps = {
       indexPatternRefs: [],
       existingFields: {},
@@ -367,7 +373,7 @@ describe('IndexPattern Data Panel', () => {
           ...createMockedDragDropContext(),
           dragging: { id: '1', humanData: { label: 'Label' } },
         },
-        dateRange: { fromDate: '2019-01-01', toDate: '2020-01-01' },
+        dateRange: { fromDate: '2019-01-01', toDate: '2020-01-02' },
         state: {
           indexPatternRefs: [],
           existingFields: {},
@@ -461,19 +467,38 @@ describe('IndexPattern Data Panel', () => {
     });
 
     it('loads existence data if date range changes', async () => {
+      getFieldsForIndexPattern.mockReset();
       const setState = await testExistenceLoading(undefined, {
         dateRange: { fromDate: '2019-01-01', toDate: '2020-01-02' },
       });
 
-      expect(setState).toHaveBeenCalledTimes(2);
+      expect(setState).toHaveBeenCalledTimes(1);
 
       expect(getFieldsForIndexPattern).toHaveBeenCalledWith('/api/lens/existing_fields/a', {
-        body: JSON.stringify({
-          dslQuery,
-          fromDate: '2019-01-01',
-          toDate: '2020-01-01',
-          timeFieldName: 'atime',
-        }),
+        filter: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  atime: {
+                    format: 'strict_date_optional_time',
+                    gte: '2019-01-01',
+                    lte: '2020-01-02',
+                  },
+                },
+              },
+              {
+                bool: {
+                  filter: [],
+                  must: [],
+                  must_not: [],
+                  should: [],
+                },
+              },
+            ],
+          },
+        },
+        pattern: '',
       });
 
       const nextState = setState.mock.calls[1][0]({

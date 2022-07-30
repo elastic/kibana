@@ -441,6 +441,7 @@ export async function syncExistingFields({
   dslQuery: object;
   showNoDataPopover: () => void;
 }) {
+  console.log('test');
   const existenceRequests = indexPatterns.map((pattern) => {
     const hasRestrictions = !!pattern.typeMeta?.aggs;
     if (hasRestrictions) {
@@ -449,6 +450,7 @@ export async function syncExistingFields({
         existingFieldNames: pattern.fields.map((field) => field.name),
       };
     }
+    console.log('test2');
 
     return fetchFieldExistence({
       dslQuery,
