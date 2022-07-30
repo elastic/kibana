@@ -75,7 +75,6 @@ export function FilterItem({
   };
 
   const onHandleOperator = (operator: Operator, params: Filter['meta']['params']) => {
-    console.log('operator', operator, 'params', params);
     dispatch({
       type: 'updateFilter',
       payload: { dataView, field, operator, params, path },
@@ -83,10 +82,9 @@ export function FilterItem({
   };
 
   const onHandleParamsChange = (params: Filter['meta']['params']) => {
-    console.log(`params`, params);
     dispatch({
-      type: 'updateFilter',
-      payload: { dataView, field, operator, params, path },
+      type: 'updateFilterParams',
+      payload: { field, params, path },
     });
   };
 

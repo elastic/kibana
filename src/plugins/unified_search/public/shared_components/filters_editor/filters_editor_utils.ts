@@ -251,9 +251,35 @@ export const updateFilterField = (filters: Filter[], path: string, field?: DataV
       key: field?.name,
       params: { query: undefined },
       value: undefined,
-      type: undefined
+      type: undefined,
     },
     query: undefined,
+  };
+
+  const pathInArray = getPathInArray(path);
+  const { targetArray } = getContainerMetaByPath(newFilters, pathInArray);
+  const selector = pathInArray[pathInArray.length - 1];
+  targetArray.splice(selector, 1, filter);
+
+  return newFilters;
+};
+
+export const updateFilterParams = (
+  filters: Filter[],
+  path: string,
+  params?: Filter['meta']['params']
+) => {
+  const newFilters = [...filters];
+  const changedFilter = getFilterByPath(newFilters, path) as Filter;
+  let filter = Object.assign({}, changedFilter);
+
+  filter = {
+    ...filter,
+    meta: {
+      ...filter.meta,
+      params: { ...filter.meta.params, query: params },
+    },
+    query: { match_phrase: { ...filter!.query!.match_phrase, [filter.meta.key!]: params } },
   };
 
   const pathInArray = getPathInArray(path);

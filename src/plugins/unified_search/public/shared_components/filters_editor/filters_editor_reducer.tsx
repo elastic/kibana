@@ -18,6 +18,7 @@ import {
   removeFilter,
   updateFilter,
   updateFilterField,
+  updateFilterParams,
 } from './filters_editor_utils';
 
 /** @internal **/
@@ -48,6 +49,13 @@ export interface UpdateFilterFieldPayload {
 }
 
 /** @internal **/
+export interface UpdateFilterParamsPayload {
+  field?: DataViewField;
+  path: string;
+  params?: Filter['meta']['params'] | undefined;
+}
+
+/** @internal **/
 export interface RemoveFilterPayload {
   path: Path;
 }
@@ -65,7 +73,8 @@ export type FiltersEditorActions =
   | { type: 'updateFilter'; payload: UpdateFilterPayload }
   | { type: 'removeFilter'; payload: RemoveFilterPayload }
   | { type: 'moveFilter'; payload: MoveFilterPayload }
-  | { type: 'updateFilterField'; payload: UpdateFilterFieldPayload };
+  | { type: 'updateFilterField'; payload: UpdateFilterFieldPayload }
+  | { type: 'updateFilterParams'; payload: UpdateFilterParamsPayload };
 
 export const filtersEditorReducer: Reducer<FiltersEditorState, FiltersEditorActions> = (
   state,
@@ -97,6 +106,11 @@ export const filtersEditorReducer: Reducer<FiltersEditorState, FiltersEditorActi
       return {
         ...state,
         filters: updateFilterField(state.filters, action.payload.path, action.payload.field),
+      };
+    case 'updateFilterParams':
+      return {
+        ...state,
+        filters: updateFilterParams(state.filters, action.payload.path, action.payload.field),
       };
     case 'removeFilter':
       return {
