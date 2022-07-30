@@ -96,13 +96,17 @@ export const getDataFromFieldsHits = (
       ];
     }
 
-    const threatEnrichmentObject = isThreatEnrichmentFieldOrSubfield(field, prependField) ? [{
-      category: fieldCategory,
-      field: dotField,
-      values: strArr,
-      originalValue: strArr,
-      isObjectArray,
-    }] : [];
+    const threatEnrichmentObject = isThreatEnrichmentFieldOrSubfield(field, prependField)
+      ? [
+          {
+            category: fieldCategory,
+            field: dotField,
+            values: strArr,
+            originalValue: strArr,
+            isObjectArray,
+          },
+        ]
+      : [];
 
     // format nested fields
     let nestedFields;
