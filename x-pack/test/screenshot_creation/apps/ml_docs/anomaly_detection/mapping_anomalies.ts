@@ -120,7 +120,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('scroll map into view and take screenshot');
       await ml.anomalyExplorer.scrollMapContainerIntoView();
       await renderable.waitForRender();
-      await maps.openLegend();
       await mlScreenshots.takeScreenshot('weblogs-anomaly-explorer-vectors', screenshotDirectories);
     });
   });
