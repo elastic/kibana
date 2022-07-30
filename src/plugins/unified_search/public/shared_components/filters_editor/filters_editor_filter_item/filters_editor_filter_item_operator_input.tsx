@@ -33,11 +33,11 @@ export function OperatorInput<TParams = unknown>({
 
   const onOperatorChange = useCallback(
     ([selectedOperator]: Operator[]) => {
-      const selectedParams = selectedOperator?.type === operator?.type ? params : undefined;
+      const selectedParams = selectedOperator === operator ? params : undefined;
 
       onHandleOperator(selectedOperator, selectedParams);
     },
-    [onHandleOperator, operator?.type, params]
+    [onHandleOperator, operator, params]
   );
 
   return (

@@ -70,28 +70,30 @@ export function FilterItem({
   const onHandleField = (field: DataViewField) => {
     dispatch({
       type: 'updateFilter',
-      payload: { dataView, field, operator, params, path, filter },
+      payload: { dataView, field, operator, params, path },
     });
   };
 
   const onHandleOperator = (operator: Operator, params: Filter['meta']['params']) => {
+    console.log('operator', operator, 'params', params);
     dispatch({
       type: 'updateFilter',
-      payload: { dataView, field, operator, params, path, filter },
+      payload: { dataView, field, operator, params, path },
     });
   };
 
   const onHandleParamsChange = (params: Filter['meta']['params']) => {
+    console.log(`params`, params);
     dispatch({
       type: 'updateFilter',
-      payload: { dataView, field, operator, params, path, filter },
+      payload: { dataView, field, operator, params, path },
     });
   };
 
   const onHandleParamsUpdate = (params: Filter['meta']['params']) => {
     dispatch({
       type: 'updateFilter',
-      payload: { dataView, field, operator, params, path, filter },
+      payload: { dataView, field, operator, params, path },
     });
   };
 

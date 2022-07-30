@@ -29,11 +29,10 @@ export interface AddFilterPayload {
 /** @internal **/
 export interface UpdateFilterPayload {
   dataView: DataView;
-  field?: DataViewField | undefined;
+  field?: DataViewField;
   operator?: Operator | undefined;
-  params?: Filter['meta']['params'];
+  params?: Filter['meta']['params'] | undefined;
   path: string;
-  filter: Filter;
 }
 
 /** @internal **/
@@ -72,15 +71,13 @@ export const filtersEditorReducer: Reducer<FiltersEditorState, FiltersEditorActi
     case 'updateFilter':
       return {
         ...state,
-        // todo:
         filters: updateFilter(
           state.filters,
           action.payload.path,
           action.payload.dataView,
           action.payload.field,
           action.payload.operator,
-          action.payload.params,
-          action.payload.filter
+          action.payload.params
         ),
       };
     case 'removeFilter':

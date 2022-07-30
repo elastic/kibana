@@ -190,8 +190,41 @@ export const updateFilter = (
   dataView: DataView,
   field?: DataViewField,
   operator?: Operator,
-  params?: Filter['meta']['params'],
-  filter?: Filter
+  params?: Filter['meta']['params']
 ) => {
-  return [...filters];
+  console.log('path', path);
+  console.log('dataView', dataView);
+  console.log('field', field);
+  console.log('operator', operator);
+  console.log('params', params);
+
+  const newFilters = [...filters];
+  const changedFilter = getFilterByPath(newFilters, path) as Filter;
+  let filter = Object.assign({}, changedFilter);
+
+  console.log('changedFilter', changedFilter);
+
+  // case with params changes
+  filter = {
+    ...filter,
+    meta: {
+      ...filter.meta,
+      negate: operator?.negate,
+      type: operator?.type,
+      params: { ...filter.meta.params, query: params },
+    },
+    query: {
+      ...filter.query,
+      match_phrase: { ...filter!.query!.match_phrase, [field!.name]: params },
+    },
+  };
+
+  console.log('filter', filter);
+
+  const pathInArray = getPathInArray(path);
+  const { targetArray } = getContainerMetaByPath(newFilters, pathInArray);
+  const selector = pathInArray[pathInArray.length - 1];
+  targetArray.splice(selector, 1, filter);
+
+  return newFilters;
 };
