@@ -65,6 +65,7 @@ class PhraseValueInputUI extends PhraseSuggestorUI<PhraseValueInputProps> {
       <StringComboBox
         disabled={this.props.disabled}
         fullWidth={fullWidth}
+        compressed={this.props.compressed}
         placeholder={intl.formatMessage({
           id: 'unifiedSearch.filter.filterEditor.valueSelectPlaceholder',
           defaultMessage: 'Select a value',

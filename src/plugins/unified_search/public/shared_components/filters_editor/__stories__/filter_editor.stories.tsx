@@ -73,7 +73,7 @@ const createMockStorage = () => ({
 
 const services = {
   uiSettings: {
-    get: () => {},
+    get: () => true,
   },
   savedObjects: action('savedObjects'),
   notifications: action('notifications'),
