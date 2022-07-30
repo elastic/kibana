@@ -12,7 +12,6 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { schema } from '@kbn/config-schema';
 import { BadRequestError, transformError } from '@kbn/securitysolution-es-utils';
 import type {
-  CreateExceptionListItemSchema,
   CreateExceptionListSchema,
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -25,7 +24,10 @@ import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { CreateRuleExceptionListItemSchema, CreateRuleExceptionSchemaDecoded } from '../../../../../common/detection_engine/schemas/request';
+import type {
+  CreateRuleExceptionListItemSchema,
+  CreateRuleExceptionSchemaDecoded,
+} from '../../../../../common/detection_engine/schemas/request';
 import { createRuleExceptionsSchema } from '../../../../../common/detection_engine/schemas/request';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
@@ -96,7 +98,11 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
 
           // if list does exist, just need to create the items
           if (exceptionListAssociatedToRule != null) {
-            await createExceptionListItems({ items, defaultList: exceptionListAssociatedToRule, listsClient });
+            await createExceptionListItems({
+              items,
+              defaultList: exceptionListAssociatedToRule,
+              listsClient,
+            });
           } else {
             // This means that there was missed cleanup when this rule exception list was
             // deleted and it remained referenced on the rule. Let's remove it from the rule,
@@ -221,7 +227,9 @@ export const createAndAssociateDefaultExceptionList = async ({
   // we need to go ahead and "attach" it to the rule.
   const existingRuleExceptionLists = rule.params.exceptionsList ?? [];
 
-  const ruleExceptionLists = removeOldAssociation ? existingRuleExceptionLists.filter((list) => list.type === ExceptionListTypeEnum.RULE_DEFAULT) : existingRuleExceptionLists;
+  const ruleExceptionLists = removeOldAssociation
+    ? existingRuleExceptionLists.filter((list) => list.type === ExceptionListTypeEnum.RULE_DEFAULT)
+    : existingRuleExceptionLists;
 
   await patchRules({
     rulesClient,

@@ -7,12 +7,12 @@
 
 import * as t from 'io-ts';
 
-import { exceptionListItemSchema, exceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
-
-export const fullResponseSchema = t.intersection([
-  exceptionListSchema,
+import {
   exceptionListItemSchema,
-]);
+  exceptionListSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+
+export const fullResponseSchema = t.intersection([exceptionListSchema, exceptionListItemSchema]);
 
 export type FullResponseSchema = t.TypeOf<typeof fullResponseSchema>;
 
