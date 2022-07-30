@@ -46,9 +46,5 @@ export const KibanaNoDataPage = ({ onDataViewCreated, noDataConfig }: KibanaNoDa
     return <NoDataViewsPrompt onDataViewCreated={onDataViewCreated} />;
   }
 
-  if (!dataExists) {
-    return <NoDataConfigPage noDataConfig={noDataConfig} />;
-  }
-
-  return null;
+  return <NoDataConfigPage noDataConfig={noDataConfig} />;
 };

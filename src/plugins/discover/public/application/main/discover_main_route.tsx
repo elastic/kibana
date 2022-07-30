@@ -87,13 +87,6 @@ export function DiscoverMainRoute(props: Props) {
           return;
         }
 
-        const defaultDataView = await data.dataViews.getDefaultDataView();
-
-        if (!defaultDataView) {
-          setShowNoDataPage(true);
-          return;
-        }
-
         const { appStateContainer } = getState({ history, uiSettings: config });
         const { index } = appStateContainer.getState();
         const ip = await loadDataView(index || '', data.dataViews, config);
