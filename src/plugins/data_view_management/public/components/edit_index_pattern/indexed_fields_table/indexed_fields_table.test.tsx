@@ -118,6 +118,7 @@ describe('IndexedFieldsTable', () => {
         indexedFieldTypeFilter={[]}
         schemaFieldTypeFilter={[]}
         fieldFilter=""
+        compositeRuntimeFields={{}}
         {...mockedServices}
       />
     );
@@ -140,6 +141,7 @@ describe('IndexedFieldsTable', () => {
         indexedFieldTypeFilter={[]}
         schemaFieldTypeFilter={[]}
         fieldFilter=""
+        compositeRuntimeFields={{}}
         {...mockedServices}
       />
     );
@@ -163,6 +165,7 @@ describe('IndexedFieldsTable', () => {
         indexedFieldTypeFilter={[]}
         schemaFieldTypeFilter={[]}
         fieldFilter=""
+        compositeRuntimeFields={{}}
         {...mockedServices}
       />
     );
@@ -186,6 +189,7 @@ describe('IndexedFieldsTable', () => {
         indexedFieldTypeFilter={[]}
         schemaFieldTypeFilter={[]}
         fieldFilter=""
+        compositeRuntimeFields={{}}
         {...mockedServices}
       />
     );
@@ -210,6 +214,7 @@ describe('IndexedFieldsTable', () => {
           indexedFieldTypeFilter={[]}
           schemaFieldTypeFilter={[]}
           fieldFilter=""
+          compositeRuntimeFields={{}}
           {...mockedServices}
         />
       );

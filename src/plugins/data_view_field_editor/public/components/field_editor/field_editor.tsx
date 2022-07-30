@@ -167,7 +167,8 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
   const isValueVisible = get(formData, '__meta__.isValueVisible');
 
   useEffect(() => {
-    if (isLoadingPreview || !initialPreviewComplete || form.getFormData().type !== 'composite') {
+    // console.log('useEffect', updatedType, form.getFormData().type);
+    if (isLoadingPreview || !initialPreviewComplete || updatedType[0].value !== 'composite') {
       return;
     }
 
@@ -224,7 +225,8 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
     initialPreviewComplete,
     fieldsAndTypes,
     previousPreviewTypes,
-    setSubfields /* , form */,
+    setSubfields,
+    updatedType,
   ]);
 
   useEffect(() => {

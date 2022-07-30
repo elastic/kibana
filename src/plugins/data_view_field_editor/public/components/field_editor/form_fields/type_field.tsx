@@ -27,7 +27,8 @@ export const TypeField = ({
   isDisabled = false,
   includeComposite,
   path,
-  defaultValue = { label: 'Keyword', value: 'keyword' },
+  // todo - use central def instead
+  defaultValue = [{ label: 'Keyword', value: 'keyword' }],
   onChange = () => {},
 }: Props) => {
   return (

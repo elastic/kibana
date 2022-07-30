@@ -116,6 +116,11 @@ export const getFieldEditorOpener =
           isMapped: false,
           esTypes: [],
           type: undefined,
+          customLabel: undefined,
+          count: undefined,
+          spec: {
+            parentName: undefined,
+          },
         };
       };
 

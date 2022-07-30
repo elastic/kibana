@@ -59,47 +59,26 @@ export interface StartPlugins {
 
 export type InternalFieldType = 'concrete' | 'runtime';
 
-export interface Field extends RuntimeField {
-  name: string;
+/**
+ * The data model for the field editor
+ * @public
+ */
+export interface Field extends Omit<RuntimeField, 'format'> {
+  /**
+   * name / path used for the field
+   */
+  name: FieldSpec['name'];
   parentName?: string;
+  /**
+   * configuration of the field format
+   */
+  format?: RuntimeField['format'] | null;
 }
 
 export interface FieldFormatConfig {
   id: string;
   params?: SerializedFieldFormat['params'];
 }
-
-/**
- * The data model for the field editor
- * @public
- */
-export interface Field {
-  /**
-   * name / path used for the field
-   */
-  name: FieldSpec['name'];
-  /**
-   * ES type
-   */
-  type: RuntimeType;
-  /**
-   * source of the runtime field script
-   */
-  script?: RuntimeField['script'];
-  /**
-   * custom label for display
-   */
-  customLabel?: FieldSpec['customLabel'];
-  /**
-   * custom popularity
-   */
-  popularity?: number;
-  /**
-   * configuration of the field format
-   */
-  format?: FieldSpec['format'];
-}
-
 export interface EsRuntimeField {
   type: RuntimeType | string;
   script?: {
