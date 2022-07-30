@@ -77,7 +77,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('set maps options and take screenshot');
       await ml.dataVisualizerTable.ensureDetailsOpen('geo.dest');
       await renderable.waitForRender();
-      await maps.openLegend();
 
       await mlScreenshots.takeScreenshot(
         'weblogs-data-visualizer-choropleth',
