@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { EuiLoadingElastic } from '@elastic/eui';
 import { NoDataConfigPage } from '@kbn/shared-ux-components';
 import { NoDataViewsPrompt } from '@kbn/shared-ux-prompt-no-data-views';
@@ -16,7 +16,11 @@ import { useServices } from './services';
 /**
  * A page to display when Kibana has no data, prompting a person to add integrations or create a new data view.
  */
-export const KibanaNoDataPage = ({ onDataViewCreated, noDataConfig }: KibanaNoDataPageProps) => {
+export const KibanaNoDataPage: FC<KibanaNoDataPageProps> = ({
+  onDataViewCreated,
+  noDataConfig,
+  children,
+}) => {
   // These hooks are temporary, until this component is moved to a package.
   const services = useServices();
   const { hasESData, hasUserDataView } = services;
@@ -50,5 +54,5 @@ export const KibanaNoDataPage = ({ onDataViewCreated, noDataConfig }: KibanaNoDa
     return <NoDataConfigPage noDataConfig={noDataConfig} />;
   }
 
-  return null;
+  return <>{children}</> || null;
 };

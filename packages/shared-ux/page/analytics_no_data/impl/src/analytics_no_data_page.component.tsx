@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React from 'react';
+import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { KibanaNoDataPage } from '@kbn/shared-ux-page-kibana-no-data';
 
@@ -41,7 +41,11 @@ const addIntegrationsDescription = i18n.translate(
 /**
  * A pure component of an entire page that can be displayed when Kibana "has no data", specifically for Analytics.
  */
-export const AnalyticsNoDataPage = ({ kibanaGuideDocLink, onDataViewCreated }: Props) => {
+export const AnalyticsNoDataPage: FC<Props> = ({
+  kibanaGuideDocLink,
+  onDataViewCreated,
+  children,
+}) => {
   const noDataConfig = {
     solution,
     pageTitle,
@@ -56,5 +60,5 @@ export const AnalyticsNoDataPage = ({ kibanaGuideDocLink, onDataViewCreated }: P
     docsLink: kibanaGuideDocLink,
   };
 
-  return <KibanaNoDataPage {...{ noDataConfig, onDataViewCreated }} />;
+  return <KibanaNoDataPage {...{ noDataConfig, onDataViewCreated }}>{children}</KibanaNoDataPage>;
 };

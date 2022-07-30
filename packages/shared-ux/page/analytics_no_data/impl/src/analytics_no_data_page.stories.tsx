@@ -30,7 +30,9 @@ export default {
 export const AnalyticsNoDataPage = (params: AnalyticsNoDataPageStorybookParams) => {
   return (
     <AnalyticsNoDataPageProvider {...mock.getServices(params)}>
-      <Component {...mock.getProps()} />
+      <Component {...mock.getProps()}>
+        <p>Seeing this means the viewer has data.</p>
+      </Component>
     </AnalyticsNoDataPageProvider>
   );
 };
@@ -50,7 +52,9 @@ export const LoadingState = (params: AnalyticsNoDataPageStorybookParams) => {
 
   return (
     <AnalyticsNoDataPageProvider {...services}>
-      <Component onDataViewCreated={action('onDataViewCreated')} />
+      <Component onDataViewCreated={action('onDataViewCreated')}>
+        <p>Seeing this means the viewer has data.</p>
+      </Component>
     </AnalyticsNoDataPageProvider>
   );
 };

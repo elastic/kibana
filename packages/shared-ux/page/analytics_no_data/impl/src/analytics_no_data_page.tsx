@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React from 'react';
+import React, { FC } from 'react';
 import type { AnalyticsNoDataPageProps } from '@kbn/shared-ux-page-analytics-no-data-types';
 
 import { useServices } from './services';
@@ -15,7 +15,10 @@ import { AnalyticsNoDataPage as Component } from './analytics_no_data_page.compo
  * An entire page that can be displayed when Kibana "has no data", specifically for Analytics.  Uses
  * services from a Provider to supply props to a pure component.
  */
-export const AnalyticsNoDataPage = ({ onDataViewCreated }: AnalyticsNoDataPageProps) => {
+export const AnalyticsNoDataPage: FC<AnalyticsNoDataPageProps> = ({
+  onDataViewCreated,
+  children,
+}) => {
   const services = useServices();
   const { kibanaGuideDocLink } = services;
 
@@ -25,6 +28,8 @@ export const AnalyticsNoDataPage = ({ onDataViewCreated }: AnalyticsNoDataPagePr
         onDataViewCreated,
         kibanaGuideDocLink,
       }}
-    />
+    >
+      {children}
+    </Component>
   );
 };

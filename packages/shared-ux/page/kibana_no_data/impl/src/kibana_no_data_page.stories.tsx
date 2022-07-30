@@ -31,7 +31,9 @@ const mock = new KibanaNoDataPageStorybookMock();
 export const KibanaNoDataPage = (params: KibanaNoDataPageStorybookParams) => {
   return (
     <KibanaNoDataPageProvider {...mock.getServices(params)}>
-      <Component {...mock.getProps(params)} />
+      <Component {...mock.getProps(params)}>
+        <p>Seeing this means the viewer has data</p>
+      </Component>
     </KibanaNoDataPageProvider>
   );
 };
@@ -51,7 +53,9 @@ export const LoadingState = (params: KibanaNoDataPageStorybookParams) => {
 
   return (
     <KibanaNoDataPageProvider {...services}>
-      <Component {...mock.getProps(params)} />
+      <Component {...mock.getProps(params)}>
+        <p>Seeing this means the viewer has data.</p>
+      </Component>
     </KibanaNoDataPageProvider>
   );
 };

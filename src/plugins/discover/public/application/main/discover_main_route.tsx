@@ -60,9 +60,6 @@ export function DiscoverMainRoute(props: Props) {
   const [savedSearch, setSavedSearch] = useState<SavedSearch>();
   const dataView = savedSearch?.searchSource?.getField('index');
   const [dataViewList, setDataViewList] = useState<Array<SavedObject<DataViewAttributes>>>([]);
-  const [hasESData, setHasESData] = useState(false);
-  const [hasUserDataView, setHasUserDataView] = useState(false);
-  const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const { id } = useParams<DiscoverLandingParams>();
 
   useExecutionContext(core.executionContext, {
@@ -74,18 +71,12 @@ export function DiscoverMainRoute(props: Props) {
   const loadDefaultOrCurrentDataView = useCallback(
     async (searchSource: ISearchSource) => {
       try {
-        const hasUserDataViewValue = await data.dataViews.hasData
-          .hasUserDataView()
-          .catch(() => false);
-        const hasESDataValue =
-          isDev || (await data.dataViews.hasData.hasESData().catch(() => false));
-        setHasUserDataView(hasUserDataViewValue);
-        setHasESData(hasESDataValue);
+        /*
+        Note: @kertal @maja
 
-        if (!hasUserDataViewValue) {
-          setShowNoDataPage(true);
-          return;
-        }
+        This is not a case the no data page handles.  So we need to know what to do with it,
+        if anything.  Because if there's data in ES and there's *a* data view, this would
+        cause the no data page to be displayed... which would render `null`.
 
         const defaultDataView = await data.dataViews.getDefaultDataView();
 
@@ -93,6 +84,7 @@ export function DiscoverMainRoute(props: Props) {
           setShowNoDataPage(true);
           return;
         }
+        */
 
         const { appStateContainer } = getState({ history, uiSettings: config });
         const { index } = appStateContainer.getState();
@@ -108,7 +100,7 @@ export function DiscoverMainRoute(props: Props) {
         setError(e);
       }
     },
-    [config, data.dataViews, history, isDev, toastNotifications]
+    [config, data.dataViews, history, toastNotifications]
   );
 
   const loadSavedSearch = useCallback(async () => {
@@ -178,7 +170,6 @@ export function DiscoverMainRoute(props: Props) {
   const onDataViewCreated = useCallback(
     async (nextDataView: unknown) => {
       if (nextDataView) {
-        setShowNoDataPage(false);
         setError(undefined);
         await loadSavedSearch();
       }
@@ -198,37 +189,36 @@ export function DiscoverMainRoute(props: Props) {
     );
   }, [chrome, savedSearch]);
 
-  if (showNoDataPage) {
-    const analyticsServices = {
-      coreStart: core,
-      dataViews: {
-        ...data.dataViews,
-        hasData: {
-          ...data.dataViews.hasData,
-
-          // We've already called this, so we can optimize the analytics services to
-          // use the already-retrieved data to avoid a double-call.
-          hasESData: () => Promise.resolve(isDev ? true : hasESData),
-          hasUserDataView: () => Promise.resolve(hasUserDataView),
-        },
+  const analyticsServices = {
+    coreStart: core,
+    dataViews: {
+      ...data.dataViews,
+      hasData: {
+        ...data.dataViews.hasData,
+        // If we're in dev mode, we want to always return true here.
+        hasESData: isDev ? () => Promise.resolve(true) : data.dataViews.hasData.hasESData,
       },
-      dataViewEditor,
-    };
+    },
+    dataViewEditor,
+  };
 
-    return (
-      <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
-        <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} />
-      </AnalyticsNoDataPageKibanaProvider>
-    );
-  }
+  const Discover = () => {
+    if (error) {
+      return <DiscoverError error={error} />;
+    }
 
-  if (error) {
-    return <DiscoverError error={error} />;
-  }
+    if (!dataView || !savedSearch) {
+      return <LoadingIndicator type="elastic" />;
+    }
 
-  if (!dataView || !savedSearch) {
-    return <LoadingIndicator type="elastic" />;
-  }
+    return <DiscoverMainAppMemoized dataViewList={dataViewList} savedSearch={savedSearch} />;
+  };
 
-  return <DiscoverMainAppMemoized dataViewList={dataViewList} savedSearch={savedSearch} />;
+  return (
+    <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
+      <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated}>
+        <Discover />
+      </AnalyticsNoDataPage>
+    </AnalyticsNoDataPageKibanaProvider>
+  );
 }
