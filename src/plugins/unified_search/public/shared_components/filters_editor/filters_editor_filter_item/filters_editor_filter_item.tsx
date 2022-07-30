@@ -89,14 +89,14 @@ export function FilterItem({
   const onHandleParamsChange = (params: Filter['meta']['params']) => {
     dispatch({
       type: 'updateFilter',
-      payload: { path, operator, field, params },
+      payload: { path, field, operator, params },
     });
   };
 
-  const onHandleParamsUpdate = (params: Filter['meta']['params']) => {
+  const onHandleParamsUpdate = (value: Filter['meta']['params']) => {
     dispatch({
       type: 'updateFilter',
-      payload: { path, field, operator, params },
+      payload: { path, field, operator, params: [value, ...(params || [])] },
     });
   };
 
