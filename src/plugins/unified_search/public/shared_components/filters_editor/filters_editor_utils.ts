@@ -205,6 +205,19 @@ export const updateFilter = (
       query: { match_phrase: { ...filter!.query?.match_phrase, [filter.meta.key!]: params } },
     };
   } else if (field && operator) {
+    if (operator.type === 'exists') {
+      filter = {
+        ...filter,
+        meta: {
+          ...filter.meta,
+          negate: operator?.negate,
+          type: operator?.type,
+          params: undefined,
+          value: 'exists',
+        },
+        query: { exists: { ...filter!.query?.exists, [filter.meta.key!]: undefined } },
+      };
+    }
     filter = {
       ...filter,
       meta: {
