@@ -223,7 +223,7 @@ export const updateFilterOperator = (filters: Filter[], path: string, operator?:
       params: { ...filter.meta.params, query: undefined },
       value: undefined,
     },
-    query: undefined,
+    query: { match_phrase: { ...filter!.query?.match_phrase, [filter.meta.key!]: undefined } },
   };
 
   const pathInArray = getPathInArray(path);
@@ -249,7 +249,7 @@ export const updateFilterParams = (
       ...filter.meta,
       params: { ...filter.meta.params, query: params },
     },
-    query: { match_phrase: { ...filter!.query!.match_phrase, [filter.meta.key!]: params } },
+    query: { match_phrase: { ...filter!.query?.match_phrase, [filter.meta.key!]: params } },
   };
 
   const pathInArray = getPathInArray(path);
