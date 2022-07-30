@@ -19,11 +19,11 @@ import {
 } from '@elastic/eui';
 import { buildEmptyFilter, FieldFilter, Filter, getFilterParams } from '@kbn/es-query';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { ConditionTypes } from '../filters_editor_condition_types';
-import { FiltersEditorContextType } from '../filters_editor_context';
 import { FieldInput } from './filters_editor_filter_item_field_input';
 import { OperatorInput } from './filters_editor_filter_item_operator_input';
 import { ParamsEditor } from './filters_editor_filter_item_params_editor';
+import { ConditionTypes } from '../filters_editor_condition_types';
+import { FiltersEditorContextType } from '../filters_editor_context';
 import { FilterGroup } from '../filters_editor_filter_group';
 import { getConditionalOperationType } from '../filters_editor_utils';
 import type { Path } from '../filter_editors_types';
@@ -34,6 +34,7 @@ import {
   getOperatorFromFilter,
 } from '../../../filter_bar/filter_editor/lib/filter_editor_utils';
 import { Operator } from '../../../filter_bar/filter_editor/lib/filter_operators';
+import { i18n } from '@kbn/i18n';
 // @todo: {end}
 
 export interface FilterItemProps {
@@ -199,7 +200,12 @@ export function FilterItem({
                           isDisabled={disableOr}
                           iconType="returnKey"
                           size="s"
-                          aria-label="Add filter group with OR"
+                          aria-label={i18n.translate(
+                            'unifiedSearch.filter.filterEditor.addOrFilterGroupButttonIcon',
+                            {
+                              defaultMessage: 'Add filter group with OR',
+                            }
+                          )}
                         />
                       </EuiFlexItem>
 
@@ -210,7 +216,12 @@ export function FilterItem({
                           isDisabled={disableAnd}
                           iconType="plus"
                           size="s"
-                          aria-label="Add filter group with AND"
+                          aria-label={i18n.translate(
+                            'unifiedSearch.filter.filterEditor.addAndFilterGroupButttonIcon',
+                            {
+                              defaultMessage: 'Add filter group with AND',
+                            }
+                          )}
                         />
                       </EuiFlexItem>
 
@@ -222,7 +233,12 @@ export function FilterItem({
                           isDisabled={disableRemove}
                           size="s"
                           color="danger"
-                          aria-label="Delete filter group"
+                          aria-label={i18n.translate(
+                            'unifiedSearch.filter.filterEditor.deleteFilterGroupButttonIcon',
+                            {
+                              defaultMessage: 'Delete filter group',
+                            }
+                          )}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>
