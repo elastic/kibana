@@ -43,7 +43,7 @@ export const isGeoField = (field: string) =>
   field.includes('geo.location') || field.includes('geoip.location');
 
 export const isThreatEnrichmentFieldOrSubfield = (field: string, prependField?: string) =>
-  (prependField?.includes(ENRICHMENT_DESTINATION_PATH) || field === ENRICHMENT_DESTINATION_PATH);
+  prependField?.includes(ENRICHMENT_DESTINATION_PATH) || field === ENRICHMENT_DESTINATION_PATH;
 
 export const getDataFromFieldsHits = (
   fields: EventHit['fields'],

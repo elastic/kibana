@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getDataFromFieldsHits } from '@kbn/security-solution-plugin/common/utils/field_formatters';
 import { groupBy } from 'lodash';
+import { getDataFromFieldsHits } from '../../../../../common/utils/field_formatters';
 import { ENRICHMENT_DESTINATION_PATH } from '../../../../../common/constants';
 import {
   ENRICHMENT_TYPES,
