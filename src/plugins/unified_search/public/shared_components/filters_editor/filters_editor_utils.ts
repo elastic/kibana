@@ -250,3 +250,40 @@ export const updateFilter = (
 
   return newFilters;
 };
+
+export const updateFilterParams = (
+  filters: Filter[],
+  path: string,
+  operator?: Operator | undefined,
+  params?: Filter['meta']['params'][]
+) => {
+  const newFilters = [...filters];
+  const changedFilter = getFilterByPath(newFilters, path) as Filter;
+  let filter = Object.assign({}, changedFilter);
+
+  filter = {
+    ...filter,
+    meta: {
+      ...filter.meta,
+      negate: operator?.negate,
+      type: operator?.type,
+      params,
+    },
+    query: {
+      bool: {
+        minimum_should_match: 1,
+        ...filter!.query?.should,
+        should: params?.map((param) => {
+          return { match_phrase: { [filter.meta.key!]: param } };
+        }),
+      },
+    },
+  };
+
+  const pathInArray = getPathInArray(path);
+  const { targetArray } = getContainerMetaByPath(newFilters, pathInArray);
+  const selector = pathInArray[pathInArray.length - 1];
+  targetArray.splice(selector, 1, filter);
+
+  return newFilters;
+};
