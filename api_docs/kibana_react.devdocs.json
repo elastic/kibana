@@ -2162,13 +2162,7 @@
             "text": "ToMountPointOptions"
           },
           ") => ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.MountPoint",
-            "text": "MountPoint"
-          },
+          "MountPoint",
           "<HTMLElement>"
         ],
         "path": "src/plugins/kibana_react/public/util/to_mount_point.tsx",
@@ -2979,21 +2973,9 @@
             "description": [],
             "signature": [
               "(node: React.ReactNode, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.OverlayFlyoutOpenOptions",
-                "text": "OverlayFlyoutOpenOptions"
-              },
+              "OverlayFlyoutOpenOptions",
               " | undefined) => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.OverlayRef",
-                "text": "OverlayRef"
-              }
+              "OverlayRef"
             ],
             "path": "src/plugins/kibana_react/public/overlays/types.ts",
             "deprecated": false,
@@ -3020,13 +3002,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.OverlayFlyoutOpenOptions",
-                    "text": "OverlayFlyoutOpenOptions"
-                  },
+                  "OverlayFlyoutOpenOptions",
                   " | undefined"
                 ],
                 "path": "src/plugins/kibana_react/public/overlays/types.ts",
@@ -3045,21 +3021,9 @@
             "description": [],
             "signature": [
               "(node: React.ReactNode, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.OverlayModalOpenOptions",
-                "text": "OverlayModalOpenOptions"
-              },
+              "OverlayModalOpenOptions",
               " | undefined) => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.OverlayRef",
-                "text": "OverlayRef"
-              }
+              "OverlayRef"
             ],
             "path": "src/plugins/kibana_react/public/overlays/types.ts",
             "deprecated": false,
@@ -3086,13 +3050,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.OverlayModalOpenOptions",
-                    "text": "OverlayModalOpenOptions"
-                  },
+                  "OverlayModalOpenOptions",
                   " | undefined"
                 ],
                 "path": "src/plugins/kibana_react/public/overlays/types.ts",
@@ -4321,13 +4279,7 @@
             "text": "NotificationsStart"
           },
           " | undefined; overlays?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.OverlayStart",
-            "text": "OverlayStart"
-          },
+          "OverlayStart",
           " | undefined; uiSettings?: ",
           "IUiSettingsClient",
           " | undefined; fatalErrors?: ",

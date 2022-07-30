@@ -2390,20 +2390,20 @@
               "path": "x-pack/plugins/ml/server/plugin.ts"
             },
             {
-              "plugin": "enterpriseSearch",
-              "path": "x-pack/plugins/enterprise_search/server/lib/check_access.ts"
-            },
-            {
-              "plugin": "enterpriseSearch",
-              "path": "x-pack/plugins/enterprise_search/server/lib/check_access.ts"
-            },
-            {
-              "plugin": "enterpriseSearch",
-              "path": "x-pack/plugins/enterprise_search/server/lib/check_access.ts"
-            },
-            {
               "plugin": "savedObjectsTagging",
               "path": "x-pack/plugins/saved_objects_tagging/server/request_handler_context.ts"
+            },
+            {
+              "plugin": "enterpriseSearch",
+              "path": "x-pack/plugins/enterprise_search/server/lib/check_access.ts"
+            },
+            {
+              "plugin": "enterpriseSearch",
+              "path": "x-pack/plugins/enterprise_search/server/lib/check_access.ts"
+            },
+            {
+              "plugin": "enterpriseSearch",
+              "path": "x-pack/plugins/enterprise_search/server/lib/check_access.ts"
             }
           ]
         },

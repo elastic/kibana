@@ -545,13 +545,7 @@
             "description": [],
             "signature": [
               "(element: HTMLElement) => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.UnmountCallback",
-                "text": "UnmountCallback"
-              }
+              "UnmountCallback"
             ],
             "path": "src/core/public/chrome/nav_controls/nav_controls_service.ts",
             "deprecated": false,
@@ -567,7 +561,7 @@
                 "signature": [
                   "T"
                 ],
-                "path": "src/core/public/types.ts",
+                "path": "node_modules/@types/kbn__core-mount-utils-browser/index.d.ts",
                 "deprecated": false
               }
             ]
@@ -1881,13 +1875,7 @@
             "description": [],
             "signature": [
               "(element: HTMLDivElement) => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.UnmountCallback",
-                "text": "UnmountCallback"
-              }
+              "UnmountCallback"
             ],
             "path": "src/core/public/chrome/types.ts",
             "deprecated": false,
@@ -1903,7 +1891,7 @@
                 "signature": [
                   "T"
                 ],
-                "path": "src/core/public/types.ts",
+                "path": "node_modules/@types/kbn__core-mount-utils-browser/index.d.ts",
                 "deprecated": false
               }
             ]
