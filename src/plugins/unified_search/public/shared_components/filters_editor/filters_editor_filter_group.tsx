@@ -68,17 +68,16 @@ export const FilterGroup = ({
         <>
           <EuiFlexGroup direction="column" gutterSize="xs">
             <EuiFlexItem>
-              <EuiPanel color={color} paddingSize={'none'} hasShadow={false}>
-                <FilterItem
-                  filter={filter}
-                  path={`${path}${path ? '.' : ''}${index}`}
-                  timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-                  reverseBackground={reverseBackground}
-                  disableOr={orDisabled}
-                  disableAnd={andDisabled}
-                  disableRemove={removeDisabled}
-                />
-              </EuiPanel>
+              <FilterItem
+                filter={filter}
+                path={`${path}${path ? '.' : ''}${index}`}
+                timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+                reverseBackground={reverseBackground}
+                disableOr={orDisabled}
+                disableAnd={andDisabled}
+                disableRemove={removeDisabled}
+                color={color}
+              />
             </EuiFlexItem>
 
             {index + 1 < acc.length ? (

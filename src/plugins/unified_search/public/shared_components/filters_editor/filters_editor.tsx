@@ -19,7 +19,7 @@ export interface FiltersEditorProps {
   filters: Filter[];
   dataView: DataView;
   onChange: (filters: Filter[]) => void;
-  timeRangeForSuggestionsOverride: boolean | undefined;
+  timeRangeForSuggestionsOverride?: boolean;
   maxDepth?: number;
   disableOr?: boolean;
   disableAnd?: boolean;
