@@ -76,7 +76,6 @@ export const getDataFromFieldsHits = (
     // return simple field value (non-esc object, non-array)
     if (
       !isObjectArray ||
-      isThreatEnrichmentFieldOrSubfield(field, prependField) ||
       Object.keys({ ...ecsFieldMap, ...technicalRuleFieldMap, ...experimentalRuleFieldMap }).find(
         (ecsField) => ecsField === field
       ) === undefined
@@ -93,6 +92,14 @@ export const getDataFromFieldsHits = (
       ];
     }
 
+    const threatEnrichmentObject = isThreatEnrichmentFieldOrSubfield(field, prependField) ? [{
+      category: fieldCategory,
+      field: dotField,
+      values: strArr,
+      originalValue: strArr,
+      isObjectArray,
+    }] : [];
+
     // format nested fields
     const nestedFields = Array.isArray(item)
       ? item
@@ -104,6 +111,7 @@ export const getDataFromFieldsHits = (
     const flat: Record<string, TimelineEventsDetailsItem> = [
       ...accumulator,
       ...nestedFields,
+      ...threatEnrichmentObject,
     ].reduce(
       (acc, f) => ({
         ...acc,
