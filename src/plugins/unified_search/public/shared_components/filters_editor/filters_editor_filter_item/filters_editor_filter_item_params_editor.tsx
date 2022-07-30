@@ -24,7 +24,7 @@ interface ParamsEditorProps<TParams = unknown> {
   params: TParams;
   onHandleParamsChange: (params: TParams) => void;
   onHandleParamsUpdate: (value: TParams) => void;
-  timeRangeForSuggestionsOverride: boolean;
+  timeRangeForSuggestionsOverride?: boolean;
   field?: DataViewField;
   operator?: Operator;
 }

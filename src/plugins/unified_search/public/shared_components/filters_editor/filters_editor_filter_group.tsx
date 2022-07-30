@@ -20,7 +20,7 @@ export interface FilterGroupProps {
   filters: Filter[];
   conditionType: ConditionTypes;
   path: Path;
-  timeRangeForSuggestionsOverride: boolean;
+  timeRangeForSuggestionsOverride?: boolean;
   reverseBackground?: boolean;
 }
 
@@ -47,7 +47,7 @@ export const FilterGroup = ({
   filters,
   conditionType,
   path,
-  timeRangeForSuggestionsOverride = false,
+  timeRangeForSuggestionsOverride,
   reverseBackground = false,
 }: FilterGroupProps) => {
   const {

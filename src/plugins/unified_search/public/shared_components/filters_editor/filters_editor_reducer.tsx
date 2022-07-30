@@ -12,7 +12,13 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { Path } from './filter_editors_types';
 import type { Operator } from '../../filter_bar/filter_editor/lib/filter_operators';
 import type { ConditionTypes } from './filters_editor_condition_types';
-import { addFilter, moveFilter, removeFilter, updateFilter } from './filters_editor_utils';
+import {
+  addFilter,
+  moveFilter,
+  removeFilter,
+  updateFilter,
+  updateFilterField,
+} from './filters_editor_utils';
 
 /** @internal **/
 export interface FiltersEditorState {
@@ -28,10 +34,16 @@ export interface AddFilterPayload {
 
 /** @internal **/
 export interface UpdateFilterPayload {
-  dataView: DataView;
+  dataView?: DataView;
   field?: DataViewField;
   operator?: Operator | undefined;
   params?: Filter['meta']['params'] | undefined;
+  path: string;
+}
+
+/** @internal **/
+export interface UpdateFilterFieldPayload {
+  field?: DataViewField;
   path: string;
 }
 
@@ -52,7 +64,8 @@ export type FiltersEditorActions =
   | { type: 'addFilter'; payload: AddFilterPayload }
   | { type: 'updateFilter'; payload: UpdateFilterPayload }
   | { type: 'removeFilter'; payload: RemoveFilterPayload }
-  | { type: 'moveFilter'; payload: MoveFilterPayload };
+  | { type: 'moveFilter'; payload: MoveFilterPayload }
+  | { type: 'updateFilterField'; payload: UpdateFilterFieldPayload };
 
 export const filtersEditorReducer: Reducer<FiltersEditorState, FiltersEditorActions> = (
   state,
@@ -79,6 +92,11 @@ export const filtersEditorReducer: Reducer<FiltersEditorState, FiltersEditorActi
           action.payload.operator,
           action.payload.params
         ),
+      };
+    case 'updateFilterField':
+      return {
+        ...state,
+        filters: updateFilterField(state.filters, action.payload.path, action.payload.field),
       };
     case 'removeFilter':
       return {

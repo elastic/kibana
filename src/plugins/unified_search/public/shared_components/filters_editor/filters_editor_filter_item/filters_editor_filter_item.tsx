@@ -38,7 +38,7 @@ import { Operator } from '../../../filter_bar/filter_editor/lib/filter_operators
 export interface FilterItemProps {
   path: Path;
   filter: Filter;
-  timeRangeForSuggestionsOverride: boolean;
+  timeRangeForSuggestionsOverride?: boolean;
   reverseBackground?: boolean;
   disableOr: boolean;
   disableAnd: boolean;
@@ -69,8 +69,8 @@ export function FilterItem({
 
   const onHandleField = (field: DataViewField) => {
     dispatch({
-      type: 'updateFilter',
-      payload: { dataView, field, operator, params, path },
+      type: 'updateFilterField',
+      payload: { field, path },
     });
   };
 
@@ -175,15 +175,17 @@ export function FilterItem({
                       </EuiFormRow>
                     </EuiFlexItem>
                     <EuiFlexItem grow={4}>
-                      <ParamsEditor
-                        dataView={dataView}
-                        field={field}
-                        operator={operator}
-                        params={params}
-                        onHandleParamsChange={onHandleParamsChange}
-                        onHandleParamsUpdate={onHandleParamsUpdate}
-                        timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-                      />
+                      <EuiFormRow fullWidth>
+                        <ParamsEditor
+                          dataView={dataView}
+                          field={field}
+                          operator={operator}
+                          params={params}
+                          onHandleParamsChange={onHandleParamsChange}
+                          onHandleParamsUpdate={onHandleParamsUpdate}
+                          timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+                        />
+                      </EuiFormRow>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>

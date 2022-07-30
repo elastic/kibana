@@ -187,7 +187,7 @@ export const moveFilter = (
 export const updateFilter = (
   filters: Filter[],
   path: string,
-  dataView: DataView,
+  dataView?: DataView,
   field?: DataViewField,
   operator?: Operator,
   params?: Filter['meta']['params']
@@ -211,15 +211,50 @@ export const updateFilter = (
       ...filter.meta,
       negate: operator?.negate,
       type: operator?.type,
-      params: { ...filter.meta.params, query: params },
+      params: operator?.type === 'exists' ? undefined : params, // operator?.type === 'phrase' ? { ...filter.meta.params, query: params } : params,
+      value: operator?.type === 'exists' ? 'exists' : undefined,
     },
-    query: {
-      ...filter.query,
-      match_phrase: { ...filter!.query!.match_phrase, [field!.name]: params },
-    },
+    query: operator?.type === 'exists' ? { exists: { field: field!.name } } : undefined,
+    // operator?.type === 'phrase'
+    //   ? {
+    //       ...filter.query,
+    //       match_phrase: { ...filter!.query!.match_phrase, [field!.name]: params },
+    //     }
+    //   : {
+    //       ...filter.query,
+    //       bool: {
+    //         minimum_should_match: 1,
+    //         should: [{ match_phrase: { ...filter!.query!.match_phrase, [field!.name]: params } }],
+    //       },
+    //     },
   };
 
   console.log('filter', filter);
+
+  const pathInArray = getPathInArray(path);
+  const { targetArray } = getContainerMetaByPath(newFilters, pathInArray);
+  const selector = pathInArray[pathInArray.length - 1];
+  targetArray.splice(selector, 1, changedFilter);
+
+  return newFilters;
+};
+
+export const updateFilterField = (filters: Filter[], path: string, field?: DataViewField) => {
+  const newFilters = [...filters];
+  const changedFilter = getFilterByPath(newFilters, path) as Filter;
+  let filter = Object.assign({}, changedFilter);
+
+  filter = {
+    ...filter,
+    meta: {
+      ...filter.meta,
+      key: field?.name,
+      params: { query: undefined },
+      value: undefined,
+      type: undefined
+    },
+    query: undefined,
+  };
 
   const pathInArray = getPathInArray(path);
   const { targetArray } = getContainerMetaByPath(newFilters, pathInArray);
