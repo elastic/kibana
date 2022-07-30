@@ -20,6 +20,7 @@ import {
 import { buildEmptyFilter, FieldFilter, Filter, getFilterParams } from '@kbn/es-query';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
+import uuid from 'uuid';
 import { FieldInput } from './filters_editor_filter_item_field_input';
 import { OperatorInput } from './filters_editor_filter_item_operator_input';
 import { ParamsEditor } from './filters_editor_filter_item_params_editor';
@@ -150,7 +151,7 @@ export function FilterItem({
             hasInteractiveChildren={true}
           >
             {(provided) => (
-              <EuiPanel color={color} paddingSize={'none'} hasShadow={false}>
+              <EuiPanel color={color} paddingSize={'none'} hasShadow={false} key={uuid()}>
                 <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
                   <EuiFlexItem grow={false} {...provided.dragHandleProps}>
                     <EuiIcon type="grab" size="s" />
