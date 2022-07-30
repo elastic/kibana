@@ -7,7 +7,7 @@
 
 export * from './add_prepackaged_rules_schema';
 export * from './create_rules_bulk_schema';
-export * from './add_rule_exception_schema';
+export * from './create_rule_exception_schema';
 export * from './export_rules_schema';
 export * from './find_rules_schema';
 export * from './import_rules_schema';

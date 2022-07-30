@@ -73,7 +73,7 @@ import { readPrebuiltDevToolContentRoute } from '../lib/prebuilt_dev_tool_conten
 import { createPrebuiltSavedObjectsRoute } from '../lib/prebuilt_saved_objects/routes/create_prebuilt_saved_objects';
 import { readAlertsIndexExistsRoute } from '../lib/detection_engine/routes/index/read_alerts_index_exists_route';
 import { getInstalledIntegrationsRoute } from '../lib/detection_engine/routes/fleet/get_installed_integrations/get_installed_integrations_route';
-import { addRuleExceptionsRoute } from '../lib/detection_engine/routes/rules/add_rule_exceptions_route';
+import { createRuleExceptionsRoute } from '../lib/detection_engine/routes/rules/create_rule_exceptions_route';
 import { registerResolverRoutes } from '../endpoint/routes/resolver';
 
 export const initRoutes = (
@@ -95,7 +95,7 @@ export const initRoutes = (
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
   // All REST rule creation, deletion, updating, etc
   createRulesRoute(router, ml);
-  addRuleExceptionsRoute(router);
+  createRuleExceptionsRoute(router);
   readRulesRoute(router, logger);
   updateRulesRoute(router, ml);
   patchRulesRoute(router, ml);
