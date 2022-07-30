@@ -8,7 +8,7 @@
 
 import type { Reducer } from 'react';
 import type { Filter } from '@kbn/es-query';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { Path } from './filter_editors_types';
 import type { Operator } from '../../filter_bar/filter_editor/lib/filter_operators';
 import type { ConditionTypes } from './filters_editor_condition_types';
@@ -16,8 +16,8 @@ import {
   addFilter,
   moveFilter,
   removeFilter,
-  updateFilter,
   updateFilterField,
+  updateFilterOperator,
   updateFilterParams,
 } from './filters_editor_utils';
 
@@ -34,11 +34,8 @@ export interface AddFilterPayload {
 }
 
 /** @internal **/
-export interface UpdateFilterPayload {
-  dataView?: DataView;
-  field?: DataViewField;
+export interface UpdateFilterOperatorPayload {
   operator?: Operator | undefined;
-  params?: Filter['meta']['params'] | undefined;
   path: string;
 }
 
@@ -70,9 +67,9 @@ export interface MoveFilterPayload {
 /** @internal **/
 export type FiltersEditorActions =
   | { type: 'addFilter'; payload: AddFilterPayload }
-  | { type: 'updateFilter'; payload: UpdateFilterPayload }
   | { type: 'removeFilter'; payload: RemoveFilterPayload }
   | { type: 'moveFilter'; payload: MoveFilterPayload }
+  | { type: 'updateFilterOperator'; payload: UpdateFilterOperatorPayload }
   | { type: 'updateFilterField'; payload: UpdateFilterFieldPayload }
   | { type: 'updateFilterParams'; payload: UpdateFilterParamsPayload };
 
@@ -90,28 +87,6 @@ export const filtersEditorReducer: Reducer<FiltersEditorState, FiltersEditorActi
           action.payload.conditionalType
         ),
       };
-    case 'updateFilter':
-      return {
-        ...state,
-        filters: updateFilter(
-          state.filters,
-          action.payload.path,
-          action.payload.dataView,
-          action.payload.field,
-          action.payload.operator,
-          action.payload.params
-        ),
-      };
-    case 'updateFilterField':
-      return {
-        ...state,
-        filters: updateFilterField(state.filters, action.payload.path, action.payload.field),
-      };
-    case 'updateFilterParams':
-      return {
-        ...state,
-        filters: updateFilterParams(state.filters, action.payload.path, action.payload.field),
-      };
     case 'removeFilter':
       return {
         ...state,
@@ -126,6 +101,21 @@ export const filtersEditorReducer: Reducer<FiltersEditorState, FiltersEditorActi
           action.payload.pathTo,
           action.payload.conditionalType
         ),
+      };
+    case 'updateFilterField':
+      return {
+        ...state,
+        filters: updateFilterField(state.filters, action.payload.path, action.payload.field),
+      };
+    case 'updateFilterOperator':
+      return {
+        ...state,
+        filters: updateFilterOperator(state.filters, action.payload.path, action.payload.operator),
+      };
+    case 'updateFilterParams':
+      return {
+        ...state,
+        filters: updateFilterParams(state.filters, action.payload.path, action.payload.field),
       };
     default:
       throw new Error('wrong action');

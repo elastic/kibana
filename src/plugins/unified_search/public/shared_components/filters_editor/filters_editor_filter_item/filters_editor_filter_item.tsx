@@ -74,10 +74,10 @@ export function FilterItem({
     });
   };
 
-  const onHandleOperator = (operator: Operator, params: Filter['meta']['params']) => {
+  const onHandleOperator = (operator: Operator) => {
     dispatch({
-      type: 'updateFilter',
-      payload: { dataView, field, operator, params, path },
+      type: 'updateFilterOperator',
+      payload: { operator, path },
     });
   };
 
@@ -90,8 +90,8 @@ export function FilterItem({
 
   const onHandleParamsUpdate = (params: Filter['meta']['params']) => {
     dispatch({
-      type: 'updateFilter',
-      payload: { dataView, field, operator, params, path },
+      type: 'updateFilterParams',
+      payload: { field, params, path },
     });
   };
 

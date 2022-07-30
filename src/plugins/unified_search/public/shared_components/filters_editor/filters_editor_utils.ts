@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 import { buildEmptyFilter, Filter } from '@kbn/es-query';
 import { Operator } from '../../filter_bar/filter_editor/lib/filter_operators';
 import { ConditionTypes } from './filters_editor_condition_types';
@@ -184,61 +184,6 @@ export const moveFilter = (
   }
 };
 
-export const updateFilter = (
-  filters: Filter[],
-  path: string,
-  dataView?: DataView,
-  field?: DataViewField,
-  operator?: Operator,
-  params?: Filter['meta']['params']
-) => {
-  console.log('path', path);
-  console.log('dataView', dataView);
-  console.log('field', field);
-  console.log('operator', operator);
-  console.log('params', params);
-
-  const newFilters = [...filters];
-  const changedFilter = getFilterByPath(newFilters, path) as Filter;
-  let filter = Object.assign({}, changedFilter);
-
-  console.log('changedFilter', changedFilter);
-
-  // case with params changes
-  filter = {
-    ...filter,
-    meta: {
-      ...filter.meta,
-      negate: operator?.negate,
-      type: operator?.type,
-      params: operator?.type === 'exists' ? undefined : params, // operator?.type === 'phrase' ? { ...filter.meta.params, query: params } : params,
-      value: operator?.type === 'exists' ? 'exists' : undefined,
-    },
-    query: operator?.type === 'exists' ? { exists: { field: field!.name } } : undefined,
-    // operator?.type === 'phrase'
-    //   ? {
-    //       ...filter.query,
-    //       match_phrase: { ...filter!.query!.match_phrase, [field!.name]: params },
-    //     }
-    //   : {
-    //       ...filter.query,
-    //       bool: {
-    //         minimum_should_match: 1,
-    //         should: [{ match_phrase: { ...filter!.query!.match_phrase, [field!.name]: params } }],
-    //       },
-    //     },
-  };
-
-  console.log('filter', filter);
-
-  const pathInArray = getPathInArray(path);
-  const { targetArray } = getContainerMetaByPath(newFilters, pathInArray);
-  const selector = pathInArray[pathInArray.length - 1];
-  targetArray.splice(selector, 1, changedFilter);
-
-  return newFilters;
-};
-
 export const updateFilterField = (filters: Filter[], path: string, field?: DataViewField) => {
   const newFilters = [...filters];
   const changedFilter = getFilterByPath(newFilters, path) as Filter;
@@ -252,6 +197,31 @@ export const updateFilterField = (filters: Filter[], path: string, field?: DataV
       params: { query: undefined },
       value: undefined,
       type: undefined,
+    },
+    query: undefined,
+  };
+
+  const pathInArray = getPathInArray(path);
+  const { targetArray } = getContainerMetaByPath(newFilters, pathInArray);
+  const selector = pathInArray[pathInArray.length - 1];
+  targetArray.splice(selector, 1, filter);
+
+  return newFilters;
+};
+
+export const updateFilterOperator = (filters: Filter[], path: string, operator?: Operator) => {
+  const newFilters = [...filters];
+  const changedFilter = getFilterByPath(newFilters, path) as Filter;
+  let filter = Object.assign({}, changedFilter);
+
+  filter = {
+    ...filter,
+    meta: {
+      ...filter.meta,
+      negate: operator?.negate,
+      type: operator?.type,
+      params: { ...filter.meta.params, query: undefined },
+      value: undefined,
     },
     query: undefined,
   };
