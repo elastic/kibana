@@ -15,7 +15,7 @@ import { CoreContextProvider } from '@kbn/core-theme-browser-internal';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { GlobalToastList } from './global_toast_list';
-import { ToastsApi, IToasts } from './toasts_api';
+import { ToastsApi } from './toasts_api';
 
 interface SetupDeps {
   uiSettings: IUiSettingsClient;
@@ -28,17 +28,17 @@ interface StartDeps {
   targetDomElement: HTMLElement;
 }
 
-/**
- * {@link IToasts}
- * @public
- */
-export type ToastsSetup = IToasts;
+// /**
+//  * {@link IToasts}
+//  * @public
+//  */
+// export type ToastsSetup = IToasts;
 
-/**
- * {@link IToasts}
- * @public
- */
-export type ToastsStart = IToasts;
+// /**
+//  * {@link IToasts}
+//  * @public
+//  */
+// export type ToastsStart = IToasts;
 
 export class ToastsService {
   private api?: ToastsApi;

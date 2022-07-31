@@ -13,7 +13,8 @@ import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
-import { ToastsService, ToastsSetup, ToastsStart } from './toasts';
+import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
+import { ToastsService } from './toasts';
 
 export interface SetupDeps {
   uiSettings: IUiSettingsClient;
@@ -84,14 +85,14 @@ export class NotificationsService {
   }
 }
 
-/** @public */
-export interface NotificationsSetup {
-  /** {@link ToastsSetup} */
-  toasts: ToastsSetup;
-}
+// /** @public */
+// export interface NotificationsSetup {
+//   /** {@link ToastsSetup} */
+//   toasts: ToastsSetup;
+// }
 
-/** @public */
-export interface NotificationsStart {
-  /** {@link ToastsStart} */
-  toasts: ToastsStart;
-}
+// /** @public */
+// export interface NotificationsStart {
+//   /** {@link ToastsStart} */
+//   toasts: ToastsStart;
+// }

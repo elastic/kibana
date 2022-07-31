@@ -3339,6 +3339,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-notifications-browser@link:bazel-bin/packages/core/notifications/core-notifications-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-overlays-browser-internal@link:bazel-bin/packages/core/overlays/core-overlays-browser-internal":
   version "0.0.0"
   uid ""
@@ -7196,6 +7200,10 @@
   uid ""
 
 "@types/kbn__core-node-server@link:bazel-bin/packages/core/node/core-node-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-notifications-browser@link:bazel-bin/packages/core/notifications/core-notifications-browser/npm_module_types":
   version "0.0.0"
   uid ""
 
