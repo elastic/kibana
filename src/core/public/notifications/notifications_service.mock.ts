@@ -8,11 +8,8 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { MockedKeys } from '@kbn/utility-types-jest';
-import {
-  NotificationsService,
-  NotificationsSetup,
-  NotificationsStart,
-} from './notifications_service';
+import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
+import { NotificationsService } from './notifications_service';
 import { toastsServiceMock } from './toasts/toasts_service.mock';
 
 const createSetupContractMock = () => {

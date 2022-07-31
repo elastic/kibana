@@ -6,14 +6,4 @@
  * Side Public License, v 1.
  */
 export { NotificationsService } from './notifications_service';
-export type {
-  ErrorToastOptions,
-  ToastOptions,
-  Toast,
-  ToastInput,
-  IToasts,
-  ToastsApi,
-  ToastInputFields,
-  ToastsSetup,
-  ToastsStart,
-} from './toasts';
+export type { ToastsApi } from './toasts';

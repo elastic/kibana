@@ -46,6 +46,7 @@ import type { UiSettingsState, IUiSettingsClient } from '@kbn/core-ui-settings-b
 import type { DeprecationsServiceStart } from '@kbn/core-deprecations-browser';
 import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
+import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
 import type {
   ChromeBadge,
   ChromeBreadcrumb,
@@ -68,7 +69,6 @@ import type {
   NavType,
   ChromeHelpMenuActions,
 } from './chrome';
-import type { NotificationsSetup, NotificationsStart } from './notifications';
 import type {
   Plugin,
   PluginInitializer,
@@ -206,13 +206,14 @@ export type {
   Toast,
   ToastInput,
   IToasts,
-  ToastsApi,
   ToastInputFields,
   ToastsSetup,
   ToastsStart,
   ToastOptions,
   ErrorToastOptions,
-} from './notifications';
+} from '@kbn/core-notifications-browser';
+
+export type { ToastsApi } from './notifications';
 
 export type { ThemeServiceSetup, ThemeServiceStart, CoreTheme } from '@kbn/core-theme-browser';
 
