@@ -26,7 +26,6 @@ export default function ({
         await PageObjects.common.navigateToUrl('home', '/some/url?some-query=some-value#some-hash', {
           useActualUrl: true,
         });
-      });
       it('check unauthenticaed page', function () {
         before(async function () {
           await PageObjects.common.sleep(2000);
@@ -36,6 +35,7 @@ export default function ({
           await browser.setScreenshotSize(1000, 1337);
           await PageObjects.common.sleep(2000);
         });
+      });
       it('unauthenticatedPage overview should match snapshot', async function () {
         try {
           const percentDifference = await screenshot.compareAgainstBaseline(

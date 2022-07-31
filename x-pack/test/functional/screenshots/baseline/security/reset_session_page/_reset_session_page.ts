@@ -40,6 +40,23 @@ export default function ({
     container.remove();
     container = null;
   });
+  //check reset session component
+  it("should render the ResetSessionPage", () => {
+    act(() => {
+      render(
+        <ResetSessionPage/>,
+          container
+      );
+    });
+  });
+  expect(container.innerHTML).toMatchInlineSnapshot();
+  //check if a message is shown 
+  it("should render a 'You do not have permission to access the requested page' message", () => {
+    act(() => {
+      render(<ResetSessionPage/>, container);
+    });
+  });
+  expect(container.innerHTML).toMatchInlineSnapshot();
   //First navigate to the reset session page
   describe('navigate to the reset session Page', function () {
     before(async function () {
@@ -47,21 +64,6 @@ export default function ({
         useActualUrl: true,
       });
     });
-    //check reset session component
-    it("should render the ResetSessionPage", () => {
-      act(() => {
-        render(
-          <ResetSessionPage/>,
-          container
-        );
-      });
-    expect(container.innerHTML).toMatchInlineSnapshot();
-    //check if a message is shown 
-    it("should render a 'You do not have permission to access the requested page' message", () => {
-      act(() => {
-        render(<ResetSessionPage/>, container);
-    });
-    expect(container.innerHTML).toMatchInlineSnapshot();
     //When the user hovers on the reset session button
     it('when the user hovers over the reset session button', () => {
       let buttonPrimary: WebElementWrapper;
@@ -80,16 +82,16 @@ export default function ({
       });
       //When the user clicks on the reset session button
       async clickPrimaryButton() {
-          await testSubjects.click('ResetSessionButton');
-        };
-        it('should render as expected', async () => {
-          expect(
-            await screenshot.compareAgainstBaseline(
-              `${fileNamePrefix}_with_primary_button_hovered`,
-              updateBaselines,
-            )
-          ).to.be.lessThan(expectedDifference);
-        });
+        await testSubjects.click('ResetSessionButton');
+      };
+      it('should render as expected', async () => {
+        expect(
+          await screenshot.compareAgainstBaseline(
+            `${fileNamePrefix}_with_primary_button_clicked`,
+            updateBaselines,
+          )
+        ).to.be.lessThan(expectedDifference);
+      });
       //When the user hovers on the go back button
       it('when the user hovers over the secondary button', () => {
         let buttonSecondary: WebElementWrapper;
@@ -108,16 +110,18 @@ export default function ({
         });
         //When the user clicks on the go back button
         async goBackButton() {
-            await testSubjects.click('GoBackButton');
-          };
-          it('should render as expected', async () => {
-            expect(
-              await screenshot.compareAgainstBaseline(
-                `${fileNamePrefix}_with_secondary_button_hovered`,
-                updateBaselines,
-              )
-            ).to.be.lessThan(expectedDifference);
-          });
-          
+          await testSubjects.click('GoBackButton');
+        };
+        it('should render as expected', async () => {
+          expect(
+            await screenshot.compareAgainstBaseline(
+              `${fileNamePrefix}_with_secondary_button_clicked`,
+              updateBaselines,
+            )
+          ).to.be.lessThan(expectedDifference);
         });
-      }
+
+      });
+    });
+  });
+}
