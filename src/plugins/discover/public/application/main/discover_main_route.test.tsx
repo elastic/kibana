@@ -107,7 +107,7 @@ describe('DiscoverMainRoute', () => {
 
     await waitFor(() => {
       component.update();
-      expect(component.find(DiscoverMainApp).exists()).toBe(true);
+      expect(findTestSubject(component, 'kbnNoDataPage').length).toBe(1);
     });
   });
 });
