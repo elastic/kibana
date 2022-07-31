@@ -18,8 +18,8 @@ export function createCommonFilter({
   timeTo,
 }: {
   kuery: string;
-  timeFrom: string;
-  timeTo: string;
+  timeFrom: number;
+  timeTo: number;
 }): ProjectTimeQuery {
   return {
     bool: {
@@ -28,8 +28,8 @@ export function createCommonFilter({
         {
           range: {
             '@timestamp': {
-              gte: timeFrom,
-              lt: timeTo,
+              gte: String(timeFrom),
+              lt: String(timeTo),
               format: 'epoch_second',
               boost: 1.0,
             },

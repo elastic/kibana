@@ -34,8 +34,8 @@ export async function topNElasticSearchQuery({
 }: {
   client: ProfilingESClient;
   logger: Logger;
-  timeFrom: string;
-  timeTo: string;
+  timeFrom: number;
+  timeTo: number;
   searchField: string;
   response: KibanaResponseFactory;
   kuery: string;
@@ -133,8 +133,8 @@ export function queryTopNCommon(
       path: pathName,
       validate: {
         query: schema.object({
-          timeFrom: schema.string(),
-          timeTo: schema.string(),
+          timeFrom: schema.number(),
+          timeTo: schema.number(),
           kuery: schema.string(),
         }),
       },

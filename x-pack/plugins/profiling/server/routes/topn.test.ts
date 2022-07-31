@@ -54,8 +54,8 @@ describe('TopN data from Elasticsearch', () => {
       const response = await topNElasticSearchQuery({
         client,
         logger,
-        timeFrom: '456',
-        timeTo: '789',
+        timeFrom: 456,
+        timeTo: 789,
         searchField: 'StackTraceID',
         kuery: '',
         response: kibanaResponseFactory,
