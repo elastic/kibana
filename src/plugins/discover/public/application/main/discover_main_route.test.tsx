@@ -25,48 +25,10 @@ jest.mock('./discover_main_app', () => {
     DiscoverMainApp: jest.fn(),
   };
 });
-discoverServiceMock.data.dataViews.getCache = jest.fn(() => {
-  return Promise.resolve([dataViewMock as unknown as SavedObject<DataViewSavedObjectAttrs>]);
-});
-discoverServiceMock.data.dataViews.get = jest.fn(() => {
-  return Promise.resolve(dataViewMock);
-});
-
-discoverServiceMock.data.dataViews.getDefaultDataView = jest.fn(() => {
-  return Promise.resolve(dataViewMock);
-});
-
-discoverServiceMock.data.search.searchSource.createEmpty = jest.fn(() => {
-  const fields: Record<string, unknown> = {};
-  const empty = {
-    ...searchSourceInstanceMock,
-    setField: (key: string, value: unknown) => (fields[key] = value),
-    getField: (key: string) => {
-      return fields[key];
-    },
-  };
-  return empty as unknown as SearchSource;
-});
-
-setHeaderActionMenuMounter(jest.fn());
-
-const mountComponent = () => {
-  const props = {
-    isDev: false,
-  };
-
-  return mountWithIntl(
-    <MemoryRouter>
-      <KibanaContextProvider services={discoverServiceMock}>
-        <DiscoverMainRoute {...props} />
-      </KibanaContextProvider>
-    </MemoryRouter>
-  );
-};
 
 describe('DiscoverMainRoute', () => {
-  test('renders the main app', async () => {
-    const component = mountComponent();
+  test('renders the main app when hasESData=true & hasUserDataView=true ', async () => {
+    const component = mountComponent(true, true);
 
     await waitFor(() => {
       component.update();
@@ -74,36 +36,24 @@ describe('DiscoverMainRoute', () => {
     });
   });
 
-  test('renders correctly when no ES data / no data views are available', async () => {
-    const component = mountComponent();
-    discoverServiceMock.data.dataViews.hasData.hasESData = jest.fn(() => Promise.resolve(false));
-    discoverServiceMock.data.dataViews.hasData.hasUserDataView = jest.fn(() =>
-      Promise.resolve(false)
-    );
+  test('renders no data page when hasESData=false & hasUserDataView=false', async () => {
+    const component = mountComponent(false, false);
 
     await waitFor(() => {
       component.update();
       expect(findTestSubject(component, 'kbnNoDataPage').length).toBe(1);
     });
   });
-  test('renders correctly when ES data / no data views are available', async () => {
-    const component = mountComponent();
-    discoverServiceMock.data.dataViews.hasData.hasESData = jest.fn(() => Promise.resolve(true));
-    discoverServiceMock.data.dataViews.hasData.hasUserDataView = jest.fn(() =>
-      Promise.resolve(false)
-    );
+  test('renders no data view when hasESData=true & hasUserDataView=false', async () => {
+    const component = mountComponent(true, false);
 
     await waitFor(() => {
       component.update();
       expect(findTestSubject(component, 'noDataViewsPrompt').length).toBe(1);
     });
   });
-  test('renders correctly when no ES data / data views are available', async () => {
-    const component = mountComponent();
-    discoverServiceMock.data.dataViews.hasData.hasESData = jest.fn(() => Promise.resolve(false));
-    discoverServiceMock.data.dataViews.hasData.hasUserDataView = jest.fn(() =>
-      Promise.resolve(true)
-    );
+  test('renders no data page when hasESData=false & hasUserDataView=true', async () => {
+    const component = mountComponent(false, true);
 
     await waitFor(() => {
       component.update();
@@ -111,3 +61,43 @@ describe('DiscoverMainRoute', () => {
     });
   });
 });
+const mountComponent = (hasESData = true, hasUserDataView = true) => {
+  const props = {
+    isDev: false,
+  };
+
+  return mountWithIntl(
+    <MemoryRouter>
+      <KibanaContextProvider services={getServicesMock(hasESData, hasUserDataView)}>
+        <DiscoverMainRoute {...props} />
+      </KibanaContextProvider>
+    </MemoryRouter>
+  );
+};
+function getServicesMock(hasESData = true, hasUserDataView = true) {
+  const dataViewsMock = discoverServiceMock.data.dataViews;
+  dataViewsMock.getCache = jest.fn(() => {
+    return Promise.resolve([dataViewMock as unknown as SavedObject<DataViewSavedObjectAttrs>]);
+  });
+  dataViewsMock.get = jest.fn(() => Promise.resolve(dataViewMock));
+  dataViewsMock.getDefaultDataView = jest.fn(() => Promise.resolve(dataViewMock));
+  dataViewsMock.hasData = {
+    hasESData: jest.fn(() => Promise.resolve(hasESData)),
+    hasUserDataView: jest.fn(() => Promise.resolve(hasUserDataView)),
+    hasDataView: jest.fn(() => Promise.resolve(true)),
+  };
+  dataViewsMock.refreshFields = jest.fn();
+
+  discoverServiceMock.data.search.searchSource.createEmpty = jest.fn(() => {
+    const fields: Record<string, unknown> = {};
+    const empty = {
+      ...searchSourceInstanceMock,
+      setField: (key: string, value: unknown) => (fields[key] = value),
+      getField: (key: string) => fields[key],
+    };
+    return empty as unknown as SearchSource;
+  });
+  return discoverServiceMock;
+}
+
+setHeaderActionMenuMounter(jest.fn());

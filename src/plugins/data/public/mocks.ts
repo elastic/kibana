@@ -27,7 +27,6 @@ const createSetupContract = (): Setup => {
 const createStartContract = (): Start => {
   const queryStartMock = queryServiceMock.createStartContract();
   const dataViews = {
-    getCache: jest.fn(() => []),
     find: jest.fn((search) => [{ id: search, title: search }]),
     createField: jest.fn(() => {}),
     createFieldList: jest.fn(() => []),
@@ -40,11 +39,6 @@ const createStartContract = (): Start => {
     get: jest.fn().mockReturnValue(Promise.resolve({})),
     clearCache: jest.fn(),
     getIdsWithTitle: jest.fn(),
-    hasData: {
-      hasUserDataView: jest.fn().mockReturnValue(Promise.resolve(true)),
-      hasESData: jest.fn().mockReturnValue(Promise.resolve(true)),
-    },
-    refreshFields: jest.fn(),
   } as unknown as DataViewsContract;
 
   return {
