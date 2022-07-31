@@ -45,5 +45,5 @@ export const RUNTIME_FIELD_OPTIONS = [
   {
     label: 'Composite',
     value: 'composite',
-  },
+  } as EuiComboBoxOptionOption<RuntimeType>,
 ];
