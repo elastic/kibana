@@ -99,7 +99,6 @@ const formSerializer = (field: FieldFormInternal): Field => {
     type: type && type[0].value!,
     // By passing "null" we are explicitly telling DataView to remove the
     // format if there is one defined for the field.
-    // todo
     format: format === undefined ? null : format,
     ...rest,
   };
@@ -197,7 +196,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
     // if (fieldTypeInfo === undefined || !isEqual(fieldTypeInfoUpdate, fieldTypeInfo)) {
 
     // todo does this get fired with key removal?
-    console.log('hasUpdates', hasUpdates);
+    // console.log('hasUpdates', hasUpdates);
     if (hasUpdates) {
       // form.updateFieldValues({ subfields: { ...fieldsAndTypes, ...update } });
 

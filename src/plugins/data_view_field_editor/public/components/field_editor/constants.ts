@@ -40,7 +40,10 @@ export const RUNTIME_FIELD_OPTIONS_PRIMITIVE: Array<EuiComboBoxOptionOption<Runt
   },
 ];
 
-export const RUNTIME_FIELD_OPTIONS = RUNTIME_FIELD_OPTIONS_PRIMITIVE.push({
-  label: 'Composite',
-  value: 'composite',
-});
+export const RUNTIME_FIELD_OPTIONS = [
+  ...RUNTIME_FIELD_OPTIONS_PRIMITIVE,
+  {
+    label: 'Composite',
+    value: 'composite',
+  },
+];
