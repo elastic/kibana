@@ -54,10 +54,7 @@ export function aggregateByFieldAndTimestamp(searchField: string, interval: stri
   return {
     terms: {
       field: searchField,
-      // We remove the ordering since we will rely directly on the natural
-      // ordering of Elasticsearch: by default this will be the descending count
-      // of matched documents. This is not equal to the ordering by sum of Count field,
-      // but it's a good-enough approximation given the distribution of Count.
+      order: { count: 'desc' },
       size: 100,
       // 'execution_hint: map' skips the slow building of ordinals that we don't need.
       // Especially with high cardinality fields, this setting speeds up the aggregation.
