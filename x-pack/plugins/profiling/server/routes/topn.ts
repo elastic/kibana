@@ -88,7 +88,7 @@ export async function topNElasticSearchQuery({
 
   const histogramBuckets = histogram?.buckets ?? [];
   for (let i = 0; i < histogramBuckets.length; i++) {
-    totalDocCount += histogramBuckets[i].doc_count;
+    totalDocCount += histogramBuckets[i].count.value;
     histogramBuckets[i].group_by.buckets.forEach((stackTraceItem) => {
       const count = stackTraceItem.count.value ?? 0;
       const oldCount = stackTraceEvents.get(String(stackTraceItem.key));

@@ -25,6 +25,7 @@ export interface TopNSamplesHistogramResponse {
   buckets: Array<{
     key: string | number;
     doc_count: number;
+    count: { value: number | null };
     group_by: {
       buckets: Array<{ doc_count: number; key: string | number; count: { value: number | null } }>;
     };

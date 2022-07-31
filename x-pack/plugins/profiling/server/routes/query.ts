@@ -77,6 +77,11 @@ export function aggregateByFieldAndTimestamp(searchField: string, interval: stri
           },
         },
       },
+      count: {
+        sum: {
+          field: 'Count',
+        },
+      },
     },
   };
 }
