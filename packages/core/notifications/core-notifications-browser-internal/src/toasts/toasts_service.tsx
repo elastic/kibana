@@ -28,18 +28,6 @@ interface StartDeps {
   targetDomElement: HTMLElement;
 }
 
-// /**
-//  * {@link IToasts}
-//  * @public
-//  */
-// export type ToastsSetup = IToasts;
-
-// /**
-//  * {@link IToasts}
-//  * @public
-//  */
-// export type ToastsStart = IToasts;
-
 export class ToastsService {
   private api?: ToastsApi;
   private targetDomElement?: HTMLElement;
