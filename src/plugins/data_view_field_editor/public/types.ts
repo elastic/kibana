@@ -63,16 +63,12 @@ export type InternalFieldType = 'concrete' | 'runtime';
  * The data model for the field editor
  * @public
  */
-export interface Field extends Omit<RuntimeField, 'format'> {
+export interface Field extends RuntimeField {
   /**
    * name / path used for the field
    */
   name: FieldSpec['name'];
   parentName?: string;
-  /**
-   * configuration of the field format
-   */
-  format?: RuntimeField['format'] | null;
 }
 
 export interface FieldFormatConfig {

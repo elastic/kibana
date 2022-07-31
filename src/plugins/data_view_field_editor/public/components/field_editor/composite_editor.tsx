@@ -45,7 +45,7 @@ export const CompositeEditor = ({ value, setValue }: CompositeEditorProps) => {
         </div>
         {Object.entries(value).map(([key, itemValue], idx) => {
           const val = RUNTIME_FIELD_OPTIONS_PRIMITIVE.find(
-            ({ value: optionValue }) => optionValue === itemValue // || 'keyword'
+            ({ value: optionValue }) => optionValue === itemValue
           );
 
           return (

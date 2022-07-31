@@ -73,7 +73,7 @@ export interface FieldConfiguration {
   /**
    * Field format in serialized form
    */
-  format?: SerializedFieldFormat;
+  format?: SerializedFieldFormat | null;
   /**
    * Custom label
    */
