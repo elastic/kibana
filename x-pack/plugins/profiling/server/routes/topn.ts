@@ -72,6 +72,7 @@ export async function topNElasticSearchQuery({
   if (!resEvents.aggregations) {
     return response.ok({
       body: {
+        TotalCount: 0,
         TopN: [],
         Metadata: {},
       },
@@ -88,7 +89,7 @@ export async function topNElasticSearchQuery({
 
   if (searchField !== 'StackTraceID') {
     return response.ok({
-      body: { TopN: topN, Metadata: {} },
+      body: { TotalCount: totalSampledStackTraces, TopN: topN, Metadata: {} },
     });
   }
 
@@ -121,6 +122,7 @@ export async function topNElasticSearchQuery({
     );
     return response.ok({
       body: {
+        TotalCount: totalSampledStackTraces,
         TopN: topN,
         Metadata: metadata,
       },

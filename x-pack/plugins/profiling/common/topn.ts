@@ -21,6 +21,10 @@ export interface TopNSamples {
   TopN: TopNSample[];
 }
 
+export interface TopNResponse extends TopNSamples {
+  TotalCount: number;
+}
+
 export interface TopNSamplesHistogramResponse {
   buckets: Array<{
     key: string | number;
@@ -76,9 +80,8 @@ export interface TopNSubchart {
   Index: number;
 }
 
-export function groupSamplesByCategory(samples: TopNSample[]): TopNSubchart[] {
+export function groupSamplesByCategory(samples: TopNSample[], totalCount: number): TopNSubchart[] {
   const seriesByCategory = new Map<string, CountPerTime[]>();
-  let total = 0;
 
   for (let i = 0; i < samples.length; i++) {
     const sample = samples[i];
@@ -88,8 +91,6 @@ export function groupSamplesByCategory(samples: TopNSample[]): TopNSubchart[] {
     }
     const series = seriesByCategory.get(sample.Category)!;
     series.push({ Timestamp: sample.Timestamp, Count: sample.Count });
-
-    total += sample.Count ?? 0;
   }
 
   const subcharts: Array<Omit<TopNSubchart, 'Color' | 'Index'>> = [];
@@ -98,7 +99,7 @@ export function groupSamplesByCategory(samples: TopNSample[]): TopNSubchart[] {
     const totalPerCategory = series.reduce((sum, { Count }) => sum + (Count ?? 0), 0);
     subcharts.push({
       Category: category,
-      Percentage: (totalPerCategory / total) * 100,
+      Percentage: (totalPerCategory / totalCount) * 100,
       Series: series,
     });
   }
