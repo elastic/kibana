@@ -13,13 +13,20 @@ import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { topNElasticSearchQuery } from './topn';
 
 const anyQuery = 'any::query';
+const smallestInterval = '1s';
 const testAgg = { aggs: { test: {} } };
 
 jest.mock('./query', () => ({
   createCommonFilter: ({}: {}) => {
     return anyQuery;
   },
-  autoHistogramSumCountOnGroupByField: (searchField: string): AggregationsAggregationContainer => {
+  findFixedIntervalForBucketsPerTimeRange: (from: number, to: number, buckets: number): string => {
+    return smallestInterval;
+  },
+  aggregateByFieldAndTimestamp: (
+    searchField: string,
+    interval: string
+  ): AggregationsAggregationContainer => {
     return testAgg;
   },
 }));

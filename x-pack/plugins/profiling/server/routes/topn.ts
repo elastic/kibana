@@ -16,7 +16,11 @@ import { ProfilingRequestHandlerContext } from '../types';
 import { createProfilingEsClient, ProfilingESClient } from '../utils/create_profiling_es_client';
 import { getClient } from './compat';
 import { findDownsampledIndex } from './downsampling';
-import { autoHistogramSumCountOnGroupByField, createCommonFilter } from './query';
+import {
+  aggregateByFieldAndTimestamp,
+  createCommonFilter,
+  findFixedIntervalForBucketsPerTimeRange,
+} from './query';
 import { mgetExecutables, mgetStackFrames, mgetStackTraces } from './stacktrace';
 
 export async function topNElasticSearchQuery({
@@ -38,6 +42,7 @@ export async function topNElasticSearchQuery({
 }) {
   const filter = createCommonFilter({ timeFrom, timeTo, kuery });
   const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
+  const fixedInterval = findFixedIntervalForBucketsPerTimeRange(timeFrom, timeTo, 50);
 
   const eventsIndex = await findDownsampledIndex({
     logger,
@@ -52,7 +57,7 @@ export async function topNElasticSearchQuery({
     size: 0,
     query: filter,
     aggs: {
-      histogram: autoHistogramSumCountOnGroupByField(searchField),
+      histogram: aggregateByFieldAndTimestamp(searchField, fixedInterval),
     },
     // Adrien and Dario found out this is a work-around for some bug in 8.1.
     // It reduces the query time by avoiding unneeded searches.

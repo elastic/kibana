@@ -40,7 +40,17 @@ export function createCommonFilter({
   };
 }
 
-export function autoHistogramSumCountOnGroupByField(searchField: string) {
+export function findFixedIntervalForBucketsPerTimeRange(
+  timeFrom: number,
+  timeTo: number,
+  buckets: number
+): string {
+  const range = timeTo - timeFrom;
+  const interval = Math.max(Math.floor(range / buckets), 1);
+  return `${interval}s`;
+}
+
+export function aggregateByFieldAndTimestamp(searchField: string, interval: string) {
   return {
     terms: {
       field: searchField,
@@ -55,9 +65,9 @@ export function autoHistogramSumCountOnGroupByField(searchField: string) {
     },
     aggs: {
       group_by: {
-        auto_date_histogram: {
+        date_histogram: {
           field: '@timestamp',
-          buckets: 50,
+          fixed_interval: interval,
         },
         aggs: {
           count: {
