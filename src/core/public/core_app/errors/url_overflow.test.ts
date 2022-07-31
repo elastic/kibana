@@ -10,7 +10,7 @@ import { createMemoryHistory, History } from 'history';
 import type { IBasePath } from '@kbn/core-http-browser';
 
 import { BasePath } from '@kbn/core-http-browser-internal';
-import { notificationServiceMock } from '../../notifications/notifications_service.mock';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';

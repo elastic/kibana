@@ -9,7 +9,7 @@
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
 import type { NotificationsServiceContract } from '@kbn/core-notifications-browser-internal';
-import { toastsServiceMock } from './toasts/toasts_service.mock';
+import { toastsServiceMock } from './toasts_service.mock';
 
 const createSetupContractMock = () => {
   const setupContract: MockedKeys<NotificationsSetup> = {
