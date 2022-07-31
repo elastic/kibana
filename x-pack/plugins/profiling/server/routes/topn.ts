@@ -58,6 +58,11 @@ export async function topNElasticSearchQuery({
     query: filter,
     aggs: {
       histogram: aggregateByFieldAndTimestamp(searchField, fixedInterval),
+      total_count: {
+        sum: {
+          field: 'Count',
+        },
+      },
     },
     // Adrien and Dario found out this is a work-around for some bug in 8.1.
     // It reduces the query time by avoiding unneeded searches.
@@ -73,8 +78,13 @@ export async function topNElasticSearchQuery({
     });
   }
 
-  const { histogram } = resEvents.aggregations;
+  const {
+    histogram,
+    total_count: { value: totalSampledStackTraces },
+  } = resEvents.aggregations;
   const topN = createTopNSamples(histogram);
+
+  logger.info('total sampled stacktraces: ' + totalSampledStackTraces);
 
   if (searchField !== 'StackTraceID') {
     return response.ok({
@@ -82,23 +92,19 @@ export async function topNElasticSearchQuery({
     });
   }
 
-  let totalDocCount = 0;
-  let totalCount = 0;
   const stackTraceEvents = new Map<StackTraceID, number>();
-
   const histogramBuckets = histogram?.buckets ?? [];
+  let totalAggregatedStackTraces = 0;
+
   for (let i = 0; i < histogramBuckets.length; i++) {
-    totalDocCount += histogramBuckets[i].count.value;
-    histogramBuckets[i].group_by.buckets.forEach((stackTraceItem) => {
-      const count = stackTraceItem.count.value ?? 0;
-      const oldCount = stackTraceEvents.get(String(stackTraceItem.key));
-      totalCount += count + (oldCount ?? 0);
-      stackTraceEvents.set(String(stackTraceItem.key), count + (oldCount ?? 0));
-    });
+    const stackTraceID = String(histogramBuckets[i].key);
+    const count = histogramBuckets[i].count.value ?? 0;
+    totalAggregatedStackTraces += count;
+    stackTraceEvents.set(stackTraceID, count);
   }
 
-  logger.info('events total count: ' + totalCount + ' (' + totalDocCount + ' docs)');
-  logger.info('unique stacktraces: ' + stackTraceEvents.size);
+  logger.info('total aggregated stacktraces: ' + totalAggregatedStackTraces);
+  logger.info('unique aggregated stacktraces: ' + stackTraceEvents.size);
 
   const { stackTraces, stackFrameDocIDs, executableDocIDs } = await mgetStackTraces({
     logger,
