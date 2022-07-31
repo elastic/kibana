@@ -714,7 +714,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   }, [scriptEditorValidation, script?.source, setPreviewError, clearPreviewError]);
 
   /**
-   * Whenever updatePreview() changes (meaning whenever any of the params changes)
+   * Whenever updatePreview() changes (meaning whenever a params changes)
    * we call it to update the preview response with the field(s) value or possible error.
    */
   useDebounce(updatePreview, 500, [updatePreview]);

@@ -7,7 +7,6 @@
  */
 
 import { EuiCode, EuiFormRow, EuiSelect } from '@elastic/eui';
-
 import { CoreStart } from '@kbn/core/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';

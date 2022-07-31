@@ -143,7 +143,6 @@ const FieldEditorFlyoutContentComponent = ({
           fieldName={fieldToEdit?.name!}
           onConfirm={async () => {
             const { data: updatedField } = await submit();
-            // todo make sure this works
             onSave(updatedField);
           }}
           onCancel={() => {

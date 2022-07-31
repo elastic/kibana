@@ -124,8 +124,6 @@ export const getFieldEditorOpener =
         };
       };
 
-      // todo this is sloppy
-      // todo types
       const dataViewField = fieldNameToEdit
         ? dataView.getFieldByName(fieldNameToEdit) || getRuntimeField(fieldNameToEdit)
         : undefined;
@@ -144,12 +142,7 @@ export const getFieldEditorOpener =
         dataViewField &&
         dataViewField.runtimeField &&
         !dataViewField.isMapped &&
-        // treat composite field instances as mapped fields for field editing purposes
-        /*
-        (dataViewField.runtimeField.type !== ('composite' as RuntimeType) ||
-          (dataViewField.runtimeField.type === ('composite' as RuntimeType) &&
-            !dataViewField?.type));
-            */
+        // treat composite subfield instances as mapped fields for field editing purposes
         (dataViewField.runtimeField.type !== ('composite' as RuntimeType) || !dataViewField.type);
 
       const fieldTypeToProcess: InternalFieldType =
@@ -158,8 +151,7 @@ export const getFieldEditorOpener =
       let field: Field | undefined;
       if (dataViewField) {
         if (isExistingRuntimeField && dataViewField.runtimeField!.type === 'composite') {
-          // We are editing a composite runtime **subField**.
-          // We need to access the parent composite.
+          // Composite runtime subfield
           const [compositeName] = fieldNameToEdit!.split('.');
           field = {
             name: compositeName,
@@ -180,7 +172,6 @@ export const getFieldEditorOpener =
             popularity: dataViewField.count,
             format: dataView.getFormatterForFieldNoDefault(fieldNameToEdit!)?.toJSON(),
             parentName: dataViewField.spec.parentName,
-            // parent: dataViewField.runtimeField?.parent,
           };
         }
       }

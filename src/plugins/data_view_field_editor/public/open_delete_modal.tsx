@@ -35,18 +35,22 @@ interface Dependencies {
   usageCollection: UsageCollectionStart;
 }
 
+export class DeleteCompositeSubfield extends Error {
+  constructor(fieldName: string) {
+    super(`Field '${fieldName} cannot be deleted because it is a composite subfield.`);
+  }
+}
+
 export const getFieldDeleteModalOpener =
   ({ core, dataViews, usageCollection }: Dependencies) =>
   (options: OpenFieldDeleteModalOptions): CloseEditor => {
     if (typeof options.fieldName === 'string') {
       const fieldToDelete = options.ctx.dataView.getFieldByName(options.fieldName);
+      // we can check for composite type since composite runtime field definitions themselves don't become fields
       const doesBelongToCompositeField = fieldToDelete?.runtimeField?.type === 'composite';
 
       if (doesBelongToCompositeField) {
-        console.log(
-          'TODO: display a modal to indicate that this field needs to be deleted through its parent.'
-        );
-        return () => undefined;
+        throw new DeleteCompositeSubfield(options.fieldName);
       }
     }
 

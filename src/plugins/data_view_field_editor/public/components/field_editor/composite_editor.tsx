@@ -18,9 +18,11 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ScriptField } from './form_fields';
 import { useFieldEditorContext } from '../field_editor_context';
 import { RUNTIME_FIELD_OPTIONS_PRIMITIVE } from './constants';
+import { valueToComboBoxOption } from './lib';
 
 export interface CompositeEditorProps {
   value: Record<string, string>;
@@ -39,15 +41,14 @@ export const CompositeEditor = ({ value, setValue }: CompositeEditorProps) => {
       <>
         <div>
           <EuiText size="s">
-            Generated fields{' '}
+            <FormattedMessage
+              id="indexPatternFieldEditor.editor.compositeFieldsCount"
+              defaultMessage="Generated fields"
+            />
             <EuiNotificationBadge color="subdued">{fields.length}</EuiNotificationBadge>
           </EuiText>
         </div>
-        {Object.entries(value).map(([key, itemValue], idx) => {
-          const val = RUNTIME_FIELD_OPTIONS_PRIMITIVE.find(
-            ({ value: optionValue }) => optionValue === itemValue
-          );
-
+        {Object.entries(value).map(([key, itemValue]) => {
           return (
             <div>
               <EuiFlexGroup gutterSize="s">
@@ -65,13 +66,15 @@ export const CompositeEditor = ({ value, setValue }: CompositeEditorProps) => {
                       )}
                       singleSelection={{ asPlainText: true }}
                       options={RUNTIME_FIELD_OPTIONS_PRIMITIVE}
-                      selectedOptions={[val!]}
+                      selectedOptions={[valueToComboBoxOption(itemValue)!]}
                       onChange={(newValue) => {
                         if (newValue.length === 0) {
                           // Don't allow clearing the type. One must always be selected
                           return;
                         }
+                        // update the type for the given field
                         value[key] = newValue[0].value!;
+                        // retun new object as to trigger react hooks
                         setValue({ ...value });
                       }}
                       isClearable={false}

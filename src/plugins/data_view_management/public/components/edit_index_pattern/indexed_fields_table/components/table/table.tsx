@@ -34,7 +34,9 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { IndexedFieldItem } from '../../types';
 
 export const showDelete = (field: IndexedFieldItem) =>
+  // runtime fields that aren't composite subfields
   (!field.isMapped && field.isUserEditable && field.runtimeField?.type !== 'composite') ||
+  // composite runtime field definitions
   (field.runtimeField?.type === 'composite' && field.type === 'composite');
 
 // localized labels
@@ -171,7 +173,7 @@ function runtimeIconTipTitle(fld: IndexedFieldItem) {
         'indexPatternManagement.editIndexPattern.fields.table.runtimeIconTipTitleComposite',
         { defaultMessage: 'Composite runtime subfield' }
       );
-      // composite defitions don't
+      // composite definitions don't
     } else {
       return i18n.translate(
         'indexPatternManagement.editIndexPattern.fields.table.runtimeIconTipTitleComposite',

@@ -13,6 +13,7 @@ import type { Field } from '../../types';
 import type { Context } from '../field_editor_context';
 import { schema } from './form_schema';
 import type { Props } from './field_editor';
+import { RUNTIME_FIELD_OPTIONS_PRIMITIVE } from './constants';
 
 const createNameNotAllowedValidator =
   (namesNotAllowed: Context['namesNotAllowed']): ValidationFunc<{}, string, string> =>
@@ -71,3 +72,6 @@ export const getNameFieldConfig = (
     ],
   };
 };
+
+export const valueToComboBoxOption = (value: string) =>
+  RUNTIME_FIELD_OPTIONS_PRIMITIVE.find(({ value: optionValue }) => optionValue === value);

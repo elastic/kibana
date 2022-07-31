@@ -27,8 +27,7 @@ export const TypeField = ({
   isDisabled = false,
   includeComposite,
   path,
-  // todo - use central def instead
-  defaultValue = [{ label: 'Keyword', value: 'keyword' }],
+  defaultValue = [RUNTIME_FIELD_OPTIONS_PRIMITIVE[0]],
   onChange = () => {},
 }: Props) => {
   return (
@@ -49,13 +48,14 @@ export const TypeField = ({
                 )}
                 singleSelection={{ asPlainText: true }}
                 options={includeComposite ? RUNTIME_FIELD_OPTIONS : RUNTIME_FIELD_OPTIONS_PRIMITIVE}
-                selectedOptions={value || [defaultValue]}
+                selectedOptions={value || defaultValue}
                 onChange={(newValue) => {
                   if (newValue.length === 0) {
                     // Don't allow clearing the type. One must always be selected
                     return;
                   }
                   setValue(newValue);
+                  // todo - might be able to remove this once using forms lib
                   onChange(newValue[0].value!);
                 }}
                 isClearable={false}
