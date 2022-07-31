@@ -726,7 +726,6 @@ export default function ({ getService }: FtrProviderContext) {
               label: 'Test private location 0',
               isServiceManaged: false,
               isInvalid: false,
-              name: 'Test private location 0',
               agentPolicyId: testPolicyId,
               id: testPolicyId,
               geo: {
