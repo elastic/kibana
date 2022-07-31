@@ -170,7 +170,7 @@ function runtimeIconTipTitle(fld: IndexedFieldItem) {
     // subfields have types
     if (fld.type) {
       return i18n.translate(
-        'indexPatternManagement.editIndexPattern.fields.table.runtimeIconTipTitleComposite',
+        'indexPatternManagement.editIndexPattern.fields.table.runtimeIconTipTitleCompositeSubfield',
         { defaultMessage: 'Composite runtime subfield' }
       );
       // composite definitions don't
