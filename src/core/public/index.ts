@@ -213,7 +213,7 @@ export type {
   ErrorToastOptions,
 } from '@kbn/core-notifications-browser';
 
-export type { ToastsApi } from './notifications';
+export type { ToastsApi } from '@kbn/core-notifications-browser-internal';
 
 export type { ThemeServiceSetup, ThemeServiceStart, CoreTheme } from '@kbn/core-theme-browser';
 

@@ -62,7 +62,7 @@ export const MockNotificationsService = notificationServiceMock.create();
 export const NotificationServiceConstructor = jest
   .fn()
   .mockImplementation(() => MockNotificationsService);
-jest.doMock('./notifications', () => ({
+jest.doMock('@kbn/core-notifications-browser-internal', () => ({
   NotificationsService: NotificationServiceConstructor,
 }));
 

@@ -14,6 +14,7 @@ import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ToastsService } from './toasts';
 
 export interface SetupDeps {
@@ -84,3 +85,8 @@ export class NotificationsService {
     }
   }
 }
+
+/**
+ * @public {@link NotificationsService}
+ */
+export type NotificationsServiceContract = PublicMethodsOf<NotificationsService>;
