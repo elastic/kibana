@@ -19,6 +19,7 @@ export function ResizableButton({
 
   return (
     <div
+      data-test-subj="unifiedTextLangEditor-resize"
       tabIndex={-1}
       className="unifiedTextLangEditor--resizableButton"
       onMouseDown={onMouseDownResizeHandler}
