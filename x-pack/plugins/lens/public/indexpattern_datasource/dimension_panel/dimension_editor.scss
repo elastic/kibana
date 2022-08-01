@@ -53,8 +53,12 @@
 }
 
 .lnsIndexPatternDimensionEditor__droppable {
-  padding: $euiSizeS;
+  padding: $euiSizeXS;
   border-radius: $euiBorderRadius;
+}
+
+.lnsIndexPatternDimensionEditor__droppableItem {
+  margin-right: $euiSizeS;
 }
 
 .lnsIndexPatternDimensionEditor-advancedOptions button {

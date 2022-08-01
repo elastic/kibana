@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   htmlIdGenerator,
+  EuiPanel,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -158,70 +159,82 @@ export function FieldInputs({
                 disableInteractiveElementBlocking
               >
                 {(provided) => (
-                  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                    <EuiFlexItem grow={false}>{/* Empty for spacing */}</EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon
-                        size="s"
-                        color="text"
-                        type="grab"
-                        title={i18n.translate('xpack.lens.indexPattern.terms.dragToReorder', {
-                          defaultMessage: 'Drag to reorder',
-                        })}
-                        data-test-subj={`indexPattern-terms-dragToReorder-${index}`}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
-                      <FieldSelect
-                        fieldIsInvalid={shouldShowError}
-                        currentIndexPattern={indexPattern}
-                        existingFields={existingFields}
-                        operationByField={filteredOperationByField}
-                        selectedOperationType={column.operationType}
-                        selectedField={value}
-                        autoFocus={isNew}
-                        onChoose={(choice) => {
-                          onFieldSelectChange(choice, index);
-                        }}
-                        isInvalid={shouldShowError}
-                        data-test-subj={
-                          localValues.length !== 1
-                            ? `indexPattern-dimension-field-${index}`
-                            : undefined
-                        }
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <TooltipWrapper
-                        tooltipContent={i18n.translate(
-                          'xpack.lens.indexPattern.terms.deleteButtonDisabled',
-                          {
-                            defaultMessage: 'This function requires a minimum of one field defined',
-                          }
-                        )}
-                        condition={disableActions}
+                  <EuiPanel paddingSize="xs" hasShadow={false} color="transparent">
+                    <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+                      <EuiFlexItem
+                        grow={false}
+                        className="lnsIndexPatternDimensionEditor__droppableItem"
                       >
-                        <EuiButtonIcon
-                          iconType="trash"
-                          color="danger"
-                          aria-label={i18n.translate(
-                            'xpack.lens.indexPattern.terms.deleteButtonAriaLabel',
+                        <EuiIcon
+                          size="s"
+                          color="text"
+                          type="grab"
+                          title={i18n.translate('xpack.lens.indexPattern.terms.dragToReorder', {
+                            defaultMessage: 'Drag to reorder',
+                          })}
+                          data-test-subj={`indexPattern-terms-dragToReorder-${index}`}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem
+                        grow={true}
+                        style={{ minWidth: 0 }}
+                        className="lnsIndexPatternDimensionEditor__droppableItem"
+                      >
+                        <FieldSelect
+                          fieldIsInvalid={shouldShowError}
+                          currentIndexPattern={indexPattern}
+                          existingFields={existingFields}
+                          operationByField={filteredOperationByField}
+                          selectedOperationType={column.operationType}
+                          selectedField={value}
+                          autoFocus={isNew}
+                          onChoose={(choice) => {
+                            onFieldSelectChange(choice, index);
+                          }}
+                          isInvalid={shouldShowError}
+                          data-test-subj={
+                            localValues.length !== 1
+                              ? `indexPattern-dimension-field-${index}`
+                              : undefined
+                          }
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <TooltipWrapper
+                          tooltipContent={i18n.translate(
+                            'xpack.lens.indexPattern.terms.deleteButtonDisabled',
                             {
-                              defaultMessage: 'Delete',
+                              defaultMessage:
+                                'This function requires a minimum of one field defined',
                             }
                           )}
-                          title={i18n.translate('xpack.lens.indexPattern.terms.deleteButtonLabel', {
-                            defaultMessage: 'Delete',
-                          })}
-                          onClick={() => {
-                            handleInputChange(localValues.filter((_, i) => i !== index));
-                          }}
-                          data-test-subj={`indexPattern-terms-removeField-${index}`}
-                          isDisabled={disableActions && !isNew}
-                        />
-                      </TooltipWrapper>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                          condition={disableActions}
+                        >
+                          <EuiButtonIcon
+                            iconType="trash"
+                            color="danger"
+                            aria-label={i18n.translate(
+                              'xpack.lens.indexPattern.terms.deleteButtonAriaLabel',
+                              {
+                                defaultMessage: 'Delete',
+                              }
+                            )}
+                            title={i18n.translate(
+                              'xpack.lens.indexPattern.terms.deleteButtonLabel',
+                              {
+                                defaultMessage: 'Delete',
+                              }
+                            )}
+                            onClick={() => {
+                              handleInputChange(localValues.filter((_, i) => i !== index));
+                            }}
+                            data-test-subj={`indexPattern-terms-removeField-${index}`}
+                            isDisabled={disableActions && !isNew}
+                          />
+                        </TooltipWrapper>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiPanel>
                 )}
               </EuiDraggable>
             );
