@@ -3339,6 +3339,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-notifications-browser-internal@link:bazel-bin/packages/core/notifications/core-notifications-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-notifications-browser-mocks@link:bazel-bin/packages/core/notifications/core-notifications-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-notifications-browser@link:bazel-bin/packages/core/notifications/core-notifications-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-overlays-browser-internal@link:bazel-bin/packages/core/overlays/core-overlays-browser-internal":
   version "0.0.0"
   uid ""
@@ -7203,6 +7215,18 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-notifications-browser-internal@link:bazel-bin/packages/core/notifications/core-notifications-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-notifications-browser-mocks@link:bazel-bin/packages/core/notifications/core-notifications-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-notifications-browser@link:bazel-bin/packages/core/notifications/core-notifications-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-overlays-browser-internal@link:bazel-bin/packages/core/overlays/core-overlays-browser-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -8337,10 +8361,10 @@
   resolved "https://registry.yarnpkg.com/@types/seedrandom/-/seedrandom-2.4.28.tgz#9ce8fa048c1e8c85cb71d7fe4d704e000226036f"
   integrity sha512-SMA+fUwULwK7sd/ZJicUztiPs8F1yCPwF3O23Z9uQ32ME5Ha0NmDK9+QTsYE4O2tHXChzXomSWWeIhCnoN1LqA==
 
-"@types/selenium-webdriver@^4.1.1":
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.1.1.tgz#aefb038f0462fd880f9c9581b8b3b71ce385719c"
-  integrity sha512-NxxZZek50ylIACiXebKQYHD3D4One3WXOasEXWazL6aTfYbZob7ClNKxUpg8I4/oWArX87oPWvj1cHKqfel3Hg==
+"@types/selenium-webdriver@^4.1.2":
+  version "4.1.2"
+  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.1.2.tgz#9c6d8d6bea08b312e890aaa5915fb2228fa62486"
+  integrity sha512-NCn1vqHC2hDgZmOuiDa4xgyo3FBZuqB+wXg5t8YcwnjIi2ufGTowqcnbUAKGHxY7z/OFfv4MnaVfuJ7gJ/xBsw==
   dependencies:
     "@types/ws" "*"
 
