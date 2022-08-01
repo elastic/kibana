@@ -23,7 +23,7 @@ Cypress.Commands.add(
   ({ username, password }: { username: string; password: string }) => {
     cy.log(`Logging in as ${username}`);
     const kibanaUrl = Cypress.env('KIBANA_URL');
-    cy.request({
+    return cy.request({
       log: false,
       method: 'POST',
       url: `${kibanaUrl}/internal/security/login`,
@@ -80,6 +80,22 @@ Cypress.Commands.add(
       } else {
         expect((interceptions as Interception).request.url).include(value);
       }
+    });
+  }
+);
+
+Cypress.Commands.add(
+  'updateAdvancedSettings',
+  (settings: Record<string, unknown>) => {
+    const kibanaUrl = Cypress.env('KIBANA_URL');
+    cy.request({
+      log: false,
+      method: 'POST',
+      url: `${kibanaUrl}/api/kibana/settings`,
+      body: { changes: settings },
+      headers: {
+        'kbn-xsrf': 'e2e_test',
+      },
     });
   }
 );
