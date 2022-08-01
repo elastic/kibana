@@ -66,21 +66,15 @@ export function createIndicesRoute(logger: Logger, router: IRouter, baseRoute: s
       logger.warn(`route ${path} error getting indices from pattern "${pattern}": ${err.message}`);
     }
 
-    const result = {
-      indices: uniqueCombined(
-        dataStreams,
-        uniqueCombined(aliases, indices, MAX_INDICES),
-        MAX_INDICES
-      ),
-    };
+    const result = { indices: uniqueCombined(aliases, indices, dataStreams, MAX_INDICES) };
 
     logger.debug(`route ${path} response: ${JSON.stringify(result)}`);
     return res.ok({ body: result });
   }
 }
 
-function uniqueCombined(list1: string[], list2: string[], limit: number) {
-  const set = new Set(list1.concat(list2));
+function uniqueCombined(list1: string[], list2: string[], list3: string[], limit: number) {
+  const set = new Set(list1.concat(list2).concat(list3));
   const result = Array.from(set);
   result.sort((string1, string2) => string1.localeCompare(string2));
   return result.slice(0, limit);
