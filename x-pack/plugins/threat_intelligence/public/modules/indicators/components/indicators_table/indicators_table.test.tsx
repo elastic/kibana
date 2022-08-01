@@ -13,13 +13,13 @@ import { TestProvidersComponent } from '../../../../common/mocks/test_providers'
 const stub = () => {};
 
 const tableProps: IndicatorsTableProps = {
-  loadData: stub,
   onChangePage: stub,
   onChangeItemsPerPage: stub,
   indicators: [],
   pagination: { pageSize: 10, pageIndex: 0, pageSizeOptions: [10] },
   indicatorCount: 0,
   firstLoad: false,
+  loading: false,
 };
 
 const indicatorsFixture = [

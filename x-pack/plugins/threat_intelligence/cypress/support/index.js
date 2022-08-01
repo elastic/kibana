@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable no-undef */
+
 // ***********************************************************
 // This example support/index.js is processed and
 // loaded automatically before your test files.
@@ -25,3 +27,9 @@ import './commands';
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
+
+Cypress.on('uncaught:exception', (err) => {
+  if (err.message.includes('ResizeObserver')) {
+    return false;
+  }
+});

@@ -11,4 +11,8 @@ export function plugin() {
   return new ThreatIntelligencePlugin();
 }
 
-export type { ThreatIntelligencePluginSetup, ThreatIntelligencePluginStart } from './types';
+export type {
+  ThreatIntelligencePluginSetup,
+  ThreatIntelligencePluginStart,
+  ThreatIntelligenceSecuritySolutionContext,
+} from './types';

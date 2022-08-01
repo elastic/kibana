@@ -5,19 +5,31 @@
  * 2.0.
  */
 
-import { VFC } from 'react';
+import { ComponentType, ReactElement, ReactNode } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-
-export type Services = { data: DataPublicPluginStart } & CoreStart;
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ThreatIntelligencePluginSetup {}
 
 export interface ThreatIntelligencePluginStart {
-  getComponent: () => VFC;
+  getComponent: () => (props: {
+    securitySolutionContext: ThreatIntelligenceSecuritySolutionContext;
+  }) => ReactElement;
 }
 
 export interface ThreatIntelligencePluginStartDeps {
   data: DataPublicPluginStart;
+}
+
+export type Services = {
+  data: DataPublicPluginStart;
+  storage: Storage;
+  dataViews: DataViewsPublicPluginStart;
+} & CoreStart;
+
+export interface ThreatIntelligenceSecuritySolutionContext {
+  getFiltersGlobalComponent: () => ComponentType<{ children: ReactNode }>;
 }
