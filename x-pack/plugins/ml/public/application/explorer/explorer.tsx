@@ -599,6 +599,8 @@ export const Explorer: FC<ExplorerUIProps> = ({
       queryString={queryString}
       updateLanguage={updateLanguage}
     >
+      <EuiSpacer size={'m'} />
+
       {noInfluencersConfigured ? (
         <EuiFlexGroup gutterSize={'s'}>
           <EuiFlexItem grow={false}>
@@ -615,8 +617,6 @@ export const Explorer: FC<ExplorerUIProps> = ({
         </EuiFlexGroup>
       ) : (
         <div>
-          <EuiSpacer size={'m'} />
-
           <EuiResizableContainer
             direction={isMobile ? 'vertical' : 'horizontal'}
             onPanelWidthChange={onPanelWidthChange}
