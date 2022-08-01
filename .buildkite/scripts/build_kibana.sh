@@ -16,7 +16,7 @@ if is_pr_with_label "ci:build-os-packages"; then
   BUILD_ARGS="--all-platforms --docker-cross-compile"
 fi
 if is_pr; then
-  BUILD_ARGS="--skip-canvas-shareable-runtime $BUILD_ARGS"
+  BUILD_ARGS=$(echo "$BUILD_ARGS --skip-canvas-shareable-runtime" | xargs)
 fi
 
 node scripts/build "$BUILD_ARGS"
