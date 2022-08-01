@@ -132,7 +132,8 @@ export const syncNewMonitor = async ({
     const errors = await syntheticsMonitorClient.addMonitor(
       monitor as MonitorFields,
       monitorSavedObject.id,
-      request
+      request,
+      savedObjectsClient
     );
 
     sendTelemetryEvents(
