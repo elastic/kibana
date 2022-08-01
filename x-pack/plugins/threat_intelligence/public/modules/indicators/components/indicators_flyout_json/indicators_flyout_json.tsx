@@ -13,7 +13,11 @@ import { Indicator } from '../../../../../common/types/indicator';
 export const EMPTY_PROMPT_TEST_ID = 'tiFlyoutJsonEmptyPrompt';
 export const CODE_BLOCK_TEST_ID = 'tiFlyoutJsonCodeBlock';
 
-export const IndicatorsFlyoutJson: VFC<{ indicator: Indicator }> = ({ indicator }) => {
+export interface IndicatorsFlyoutJsonProps {
+  indicator: Indicator;
+}
+
+export const IndicatorsFlyoutJson: VFC<IndicatorsFlyoutJsonProps> = ({ indicator }) => {
   return Object.keys(indicator).length === 0 ? (
     <EuiEmptyPrompt
       iconType="alert"
