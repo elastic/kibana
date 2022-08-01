@@ -121,8 +121,6 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     isValid: boolean;
     message: string | null;
   }>({ isValidating: false, isValid: true, message: null });
-  /** Array of fields detected in the script (returned by the _execute API) */
-  const [fieldsInScript, setFieldsInScript] = useState<string[]>([]);
 
   const { documents, currentIdx } = clusterData;
   const currentDocument: EsDocument | undefined = documents[currentIdx];
@@ -369,8 +367,6 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         fields,
         error: null,
       });
-
-      setFieldsInScript(updatedFieldsInScript);
     },
     [valueFormatter]
   );
@@ -534,7 +530,6 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       validation: {
         setScriptEditorValidation,
       },
-      fieldsInScript,
     }),
     [
       previewResponse,
@@ -557,7 +552,6 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       from,
       reset,
       pinnedFields,
-      fieldsInScript,
       initialPreviewComplete,
     ]
   );
