@@ -59,6 +59,10 @@ a| <<webhook-action-type, Webhook>>
 
 | Send a request to a web service.
 
+a| <<cases-webhook-action-type, Webhook - Case Management>>
+
+| Send a request to a Case Management web service.
+
 a| <<xmatters-action-type,xMatters>>
 
 | Send actionable alerts to on-call xMatters resources.
