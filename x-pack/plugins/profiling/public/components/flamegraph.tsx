@@ -55,13 +55,13 @@ function FlameGraphTooltip({
               label={i18n.translate('xpack.profiling.flameGraphTooltip.inclusiveCpuLabel', {
                 defaultMessage: `Inclusive CPU:`,
               })}
-              value={asPercentage(countInclusive / totalSamples, 1)}
+              value={asPercentage(countInclusive / totalSamples, 2)}
             />
             <TooltipRow
               label={i18n.translate('xpack.profiling.flameGraphTooltip.exclusiveCpuLabel', {
                 defaultMessage: `Exclusive CPU:`,
               })}
-              value={asPercentage(countExclusive / totalSamples, 1)}
+              value={asPercentage(countExclusive / totalSamples, 2)}
             />
             <TooltipRow
               label={i18n.translate('xpack.profiling.flameGraphTooltip.samplesLabel', {
