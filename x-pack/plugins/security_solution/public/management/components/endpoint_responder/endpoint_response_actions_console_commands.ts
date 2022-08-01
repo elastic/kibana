@@ -29,7 +29,7 @@ const pidValidator = (argData: ParsedArgData): true | string => {
   const emptyResult = emptyArgumentValidator(argData);
   if (emptyResult !== true) {
     return emptyResult;
-  } else if (Number.isInteger(Number(argData)) && Number(argData) > 0) {
+  } else if (Number.isSafeInteger(Number(argData)) && Number(argData) > 0) {
     return true;
   } else {
     return i18n.translate('xpack.securitySolution.endpointConsoleCommands.invalidPidMessage', {
@@ -97,7 +97,7 @@ export const getEndpointResponseActionsConsoleCommands = (
       meta: {
         endpointId: endpointAgentId,
       },
-      exampleUsage: 'release --comment "isolate this host"',
+      exampleUsage: 'release --comment "release this host"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
       args: {
         comment: {
