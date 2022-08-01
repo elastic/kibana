@@ -253,9 +253,9 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   : T extends CtiQueries.dataSource
   ? CtiDataSourceRequestOptions
   : T extends RiskQueries.hostsRiskScore
-  ? RiskScoreRequestOptions<RiskQueries.hostsRiskScore>
+  ? RiskScoreRequestOptions
   : T extends RiskQueries.usersRiskScore
-  ? RiskScoreRequestOptions<RiskQueries.usersRiskScore>
+  ? RiskScoreRequestOptions
   : T extends RiskQueries.kpiRiskScore
   ? KpiRiskScoreRequestOptions
   : never;
