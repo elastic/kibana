@@ -66,6 +66,7 @@ describe('ALL - Packs', () => {
       cy.contains('Save and deploy changes');
       findAndClickButton('Save and deploy changes');
       cy.contains(PACK_NAME);
+      cy.contains(`Successfully created "${PACK_NAME}" pack`);
     });
 
     it('to click the edit button and edit pack', () => {

@@ -28,7 +28,11 @@ export const useCreatePack = ({ withRedirect }: UseCreatePackProps) => {
   } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useMutation<PackSavedObject, { body: { error: string; message: string } }>(
+  return useMutation<
+    { data: PackSavedObject },
+    { body: { error: string; message: string } },
+    PackSavedObject
+  >(
     (payload) =>
       http.post('/api/osquery/packs', {
         body: JSON.stringify(payload),
@@ -47,7 +51,7 @@ export const useCreatePack = ({ withRedirect }: UseCreatePackProps) => {
           i18n.translate('xpack.osquery.newPack.successToastMessageText', {
             defaultMessage: 'Successfully created "{packName}" pack',
             values: {
-              packName: payload.attributes?.name ?? '',
+              packName: payload.data.attributes?.name ?? '',
             },
           })
         );

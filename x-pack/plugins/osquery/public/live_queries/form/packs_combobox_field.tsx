@@ -64,6 +64,7 @@ export const PacksComboBoxField = ({ field, euiFieldProps = {}, idAria, ...rest 
     (newSelectedOptions) => {
       if (!newSelectedOptions.length) {
         setSelectedOptions(newSelectedOptions);
+        field.setValue([]);
 
         return;
       }

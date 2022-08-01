@@ -19,9 +19,12 @@ import {
 import React, { useState, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 
-import { useAllActions } from './use_all_actions';
+import { useAllLiveQueries } from './use_all_live_queries';
+import type { SearchHit } from '../../common/search_strategy';
 import { Direction } from '../../common/search_strategy';
 import { useRouterNavigate, useKibana } from '../common/lib/kibana';
+
+const EMPTY_ARRAY: SearchHit[] = [];
 
 interface ActionTableResultsButtonProps {
   actionId: string;
@@ -41,7 +44,7 @@ const ActionsTableComponent = () => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
 
-  const { data: actionsData } = useAllActions({
+  const { data: actionsData } = useAllLiveQueries({
     activePage: pageIndex,
     limit: pageSize,
     direction: Direction.desc,
@@ -129,7 +132,7 @@ const ActionsTableComponent = () => {
     [push]
   );
   const isPlayButtonAvailable = useCallback(
-    () => permissions.runSavedQueries || permissions.writeLiveQueries,
+    () => !!(permissions.runSavedQueries || permissions.writeLiveQueries),
     [permissions.runSavedQueries, permissions.writeLiveQueries]
   );
 
@@ -199,16 +202,15 @@ const ActionsTableComponent = () => {
     () => ({
       pageIndex,
       pageSize,
-      totalItemCount: actionsData?.total ?? 0,
+      totalItemCount: actionsData?.data?.total ?? 0,
       pageSizeOptions: [20, 50, 100],
     }),
-    [actionsData?.total, pageIndex, pageSize]
+    [actionsData, pageIndex, pageSize]
   );
 
   return (
     <EuiBasicTable
-      // eslint-disable-next-line react-perf/jsx-no-new-array-as-prop
-      items={actionsData?.actions ?? []}
+      items={actionsData?.data?.items ?? EMPTY_ARRAY}
       // @ts-expect-error update types
       columns={columns}
       pagination={pagination}

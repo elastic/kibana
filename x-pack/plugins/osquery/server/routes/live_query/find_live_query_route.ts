@@ -7,23 +7,24 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
-import { map } from 'lodash';
+import { omit } from 'lodash';
 import type { Observable } from 'rxjs';
-import { lastValueFrom, zip } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { PLUGIN_ID } from '../../../common';
+
 import type {
-  ActionDetailsRequestOptions,
-  ActionDetailsStrategyResponse,
+  ActionsRequestOptions,
+  ActionsStrategyResponse,
+  Direction,
 } from '../../../common/search_strategy';
 import { OsqueryQueries } from '../../../common/search_strategy';
 import { createFilter, generateTablePaginationOptions } from '../../../common/utils/build_query';
-import { getActionResponses } from './utils';
 
-export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerContext>) => {
+export const findLiveQueryRoute = (router: IRouter<DataRequestHandlerContext>) => {
   router.get(
     {
-      path: '/api/osquery/live_queries/{id}/results/{actionId}',
+      path: '/api/osquery/live_queries',
       validate: {
         query: schema.object(
           {
@@ -35,13 +36,6 @@ export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerConte
           },
           { unknowns: 'allow' }
         ),
-        params: schema.object(
-          {
-            id: schema.string(),
-            actionId: schema.string(),
-          },
-          { unknowns: 'allow' }
-        ),
       },
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
@@ -50,40 +44,18 @@ export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerConte
 
       try {
         const search = await context.search;
-        const { actionDetails } = await lastValueFrom(
-          search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
-            {
-              actionId: request.params.id,
-              filterQuery: createFilter(request.query.filterQuery),
-              factoryQueryType: OsqueryQueries.actionDetails,
-            },
-            { abortSignal, strategy: 'osquerySearchStrategy' }
-          )
-        );
-
-        const queries = actionDetails?._source?.queries;
-
-        await lastValueFrom(
-          zip(
-            ...map(queries, (query) =>
-              getActionResponses(search, query.action_id, query.agents?.length ?? 0)
-            )
-          )
-        );
-
         const res = await lastValueFrom(
-          search.search<{}>(
+          search.search<ActionsRequestOptions, ActionsStrategyResponse>(
             {
-              actionId: request.params.actionId,
-              factoryQueryType: OsqueryQueries.results,
+              factoryQueryType: OsqueryQueries.actions,
               filterQuery: createFilter(request.query.filterQuery),
               pagination: generateTablePaginationOptions(
                 request.query.page ?? 0,
                 request.query.pageSize ?? 100
               ),
               sort: {
-                direction: request.query.sortOrder ?? 'desc',
-                field: request.query.sort ?? '@timestamp',
+                direction: (request.query.sortOrder ?? 'desc') as Direction,
+                field: request.query.sort ?? 'created_at',
               },
             },
             { abortSignal, strategy: 'osquerySearchStrategy' }
@@ -91,7 +63,12 @@ export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerConte
         );
 
         return response.ok({
-          body: { data: res },
+          body: {
+            data: {
+              ...omit(res, 'edges'),
+              items: res.edges,
+            },
+          },
         });
       } catch (e) {
         return response.customError({
