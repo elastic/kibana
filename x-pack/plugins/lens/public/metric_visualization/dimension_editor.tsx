@@ -79,13 +79,13 @@ export function MetricDimensionEditor(
       <EuiFormRow
         display="columnCompressed"
         fullWidth
-        label={i18n.translate('xpack.lens.metric.dynamicColoring.label', {
+        label={i18n.translate('xpack.lens.legacyMetric.dynamicColoring.label', {
           defaultMessage: 'Color by value',
         })}
       >
         <EuiButtonGroup
           isFullWidth
-          legend={i18n.translate('xpack.lens.metric.dynamicColoring.label', {
+          legend={i18n.translate('xpack.lens.legacyMetric.dynamicColoring.label', {
             defaultMessage: 'Color by value',
           })}
           data-test-subj="lnsMetric_dynamicColoring_groups"
@@ -94,21 +94,21 @@ export function MetricDimensionEditor(
           options={[
             {
               id: `${idPrefix}None`,
-              label: i18n.translate('xpack.lens.metric.dynamicColoring.none', {
+              label: i18n.translate('xpack.lens.legacyMetric.dynamicColoring.none', {
                 defaultMessage: 'None',
               }),
               'data-test-subj': 'lnsMetric_dynamicColoring_groups_none',
             },
             {
               id: `${idPrefix}Background`,
-              label: i18n.translate('xpack.lens.metric.dynamicColoring.background', {
+              label: i18n.translate('xpack.lens.legacyMetric.dynamicColoring.background', {
                 defaultMessage: 'Fill',
               }),
               'data-test-subj': 'lnsMetric_dynamicColoring_groups_background',
             },
             {
               id: `${idPrefix}Labels`,
-              label: i18n.translate('xpack.lens.metric.dynamicColoring.text', {
+              label: i18n.translate('xpack.lens.legacyMetric.dynamicColoring.text', {
                 defaultMessage: 'Text',
               }),
               'data-test-subj': 'lnsMetric_dynamicColoring_groups_labels',

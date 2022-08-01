@@ -41,6 +41,7 @@ import { useGlobalFullScreen } from '../../../../common/containers/use_full_scre
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 import { timelineActions } from '../../../../timelines/store/timeline';
 import type { State } from '../../../../common/store';
+import type { AdvancedPreviewOptions } from '../../../pages/detection_engine/rules/types';
 
 const LoadingChart = styled(EuiLoadingChart)`
   display: block;
@@ -63,6 +64,7 @@ interface PreviewHistogramProps {
   spaceId: string;
   ruleType: Type;
   index: string[];
+  advancedOptions?: AdvancedPreviewOptions;
 }
 
 const DEFAULT_HISTOGRAM_HEIGHT = 300;
@@ -74,14 +76,22 @@ export const PreviewHistogram = ({
   spaceId,
   ruleType,
   index,
+  advancedOptions,
 }: PreviewHistogramProps) => {
   const dispatch = useDispatch();
   const { setQuery, isInitializing } = useGlobalTime();
   const { timelines: timelinesUi } = useKibana().services;
   const from = useMemo(() => `now-1${timeFrame}`, [timeFrame]);
   const to = useMemo(() => 'now', []);
-  const startDate = useMemo(() => formatDate(from), [from]);
-  const endDate = useMemo(() => formatDate(to), [to]);
+  const startDate = useMemo(
+    () => (advancedOptions ? advancedOptions.timeframeStart.toISOString() : formatDate(from)),
+    [from, advancedOptions]
+  );
+  const endDate = useMemo(
+    () => (advancedOptions ? advancedOptions.timeframeEnd.toISOString() : formatDate(to)),
+    [to, advancedOptions]
+  );
+  const alertsEndDate = useMemo(() => formatDate(to), [to]);
   const isEqlRule = useMemo(() => ruleType === 'eql', [ruleType]);
   const isMlRule = useMemo(() => ruleType === 'machine_learning', [ruleType]);
 
@@ -204,7 +214,7 @@ export const PreviewHistogram = ({
             dataProviders,
             deletedEventIds,
             disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
-            end: endDate,
+            end: alertsEndDate,
             entityType: 'events',
             filters: [],
             globalFullScreen,
