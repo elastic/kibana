@@ -122,7 +122,7 @@ export const ActionTypeForm = ({
     errors: {},
   });
   const [isSummary, setIsSummary] = useState<RuleAction['isSummary']>(
-    Boolean(actionItem.params.isSummary) || false
+    Boolean(actionItem.isSummary) || false
   );
   const [summaryOf, setSummaryOf] = useState<RuleAction['summaryOf']>(
     actionItem.summaryOf || SummaryOf.TIME_SPAN

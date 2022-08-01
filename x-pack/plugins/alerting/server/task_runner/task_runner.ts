@@ -48,6 +48,7 @@ import {
   RuleTaskState,
   RuleTypeRegistry,
   SanitizedRule,
+  SummaryOf,
 } from '../types';
 import { asErr, asOk, map, promiseResult, resolveErr, Resultable } from '../lib/result_type';
 import { getExecutionDurationPercentiles, getExecutionSuccessRatio } from '../lib/monitoring';
@@ -666,46 +667,24 @@ export class TaskRunner<
     if (!ruleIsSnoozed && this.shouldLogAndScheduleActionsForAlerts()) {
       const actionsStore: ActionsStore = {};
 
-      const executableActiveAlerts = this.getExecutableAlerts({
+      const allAlerts = this.getExecutableAlerts({
         rule,
-        alerts: activeAlerts,
-      });
-      const executableRecoveredAlerts = this.getExecutableAlerts({
-        rule,
-        alerts: recoveredAlerts,
+        alerts: [...Object.values(activeAlerts), ...Object.values(recoveredAlerts)],
       });
 
-      // Active alerts
-      const activeAlertsActions = this.getActiveAlertsActions({
-        executableActiveAlerts,
+      const allActions = this.getActions({
         rule,
-        alerts: [...executableActiveAlerts, ...executableRecoveredAlerts] as unknown as Alert[],
+        alerts: allAlerts as unknown as Array<
+          Alert<State, Context, ActionGroupIds> | Alert<State, Context, RecoveryActionGroupId>
+        >,
         ruleRunMetricsStore,
         spaceId,
         actionsStore,
       });
-      ruleRunMetricsStore.incrementNumberOfGeneratedActions(activeAlertsActions.length);
-      await this.triggerActions({
-        actions: activeAlertsActions,
-        spaceId,
-        apiKey,
-        ruleId,
-        fakeRequest,
-      });
 
-      // Recovered alerts
-      const recoveredAlertsActions = this.getRecoveredAlertsActions({
-        executableRecoveredAlerts,
-        rule,
-        alerts: [...executableActiveAlerts, ...executableRecoveredAlerts] as unknown as Alert[],
-        ruleRunMetricsStore,
-        spaceId,
-        actionGroup: this.ruleType.recoveryActionGroup.id,
-        actionsStore,
-      });
-      ruleRunMetricsStore.incrementNumberOfGeneratedActions(recoveredAlertsActions.length);
+      ruleRunMetricsStore.incrementNumberOfGeneratedActions(allActions.length);
       await this.triggerActions({
-        actions: recoveredAlertsActions,
+        actions: allActions,
         spaceId,
         apiKey,
         ruleId,
@@ -755,19 +734,15 @@ export class TaskRunner<
     };
   }
 
-  private getActiveAlertsActions({
-    executableActiveAlerts,
-    rule,
+  private getActions({
     alerts,
+    rule,
     ruleRunMetricsStore,
     spaceId,
     actionsStore,
   }: {
-    executableActiveAlerts: Array<
-      [string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>]
-    >;
+    alerts: Array<Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>;
     rule: SanitizedRule<RuleTypeParams>;
-    alerts: Alert[];
     ruleRunMetricsStore: RuleRunMetricsStore;
     spaceId: string;
     actionsStore: ActionsStore;
@@ -780,13 +755,13 @@ export class TaskRunner<
       ruleType.actionGroups.map((group) => [group.id, group.name])
     );
 
-    for (const [alertId, alert] of executableActiveAlerts) {
-      const {
-        actionGroup,
-        subgroup: actionSubgroup,
-        context,
-        state,
-      } = alert.getScheduledActionOptions()!;
+    for (const alert of alerts) {
+      const actionGroup = alert.getState().end
+        ? (ruleType.recoveryActionGroup.id as RecoveryActionGroupId & ActionGroupIds)
+        : (alert.getScheduledActionOptions()!.actionGroup as RecoveryActionGroupId &
+            ActionGroupIds);
+
+      const actionSubgroup = alert.getScheduledActionOptions()?.subgroup;
       alert.updateLastScheduledActions(actionGroup, actionSubgroup);
       alert.unscheduleActions();
 
@@ -794,6 +769,7 @@ export class TaskRunner<
         this.logger.error(`Invalid action group "${actionGroup}" for rule "${ruleType.id}".`);
         continue;
       }
+
       actionsToTrigger = actionsToTrigger.concat(
         this.generateActions({
           rule,
@@ -801,62 +777,18 @@ export class TaskRunner<
           actionGroup,
           actionSubgroup,
           spaceId,
-          alertId,
+          alertId: alert.getId(),
           alertActionGroupName: ruleTypeActionGroups.get(actionGroup)!,
-          alerts,
-          alertContext: context,
-          state,
-          actionsStore,
-        })
-      );
-    }
-
-    return actionsToTrigger;
-  }
-
-  private getRecoveredAlertsActions({
-    executableRecoveredAlerts,
-    rule,
-    alerts,
-    ruleRunMetricsStore,
-    spaceId,
-    actionGroup,
-    actionsStore,
-  }: {
-    executableRecoveredAlerts: Array<
-      [string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>]
-    >;
-    rule: SanitizedRule<RuleTypeParams>;
-    alerts: Alert[];
-    ruleRunMetricsStore: RuleRunMetricsStore;
-    spaceId: string;
-    actionGroup: RecoveryActionGroupId;
-    actionsStore: ActionsStore;
-  }) {
-    let actionsToTrigger: RuleAction[] = [];
-    const ruleTypeActionGroups = new Map(
-      this.ruleType.actionGroups.map((group) => [group.id, group.name])
-    );
-    for (const [alertId, alert] of executableRecoveredAlerts) {
-      alert.updateLastScheduledActions(actionGroup);
-      alert.unscheduleActions();
-
-      actionsToTrigger = actionsToTrigger.concat(
-        this.generateActions({
-          rule,
-          ruleRunMetricsStore,
-          actionGroup,
-          spaceId,
-          alertId,
-          alertActionGroupName: ruleTypeActionGroups.get(actionGroup)!,
-          alerts,
+          alerts: alerts as unknown as Alert[],
           alertContext: alert.getContext(),
           state: alert.getState(),
           actionsStore,
         })
       );
 
-      alert.scheduleActions(actionGroup);
+      if (alert.getState().end) {
+        alert.scheduleActions(actionGroup);
+      }
     }
 
     return actionsToTrigger;
@@ -867,26 +799,25 @@ export class TaskRunner<
     alerts,
   }: {
     rule: SanitizedRule<RuleTypeParams>;
-    alerts: Record<string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>;
-  }): Array<[string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>]> {
-    return Object.entries(alerts).filter(
-      ([alertId, alert]: [
-        string,
-        Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>
-      ]) => {
-        const muted = new Set(rule.mutedInstanceIds).has(alertId);
-        let shouldExecuteAction = true;
+    alerts: Array<
+      Alert<State, Context, ActionGroupIds> | Alert<State, Context, RecoveryActionGroupId>
+    >;
+  }): Array<Alert<State, Context, ActionGroupIds> | Alert<State, Context, RecoveryActionGroupId>> {
+    return alerts.filter((alert) => {
+      const muted = new Set(rule.mutedInstanceIds).has(alert.getId());
+      let shouldExecuteAction = true;
 
-        if (muted) {
-          shouldExecuteAction = false;
-          this.logger.debug(
-            `skipping scheduling of actions for '${alertId}' in rule ${rule.name}: rule is muted`
-          );
-        }
-
-        return shouldExecuteAction;
+      if (muted) {
+        shouldExecuteAction = false;
+        this.logger.debug(
+          `skipping scheduling of actions for '${alert.getId()}' in rule ${
+            rule.name
+          }: rule is muted`
+        );
       }
-    );
+
+      return shouldExecuteAction;
+    });
   }
 
   private async triggerActions({
@@ -931,14 +862,14 @@ export class TaskRunner<
         if (this.context.supportsEphemeralTasks && ephemeralActionsToSchedule > 0) {
           ephemeralActionsToSchedule--;
           try {
-            return await actionsClient.ephemeralEnqueuedExecution(enqueueOptions);
+            return actionsClient.ephemeralEnqueuedExecution(enqueueOptions);
           } catch (err) {
             if (isEphemeralTaskRejectedDueToCapacityError(err)) {
-              return await actionsClient.enqueueExecution(enqueueOptions);
+              return actionsClient.enqueueExecution(enqueueOptions);
             }
           }
         } else {
-          return await actionsClient.enqueueExecution(enqueueOptions);
+          return actionsClient.enqueueExecution(enqueueOptions);
         }
       })
     );
@@ -1027,7 +958,10 @@ export class TaskRunner<
           lastTriggerDate: new Date().toISOString(),
         };
 
-        // here we can fetch alerts
+        if (action.isSummary && action.summaryOf === SummaryOf.TIME_SPAN) {
+          // fetch alert as data
+          // alerts = alerts.concat(fetchAlertAsData(rule.id));
+        }
 
         actionsToTrigger.push({
           ...action,
