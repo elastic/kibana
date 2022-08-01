@@ -7,6 +7,7 @@
 
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import 'whatwg-fetch';
 import 'jquery';
 import '@kbn/flot-charts';
