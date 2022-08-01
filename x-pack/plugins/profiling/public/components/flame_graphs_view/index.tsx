@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiPageHeaderContentProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPageHeaderContentProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { Redirect } from 'react-router-dom';
@@ -17,6 +17,7 @@ import { FlameGraphContext } from '../contexts/flamegraph';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { FlameGraph } from '../flamegraph';
 import { FlameGraphNavigation } from '../flamegraph_nav';
+import { PrimaryAndComparisonSearchBar } from '../primary_and_comparison_search_bar';
 import { ProfilingAppPageTemplate } from '../profiling_app_page_template';
 
 export function FlameGraphsView({ children }: { children: React.ReactElement }) {
@@ -37,20 +38,29 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
 
   const profilingRouter = useProfilingRouter();
 
+  const isDifferentialView = routePath === '/flamegraphs/differential';
+
   const tabs: Required<EuiPageHeaderContentProps>['tabs'] = [
     {
       label: i18n.translate('xpack.profiling.flameGraphsView.flameGraphTabLabel', {
         defaultMessage: 'Flamegraph',
       }),
-      isSelected: routePath === '/flamegraphs/flamegraph',
+      isSelected: !isDifferentialView,
       href: profilingRouter.link('/flamegraphs/flamegraph', { query }),
     },
     {
       label: i18n.translate('xpack.profiling.flameGraphsView.differentialFlameGraphTabLabel', {
         defaultMessage: 'Differential flamegraph',
       }),
-      isSelected: routePath === '/flamegraphs/differential',
-      href: profilingRouter.link('/flamegraphs/differential', { query }),
+      isSelected: isDifferentialView,
+      href: profilingRouter.link('/flamegraphs/differential', {
+        query: {
+          ...query,
+          comparisonRangeFrom: query.rangeFrom,
+          comparisonRangeTo: query.rangeTo,
+          comparisonKuery: query.kuery,
+        },
+      }),
     },
   ];
 
@@ -59,16 +69,25 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
   }
 
   return (
-    <ProfilingAppPageTemplate tabs={tabs}>
+    <ProfilingAppPageTemplate tabs={tabs} hideSearchBar={isDifferentialView}>
       <FlameGraphContext.Provider value={elasticFlamegraph}>
-        <FlameGraphNavigation
-          timeRange={timeRange}
-          kuery={kuery}
-          getter={fetchElasticFlamechart}
-          setter={setElasticFlamegraph}
-        />
-        <FlameGraph id="flamechart" height={600} />
-        {children}
+        <EuiFlexGroup direction="column">
+          {isDifferentialView ? (
+            <EuiFlexItem>
+              <PrimaryAndComparisonSearchBar />
+            </EuiFlexItem>
+          ) : null}
+          <EuiFlexItem>
+            <FlameGraphNavigation
+              timeRange={timeRange}
+              kuery={kuery}
+              getter={fetchElasticFlamechart}
+              setter={setElasticFlamegraph}
+            />
+            <FlameGraph id="flamechart" height={600} />
+            {children}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </FlameGraphContext.Provider>
     </ProfilingAppPageTemplate>
   );

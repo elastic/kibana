@@ -98,6 +98,13 @@ const routes = {
                     <Outlet />
                   </RouteBreadcrumb>
                 ),
+                params: t.type({
+                  query: t.type({
+                    comparisonRangeFrom: t.string,
+                    comparisonRangeTo: t.string,
+                    comparisonKuery: t.string,
+                  }),
+                }),
               },
             },
           },
@@ -138,6 +145,13 @@ const routes = {
                     <Outlet />
                   </RouteBreadcrumb>
                 ),
+                params: t.type({
+                  query: t.type({
+                    comparisonRangeFrom: t.string,
+                    comparisonRangeTo: t.string,
+                    comparisonKuery: t.string,
+                  }),
+                }),
               },
             },
           },
