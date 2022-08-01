@@ -6,12 +6,9 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import * as t from 'io-ts';
 import { transformError } from '@kbn/securitysolution-es-utils';
 // import { validFeatureIds } from '@kbn/rule-data-utils';
-import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { schema } from '@kbn/config-schema';
-import { buildRouteValidation } from './utils/route_validation';
 
 import { RacRequestHandlerContext } from '../types';
 // import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
