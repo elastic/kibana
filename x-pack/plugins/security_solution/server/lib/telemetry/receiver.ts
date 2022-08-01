@@ -830,6 +830,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           type_breakdown: {
             terms: {
               field: 'type',
+              size: 50,
             },
           },
         },
@@ -845,6 +846,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           value_list_item_count: {
             terms: {
               field: 'list_id',
+              size: 100,
             },
           },
         },
