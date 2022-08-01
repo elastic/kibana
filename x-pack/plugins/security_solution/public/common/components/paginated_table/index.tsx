@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  EuiBasicTableProps,
-  EuiGlobalToastListToast as Toast,
-  EuiTableRowCellProps,
-} from '@elastic/eui';
+import type { EuiBasicTableProps, EuiTableRowCellProps } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiButtonEmpty,
@@ -46,7 +42,6 @@ import type { HostRiskScoreColumns } from '../../../hosts/components/host_risk_s
 import type { UsersColumns } from '../../../network/components/users_table/columns';
 import { HeaderSection } from '../header_section';
 import { Loader } from '../loader';
-import { useStateToaster } from '../toasters';
 
 import * as i18n from './translations';
 import { Panel } from '../panel';
@@ -54,6 +49,8 @@ import { InspectButtonContainer } from '../inspect';
 import { useQueryToggle } from '../../containers/query_toggle';
 import type { UsersTableColumns } from '../../../users/components/all_users';
 import type { AuthTableColumns } from '../authentication/types';
+import { useAppToasts } from '../../hooks/use_app_toasts';
+import { getSubtitle } from './helpers';
 
 const DEFAULT_DATA_TEST_SUBJ = 'paginated-table';
 
@@ -103,7 +100,7 @@ export interface BasicTableProps<T> {
   activePage: number;
   columns: T;
   dataTestSubj?: string;
-  headerCount: number;
+  headerCount: number | null | undefined;
   headerFilters?: string | React.ReactNode;
   headerSupplement?: React.ReactElement;
   headerTitle: string | React.ReactElement;
@@ -124,7 +121,7 @@ export interface BasicTableProps<T> {
   sorting?: SortingBasicTable;
   split?: boolean;
   stackHeader?: boolean;
-  totalCount: number;
+  totalCount: number | null | undefined;
   updateActivePage: (activePage: number) => void;
   updateLimitPagination: (limit: number) => void;
 }
@@ -171,18 +168,18 @@ const PaginatedTableComponent: FC<SiemTables> = ({
 }) => {
   const [myLoading, setMyLoading] = useState(loading);
   const [myActivePage, setActivePage] = useState(activePage);
-  const [loadingInitial, setLoadingInitial] = useState(headerCount === -1);
+  const [loadingInitial, setLoadingInitial] = useState(headerCount == null || headerCount === -1); // Todo: remove headerCount === -1 once all the headerCount have been updated
   const [isPopoverOpen, setPopoverOpen] = useState(false);
 
-  const pageCount = Math.ceil(totalCount / limit);
-  const dispatchToaster = useStateToaster()[1];
+  const pageCount = totalCount != null ? Math.ceil(totalCount / limit) : undefined;
+  const { addWarning } = useAppToasts();
 
   useEffect(() => {
     setActivePage(activePage);
   }, [activePage]);
 
   useEffect(() => {
-    if (headerCount >= 0 && loadingInitial) {
+    if (headerCount != null && headerCount >= 0 && loadingInitial) {
       setLoadingInitial(false);
     }
   }, [loadingInitial, headerCount]);
@@ -199,25 +196,17 @@ const PaginatedTableComponent: FC<SiemTables> = ({
     setPopoverOpen(false);
   };
 
-  const goToPage = (newActivePage: number) => {
-    if ((newActivePage + 1) * limit >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
-      const toast: Toast = {
-        id: 'PaginationWarningMsg',
-        title: headerTitle + i18n.TOAST_TITLE,
-        color: 'warning',
-        iconType: 'alert',
-        toastLifeTimeMs: 10000,
-        text: i18n.TOAST_TEXT,
-      };
-      return dispatchToaster({
-        type: 'addToaster',
-        toast,
-      });
-    }
-    setActivePage(newActivePage);
-    loadPage(newActivePage);
-    updateActivePage(newActivePage);
-  };
+  const goToPage = useCallback(
+    (newActivePage: number) => {
+      if ((newActivePage + 1) * limit >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
+        addWarning({ title: headerTitle + i18n.TOAST_TITLE, text: i18n.TOAST_TEXT });
+      }
+      setActivePage(newActivePage);
+      loadPage(newActivePage);
+      updateActivePage(newActivePage);
+    },
+    [addWarning, headerTitle, limit, loadPage, updateActivePage]
+  );
 
   const button = (
     <EuiButtonEmpty
@@ -271,7 +260,12 @@ const PaginatedTableComponent: FC<SiemTables> = ({
     },
     [setQuerySkip, setToggleStatus]
   );
-
+  const subtitle = getSubtitle({
+    loadingInitial,
+    headerSubtitle,
+    headerCount,
+    headerUnit,
+  });
   return (
     <InspectButtonContainer show={!loadingInitial}>
       <Panel data-test-subj={`${dataTestSubj}-loading-${loading}`} loading={loading}>
@@ -282,14 +276,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
           id={id}
           split={split}
           stackHeader={stackHeader}
-          subtitle={
-            !loadingInitial && headerSubtitle
-              ? `${i18n.SHOWING}: ${headerSubtitle}`
-              : headerUnit &&
-                `${i18n.SHOWING}: ${
-                  headerCount >= 0 ? headerCount.toLocaleString() : 0
-                } ${headerUnit}`
-          }
+          subtitle={subtitle}
           title={headerTitle}
           tooltip={headerTooltip}
         >
@@ -311,6 +298,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
                 <EuiFlexItem>
                   {itemsPerRow &&
                     itemsPerRow.length > 0 &&
+                    totalCount != null &&
                     totalCount >= itemsPerRow[0].numberOfRow && (
                       <EuiPopover
                         id="customizablePagination"
@@ -330,7 +318,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
                 </EuiFlexItem>
 
                 <PaginationWrapper grow={false}>
-                  {totalCount > 0 && (
+                  {totalCount != null && totalCount > 0 && pageCount != null && (
                     <EuiPagination
                       data-test-subj="numberedPagination"
                       pageCount={pageCount}

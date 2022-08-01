@@ -6,6 +6,7 @@
  */
 
 import type { PaginationInputPaginated } from '../../../../common/search_strategy';
+import { SHOWING } from './translations';
 
 export const generateTablePaginationOptions = (
   activePage: number,
@@ -20,3 +21,21 @@ export const generateTablePaginationOptions = (
     querySize: isBucketSort ? limit : limit + cursorStart,
   };
 };
+
+export const getSubtitle = ({
+  loadingInitial,
+  headerSubtitle,
+  headerCount,
+  headerUnit,
+}: {
+  loadingInitial: boolean;
+  headerSubtitle?: string | React.ReactElement;
+  headerCount: number | null | undefined;
+  headerUnit?: string | React.ReactElement;
+}) =>
+  !loadingInitial && headerSubtitle
+    ? `${SHOWING}: ${headerSubtitle}`
+    : headerUnit &&
+      `${SHOWING}: ${
+        headerCount != null && headerCount >= 0 ? headerCount.toLocaleString() : 0
+      } ${headerUnit}`;

@@ -56,7 +56,7 @@ export interface NetworkTlsRequestOptions extends RequestOptionsPaginated<Networ
 
 export interface NetworkTlsStrategyResponse extends IEsSearchResponse {
   edges: NetworkTlsEdges[];
-  totalCount: number;
+  totalCount: number | null | undefined;
   pageInfo: PageInfoPaginated;
   inspect?: Maybe<Inspect>;
 }

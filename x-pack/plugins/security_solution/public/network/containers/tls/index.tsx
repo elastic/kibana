@@ -35,7 +35,7 @@ export interface NetworkTlsArgs {
   pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
   tls: NetworkTlsStrategyResponse['edges'];
-  totalCount: number;
+  totalCount: number | null | undefined;
 }
 
 interface UseNetworkTls {
@@ -94,7 +94,7 @@ export const useNetworkTls = ({
     factoryQueryType: NetworkQueries.tls,
     initialResult: {
       edges: [],
-      totalCount: -1,
+      totalCount: undefined,
       pageInfo: {
         activePage: 0,
         fakeTotalCount: 0,

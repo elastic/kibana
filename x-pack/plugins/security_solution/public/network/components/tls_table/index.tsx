@@ -31,7 +31,7 @@ interface TlsTableProps {
   loadPage: (newActivePage: number) => void;
   setQuerySkip: (skip: boolean) => void;
   showMorePagesIndicator: boolean;
-  totalCount: number;
+  totalCount: number | null | undefined;
   type: networkModel.NetworkType;
 }
 
@@ -124,7 +124,7 @@ const TlsTableComponent: React.FC<TlsTableProps> = ({
       showMorePagesIndicator={showMorePagesIndicator}
       headerCount={totalCount}
       headerTitle={i18n.TRANSPORT_LAYER_SECURITY}
-      headerUnit={i18n.UNIT(totalCount)}
+      headerUnit={totalCount ? i18n.UNIT(totalCount) : undefined}
       id={id}
       isInspect={isInspect}
       itemsPerRow={rowItems}
