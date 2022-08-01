@@ -68,7 +68,7 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
   stackByWidth,
   title,
 }: Props) => {
-  const { to, from, deleteQuery, setQuery } = useGlobalTime();
+  const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
 
   // create a unique, but stable (across re-renders) query id
   const uniqueQueryId = useMemo(() => `${ALERTS_TREEMAP_ID}-${uuid.v4()}`, []);
@@ -175,7 +175,7 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
           )}
         </HeaderSection>
 
-        {isLoadingAlerts ? (
+        {isLoadingAlerts && isPanelExpanded ? (
           <EuiProgress color="accent" data-test-subj="progress" position="absolute" size="xs" />
         ) : (
           <>
