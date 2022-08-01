@@ -22,18 +22,21 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 
 import type { SavedObject } from '@kbn/core/public';
+import { Direction } from '../../../../common/search_strategy';
 import type { ECSMapping } from '../../../../common/schemas/common';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { useSavedQueries } from '../../../saved_queries/use_saved_queries';
 
-type SavedQuerySO = SavedObject<{
+export type SavedQuerySO = SavedObject<{
   name: string;
   id: string;
+  description?: string;
   query: string;
   ecs_mapping: ECSMapping;
   updated_at: string;
+  prebuilt?: boolean;
 }>;
 
 interface PlayButtonProps {
@@ -114,7 +117,7 @@ const SavedQueriesPageComponent = () => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
   const [sortField, setSortField] = useState('attributes.updated_at');
-  const [sortDirection, setSortDirection] = useState('desc');
+  const [sortDirection, setSortDirection] = useState<Direction>(Direction.desc);
 
   const { data } = useSavedQueries({ isLive: true });
 
@@ -269,13 +272,12 @@ const SavedQueriesPageComponent = () => {
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn} rightColumn={RightColumn} rightColumnGrow={false}>
-      {data?.saved_objects && (
+      {data?.data && (
         <EuiInMemoryTable
-          items={data?.saved_objects}
+          items={data?.data}
           itemId="id"
           columns={columns}
           pagination={pagination}
-          // @ts-expect-error update types
           sorting={sorting}
           onChange={onTableChange}
           rowHeader="id"

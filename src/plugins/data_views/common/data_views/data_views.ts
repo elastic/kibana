@@ -38,6 +38,10 @@ import { DuplicateDataViewError, DataViewInsufficientAccessError } from '../erro
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 
+/*
+ * Attributes of the data view saved object
+ * @public
+ */
 export type DataViewSavedObjectAttrs = Pick<
   DataViewAttributes,
   'title' | 'type' | 'typeMeta' | 'name'
@@ -445,7 +449,7 @@ export class DataViewsService {
    * Get default index pattern id
    */
   getDefaultId = async (): Promise<string | null> => {
-    const defaultIndexPatternId = await this.config.get('defaultIndex');
+    const defaultIndexPatternId = await this.config.get<string | null>('defaultIndex');
     return defaultIndexPatternId ?? null;
   };
 
@@ -473,7 +477,7 @@ export class DataViewsService {
    * @returns FieldSpec[]
    */
   getFieldsForWildcard = async (options: GetFieldsOptions): Promise<FieldSpec[]> => {
-    const metaFields = await this.config.get(META_FIELDS);
+    const metaFields = await this.config.get<string[]>(META_FIELDS);
     return this.apiClient.getFieldsForWildcard({
       pattern: options.pattern,
       metaFields,
@@ -786,8 +790,8 @@ export class DataViewsService {
     { id, name, title, ...restOfSpec }: DataViewSpec,
     skipFetchFields = false
   ): Promise<DataView> {
-    const shortDotsEnable = await this.config.get(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
-    const metaFields = await this.config.get(META_FIELDS);
+    const shortDotsEnable = await this.config.get<boolean>(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
+    const metaFields = await this.config.get<string[] | undefined>(META_FIELDS);
 
     const spec = {
       id: id ?? uuid.v4(),
@@ -886,7 +890,8 @@ export class DataViewsService {
     // get changed keys
     const originalChangedKeys: string[] = [];
     Object.entries(body).forEach(([key, value]) => {
-      if (value !== (originalBody as any)[key]) {
+      const realKey = key as keyof typeof originalBody;
+      if (value !== originalBody[realKey]) {
         originalChangedKeys.push(key);
       }
     });
@@ -913,7 +918,8 @@ export class DataViewsService {
 
           const serverChangedKeys: string[] = [];
           Object.entries(updatedBody).forEach(([key, value]) => {
-            if (value !== (body as any)[key] && value !== (originalBody as any)[key]) {
+            const realKey = key as keyof typeof originalBody;
+            if (value !== body[realKey] && value !== originalBody[realKey]) {
               serverChangedKeys.push(key);
             }
           });
@@ -946,6 +952,7 @@ export class DataViewsService {
 
           // Set the updated response on this object
           serverChangedKeys.forEach((key) => {
+            // FIXME: this overwrites read-only properties
             (indexPattern as any)[key] = (samePattern as any)[key];
           });
           indexPattern.version = samePattern.version;

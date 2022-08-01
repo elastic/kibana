@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -17,27 +16,24 @@ import type {
 import type { ListClient } from '@kbn/lists-plugin/server';
 import type { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
-import type { BuildRuleMessage } from '../rule_messages';
 import { createThreatSignals } from '../threat_mapping/create_threat_signals';
 import type { CompleteRule, ThreatRuleParams } from '../../schemas/rule_schemas';
-import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 
 export const threatMatchExecutor = async ({
   inputIndex,
   runtimeMappings,
   completeRule,
   tuple,
-  listClient,
   exceptionItems,
+  listClient,
   services,
   version,
   searchAfterSize,
-  logger,
+  ruleExecutionLogger,
   eventsTelemetry,
-  experimentalFeatures,
-  buildRuleMessage,
   bulkCreate,
   wrapHits,
   primaryTimestamp,
@@ -47,15 +43,13 @@ export const threatMatchExecutor = async ({
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   completeRule: CompleteRule<ThreatRuleParams>;
   tuple: RuleRangeTuple;
-  listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[];
+  listClient: ListClient;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
   searchAfterSize: number;
-  logger: Logger;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
   eventsTelemetry: ITelemetryEventsSender | undefined;
-  experimentalFeatures: ExperimentalFeatures;
-  buildRuleMessage: BuildRuleMessage;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
   primaryTimestamp: string;
@@ -66,7 +60,6 @@ export const threatMatchExecutor = async ({
   return withSecuritySpan('threatMatchExecutor', async () => {
     return createThreatSignals({
       alertId: completeRule.alertId,
-      buildRuleMessage,
       bulkCreate,
       completeRule,
       concurrentSearches: ruleParams.concurrentSearches ?? 1,
@@ -77,9 +70,9 @@ export const threatMatchExecutor = async ({
       itemsPerSearch: ruleParams.itemsPerSearch ?? 9000,
       language: ruleParams.language,
       listClient,
-      logger,
       outputIndex: ruleParams.outputIndex,
       query: ruleParams.query,
+      ruleExecutionLogger,
       savedId: ruleParams.savedId,
       searchAfterSize,
       services,

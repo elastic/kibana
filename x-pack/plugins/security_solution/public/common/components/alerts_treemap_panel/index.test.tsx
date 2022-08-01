@@ -149,7 +149,17 @@ describe('AlertsTreemapPanel', () => {
     );
   });
 
-  it('renders the panel with an auto overflow-y to allow vertical scrolling when necessary', async () => {
+  it('renders the panel with the expected class to style the overflow-y scroll bar', async () => {
+    render(
+      <TestProviders>
+        <AlertsTreemapPanel {...defaultProps} />
+      </TestProviders>
+    );
+
+    await waitFor(() => expect(screen.getByTestId('treemapPanel')).toHaveClass('eui-yScroll'));
+  });
+
+  it('renders the panel with an auto overflow-y to allow vertical scrolling when necessary when the panel is expanded', async () => {
     render(
       <TestProviders>
         <AlertsTreemapPanel {...defaultProps} />
@@ -158,6 +168,18 @@ describe('AlertsTreemapPanel', () => {
 
     await waitFor(() =>
       expect(screen.getByTestId('treemapPanel')).toHaveStyleRule('overflow-y', 'auto')
+    );
+  });
+
+  it('renders the panel with a hidden overflow-y when the panel is NOT expanded', async () => {
+    render(
+      <TestProviders>
+        <AlertsTreemapPanel {...defaultProps} isPanelExpanded={false} />
+      </TestProviders>
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId('treemapPanel')).toHaveStyleRule('overflow-y', 'hidden')
     );
   });
 

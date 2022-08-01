@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject, SavedObjectsClientContract } from '../../types';
-import { SavedObjectsImportFailure, SavedObjectsImportRetry } from '../types';
+import type {
+  SavedObject,
+  SavedObjectsImportFailure,
+  SavedObjectsImportRetry,
+} from '@kbn/core-saved-objects-common';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsImportError } from '../errors';
 import type { ImportStateMap } from './types';
 
@@ -16,6 +20,7 @@ const REF_TYPES_TO_VALIDATE = ['index-pattern', 'search'];
 function filterReferencesToValidate({ type }: { type: string }) {
   return REF_TYPES_TO_VALIDATE.includes(type);
 }
+
 const getObjectsToSkip = (retries: SavedObjectsImportRetry[] = []) =>
   retries.reduce(
     (acc, { type, id, ignoreMissingReferences }) =>

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ConnectorTypes } from './api';
 import { CasesFeaturesAllRequired } from './ui/types';
 
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
@@ -88,14 +87,6 @@ export const ACTION_URL = '/api/actions' as const;
 export const ACTION_TYPES_URL = `${ACTION_URL}/connector_types` as const;
 export const CONNECTORS_URL = `${ACTION_URL}/connectors` as const;
 
-export const SUPPORTED_CONNECTORS = [
-  `${ConnectorTypes.serviceNowITSM}`,
-  `${ConnectorTypes.serviceNowSIR}`,
-  `${ConnectorTypes.jira}`,
-  `${ConnectorTypes.resilient}`,
-  `${ConnectorTypes.swimlane}`,
-];
-
 /**
  * Alerts
  */
@@ -140,7 +131,7 @@ export const MAX_TITLE_LENGTH = 64 as const;
  */
 
 export const DEFAULT_FEATURES: CasesFeaturesAllRequired = Object.freeze({
-  alerts: { sync: true, enabled: true },
+  alerts: { sync: true, enabled: true, isExperimental: false },
   metrics: [],
 });
 

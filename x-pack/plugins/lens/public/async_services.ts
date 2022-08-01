@@ -18,6 +18,8 @@ export * from './datatable_visualization/datatable_visualization';
 export * from './datatable_visualization';
 export * from './metric_visualization/metric_visualization';
 export * from './metric_visualization';
+export * from './visualizations/metric/metric_visualization';
+export * from './visualizations/metric';
 export * from './pie_visualization/pie_visualization';
 export * from './pie_visualization';
 export * from './xy_visualization/xy_visualization';
@@ -31,11 +33,10 @@ export * from './indexpattern_datasource/indexpattern';
 export { createFormulaPublicApi } from './indexpattern_datasource/operations/definitions/formula/formula_public_api';
 
 export * from './indexpattern_datasource';
-
+export * from './lens_ui_telemetry';
 export * from './editor_frame_service/editor_frame';
 export * from './editor_frame_service';
 export * from './embeddable';
 export * from './app_plugin/mounter';
 export * from './lens_attribute_service';
-export * from './lens_ui_telemetry';
 export * from './app_plugin/save_modal_container';

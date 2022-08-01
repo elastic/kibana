@@ -69,6 +69,13 @@ export const CONDITION_OPERATOR_TYPE_WILDCARD_MATCHES = i18n.translate(
   }
 );
 
+export const CONDITION_OPERATOR_TYPE_WILDCARD_DOES_NOT_MATCH = i18n.translate(
+  'xpack.securitySolution.exceptions.exceptionItem.conditions.wildcardDoesNotMatchOperator',
+  {
+    defaultMessage: 'DOES NOT MATCH',
+  }
+);
+
 export const CONDITION_OPERATOR_TYPE_NESTED = i18n.translate(
   'xpack.securitySolution.exceptions.exceptionItem.conditions.nestedOperator',
   {
@@ -97,10 +104,24 @@ export const CONDITION_OPERATOR_TYPE_EXISTS = i18n.translate(
   }
 );
 
+export const CONDITION_OPERATOR_TYPE_DOES_NOT_EXIST = i18n.translate(
+  'xpack.securitySolution.exceptions.exceptionItem.conditions.existsOperator.not',
+  {
+    defaultMessage: 'does not exist',
+  }
+);
+
 export const CONDITION_OPERATOR_TYPE_LIST = i18n.translate(
   'xpack.securitySolution.exceptions.exceptionItem.conditions.listOperator',
   {
     defaultMessage: 'included in',
+  }
+);
+
+export const CONDITION_OPERATOR_TYPE_NOT_IN_LIST = i18n.translate(
+  'xpack.securitySolution.exceptions.exceptionItem.conditions.listOperator.not',
+  {
+    defaultMessage: 'is not included in',
   }
 );
 
