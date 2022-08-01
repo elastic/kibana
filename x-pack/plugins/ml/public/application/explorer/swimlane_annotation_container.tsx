@@ -7,12 +7,17 @@
 
 import React, { FC, useEffect } from 'react';
 import d3 from 'd3';
-import { scaleTime } from 'd3-scale';
+import type { scaleTime as ScaleTime } from 'd3-scale';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import type { Annotation, AnnotationsTable } from '../../../common/types/annotations';
 import { ChartTooltipService } from '../components/chart_tooltip';
 import { useCurrentEuiTheme } from '../components/color_range_legend';
+
+let scaleTime: typeof ScaleTime;
+(async () => {
+  scaleTime = (await import('d3-scale')).scaleTime;
+})();
 
 export const Y_AXIS_LABEL_WIDTH = 170;
 export const Y_AXIS_LABEL_PADDING = 8;

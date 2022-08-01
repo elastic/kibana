@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { scaleLog } from 'd3-scale';
+import type { scaleLog as ScaleLog } from 'd3-scale';
 
 import { isFiniteNumber } from '@kbn/observability-plugin/common/utils/is_finite_number';
 import { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
@@ -13,6 +13,12 @@ import { LatencyDistributionChartType } from '../../../../common/latency_distrib
 import { Setup } from '../../../lib/helpers/setup_request';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 import { getDurationField, getEventType } from '../utils';
+
+// d3-scale is an ECMAScript module. But since our build pipeline converts
+// `import 'd3-scale'` to `require('d3-scale')`, we have to use
+// `await import('d3-scale')` instead. And since top-level await isn't
+// supported, we also need to lacy-load it.
+let scaleLog: typeof ScaleLog;
 
 const getHistogramRangeSteps = (min: number, max: number, steps: number) => {
   // A d3 based scale function as a helper to get equally distributed bins on a log scale.
@@ -37,6 +43,7 @@ export const fetchDurationHistogramRangeSteps = async ({
   setup: Setup;
   searchMetrics: boolean;
 }): Promise<number[]> => {
+  scaleLog = scaleLog ?? (await import('d3-scale')).scaleLog;
   const { apmEventClient } = setup;
 
   const steps = 100;

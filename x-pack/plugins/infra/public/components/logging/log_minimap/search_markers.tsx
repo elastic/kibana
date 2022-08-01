@@ -6,12 +6,17 @@
  */
 
 import classNames from 'classnames';
-import { scaleTime } from 'd3-scale';
+import type { scaleTime as ScaleTime } from 'd3-scale';
 import * as React from 'react';
 
 import { LogEntryTime } from '../../../../common/log_entry';
 import { SearchMarker } from './search_marker';
 import { LogEntriesSummaryHighlightsBucket } from '../../../../common/http_api';
+
+let scaleTime: typeof ScaleTime;
+(async () => {
+  scaleTime = (await import('d3-scale')).scaleTime;
+})();
 
 interface SearchMarkersProps {
   buckets: LogEntriesSummaryHighlightsBucket[];
