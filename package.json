@@ -563,7 +563,6 @@
     "vega-spec-injector": "^0.0.2",
     "vega-tooltip": "^0.28.0",
     "vinyl": "^2.2.0",
-    "whatwg-fetch": "^3.0.0",
     "xml2js": "^0.4.22",
     "yauzl": "^2.10.0"
   },
@@ -1251,6 +1250,7 @@
     "webpack-dev-server": "^4.9.3",
     "webpack-merge": "^4.2.2",
     "webpack-sources": "^1.4.1",
+    "whatwg-fetch": "^3.0.0",
     "xml-crypto": "^2.1.4",
     "xmlbuilder": "13.0.2",
     "yargs": "^15.4.1"

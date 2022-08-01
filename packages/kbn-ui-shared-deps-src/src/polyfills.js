@@ -15,5 +15,4 @@ if (typeof window.Event === 'object') {
   window.Event = CustomEvent;
 }
 
-require('whatwg-fetch');
 require('symbol-observable');

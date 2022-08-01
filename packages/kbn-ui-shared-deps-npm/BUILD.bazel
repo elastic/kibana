@@ -58,7 +58,6 @@ RUNTIME_DEPS = [
   "@npm//tslib",
   "@npm//url-loader",
   "@npm//val-loader",
-  "@npm//whatwg-fetch",
 ]
 
 WEBPACK_DEPS = [
@@ -94,7 +93,6 @@ TYPES_DEPS = [
   "@npm//symbol-observable",
   "@npm//url-loader",
   "@npm//val-loader",
-  "@npm//whatwg-fetch",
   "@npm//@types/node",
 ]
 
