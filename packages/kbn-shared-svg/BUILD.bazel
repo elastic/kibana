@@ -9,6 +9,7 @@ SOURCE_FILES = glob(
   [
     "src/**/*.ts",
     "src/**/*.tsx",
+    "src/**/*.svg",
   ],
   exclude = [
     "**/*.test.*",
@@ -53,7 +54,8 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
-  "@npm//@types/react"
+  "@npm//@types/react",
+  "//packages/kbn-ambient-ui-types:npm_module_types",
 ]
 
 jsts_transpiler(
