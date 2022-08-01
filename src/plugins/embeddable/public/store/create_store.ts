@@ -16,6 +16,7 @@ import {
   last,
   map,
   pluck,
+  share,
   takeUntil,
   Observable,
 } from 'rxjs';
@@ -73,13 +74,21 @@ function diff<T extends Record<keyof any, any>>(previous: T, current: T) {
  */
 export function createStore<E extends IEmbeddable = IEmbeddable, S extends State<E> = State<E>>(
   embeddable: E,
-  { reducer, ...options }: CreateStoreOptions<S> = {}
+  { preloadedState, reducer, ...options }: CreateStoreOptions<S> = {}
 ): Store<S> {
-  const store = configureStore({ ...options, reducer: createReducer(reducer) });
+  const store = configureStore({
+    ...options,
+    preloadedState: {
+      input: embeddable.getInput(),
+      output: embeddable.getOutput(),
+      ...(preloadedState ?? {}),
+    } as NonNullable<typeof preloadedState>,
+    reducer: createReducer(reducer),
+  });
 
   const state$ = new Observable<S>((subscriber) => {
     subscriber.add(store.subscribe(() => subscriber.next(store.getState())));
-  });
+  }).pipe(share());
   const input$ = embeddable.getInput$();
   const output$ = embeddable.getOutput$();
 
@@ -88,9 +97,9 @@ export function createStore<E extends IEmbeddable = IEmbeddable, S extends State
       takeUntil(input$.pipe(last())),
       pluck('input'),
       distinctUntilChanged(),
-      debounceTime(0),
       map((value) => diff(embeddable.getInput(), value)),
-      filter((patch) => !isEmpty(patch))
+      filter((patch) => !isEmpty(patch)),
+      debounceTime(0),
     )
     .subscribe((patch) => embeddable.updateInput(patch));
 
@@ -99,23 +108,23 @@ export function createStore<E extends IEmbeddable = IEmbeddable, S extends State
       takeUntil(output$.pipe(last())),
       pluck('output'),
       distinctUntilChanged(),
-      debounceTime(0),
       map((value) => diff(embeddable.getOutput(), value)),
-      filter((patch) => !isEmpty(patch))
+      filter((patch) => !isEmpty(patch)),
+      debounceTime(0),
     )
     .subscribe((patch) => embeddable.updateOutput(patch));
 
   input$
     .pipe(
       map((value) => diff(store.getState().input, value)),
-      filter((patch) => !isEmpty(patch))
+      filter((patch) => !isEmpty(patch)),
     )
     .subscribe((patch) => store.dispatch(input.actions.update(patch)));
 
   output$
     .pipe(
       map((value) => diff(store.getState().output, value)),
-      filter((patch) => !isEmpty(patch))
+      filter((patch) => !isEmpty(patch)),
     )
     .subscribe((patch) => store.dispatch(output.actions.update(patch)));
 
