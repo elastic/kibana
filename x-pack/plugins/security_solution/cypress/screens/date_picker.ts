@@ -22,10 +22,13 @@ export const DATE_PICKER_END_DATE_POPOVER_BUTTON_TIMELINE =
   '[data-test-subj="timeline-date-picker-container"] [data-test-subj="superDatePickerendDatePopoverButton"]';
 
 export const DATE_PICKER_START_DATE_POPOVER_BUTTON =
-  '[data-test-subj="filters-global-container"] [data-test-subj="superDatePickerShowDatesButton"]';
+  'div[data-test-subj="globalDatePicker"] button[data-test-subj="superDatePickerstartDatePopoverButton"]';
 
-export const DATE_PICKER_SHOW_DATE_POPOVER_BUTTON =
-  '[data-test-subj="filters-global-container"] [data-test-subj="superDatePickerShowDatesButton"]';
+export const GLOBAL_FILTERS_CONTAINER = '[data-test-subj="globalDatePicker"]';
+
+export const SHOW_DATES_BUTTON = '[data-test-subj="superDatePickerShowDatesButton"]';
+
+export const DATE_PICKER_SHOW_DATE_POPOVER_BUTTON = `${GLOBAL_FILTERS_CONTAINER} ${SHOW_DATES_BUTTON}`;
 
 export const DATE_PICKER_RELATIVE_DATE_INPUT_UNIT_SELECTOR =
   '[data-test-subj="superDatePickerRelativeDateInputUnitSelector"]';
