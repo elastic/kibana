@@ -274,6 +274,10 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
         params: schema.object({
           indexName: schema.string(),
         }),
+        query: schema.object({
+          'page[current]': schema.maybe(schema.number()),
+          'page[size]': schema.maybe(schema.number()),
+        }),
       },
     },
     enterpriseSearchRequestHandler.createRequest({
