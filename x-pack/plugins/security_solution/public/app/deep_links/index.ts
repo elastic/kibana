@@ -174,6 +174,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         title: ENTITY_ANALYTICS,
         path: ENTITY_ANALYTICS_PATH,
         features: [FEATURE.general],
+        experimentalKey: 'entityAnalyticsDashoardEnabled',
         keywords: [
           i18n.translate('xpack.securitySolution.search.entityAnalytics', {
             defaultMessage: 'Entity Analytics',
