@@ -115,9 +115,7 @@ describe('ALL - Live Query', () => {
     cy.getBySel('toggleIcon-system_memory_linux_elastic').click();
     cy.getBySel('toggleIcon-failingQuery').click();
     cy.contains('Status').click();
-    cy.contains(
-      'query failed, code: 1, message: no such table: opera_extensions'
-    );
+    cy.contains('query failed, code: 1, message: no such table: opera_extensions');
     navigateTo('/app/osquery');
     cy.contains('Example');
   });
