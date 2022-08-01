@@ -108,16 +108,17 @@ export const EntityAnalyticsUserRiskScores = () => {
   const goToUserRiskTab = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateTo({
-        deepLinkId: SecurityPageName.users,
-        path: getTabsOnUsersUrl(UsersTableType.risk, search),
-      });
 
       dispatch(
         usersActions.updateUserRiskScoreSeverityFilter({
           severitySelection: [],
         })
       );
+
+      navigateTo({
+        deepLinkId: SecurityPageName.users,
+        path: getTabsOnUsersUrl(UsersTableType.risk, search),
+      });
     },
     [navigateTo, search, dispatch]
   );

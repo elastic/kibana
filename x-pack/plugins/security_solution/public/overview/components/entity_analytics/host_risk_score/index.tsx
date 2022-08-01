@@ -109,10 +109,6 @@ export const EntityAnalyticsHostRiskScores = () => {
   const goToHostRiskTab = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateTo({
-        deepLinkId: SecurityPageName.hosts,
-        path: getTabsOnHostsUrl(HostsTableType.risk, search),
-      });
 
       dispatch(
         hostsActions.updateHostRiskScoreSeverityFilter({
@@ -120,6 +116,11 @@ export const EntityAnalyticsHostRiskScores = () => {
           hostsType: HostsType.page,
         })
       );
+
+      navigateTo({
+        deepLinkId: SecurityPageName.hosts,
+        path: getTabsOnHostsUrl(HostsTableType.risk, search),
+      });
     },
     [navigateTo, search, dispatch]
   );

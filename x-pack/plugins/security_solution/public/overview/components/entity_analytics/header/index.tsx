@@ -10,7 +10,7 @@ import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { useHostRiskScoreKpi, useUserRiskScoreKpi } from '../../../../risk_score/containers';
 import { LinkAnchor } from '../../../../common/components/links';
-import { RiskSeverity } from '../../../../../common/search_strategy';
+import { Direction, RiskScoreFields, RiskSeverity } from '../../../../../common/search_strategy';
 import * as i18n from './translations';
 import { getTabsOnHostsUrl } from '../../../../common/components/link_to/redirect_to_hosts';
 import { useFormatUrl } from '../../../../common/components/link_to';
@@ -36,10 +36,6 @@ export const EntityAnalyticsHeader = () => {
   const goToHostRiskTabFilterdByCritical = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateTo({
-        deepLinkId: SecurityPageName.hosts,
-        path: getTabsOnHostsUrl(HostsTableType.risk, search),
-      });
 
       dispatch(
         hostsActions.updateHostRiskScoreSeverityFilter({
@@ -47,6 +43,18 @@ export const EntityAnalyticsHeader = () => {
           hostsType: HostsType.page,
         })
       );
+
+      dispatch(
+        hostsActions.updateHostRiskScoreSort({
+          sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
+          hostsType: HostsType.page,
+        })
+      );
+
+      navigateTo({
+        deepLinkId: SecurityPageName.hosts,
+        path: getTabsOnHostsUrl(HostsTableType.risk, search),
+      });
     },
     [navigateTo, search, dispatch]
   );
@@ -55,16 +63,24 @@ export const EntityAnalyticsHeader = () => {
   const goToUserRiskTabFilterdByCritical = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateTo({
-        deepLinkId: SecurityPageName.users,
-        path: getTabsOnUsersUrl(UsersTableType.risk, search),
-      });
 
       dispatch(
         usersActions.updateUserRiskScoreSeverityFilter({
           severitySelection: [RiskSeverity.critical],
         })
       );
+
+      dispatch(
+        usersActions.updateTableSorting({
+          sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
+          tableType: UsersTableType.risk,
+        })
+      );
+
+      navigateTo({
+        deepLinkId: SecurityPageName.users,
+        path: getTabsOnUsersUrl(UsersTableType.risk, search),
+      });
     },
     [navigateTo, search, dispatch]
   );
