@@ -695,7 +695,6 @@
     "xpack.lens.indexPattern.uniqueLabel": "{label} [{num}]",
     "xpack.lens.indexPattern.useAsTopLevelAgg": "先按此字段分组",
     "xpack.lens.indexPatterns.clearFiltersLabel": "清除名称和类型筛选",
-    "xpack.lens.indexPatterns.fieldFiltersLabel": "按类型筛选",
     "xpack.lens.indexPatterns.fieldSearchLiveRegion": "{availableFields} 个可用{availableFields, plural, other {字段}}。{emptyFields} 个空{emptyFields, plural, other {字段}}。{metaFields} 个元{metaFields, plural,other {字段}}。",
     "xpack.lens.indexPatterns.filterByNameLabel": "搜索字段名称",
     "xpack.lens.indexPatterns.noAvailableDataLabel": "没有包含数据的可用字段。",

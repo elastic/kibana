@@ -694,7 +694,6 @@
     "xpack.lens.indexPattern.uniqueLabel": "{label} [{num}]",
     "xpack.lens.indexPattern.useAsTopLevelAgg": "Regrouper d'abord en fonction de ce champ",
     "xpack.lens.indexPatterns.clearFiltersLabel": "Effacer le nom et saisissez les filtres",
-    "xpack.lens.indexPatterns.fieldFiltersLabel": "Filtrer par type",
     "xpack.lens.indexPatterns.fieldSearchLiveRegion": "{availableFields} {availableFields, plural, one {champ} other {champs}} disponible(s). {emptyFields} {emptyFields, plural, one {champ} other {champs}} vide(s). {metaFields} {metaFields, plural, one {champ} other {champs}} méta.",
     "xpack.lens.indexPatterns.filterByNameLabel": "Rechercher les noms de champs",
     "xpack.lens.indexPatterns.noAvailableDataLabel": "Aucun champ disponible ne contient de données.",
