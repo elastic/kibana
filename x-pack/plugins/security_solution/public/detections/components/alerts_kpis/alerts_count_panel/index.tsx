@@ -60,7 +60,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
     stackByWidth,
     title = i18n.COUNT_TABLE_TITLE,
   }) => {
-    const { to, from, deleteQuery, setQuery } = useGlobalTime();
+    const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
 
     // create a unique, but stable (across re-renders) query id
     const uniqueQueryId = useMemo(() => `${DETECTIONS_ALERTS_COUNT_ID}-${uuid.v4()}`, []);
