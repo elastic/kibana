@@ -1583,13 +1583,7 @@
               "{@link OverlayStart}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.OverlayStart",
-                "text": "OverlayStart"
-              }
+              "OverlayStart"
             ],
             "path": "src/core/public/index.ts",
             "deprecated": false
@@ -5296,7 +5290,10 @@
         "tags": [],
         "label": "OverlayBannersStart",
         "description": [],
-        "path": "src/core/public/overlays/banners/banners_service.tsx",
+        "signature": [
+          "OverlayBannersStart"
+        ],
+        "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -5310,16 +5307,10 @@
             ],
             "signature": [
               "(mount: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.MountPoint",
-                "text": "MountPoint"
-              },
+              "MountPoint",
               "<HTMLElement>, priority?: number | undefined) => string"
             ],
-            "path": "src/core/public/overlays/banners/banners_service.tsx",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -5332,16 +5323,10 @@
                   "{@link MountPoint }"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.MountPoint",
-                    "text": "MountPoint"
-                  },
+                  "MountPoint",
                   "<HTMLElement>"
                 ],
-                "path": "src/core/public/overlays/banners/banners_service.tsx",
+                "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -5357,7 +5342,7 @@
                 "signature": [
                   "number | undefined"
                 ],
-                "path": "src/core/public/overlays/banners/banners_service.tsx",
+                "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -5378,7 +5363,7 @@
             "signature": [
               "(id: string) => boolean"
             ],
-            "path": "src/core/public/overlays/banners/banners_service.tsx",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -5393,7 +5378,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/core/public/overlays/banners/banners_service.tsx",
+                "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -5413,16 +5398,10 @@
             ],
             "signature": [
               "(id: string | undefined, mount: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.MountPoint",
-                "text": "MountPoint"
-              },
+              "MountPoint",
               "<HTMLElement>, priority?: number | undefined) => string"
             ],
-            "path": "src/core/public/overlays/banners/banners_service.tsx",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -5437,7 +5416,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "src/core/public/overlays/banners/banners_service.tsx",
+                "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
                 "deprecated": false,
                 "isRequired": false
               },
@@ -5451,16 +5430,10 @@
                   "{@link MountPoint }"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.MountPoint",
-                    "text": "MountPoint"
-                  },
+                  "MountPoint",
                   "<HTMLElement>"
                 ],
-                "path": "src/core/public/overlays/banners/banners_service.tsx",
+                "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -5476,7 +5449,7 @@
                 "signature": [
                   "number | undefined"
                 ],
-                "path": "src/core/public/overlays/banners/banners_service.tsx",
+                "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -5495,7 +5468,7 @@
             "signature": [
               "() => JSX.Element"
             ],
-            "path": "src/core/public/overlays/banners/banners_service.tsx",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -5510,7 +5483,10 @@
         "tags": [],
         "label": "OverlayFlyoutOpenOptions",
         "description": [],
-        "path": "src/core/public/overlays/flyout/flyout_service.tsx",
+        "signature": [
+          "OverlayFlyoutOpenOptions"
+        ],
+        "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -5523,7 +5499,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/public/overlays/flyout/flyout_service.tsx",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false
           },
           {
@@ -5536,7 +5512,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/public/overlays/flyout/flyout_service.tsx",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false
           },
           {
@@ -5549,7 +5525,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/core/public/overlays/flyout/flyout_service.tsx",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false
           },
           {
@@ -5562,7 +5538,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/public/overlays/flyout/flyout_service.tsx",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false
           },
           {
@@ -5575,7 +5551,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/public/overlays/flyout/flyout_service.tsx",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false
           },
           {
@@ -5588,7 +5564,7 @@
             "signature": [
               "\"s\" | \"m\" | \"l\" | undefined"
             ],
-            "path": "src/core/public/overlays/flyout/flyout_service.tsx",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false
           },
           {
@@ -5601,7 +5577,7 @@
             "signature": [
               "string | number | boolean | undefined"
             ],
-            "path": "src/core/public/overlays/flyout/flyout_service.tsx",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false
           },
           {
@@ -5614,7 +5590,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/core/public/overlays/flyout/flyout_service.tsx",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false
           },
           {
@@ -5627,7 +5603,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/core/public/overlays/flyout/flyout_service.tsx",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false
           },
           {
@@ -5641,7 +5617,7 @@
               "EuiOverlayMaskProps",
               " | undefined"
             ],
-            "path": "src/core/public/overlays/flyout/flyout_service.tsx",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false
           },
           {
@@ -5655,16 +5631,10 @@
             ],
             "signature": [
               "((flyout: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.OverlayRef",
-                "text": "OverlayRef"
-              },
+              "OverlayRef",
               ") => void) | undefined"
             ],
-            "path": "src/core/public/overlays/flyout/flyout_service.tsx",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -5675,15 +5645,9 @@
                 "label": "flyout",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.OverlayRef",
-                    "text": "OverlayRef"
-                  }
+                  "OverlayRef"
                 ],
-                "path": "src/core/public/overlays/flyout/flyout_service.tsx",
+                "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -5702,7 +5666,10 @@
         "description": [
           "\nAPIs to open and manage fly-out dialogs.\n"
         ],
-        "path": "src/core/public/overlays/flyout/flyout_service.tsx",
+        "signature": [
+          "OverlayFlyoutStart"
+        ],
+        "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -5718,31 +5685,13 @@
             ],
             "signature": [
               "(mount: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.MountPoint",
-                "text": "MountPoint"
-              },
+              "MountPoint",
               "<HTMLElement>, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.OverlayFlyoutOpenOptions",
-                "text": "OverlayFlyoutOpenOptions"
-              },
+              "OverlayFlyoutOpenOptions",
               " | undefined) => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.OverlayRef",
-                "text": "OverlayRef"
-              }
+              "OverlayRef"
             ],
-            "path": "src/core/public/overlays/flyout/flyout_service.tsx",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -5755,16 +5704,10 @@
                   "{@link MountPoint } - Mounts the children inside a flyout panel"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.MountPoint",
-                    "text": "MountPoint"
-                  },
+                  "MountPoint",
                   "<HTMLElement>"
                 ],
-                "path": "src/core/public/overlays/flyout/flyout_service.tsx",
+                "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -5778,16 +5721,10 @@
                   "{@link OverlayFlyoutOpenOptions } - options for the flyout"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.OverlayFlyoutOpenOptions",
-                    "text": "OverlayFlyoutOpenOptions"
-                  },
+                  "OverlayFlyoutOpenOptions",
                   " | undefined"
                 ],
-                "path": "src/core/public/overlays/flyout/flyout_service.tsx",
+                "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -5804,7 +5741,10 @@
         "tags": [],
         "label": "OverlayModalConfirmOptions",
         "description": [],
-        "path": "src/core/public/overlays/modal/modal_service.tsx",
+        "signature": [
+          "OverlayModalConfirmOptions"
+        ],
+        "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -5817,7 +5757,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/public/overlays/modal/modal_service.tsx",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false
           },
           {
@@ -5830,7 +5770,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/public/overlays/modal/modal_service.tsx",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false
           },
           {
@@ -5843,7 +5783,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/public/overlays/modal/modal_service.tsx",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false
           },
           {
@@ -5856,7 +5796,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/public/overlays/modal/modal_service.tsx",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false
           },
           {
@@ -5869,7 +5809,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/public/overlays/modal/modal_service.tsx",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false
           },
           {
@@ -5882,7 +5822,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/public/overlays/modal/modal_service.tsx",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false
           },
           {
@@ -5895,7 +5835,7 @@
             "signature": [
               "\"cancel\" | \"confirm\" | undefined"
             ],
-            "path": "src/core/public/overlays/modal/modal_service.tsx",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false
           },
           {
@@ -5909,7 +5849,7 @@
               "ButtonColor",
               " | undefined"
             ],
-            "path": "src/core/public/overlays/modal/modal_service.tsx",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false
           },
           {
@@ -5924,7 +5864,7 @@
             "signature": [
               "string | number | boolean | undefined"
             ],
-            "path": "src/core/public/overlays/modal/modal_service.tsx",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false
           }
         ],
@@ -5937,7 +5877,10 @@
         "tags": [],
         "label": "OverlayModalOpenOptions",
         "description": [],
-        "path": "src/core/public/overlays/modal/modal_service.tsx",
+        "signature": [
+          "OverlayModalOpenOptions"
+        ],
+        "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -5950,7 +5893,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/public/overlays/modal/modal_service.tsx",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false
           },
           {
@@ -5963,7 +5906,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/public/overlays/modal/modal_service.tsx",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false
           },
           {
@@ -5976,7 +5919,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/public/overlays/modal/modal_service.tsx",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false
           },
           {
@@ -5989,7 +5932,7 @@
             "signature": [
               "string | number | boolean | undefined"
             ],
-            "path": "src/core/public/overlays/modal/modal_service.tsx",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false
           }
         ],
@@ -6004,7 +5947,10 @@
         "description": [
           "\nAPIs to open and manage modal dialogs.\n"
         ],
-        "path": "src/core/public/overlays/modal/modal_service.tsx",
+        "signature": [
+          "OverlayModalStart"
+        ],
+        "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -6020,31 +5966,13 @@
             ],
             "signature": [
               "(mount: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.MountPoint",
-                "text": "MountPoint"
-              },
+              "MountPoint",
               "<HTMLElement>, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.OverlayModalOpenOptions",
-                "text": "OverlayModalOpenOptions"
-              },
+              "OverlayModalOpenOptions",
               " | undefined) => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.OverlayRef",
-                "text": "OverlayRef"
-              }
+              "OverlayRef"
             ],
-            "path": "src/core/public/overlays/modal/modal_service.tsx",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -6057,16 +5985,10 @@
                   "{@link MountPoint } - Mounts the children inside the modal"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.MountPoint",
-                    "text": "MountPoint"
-                  },
+                  "MountPoint",
                   "<HTMLElement>"
                 ],
-                "path": "src/core/public/overlays/modal/modal_service.tsx",
+                "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -6080,16 +6002,10 @@
                   "{@link OverlayModalOpenOptions } - options for the modal"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.OverlayModalOpenOptions",
-                    "text": "OverlayModalOpenOptions"
-                  },
+                  "OverlayModalOpenOptions",
                   " | undefined"
                 ],
-                "path": "src/core/public/overlays/modal/modal_service.tsx",
+                "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -6107,24 +6023,12 @@
             ],
             "signature": [
               "(message: string | ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.MountPoint",
-                "text": "MountPoint"
-              },
+              "MountPoint",
               "<HTMLElement>, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.OverlayModalConfirmOptions",
-                "text": "OverlayModalConfirmOptions"
-              },
+              "OverlayModalConfirmOptions",
               " | undefined) => Promise<boolean>"
             ],
-            "path": "src/core/public/overlays/modal/modal_service.tsx",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -6138,16 +6042,10 @@
                 ],
                 "signature": [
                   "string | ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.MountPoint",
-                    "text": "MountPoint"
-                  },
+                  "MountPoint",
                   "<HTMLElement>"
                 ],
-                "path": "src/core/public/overlays/modal/modal_service.tsx",
+                "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -6161,16 +6059,10 @@
                   "{@link OverlayModalConfirmOptions } - options for the confirm modal"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.OverlayModalConfirmOptions",
-                    "text": "OverlayModalConfirmOptions"
-                  },
+                  "OverlayModalConfirmOptions",
                   " | undefined"
                 ],
-                "path": "src/core/public/overlays/modal/modal_service.tsx",
+                "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -6189,7 +6081,10 @@
         "description": [
           "\nReturned by {@link OverlayStart} methods for closing a mounted overlay."
         ],
-        "path": "src/core/public/overlays/types.ts",
+        "signature": [
+          "OverlayRef"
+        ],
+        "path": "node_modules/@types/kbn__core-mount-utils-browser/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -6204,7 +6099,7 @@
             "signature": [
               "Promise<void>"
             ],
-            "path": "src/core/public/overlays/types.ts",
+            "path": "node_modules/@types/kbn__core-mount-utils-browser/index.d.ts",
             "deprecated": false
           },
           {
@@ -6219,7 +6114,7 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "src/core/public/overlays/types.ts",
+            "path": "node_modules/@types/kbn__core-mount-utils-browser/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -6234,7 +6129,10 @@
         "tags": [],
         "label": "OverlayStart",
         "description": [],
-        "path": "src/core/public/overlays/overlay_service.ts",
+        "signature": [
+          "OverlayStart"
+        ],
+        "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -6247,15 +6145,9 @@
               "{@link OverlayBannersStart}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.OverlayBannersStart",
-                "text": "OverlayBannersStart"
-              }
+              "OverlayBannersStart"
             ],
-            "path": "src/core/public/overlays/overlay_service.ts",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false
           },
           {
@@ -6269,31 +6161,13 @@
             ],
             "signature": [
               "(mount: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.MountPoint",
-                "text": "MountPoint"
-              },
+              "MountPoint",
               "<HTMLElement>, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.OverlayFlyoutOpenOptions",
-                "text": "OverlayFlyoutOpenOptions"
-              },
+              "OverlayFlyoutOpenOptions",
               " | undefined) => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.OverlayRef",
-                "text": "OverlayRef"
-              }
+              "OverlayRef"
             ],
-            "path": "src/core/public/overlays/overlay_service.ts",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -6306,15 +6180,9 @@
                 "description": [],
                 "signature": [
                   "(element: HTMLElement) => ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.UnmountCallback",
-                    "text": "UnmountCallback"
-                  }
+                  "UnmountCallback"
                 ],
-                "path": "src/core/public/overlays/flyout/flyout_service.tsx",
+                "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
                 "deprecated": false,
                 "returnComment": [],
                 "children": [
@@ -6328,7 +6196,7 @@
                     "signature": [
                       "T"
                     ],
-                    "path": "src/core/public/types.ts",
+                    "path": "node_modules/@types/kbn__core-mount-utils-browser/index.d.ts",
                     "deprecated": false
                   }
                 ]
@@ -6341,16 +6209,10 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.OverlayFlyoutOpenOptions",
-                    "text": "OverlayFlyoutOpenOptions"
-                  },
+                  "OverlayFlyoutOpenOptions",
                   " | undefined"
                 ],
-                "path": "src/core/public/overlays/flyout/flyout_service.tsx",
+                "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
                 "deprecated": false
               }
             ]
@@ -6366,31 +6228,13 @@
             ],
             "signature": [
               "(mount: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.MountPoint",
-                "text": "MountPoint"
-              },
+              "MountPoint",
               "<HTMLElement>, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.OverlayModalOpenOptions",
-                "text": "OverlayModalOpenOptions"
-              },
+              "OverlayModalOpenOptions",
               " | undefined) => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.OverlayRef",
-                "text": "OverlayRef"
-              }
+              "OverlayRef"
             ],
-            "path": "src/core/public/overlays/overlay_service.ts",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -6403,15 +6247,9 @@
                 "description": [],
                 "signature": [
                   "(element: HTMLElement) => ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.UnmountCallback",
-                    "text": "UnmountCallback"
-                  }
+                  "UnmountCallback"
                 ],
-                "path": "src/core/public/overlays/modal/modal_service.tsx",
+                "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
                 "deprecated": false,
                 "returnComment": [],
                 "children": [
@@ -6425,7 +6263,7 @@
                     "signature": [
                       "T"
                     ],
-                    "path": "src/core/public/types.ts",
+                    "path": "node_modules/@types/kbn__core-mount-utils-browser/index.d.ts",
                     "deprecated": false
                   }
                 ]
@@ -6438,16 +6276,10 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.OverlayModalOpenOptions",
-                    "text": "OverlayModalOpenOptions"
-                  },
+                  "OverlayModalOpenOptions",
                   " | undefined"
                 ],
-                "path": "src/core/public/overlays/modal/modal_service.tsx",
+                "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
                 "deprecated": false
               }
             ]
@@ -6463,24 +6295,12 @@
             ],
             "signature": [
               "(message: string | ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.MountPoint",
-                "text": "MountPoint"
-              },
+              "MountPoint",
               "<HTMLElement>, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.OverlayModalConfirmOptions",
-                "text": "OverlayModalConfirmOptions"
-              },
+              "OverlayModalConfirmOptions",
               " | undefined) => Promise<boolean>"
             ],
-            "path": "src/core/public/overlays/overlay_service.ts",
+            "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -6493,16 +6313,10 @@
                 "description": [],
                 "signature": [
                   "string | ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.MountPoint",
-                    "text": "MountPoint"
-                  },
+                  "MountPoint",
                   "<HTMLElement>"
                 ],
-                "path": "src/core/public/overlays/modal/modal_service.tsx",
+                "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
                 "deprecated": false
               },
               {
@@ -6513,16 +6327,10 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.OverlayModalConfirmOptions",
-                    "text": "OverlayModalConfirmOptions"
-                  },
+                  "OverlayModalConfirmOptions",
                   " | undefined"
                 ],
-                "path": "src/core/public/overlays/modal/modal_service.tsx",
+                "path": "node_modules/@types/kbn__core-overlays-browser/index.d.ts",
                 "deprecated": false
               }
             ]
@@ -10332,15 +10140,9 @@
         ],
         "signature": [
           "(element: T) => ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.UnmountCallback",
-            "text": "UnmountCallback"
-          }
+          "UnmountCallback"
         ],
-        "path": "src/core/public/types.ts",
+        "path": "node_modules/@types/kbn__core-mount-utils-browser/index.d.ts",
         "deprecated": false,
         "returnComment": [
           "a {@link UnmountCallback } that unmount the element on call."
@@ -10358,7 +10160,7 @@
             "signature": [
               "T"
             ],
-            "path": "src/core/public/types.ts",
+            "path": "node_modules/@types/kbn__core-mount-utils-browser/index.d.ts",
             "deprecated": false
           }
         ],
@@ -10613,21 +10415,9 @@
           "Pick<",
           "Toast",
           ", \"children\" | \"color\" | \"className\" | \"lang\" | \"style\" | \"role\" | \"tabIndex\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChange\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClick\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"data-test-subj\" | \"hidden\" | \"security\" | \"defaultValue\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"translate\" | \"radioGroup\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\"> & { title?: string | ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.MountPoint",
-            "text": "MountPoint"
-          },
+          "MountPoint",
           "<HTMLElement> | undefined; text?: string | ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.MountPoint",
-            "text": "MountPoint"
-          },
+          "MountPoint",
           "<HTMLElement> | undefined; } & { id: string; }"
         ],
         "path": "src/core/public/notifications/toasts/toasts_api.tsx",
@@ -10670,21 +10460,9 @@
           "Pick<",
           "Toast",
           ", \"children\" | \"color\" | \"className\" | \"lang\" | \"style\" | \"role\" | \"tabIndex\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChange\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClick\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"data-test-subj\" | \"hidden\" | \"security\" | \"defaultValue\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"translate\" | \"radioGroup\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\"> & { title?: string | ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.MountPoint",
-            "text": "MountPoint"
-          },
+          "MountPoint",
           "<HTMLElement> | undefined; text?: string | ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.MountPoint",
-            "text": "MountPoint"
-          },
+          "MountPoint",
           "<HTMLElement> | undefined; }"
         ],
         "path": "src/core/public/notifications/toasts/toasts_api.tsx",
@@ -11043,7 +10821,7 @@
         "signature": [
           "() => void"
         ],
-        "path": "src/core/public/types.ts",
+        "path": "node_modules/@types/kbn__core-mount-utils-browser/index.d.ts",
         "deprecated": false,
         "returnComment": [],
         "children": [],
