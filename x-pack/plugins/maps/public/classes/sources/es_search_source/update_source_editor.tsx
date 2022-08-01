@@ -5,45 +5,61 @@
  * 2.0.
  */
 
-import React, { Fragment, Component } from 'react';
-import PropTypes from 'prop-types';
+import React, { ChangeEvent, Component, Fragment } from 'react';
 import { EuiFormRow, EuiSelect, EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { SortDirection, indexPatterns } from '@kbn/data-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
-import { FIELD_ORIGIN } from '../../../../common/constants';
+import { FIELD_ORIGIN, SCALING_TYPES } from '../../../../common/constants';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { TooltipSelector } from '../../../components/tooltip_selector';
 
 import { getIndexPatternService } from '../../../kibana_services';
-import { i18n } from '@kbn/i18n';
 import {
   getGeoTileAggNotSupportedReason,
   getSourceFields,
   supportsGeoTileAgg,
 } from '../../../index_pattern_util';
-import { SortDirection, indexPatterns } from '@kbn/data-plugin/public';
 import { ESDocField } from '../../fields/es_doc_field';
-import { FormattedMessage } from '@kbn/i18n-react';
-
+import { IESSource } from '../es_source';
+import { OnSourceChangeArgs } from '../source';
+import { IField } from '../../fields/field';
 import { ScalingForm } from './util/scaling_form';
 
-export class UpdateSourceEditor extends Component {
-  static propTypes = {
-    indexPatternId: PropTypes.string.isRequired,
-    onChange: PropTypes.func.isRequired,
-    tooltipFields: PropTypes.arrayOf(PropTypes.object).isRequired,
-    sortField: PropTypes.string,
-    sortOrder: PropTypes.string.isRequired,
-    scalingType: PropTypes.string.isRequired,
-    source: PropTypes.object,
-    numberOfJoins: PropTypes.number.isRequired,
-  };
+interface Props {
+  indexPatternId: string;
+  onChange(...args: OnSourceChangeArgs[]): void;
+  tooltipFields: ESDocField[];
+  sortField: string;
+  sortOrder: SortDirection;
+  scalingType: SCALING_TYPES;
+  source: IESSource;
+  numberOfJoins: number;
+  getGeoField(): Promise<DataViewField>;
+  filterByMapBounds: boolean;
+}
 
-  state = {
+interface State {
+  loadError?: string;
+  sourceFields: IField[] | null;
+  sortFields: DataViewField[] | undefined;
+  supportsClustering: boolean;
+  clusteringDisabledReason: string | null;
+  supportsMvt: boolean;
+  mvtDisabledReason: string | null;
+}
+
+export class UpdateSourceEditor extends Component<Props, State> {
+  _isMounted: boolean = false;
+  state: State = {
     sourceFields: null,
-    sortFields: null,
+    sortFields: undefined,
     supportsClustering: false,
-    mvtDisabledReason: null,
     clusteringDisabledReason: null,
+    supportsMvt: true,
+    mvtDisabledReason: null,
   };
 
   componentDidMount() {
@@ -82,7 +98,7 @@ export class UpdateSourceEditor extends Component {
       return;
     }
 
-    //todo move this all to the source
+    // todo move this all to the source
     const rawTooltipFields = getSourceFields(indexPattern.fields);
     const sourceFields = rawTooltipFields.map((field) => {
       return new ESDocField({
@@ -95,22 +111,28 @@ export class UpdateSourceEditor extends Component {
     this.setState({
       supportsClustering: supportsGeoTileAgg(geoField),
       clusteringDisabledReason: getGeoTileAggNotSupportedReason(geoField),
-      mvtDisabledReason: null,
-      sourceFields: sourceFields,
+      supportsMvt: !geoField.isRuntimeField,
+      mvtDisabledReason: geoField.isRuntimeField
+        ? i18n.translate('xpack.maps.source.esSearch.mvtDisableReason', {
+            defaultMessage: 'Vector tile API does not support runtime {type} field',
+            values: { type: geoField.type },
+          })
+        : null,
+      sourceFields,
       sortFields: indexPattern.fields.filter(
         (field) => field.sortable && !indexPatterns.isNestedField(field)
-      ), //todo change sort fields to use fields
+      ), // todo change sort fields to use fields
     });
   }
-  _onTooltipPropertiesChange = (propertyNames) => {
+  _onTooltipPropertiesChange = (propertyNames: string[]) => {
     this.props.onChange({ propName: 'tooltipProperties', value: propertyNames });
   };
 
-  _onSortFieldChange = (sortField) => {
+  _onSortFieldChange = (sortField?: string) => {
     this.props.onChange({ propName: 'sortField', value: sortField });
   };
 
-  _onSortOrderChange = (e) => {
+  _onSortOrderChange = (e: ChangeEvent<HTMLSelectElement>) => {
     this.props.onChange({ propName: 'sortOrder', value: e.target.value });
   };
 
@@ -206,6 +228,8 @@ export class UpdateSourceEditor extends Component {
           scalingType={this.props.scalingType}
           supportsClustering={this.state.supportsClustering}
           clusteringDisabledReason={this.state.clusteringDisabledReason}
+          supportsMvt={this.state.supportsMvt}
+          mvtDisabledReason={this.state.mvtDisabledReason}
           numberOfJoins={this.props.numberOfJoins}
         />
       </EuiPanel>
