@@ -203,17 +203,15 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   )
                 );
 
-                const {
-                  wroteWarningStatus: wroteWarningStatusResult,
-                  skipExecution: skipExecutionResult,
-                } = await hasTimestampFields({
-                  timestampField: primaryTimestamp,
-                  timestampFieldCapsResponse: timestampFieldCaps,
-                  inputIndices: inputIndex,
-                  ruleExecutionLogger,
-                });
+                const { wroteWarningStatus: wroteWarningStatusResult, foundNoIndices } =
+                  await hasTimestampFields({
+                    timestampField: primaryTimestamp,
+                    timestampFieldCapsResponse: timestampFieldCaps,
+                    inputIndices: inputIndex,
+                    ruleExecutionLogger,
+                  });
                 wroteWarningStatus = wroteWarningStatusResult;
-                skipExecution = skipExecutionResult;
+                skipExecution = foundNoIndices;
               }
             }
           } catch (exc) {
