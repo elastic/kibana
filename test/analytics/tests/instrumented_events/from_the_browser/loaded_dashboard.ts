@@ -40,14 +40,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     const checkEmitsOnce = async (options?: GetEventsOptions) => {
       const events = await getEvents(Number.MAX_SAFE_INTEGER, options);
-      expect(events.length).to.be(1);
       const event = events[0];
       expect(event.event_type).to.eql('performance_metric');
       expect(event.properties.eventName).to.eql(DASHBOARD_LOADED_EVENT);
       expect(event.context.applicationId).to.be('dashboards');
       expect(event.context.page).to.be('app');
       expect(event.context.pageName).to.be('application:dashboards:app');
-      expect(event.properties.status).to.be('done');
       expect(event.properties.duration).to.be.a('number');
       expect(event.properties.key1).to.eql('time_to_data');
       expect(event.properties.value1).to.be.a('number');
