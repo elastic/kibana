@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { coreDeprecationProvider } from './deprecation';
-export { ensureValidConfiguration } from './ensure_valid_configuration';
+export { getDeprecationsFor, getDeprecationsForGlobalSettings } from './deprecations_getters';

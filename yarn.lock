@@ -3379,6 +3379,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-test-helpers-deprecations-getters@link:bazel-bin/packages/core/test-helpers/core-test-helpers-deprecations-getters":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-test-helpers-http-setup-browser@link:bazel-bin/packages/core/test-helpers/core-test-helpers-http-setup-browser":
   version "0.0.0"
   uid ""
@@ -7244,6 +7248,10 @@
   uid ""
 
 "@types/kbn__core-server-internal-base@link:bazel-bin/packages/core/server/internal-base/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-test-helpers-deprecations-getters@link:bazel-bin/packages/core/test-helpers/core-test-helpers-deprecations-getters/npm_module_types":
   version "0.0.0"
   uid ""
 
