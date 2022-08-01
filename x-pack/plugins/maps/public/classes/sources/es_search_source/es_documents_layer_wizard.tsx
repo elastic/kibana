@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-// @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
 import { LayerWizard, RenderWizardArguments } from '../../layers';
 import { ESSearchSource, sourceTitle } from './es_search_source';
@@ -43,7 +42,7 @@ export const esDocumentsLayerWizardConfig: LayerWizard = {
   }),
   icon: DocumentsLayerIcon,
   renderWizard: ({ previewLayers, mapColors }: RenderWizardArguments) => {
-    const onSourceConfigChange = (sourceConfig: Partial<ESSearchSourceDescriptor>) => {
+    const onSourceConfigChange = (sourceConfig: Partial<ESSearchSourceDescriptor> | null) => {
       if (!sourceConfig) {
         previewLayers([]);
         return;
