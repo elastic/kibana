@@ -14,27 +14,20 @@ import deepEqual from 'fast-deep-equal';
 import { merge, Subscription, BehaviorSubject, Observable } from 'rxjs';
 import { map, distinctUntilChanged, skip, take, mergeMap } from 'rxjs/operators';
 
-import {
-  withSuspense,
-  LazyReduxEmbeddableWrapper,
-  ReduxEmbeddableWrapperPropsWithChildren,
-} from '@kbn/presentation-util-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
+import { ReduxEmbeddableTools, ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { TimeSliderControlEmbeddableInput } from '../../../common/control_types/time_slider/types';
 
+import { TimeSliderControlEmbeddableInput } from '../../../common/control_types/time_slider/types';
 import { TIME_SLIDER_CONTROL } from '../..';
 import { ControlsSettingsService } from '../../services/settings';
 import { ControlsDataService } from '../../services/data';
 import { ControlOutput } from '../..';
 import { pluginServices } from '../../services';
 
-import { TimeSlider as TimeSliderComponent, TimeSliderSubjectState } from './time_slider';
+import { TimeSlider as TimeSliderComponent } from './time_slider';
 import { timeSliderReducers } from './time_slider_reducers';
-
-const TimeSliderControlReduxWrapper = withSuspense<
-  ReduxEmbeddableWrapperPropsWithChildren<TimeSliderControlEmbeddableInput>
->(LazyReduxEmbeddableWrapper);
+import { TimeSliderReduxState, TimeSliderSubjectState } from './types';
 
 const diffDataFetchProps = (current?: any, last?: any) => {
   if (!current || !last) return false;
@@ -77,7 +70,17 @@ export class TimeSliderControlEmbeddable extends Embeddable<
   private getDateFormat: ControlsSettingsService['getDateFormat'];
   private getTimezone: ControlsSettingsService['getTimezone'];
 
-  constructor(input: TimeSliderControlEmbeddableInput, output: ControlOutput, parent?: IContainer) {
+  private reduxEmbeddableTools: ReduxEmbeddableTools<
+    TimeSliderReduxState,
+    typeof timeSliderReducers
+  >;
+
+  constructor(
+    reduxEmbeddablePackage: ReduxEmbeddablePackage,
+    input: TimeSliderControlEmbeddableInput,
+    output: ControlOutput,
+    parent?: IContainer
+  ) {
     super(input, output, parent); // get filters for initial output...
 
     const {
@@ -93,6 +96,15 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     this.updateComponentState(this.componentState, true);
 
     this.internalOutput = {};
+
+    // build redux embeddable tools
+    this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
+      TimeSliderReduxState,
+      typeof timeSliderReducers
+    >({
+      embeddable: this,
+      reducers: timeSliderReducers,
+    });
 
     this.initialize();
   }
@@ -204,7 +216,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
         this.updateInternalOutput({ filters: [rangeFilter] }, true);
         this.updateComponentState({ loading: false });
       } else {
-        this.updateInternalOutput({ filters: undefined, dataViews: [dataView] }, true);
+        this.updateInternalOutput({ filters: undefined, dataViewId: dataView.id }, true);
         this.updateComponentState({ loading: false });
       }
     });
@@ -300,8 +312,10 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     }
     this.node = node;
 
+    const { Wrapper: TimeSliderControlReduxWrapper } = this.reduxEmbeddableTools;
+
     ReactDOM.render(
-      <TimeSliderControlReduxWrapper embeddable={this} reducers={timeSliderReducers}>
+      <TimeSliderControlReduxWrapper>
         <TimeSliderComponent
           componentStateSubject={this.componentStateSubject$}
           timezone={this.getTimezone()}

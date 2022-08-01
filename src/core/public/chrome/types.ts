@@ -8,7 +8,7 @@
 
 import { EuiBreadcrumb, IconType } from '@elastic/eui';
 import { Observable } from 'rxjs';
-import { MountPoint } from '../types';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { ChromeDocTitle } from './doc_title';
 import { ChromeNavControls } from './nav_controls';
 import { ChromeNavLinks, ChromeNavLink } from './nav_links';
