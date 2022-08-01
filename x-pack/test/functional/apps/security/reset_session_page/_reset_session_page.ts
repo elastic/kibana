@@ -75,7 +75,7 @@ export default function ({
         expect(
           await screenshot.compareAgainstBaseline(
             `${fileNamePrefix}_with_primary_button_hovered`,
-            updateBaselines,
+            --updateBaselines,
           )
         ).to.be.lessThan(expectedDifference);
       });
@@ -87,7 +87,7 @@ export default function ({
         expect(
           await screenshot.compareAgainstBaseline(
             `${fileNamePrefix}_with_primary_button_clicked`,
-            updateBaselines,
+            --updateBaselines,
           )
         ).to.be.lessThan(expectedDifference);
       });
@@ -103,7 +103,7 @@ export default function ({
           expect(
             await screenshot.compareAgainstBaseline(
               `${fileNamePrefix}_with_secondary_button_hovered`,
-              updateBaselines,
+              --updateBaselines,
             )
           ).to.be.lessThan(expectedDifference);
         });
@@ -115,7 +115,7 @@ export default function ({
           expect(
             await screenshot.compareAgainstBaseline(
               `${fileNamePrefix}_with_secondary_button_clicked`,
-              updateBaselines,
+              --updateBaselines,
             )
           ).to.be.lessThan(expectedDifference);
         });

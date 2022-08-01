@@ -39,7 +39,7 @@ export default function ({
         try {
           const percentDifference = await screenshot.compareAgainstBaseline(
             'unauthenticated_page',
-            updateBaselines
+            --updateBaselines
           );
           expect(percentDifference).to.be.lessThan(0.01);
         } finally {
