@@ -13,13 +13,13 @@ import { IconButtonGroup, PrimaryButton } from '../buttons';
 import { ToolbarPopover } from '../popover';
 
 /** type for cases with both button or a popover could be used */
-export type Button =  typeof PrimaryButton | typeof ToolbarPopover;
+export type Button = typeof PrimaryButton | typeof ToolbarPopover;
 
 /** Specific type for the toolbar children in its props */
 interface NamedSlots {
   primaryButton: ReactElement<Button>;
   iconButtonGroup?: ReactElement<typeof IconButtonGroup>;
-  extraButtons?: Array<Button> | undefined;
+  extraButtons?: Button[] | undefined;
 }
 
 /**
