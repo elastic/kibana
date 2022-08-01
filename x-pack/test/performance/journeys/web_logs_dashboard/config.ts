@@ -7,12 +7,10 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 import { serializeApmGlobalLabels } from '../../utils';
 
-const JOURNEY_WEBLOGS_DASHBOARD = 'web_logs_dashboard';
-
-export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+export default async function webLogsDashboard({ readConfigFile, log }: FtrConfigProviderContext) {
   const performanceConfig = await readConfigFile(require.resolve('../base.config'));
 
-  const testFiles = [require.resolve(`./${JOURNEY_WEBLOGS_DASHBOARD}`)];
+  const testFiles = [require.resolve('./web_logs_dashboard')];
 
   const config = {
     testFiles,
@@ -21,19 +19,15 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   const apmGlobalLabels = {
     ...performanceConfig.get('kbnTestServer').env.ELASTIC_APM_GLOBAL_LABELS,
-    ftrConfig: `x-pack/test/performance/tests/journeys/${JOURNEY_WEBLOGS_DASHBOARD}/config.ts`,
+    ftrConfig: `x-pack/test/performance/tests/journeys/web_logs_dashboard/config.ts`,
     performancePhase: process.env.TEST_PERFORMANCE_PHASE,
-    journeyName: JOURNEY_WEBLOGS_DASHBOARD,
+    journeyName: 'web_logs_dashboard',
   };
 
   return {
     ...config,
     kbnTestServer: {
       ...config.kbnTestServer,
-      serverArgs: [
-        ...performanceConfig.get('kbnTestServer.serverArgs'),
-        `--telemetry.labels.journeyName=${JOURNEY_WEBLOGS_DASHBOARD}`,
-      ],
       env: {
         ...config.kbnTestServer.env,
         ELASTIC_APM_GLOBAL_LABELS: serializeApmGlobalLabels(apmGlobalLabels),
