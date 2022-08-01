@@ -37,6 +37,7 @@ import {
 import { MemoizedDocumentation, DocumentationSections } from './documentation';
 import { useDebounceWithOptions, parseErrors, getDocumentationSections } from './helpers';
 import { EditorFooter } from './editor_footer';
+import { ResizableButton } from './resizable_button';
 
 import './overwrite.scss';
 
@@ -88,7 +89,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [isCompactFocused, setIsCompactFocused] = useState(isCodeEditorExpanded);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isWordWrapped, setIsWordWrapped] = useState(true);
-  const [userDrags, setUserDrags] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
   const [editorErrors, setEditorErrors] = useState<
     Array<{ startLineNumber: number; message: string }>
@@ -123,11 +123,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         const height = startSize - startPosition + mouseMoveEvent.pageY;
         const validatedHeight = Math.min(Math.max(height, EDITOR_MIN_HEIGHT), EDITOR_MAX_HEIGHT);
         setEditorHeight(validatedHeight);
-        setUserDrags(true);
       }
       function onMouseUp() {
         document.body.removeEventListener('mousemove', onMouseMove);
-        setUserDrags(false);
       }
 
       document.body.addEventListener('mousemove', onMouseMove);
@@ -592,17 +590,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         <EditorFooter lines={lines} containerCSS={styles.bottomContainer} errors={editorErrors} />
       )}
       {isCodeEditorExpanded && (
-        <div css={styles.dragResizeContainer} onMouseDown={onMouseDownResizeHandler}>
-          {!userDrags && (
-            <EuiButtonIcon
-              color="primary"
-              iconType="grab"
-              aria-label="Resize editor"
-              data-test-subj="unifiedTextLangEditor-resize"
-              css={styles.dragResizeButton}
-            />
-          )}
-        </div>
+        <ResizableButton onMouseDownResizeHandler={onMouseDownResizeHandler} />
       )}
     </>
   );
