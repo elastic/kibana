@@ -275,13 +275,13 @@ export const GET_INCIDENT_UPDATED_KEY_HELP = i18n.translate(
 );
 
 export const EXTERNAL_INCIDENT_VIEW_URL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.incidentViewUrlTextFieldLabel',
+  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.viewIncidentUrlTextFieldLabel',
   {
     defaultMessage: 'External Case View URL',
   }
 );
 export const EXTERNAL_INCIDENT_VIEW_URL_HELP = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.incidentViewUrlHelp',
+  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.viewIncidentUrlHelp',
   {
     defaultMessage:
       'URL to view case in external system. Use the variable selector to add external system id or external system title to the url.',
