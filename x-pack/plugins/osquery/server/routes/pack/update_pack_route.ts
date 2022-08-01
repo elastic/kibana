@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment-timezone';
-import { set, unset, has, difference, filter, find, map, mapKeys, uniq } from 'lodash';
+import { set, unset, has, difference, filter, find, map, mapKeys, uniq, some } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { produce } from 'immer';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -95,11 +95,10 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         });
 
         if (
-          filter(
-            conflictingEntries.saved_objects,
-            (packSO) =>
-              packSO.id !== currentPackSO.id && packSO.attributes.name.length === name.length
-          ).length
+          some(
+            filter(conflictingEntries.saved_objects, (packSO) => packSO.id !== currentPackSO.id),
+            ['attributes.name', name]
+          )
         ) {
           return response.conflict({ body: `Pack with name "${name}" already exists.` });
         }
