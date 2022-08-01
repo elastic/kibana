@@ -34,7 +34,7 @@ import {
 
 import { lastValueFrom } from 'rxjs';
 import { CoreStart } from '@kbn/core/public';
-import { mountReactNode } from '@kbn/core/public/utils';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
 import {
@@ -232,7 +232,7 @@ export const SearchExamplesApp = ({
             notifications.toasts.addSuccess(
               {
                 title: 'Query result',
-                text: mountReactNode(message),
+                text: toMountPoint(message),
               },
               {
                 toastLifeTimeMs: 300000,
@@ -241,7 +241,7 @@ export const SearchExamplesApp = ({
             if (res.warning) {
               notifications.toasts.addWarning({
                 title: 'Warning',
-                text: mountReactNode(res.warning),
+                text: toMountPoint(res.warning),
               });
             }
           } else if (isErrorResponse(res)) {
@@ -315,7 +315,7 @@ export const SearchExamplesApp = ({
       notifications.toasts.addSuccess(
         {
           title: 'Query result',
-          text: mountReactNode(message),
+          text: toMountPoint(message),
         },
         {
           toastLifeTimeMs: 300000,

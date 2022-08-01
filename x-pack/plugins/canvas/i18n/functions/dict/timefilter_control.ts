@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { timefilterControl } from '../../../canvas_plugin_src/functions/common/timefilterControl';
+import type { timefilterControl } from '../../../canvas_plugin_src/functions/common/timefilterControl';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 

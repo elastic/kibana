@@ -13,7 +13,7 @@ import { Env } from '@kbn/config';
 import { schema } from '@kbn/config-schema';
 import { REPO_ROOT } from '@kbn/utils';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsType } from '../../../saved_objects/types';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { InternalCoreSetup, InternalCoreStart } from '../../../internal_types';
 import { Root } from '../../../root';
