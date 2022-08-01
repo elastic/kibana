@@ -104,6 +104,7 @@ export interface DocLinks {
     readonly webCrawlerReference: string;
   };
   readonly enterpriseSearch: {
+    readonly apiKeys: string;
     readonly bulkApi: string;
     readonly configuration: string;
     readonly crawlerGettingStarted: string;
@@ -335,6 +336,8 @@ export interface DocLinks {
   readonly monitoring: Record<string, string>;
   readonly reporting: Readonly<{
     cloudMinimumRequirements: string;
+    browserSystemDependencies: string;
+    browserSandboxDependencies: string;
   }>;
   readonly security: Readonly<{
     apiKeyServiceSettings: string;
