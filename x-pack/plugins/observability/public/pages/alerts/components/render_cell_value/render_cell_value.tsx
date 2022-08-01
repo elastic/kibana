@@ -16,6 +16,7 @@ import {
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import type { CellValueElementProps, TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import { TimelineNonEcsDataFieldValue } from '@kbn/timelines-plugin/common/search_strategy';
 import { AlertStatusIndicator } from '../../../../components/shared/alert_status_indicator';
 import { TimestampTooltip } from '../../../../components/shared/timestamp_tooltip';
 import { asDuration } from '../../../../../common/utils/formatters';
@@ -30,7 +31,7 @@ export const getMappedNonEcsValue = ({
 }: {
   data: TimelineNonEcsData[];
   fieldName: string;
-}): string[] | undefined => {
+}): TimelineNonEcsDataFieldValue | undefined => {
   const item = data.find((d) => d.field === fieldName);
   if (item != null && item.value != null) {
     return item.value;
@@ -53,10 +54,11 @@ export const getRenderCellValue = ({
 }) => {
   return ({ columnId, data }: CellValueElementProps) => {
     if (!data) return null;
-    const value = getMappedNonEcsValue({
+    const fieldValue = getMappedNonEcsValue({
       data,
       fieldName: columnId,
-    })?.reduce((x) => x[0]);
+    });
+    const value = (Array.isArray(fieldValue) && fieldValue[0]) || void 0;
 
     switch (columnId) {
       case ALERT_STATUS:
@@ -67,11 +69,16 @@ export const getRenderCellValue = ({
         }
         return <AlertStatusIndicator alertStatus={value} />;
       case TIMESTAMP:
-        return <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />;
+        return (
+          <TimestampTooltip
+            time={new Date((value as string) ?? '').getTime()}
+            timeUnit="milliseconds"
+          />
+        );
       case ALERT_DURATION:
         return asDuration(Number(value));
       case ALERT_SEVERITY:
-        return <SeverityBadge severityLevel={value ?? undefined} />;
+        return <SeverityBadge severityLevel={(value as string) ?? undefined} />;
       case ALERT_REASON:
         const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
         const alert = parseAlert(observabilityRuleTypeRegistry)(dataFieldEs);
