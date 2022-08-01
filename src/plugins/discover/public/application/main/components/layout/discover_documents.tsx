@@ -42,6 +42,21 @@ import { getRawRecordType } from '../../utils/get_raw_record_type';
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);
 
+// export needs for testing
+export const onResize = (
+  colSettings: { columnId: string; width: number },
+  stateContainer: GetStateReturn,
+  state: AppState
+) => {
+  const grid = { ...(state.grid || {}) };
+  const newColumns = { ...(grid.columns || {}) };
+  newColumns[colSettings.columnId] = {
+    width: Math.round(colSettings.width),
+  };
+  const newGrid = { ...grid, columns: newColumns };
+  stateContainer.setAppState({ grid: newGrid });
+};
+
 function DiscoverDocumentsComponent({
   documents$,
   expandedDoc,
@@ -88,16 +103,8 @@ function DiscoverDocumentsComponent({
     useNewFieldsApi,
   });
 
-  const onResize = useCallback(
-    (colSettings: { columnId: string; width: number }) => {
-      const grid = { ...(state.grid || {}) };
-      const newColumns = { ...(grid.columns || {}) };
-      newColumns[colSettings.columnId] = {
-        width: colSettings.width,
-      };
-      const newGrid = { ...grid, columns: newColumns };
-      stateContainer.setAppState({ grid: newGrid });
-    },
+  const onResizeDataGrid = useCallback(
+    (colSettings) => onResize(colSettings, stateContainer, state),
     [stateContainer, state]
   );
 
@@ -200,7 +207,7 @@ function DiscoverDocumentsComponent({
               onRemoveColumn={onRemoveColumn}
               onSetColumns={onSetColumns}
               onSort={!isPlainRecord ? onSort : undefined}
-              onResize={onResize}
+              onResize={onResizeDataGrid}
               useNewFieldsApi={useNewFieldsApi}
               rowHeightState={state.rowHeight}
               onUpdateRowHeight={onUpdateRowHeight}
