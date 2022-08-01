@@ -37,6 +37,12 @@ export interface Props {
 export const Toolbar = ({ children }: Props) => {
   const { primaryButton, iconButtonGroup, extraButtons = [] } = children;
 
+  if (extraButtons.length > 120) {
+    throw new Error(
+      'There are over 120 extra buttons. Please consider limiting the number of buttons.'
+    );
+  }
+
   const extra = extraButtons.map((button, index) =>
     button ? (
       <EuiFlexItem grow={false} key={`button-${index}`}>
