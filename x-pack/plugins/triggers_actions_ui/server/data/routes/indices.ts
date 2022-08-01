@@ -57,11 +57,14 @@ export function createIndicesRoute(logger: Logger, router: IRouter, baseRoute: s
     let dataStreams: string[] = [];
 
     try {
-      [aliases, indices, dataStreams] = await Promise.all([
+      const results = await Promise.allSettled([
         getAliasesFromPattern(esClient, pattern),
         getIndicesFromPattern(esClient, pattern),
         getDataStreamsFromPattern(esClient, pattern),
       ]);
+      [aliases, indices, dataStreams] = results.map((r) => {
+        return r.status === 'fulfilled' ? r.value : [];
+      });
     } catch (err) {
       logger.warn(`route ${path} error getting indices from pattern "${pattern}": ${err.message}`);
     }
