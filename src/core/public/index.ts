@@ -45,6 +45,7 @@ import type {
 import type { UiSettingsState, IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { DeprecationsServiceStart } from '@kbn/core-deprecations-browser';
 import type { Capabilities } from '@kbn/core-capabilities-common';
+import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type {
   ChromeBadge,
   ChromeBreadcrumb,
@@ -68,7 +69,6 @@ import type {
   ChromeHelpMenuActions,
 } from './chrome';
 import type { NotificationsSetup, NotificationsStart } from './notifications';
-import type { OverlayStart } from './overlays';
 import type {
   Plugin,
   PluginInitializer,
@@ -86,6 +86,7 @@ export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
 export type { AppCategory } from '../types';
 export type {
   UiSettingsParams,
+  PublicUiSettingsParams,
   UserProvidedValues,
   UiSettingsType,
 } from '@kbn/core-ui-settings-common';
@@ -194,13 +195,12 @@ export type { IHttpFetchError } from '@kbn/core-http-browser';
 export type {
   OverlayStart,
   OverlayBannersStart,
-  OverlayRef,
   OverlayFlyoutStart,
   OverlayFlyoutOpenOptions,
   OverlayModalOpenOptions,
   OverlayModalConfirmOptions,
   OverlayModalStart,
-} from './overlays';
+} from '@kbn/core-overlays-browser';
 
 export type {
   Toast,
@@ -221,7 +221,7 @@ export type {
   ResolveDeprecationResponse,
 } from '@kbn/core-deprecations-browser';
 
-export type { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
+export type { MountPoint, UnmountCallback, OverlayRef } from '@kbn/core-mount-utils-browser';
 
 export { URL_MAX_LENGTH } from './core_app';
 
