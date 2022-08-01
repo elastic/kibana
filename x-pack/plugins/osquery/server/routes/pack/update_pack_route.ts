@@ -96,11 +96,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
         if (
           some(
-            filter(
-              conflictingEntries.saved_objects,
-              (packSO) =>
-                packSO.id !== currentPackSO.id && packSO.attributes.name.length === name.length
-            ),
+            filter(conflictingEntries.saved_objects, (packSO) => packSO.id !== currentPackSO.id),
             ['attributes.name', name]
           )
         ) {
