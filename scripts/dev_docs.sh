@@ -59,23 +59,33 @@ else
 fi
 
 # The minimum sources required to build kibana docs
-cat << EOF > "$DOCS_DIR/sources-dev.json"
-{
-  "sources": [
-    {
-      "type": "file",
-      "location": "$KIBANA_DIR"
-    },
-    {
-      "type": "file",
-      "location": "$DEV_DIR"
-    },
-    {
-      "type": "file",
-      "location": "$TEAM_DIR"
+cat << EOF > "$DOCS_DIR/config/content-dev.js"
+module.exports = {
+  "content": {
+    "sources": [
+      {
+        "type": "file",
+        "location": "$KIBANA_DIR"
+      },
+      {
+        "type": "file",
+        "location": "$DEV_DIR"
+      },
+      {
+        "type": "file",
+        "location": "$TEAM_DIR"
+      }
+    ],
+    "nav": {
+      "structure": [
+        "nav-elastic-developer-guide",
+        "nav-kibana-team",
+        "nav-kibana-dev"
+      ],
+      "default": "nav-kibana-dev"
     }
-  ]
-}
+  }
+};
 EOF
 
 cd "$DOCS_DIR"
