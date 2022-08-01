@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, FC } from 'react';
+import React, { useEffect, useState, FC } from 'react';
+import { isEqual } from 'lodash';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ProgressControls } from '@kbn/aiops-components';
@@ -51,6 +52,21 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   const { services } = useAiOpsKibana();
   const basePath = services.http?.basePath.get() ?? '';
 
+  const [currentAnalysisWindowParameters, setCurrentAnalysisWindowParameters] = useState<
+    WindowParameters | undefined
+  >();
+  const [shouldRerunAnalysis, setShouldRerunAnalysis] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (
+      currentAnalysisWindowParameters !== undefined &&
+      !isEqual(currentAnalysisWindowParameters, windowParameters)
+    ) {
+      console.log('STALE!!'); // remove
+      setShouldRerunAnalysis(true);
+    }
+  }, [currentAnalysisWindowParameters, windowParameters]);
+
   const { cancel, start, data, isRunning, error } = useFetchStream<
     ApiExplainLogRateSpikes,
     typeof basePath
@@ -69,6 +85,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   );
 
   useEffect(() => {
+    setCurrentAnalysisWindowParameters(windowParameters);
     start();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -82,6 +99,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     if (onSelectedChangePoint) {
       onSelectedChangePoint(null);
     }
+    setShouldRerunAnalysis(false);
     start();
   }
 
@@ -93,6 +111,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
         isRunning={isRunning}
         onRefresh={startHandler}
         onCancel={cancel}
+        shouldRerunAnalysis={shouldRerunAnalysis}
       />
       {data?.changePoints ? (
         <SpikeAnalysisTable

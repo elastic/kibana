@@ -65,3 +65,46 @@ export const getWindowParameters = (
     deviationMax: Math.round(deviationMax),
   };
 };
+
+export const getSnappedWindowParameters = (
+  d: WindowParameters,
+  snapTimestamps: number[]
+): WindowParameters => {
+  const snappedBaselineMin = snapTimestamps.reduce((pts, cts) => {
+    if (Math.abs(cts - d.baselineMin) < Math.abs(pts - d.baselineMin)) {
+      return cts;
+    }
+    return pts;
+  }, snapTimestamps[0]);
+  const baselineMaxTss = snapTimestamps.filter((ts) => ts > snappedBaselineMin);
+
+  const snappedBaselineMax = baselineMaxTss.reduce((pts, cts) => {
+    if (Math.abs(cts - d.baselineMax) < Math.abs(pts - d.baselineMax)) {
+      return cts;
+    }
+    return pts;
+  }, baselineMaxTss[0]);
+  const deviationMinTss = baselineMaxTss.filter((ts) => ts > snappedBaselineMax);
+
+  const snappedDeviationMin = deviationMinTss.reduce((pts, cts) => {
+    if (Math.abs(cts - d.deviationMin) < Math.abs(pts - d.deviationMin)) {
+      return cts;
+    }
+    return pts;
+  }, deviationMinTss[0]);
+  const deviationMaxTss = deviationMinTss.filter((ts) => ts > snappedDeviationMin);
+
+  const snappedDeviationMax = deviationMaxTss.reduce((pts, cts) => {
+    if (Math.abs(cts - d.deviationMax) < Math.abs(pts - d.deviationMax)) {
+      return cts;
+    }
+    return pts;
+  }, deviationMaxTss[0]);
+
+  return {
+    baselineMin: snappedBaselineMin,
+    baselineMax: snappedBaselineMax,
+    deviationMin: snappedDeviationMin,
+    deviationMax: snappedDeviationMax,
+  };
+};
