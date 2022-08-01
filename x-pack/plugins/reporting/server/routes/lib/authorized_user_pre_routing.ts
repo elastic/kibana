@@ -29,10 +29,10 @@ export const authorizedUserPreRouting = <P, Q, B>(
   reporting: ReportingCore,
   handler: RequestHandlerUser<P, Q, B>
 ): RequestHandler<P, Q, B, ReportingRequestHandlerContext, RouteMethod> => {
-  const { logger, security } = reporting.getPluginSetupDeps();
+  const { logger, security, docLinks } = reporting.getPluginSetupDeps();
 
   return async (context, req, res) => {
-    const { security: securityStart, docLinks } = await reporting.getPluginStartDeps();
+    const { security: securityStart } = await reporting.getPluginStartDeps();
     try {
       let user: ReportingRequestUser = false;
       if (security && security.license.isEnabled()) {
@@ -52,7 +52,7 @@ export const authorizedUserPreRouting = <P, Q, B>(
 
         if (!user.roles.find((role) => authorizedRoles.includes(role))) {
           const body = i18n.translate('xpack.reporting.userAccessError.message', {
-            defaultMessage: `Sorry, you don't have access to Reporting. {grantUserAccessDocs} to grant user access.`,
+            defaultMessage: `Contact your administrator for access to reporting features. {grantUserAccessDocs} how to grant user access.`,
             values: {
               grantUserAccessDocs:
                 `<a href=${docLinks.links.reporting.grantUserAccess} style="font-weight: 600;"

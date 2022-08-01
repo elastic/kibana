@@ -73,7 +73,6 @@ export interface ReportingInternalStart {
   screenshotting: ScreenshottingStart;
   security?: SecurityPluginStart;
   taskManager: TaskManagerStartContract;
-  docLinks: DocLinksServiceSetup;
 }
 
 /**

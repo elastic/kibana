@@ -146,7 +146,7 @@ describe('authorized_user_pre_routing', function () {
           getMockResponseFactory()
         )
       ).toMatchObject({
-        body: `Sorry, you don't have access to Reporting. <a href=mock-link style="font-weight: 600;"
+        body: `Contact your administrator for access to reporting features. <a href=mock-link style="font-weight: 600;"
                     target="_blank" rel="noopener">See details</a> to grant user access.`,
       });
     });
