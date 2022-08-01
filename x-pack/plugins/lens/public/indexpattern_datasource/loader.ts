@@ -56,7 +56,6 @@ export function convertDataViewIntoLensIndexPattern(dataView: DataView): IndexPa
         type: field.type,
         aggregatable: field.aggregatable,
         searchable: field.searchable,
-        meta: dataView.metaFields.includes(field.name),
         esTypes: field.esTypes,
         scripted: field.scripted,
         runtime: Boolean(field.runtimeField),
