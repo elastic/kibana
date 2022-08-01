@@ -100,11 +100,12 @@ export function convertDataViewIntoLensIndexPattern(dataView: DataView): IndexPa
       Object.fromEntries(
         Object.entries(fieldFormatMap).map(([id, format]) => [
           id,
+          // @ts-expect-error FIXME Property 'toJSON' does not exist on type 'SerializedFieldFormat'
           'toJSON' in format ? format.toJSON() : format,
         ])
       ),
     fields: newFields,
-    getFieldByName: getFieldByNameFactory(newFields),
+    getFieldByName: getFieldByNameFactory(newFields, false),
     hasRestrictions: !!typeMeta?.aggs,
   };
 }

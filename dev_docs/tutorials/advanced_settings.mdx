@@ -54,7 +54,7 @@ The following is a basic example for using the `uiSettings` service:
 
 **src/plugins/charts/public/plugin.ts**
 ```ts
-import { Plugin, CoreSetup } from 'kibana/public';
+import { Plugin, CoreSetup } from '@kbn/core/public';
 import { ExpressionsSetup } from '../../expressions/public';
 import { palette, systemPalette } from '../common';
 
@@ -132,7 +132,7 @@ The example also shows how plugins can leverage the optional deprecation paramet
 ```ts
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { CoreSetup, Plugin } from 'kibana/server';
+import { CoreSetup, Plugin } from '@kbn/core/server';
 import { COLOR_MAPPING_SETTING, LEGACY_TIME_AXIS, palette, systemPalette } from '../common';
 import { ExpressionsServerSetup } from '../../expressions/server';
 
@@ -192,7 +192,7 @@ For example, changing the time filter refresh interval triggers a prompt in the 
 ```ts
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import type { DocLinksServiceSetup, UiSettingsParams } from 'kibana/server';
+import type { DocLinksServiceSetup, UiSettingsParams } from '@kbn/core/server';
 import { DEFAULT_QUERY_LANGUAGE, UI_SETTINGS } from '../common';
 
 export function getUiSettings(
@@ -231,7 +231,7 @@ For example, in 7.9.0, `siem` as renamed to `securitySolution`, and in 8.0.0, `t
 **src/core/server/ui_settings/saved_objects/migrations.ts**
 
 ```ts
-import { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from 'kibana/server';
+import { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '@kbn/core/server';
 
 export const migrations = {
   '7.9.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({

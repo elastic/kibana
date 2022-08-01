@@ -27,7 +27,7 @@ import type { FleetConfigType, FleetStartServices } from '../../plugin';
 
 import { PackageInstallProvider } from '../integrations/hooks';
 
-import { useAuthz, useFlyoutContext } from './hooks';
+import { useAuthz, useFleetStatus, useFlyoutContext } from './hooks';
 
 import {
   ConfigContext,
@@ -304,6 +304,7 @@ const FleetTopNav = memo(
 export const AppRoutes = memo(
   ({ setHeaderActionMenu }: { setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'] }) => {
     const flyoutContext = useFlyoutContext();
+    const fleetStatus = useFleetStatus();
 
     return (
       <>
@@ -361,7 +362,11 @@ export const AppRoutes = memo(
         {flyoutContext.isEnrollmentFlyoutOpen && (
           <EuiPortal>
             <AgentEnrollmentFlyout
-              defaultMode="standalone"
+              defaultMode={
+                fleetStatus.isReady && !fleetStatus.missingRequirements?.includes('fleet_server')
+                  ? 'managed'
+                  : 'standalone'
+              }
               isIntegrationFlow={true}
               onClose={() => flyoutContext.closeEnrollmentFlyout()}
             />

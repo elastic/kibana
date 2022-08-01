@@ -246,7 +246,7 @@ Object {
 `);
     });
 
-    test('extracts index patterns from filter', () => {
+    test('extracts data views from filter', () => {
       const doc = {
         id: '123',
         type: 'search',

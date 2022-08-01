@@ -30,6 +30,7 @@ export {
   enableInfrastructureView,
   enableServiceGroups,
   enableNewSyntheticsView,
+  apmServiceGroupMaxNumberOfServices,
 } from '../common/ui_settings_keys';
 export { uptimeOverviewLocatorID } from '../common';
 

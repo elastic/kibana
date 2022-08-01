@@ -12,7 +12,7 @@ const settingsPath = '/app/management/kibana/settings';
 
 const start = '2021-10-10T00:00:00.000Z';
 const end = '2021-10-10T00:15:00.000Z';
-describe('Comparison feature flag', () => {
+describe.skip('Comparison feature flag', () => {
   const comparisonToggle =
     '[data-test-subj="advancedSetting-editField-observability:enableComparisonByDefault"]';
 

@@ -8,6 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { CoreStart } from '@kbn/core/public';
+import { ObservabilityPublicPluginsStart } from '../../../..';
 import type { AppDataType } from '../../../shared/exploratory_view/types';
 import { SectionContainer } from '..';
 import { getDataHandler } from '../../../../data_handler';
@@ -22,7 +24,6 @@ import {
   SERVICE_NAME,
   TRANSACTION_DURATION,
 } from '../../../shared/exploratory_view/configurations/constants/elasticsearch_fieldnames';
-import { ObservabilityAppServices } from '../../../../application/types';
 
 interface Props {
   bucketSize: BucketSize;
@@ -30,16 +31,14 @@ interface Props {
 
 export function UXSection({ bucketSize }: Props) {
   const { forceUpdate, hasDataMap } = useHasData();
-  const { services } = useKibana<ObservabilityAppServices>();
+  const { services } = useKibana<ObservabilityPublicPluginsStart>();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
     useDatePickerContext();
   const uxHasDataResponse = hasDataMap.ux;
   const serviceName = uxHasDataResponse?.serviceName as string;
 
   const ExploratoryViewEmbeddable = getExploratoryViewEmbeddable(
-    services.uiSettings,
-    services.dataViews,
-    services.lens
+    services as ObservabilityPublicPluginsStart & CoreStart
   );
 
   const seriesList: AllSeries = [

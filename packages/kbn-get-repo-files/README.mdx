@@ -1,0 +1,10 @@
+---
+id: kibDevDocsOpsGetRepoFiles
+slug: /kibana-dev-docs/ops/get-repo-files
+title: "@kbn/get-repo-files"
+description: 'A tool which lists the files under source-control'
+date: 2022-07-25
+tags: ['kibana', 'dev', 'contributor', 'operations', 'packages', 'scripts', 'repo', 'files']
+---
+
+This package exposes a helper to retreive a list of the files checked into the repository. It does this using the `git ls-files` CLI with some post processing to detemine if unstaged changes represent files which are modified (have edits) or deleted.

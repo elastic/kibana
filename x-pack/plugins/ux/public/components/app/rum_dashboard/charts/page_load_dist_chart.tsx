@@ -45,6 +45,10 @@ export function PageLoadDistChart({ onPercentileChange, breakdown }: Props) {
     },
   ];
 
+  if (!dataViewTitle) {
+    return null;
+  }
+
   return (
     <ExploratoryViewEmbeddable
       customHeight={'300px'}

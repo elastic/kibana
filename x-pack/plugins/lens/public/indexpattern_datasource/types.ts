@@ -7,7 +7,7 @@
 
 import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
 import type { FieldSpec } from '@kbn/data-plugin/common';
-import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatMap } from '@kbn/data-views-plugin/common';
 import type { DragDropIdentifier } from '../drag_drop/providers';
 import type { IncompleteColumn, GenericIndexPatternColumn } from './operations';
 import { DragDropOperation } from '../types';
@@ -57,13 +57,7 @@ export interface IndexPattern {
   title: string;
   name?: string;
   timeFieldName?: string;
-  fieldFormatMap?: Record<
-    string,
-    {
-      id: string;
-      params: FieldFormatParams;
-    }
-  >;
+  fieldFormatMap?: FieldFormatMap;
   hasRestrictions: boolean;
 }
 

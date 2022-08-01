@@ -7,8 +7,10 @@
  */
 
 import { schema, Type } from '@kbn/config-schema';
-import { SavedObjectsValidationSpec } from './types';
-import { SavedObjectSanitizedDoc } from '../serialization';
+import type {
+  SavedObjectsValidationSpec,
+  SavedObjectSanitizedDoc,
+} from '@kbn/core-saved-objects-server';
 
 // We convert `SavedObjectSanitizedDoc` to its validation schema representation
 // to ensure that we don't forget to keep the schema up-to-date. TS will complain

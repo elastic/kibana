@@ -11,7 +11,7 @@ import { useStyles } from './styles';
 import { ContainerNameRow } from './container_name_row';
 import type { IndexPattern, GlobalFilter } from '../../types';
 import { useSetFilter, useScroll } from '../../hooks';
-import { addTimerangeToQuery } from '../../utils/add_timerange_to_query';
+import { addTimerangeAndDefaultFilterToQuery } from '../../utils/add_timerange_and_default_filter_to_query';
 import { useFetchContainerNameData } from './hooks';
 import { CONTAINER_IMAGE_NAME } from '../../../common/constants';
 import {
@@ -19,6 +19,7 @@ import {
   CONTAINER_NAME_SESSION_COUNT_COLUMN,
   CONTAINER_NAME_SESSION_ARIA_LABEL,
 } from '../../../common/translations';
+import { addCommasToNumber } from '../../utils/add_commas_to_number';
 
 export const LOADING_TEST_ID = 'kubernetesSecurity:containerNameWidgetLoading';
 export const NAME_COLUMN_TEST_ID = 'kubernetesSecurity:containerImageNameSessionNameColumn';
@@ -35,7 +36,7 @@ export interface ContainerNameWidgetDataValueMap {
 
 export interface ContainerNameArrayDataValue {
   name: string;
-  count: number;
+  count: string;
 }
 
 export interface ContainerNameWidgetDeps {
@@ -51,6 +52,10 @@ interface FilterButtons {
   filterOutButtons: ReactNode[];
 }
 
+interface CopyButtons {
+  copyButtons: ReactNode[];
+}
+
 export const ContainerNameWidget = ({
   widgetKey,
   indexPattern,
@@ -63,7 +68,7 @@ export const ContainerNameWidget = ({
   const styles = useStyles();
 
   const filterQueryWithTimeRange = useMemo(() => {
-    return addTimerangeToQuery(
+    return addTimerangeAndDefaultFilterToQuery(
       globalFilter.filterQuery,
       globalFilter.startDate,
       globalFilter.endDate
@@ -95,7 +100,8 @@ export const ContainerNameWidget = ({
     enableAllColumns: true,
   };
 
-  const { getFilterForValueButton, getFilterOutValueButton, filterManager } = useSetFilter();
+  const { getFilterForValueButton, getFilterOutValueButton, getCopyButton, filterManager } =
+    useSetFilter();
   const filterButtons = useMemo((): FilterButtons => {
     const result: FilterButtons = {
       filterForButtons:
@@ -137,6 +143,27 @@ export const ContainerNameWidget = ({
     return result;
   }, [data, getFilterForValueButton, getFilterOutValueButton, filterManager]);
 
+  const copyToClipboardButtons = useMemo((): CopyButtons => {
+    const result: CopyButtons = {
+      copyButtons:
+        data?.pages
+          ?.map((aggsData) => {
+            return aggsData?.buckets.map((aggData) => {
+              return getCopyButton({
+                field: CONTAINER_IMAGE_NAME,
+                size: 'xs',
+                onClick: () => {},
+                ownFocus: false,
+                showTooltip: true,
+                value: aggData.key as string,
+              });
+            });
+          })
+          .flat() || [],
+    };
+    return result;
+  }, [data, getCopyButton]);
+
   const containerNameArray = useMemo((): ContainerNameArrayDataValue[] => {
     return data
       ? data?.pages
@@ -144,7 +171,7 @@ export const ContainerNameWidget = ({
             return aggsData?.buckets.map((aggData) => {
               return {
                 name: aggData.key as string,
-                count: aggData.count_by_aggs.value,
+                count: addCommasToNumber(aggData.count_by_aggs.value),
               };
             });
           })
@@ -162,23 +189,23 @@ export const ContainerNameWidget = ({
           const indexHelper = containerNameArray.findIndex((obj) => {
             return obj.name === name;
           });
-
           return (
             <ContainerNameRow
               name={name}
               filterButtonIn={filterButtons.filterForButtons[indexHelper]}
               filterButtonOut={filterButtons.filterOutButtons[indexHelper]}
+              copyToClipboardButton={copyToClipboardButtons.copyButtons[indexHelper]}
             />
           );
         },
         align: 'left',
-        width: '74%',
+        width: '67%',
         sortable: false,
       },
       {
         field: 'count',
         name: CONTAINER_NAME_SESSION_COUNT_COLUMN,
-        width: '26%',
+        width: '33%',
         'data-test-subj': COUNT_COLUMN_TEST_ID,
         render: (count: number) => {
           return <span css={styles.countValue}>{count}</span>;
@@ -187,7 +214,13 @@ export const ContainerNameWidget = ({
         align: 'right',
       },
     ];
-  }, [filterButtons.filterForButtons, filterButtons.filterOutButtons, containerNameArray, styles]);
+  }, [
+    filterButtons.filterForButtons,
+    filterButtons.filterOutButtons,
+    copyToClipboardButtons.copyButtons,
+    containerNameArray,
+    styles,
+  ]);
 
   const scrollerRef = useRef<HTMLDivElement>(null);
   useScroll({
@@ -198,6 +231,12 @@ export const ContainerNameWidget = ({
       }
     },
   });
+
+  const cellProps = () => {
+    return {
+      css: styles.cellPad,
+    };
+  };
 
   return (
     <div
@@ -220,6 +259,7 @@ export const ContainerNameWidget = ({
         columns={columns}
         sorting={sorting}
         onChange={onTableChange}
+        cellProps={cellProps}
       />
     </div>
   );

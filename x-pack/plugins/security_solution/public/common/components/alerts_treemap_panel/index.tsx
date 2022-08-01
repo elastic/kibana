@@ -16,7 +16,6 @@ import { useGlobalTime } from '../../containers/use_global_time';
 import { AlertsTreemap, DEFAULT_MIN_CHART_HEIGHT } from '../alerts_treemap';
 import { KpiPanel } from '../../../detections/components/alerts_kpis/common/components';
 import { useInspectButton } from '../../../detections/components/alerts_kpis/common/hooks';
-import type { AlertSearchResponse } from '../../../detections/containers/detection_engine/alerts/types';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { FieldSelection } from '../field_selection';
 import { HeaderSection } from '../header_section';
@@ -50,10 +49,6 @@ export interface Props {
   title: React.ReactNode;
 }
 
-export const getBucketsCount = (
-  data: AlertSearchResponse<unknown, AlertsTreeMapAggregation> | null
-): number => data?.aggregations?.stackByField0?.buckets?.length ?? 0;
-
 const AlertsTreemapPanelComponent: React.FC<Props> = ({
   addFilter,
   alignHeader,
@@ -73,7 +68,7 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
   stackByWidth,
   title,
 }: Props) => {
-  const { to, from, deleteQuery, setQuery } = useGlobalTime();
+  const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
 
   // create a unique, but stable (across re-renders) query id
   const uniqueQueryId = useMemo(() => `${ALERTS_TREEMAP_ID}-${uuid.v4()}`, []);
@@ -149,10 +144,11 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
   return (
     <InspectButtonContainer>
       <KpiPanel
+        className="eui-yScroll"
         data-test-subj="treemapPanel"
         hasBorder
         height={isPanelExpanded ? height : COLLAPSED_HEIGHT}
-        $overflowY="auto"
+        $overflowY={isPanelExpanded ? 'auto' : 'hidden'}
         $toggleStatus
       >
         <HeaderSection
@@ -179,7 +175,7 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
           )}
         </HeaderSection>
 
-        {isLoadingAlerts ? (
+        {isLoadingAlerts && isPanelExpanded ? (
           <EuiProgress color="accent" data-test-subj="progress" position="absolute" size="xs" />
         ) : (
           <>

@@ -153,6 +153,9 @@
       "label": "Contributors Newsletters",
       "items": [
         {
+          "id": "kibJuly2022ContributorNewsletter"
+        },
+        {
           "id": "kibJune2022ContributorNewsletter"
         },
         {
@@ -489,6 +492,9 @@
               "id": "kibDevDocsOpsEslintPluginImports"
             },
             {
+              "id": "kibDevDocsOpsEslintPluginDisable"
+            },
+            {
               "id": "kibDevDocsOpsKbnYarnLockValidator"
             }
           ]
@@ -528,6 +534,12 @@
             },
             {
               "id": "kibDevDocsOpsDevCliRunner"
+            },
+            {
+              "id": "kibDevDocsOpsGetRepoFiles"
+            },
+            {
+              "id": "kibDevDocsOpsRepoSourceClassifier"
             }
           ]
         }
