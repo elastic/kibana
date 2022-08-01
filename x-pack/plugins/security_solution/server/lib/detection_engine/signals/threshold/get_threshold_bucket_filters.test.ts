@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { sampleThresholdSignalHistory } from '../__mocks__/threshold_signal_history.mock';
 import { getThresholdBucketFilters } from './get_threshold_bucket_filters';
 
@@ -13,7 +12,6 @@ describe('getThresholdBucketFilters', () => {
   it('should generate filters for threshold signal detection with dupe mitigation', async () => {
     const result = await getThresholdBucketFilters({
       signalHistory: sampleThresholdSignalHistory(),
-      primaryTimestamp: TIMESTAMP,
     });
     expect(result).toEqual([
       {

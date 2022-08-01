@@ -5,20 +5,19 @@
  * 2.0.
  */
 
+import { TIMESTAMP } from '@kbn/rule-data-utils';
 import {
   buildThresholdMultiBucketAggregation,
   buildThresholdSingleBucketAggregation,
 } from './build_threshold_aggregation';
 
 describe('build_threshold_aggregation', () => {
-  const timestampField = '@timestamp';
-
   describe('build_threshold_multi_bucket_aggregation', () => {
     const threshold = { field: ['host.name', 'source.ip'], value: 2 };
     it('Generates aggregation without cardinality', async () => {
       const aggs = buildThresholdMultiBucketAggregation({
         threshold,
-        timestampField,
+        timestampField: TIMESTAMP,
         sortKeys: undefined,
       });
       expect(aggs).toStrictEqual({
@@ -34,12 +33,12 @@ describe('build_threshold_aggregation', () => {
             },
             max_timestamp: {
               max: {
-                field: '@timestamp',
+                field: TIMESTAMP,
               },
             },
             min_timestamp: {
               min: {
-                field: '@timestamp',
+                field: TIMESTAMP,
               },
             },
           },
@@ -74,7 +73,7 @@ describe('build_threshold_aggregation', () => {
       };
       const aggs = buildThresholdMultiBucketAggregation({
         threshold: thresholdWithCardinality,
-        timestampField,
+        timestampField: TIMESTAMP,
         sortKeys: undefined,
       });
       expect(aggs).toStrictEqual({
@@ -103,12 +102,12 @@ describe('build_threshold_aggregation', () => {
             },
             max_timestamp: {
               max: {
-                field: '@timestamp',
+                field: TIMESTAMP,
               },
             },
             min_timestamp: {
               min: {
-                field: '@timestamp',
+                field: TIMESTAMP,
               },
             },
           },
@@ -141,16 +140,16 @@ describe('build_threshold_aggregation', () => {
     const threshold = { field: [], value: 3 };
 
     it('Generates aggregation without cardinality', async () => {
-      const aggs = buildThresholdSingleBucketAggregation({ threshold, timestampField });
+      const aggs = buildThresholdSingleBucketAggregation({ threshold, timestampField: TIMESTAMP });
       expect(aggs).toStrictEqual({
         max_timestamp: {
           max: {
-            field: '@timestamp',
+            field: TIMESTAMP,
           },
         },
         min_timestamp: {
           min: {
-            field: '@timestamp',
+            field: TIMESTAMP,
           },
         },
       });
@@ -163,7 +162,7 @@ describe('build_threshold_aggregation', () => {
       };
       const aggs = buildThresholdSingleBucketAggregation({
         threshold: thresholdWithCardinality,
-        timestampField,
+        timestampField: TIMESTAMP,
       });
       expect(aggs).toStrictEqual({
         cardinality_count: {
@@ -173,12 +172,12 @@ describe('build_threshold_aggregation', () => {
         },
         max_timestamp: {
           max: {
-            field: '@timestamp',
+            field: TIMESTAMP,
           },
         },
         min_timestamp: {
           min: {
-            field: '@timestamp',
+            field: TIMESTAMP,
           },
         },
       });
