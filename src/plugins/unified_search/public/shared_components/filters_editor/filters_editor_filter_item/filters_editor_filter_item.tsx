@@ -74,24 +74,24 @@ export function FilterItem({
     params = getFilterParams(filter);
   }
 
-  const onHandleField = (field: DataViewField) => {
+  const onHandleField = (selectedField: DataViewField) => {
     dispatch({
       type: 'updateFilter',
-      payload: { path, field },
+      payload: { path, field: selectedField },
     });
   };
 
-  const onHandleOperator = (operator: Operator) => {
+  const onHandleOperator = (selectedOperator: Operator) => {
     dispatch({
       type: 'updateFilter',
-      payload: { path, field, operator },
+      payload: { path, field, operator: selectedOperator },
     });
   };
 
-  const onHandleParamsChange = (params: string) => {
+  const onHandleParamsChange = (selectedParams: string) => {
     dispatch({
       type: 'updateFilter',
-      payload: { path, field, operator, params },
+      payload: { path, field, operator, params: selectedParams },
     });
   };
 
