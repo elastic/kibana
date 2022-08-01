@@ -6,7 +6,7 @@
  */
 
 import { badRequest } from '@hapi/boom';
-import { get, isPlainObject } from 'lodash';
+import { get, isPlainObject, differenceWith, isEqual } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
@@ -313,48 +313,29 @@ export const constructQueryOptions = ({
   };
 };
 
-interface CompareArrays {
-  addedItems: string[];
-  deletedItems: string[];
+interface CompareArrays<T> {
+  addedItems: T[];
+  deletedItems: T[];
 }
-export const compareArrays = ({
-  originalValue,
-  updatedValue,
-}: {
-  originalValue: string[];
-  updatedValue: string[];
-}): CompareArrays => {
-  const result: CompareArrays = {
-    addedItems: [],
-    deletedItems: [],
-  };
-  originalValue.forEach((origVal) => {
-    if (!updatedValue.includes(origVal)) {
-      result.deletedItems = [...result.deletedItems, origVal];
-    }
-  });
-  updatedValue.forEach((updatedVal) => {
-    if (!originalValue.includes(updatedVal)) {
-      result.addedItems = [...result.addedItems, updatedVal];
-    }
-  });
 
-  return result;
-};
-
-export const isTwoArraysDifference = (
-  originalValue: unknown,
-  updatedValue: unknown
-): CompareArrays | null => {
+export const arraysDifference = <T>(
+  originalValue: T[] | undefined | null,
+  updatedValue: T[] | undefined | null
+): CompareArrays<T> | null => {
   if (
     originalValue != null &&
     updatedValue != null &&
     Array.isArray(updatedValue) &&
     Array.isArray(originalValue)
   ) {
-    const compObj = compareArrays({ originalValue, updatedValue });
-    if (compObj.addedItems.length > 0 || compObj.deletedItems.length > 0) {
-      return compObj;
+    const addedItems = differenceWith(updatedValue, originalValue, isEqual);
+    const deletedItems = differenceWith(originalValue, updatedValue, isEqual);
+
+    if (addedItems.length > 0 || deletedItems.length > 0) {
+      return {
+        addedItems,
+        deletedItems,
+      };
     }
   }
   return null;
@@ -374,7 +355,7 @@ export const getCaseToUpdate = (
     (acc, [key, value]) => {
       const currentValue = get(currentCase, key);
       if (Array.isArray(currentValue) && Array.isArray(value)) {
-        if (isTwoArraysDifference(value, currentValue)) {
+        if (arraysDifference(value, currentValue)) {
           return {
             ...acc,
             [key]: value,
