@@ -78,6 +78,11 @@ describe('SyntheticsPrivateLocation', () => {
         get: jest.fn().mockReturnValue({}),
       },
     },
+    spaces: {
+      spacesService: {
+        getSpaceId: jest.fn().mockReturnValue('nonDefaultSpace'),
+      },
+    },
   } as unknown as UptimeServerSetup;
 
   it.each([
