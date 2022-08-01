@@ -14,6 +14,7 @@ import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.st
 import { pluginServices } from '../../services';
 import { TestScheduler } from 'rxjs/testing';
 import { buildRangeFilter } from '@kbn/es-query';
+import { ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 
 const buildFilter = (range: [number | null, number | null]) => {
   const filterPieces: Record<string, number> = {};
@@ -62,6 +63,10 @@ const baseInput: TimeSliderControlEmbeddableInput = {
   dataViewId: stubLogstashDataView.id!,
 };
 
+const mockReduxEmbeddablePackage = {
+  createTools: () => {},
+} as unknown as ReduxEmbeddablePackage;
+
 describe('Time Slider Control Embeddable', () => {
   const services = pluginServices.getServices();
   const fetchRange = jest.spyOn(services.data, 'fetchFieldRange');
@@ -99,7 +104,7 @@ describe('Time Slider Control Embeddable', () => {
           b: expectedFilterAfterRangeFetch ? [expectedFilterAfterRangeFetch] : undefined,
         };
 
-        const embeddable = new TimeSliderControlEmbeddable(input, {});
+        const embeddable = new TimeSliderControlEmbeddable(mockReduxEmbeddablePackage, input, {});
         const source$ = embeddable.getOutput$().pipe(map((o) => o.filters));
 
         expectObservable(source$).toBe(expectedMarbles, expectedValues);
@@ -196,7 +201,11 @@ describe('Time Slider Control Embeddable', () => {
           b: mockRange,
         };
 
-        const embeddable = new TimeSliderControlEmbeddable(baseInput, {});
+        const embeddable = new TimeSliderControlEmbeddable(
+          mockReduxEmbeddablePackage,
+          baseInput,
+          {}
+        );
         const source$ = embeddable.getComponentState$().pipe(map((state) => state.range));
 
         const { fieldName, ...inputForFetch } = baseInput;
@@ -221,7 +230,11 @@ describe('Time Slider Control Embeddable', () => {
         const mockRange = { min: 1, max: 2 };
         fetchRange$.mockReturnValue(cold('a', { a: mockRange }));
 
-        const embeddable = new TimeSliderControlEmbeddable(baseInput, {});
+        const embeddable = new TimeSliderControlEmbeddable(
+          mockReduxEmbeddablePackage,
+          baseInput,
+          {}
+        );
         const updatedInput = { ...baseInput, fieldName: '@timestamp' };
 
         embeddable.updateInput(updatedInput);
@@ -247,7 +260,7 @@ describe('Time Slider Control Embeddable', () => {
           timeRange: {} as any,
         };
 
-        new TimeSliderControlEmbeddable(input, {});
+        new TimeSliderControlEmbeddable(mockReduxEmbeddablePackage, input, {});
 
         expect(fetchRange$).toBeCalledTimes(1);
         const args = fetchRange$.mock.calls[0][2];
@@ -274,7 +287,7 @@ describe('Time Slider Control Embeddable', () => {
           ignoreParentSettings: { ignoreFilters: true, ignoreQuery: true, ignoreTimerange: true },
         };
 
-        new TimeSliderControlEmbeddable(input, {});
+        new TimeSliderControlEmbeddable(mockReduxEmbeddablePackage, input, {});
 
         expect(fetchRange$).toBeCalledTimes(1);
         const args = fetchRange$.mock.calls[0][2];

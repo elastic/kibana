@@ -165,7 +165,9 @@
                 "section": "def-common.TagAttributes",
                 "text": "TagAttributes"
               },
-              ") => Promise<",
+              ", options?: ",
+              "CreateTagOptions",
+              " | undefined) => Promise<",
               {
                 "pluginId": "savedObjectsTaggingOss",
                 "scope": "common",
@@ -197,6 +199,21 @@
                 "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
                 "deprecated": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "savedObjectsTagging",
+                "id": "def-server.ITagsClient.create.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "CreateTagOptions",
+                  " | undefined"
+                ],
+                "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                "deprecated": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -406,7 +423,7 @@
           "FindAssignableObjectsOptions",
           ") => Promise<",
           "AssignableObject",
-          "[]>; getAssignableTypes: (types?: string[] | undefined) => Promise<string[]>; updateTagAssignments: ({ tags, assign, unassign }: ",
+          "[]>; getAssignableTypes: (types?: string[] | undefined) => Promise<string[]>; updateTagAssignments: ({ tags, assign, unassign, refresh, }: ",
           "UpdateTagAssignmentsOptions",
           ") => Promise<void>; }"
         ],
@@ -701,7 +718,9 @@
                 "section": "def-common.TagAttributes",
                 "text": "TagAttributes"
               },
-              ") => Promise<",
+              ", options?: ",
+              "CreateTagOptions",
+              " | undefined) => Promise<",
               {
                 "pluginId": "savedObjectsTaggingOss",
                 "scope": "common",
@@ -733,6 +752,21 @@
                 "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
                 "deprecated": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "savedObjectsTagging",
+                "id": "def-common.ITagsClient.create.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "CreateTagOptions",
+                  " | undefined"
+                ],
+                "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                "deprecated": false,
+                "isRequired": false
               }
             ],
             "returnComment": []

@@ -55,14 +55,19 @@ const FlyoutHeaderComponent: React.FC<{
         <EuiFlexItem grow={false}>
           {isPreconfigured ? (
             <>
-              <EuiTitle size="s">
-                <h3 id="flyoutTitle">
-                  <FormattedMessage
-                    defaultMessage="{connectorName}"
-                    id="xpack.triggersActionsUI.sections.preconfiguredConnectorForm.flyoutTitle"
-                    values={{ connectorName }}
-                  />
-                  &emsp;
+              <EuiFlexGroup gutterSize="s" justifyContent="center" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="s">
+                    <h3 id="flyoutTitle">
+                      <FormattedMessage
+                        defaultMessage="{connectorName}"
+                        id="xpack.triggersActionsUI.sections.preconfiguredConnectorForm.flyoutTitle"
+                        values={{ connectorName }}
+                      />
+                    </h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   <EuiBetaBadge
                     label="Preconfigured"
                     data-test-subj="preconfiguredBadge"
@@ -73,8 +78,16 @@ const FlyoutHeaderComponent: React.FC<{
                       }
                     )}
                   />
-                </h3>
-              </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  {isExperimental && (
+                    <EuiBetaBadge
+                      label={betaBadgeProps.label}
+                      tooltipContent={betaBadgeProps.tooltipContent}
+                    />
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
               <EuiText size="s">
                 <FormattedMessage
                   defaultMessage="{connectorTypeDesc}"
@@ -84,14 +97,26 @@ const FlyoutHeaderComponent: React.FC<{
               </EuiText>
             </>
           ) : (
-            <EuiTitle size="s">
-              <h3 id="flyoutTitle">
-                <FormattedMessage
-                  defaultMessage="Edit connector"
-                  id="xpack.triggersActionsUI.sections.editConnectorForm.flyoutPreconfiguredTitle"
-                />
-              </h3>
-            </EuiTitle>
+            <EuiFlexGroup gutterSize="s" justifyContent="center" alignItems="center">
+              <EuiFlexItem>
+                <EuiTitle size="s">
+                  <h3 id="flyoutTitle">
+                    <FormattedMessage
+                      defaultMessage="Edit connector"
+                      id="xpack.triggersActionsUI.sections.editConnectorForm.flyoutPreconfiguredTitle"
+                    />
+                  </h3>
+                </EuiTitle>
+              </EuiFlexItem>
+              {isExperimental && (
+                <EuiFlexItem grow={false}>
+                  <EuiBetaBadge
+                    label={betaBadgeProps.label}
+                    tooltipContent={betaBadgeProps.tooltipContent}
+                  />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           )}
         </EuiFlexItem>
         {isExperimental && (
