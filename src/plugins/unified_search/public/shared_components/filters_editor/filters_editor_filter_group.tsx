@@ -77,6 +77,7 @@ export const FilterGroup = ({
                 disableAnd={andDisabled}
                 disableRemove={removeDisabled}
                 color={color}
+                index={index}
               />
             </EuiFlexItem>
 

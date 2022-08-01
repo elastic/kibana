@@ -47,6 +47,7 @@ export interface FilterItemProps {
   disableAnd: boolean;
   disableRemove: boolean;
   color: 'plain' | 'subdued';
+  index: number;
 }
 
 export function FilterItem({
@@ -58,6 +59,7 @@ export function FilterItem({
   disableAnd,
   disableRemove,
   color,
+  index,
 }: FilterItemProps) {
   const { dispatch, dataView } = useContext(FiltersEditorContextType);
   const conditionalOperationType = getConditionalOperationType(filter);
@@ -145,7 +147,7 @@ export function FilterItem({
           <EuiDraggable
             spacing="m"
             key={path}
-            index={2}
+            index={index}
             draggableId={`${path}`}
             customDragHandle={true}
             hasInteractiveChildren={true}
