@@ -7,13 +7,4 @@
  */
 
 export { ToastsService } from './toasts_service';
-export type { ToastsSetup, ToastsStart } from './toasts_service';
-export type {
-  ErrorToastOptions,
-  ToastOptions,
-  ToastsApi,
-  ToastInput,
-  IToasts,
-  ToastInputFields,
-  Toast,
-} from './toasts_api';
+export type { ToastsApi } from './toasts_api';

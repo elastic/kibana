@@ -9,12 +9,12 @@
 import { EuiGlobalToastList } from '@elastic/eui';
 import { shallow } from 'enzyme';
 import React from 'react';
-import * as Rx from 'rxjs';
+import { Observable, from, EMPTY } from 'rxjs';
 
 import { GlobalToastList } from './global_toast_list';
 
 function render(props: Partial<GlobalToastList['props']> = {}) {
-  return <GlobalToastList dismissToast={jest.fn()} toasts$={Rx.EMPTY} {...props} />;
+  return <GlobalToastList dismissToast={jest.fn()} toasts$={EMPTY} {...props} />;
 }
 
 it('renders matching snapshot', () => {
@@ -29,7 +29,7 @@ it('subscribes to toasts$ on mount and unsubscribes on unmount', () => {
   });
 
   const component = render({
-    toasts$: new Rx.Observable<any>(subscribeSpy),
+    toasts$: new Observable<any>(subscribeSpy),
   });
 
   expect(subscribeSpy).not.toHaveBeenCalled();
@@ -46,7 +46,7 @@ it('subscribes to toasts$ on mount and unsubscribes on unmount', () => {
 it('passes latest value from toasts$ to <EuiGlobalToastList />', () => {
   const el = shallow(
     render({
-      toasts$: Rx.from([[], [{ id: '1' }], [{ id: '1' }, { id: '2' }]]) as any,
+      toasts$: from([[], [{ id: '1' }], [{ id: '1' }, { id: '2' }]]) as any,
     })
   );
 

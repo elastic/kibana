@@ -12,7 +12,7 @@ import type {
   SavedObjectsCreateOptions,
   SavedObjectsUpdateOptions,
 } from '@kbn/core/public';
-import type { ErrorToastOptions, ToastInputFields } from '@kbn/core/public/notifications';
+import type { ErrorToastOptions, ToastInputFields } from '@kbn/core-notifications-browser';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { RUNTIME_FIELD_TYPES } from './constants';
