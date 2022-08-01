@@ -19,7 +19,7 @@ export type Button =  typeof PrimaryButton | typeof ToolbarPopover;
 interface NamedSlots {
   primaryButton: ReactElement<Button>;
   iconButtonGroup?: ReactElement<typeof IconButtonGroup>;
-  extraButtons?: Array<Button> | undefined;
+  extraButtons?: Array<ReactElement<Button>> | undefined;
 }
 
 /**
