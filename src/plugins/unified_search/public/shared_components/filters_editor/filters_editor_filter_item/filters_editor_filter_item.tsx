@@ -74,33 +74,45 @@ export function FilterItem({
     params = getFilterParams(filter);
   }
 
-  const onHandleField = (selectedField: DataViewField) => {
-    dispatch({
-      type: 'updateFilter',
-      payload: { path, field: selectedField },
-    });
-  };
+  const onHandleField = useCallback(
+    (selectedField: DataViewField) => {
+      dispatch({
+        type: 'updateFilter',
+        payload: { path, field: selectedField },
+      });
+    },
+    [dispatch, path]
+  );
 
-  const onHandleOperator = (selectedOperator: Operator) => {
-    dispatch({
-      type: 'updateFilter',
-      payload: { path, field, operator: selectedOperator },
-    });
-  };
+  const onHandleOperator = useCallback(
+    (selectedOperator: Operator) => {
+      dispatch({
+        type: 'updateFilter',
+        payload: { path, field, operator: selectedOperator },
+      });
+    },
+    [dispatch, path, field]
+  );
 
-  const onHandleParamsChange = (selectedParams: string) => {
-    dispatch({
-      type: 'updateFilter',
-      payload: { path, field, operator, params: selectedParams },
-    });
-  };
+  const onHandleParamsChange = useCallback(
+    (selectedParams: string) => {
+      dispatch({
+        type: 'updateFilter',
+        payload: { path, field, operator, params: selectedParams },
+      });
+    },
+    [dispatch, path, field, operator]
+  );
 
-  const onHandleParamsUpdate = (value: Filter['meta']['params']) => {
-    dispatch({
-      type: 'updateFilterParams',
-      payload: { path, params: [value, ...(params || [])] },
-    });
-  };
+  const onHandleParamsUpdate = useCallback(
+    (value: Filter['meta']['params']) => {
+      dispatch({
+        type: 'updateFilterParams',
+        payload: { path, params: [value, ...(params || [])] },
+      });
+    },
+    [dispatch, path, params]
+  );
 
   const onRemoveFilter = useCallback(() => {
     dispatch({
