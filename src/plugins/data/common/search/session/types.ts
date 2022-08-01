@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { SerializableRecord } from '@kbn/utility-types';
 import type { SearchSessionStatus, SearchStatus } from './status';
