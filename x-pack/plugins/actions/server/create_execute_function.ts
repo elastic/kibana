@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import {
+  SavedObjectReference,
+  SavedObjectsBulkResponse,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { RunNowResult, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import {
   RawAction,
@@ -34,9 +38,22 @@ export interface ExecuteOptions extends Pick<ActionExecutorOptions, 'params' | '
   relatedSavedObjects?: RelatedSavedObjects;
 }
 
+export interface ActionTaskParams extends Pick<ActionExecutorOptions, 'params'> {
+  actionId: string;
+  apiKey: string | null;
+  executionId: string;
+  consumer?: string;
+  relatedSavedObjects?: RelatedSavedObjects;
+}
+
 export type ExecutionEnqueuer<T> = (
   unsecuredSavedObjectsClient: SavedObjectsClientContract,
   options: ExecuteOptions
+) => Promise<T>;
+
+export type BulkExecutionEnqueuer<T> = (
+  unsecuredSavedObjectsClient: SavedObjectsClientContract,
+  options: ExecuteOptions[]
 ) => Promise<T>;
 
 export function createExecutionEnqueuerFunction({
@@ -116,6 +133,91 @@ export function createExecutionEnqueuerFunction({
       state: {},
       scope: ['actions'],
     });
+  };
+}
+
+export function createBulkExecutionEnqueuerFunction({
+  taskManager,
+  actionTypeRegistry,
+  isESOCanEncrypt,
+  preconfiguredActions,
+}: CreateExecuteFunctionOptions): BulkExecutionEnqueuer<void> {
+  return async function execute(
+    unsecuredSavedObjectsClient: SavedObjectsClientContract,
+    options: ExecuteOptions[]
+  ) {
+    if (!isESOCanEncrypt) {
+      throw new Error(
+        `Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+      );
+    }
+
+    const taskReferences: SavedObjectReference[] = [];
+    const actionTypeIds: { [key: string]: string } = {};
+    const spaceIds: { [key: string]: string } = {};
+    const actions = await Promise.all(
+      options.map(async (option) => {
+        const { action, isPreconfigured } = await getAction(
+          unsecuredSavedObjectsClient,
+          preconfiguredActions,
+          option.id
+        );
+        validateCanActionBeUsed(action);
+
+        const { actionTypeId } = action;
+        if (
+          !actionTypeRegistry.isActionExecutable(option.id, actionTypeId, { notifyUsage: true })
+        ) {
+          actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+        }
+
+        // Get saved object references from action ID and relatedSavedObjects
+        const { references, relatedSavedObjectWithRefs } = extractSavedObjectReferences(
+          option.id,
+          isPreconfigured,
+          option.relatedSavedObjects
+        );
+        const executionSourceReference = executionSourceAsSavedObjectReferences(option.source);
+
+        if (executionSourceReference.references) {
+          taskReferences.push(...executionSourceReference.references);
+        }
+        if (references) {
+          taskReferences.push(...references);
+        }
+
+        actionTypeIds[option.id] = actionTypeId;
+        spaceIds[option.id] = option.spaceId;
+
+        return {
+          type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+          attributes: {
+            actionId: option.id,
+            params: option.params,
+            apiKey: option.apiKey,
+            executionId: option.executionId,
+            consumer: option.consumer,
+            relatedSavedObjects: relatedSavedObjectWithRefs,
+          },
+        };
+      })
+    );
+
+    const actionTaskParamsRecords: SavedObjectsBulkResponse<ActionTaskParams> =
+      await unsecuredSavedObjectsClient.bulkCreate(actions, { references: taskReferences });
+    const taskInstances = actionTaskParamsRecords.saved_objects.map((so) => {
+      const actionId = so.attributes.actionId;
+      return {
+        taskType: `actions:${actionTypeIds[actionId]}`,
+        params: {
+          spaceId: spaceIds[actionId],
+          actionTaskParamsId: so.id,
+        },
+        state: {},
+        scope: ['actions'],
+      };
+    });
+    await taskManager.bulkSchedule(taskInstances);
   };
 }
 

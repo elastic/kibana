@@ -6,6 +6,8 @@
  */
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import { isEphemeralTaskRejectedDueToCapacityError } from '@kbn/task-manager-plugin/server';
+import { chunk } from 'lodash';
+import { asyncForEach } from '@kbn/std';
 import { transformActionParams } from './transform_action_params';
 import { injectActionParams } from './inject_action_params';
 import {
@@ -115,6 +117,7 @@ export function createExecutionHandler<
     const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
     let ephemeralActionsToSchedule = maxEphemeralActionsPerRule;
 
+    const bulkEnqueueOptions = [];
     for (const action of actions) {
       const { actionTypeId } = action;
 
@@ -188,11 +191,11 @@ export function createExecutionHandler<
           await actionsClient.ephemeralEnqueuedExecution(enqueueOptions);
         } catch (err) {
           if (isEphemeralTaskRejectedDueToCapacityError(err)) {
-            await actionsClient.enqueueExecution(enqueueOptions);
+            bulkEnqueueOptions.push(enqueueOptions);
           }
         }
       } else {
-        await actionsClient.enqueueExecution(enqueueOptions);
+        bulkEnqueueOptions.push(enqueueOptions);
       }
 
       alertingEventLogger.logAction({
@@ -203,5 +206,11 @@ export function createExecutionHandler<
         alertSubgroup: actionSubgroup,
       });
     }
+
+    await asyncForEach(
+      chunk(bulkEnqueueOptions, 1000),
+      async (bulkEnqueueOptionChunk) =>
+        await actionsClient.bulkEnqueueExecution(bulkEnqueueOptionChunk)
+    );
   };
 }

@@ -39,6 +39,7 @@ import { ExecuteOptions } from './lib/action_executor';
 import {
   ExecutionEnqueuer,
   ExecuteOptions as EnqueueExecutionOptions,
+  BulkExecutionEnqueuer,
 } from './create_execute_function';
 import { ActionsAuthorization } from './authorization/actions_authorization';
 import {
@@ -94,6 +95,7 @@ interface ConstructorOptions {
   actionExecutor: ActionExecutorContract;
   executionEnqueuer: ExecutionEnqueuer<void>;
   ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
+  bulkExecutionEnqueuer: BulkExecutionEnqueuer<void>;
   request: KibanaRequest;
   authorization: ActionsAuthorization;
   auditLogger?: AuditLogger;
@@ -118,6 +120,7 @@ export class ActionsClient {
   private readonly authorization: ActionsAuthorization;
   private readonly executionEnqueuer: ExecutionEnqueuer<void>;
   private readonly ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
+  private readonly bulkExecutionEnqueuer: BulkExecutionEnqueuer<void>;
   private readonly auditLogger?: AuditLogger;
   private readonly usageCounter?: UsageCounter;
   private readonly connectorTokenClient: ConnectorTokenClientContract;
@@ -132,6 +135,7 @@ export class ActionsClient {
     actionExecutor,
     executionEnqueuer,
     ephemeralExecutionEnqueuer,
+    bulkExecutionEnqueuer,
     request,
     authorization,
     auditLogger,
@@ -147,6 +151,7 @@ export class ActionsClient {
     this.actionExecutor = actionExecutor;
     this.executionEnqueuer = executionEnqueuer;
     this.ephemeralExecutionEnqueuer = ephemeralExecutionEnqueuer;
+    this.bulkExecutionEnqueuer = bulkExecutionEnqueuer;
     this.request = request;
     this.authorization = authorization;
     this.auditLogger = auditLogger;
@@ -654,6 +659,23 @@ export class ActionsClient {
       trackLegacyRBACExemption('enqueueExecution', this.usageCounter);
     }
     return this.executionEnqueuer(this.unsecuredSavedObjectsClient, options);
+  }
+
+  public async bulkEnqueueExecution(options: EnqueueExecutionOptions[]): Promise<void> {
+    await Promise.all(
+      options.map(async (option) => {
+        const { source } = option;
+        if (
+          (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
+          AuthorizationMode.RBAC
+        ) {
+          return this.authorization.ensureAuthorized('execute');
+        } else {
+          return trackLegacyRBACExemption('enqueueExecution', this.usageCounter);
+        }
+      })
+    );
+    return this.bulkExecutionEnqueuer(this.unsecuredSavedObjectsClient, options);
   }
 
   public async ephemeralEnqueuedExecution(options: EnqueueExecutionOptions): Promise<RunNowResult> {
