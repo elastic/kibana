@@ -573,6 +573,7 @@ describe('Cases API', () => {
         syncAlerts: true,
       },
       owner: SECURITY_SOLUTION_OWNER,
+      assignees: [],
     };
 
     test('should be called with correct check url, method, signal', async () => {
