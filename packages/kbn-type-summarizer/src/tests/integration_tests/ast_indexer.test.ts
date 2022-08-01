@@ -238,7 +238,7 @@ describe('indexExports()', () => {
           "ambientRefs": Array [
             Object {
               "name": "Promise",
-              "rootSymbol": Symbol(ts.InterfaceDeclaration (Promise) @ ../../../node_modules/typescript/lib/lib.es5.d.ts:1495:1),
+              "rootSymbol": Symbol(ts.InterfaceDeclaration (Promise) @ ../../../node_modules/typescript/lib/lib.es5.d.ts:1501:1),
               "type": "ambient ref",
             },
           ],

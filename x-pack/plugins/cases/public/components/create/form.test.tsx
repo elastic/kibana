@@ -67,6 +67,7 @@ describe('CreateCaseForm', () => {
     globalForm = form;
 
     return (
+      // @ts-expect-error
       <TestProviders {...testProviderProps}>
         <Form form={form}>{children}</Form>
       </TestProviders>

@@ -61,6 +61,7 @@ const setupHandler = (commit: CommitFn, canvasOrigin: CanvasOriginFn, zoomScale?
 
     // only commits the cursor position if there's a way to latch onto x/y calculation (canvasOrigin is knowable)
     // or if left button is being held down (i.e. an element is being dragged)
+    // @ts-expect-error
     if (buttons === 1 || canvasOrigin) {
       commit('cursorPosition', { x, y, altKey, metaKey, shiftKey, ctrlKey });
     } else {

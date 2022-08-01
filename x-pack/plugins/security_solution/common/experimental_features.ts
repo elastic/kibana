@@ -103,6 +103,7 @@ export const parseExperimentalConfigValue = (configValue: string[]): Experimenta
       throw new SecuritySolutionInvalidExperimentalValue(`[${value}] is not valid.`);
     }
 
+    // @ts-expect-error
     enabledFeatures[value as keyof ExperimentalFeatures] = true;
   }
 
