@@ -15,7 +15,7 @@ fi
 if is_pr_with_label "ci:build-os-packages"; then
   BUILD_ARGS="--all-platforms --docker-cross-compile"
 fi
-if ! is_pr_with_label "ci:build-canvas-shareable-runtime"
+if ! is_pr_with_label "ci:build-canvas-shareable-runtime"; then
   BUILD_ARGS="$BUILD_ARGS --skip-canvas-shareable-runtime"
 fi
 
