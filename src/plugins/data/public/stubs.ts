@@ -7,5 +7,4 @@
  */
 
 export * from '../common/stubs';
-// eslint-disable-next-line @kbn/imports/uniform_imports,@kbn/eslint/no-restricted-paths
-export { createStubDataView } from '../../data_views/public/data_views/data_view.stub';
+export { createStubDataView } from '@kbn/data-views-plugin/public/data_views/data_view.stub';
