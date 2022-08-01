@@ -382,7 +382,7 @@ export interface EpmPackageAdditions {
   latestVersion: string;
   assets: AssetsGroupedByServiceByType;
   notice?: string;
-  license?: string;
+  licensePath?: string;
   keepPoliciesUpToDate?: boolean;
 }
 
