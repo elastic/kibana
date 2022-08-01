@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { ITooltipProperty } from '@kbn/maps-plugin/public/classes/tooltips/tooltip_property';
 import { sourceDestinationFieldMappings } from '../map_config';
 import {
