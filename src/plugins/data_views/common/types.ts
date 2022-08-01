@@ -410,6 +410,24 @@ export type FieldSpec = DataViewFieldBase & {
    */
   runtimeField?: RuntimeFieldSpec;
 
+  /**
+   * Field meta information
+   */
+  meta?: {
+    fixedInterval: string[];
+    time_zone: string[];
+  };
+
+  /**
+   * set to true if field is a TSDB dimension field
+   */
+  time_series_dimension?: boolean;
+
+  /**
+   * set if field is a TSDB metric field
+   */
+  time_series_metric?: 'histogram' | 'summary' | 'gauge' | 'counter';
+
   // not persisted
 
   /**
