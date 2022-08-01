@@ -58,6 +58,7 @@ export interface ReportingInternalSetup {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
   status: StatusServiceSetup;
+  docLinks: DocLinksServiceSetup;
 }
 
 export interface ReportingInternalStart {

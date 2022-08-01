@@ -337,6 +337,8 @@ export interface DocLinks {
   readonly reporting: Readonly<{
     cloudMinimumRequirements: string;
     grantUserAccess: string;
+    browserSystemDependencies: string;
+    browserSandboxDependencies: string;
   }>;
   readonly security: Readonly<{
     apiKeyServiceSettings: string;
