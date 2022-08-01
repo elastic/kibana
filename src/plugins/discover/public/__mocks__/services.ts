@@ -8,6 +8,7 @@
 import { EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { DiscoverServices } from '../build_services';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { chromeServiceMock, coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';
 import {
   CONTEXT_STEP_SETTING,
@@ -15,6 +16,7 @@ import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   MAX_DOC_FIELDS_DISPLAYED,
   SAMPLE_SIZE_SETTING,
+  SAMPLE_ROWS_PER_PAGE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
   HIDE_ANNOUNCEMENTS,
 } from '../../common';
@@ -24,6 +26,7 @@ import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { LocalStorageMock } from './local_storage_mock';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 const dataPlugin = dataPluginMock.createStartContract();
+const expressionsPlugin = expressionsPluginMock.createStartContract();
 
 export const discoverServiceMock = {
   core: coreMock.createStart(),
@@ -67,6 +70,8 @@ export const discoverServiceMock = {
         return false;
       } else if (key === SAMPLE_SIZE_SETTING) {
         return 250;
+      } else if (key === SAMPLE_ROWS_PER_PAGE_SETTING) {
+        return 150;
       } else if (key === MAX_DOC_FIELDS_DISPLAYED) {
         return 50;
       } else if (key === HIDE_ANNOUNCEMENTS) {
@@ -92,7 +97,7 @@ export const discoverServiceMock = {
     },
   },
   navigation: {
-    ui: { TopNavMenu },
+    ui: { TopNavMenu, AggregateQueryTopNavMenu: TopNavMenu },
   },
   metadata: {
     branch: 'test',
@@ -107,4 +112,5 @@ export const discoverServiceMock = {
     addInfo: jest.fn(),
     addWarning: jest.fn(),
   },
+  expressions: expressionsPlugin,
 } as unknown as DiscoverServices;

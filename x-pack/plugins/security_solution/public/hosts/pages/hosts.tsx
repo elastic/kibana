@@ -74,12 +74,7 @@ const HostsComponent = () => {
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
-    (state) =>
-      (
-        getTimeline(state, TimelineId.hostsPageEvents) ??
-        getTimeline(state, TimelineId.hostsPageExternalAlerts) ??
-        timelineDefaults
-      ).graphEventId
+    (state) => (getTimeline(state, TimelineId.hostsPageEvents) ?? timelineDefaults).graphEventId
   );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -102,7 +97,7 @@ const HostsComponent = () => {
   const { uiSettings } = useKibana().services;
   const { tabName } = useParams<{ tabName: string }>();
   const tabsFilters: Filter[] = React.useMemo(() => {
-    if (tabName === HostsTableType.alerts || tabName === HostsTableType.events) {
+    if (tabName === HostsTableType.events) {
       return filters.length > 0 ? [...filters, ...hostNameExistsFilter] : hostNameExistsFilter;
     }
 
@@ -129,8 +124,7 @@ const HostsComponent = () => {
     },
     [dispatch]
   );
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns, loading } =
-    useSourcererDataView();
+  const { indicesExist, indexPattern, selectedPatterns, loading } = useSourcererDataView();
   const [filterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
@@ -197,11 +191,7 @@ const HostsComponent = () => {
             <Display show={!globalFullScreen}>
               <HeaderPage
                 subtitle={
-                  <LastEventTime
-                    docValueFields={docValueFields}
-                    indexKey={LastEventIndexKey.hosts}
-                    indexNames={selectedPatterns}
-                  />
+                  <LastEventTime indexKey={LastEventIndexKey.hosts} indexNames={selectedPatterns} />
                 }
                 title={i18n.PAGE_TITLE}
                 border

@@ -8,12 +8,11 @@
 import {
   EuiButtonGroup,
   EuiDatePicker,
-  EuiFieldNumber,
   EuiFormControlLayout,
   EuiFormRow,
   EuiHorizontalRule,
-  EuiPanel,
   EuiSelect,
+  EuiSplitPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
@@ -21,6 +20,7 @@ import { Moment } from 'moment';
 import React from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
+import { NumberField } from '../helpers/number_field';
 import { RRuleFrequency, RecurrenceSchedule } from '../../../../../../types';
 import { i18nMonthDayDate } from '../../../../../lib/i18n_month_day_date';
 import {
@@ -37,6 +37,8 @@ import {
   recurrenceSummary,
 } from './helpers';
 import { i18nNthWeekday } from './translations';
+
+import './recurrence_scheduler.scss';
 
 interface ComponentOpts {
   startDate: Moment | null;
@@ -192,8 +194,8 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
   }, [compiledRecurrenceSchedule, onChange]);
 
   return (
-    <EuiPanel hasShadow={false} hasBorder={true} paddingSize="none">
-      <div style={{ padding: '16px', backgroundColor: '#f8fafd' }}>
+    <EuiSplitPanel.Outer hasShadow={false} hasBorder={true}>
+      <EuiSplitPanel.Inner color="subdued" className="ramRecurrenceScheduler">
         <EuiFormRow
           display="columnCompressed"
           style={{ alignItems: 'center' }}
@@ -274,24 +276,24 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
                 }
               )}
             >
-              <EuiFieldNumber
+              <NumberField
                 compressed
                 min={1}
                 value={occurrences}
-                onChange={(e) => setOccurrrences(Number(e.target.value))}
+                onChange={(value) => setOccurrrences(Number(value))}
               />
             </EuiFormControlLayout>
           </EuiFormRow>
         )}
-      </div>
+      </EuiSplitPanel.Inner>
       <EuiHorizontalRule margin="none" />
-      <div style={{ padding: '16px' }}>
+      <EuiSplitPanel.Inner style={{ maxWidth: '400px' }}>
         {i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.repeatsSummary', {
           defaultMessage: 'Repeats {summary}',
           values: { summary: recurrenceSummary(compiledRecurrenceSchedule) },
         })}
-      </div>
-    </EuiPanel>
+      </EuiSplitPanel.Inner>
+    </EuiSplitPanel.Outer>
   );
 };
 

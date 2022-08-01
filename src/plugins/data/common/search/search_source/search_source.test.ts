@@ -117,6 +117,130 @@ describe('SearchSource', () => {
     });
   });
 
+  describe('#getActiveIndexFilter()', () => {
+    test('pase _index from query', () => {
+      searchSource.setField('query', {
+        language: 'kuery',
+        query: `_INDEX : fakebeat and _index : "mybeat-*"`,
+      });
+      expect(searchSource.getActiveIndexFilter()).toMatchInlineSnapshot(
+        ['mybeat-*'],
+        `
+        Array [
+          "mybeat-*",
+        ]
+      `
+      );
+    });
+
+    test('pase _index from filter', () => {
+      const filter = [
+        {
+          query: { match_phrase: { _index: 'auditbeat-*' } },
+          meta: {
+            key: '_index',
+            alias: null,
+            disabled: false,
+            negate: false,
+            params: {
+              query: 'auditbeat-*',
+            },
+            type: 'phrase',
+          },
+        },
+        {
+          query: {
+            bool: {
+              should: [
+                {
+                  match_phrase: {
+                    _index: 'auditbeat-*',
+                  },
+                },
+              ],
+            },
+          },
+          meta: {
+            key: '_index',
+            alias: null,
+            disabled: false,
+            negate: false,
+            params: ['auditbeat-*'],
+            type: 'phrase',
+          },
+        },
+      ];
+      searchSource.setField('filter', filter);
+      expect(searchSource.getActiveIndexFilter()).toMatchInlineSnapshot(
+        ['auditbeat-*'],
+        `
+        Array [
+          "auditbeat-*",
+        ]
+      `
+      );
+    });
+
+    test('pase _index from query and filter with negate equals to true', () => {
+      const filter = [
+        {
+          query: {
+            match_phrase: {
+              _index: 'auditbeat-*',
+            },
+          },
+          meta: {
+            key: '_index',
+            alias: null,
+            disabled: false,
+            negate: true,
+            params: { query: 'auditbeat-*' },
+            type: 'phrase',
+          },
+        },
+      ];
+      searchSource.setField('filter', filter);
+      searchSource.setField('query', {
+        language: 'kuery',
+        query: '_index : auditbeat-*',
+      });
+      expect(searchSource.getActiveIndexFilter()).toMatchInlineSnapshot([], `Array []`);
+    });
+
+    test('pase _index from query and filter with negate equals to true and disabled equals to true', () => {
+      const filter = [
+        {
+          query: {
+            match_phrase: {
+              _index: 'auditbeat-*',
+            },
+          },
+          meta: {
+            key: '_index',
+            alias: null,
+            disabled: true,
+            negate: true,
+            params: { query: 'auditbeat-*' },
+            type: 'phrase',
+          },
+        },
+      ];
+      searchSource.setField('filter', filter);
+      searchSource.setField('query', {
+        language: 'kuery',
+        query: '_index : auditbeat-*',
+      });
+      expect(searchSource.getActiveIndexFilter()).toMatchInlineSnapshot(
+        ['auditbeat-*'],
+        `
+        Array [
+          "auditbeat-*",
+        ]
+      `
+      );
+    });
+  });
+
   describe('#removeField()', () => {
     test('remove property', () => {
       searchSource = new SearchSource({}, searchSourceDependencies);

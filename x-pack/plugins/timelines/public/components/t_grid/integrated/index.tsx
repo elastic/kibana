@@ -12,14 +12,13 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DataViewBase, Filter, Query } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { Direction, EntityType } from '../../../../common/search_strategy';
-import type { DocValueFields } from '../../../../common/search_strategy';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import {
   BulkActionsProp,
@@ -105,7 +104,6 @@ export interface TGridIntegratedProps {
   defaultCellActions?: TGridCellAction[];
   deletedEventIds: Readonly<string[]>;
   disabledCellActions: string[];
-  docValueFields: DocValueFields[];
   end: string;
   entityType: EntityType;
   fieldBrowserOptions?: FieldBrowserOptions;
@@ -151,7 +149,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   defaultCellActions,
   deletedEventIds,
   disabledCellActions,
-  docValueFields,
   end,
   entityType,
   fieldBrowserOptions,
@@ -241,7 +238,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
       alertConsumers: SECURITY_ALERTS_CONSUMERS,
       data,
       dataViewId,
-      docValueFields,
       endDate: end,
       entityType,
       fields,

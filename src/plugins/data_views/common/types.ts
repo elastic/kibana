@@ -6,15 +6,19 @@
  * Side Public License, v 1.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  SavedObject,
+  SavedObjectsCreateOptions,
+  SavedObjectsUpdateOptions,
+} from '@kbn/core/public';
+import type { ErrorToastOptions, ToastInputFields } from '@kbn/core/public/notifications';
 import type { DataViewFieldBase } from '@kbn/es-query';
-import { ToastInputFields, ErrorToastOptions } from '@kbn/core/public/notifications';
-// eslint-disable-next-line
-import type { SavedObject } from 'src/core/server';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { RUNTIME_FIELD_TYPES } from './constants';
 
 export type { QueryDslQueryContainer };
+export type { SavedObject };
 
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
@@ -210,7 +214,7 @@ export interface UiSettingsCommon {
    * Get a setting value
    * @param key name of value
    */
-  get: <T = any>(key: string) => Promise<T>;
+  get: <T = unknown>(key: string) => Promise<T | undefined>;
   /**
    * Get all settings values
    */
@@ -220,7 +224,7 @@ export interface UiSettingsCommon {
    * @param key name of value
    * @param value value to set
    */
-  set: <T = any>(key: string, value: T) => Promise<void>;
+  set: <T = unknown>(key: string, value: T) => Promise<void>;
   /**
    * Remove a setting value
    * @param key name of value
@@ -281,8 +285,8 @@ export interface SavedObjectsClientCommon {
   update: (
     type: string,
     id: string,
-    attributes: Record<string, any>,
-    options: Record<string, any>
+    attributes: DataViewAttributes,
+    options: SavedObjectsUpdateOptions
   ) => Promise<SavedObject>;
   /**
    * Create a saved object
@@ -292,8 +296,8 @@ export interface SavedObjectsClientCommon {
    */
   create: (
     type: string,
-    attributes: Record<string, any>,
-    options: Record<string, any>
+    attributes: DataViewAttributes,
+    options: SavedObjectsCreateOptions
   ) => Promise<SavedObject>;
   /**
    * Delete a saved object by id
@@ -314,11 +318,9 @@ export interface GetFieldsOptions {
 }
 
 export interface IDataViewsApiClient {
-  getFieldsForWildcard: (options: GetFieldsOptions) => Promise<any>;
+  getFieldsForWildcard: (options: GetFieldsOptions) => Promise<FieldSpec[]>;
   hasUserIndexPattern: () => Promise<boolean>;
 }
-
-export type { SavedObject };
 
 export type AggregationRestrictions = Record<
   string,

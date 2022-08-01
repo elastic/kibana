@@ -6,6 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import {
+  observTourActiveStorageKey,
+  observTourStepStorageKey,
+} from '@kbn/observability-plugin/public/components/shared/tour';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -15,13 +19,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const find = getService('find');
 
   const setInitialTourState = async (activeStep?: number) => {
-    await browser.setLocalStorageItem(
-      'xpack.observability.tourState',
-      JSON.stringify({
-        activeStep: activeStep || 1,
-        isTourActive: true,
-      })
-    );
+    await browser.setLocalStorageItem(observTourActiveStorageKey, 'true');
+    await browser.setLocalStorageItem(observTourStepStorageKey, String(activeStep || 1));
     await browser.refresh();
   };
 
@@ -31,11 +30,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       await pageObjects.common.navigateToApp('observability');
+      // Need to increase the browser height so the tour steps fit to screen
+      await browser.setWindowSize(1600, 1400);
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
-      await browser.removeLocalStorageItem('xpack.observability.tourState');
+      await browser.removeLocalStorageItem(observTourActiveStorageKey);
+      await browser.removeLocalStorageItem(observTourStepStorageKey);
     });
 
     describe('Tour enabled', () => {
@@ -45,22 +47,27 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Step 1: Overview
         await pageObjects.infraHome.waitForTourStep('overviewStep');
         await pageObjects.infraHome.clickTourNextButton();
+        await pageObjects.infraHome.ensureTourStepIsClosed('overviewStep');
 
         // Step 2: Streams
         await pageObjects.infraHome.waitForTourStep('streamStep');
         await pageObjects.infraHome.clickTourNextButton();
+        await pageObjects.infraHome.ensureTourStepIsClosed('streamStep');
 
         // Step 3: Metrics explorer
         await pageObjects.infraHome.waitForTourStep('metricsExplorerStep');
         await pageObjects.infraHome.clickTourNextButton();
+        await pageObjects.infraHome.ensureTourStepIsClosed('metricsExplorerStep');
 
-        // Step 4: Traces
-        await pageObjects.infraHome.waitForTourStep('tracesStep');
+        // Step 4: Services
+        await pageObjects.infraHome.waitForTourStep('servicesStep');
         await pageObjects.infraHome.clickTourNextButton();
+        await pageObjects.infraHome.ensureTourStepIsClosed('servicesStep');
 
         // Step 5: Alerts
         await pageObjects.infraHome.waitForTourStep('alertStep');
         await pageObjects.infraHome.clickTourNextButton();
+        await pageObjects.infraHome.ensureTourStepIsClosed('alertStep');
 
         // Step 6: Guided setup
         await pageObjects.infraHome.waitForTourStep('guidedSetupStep');
@@ -92,6 +99,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Step 5: Alerts
         await pageObjects.infraHome.waitForTourStep('alertStep');
         await pageObjects.infraHome.clickTourNextButton();
+        await pageObjects.infraHome.ensureTourStepIsClosed('alertStep');
 
         // Step 6: Guided setup
         await pageObjects.infraHome.waitForTourStep('guidedSetupStep');
@@ -120,6 +128,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.waitForTourStep('guidedSetupStep');
         const overviewPageUrl = await browser.getCurrentUrl();
         expect(overviewPageUrl).to.contain('/app/observability/overview');
+      });
+
+      it('ends the tour if the user clicks on the guided setup button', async () => {
+        // For brevity, starting the tour at step 5, "Alerts"
+        await setInitialTourState(5);
+
+        await pageObjects.infraHome.clickTourNextButton();
+        await pageObjects.infraHome.waitForTourStep('guidedSetupStep');
+        await pageObjects.infraHome.clickGuidedSetupButton();
+        await pageObjects.infraHome.ensureTourStepIsClosed('guidedSetupStep');
       });
     });
   });

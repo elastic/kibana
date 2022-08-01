@@ -11,9 +11,9 @@ import type { IBasePath } from '@kbn/core-http-browser';
 
 import { BasePath } from '@kbn/core-http-browser-internal';
 import { notificationServiceMock } from '../../notifications/notifications_service.mock';
-import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.mock';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import type { IToasts } from '../../notifications';
-import type { IUiSettingsClient } from '../../ui_settings';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 
 import { setupUrlOverflowDetection, URL_MAX_LENGTH, URL_WARNING_LENGTH } from './url_overflow';
 

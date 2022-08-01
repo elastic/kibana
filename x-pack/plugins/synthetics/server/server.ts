@@ -5,14 +5,18 @@
  * 2.0.
  */
 
+import { createSyntheticsRouteWithAuth } from './routes/create_route_with_auth';
+import { SyntheticsMonitorClient } from './synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { syntheticsRouteWrapper } from './synthetics_route_wrapper';
 import { uptimeRequests } from './legacy_uptime/lib/requests';
 import { syntheticsAppRestApiRoutes } from './routes';
-import { createRouteWithAuth } from './legacy_uptime/routes';
 import { UptimeServerSetup } from './legacy_uptime/lib/adapters';
 import { licenseCheck } from './legacy_uptime/lib/domains';
 
-export const initSyntheticsServer = (server: UptimeServerSetup) => {
+export const initSyntheticsServer = (
+  server: UptimeServerSetup,
+  syntheticsMonitorClient: SyntheticsMonitorClient
+) => {
   const libs = {
     requests: uptimeRequests,
     license: licenseCheck,
@@ -20,8 +24,9 @@ export const initSyntheticsServer = (server: UptimeServerSetup) => {
 
   syntheticsAppRestApiRoutes.forEach((route) => {
     const { method, options, handler, validate, path } = syntheticsRouteWrapper(
-      createRouteWithAuth(libs, route),
-      server
+      createSyntheticsRouteWithAuth(libs, route),
+      server,
+      syntheticsMonitorClient
     );
 
     const routeDefinition = {

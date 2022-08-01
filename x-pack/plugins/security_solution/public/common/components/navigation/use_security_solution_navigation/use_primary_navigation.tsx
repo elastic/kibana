@@ -13,6 +13,7 @@ import type { PrimaryNavigationProps } from './types';
 import { usePrimaryNavigationItems } from './use_navigation_items';
 import { useIsGroupedNavigationEnabled } from '../helpers';
 import { SecuritySideNav } from '../security_side_nav';
+import { useTourContext } from '../../guided_onboarding';
 
 const translatedNavTitle = i18n.translate('xpack.securitySolution.navigation.mainLabel', {
   defaultMessage: 'Security',
@@ -22,8 +23,6 @@ export const usePrimaryNavigation = ({
   navTabs,
   pageName,
   tabName,
-  timeline,
-  timerange,
 }: PrimaryNavigationProps): KibanaPageTemplateProps['solutionNav'] => {
   const isGroupedNavigationEnabled = useIsGroupedNavigationEnabled();
   const mapLocationToTab = useCallback(
@@ -32,6 +31,8 @@ export const usePrimaryNavigation = ({
   );
 
   const [selectedTabId, setSelectedTabId] = useState(mapLocationToTab());
+
+  const { isTourShown } = useTourContext();
 
   useEffect(() => {
     const currentTabSelected = mapLocationToTab();
@@ -46,11 +47,10 @@ export const usePrimaryNavigation = ({
   const navItems = usePrimaryNavigationItems({
     navTabs,
     selectedTabId,
-    timeline,
-    timerange,
   });
 
   return {
+    canBeCollapsed: !isTourShown,
     name: translatedNavTitle,
     icon: 'logoSecurity',
     ...(isGroupedNavigationEnabled

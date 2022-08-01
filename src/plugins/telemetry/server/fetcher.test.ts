@@ -9,21 +9,60 @@
 /* eslint-disable dot-notation */
 import { FetcherTask } from './fetcher';
 import { coreMock } from '@kbn/core/server/mocks';
+import {
+  telemetryCollectionManagerPluginMock,
+  Setup,
+} from '@kbn/telemetry-collection-manager-plugin/server/mocks';
 
 describe('FetcherTask', () => {
   describe('sendIfDue', () => {
-    it('stops when it fails to get telemetry configs', async () => {
+    let getCurrentConfigs: jest.Mock;
+    let shouldSendReport: jest.Mock;
+    let fetchTelemetry: jest.Mock;
+    let sendTelemetry: jest.Mock;
+    let updateReportFailure: jest.Mock;
+    let telemetryCollectionManagerMock: Setup;
+    let fetcherTask: FetcherTask;
+
+    beforeEach(() => {
+      getCurrentConfigs = jest.fn();
+      shouldSendReport = jest.fn();
+      fetchTelemetry = jest.fn();
+      sendTelemetry = jest.fn();
+      updateReportFailure = jest.fn();
+
       const initializerContext = coreMock.createPluginInitializerContext({});
-      const fetcherTask = new FetcherTask(initializerContext);
-      const mockError = new Error('Some message.');
-      const getCurrentConfigs = jest.fn().mockRejectedValue(mockError);
-      const fetchTelemetry = jest.fn();
-      const sendTelemetry = jest.fn();
+      fetcherTask = new FetcherTask(initializerContext);
+
+      telemetryCollectionManagerMock = telemetryCollectionManagerPluginMock.createSetupContract();
+      telemetryCollectionManagerMock.shouldGetTelemetry.mockResolvedValue(true);
+      fetcherTask['telemetryCollectionManager'] = telemetryCollectionManagerMock;
+
       Object.assign(fetcherTask, {
         getCurrentConfigs,
+        shouldSendReport,
         fetchTelemetry,
+        updateReportFailure,
         sendTelemetry,
       });
+    });
+
+    it('stops when Kibana is not ready to fetch telemetry', async () => {
+      const mockError = new Error('Some message.');
+      getCurrentConfigs.mockRejectedValue(mockError);
+      telemetryCollectionManagerMock.shouldGetTelemetry.mockResolvedValue(false);
+
+      const result = await fetcherTask['sendIfDue']();
+      expect(result).toBe(undefined);
+      expect(getCurrentConfigs).toBeCalledTimes(0);
+      expect(fetchTelemetry).toBeCalledTimes(0);
+      expect(sendTelemetry).toBeCalledTimes(0);
+      expect(fetcherTask['logger'].warn).toBeCalledTimes(0);
+    });
+
+    it('stops when it fails to get telemetry configs', async () => {
+      const mockError = new Error('Some message.');
+      getCurrentConfigs.mockRejectedValue(mockError);
       const result = await fetcherTask['sendIfDue']();
       expect(result).toBe(undefined);
       expect(getCurrentConfigs).toBeCalledTimes(1);
@@ -36,30 +75,17 @@ describe('FetcherTask', () => {
     });
 
     it('fetches usage and send telemetry', async () => {
-      const initializerContext = coreMock.createPluginInitializerContext({});
-      const fetcherTask = new FetcherTask(initializerContext);
       const mockTelemetryUrl = 'mock_telemetry_url';
       const mockClusters = [
         { clusterUuid: 'mk_uuid_1', stats: 'cluster_1' },
         { clusterUuid: 'mk_uuid_2', stats: 'cluster_2' },
       ];
 
-      const getCurrentConfigs = jest.fn().mockResolvedValue({
+      getCurrentConfigs.mockResolvedValue({
         telemetryUrl: mockTelemetryUrl,
       });
-      const shouldSendReport = jest.fn().mockReturnValue(true);
-
-      const fetchTelemetry = jest.fn().mockResolvedValue(mockClusters);
-      const sendTelemetry = jest.fn();
-      const updateReportFailure = jest.fn();
-
-      Object.assign(fetcherTask, {
-        getCurrentConfigs,
-        shouldSendReport,
-        fetchTelemetry,
-        updateReportFailure,
-        sendTelemetry,
-      });
+      shouldSendReport.mockReturnValue(true);
+      fetchTelemetry.mockResolvedValue(mockClusters);
 
       await fetcherTask['sendIfDue']();
 

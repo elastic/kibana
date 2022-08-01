@@ -50,6 +50,8 @@ describe('rule helpers', () => {
       const defineRuleStepData = {
         ruleType: 'saved_query',
         anomalyThreshold: 50,
+        dataSourceType: 'indexPatterns',
+        dataViewId: undefined,
         index: ['auditbeat-*'],
         machineLearningJobId: [],
         queryBar: {
@@ -110,6 +112,8 @@ describe('rule helpers', () => {
           eventCategoryField: undefined,
           tiebreakerField: undefined,
         },
+        newTermsFields: ['host.name'],
+        historyWindowSize: '7d',
       };
 
       const aboutRuleStepData: AboutStepRule = {
@@ -128,6 +132,7 @@ describe('rule helpers', () => {
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
         timestampOverride: 'event.ingested',
+        timestampOverrideFallbackDisabled: false,
       };
       const scheduleRuleStepData = { from: '0s', interval: '5m' };
       const ruleActionsStepData = {
@@ -212,6 +217,8 @@ describe('rule helpers', () => {
       const expected = {
         ruleType: 'saved_query',
         anomalyThreshold: 50,
+        dataSourceType: 'indexPatterns',
+        dataViewId: undefined,
         machineLearningJobId: [],
         index: ['auditbeat-*'],
         queryBar: {
@@ -247,6 +254,8 @@ describe('rule helpers', () => {
           eventCategoryField: undefined,
           tiebreakerField: undefined,
         },
+        newTermsFields: [],
+        historyWindowSize: '7d',
       };
 
       expect(result).toEqual(expected);
@@ -261,6 +270,8 @@ describe('rule helpers', () => {
       const expected = {
         ruleType: 'saved_query',
         anomalyThreshold: 50,
+        dataSourceType: 'indexPatterns',
+        dataViewId: undefined,
         machineLearningJobId: [],
         index: ['auditbeat-*'],
         queryBar: {
@@ -296,6 +307,8 @@ describe('rule helpers', () => {
           eventCategoryField: undefined,
           tiebreakerField: undefined,
         },
+        newTermsFields: [],
+        historyWindowSize: '7d',
       };
 
       expect(result).toEqual(expected);

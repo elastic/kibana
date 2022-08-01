@@ -186,7 +186,7 @@ describe('SearchBarComponent', () => {
     expect(mockUpdateUrlParam).toHaveBeenCalledWith(savedQuery.id);
   });
 
-  it('calls useUpdateUrlParam when query state changes', async () => {
+  it('calls useUpdateUrlParam when query query changes', async () => {
     const { storage } = createSecuritySolutionStorageMock();
     const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
@@ -276,6 +276,107 @@ describe('SearchBarComponent', () => {
 
     await waitFor(() => {
       expect(mockUpdateUrlParam).toHaveBeenCalledWith(savedQuery.id);
+    });
+  });
+
+  describe('Timerange', () => {
+    it('calls useUpdateUrlParam when global timerange changes', async () => {
+      const { storage } = createSecuritySolutionStorageMock();
+      const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+
+      render(
+        <TestProviders store={store}>
+          <SearchBarComponent {...props} />
+        </TestProviders>
+      );
+
+      jest.clearAllMocks();
+
+      const newTimerange = {
+        from: '2020-07-07T08:20:18.966Z',
+        fromStr: 'now-24h',
+        kind: 'relative',
+        to: '2020-07-08T08:20:18.966Z',
+        toStr: 'now',
+      };
+
+      store.dispatch(
+        inputsActions.setRelativeRangeDatePicker({ id: 'global' as InputsModelId, ...newTimerange })
+      );
+
+      await waitFor(() => {
+        expect(mockUpdateUrlParam).toHaveBeenCalledWith(
+          expect.objectContaining({
+            global: {
+              linkTo: ['timeline'],
+              timerange: newTimerange,
+            },
+          })
+        );
+      });
+    });
+
+    it('calls useUpdateUrlParam when timeline timerange changes', async () => {
+      const { storage } = createSecuritySolutionStorageMock();
+      const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+
+      render(
+        <TestProviders store={store}>
+          <SearchBarComponent {...props} />
+        </TestProviders>
+      );
+
+      jest.clearAllMocks();
+
+      const newTimerange = {
+        from: '2020-07-07T08:20:18.966Z',
+        fromStr: 'now-24h',
+        kind: 'relative',
+        to: '2020-07-08T08:20:18.966Z',
+        toStr: 'now',
+      };
+
+      store.dispatch(
+        inputsActions.setRelativeRangeDatePicker({
+          id: 'timeline' as InputsModelId,
+          ...newTimerange,
+        })
+      );
+
+      await waitFor(() => {
+        expect(mockUpdateUrlParam).toHaveBeenCalledWith(
+          expect.objectContaining({
+            timeline: {
+              linkTo: ['global'],
+              timerange: newTimerange,
+            },
+          })
+        );
+      });
+    });
+
+    it('initializes timerange URL param with redux date on mount', async () => {
+      const { storage } = createSecuritySolutionStorageMock();
+      const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      jest.clearAllMocks();
+      render(
+        <TestProviders store={store}>
+          <SearchBarComponent {...props} />
+        </TestProviders>
+      );
+
+      expect(mockUpdateUrlParam.mock.calls[3]).toEqual([
+        {
+          global: {
+            timerange: mockGlobalState.inputs.global.timerange,
+            linkTo: mockGlobalState.inputs.global.linkTo,
+          },
+          timeline: {
+            timerange: mockGlobalState.inputs.timeline.timerange,
+            linkTo: mockGlobalState.inputs.timeline.linkTo,
+          },
+        },
+      ]);
     });
   });
 });

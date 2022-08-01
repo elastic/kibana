@@ -19,9 +19,10 @@ import { encodeQuery } from '../../../common/navigation/query_utils';
 import { useLocation } from 'react-router-dom';
 import { RisonObject } from 'rison-node';
 import { buildEsQuery } from '@kbn/es-query';
-import { getPaginationQuery } from '../utils';
+import { getPaginationQuery } from '../utils/utils';
 import { FindingsEsPitContext } from '../es_pit/findings_es_pit_context';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
 
 jest.mock('../../../common/api/use_latest_findings_data_view');
 jest.mock('../../../common/api/use_cis_kubernetes_integration');
@@ -66,6 +67,7 @@ describe('<LatestFindingsContainer />', () => {
           data: dataMock,
           unifiedSearch: unifiedSearchPluginMock.createStartContract(),
           charts: chartPluginMock.createStartContract(),
+          discover: discoverPluginMock.createStartContract(),
         }}
       >
         <FindingsEsPitContext.Provider value={{ setPitId, pitIdRef, pitQuery }}>

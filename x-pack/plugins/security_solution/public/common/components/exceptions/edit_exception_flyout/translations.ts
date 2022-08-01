@@ -32,13 +32,6 @@ export const EDIT_ENDPOINT_EXCEPTION_TITLE = i18n.translate(
   }
 );
 
-export const EDIT_EXCEPTION_ERROR = i18n.translate(
-  'xpack.securitySolution.exceptions.editException.error',
-  {
-    defaultMessage: 'Failed to update exception',
-  }
-);
-
 export const EDIT_EXCEPTION_SUCCESS = i18n.translate(
   'xpack.securitySolution.exceptions.editException.success',
   {

@@ -7,7 +7,6 @@
 
 import { notificationServiceMock } from '@kbn/core/public/mocks';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createTGridMocks } from '@kbn/timelines-plugin/public/mock';
 
 import {
@@ -53,6 +52,11 @@ export const useKibana = jest.fn().mockReturnValue({
       },
     },
     timelines: createTGridMocks(),
+    savedObjectsTagging: {
+      ui: {
+        getTableColumnDefinition: jest.fn(),
+      },
+    },
   },
 });
 export const useUiSetting = jest.fn(createUseUiSettingMock());
@@ -75,6 +79,7 @@ export const useAppUrl = jest.fn().mockReturnValue({
       mockStartServicesMock.application.getUrlForApp(appId, options)
     ),
 });
+// do not delete
 export const useNavigateTo = jest.fn().mockReturnValue({
   navigateTo: jest.fn().mockImplementation(({ appId = APP_UI_ID, url, ...options }) => {
     if (url) {
@@ -84,3 +89,9 @@ export const useNavigateTo = jest.fn().mockReturnValue({
     }
   }),
 });
+
+export const useCapabilities = jest.fn((featureId?: string) =>
+  featureId
+    ? mockStartServicesMock.application.capabilities[featureId]
+    : mockStartServicesMock.application.capabilities
+);

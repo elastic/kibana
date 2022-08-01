@@ -7,7 +7,7 @@
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import type { AgentPolicy, Output } from '../../types';
+import type { AgentPolicy, Output, DownloadSource } from '../../types';
 
 import { agentPolicyService } from '../agent_policy';
 import { agentPolicyUpdateEventHandler } from '../agent_policy_update';
@@ -19,6 +19,8 @@ const mockedGetElasticAgentMonitoringPermissions = getMonitoringPermissions as j
   ReturnType<typeof getMonitoringPermissions>
 >;
 const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
+
+const soClientMock = savedObjectsClientMock.create();
 
 function mockAgentPolicy(data: Partial<AgentPolicy>) {
   mockedAgentPolicyService.get.mockResolvedValue({
@@ -97,6 +99,30 @@ jest.mock('../package_policy');
 
 jest.mock('./monitoring_permissions');
 
+jest.mock('../download_source', () => {
+  return {
+    downloadSourceService: {
+      getDefaultDownloadSourceId: async () => 'default-download-source-id',
+      get: async (soClient: any, id: string): Promise<DownloadSource> => {
+        if (id === 'test-ds-1') {
+          return {
+            id: 'test-ds-1',
+            is_default: false,
+            name: 'Test',
+            host: 'http://custom-registry-test',
+          };
+        }
+        return {
+          id: 'default-download-source-id',
+          is_default: true,
+          name: 'Default host',
+          host: 'http://default-registry.co',
+        };
+      },
+    },
+  };
+});
+
 function getAgentPolicyUpdateMock() {
   return agentPolicyUpdateEventHandler as unknown as jest.Mock<
     typeof agentPolicyUpdateEventHandler
@@ -130,6 +156,23 @@ describe('getFullAgentPolicy', () => {
         };
       }
     );
+    soClientMock.find.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'default-download-source-id',
+          is_default: true,
+          attributes: {
+            download_source_id: 'test-source-id',
+          },
+        },
+        {
+          id: 'test-ds-1',
+          attributes: {
+            download_source_id: 'test-ds-1',
+          },
+        },
+      ],
+    } as any);
   });
 
   it('should return a policy without monitoring if monitoring is not enabled', async () => {
@@ -183,6 +226,9 @@ describe('getFullAgentPolicy', () => {
         hosts: ['http://fleetserver:8220'],
       },
       agent: {
+        download: {
+          source_uri: 'http://default-registry.co',
+        },
         monitoring: {
           namespace: 'default',
           use_output: 'default',
@@ -216,6 +262,9 @@ describe('getFullAgentPolicy', () => {
         hosts: ['http://fleetserver:8220'],
       },
       agent: {
+        download: {
+          source_uri: 'http://default-registry.co',
+        },
         monitoring: {
           namespace: 'default',
           use_output: 'default',
@@ -298,6 +347,43 @@ describe('getFullAgentPolicy', () => {
 
     expect(agentPolicy?.outputs.default).toBeDefined();
   });
+
+  it('should return the source_uri from the agent policy', async () => {
+    mockAgentPolicy({
+      namespace: 'default',
+      revision: 1,
+      monitoring_enabled: ['metrics'],
+      download_source_id: 'test-ds-1',
+    });
+    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+
+    expect(agentPolicy).toMatchObject({
+      id: 'agent-policy',
+      outputs: {
+        default: {
+          type: 'elasticsearch',
+          hosts: ['http://127.0.0.1:9201'],
+        },
+      },
+      inputs: [],
+      revision: 1,
+      fleet: {
+        hosts: ['http://fleetserver:8220'],
+      },
+      agent: {
+        download: {
+          source_uri: 'http://custom-registry-test',
+        },
+        monitoring: {
+          namespace: 'default',
+          use_output: 'default',
+          enabled: true,
+          logs: false,
+          metrics: true,
+        },
+      },
+    });
+  });
 });
 
 describe('transformOutputToFullPolicyOutput', () => {
@@ -330,7 +416,7 @@ describe('transformOutputToFullPolicyOutput', () => {
       type: 'elasticsearch',
       ca_trusted_fingerprint: 'fingerprint123',
       config_yaml: `
-test: 1234      
+test: 1234
 ssl.test: 123
       `,
     });

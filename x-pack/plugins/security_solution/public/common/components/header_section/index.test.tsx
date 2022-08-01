@@ -10,7 +10,7 @@ import { mount, shallow } from 'enzyme';
 import React from 'react';
 
 import { TestProviders } from '../../mock';
-import { HeaderSection } from '.';
+import { getHeaderAlignment, HeaderSection } from '.';
 
 describe('HeaderSection', () => {
   test('it renders', () => {
@@ -205,6 +205,90 @@ describe('HeaderSection', () => {
     expect(wrapper.find('[data-test-subj="query-toggle-header"]').first().exists()).toBe(true);
   });
 
+  test('it does NOT align items to flex start in the outer flex group when stackHeader is true', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <HeaderSection id="an id" stackHeader={true} title="Test title" toggleQuery={jest.fn()}>
+          <p>{'Test children'}</p>
+        </HeaderSection>
+      </TestProviders>
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="headerSectionOuterFlexGroup"]').first().getDOMNode()
+    ).not.toHaveClass('euiFlexGroup--alignItemsFlexStart');
+  });
+
+  test(`it uses the 'column' direction in the outer flex group by default`, () => {
+    const wrapper = mount(
+      <TestProviders>
+        <HeaderSection id="an id" title="Test title" toggleQuery={jest.fn()}>
+          <p>{'Test children'}</p>
+        </HeaderSection>
+      </TestProviders>
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="headerSectionOuterFlexGroup"]').first().getDOMNode()
+    ).toHaveClass('euiFlexGroup--directionColumn');
+  });
+
+  test('it uses the `outerDirection` prop to specify the direction of the outer flex group when it is provided', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <HeaderSection id="an id" outerDirection="row" title="Test title" toggleQuery={jest.fn()}>
+          <p>{'Test children'}</p>
+        </HeaderSection>
+      </TestProviders>
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="headerSectionOuterFlexGroup"]').first().getDOMNode()
+    ).toHaveClass('euiFlexGroup--directionRow');
+  });
+
+  test('it defaults to center alignment in the inner flex group', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <HeaderSection id="an id" title="Test title" toggleQuery={jest.fn()}>
+          <p>{'Test children'}</p>
+        </HeaderSection>
+      </TestProviders>
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="headerSectionInnerFlexGroup"]').first().getDOMNode()
+    ).toHaveClass('euiFlexGroup--alignItemsCenter');
+  });
+
+  test('it aligns items using the value of the `alignHeader` prop in the inner flex group when specified', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <HeaderSection alignHeader="flexEnd" id="an id" title="Test title" toggleQuery={jest.fn()}>
+          <p>{'Test children'}</p>
+        </HeaderSection>
+      </TestProviders>
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="headerSectionInnerFlexGroup"]').first().getDOMNode()
+    ).toHaveClass('euiFlexGroup--alignItemsFlexEnd');
+  });
+
+  test('it does NOT default to center alignment in the inner flex group when the `stackHeader` prop is true', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <HeaderSection id="an id" stackHeader={true} title="Test title" toggleQuery={jest.fn()}>
+          <p>{'Test children'}</p>
+        </HeaderSection>
+      </TestProviders>
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="headerSectionInnerFlexGroup"]').first().getDOMNode()
+    ).not.toHaveClass('euiFlexGroup--alignItemsCenter');
+  });
+
   test('it does render everything but title when toggleStatus = true', () => {
     const wrapper = mount(
       <TestProviders>
@@ -291,5 +375,30 @@ describe('HeaderSection', () => {
     );
     wrapper.find('[data-test-subj="query-toggle-header"]').first().simulate('click');
     expect(mockToggle).toBeCalledWith(false);
+  });
+
+  describe('getHeaderAlignment', () => {
+    test(`it always returns the value of alignHeader when it's provided`, () => {
+      const alignHeader = 'flexStart';
+      const stackHeader = true;
+
+      expect(getHeaderAlignment({ alignHeader, stackHeader })).toEqual(alignHeader);
+    });
+
+    test(`it returns undefined when stackHeader is true`, () => {
+      const stackHeader = true;
+
+      expect(getHeaderAlignment({ stackHeader })).toBeUndefined();
+    });
+
+    test(`it returns 'center' when stackHeader is false`, () => {
+      const stackHeader = false;
+
+      expect(getHeaderAlignment({ stackHeader })).toEqual('center');
+    });
+
+    test(`it returns 'center' by default`, () => {
+      expect(getHeaderAlignment({})).toEqual('center');
+    });
   });
 });

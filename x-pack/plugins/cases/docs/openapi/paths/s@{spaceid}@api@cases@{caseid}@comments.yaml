@@ -1,5 +1,6 @@
 post:
   summary: Adds a comment or alert to a case.
+  operationId: addCaseComment
   description: >
     You must have `all` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana
@@ -38,6 +39,7 @@ post:
 
 delete:
   summary: Deletes all comments and alerts from a case.
+  operationId: deleteCaseComments
   description: >
     You must have `all` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana
@@ -57,6 +59,7 @@ delete:
 
 patch:
   summary: Updates a comment or alert in a case.
+  operationId: updateCaseComment
   description: >
     You must have `all` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana
@@ -96,6 +99,7 @@ patch:
 
 get:
   summary: Retrieves all the comments from a case.
+  operationId: getAllCaseComments
   description: >
     You must have `read` privileges for the **Cases** feature in the **Management**,
     **Observability**, or **Security** section of the Kibana feature privileges,

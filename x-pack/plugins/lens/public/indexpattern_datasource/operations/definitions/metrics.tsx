@@ -45,6 +45,7 @@ const typeToFn: Record<string, string> = {
   average: 'aggAvg',
   sum: 'aggSum',
   median: 'aggMedian',
+  standard_deviation: 'aggStdDeviation',
 };
 
 const supportedTypes = ['number', 'histogram'];
@@ -58,6 +59,8 @@ function buildMetricOperation<T extends MetricColumn<string>>({
   optionalTimeScaling,
   supportsDate,
   hideZeroOption,
+  aggConfigParams,
+  documentationDescription,
 }: {
   type: T['operationType'];
   displayName: string;
@@ -67,6 +70,8 @@ function buildMetricOperation<T extends MetricColumn<string>>({
   description?: string;
   supportsDate?: boolean;
   hideZeroOption?: boolean;
+  aggConfigParams?: Record<string, string | number | boolean>;
+  documentationDescription?: string;
 }) {
   const labelLookup = (name: string, column?: BaseIndexPatternColumn) => {
     const label = ofName(name);
@@ -153,36 +158,30 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       return [
         {
           dataTestSubj: 'hide-zero-values',
-          optionElement: (
-            <>
-              <EuiSwitch
-                label={i18n.translate('xpack.lens.indexPattern.hideZero', {
-                  defaultMessage: 'Hide zero values',
-                })}
-                labelProps={{
-                  style: {
-                    fontWeight: euiThemeVars.euiFontWeightMedium,
-                  },
-                }}
-                checked={Boolean(currentColumn.params?.emptyAsNull)}
-                onChange={() => {
-                  paramEditorUpdater(
-                    updateColumnParam({
-                      layer,
-                      columnId,
-                      paramName: 'emptyAsNull',
-                      value: !currentColumn.params?.emptyAsNull,
-                    })
-                  );
-                }}
-                compressed
-              />
-            </>
+          inlineElement: (
+            <EuiSwitch
+              label={i18n.translate('xpack.lens.indexPattern.hideZero', {
+                defaultMessage: 'Hide zero values',
+              })}
+              labelProps={{
+                style: {
+                  fontWeight: euiThemeVars.euiFontWeightMedium,
+                },
+              }}
+              checked={Boolean(currentColumn.params?.emptyAsNull)}
+              onChange={() => {
+                paramEditorUpdater(
+                  updateColumnParam({
+                    layer,
+                    columnId,
+                    paramName: 'emptyAsNull',
+                    value: !currentColumn.params?.emptyAsNull,
+                  })
+                );
+              }}
+              compressed
+            />
           ),
-          title: '',
-          showInPopover: true,
-          inlineElement: null,
-          onClick: () => {},
         },
       ];
     },
@@ -195,6 +194,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         // time shift is added to wrapping aggFilteredMetric if filter is set
         timeShift: column.filter ? undefined : column.timeShift,
         emptyAsNull: hideZeroOption ? column.params?.emptyAsNull : undefined,
+        ...aggConfigParams,
       }).toAst();
     },
     getErrorMessage: (layer, columnId, indexPattern) =>
@@ -211,8 +211,10 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       signature: i18n.translate('xpack.lens.indexPattern.metric.signature', {
         defaultMessage: 'field: string',
       }),
-      description: i18n.translate('xpack.lens.indexPattern.metric.documentation.markdown', {
-        defaultMessage: `
+      description:
+        documentationDescription ||
+        i18n.translate('xpack.lens.indexPattern.metric.documentation.markdown', {
+          defaultMessage: `
 Returns the {metric} of a field. This function only works for number fields.
 
 Example: Get the {metric} of price:
@@ -221,10 +223,10 @@ Example: Get the {metric} of price:
 Example: Get the {metric} of price for orders from the UK:
 \`{metric}(price, kql='location:UK')\`
       `,
-        values: {
-          metric: type,
-        },
-      }),
+          values: {
+            metric: type,
+          },
+        }),
     },
     shiftable: true,
   } as OperationDefinition<T, 'field', {}, true>;
@@ -232,6 +234,7 @@ Example: Get the {metric} of price for orders from the UK:
 
 export type SumIndexPatternColumn = MetricColumn<'sum'>;
 export type AvgIndexPatternColumn = MetricColumn<'average'>;
+export type StandardDeviationIndexPatternColumn = MetricColumn<'standard_deviation'>;
 export type MinIndexPatternColumn = MetricColumn<'min'>;
 export type MaxIndexPatternColumn = MetricColumn<'max'>;
 export type MedianIndexPatternColumn = MetricColumn<'median'>;
@@ -286,6 +289,41 @@ export const averageOperation = buildMetricOperation<AvgIndexPatternColumn>({
       'A single-value metric aggregation that computes the average of numeric values that are extracted from the aggregated documents',
   }),
 });
+
+export const standardDeviationOperation = buildMetricOperation<StandardDeviationIndexPatternColumn>(
+  {
+    type: 'standard_deviation',
+    displayName: i18n.translate('xpack.lens.indexPattern.standardDeviation', {
+      defaultMessage: 'Standard deviation',
+    }),
+    ofName: (name) =>
+      i18n.translate('xpack.lens.indexPattern.standardDeviationOf', {
+        defaultMessage: 'Standard deviation of {name}',
+        values: { name },
+      }),
+    description: i18n.translate('xpack.lens.indexPattern.standardDeviation.description', {
+      defaultMessage:
+        'A single-value metric aggregation that computes the standard deviation of numeric values that are extracted from the aggregated documents',
+    }),
+    aggConfigParams: {
+      showBounds: false,
+    },
+    documentationDescription: i18n.translate(
+      'xpack.lens.indexPattern.standardDeviation.documentation.markdown',
+      {
+        defaultMessage: `
+Returns the amount of variation or dispersion of the field. The function works only for number fields.
+
+#### Examples
+
+To get the standard deviation of price, use \`standard_deviation(price)\`.
+
+To get the variance of price for orders from the UK, use \`square(standard_deviation(price, kql='location:UK'))\`.
+      `,
+      }
+    ),
+  }
+);
 
 export const sumOperation = buildMetricOperation<SumIndexPatternColumn>({
   type: 'sum',
