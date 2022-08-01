@@ -106,7 +106,7 @@ describe('IndexPattern', () => {
       type: 'number',
       aggregatable: true,
       searchable: true,
-      time_series_metric: 'gauge',
+      timeSeriesMetric: 'gauge',
     };
 
     test('should return false if no fields are tsdb fields', () => {
