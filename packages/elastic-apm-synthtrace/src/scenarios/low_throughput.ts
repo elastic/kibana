@@ -10,9 +10,11 @@ import { random } from 'lodash';
 import { apm, timerange } from '..';
 import { ApmFields } from '../lib/apm/apm_fields';
 import { Instance } from '../lib/apm/instance';
-import { Scenario } from '../scripts/scenario';
-import { getLogger } from '../scripts/utils/get_common_services';
-import { RunOptions } from '../scripts/utils/parse_run_cli_flags';
+import { Scenario } from '../cli/scenario';
+import { getLogger } from '../cli/utils/get_common_services';
+import { RunOptions } from '../cli/utils/parse_run_cli_flags';
+
+const ENVIRONMENT = __filename;
 
 const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   const logger = getLogger(runOptions);
@@ -32,7 +34,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
         apm
           .service(
             `${services[index % services.length]}-${languages[index % languages.length]}-${index}`,
-            'production',
+            ENVIRONMENT,
             languages[index % languages.length]
           )
           .instance('instance')
