@@ -7,8 +7,9 @@
 
 import type { MachineLearningResponseSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
 import { getBaseSimpleRuleOutput } from './get_simple_rule_output';
+import { removeServerGeneratedProperties } from './remove_server_generated_properties';
 
-export const getSimpleMlRuleOutput = (ruleId = 'rule-1'): MachineLearningResponseSchema => {
+const getBaseMlRuleOutput = (ruleId = 'rule-1'): MachineLearningResponseSchema => {
   return {
     ...getBaseSimpleRuleOutput(ruleId),
     name: 'Simple ML Rule',
@@ -17,4 +18,8 @@ export const getSimpleMlRuleOutput = (ruleId = 'rule-1'): MachineLearningRespons
     machine_learning_job_id: ['some_job_id'],
     type: 'machine_learning',
   };
+};
+
+export const getSimpleMlRuleOutput = (ruleId = 'rule-1') => {
+  return removeServerGeneratedProperties(getBaseMlRuleOutput(ruleId));
 };
