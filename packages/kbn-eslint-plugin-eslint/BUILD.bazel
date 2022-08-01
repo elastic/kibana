@@ -34,7 +34,6 @@ RUNTIME_DEPS = [
   "@npm//dedent",
   "@npm//eslint",
   "@npm//eslint-module-utils",
-  "@npm//micromatch",
 ]
 
 js_library(
