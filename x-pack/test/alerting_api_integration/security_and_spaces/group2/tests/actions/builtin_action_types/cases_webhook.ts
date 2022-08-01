@@ -24,25 +24,23 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
   const config = {
     createCommentJson: '{"body":{{{case.comment}}}}',
     createCommentMethod: 'post',
-    createCommentUrl:
-      'https://siem-kibana.atlassian.net/rest/api/2/issue/{{{external.system.id}}}/comment',
+    createCommentUrl: 'https://coolsite.net/rest/api/2/issue/{{{external.system.id}}}/comment',
     createIncidentJson:
       '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"labels":{{{case.tags}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
     createIncidentMethod: 'post',
     createIncidentResponseKey: 'id',
-    createIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue',
+    createIncidentUrl: 'https://coolsite.net/rest/api/2/issue',
     getIncidentResponseCreatedDateKey: 'fields.created',
     getIncidentResponseExternalTitleKey: 'key',
     getIncidentResponseUpdatedDateKey: 'fields.updated',
     hasAuth: true,
     headers: { ['content-type']: 'application/json', ['kbn-xsrf']: 'abcd' },
-    incidentViewUrl: 'https://siem-kibana.atlassian.net/browse/{{{external.system.title}}}',
-    getIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue/{{{external.system.id}}}',
+    viewIncidentUrl: 'https://coolsite.net/browse/{{{external.system.title}}}',
+    getIncidentUrl: 'https://coolsite.net/rest/api/2/issue/{{{external.system.id}}}',
     updateIncidentJson:
       '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"labels":{{{case.tags}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
     updateIncidentMethod: 'put',
-    updateIncidentUrl:
-      'https://siem-kibana.atlassian.net/rest/api/2/issue/{{{external.system.id}}}',
+    updateIncidentUrl: 'https://coolsite.net/rest/api/2/issue/{{{external.system.id}}}',
   };
   const requiredFields = [
     'createIncidentJson',
@@ -51,7 +49,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
     'getIncidentResponseCreatedDateKey',
     'getIncidentResponseExternalTitleKey',
     'getIncidentResponseUpdatedDateKey',
-    'incidentViewUrl',
+    'viewIncidentUrl',
     'getIncidentUrl',
     'updateIncidentJson',
     'updateIncidentUrl',
@@ -94,7 +92,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
         ...mockCasesWebhook.config,
         createCommentUrl: `${casesWebhookSimulatorURL}/rest/api/2/issue/{{{external.system.id}}}/comment`,
         createIncidentUrl: `${casesWebhookSimulatorURL}/rest/api/2/issue`,
-        incidentViewUrl: `${casesWebhookSimulatorURL}/browse/{{{external.system.title}}}`,
+        viewIncidentUrl: `${casesWebhookSimulatorURL}/browse/{{{external.system.title}}}`,
         getIncidentUrl: `${casesWebhookSimulatorURL}/rest/api/2/issue/{{{external.system.id}}}`,
         updateIncidentUrl: `${casesWebhookSimulatorURL}/rest/api/2/issue/{{{external.system.id}}}`,
       };
@@ -174,7 +172,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
               ...mockCasesWebhook.config,
               createCommentUrl: `${badUrl}/{{{external.system.id}}}/comments`,
               createIncidentUrl: badUrl,
-              incidentViewUrl: `${badUrl}/{{{external.system.title}}}`,
+              viewIncidentUrl: `${badUrl}/{{{external.system.title}}}`,
               getIncidentUrl: `${badUrl}/{{{external.system.id}}}`,
               updateIncidentUrl: `${badUrl}/{{{external.system.id}}}`,
             },
