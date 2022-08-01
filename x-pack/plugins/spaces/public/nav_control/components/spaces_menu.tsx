@@ -7,6 +7,7 @@
 
 import './spaces_menu.scss';
 
+import type { ExclusiveUnion } from '@elastic/eui';
 import {
   EuiLoadingSpinner,
   EuiPopoverFooter,
@@ -15,7 +16,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable';
-import type { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
+import type {
+  EuiSelectableOnChangeEvent,
+  EuiSelectableSearchableSearchProps,
+} from '@elastic/eui/src/components/selectable/selectable';
 import React, { Component, lazy, Suspense } from 'react';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
@@ -56,6 +60,30 @@ class SpacesMenuUI extends Component<Props> {
       </EuiText>
     );
 
+    // In the future this could be replaced by EuiSelectableSearchableProps, but at this time is is not exported from EUI
+    const searchableProps: ExclusiveUnion<
+      { searchable: true; searchProps: EuiSelectableSearchableSearchProps<{}> },
+      { searchable: false }
+    > =
+      this.props.spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD
+        ? {
+            searchable: true,
+            searchProps: {
+              placeholder: i18n.translate(
+                'xpack.spaces.navControl.spacesMenu.findSpacePlaceholder',
+                {
+                  defaultMessage: 'Find a space',
+                }
+              ),
+              compressed: true,
+              isClearable: true,
+              id: 'headerSpacesMenuListSearch',
+            },
+          }
+        : {
+            searchable: false,
+          };
+
     return (
       <>
         <EuiSelectable
@@ -64,22 +92,7 @@ class SpacesMenuUI extends Component<Props> {
           title={i18n.translate('xpack.spaces.navControl.spacesMenu.changeCurrentSpaceTitle', {
             defaultMessage: 'Change current space',
           })}
-          searchable={this.props.spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD}
-          searchProps={
-            this.props.spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD
-              ? ({
-                  placeholder: i18n.translate(
-                    'xpack.spaces.navControl.spacesMenu.findSpacePlaceholder',
-                    {
-                      defaultMessage: 'Find a space',
-                    }
-                  ),
-                  compressed: true,
-                  isClearable: true,
-                  id: 'headerSpacesMenuListSearch',
-                } as any)
-              : undefined
-          }
+          {...searchableProps}
           noMatchesMessage={noSpacesMessage}
           options={spaceOptions}
           singleSelection={'always'}

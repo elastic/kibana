@@ -203,9 +203,7 @@ export class SpaceSelectorPageObject extends FtrService {
   async goToSpecificSpace(spaceId: string) {
     return await this.retry.try(async () => {
       this.log.info(`SpaceSelectorPage:goToSpecificSpace(${spaceId})`);
-      // await this.testSubjects.click(`${spaceId}-selectableSpaceItem`);
-      const spaceOption = await this.testSubjects.find(`${spaceId}-selectableSpaceItem`);
-      await spaceOption?.click();
+      await this.testSubjects.click(`${spaceId}-selectableSpaceItem`);
       await this.common.sleep(1000);
     });
   }
