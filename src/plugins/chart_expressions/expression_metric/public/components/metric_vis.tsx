@@ -81,7 +81,9 @@ const getMetricFormatter = (
   const serializedFieldFormat = getFormatByAccessor(accessor, columns);
   const formatId = serializedFieldFormat?.id ?? 'number';
 
-  if (!['number', 'currency', 'percent', 'bytes', 'duration'].includes(formatId)) {
+  if (
+    !['number', 'currency', 'percent', 'bytes', 'duration', 'string', 'null'].includes(formatId)
+  ) {
     throw new Error(
       i18n.translate('expressionMetricVis.errors.unsupportedColumnFormat', {
         defaultMessage: 'Metric visualization expression - Unsupported column format: "{id}"',
@@ -90,6 +92,11 @@ const getMetricFormatter = (
         },
       })
     );
+  }
+
+  // this formats are coming when formula is empty
+  if (formatId === 'string') {
+    return getFormatService().deserialize(serializedFieldFormat).getConverterFor('text');
   }
 
   if (formatId === 'duration') {
@@ -297,7 +304,7 @@ export const MetricVis = ({
     // In the editor, we constrain the maximum size of the tiles for aesthetic reasons
     const maxTileSideLength = metricConfigs.flat().length > 1 ? 200 : 300;
     pixelHeight = grid.length * maxTileSideLength;
-    pixelWidth = grid[0].length * maxTileSideLength;
+    pixelWidth = grid[0]?.length * maxTileSideLength;
   }
 
   // force chart to re-render to circumvent a charts bug

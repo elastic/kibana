@@ -61,11 +61,13 @@ export const getMetricVisRenderer = (
         unmountComponentAtNode(domNode);
       });
 
-      const filterable = await metricFilterable(
-        visConfig.dimensions,
-        visData,
-        handlers.hasCompatibleActions?.bind(handlers)
-      );
+      const filterable = visData.rows.length
+        ? await metricFilterable(
+            visConfig.dimensions,
+            visData,
+            handlers.hasCompatibleActions?.bind(handlers)
+          )
+        : false;
       const renderComplete = () => {
         const executionContext = handlers.getExecutionContext();
         const containerType = extractContainerType(executionContext);
