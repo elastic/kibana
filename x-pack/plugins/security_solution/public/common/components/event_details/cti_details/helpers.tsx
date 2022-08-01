@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { groupBy, isArray } from 'lodash';
+import { groupBy } from 'lodash';
+import { getDataFromFieldsHits } from '../../../../../common/utils/field_formatters';
 import { ENRICHMENT_DESTINATION_PATH } from '../../../../../common/constants';
 import {
   ENRICHMENT_TYPES,
@@ -31,37 +32,21 @@ export const isInvestigationTimeEnrichment = (type: string | undefined) =>
 export const parseExistingEnrichments = (
   data: TimelineEventsDetailsItem[]
 ): TimelineEventsDetailsItem[][] => {
-  const threatIndicatorFields = data.filter(
-    ({ field, originalValue }) =>
-      field.startsWith(`${ENRICHMENT_DESTINATION_PATH}.`) && originalValue
+  const threatIndicatorField = data.find(
+    ({ field, originalValue }) => field === ENRICHMENT_DESTINATION_PATH && originalValue
   );
-  if (threatIndicatorFields.length === 0) {
+  if (!threatIndicatorField) {
     return [];
   }
 
-  return threatIndicatorFields.reduce<TimelineEventsDetailsItem[][]>(
-    (enrichments, enrichmentData) => {
+  const { originalValue } = threatIndicatorField;
+  const enrichmentStrings = Array.isArray(originalValue) ? originalValue : [originalValue];
+
+  return enrichmentStrings.reduce<TimelineEventsDetailsItem[][]>(
+    (enrichments, enrichmentString) => {
       try {
-        if (isArray(enrichmentData.values)) {
-          for (
-            let enrichmentIndex = 0;
-            enrichmentIndex < enrichmentData.values.length;
-            enrichmentIndex++
-          ) {
-            if (!isArray(enrichments[enrichmentIndex])) {
-              enrichments[enrichmentIndex] = [];
-            }
-            const fieldParts = enrichmentData.field.split('.');
-            enrichments[enrichmentIndex].push({
-              ...enrichmentData,
-              isObjectArray: false,
-              field: enrichmentData.field.replace(`${ENRICHMENT_DESTINATION_PATH}.`, ''),
-              category: fieldParts.length > 3 ? fieldParts[2] : enrichmentData.category,
-              values: [enrichmentData.values[enrichmentIndex]],
-              originalValue: [enrichmentData.originalValue[enrichmentIndex]],
-            });
-          }
-        }
+        const enrichment = getDataFromFieldsHits(JSON.parse(enrichmentString));
+        enrichments.push(enrichment);
       } catch (e) {
         // omit failed parse
       }
