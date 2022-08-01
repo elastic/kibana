@@ -35,6 +35,9 @@ const userSearchStrategyProps = {
 };
 
 describe('useSearchStrategy', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   it("returns the provided initial result while the query hasn't returned data", () => {
     const initialResult = {};
     (useObservable as jest.Mock).mockReturnValue(useObservableHookResult);
@@ -100,6 +103,25 @@ describe('useSearchStrategy', () => {
     );
 
     expect(mockAddToastError).toBeCalledWith(error, { title: errorMessage });
+  });
+
+  it('does not show toast error if showErrorToast = false', () => {
+    const error = 'test error';
+    const errorMessage = 'error message title';
+    (useObservable as jest.Mock).mockReturnValue({
+      ...useObservableHookResult,
+      error,
+    });
+
+    renderHook(() =>
+      useSearchStrategy<FactoryQueryTypes>({
+        ...userSearchStrategyProps,
+        showErrorToast: false,
+        errorMessage,
+      })
+    );
+
+    expect(mockAddToastError).not.toBeCalled();
   });
 
   it('start should be called when search is called ', () => {
