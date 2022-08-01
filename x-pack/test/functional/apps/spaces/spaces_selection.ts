@@ -84,9 +84,9 @@ export default function spaceSelectorFunctionalTests({
         await PageObjects.spaceSelector.goToSpecificSpace(space5Id);
         await PageObjects.spaceSelector.expectHomePage(space5Id);
 
-        await PageObjects.spaceSelector.openSpacesNav();
-        await PageObjects.spaceSelector.goToSpecificSpace(defaultSpaceId);
-        await PageObjects.spaceSelector.expectHomePage(defaultSpaceId);
+        // await PageObjects.spaceSelector.openSpacesNav();
+        // await PageObjects.spaceSelector.goToSpecificSpace(defaultSpaceId);
+        // await PageObjects.spaceSelector.expectHomePage(defaultSpaceId);
 
         await PageObjects.spaceSelector.openSpacesNav();
         await PageObjects.spaceSelector.goToSpecificSpace(anotherSpaceId);

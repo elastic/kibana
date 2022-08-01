@@ -44,6 +44,7 @@ export class SpaceSelectorPageObject extends FtrService {
       } else {
         expect(url).to.contain(`/s/${spaceId}${route}`);
       }
+      await this.common.sleep(1000);
     });
   }
 
@@ -58,6 +59,7 @@ export class SpaceSelectorPageObject extends FtrService {
       } else {
         expect(url).to.contain(`/s/${spaceId}`);
       }
+      await this.common.sleep(1000);
     });
   }
 
@@ -66,6 +68,7 @@ export class SpaceSelectorPageObject extends FtrService {
     return await this.retry.try(async () => {
       await this.testSubjects.click('spacesNavSelector');
       await this.find.byCssSelector('#headerSpacesMenuContent');
+      await this.common.sleep(1000);
     });
   }
 
@@ -197,10 +200,12 @@ export class SpaceSelectorPageObject extends FtrService {
     await this.testSubjects.click('space-avatar-space_b');
   }
 
-  async goToSpecificSpace(spaceName: string) {
+  async goToSpecificSpace(spaceId: string) {
     return await this.retry.try(async () => {
-      this.log.info(`SpaceSelectorPage:goToSpecificSpace(${spaceName})`);
-      await this.testSubjects.click(`${spaceName}-selectableSpaceItem`);
+      this.log.info(`SpaceSelectorPage:goToSpecificSpace(${spaceId})`);
+      // await this.testSubjects.click(`${spaceId}-selectableSpaceItem`);
+      const spaceOption = await this.testSubjects.find(`${spaceId}-selectableSpaceItem`);
+      await spaceOption?.click();
       await this.common.sleep(1000);
     });
   }
