@@ -9,6 +9,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
+import { SecurityPageName } from '../../../../../common/constants';
 import type { PrimaryNavigationProps } from './types';
 import { usePrimaryNavigationItems } from './use_navigation_items';
 import { useIsGroupedNavigationEnabled } from '../helpers';
@@ -26,7 +27,7 @@ export const usePrimaryNavigation = ({
 }: PrimaryNavigationProps): KibanaPageTemplateProps['solutionNav'] => {
   const isGroupedNavigationEnabled = useIsGroupedNavigationEnabled();
   const mapLocationToTab = useCallback((): string => {
-    if (pageName === 'administration') {
+    if (pageName === SecurityPageName.administration) {
       // revist with ticket #137625. consider using tab Ids instead of tab Name for matching
       return ((tabName && navTabs[tabName]) || navTabs[pageName])?.id ?? '';
     } else {
