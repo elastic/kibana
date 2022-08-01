@@ -15,5 +15,5 @@ const isArrayOfStrings = (subj: unknown): subj is string[] => isArray(subj) && s
 
 export const TestCellRenderer: React.FC<CellValueElementProps> = ({ columnId, data }) => {
   const value = getMappedNonEcsValue({ data, fieldName: columnId });
-  return <>{(isArrayOfStrings(value) && value.reduce((x) => x[0])) ?? ''}</>;
+  return <>{(isArrayOfStrings(value) && value[0]) ?? ''}</>;
 };
