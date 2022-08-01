@@ -69,6 +69,9 @@ describe('Alert Flyout', () => {
   });
 
   it('Opens a new timeline investigation with alert ids from the process ancestry', () => {
+    // cy.get(
+    //   '[data-test-subj="timeline:details-panel:flyout"] [data-test-subj="euiFlyoutCloseButton"]'
+    // ).click({ force: true });
     verifyInsightCount({
       tableSelector: INSIGHTS_RELATED_ALERTS_BY_ANCESTRY,
       investigateSelector: INSIGHTS_INVESTIGATE_ANCESTRY_ALERTS_IN_TIMELINE_BUTTON,

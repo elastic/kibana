@@ -43,6 +43,9 @@ export const verifyInsightCount = ({
   investigateSelector: string;
 }) => {
   cy.get(tableSelector).click();
+
+  // Make sure the table containing data has loaded before parsing the text for the alert count
+  cy.get(investigateSelector);
   cy.get(tableSelector)
     .invoke('text')
     .then((relatedAlertsByAncestryText) => {
