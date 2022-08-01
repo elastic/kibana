@@ -410,6 +410,15 @@ export type FieldSpec = DataViewFieldBase & {
    */
   runtimeField?: RuntimeFieldSpec;
 
+  /**
+   * time series type of this field (undefined if there is at least one index which is not a time series index)
+   */
+  timeSeriesMetricType?: 'gauge' | 'counter';
+  /**
+   * True if there is at least one index in which this field is of a rolled up time series type
+   */
+  timeSeriesRollup?: boolean;
+
   // not persisted
 
   /**

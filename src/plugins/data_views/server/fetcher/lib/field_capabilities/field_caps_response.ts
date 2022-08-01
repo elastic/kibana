@@ -125,19 +125,21 @@ export function readFieldCapsResponse(
         return agg;
       }
 
-      const esTypes = [...types];
-      if (timeSeriesMetricProp.includes('gauge')) {
-        esTypes.push('gauge');
+      let timeSeriesMetricType: 'counter' | 'gauge' | undefined;
+      if (timeSeriesMetricProp.length === 1 && timeSeriesMetricProp[0] === 'gauge') {
+        timeSeriesMetricType = 'gauge';
       }
-      if (timeSeriesMetricProp.includes('counter')) {
-        esTypes.push('counter');
+      if (timeSeriesMetricProp.length === 1 && timeSeriesMetricProp[0] === 'counter') {
+        timeSeriesMetricType = 'counter';
       }
 
       const esType = types[0];
       const field = {
         name: fieldName,
         type: castEsToKbnFieldTypeName(esType),
-        esTypes,
+        esTypes: types,
+        timeSeriesMetricType,
+        timeSeriesRollup: types.includes('aggregate_metric_double'),
         searchable: isSearchable,
         aggregatable: isAggregatable,
         readFromDocValues: shouldReadFieldFromDocValues(isAggregatable, esType),

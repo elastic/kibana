@@ -59,6 +59,8 @@ export interface IndexPattern {
   timeFieldName?: string;
   fieldFormatMap?: FieldFormatMap;
   hasRestrictions: boolean;
+  timeSeriesMetricType?: 'gauge' | 'counter';
+  timeSeriesRollup?: boolean;
 }
 
 export type IndexPatternField = FieldSpec & {

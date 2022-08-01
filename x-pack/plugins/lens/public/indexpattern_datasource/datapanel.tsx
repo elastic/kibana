@@ -16,10 +16,9 @@ import {
   EuiPopover,
   EuiCallOut,
   EuiFormControlLayout,
-  EuiSpacer,
-  EuiFilterGroup,
   EuiFilterButton,
   EuiScreenReaderOnly,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EsQueryConfig, Query, Filter } from '@kbn/es-query';
@@ -275,10 +274,6 @@ const defaultFieldGroups: {
   emptyFields: [],
   metaFields: [],
 };
-
-const fieldFiltersLabel = i18n.translate('xpack.lens.indexPatterns.fieldFiltersLabel', {
-  defaultMessage: 'Filter by type',
-});
 
 const htmlId = htmlIdGenerator('datapanel');
 const fieldSearchDescriptionId = htmlId();
@@ -614,6 +609,61 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 clearLocalState();
               },
             }}
+            append={
+              <EuiPopover
+                id="dataPanelTypeFilter"
+                panelClassName="euiFilterGroup__popoverPanel"
+                panelPaddingSize="none"
+                anchorPosition="rightUp"
+                display="block"
+                isOpen={localState.isTypeFilterOpen}
+                closePopover={() =>
+                  setLocalState(() => ({ ...localState, isTypeFilterOpen: false }))
+                }
+                button={
+                  <EuiFilterButton
+                    isSelected={localState.isTypeFilterOpen}
+                    numFilters={localState.typeFilter.length}
+                    hasActiveFilters={!!localState.typeFilter.length}
+                    numActiveFilters={localState.typeFilter.length}
+                    data-test-subj="lnsIndexPatternFiltersToggle"
+                    className="lnsFilterButton"
+                    onClick={() => {
+                      setLocalState((s) => ({
+                        ...s,
+                        isTypeFilterOpen: !localState.isTypeFilterOpen,
+                      }));
+                    }}
+                  >
+                    <EuiIcon type="filter" />
+                  </EuiFilterButton>
+                }
+              >
+                <EuiContextMenuPanel
+                  data-test-subj="lnsIndexPatternTypeFilterOptions"
+                  items={(availableFieldTypes as DataType[]).map((type) => (
+                    <EuiContextMenuItem
+                      className="lnsInnerIndexPatternDataPanel__filterType"
+                      key={type}
+                      icon={localState.typeFilter.includes(type) ? 'check' : 'empty'}
+                      data-test-subj={`typeFilter-${type}`}
+                      onClick={() => {
+                        setLocalState((s) => ({
+                          ...s,
+                          typeFilter: localState.typeFilter.includes(type)
+                            ? localState.typeFilter.filter((t) => t !== type)
+                            : [...localState.typeFilter, type],
+                        }));
+                      }}
+                    >
+                      <span className="lnsInnerIndexPatternDataPanel__filterTypeInner">
+                        <LensFieldIcon type={type} /> {fieldTypeNames[type]}
+                      </span>
+                    </EuiContextMenuItem>
+                  ))}
+                />
+              </EuiPopover>
+            }
           >
             <input
               className="euiFieldText euiFieldText--fullWidth lnsInnerIndexPatternDataPanel__textField"
@@ -633,62 +683,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               aria-describedby={fieldSearchDescriptionId}
             />
           </EuiFormControlLayout>
-
-          <EuiSpacer size="xs" />
-
-          <EuiFilterGroup>
-            <EuiPopover
-              id="dataPanelTypeFilter"
-              panelClassName="euiFilterGroup__popoverPanel"
-              panelPaddingSize="none"
-              anchorPosition="rightUp"
-              display="block"
-              isOpen={localState.isTypeFilterOpen}
-              closePopover={() => setLocalState(() => ({ ...localState, isTypeFilterOpen: false }))}
-              button={
-                <EuiFilterButton
-                  iconType="arrowDown"
-                  isSelected={localState.isTypeFilterOpen}
-                  numFilters={localState.typeFilter.length}
-                  hasActiveFilters={!!localState.typeFilter.length}
-                  numActiveFilters={localState.typeFilter.length}
-                  data-test-subj="lnsIndexPatternFiltersToggle"
-                  onClick={() => {
-                    setLocalState((s) => ({
-                      ...s,
-                      isTypeFilterOpen: !localState.isTypeFilterOpen,
-                    }));
-                  }}
-                >
-                  {fieldFiltersLabel}
-                </EuiFilterButton>
-              }
-            >
-              <EuiContextMenuPanel
-                data-test-subj="lnsIndexPatternTypeFilterOptions"
-                items={(availableFieldTypes as DataType[]).map((type) => (
-                  <EuiContextMenuItem
-                    className="lnsInnerIndexPatternDataPanel__filterType"
-                    key={type}
-                    icon={localState.typeFilter.includes(type) ? 'check' : 'empty'}
-                    data-test-subj={`typeFilter-${type}`}
-                    onClick={() => {
-                      setLocalState((s) => ({
-                        ...s,
-                        typeFilter: localState.typeFilter.includes(type)
-                          ? localState.typeFilter.filter((t) => t !== type)
-                          : [...localState.typeFilter, type],
-                      }));
-                    }}
-                  >
-                    <span className="lnsInnerIndexPatternDataPanel__filterTypeInner">
-                      <LensFieldIcon type={type} /> {fieldTypeNames[type]}
-                    </span>
-                  </EuiContextMenuItem>
-                ))}
-              />
-            </EuiPopover>
-          </EuiFilterGroup>
         </EuiFlexItem>
         <EuiScreenReaderOnly>
           <div aria-live="polite" id={fieldSearchDescriptionId}>

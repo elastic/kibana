@@ -25,6 +25,8 @@ export interface FieldDescriptor {
   esTypes: string[];
   subType?: FieldSubType;
   metadata_field?: boolean;
+  timeSeriesMetricType?: 'gauge' | 'counter';
+  timeSeriesRollup?: boolean;
 }
 
 interface FieldSubType {

@@ -60,7 +60,9 @@ export function convertDataViewIntoLensIndexPattern(dataView: DataView): IndexPa
         esTypes: field.esTypes,
         scripted: field.scripted,
         runtime: Boolean(field.runtimeField),
-        softRestrictions: field.esTypes?.includes('aggregate_metric_double')
+        timeSeriesMetricType: field.timeSeriesMetricType,
+        timeSeriesRollup: field.timeSeriesRollup,
+        softRestrictions: field.timeSeriesRollup
           ? {
               percentile: true,
               percentile_rank: true,

@@ -183,6 +183,14 @@ export class DataViewField implements DataViewFieldBase {
     return this.spec.esTypes;
   }
 
+  public get timeSeriesMetricType() {
+    return this.spec.timeSeriesMetricType;
+  }
+
+  public get timeSeriesRollup() {
+    return this.spec.timeSeriesRollup;
+  }
+
   /**
    * Returns true if scripted field
    */
