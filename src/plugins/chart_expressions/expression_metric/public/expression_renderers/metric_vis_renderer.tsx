@@ -18,6 +18,7 @@ import type { IInterpreterRenderHandlers, Datatable } from '@kbn/expressions-plu
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { ExpressionMetricPluginStart } from '../plugin';
 import { EXPRESSION_METRIC_NAME, MetricVisRenderConfig, VisParams } from '../../common';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { extractContainerType, extractVisualizationType } from '../../../common';
 
 async function metricFilterable(

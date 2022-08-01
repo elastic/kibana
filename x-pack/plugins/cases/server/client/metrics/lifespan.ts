@@ -26,8 +26,12 @@ export class Lifespan extends SingleCaseBaseHandler {
   }
 
   public async compute(): Promise<SingleCaseMetricsResponse> {
-    const { unsecuredSavedObjectsClient, authorization, userActionService, logger } =
-      this.options.clientArgs;
+    const {
+      unsecuredSavedObjectsClient,
+      authorization,
+      services: { userActionService },
+      logger,
+    } = this.options.clientArgs;
 
     const { casesClient } = this.options;
 

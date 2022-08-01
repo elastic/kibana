@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { SHAREABLE_RUNTIME_NAME } from '../../shareable_runtime/constants_static';
 import { FilterField } from '../../types';
 
