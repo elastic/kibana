@@ -7,7 +7,8 @@
 
 import React, { memo, useMemo } from 'react';
 import type { EuiLinkAnchorProps } from '@elastic/eui';
-import { EuiLink } from '@elastic/eui';
+import { EuiLink, EuiText, EuiIcon } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getPolicyDetailPath } from '../common/routing';
 import { useNavigateByRouterEventHandler } from '../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { useAppUrl } from '../../common/lib/kibana/hooks';
@@ -25,20 +26,32 @@ export const EndpointPolicyLink = memo<
     backLink?: PolicyDetailsRouteState['backLink'];
   }
 >(({ policyId, backLink, children, missingPolicies = {}, ...otherProps }) => {
+  const isPolicyIdMissing = policyId === undefined || policyId === '';
+
   const { getAppUrl } = useAppUrl();
   const { toRoutePath, toRouteUrl } = useMemo(() => {
-    const path = getPolicyDetailPath(policyId);
+    const path = !isPolicyIdMissing ? getPolicyDetailPath(policyId) : '';
     return {
       toRoutePath: backLink ? { pathname: path, state: { backLink } } : path,
       toRouteUrl: getAppUrl({ path }),
     };
-  }, [policyId, getAppUrl, backLink]);
+  }, [policyId, getAppUrl, backLink, isPolicyIdMissing]);
   const clickHandler = useNavigateByRouterEventHandler(toRoutePath);
 
-  if (missingPolicies[policyId]) {
+  if (isPolicyIdMissing || missingPolicies[policyId]) {
     return (
       <span className={otherProps.className} data-test-subj={otherProps['data-test-subj']}>
         {children}
+        {
+          <EuiText color="subdued" size="xs" className="eui-textNoWrap">
+            <EuiIcon size="m" type="alert" color="warning" />
+            &nbsp;
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.policyNotFound"
+              defaultMessage="Policy not found!"
+            />
+          </EuiText>
+        }
       </span>
     );
   }
