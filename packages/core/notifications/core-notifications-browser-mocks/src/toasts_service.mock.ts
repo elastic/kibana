@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { IToasts } from '@kbn/core-notifications-browser';
 import { Observable } from 'rxjs';
-import { IToasts } from './toasts_api';
 
 const createToastsApiMock = () => {
   const api: jest.Mocked<IToasts> = {
