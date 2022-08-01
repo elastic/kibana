@@ -24,16 +24,14 @@ const buildOrFilter = (filters: FilterItem) => {
     ...filter,
     meta: {
       ...filter.meta,
-      params: {
-        ...filter.meta.params,
-        filters,
-      },
+      type: 'OR',
+      params: filters,
     },
   };
 };
 
 /** to: @kbn/es-query **/
-export const isOrFilter = (filter: Filter) => Boolean(filter.meta?.params?.filters);
+export const isOrFilter = (filter: Filter) => Boolean(filter.meta?.type === 'OR');
 
 export const getConditionalOperationType = (filter: FilterItem) => {
   if (Array.isArray(filter)) {
@@ -46,7 +44,7 @@ export const getConditionalOperationType = (filter: FilterItem) => {
 export const getPathInArray = (path: string) => path.split(PATH_SEPARATOR).map((i) => +i);
 
 const getGroupedFilters = (filter: FilterItem) =>
-  Array.isArray(filter) ? filter : filter.meta.params.filters;
+  Array.isArray(filter) ? filter : filter.meta.params;
 
 const doForFilterByPath = <T>(
   filters: FilterItem[],
@@ -116,10 +114,7 @@ const normalizeFilters = (filters: FilterItem[]) => {
       ...orFilter,
       meta: {
         ...orFilter.meta,
-        params: {
-          ...orFilter.meta.params,
-          filters: normalizeArray(orFilters),
-        },
+        params: normalizeArray(orFilters),
       },
     };
   };
@@ -255,7 +250,7 @@ export const updateFilterParams = (
   filters: Filter[],
   path: string,
   operator?: Operator | undefined,
-  params?: Filter['meta']['params'][]
+  params?: Array<Filter['meta']['params']>
 ) => {
   const newFilters = [...filters];
   const changedFilter = getFilterByPath(newFilters, path) as Filter;

@@ -33,8 +33,30 @@ export const getFiltersMock = () =>
     },
     {
       meta: {
-        params: {
-          filters: [
+        type: 'OR',
+        params: [
+          {
+            meta: {
+              index: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+              alias: null,
+              negate: false,
+              disabled: false,
+              type: 'phrase',
+              key: 'category.keyword',
+              params: {
+                query: "Men's Accessories 2",
+              },
+            },
+            query: {
+              match_phrase: {
+                'category.keyword': "Men's Accessories 2",
+              },
+            },
+            $state: {
+              store: 'appState',
+            },
+          },
+          [
             {
               meta: {
                 index: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
@@ -44,62 +66,18 @@ export const getFiltersMock = () =>
                 type: 'phrase',
                 key: 'category.keyword',
                 params: {
-                  query: "Men's Accessories 2",
+                  query: "Men's Accessories 3",
                 },
               },
               query: {
                 match_phrase: {
-                  'category.keyword': "Men's Accessories 2",
+                  'category.keyword': "Men's Accessories 3",
                 },
               },
               $state: {
                 store: 'appState',
               },
             },
-            [
-              {
-                meta: {
-                  index: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-                  alias: null,
-                  negate: false,
-                  disabled: false,
-                  type: 'phrase',
-                  key: 'category.keyword',
-                  params: {
-                    query: "Men's Accessories 3",
-                  },
-                },
-                query: {
-                  match_phrase: {
-                    'category.keyword': "Men's Accessories 3",
-                  },
-                },
-                $state: {
-                  store: 'appState',
-                },
-              },
-              {
-                meta: {
-                  index: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-                  alias: null,
-                  negate: false,
-                  disabled: false,
-                  type: 'phrase',
-                  key: 'category.keyword',
-                  params: {
-                    query: "Men's Accessories 4",
-                  },
-                },
-                query: {
-                  match_phrase: {
-                    'category.keyword': "Men's Accessories 4",
-                  },
-                },
-                $state: {
-                  store: 'appState',
-                },
-              },
-            ],
             {
               meta: {
                 index: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
@@ -109,12 +87,12 @@ export const getFiltersMock = () =>
                 type: 'phrase',
                 key: 'category.keyword',
                 params: {
-                  query: "Men's Accessories 5",
+                  query: "Men's Accessories 4",
                 },
               },
               query: {
                 match_phrase: {
-                  'category.keyword': "Men's Accessories 5",
+                  'category.keyword': "Men's Accessories 4",
                 },
               },
               $state: {
@@ -122,7 +100,28 @@ export const getFiltersMock = () =>
               },
             },
           ],
-        },
+          {
+            meta: {
+              index: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+              alias: null,
+              negate: false,
+              disabled: false,
+              type: 'phrase',
+              key: 'category.keyword',
+              params: {
+                query: "Men's Accessories 5",
+              },
+            },
+            query: {
+              match_phrase: {
+                'category.keyword': "Men's Accessories 5",
+              },
+            },
+            $state: {
+              store: 'appState',
+            },
+          },
+        ],
       },
     },
     {

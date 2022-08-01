@@ -31,7 +31,7 @@ const Delimiter = ({ conditionType }: { conditionType: ConditionTypes }) =>
         <EuiHorizontalRule margin="s" />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiText size="xs" color="subdued">
+        <EuiText size="s" color="subdued">
           {i18n.translate('unifiedSearch.filter.filtersEditor.orDelimiterLabel', {
             defaultMessage: 'OR',
           })}

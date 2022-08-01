@@ -150,7 +150,7 @@ export function FilterItem({
         <FilterGroup
           path={path}
           conditionType={conditionalOperationType}
-          filters={Array.isArray(filter) ? filter : filter.meta?.params?.filters}
+          filters={Array.isArray(filter) ? filter : filter.meta?.params}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           reverseBackground={!reverseBackground}
         />
