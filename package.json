@@ -844,7 +844,7 @@
     "dependency-check": "^4.1.0",
     "diff": "^4.0.1",
     "dpdm": "3.5.0",
-    "ejs": "^3.1.6",
+    "ejs": "^3.1.8",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.6",
     "enzyme-adapter-utils": "^1.14.0",
