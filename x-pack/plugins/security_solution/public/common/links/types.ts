@@ -27,7 +27,7 @@ export interface LinkCategory {
 
 export type LinkCategories = Readonly<LinkCategory[]>;
 
-export type LinkItem = {
+export interface LinkItem {
   /**
    * Capabilities strings (using object dot notation) to enable the link.
    *
@@ -54,6 +54,12 @@ export type LinkItem = {
    * Experimental flag needed to enable the link
    */
   experimentalKey?: keyof ExperimentalFeatures;
+  /**
+   * Global navigation position number.
+   * Define this property only if the link needs to be visible in
+   * the Security section within the Kibana collapsible global navigation
+   */
+  globalNavPosition?: number;
   /**
    * Disables link in the global search. Defaults to false.
    */
@@ -112,26 +118,7 @@ export type LinkItem = {
    * Title of the link
    */
   title: string;
-} & GlobalNavLinkItemProps;
-
-/* Union type to ensure that optional props `globalNavOrder` and `globalNavEnabled` are defined when enabled */
-type GlobalNavLinkItemProps =
-  | {
-      /**
-       * Enables link in the global navigation. Defaults to false.
-       * When it is true the `globalNavOrder` needs to be defined as well
-       */
-      globalNavEnabled: true;
-      /**
-       * Global navigation order number.
-       * Needs to be defined only when `globalNavEnabled` is true
-       */
-      globalNavOrder: number;
-    }
-  | {
-      globalNavEnabled?: never;
-      globalNavOrder?: never;
-    };
+}
 
 export type AppLinkItems = Readonly<LinkItem[]>;
 
