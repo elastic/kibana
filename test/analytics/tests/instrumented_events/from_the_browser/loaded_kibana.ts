@@ -12,6 +12,7 @@ import { FtrProviderContext } from '../../../services';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const ebtUIHelper = getService('kibana_ebt_ui');
   const { common } = getPageObjects(['common']);
+  const browser = getService('browser');
 
   describe('Loaded Kibana', () => {
     beforeEach(async () => {
@@ -61,7 +62,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(event.properties.value4).to.be.a('number');
       expect(event.properties.value5).to.be.a('number');
 
-      expect(event.properties.meta).to.be.a('unknown');
+      if (browser.isChromium) {
+        // Kibana Loaded memory
+        expect(meta).to.have.property('jsHeapSizeLimit');
+        expect(meta.jsHeapSizeLimit).to.be.a('string');
+        expect(meta).to.have.property('totalJSHeapSize');
+        expect(meta.totalJSHeapSize).to.be.a('string');
+        expect(meta).to.have.property('usedJSHeapSize');
+        expect(meta.usedJSHeapSize).to.be.a('string');
+      }
     });
   });
 }
