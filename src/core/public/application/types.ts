@@ -13,7 +13,7 @@ import { RecursiveReadonly } from '@kbn/utility-types';
 
 import type { CoreTheme } from '@kbn/core-theme-browser';
 import type { Capabilities } from '@kbn/core-capabilities-common';
-import { MountPoint } from '../types';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { PluginOpaqueId } from '../plugins';
 import { AppCategory } from '../../types';
 import { ScopedHistory } from './scoped_history';

@@ -7,6 +7,7 @@
 
 import React from 'react';
 
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { mockEndpointLibraryLoadEvent } from '../../../../common/mock/mock_timeline_data';
 import { createEndpointLibraryRowRenderer } from '../../timeline/body/renderers/system/generic_row_renderer';
 import { LOADED_LIBRARY } from '../../timeline/body/renderers/system/translations';
