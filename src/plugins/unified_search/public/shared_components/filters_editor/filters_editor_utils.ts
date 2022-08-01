@@ -255,7 +255,7 @@ export const updateFilterParams = (
   filters: Filter[],
   path: string,
   operator?: Operator | undefined,
-  params?: Filter['meta']['params'][]
+  params?: Array<Filter['meta']['params']>
 ) => {
   const newFilters = [...filters];
   const changedFilter = getFilterByPath(newFilters, path) as Filter;
