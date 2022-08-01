@@ -862,7 +862,6 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           bool: {
             must: [
               { match: { 'exception-list.entries.type': 'list' } },
-              { match: { 'exception-list.entries.operator': 'included' } },
             ],
           },
         },
