@@ -11,8 +11,9 @@ import { ApmFields } from '../lib/apm/apm_fields';
 import { Scenario } from '../cli/scenario';
 import { getLogger } from '../cli/utils/get_common_services';
 import { RunOptions } from '../cli/utils/parse_run_cli_flags';
+import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 
-const ENVIRONMENT = __filename;
+const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   const logger = getLogger(runOptions);
