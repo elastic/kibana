@@ -15,6 +15,7 @@ import { FlameGraphsView } from '../components/flame_graphs_view';
 import { FunctionsView } from '../components/functions_view';
 import { RouteBreadcrumb } from '../components/route_breadcrumb';
 import { StackTracesView } from '../components/stack_traces_view';
+import { TopNFunctionSortField, topNFunctionSortFieldRt } from '../../common/functions';
 
 const routes = {
   '/': {
@@ -121,6 +122,18 @@ const routes = {
                 </FunctionsView>
               </RouteBreadcrumb>
             ),
+            params: t.type({
+              query: t.type({
+                sortField: topNFunctionSortFieldRt,
+                sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+              }),
+            }),
+            defaults: {
+              query: {
+                sortField: TopNFunctionSortField.Rank,
+                sortDirection: 'asc',
+              },
+            },
             children: {
               '/functions/topn': {
                 element: (
