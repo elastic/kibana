@@ -12,7 +12,6 @@ export type DynamicTreeViewProps = {
   depth?: number;
   selectionDepth?: TreeNavSelection;
   query: QueryDslQueryContainerBool;
-  indexPattern?: string;
   onSelect: (selectionDepth: TreeNavSelection, key: string | number, type: string) => void;
   hasSelection?: boolean;
   'aria-label': string;

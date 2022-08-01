@@ -34,10 +34,12 @@ export interface Connector {
   configuration: ConnectorConfiguration;
   id: string;
   index_name: string;
+  language: string | null;
   last_seen: string | null;
   last_sync_error: string | null;
   last_sync_status: string | null;
   last_synced: string | null;
+  name: string;
   scheduling: {
     enabled: boolean;
     interval: string; // crontab syntax

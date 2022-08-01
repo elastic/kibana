@@ -7,13 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { ValidationConfig, ValidationFunc } from '../../shared_imports';
+import type { FormData, ValidationConfig, ValidationFunc } from '../../shared_imports';
 import { fieldValidators } from '../../shared_imports';
 export { queryFieldValidation } from '../../common/validations';
 
 const idPattern = /^[a-zA-Z0-9-_]+$/;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const idSchemaValidation: ValidationFunc<any, string, string> = ({ value }) => {
+export const idSchemaValidation: ValidationFunc<FormData, string, string> = ({ value }) => {
   const valueIsValid = idPattern.test(value);
   if (!valueIsValid) {
     return {
@@ -25,8 +24,7 @@ export const idSchemaValidation: ValidationFunc<any, string, string> = ({ value 
 };
 
 const createUniqueIdValidation = (ids: Set<string>) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const uniqueIdCheck: ValidationFunc<any, string, string> = ({ value }) => {
+  const uniqueIdCheck: ValidationFunc<FormData, string, string> = ({ value }) => {
     if (ids.has(value)) {
       return {
         message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.uniqueIdError', {
@@ -49,14 +47,7 @@ export const createIdFieldValidations = (ids: Set<string>) => [
   createUniqueIdValidation(ids),
 ];
 
-export const intervalFieldValidations: Array<
-  ValidationConfig<
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    any,
-    string,
-    number
-  >
-> = [
+export const intervalFieldValidations: Array<ValidationConfig<FormData, string, number>> = [
   {
     validator: fieldValidators.numberGreaterThanField({
       than: 0,

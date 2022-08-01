@@ -25,7 +25,6 @@ import { getPieOptions } from '../editor/components';
 export const getPieVisTypeDefinition = ({
   showElasticChartsOptions = false,
   palettes,
-  trackUiMetric,
 }: PieTypeProps): VisTypeDefinition<PartitionVisParams> => ({
   name: 'pie',
   title: i18n.translate('visTypePie.pie.pieTitle', { defaultMessage: 'Pie' }),
@@ -68,7 +67,6 @@ export const getPieVisTypeDefinition = ({
     optionsTemplate: getPieOptions({
       showElasticChartsOptions,
       palettes,
-      trackUiMetric,
     }),
     schemas: [
       {

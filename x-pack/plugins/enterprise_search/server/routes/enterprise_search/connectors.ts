@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 import { addConnector } from '../../lib/connectors/add_connector';
+import { startConnectorSync } from '../../lib/connectors/start_sync';
 import { updateConnectorConfiguration } from '../../lib/connectors/update_connector_configuration';
 import { updateConnectorScheduling } from '../../lib/connectors/update_connector_scheduling';
 
@@ -24,6 +25,7 @@ export function registerConnectorRoutes({ router }: RouteDependencies) {
         body: schema.object({
           delete_existing_connector: schema.maybe(schema.boolean()),
           index_name: schema.string(),
+          language: schema.nullable(schema.string()),
         }),
       },
     },
@@ -113,6 +115,30 @@ export function registerConnectorRoutes({ router }: RouteDependencies) {
       const { client } = (await context.core).elasticsearch;
       try {
         await updateConnectorScheduling(client, request.params.connectorId, request.body);
+        return response.ok();
+      } catch (error) {
+        return response.customError({
+          body: i18n.translate('xpack.enterpriseSearch.server.routes.updateConnector.error', {
+            defaultMessage: 'Error fetching data from Enterprise Search',
+          }),
+          statusCode: 502,
+        });
+      }
+    }
+  );
+  router.post(
+    {
+      path: '/internal/enterprise_search/connectors/{connectorId}/start_sync',
+      validate: {
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      try {
+        await startConnectorSync(client, request.params.connectorId);
         return response.ok();
       } catch (error) {
         return response.customError({

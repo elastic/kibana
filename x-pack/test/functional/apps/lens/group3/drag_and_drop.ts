@@ -14,8 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const xyChartContainer = 'xyVisChart';
 
-  // Failing: See https://github.com/elastic/kibana/issues/136797
-  describe.skip('lens drag and drop tests', () => {
+  describe('lens drag and drop tests', () => {
     describe('basic drag and drop', () => {
       it('should construct the basic split xy chart', async () => {
         await PageObjects.visualize.navigateToNewVisualization();
@@ -105,7 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel')
         ).to.eql([]);
         expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel')).to.eql([
-          'Unique count of @message.raw',
+          'Value count of @message.raw',
         ]);
       });
       it('should duplicate the column when dragging to empty dimension in the same group', async () => {
@@ -118,9 +117,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           to: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         });
         expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel')).to.eql([
-          'Unique count of @message.raw',
-          'Unique count of @message.raw [1]',
-          'Unique count of @message.raw [2]',
+          'Value count of @message.raw',
+          'Value count of @message.raw [1]',
+          'Value count of @message.raw [2]',
         ]);
       });
       it('should move duplicated column to non-compatible dimension group', async () => {
@@ -129,8 +128,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           to: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         });
         expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel')).to.eql([
-          'Unique count of @message.raw',
-          'Unique count of @message.raw [1]',
+          'Value count of @message.raw',
+          'Value count of @message.raw [1]',
         ]);
         expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_xDimensionPanel')).to.eql([
           'Top 5 values of @message.raw',
@@ -145,7 +144,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.dragDimensionToExtraDropType(
           'lnsXY_xDimensionPanel > lns-dimensionTrigger',
           'lnsXY_splitDimensionPanel',
-          'duplicate'
+          'duplicate',
+          xyChartContainer
         );
         expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_splitDimensionPanel')).to.eql(
           '@timestamp [1]'
@@ -157,10 +157,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.dragDimensionToExtraDropType(
           'lnsXY_splitDimensionPanel > lns-dimensionTrigger',
           'lnsXY_yDimensionPanel',
-          'swap'
+          'swap',
+          xyChartContainer
         );
         expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
-          'Unique count of @timestamp'
+          'Value count of @timestamp'
         );
         expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_splitDimensionPanel')).to.eql(
           'Top 3 values of @message.raw'
@@ -175,7 +176,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.dragDimensionToExtraDropType(
           'lnsXY_splitDimensionPanel > lns-dimensionTrigger',
           'lnsXY_xDimensionPanel',
-          'combine'
+          'combine',
+          xyChartContainer
         );
         expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
           'Top values of clientip + 1 other'
@@ -189,7 +191,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.dragFieldToExtraDropType(
           '@message.raw',
           'lnsXY_xDimensionPanel',
-          'combine'
+          'combine',
+          xyChartContainer
         );
         expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
           'Top values of clientip + 1 other'
@@ -203,7 +206,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.dragFieldToExtraDropType(
           '@message.raw',
           'lnsXY_xDimensionPanel',
-          'combine'
+          'combine',
+          xyChartContainer
         );
 
         await PageObjects.lens.dragFieldToDimensionTrigger(
@@ -213,12 +217,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.dragFieldToExtraDropType(
           'geo.src',
           'lnsXY_splitDimensionPanel',
-          'combine'
+          'combine',
+          xyChartContainer
         );
         await PageObjects.lens.dragDimensionToExtraDropType(
           'lnsXY_splitDimensionPanel > lns-dimensionTrigger',
           'lnsXY_xDimensionPanel',
-          'combine'
+          'combine',
+          xyChartContainer
         );
 
         expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
@@ -297,14 +303,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.dimensionKeyboardDragDrop('lnsXY_xDimensionPanel', 0, 2);
         expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel')).to.eql([
           'Count of records',
-          'Unique count of @timestamp',
+          'Value count of @timestamp',
         ]);
-        await PageObjects.lens.assertFocusedDimension('Unique count of @timestamp');
+        await PageObjects.lens.assertFocusedDimension('Value count of @timestamp');
       });
       it('should reorder elements with keyboard', async () => {
         await PageObjects.lens.dimensionKeyboardReorder('lnsXY_yDimensionPanel', 0, 1);
         expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel')).to.eql([
-          'Unique count of @timestamp',
+          'Value count of @timestamp',
           'Count of records',
         ]);
         await PageObjects.lens.assertFocusedDimension('Count of records');
@@ -356,7 +362,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.dragDimensionToExtraDropType(
           'lns-layerPanel-0 > lnsXY_xDimensionPanel  > lns-dimensionTrigger',
           'lns-layerPanel-1 > lnsXY_xDimensionPanel',
-          'duplicate'
+          'duplicate',
+          xyChartContainer
         );
 
         await PageObjects.lens.assertFocusedDimension('@timestamp [1]');
@@ -364,7 +371,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.dragDimensionToExtraDropType(
           'lns-layerPanel-0 > lnsXY_yDimensionPanel  > lns-dimensionTrigger',
           'lns-layerPanel-1 > lnsXY_yDimensionPanel',
-          'duplicate'
+          'duplicate',
+          xyChartContainer
         );
 
         await PageObjects.lens.assertFocusedDimension('Average of bytes [1]');
@@ -388,7 +396,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.dragDimensionToExtraDropType(
           'lns-layerPanel-0 > lnsXY_yDimensionPanel  > lns-dimensionTrigger',
           'lns-layerPanel-1 > lnsXY_yDimensionPanel',
-          'duplicate'
+          'duplicate',
+          xyChartContainer
         );
 
         expect(await PageObjects.lens.getDimensionTriggersTexts('lns-layerPanel-0')).to.eql([
@@ -440,7 +449,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.dragDimensionToExtraDropType(
           'lns-layerPanel-1 > lnsXY_splitDimensionPanel  > lns-dimensionTrigger',
           'lns-layerPanel-0 > lnsXY_splitDimensionPanel',
-          'swap'
+          'swap',
+          xyChartContainer
         );
 
         expect(await PageObjects.lens.getDimensionTriggersTexts('lns-layerPanel-0')).to.eql([
@@ -457,7 +467,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.dragDimensionToExtraDropType(
           'lns-layerPanel-0 > lnsXY_splitDimensionPanel  > lns-dimensionTrigger',
           'lns-layerPanel-1 > lnsXY_splitDimensionPanel',
-          'combine'
+          'combine',
+          xyChartContainer
         );
 
         expect(await PageObjects.lens.getDimensionTriggersTexts('lns-layerPanel-0')).to.eql([
