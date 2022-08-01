@@ -12,11 +12,14 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { IconButtonGroup, PrimaryButton } from '../buttons';
 import { ToolbarPopover } from '../popover';
 
+/** type for cases with both button or a popover could be used */
+export type Button =  typeof PrimaryButton | typeof ToolbarPopover;
+
 /** Specific type for the toolbar children in its props */
 interface NamedSlots {
-  primaryButton: ReactElement<typeof PrimaryButton | typeof ToolbarPopover>;
+  primaryButton: ReactElement<Button>;
   iconButtonGroup?: ReactElement<typeof IconButtonGroup>;
-  extraButtons?: Array<ReactElement<typeof PrimaryButton | typeof ToolbarPopover> | undefined>;
+  extraButtons?: Array<Button> | undefined;
 }
 
 /**
