@@ -131,8 +131,9 @@ const uploadPipeline = (pipelineContent: string | object) => {
       GITHUB_PR_LABELS.includes('ci:build-storybooks')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/storybooks.yml'));
-    
-      if (GITHUB_PR_LABELS.includes('ci:build-webpack-bundle-analyzer')) {
+    }
+
+    if (GITHUB_PR_LABELS.includes('ci:build-webpack-bundle-analyzer')) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/webpack_bundle_analyzer.yml'));
     }
 
