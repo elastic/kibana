@@ -59,7 +59,7 @@ export class CsvGenerator {
   private async scan(index: DataView, searchSource: ISearchSource, settings: CsvExportSettings) {
     const { scroll: scrollSettings, includeFrozen } = settings;
     const searchBody = searchSource.getSearchRequestBody();
-    this.logger.info(`executing search request`);
+    this.logger.info(`Executing search request...`);
     const searchParams = {
       params: {
         body: searchBody,
@@ -70,20 +70,35 @@ export class CsvGenerator {
       },
     };
 
-    const results = (
-      await lastValueFrom(this.clients.data.search(searchParams, { strategy: ES_SEARCH_STRATEGY }))
-    ).rawResponse as estypes.SearchResponse<unknown>;
+    let results: estypes.SearchResponse<unknown> | undefined;
+    try {
+      results = (
+        await lastValueFrom(
+          this.clients.data.search(searchParams, { strategy: ES_SEARCH_STRATEGY })
+        )
+      ).rawResponse as estypes.SearchResponse<unknown>;
+    } catch (err) {
+      this.logger.error(`CSV export scan error: ${err}`);
+      throw err;
+    }
 
     return results;
   }
 
   private async scroll(scrollId: string, scrollSettings: CsvExportSettings['scroll']) {
-    this.logger.info(`executing scroll request`);
+    this.logger.info(`Executing scroll request...`);
 
-    return await this.clients.es.asCurrentUser.scroll({
-      scroll: scrollSettings.duration,
-      scroll_id: scrollId,
-    });
+    let results: estypes.SearchResponse<unknown> | undefined;
+    try {
+      results = await this.clients.es.asCurrentUser.scroll({
+        scroll: scrollSettings.duration,
+        scroll_id: scrollId,
+      });
+    } catch (err) {
+      this.logger.error(`CSV export scroll error: ${err}`);
+      throw err;
+    }
+    return results;
   }
 
   /*
@@ -293,7 +308,7 @@ export class CsvGenerator {
           // open a scroll cursor in Elasticsearch
           results = await this.scan(index, searchSource, settings);
           scrollId = results?._scroll_id;
-          if (results.hits?.total != null) {
+          if (results?.hits?.total != null) {
             totalRecords = results.hits.total as number;
             this.logger.info(`Total search results: ${totalRecords}`);
           }
@@ -369,7 +384,7 @@ export class CsvGenerator {
     } finally {
       // clear scrollID
       if (scrollId) {
-        this.logger.info(`executing clearScroll request`);
+        this.logger.info(`Executing clearScroll request`);
         try {
           await this.clients.es.asCurrentUser.clearScroll({ scroll_id: [scrollId] });
         } catch (err) {
