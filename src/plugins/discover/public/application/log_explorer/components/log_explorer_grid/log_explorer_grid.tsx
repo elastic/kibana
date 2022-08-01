@@ -7,13 +7,17 @@
  */
 
 import {
+  EuiButtonIcon,
   EuiDataGrid,
   EuiDataGridColumn,
   EuiDataGridColumnVisibility,
+  EuiDataGridControlColumn,
   EuiDataGridProps,
   EuiDataGridRefProps,
   EuiDataGridStyle,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useSelector } from '@xstate/react';
 import classnames from 'classnames';
 import React, { useCallback, useRef } from 'react';
@@ -75,6 +79,7 @@ export function LogExplorerGrid() {
           columnVisibility={columnVisibility}
           data-test-subj="logExplorerGrid"
           gridStyle={gridStyle}
+          leadingControlColumns={controlColumns}
           ref={imperativeGridRef}
           rowCount={LOG_EXPLORER_VIRTUAL_GRID_ROWS}
           rowHeightsOptions={{
@@ -92,6 +97,23 @@ export function LogExplorerGrid() {
     </span>
   );
 }
+
+const controlColumns: EuiDataGridControlColumn[] = [
+  {
+    id: 'openDetails',
+    width: 24,
+    headerCellRender: () => (
+      <EuiScreenReaderOnly>
+        <span>
+          {i18n.translate('discover.controlColumnHeader', {
+            defaultMessage: 'Control column',
+          })}
+        </span>
+      </EuiScreenReaderOnly>
+    ),
+    rowCellRender: () => <EuiButtonIcon size="xs" iconSize="s" color="text" iconType="expand" />,
+  },
+];
 
 const columns: EuiDataGridColumn[] = [
   {
