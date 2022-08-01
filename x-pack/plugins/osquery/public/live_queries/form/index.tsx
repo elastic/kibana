@@ -17,7 +17,7 @@ import {
   EuiCard,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { pickBy, isEmpty, map, find } from 'lodash';
@@ -122,7 +122,14 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   const handleShowSaveQueryFlyout = useCallback(() => setShowSavedQueryFlyout(true), []);
   const handleCloseSaveQueryFlyout = useCallback(() => setShowSavedQueryFlyout(false), []);
 
-  const { data, isLoading, mutateAsync, isError, isSuccess } = useCreateLiveQuery({ onSuccess });
+  const {
+    data,
+    isLoading,
+    mutateAsync,
+    isError,
+    isSuccess,
+    reset: cleanupLiveQuery,
+  } = useCreateLiveQuery({ onSuccess });
 
   const { data: liveQueryDetails } = useLiveQueryDetails({
     actionId: data?.action_id,
@@ -271,6 +278,13 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     [permissions.readSavedQueries, permissions.runSavedQueries]
   );
 
+  const { data: packsData } = usePacks({});
+
+  const selectedPackData = useMemo(
+    () => (packId?.length ? find(packsData?.data, { id: packId[0] }) : null),
+    [packId, packsData]
+  );
+
   const submitButtonContent = useMemo(
     () => (
       <EuiFlexItem>
@@ -300,7 +314,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
                 !enabled ||
                 !agentSelected ||
                 (queryType === 'query' && !queryValueProvided) ||
-                (queryType === 'pack' && !packId) ||
+                (queryType === 'pack' &&
+                  (!packId || !selectedPackData?.attributes.queries.length)) ||
                 isSubmitting
               }
               onClick={submit}
@@ -325,6 +340,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       queryType,
       queryValueProvided,
       resultsStatus,
+      selectedPackData,
       submit,
     ]
   );
@@ -426,13 +442,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     }
   }, [defaultValue, updateFieldValues]);
 
-  const { data: packsData } = usePacks({});
-
-  const selectedPackData = useMemo(
-    () => (packId?.length ? find(packsData?.data, { id: packId[0] }) : null),
-    [packId, packsData]
-  );
-
   const queryCardSelectable = useMemo(
     () => ({
       onClick: () => setQueryType('query'),
@@ -452,11 +461,12 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   );
 
   const canRunPacks = useMemo(
-    () => !!(permissions.runSavedQueries && permissions.readPacks),
+    () =>
+      !!((permissions.runSavedQueries || permissions.writeLiveQueries) && permissions.readPacks),
     [permissions]
   );
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (defaultValue?.packId) {
       setQueryType('pack');
       const selectedPackOption = find(packsData?.data, ['id', defaultValue.packId]);
@@ -468,9 +478,11 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     }
   }, [defaultValue, packsData, updateFieldValues]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     setIsLive(() => !(liveQueryDetails?.status === 'completed'));
   }, [liveQueryDetails?.status]);
+
+  useEffect(() => cleanupLiveQuery(), [queryType, packId, cleanupLiveQuery]);
 
   return (
     <>
@@ -544,18 +556,19 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
               </EuiFlexItem>
               {submitButtonContent}
               <EuiSpacer />
-              {(liveQueryDetails?.queries?.length ||
-                selectedPackData?.attributes?.queries?.length) && (
+              {liveQueryDetails?.queries?.length ||
+              selectedPackData?.attributes?.queries?.length ? (
                 <>
                   <EuiFlexItem>
                     <PackQueriesStatusTable
                       actionId={actionId}
                       agentIds={agentIds}
                       data={liveQueryDetails?.queries ?? selectedPackData?.attributes?.queries}
+                      addToTimeline={addToTimeline}
                     />
                   </EuiFlexItem>
                 </>
-              )}
+              ) : null}
             </>
           ) : (
             <>
