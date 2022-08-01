@@ -13675,7 +13675,6 @@
     "xpack.fleet.upgradeAgents.hourLabel": "{option} {count, plural, other {時間}}",
     "xpack.fleet.upgradeAgents.scheduleUpgradeMultipleTitle": "{count, plural, other {{count}個のエージェント} =true {すべての選択されたエージェント}}のアップグレードをスケジュール",
     "xpack.fleet.upgradeAgents.startTimeLabel": "スケジュールされた日時",
-    "xpack.fleet.upgradeAgents.successMultiNotificationTitle": "{isMixed, select, true {{success}/{total}個の} other {{isAllAgents, select, true {すべての選択された} other {{success}} }}}エージェントをアップグレードしました",
     "xpack.fleet.upgradeAgents.successSingleNotificationTitle": "{count}個のエージェントをアップグレードしました",
     "xpack.fleet.upgradeAgents.upgradeMultipleDescription": "このアクションにより、複数のエージェントがバージョン{version}にアップグレードされます。このアクションは元に戻せません。続行していいですか？",
     "xpack.fleet.upgradeAgents.upgradeMultipleTitle": "{count, plural, other  {{count}個のエージェント} =true {すべての選択されたエージェント}}をアップグレード",

@@ -13683,7 +13683,6 @@
     "xpack.fleet.upgradeAgents.hourLabel": "{option} {count, plural, one {heure} other {heures}}",
     "xpack.fleet.upgradeAgents.scheduleUpgradeMultipleTitle": "Planifier la mise à niveau pour {count, plural, one {l'agent} other {{count} agents} =true {tous les agents sélectionnés}}",
     "xpack.fleet.upgradeAgents.startTimeLabel": "Date et heure sélectionnées",
-    "xpack.fleet.upgradeAgents.successMultiNotificationTitle": "{isMixed, select, true {{success} agents sur {total}} other {{isAllAgents, select, true {Tous les agents sélectionnés} other {{success}} }}} mis à niveau",
     "xpack.fleet.upgradeAgents.successSingleNotificationTitle": "{count} agent mis à niveau",
     "xpack.fleet.upgradeAgents.upgradeMultipleDescription": "Cette action met à niveau plusieurs agents vers la version {version}. Impossible d'annuler cette action. Voulez-vous vraiment continuer ?",
     "xpack.fleet.upgradeAgents.upgradeMultipleTitle": "Mettre à niveau {count, plural, one {l'agent} other {{count} agents} =true {tous les agents sélectionnés}}",
