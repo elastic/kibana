@@ -32,7 +32,7 @@
   color: $euiTextSubduedColor;
   text-decoration: line-through;
   margin-left: $euiSizeS;
-  font-weight: 300;
+  font-weight: $euiFontWeightLight;
 }
 
 .optionsList__ignoredBadge {
