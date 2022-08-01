@@ -7,15 +7,19 @@ source .buildkite/scripts/common/util.sh
 export KBN_NP_PLUGINS_BUILT=true
 
 echo "--- Build Kibana Distribution"
+
+BUILD_ARGS=""
 if is_pr_with_label "ci:build-all-platforms"; then
-  node scripts/build --all-platforms --skip-os-packages
-elif is_pr_with_label "ci:build-os-packages"; then
-  node scripts/build --all-platforms --docker-cross-compile
-elif is_pr_with_label "ci:build-canvas-shareable-runtime"
-  node scripts/build
-elif
-  node scripts/build --skip-canvas-shareable-runtime
+  BUILD_ARGS="--all-platforms --skip-os-packages"
 fi
+if is_pr_with_label "ci:build-os-packages"; then
+  BUILD_ARGS="--all-platforms --docker-cross-compile"
+fi
+if ! is_pr_with_label "ci:build-canvas-shareable-runtime"
+  BUILD_ARGS="$BUILD_ARGS --skip-canvas-shareable-runtime"
+fi
+
+node scripts/build "$BUILD_ARGS"
 
 if is_pr_with_label "ci:build-cloud-image"; then
   echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
