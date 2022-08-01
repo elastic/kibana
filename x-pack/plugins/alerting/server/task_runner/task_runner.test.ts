@@ -15,6 +15,8 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
   RuleExecutionStatusWarningReasons,
+  SummaryOf,
+  NotifyWhen,
 } from '../types';
 import {
   ConcreteTaskInstance,
@@ -249,7 +251,6 @@ describe('Task Runner', () => {
     expect(call.rule.updatedBy).toBe('rule-updater');
     expect(call.rule.createdAt).toBe(mockDate);
     expect(call.rule.updatedAt).toBe(mockDate);
-    expect(call.rule.notifyWhen).toBe('onActiveAlert');
     expect(call.rule.throttle).toBe(null);
     expect(call.rule.producer).toBe('alerts');
     expect(call.rule.ruleTypeId).toBe('test');
@@ -706,7 +707,6 @@ describe('Task Runner', () => {
       rulesClient.get.mockResolvedValue({
         ...mockedRuleTypeSavedObject,
         mutedInstanceIds: ['2'],
-        notifyWhen: 'onActionGroupChange',
       });
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
       await taskRunner.run();
@@ -762,7 +762,6 @@ describe('Task Runner', () => {
 
     rulesClient.get.mockResolvedValue({
       ...mockedRuleTypeSavedObject,
-      notifyWhen: 'onActionGroupChange',
     });
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
     await taskRunner.run();
@@ -830,7 +829,6 @@ describe('Task Runner', () => {
 
       rulesClient.get.mockResolvedValue({
         ...mockedRuleTypeSavedObject,
-        notifyWhen: 'onActionGroupChange',
       });
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
 
@@ -911,7 +909,6 @@ describe('Task Runner', () => {
 
       rulesClient.get.mockResolvedValue({
         ...mockedRuleTypeSavedObject,
-        notifyWhen: 'onActionGroupChange',
       });
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
       await taskRunner.run();
@@ -1299,6 +1296,12 @@ describe('Task Runner', () => {
             params: {
               foo: true,
             },
+            isSummary: false,
+            summaryOf: SummaryOf.SINGLE_RUN,
+            actionThrottle: null,
+            actionThrottleUnit: null,
+            notifyWhen: NotifyWhen.ONCE,
+            lastTriggerDate: null,
           },
           {
             group: recoveryActionGroup.id,
@@ -1307,6 +1310,12 @@ describe('Task Runner', () => {
             params: {
               isResolved: true,
             },
+            isSummary: false,
+            summaryOf: SummaryOf.SINGLE_RUN,
+            actionThrottle: null,
+            actionThrottleUnit: null,
+            notifyWhen: NotifyWhen.ONCE,
+            lastTriggerDate: null,
           },
         ],
       });
@@ -1922,7 +1931,6 @@ describe('Task Runner', () => {
 
     rulesClient.get.mockResolvedValue({
       ...mockedRuleTypeSavedObject,
-      notifyWhen: 'onActionGroupChange',
       actions: [],
     });
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
@@ -2028,7 +2036,6 @@ describe('Task Runner', () => {
 
     rulesClient.get.mockResolvedValue({
       ...mockedRuleTypeSavedObject,
-      notifyWhen: 'onActionGroupChange',
       actions: [],
     });
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
@@ -2102,7 +2109,6 @@ describe('Task Runner', () => {
 
     rulesClient.get.mockResolvedValue({
       ...mockedRuleTypeSavedObject,
-      notifyWhen: 'onActionGroupChange',
       actions: [],
     });
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
@@ -2171,7 +2177,6 @@ describe('Task Runner', () => {
 
     rulesClient.get.mockResolvedValue({
       ...mockedRuleTypeSavedObject,
-      notifyWhen: 'onActionGroupChange',
       actions: [],
     });
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
@@ -2245,7 +2250,6 @@ describe('Task Runner', () => {
 
     rulesClient.get.mockResolvedValue({
       ...mockedRuleTypeSavedObject,
-      notifyWhen: 'onActionGroupChange',
       actions: [],
     });
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
@@ -2319,7 +2323,6 @@ describe('Task Runner', () => {
     expect(call.rule.updatedBy).toBe('rule-updater');
     expect(call.rule.createdAt).toBe(mockDate);
     expect(call.rule.updatedAt).toBe(mockDate);
-    expect(call.rule.notifyWhen).toBe('onActiveAlert');
     expect(call.rule.throttle).toBe(null);
     expect(call.rule.producer).toBe('alerts');
     expect(call.rule.ruleTypeId).toBe('test');

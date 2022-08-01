@@ -14,9 +14,8 @@ import { mockHandlerArguments } from './_mock_handler_arguments';
 import { UpdateOptions } from '../rules_client';
 import { rulesClientMock } from '../rules_client.mock';
 import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
-import { RuleNotifyWhenType } from '../../common';
 import { AsApiContract } from './lib';
-import { PartialRule } from '../types';
+import { NotifyWhen, PartialRule, SummaryOf } from '../types';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../lib/license_api_access', () => ({
@@ -48,19 +47,29 @@ describe('updateRuleRoute', () => {
         params: {
           baz: true,
         },
+        isSummary: false,
+        summaryOf: SummaryOf.SINGLE_RUN,
+        actionThrottle: null,
+        actionThrottleUnit: null,
+        notifyWhen: NotifyWhen.ONCE,
+        lastTriggerDate: null,
       },
     ],
-    notifyWhen: 'onActionGroupChange' as RuleNotifyWhenType,
   };
 
   const updateRequest: AsApiContract<UpdateOptions<{ otherField: boolean }>['data']> = {
     ...pick(mockedAlert, 'name', 'tags', 'schedule', 'params', 'throttle'),
-    notify_when: mockedAlert.notifyWhen,
     actions: [
       {
         group: mockedAlert.actions[0].group,
         id: mockedAlert.actions[0].id,
         params: mockedAlert.actions[0].params,
+        is_summary: false,
+        summary_of: SummaryOf.SINGLE_RUN,
+        action_throttle: null,
+        action_throttle_unit: null,
+        notify_when: NotifyWhen.ONCE,
+        last_trigger_date: null,
       },
     ],
   };
@@ -71,9 +80,15 @@ describe('updateRuleRoute', () => {
     updated_at: mockedAlert.updatedAt,
     created_at: mockedAlert.createdAt,
     rule_type_id: mockedAlert.alertTypeId,
-    actions: mockedAlert.actions.map(({ actionTypeId, ...rest }) => ({
+    actions: mockedAlert.actions.map(({ actionTypeId, isSummary, ...rest }) => ({
       ...rest,
       connector_type_id: actionTypeId,
+      is_summary: isSummary,
+      summary_of: SummaryOf.SINGLE_RUN,
+      action_throttle: null,
+      action_throttle_unit: null,
+      notify_when: NotifyWhen.ONCE,
+      last_trigger_date: null,
     })),
   };
 

@@ -27,6 +27,7 @@ const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({ actions, ...
       summaryOf,
       actionThrottle,
       actionThrottleUnit,
+      lastTriggerDate,
     }) => ({
       group,
       id,
@@ -36,6 +37,7 @@ const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({ actions, ...
       summary_of: summaryOf,
       action_throttle: actionThrottle,
       action_throttle_unit: actionThrottleUnit,
+      last_trigger_date: lastTriggerDate,
     })
   ),
 });

@@ -11,6 +11,7 @@ import {
   RuleExecutionStatusValues,
   RuleExecutionStatusWarningReasons,
   RawRuleExecutionStatus,
+  RuleAction,
 } from '../types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
@@ -22,6 +23,7 @@ import { RuleRunMetrics } from './rule_run_metrics_store';
 export interface IExecutionStatusAndMetrics {
   status: RuleExecutionStatus;
   metrics: RuleRunMetrics | null;
+  actions: RuleAction[];
 }
 
 export function executionStatusFromState(
@@ -52,6 +54,7 @@ export function executionStatusFromState(
       }),
     },
     metrics: stateWithMetrics.metrics,
+    actions: stateWithMetrics.actions,
   };
 }
 
@@ -69,6 +72,7 @@ export function executionStatusFromError(
       },
     },
     metrics: null,
+    actions: [],
   };
 }
 

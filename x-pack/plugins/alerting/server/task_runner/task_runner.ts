@@ -206,11 +206,11 @@ export class TaskRunner<
         return getDefaultRuleMonitoring();
       }) ?? getDefaultRuleMonitoring();
 
-    const { status: executionStatus, metrics: executionMetrics } = map<
-      RuleTaskStateAndMetrics,
-      ElasticsearchError,
-      IExecutionStatusAndMetrics
-    >(
+    const {
+      status: executionStatus,
+      metrics: executionMetrics,
+      actions: triggeredActions,
+    } = map<RuleTaskStateAndMetrics, ElasticsearchError, IExecutionStatusAndMetrics>(
       stateWithMetrics,
       (ruleRunStateWithMetrics) => executionStatusFromState(ruleRunStateWithMetrics, runDate),
       (err: ElasticsearchError) => executionStatusFromError(err, runDate)
@@ -275,6 +275,7 @@ export class TaskRunner<
       await this.updateRuleSavedObject(ruleId, namespace, {
         executionStatus: ruleExecutionStatusToRaw(executionStatus),
         monitoring: ruleMonitoring,
+        actions: triggeredActions,
       });
     }
 
@@ -376,13 +377,18 @@ export class TaskRunner<
     );
     await this.updateRuleSavedObject(ruleId, namespace, {
       executionStatus: ruleExecutionStatusToRaw(executionStatus),
+      actions: [],
     });
   }
 
   private async updateRuleSavedObject(
     ruleId: string,
     namespace: string | undefined,
-    attributes: { executionStatus?: RawRuleExecutionStatus; monitoring?: RuleMonitoring }
+    attributes: {
+      executionStatus?: RawRuleExecutionStatus;
+      monitoring?: RuleMonitoring;
+      actions: RuleAction[];
+    }
   ) {
     const client = this.context.internalSavedObjectsRepository;
 
@@ -655,6 +661,8 @@ export class TaskRunner<
       await this.markRuleAsSnoozed(rule.id, rulesClient);
     }
 
+    let actionsToReturn: Array<Omit<RuleAction, 'id' | 'ref'>> = [];
+
     if (!ruleIsSnoozed && this.shouldLogAndScheduleActionsForAlerts()) {
       const actionsStore: ActionsStore = {};
 
@@ -666,8 +674,6 @@ export class TaskRunner<
         rule,
         alerts: recoveredAlerts,
       });
-
-      // rulesClient.update({})
 
       // Active alerts
       const activeAlertsActions = this.getActiveAlertsActions({
@@ -705,6 +711,17 @@ export class TaskRunner<
         ruleId,
         fakeRequest,
       });
+
+      actionsToReturn = rule.actions.map((action) => {
+        return omit(
+          {
+            ...action,
+            lastTriggerDate: actionsStore[action.ref!]?.lastTriggerDate || action.lastTriggerDate,
+            actionRef: action.ref,
+          },
+          ['id', 'ref']
+        );
+      });
     } else {
       if (ruleIsSnoozed) {
         this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is snoozed.`);
@@ -723,6 +740,7 @@ export class TaskRunner<
     }
 
     const alertsToReturn: Record<string, RawAlertInstance> = {};
+
     for (const id in activeAlerts) {
       if (activeAlerts.hasOwnProperty(id)) {
         alertsToReturn[id] = activeAlerts[id].toRaw();
@@ -733,6 +751,7 @@ export class TaskRunner<
       metrics: ruleRunMetricsStore.getMetrics(),
       alertTypeState: updatedRuleTypeState || undefined,
       alertInstances: alertsToReturn,
+      actions: actionsToReturn,
     };
   }
 
@@ -882,7 +901,7 @@ export class TaskRunner<
     apiKey: string | null;
     ruleId: string;
     fakeRequest: KibanaRequest;
-  }) {
+  }): Promise<void> {
     const actionsClient = await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest);
     let ephemeralActionsToSchedule = this.context.maxEphemeralActionsPerRule;
 
@@ -912,16 +931,13 @@ export class TaskRunner<
         if (this.context.supportsEphemeralTasks && ephemeralActionsToSchedule > 0) {
           ephemeralActionsToSchedule--;
           try {
-            this.logger.info('triggered');
             return await actionsClient.ephemeralEnqueuedExecution(enqueueOptions);
           } catch (err) {
-            this.logger.info('err');
             if (isEphemeralTaskRejectedDueToCapacityError(err)) {
               return await actionsClient.enqueueExecution(enqueueOptions);
             }
           }
         } else {
-          this.logger.info('else triggered');
           return await actionsClient.enqueueExecution(enqueueOptions);
         }
       })
@@ -1006,7 +1022,12 @@ export class TaskRunner<
         ruleRunMetricsStore.incrementNumberOfTriggeredActions();
         ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(action.actionTypeId);
 
-        actionsStore[action.ref!] = { isSummary: Boolean(action.isSummary) };
+        actionsStore[action.ref!] = {
+          isSummary: Boolean(action.isSummary),
+          lastTriggerDate: new Date().toISOString(),
+        };
+
+        // here we can fetch alerts
 
         actionsToTrigger.push({
           ...action,
@@ -1032,7 +1053,7 @@ export class TaskRunner<
                 state,
                 kibanaBaseUrl: this.context.kibanaBaseUrl,
                 alertParams: rule.params,
-                alerts,
+                ...(action.isSummary && { alerts }),
               }),
               actionTypeId: action.actionTypeId,
             }),

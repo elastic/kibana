@@ -67,6 +67,9 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
         actionThrottleUnit: {
           type: 'keyword',
         },
+        lastTriggerDate: {
+          type: 'date',
+        },
         params: {
           enabled: false,
           type: 'object',

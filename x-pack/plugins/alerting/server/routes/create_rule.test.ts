@@ -15,7 +15,7 @@ import { CreateOptions } from '../rules_client';
 import { rulesClientMock } from '../rules_client.mock';
 import { RuleTypeDisabledError } from '../lib';
 import { AsApiContract } from './lib';
-import { NotifyWhen, SanitizedRule, SummaryOf, ThrottleUnit } from '../types';
+import { NotifyWhen, SanitizedRule, SummaryOf } from '../types';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 
@@ -53,9 +53,10 @@ describe('createRuleRoute', () => {
         },
         isSummary: false,
         summaryOf: SummaryOf.SINGLE_RUN,
-        actionThrottle: 1,
-        actionThrottleUnit: ThrottleUnit.HOUR,
+        actionThrottle: null,
+        actionThrottleUnit: null,
         notifyWhen: NotifyWhen.ONCE,
+        lastTriggerDate: null,
       },
     ],
     enabled: true,
@@ -64,7 +65,6 @@ describe('createRuleRoute', () => {
     updatedBy: '',
     apiKeyOwner: '',
     mutedInstanceIds: [],
-    notifyWhen: 'onActionGroupChange',
     createdAt,
     updatedAt,
     id: '123',
@@ -77,7 +77,6 @@ describe('createRuleRoute', () => {
   const ruleToCreate: AsApiContract<CreateOptions<{ bar: boolean }>['data']> = {
     ...pick(mockedAlert, 'consumer', 'name', 'schedule', 'tags', 'params', 'throttle', 'enabled'),
     rule_type_id: mockedAlert.alertTypeId,
-    notify_when: mockedAlert.notifyWhen,
     actions: [
       {
         group: mockedAlert.actions[0].group,
@@ -88,6 +87,7 @@ describe('createRuleRoute', () => {
         action_throttle: mockedAlert.actions[0].actionThrottle,
         action_throttle_unit: mockedAlert.actions[0].actionThrottleUnit,
         notify_when: mockedAlert.actions[0].notifyWhen,
+        last_trigger_date: mockedAlert.actions[0].lastTriggerDate,
       },
     ],
   };

@@ -137,6 +137,10 @@ export const ActionTypeForm = ({
     actionItem.actionThrottleUnit || ThrottleUnit.HOUR
   );
 
+  const [lastTriggerDate] = useState<RuleAction['lastTriggerDate']>(
+    actionItem.lastTriggerDate || null
+  );
+
   useEffect(() => {
     setAvailableActionVariables(
       messageVariables ? getAvailableActionVariables(messageVariables, selectedActionGroup) : []
@@ -193,6 +197,11 @@ export const ActionTypeForm = ({
     setActionProperty('summaryOf', summaryOf, index);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [summaryOf]);
+
+  useEffect(() => {
+    setActionProperty('lastTriggerDate', lastTriggerDate, index);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastTriggerDate]);
 
   const canSave = hasSaveActionsCapability(capabilities);
 

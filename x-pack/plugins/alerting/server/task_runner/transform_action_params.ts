@@ -32,7 +32,7 @@ interface TransformActionParamsOptions {
   state: AlertInstanceState;
   kibanaBaseUrl?: string;
   context: AlertInstanceContext;
-  alerts: Alert[];
+  alerts?: Alert[];
 }
 
 export function transformActionParams({

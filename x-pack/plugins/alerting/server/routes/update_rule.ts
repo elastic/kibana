@@ -177,7 +177,7 @@ export const updateRuleRoute = (
                       notify_when: act.notify_when as NotifyWhen,
                       action_throttle: act.action_throttle as number,
                       action_throttle_unit: act.action_throttle_unit as ThrottleUnit,
-                      last_trigger_date: null,
+                      last_trigger_date: act.last_trigger_date,
                     };
                   }),
                 },
