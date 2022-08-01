@@ -22462,7 +22462,6 @@
     "xpack.osquery.agents.policyLabel": "Politique",
     "xpack.osquery.agents.selectAgentLabel": "Sélectionner les agents ou les groupes à interroger",
     "xpack.osquery.agents.selectionLabel": "Agents",
-    "xpack.osquery.all_actions.fetchError": "Erreur lors de la récupération des actions",
     "xpack.osquery.appNavigation.liveQueriesLinkText": "Recherches en direct",
     "xpack.osquery.appNavigation.manageIntegrationButton": "Gérer l'intégration",
     "xpack.osquery.appNavigation.packsLinkText": "Packs",
