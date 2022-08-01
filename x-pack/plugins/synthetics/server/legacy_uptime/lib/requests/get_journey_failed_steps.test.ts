@@ -6,7 +6,7 @@
  */
 
 import { getJourneyFailedSteps } from './get_journey_failed_steps';
-import { mockSearchResult } from './helper';
+import { mockSearchResult } from './test_helpers';
 
 describe('getJourneyFailedSteps', () => {
   let mockData: unknown;
