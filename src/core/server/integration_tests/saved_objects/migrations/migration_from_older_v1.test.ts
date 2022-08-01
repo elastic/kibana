@@ -14,8 +14,8 @@ import { REPO_ROOT } from '@kbn/utils';
 import { Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
-import { SavedObjectsRawDoc } from '../../../saved_objects/serialization';
 import { InternalCoreStart } from '../../../internal_types';
 import { Root } from '../../../root';
 
