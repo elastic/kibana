@@ -121,6 +121,7 @@ const FieldEditorFlyoutContentComponent = ({
         });
       } else {
         if (updatedField.type === 'composite' && subfields) {
+          // merge subfields into the updated field
           updatedField.fields = fieldTypeMapToRuntimeSpecFormat(subfields);
         }
         onSave(updatedField);
