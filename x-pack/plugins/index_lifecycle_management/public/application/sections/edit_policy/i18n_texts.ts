@@ -107,6 +107,12 @@ export const i18nTexts = {
         defaultMessage: 'Maximum primary shard size',
       }
     ),
+    maxPrimaryShardDocsLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.hotPhase.maximumPrimaryShardDocsLabel',
+      {
+        defaultMessage: 'Maximum docs in the primary shard',
+      }
+    ),
     maxPrimaryShardSizeUnitsLabel: i18n.translate(
       'xpack.indexLifecycleMgmt.editPolicy.maximumPrimaryShardSizeAriaLabel',
       {
@@ -154,6 +160,12 @@ export const i18nTexts = {
         'xpack.indexLifecycleMgmt.editPolicy.errors.maximumPrimaryShardSizeMissingError',
         {
           defaultMessage: 'A maximum primary shard size is required',
+        }
+      ),
+      maximumPrimaryShardDocsRequiredMessage: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.errors.maximumPrimaryShardDocsMissingError',
+        {
+          defaultMessage: 'Maximum documents in the primary shard is required',
         }
       ),
       rollOverConfigurationCallout: {
