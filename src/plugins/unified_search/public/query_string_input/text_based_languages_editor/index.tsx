@@ -35,7 +35,12 @@ import {
   EDITOR_MIN_HEIGHT,
 } from './text_based_languages_editor.styles';
 import { MemoizedDocumentation, DocumentationSections } from './documentation';
-import { useDebounceWithOptions, parseErrors, getDocumentationSections } from './helpers';
+import {
+  useDebounceWithOptions,
+  parseErrors,
+  getInlineEditorText,
+  getDocumentationSections,
+} from './helpers';
 import { EditorFooter } from './editor_footer';
 
 import './overwrite.scss';
@@ -228,8 +233,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         if (hasLines && !updateLinesFromModel) {
           setLines(queryString.split(/\r|\n/).length);
         }
-        const trimmedText = queryString.replace(/\r?\n|\r/g, '');
-        const text = hasLines ? trimmedText : queryString;
+        const text = getInlineEditorText(queryString, Boolean(hasLines));
         const queryLength = text.length;
         const unusedSpace =
           errors && errors.length

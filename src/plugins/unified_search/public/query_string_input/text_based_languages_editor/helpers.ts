@@ -132,3 +132,8 @@ export const getDocumentationSections = async (language: string) => {
     };
   }
 };
+
+export const getInlineEditorText = (queryString: string, isMultiLine: boolean) => {
+  const trimmedText = queryString.replace(/\r?\n|\r/g, ' ').replace(/  +/g, ' ');
+  return isMultiLine ? trimmedText : queryString;
+};
