@@ -72,6 +72,7 @@ async function copySource() {
           '**/node_modules/**',
           '**/public/**/*.{js,ts,tsx,json,scss}',
           '**/{test,__tests__,__mocks__,__snapshots__,__fixtures__,__jest__,cypress,fixtures}/**',
+          '**/dev_docs}/**',
           'plugins/*/target/**',
           'plugins/canvas/shareable_runtime/test/**',
           'plugins/screenshotting/chromium/**',
@@ -79,6 +80,9 @@ async function copySource() {
           'plugins/apm/ftr_e2e/**',
           'plugins/apm/scripts/**',
           'plugins/lists/server/scripts/**',
+          'plugins/cases/images/**', // docs
+          'plugins/security_solution/public/common/images', // loaded via webpack
+          'plugins/apm/public/images/', // loaded via webpack
           ...xpackBazelPackages,
         ],
         allowEmpty: true,
