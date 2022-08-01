@@ -401,7 +401,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
 
     if (currentApiCall !== previewCount.current) {
       // Discard this response as there is another one inflight
-      // or we have called reset() and don't need the response anymore.
+      // or we have called reset() and no longer need the response.
       return;
     }
 
@@ -476,7 +476,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   }, [currentIdx, totalDocs]);
 
   const reset = useCallback(() => {
-    // By resetting the previewCount we will discard any inflight
+    // By resetting the previewCount we will discard previous inflight
     // API call response coming in after calling reset() was called
     previewCount.current = 0;
 
@@ -605,7 +605,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   }, [currentDocument, updateParams]);
 
   /**
-   * Whenever the name changes we immediately update the preview
+   * Whenever the name or the format changes we immediately update the preview
    */
   useEffect(() => {
     setPreviewResponse((prev) => {
@@ -615,7 +615,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         let key = name ?? '';
 
         if (type === 'composite') {
-          // todo find better way
+          // restore initial key segement (the parent name), which was not returned
           const { 1: fieldName } = field.key.split('.');
           key = `${name ?? ''}.${fieldName}`;
         }
@@ -714,7 +714,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   }, [scriptEditorValidation, script?.source, setPreviewError, clearPreviewError]);
 
   /**
-   * Whenever updatePreview() changes (meaning whenever a params changes)
+   * Whenever updatePreview() changes (meaning whenever a param changes)
    * we call it to update the preview response with the field(s) value or possible error.
    */
   useDebounce(updatePreview, 500, [updatePreview]);
