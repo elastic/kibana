@@ -666,7 +666,6 @@ describe('IndexPattern Data Panel', () => {
                 {
                   name: '_id',
                   displayName: '_id',
-                  meta: true,
                   type: 'string',
                   searchable: true,
                   aggregatable: true,
