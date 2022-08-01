@@ -107,11 +107,9 @@ exports[`<Toolbar /> is rendered 1`] = `
 >
   <EuiFlexGroup
     gutterSize="s"
-    id="kbnPresentationToolbar__solutionToolbar"
   >
     <div
       className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
-      id="kbnPresentationToolbar__solutionToolbar"
     >
       <EuiFlexItem
         grow={false}
