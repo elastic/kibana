@@ -33,7 +33,7 @@ export interface LinkItem {
    *
    * The format of defining features supports OR and AND mechanism. To specify features in an OR fashion
    * they can be defined in a single level array like: [requiredFeature1, requiredFeature2]. If either of these features
-   * is satisfied the link will be included. To require that the features be AND'd together a second level array
+   * is satisfied the link would be included. To require that the features be AND'd together a second level array
    * can be specified: [feature1, [feature2, feature3]] this would result in feature1 || (feature2 && feature3). To specify
    * features that all must be and'd together an example would be: [[feature1, feature2]], this would result in the boolean
    * operation feature1 && feature2.
@@ -56,14 +56,14 @@ export interface LinkItem {
   experimentalKey?: keyof ExperimentalFeatures;
   /**
    * Global navigation position number.
-   * Define this property only if the link needs to be visible in
-   * the Security section within the Kibana collapsible global navigation
+   * Define this property only if the link needs to be visible within
+   * the Security section of the Kibana collapsible global navigation
    */
   globalNavPosition?: number;
   /**
    * Disables link in the global search. Defaults to false.
    */
-  globalSearchDisabled?: true;
+  globalSearchDisabled?: boolean;
   /**
    * Keywords for the global search to search.
    */
@@ -71,7 +71,7 @@ export interface LinkItem {
   /**
    * Disables the timeline call to action on the bottom of the page. Defaults to false.
    */
-  hideTimeline?: true;
+  hideTimeline?: boolean;
   /**
    * Experimental flag needed to disable the link. Opposite of experimentalKey
    */
@@ -81,9 +81,9 @@ export interface LinkItem {
    */
   id: SecurityPageName;
   /**
-   * Displays the "Beta" badge
+   * Displays the "Beta" badge. Defaults to false.
    */
-  isBeta?: true;
+  isBeta?: boolean;
   /**
    * Icon that is displayed on menu navigation landing page.
    * Only required for pages that are displayed inside a landing page.
@@ -109,11 +109,11 @@ export interface LinkItem {
   /**
    * Disables link in the side navigation. Defaults to false.
    */
-  sideNavDisabled?: true;
+  sideNavDisabled?: boolean;
   /**
    * Disables the state query string in the URL. Defaults to false.
    */
-  skipUrlState?: true;
+  skipUrlState?: boolean;
   /**
    * Title of the link
    */
