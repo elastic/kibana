@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
@@ -21,18 +22,38 @@ const stub = () => void 0;
 
 export function WithIndicators() {
   return (
+    <KibanaContextProvider>
+      <IndicatorsTable
+        firstLoad={false}
+        loading={false}
+        pagination={{
+          pageSize: 10,
+          pageIndex: 0,
+          pageSizeOptions: [10, 25, 50],
+        }}
+        indicators={indicatorsFixture}
+        onChangePage={stub}
+        onChangeItemsPerPage={stub}
+        indicatorCount={indicatorsFixture.length * 2}
+      />
+    </KibanaContextProvider>
+  );
+}
+
+export function WithNoIndicators() {
+  return (
     <IndicatorsTable
-      loadData={stub}
       firstLoad={false}
       pagination={{
         pageSize: 10,
         pageIndex: 0,
         pageSizeOptions: [10, 25, 50],
       }}
-      indicators={indicatorsFixture}
+      indicators={[]}
       onChangePage={stub}
       onChangeItemsPerPage={stub}
-      indicatorCount={indicatorsFixture.length * 2}
+      indicatorCount={0}
+      loading={false}
     />
   );
 }
