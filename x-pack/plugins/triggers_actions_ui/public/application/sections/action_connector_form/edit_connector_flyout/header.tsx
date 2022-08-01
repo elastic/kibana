@@ -119,14 +119,6 @@ const FlyoutHeaderComponent: React.FC<{
             </EuiFlexGroup>
           )}
         </EuiFlexItem>
-        {isExperimental && (
-          <EuiFlexItem grow={false}>
-            <EuiBetaBadge
-              label={betaBadgeProps.label}
-              tooltipContent={betaBadgeProps.tooltipContent}
-            />
-          </EuiFlexItem>
-        )}
       </EuiFlexGroup>
       <EuiTabs
         className="connectorEditFlyoutTabs"

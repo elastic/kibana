@@ -167,14 +167,6 @@ const ConnectorAddModal = ({
                 )}
               </EuiFlexGroup>
             </EuiFlexItem>
-            {actionTypeModel && actionTypeModel.isExperimental && (
-              <EuiFlexItem className="betaBadgeFlexItem" grow={false}>
-                <EuiBetaBadge
-                  label={betaBadgeProps.label}
-                  tooltipContent={betaBadgeProps.tooltipContent}
-                />
-              </EuiFlexItem>
-            )}
           </EuiFlexGroup>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
