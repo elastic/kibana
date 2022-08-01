@@ -54,7 +54,7 @@ function shutdown {
   echo "--- Shutdown deployment"
   # Re-fetch the deployment ID - if there's an error during creation the ID may not be set
   CLOUD_DEPLOYMENT_ID=$(ecctl deployment list --output json | jq -r '.deployments[] | select(.name == "'$CLOUD_DEPLOYMENT_NAME'") | .id')
-  if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
+  if [ -n "${CLOUD_DEPLOYMENT_ID}" ]; then
     ecctl deployment shutdown "$CLOUD_DEPLOYMENT_ID" --force --track --output json > "$LOGS"
   fi
 }
