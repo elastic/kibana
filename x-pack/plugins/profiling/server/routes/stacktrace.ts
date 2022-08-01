@@ -145,6 +145,8 @@ export function decodeStackTrace(input: EncodedStackTrace): StackTrace {
     const frameID = input.FrameID.slice(i, i + BASE64_FRAME_ID_LENGTH);
     const fileIDChunk = frameID.slice(0, BASE64_FILE_ID_LENGTH);
     const fileID = fileIDChunkToFileIDCache.get(fileIDChunk) as string;
+
+    // the frames are stored in reverse order, leaf frame first
     const j = countsFrameIDs - Math.floor(i / BASE64_FRAME_ID_LENGTH) - 1;
 
     frameIDs[j] = frameID;
