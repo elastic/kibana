@@ -77,7 +77,7 @@ describe('ALL - Add Integration', () => {
     cy.contains('osquery_manager-');
   });
 
-  it.skip('should have integration and packs copied when upgrading integration', () => {
+  it('should have integration and packs copied when upgrading integration', () => {
     const packageName = 'osquery_manager';
     const oldVersion = '1.2.0';
     const newVersion = '1.3.1';

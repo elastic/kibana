@@ -1,0 +1,39 @@
+{
+  "attributes": {
+    "created_at": "2022-08-01T08:01:50.452Z",
+    "created_by": "elastic",
+    "description": "",
+    "enabled": true,
+    "name": "Example",
+    "queries": [
+      {
+        "ecs_mapping": [],
+        "id": "system_memory_linux_elastic",
+        "interval": 3600,
+        "platform": "linux",
+        "query": "SELECT * FROM memory_info;"
+      },
+      {
+        "ecs_mapping": [],
+        "id": "system_info_elastic",
+        "interval": 3600,
+        "platform": "linux,windows,darwin",
+        "query": "SELECT * FROM system_info;"
+      },
+      {
+      "ecs_mapping": [],
+      "id": "failingQuery",
+      "interval": 10,
+      "query": "select opera_extensions.* from users join opera_extensions using (uid);"
+      }
+    ],
+    "updated_at": "2022-08-01T08:07:54.950Z",
+    "updated_by": "elastic"
+  },
+  "coreMigrationVersion": "8.5.0",
+  "id": "32cae340-1170-11ed-9ac3-9feb91078661",
+  "references": [],
+  "type": "osquery-pack",
+  "updated_at": "2022-08-01T08:07:54.956Z",
+  "version": "WzQ4NTksMV0="
+}

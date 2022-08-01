@@ -97,7 +97,28 @@ describe('ALL - Packs', () => {
       cy.contains('ID must be unique').should('exist');
       cy.react('EuiFlyoutFooter').react('EuiButtonEmpty').contains('Cancel').click();
     });
-    it.skip('should open lens in new tab', () => {
+
+    it('should verify that packs are triggered', () => {
+      cy.waitForReact();
+      preparePack(PACK_NAME);
+      cy.contains(`${PACK_NAME} details`).should('exist');
+
+      cy.getBySel('docsLoading').should('exist');
+      cy.getBySel('docsLoading').should('not.exist');
+      cy.react('ScheduledQueryLastResults').within(() => {
+        cy.react('FormattedRelative');
+      });
+
+      cy.react('DocsColumnResults').within(() => {
+        cy.react('EuiNotificationBadge').contains('1');
+      });
+      cy.react('AgentsColumnResults').within(() => {
+        cy.react('EuiNotificationBadge').contains('1');
+      });
+      cy.getBySel('packResultsErrorsEmpty').should('have.length', 2);
+    });
+
+    it('should open lens in new tab', () => {
       let lensUrl = '';
       cy.window().then((win) => {
         cy.stub(win, 'open')
