@@ -50,15 +50,21 @@ export function findFixedIntervalForBucketsPerTimeRange(
   return `${interval}s`;
 }
 
-export function aggregateByFieldAndTimestamp(searchField: string, interval: string) {
+export function aggregateByFieldAndTimestamp(
+  searchField: string,
+  highCardinality: boolean,
+  interval: string
+) {
+  // 'execution_hint: map' skips the slow building of ordinals that we don't need.
+  // Especially with high cardinality fields, this setting speeds up the aggregation.
+  const executionHint = highCardinality ? 'map' : 'global_ordinals';
+
   return {
     terms: {
       field: searchField,
       order: { count: 'desc' },
       size: 100,
-      // 'execution_hint: map' skips the slow building of ordinals that we don't need.
-      // Especially with high cardinality fields, this setting speeds up the aggregation.
-      execution_hint: 'map',
+      execution_hint: executionHint,
     },
     aggs: {
       group_by: {

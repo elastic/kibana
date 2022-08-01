@@ -57,6 +57,7 @@ describe('TopN data from Elasticsearch', () => {
         timeFrom: 456,
         timeTo: 789,
         searchField: 'StackTraceID',
+        highCardinality: false,
         kuery: '',
         response: kibanaResponseFactory,
       });

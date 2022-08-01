@@ -29,6 +29,7 @@ export async function topNElasticSearchQuery({
   timeFrom,
   timeTo,
   searchField,
+  highCardinality,
   response,
   kuery,
 }: {
@@ -37,6 +38,7 @@ export async function topNElasticSearchQuery({
   timeFrom: number;
   timeTo: number;
   searchField: string;
+  highCardinality: boolean;
   response: KibanaResponseFactory;
   kuery: string;
 }) {
@@ -57,7 +59,7 @@ export async function topNElasticSearchQuery({
     size: 0,
     query: filter,
     aggs: {
-      histogram: aggregateByFieldAndTimestamp(searchField, fixedInterval),
+      histogram: aggregateByFieldAndTimestamp(searchField, highCardinality, fixedInterval),
       total_count: {
         sum: {
           field: 'Count',
@@ -134,7 +136,8 @@ export function queryTopNCommon(
   router: IRouter<ProfilingRequestHandlerContext>,
   logger: Logger,
   pathName: string,
-  searchField: string
+  searchField: string,
+  highCardinality: boolean
 ) {
   router.get(
     {
@@ -158,6 +161,7 @@ export function queryTopNCommon(
           timeFrom,
           timeTo,
           searchField,
+          highCardinality,
           response,
           kuery,
         });
@@ -182,7 +186,8 @@ export function registerTraceEventsTopNContainersSearchRoute({
     router,
     logger,
     paths.TopNContainers,
-    getFieldNameForTopNType(TopNType.Containers)
+    getFieldNameForTopNType(TopNType.Containers),
+    false
   );
 }
 
@@ -195,7 +200,8 @@ export function registerTraceEventsTopNDeploymentsSearchRoute({
     router,
     logger,
     paths.TopNDeployments,
-    getFieldNameForTopNType(TopNType.Deployments)
+    getFieldNameForTopNType(TopNType.Deployments),
+    false
   );
 }
 
@@ -204,7 +210,13 @@ export function registerTraceEventsTopNHostsSearchRoute({
   logger,
 }: RouteRegisterParameters) {
   const paths = getRoutePaths();
-  return queryTopNCommon(router, logger, paths.TopNHosts, getFieldNameForTopNType(TopNType.Hosts));
+  return queryTopNCommon(
+    router,
+    logger,
+    paths.TopNHosts,
+    getFieldNameForTopNType(TopNType.Hosts),
+    false
+  );
 }
 
 export function registerTraceEventsTopNStackTracesSearchRoute({
@@ -216,7 +228,8 @@ export function registerTraceEventsTopNStackTracesSearchRoute({
     router,
     logger,
     paths.TopNTraces,
-    getFieldNameForTopNType(TopNType.Traces)
+    getFieldNameForTopNType(TopNType.Traces),
+    false
   );
 }
 
@@ -229,6 +242,7 @@ export function registerTraceEventsTopNThreadsSearchRoute({
     router,
     logger,
     paths.TopNThreads,
-    getFieldNameForTopNType(TopNType.Threads)
+    getFieldNameForTopNType(TopNType.Threads),
+    true
   );
 }
