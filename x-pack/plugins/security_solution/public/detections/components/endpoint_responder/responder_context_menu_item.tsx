@@ -53,7 +53,7 @@ export const ResponderContextMenuItem = memo<ResponderContextMenuItemProps>(
         return [true, NOT_FROM_ENDPOINT_HOST_TOOLTIP];
       }
 
-      if (!isResponderCapabilitiesEnabled) {
+      if (endpointHostInfo && !isResponderCapabilitiesEnabled) {
         return [true, UPGRADE_ENDPOINT_FOR_RESPONDER];
       }
 
@@ -62,24 +62,18 @@ export const ResponderContextMenuItem = memo<ResponderContextMenuItemProps>(
         return [true, LOADING_ENDPOINT_DATA_TOOLTIP];
       }
 
-      // if we got an error and it's a 404 (alerts can exist for endpoint that are no longer around)
+      // if we got an error and it's a 400 (alerts can exist for endpoint that are no longer around)
       // or,
       // the Host status is `unenrolled`
       if (
-        (error && error.body?.statusCode === 404) ||
+        (error && error.body?.statusCode === 400) ||
         endpointHostInfo?.host_status === HostStatus.UNENROLLED
       ) {
         return [true, HOST_ENDPOINT_UNENROLLED_TOOLTIP];
       }
 
       return [false, undefined];
-    }, [
-      endpointHostInfo?.host_status,
-      endpointId,
-      error,
-      isFetching,
-      isResponderCapabilitiesEnabled,
-    ]);
+    }, [endpointHostInfo, endpointId, error, isFetching, isResponderCapabilitiesEnabled]);
 
     const handleResponseActionsClick = useCallback(() => {
       if (endpointHostInfo) showEndpointResponseActionsConsole(endpointHostInfo.metadata);
