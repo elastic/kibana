@@ -73,13 +73,18 @@ steps:
 
   - command: .buildkite/scripts/steps/artifacts/cloud.sh
     label: 'Cloud Deployment'
-    soft_fail: true
+    soft_fail:
+      - exit_status: 255
     agents:
       queue: n2-2
     timeout_in_minutes: 30
     if: "build.env('RELEASE_BUILD') == null || build.env('RELEASE_BUILD') == '' || build.env('RELEASE_BUILD') == 'false'"
     retry:
       automatic:
+        # Matches buildkite forced agent shutdown (timeout_in_minutes) and ecctl create failures
+        # This is typically caused by trying to use an unavailable on Cloud stack version
+        - exit_status: 255
+          limit: 0
         - exit_status: '*'
           limit: 1
 
