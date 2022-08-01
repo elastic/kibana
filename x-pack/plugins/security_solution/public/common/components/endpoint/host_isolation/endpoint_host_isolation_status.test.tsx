@@ -111,6 +111,7 @@ describe('when using the EndpointHostIsolationStatus component', () => {
 
   describe('and the disableIsolationUIPendingStatuses experimental feature flag is true', () => {
     beforeEach(() => {
+      // @ts-expect-error
       appContext.setExperimentalFlag({ disableIsolationUIPendingStatuses: true });
     });
 

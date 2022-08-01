@@ -534,7 +534,7 @@ export class ExceptionListClient {
         'exceptionsListPreCreateItem',
         itemData,
         this.getServerExtensionCallbackContext(),
-        (data) => {
+        (data: any) => {
           return validateData(
             createExceptionListItemSchema,
             transformCreateExceptionListItemOptionsToCreateExceptionListItemSchema(data)
@@ -602,7 +602,7 @@ export class ExceptionListClient {
         'exceptionsListPreUpdateItem',
         updatedItem,
         this.getServerExtensionCallbackContext(),
-        (data) => {
+        (data: any) => {
           return validateData(
             updateExceptionListItemSchema,
             transformUpdateExceptionListItemOptionsToUpdateExceptionListItemSchema(data)

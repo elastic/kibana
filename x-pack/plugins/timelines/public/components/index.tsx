@@ -33,6 +33,7 @@ export const TGrid = (props: TGridComponent) => {
   const { store, storage, setStore, ...tGridProps } = props;
   let tGridStore = store;
   if (!tGridStore && props.type === 'standalone') {
+    // @ts-expect-error
     tGridStore = createStore(initialTGridState, storage);
     setStore(tGridStore);
   }

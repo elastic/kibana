@@ -109,6 +109,7 @@ export class CoreKibanaRequest<
   public readonly rewrittenUrl?: URL;
 
   /** @internal */
+  // @ts-expect-error
   protected readonly [requestSymbol]: Request;
 
   constructor(

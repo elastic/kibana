@@ -252,6 +252,7 @@ export class Authenticator {
               ...providerCommonOptions,
               name,
               logger: options.loggers.get(type, name),
+              // @ts-expect-error
               urls: { loggedOut: (request) => this.getLoggedOutURL(request, type) },
             }),
             this.options.config.authc.providers[type]?.[name]
@@ -268,6 +269,7 @@ export class Authenticator {
           name: '__http__',
           logger: options.loggers.get(HTTPAuthenticationProvider.type),
           urls: {
+            // @ts-expect-error
             loggedOut: (request) => this.getLoggedOutURL(request, HTTPAuthenticationProvider.type),
           },
         })

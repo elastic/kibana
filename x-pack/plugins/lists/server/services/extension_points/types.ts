@@ -182,16 +182,17 @@ export interface ExtensionPointStorageClientInterface {
     extensionType: T
   ): Set<NarrowExtensionPointToType<T>> | undefined;
 
-  pipeRun<
-    T extends ExtensionPoint['type'],
-    D extends NarrowExtensionPointToType<T> = NarrowExtensionPointToType<T>,
-    P extends Parameters<D['callback']> = Parameters<D['callback']>
-  >(
-    extensionType: T,
-    initialCallbackInput: P[0]['data'],
-    callbackContext: ServerExtensionCallbackContext,
-    callbackResponseValidator?: (data: P[0]['data']) => Error | undefined
-  ): Promise<P[0]['data']>;
+  pipeRun: any;
+  // pipeRun<
+  //   T extends ExtensionPoint['type'],
+  //   D extends NarrowExtensionPointToType<T> = NarrowExtensionPointToType<T>,
+  //   P extends Parameters<D['callback']> = Parameters<D['callback']>
+  // >(
+  //   extensionType: T,
+  //   initialCallbackInput: P[0]['data'],
+  //   callbackContext: ServerExtensionCallbackContext,
+  //   callbackResponseValidator?: (data: P[0]['data']) => Error | undefined
+  // ): Promise<P[0]['data']>;
 }
 
 export interface ExtensionPointStorageInterface {
