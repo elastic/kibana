@@ -154,24 +154,38 @@ export const Details: React.FC<Props> = memo(({ packageInfo }) => {
       });
     }
 
-    // License details
+    // Subscription details
     items.push({
       title: (
         <EuiTextColor color="subdued">
-          <FormattedMessage id="xpack.fleet.epm.licenseLabel" defaultMessage="License" />
+          <FormattedMessage id="xpack.fleet.epm.subscriptionLabel" defaultMessage="Subscription" />
         </EuiTextColor>
       ),
       description: (
-        <>
-          <p>{packageInfo.conditions?.elastic?.subscription || packageInfo.license || '-'}</p>
-          {packageInfo.notice && (
-            <p>
-              <EuiLink onClick={toggleNoticeModal}>NOTICE.txt</EuiLink>
-            </p>
-          )}
-        </>
+        <p>{packageInfo.conditions?.elastic?.subscription || packageInfo.license || '-'}</p>
       ),
     });
+
+    // License details
+    if (packageInfo.source?.license || packageInfo.notice) {
+      items.push({
+        title: (
+          <EuiTextColor color="subdued">
+            <FormattedMessage id="xpack.fleet.epm.licenseLabel" defaultMessage="License" />
+          </EuiTextColor>
+        ),
+        description: (
+          <>
+            {packageInfo.source?.license && <p>{packageInfo.source.license}</p>}
+            {packageInfo.notice && (
+              <p>
+                <EuiLink onClick={toggleNoticeModal}>NOTICE.txt</EuiLink>
+              </p>
+            )}
+          </>
+        ),
+      });
+    }
 
     return items;
   }, [
@@ -181,6 +195,7 @@ export const Details: React.FC<Props> = memo(({ packageInfo }) => {
     packageInfo.data_streams,
     packageInfo.license,
     packageInfo.notice,
+    packageInfo.source?.license,
     packageInfo.version,
     toggleNoticeModal,
   ]);
