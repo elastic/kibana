@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-// a11y tests for spaces, space selection and space creation and feature controls
-
+// a11y tests for stack monitoring
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -18,8 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaOverview = getService('monitoringKibanaOverview');
   const clusterOverview = getService('monitoringClusterOverview');
 
-  // Failing: See https://github.com/elastic/kibana/issues/136242
-  describe.skip('Kibana Stack Monitoring a11y tests', () => {
+  describe('Kibana Stack Monitoring a11y tests', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('monitoring');
       await a11y.testAppSnapshot();
@@ -49,15 +48,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('alerts-modal-remind-later-button');
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/135196
-    it.skip('a11y tests for Kibana Overview', async function () {
+    it('a11y tests for Kibana Overview', async function () {
       await clusterOverview.clickKibanaOverview();
-      await kibanaOverview.isOnOverview();
+      expect(await kibanaOverview.isOnOverview()).to.be(true);
       await a11y.testAppSnapshot();
     });
 
     it('a11y tests for Kibana Instances Page', async function () {
       await kibanaOverview.isOnOverview();
+      await retry.waitForWithTimeout(
+        'Make sure Kibana instances tab is visble',
+        30000,
+        async () => {
+          return await testSubjects.isDisplayed('kibanaInstancesPage');
+        }
+      );
       await kibanaOverview.clickInstanceTab();
       await a11y.testAppSnapshot();
     });
