@@ -51,7 +51,7 @@ export type EpmPackageInstallStatus = 'installed' | 'installing' | 'install_fail
 export type DetailViewPanelName = 'overview' | 'policies' | 'assets' | 'settings' | 'custom';
 export type ServiceName = 'kibana' | 'elasticsearch';
 export type AgentAssetType = typeof agentAssetTypes;
-export type DocAssetType = 'doc' | 'notice';
+export type DocAssetType = 'doc' | 'notice' | 'license';
 export type AssetType =
   | KibanaAssetType
   | ElasticsearchAssetType
@@ -382,6 +382,7 @@ export interface EpmPackageAdditions {
   latestVersion: string;
   assets: AssetsGroupedByServiceByType;
   notice?: string;
+  license?: string;
   keepPoliciesUpToDate?: boolean;
 }
 
