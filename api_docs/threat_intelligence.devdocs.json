@@ -1,0 +1,68 @@
+{
+  "id": "threatIntelligence",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "threatIntelligence",
+        "id": "def-public.ThreatIntelligencePluginSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "ThreatIntelligencePluginSetup",
+        "description": [],
+        "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+        "deprecated": false,
+        "children": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "threatIntelligence",
+        "id": "def-public.ThreatIntelligencePluginStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "ThreatIntelligencePluginStart",
+        "description": [],
+        "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.ThreatIntelligencePluginStart.getComponent",
+            "type": "Function",
+            "tags": [],
+            "label": "getComponent",
+            "description": [],
+            "signature": [
+              "() => React.VFC<{}>"
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -8,11 +8,12 @@
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import type { trustedAppsAllHttpMocks } from '../../../mocks';
 import type { ArtifactListPageRenderingSetup } from '../mocks';
-import { getArtifactListPageRenderingSetup, getDeferred } from '../mocks';
+import { getArtifactListPageRenderingSetup } from '../mocks';
 import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { getDeferred } from '../../mocks';
 
-// FLAKY: https://github.com/elastic/kibana/issues/135794
+// FLAKY: https://github.com/elastic/kibana/issues/137590
 describe.skip('When displaying the Delete artfifact modal in the Artifact List Page', () => {
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let history: AppContextTestRender['history'];
@@ -86,7 +87,9 @@ describe.skip('When displaying the Delete artfifact modal in the Artifact List P
       expect(submitButton).toBeEnabled();
     });
 
-    deferred.resolve(); // cleanup
+    await act(async () => {
+      deferred.resolve(); // cleanup
+    });
   });
 
   it('should show success toast if deleted successfully', async () => {

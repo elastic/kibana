@@ -46,7 +46,7 @@ export interface ThreadingParams {
   threadsPerAllocations: number;
 }
 
-const THREADS_MAX_EXPONENT = 6;
+const THREADS_MAX_EXPONENT = 4;
 
 /**
  * Form for setting threading params.

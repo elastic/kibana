@@ -2178,16 +2178,3 @@ export const mockTimelineDetails: TimelineEventsDetailsItem[] = [
     isObjectArray: false,
   },
 ];
-
-export const mockTimelineDetailsApollo = {
-  data: {
-    source: {
-      TimelineDetails: {
-        data: mockTimelineDetails,
-      },
-    },
-  },
-  loading: false,
-  networkStatus: 7,
-  stale: false,
-};

@@ -23,43 +23,16 @@ import {
 import type { Payload } from '@hapi/boom';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
-import {
-  SavedObjectsType,
-  SavedObject,
-  SavedObjectReference,
+import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-common';
+import type {
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
-} from '../../types';
-import type { SavedObjectsUpdateObjectsSpacesResponse } from './update_objects_spaces';
-import {
+  SavedObjectsUpdateObjectsSpacesResponse,
   SavedObjectsDeleteByNamespaceOptions,
   SavedObjectsIncrementCounterField,
   SavedObjectsIncrementCounterOptions,
-  SavedObjectsRepository,
-} from './repository';
-import { SavedObjectsErrorHelpers } from './errors';
-import {
-  PointInTimeFinder,
   SavedObjectsCreatePointInTimeFinderDependencies,
   SavedObjectsCreatePointInTimeFinderOptions,
-} from './point_in_time_finder';
-import { ALL_NAMESPACES_STRING } from './utils';
-import { loggerMock } from '@kbn/logging-mocks';
-import {
-  SavedObjectsRawDoc,
-  SavedObjectsRawDocSource,
-  SavedObjectsSerializer,
-  SavedObjectUnsanitizedDoc,
-} from '../../serialization';
-import { encodeHitVersion } from '../../version';
-import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import { DocumentMigrator } from '../../migrations/core/document_migrator';
-import { mockKibanaMigrator } from '../../migrations/kibana_migrator.mock';
-import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import * as esKuery from '@kbn/es-query';
-import { errors as EsErrors } from '@elastic/elasticsearch';
-import {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkUpdateObject,
@@ -69,14 +42,33 @@ import {
   SavedObjectsOpenPointInTimeOptions,
   SavedObjectsResolveResponse,
   SavedObjectsUpdateOptions,
-} from '../saved_objects_client';
-import { SavedObjectsMappingProperties, SavedObjectsTypeMappingDefinition } from '../../mappings';
-import {
   SavedObjectsCollectMultiNamespaceReferencesObject,
   SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectsUpdateObjectsSpacesObject,
   SavedObjectsUpdateObjectsSpacesOptions,
-} from '../../..';
+} from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectsType,
+  SavedObjectsRawDoc,
+  SavedObjectsRawDocSource,
+  SavedObjectUnsanitizedDoc,
+  SavedObjectsMappingProperties,
+  SavedObjectsTypeMappingDefinition,
+} from '@kbn/core-saved-objects-server';
+import { SavedObjectsRepository } from './repository';
+import { SavedObjectsErrorHelpers } from './errors';
+import { PointInTimeFinder } from './point_in_time_finder';
+import { ALL_NAMESPACES_STRING } from './utils';
+import { loggerMock } from '@kbn/logging-mocks';
+import { SavedObjectsSerializer } from '../../serialization';
+import { encodeHitVersion } from '../../version';
+import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { DocumentMigrator } from '../../migrations/core/document_migrator';
+import { mockKibanaMigrator } from '../../migrations/kibana_migrator.mock';
+import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import * as esKuery from '@kbn/es-query';
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import { InternalBulkResolveError } from './internal_bulk_resolve';
 
 const { nodeTypes } = esKuery;
@@ -3773,16 +3765,13 @@ describe('SavedObjectsRepository', () => {
           Object {
             "arguments": Array [
               Object {
+                "isQuoted": false,
                 "type": "literal",
                 "value": "dashboard.otherField",
               },
               Object {
                 "type": "wildcard",
                 "value": "@kuery-wildcard@",
-              },
-              Object {
-                "type": "literal",
-                "value": false,
               },
             ],
             "function": "is",
@@ -3813,16 +3802,13 @@ describe('SavedObjectsRepository', () => {
           Object {
             "arguments": Array [
               Object {
+                "isQuoted": false,
                 "type": "literal",
                 "value": "dashboard.otherField",
               },
               Object {
                 "type": "wildcard",
                 "value": "@kuery-wildcard@",
-              },
-              Object {
-                "type": "literal",
-                "value": false,
               },
             ],
             "function": "is",

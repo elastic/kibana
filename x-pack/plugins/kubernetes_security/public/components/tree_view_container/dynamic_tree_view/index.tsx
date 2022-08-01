@@ -22,6 +22,7 @@ import {
 import { useFetchDynamicTreeView } from './hooks';
 import { useStyles } from './styles';
 import { disableEventDefaults, focusNextElement } from './helpers';
+import { useTreeViewContext } from '../contexts';
 import type { DynamicTreeViewProps, DynamicTreeViewItemProps } from './types';
 
 const BUTTON_TEST_ID = 'kubernetesSecurity:dynamicTreeViewButton';
@@ -55,14 +56,14 @@ export const DynamicTreeView = ({
   depth = 0,
   selectionDepth = {},
   query,
-  indexPattern = '',
   onSelect,
-  hasSelection,
   selected = '',
   expanded = true,
   ...props
 }: DynamicTreeViewProps) => {
   const styles = useStyles(depth);
+
+  const { indexPattern, hasSelection, setNoResults } = useTreeViewContext();
 
   const { data, fetchNextPage, isFetchingNextPage, hasNextPage, isLoading } =
     useFetchDynamicTreeView(query, tree[depth].key, indexPattern, expanded);
@@ -85,6 +86,12 @@ export const DynamicTreeView = ({
       }
     }
   };
+
+  useEffect(() => {
+    if (depth === 0 && data && data.pages?.[0].buckets.length === 0) {
+      setNoResults(true);
+    }
+  }, [data, depth, setNoResults]);
 
   useEffect(() => {
     if (expanded) {
@@ -158,7 +165,6 @@ export const DynamicTreeView = ({
                   aria-label={ariaLabel}
                   depth={depth}
                   expanded={expanded}
-                  indexPattern={indexPattern}
                   isExpanded={isExpanded}
                   onSelect={onSelect}
                   onToggleExpand={onToggleExpand}
@@ -209,7 +215,6 @@ const DynamicTreeViewItem = ({
   selected,
   expanded,
   query,
-  indexPattern,
   ...props
 }: DynamicTreeViewItemProps) => {
   const isLastNode = depth === tree.length - 1;
@@ -319,7 +324,6 @@ const DynamicTreeViewItem = ({
               [tree[depth].type]: aggData.key,
             }}
             tree={tree}
-            indexPattern={indexPattern}
             onSelect={onSelect}
             selected={selected}
             aria-label={`${aggData.key} child of ${props['aria-label']}`}

@@ -18,14 +18,14 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { Agent } from '../../../../types';
+import type { Agent, AgentPolicy } from '../../../../types';
 import {
   AgentReassignAgentPolicyModal,
   AgentUnenrollAgentModal,
   AgentUpgradeAgentModal,
 } from '../../components';
 import { useLicense } from '../../../../hooks';
-import { LICENSE_FOR_SCHEDULE_UPGRADE } from '../../../../../../../common';
+import { LICENSE_FOR_SCHEDULE_UPGRADE } from '../../../../../../../common/constants';
 
 import { getCommonTags } from '../utils';
 
@@ -44,6 +44,7 @@ export interface Props {
   visibleAgents: Agent[];
   refreshAgents: (args?: { refreshTags?: boolean }) => void;
   allTags: string[];
+  agentPolicies: AgentPolicy[];
 }
 
 export const AgentBulkActions: React.FunctionComponent<Props> = ({
@@ -55,6 +56,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   visibleAgents,
   refreshAgents,
   allTags,
+  agentPolicies,
 }) => {
   const licenseService = useLicense();
   const isLicenceAllowingScheduleUpgrade = licenseService.hasAtLeast(LICENSE_FOR_SCHEDULE_UPGRADE);
@@ -173,8 +175,8 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   ];
 
   const getSelectedTagsFromAgents = useMemo(
-    () => getCommonTags(agents, visibleAgents),
-    [agents, visibleAgents]
+    () => getCommonTags(agents, visibleAgents ?? [], agentPolicies),
+    [agents, visibleAgents, agentPolicies]
   );
 
   return (
@@ -223,6 +225,9 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
           button={tagsPopoverButton!}
           onTagsUpdated={() => {
             refreshAgents({ refreshTags: true });
+          }}
+          onClosePopover={() => {
+            setIsTagAddVisible(false);
           }}
         />
       )}

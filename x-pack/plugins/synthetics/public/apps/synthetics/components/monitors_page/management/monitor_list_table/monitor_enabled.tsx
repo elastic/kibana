@@ -6,15 +6,12 @@
  */
 
 import { EuiSwitch, EuiSwitchEvent, EuiLoadingSpinner } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { FETCH_STATUS, useFetcher } from '@kbn/observability-plugin/public';
-
+import React from 'react';
+import { FETCH_STATUS } from '@kbn/observability-plugin/public';
 import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
 import { ConfigKey, EncryptedSyntheticsMonitor } from '../../../../../../../common/runtime_types';
-import { fetchUpsertMonitor } from '../../../../state';
-
 import * as labels from './labels';
+import { useMonitorEnableHandler } from '../../../../hooks/use_monitor_enable_handler';
 
 interface Props {
   id: string;
@@ -26,41 +23,16 @@ interface Props {
 export const MonitorEnabled = ({ id, monitor, reloadPage, initialLoading }: Props) => {
   const isDisabled = !useCanEditSynthetics();
 
-  const [isEnabled, setIsEnabled] = useState<boolean | null>(null);
-
-  const { notifications } = useKibana();
-
-  const { status } = useFetcher(() => {
-    if (isEnabled !== null) {
-      return fetchUpsertMonitor({ id, monitor: { ...monitor, [ConfigKey.ENABLED]: isEnabled } });
-    }
-  }, [isEnabled]);
-
-  useEffect(() => {
-    if (status === FETCH_STATUS.FAILURE) {
-      notifications.toasts.danger({
-        title: (
-          <p data-test-subj="uptimeMonitorEnabledUpdateFailure">
-            {labels.getMonitorEnabledUpdateFailureMessage(monitor[ConfigKey.NAME])}
-          </p>
-        ),
-        toastLifeTimeMs: 3000,
-      });
-      setIsEnabled(null);
-    } else if (status === FETCH_STATUS.SUCCESS) {
-      notifications.toasts.success({
-        title: (
-          <p data-test-subj="uptimeMonitorEnabledUpdateSuccess">
-            {isEnabled
-              ? labels.getMonitorEnabledSuccessLabel(monitor[ConfigKey.NAME])
-              : labels.getMonitorDisabledSuccessLabel(monitor[ConfigKey.NAME])}
-          </p>
-        ),
-        toastLifeTimeMs: 3000,
-      });
-      reloadPage();
-    }
-  }, [status]); // eslint-disable-line react-hooks/exhaustive-deps
+  const { isEnabled, setIsEnabled, status } = useMonitorEnableHandler({
+    id,
+    monitor,
+    reloadPage,
+    labels: {
+      failureLabel: labels.getMonitorEnabledUpdateFailureMessage(monitor[ConfigKey.NAME]),
+      enabledSuccessLabel: labels.getMonitorEnabledSuccessLabel(monitor[ConfigKey.NAME]),
+      disabledSuccessLabel: labels.getMonitorDisabledSuccessLabel(monitor[ConfigKey.NAME]),
+    },
+  });
 
   const enabled = isEnabled ?? monitor[ConfigKey.ENABLED];
   const isLoading = status === FETCH_STATUS.LOADING;
