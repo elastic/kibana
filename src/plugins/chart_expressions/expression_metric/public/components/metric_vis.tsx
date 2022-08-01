@@ -95,7 +95,7 @@ const getMetricFormatter = (
   }
 
   // this formats are coming when formula is empty
-  if (formatId === 'string' || formatId === 'null') {
+  if (formatId === 'string') {
     return getFormatService().deserialize(serializedFieldFormat).getConverterFor('text');
   }
 
