@@ -27,7 +27,7 @@ export function PrimaryAndComparisonSearchBar() {
   return (
     <EuiFlexGroup direction="row" gutterSize="xs">
       <EuiFlexItem>
-        <PrimaryProfilingSearchBar showSubmitButton={false} />
+        <PrimaryProfilingSearchBar />
       </EuiFlexItem>
       <EuiFlexItem>
         <ProfilingSearchBar
