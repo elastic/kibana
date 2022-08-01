@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import execa from 'execa';
 import { resolve } from 'path';
 import { writeFileSync } from 'fs';
 import { promisify } from 'util';
@@ -30,9 +29,6 @@ async function cleanBuildTask() {
   const log = new ToolingLog();
   log.info('Deleting', BUILD_DIR);
   await del(BUILD_DIR);
-
-  log.info('[canvas] Deleting Shareable Runtime');
-  await del(resolve(XPACK_DIR, 'plugins/canvas/shareable_runtime/build'));
 }
 
 async function copySource() {
@@ -89,19 +85,6 @@ async function copySource() {
   );
 }
 
-async function buildCanvasShareableRuntime() {
-  await execa(
-    process.execPath,
-    ['--preserve-symlinks', 'plugins/canvas/scripts/shareable_runtime'],
-    {
-      cwd: XPACK_DIR,
-      stdio: ['ignore', 'inherit', 'inherit'],
-      // @ts-ignore Incorrect @types - execa supports `buffer`
-      buffer: false,
-    }
-  );
-}
-
 async function generateNoticeText() {
   const log = new ToolingLog({
     level: 'info',
@@ -118,9 +101,4 @@ async function generateNoticeText() {
   );
 }
 
-export const buildTask = gulp.series(
-  cleanBuildTask,
-  buildCanvasShareableRuntime,
-  copySource,
-  generateNoticeText
-);
+export const buildTask = gulp.series(cleanBuildTask, copySource, generateNoticeText);

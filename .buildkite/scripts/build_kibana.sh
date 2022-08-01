@@ -11,8 +11,10 @@ if is_pr_with_label "ci:build-all-platforms"; then
   node scripts/build --all-platforms --skip-os-packages
 elif is_pr_with_label "ci:build-os-packages"; then
   node scripts/build --all-platforms --docker-cross-compile
-else
+elif is_pr_with_label "ci:build-canvas-shareable-runtime"
   node scripts/build
+elif
+  node scripts/build --skip-canvas-shareable-runtime
 fi
 
 if is_pr_with_label "ci:build-cloud-image"; then
