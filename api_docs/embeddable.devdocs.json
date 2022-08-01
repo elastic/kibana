@@ -213,13 +213,7 @@
                 "label": "overlays",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.OverlayStart",
-                    "text": "OverlayStart"
-                  }
+                  "OverlayStart"
                 ],
                 "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
                 "deprecated": false,
@@ -5457,13 +5451,7 @@
           ">, ",
           "SavedObjectAttributes",
           ">>; overlays: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.OverlayStart",
-            "text": "OverlayStart"
-          },
+          "OverlayStart",
           "; notifications: ",
           {
             "pluginId": "core",
@@ -5475,13 +5463,7 @@
           "; SavedObjectFinder: React.ComponentType<any>; showCreateNewMenu?: boolean | undefined; reportUiCounter?: ((appName: string, type: string, eventNames: string | string[], count?: number | undefined) => void) | undefined; theme: ",
           "ThemeServiceStart",
           "; }) => ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.OverlayRef",
-            "text": "OverlayRef"
-          }
+          "OverlayRef"
         ],
         "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
         "deprecated": false,
@@ -5689,13 +5671,7 @@
                 "label": "overlays",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.OverlayStart",
-                    "text": "OverlayStart"
-                  }
+                  "OverlayStart"
                 ],
                 "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
                 "deprecated": false
@@ -9051,6 +9027,39 @@
             "description": [],
             "path": "src/plugins/embeddable/common/lib/saved_object_embeddable.ts",
             "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.SelfStyledEmbeddable",
+        "type": "Interface",
+        "tags": [],
+        "label": "SelfStyledEmbeddable",
+        "description": [
+          "\nAll embeddables that implement this interface will be able to configure\nthe style of their containing panels"
+        ],
+        "path": "src/plugins/embeddable/public/lib/self_styled_embeddable/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.SelfStyledEmbeddable.getSelfStyledOptions",
+            "type": "Function",
+            "tags": [],
+            "label": "getSelfStyledOptions",
+            "description": [
+              "\nGets the embeddable's style configuration"
+            ],
+            "signature": [
+              "() => ",
+              "SelfStyledOptions"
+            ],
+            "path": "src/plugins/embeddable/public/lib/self_styled_embeddable/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

@@ -195,9 +195,8 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .expect(200);
 
-          const { name, touched, created, idMapping } = resp.body.attributes;
+          const { name, created, idMapping } = resp.body.attributes;
           expect(name).to.be('My Session');
-          expect(touched).not.to.be(undefined);
           expect(created).not.to.be(undefined);
 
           const idMappings = Object.values(idMapping).map((value: any) => value.id);
@@ -296,8 +295,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .expect(200);
 
-        const { touched, created, idMapping } = resp.body.attributes;
-        expect(touched).not.to.be(undefined);
+        const { created, idMapping } = resp.body.attributes;
         expect(created).not.to.be(undefined);
 
         const idMappings = Object.values(idMapping).map((value: any) => value.id);

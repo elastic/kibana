@@ -29,13 +29,11 @@ import {
   SearchSessionRequestInfo,
   SearchSessionSavedObjectAttributes,
   SearchSessionsFindResponse,
-  SearchSessionStatus,
   SearchSessionStatusResponse,
 } from '../../../common';
 import { ISearchSessionService, NoSearchIdInSessionError } from '../..';
 import { createRequestHash } from './utils';
 import { ConfigSchema, SearchSessionsConfigSchema } from '../../../config';
-import { SearchStatus } from './types';
 import { getSessionStatus } from './get_session_status';
 
 export interface SearchSessionDependencies {
@@ -240,12 +238,10 @@ export class SearchSessionService implements ISearchSessionService {
       SEARCH_SESSION_TYPE,
       {
         sessionId,
-        status: SearchSessionStatus.IN_PROGRESS,
         expires: new Date(
           Date.now() + this.sessionConfig.defaultExpiration.asMilliseconds()
         ).toISOString(),
         created: new Date().toISOString(),
-        touched: new Date().toISOString(),
         idMapping: {},
         version: this.version,
         realmType,
@@ -335,7 +331,6 @@ export class SearchSessionService implements ISearchSessionService {
       sessionId,
       {
         ...attributes,
-        touched: new Date().toISOString(),
       }
     );
   };
@@ -357,7 +352,7 @@ export class SearchSessionService implements ISearchSessionService {
   ) => {
     this.logger.debug(`cancel | ${sessionId}`);
     return this.update(deps, user, sessionId, {
-      status: SearchSessionStatus.CANCELLED,
+      isCanceled: true,
     });
   };
 
@@ -391,10 +386,9 @@ export class SearchSessionService implements ISearchSessionService {
 
     if (searchRequest.params) {
       const requestHash = createRequestHash(searchRequest.params);
-      const searchInfo = {
+      const searchInfo: SearchSessionRequestInfo = {
         id: searchId,
         strategy,
-        status: SearchStatus.IN_PROGRESS,
       };
       idMapping = { [requestHash]: searchInfo };
     }
@@ -408,6 +402,7 @@ export class SearchSessionService implements ISearchSessionService {
     sessionId: string
   ) {
     const searchSession = await this.get(deps, user, sessionId);
+
     const searchIdMapping = new Map<string, string>();
     Object.values(searchSession.attributes.idMapping).forEach((requestInfo) => {
       searchIdMapping.set(requestInfo.id, requestInfo.strategy);

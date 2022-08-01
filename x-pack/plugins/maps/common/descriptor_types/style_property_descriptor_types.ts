@@ -83,6 +83,7 @@ export type ColorDynamicOptions = {
   colorCategory?: string; // TODO move color category palettes to constants and make ENUM type
   customColorPalette?: CategoryColorStop[];
   useCustomColorPalette?: boolean;
+  otherCategoryColor?: string;
 
   field?: StylePropertyField;
   fieldMetaOptions: FieldMetaOptions;

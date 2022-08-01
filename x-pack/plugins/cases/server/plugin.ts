@@ -66,7 +66,7 @@ export interface PluginsStart {
   features: FeaturesPluginStart;
   taskManager?: TaskManagerStartContract;
   security?: SecurityPluginStart;
-  spaces?: SpacesPluginStart;
+  spaces: SpacesPluginStart;
 }
 
 export class CasePlugin {
@@ -166,9 +166,7 @@ export class CasePlugin {
     this.clientFactory.initialize({
       securityPluginSetup: this.securityPluginSetup,
       securityPluginStart: plugins.security,
-      getSpace: async (request: KibanaRequest) => {
-        return plugins.spaces?.spacesService.getActiveSpace(request);
-      },
+      spacesPluginStart: plugins.spaces,
       featuresPluginStart: plugins.features,
       actionsPluginStart: plugins.actions,
       /**

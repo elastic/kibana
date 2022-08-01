@@ -7,11 +7,10 @@
 
 import React from 'react';
 import { EuiFlexItem } from '@elastic/eui';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ToolbarProps } from '../../../../public/pages/metrics/inventory_view/components/toolbars/toolbar';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { ToolbarProps } from '../../../../public/pages/metrics/inventory_view/components/toolbars/toolbar';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { WaffleAccountsControls } from '../../../../public/pages/metrics/inventory_view/components/waffle/waffle_accounts_controls';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { WaffleRegionControls } from '../../../../public/pages/metrics/inventory_view/components/waffle/waffle_region_controls';
 
 type Props = ToolbarProps;

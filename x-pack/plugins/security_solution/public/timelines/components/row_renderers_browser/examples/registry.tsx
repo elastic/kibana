@@ -7,6 +7,7 @@
 
 import React from 'react';
 
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { mockEndpointRegistryModificationEvent } from '../../../../common/mock/mock_timeline_data';
 import { createEndpointRegistryRowRenderer } from '../../timeline/body/renderers/system/generic_row_renderer';
 import { MODIFIED_REGISTRY_KEY } from '../../timeline/body/renderers/system/translations';

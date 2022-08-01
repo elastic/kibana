@@ -214,9 +214,9 @@ export interface DiscoverFieldProps {
    */
   field: DataViewField;
   /**
-   * The currently selected index pattern
+   * The currently selected data view
    */
-  indexPattern: DataView;
+  dataView: DataView;
   /**
    * Callback to add/select the field
    */
@@ -268,7 +268,7 @@ export interface DiscoverFieldProps {
 function DiscoverFieldComponent({
   alwaysShowActionButton = false,
   field,
-  indexPattern,
+  dataView,
   onAddField,
   onRemoveField,
   onAddFilter,
@@ -320,7 +320,7 @@ function DiscoverFieldComponent({
     );
   }
 
-  const { canEdit, canDelete } = getFieldCapabilities(indexPattern, field);
+  const { canEdit, canDelete } = getFieldCapabilities(dataView, field);
   const canEditField = onEditField && canEdit;
   const canDeleteField = onDeleteField && canDelete;
   const popoverTitle = (
@@ -409,7 +409,7 @@ function DiscoverFieldComponent({
               </h5>
             </EuiTitle>
             <DiscoverFieldDetails
-              indexPattern={indexPattern}
+              dataView={dataView}
               field={field}
               details={details}
               onAddFilter={onAddFilter}
@@ -431,7 +431,7 @@ function DiscoverFieldComponent({
         {(showFieldStats || multiFields) && <EuiHorizontalRule margin="m" />}
         <DiscoverFieldVisualize
           field={field}
-          indexPattern={indexPattern}
+          dataView={dataView}
           multiFields={rawMultiFields}
           trackUiMetric={trackUiMetric}
           details={details}

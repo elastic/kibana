@@ -19,7 +19,7 @@ import { useDiscoverServices } from './use_discover_services';
 export type DiscoverNavigationProps = { onClick: () => void } | { href: string };
 
 export interface UseNavigationProps {
-  indexPatternId: string;
+  dataViewId: string;
   rowIndex: string;
   rowId: string;
   columns: string[];
@@ -71,7 +71,7 @@ export const useMainRouteBreadcrumb = () => {
 };
 
 export const useNavigationProps = ({
-  indexPatternId,
+  dataViewId,
   rowIndex,
   rowId,
   columns,
@@ -91,10 +91,10 @@ export const useNavigationProps = ({
   );
 
   const singleDocHref = addBasePath(
-    `/app/discover#/doc/${indexPatternId}/${rowIndex}?id=${encodeURIComponent(rowId)}`
+    `/app/discover#/doc/${dataViewId}/${rowIndex}?id=${encodeURIComponent(rowId)}`
   );
   const surDocsHref = addBasePath(
-    `/app/discover#/context/${encodeURIComponent(indexPatternId)}/${encodeURIComponent(
+    `/app/discover#/context/${encodeURIComponent(dataViewId)}/${encodeURIComponent(
       rowId
     )}?${contextSearchHash}`
   );
@@ -105,7 +105,7 @@ export const useNavigationProps = ({
    */
   if (!!history) {
     const isContextRoute = matchPath(history.location.pathname, {
-      path: '/context/:indexPatternId/:id',
+      path: '/context/:dataViewId/:id',
       exact: true,
     });
     const currentBreadcrumb = encodeURIComponent(
@@ -116,7 +116,7 @@ export const useNavigationProps = ({
       event?.preventDefault?.();
 
       history.push({
-        pathname: `/doc/${indexPatternId}/${rowIndex}`,
+        pathname: `/doc/${dataViewId}/${rowIndex}`,
         search: `?id=${encodeURIComponent(rowId)}&breadcrumb=${currentBreadcrumb}`,
       });
     };
@@ -125,9 +125,7 @@ export const useNavigationProps = ({
       event?.preventDefault?.();
 
       history.push({
-        pathname: `/context/${encodeURIComponent(indexPatternId)}/${encodeURIComponent(
-          String(rowId)
-        )}`,
+        pathname: `/context/${encodeURIComponent(dataViewId)}/${encodeURIComponent(String(rowId))}`,
         search: `?${contextSearchHash}&breadcrumb=${currentBreadcrumb}`,
       });
     };

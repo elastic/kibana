@@ -8,7 +8,6 @@
 
 import { createSessionStateContainer, SearchSessionState } from './search_session_state';
 import type { SearchSessionSavedObject } from './sessions_client';
-import { SearchSessionStatus } from '../../../common';
 
 const mockSavedObject: SearchSessionSavedObject = {
   id: 'd7170a35-7e2c-48d6-8dec-9a056721b489',
@@ -19,10 +18,8 @@ const mockSavedObject: SearchSessionSavedObject = {
     locatorId: 'my_url_generator_id',
     idMapping: {},
     sessionId: 'session_id',
-    touched: new Date().toISOString(),
     created: new Date().toISOString(),
     expires: new Date().toISOString(),
-    status: SearchSessionStatus.COMPLETE,
     version: '8.0.0',
   },
   references: [],

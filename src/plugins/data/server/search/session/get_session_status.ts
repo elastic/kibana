@@ -18,7 +18,7 @@ export async function getSessionStatus(
   session: SearchSessionSavedObjectAttributes,
   config: SearchSessionsConfigSchema
 ): Promise<SearchSessionStatus> {
-  if (session.status === SearchSessionStatus.CANCELLED) {
+  if (session.isCanceled === true) {
     return SearchSessionStatus.CANCELLED;
   }
 
