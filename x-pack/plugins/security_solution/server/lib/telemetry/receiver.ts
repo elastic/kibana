@@ -860,9 +860,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       body: {
         query: {
           bool: {
-            must: [
-              { match: { 'exception-list.entries.type': 'list' } },
-            ],
+            must: [{ match: { 'exception-list.entries.type': 'list' } }],
           },
         },
         aggs: {
