@@ -9,7 +9,7 @@ import { omit, sortBy } from 'lodash';
 import expect from '@kbn/expect';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 
-export const testSyntheticsPolicy: PackagePolicy = {
+export const getTestSyntheticsPolicy = (name: string): PackagePolicy => ({
   id: '5863efe0-0368-11ed-8df7-a7424c6f5167-5347cd10-0368-11ed-8df7-a7424c6f5167',
   version: 'WzMyNTcsMV0=',
   name: '5863efe0-0368-11ed-8df7-a7424c6f5167-5347cd10-0368-11ed-8df7-a7424c6f5167',
@@ -35,7 +35,7 @@ export const testSyntheticsPolicy: PackagePolicy = {
             },
             enabled: { value: true, type: 'bool' },
             type: { value: 'http', type: 'text' },
-            name: { value: 'test-monitor-name', type: 'text' },
+            name: { value: name, type: 'text' },
             schedule: { value: '"@every 5m"', type: 'text' },
             urls: { value: 'https://nextjs-test-synthetics.vercel.app/api/users', type: 'text' },
             'service.name': { value: '', type: 'text' },
@@ -69,7 +69,7 @@ export const testSyntheticsPolicy: PackagePolicy = {
               script_source: { is_generated_script: false, file_name: 'test-file.name' },
             },
             type: 'http',
-            name: 'test-monitor-name',
+            name,
             enabled: true,
             urls: 'https://nextjs-test-synthetics.vercel.app/api/users',
             schedule: '@every 5m',
@@ -238,7 +238,7 @@ export const testSyntheticsPolicy: PackagePolicy = {
   created_by: 'system',
   updated_at: '2022-07-14T11:30:23.034Z',
   updated_by: 'system',
-};
+});
 
 export const getTestProjectSyntheticsPolicy = (
   {

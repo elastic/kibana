@@ -30,7 +30,6 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
 
     // specifically needed for the synthetics service api key generation
     server.authSavedObjectsClient = savedObjectsClient;
-    server.currentRequest = request;
 
     const isInspectorEnabled = await coreContext.uiSettings.client.get<boolean>(
       enableInspectEsQueries
