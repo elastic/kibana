@@ -10,11 +10,11 @@ import Boom from '@hapi/boom';
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObjectsPitParams } from '@kbn/core-saved-objects-api-server';
+import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { IndexMapping } from '../../../mappings';
 import { getQueryParams, HasReferenceQueryParams, SearchOperator } from './query_params';
 import { getPitParams } from './pit_params';
 import { getSortingParams } from './sorting_params';
-import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
 
 type KueryNode = any;
 
