@@ -233,7 +233,5 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(retrievedProfiles).to.eql(profiles);
     });
-
-    // TODO: test user actions
   });
 };
