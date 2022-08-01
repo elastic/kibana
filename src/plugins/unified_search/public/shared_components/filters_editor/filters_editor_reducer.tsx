@@ -48,6 +48,13 @@ export interface UpdateFilterParamsPayload {
 }
 
 /** @internal **/
+export interface UpdateFilterParamsPayload {
+  path: string;
+  operator?: Operator;
+  params?: Filter['meta']['params'];
+}
+
+/** @internal **/
 export interface RemoveFilterPayload {
   path: Path;
 }
