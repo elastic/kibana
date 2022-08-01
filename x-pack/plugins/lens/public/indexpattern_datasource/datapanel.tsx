@@ -82,15 +82,21 @@ const supportedFieldTypes = new Set([
 ]);
 
 const fieldTypeNames: Record<DataType, string> = {
-  document: i18n.translate('xpack.lens.datatypes.record', { defaultMessage: 'record' }),
-  string: i18n.translate('xpack.lens.datatypes.string', { defaultMessage: 'string' }),
-  number: i18n.translate('xpack.lens.datatypes.number', { defaultMessage: 'number' }),
-  boolean: i18n.translate('xpack.lens.datatypes.boolean', { defaultMessage: 'boolean' }),
-  date: i18n.translate('xpack.lens.datatypes.date', { defaultMessage: 'date' }),
-  ip: i18n.translate('xpack.lens.datatypes.ipAddress', { defaultMessage: 'IP' }),
-  histogram: i18n.translate('xpack.lens.datatypes.histogram', { defaultMessage: 'histogram' }),
-  geo_point: i18n.translate('xpack.lens.datatypes.geoPoint', { defaultMessage: 'geo_point' }),
-  geo_shape: i18n.translate('xpack.lens.datatypes.geoShape', { defaultMessage: 'geo_shape' }),
+  document: i18n.translate('xpack.lens.datatypes.record', { defaultMessage: 'Record' }),
+  string: i18n.translate('xpack.lens.datatypes.string', { defaultMessage: 'Text string' }),
+  number: i18n.translate('xpack.lens.datatypes.number', { defaultMessage: 'Number' }),
+  gauge: i18n.translate('xpack.lens.datatypes.gauge', { defaultMessage: 'Gauge metric' }),
+  counter: i18n.translate('xpack.lens.datatypes.counter', { defaultMessage: 'Counter metric' }),
+  boolean: i18n.translate('xpack.lens.datatypes.boolean', { defaultMessage: 'Boolean' }),
+  date: i18n.translate('xpack.lens.datatypes.date', { defaultMessage: 'Date' }),
+  ip: i18n.translate('xpack.lens.datatypes.ipAddress', { defaultMessage: 'IP address' }),
+  histogram: i18n.translate('xpack.lens.datatypes.histogram', { defaultMessage: 'Histogram' }),
+  geo_point: i18n.translate('xpack.lens.datatypes.geoPoint', {
+    defaultMessage: 'Geographic point',
+  }),
+  geo_shape: i18n.translate('xpack.lens.datatypes.geoShape', {
+    defaultMessage: 'Geographic shape',
+  }),
   murmur3: i18n.translate('xpack.lens.datatypes.murmur3', { defaultMessage: 'murmur3' }),
 };
 
@@ -278,6 +284,13 @@ const defaultFieldGroups: {
 const htmlId = htmlIdGenerator('datapanel');
 const fieldSearchDescriptionId = htmlId();
 
+function getFilterType(field: IndexPatternField) {
+  if (field.timeSeriesMetricType) {
+    return field.timeSeriesMetricType;
+  }
+  return field.type;
+}
+
 export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   currentIndexPatternId,
   indexPatternRefs,
@@ -332,9 +345,11 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     : currentIndexPattern.fields.filter(({ type }) => type !== 'geo_point' && type !== 'geo_shape');
   const clearLocalState = () => setLocalState((s) => ({ ...s, nameFilter: '', typeFilter: [] }));
   const hasSyncedExistingFields = existingFields[currentIndexPattern.title];
-  const availableFieldTypes = uniq(allFields.map(({ type }) => type)).filter(
-    (type) => type in fieldTypeNames
-  );
+  const availableFieldTypes = uniq([
+    ...uniq(allFields.map(getFilterType)).filter((type) => type in fieldTypeNames),
+    // always include current selection - there might be no match for an existing type filter on data view switch
+    ...localState.typeFilter,
+  ]);
 
   const fieldInfoUnavailable =
     existenceFetchFailed || existenceFetchTimeout || currentIndexPattern.hasRestrictions;
@@ -472,7 +487,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
           return false;
         }
         if (localState.typeFilter.length > 0) {
-          return localState.typeFilter.includes(field.type as DataType);
+          return localState.typeFilter.includes(getFilterType(field) as DataType);
         }
         return true;
       });
