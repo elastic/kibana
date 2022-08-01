@@ -8,9 +8,11 @@
 
 import { apm, timerange } from '..';
 import { ApmFields } from '../lib/apm/apm_fields';
-import { Scenario } from '../scripts/scenario';
-import { getLogger } from '../scripts/utils/get_common_services';
-import { RunOptions } from '../scripts/utils/parse_run_cli_flags';
+import { Scenario } from '../cli/scenario';
+import { getLogger } from '../cli/utils/get_common_services';
+import { RunOptions } from '../cli/utils/parse_run_cli_flags';
+
+const ENVIRONMENT = __filename;
 
 const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   const logger = getLogger(runOptions);
@@ -20,7 +22,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
       const range = timerange(from, to);
       const timestamps = range.interval('1s').rate(3);
 
-      const instance = apm.service('lambda-python', 'production', 'python').instance('instance');
+      const instance = apm.service('lambda-python', ENVIRONMENT, 'python').instance('instance');
 
       const traceEventsSetups = [
         { functionName: 'lambda-python-1', coldStart: true },

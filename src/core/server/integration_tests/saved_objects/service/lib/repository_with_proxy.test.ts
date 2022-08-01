@@ -9,8 +9,8 @@
 import Hapi from '@hapi/hapi';
 import h2o2 from '@hapi/h2o2';
 import { URL } from 'url';
-import { ISavedObjectsRepository } from '../../../../saved_objects/service/lib/repository';
-import { SavedObject } from '../../../../saved_objects/types';
+import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { InternalCoreSetup, InternalCoreStart } from '../../../../internal_types';
 import { Root } from '../../../../root';
 import * as kbnTestServer from '../../../../../test_helpers/kbn_server';

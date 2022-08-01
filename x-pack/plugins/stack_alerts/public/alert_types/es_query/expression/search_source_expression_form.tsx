@@ -87,7 +87,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
     },
     {
       index: searchSource.getField('index')!,
-      query: searchSource.getField('query')!,
+      query: searchSource.getField('query')! as Query,
       filter: mapAndFlattenFilters(searchSource.getField('filter') as Filter[]),
       threshold: ruleParams.threshold ?? DEFAULT_VALUES.THRESHOLD,
       thresholdComparator: ruleParams.thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,

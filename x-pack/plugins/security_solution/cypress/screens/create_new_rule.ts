@@ -16,7 +16,7 @@ export const ACTIONS_EDIT_TAB = '[data-test-subj="edit-rule-actions-tab"]';
 export const ACTIONS_THROTTLE_INPUT =
   '[data-test-subj="stepRuleActions"] [data-test-subj="select"]';
 
-export const EMAIL_ACTION_BTN = '[data-test-subj=".email-ActionTypeSelectOption"]';
+export const EMAIL_ACTION_BTN = '[data-test-subj=".email-siem-ActionTypeSelectOption"]';
 
 export const CREATE_ACTION_CONNECTOR_BTN = '[data-test-subj="createActionConnectorButton-0"]';
 
@@ -92,6 +92,11 @@ export const AT_LEAST_ONE_VALID_MATCH = 'At least one indicator match is require
 export const AT_LEAST_ONE_INDEX_PATTERN = 'A minimum of one index pattern is required.';
 
 export const CUSTOM_QUERY_REQUIRED = 'A custom query is required.';
+
+export const DATA_VIEW_COMBO_BOX =
+  '[data-test-subj="pick-rule-data-source"] [data-test-subj="comboBoxInput"]';
+
+export const DATA_VIEW_OPTION = '[data-test-subj="rule-index-toggle-dataView"]';
 
 export const DEFINE_CONTINUE_BUTTON = '[data-test-subj="define-continue"]';
 
