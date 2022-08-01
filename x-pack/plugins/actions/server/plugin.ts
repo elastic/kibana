@@ -101,6 +101,7 @@ import { createSubActionConnectorFramework } from './sub_action_framework';
 import { IServiceAbstract, SubActionConnectorType } from './sub_action_framework/types';
 import { SubActionConnector } from './sub_action_framework/sub_action_connector';
 import { CaseConnector } from './sub_action_framework/case';
+import { TorqConnector, TorqConfigSchema, TorqSecretSchema } from './sub_action_framework/torq';
 
 export interface PluginSetupContract {
   registerType<
@@ -326,6 +327,15 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       logger: this.logger,
       actionsConfigUtils,
     });
+
+    // subActionFramework.registerConnector({
+    //   id: '.torq',
+    //   name: 'Send to Torq',
+    //   minimumLicenseRequired: 'basic' as const,
+    //   schema: { config: TorqConfigSchema, secrets: TorqSecretSchema },
+    //   supportedFeatureIds: ['alerting'],
+    //   Service: TorqConnector,
+    // });
 
     // Routes
     defineRoutes({

@@ -23,5 +23,8 @@
   },
   "engines": {
     "yarn": "^1.21.1"
+  },
+  "dependencies": {
+    "crypto-js": "^4.1.1"
   }
 }

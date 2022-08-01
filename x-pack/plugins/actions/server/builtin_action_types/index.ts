@@ -18,6 +18,7 @@ import { getActionType as getSlackActionType } from './slack';
 import { getActionType as getWebhookActionType } from './webhook';
 import { getActionType as getCasesWebhookActionType } from './cases_webhook';
 import { getActionType as getXmattersActionType } from './xmatters';
+import { getActionType as getTorqActionType } from './torq';
 import {
   getServiceNowITSMActionType,
   getServiceNowSIRActionType,
@@ -83,4 +84,5 @@ export function registerBuiltInActionTypes({
   actionTypeRegistry.register(getJiraActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getResilientActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getTeamsActionType({ logger, configurationUtilities }));
+  actionTypeRegistry.register(getTorqActionType({ logger, configurationUtilities }));
 }
