@@ -94,6 +94,9 @@
         },
         {
           "id": "kibDevKeyConceptsNavigation"
+        },
+        {
+          "id": "kibDevDocsEmbeddables"
         }
       ]
     },
