@@ -184,15 +184,15 @@ export class ListingTableService extends FtrService {
    */
   public async clickNewButton(promptBtnTestSubj: string): Promise<void> {
     await this.retry.tryForTime(20000, async () => {
-      // newItemButton button is only visible when there are items in the listing table is displayed.
-      const isnNewItemButtonPresent = await this.testSubjects.exists('newItemButton', {
-        timeout: 10000,
-      });
-      if (isnNewItemButtonPresent) {
-        await this.testSubjects.click('newItemButton');
+      const landingPageElement = await this.testSubjects.find('visualizationLandingPage');
+      const landingPageText = await landingPageElement.getVisibleText();
+      // NOTE: It's much faster to get the landing page parent, get the innerHTML and check
+      // which button it has compared to looking for an element and waiting for the timeout
+      // But do we have i18n tests for this page which would fail if it's localized?
+      if (landingPageText.includes('Create your first visualization')) {
+        await this.testSubjects.click('createVisualizationPromptButton');
       } else {
-        // no items exist, click createPromptButton to create new dashboard/visualization
-        await this.testSubjects.click(promptBtnTestSubj);
+        await this.testSubjects.click('newItemButton');
       }
     });
   }

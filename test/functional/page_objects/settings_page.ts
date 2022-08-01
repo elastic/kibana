@@ -453,20 +453,20 @@ export class SettingsPageObject extends FtrService {
     await this.retry.try(async () => {
       await this.header.waitUntilLoadingHasFinished();
       await this.clickKibanaIndexPatterns();
-      const exists = await this.hasIndexPattern(indexPatternName);
+      // const exists = await this.hasIndexPattern(indexPatternName);
 
-      if (exists) {
-        await this.clickIndexPatternByName(indexPatternName);
-        return;
-      }
+      // if (exists) {
+      //   await this.clickIndexPatternByName(indexPatternName);
+      //   return;
+      // }
 
-      await this.header.waitUntilLoadingHasFinished();
-      const flyOut = await this.testSubjects.exists('createAnyway');
-      if (flyOut) {
-        await this.testSubjects.click('createAnyway');
-      } else {
+      // await this.header.waitUntilLoadingHasFinished();
+      // const flyOut = await this.testSubjects.exists('createAnyway');
+      // if (flyOut) {
+      //   await this.testSubjects.click('createAnyway');
+      // } else {
         await this.clickAddNewIndexPatternButton();
-      }
+      // }
       await this.header.waitUntilLoadingHasFinished();
       if (!isStandardIndexPattern) {
         await this.selectRollupIndexPatternType();
