@@ -9,7 +9,7 @@
 import fn from './legend';
 
 import expect from '@kbn/expect';
-import invoke from './helpers/invoke_series_fn';
+import invoke from './test_helpers/invoke_series_fn';
 
 describe('legend.js', () => {
   let seriesList;
