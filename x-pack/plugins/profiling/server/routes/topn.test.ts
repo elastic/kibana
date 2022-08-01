@@ -39,7 +39,7 @@ describe('TopN data from Elasticsearch', () => {
         context.elasticsearch.client.asCurrentUser.search(request) as Promise<any>
     ),
     mget: jest.fn(
-      (ooperationName, request) =>
+      (operationName, request) =>
         context.elasticsearch.client.asCurrentUser.search(request) as Promise<any>
     ),
   };
