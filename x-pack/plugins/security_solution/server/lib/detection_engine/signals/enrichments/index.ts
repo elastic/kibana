@@ -45,10 +45,21 @@ export const enrichEvents = async ({
       logger,
       buildRuleMessage,
       events,
-      threatIndex: ['threat-indicator-0','threat-indicator-1','threat-indicator-2','threat-indicator-3','threat-indicator-4','threat-indicator-5','threat-indicator-6','threat-indicator-7','threat-indicator-8','threat-indicator-9'],
+      threatIndex: [
+        'threat-indicator-0',
+        'threat-indicator-1',
+        'threat-indicator-2',
+        'threat-indicator-3',
+        'threat-indicator-4',
+        'threat-indicator-5',
+        'threat-indicator-6',
+        'threat-indicator-7',
+        'threat-indicator-8',
+        'threat-indicator-9',
+      ],
       threatIndicatorPath: 'threat.indicator',
       listClient,
-    })
+    }),
   ]);
 
   const eventsMap: { [key: string]: SignalSourceHit[] } = {};
