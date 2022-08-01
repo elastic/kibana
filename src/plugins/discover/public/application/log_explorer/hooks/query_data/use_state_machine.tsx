@@ -11,14 +11,10 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { useInterpret } from '@xstate/react';
 import createContainer from 'constate';
+import { throttle } from 'lodash';
 import moment from 'moment';
-import { useMemo } from 'react';
-import { assign } from 'xstate';
-import {
-  dataAccessStateMachine,
-  loadAround,
-  updateChunksFromLoadAround,
-} from '../../state_machines/data_access_state_machine';
+import { useEffect, useMemo } from 'react';
+import { dataAccessStateMachine, loadAround } from '../../state_machines/data_access_state_machine';
 import { useSubscription } from '../use_observable';
 
 export const useStateMachineService = ({
@@ -54,29 +50,6 @@ export const useStateMachineService = ({
       });
     },
     {
-      actions: {
-        resetChunks: assign((context) => ({
-          ...context,
-          topChunk: {
-            status: 'uninitialized' as const,
-          },
-          bottomChunk: {
-            status: 'uninitialized' as const,
-          },
-        })),
-        updateChunksFromLoadAround,
-      },
-      guards: {
-        succeededTop: constantGuard(true),
-        succeededBottom: constantGuard(true),
-        isNearStart: constantGuard(false),
-        isNearEnd: constantGuard(false),
-        isWithinLoadedChunks: constantGuard(false),
-        startTimestampExtendsLoadedTop: constantGuard(false),
-        startTimestampReducesLoadedTop: constantGuard(false),
-        endTimestampExtendsLoadedBottom: constantGuard(false),
-        endTimestampReducesLoadedBottom: constantGuard(false),
-      },
       services: {
         loadAround: loadAround({
           centerRowIndex,
@@ -105,6 +78,17 @@ export const useStateMachineService = ({
 export const [StateMachineProvider, useStateMachineContext] =
   createContainer(useStateMachineService);
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const useThrottled = <Fn extends (...args: any[]) => any>(fn: Fn, delay: number) => {
+  const throttledFn = useMemo(() => throttle(fn, delay), [fn, delay]);
+
+  useEffect(() => {
+    return () => throttledFn.cancel();
+  }, [throttledFn]);
+
+  return throttledFn;
+};
+
 // export const useStateMachineContextSelector = <T, TEmitted = DataAccessService['state']>(
 //   selector: (emitted: TEmitted) => T,
 //   compare?: (a: T, b: T) => boolean,
@@ -126,8 +110,3 @@ const getMiddleOfTimeRange = ({ from, to }: TimeRange): string => {
 
   return fromMoment.add(toMoment.diff(fromMoment) / 2, 'ms').toISOString();
 };
-
-const constantGuard =
-  <Value extends unknown>(value: Value) =>
-  () =>
-    value;

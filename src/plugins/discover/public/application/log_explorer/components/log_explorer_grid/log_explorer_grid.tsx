@@ -12,63 +12,23 @@ import {
   EuiDataGridColumn,
   EuiDataGridColumnVisibility,
   EuiDataGridControlColumn,
-  EuiDataGridProps,
   EuiDataGridRefProps,
   EuiDataGridStyle,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useSelector } from '@xstate/react';
 import classnames from 'classnames';
-import React, { useCallback, useRef } from 'react';
+import React, { useRef } from 'react';
 import { LOG_EXPLORER_VIRTUAL_GRID_ROWS } from '../../constants';
-import { useStateMachineContext } from '../../hooks/query_data/use_state_machine';
-import { selectLoadedEntries } from '../../state_machines/data_access_state_machine';
 import { LogExplorerCell } from './log_explorer_grid_cell';
-
-type GridOnItemsRenderedProps = Parameters<
-  NonNullable<NonNullable<EuiDataGridProps['virtualizationOptions']>['onItemsRendered']>
->[0];
+import { useOnItemsRendered } from './use_on_items_rendered';
 
 const EuiDataGridMemoized = React.memo(EuiDataGrid);
 
 export function LogExplorerGrid() {
   const imperativeGridRef = useRef<EuiDataGridRefProps | null>(null);
 
-  const { startRowIndex, endRowIndex, chunkBoundaryRowIndex } = useSelector(
-    useStateMachineContext(),
-    selectLoadedEntries
-  );
-
-  const onItemsRendered = useCallback(
-    ({ visibleRowStartIndex, visibleRowStopIndex }: GridOnItemsRenderedProps) => {
-      if (startRowIndex == null || endRowIndex == null) {
-        return;
-      }
-
-      // TODO: trigger position update in state machine
-      if (visibleRowStartIndex === 0 && visibleRowStartIndex < startRowIndex) {
-        // scroll to initial position
-        imperativeGridRef.current?.scrollToItem?.({
-          rowIndex: chunkBoundaryRowIndex,
-          align: 'start',
-        });
-      } else if (visibleRowStartIndex < startRowIndex) {
-        // block scrolling outside of loaded area
-        imperativeGridRef.current?.scrollToItem?.({
-          rowIndex: startRowIndex,
-          align: 'start',
-        });
-      } else if (visibleRowStopIndex > endRowIndex) {
-        // block scrolling outside of loaded area
-        imperativeGridRef.current?.scrollToItem?.({
-          rowIndex: endRowIndex,
-          align: 'end',
-        });
-      }
-    },
-    [chunkBoundaryRowIndex, endRowIndex, startRowIndex]
-  );
+  const onItemsRendered = useOnItemsRendered({ imperativeGridRef });
 
   return (
     <span className="dscDiscoverGrid__inner">
@@ -111,7 +71,15 @@ const controlColumns: EuiDataGridControlColumn[] = [
         </span>
       </EuiScreenReaderOnly>
     ),
-    rowCellRender: () => <EuiButtonIcon size="xs" iconSize="s" color="text" iconType="expand" />,
+    rowCellRender: () => (
+      <EuiButtonIcon
+        aria-label="open row details"
+        size="xs"
+        iconSize="s"
+        color="text"
+        iconType="expand"
+      />
+    ),
   },
 ];
 
