@@ -15,7 +15,7 @@ import { EuiLink } from '@elastic/eui';
 import type { InternalInjectedMetadataStart } from '@kbn/core-injected-metadata-browser-internal';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
-import { mountReactNode } from '../utils/mount';
+import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import type { InternalApplicationStart } from '../application';
 import type { NotificationsStart } from '../notifications';
 import { KIBANA_ASK_ELASTIC_LINK } from './constants';

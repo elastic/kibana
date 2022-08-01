@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { filter } from 'lodash';
+import { filter, some } from 'lodash';
 import { schema } from '@kbn/config-schema';
 
 import type { IRouter } from '@kbn/core/server';
@@ -76,8 +76,10 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
       });
 
       if (
-        filter(conflictingEntries.saved_objects, (soObject) => soObject.id !== request.params.id)
-          .length
+        some(
+          filter(conflictingEntries.saved_objects, (soObject) => soObject.id !== request.params.id),
+          ['attributes.id', id]
+        )
       ) {
         return response.conflict({ body: `Saved query with id "${id}" already exists.` });
       }
