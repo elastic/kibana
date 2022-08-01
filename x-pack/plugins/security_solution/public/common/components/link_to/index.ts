@@ -34,6 +34,12 @@ interface FormatUrlOptions {
 
 export type FormatUrl = (path: string, options?: Partial<FormatUrlOptions>) => string;
 
+/**
+ * @deprecated `useFormatUrl` is deprecated. Use instead:
+ * - `withSecuritySolutionLink` -> HOC to create a security link component.
+ * - `useGetSecuritySolutionLinkProps` -> Hook to get `href` and `onClick` link props.
+ * - `useGetSecuritySolutionUrl` -> Hook to get a formatted url only.
+ */
 export const useFormatUrl = (page: SecurityPageName) => {
   const { getAppUrl } = useAppUrl();
   const tab = page in navTabs ? navTabs[page as SecurityNavKey] : undefined;
