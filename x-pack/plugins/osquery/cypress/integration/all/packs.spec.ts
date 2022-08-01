@@ -118,7 +118,7 @@ describe('ALL - Packs', () => {
       cy.getBySel('packResultsErrorsEmpty').should('have.length', 2);
     });
 
-    it('should open lens in new tab', () => {
+    it.skip('should open lens in new tab', () => {
       let lensUrl = '';
       cy.window().then((win) => {
         cy.stub(win, 'open')
