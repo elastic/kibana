@@ -219,7 +219,6 @@ describe('SearchSessionService', () => {
         expect(type).toBe(SEARCH_SESSION_TYPE);
         expect(id).toBe(sessionId);
         expect(callAttributes).not.toHaveProperty('idMapping');
-        expect(callAttributes).toHaveProperty('touched');
         expect(callAttributes).toHaveProperty('name', 'banana');
         expect(callAttributes).toHaveProperty('appId', 'nanana');
         expect(callAttributes).toHaveProperty('locatorId', 'panama');
@@ -251,7 +250,6 @@ describe('SearchSessionService', () => {
         expect(type).toBe(SEARCH_SESSION_TYPE);
         expect(options?.id).toBe(sessionId);
         expect(callAttributes).toHaveProperty('idMapping', {});
-        expect(callAttributes).toHaveProperty('touched');
         expect(callAttributes).toHaveProperty('expires');
         expect(callAttributes).toHaveProperty('created');
         expect(callAttributes).toHaveProperty('name', 'banana');
@@ -652,7 +650,6 @@ describe('SearchSessionService', () => {
         expect(type).toBe(SEARCH_SESSION_TYPE);
         expect(id).toBe(sessionId);
         expect(callAttributes).toHaveProperty('name', attributes.name);
-        expect(callAttributes).toHaveProperty('touched');
       });
 
       it('throws if user conflicts', () => {
@@ -685,7 +682,6 @@ describe('SearchSessionService', () => {
         expect(type).toBe(SEARCH_SESSION_TYPE);
         expect(id).toBe(sessionId);
         expect(callAttributes).toHaveProperty('name', 'new_name');
-        expect(callAttributes).toHaveProperty('touched');
       });
     });
 
@@ -698,8 +694,7 @@ describe('SearchSessionService', () => {
 
         expect(type).toBe(SEARCH_SESSION_TYPE);
         expect(id).toBe(sessionId);
-        expect(callAttributes).toHaveProperty('status', SearchSessionStatus.CANCELLED);
-        expect(callAttributes).toHaveProperty('touched');
+        expect(callAttributes).toHaveProperty('isCanceled', true);
       });
 
       it('throws if user conflicts', () => {
@@ -719,8 +714,7 @@ describe('SearchSessionService', () => {
 
         expect(type).toBe(SEARCH_SESSION_TYPE);
         expect(id).toBe(sessionId);
-        expect(callAttributes).toHaveProperty('status', SearchSessionStatus.CANCELLED);
-        expect(callAttributes).toHaveProperty('touched');
+        expect(callAttributes).toHaveProperty('isCanceled', true);
       });
     });
 
@@ -750,11 +744,9 @@ describe('SearchSessionService', () => {
         expect(callAttributes).toHaveProperty('idMapping', {
           [requestHash]: {
             id: searchId,
-            status: SearchSessionStatus.IN_PROGRESS,
             strategy: MOCK_STRATEGY,
           },
         });
-        expect(callAttributes).toHaveProperty('touched');
       });
 
       it('retries updating the saved object if there was a ES conflict 409', async () => {
@@ -837,13 +829,11 @@ describe('SearchSessionService', () => {
         expect(callAttributes).toHaveProperty('idMapping', {
           [requestHash]: {
             id: searchId,
-            status: SearchSessionStatus.IN_PROGRESS,
             strategy: MOCK_STRATEGY,
           },
         });
         expect(callAttributes).toHaveProperty('expires');
         expect(callAttributes).toHaveProperty('created');
-        expect(callAttributes).toHaveProperty('touched');
         expect(callAttributes).toHaveProperty('sessionId', sessionId);
       });
 
@@ -948,16 +938,13 @@ describe('SearchSessionService', () => {
         expect(callAttributes1).toHaveProperty('idMapping', {
           [requestHash1]: {
             id: searchId1,
-            status: SearchSessionStatus.IN_PROGRESS,
             strategy: MOCK_STRATEGY,
           },
           [requestHash2]: {
             id: searchId2,
-            status: SearchSessionStatus.IN_PROGRESS,
             strategy: MOCK_STRATEGY,
           },
         });
-        expect(callAttributes1).toHaveProperty('touched');
 
         const [type2, id2, callAttributes2] = savedObjectsClient.update.mock.calls[1];
         expect(type2).toBe(SEARCH_SESSION_TYPE);
@@ -965,11 +952,9 @@ describe('SearchSessionService', () => {
         expect(callAttributes2).toHaveProperty('idMapping', {
           [requestHash3]: {
             id: searchId3,
-            status: SearchSessionStatus.IN_PROGRESS,
             strategy: MOCK_STRATEGY,
           },
         });
-        expect(callAttributes2).toHaveProperty('touched');
       });
     });
 

@@ -8,7 +8,7 @@
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getSessionStatus } from './get_session_status';
-import { SearchSessionStatus } from '../../../common';
+import { SearchSessionSavedObjectAttributes, SearchSessionStatus } from '../../../common';
 import moment from 'moment';
 import { SearchSessionsConfigSchema } from '../../../config';
 
@@ -99,14 +99,16 @@ describe('getSessionStatus', () => {
   });
 
   test('returns cancelled status if session was cancelled', async () => {
-    const session: any = {
+    const session: Partial<SearchSessionSavedObjectAttributes> = {
       idMapping: {
-        a: { id: 'a' },
+        a: { id: 'a', strategy: 'ese' },
       },
-      status: SearchSessionStatus.CANCELLED,
-      expires: moment().subtract(2, 'm'),
+      isCanceled: true,
+      expires: moment().subtract(2, 'm').toISOString(),
     };
-    expect(await getSessionStatus(deps, session, mockConfig)).toBe(SearchSessionStatus.CANCELLED);
+    expect(
+      await getSessionStatus(deps, session as SearchSessionSavedObjectAttributes, mockConfig)
+    ).toBe(SearchSessionStatus.CANCELLED);
   });
 
   test('returns a complete status if all are complete', async () => {

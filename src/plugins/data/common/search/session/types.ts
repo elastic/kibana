@@ -9,7 +9,7 @@
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { SerializableRecord } from '@kbn/utility-types';
-import { SearchSessionStatus } from './status';
+import type { SearchSessionStatus, SearchStatus } from './status';
 
 export const SEARCH_SESSION_TYPE = 'search-session';
 export interface SearchSessionSavedObjectAttributes {
@@ -26,19 +26,12 @@ export interface SearchSessionSavedObjectAttributes {
    * Creation time of the session
    */
   created: string;
-  /**
-   * Last touch time of the session
-   */
-  touched: string;
+
   /**
    * Expiration time of the session. Expiration itself is managed by Elasticsearch.
    */
   expires: string;
 
-  /**
-   * status
-   */
-  status: SearchSessionStatus;
   /**
    * locatorId (see share.url.locators service)
    */
@@ -68,6 +61,11 @@ export interface SearchSessionSavedObjectAttributes {
    * Version information to display warnings when trying to restore a session from a different version
    */
   version: string;
+
+  /**
+   * `true` if session was cancelled
+   */
+  isCanceled?: boolean;
 }
 
 export interface SearchSessionRequestInfo {
@@ -79,10 +77,10 @@ export interface SearchSessionRequestInfo {
    * Search strategy used to submit the search request
    */
   strategy: string;
-  /**
-   * status
-   */
-  status: string;
+}
+
+export interface SearchSessionRequestStatus {
+  status: SearchStatus;
   /**
    * An optional error. Set if status is set to error.
    */

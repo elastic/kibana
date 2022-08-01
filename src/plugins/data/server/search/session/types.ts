@@ -22,6 +22,8 @@ import {
 } from '../../../common/search';
 import { SearchSessionsConfigSchema } from '../../../config';
 
+export { SearchStatus } from '../../../common/search';
+
 export interface IScopedSearchSessionsClient {
   getId: (request: IKibanaSearchRequest, options: ISearchOptions) => Promise<string>;
   trackId: (
@@ -52,10 +54,4 @@ export interface IScopedSearchSessionsClient {
 
 export interface ISearchSessionService {
   asScopedProvider: (core: CoreStart) => (request: KibanaRequest) => IScopedSearchSessionsClient;
-}
-
-export enum SearchStatus {
-  IN_PROGRESS = 'in_progress',
-  ERROR = 'error',
-  COMPLETE = 'complete',
 }
