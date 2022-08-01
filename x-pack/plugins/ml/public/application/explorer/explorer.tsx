@@ -107,10 +107,7 @@ const ExplorerPage: FC<ExplorerPageProps> = ({
       <EuiPageHeaderSection style={{ width: '100%' }}>
         <JobSelector {...jobSelectorProps} />
 
-        {noInfluencersConfigured === false &&
-        influencers !== undefined &&
-        indexPattern &&
-        updateLanguage ? (
+        {indexPattern && updateLanguage ? (
           <>
             <ExplorerQueryBar
               filterActive={!!filterActive}
