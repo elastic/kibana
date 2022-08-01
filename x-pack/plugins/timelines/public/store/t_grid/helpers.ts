@@ -9,6 +9,7 @@ import { omit, union } from 'lodash/fp';
 
 import { isEmpty } from 'lodash';
 import { EuiDataGridColumn } from '@elastic/eui';
+import type { TimelineNonEcsData } from '../../../common';
 import type { ToggleDetailPanel } from './actions';
 import { TGridPersistInput, TimelineById, TimelineId } from './types';
 import type { TGridModel, TGridModelSettings } from './model';
@@ -55,11 +56,6 @@ interface AddTimelineColumnParams {
   id: string;
   index: number;
   timelineById: TimelineById;
-}
-
-interface TimelineNonEcsData {
-  field: string;
-  value?: Maybe<string[]>;
 }
 
 interface CreateTGridParams extends TGridPersistInput {

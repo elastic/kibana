@@ -25,9 +25,11 @@ export interface TimelineItem {
   ecs: Ecs;
 }
 
+export type TimelineNonEcsDataFieldValue = Maybe<string[] | number[] | object[] | string | number>;
+
 export interface TimelineNonEcsData {
   field: string;
-  value?: Maybe<string[]>;
+  value?: TimelineNonEcsDataFieldValue;
 }
 
 export interface TimelineEventsAllStrategyResponse extends IEsSearchResponse {

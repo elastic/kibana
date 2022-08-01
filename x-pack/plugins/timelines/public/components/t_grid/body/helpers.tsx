@@ -47,8 +47,10 @@ export const getEventIdToDataMapping = (
     // We only have one featureId for security solution therefore we can just use hasAlertsCrud
     // but for o11y we can multiple featureIds so we need to check every consumer
     // of the alert to see if they have the permission to update the alert
-    const ruleConsumers = v.data.find((d) => d.field === ALERT_RULE_CONSUMER)?.value ?? [];
-    const ruleProducers = v.data.find((d) => d.field === ALERT_RULE_PRODUCER)?.value ?? [];
+    const ruleConsumers = (v.data.find((d) => d.field === ALERT_RULE_CONSUMER)?.value ??
+      []) as string[];
+    const ruleProducers = (v.data.find((d) => d.field === ALERT_RULE_PRODUCER)?.value ??
+      []) as string[];
     const hasPermissions = hasAlertsCrudPermissionsByRule
       ? hasAlertsCrudPermissionsByRule({
           ruleConsumer: ruleConsumers.length > 0 ? ruleConsumers[0] : '',
