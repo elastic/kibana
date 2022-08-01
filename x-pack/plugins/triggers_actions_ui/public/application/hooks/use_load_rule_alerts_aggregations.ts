@@ -243,10 +243,11 @@ export async function fetchRuleAlertsAggByTimeRange({
                 status: alert.key,
               });
             });
-            if (totalAlerts - countOfRecoveredActiveAlerts > 0) {
+            const deltaAlertsCount = totalAlerts - countOfRecoveredActiveAlerts;
+            if (deltaAlertsCount > 0) {
               localAlertChartData.push({
                 date: dayAlerts.key,
-                count: totalAlerts - countOfRecoveredActiveAlerts,
+                count: deltaAlertsCount,
                 status: 'total',
               });
             }

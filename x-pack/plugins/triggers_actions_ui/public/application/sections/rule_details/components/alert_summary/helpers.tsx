@@ -29,3 +29,13 @@ export const getColorSeries = ({ seriesKeys }: XYChartSeriesIdentifier) => {
       return null;
   }
 };
+
+/**
+ * This function may be passed to `Array.find()` to locate the `P1DT`
+ * configuration (sub) setting, a string array that contains two entries
+ * like the following example: `['P1DT', 'YYYY-MM-DD']`.
+ */
+export const isP1DTFormatterSetting = (formatNameFormatterPair?: string[]) =>
+  Array.isArray(formatNameFormatterPair) &&
+  formatNameFormatterPair[0] === 'P1DT' &&
+  formatNameFormatterPair.length === 2;

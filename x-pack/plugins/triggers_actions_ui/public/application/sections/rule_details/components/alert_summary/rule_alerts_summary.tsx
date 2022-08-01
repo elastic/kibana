@@ -37,15 +37,25 @@ import { useLoadRuleAlertsAggs } from '../../../../hooks/use_load_rule_alerts_ag
 import { useLoadRuleTypes } from '../../../../hooks/use_load_rule_types';
 import { formatChartAlertData, getColorSeries } from '.';
 import { RuleAlertsSummaryProps } from '.';
+import { isP1DTFormatterSetting } from './helpers';
 
 const Y_ACCESSORS = ['y'];
 const X_ACCESSORS = ['x'];
 const G_ACCESSORS = ['g'];
-
+const FALLBACK_DATE_FORMAT_SCALED_P1DT = 'YYYY-MM-DD';
 export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummaryProps) => {
   const [features, setFeatures] = useState<string>('');
   const isDarkMode = useUiSetting<boolean>('theme:darkMode');
-  const dateFormat = useUiSetting<string>('dateFormat');
+
+  const scaledDateFormatPreference = useUiSetting<string[][]>('dateFormat:scaled');
+  const maybeP1DTFormatter = Array.isArray(scaledDateFormatPreference)
+    ? scaledDateFormatPreference.find(isP1DTFormatterSetting)
+    : null;
+  const p1dtFormat =
+    Array.isArray(maybeP1DTFormatter) && maybeP1DTFormatter.length === 2
+      ? maybeP1DTFormatter[1]
+      : FALLBACK_DATE_FORMAT_SCALED_P1DT;
+
   const theme = useMemo(
     () => [
       EUI_SPARKLINE_THEME_PARTIAL,
@@ -70,10 +80,10 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
     () => ({
       type: TooltipType.VerticalCursor,
       headerFormatter: ({ value }: { value: number }) => {
-        return <>{moment(value).format(dateFormat)}</>;
+        return <>{moment(value).format(p1dtFormat)}</>;
       },
     }),
-    [dateFormat]
+    [p1dtFormat]
   );
 
   useEffect(() => {
