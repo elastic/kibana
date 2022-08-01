@@ -133,9 +133,12 @@ export function readFieldCapsResponse(
         aggregatable: isAggregatable,
         readFromDocValues: shouldReadFieldFromDocValues(isAggregatable, esType),
         metadata_field: capsByType[types[0]].metadata_field,
-        meta: capsByType[types[0]].meta,
-        time_series_metric: capsByType[types[0]].time_series_metric,
-        time_series_dimension: capsByType[types[0]].time_series_dimension,
+        meta: {
+          fixedInterval: capsByType[types[0]].meta?.fixed_interval,
+          timeZone: capsByType[types[0]].meta?.time_zone,
+        },
+        timeSeriesMetric: capsByType[types[0]].time_series_metric,
+        timeSeriesDimension: capsByType[types[0]].time_series_dimension,
       };
       // This is intentionally using a "hash" and a "push" to be highly optimized with very large indexes
       agg.array.push(field);

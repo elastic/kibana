@@ -211,14 +211,14 @@ export class DataViewField implements DataViewFieldBase {
    * returns true if field is a TSDB dimension field
    */
   public get timeSeriesDimension() {
-    return this.spec.time_series_dimension || false;
+    return this.spec.timeSeriesDimension || false;
   }
 
   /**
    * returns type of TSDB metric or undefined
    */
   public get timeSeriesMetric() {
-    return this.spec.time_series_metric;
+    return this.spec.timeSeriesMetric;
   }
 
   /**
@@ -377,8 +377,8 @@ export class DataViewField implements DataViewFieldBase {
       shortDotsEnable: this.spec.shortDotsEnable,
       runtimeField: this.runtimeField,
       isMapped: this.isMapped,
-      time_series_dimension: this.spec.time_series_dimension,
-      time_series_metric: this.spec.time_series_metric,
+      timeSeriesDimension: this.spec.timeSeriesDimension,
+      timeSeriesMetric: this.spec.timeSeriesMetric,
       meta: this.spec.meta,
     };
   }

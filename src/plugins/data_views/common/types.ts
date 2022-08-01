@@ -415,18 +415,18 @@ export type FieldSpec = DataViewFieldBase & {
    */
   meta?: {
     fixedInterval: string[];
-    time_zone: string[];
+    timeZone: string[];
   };
 
   /**
    * set to true if field is a TSDB dimension field
    */
-  time_series_dimension?: boolean;
+  timeSeriesDimension?: boolean;
 
   /**
    * set if field is a TSDB metric field
    */
-  time_series_metric?: 'histogram' | 'summary' | 'gauge' | 'counter';
+  timeSeriesMetric?: 'histogram' | 'summary' | 'gauge' | 'counter';
 
   // not persisted
 
