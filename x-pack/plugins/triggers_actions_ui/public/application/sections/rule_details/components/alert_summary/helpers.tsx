@@ -10,7 +10,7 @@ import { AlertChartData } from './types';
 
 export const formatChartAlertData = (
   data: AlertChartData[]
-): Array<{ x: string; y: number; g: string }> =>
+): Array<{ x: number; y: number; g: string }> =>
   data.map((alert) => ({
     x: alert.date,
     y: alert.count,

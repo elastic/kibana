@@ -32,6 +32,7 @@ import {
   EUI_SPARKLINE_THEME_PARTIAL,
 } from '@elastic/eui/dist/eui_charts_theme';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import moment from 'moment';
 import { useLoadRuleAlertsAggs } from '../../../../hooks/use_load_rule_alerts_aggregations';
 import { useLoadRuleTypes } from '../../../../hooks/use_load_rule_types';
 import { formatChartAlertData, getColorSeries } from '.';
@@ -44,6 +45,7 @@ const G_ACCESSORS = ['g'];
 export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummaryProps) => {
   const [features, setFeatures] = useState<string>('');
   const isDarkMode = useUiSetting<boolean>('theme:darkMode');
+  const dateFormat = useUiSetting<string>('dateFormat');
   const theme = useMemo(
     () => [
       EUI_SPARKLINE_THEME_PARTIAL,
@@ -64,6 +66,15 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
     features,
   });
   const chartData = useMemo(() => formatChartAlertData(alertsChartData), [alertsChartData]);
+  const tooltipSettings = useMemo(
+    () => ({
+      type: TooltipType.VerticalCursor,
+      headerFormatter: ({ value }: { value: number }) => {
+        return <>{moment(value).format(dateFormat)}</>;
+      },
+    }),
+    [dateFormat]
+  );
 
   useEffect(() => {
     const matchedRuleType = ruleTypes.find((type) => type.id === rule.ruleTypeId);
@@ -184,7 +195,7 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <Chart size={{ height: 50 }}>
-        <Settings tooltip={TooltipType.VerticalCursor} theme={theme} />
+        <Settings tooltip={tooltipSettings} theme={theme} />
         <BarSeries
           id="bars"
           xScaleType={ScaleType.Time}

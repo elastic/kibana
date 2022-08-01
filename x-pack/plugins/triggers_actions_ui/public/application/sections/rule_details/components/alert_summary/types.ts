@@ -14,7 +14,7 @@ export interface RuleAlertsSummaryProps {
 export interface AlertChartData {
   status: 'active' | 'recovered' | 'total';
   count: number;
-  date: string;
+  date: number;
 }
 
 export interface AlertsChartProps {
