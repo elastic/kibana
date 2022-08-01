@@ -22567,7 +22567,6 @@
     "xpack.osquery.agents.policyLabel": "策略",
     "xpack.osquery.agents.selectAgentLabel": "选择要查询的代理或组",
     "xpack.osquery.agents.selectionLabel": "代理",
-    "xpack.osquery.all_actions.fetchError": "提取操作时出错",
     "xpack.osquery.appNavigation.liveQueriesLinkText": "实时查询",
     "xpack.osquery.appNavigation.manageIntegrationButton": "管理集成",
     "xpack.osquery.appNavigation.packsLinkText": "包",
