@@ -6,25 +6,19 @@
  */
 
 import React, { memo } from 'react';
-import { EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EndpointActionFailureMessage } from '../endpoint_action_failure_message';
 import type { CommandExecutionResultComponent } from '../console/components/command_execution_result';
-import type { ImmutableArray } from '../../../../common/endpoint/types';
+import type { ActionDetails, MaybeImmutable } from '../../../../common/endpoint/types';
 
 export const ActionError = memo<{
-  errors: ImmutableArray<string>;
-  title?: string;
+  action: MaybeImmutable<ActionDetails>;
   ResultComponent: CommandExecutionResultComponent;
+  title?: string;
   dataTestSubj?: string;
-}>(({ title, dataTestSubj, errors, ResultComponent }) => {
+}>(({ title, dataTestSubj, action, ResultComponent }) => {
   return (
     <ResultComponent showAs="failure" title={title} data-test-subj={dataTestSubj}>
-      <FormattedMessage
-        id="xpack.securitySolution.endpointResponseActions.actionError.errorMessage"
-        defaultMessage="The following errors were encountered:"
-      />
-      <EuiSpacer size="s" />
-      <div>{errors.join(' | ')}</div>
+      <EndpointActionFailureMessage action={action} />
     </ResultComponent>
   );
 });
