@@ -47,7 +47,7 @@ export interface ElasticsearchServicePreboot {
    * ```
    */
   readonly createClient: (
-    type: string,
+    type?: string,
     clientConfig?: Partial<ElasticsearchClientConfig>
   ) => ICustomClusterClient;
 }
@@ -123,7 +123,7 @@ export interface ElasticsearchServiceStart {
    * ```
    */
   readonly createClient: (
-    type: string,
+    type?: string,
     clientConfig?: Partial<ElasticsearchClientConfig>
   ) => ICustomClusterClient;
 }

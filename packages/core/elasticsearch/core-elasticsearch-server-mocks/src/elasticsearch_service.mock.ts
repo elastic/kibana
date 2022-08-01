@@ -42,7 +42,7 @@ export type MockedElasticSearchServiceSetup = jest.Mocked<
 export interface MockedElasticSearchServiceStart {
   client: ClusterClientMock;
   createClient: jest.MockedFunction<
-    (name: string, config?: Partial<ElasticsearchClientConfig>) => CustomClusterClientMock
+    (type?: string, config?: Partial<ElasticsearchClientConfig>) => CustomClusterClientMock
   >;
 }
 
