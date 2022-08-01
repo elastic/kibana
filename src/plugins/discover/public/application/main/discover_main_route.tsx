@@ -68,23 +68,30 @@ export function DiscoverMainRoute(props: Props) {
     id: id || 'new',
   });
 
+  const hasDataView = useCallback(async () => {
+    const hasUserDataViewValue = await data.dataViews.hasData.hasUserDataView().catch(() => false);
+
+    if (!hasUserDataViewValue) {
+      return false;
+    }
+
+    const defaultDataView = await data.dataViews.getDefaultDataView();
+
+    if (!defaultDataView) {
+      return false;
+    }
+
+    return await data.dataViews.hasData.hasDataView();
+  }, [data.dataViews]);
+
   const loadDefaultOrCurrentDataView = useCallback(
     async (searchSource: ISearchSource) => {
       try {
-        /*
-        Note: @kertal @maja
+        const hasView = await hasDataView();
 
-        This is not a case the no data page handles.  So we need to know what to do with it,
-        if anything.  Because if there's data in ES and there's *a* data view, this would
-        cause the no data page to be displayed... which would render `null`.
-
-        const defaultDataView = await data.dataViews.getDefaultDataView();
-
-        if (!defaultDataView) {
-          setShowNoDataPage(true);
+        if (!hasView) {
           return;
         }
-        */
 
         const { appStateContainer } = getState({ history, uiSettings: config });
         const { index } = appStateContainer.getState();
@@ -100,7 +107,7 @@ export function DiscoverMainRoute(props: Props) {
         setError(e);
       }
     },
-    [config, data.dataViews, history, toastNotifications]
+    [config, data.dataViews, history, toastNotifications, hasDataView]
   );
 
   const loadSavedSearch = useCallback(async () => {
@@ -197,6 +204,7 @@ export function DiscoverMainRoute(props: Props) {
         ...data.dataViews.hasData,
         // If we're in dev mode, we want to always return true here.
         hasESData: isDev ? () => Promise.resolve(true) : data.dataViews.hasData.hasESData,
+        hasDataView,
       },
     },
     dataViewEditor,
