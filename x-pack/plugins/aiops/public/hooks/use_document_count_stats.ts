@@ -7,8 +7,11 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { lastValueFrom } from 'rxjs';
+
 import { i18n } from '@kbn/i18n';
 import type { ToastsStart } from '@kbn/core/public';
+import { stringHash } from '@kbn/ml-string-hash';
+
 import { useAiOpsKibana } from '../kibana_context';
 import { extractErrorProperties } from '../application/utils/error_utils';
 import {
@@ -68,8 +71,19 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
     totalCount: 0,
   });
 
+  const [documentStatsCache, setDocumentStatsCache] = useState<Record<string, DocumentStats>>({});
+
   const fetchDocumentCountData = useCallback(async () => {
     if (!searchParams) return;
+
+    const cacheKey = stringHash(
+      `${JSON.stringify(searchParams)}_${JSON.stringify(searchParamsCompare)}`
+    );
+
+    if (documentStatsCache[cacheKey]) {
+      setDocumentStats(documentStatsCache[cacheKey]);
+      return;
+    }
 
     try {
       abortCtrl.current = new AbortController();
@@ -108,17 +122,21 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
         const totalCountCompare = documentCountStatsCompare?.totalCount ?? 0;
 
         newStats.documentCountStatsCompare = documentCountStatsCompare;
-        newStats.totalCount += totalCountCompare;
+        newStats.totalCount = totalCount + totalCountCompare;
       }
 
       setDocumentStats(newStats);
+      setDocumentStatsCache({
+        ...documentStatsCache,
+        [cacheKey]: newStats,
+      });
     } catch (error) {
       // An `AbortError` gets triggered when a user cancels a request by navigating away, we need to ignore these errors.
       if (error.name !== 'AbortError') {
         displayError(toasts, searchParams!.index, extractErrorProperties(error));
       }
     }
-  }, [data?.search, searchParams, searchParamsCompare, toasts]);
+  }, [data?.search, documentStatsCache, searchParams, searchParamsCompare, toasts]);
 
   useEffect(
     function getDocumentCountData() {
@@ -127,6 +145,11 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
     },
     [fetchDocumentCountData, lastRefresh]
   );
+
+  // Clear the document count stats cache when the outer page (date picker/search bar) triggers a refresh.
+  useEffect(() => {
+    setDocumentStatsCache({});
+  }, [lastRefresh]);
 
   return documentStats;
 }

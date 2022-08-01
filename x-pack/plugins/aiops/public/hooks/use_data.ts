@@ -108,7 +108,7 @@ export const useData = (
   }, [fieldStatsRequest, selectedChangePoint]);
 
   const selectedChangePointStatsRequest = useMemo(() => {
-    return fieldStatsRequest
+    return fieldStatsRequest && selectedChangePoint
       ? { ...fieldStatsRequest, selectedChangePoint, includeSelectedChangePoint: true }
       : undefined;
   }, [fieldStatsRequest, selectedChangePoint]);
