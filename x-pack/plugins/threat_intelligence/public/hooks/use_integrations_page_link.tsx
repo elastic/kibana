@@ -10,4 +10,4 @@ import { useKibana } from './use_kibana';
 const useKibanaBasePath = (): string => useKibana().services.http.basePath.get();
 
 export const useIntegrationsPageLink = () =>
-  `${useKibanaBasePath()}/app/integrations/browse?q=threat%20intelligence`;
+  `${useKibanaBasePath()}/app/integrations/browse/threat_intel`;
