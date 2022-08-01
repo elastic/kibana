@@ -18,6 +18,7 @@ export function initRoutes(core: CoreSetup<PluginStartDependencies>) {
         body: schema.object({
           name: schema.string(),
           dataPath: schema.maybe(schema.string()),
+          size: schema.maybe(schema.number()),
           requiredAppPrivileges: schema.maybe(schema.arrayOf(schema.string())),
         }),
       },
@@ -27,6 +28,7 @@ export function initRoutes(core: CoreSetup<PluginStartDependencies>) {
       const profiles = await pluginDeps.security.userProfiles.suggest({
         name: request.body.name,
         dataPath: request.body.dataPath,
+        size: request.body.size,
         requiredPrivileges: request.body.requiredAppPrivileges
           ? {
               spaceId: pluginDeps.spaces.spacesService.getSpaceId(request),
