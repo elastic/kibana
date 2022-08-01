@@ -3319,6 +3319,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-mount-utils-browser-internal@link:bazel-bin/packages/core/mount-utils/core-mount-utils-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-mount-utils-browser@link:bazel-bin/packages/core/mount-utils/core-mount-utils-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-node-server-internal@link:bazel-bin/packages/core/node/core-node-server-internal":
   version "0.0.0"
   uid ""
@@ -3328,6 +3336,18 @@
   uid ""
 
 "@kbn/core-node-server@link:bazel-bin/packages/core/node/core-node-server":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-overlays-browser-internal@link:bazel-bin/packages/core/overlays/core-overlays-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-overlays-browser-mocks@link:bazel-bin/packages/core/overlays/core-overlays-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-overlays-browser@link:bazel-bin/packages/core/overlays/core-overlays-browser":
   version "0.0.0"
   uid ""
 
@@ -7163,6 +7183,14 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-mount-utils-browser-internal@link:bazel-bin/packages/core/mount-utils/core-mount-utils-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-mount-utils-browser@link:bazel-bin/packages/core/mount-utils/core-mount-utils-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-node-server-internal@link:bazel-bin/packages/core/node/core-node-server-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7172,6 +7200,18 @@
   uid ""
 
 "@types/kbn__core-node-server@link:bazel-bin/packages/core/node/core-node-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-overlays-browser-internal@link:bazel-bin/packages/core/overlays/core-overlays-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-overlays-browser-mocks@link:bazel-bin/packages/core/overlays/core-overlays-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-overlays-browser@link:bazel-bin/packages/core/overlays/core-overlays-browser/npm_module_types":
   version "0.0.0"
   uid ""
 
