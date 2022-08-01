@@ -59,7 +59,7 @@ export class CsvGenerator {
   private async scan(index: DataView, searchSource: ISearchSource, settings: CsvExportSettings) {
     const { scroll: scrollSettings, includeFrozen } = settings;
     const searchBody = searchSource.getSearchRequestBody();
-    this.logger.debug(`executing search request`);
+    this.logger.info(`executing search request`);
     const searchParams = {
       params: {
         body: searchBody,
@@ -78,7 +78,7 @@ export class CsvGenerator {
   }
 
   private async scroll(scrollId: string, scrollSettings: CsvExportSettings['scroll']) {
-    this.logger.debug(`executing scroll request`);
+    this.logger.info(`executing scroll request`);
 
     return await this.clients.es.asCurrentUser.scroll({
       scroll: scrollSettings.duration,
@@ -166,7 +166,7 @@ export class CsvGenerator {
     builder: MaxSizeStringBuilder,
     settings: CsvExportSettings
   ) {
-    this.logger.debug(`Building CSV header row...`);
+    this.logger.info(`Building CSV header row...`);
     const header = columns.map(this.escapeValues(settings)).join(settings.separator) + '\n';
 
     if (!builder.tryAppend(header)) {
@@ -188,7 +188,7 @@ export class CsvGenerator {
     formatters: Record<string, FieldFormat>,
     settings: CsvExportSettings
   ) {
-    this.logger.debug(`Building ${table.rows.length} CSV data rows...`);
+    this.logger.info(`Building ${table.rows.length} CSV data rows...`);
     for (const dataTableRow of table.rows) {
       if (this.cancellationToken.isCancelled()) {
         break;
@@ -295,7 +295,7 @@ export class CsvGenerator {
           scrollId = results?._scroll_id;
           if (results.hits?.total != null) {
             totalRecords = results.hits.total as number;
-            this.logger.debug(`Total search results: ${totalRecords}`);
+            this.logger.info(`Total search results: ${totalRecords}`);
           }
         } else {
           // use the scroll cursor in Elasticsearch
@@ -369,7 +369,7 @@ export class CsvGenerator {
     } finally {
       // clear scrollID
       if (scrollId) {
-        this.logger.debug(`executing clearScroll request`);
+        this.logger.info(`executing clearScroll request`);
         try {
           await this.clients.es.asCurrentUser.clearScroll({ scroll_id: [scrollId] });
         } catch (err) {
@@ -380,7 +380,7 @@ export class CsvGenerator {
       }
     }
 
-    this.logger.debug(`Finished generating. Row count: ${this.csvRowCount}.`);
+    this.logger.info(`Finished generating. Row count: ${this.csvRowCount}.`);
 
     if (!this.maxSizeReached && this.csvRowCount !== totalRecords) {
       this.logger.warn(
