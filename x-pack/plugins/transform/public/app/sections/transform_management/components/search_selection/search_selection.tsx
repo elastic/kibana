@@ -67,7 +67,7 @@ export const SearchSelection: FC<SearchSelectionProps> = ({ onSearchSelected }) 
                   defaultMessage: 'Data view',
                 }
               ),
-              // defaultSearchField: 'name',
+              defaultSearchField: 'name',
             },
           ]}
           fixedPageSize={fixedPageSize}
