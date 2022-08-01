@@ -169,23 +169,14 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
         }
       );
       setIsSubmitting(false);
-      const successMessage = isSingleAgent
-        ? i18n.translate('xpack.fleet.upgradeAgents.successSingleNotificationTitle', {
+
+      if (isSingleAgent && counts.success === counts.total) {
+        notifications.toasts.addSuccess(
+          i18n.translate('xpack.fleet.upgradeAgents.successSingleNotificationTitle', {
             defaultMessage: 'Upgrading {count} agent',
             values: { count: 1 },
           })
-        : i18n.translate('xpack.fleet.upgradeAgents.successMultiNotificationTitle', {
-            defaultMessage:
-              'Upgrading {isMixed, select, true {{success} of {total}} other {{isAllAgents, select, true {all selected} other {{success}} }}} agents',
-            values: {
-              isMixed: counts.success !== counts.total,
-              success: counts.success,
-              total: counts.total,
-              isAllAgents,
-            },
-          });
-      if (counts.success === counts.total) {
-        notifications.toasts.addSuccess(successMessage);
+        );
       } else if (counts.error === counts.total) {
         notifications.toasts.addDanger(
           i18n.translate('xpack.fleet.upgradeAgents.bulkResultAllErrorsNotificationTitle', {
@@ -196,7 +187,6 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
         );
       } else {
         notifications.toasts.addWarning({
-          title: successMessage,
           text: i18n.translate('xpack.fleet.upgradeAgents.bulkResultErrorResultsSummary', {
             defaultMessage:
               '{count} {count, plural, one {agent was} other {agents were}} not successful',
