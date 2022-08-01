@@ -16,7 +16,7 @@ import { DataViewField } from '../fields';
 
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { RuntimeField, RuntimeTypeExceptComposite } from '../types';
+import { FieldSpec, RuntimeField, RuntimeTypeExceptComposite } from '../types';
 import { stubLogstashFields } from '../field.stub';
 import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
 
@@ -97,6 +97,29 @@ describe('IndexPattern', () => {
       expect(indexPattern.fields[0]).toHaveProperty('sortable');
       expect(indexPattern.fields[0]).toHaveProperty('scripted');
       expect(indexPattern.fields[0]).toHaveProperty('isMapped');
+    });
+  });
+
+  describe('isTSDBMode', () => {
+    const tsdbField: FieldSpec = {
+      name: 'tsdb-metric-field',
+      type: 'number',
+      aggregatable: true,
+      searchable: true,
+      time_series_metric: 'gauge',
+    };
+
+    test('should return false if no fields are tsdb fields', () => {
+      expect(indexPattern.isTSDBMode()).toBe(false);
+    });
+
+    test('should return true if some fields are tsdb fields', () => {
+      indexPattern.fields.add(tsdbField);
+      expect(indexPattern.isTSDBMode()).toBe(true);
+    });
+
+    afterAll(() => {
+      indexPattern.fields.remove(tsdbField);
     });
   });
 
