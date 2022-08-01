@@ -3,7 +3,7 @@ id: kibDevDocsDeprecationsByApi
 slug: /kibana-dev-docs/api-meta/deprecated-api-list-by-api
 title: Deprecated API usage by API
 summary: A list of deprecated APIs, which plugins are still referencing them, and when they need to be removed by.
-date: 2022-07-26
+date: 2022-08-01
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
 warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system.
 ---
@@ -23,10 +23,12 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 | <DocLink id="kibUiActionsPluginApi" section="def-public.UiActionsService.executeTriggerActions" text="executeTriggerActions"/> | data, discover, embeddable | - |
 | <DocLink id="kibCorePluginApi" section="def-public.UiSettingsParams.metric" text="metric"/> | advancedSettings, discover | - |
 | <DocLink id="kibCorePluginApi" section="def-server.UiSettingsParams.metric" text="metric"/> | advancedSettings, discover | - |
+| <DocLink id="kibDataPluginApi" section="def-public.SearchSource.fetch" text="fetch"/> | stackAlerts, alerting, securitySolution, inputControlVis | - |
+| <DocLink id="kibDataPluginApi" section="def-common.SearchSource.fetch" text="fetch"/> | stackAlerts, alerting, securitySolution, inputControlVis | - |
 | <DocLink id="kibTaskManagerPluginApi" section="def-server.TaskManagerSetupContract.index" text="index"/> | actions, alerting | - |
 | <DocLink id="kibSecurityPluginApi" section="def-server.SecurityPluginSetup.authc" text="authc"/> | encryptedSavedObjects, actions, data, cloud, ml, logstash, securitySolution | - |
 | <DocLink id="kibDataPluginApi" section="def-public.DataPublicPluginStart.fieldFormats" text="fieldFormats"/> | dashboard, lens, stackAlerts, visTypeTable, visTypeTimeseries, visTypeXy, visTypeVislib, expressionPartitionVis | - |
-| <DocLink id="kibKibanaReactPluginApi" section="def-public.RedirectAppLinks" text="RedirectAppLinks"/> | esUiShared, home, data, spaces, fleet, visualizations, lens, observability, ml, apm, cloudSecurityPosture, indexLifecycleManagement, synthetics, upgradeAssistant, ux, savedObjectsManagement, kibanaOverview | - |
+| <DocLink id="kibKibanaReactPluginApi" section="def-public.RedirectAppLinks" text="RedirectAppLinks"/> | esUiShared, home, data, spaces, fleet, visualizations, lens, observability, ml, apm, indexLifecycleManagement, synthetics, upgradeAssistant, ux, savedObjectsManagement, kibanaOverview | - |
 | <DocLink id="kibKibanaReactPluginApi" section="def-public.ExitFullScreenButton" text="ExitFullScreenButton"/> | dashboard | - |
 | <DocLink id="kibDataPluginApi" section="def-common.DataView.flattenHit" text="flattenHit"/> | dataViews, maps | - |
 | <DocLink id="kibDataPluginApi" section="def-server.DataView.flattenHit" text="flattenHit"/> | dataViews, maps | - |
@@ -56,12 +58,10 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 | <DocLink id="kibKibanaReactPluginApi" section="def-public.KibanaPageTemplate" text="KibanaPageTemplate"/> | management, spaces, ml, canvas, enterpriseSearch, osquery, home | - |
 | <DocLink id="kibKibanaReactPluginApi" section="def-public.KibanaPageTemplateProps" text="KibanaPageTemplateProps"/> | management, enterpriseSearch | - |
 | <DocLink id="kibSecurityPluginApi" section="def-public.SecurityPluginStart.uiApi" text="uiApi"/> | enterpriseSearch | - |
-| <DocLink id="kibSecurityPluginApi" section="def-server.SecurityPluginSetup.authz" text="authz"/> | actions, ml, enterpriseSearch, savedObjectsTagging | - |
+| <DocLink id="kibSecurityPluginApi" section="def-server.SecurityPluginSetup.authz" text="authz"/> | actions, ml, savedObjectsTagging, enterpriseSearch | - |
 | <DocLink id="kibCorePluginApi" section="def-public.SavedObjectsImportSuccess.createNewCopy" text="createNewCopy"/> | spaces, savedObjectsManagement | - |
 | <DocLink id="kibCorePluginApi" section="def-server.SavedObjectsImportSuccess.createNewCopy" text="createNewCopy"/> | spaces, savedObjectsManagement | - |
 | <DocLink id="kibCorePluginApi" section="def-server.ElasticsearchServiceSetup.legacy" text="legacy"/> | console, @kbn/core-elasticsearch-server-internal | - |
-| <DocLink id="kibDataPluginApi" section="def-public.SearchSource.fetch" text="fetch"/> | stackAlerts, alerting, securitySolution, inputControlVis | 8.1 |
-| <DocLink id="kibDataPluginApi" section="def-common.SearchSource.fetch" text="fetch"/> | stackAlerts, alerting, securitySolution, inputControlVis | 8.1 |
 | <DocLink id="kibSavedObjectsPluginApi" section="def-public.SavedObjectSaveModal" text="SavedObjectSaveModal"/> | embeddable, discover, presentationUtil, dashboard, graph | 8.8.0 |
 | <DocLink id="kibFeaturesPluginApi" section="def-server.PluginSetupContract.getKibanaFeatures" text="getKibanaFeatures"/> | spaces, security, alerting | 8.8.0 |
 | <DocLink id="kibLicensingPluginApi" section="def-server.LicensingPluginSetup.license$" text="license$"/> | spaces, security, actions, alerting, ml, remoteClusters, graph, indexLifecycleManagement, mapsEms, painlessLab, rollup, searchprofiler, snapshotRestore, transform, upgradeAssistant | 8.8.0 |
@@ -140,4 +140,6 @@ Safe to remove.
 | <DocLink id="kibKbnCoreInjectedMetadataBrowserPluginApi" section="def-common.InjectedMetadataStart" text="InjectedMetadataStart"/> | @kbn/core-injected-metadata-browser | 
 | <DocLink id="kibKbnCoreInjectedMetadataBrowserPluginApi" section="def-common.InjectedMetadataSetup" text="InjectedMetadataSetup"/> | @kbn/core-injected-metadata-browser | 
 | <DocLink id="kibKbnCoreMetricsServerPluginApi" section="def-server.OpsMetrics.process" text="process"/> | @kbn/core-metrics-server | 
+| <DocLink id="kibKbnCoreSavedObjectsCommonPluginApi" section="def-common.SavedObjectsImportSuccess.createNewCopy" text="createNewCopy"/> | @kbn/core-saved-objects-common | 
+| <DocLink id="kibKbnCoreSavedObjectsServerPluginApi" section="def-server.SavedObjectsMigrationLogger.warning" text="warning"/> | @kbn/core-saved-objects-server | 
 | <DocLink id="kibKbnCoreUiSettingsCommonPluginApi" section="def-common.UiSettingsParams.metric" text="metric"/> | @kbn/core-ui-settings-common |

@@ -13,10 +13,10 @@ import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { AlertsPopover } from './open_alerts_popover';
 import { discoverServiceMock } from '../../../../__mocks__/services';
-import { indexPatternWithTimefieldMock } from '../../../../__mocks__/index_pattern_with_timefield';
-import { indexPatternMock } from '../../../../__mocks__/index_pattern';
+import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
+import { dataViewMock } from '../../../../__mocks__/data_view';
 
-const mount = (dataView = indexPatternMock) =>
+const mount = (dataView = dataViewMock) =>
   mountWithIntl(
     <KibanaContextProvider services={discoverServiceMock}>
       <AlertsPopover
@@ -35,7 +35,7 @@ describe('OpenAlertsPopover', () => {
   });
 
   it('should render with the create search threshold rule button enabled if the data view has a time field', () => {
-    const component = mount(indexPatternWithTimefieldMock);
+    const component = mount(dataViewWithTimefieldMock);
     expect(findTestSubject(component, 'discoverCreateAlertButton').prop('disabled')).toBeFalsy();
   });
 
