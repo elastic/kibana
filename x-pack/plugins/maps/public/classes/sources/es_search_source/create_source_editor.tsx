@@ -6,31 +6,39 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { EuiFormRow, EuiPanel } from '@elastic/eui';
+import { DataView } from '@kbn/data-plugin/common';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 
+import { i18n } from '@kbn/i18n';
+import { ESSearchSourceDescriptor } from '../../../../common/descriptor_types';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_select';
-import { i18n } from '@kbn/i18n';
 import { SCALING_TYPES } from '../../../../common/constants';
 import { getGeoFields } from '../../../index_pattern_util';
 
-const RESET_INDEX_PATTERN_STATE = {
+interface Props {
+  onSourceConfigChange: (sourceConfig: Partial<ESSearchSourceDescriptor> | null) => void;
+}
+
+interface State {
+  indexPattern: DataView | undefined;
+  geoFields: DataViewField[] | undefined;
+  geoFieldName: string | undefined;
+}
+
+const RESET_INDEX_PATTERN_STATE: State = {
   indexPattern: undefined,
   geoFields: undefined,
   geoFieldName: undefined,
 };
 
-export class CreateSourceEditor extends Component {
-  static propTypes = {
-    onSourceConfigChange: PropTypes.func.isRequired,
-  };
-
-  state = {
+export class CreateSourceEditor extends Component<Props, State> {
+  state: State = {
     ...RESET_INDEX_PATTERN_STATE,
   };
 
-  _onIndexPatternSelect = (indexPattern) => {
+  _onIndexPatternSelect = (indexPattern: DataView) => {
     const geoFields = getGeoFields(indexPattern.fields);
 
     this.setState(
@@ -54,7 +62,7 @@ export class CreateSourceEditor extends Component {
     );
   };
 
-  _onGeoFieldSelect = (geoFieldName) => {
+  _onGeoFieldSelect = (geoFieldName?: string) => {
     this.setState(
       {
         geoFieldName,
@@ -66,12 +74,14 @@ export class CreateSourceEditor extends Component {
   _previewLayer = () => {
     const { indexPattern, geoFieldName } = this.state;
 
+    const field = geoFieldName && indexPattern?.getFieldByName(geoFieldName);
+
     const sourceConfig =
       indexPattern && geoFieldName
         ? {
             indexPatternId: indexPattern.id,
             geoField: geoFieldName,
-            scalingType: SCALING_TYPES.MVT,
+            scalingType: field && field.isRuntimeField ? SCALING_TYPES.LIMIT : SCALING_TYPES.MVT,
           }
         : null;
     this.props.onSourceConfigChange(sourceConfig);
@@ -92,7 +102,7 @@ export class CreateSourceEditor extends Component {
           placeholder={i18n.translate('xpack.maps.source.esSearch.selectLabel', {
             defaultMessage: 'Select geo field',
           })}
-          value={this.state.geoFieldName}
+          value={this.state.geoFieldName ? this.state.geoFieldName : null}
           onChange={this._onGeoFieldSelect}
           fields={this.state.geoFields}
         />
@@ -104,7 +114,9 @@ export class CreateSourceEditor extends Component {
     return (
       <EuiPanel>
         <GeoIndexPatternSelect
-          value={this.state.indexPattern ? this.state.indexPattern.id : ''}
+          value={
+            this.state.indexPattern && this.state.indexPattern.id ? this.state.indexPattern.id : ''
+          }
           onChange={this._onIndexPatternSelect}
         />
 

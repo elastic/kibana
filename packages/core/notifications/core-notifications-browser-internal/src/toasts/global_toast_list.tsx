@@ -8,14 +8,14 @@
 
 import { EuiGlobalToastList, EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
 import React from 'react';
-import * as Rx from 'rxjs';
+import { Observable, type Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 
-import { MountWrapper } from '../../utils';
-import { Toast } from './toasts_api';
+import type { Toast } from '@kbn/core-notifications-browser';
+import { MountWrapper } from '@kbn/core-mount-utils-browser-internal';
 
 interface Props {
-  toasts$: Rx.Observable<Toast[]>;
+  toasts$: Observable<Toast[]>;
   dismissToast: (toastId: string) => void;
 }
 
@@ -34,7 +34,7 @@ export class GlobalToastList extends React.Component<Props, State> {
     toasts: [],
   };
 
-  private subscription?: Rx.Subscription;
+  private subscription?: Subscription;
 
   public componentDidMount() {
     this.subscription = this.props.toasts$.subscribe((toasts) => {
