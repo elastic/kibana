@@ -25,7 +25,7 @@ export function getSupportedFilterAggs(
   fieldName: string,
   dataView: DataView,
   runtimeMappings?: RuntimeMappings
-): FilterAggType[] {
+): FilterAggType[] | undefined {
   const dataViewField = dataView.fields.getByName(fieldName);
 
   if (dataViewField !== undefined) {
@@ -39,7 +39,11 @@ export function getSupportedFilterAggs(
     ];
   }
 
-  throw new Error(`The field ${fieldName} does not exist in the index or runtime fields`);
+  // Filter boolean fields might not exist in the data view
+  // but we still support it as JSON
+  // eslint-disable-next-line no-console
+  console.error(`The field ${fieldName} does not exist in the index or runtime fields`);
+  return undefined;
 }
 
 /**
@@ -70,42 +74,49 @@ export const FilterAggForm: PivotAggsConfigFilter['AggFormComponent'] = ({
 
   return (
     <>
-      <EuiFormRow
-        label={
-          <>
-            <FormattedMessage
-              id="xpack.transform.agg.popoverForm.filerAggLabel"
-              defaultMessage="Filter query"
-            />
-            <EuiToolTip
-              content={
-                <FormattedMessage
-                  id="xpack.transform.agg.popoverForm.filerQueryAdvancedSuggestionTooltip"
-                  defaultMessage="To add other filter query aggregations, edit the JSON config."
+      {filterAggsOptions !== undefined ? (
+        <EuiFormRow
+          label={
+            <>
+              <FormattedMessage
+                id="xpack.transform.agg.popoverForm.filerAggLabel"
+                defaultMessage="Filter query"
+              />
+              <EuiToolTip
+                content={
+                  <FormattedMessage
+                    id="xpack.transform.agg.popoverForm.filerQueryAdvancedSuggestionTooltip"
+                    defaultMessage="To add other filter query aggregations, edit the JSON config."
+                  />
+                }
+              >
+                <EuiIcon
+                  size="s"
+                  color="subdued"
+                  type="questionInCircle"
+                  className="eui-alignTop"
                 />
-              }
-            >
-              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-            </EuiToolTip>
-          </>
-        }
-      >
-        <EuiSelect
-          options={[{ text: '', value: '' }].concat(
-            filterAggsOptions.map((v) => ({ text: v, value: v }))
-          )}
-          value={filterAgg}
-          onChange={(e) => {
-            // have to reset aggTypeConfig of filterAgg change
-            const filterAggUpdate = e.target.value as FilterAggType;
-            onChange({
-              filterAgg: filterAggUpdate,
-              aggTypeConfig: getFilterAggTypeConfig(filterAggUpdate),
-            });
-          }}
-          data-test-subj="transformFilterAggTypeSelector"
-        />
-      </EuiFormRow>
+              </EuiToolTip>
+            </>
+          }
+        >
+          <EuiSelect
+            options={[{ text: '', value: '' }].concat(
+              filterAggsOptions.map((v) => ({ text: v, value: v }))
+            )}
+            value={filterAgg}
+            onChange={(e) => {
+              // have to reset aggTypeConfig of filterAgg change
+              const filterAggUpdate = e.target.value as FilterAggType;
+              onChange({
+                filterAgg: filterAggUpdate,
+                aggTypeConfig: getFilterAggTypeConfig(filterAggUpdate),
+              });
+            }}
+            data-test-subj="transformFilterAggTypeSelector"
+          />
+        </EuiFormRow>
+      ) : null}
       {filterAgg !== '' && filterAggTypeConfig?.FilterAggFormComponent && (
         <filterAggTypeConfig.FilterAggFormComponent
           config={filterAggTypeConfig?.filterAggConfig}

@@ -315,3 +315,15 @@ export function getEsAggFromAggConfig(
 
   return result;
 }
+
+export const isFilterBooleanAgg = (config: PivotAggsConfig) => {
+  if (
+    config.agg === 'filter' &&
+    isPopulatedObject(config.subAggs) &&
+    isPopulatedObject(config, ['aggConfig']) &&
+    isPopulatedObject(config.aggConfig, ['filterAgg']) &&
+    config.aggConfig.filterAgg === 'bool'
+  )
+    return true;
+  return false;
+};

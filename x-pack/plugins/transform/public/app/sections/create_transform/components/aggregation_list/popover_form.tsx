@@ -41,7 +41,7 @@ import {
   PivotAggsConfig,
   PivotAggsConfigWithUiSupportDict,
 } from '../../../../common';
-import { isPivotAggsWithExtendedForm } from '../../../../common/pivot_aggs';
+import { isFilterBooleanAgg, isPivotAggsWithExtendedForm } from '../../../../common/pivot_aggs';
 import { getAggFormConfig } from '../step_define/common/get_agg_form_config';
 
 interface Props {
@@ -116,7 +116,8 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
   const [size, setSize] = useState(getDefaultSize(defaultData));
   const [validSize, setValidSize] = useState(agg === PIVOT_SUPPORTED_AGGS.TERMS);
 
-  const isUnsupportedAgg = !isPivotAggsConfigWithUiSupport(defaultData);
+  const isUnsupportedAgg =
+    !isPivotAggsConfigWithUiSupport(defaultData) || isFilterBooleanAgg(defaultData);
 
   // Update configuration based on the aggregation type
   useEffect(() => {
