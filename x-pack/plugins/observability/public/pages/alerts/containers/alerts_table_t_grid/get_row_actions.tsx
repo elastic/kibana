@@ -7,8 +7,8 @@
 import React from 'react';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { ObservabilityRuleTypeRegistry } from '../../../../rules/create_observability_rule_type_registry';
-import { ObservabilityActions } from './alerts_table_t_grid';
-import type { ObservabilityActionsProps } from './alerts_table_t_grid';
+import { ObservabilityActions } from '../../components/observability_actions';
+import type { ObservabilityActionsProps } from '../../components/observability_actions';
 
 const buildData = (alerts: EcsFieldsResponse): ObservabilityActionsProps['data'] => {
   return Object.entries(alerts).reduce<ObservabilityActionsProps['data']>(
