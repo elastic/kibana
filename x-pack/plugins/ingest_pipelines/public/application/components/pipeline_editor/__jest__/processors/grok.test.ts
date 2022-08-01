@@ -62,16 +62,16 @@ describe('Processor: Grok', () => {
     const {
       actions: { saveNewProcessor },
       form,
-      exists,
     } = testBed;
 
     // Click submit button with only the type defined
     await saveNewProcessor();
 
     // Expect form error as "field" is a required parameter
-    expect(form.getErrorsMessages()).toEqual(['A field value is required.']);
-    // Patterns field is also required; it uses EuiDraggable and only shows an error icon when invalid
-    expect(exists('droppableList.errorIcon')).toBe(true);
+    expect(form.getErrorsMessages()).toEqual([
+      'A field value is required.', // "Field" input
+      'A value is required.', // First input in "Patterns" list
+    ]);
   });
 
   test('saves with default parameter values', async () => {
