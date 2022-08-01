@@ -1,0 +1,10 @@
+summary: Retrieves all alerts attached to a case
+value: 
+  [
+    {
+      "id": "f6a7d0c3-d52d-432c-b2e6-447cd7fce04d",
+      "index": ".alerts-observability.logs.alerts-default",
+      "attached_at": "2022-07-25T20:09:40.963Z"
+    }
+  ]
+  

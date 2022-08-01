@@ -19,6 +19,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     getVisualDefaults: jest.fn(),
     getSourceId: jest.fn(),
     getFilters: jest.fn(),
+    getMaxPossibleNumValues: jest.fn(),
   };
 
   return {
