@@ -7,7 +7,6 @@
   "retries": {
     "runMode": 2
   },
-  "numTestsKeptInMemory": 0,
   "screenshotsFolder": "../../../target/kibana-security-solution/cypress/screenshots",
   "trashAssetsBeforeRuns": false,
   "video": false,
