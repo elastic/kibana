@@ -28,18 +28,19 @@ import { DeprecationsService } from '@kbn/core-deprecations-browser-internal';
 import { IntegrationsService } from '@kbn/core-integrations-browser-internal';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
+import { OverlayService } from '@kbn/core-overlays-browser-internal';
+import { KBN_LOAD_MARKS } from '@kbn/core-mount-utils-browser-internal';
 import { CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
 import { NotificationsService } from './notifications';
-import { OverlayService } from './overlays';
 import { PluginsService } from './plugins';
 import { ApplicationService } from './application';
 import { RenderingService } from './rendering';
 import { SavedObjectsService } from './saved_objects';
 import { CoreApp } from './core_app';
 import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
+
 import {
-  KBN_LOAD_MARKS,
   LOAD_SETUP_DONE,
   LOAD_START_DONE,
   KIBANA_LOADED_EVENT,
