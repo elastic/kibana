@@ -32,7 +32,7 @@ Create Case Object::      A JSON payload sent to the create case URL to create c
 	}
 }
 --
-Note: Due to Mustache template variables (the text enclosed in triple braces, for example, `{{{case.title}}}`), the JSON is not validated in this step. The JSON is validated once the mustache variables have been placed when REST method is executed. Manually ensure that the JSON is valid besides the mustache variables so the later validation will pass.
+Note: Due to Mustache template variables (the text enclosed in triple braces, for example, `{{{case.title}}}`), the JSON is not validated in this step. The JSON is validated once the mustache variables have been placed when REST method is executed. Manually ensure that the JSON is valid, disregarding the mustache variables, so the later validation will pass.
 
 Create Case Response - Case ID Key::   JSON key in create case response that contains the external case id
 Get Case URL::       Rest API URL to GET case by id from third party system. Use the variable selector to add external system id to the url. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts. For example:
@@ -41,7 +41,7 @@ Get Case URL::       Rest API URL to GET case by id from third party system. Use
 --
 https://test.host/rest/api/2/issue/{{{external.system.id}}}
 --
-Note: Due to Mustache template variables (the text enclosed in triple braces, for example, `{{{case.title}}}`), the JSON is not validated in this step. The JSON is validated once the mustache variables have been placed when REST method is executed. Manually ensure that the JSON is valid besides the mustache variables so the later validation will pass.
+Note: Due to Mustache template variables (the text enclosed in triple braces, for example, `{{{case.title}}}`), the JSON is not validated in this step. The JSON is validated once the mustache variables have been placed when REST method is executed. Manually ensure that the JSON is valid, disregarding the mustache variables, so the later validation will pass.
 
 Get Case Response - Title Key::   JSON key in get case response that contains the external case title
 Get Case Response - Created Date Key::   JSON key in get case response that contains the external case created date
@@ -71,7 +71,7 @@ Update Case Object::      A JSON payload sent to the update case URL to update c
 	}
 }
 --
-Note: Due to Mustache template variables (the text enclosed in triple braces, for example, `{{{case.title}}}`), the JSON is not validated in this step. The JSON is validated once the mustache variables have been placed when REST method is executed. Manually ensure that the JSON is valid besides the mustache variables so the later validation will pass.
+Note: Due to Mustache template variables (the text enclosed in triple braces, for example, `{{{case.title}}}`), the JSON is not validated in this step. The JSON is validated once the mustache variables have been placed when REST method is executed. Manually ensure that the JSON is valid, disregarding the mustache variables, so the later validation will pass.
 Create Comment Method::  (optional) REST API HTTP request method to create a case comment in third party system, either `post`, `put`(default), or `patch`.
 Create Comment URL::       (optional) Rest API URL to create a case comment by id in third party system. Use the variable selector to add external system id to the url. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts. For example:
 +
@@ -87,7 +87,7 @@ Create Comment Object::      (optional) A JSON payload sent to the create commen
   "body": {{{case.comment}}}
 }
 --
-Note: Due to Mustache template variables (the text enclosed in triple braces, for example, `{{{case.title}}}`), the JSON is not validated in this step. The JSON is validated once the mustache variables have been placed when REST method is executed. Manually ensure that the JSON is valid besides the mustache variables so the later validation will pass.
+Note: Due to Mustache template variables (the text enclosed in triple braces, for example, `{{{case.title}}}`), the JSON is not validated in this step. The JSON is validated once the mustache variables have been placed when REST method is executed. Manually ensure that the JSON is valid, disregarding the mustache variables, so the later validation will pass.
 
 [float]
 [[cases-webhook-connector-networking-configuration]]
