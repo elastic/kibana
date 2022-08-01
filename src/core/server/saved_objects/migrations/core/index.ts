@@ -8,7 +8,7 @@
 
 export { DocumentMigrator } from './document_migrator';
 export { buildActiveMappings } from './build_active_mappings';
-export type { LogFn, SavedObjectsMigrationLogger } from './migration_logger';
+export type { LogFn } from './migration_logger';
 export { excludeUnusedTypesQuery, REMOVED_TYPES } from './unused_types';
 export { TransformSavedObjectDocumentError } from './transform_saved_object_document_error';
 export type {
