@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { arraysDifference, buildNestedFilter, buildRangeFilter, constructQueryOptions, sortToSnake } from './utils';
+import {
+  arraysDifference,
+  buildNestedFilter,
+  buildRangeFilter,
+  constructQueryOptions,
+  sortToSnake,
+} from './utils';
 import { toElasticsearchQuery } from '@kbn/es-query';
 import { CaseStatuses } from '../../common';
 import { CaseSeverity } from '../../common/api';
@@ -644,6 +650,9 @@ describe('utils', () => {
           },
         }
       `);
+    });
+  });
+
   describe('arraysDifference', () => {
     it('returns null if originalValue is null', () => {
       expect(arraysDifference(null, [])).toBeNull();

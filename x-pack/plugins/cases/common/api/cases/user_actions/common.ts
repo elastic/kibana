@@ -8,6 +8,8 @@
 import * as rt from 'io-ts';
 import { UserRT } from '../../user';
 
+// TODO: do we need this? can we build this based on the builderMap here:
+// x-pack/plugins/cases/server/services/user_actions/builder_factory.ts
 export const ActionTypes = {
   assignees: 'assignees',
   comment: 'comment',
@@ -23,6 +25,9 @@ export const ActionTypes = {
   delete_case: 'delete_case',
 } as const;
 
+export type ActionTypeKeys = keyof typeof ActionTypes;
+export type ActionTypeValues = typeof ActionTypes[ActionTypeKeys];
+
 export const Actions = {
   add: 'add',
   create: 'create',
@@ -30,6 +35,9 @@ export const Actions = {
   update: 'update',
   push_to_service: 'push_to_service',
 } as const;
+
+export type ActionOperationKeys = keyof typeof Actions;
+export type ActionOperationValues = typeof Actions[ActionOperationKeys];
 
 /* To the next developer, if you add/removed fields here
  * make sure to check this file (x-pack/plugins/cases/server/services/user_actions/helpers.ts) too
