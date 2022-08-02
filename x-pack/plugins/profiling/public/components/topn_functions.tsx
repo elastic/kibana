@@ -8,10 +8,18 @@
 import React, { useContext, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiBasicTable, EuiHorizontalRule, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 
+import { orderBy } from 'lodash';
 import { getCalleeFunction, getCalleeSource, StackFrameMetadata } from '../../common/profiling';
 import { FunctionContext } from './contexts/function';
+import { TopNFunctionSortField } from '../../common/functions';
 
 interface Row {
   rank: number;
@@ -21,7 +29,18 @@ interface Row {
   inclusiveCPU: number;
 }
 
-export const TopNFunctionsTable = () => {
+export const TopNFunctionsTable = ({
+  sortDirection,
+  sortField,
+  onSortChange,
+}: {
+  sortDirection: 'asc' | 'desc';
+  sortField: TopNFunctionSortField;
+  onSortChange: (options: {
+    sortDirection: 'asc' | 'desc';
+    sortField: TopNFunctionSortField;
+  }) => void;
+}) => {
   const ctx = useContext(FunctionContext);
 
   const totalCount: number = useMemo(() => {
@@ -46,45 +65,45 @@ export const TopNFunctionsTable = () => {
     }));
   }, [ctx]);
 
-  const columns = [
+  const columns: Array<EuiBasicTableColumn<Row>> = [
     {
-      field: 'rank',
+      field: TopNFunctionSortField.Rank,
       name: i18n.translate('xpack.profiling.functionsView.rankColumnLabel', {
         defaultMessage: 'Rank',
       }),
     },
     {
-      field: 'frame',
+      field: TopNFunctionSortField.Frame,
       name: i18n.translate('xpack.profiling.functionsView.functionColumnLabel', {
         defaultMessage: 'Function',
       }),
-      width: '50%',
-      render: (f: StackFrameMetadata, row: Row) => (
+      width: '100%',
+      render: (_, { frame }) => (
         <EuiText size="s">
-          <strong>{getCalleeFunction(f)}</strong>
-          <p>{getCalleeSource(f)}</p>
+          <strong>{getCalleeFunction(frame)}</strong>
+          <p>{getCalleeSource(frame)}</p>
         </EuiText>
       ),
     },
     {
-      field: 'samples',
+      field: TopNFunctionSortField.Samples,
       name: i18n.translate('xpack.profiling.functionsView.samplesColumnLabel', {
         defaultMessage: 'Samples',
       }),
     },
     {
-      field: 'exclusiveCPU',
+      field: TopNFunctionSortField.ExclusiveCPU,
       name: i18n.translate('xpack.profiling.functionsView.exclusiveCpuColumnLabel', {
         defaultMessage: 'Exclusive CPU',
       }),
-      render: (n: number, row: Row) => `${n.toFixed(2)}%`,
+      render: (_, { exclusiveCPU }) => `${exclusiveCPU.toFixed(2)}%`,
     },
     {
-      field: 'inclusiveCPU',
+      field: TopNFunctionSortField.InclusiveCPU,
       name: i18n.translate('xpack.profiling.functionsView.inclusiveCpuColumnLabel', {
         defaultMessage: 'Inclusive CPU',
       }),
-      render: (n: number, row: Row) => `${n.toFixed(2)}%`,
+      render: (_, { inclusiveCPU }) => `${inclusiveCPU.toFixed(2)}%`,
     },
   ];
 
@@ -95,6 +114,16 @@ export const TopNFunctionsTable = () => {
     }
   );
 
+  const sortedRows = orderBy(
+    rows,
+    (row) => {
+      return sortField === TopNFunctionSortField.Frame
+        ? getCalleeFunction(row.frame).toLowerCase()
+        : row[sortField];
+    },
+    [sortDirection]
+  );
+
   return (
     <>
       <EuiText size="xs">
@@ -102,7 +131,24 @@ export const TopNFunctionsTable = () => {
       </EuiText>
       <EuiSpacer size="s" />
       <EuiHorizontalRule margin="none" style={{ height: 2 }} />
-      <EuiBasicTable items={rows} columns={columns} />
+      <EuiBasicTable
+        items={sortedRows}
+        columns={columns}
+        tableLayout="auto"
+        onChange={(criteria) => {
+          onSortChange({
+            sortDirection: criteria.sort!.direction,
+            sortField: criteria.sort!.field as TopNFunctionSortField,
+          });
+        }}
+        sorting={{
+          enableAllColumns: true,
+          sort: {
+            direction: sortDirection,
+            field: sortField,
+          },
+        }}
+      />
     </>
   );
 };

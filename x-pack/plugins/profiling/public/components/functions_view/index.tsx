@@ -22,8 +22,9 @@ import { TopNFunctionsTable } from '../topn_functions';
 
 export function FunctionsView({ children }: { children: React.ReactElement }) {
   const {
+    path,
     query,
-    query: { rangeFrom, rangeTo, kuery },
+    query: { rangeFrom, rangeTo, kuery, sortDirection, sortField },
   } = useProfilingParams('/functions/*');
 
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
@@ -34,7 +35,10 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
     services: { fetchTopNFunctions },
   } = useProfilingDependencies();
 
-  const routePath = useProfilingRoutePath();
+  const routePath = useProfilingRoutePath() as
+    | '/functions'
+    | '/functions/topn'
+    | '/functions/differential';
 
   const profilingRouter = useProfilingRouter();
 
@@ -84,7 +88,20 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
               getter={fetchTopNFunctions}
               setter={setTopNFunctions}
             />
-            <TopNFunctionsTable />
+            <TopNFunctionsTable
+              sortDirection={sortDirection}
+              sortField={sortField}
+              onSortChange={(nextSort) => {
+                profilingRouter.push(routePath, {
+                  path,
+                  query: {
+                    ...query,
+                    sortField: nextSort.sortField,
+                    sortDirection: nextSort.sortDirection,
+                  },
+                });
+              }}
+            />
             {children}
           </EuiFlexItem>
         </EuiFlexGroup>
