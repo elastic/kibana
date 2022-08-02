@@ -12,9 +12,9 @@ export interface RuleAlertsSummaryProps {
   filteredRuleTypes: string[];
 }
 export interface AlertChartData {
-  status: 'active' | 'recovered';
+  status: 'active' | 'recovered' | 'total';
   count: number;
-  date: string;
+  date: number;
 }
 
 export interface AlertsChartProps {
