@@ -671,7 +671,7 @@ export class ActionsClient {
         ) {
           return this.authorization.ensureAuthorized('execute');
         } else {
-          return trackLegacyRBACExemption('enqueueExecution', this.usageCounter);
+          return trackLegacyRBACExemption('bulkEnqueueExecution', this.usageCounter);
         }
       })
     );

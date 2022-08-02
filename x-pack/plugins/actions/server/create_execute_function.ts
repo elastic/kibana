@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  SavedObjectReference,
-  SavedObjectsBulkResponse,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import { SavedObjectsBulkResponse, SavedObjectsClientContract } from '@kbn/core/server';
 import { RunNowResult, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import {
   RawAction,
@@ -152,7 +148,6 @@ export function createBulkExecutionEnqueuerFunction({
       );
     }
 
-    const taskReferences: SavedObjectReference[] = [];
     const actionTypeIds: { [key: string]: string } = {};
     const spaceIds: { [key: string]: string } = {};
     const actions = await Promise.all(
@@ -179,6 +174,7 @@ export function createBulkExecutionEnqueuerFunction({
         );
         const executionSourceReference = executionSourceAsSavedObjectReferences(option.source);
 
+        const taskReferences = [];
         if (executionSourceReference.references) {
           taskReferences.push(...executionSourceReference.references);
         }
