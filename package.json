@@ -324,6 +324,7 @@
     "@kbn/ui-shared-deps-npm": "link:bazel-bin/packages/kbn-ui-shared-deps-npm",
     "@kbn/ui-shared-deps-src": "link:bazel-bin/packages/kbn-ui-shared-deps-src",
     "@kbn/ui-theme": "link:bazel-bin/packages/kbn-ui-theme",
+    "@kbn/user-profile-components": "link:bazel-bin/packages/kbn-user-profile-components",
     "@kbn/utility-types": "link:bazel-bin/packages/kbn-utility-types",
     "@kbn/utility-types-jest": "link:bazel-bin/packages/kbn-utility-types-jest",
     "@kbn/utils": "link:bazel-bin/packages/kbn-utils",
