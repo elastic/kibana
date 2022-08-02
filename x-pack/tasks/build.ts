@@ -6,7 +6,6 @@
  */
 
 import { resolve } from 'path';
-import { writeFileSync } from 'fs';
 import { promisify } from 'util';
 import { pipeline } from 'stream';
 
@@ -16,8 +15,6 @@ import { ToolingLog } from '@kbn/tooling-log';
 import gulp from 'gulp';
 import del from 'del';
 import vfs from 'vinyl-fs';
-
-import { generateNoticeFromSource } from '../../src/dev/notice';
 
 const asyncPipeline = promisify(pipeline);
 
@@ -85,20 +82,4 @@ async function copySource() {
   );
 }
 
-async function generateNoticeText() {
-  const log = new ToolingLog({
-    level: 'info',
-    writeTo: process.stdout,
-  });
-
-  writeFileSync(
-    resolve(PLUGIN_BUILD_DIR, 'NOTICE.txt'),
-    await generateNoticeFromSource({
-      productName: 'Kibana X-Pack',
-      log,
-      directory: PLUGIN_BUILD_DIR,
-    })
-  );
-}
-
-export const buildTask = gulp.series(cleanBuildTask, copySource, generateNoticeText);
+export const buildTask = gulp.series(cleanBuildTask, copySource);
