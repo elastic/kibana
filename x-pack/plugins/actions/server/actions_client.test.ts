@@ -2438,8 +2438,9 @@ describe('bulkEnqueueExecution()', () => {
         apiKey: null,
       },
     ];
-    await expect(actionsClient.bulkEnqueueExecution(opts)).resolves.toMatchInlineSnapshot(`
-      undefined`);
+    await expect(actionsClient.bulkEnqueueExecution(opts)).resolves.toMatchInlineSnapshot(
+      `undefined`
+    );
 
     expect(bulkExecutionEnqueuer).toHaveBeenCalledWith(unsecuredSavedObjectsClient, opts);
   });
