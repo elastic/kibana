@@ -34,7 +34,43 @@
             "label": "getComponent",
             "description": [],
             "signature": [
-              "() => React.VFC<{}>"
+              "() => (props: { securitySolutionContext: ",
+              {
+                "pluginId": "threatIntelligence",
+                "scope": "public",
+                "docId": "kibThreatIntelligencePluginApi",
+                "section": "def-public.ThreatIntelligenceSecuritySolutionContext",
+                "text": "ThreatIntelligenceSecuritySolutionContext"
+              },
+              "; }) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "threatIntelligence",
+        "id": "def-public.ThreatIntelligenceSecuritySolutionContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "ThreatIntelligenceSecuritySolutionContext",
+        "description": [],
+        "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.ThreatIntelligenceSecuritySolutionContext.getFiltersGlobalComponent",
+            "type": "Function",
+            "tags": [],
+            "label": "getFiltersGlobalComponent",
+            "description": [],
+            "signature": [
+              "() => React.ComponentType<{ children: React.ReactNode; }>"
             ],
             "path": "x-pack/plugins/threat_intelligence/public/types.ts",
             "deprecated": false,
