@@ -199,7 +199,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
   const goToPage = useCallback(
     (newActivePage: number) => {
       if ((newActivePage + 1) * limit >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
-        addWarning({ title: headerTitle + i18n.TOAST_TITLE, text: i18n.TOAST_TEXT });
+        return addWarning({ title: headerTitle + i18n.TOAST_TITLE, text: i18n.TOAST_TEXT });
       }
       setActivePage(newActivePage);
       loadPage(newActivePage);

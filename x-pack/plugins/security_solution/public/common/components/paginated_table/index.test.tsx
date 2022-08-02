@@ -17,7 +17,11 @@ import { ThemeProvider } from 'styled-components';
 import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
 import { Direction } from '../../../../common/search_strategy';
 import { useQueryToggle } from '../../containers/query_toggle';
+import { useAppToasts } from '../../hooks/use_app_toasts';
+import { useAppToastsMock } from '../../hooks/use_app_toasts.mock';
+
 jest.mock('../../containers/query_toggle');
+jest.mock('../../hooks/use_app_toasts');
 
 jest.mock('react', () => {
   const r = jest.requireActual('react');
@@ -43,10 +47,13 @@ describe('Paginated Table Component', () => {
   const mockUseQueryToggle = useQueryToggle as jest.Mock;
   const mockSetToggle = jest.fn();
   const mockSetQuerySkip = jest.fn();
+  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
+    appToastsMock = useAppToastsMock.create();
+    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
   });
 
   const testProps = {
@@ -168,6 +175,10 @@ describe('Paginated Table Component', () => {
       );
       wrapper.find('[data-test-subj="pagination-button-next"]').first().simulate('click');
       expect(updateActivePage.mock.calls.length).toEqual(0);
+      expect(appToastsMock.addWarning).toHaveBeenCalledWith({
+        title: 'Hosts - too many results',
+        text: 'Narrow your query to better filter the results',
+      });
     });
 
     test('Should show items per row if totalCount is greater than items', () => {
