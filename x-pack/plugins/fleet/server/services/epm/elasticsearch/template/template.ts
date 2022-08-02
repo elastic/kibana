@@ -158,7 +158,11 @@ function _generateMappings(
     addDynamicMapping: any;
     groupFieldName?: string;
   }
-): IndexTemplateMappings {
+): {
+  properties: IndexTemplateMappings['properties'];
+  hasNonDynamicTemplateMappings: boolean;
+} {
+  let hasNonDynamicTemplateMappings = false;
   const props: Properties = {};
   // TODO: this can happen when the fields property in fields.yml is present but empty
   // Maybe validation should be moved to fields/field.ts
@@ -213,24 +217,29 @@ function _generateMappings(
 
         switch (type) {
           case 'group':
+            const mappings = _generateMappings(field.fields!, {
+              ...ctx,
+              groupFieldName: ctx.groupFieldName
+                ? `${ctx.groupFieldName}.${field.name}`
+                : field.name,
+            });
+            if (!mappings.hasNonDynamicTemplateMappings) {
+              return;
+            }
+
             fieldProps = {
-              ..._generateMappings(field.fields!, {
-                ...ctx,
-                groupFieldName: ctx.groupFieldName
-                  ? `${ctx.groupFieldName}.${field.name}`
-                  : field.name,
-              }),
+              properties: mappings.properties,
               ...generateDynamicAndEnabled(field),
             };
             break;
           case 'group-nested':
             fieldProps = {
-              ..._generateMappings(field.fields!, {
+              properties: _generateMappings(field.fields!, {
                 ...ctx,
                 groupFieldName: ctx.groupFieldName
                   ? `${ctx.groupFieldName}.${field.name}`
                   : field.name,
-              }),
+              }).properties,
               ...generateNestedProps(field),
               type: 'nested',
             };
@@ -309,11 +318,12 @@ function _generateMappings(
         }
 
         props[field.name] = fieldProps;
+        hasNonDynamicTemplateMappings = true;
       }
     });
   }
 
-  return { properties: props };
+  return { properties: props, hasNonDynamicTemplateMappings };
 }
 
 function generateDynamicAndEnabled(field: Field) {

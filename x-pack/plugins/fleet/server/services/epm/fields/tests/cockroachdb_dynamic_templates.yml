@@ -2,7 +2,7 @@
   type: group
   release: beta
   fields:
-    - name: labels.*
+    - name: labels
       type: object
       object_type: keyword
       description: >

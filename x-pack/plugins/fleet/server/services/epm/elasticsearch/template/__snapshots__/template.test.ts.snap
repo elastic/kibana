@@ -58,25 +58,10 @@ exports[`EPM template tests loading base.yml: base.yml 1`] = `
 
 exports[`EPM template tests loading cockroachdb_dynamic_templates.yml: cockroachdb_dynamic_templates.yml 1`] = `
 {
-  "properties": {
-    "cockroachdb": {
-      "properties": {
-        "status": {
-          "properties": {
-            "labels": {
-              "properties": {}
-            },
-            "*": {
-              "properties": {}
-            }
-          }
-        }
-      }
-    }
-  },
+  "properties": {},
   "dynamic_templates": [
     {
-      "cockroachdb.status.labels.*": {
+      "cockroachdb.status.labels": {
         "mapping": {
           "type": "keyword"
         },
@@ -1403,9 +1388,6 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
                 },
                 "failed": {
                   "type": "long"
-                },
-                "states": {
-                  "properties": {}
                 }
               }
             },
@@ -1462,9 +1444,6 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
                   "type": "keyword"
                 }
               }
-            },
-            "user": {
-              "properties": {}
             },
             "summary": {
               "properties": {
