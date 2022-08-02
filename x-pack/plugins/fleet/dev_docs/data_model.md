@@ -1,6 +1,7 @@
 # Fleet Data Model
 
 The Fleet plugin has 3 sources of data that it reads and writes to, these large categories are:
+
 - **Package Registry**: read-only data source for retrieving packages published by Elastic
 - **`.fleet-*` Indices**: read & write data source for interacting with Elastic Agent policies, actions, and enrollment tokens
 - **Saved Objects**: read & write data source for storing installed packages, configured policies, outputs, and other settings
@@ -28,7 +29,7 @@ In prior alpha versions of Fleet, this data was also stored in Saved Objects bec
 communicating directly with Kibana for policy updates. Once Fleet Server was introduced, that data was migrated to these
 Elasticsearch indices to be readable by Fleet Server.
 
-* Cleanup model:
+_Note: All of these system indices are plain indices, and not data streams._
 
 ### `.fleet-agents` index
 
@@ -39,7 +40,7 @@ All of the code that interacts with this index is currently located in
 [`x-pack/plugins/fleet/server/services/agents/crud.ts`](../server/services/agents/crud.ts) and the schema of these
 documents is maintained by the `FleetServerAgent` TypeScript interface.
 
-* Cleanup model:
+- Cleanup model: N/A
 
 ### `.fleet-actions` index
 
@@ -50,31 +51,33 @@ list.
 
 The total schema for actions is represented by the `FleetServerAgentAction` type.
 
-* Cleanup model: Timeout after X days
+- Cleanup model: Fleet Server considers actions expired after 30 days, and will remove them via an hourly process
+- [Source](https://github.com/elastic/fleet-server/blob/9af3b2176b42a0de34c5583b5430558c03792dd0/internal/pkg/gc/schedules.go#L29-L33)
 
 ### `.fleet-actions-results`
 
-* Cleanup model: 
+- Cleanup model: N/A
 
 ### `.fleet-servers`
 
-* Cleanup model: 
+- Cleanup model: N/A
 
 ### `.fleet-artifacts`
 
-* Cleanup model:
+- Cleanup model: N/A
 
-### `.fleet-entrollment-api-keys`
+### `.fleet-enrollment-api-keys`
 
-* Cleanup model:
+- Cleanup model: N/A
 
 ### `.fleet-policies`
 
-* Cleanup model:
+- Cleanup model: Deleted when a corresponding agent policy is deleted in the Fleet UI or API
+- [Source](https://github.com/elastic/kibana/blob/976b1b2331371f4a1325f6947d38d1f4de7a7254/x-pack/plugins/fleet/server/services/agent_policy.ts#L699-L701)
 
 ### `.fleet-policies-leader`
 
-* Cleanup model:
+- Cleanup model: N/A
 
 ## Saved Object types
 
@@ -83,6 +86,7 @@ This document is intended to outline what each type is for, the primary places i
 any caveats regarding the history of that saved object type.
 
 At this point in time, all types are currently:
+
 - `hidden: false`
 - `namespaceType: agnostic`
 - `management.importableAndExportable: false`
@@ -98,7 +102,6 @@ Tracks the Fleet server host addresses and whether or not the cluster has been s
 "fleet migration" notices in the UI.
 
 Can be accessed via the APIs exposed in the [server's settings service](../server/services/settings.ts).
-
 
 ### `ingest-agent-policies`
 
@@ -152,7 +155,7 @@ used for other types of outputs like separate monitoring clusters, Logstash, etc
   - `package_assets` - array of original file contents of the package as it was installed
     - `package_assets.id` - Saved Object ID for a `epm-package-assets` type
     - `package_assets.type` - Saved Object type for the asset. As of now, only `epm-packages-assets` are supported.
-  
+
 Contains metadata on an installed integration package including references to all assets installed in Kibana and
 Elasticsearch. This allows for easy cleanup when a package is removed or upgraded.
 
