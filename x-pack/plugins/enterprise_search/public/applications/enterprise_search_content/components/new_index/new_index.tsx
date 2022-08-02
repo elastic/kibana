@@ -13,6 +13,7 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -20,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { KibanaLogic } from '../../../shared/kibana';
 import { parseQueryParams } from '../../../shared/query_params';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 import { baseBreadcrumbs } from '../search_indices';
@@ -147,6 +149,19 @@ export const NewIndex: React.FC = () => {
               selected={selectedMethod}
               onChange={setSelectedMethod}
             />
+            <EuiSpacer size="xxl" />
+            <EuiLink
+              target="_blank"
+              onClick={() =>
+                KibanaLogic.values.navigateToUrl('/app/integrations/', {
+                  shouldNotCreateHref: true,
+                })
+              }
+            >
+              {i18n.translate('xpack.enterpriseSearch.content.newIndex.viewIntegrationsLink', {
+                defaultMessage: 'View additional integrations',
+              })}
+            </EuiLink>
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem>
