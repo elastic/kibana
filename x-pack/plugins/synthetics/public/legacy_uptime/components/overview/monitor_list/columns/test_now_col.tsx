@@ -82,7 +82,8 @@ export const TEST_NOW_AVAILABLE_LABEL = i18n.translate(
 export const PRIVATE_AVAILABLE_LABEL = i18n.translate(
   'xpack.synthetics.monitorList.testNow.available.private',
   {
-    defaultMessage: 'For now, Test now is disabled for private locations monitors.',
+    defaultMessage:
+      'Test now is currently not available for monitors running on Private Locations.',
   }
 );
 
