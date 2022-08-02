@@ -122,7 +122,7 @@ describe('Executor', () => {
   describe('.inject', () => {
     const executor = new Executor();
 
-    const injectFn = jest.fn().mockImplementation((args, references) => args);
+    const injectFn = jest.fn().mockImplementation((args, _references) => args);
     const extractFn = jest.fn().mockImplementation((state) => ({ state, references: [] }));
     const migrateFn = jest.fn().mockImplementation((args) => args);
 
@@ -270,7 +270,7 @@ describe('Executor', () => {
           },
         },
         migrations: {
-          '8.1.0': ((state: ExpressionAstFunction, version: string) => {
+          '8.1.0': ((state: ExpressionAstFunction, _version: string) => {
             const migrateToAst = parseExpression('fnMigrateTo');
             const { arguments: args } = state;
             const ast = { ...migrateToAst.chain[0], arguments: args };

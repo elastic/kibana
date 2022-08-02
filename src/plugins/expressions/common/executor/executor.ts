@@ -138,9 +138,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
 
   public getFunctions(namespace?: string): Record<string, ExpressionFunction> {
     const fns = Object.entries(this.container.get().functions);
-    const filtered = fns.filter(
-      ([key, value]) => !value.namespace || value.namespace === namespace
-    );
+    const filtered = fns.filter(([_, value]) => !value.namespace || value.namespace === namespace);
     return Object.fromEntries(filtered);
   }
 
@@ -171,7 +169,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
    *
    * @param ast Expression AST or a string representing expression.
    * @param input Initial input to the first expression function.
-   * @param context Extra global context object that will be merged into the
+   * @param params Extra global context object that will be merged into the
    *    expression global context object that is provided to each function to allow side-effects.
    */
   public run<Input, Output>(

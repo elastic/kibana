@@ -86,18 +86,13 @@ import { normalizeSortRequest } from './normalize_sort_request';
 
 import { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
 
-import {
-  AggConfigs,
-  EsQuerySortValue,
-  IEsSearchResponse,
-  ISearchGeneric,
-  ISearchOptions,
-} from '../..';
+import { AggConfigs, EsQuerySortValue, IEsSearchResponse, ISearchGeneric } from '../..';
 import type {
   ISearchSource,
   SearchFieldValue,
   SearchSourceFields,
   SearchSourceOptions,
+  SearchSourceSearchOptions,
 } from './types';
 import { getSearchParamsFromRequest, RequestFailure } from './fetch';
 import type { FetchHandlers, SearchRequest } from './fetch';
@@ -155,7 +150,7 @@ export class SearchSource {
   private overwriteDataViewType?: string;
   private parent?: SearchSource;
   private requestStartHandlers: Array<
-    (searchSource: SearchSource, options?: ISearchOptions) => Promise<unknown>
+    (searchSource: SearchSource, options?: SearchSourceSearchOptions) => Promise<unknown>
   > = [];
   private inheritOptions: SearchSourceOptions = {};
   public history: SearchRequest[] = [];
@@ -338,7 +333,7 @@ export class SearchSource {
    * @param  {SearchSourceOptions} options - the inherit options
    * @return {this} - chainable
    */
-  setParent(parent?: ISearchSource, options: SearchSourceOptions = {}) {
+  setParent(parent?: ISearchSource, options: SearchSourceOptions = {}): this {
     this.parent = parent as SearchSource;
     this.inheritOptions = options;
     return this;
@@ -346,9 +341,8 @@ export class SearchSource {
 
   /**
    * Get the parent of this SearchSource
-   * @return {undefined|searchSource}
    */
-  getParent() {
+  getParent(): SearchSource | undefined {
     return this.parent;
   }
 
@@ -357,7 +351,7 @@ export class SearchSource {
    * @param options
    */
   fetch$(
-    options: ISearchOptions = {}
+    options: SearchSourceSearchOptions = {}
   ): Observable<IKibanaSearchResponse<estypes.SearchResponse<any>>> {
     const s$ = defer(() => this.requestIsStarting(options)).pipe(
       switchMap(() => {
@@ -385,20 +379,20 @@ export class SearchSource {
    * Fetch this source and reject the returned Promise on error
    * @deprecated Use the `fetch$` method instead
    */
-  fetch(options: ISearchOptions = {}) {
-    return lastValueFrom(this.fetch$(options)).then((r) => {
-      return r.rawResponse as estypes.SearchResponse<any>;
-    });
+  async fetch(
+    options: SearchSourceSearchOptions = {}
+  ): Promise<estypes.SearchResponse<any, Record<string, estypes.AggregationsAggregate>>> {
+    const r = await lastValueFrom(this.fetch$(options));
+    return r.rawResponse as estypes.SearchResponse<any>;
   }
 
   /**
    *  Add a handler that will be notified whenever requests start
    *  @param  {Function} handler
-   *  @return {undefined}
    */
   onRequestStart(
-    handler: (searchSource: SearchSource, options?: ISearchOptions) => Promise<unknown>
-  ) {
+    handler: (searchSource: SearchSource, options?: SearchSourceSearchOptions) => Promise<unknown>
+  ): void {
     this.requestStartHandlers.push(handler);
   }
 
@@ -411,9 +405,8 @@ export class SearchSource {
 
   /**
    * Completely destroy the SearchSource.
-   * @return {undefined}
    */
-  destroy() {
+  destroy(): void {
     this.requestStartHandlers.length = 0;
   }
 
@@ -421,7 +414,10 @@ export class SearchSource {
    * PRIVATE APIS
    ******/
 
-  private inspectSearch(s$: Observable<IKibanaSearchResponse<any>>, options: ISearchOptions) {
+  private inspectSearch(
+    s$: Observable<IKibanaSearchResponse<any>>,
+    options: SearchSourceSearchOptions
+  ) {
     const { id, title, description, adapter } = options.inspector || { title: '' };
 
     const requestResponder = adapter?.start(title, {
@@ -497,7 +493,10 @@ export class SearchSource {
     }
   }
 
-  private async fetchOthers(response: estypes.SearchResponse<any>, options: ISearchOptions) {
+  private async fetchOthers(
+    response: estypes.SearchResponse<any>,
+    options: SearchSourceSearchOptions
+  ) {
     const aggs = this.getField('aggs');
     if (aggs instanceof AggConfigs) {
       for (const agg of aggs.aggs) {
@@ -519,9 +518,11 @@ export class SearchSource {
 
   /**
    * Run a search using the search service
-   * @return {Observable<SearchResponse<any>>}
    */
-  private fetchSearch$(searchRequest: SearchRequest, options: ISearchOptions) {
+  private fetchSearch$(
+    searchRequest: SearchRequest,
+    options: SearchSourceSearchOptions
+  ): Observable<IKibanaSearchResponse<any>> {
     const { search, getConfig, onResponse } = this.dependencies;
 
     const params = getSearchParamsFromRequest(searchRequest, {
@@ -568,16 +569,15 @@ export class SearchSource {
           }
         });
       }),
-      map((response) => onResponse(searchRequest, response))
+      map((response) => onResponse(searchRequest, response, options))
     );
   }
 
   /**
    *  Called by requests of this search source when they are started
    *  @param options
-   *  @return {Promise<undefined>}
    */
-  private requestIsStarting(options: ISearchOptions = {}) {
+  private requestIsStarting(options: SearchSourceSearchOptions = {}): Promise<unknown[]> {
     const handlers = [...this.requestStartHandlers];
     // If callParentStartHandlers has been set to true, we also call all
     // handlers of parent search sources.
@@ -599,13 +599,12 @@ export class SearchSource {
    * @param  {object} data - the current merged data
    * @param  {*} val - the value at `key`
    * @param  {*} key - The key of `val`
-   * @return {undefined}
    */
   private mergeProp<K extends keyof SearchSourceFields>(
     data: SearchRequest,
     val: SearchSourceFields[K],
     key: K
-  ) {
+  ): false | void {
     val = typeof val === 'function' ? val(this) : val;
     if (val == null || !key) return;
 
@@ -673,10 +672,10 @@ export class SearchSource {
   /**
    * Walk the inheritance chain of a source and return its
    * flat representation (taking into account merging rules)
-   * @returns {Promise}
+   * @returns {SearchRequest}
    * @resolved {Object|null} - the flat data of the SearchSource
    */
-  private mergeProps(root = this, searchRequest: SearchRequest = { body: {} }) {
+  private mergeProps(root = this, searchRequest: SearchRequest = { body: {} }): SearchRequest {
     Object.entries(this.fields).forEach(([key, value]) => {
       this.mergeProp(searchRequest, value, key as keyof SearchSourceFields);
     });
