@@ -185,6 +185,8 @@ Additional comments:: Additional information for the client, such as how to trou
 
 The following is an example of using the Webhook - Case Management Connector with a real third party case management system, Jira. We will reference their https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-issues/[API documentation] for creating an issue and use a demo instance of Jira with real working endpoints.
 
+_Note: We are using Jira as an example third party. However, if you wish to connect with Jira, using the <<jira-action-type, preconfigured Jira connector>> will simplify your setup._
+
 [float]
 [[cases-webhook-example-step-1]]
 ===  Step 1 - Set up connector
