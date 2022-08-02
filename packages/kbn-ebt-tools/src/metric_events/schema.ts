@@ -13,7 +13,7 @@ import type { RootSchema } from '@kbn/analytics-client';
  */
 export interface MetricEvent {
   /**
-   * The name of the action that is tracked in the metrics.
+   * The name of the event that is tracked in the metrics i.e. kibana_loaded, kibana_started
    */
   eventName: string;
   /**
@@ -82,7 +82,10 @@ export interface MetricEvent {
 export const METRIC_EVENT_SCHEMA: RootSchema<MetricEvent> = {
   eventName: {
     type: 'keyword',
-    _meta: { description: 'The name of the action that is tracked in the metrics' },
+    _meta: {
+      description:
+        'The name of the event that is tracked in the metrics i.e. kibana_loaded, kibana_started',
+    },
   },
   meta: {
     type: 'pass_through',
