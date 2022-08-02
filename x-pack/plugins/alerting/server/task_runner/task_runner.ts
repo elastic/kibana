@@ -674,6 +674,7 @@ export class TaskRunner<
 
       const allActions = this.getActions({
         rule,
+        ruleLabel,
         alerts: allAlerts as unknown as Array<
           Alert<State, Context, ActionGroupIds> | Alert<State, Context, RecoveryActionGroupId>
         >,
@@ -734,15 +735,43 @@ export class TaskRunner<
     };
   }
 
+  private getExecutableAlerts({
+    rule,
+    alerts,
+  }: {
+    rule: SanitizedRule<RuleTypeParams>;
+    alerts: Array<
+      Alert<State, Context, ActionGroupIds> | Alert<State, Context, RecoveryActionGroupId>
+    >;
+  }): Array<Alert<State, Context, ActionGroupIds> | Alert<State, Context, RecoveryActionGroupId>> {
+    return alerts.filter((alert) => {
+      const muted = new Set(rule.mutedInstanceIds).has(alert.getId());
+      let shouldExecuteAction = true;
+
+      if (muted) {
+        shouldExecuteAction = false;
+        this.logger.debug(
+          `skipping scheduling of actions for '${alert.getId()}' in rule ${
+            rule.name
+          }: rule is muted`
+        );
+      }
+
+      return shouldExecuteAction;
+    });
+  }
+
   private getActions({
     alerts,
     rule,
+    ruleLabel,
     ruleRunMetricsStore,
     spaceId,
     actionsStore,
   }: {
     alerts: Array<Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>;
     rule: SanitizedRule<RuleTypeParams>;
+    ruleLabel: string;
     ruleRunMetricsStore: RuleRunMetricsStore;
     spaceId: string;
     actionsStore: ActionsStore;
@@ -772,12 +801,13 @@ export class TaskRunner<
 
       actionsToTrigger = actionsToTrigger.concat(
         this.generateActions({
+          alert,
           rule,
+          ruleLabel,
           ruleRunMetricsStore,
           actionGroup,
           actionSubgroup,
           spaceId,
-          alertId: alert.getId(),
           alertActionGroupName: ruleTypeActionGroups.get(actionGroup)!,
           alerts: alerts as unknown as Alert[],
           alertContext: alert.getContext(),
@@ -792,32 +822,6 @@ export class TaskRunner<
     }
 
     return actionsToTrigger;
-  }
-
-  private getExecutableAlerts({
-    rule,
-    alerts,
-  }: {
-    rule: SanitizedRule<RuleTypeParams>;
-    alerts: Array<
-      Alert<State, Context, ActionGroupIds> | Alert<State, Context, RecoveryActionGroupId>
-    >;
-  }): Array<Alert<State, Context, ActionGroupIds> | Alert<State, Context, RecoveryActionGroupId>> {
-    return alerts.filter((alert) => {
-      const muted = new Set(rule.mutedInstanceIds).has(alert.getId());
-      let shouldExecuteAction = true;
-
-      if (muted) {
-        shouldExecuteAction = false;
-        this.logger.debug(
-          `skipping scheduling of actions for '${alert.getId()}' in rule ${
-            rule.name
-          }: rule is muted`
-        );
-      }
-
-      return shouldExecuteAction;
-    });
   }
 
   private async triggerActions({
@@ -876,24 +880,26 @@ export class TaskRunner<
   }
 
   private generateActions({
+    alert,
     rule,
+    ruleLabel,
     ruleRunMetricsStore,
     actionGroup,
     actionSubgroup,
     spaceId,
-    alertId,
     alertActionGroupName,
     alerts,
     alertContext,
     state,
     actionsStore,
   }: {
+    alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>;
     rule: SanitizedRule<RuleTypeParams>;
+    ruleLabel: string;
     ruleRunMetricsStore: RuleRunMetricsStore;
     actionGroup: string;
     actionSubgroup?: string;
     spaceId: string;
-    alertId: string;
     alertActionGroupName: string;
     alerts: Alert[];
     alertContext: AlertInstanceContext;
@@ -904,13 +910,36 @@ export class TaskRunner<
     const actionsToTrigger: RuleAction[] = [];
 
     for (const action of rule.actions) {
+      // Selected action group or summary
       if (action.group === actionGroup || action.isSummary) {
+        // Don't add the same action that is a summary
         if (action.isSummary && actionsStore[action.ref!] !== undefined) {
           this.logger.info(
-            `Action "${action.ref}" of "${ruleType.id}" is a summary and already in the list to trigger`
+            `skipping action "${action.ref}" of "${ruleType.id}" as it is a summary and already in the list to trigger`
           );
           continue;
         }
+
+        // Action should run on status change
+        if (
+          action.notifyWhen === NotifyWhen.ONCE &&
+          !alert.scheduledActionGroupOrSubgroupHasChanged()
+        ) {
+          this.logger.debug(
+            `skipping scheduling of actions for '${alert.getId()}' in rule ${ruleLabel}: alert is active but action group has not changed`
+          );
+          continue;
+        }
+
+        // Summary actions should not run every time
+        if (action.notifyWhen === NotifyWhen.ON_EVERY_RUN && action.isSummary) {
+          this.logger.debug(
+            `skipping action "${action.ref}" of "${ruleType.id}" as it is a summary and supposed to run every rule run`
+          );
+          continue;
+        }
+
+        // Throttle
         if (
           action.notifyWhen === NotifyWhen.ON_INTERVAL &&
           action.lastTriggerDate &&
@@ -977,7 +1006,7 @@ export class TaskRunner<
                 alertName: rule.name,
                 spaceId,
                 tags: rule.tags,
-                alertInstanceId: alertId,
+                alertInstanceId: alert.getId(),
                 alertActionGroup: actionGroup,
                 alertActionGroupName,
                 alertActionSubgroup: actionSubgroup,
@@ -997,7 +1026,7 @@ export class TaskRunner<
         this.alertingEventLogger.logAction({
           id: action.id,
           typeId: action.actionTypeId,
-          alertId,
+          alertId: alert.getId(),
           alertGroup: actionGroup,
           alertSubgroup: actionSubgroup,
         });
