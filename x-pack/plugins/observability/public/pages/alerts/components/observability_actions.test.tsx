@@ -12,6 +12,7 @@ import { ObservabilityActions, ObservabilityActionsProps } from './observability
 import { inventoryThresholdAlert } from '../../../rules/fixtures/example_alerts';
 import { RULE_DETAILS_PAGE_ID } from '../../rule_details/types';
 import { createObservabilityRuleTypeRegistryMock } from '../../../rules/observability_rule_type_registry_mock';
+import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
@@ -32,7 +33,7 @@ describe('ObservabilityActions component', () => {
         _id: '6d4c6d74-d51a-495c-897d-88ced3b95e30',
         _index: '.internal.alerts-observability.metrics.alerts-default-000001',
       },
-      data: inventoryThresholdAlert,
+      data: inventoryThresholdAlert as unknown as TimelineNonEcsData[],
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
       setEventsDeleted: jest.fn(),
       setFlyoutAlert: jest.fn(),
