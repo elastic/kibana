@@ -200,19 +200,17 @@ export const groupAndBulkCreate = async ({
     let indexedLastPass = [];
     for (let i = 0; ; i = (i + 1) % numBuckets) {
       if (i === 0) {
-        if (indexedThisPass.length) {
-          indexedLastPass = [...indexedThisPass];
-          indexedThisPass = [];
-        } else if (indexedLastPass.length) {
-          // we didn't find anything on this pass through, so we're done
+        if (!indexedThisPass.length && indexedLastPass.length) {
           break;
         }
+        indexedLastPass = [...indexedThisPass];
+        indexedThisPass = [];
       }
 
       const event = buckets[i].topHits.hits.hits.pop();
       if (event != null) {
         toIndex.push(event);
-        indexedThisPass.push(bucket[i].key);
+        indexedThisPass.push(buckets[i].key);
       }
     }
 
@@ -222,6 +220,7 @@ export const groupAndBulkCreate = async ({
     }
 
     // TODO: bulk create
+    // Implement this next
 
     return toReturn;
   });
