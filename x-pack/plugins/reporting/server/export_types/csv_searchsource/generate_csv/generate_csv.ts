@@ -336,6 +336,7 @@ export class CsvGenerator {
           table = tabifyDocs(results, index, { shallow: true, includeIgnoredValues: true });
         } catch (err) {
           this.logger.error(err);
+          warnings.push(i18nTexts.unknownError(err?.message ?? err));
         }
 
         if (!table) {
@@ -379,7 +380,7 @@ export class CsvGenerator {
           warnings.push(i18nTexts.esErrorMessage(err.statusCode ?? 0, String(err.body)));
         }
       } else {
-        warnings.push(i18nTexts.unknownError(err?.message));
+        warnings.push(i18nTexts.unknownError(err?.message ?? err));
       }
     } finally {
       // clear scrollID
@@ -398,6 +399,10 @@ export class CsvGenerator {
     this.logger.info(`Finished generating. Row count: ${this.csvRowCount}.`);
 
     if (!this.maxSizeReached && this.csvRowCount !== totalRecords) {
+      this.logger.warn(
+        `ES scroll returned fewer total hits than expected! ` +
+          `Search result total hits: ${totalRecords}. Row count: ${this.csvRowCount}.`
+      );
       warnings.push(
         i18nTexts.csvRowCountError({ expected: totalRecords, received: this.csvRowCount })
       );
