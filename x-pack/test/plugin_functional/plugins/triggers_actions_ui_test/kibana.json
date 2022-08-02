@@ -1,0 +1,11 @@
+{
+  "id": "triggersActionsUiTest",
+  "owner": { "name": "Response Ops", "githubTeam": "response-ops" },
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "triggersActionsUiTest"],
+  "requiredPlugins": ["triggersActionsUi", "data", "cases", "kibanaReact"],
+  "requiredBundles": ["kibanaReact"],
+  "server": false,
+  "ui": true
+}

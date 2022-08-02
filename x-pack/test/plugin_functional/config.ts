@@ -29,9 +29,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     // list paths to the files that contain your plugins tests
     testFiles: [
-      resolve(__dirname, './test_suites/resolver'),
-      resolve(__dirname, './test_suites/global_search'),
-      resolve(__dirname, './test_suites/timelines'),
+      resolve(__dirname, './test_suites/triggers_actions_ui'),
     ],
 
     services,
@@ -64,6 +62,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       },
       timelineTest: {
         pathname: '/app/timelinesTest',
+      },
+      triggersActionsUiTest: {
+        pathname: '/app/triggersActionsUiTest',
       },
     },
 
