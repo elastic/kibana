@@ -42,9 +42,9 @@ export interface StackTraceEvent {
 }
 
 export interface StackTrace {
-  FileID: string[];
-  FrameID: string[];
-  Type: number[];
+  FileIDs: string[];
+  FrameIDs: string[];
+  Types: number[];
 }
 
 export interface StackFrame {
@@ -156,13 +156,13 @@ export function groupStackFrameMetadataByStackTrace(
   const frameMetadataForTraces = new Map<StackTraceID, StackFrameMetadata[]>();
   for (const [stackTraceID, trace] of stackTraces) {
     const frameMetadata = new Array<StackFrameMetadata>();
-    for (let i = 0; i < trace.FrameID.length; i++) {
-      const frame = stackFrames.get(trace.FrameID[i])!;
-      const executable = executables.get(trace.FileID[i])!;
+    for (let i = 0; i < trace.FrameIDs.length; i++) {
+      const frame = stackFrames.get(trace.FrameIDs[i])!;
+      const executable = executables.get(trace.FileIDs[i])!;
 
       const metadata = createStackFrameMetadata({
         FileID: trace.FileID[i],
-        FrameType: trace.Type[i],
+        FrameType: trace.Types[i],
         AddressOrLine: frame.LineNumber,
         FunctionName: frame.FunctionName,
         FunctionOffset: frame.FunctionOffset,
