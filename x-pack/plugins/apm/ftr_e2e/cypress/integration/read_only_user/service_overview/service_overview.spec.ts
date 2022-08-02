@@ -250,6 +250,8 @@ describe('Service Overview', () => {
 
     it('when clicking the refresh button', () => {
       cy.visit(baseUrl);
+      cy.wait(aliasNames, { requestTimeout: 10000 });
+
       cy.contains('opbeans-node');
       cy.contains('Refresh').click();
       cy.wait(aliasNames, { requestTimeout: 10000 });
