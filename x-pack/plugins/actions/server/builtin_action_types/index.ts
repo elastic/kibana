@@ -44,8 +44,8 @@ export { ActionTypeId as WebhookActionTypeId } from './webhook';
 export type { ActionParamsType as XmattersActionParams } from './xmatters';
 export { ActionTypeId as XmattersActionTypeId } from './xmatters';
 export type { ActionParamsType as ServiceNowActionParams } from './servicenow';
-export type { ActionParamsType as D3ActionParams } from './d3security';
 export { ActionTypeId as D3ActionTypeId } from './d3security';
+export type { ActionParamsType as D3ActionParams } from './d3security';
 export {
   ServiceNowITSMActionTypeId,
   ServiceNowSIRActionTypeId,
