@@ -20,9 +20,8 @@ import { AppState } from './services/context_state';
 import { SurrDocType } from './services/context';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
 import { DocTableContext } from '../../components/doc_table/doc_table_context';
-import type { SortPairArr } from '../../utils/sorting';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import type { DataTableRecord } from '../../types';
+import type { DataTableRecord, SortPairArr } from '../../types';
 
 export interface ContextAppContentProps {
   columns: string[];

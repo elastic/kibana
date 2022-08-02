@@ -32,11 +32,10 @@ import { DataDocuments$, DataDocumentsMsg, RecordRawType } from '../../hooks/use
 import { AppState, GetStateReturn } from '../../services/discover_state';
 import { useDataState } from '../../hooks/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
-import { SortPairArr } from '../../../../utils/sorting';
 import { DocumentExplorerCallout } from '../document_explorer_callout';
 import { DocumentExplorerUpdateCallout } from '../document_explorer_callout/document_explorer_update_callout';
 import { DiscoverTourProvider } from '../../../../components/discover_tour';
-import { DataTableRecord } from '../../../../types';
+import { DataTableRecord, SortPairArr } from '../../../../types';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);

@@ -8,4 +8,4 @@
 export { getSort, getSortArray, getSortForEmbeddable } from './get_sort';
 export { getSortForSearchSource } from './get_sort_for_search_source';
 export { getDefaultSort } from './get_default_sort';
-export type { SortPairArr, SortPair } from './get_sort';
+export type { SortPair } from './get_sort';

@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { ISearchSource } from '@kbn/data-plugin/public';
-import { getSortForSearchSource, SortPairArr } from '../../utils/sorting';
+import type { ISearchSource } from '@kbn/data-plugin/public';
+import type { SortPairArr } from '../../types';
+import { getSortForSearchSource } from '../../utils/sorting';
 
 export const updateSearchSource = (
   searchSource: ISearchSource,

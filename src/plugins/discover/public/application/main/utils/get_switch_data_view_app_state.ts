@@ -7,7 +7,8 @@
  */
 import { isOfAggregateQueryType, Query, AggregateQuery } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { getSortArray, SortPairArr } from '../../../utils/sorting';
+import type { SortPairArr } from '../../../types';
+import { getSortArray } from '../../../utils/sorting';
 
 /**
  * Helper function to remove or adapt the currently selected columns/sort to be valid with the next

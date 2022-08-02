@@ -9,11 +9,11 @@
 import { isPlainObject } from 'lodash';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { IUiSettingsClient } from '@kbn/core/public';
+import { SortPairArr } from '../../types';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
 import { getDefaultSort } from './get_default_sort';
 
 export type SortPairObj = Record<string, string>;
-export type SortPairArr = [string, string];
 export type SortPair = SortPairArr | SortPairObj;
 export type SortInput = SortPair | SortPair[];
 
