@@ -22,7 +22,7 @@ import { initPlugin as initSlack } from './slack_simulation';
 import { initPlugin as initWebhook } from './webhook_simulation';
 import { initPlugin as initMSExchange } from './ms_exchage_server_simulation';
 import { initPlugin as initXmatters } from './xmatters_simulation';
-
+import { initPlugin as initD3Security } from './d3security_simulation';
 export const NAME = 'actions-FTS-external-service-simulators';
 
 export enum ExternalServiceSimulator {
@@ -35,6 +35,7 @@ export enum ExternalServiceSimulator {
   WEBHOOK = 'webhook',
   MS_EXCHANGE = 'exchange',
   XMATTERS = 'xmatters',
+  D3SECURITY = 'd3security',
 }
 
 export function getExternalServiceSimulatorPath(service: ExternalServiceSimulator): string {
@@ -61,6 +62,15 @@ export async function getWebhookServer(): Promise<http.Server> {
 
 export async function getHttpsWebhookServer(): Promise<https.Server> {
   const { httpsServer } = await initWebhook();
+  return httpsServer;
+}
+export async function getD3SecurityServer(): Promise<http.Server> {
+  const { httpServer } = await initD3Security();
+  return httpServer;
+}
+
+export async function getHttpsD3SecurityServer(): Promise<https.Server> {
+  const { httpsServer } = await initD3Security();
   return httpsServer;
 }
 

@@ -26,6 +26,7 @@ const ACTION_TYPE_IDS = [
   '.teams',
   '.webhook',
   '.xmatters',
+  '.d3security',
 ];
 
 export function createActionTypeRegistry(): {

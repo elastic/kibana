@@ -75,7 +75,7 @@ export function getActionType({
     }),
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
-      CasesConnectorFeatureId,
+      // CasesConnectorFeatureId,
       SecurityConnectorFeatureId,
     ],
     validate: {

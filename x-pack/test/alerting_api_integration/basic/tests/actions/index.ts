@@ -20,5 +20,6 @@ export default function actionsTests({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./builtin_action_types/servicenow'));
     loadTestFile(require.resolve('./builtin_action_types/slack'));
     loadTestFile(require.resolve('./builtin_action_types/webhook'));
+    loadTestFile(require.resolve('./builtin_action_types/d3security'));
   });
 }
