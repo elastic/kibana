@@ -199,12 +199,13 @@ export function createBulkExecutionEnqueuerFunction({
             consumer: option.consumer,
             relatedSavedObjects: relatedSavedObjectWithRefs,
           },
+          references: taskReferences,
         };
       })
     );
 
     const actionTaskParamsRecords: SavedObjectsBulkResponse<ActionTaskParams> =
-      await unsecuredSavedObjectsClient.bulkCreate(actions, { references: taskReferences });
+      await unsecuredSavedObjectsClient.bulkCreate(actions);
     const taskInstances = actionTaskParamsRecords.saved_objects.map((so) => {
       const actionId = so.attributes.actionId;
       return {
