@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiText,
@@ -20,7 +21,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { i18n } from '@kbn/i18n';
-import { useRouterNavigate } from '../common/lib/kibana';
+import { useHistory } from 'react-router-dom';
+import { useKibana, useRouterNavigate } from '../common/lib/kibana';
 import { usePacks } from './use_packs';
 import { ActiveStateSwitch } from './active_state_switch';
 import { AgentsPolicyLink } from '../agent_policies/agents_policy_link';
@@ -85,6 +87,8 @@ export const AgentPoliciesPopover = ({ agentPolicyIds = [] }: { agentPolicyIds?:
 };
 
 const PacksTableComponent = () => {
+  const permissions = useKibana().services.application.capabilities.osquery;
+  const { push } = useHistory();
   const { data, isLoading } = usePacks({});
 
   const renderAgentPolicy = useCallback(
@@ -115,6 +119,23 @@ const PacksTableComponent = () => {
       '-'
     );
   }, []);
+
+  const handlePlayClick = useCallback<(item: PackSavedObject) => () => void>(
+    (item) => () =>
+      push('/live_queries/new', {
+        form: {
+          packId: item.id,
+        },
+      }),
+    [push]
+  );
+
+  const renderPlayAction = useCallback(
+    (item, enabled) => (
+      <EuiButtonIcon iconType="play" onClick={handlePlayClick(item)} isDisabled={!enabled} />
+    ),
+    [handlePlayClick]
+  );
 
   const columns: Array<EuiBasicTableColumn<PackSavedObject>> = useMemo(
     () => [
@@ -167,8 +188,28 @@ const PacksTableComponent = () => {
         width: '80px',
         render: renderActive,
       },
+      {
+        name: i18n.translate('xpack.osquery.pack.queriesTable.actionsColumnTitle', {
+          defaultMessage: 'Actions',
+        }),
+        width: '80px',
+        actions: [
+          {
+            render: renderPlayAction,
+            enabled: () => permissions.writeLiveQueries || permissions.runSavedQueries,
+          },
+        ],
+      } as EuiTableActionsColumnType<PackSavedObject>,
     ],
-    [renderActive, renderAgentPolicy, renderQueries, renderUpdatedAt]
+    [
+      permissions.runSavedQueries,
+      permissions.writeLiveQueries,
+      renderActive,
+      renderAgentPolicy,
+      renderPlayAction,
+      renderQueries,
+      renderUpdatedAt,
+    ]
   );
 
   const sorting = useMemo(

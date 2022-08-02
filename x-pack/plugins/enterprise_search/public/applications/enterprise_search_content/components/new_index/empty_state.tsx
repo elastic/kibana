@@ -15,6 +15,8 @@ import React from 'react';
 import { EuiEmptyPrompt, EuiLink, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { docLinks } from '../../../shared/doc_links';
+
 export const SearchIndexEmptyState: React.FC = () => {
   return (
     <EuiPanel color="subdued">
@@ -43,7 +45,7 @@ export const SearchIndexEmptyState: React.FC = () => {
                 })}
               </h4>
             </EuiTitle>
-            <EuiLink href="#" target="_blank">
+            <EuiLink href={docLinks.start} target="_blank">
               {i18n.translate('xpack.enterpriseSearch.content.newIndex.emptyState.footer.link', {
                 defaultMessage: 'Read the docs',
               })}
