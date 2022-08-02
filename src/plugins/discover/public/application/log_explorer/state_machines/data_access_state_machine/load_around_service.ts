@@ -22,7 +22,7 @@ import {
   getPredecessorPosition,
 } from '../../utils/cursor';
 import { decodeOrThrow } from '../../utils/runtime_types';
-import { LogExplorerContext, LogExplorerEvent } from './state_machine';
+import { LogExplorerContext, LogExplorerEvent } from './types';
 
 export type LoadAroundParameters = FetchEntriesAroundParameters & {
   centerRowIndex: number;
@@ -56,10 +56,14 @@ export const loadAround = ({
 
   return (context: LogExplorerContext): Observable<LoadAroundEvent> => {
     // console.log(searchSource.getSearchRequestBody());
-    const { position, timeRange } = context;
+    const {
+      configuration: { chunkSize },
+      position,
+      timeRange,
+    } = context;
 
     const fetchAroundRequestParamters: FetchEntriesAroundParameters = {
-      chunkSize: 100,
+      chunkSize,
       position,
       sorting: [
         [dataView.timeFieldName!, 'asc'],
