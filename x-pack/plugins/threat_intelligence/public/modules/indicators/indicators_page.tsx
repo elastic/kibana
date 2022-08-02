@@ -18,7 +18,6 @@ import QueryBar from './components/query_bar';
 export const IndicatorsPage: VFC = () => {
   const { count: indicatorsTotalCount, isLoading: isIndicatorsTotalCountLoading } =
     useIndicatorsTotalCount();
-  const showEmptyPage = !isIndicatorsTotalCountLoading && indicatorsTotalCount === 0;
 
   const {
     timeRange,
@@ -37,6 +36,15 @@ export const IndicatorsPage: VFC = () => {
     filterQuery,
     timeRange,
   });
+
+  // This prevents indicators table flash when total count is loading.
+  // TODO: Improve this with custom loader component. It would require changes to security solutions' template wrapper - to allow
+  // 'template' overrides.
+  if (isIndicatorsTotalCountLoading) {
+    return null;
+  }
+
+  const showEmptyPage = indicatorsTotalCount === 0;
 
   return showEmptyPage ? (
     <EmptyPage />
