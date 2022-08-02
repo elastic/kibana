@@ -6,69 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
 import React from 'react';
 import * as Rx from 'rxjs';
 import { omitBy, isUndefined } from 'lodash';
 
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
+import type {
+  ErrorToastOptions,
+  IToasts,
+  Toast,
+  ToastInput,
+  ToastInputFields,
+  ToastOptions,
+} from '@kbn/core-notifications-browser';
 import { ErrorToast } from './error_toast';
-
-/**
- * Allowed fields for {@link ToastInput}.
- *
- * @remarks
- * `id` cannot be specified.
- *
- * @public
- */
-export type ToastInputFields = Pick<EuiToast, Exclude<keyof EuiToast, 'id' | 'text' | 'title'>> & {
-  title?: string | MountPoint;
-  text?: string | MountPoint;
-};
-
-export type Toast = ToastInputFields & {
-  id: string;
-};
-
-/**
- * Inputs for {@link IToasts} APIs.
- * @public
- */
-export type ToastInput = string | ToastInputFields;
-
-/**
- * Options available for {@link IToasts} APIs.
- * @public
- */
-export interface ToastOptions {
-  /**
-   * How long should the toast remain on screen.
-   */
-  toastLifeTimeMs?: number;
-}
-
-/**
- * Options available for {@link IToasts} error APIs.
- * @public
- */
-export interface ErrorToastOptions extends ToastOptions {
-  /**
-   * The title of the toast and the dialog when expanding the message.
-   */
-  title: string;
-  /**
-   * The message to be shown in the toast. If this is not specified the error's
-   * message will be shown in the toast instead. Overwriting that message can
-   * be used to provide more user-friendly toasts. If you specify this, the error
-   * message will still be shown in the detailed error modal.
-   */
-  toastMessage?: string;
-}
 
 const normalizeToast = (toastOrTitle: ToastInput): ToastInputFields => {
   if (typeof toastOrTitle === 'string') {
@@ -78,15 +32,6 @@ const normalizeToast = (toastOrTitle: ToastInput): ToastInputFields => {
   }
   return omitBy(toastOrTitle, isUndefined);
 };
-
-/**
- * Methods for adding and removing global toast messages. See {@link ToastsApi}.
- * @public
- */
-export type IToasts = Pick<
-  ToastsApi,
-  'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError' | 'addInfo'
->;
 
 /**
  * Methods for adding and removing global toast messages.

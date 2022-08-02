@@ -8,7 +8,7 @@
 
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import type { StatusResponse } from '../../../../types/status';
-import { notificationServiceMock } from '../../../notifications/notifications_service.mock';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { mocked } from '@kbn/core-metrics-collectors-server-mocks';
 import { loadStatus } from './load_status';
 
