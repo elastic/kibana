@@ -1,8 +1,12 @@
 {
-  "defaultCommandTimeout": 20000,
-  "execTimeout": 20000,
-  "pageLoadTimeout": 20000,
+  "defaultCommandTimeout": 120000,
+  "execTimeout": 120000,
+  "pageLoadTimeout": 120000,
   "nodeVersion": "system",
+  "numTestsKeptInMemory": 0,
+  "retries": {
+    "runMode": 2
+  },
   "screenshotsFolder": "../../../target/kibana-security-solution/cypress/screenshots",
   "trashAssetsBeforeRuns": false,
   "video": false,
