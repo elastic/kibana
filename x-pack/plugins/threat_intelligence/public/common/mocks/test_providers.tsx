@@ -48,7 +48,8 @@ export const createTiStorageMock = () => {
 
 const data = dataPluginMock.createStartContract();
 const { storage } = createTiStorageMock();
-const unifiedSearch = unifiedSearchPluginMock.createStartContract();
+
+export const unifiedSearch = unifiedSearchPluginMock.createStartContract();
 
 const dataServiceMock = {
   ...data,
@@ -100,18 +101,16 @@ const mockSecurityContext: ThreatIntelligenceSecuritySolutionContext = {
 
 mockCoreStart.uiSettings.get.mockImplementation(mockUiSetting);
 
+const mockedServices = {
+  ...mockCoreStart,
+  data: dataServiceMock,
+  storage,
+  unifiedSearch,
+} as unknown as Services;
+
 export const TestProvidersComponent: FC = ({ children }) => (
   <SecuritySolutionContext.Provider value={mockSecurityContext}>
-    <KibanaContextProvider
-      services={
-        {
-          ...mockCoreStart,
-          data: dataServiceMock,
-          storage,
-          unifiedSearch,
-        } as unknown as Services
-      }
-    >
+    <KibanaContextProvider services={mockedServices}>
       <I18nProvider>{children}</I18nProvider>
     </KibanaContextProvider>
   </SecuritySolutionContext.Provider>
