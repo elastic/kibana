@@ -11,10 +11,14 @@ import {
   SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON,
   INSIGHTS_RELATED_ALERTS_BY_SESSION,
   INSIGHTS_INVESTIGATE_IN_TIMELINE_BUTTON,
+  INSIGHTS_RELATED_ALERTS_BY_ANCESTRY,
+  INSIGHTS_INVESTIGATE_ANCESTRY_ALERTS_IN_TIMELINE_BUTTON,
 } from '../../screens/alerts_details';
 import { QUERY_TAB_BUTTON, TIMELINE_TITLE } from '../../screens/timeline';
 
 import { expandFirstAlert } from '../../tasks/alerts';
+import { verifyInsightCount } from '../../tasks/alerts_details';
+import { setStartDate } from '../../tasks/date_picker';
 import { closeTimeline } from '../../tasks/timeline';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
@@ -31,6 +35,8 @@ describe('Alert Flyout', () => {
     login();
     createCustomRuleEnabled(getNewRule(), 'rule1');
     visitWithoutDateRange(ALERTS_URL);
+    const dateContainingAllEvents = 'Jul 27, 2015 @ 00:00:00.000';
+    setStartDate(dateContainingAllEvents);
     waitForAlertsToPopulate();
     expandFirstAlert();
   });
@@ -56,25 +62,16 @@ describe('Alert Flyout', () => {
   });
 
   it('Opens a new timeline investigation (from an insights module)', () => {
-    cy.get(INSIGHTS_RELATED_ALERTS_BY_SESSION)
-      .click()
-      .invoke('text')
-      .then((relatedAlertsBySessionText) => {
-        // Extract the count from the text
-        const alertCount = relatedAlertsBySessionText.match(/(\d)/);
-        const actualCount = alertCount && alertCount[0];
+    verifyInsightCount({
+      tableSelector: INSIGHTS_RELATED_ALERTS_BY_SESSION,
+      investigateSelector: INSIGHTS_INVESTIGATE_IN_TIMELINE_BUTTON,
+    });
+  });
 
-        // Make sure we can see the table
-        cy.contains('New Rule Test').should('be.visible');
-
-        // Click on the first button that lets us investigate in timeline
-        cy.get(ALERT_FLYOUT).find(INSIGHTS_INVESTIGATE_IN_TIMELINE_BUTTON).click();
-
-        // Make sure a new timeline is created and opened
-        cy.get(TIMELINE_TITLE).should('contain.text', 'Untitled timeline');
-
-        // The alert count in this timeline should match the count shown on the alert flyout
-        cy.get(QUERY_TAB_BUTTON).should('contain.text', actualCount);
-      });
+  it('Opens a new timeline investigation with alert ids from the process ancestry', () => {
+    verifyInsightCount({
+      tableSelector: INSIGHTS_RELATED_ALERTS_BY_ANCESTRY,
+      investigateSelector: INSIGHTS_INVESTIGATE_ANCESTRY_ALERTS_IN_TIMELINE_BUTTON,
+    });
   });
 });
