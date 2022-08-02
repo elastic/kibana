@@ -69,7 +69,7 @@ describe('when calling hasData service', () => {
     const spy = jest.spyOn(http, 'get').mockImplementation((path: any) =>
       Promise.resolve({
         aliases: [],
-        data_streams: path.includes('*:*') // TODO: should we also filter default assets for remote cluster check?
+        data_streams: path.includes('*:*')
           ? [] // return empty on remote cluster call
           : [
               {
