@@ -16285,13 +16285,7 @@
             ],
             "signature": [
               "(toastInputFields: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ToastInputFields",
-                "text": "ToastInputFields"
-              },
+              "ToastInputFields",
               ", key: string) => void"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -16340,13 +16334,7 @@
             ],
             "signature": [
               "(error: Error, toastInputFields: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ErrorToastOptions",
-                "text": "ErrorToastOptions"
-              },
+              "ErrorToastOptions",
               ", key: string) => void"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -16374,13 +16362,7 @@
                 "label": "toastInputFields",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ErrorToastOptions",
-                    "text": "ErrorToastOptions"
-                  }
+                  "ErrorToastOptions"
                 ],
                 "path": "src/plugins/data_views/common/types.ts",
                 "deprecated": false
@@ -19998,13 +19980,7 @@
         ],
         "signature": [
           "(error: Error, toastInputFields: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.ErrorToastOptions",
-            "text": "ErrorToastOptions"
-          },
+          "ErrorToastOptions",
           ", key: string) => void"
         ],
         "path": "src/plugins/data_views/common/types.ts",
@@ -20036,13 +20012,7 @@
               "Toast notif config"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ErrorToastOptions",
-                "text": "ErrorToastOptions"
-              }
+              "ErrorToastOptions"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false
@@ -20073,13 +20043,7 @@
         ],
         "signature": [
           "(toastInputFields: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.ToastInputFields",
-            "text": "ToastInputFields"
-          },
+          "ToastInputFields",
           ", key: string) => void"
         ],
         "path": "src/plugins/data_views/common/types.ts",

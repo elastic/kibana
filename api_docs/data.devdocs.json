@@ -7121,13 +7121,7 @@
             "label": "notifications",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.NotificationsStart",
-                "text": "NotificationsStart"
-              }
+              "NotificationsStart"
             ],
             "path": "src/plugins/data/public/types.ts",
             "deprecated": false

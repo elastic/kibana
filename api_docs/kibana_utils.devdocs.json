@@ -1856,13 +1856,7 @@
             "text": "AppUpdater"
           },
           ">; toastNotifications: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.IToasts",
-            "text": "IToasts"
-          },
+          "IToasts",
           "; history?: ",
           "History",
           "<unknown> | undefined; getHistory?: (() => ",
@@ -1970,153 +1964,7 @@
                   "\nToast notifications service to show toasts in error cases."
                 ],
                 "signature": [
-                  "{ add: (toastOrTitle: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastInput",
-                    "text": "ToastInput"
-                  },
-                  ") => ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "; get$: () => ",
-                  "Observable",
-                  "<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "[]>; remove: (toastOrId: string | ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  ") => void; addSuccess: (toastOrTitle: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastInput",
-                    "text": "ToastInput"
-                  },
-                  ", options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastOptions",
-                    "text": "ToastOptions"
-                  },
-                  " | undefined) => ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "; addWarning: (toastOrTitle: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastInput",
-                    "text": "ToastInput"
-                  },
-                  ", options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastOptions",
-                    "text": "ToastOptions"
-                  },
-                  " | undefined) => ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "; addDanger: (toastOrTitle: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastInput",
-                    "text": "ToastInput"
-                  },
-                  ", options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastOptions",
-                    "text": "ToastOptions"
-                  },
-                  " | undefined) => ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "; addError: (error: Error, options: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ErrorToastOptions",
-                    "text": "ErrorToastOptions"
-                  },
-                  ") => ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "; addInfo: (toastOrTitle: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastInput",
-                    "text": "ToastInput"
-                  },
-                  ", options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastOptions",
-                    "text": "ToastOptions"
-                  },
-                  " | undefined) => ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "; }"
+                  "IToasts"
                 ],
                 "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
                 "deprecated": false
@@ -3362,13 +3210,7 @@
           " | undefined) => Promise<void>; basePath: ",
           "IBasePath",
           "; mapping: string | Mapping; toastNotifications: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.IToasts",
-            "text": "IToasts"
-          },
+          "IToasts",
           "; onBeforeRedirect?: ((error: ",
           {
             "pluginId": "kibanaUtils",
@@ -3508,153 +3350,7 @@
                   "\nToast notifications service to show toasts in error cases."
                 ],
                 "signature": [
-                  "{ add: (toastOrTitle: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastInput",
-                    "text": "ToastInput"
-                  },
-                  ") => ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "; get$: () => ",
-                  "Observable",
-                  "<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "[]>; remove: (toastOrId: string | ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  ") => void; addSuccess: (toastOrTitle: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastInput",
-                    "text": "ToastInput"
-                  },
-                  ", options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastOptions",
-                    "text": "ToastOptions"
-                  },
-                  " | undefined) => ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "; addWarning: (toastOrTitle: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastInput",
-                    "text": "ToastInput"
-                  },
-                  ", options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastOptions",
-                    "text": "ToastOptions"
-                  },
-                  " | undefined) => ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "; addDanger: (toastOrTitle: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastInput",
-                    "text": "ToastInput"
-                  },
-                  ", options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastOptions",
-                    "text": "ToastOptions"
-                  },
-                  " | undefined) => ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "; addError: (error: Error, options: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ErrorToastOptions",
-                    "text": "ErrorToastOptions"
-                  },
-                  ") => ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "; addInfo: (toastOrTitle: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastInput",
-                    "text": "ToastInput"
-                  },
-                  ", options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastOptions",
-                    "text": "ToastOptions"
-                  },
-                  " | undefined) => ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "; }"
+                  "IToasts"
                 ],
                 "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
                 "deprecated": false
@@ -4389,13 +4085,7 @@
         ],
         "signature": [
           "(toasts: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.IToasts",
-            "text": "IToasts"
-          },
+          "IToasts",
           ") => { onGetError: (error: Error) => void; onSetError: (error: Error) => void; }"
         ],
         "path": "src/plugins/kibana_utils/public/state_management/url/errors.ts",
@@ -4409,13 +4099,7 @@
             "label": "toasts",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.IToasts",
-                "text": "IToasts"
-              }
+              "IToasts"
             ],
             "path": "src/plugins/kibana_utils/public/state_management/url/errors.ts",
             "deprecated": false,
