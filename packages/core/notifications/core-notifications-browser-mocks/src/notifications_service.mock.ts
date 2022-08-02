@@ -6,14 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { MockedKeys } from '@kbn/utility-types-jest';
-import {
-  NotificationsService,
-  NotificationsSetup,
-  NotificationsStart,
-} from './notifications_service';
-import { toastsServiceMock } from './toasts/toasts_service.mock';
+import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
+import type { NotificationsServiceContract } from '@kbn/core-notifications-browser-internal';
+import { toastsServiceMock } from './toasts_service.mock';
 
 const createSetupContractMock = () => {
   const setupContract: MockedKeys<NotificationsSetup> = {
@@ -31,7 +27,6 @@ const createStartContractMock = () => {
   return startContract;
 };
 
-type NotificationsServiceContract = PublicMethodsOf<NotificationsService>;
 const createMock = () => {
   const mocked: jest.Mocked<NotificationsServiceContract> = {
     setup: jest.fn(),

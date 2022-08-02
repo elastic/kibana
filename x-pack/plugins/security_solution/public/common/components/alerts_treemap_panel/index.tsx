@@ -33,6 +33,7 @@ export interface Props {
   addFilter?: ({ field, value }: { field: string; value: string | number }) => void;
   alignHeader?: 'center' | 'baseline' | 'stretch' | 'flexStart' | 'flexEnd';
   chartOptionsContextMenu?: (queryId: string) => React.ReactNode;
+  inspectTitle: string;
   isPanelExpanded: boolean;
   filters?: Filter[];
   height?: number;
@@ -53,6 +54,7 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
   addFilter,
   alignHeader,
   chartOptionsContextMenu,
+  inspectTitle,
   isPanelExpanded,
   filters,
   height = DEFAULT_HEIGHT,
@@ -68,7 +70,7 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
   stackByWidth,
   title,
 }: Props) => {
-  const { to, from, deleteQuery, setQuery } = useGlobalTime();
+  const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
 
   // create a unique, but stable (across re-renders) query id
   const uniqueQueryId = useMemo(() => `${ALERTS_TREEMAP_ID}-${uuid.v4()}`, []);
@@ -155,6 +157,7 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
           alignHeader={alignHeader}
           hideSubtitle
           id={uniqueQueryId}
+          inspectTitle={inspectTitle}
           outerDirection="row"
           showInspectButton={chartOptionsContextMenu == null}
           title={title}
@@ -175,7 +178,7 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
           )}
         </HeaderSection>
 
-        {isLoadingAlerts ? (
+        {isLoadingAlerts && isPanelExpanded ? (
           <EuiProgress color="accent" data-test-subj="progress" position="absolute" size="xs" />
         ) : (
           <>
