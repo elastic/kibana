@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
-
 import moment from 'moment';
 
 import type { MatrixHistogramRequestOptions } from '../../../../../../common/search_strategy';

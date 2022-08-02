@@ -132,16 +132,7 @@ export const useNetworkDns = ({
       }
       return prevRequest;
     });
-  }, [
-    activePage,
-    indexNames,
-    endDate,
-    filterQuery,
-    limit,
-    startDate,
-    sort,
-    isPtrIncluded,
-  ]);
+  }, [activePage, indexNames, endDate, filterQuery, limit, startDate, sort, isPtrIncluded]);
 
   useEffect(() => {
     if (!skip && networkDnsRequest) {

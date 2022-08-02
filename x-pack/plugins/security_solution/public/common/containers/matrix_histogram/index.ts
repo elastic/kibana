@@ -6,7 +6,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { getOr, isEmpty, noop } from 'lodash/fp';
+import { getOr, noop } from 'lodash/fp';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 

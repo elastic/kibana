@@ -126,10 +126,7 @@ describe('source/index.tsx', () => {
 
       await indexFieldsSearch!({ dataViewId: 'neato' });
       const {
-        payload: {
-          browserFields: newBrowserFields,
-          indexFields: newIndexFields,
-        },
+        payload: { browserFields: newBrowserFields, indexFields: newIndexFields },
       } = mockDispatch.mock.calls[1][0];
 
       expect(browserFields).toBe(newBrowserFields);
@@ -158,10 +155,7 @@ describe('source/index.tsx', () => {
 
       await indexFieldsSearch!({ dataViewId: 'neato', cleanCache: true });
       const {
-        payload: {
-          browserFields: newBrowserFields,
-          indexFields: newIndexFields,
-        },
+        payload: { browserFields: newBrowserFields, indexFields: newIndexFields },
       } = mockDispatch.mock.calls[1][0];
 
       expect(browserFields).not.toBe(newBrowserFields);

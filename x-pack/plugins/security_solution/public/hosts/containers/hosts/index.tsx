@@ -151,16 +151,7 @@ export const useAllHost = ({
       }
       return prevRequest;
     });
-  }, [
-    activePage,
-    direction,
-    endDate,
-    filterQuery,
-    indexNames,
-    limit,
-    startDate,
-    sortField,
-  ]);
+  }, [activePage, direction, endDate, filterQuery, indexNames, limit, startDate, sortField]);
 
   useEffect(() => {
     if (!skip && hostsRequest) {

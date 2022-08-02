@@ -78,17 +78,7 @@ export const AllUsersQueryTabBody = ({
         sort,
       });
     }
-  }, [
-    search,
-    startDate,
-    endDate,
-    filterQuery,
-    indexNames,
-    querySkip,
-    activePage,
-    limit,
-    sort,
-  ]);
+  }, [search, startDate, endDate, filterQuery, indexNames, querySkip, activePage, limit, sort]);
 
   return (
     <UsersTableManage
