@@ -42,10 +42,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     let isNewChartsLibraryEnabled = true;
 
     before(async function () {
-      log.debug('https://www.elastic.co/guide/en/kibana/current/tutorial-load-dataset.html');
+      log.debug(
+        'Load empty_kibana and Shakespeare Getting Started data\n' +
+          'https://www.elastic.co/guide/en/kibana/current/tutorial-load-dataset.html'
+      );
       isNewChartsLibraryEnabled = await PageObjects.visChart.isNewChartsLibraryEnabled();
       await security.testUser.setRoles(['kibana_admin', 'test_shakespeare_reader']);
-      await kibanaServer.savedObjects.cleanStandardList();
+      await esArchiver.load('test/functional/fixtures/es_archiver/empty_kibana', {
+        skipExisting: true,
+      });
       log.debug('Load shakespeare data');
       await esArchiver.loadIfNeeded(
         'test/functional/fixtures/es_archiver/getting_started/shakespeare'
@@ -62,7 +67,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await security.testUser.restoreDefaults();
       await esArchiver.unload('test/functional/fixtures/es_archiver/getting_started/shakespeare');
-      kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.uiSettings.replace({});
     });
 
