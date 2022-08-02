@@ -232,11 +232,11 @@ export const ContainerNameWidget = ({
     },
   });
 
-  const cellProps = () => {
+  const cellProps = useMemo(() => {
     return {
       css: styles.cellPad,
     };
-  };
+  }, [styles.cellPad]);
 
   return (
     <div
