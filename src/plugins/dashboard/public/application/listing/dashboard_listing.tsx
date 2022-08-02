@@ -183,7 +183,7 @@ export const DashboardListing = ({
             iconType="pencil"
             color="primary"
             onClick={() => redirectTo({ destination: 'dashboard' })}
-            data-test-subj="createDashboardPromptButton"
+            data-test-subj="newItemButton"
             aria-label={dashboardUnsavedListingStrings.getEditAriaLabel(getNewDashboardTitle())}
           >
             {dashboardUnsavedListingStrings.getEditTitle()}
@@ -195,7 +195,7 @@ export const DashboardListing = ({
         onClick={createItem}
         fill
         iconType="plusInCircle"
-        data-test-subj="createDashboardPromptButton"
+        data-test-subj="newItemButton"
       >
         {noItemsStrings.getCreateNewDashboardText()}
       </EuiButton>

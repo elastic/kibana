@@ -70,7 +70,7 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async clickNewVisualization() {
-    await this.listingTable.clickNewButton('createVisualizationPromptButton');
+    await this.listingTable.clickNewButton();
   }
 
   public async clickAggBasedVisualizations() {
