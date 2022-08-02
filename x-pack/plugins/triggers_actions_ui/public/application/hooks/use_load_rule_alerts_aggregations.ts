@@ -206,8 +206,23 @@ export async function fetchRuleAlertsAggByTimeRange({
 
     const active = res?.aggregations?.total.buckets.totalActiveAlerts?.doc_count ?? 0;
     const recovered = res?.aggregations?.total.buckets.totalRecoveredAlerts?.doc_count ?? 0;
-    // Total alerts count in the last 30 days per status
-    const totalAlerts = active + recovered;
+    let maxTotalAlertPerDay = 0;
+    res?.aggregations?.statusPerDay.buckets.forEach(
+      (dayAlerts: {
+        key: number;
+        doc_count: number;
+        alertStatus: {
+          buckets: Array<{
+            key: 'active' | 'recovered';
+            doc_count: number;
+          }>;
+        };
+      }) => {
+        if (dayAlerts.doc_count > maxTotalAlertPerDay) {
+          maxTotalAlertPerDay = dayAlerts.doc_count;
+        }
+      }
+    );
 
     const alertsChartData = [
       ...res?.aggregations?.statusPerDay.buckets.reduce(
@@ -227,23 +242,21 @@ export async function fetchRuleAlertsAggByTimeRange({
           // We are adding this to each day to construct the 30 days bars (background bar) when there is no data for a given day or to show the delta today alerts/total alerts.
           const totalDayAlerts = {
             date: dayAlerts.key,
-            count: totalAlerts === 0 ? 1 : totalAlerts,
+            count: maxTotalAlertPerDay === 0 ? 1 : maxTotalAlertPerDay,
             status: 'total',
           };
 
           if (dayAlerts.doc_count > 0) {
             const localAlertChartData = acc;
-            // If there are alerts in this day, we construct the chart data.
-            let countOfRecoveredActiveAlerts = 0;
+            // If there are alerts in this day, we construct the chart data
             dayAlerts.alertStatus.buckets.forEach((alert) => {
-              countOfRecoveredActiveAlerts += alert.doc_count;
               localAlertChartData.push({
                 date: dayAlerts.key,
                 count: alert.doc_count,
                 status: alert.key,
               });
             });
-            const deltaAlertsCount = totalAlerts - countOfRecoveredActiveAlerts;
+            const deltaAlertsCount = maxTotalAlertPerDay - dayAlerts.doc_count;
             if (deltaAlertsCount > 0) {
               localAlertChartData.push({
                 date: dayAlerts.key,
@@ -258,7 +271,6 @@ export async function fetchRuleAlertsAggByTimeRange({
         []
       ),
     ];
-
     return {
       active,
       recovered,

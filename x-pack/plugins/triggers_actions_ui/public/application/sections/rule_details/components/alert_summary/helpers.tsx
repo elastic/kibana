@@ -20,9 +20,9 @@ export const formatChartAlertData = (
 export const getColorSeries = ({ seriesKeys }: XYChartSeriesIdentifier) => {
   switch (seriesKeys[0]) {
     case 'active':
-      return LIGHT_THEME.colors.vizColors[1];
-    case 'recovered':
       return LIGHT_THEME.colors.vizColors[2];
+    case 'recovered':
+      return LIGHT_THEME.colors.vizColors[1];
     case 'total':
       return '#f5f7fa';
     default:

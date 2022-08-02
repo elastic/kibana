@@ -9,6 +9,7 @@ import {
   BarSeries,
   Chart,
   FilterPredicate,
+  LIGHT_THEME,
   ScaleType,
   Settings,
   TooltipType,
@@ -167,7 +168,7 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
                         defaultMessage="Active"
                       />
                     </EuiText>
-                    <EuiText color="#4A7194">
+                    <EuiText color={LIGHT_THEME.colors.vizColors[2]}>
                       <h4>{active}</h4>
                     </EuiText>
                   </EuiFlexItem>
@@ -181,7 +182,7 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
                       />
                     </EuiText>
                     <EuiFlexItem>
-                      <EuiText color="#C4407C">
+                      <EuiText color={LIGHT_THEME.colors.vizColors[1]}>
                         <h4>{recovered}</h4>
                       </EuiText>
                     </EuiFlexItem>
