@@ -46,7 +46,6 @@ const defaultLinkInfo: LinkInfo = {
   id: SecurityPageName.alerts,
   path: '/test',
   title: 'test title',
-  skipUrlState: false,
 };
 
 const mockLinkInfo = jest.fn().mockResolvedValue(defaultLinkInfo);

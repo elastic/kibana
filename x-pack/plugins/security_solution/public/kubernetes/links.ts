@@ -20,9 +20,7 @@ export const links: LinkItem = {
       'Provides interactive visualizations of your Kubernetes workload and session data.',
   }),
   path: KUBERNETES_PATH,
-  globalNavEnabled: false,
   isBeta: true,
   experimentalKey: 'kubernetesEnabled',
   globalSearchKeywords: ['Kubernetes'],
-  globalNavOrder: 9005,
 };
