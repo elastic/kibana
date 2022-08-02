@@ -7,7 +7,6 @@
 
 export default function ({ loadTestFile }) {
   describe('Osquery Endpoints', () => {
-    // loadTestFile(require.resolve('./packs'));
-    loadTestFile(require.resolve('./live_query'));
+    loadTestFile(require.resolve('./packs'));
   });
 }
