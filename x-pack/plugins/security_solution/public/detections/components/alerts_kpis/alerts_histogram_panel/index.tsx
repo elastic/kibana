@@ -75,6 +75,7 @@ interface AlertsHistogramPanelProps {
   defaultStackByOption?: string;
   filters?: Filter[];
   headerChildren?: React.ReactNode;
+  inspectTitle?: string;
   onFieldSelected?: (field: string) => void;
   /** Override all defaults, and only display this field */
   onlyField?: AlertsStackByField;
@@ -109,6 +110,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     defaultStackByOption = DEFAULT_STACK_BY_FIELD,
     filters,
     headerChildren,
+    inspectTitle,
     onFieldSelected,
     onlyField,
     paddingSize = 'm',
@@ -336,6 +338,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
           <HeaderSection
             alignHeader={alignHeader}
             id={uniqueQueryId}
+            inspectTitle={inspectTitle}
             outerDirection="row"
             title={titleText}
             titleSize={titleSize}
