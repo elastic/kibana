@@ -45,6 +45,7 @@ for (const deployment of prDeployments) {
   } catch (ex) {
     console.error(ex.toString());
     // deploymentsToPurge.push(deployment); // TODO should we delete on error?
+    process.exitCode = 1;
   }
 }
 
@@ -57,5 +58,6 @@ for (const deployment of deploymentsToPurge) {
     });
   } catch (ex) {
     console.error(ex.toString());
+    process.exitCode = 1;
   }
 }
