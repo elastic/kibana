@@ -11,11 +11,8 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
 import { KibanaRequest, Logger } from '@kbn/core/server';
-import {
-  SecurityPluginSetup,
-  SecurityPluginStart,
-  UserProfileServiceStart,
-} from '@kbn/security-plugin/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { UserProfile } from '@kbn/security-plugin/common';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 import { excess, SuggestUserProfilesRequestRt, throwErrors } from '../../../common/api';
@@ -41,7 +38,7 @@ export class UserProfileService {
     this.options = options;
   }
 
-  public async suggest(request: KibanaRequest): ReturnType<UserProfileServiceStart['suggest']> {
+  public async suggest(request: KibanaRequest): Promise<UserProfile[]> {
     const params = pipe(
       excess(SuggestUserProfilesRequestRt).decode(request.body),
       fold(throwErrors(Boom.badRequest), identity)
@@ -60,6 +57,13 @@ export class UserProfileService {
         securityPluginSetup: this.options.securityPluginSetup,
         securityPluginStart: this.options.securityPluginStart,
       };
+
+      /**
+       * The limit of 100 helps prevent DDoS attacks and is also enforced by the security plugin.
+       */
+      if (size !== undefined && (size > 100 || size < 0)) {
+        throw Boom.badRequest('size must be between 0 and 100');
+      }
 
       if (!UserProfileService.isSecurityEnabled(securityPluginFields)) {
         return [];
@@ -81,9 +85,8 @@ export class UserProfileService {
     } catch (error) {
       throw createCaseError({
         logger: this.logger,
-        message: `Failed to retrieve suggested user profiles in service for name: ${name} owners: [${owners.join(
-          ','
-        )}]`,
+        message: `Failed to retrieve suggested user profiles in service for name: ${name} owners: [${owners}]: ${error}`,
+        error,
       });
     }
   }
@@ -104,6 +107,13 @@ export class UserProfileService {
     );
   }
 
+  /**
+   * This function constructs the privileges required for a user to be assigned to a case. We're requiring the ability
+   * to read and update a case saved object. My thought process was that a user should at a minimum be able to read it
+   * and change its status to close it. This is does not require that the user have access to comments or various other
+   * privileges around the other entities within cases. If we move to a more granular object level permissions we'll
+   * likely need to expand this to include the privileges for the other entities as well.
+   */
   private static buildRequiredPrivileges(owners: string[], security: SecurityPluginStart) {
     const privileges: string[] = [];
     for (const owner of owners) {
