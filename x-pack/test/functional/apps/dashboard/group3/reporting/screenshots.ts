@@ -39,7 +39,7 @@ export default function ({
     await kibanaServer.importExport.unload(ecommerceSOPath);
   };
 
-  describe.only('Dashboard Reporting Screenshots', () => {
+  describe('Dashboard Reporting Screenshots', () => {
     before('initialize tests', async () => {
       await loadEcommerce();
       await browser.setWindowSize(1600, 850);
