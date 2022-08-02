@@ -15,7 +15,7 @@ const DEFAULT_DATA_OPTIONS = {
     defaultMessage: 'Data options',
   }),
   description: i18n.translate('xpack.synthetics.monitorConfig.section.dataOptions.description', {
-    defaultMessage: 'A description goes here',
+    defaultMessage: 'Configure data options to add context to the data coming from your monitors.',
   }),
   components: [
     FIELD[ConfigKey.TAGS],
@@ -125,7 +125,8 @@ const TLS_OPTIONS = {
     defaultMessage: 'TLS options',
   }),
   description: i18n.translate('xpack.synthetics.monitorConfig.section.tlsOptions.description', {
-    defaultMessage: 'TLS Description',
+    defaultMessage:
+      'Configure TLS options, including verification mode, certificate authorities, and client certificates.',
   }),
   components: [
     FIELD.isTLSEnabled,
