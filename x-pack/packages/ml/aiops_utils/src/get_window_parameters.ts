@@ -71,7 +71,9 @@ export const getSnappedWindowParameters = (
   snapTimestamps: number[]
 ): WindowParameters => {
   const snappedBaselineMin = snapTimestamps.reduce((pts, cts) => {
-    if (Math.abs(cts - windowParameters.baselineMin) < Math.abs(pts - windowParameters.baselineMin)) {
+    if (
+      Math.abs(cts - windowParameters.baselineMin) < Math.abs(pts - windowParameters.baselineMin)
+    ) {
       return cts;
     }
     return pts;
@@ -79,7 +81,9 @@ export const getSnappedWindowParameters = (
   const baselineMaxTimestamps = snapTimestamps.filter((ts) => ts > snappedBaselineMin);
 
   const snappedBaselineMax = baselineMaxTimestamps.reduce((pts, cts) => {
-    if (Math.abs(cts - windowParameters.baselineMax) < Math.abs(pts - windowParameters.baselineMax)) {
+    if (
+      Math.abs(cts - windowParameters.baselineMax) < Math.abs(pts - windowParameters.baselineMax)
+    ) {
       return cts;
     }
     return pts;
@@ -87,7 +91,9 @@ export const getSnappedWindowParameters = (
   const deviationMinTss = baselineMaxTimestamps.filter((ts) => ts > snappedBaselineMax);
 
   const snappedDeviationMin = deviationMinTss.reduce((pts, cts) => {
-    if (Math.abs(cts - windowParameters.deviationMin) < Math.abs(pts - windowParameters.deviationMin)) {
+    if (
+      Math.abs(cts - windowParameters.deviationMin) < Math.abs(pts - windowParameters.deviationMin)
+    ) {
       return cts;
     }
     return pts;
@@ -95,7 +101,9 @@ export const getSnappedWindowParameters = (
   const deviationMaxTss = deviationMinTss.filter((ts) => ts > snappedDeviationMin);
 
   const snappedDeviationMax = deviationMaxTss.reduce((pts, cts) => {
-    if (Math.abs(cts - windowParameters.deviationMax) < Math.abs(pts - windowParameters.deviationMax)) {
+    if (
+      Math.abs(cts - windowParameters.deviationMax) < Math.abs(pts - windowParameters.deviationMax)
+    ) {
       return cts;
     }
     return pts;
