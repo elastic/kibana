@@ -18,7 +18,7 @@ import {
   EuiText,
   EuiTextColor,
 } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
+import type { FunctionComponent, ReactNode } from 'react';
 import React, { useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -81,12 +81,12 @@ export interface UserProfilesSelectableProps
   /**
    * Placeholder text for search box.
    */
-  selectedStatusMessage?(selectedCount: number): string;
+  selectedStatusMessage?(selectedCount: number): ReactNode;
 
   /**
    * Placeholder text for search box.
    */
-  clearButtonLabel?: string;
+  clearButtonLabel?: ReactNode;
 }
 
 /**
