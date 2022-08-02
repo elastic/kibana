@@ -15,7 +15,7 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ManagementSetup, ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type {
@@ -44,7 +44,7 @@ import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_fra
 import { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 
 export interface CasesPluginSetup {
-  security: SecurityPluginSetup;
+  security?: SecurityPluginSetup;
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
 }
@@ -57,6 +57,7 @@ export interface CasesPluginStart {
   triggersActionsUi: TriggersActionsStart;
   features: FeaturesPluginStart;
   spaces?: SpacesPluginStart;
+  security?: SecurityPluginStart;
 }
 
 /**
@@ -67,7 +68,7 @@ export interface CasesPluginStart {
 
 export type StartServices = CoreStart &
   CasesPluginStart & {
-    security: SecurityPluginSetup;
+    security?: SecurityPluginStart;
   };
 
 export interface RenderAppProps {
