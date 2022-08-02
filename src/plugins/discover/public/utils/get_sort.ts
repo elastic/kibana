@@ -65,7 +65,7 @@ export function getSort(sort: SortPair[] | SortPair, dataView: DataView): SortPa
  * compared to getSort it doesn't return an array of objects, it returns an array of arrays
  * [[fieldToSort: directionToSort]]
  */
-export function getSortArray(sort: SortPair[] | SortPair, dataView: DataView): SortPairArr[] {
+export function getSortArray(sort: SortInput, dataView: DataView): SortPairArr[] {
   return getSort(sort, dataView).reduce((acc: SortPairArr[], sortPair) => {
     const entries = Object.entries(sortPair);
     if (entries && entries[0]) {
