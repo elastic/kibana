@@ -32,6 +32,7 @@ interface AlertsCountPanelProps {
   alignHeader?: 'center' | 'baseline' | 'stretch' | 'flexStart' | 'flexEnd';
   chartOptionsContextMenu?: (queryId: string) => React.ReactNode;
   filters?: Filter[];
+  inspectTitle: string;
   panelHeight?: number;
   query?: Query;
   setStackByField0: (stackBy: string) => void;
@@ -49,6 +50,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
     alignHeader,
     chartOptionsContextMenu,
     filters,
+    inspectTitle,
     panelHeight,
     query,
     runtimeMappings,
@@ -60,7 +62,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
     stackByWidth,
     title = i18n.COUNT_TABLE_TITLE,
   }) => {
-    const { to, from, deleteQuery, setQuery } = useGlobalTime();
+    const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
 
     // create a unique, but stable (across re-renders) query id
     const uniqueQueryId = useMemo(() => `${DETECTIONS_ALERTS_COUNT_ID}-${uuid.v4()}`, []);
@@ -158,6 +160,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
           <HeaderSection
             alignHeader={alignHeader}
             id={uniqueQueryId}
+            inspectTitle={inspectTitle}
             outerDirection="row"
             title={title}
             titleSize="s"

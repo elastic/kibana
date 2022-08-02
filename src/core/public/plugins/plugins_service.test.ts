@@ -29,9 +29,9 @@ import {
 } from './plugins_service';
 
 import type { InjectedMetadataPlugin } from '@kbn/core-injected-metadata-common-internal';
-import { notificationServiceMock } from '../notifications/notifications_service.mock';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { applicationServiceMock } from '../application/application_service.mock';
-import { overlayServiceMock } from '../overlays/overlay_service.mock';
+import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { chromeServiceMock } from '../chrome/chrome_service.mock';
 import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
