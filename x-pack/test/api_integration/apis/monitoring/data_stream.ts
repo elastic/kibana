@@ -23,12 +23,17 @@ export const getLifecycleMethods = (getService: FtrProviderContext['getService']
   };
 
   return {
-    async setup(archives: string[] = []) {
-      await Promise.all(archives.map((archive) => esArchiver.load(archive, { useCreate: true })));
+    async setup(archives: string[] | string) {
+      const archivesArray = Array.isArray(archives) ? archives : [archives];
+      await Promise.all(
+        archivesArray.map((archive) => esArchiver.load(archive, { useCreate: true }))
+      );
     },
 
-    async tearDown(archives: string[] = []) {
-      await Promise.all(archives.map((archive) => esArchiver.unload(archive)));
+    async tearDown(archives: string[] | string = []) {
+      const archivesArray = Array.isArray(archives) ? archives : [archives];
+      await Promise.all(archivesArray.map((archive) => esArchiver.unload(archive)));
+
       await deleteDataStream('metricbeat-*');
       await deleteDataStream('.monitoring-*');
     },
