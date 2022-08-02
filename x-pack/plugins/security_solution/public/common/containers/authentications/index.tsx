@@ -33,7 +33,7 @@ export interface AuthenticationArgs {
   loadPage: (newActivePage: number) => void;
   pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
-  totalCount: number;
+  totalCount: number | null | undefined;
 }
 
 interface UseAuthentications {
@@ -86,7 +86,7 @@ export const useAuthentications = ({
     factoryQueryType: UsersQueries.authentications,
     initialResult: {
       edges: [],
-      totalCount: -1,
+      totalCount: undefined,
       pageInfo: {
         activePage: 0,
         fakeTotalCount: 0,

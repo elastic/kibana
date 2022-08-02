@@ -198,13 +198,13 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     }
 
     if (typeof subtitle === 'function') {
-      return totalCount >= 0 ? subtitle(totalCount) : null;
+      return totalCount != null && totalCount >= 0 ? subtitle(totalCount) : null;
     }
 
     return subtitle;
   }, [isInitialLoading, subtitle, totalCount]);
   const hideHistogram = useMemo(
-    () => (totalCount <= 0 && hideHistogramIfEmpty ? true : false),
+    () => (totalCount != null && totalCount <= 0 && hideHistogramIfEmpty ? true : false),
     [totalCount, hideHistogramIfEmpty]
   );
   const barChartData = useMemo(() => getCustomChartData(data, mapping), [data, mapping]);

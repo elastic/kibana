@@ -32,7 +32,7 @@ export interface NetworkHttpRequestOptions extends RequestOptionsPaginated {
 
 export interface NetworkHttpStrategyResponse extends IEsSearchResponse {
   edges: NetworkHttpEdges[];
-  totalCount: number;
+  totalCount: number | null | undefined;
   pageInfo: PageInfoPaginated;
   inspect?: Maybe<Inspect>;
 }

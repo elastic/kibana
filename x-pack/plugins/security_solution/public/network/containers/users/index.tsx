@@ -38,7 +38,7 @@ export interface NetworkUsersArgs {
   pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
   stackByField?: string;
-  totalCount: number;
+  totalCount: number | null | undefined;
 }
 
 interface UseNetworkUsers {
@@ -95,7 +95,7 @@ export const useNetworkUsers = ({
     factoryQueryType: NetworkQueries.users,
     initialResult: {
       edges: [],
-      totalCount: -1,
+      totalCount: undefined,
       pageInfo: {
         activePage: 0,
         fakeTotalCount: 0,

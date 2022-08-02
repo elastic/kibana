@@ -36,7 +36,7 @@ export interface NetworkDnsResponse {
   pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
   stackByField?: string;
-  totalCount: number;
+  totalCount: number | null | undefined;
 }
 
 interface UseNetworkDns {
@@ -89,7 +89,7 @@ export const useNetworkDns = ({
     factoryQueryType: NetworkQueries.dns,
     initialResult: {
       edges: [],
-      totalCount: -1,
+      totalCount: undefined,
       pageInfo: {
         activePage: 0,
         fakeTotalCount: 0,

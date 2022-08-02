@@ -36,7 +36,7 @@ export interface NetworkTopNFlowArgs {
   pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
   networkTopNFlow: NetworkTopNFlowEdges[];
-  totalCount: number;
+  totalCount: number | null | undefined;
 }
 
 interface UseNetworkTopNFlow {
@@ -96,7 +96,7 @@ export const useNetworkTopNFlow = ({
     factoryQueryType: NetworkQueries.topNFlow,
     initialResult: {
       edges: [],
-      totalCount: -1,
+      totalCount: undefined,
       pageInfo: {
         activePage: 0,
         fakeTotalCount: 0,

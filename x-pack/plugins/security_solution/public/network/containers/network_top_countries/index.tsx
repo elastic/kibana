@@ -36,7 +36,7 @@ export interface NetworkTopCountriesArgs {
   networkTopCountries: NetworkTopCountriesEdges[];
   pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
-  totalCount: number;
+  totalCount: number | null | undefined;
 }
 
 interface UseNetworkTopCountries {
@@ -96,7 +96,7 @@ export const useNetworkTopCountries = ({
     factoryQueryType: NetworkQueries.topCountries,
     initialResult: {
       edges: [],
-      totalCount: -1,
+      totalCount: undefined,
       pageInfo: {
         activePage: 0,
         fakeTotalCount: 0,

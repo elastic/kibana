@@ -31,7 +31,7 @@ export interface NetworkTopCountriesRequestOptions
 
 export interface NetworkTopCountriesStrategyResponse extends IEsSearchResponse {
   edges: NetworkTopCountriesEdges[];
-  totalCount: number;
+  totalCount: number | null | undefined;
   pageInfo: PageInfoPaginated;
   inspect?: Maybe<Inspect>;
 }

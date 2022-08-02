@@ -23,7 +23,7 @@ export interface NetworkUsersRequestOptions extends RequestOptionsPaginated {
 
 export interface NetworkUsersStrategyResponse extends IEsSearchResponse {
   edges: NetworkUsersEdges[];
-  totalCount: number;
+  totalCount: number | null | undefined;
   pageInfo: PageInfoPaginated;
   inspect?: Maybe<Inspect>;
 }

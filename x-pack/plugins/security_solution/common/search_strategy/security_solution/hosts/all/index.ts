@@ -18,7 +18,7 @@ export interface HostsEdges {
 
 export interface HostsStrategyResponse extends IEsSearchResponse {
   edges: HostsEdges[];
-  totalCount: number;
+  totalCount: number | null | undefined;
   pageInfo: PageInfoPaginated;
   inspect?: Maybe<Inspect>;
 }

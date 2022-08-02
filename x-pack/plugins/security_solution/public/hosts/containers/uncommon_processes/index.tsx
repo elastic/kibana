@@ -37,7 +37,7 @@ export interface UncommonProcessesArgs {
   loadPage: (newActivePage: number) => void;
   pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
-  totalCount: number;
+  totalCount: number | null | undefined;
   uncommonProcesses: HostsUncommonProcessesEdges[];
 }
 
@@ -94,7 +94,7 @@ export const useUncommonProcesses = ({
     factoryQueryType: HostsQueries.uncommonProcesses,
     initialResult: {
       edges: [],
-      totalCount: -1,
+      totalCount: undefined,
       pageInfo: {
         activePage: 0,
         fakeTotalCount: 0,

@@ -51,7 +51,7 @@ export interface TimelineArgs {
   loadPage: LoadPage;
   pageInfo: Pick<PaginationInputPaginated, 'activePage' | 'querySize'>;
   refetch: inputsModel.Refetch;
-  totalCount: number;
+  totalCount: number | null | undefined;
   updatedAt: number;
 }
 
@@ -198,7 +198,7 @@ export const useTimelineEvents = ({
       response: [],
     },
     refetch: refetchGrid,
-    totalCount: -1,
+    totalCount: undefined,
     pageInfo: {
       activePage: 0,
       querySize: 0,
@@ -436,7 +436,7 @@ export const useTimelineEvents = ({
           response: [],
         },
         refetch: refetchGrid,
-        totalCount: -1,
+        totalCount: undefined,
         pageInfo: {
           activePage: 0,
           querySize: 0,

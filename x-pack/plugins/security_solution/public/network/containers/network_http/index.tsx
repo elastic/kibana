@@ -38,7 +38,7 @@ export interface NetworkHttpArgs {
   networkHttp: NetworkHttpEdges[];
   pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
-  totalCount: number;
+  totalCount: number | null | undefined;
 }
 
 interface UseNetworkHttp {
@@ -93,7 +93,7 @@ export const useNetworkHttp = ({
     factoryQueryType: NetworkQueries.http,
     initialResult: {
       edges: [],
-      totalCount: -1,
+      totalCount: undefined,
       pageInfo: {
         activePage: 0,
         fakeTotalCount: 0,

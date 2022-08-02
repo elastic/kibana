@@ -31,7 +31,7 @@ export interface HostsUncommonProcessesRequestOptions extends RequestOptionsPagi
 
 export interface HostsUncommonProcessesStrategyResponse extends IEsSearchResponse {
   edges: HostsUncommonProcessesEdges[];
-  totalCount: number;
+  totalCount: number | null | undefined;
   pageInfo: PageInfoPaginated;
   inspect?: Maybe<Inspect>;
 }

@@ -40,7 +40,7 @@ export interface UseMatrixHistogramArgs {
   data: MatrixHistogramData[];
   inspect: InspectResponse;
   refetch: inputsModel.Refetch;
-  totalCount: number;
+  totalCount: number | null | undefined;
   buckets: Array<{
     key: string;
     doc_count: number;
@@ -100,7 +100,7 @@ export const useMatrixHistogram = ({
       response: [],
     },
     refetch: refetch.current,
-    totalCount: -1,
+    totalCount: undefined,
     buckets: [],
   });
 
@@ -276,7 +276,7 @@ export const useMatrixHistogramCombined = (
           response: [],
         },
         refetch: combinedRefetch,
-        totalCount: -1,
+        totalCount: undefined,
         buckets: [],
       };
     }
@@ -287,7 +287,8 @@ export const useMatrixHistogramCombined = (
         dsl: [...inspect.dsl, ...extraInspect.dsl],
         response: [...inspect.response, ...extraInspect.response],
       },
-      totalCount: totalCount + extraTotalCount,
+      totalCount:
+        totalCount != null && extraTotalCount != null ? totalCount + extraTotalCount : undefined,
       refetch: combinedRefetch,
       buckets,
     };

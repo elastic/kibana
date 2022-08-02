@@ -25,7 +25,7 @@ export interface NetworkDnsRequestOptions extends RequestOptionsPaginated {
 
 export interface NetworkDnsStrategyResponse extends IEsSearchResponse {
   edges: NetworkDnsEdges[];
-  totalCount: number;
+  totalCount: number | null | undefined;
   pageInfo: PageInfoPaginated;
   inspect?: Maybe<Inspect>;
 }

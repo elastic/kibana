@@ -40,7 +40,7 @@ export interface HostsArgs {
   pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
   startDate: string;
-  totalCount: number;
+  totalCount: number | null | undefined;
 }
 
 interface UseAllHost {
@@ -95,7 +95,7 @@ export const useAllHost = ({
     factoryQueryType: HostsQueries.hosts,
     initialResult: {
       edges: [],
-      totalCount: -1,
+      totalCount: undefined,
       pageInfo: {
         activePage: 0,
         fakeTotalCount: 0,
