@@ -29,9 +29,6 @@ export const exportRulesDetails = {
   missing_rules_count: t.number,
 };
 
-const exportRulesDetailsSchema = t.exact(t.type(exportRulesDetails));
-export type ExportRulesDetailsSchema = t.TypeOf<typeof exportRulesDetailsSchema>;
-
 // With exceptions
 export const exportRulesDetailsWithExceptionsSchema = createSchema(
   exportRulesDetails,

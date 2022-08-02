@@ -28,6 +28,7 @@ const mockCore = merge({}, coreStart, {
     capabilities: {
       apm: {},
       ml: {},
+      savedObjectsManagement: { edit: true },
     },
   },
   uiSettings: {

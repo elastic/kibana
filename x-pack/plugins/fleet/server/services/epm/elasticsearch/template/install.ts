@@ -10,7 +10,7 @@ import Boom from '@hapi/boom';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { ElasticsearchAssetType } from '../../../../types';
-import { getPipelineNameForDatastream } from '../../../../../common';
+import { getPipelineNameForDatastream } from '../../../../../common/services';
 import type {
   RegistryDataStream,
   IndexTemplateEntry,

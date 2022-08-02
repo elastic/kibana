@@ -54,6 +54,7 @@ interface Props {
   annotations: Annotation[];
   timeseries?: Array<TimeSeries<Coordinate>>;
   yAxisType: 'duration' | 'percentage';
+  id?: string;
 }
 
 const asPercentBound = (y: number | null) => asPercent(y, 1);
@@ -65,6 +66,7 @@ export function BreakdownChart({
   annotations,
   timeseries,
   yAxisType,
+  id,
 }: Props) {
   const history = useHistory();
   const chartTheme = useChartTheme();
@@ -94,7 +96,12 @@ export function BreakdownChart({
   const timeZone = getTimeZone(core.uiSettings);
 
   return (
-    <ChartContainer height={height} hasData={!isEmpty} status={fetchStatus}>
+    <ChartContainer
+      height={height}
+      hasData={!isEmpty}
+      status={fetchStatus}
+      id={id}
+    >
       <Chart ref={chartRef}>
         <Settings
           tooltip={{ stickTo: 'top', showNullValues: true }}

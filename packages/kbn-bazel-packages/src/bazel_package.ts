@@ -30,12 +30,10 @@ export class BazelPackage {
     const pkg = readPackageJson(Path.resolve(dir, 'package.json'));
 
     let buildBazelContent;
-    if (pkg.name !== '@kbn/pm') {
-      try {
-        buildBazelContent = await Fsp.readFile(Path.resolve(dir, 'BUILD.bazel'), 'utf8');
-      } catch (error) {
-        throw new Error(`unable to read BUILD.bazel file in [${dir}]: ${error.message}`);
-      }
+    try {
+      buildBazelContent = await Fsp.readFile(Path.resolve(dir, 'BUILD.bazel'), 'utf8');
+    } catch (error) {
+      throw new Error(`unable to read BUILD.bazel file in [${dir}]: ${error.message}`);
     }
 
     return new BazelPackage(normalizePath(Path.relative(REPO_ROOT, dir)), pkg, buildBazelContent);

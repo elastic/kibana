@@ -7,12 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const BACK_TO_DETECTIONS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.backOptionsHeader',
-  {
-    defaultMessage: 'Back to detections',
-  }
-);
 export const POPOVER_TOOLTIP_ARIA_LABEL = (columnName: string) =>
   i18n.translate('xpack.securitySolution.detectionEngine.rules.popoverTooltip.ariaLabel', {
     defaultMessage: 'Tooltip for column: {columnName}',
@@ -99,20 +93,6 @@ export const BATCH_ACTIONS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.batchActionsTitle',
   {
     defaultMessage: 'Bulk actions',
-  }
-);
-
-export const ACTIVE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.activeRuleDescription',
-  {
-    defaultMessage: 'active',
-  }
-);
-
-export const INACTIVE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.inactiveRuleDescription',
-  {
-    defaultMessage: 'inactive',
   }
 );
 
@@ -230,13 +210,31 @@ export const BULK_EDIT_WARNING_TOAST_NOTIFY = i18n.translate(
   }
 );
 
-export const BULK_EDIT_CONFIRMATION_TITLE = (elasticRulesCount: number) =>
+export const BULK_EXPORT_CONFIRMATION_REJECTED_TITLE = (rulesCount: number) =>
   i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditConfirmationTitle',
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkExportConfirmationDeniedTitle',
     {
-      values: { elasticRulesCount },
+      values: { rulesCount },
+      defaultMessage: '{rulesCount, plural, =1 {# rule} other {# rules}} cannot be exported',
+    }
+  );
+
+export const BULK_EDIT_CONFIRMATION_REJECTED_TITLE = (rulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditConfirmationDeniedTitle',
+    {
+      values: { rulesCount },
+      defaultMessage: '{rulesCount, plural, =1 {# rule} other {# rules}} cannot be edited',
+    }
+  );
+
+export const BULK_ACTION_CONFIRMATION_PARTLY_TITLE = (customRulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkActionConfirmationPartlyTitle',
+    {
+      values: { customRulesCount },
       defaultMessage:
-        '{elasticRulesCount, plural, =1 {# Elastic rule} other {# Elastic rules}} cannot be edited',
+        "The action will only be applied to {customRulesCount, plural, =1 {# Custom rule} other {# Custom rules}} you've selected",
     }
   );
 
@@ -247,12 +245,31 @@ export const BULK_EDIT_CONFIRMATION_CANCEL = i18n.translate(
   }
 );
 
-export const BULK_EDIT_CONFIRMATION_CONFIRM = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditConfirmation.confirmButtonLabel',
+export const BULK_ACTION_CONFIRMATION_CLOSE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkActionConfirmationCloseButtonLabel',
   {
-    defaultMessage: 'Edit custom rules',
+    defaultMessage: 'Close',
   }
 );
+
+export const BULK_EDIT_CONFIRMATION_CONFIRM = (customRulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditConfirmation.confirmButtonLabel',
+    {
+      values: { customRulesCount },
+      defaultMessage: 'Edit {customRulesCount, plural, =1 {# Custom rule} other {# Custom rules}}',
+    }
+  );
+
+export const BULK_EXPORT_CONFIRMATION_CONFIRM = (customRulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkExportConfirmation.confirmButtonLabel',
+    {
+      values: { customRulesCount },
+      defaultMessage:
+        'Export {customRulesCount, plural, =1 {# Custom rule} other {# Custom rules}}',
+    }
+  );
 
 export const BULK_EDIT_FLYOUT_FORM_SAVE = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.saveButtonLabel',
@@ -459,13 +476,6 @@ export const EDIT_RULE_SETTINGS_TOOLTIP = i18n.translate(
   }
 );
 
-export const DUPLICATE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.actions.duplicateTitle',
-  {
-    defaultMessage: 'Duplicate',
-  }
-);
-
 export const DUPLICATE_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.actions.duplicateRuleDescription',
   {
@@ -543,13 +553,6 @@ export const COLUMN_TAGS = i18n.translate(
   }
 );
 
-export const COLUMN_SEE_ALL_POPOVER = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.columns.tagsPopoverTitle',
-  {
-    defaultMessage: 'See all',
-  }
-);
-
 export const COLUMN_ENABLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.enabledTitle',
   {
@@ -610,13 +613,6 @@ export const MONITORING_TAB = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.tabs.monitoring',
   {
     defaultMessage: 'Rule Monitoring',
-  }
-);
-
-export const EXCEPTIONS_TAB = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.tabs.exceptions',
-  {
-    defaultMessage: 'Exception Lists',
   }
 );
 
@@ -800,27 +796,6 @@ export const IMPORT_FAILED_DETAILED = (message: string) =>
     }
   );
 
-export const REFRESH_PROMPT_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.refreshPromptTitle',
-  {
-    defaultMessage: 'Are you still there?',
-  }
-);
-
-export const REFRESH_PROMPT_CONFIRM = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.refreshPromptConfirm',
-  {
-    defaultMessage: 'Continue',
-  }
-);
-
-export const REFRESH_PROMPT_BODY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.refreshPromptBody',
-  {
-    defaultMessage: 'Rule auto-refresh has been paused. Click "Continue" to resume.',
-  }
-);
-
 export const DELETE_CONFIRMATION_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationTitle',
   {
@@ -887,9 +862,16 @@ export const RULES_BULK_EXPORT_SUCCESS_DESCRIPTION = (exportedRules: number, tot
     {
       values: { totalRules, exportedRules },
       defaultMessage:
-        'Successfully exported {exportedRules} of {totalRules} {totalRules, plural, =1 {rule} other {rules}}. Prebuilt rules were excluded from the resulting file.',
+        'Successfully exported {exportedRules} of {totalRules} {totalRules, plural, =1 {rule} other {rules}}.',
     }
   );
+
+export const RULES_BULK_EXPORT_PREBUILT_RULES_EXCLUDED_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.export.prebuiltRulesExcludedToastDescription',
+  {
+    defaultMessage: 'Prebuilt rules were excluded from the resulting file.',
+  }
+);
 
 export const RULES_BULK_EXPORT_FAILURE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.export.errorToastTitle',

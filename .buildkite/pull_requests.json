@@ -34,10 +34,12 @@
         "^src/dev/prs/kibana_qa_pr_list\\.json$",
         "^\\.buildkite/pull_requests\\.json$"
       ],
-      "always_require_ci_on_changed": [
-        "^docs/developer/plugin-list.asciidoc$"
-      ],
-      "kibana_versions_check": true
+      "always_require_ci_on_changed": ["^docs/developer/plugin-list.asciidoc$"],
+      "kibana_versions_check": true,
+      "kibana_build_reuse": true,
+      "kibana_build_reuse_pipeline_slugs": ["kibana-pull-request", "kibana-on-merge"],
+      "kibana_build_reuse_regexes": ["^test/", "^x-pack/test/"],
+      "kibana_build_reuse_label": "ci:reuse-kibana-build"
     }
   ]
 }

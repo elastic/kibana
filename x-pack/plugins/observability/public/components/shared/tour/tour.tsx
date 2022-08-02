@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import React, { ReactNode, useState, useCallback, useEffect } from 'react';
+import React, {
+  ReactNode,
+  useState,
+  useCallback,
+  useEffect,
+  createContext,
+  useContext,
+} from 'react';
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -94,7 +101,7 @@ const getSteps = ({
 
   return tourStepsConfig.map((stepConfig, index) => {
     const step = index + 1;
-    const { dataTestSubj, content, imageConfig, ...tourStepProps } = stepConfig;
+    const { dataTestSubj, content, offset: stepOffset, imageConfig, ...tourStepProps } = stepConfig;
     return (
       <EuiTourStep
         {...tourStepProps}
@@ -102,7 +109,7 @@ const getSteps = ({
         step={step}
         minWidth={minWidth}
         maxWidth={maxWidth}
-        offset={offset}
+        offset={stepOffset ?? offset}
         repositionOnScroll={repositionOnScroll}
         stepsTotal={tourStepsConfig.length}
         isStepOpen={step === activeStep}
@@ -162,6 +169,16 @@ const getInitialTourState = ({
   };
 };
 
+export interface ObservabilityTourContextValue {
+  endTour: () => void;
+  isTourVisible: boolean;
+}
+
+const ObservabilityTourContext = createContext<ObservabilityTourContextValue>({
+  endTour: () => {},
+  isTourVisible: false,
+} as ObservabilityTourContextValue);
+
 export function ObservabilityTour({
   children,
   navigateToApp,
@@ -211,6 +228,8 @@ export function ObservabilityTour({
    */
   const isTourVisible = showTour && isTourActive && isPageDataLoaded && isSmallBreakpoint === false;
 
+  const context: ObservabilityTourContextValue = { endTour, isTourVisible };
+
   useEffect(() => {
     localStorage.setItem(observTourActiveStorageKey, String(isTourActive));
   }, [isTourActive]);
@@ -229,9 +248,19 @@ export function ObservabilityTour({
   }, [activeStep, isOverviewPage, isTourActive, navigateToApp]);
 
   return (
-    <>
-      {children({ isTourVisible })}
-      {isTourVisible && getSteps({ activeStep, incrementStep, endTour, prependBasePath })}
-    </>
+    <ObservabilityTourContext.Provider value={context}>
+      <>
+        {children({ isTourVisible })}
+        {isTourVisible && getSteps({ activeStep, incrementStep, endTour, prependBasePath })}
+      </>
+    </ObservabilityTourContext.Provider>
   );
 }
+
+export const useObservabilityTourContext = (): ObservabilityTourContextValue => {
+  const ctx = useContext(ObservabilityTourContext);
+  if (!ctx) {
+    throw new Error('useObservabilityTourContext can only be called inside of TourContext');
+  }
+  return ctx;
+};

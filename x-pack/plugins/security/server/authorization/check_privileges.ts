@@ -17,6 +17,9 @@ import type {
   CheckPrivilegesOptions,
   CheckPrivilegesPayload,
   CheckPrivilegesResponse,
+  CheckUserProfilesPrivileges,
+  CheckUserProfilesPrivilegesPayload,
+  CheckUserProfilesPrivilegesResponse,
   HasPrivilegesResponse,
   HasPrivilegesResponseApplication,
 } from './types';
@@ -27,7 +30,7 @@ interface CheckPrivilegesActions {
   version: string;
 }
 
-export function checkPrivilegesWithRequestFactory(
+export function checkPrivilegesFactory(
   actions: CheckPrivilegesActions,
   getClusterClient: () => Promise<IClusterClient>,
   applicationName: string
@@ -40,23 +43,76 @@ export function checkPrivilegesWithRequestFactory(
     );
   };
 
-  return function checkPrivilegesWithRequest(request: KibanaRequest): CheckPrivileges {
+  const createApplicationPrivilegesCheck = (
+    resources: string[],
+    kibanaPrivileges: string | string[],
+    { requireLoginAction }: CheckPrivilegesOptions
+  ) => {
+    const normalizedKibanaPrivileges = Array.isArray(kibanaPrivileges)
+      ? kibanaPrivileges
+      : [kibanaPrivileges];
+
+    return {
+      application: applicationName,
+      resources,
+      privileges: uniq([
+        actions.version,
+        ...(requireLoginAction ? [actions.login] : []),
+        ...normalizedKibanaPrivileges,
+      ]),
+    };
+  };
+
+  function checkUserProfilesPrivileges(userProfileUids: Set<string>): CheckUserProfilesPrivileges {
+    const checkPrivilegesAtResources = async (
+      resources: string[],
+      privileges: CheckUserProfilesPrivilegesPayload
+    ): Promise<CheckUserProfilesPrivilegesResponse> => {
+      const clusterClient = await getClusterClient();
+
+      const applicationPrivilegesCheck = createApplicationPrivilegesCheck(
+        resources,
+        privileges.kibana,
+        { requireLoginAction: true }
+      );
+
+      const response = await clusterClient.asInternalUser.transport.request<{
+        has_privilege_uids: string[];
+        error_uids?: string[];
+      }>({
+        method: 'POST',
+        path: '_security/profile/_has_privileges',
+        body: {
+          uids: [...userProfileUids],
+          privileges: { application: [applicationPrivilegesCheck] },
+        },
+      });
+
+      return {
+        hasPrivilegeUids: response.has_privilege_uids,
+        errorUids: response.error_uids ?? [],
+      };
+    };
+
+    return {
+      async atSpace(spaceId: string, privileges: CheckUserProfilesPrivilegesPayload) {
+        const spaceResource = ResourceSerializer.serializeSpaceResource(spaceId);
+        return await checkPrivilegesAtResources([spaceResource], privileges);
+      },
+    };
+  }
+
+  function checkPrivilegesWithRequest(request: KibanaRequest): CheckPrivileges {
     const checkPrivilegesAtResources = async (
       resources: string[],
       privileges: CheckPrivilegesPayload,
       { requireLoginAction = true }: CheckPrivilegesOptions = {}
     ): Promise<CheckPrivilegesResponse> => {
-      const kibanaPrivileges = Array.isArray(privileges.kibana)
-        ? privileges.kibana
-        : privileges.kibana
-        ? [privileges.kibana]
-        : [];
-
-      const allApplicationPrivileges = uniq([
-        actions.version,
-        ...(requireLoginAction ? [actions.login] : []),
-        ...kibanaPrivileges,
-      ]);
+      const applicationPrivilegesCheck = createApplicationPrivilegesCheck(
+        resources,
+        privileges.kibana ?? [],
+        { requireLoginAction }
+      );
 
       const clusterClient = await getClusterClient();
       const body = await clusterClient.asScoped(request).asCurrentUser.security.hasPrivileges({
@@ -68,9 +124,7 @@ export function checkPrivilegesWithRequestFactory(
               privileges: indexPrivileges as estypes.SecurityIndexPrivilege[],
             })
           ),
-          application: [
-            { application: applicationName, resources, privileges: allApplicationPrivileges },
-          ],
+          application: [applicationPrivilegesCheck],
         },
       });
 
@@ -79,7 +133,7 @@ export function checkPrivilegesWithRequestFactory(
       validateEsPrivilegeResponse(
         hasPrivilegesResponse,
         applicationName,
-        allApplicationPrivileges,
+        applicationPrivilegesCheck.privileges,
         resources
       );
 
@@ -165,5 +219,7 @@ export function checkPrivilegesWithRequestFactory(
         return await checkPrivilegesAtResources([GLOBAL_RESOURCE], privileges, options);
       },
     };
-  };
+  }
+
+  return { checkPrivilegesWithRequest, checkUserProfilesPrivileges };
 }

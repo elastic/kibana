@@ -14,18 +14,19 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { Setup } from '../../lib/helpers/setup_request';
-import { MAX_NUMBER_OF_SERVICE_GROUPS } from '../../../common/service_groups';
 
 export async function lookupServices({
   setup,
   kuery,
   start,
   end,
+  maxNumberOfServices,
 }: {
   setup: Setup;
   kuery: string;
   start: number;
   end: number;
+  maxNumberOfServices: number;
 }) {
   const { apmEventClient } = setup;
 
@@ -49,7 +50,7 @@ export async function lookupServices({
         services: {
           terms: {
             field: SERVICE_NAME,
-            size: MAX_NUMBER_OF_SERVICE_GROUPS,
+            size: maxNumberOfServices,
           },
           aggs: {
             environments: {

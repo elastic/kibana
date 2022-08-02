@@ -186,8 +186,9 @@ describe('Lens App', () => {
           ],
         },
       });
-
-      const extraEntry = instance.find(services.navigation.ui.TopNavMenu).prop('config')[0];
+      const navigationComponent = services.navigation.ui
+        .TopNavMenu as unknown as React.ReactElement;
+      const extraEntry = instance.find(navigationComponent).prop('config')[0];
       expect(extraEntry.label).toEqual('My entry');
       expect(extraEntry.run).toBe(runFn);
     });

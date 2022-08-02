@@ -17,6 +17,7 @@ import {
   injectReferences,
 } from './loader';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
 import {
   IndexPatternPersistedState,
@@ -27,6 +28,7 @@ import {
 import { createMockedRestrictedIndexPattern, createMockedIndexPattern } from './mocks';
 import { documentField } from './document_field';
 import { DateHistogramIndexPatternColumn } from './operations';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 const createMockStorage = (lastData?: Record<string, string>) => {
   return {
@@ -887,6 +889,12 @@ describe('loader', () => {
   });
 
   describe('changeLayerIndexPattern', () => {
+    let uiActions: UiActionsStart;
+
+    beforeEach(() => {
+      uiActions = uiActionsPluginMock.createStartContract();
+    });
+
     it('loads the index pattern and then changes the specified layer', async () => {
       const setState = jest.fn();
       const state: IndexPatternPrivateState = {
@@ -932,6 +940,7 @@ describe('loader', () => {
         indexPatternsService: mockIndexPatternsService(),
         onError: jest.fn(),
         storage,
+        uiActions,
       });
 
       expect(setState).toHaveBeenCalledTimes(1);
@@ -1006,6 +1015,7 @@ describe('loader', () => {
         },
         onError,
         storage,
+        uiActions,
       });
 
       expect(setState).not.toHaveBeenCalled();

@@ -42,6 +42,7 @@ import {
 } from '../so_references';
 import { SavedObjectFindOptionsKueryNode } from '../../common/types';
 import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import { IndexRefresh } from '../types';
 
 interface AttachedToCaseArgs extends ClientArgs {
   caseId: string;
@@ -64,13 +65,15 @@ interface GetAttachmentArgs extends ClientArgs {
   attachmentId: string;
 }
 
-interface CreateAttachmentArgs extends ClientArgs {
+interface DeleteAttachmentArgs extends GetAttachmentArgs, IndexRefresh {}
+
+interface CreateAttachmentArgs extends ClientArgs, IndexRefresh {
   attributes: AttachmentAttributes;
   references: SavedObjectReference[];
   id: string;
 }
 
-interface BulkCreateAttachments extends ClientArgs {
+interface BulkCreateAttachments extends ClientArgs, IndexRefresh {
   attachments: Array<{
     attributes: AttachmentAttributes;
     references: SavedObjectReference[];
@@ -86,7 +89,7 @@ interface UpdateArgs {
 
 export type UpdateAttachmentArgs = UpdateArgs & ClientArgs;
 
-interface BulkUpdateAttachmentArgs extends ClientArgs {
+interface BulkUpdateAttachmentArgs extends ClientArgs, IndexRefresh {
   comments: UpdateArgs[];
 }
 
@@ -256,10 +259,16 @@ export class AttachmentService {
     }
   }
 
-  public async delete({ unsecuredSavedObjectsClient, attachmentId }: GetAttachmentArgs) {
+  public async delete({
+    unsecuredSavedObjectsClient,
+    attachmentId,
+    refresh,
+  }: DeleteAttachmentArgs) {
     try {
       this.log.debug(`Attempting to DELETE attachment ${attachmentId}`);
-      return await unsecuredSavedObjectsClient.delete(CASE_COMMENT_SAVED_OBJECT, attachmentId);
+      return await unsecuredSavedObjectsClient.delete(CASE_COMMENT_SAVED_OBJECT, attachmentId, {
+        refresh,
+      });
     } catch (error) {
       this.log.error(`Error on DELETE attachment ${attachmentId}: ${error}`);
       throw error;
@@ -271,6 +280,7 @@ export class AttachmentService {
     attributes,
     references,
     id,
+    refresh,
   }: CreateAttachmentArgs): Promise<SavedObject<AttachmentAttributes>> {
     try {
       this.log.debug(`Attempting to POST a new comment`);
@@ -288,6 +298,7 @@ export class AttachmentService {
         {
           references: extractedReferences,
           id,
+          refresh,
         }
       );
 
@@ -304,6 +315,7 @@ export class AttachmentService {
   public async bulkCreate({
     unsecuredSavedObjectsClient,
     attachments,
+    refresh,
   }: BulkCreateAttachments): Promise<SavedObjectsBulkResponse<AttachmentAttributes>> {
     try {
       this.log.debug(`Attempting to bulk create attachments`);
@@ -322,7 +334,8 @@ export class AttachmentService {
             attributes: extractedAttributes,
             references: extractedReferences,
           };
-        })
+        }),
+        { refresh }
       );
 
       return {
@@ -390,6 +403,7 @@ export class AttachmentService {
   public async bulkUpdate({
     unsecuredSavedObjectsClient,
     comments,
+    refresh,
   }: BulkUpdateAttachmentArgs): Promise<SavedObjectsBulkUpdateResponse<AttachmentAttributes>> {
     try {
       this.log.debug(
@@ -422,7 +436,8 @@ export class AttachmentService {
              */
             references: shouldUpdateRefs ? extractedReferences : undefined,
           };
-        })
+        }),
+        { refresh }
       );
 
       return {

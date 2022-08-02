@@ -17,6 +17,7 @@ export {
   defaultApmServiceEnvironment,
   apmServiceInventoryOptimizedSorting,
   apmProgressiveLoading,
+  apmServiceGroupMaxNumberOfServices,
   apmTraceExplorerTab,
   apmOperationsTab,
 } from './ui_settings_keys';
@@ -42,3 +43,5 @@ export const casesPath = '/cases';
 // Name of a locator created by the uptime plugin. Intended for use
 // by other plugins as well, so defined here to prevent cross-references.
 export const uptimeOverviewLocatorID = 'UPTIME_OVERVIEW_LOCATOR';
+export const syntheticsMonitorDetailLocatorID = 'SYNTHETICS_MONITOR_DETAIL_LOCATOR';
+export const syntheticsEditMonitorLocatorID = 'SYNTHETICS_EDIT_MONITOR_LOCATOR';

@@ -29,7 +29,7 @@ import type {
 } from '../common/api';
 import type { UseCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import type { UseCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
-import type { CasesOwners } from './client/helpers/can_use_cases';
+import { canUseCases } from './client/helpers/can_use_cases';
 import { getRuleIdFromEvent } from './client/helpers/get_rule_id_from_event';
 import type { GetCasesContextProps } from './client/ui/get_cases_context';
 import type { GetCasesProps } from './client/ui/get_cases';
@@ -38,6 +38,7 @@ import type { GetCreateCaseFlyoutProps } from './client/ui/get_create_case_flyou
 import type { GetRecentCasesProps } from './client/ui/get_recent_cases';
 import type { Cases, CasesStatus, CasesMetrics } from '../common/ui';
 import { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
+import { getUICapabilities } from './client/helpers/capabilities';
 import type { AttachmentFramework } from './client/attachment_framework/types';
 import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
@@ -137,7 +138,8 @@ export interface CasesUiStart {
      * @param owners an array of CaseOwners that should be queried for permission
      * @returns An object denoting the case permissions of the current user
      */
-    canUseCases: (owners?: CasesOwners[]) => { crud: boolean; read: boolean };
+    canUseCases: ReturnType<typeof canUseCases>;
+    getUICapabilities: typeof getUICapabilities;
     getRuleIdFromEvent: typeof getRuleIdFromEvent;
     groupAlertsByRule: typeof groupAlertsByRule;
   };

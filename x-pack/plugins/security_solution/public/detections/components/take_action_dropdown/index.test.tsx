@@ -35,6 +35,7 @@ import {
 } from '../../../common/utils/endpoint_alert_check';
 import { HostStatus } from '../../../../common/endpoint/types';
 import { getUserPrivilegesMockDefaultValue } from '../../../common/components/user_privileges/__mocks__';
+import { allCasesPermissions } from '../../../cases_test_utils';
 
 jest.mock('../../../common/components/user_privileges');
 
@@ -43,7 +44,7 @@ jest.mock('../user_info', () => ({
 }));
 
 jest.mock('../../../common/lib/kibana');
-(useGetUserCasesPermissions as jest.Mock).mockReturnValue({ crud: true });
+(useGetUserCasesPermissions as jest.Mock).mockReturnValue(allCasesPermissions());
 
 jest.mock('../../containers/detection_engine/alerts/use_alerts_privileges', () => ({
   useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true, hasKibanaCRUD: true }),
