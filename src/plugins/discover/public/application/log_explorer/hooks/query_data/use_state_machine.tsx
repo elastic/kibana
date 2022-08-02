@@ -15,6 +15,7 @@ import moment from 'moment';
 import { useMemo } from 'react';
 import {
   dataAccessStateMachine,
+  loadAfter,
   loadAround,
   loadBefore,
 } from '../../state_machines/data_access_state_machine';
@@ -65,6 +66,11 @@ export const useStateMachineService = ({
           searchSource,
         }),
         loadBefore: loadBefore({
+          dataView,
+          query,
+          searchSource,
+        }),
+        loadAfter: loadAfter({
           dataView,
           query,
           searchSource,

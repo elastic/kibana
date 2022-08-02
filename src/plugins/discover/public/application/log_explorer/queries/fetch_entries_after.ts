@@ -11,18 +11,18 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { Observable, pipe } from 'rxjs';
 import { LogExplorerPosition, SortCriteria } from '../types';
-import { getCursorFromPosition } from '../utils/cursor';
-import { invertSortCriteria, normalizeSortCriteriaForDataView } from '../utils/sort_criteria';
+import { getCursorFromPosition, getPredecessorPosition } from '../utils/cursor';
+import { normalizeSortCriteriaForDataView } from '../utils/sort_criteria';
 import { copyWithCommonParameters } from './common';
 
-export interface FetchEntriesBeforeParameters {
+export interface FetchEntriesAfterParameters {
   chunkSize: number;
   position: LogExplorerPosition;
   sortCriteria: SortCriteria;
   timeRange: TimeRange;
 }
 
-export const fetchEntriesBefore =
+export const fetchEntriesAfter =
   ({
     dataView,
     query,
@@ -37,19 +37,23 @@ export const fetchEntriesBefore =
     position,
     sortCriteria,
     timeRange,
-  }: FetchEntriesBeforeParameters): Observable<IEsSearchResponse> => {
+  }: FetchEntriesAfterParameters): Observable<IEsSearchResponse> => {
     const timeRangeFilter = query.timefilter.timefilter.createFilter(dataView, timeRange);
 
     // TODO: create and use point-in-time, not currently possible from client?
     const response$ = pipe(
       copyWithCommonParameters({ chunkSize, timeRangeFilter }),
-      applyBeforeParameters({ dataView, position, sortCriteria })
+      applyAfterParameters({
+        dataView,
+        position,
+        sortCriteria,
+      })
     )(searchSource).fetch$();
 
     return response$;
   };
 
-export const applyBeforeParameters =
+export const applyAfterParameters =
   ({
     dataView,
     position,
@@ -61,8 +65,5 @@ export const applyBeforeParameters =
   }) =>
   (searchSource: ISearchSource) =>
     searchSource
-      .setField('searchAfter', getCursorFromPosition(position))
-      .setField(
-        'sort',
-        normalizeSortCriteriaForDataView(dataView)(invertSortCriteria(sortCriteria))
-      );
+      .setField('searchAfter', getCursorFromPosition(getPredecessorPosition(position)))
+      .setField('sort', normalizeSortCriteriaForDataView(dataView)(sortCriteria));

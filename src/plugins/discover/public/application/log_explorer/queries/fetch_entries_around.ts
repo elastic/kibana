@@ -11,14 +11,14 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { forkJoin, Observable } from 'rxjs';
 import { LogExplorerPosition, SortCriteria } from '../types';
-import { getCursorFromPosition, getPredecessorPosition } from '../utils/cursor';
-import { invertSortCriteria, normalizeSortCriteriaForDataView } from '../utils/sort_criteria';
 import { copyWithCommonParameters } from './common';
+import { applyAfterParameters } from './fetch_entries_after';
+import { applyBeforeParameters } from './fetch_entries_before';
 
 export interface FetchEntriesAroundParameters {
   chunkSize: number;
   position: LogExplorerPosition;
-  sorting: SortCriteria;
+  sortCriteria: SortCriteria;
   timeRange: TimeRange;
 }
 
@@ -35,31 +35,30 @@ export const fetchEntriesAround =
   ({
     chunkSize,
     position,
-    sorting,
+    sortCriteria,
     timeRange,
   }: FetchEntriesAroundParameters): Observable<{
     beforeResponse: IEsSearchResponse;
     afterResponse: IEsSearchResponse;
   }> => {
-    const normalizeSortCriteria = normalizeSortCriteriaForDataView(dataView);
     const timeRangeFilter = query.timefilter.timefilter.createFilter(dataView, timeRange);
 
-    const commonSearchSource = copyWithCommonParameters(searchSource, {
+    const commonSearchSource = copyWithCommonParameters({
       chunkSize,
       timeRangeFilter,
-    });
+    })(searchSource);
 
     // TODO: create and use point-in-time, not currently possible from client?
-    const beforeResponse$ = commonSearchSource
-      .createCopy()
-      .setField('searchAfter', getCursorFromPosition(position))
-      .setField('sort', normalizeSortCriteria(invertSortCriteria(sorting)))
-      .fetch$();
-    const afterResponse$ = commonSearchSource
-      .createCopy()
-      .setField('searchAfter', getCursorFromPosition(getPredecessorPosition(position)))
-      .setField('sort', normalizeSortCriteria(sorting))
-      .fetch$();
+    const beforeResponse$ = applyBeforeParameters({
+      dataView,
+      position,
+      sortCriteria,
+    })(commonSearchSource.createCopy()).fetch$();
+    const afterResponse$ = applyAfterParameters({
+      dataView,
+      position,
+      sortCriteria,
+    })(commonSearchSource.createCopy()).fetch$();
 
     return forkJoin({
       beforeResponse: beforeResponse$,

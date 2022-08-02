@@ -9,6 +9,7 @@
 import { DataView } from '@kbn/data-views-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { LogExplorerChunk, LogExplorerPosition } from '../../types';
+import { LoadAfterEvent } from './load_after_service';
 import { LoadAroundEvent } from './load_around_service';
 import { LoadBeforeEvent } from './load_before_service';
 
@@ -76,15 +77,10 @@ export type LogExplorerInternalEvent =
     }
   | LoadAroundEvent
   | LoadBeforeEvent
+  | LoadAfterEvent
   | {
       // the following event types will be moved to their respective services
       // once these exist
-      type: 'loadAfterSucceeded';
-    }
-  | {
-      type: 'loadAfterFailed';
-    }
-  | {
       type: 'extendTopSucceeded';
     }
   | {

@@ -7,6 +7,7 @@
  */
 
 import { assign, createMachine, InterpreterFrom } from 'xstate';
+import { appendNewBottomChunk, updateChunksFromLoadAfter } from './load_after_service';
 import { updateChunksFromLoadAround } from './load_around_service';
 import { prependNewTopChunk, updateChunksFromLoadBefore } from './load_before_service';
 import { LogExplorerContext, LogExplorerEvent, LogExplorerState } from './types';
@@ -304,7 +305,9 @@ export const dataAccessStateMachine = createMachine<
       })),
       updateChunksFromLoadAround,
       updateChunksFromLoadBefore,
+      updateChunksFromLoadAfter,
       prependNewTopChunk,
+      appendNewBottomChunk,
     },
     guards: {
       areVisibleEntriesNearStart,

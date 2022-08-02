@@ -7,6 +7,7 @@
  */
 
 export * from './entry_selectors';
+export * from './load_after_service';
 export * from './load_around_service';
 export * from './load_before_service';
 export * from './state_machine';

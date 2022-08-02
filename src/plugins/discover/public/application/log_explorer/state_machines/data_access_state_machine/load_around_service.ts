@@ -14,14 +14,7 @@ import {
   fetchEntriesAround,
   FetchEntriesAroundParameters,
 } from '../../queries/fetch_entries_around';
-import { LogExplorerChunk } from '../../types';
-import {
-  getCursorFromHitSort,
-  getPositionFromCursor,
-  getPositionFromTimestamp,
-  getPredecessorPosition,
-} from '../../utils/cursor';
-import { getEntryFromHit } from '../../utils/entry';
+import { createBottomChunkFromResponse } from './load_after_service';
 import { createTopChunkFromResponse } from './load_before_service';
 import { LogExplorerContext, LogExplorerEvent } from './types';
 
@@ -67,7 +60,8 @@ export const loadAround = ({
     const fetchAroundRequestParamters: FetchEntriesAroundParameters = {
       chunkSize,
       position,
-      sorting: [
+      sortCriteria: [
+        // TODO: don't hard-code this
         [dataView.timeFieldName!, 'asc'],
         ['_doc', 'asc'], // _shard_doc is only available when used inside a PIT
       ],
@@ -117,33 +111,3 @@ export const updateChunksFromLoadAround = assign(
     };
   }
 );
-
-export const createBottomChunkFromResponse = (
-  requestParameters: LoadAroundParameters,
-  response: IEsSearchResponse
-): LogExplorerChunk => {
-  const hits = response.rawResponse.hits.hits;
-  const startPosition = getPredecessorPosition(requestParameters.position);
-
-  if (hits.length <= 0) {
-    return {
-      status: 'empty',
-      startPosition,
-      endPosition: getPositionFromTimestamp(requestParameters.timeRange.to),
-      chunkSize: requestParameters.chunkSize,
-      rowIndex: requestParameters.bottomStartRowIndex,
-    };
-  }
-
-  const lastHit = hits[hits.length - 1];
-
-  return {
-    status: 'loaded',
-    startPosition,
-    endPosition: getPositionFromCursor(getCursorFromHitSort(lastHit.sort)),
-    entries: hits.map(getEntryFromHit),
-    chunkSize: requestParameters.chunkSize,
-    startRowIndex: requestParameters.bottomStartRowIndex,
-    endRowIndex: requestParameters.bottomStartRowIndex + (hits.length - 1),
-  };
-};
