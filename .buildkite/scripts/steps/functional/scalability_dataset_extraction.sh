@@ -13,7 +13,7 @@ GCS_BUCKET="gs://kibana-performance/scalability-tests"
 .buildkite/scripts/bootstrap.sh
 
 echo "--- Extract APM metrics"
-journeys=("login" "ecommerce_dashboard" "flight_dashboard" "web_logs_dashboard" "promotion_tracking_dashboard" "many_fields_discover")
+scalabilityJourneys=("login" "ecommerce_dashboard" "flight_dashboard" "web_logs_dashboard" "promotion_tracking_dashboard" "many_fields_discover")
 
 for i in "${scalabilityJourneys[@]}"; do
     JOURNEY_NAME="${i}"
