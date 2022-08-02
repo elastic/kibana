@@ -32,6 +32,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       cases: ['securitySolutionFixture'],
       privileges: {
         all: {
+          api: ['casesSuggestUserProfiles'],
           app: ['kibana'],
           cases: {
             create: ['securitySolutionFixture'],
