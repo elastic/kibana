@@ -9,7 +9,7 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { ThreatIntelligencePage } from './pages/threat_intelligence';
-import { SecurityPageName, THREAT_INTELLIGENCE_PATH } from '../../common/constants';
+import { INDICATORS_PATH, SecurityPageName } from '../../common/constants';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
 
@@ -28,7 +28,7 @@ const ThreatIntelligenceRoutes = () => {
 
 export const routes: SecuritySubPluginRoutes = [
   {
-    path: THREAT_INTELLIGENCE_PATH,
+    path: INDICATORS_PATH,
     component: ThreatIntelligenceRoutes,
   },
 ];

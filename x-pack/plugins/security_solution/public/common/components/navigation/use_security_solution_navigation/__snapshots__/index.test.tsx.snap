@@ -146,6 +146,22 @@ Object {
       "name": "Explore",
     },
     Object {
+      "id": "intelligence",
+      "items": Array [
+        Object {
+          "data-href": "securitySolutionUI/indicators",
+          "data-test-subj": "navigation-indicators",
+          "disabled": false,
+          "href": "securitySolutionUI/indicators",
+          "id": "indicators",
+          "isSelected": false,
+          "name": "Indicators",
+          "onClick": [Function],
+        },
+      ],
+      "name": "Intelligence",
+    },
+    Object {
       "id": "investigate",
       "items": Array [
         Object {

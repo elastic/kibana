@@ -30,7 +30,7 @@ import {
   APP_KUBERNETES_PATH,
   APP_LANDING_PATH,
   APP_RESPONSE_ACTIONS_PATH,
-  APP_THREAT_INTELLIGENCE_PATH,
+  APP_INDICATORS_PATH,
   APP_PATH,
 } from '../../../common/constants';
 
@@ -168,12 +168,12 @@ export const navTabs: SecurityNav = {
     disabled: false,
     urlKey: 'administration',
   },
-  [SecurityPageName.threatIntelligence]: {
-    id: SecurityPageName.threatIntelligence,
-    name: i18n.THREAT_INTELLIGENCE,
-    href: APP_THREAT_INTELLIGENCE_PATH,
+  [SecurityPageName.indicators]: {
+    id: SecurityPageName.indicators,
+    name: i18n.INDICATORS,
+    href: APP_INDICATORS_PATH,
     disabled: false,
-    urlKey: 'threat_intelligence',
+    urlKey: 'indicators',
   },
   [SecurityPageName.cloudSecurityPostureFindings]: {
     ...getSecuritySolutionNavTab<SecurityPageName>('findings', APP_PATH),
@@ -209,6 +209,10 @@ export const securityNavGroup: SecurityNavGroup = {
   [SecurityNavGroupKey.explore]: {
     id: SecurityNavGroupKey.explore,
     name: i18n.EXPLORE,
+  },
+  [SecurityNavGroupKey.intelligence]: {
+    id: SecurityNavGroupKey.intelligence,
+    name: i18n.THREAT_INTELLIGENCE,
   },
   [SecurityNavGroupKey.investigate]: {
     id: SecurityNavGroupKey.investigate,

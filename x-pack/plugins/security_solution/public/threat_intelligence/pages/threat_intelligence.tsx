@@ -27,7 +27,7 @@ const ThreatIntelligence = () => {
   return (
     <SecuritySolutionPageWrapper noPadding>
       <ThreatIntelligencePlugin securitySolutionContext={securitySolutionContext} />
-      <SpyRoute pageName={SecurityPageName.threatIntelligence} />
+      <SpyRoute pageName={SecurityPageName.indicators} />
     </SecuritySolutionPageWrapper>
   );
 };

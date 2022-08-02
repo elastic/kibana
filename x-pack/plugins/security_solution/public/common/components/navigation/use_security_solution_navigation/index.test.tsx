@@ -138,7 +138,7 @@ describe('useSecuritySolutionNavigation', () => {
           { wrapper: TestProviders }
         );
 
-        const caseNavItem = (result.current?.items || [])[5].items?.find(
+        const caseNavItem = (result.current?.items || [])[6].items?.find(
           (item) => item['data-test-subj'] === 'navigation-cases'
         );
         expect(caseNavItem).toMatchInlineSnapshot(`

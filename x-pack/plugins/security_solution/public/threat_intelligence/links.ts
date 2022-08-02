@@ -6,25 +6,25 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SecurityPageName, SERVER_APP_ID, THREAT_INTELLIGENCE_PATH } from '../../common/constants';
+import { INDICATORS_PATH, SecurityPageName, SERVER_APP_ID } from '../../common/constants';
 import { THREAT_INTELLIGENCE } from '../app/translations';
 import type { LinkItem } from '../common/links';
-import threatIntelligencePageImg from '../common/images/threat_intelligence.png';
 
 export const links: LinkItem = {
-  id: SecurityPageName.threatIntelligence,
+  id: SecurityPageName.indicators,
   title: THREAT_INTELLIGENCE,
-  path: THREAT_INTELLIGENCE_PATH,
+  path: INDICATORS_PATH,
   experimentalKey: 'threatIntelligenceEnabled',
   landingImage: threatIntelligencePageImg,
+  globalNavPosition: 7,
   description: i18n.translate('xpack.securitySolution.appLinks.threatIntelligence.description', {
     defaultMessage:
       'Elastic threat intelligence helps you see if you are open to or have been subject to current or historical known threats.',
   }),
   capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
-    i18n.translate('xpack.securitySolution.appLinks.threatIntelligence', {
-      defaultMessage: 'Threat Intelligence',
+    i18n.translate('xpack.securitySolution.appLinks.threatIntelligence.indicators', {
+      defaultMessage: 'Indicators',
     }),
   ],
 };
