@@ -63,8 +63,8 @@ describe('Alert Event Details', () => {
     cy.visit('/app/security/alerts');
     cy.getBySel('header-page-title').contains('Alerts').should('exist');
     cy.getBySel('timeline-context-menu-button').first().click({ force: true });
-    cy.getBySel('osquery-action-item').should('exist').contains('Run Osquery');
-    cy.getBySel('expand-event').first().click();
+    cy.contains('Run Osquery');
+    cy.getBySel('expand-event').first().click({ force: true });
     cy.getBySel('take-action-dropdown-btn').click();
     cy.getBySel('osquery-action-item').click();
     cy.contains('1 agent selected.');
