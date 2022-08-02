@@ -17,8 +17,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const pageObjects = getPageObjects(['common', 'infraHome', 'infraSavedViews']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/106650
-  describe.skip('Home page', function () {
+  describe('Home page', function () {
     this.tags('includeFirefox');
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
@@ -56,6 +55,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraHome.getWaffleMap();
         await pageObjects.infraHome.getWaffleMapTooltips();
+      });
+
+      it('shows query suggestions', async () => {
+        await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
+        await pageObjects.infraHome.clickQueryBar();
+        await pageObjects.infraHome.inputQueryData();
+        await pageObjects.infraHome.ensureSuggestionsPanelVisible();
+        await pageObjects.infraHome.clearSearchTerm();
       });
 
       it('sort nodes by descending value', async () => {
@@ -169,8 +176,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.ensurePopoverClosed();
       });
     });
-
-    describe('Saved Views', () => {
+    // Failing: See https://github.com/elastic/kibana/issues/106650
+    describe.skip('Saved Views', () => {
       before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
       it('should have save and load controls', async () => {

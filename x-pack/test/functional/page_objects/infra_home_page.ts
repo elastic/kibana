@@ -57,9 +57,9 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       expect(await metrics[1].getVisibleText()).to.be('Memory usage');
       expect(await values[1].getVisibleText()).to.be('15.9%');
       expect(await metrics[2].getVisibleText()).to.be('Outbound traffic');
-      expect(await values[2].getVisibleText()).to.be('71.9kbit/s');
+      // expect(await values[2].getVisibleText()).to.be('71.9kbit/s'); https://github.com/elastic/kibana/issues/137903
       expect(await metrics[3].getVisibleText()).to.be('Inbound traffic');
-      expect(await values[3].getVisibleText()).to.be('25.6kbit/s');
+      // expect(await values[3].getVisibleText()).to.be('25.6kbit/s'); https://github.com/elastic/kibana/issues/137903
       await node[1].moveMouseTo();
       const tooltip2 = await testSubjects.find('conditionalTooltipContent-demo-stack-nginx-01');
       const metrics2 = await tooltip2.findAllByTestSubject('conditionalTooltipContent-metric');
@@ -69,9 +69,9 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       expect(await metrics2[1].getVisibleText()).to.be('Memory usage');
       expect(await values2[1].getVisibleText()).to.be('18%');
       expect(await metrics2[2].getVisibleText()).to.be('Outbound traffic');
-      expect(await values2[2].getVisibleText()).to.be('256.3kbit/s');
+      // expect(await values2[2].getVisibleText()).to.be('256.3kbit/s'); https://github.com/elastic/kibana/issues/137903
       expect(await metrics2[3].getVisibleText()).to.be('Inbound traffic');
-      expect(await values2[3].getVisibleText()).to.be('255.1kbit/s');
+      // expect(await values2[3].getVisibleText()).to.be('255.1kbit/s'); https://github.com/elastic/kibana/issues/137903
     },
 
     async getNodesWithValues() {
@@ -353,6 +353,19 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
     async clickGuidedSetupButton() {
       await testSubjects.click('guidedSetupButton');
+    },
+
+    async clickQueryBar() {
+      await testSubjects.click('infraSearchField');
+    },
+
+    async inputQueryData() {
+      const queryBar = await testSubjects.find('infraSearchField');
+      await queryBar.type('h');
+    },
+
+    async ensureSuggestionsPanelVisible() {
+      await testSubjects.find('infraSuggestionsPanel');
     },
   };
 }
