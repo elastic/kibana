@@ -8,14 +8,9 @@
 import { synthtrace } from '../../../../synthtrace';
 import { opbeans } from '../../../fixtures/synthtrace/opbeans';
 
-const settingsPath = '/app/management/kibana/settings';
-
 const start = '2021-10-10T00:00:00.000Z';
 const end = '2021-10-10T00:15:00.000Z';
-describe.skip('Comparison feature flag', () => {
-  const comparisonToggle =
-    '[data-test-subj="advancedSetting-editField-observability:enableComparisonByDefault"]';
-
+describe('Comparison feature flag', () => {
   before(async () => {
     await synthtrace.index(
       opbeans({
@@ -29,17 +24,9 @@ describe.skip('Comparison feature flag', () => {
     await synthtrace.clean();
   });
 
-  beforeEach(() => {
-    cy.loginAsEditorUser();
-  });
-
   describe('when comparison feature is enabled', () => {
-    it('shows the flag as enabled in kibana advanced settings', () => {
-      cy.visit(settingsPath);
-
-      cy.get(comparisonToggle)
-        .should('have.attr', 'aria-checked')
-        .and('equal', 'true');
+    beforeEach(() => {
+      cy.loginAsEditorUser();
     });
 
     it('shows the comparison feature enabled in services overview', () => {
@@ -62,24 +49,19 @@ describe.skip('Comparison feature flag', () => {
   });
 
   describe('when comparison feature is disabled', () => {
-    // Reverts to default state, which is comparison enabled
-    after(() => {
-      cy.visit(settingsPath);
-      cy.get(comparisonToggle).click();
-      cy.contains('Save changes').should('not.be.disabled');
-      cy.contains('Save changes').click();
+    beforeEach(() => {
+      cy.loginAsEditorUser().then(() => {
+        // Disables comparison feature on advanced settings
+        cy.updateAdvancedSettings({
+          'observability:enableComparisonByDefault': false,
+        });
+      });
     });
 
-    it('shows the flag as disabled in kibana advanced settings', () => {
-      cy.visit(settingsPath);
-      cy.get(comparisonToggle).click();
-      cy.contains('Save changes').should('not.be.disabled');
-      cy.contains('Save changes').click();
-      cy.get(comparisonToggle).should('not.be.checked');
-
-      cy.get(comparisonToggle)
-        .should('have.attr', 'aria-checked')
-        .and('equal', 'false');
+    after(() => {
+      cy.updateAdvancedSettings({
+        'observability:enableComparisonByDefault': true,
+      });
     });
 
     it('shows the comparison feature disabled in services overview', () => {
@@ -89,7 +71,11 @@ describe.skip('Comparison feature flag', () => {
     });
 
     it('shows the comparison feature disabled in dependencies overview page', () => {
+      cy.intercept('GET', '/internal/apm/dependencies/top_dependencies?*').as(
+        'topDependenciesRequest'
+      );
       cy.visit('/app/apm/dependencies');
+      cy.wait('@topDependenciesRequest', { requestTimeout: 10000 });
       cy.get('input[type="checkbox"]#comparison').should('not.be.checked');
       cy.get('[data-test-subj="comparisonSelect"]').should('be.disabled');
     });
