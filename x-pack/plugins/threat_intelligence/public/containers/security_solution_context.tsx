@@ -4,3 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { createContext } from 'react';
+import { ThreatIntelligenceSecuritySolutionContext } from '../types';
+
+export const SecuritySolutionContext = createContext<
+  ThreatIntelligenceSecuritySolutionContext | undefined
+>(undefined);
