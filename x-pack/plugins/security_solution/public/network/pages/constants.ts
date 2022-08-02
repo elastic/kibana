@@ -10,8 +10,34 @@ import { FlowTargetSourceDest } from '../../../common/search_strategy';
 import { NetworkDetailsRouteType } from './details/types';
 import { NetworkRouteType } from './navigation/types';
 
-export const networkTabPath = `${NETWORK_PATH}/:tabName(${NetworkRouteType.flows}|${NetworkRouteType.http}|${NetworkRouteType.tls}|${NetworkRouteType.anomalies}|${NetworkRouteType.events})`;
+const NETWORK_TABS = [
+  NetworkRouteType.flows,
+  NetworkRouteType.dns,
+  NetworkRouteType.http,
+  NetworkRouteType.tls,
+  NetworkRouteType.events,
+];
 
-export const networkDetailsPagePath = `${NETWORK_PATH}/ip/:detailName`;
+const NETWORK_WITHOUT_ANOMALIES_TAB_PARAM = NETWORK_TABS.join('|');
+const NETWORK_WITH_ANOMALIES_TAB_PARAM = [...NETWORK_TABS, NetworkRouteType.anomalies].join('|');
 
-export const networkDetailsTabPath = `${networkDetailsPagePath}/:flowTarget(${FlowTargetSourceDest.source}|${FlowTargetSourceDest.destination})/:tabName(${NetworkDetailsRouteType.flows}|${NetworkDetailsRouteType.http}|${NetworkDetailsRouteType.tls}|${NetworkDetailsRouteType.anomalies}|${NetworkDetailsRouteType.events}|${NetworkDetailsRouteType.users})`;
+export const NETWORK_PATH_WITH_ANOMALIES = `${NETWORK_PATH}/:tabName(${NETWORK_WITH_ANOMALIES_TAB_PARAM})`;
+export const NETWORK_PATH_WITHOUT_ANOMALIES = `${NETWORK_PATH}/:tabName(${NETWORK_WITHOUT_ANOMALIES_TAB_PARAM})`;
+
+const DETAIL_TABS_PARAM = [
+  NetworkDetailsRouteType.flows,
+  NetworkDetailsRouteType.http,
+  NetworkDetailsRouteType.tls,
+  NetworkDetailsRouteType.anomalies,
+  NetworkDetailsRouteType.events,
+  NetworkDetailsRouteType.users,
+].join('|');
+
+export const FLOW_TARGET_PARAM = [
+  FlowTargetSourceDest.source,
+  FlowTargetSourceDest.destination,
+].join('|');
+
+export const NETWORK_DETAILS_PAGE_PATH = `${NETWORK_PATH}/ip/:detailName`;
+
+export const NETWORK_DETAILS_TAB_PATH = `${NETWORK_DETAILS_PAGE_PATH}/:flowTarget(${FLOW_TARGET_PARAM})/:tabName(${DETAIL_TABS_PARAM})`;

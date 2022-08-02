@@ -20,7 +20,7 @@ import type { GlobalTimeArgs } from '../../../common/containers/use_global_time'
 
 import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
 
-import { networkDetailsPagePath } from '../constants';
+import { NETWORK_DETAILS_PAGE_PATH } from '../constants';
 
 import {
   CountriesQueryTabBody,
@@ -62,7 +62,7 @@ export const NetworkDetailsTabs = React.memo<NetworkDetailTabsProps>(
     return (
       <Switch>
         <Route
-          path={`${networkDetailsPagePath}/:flowTarget/:tabName(${NetworkDetailsRouteType.flows})`}
+          path={`${NETWORK_DETAILS_PAGE_PATH}/:flowTarget/:tabName(${NetworkDetailsRouteType.flows})`}
         >
           <>
             <ConditionalFlexGroup direction="column">
@@ -90,22 +90,22 @@ export const NetworkDetailsTabs = React.memo<NetworkDetailTabsProps>(
           </>
         </Route>
         <Route
-          path={`${networkDetailsPagePath}/:flowTarget/:tabName(${NetworkDetailsRouteType.users})`}
+          path={`${NETWORK_DETAILS_PAGE_PATH}/:flowTarget/:tabName(${NetworkDetailsRouteType.users})`}
         >
           <UsersQueryTabBody {...commonPropsWithFlowTarget} />
         </Route>
         <Route
-          path={`${networkDetailsPagePath}/:flowTarget/:tabName(${NetworkDetailsRouteType.http})`}
+          path={`${NETWORK_DETAILS_PAGE_PATH}/:flowTarget/:tabName(${NetworkDetailsRouteType.http})`}
         >
           <HttpQueryTabBody {...commonProps} />
         </Route>
         <Route
-          path={`${networkDetailsPagePath}/:flowTarget/:tabName(${NetworkDetailsRouteType.tls})`}
+          path={`${NETWORK_DETAILS_PAGE_PATH}/:flowTarget/:tabName(${NetworkDetailsRouteType.tls})`}
         >
           <TlsQueryTabBody {...commonPropsWithFlowTarget} />
         </Route>
         <Route
-          path={`${networkDetailsPagePath}/:flowTarget/:tabName(${NetworkDetailsRouteType.anomalies})`}
+          path={`${NETWORK_DETAILS_PAGE_PATH}/:flowTarget/:tabName(${NetworkDetailsRouteType.anomalies})`}
         >
           <AnomaliesQueryTabBody
             {...commonPropsWithFlowTarget}
@@ -115,7 +115,7 @@ export const NetworkDetailsTabs = React.memo<NetworkDetailTabsProps>(
           />
         </Route>
         <Route
-          path={`${networkDetailsPagePath}/:flowTarget/:tabName(${NetworkDetailsRouteType.events})`}
+          path={`${NETWORK_DETAILS_PAGE_PATH}/:flowTarget/:tabName(${NetworkDetailsRouteType.events})`}
         >
           <EventsQueryTabBody
             pageFilters={networkDetailsPageFilters}

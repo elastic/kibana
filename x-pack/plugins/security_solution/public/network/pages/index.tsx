@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Redirect, Switch } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 
@@ -18,8 +18,17 @@ import { getNetworkRoutePath } from './navigation';
 import { NetworkRouteType } from './navigation/types';
 import { MlNetworkConditionalContainer } from '../../common/components/ml/conditional_links/ml_network_conditional_container';
 import { NETWORK_PATH } from '../../../common/constants';
-import { FlowTarget } from '../../../common/search_strategy';
-import { networkDetailsPagePath, networkDetailsTabPath } from './constants';
+import { FlowTargetSourceDest } from '../../../common/search_strategy';
+import {
+  FLOW_TARGET_PARAM,
+  NETWORK_DETAILS_PAGE_PATH,
+  NETWORK_DETAILS_TAB_PATH,
+} from './constants';
+
+const getPathWithFlowType = (detailName: string, flowTarget: FlowTargetSourceDest) =>
+  `${NETWORK_PATH}/ip/${detailName}/${flowTarget || FlowTargetSourceDest.source}/${
+    NetworkRouteType.flows
+  }`;
 
 const NetworkContainerComponent = () => {
   const capabilities = useMlCapabilities();
@@ -31,12 +40,6 @@ const NetworkContainerComponent = () => {
   const networkRoutePath = useMemo(
     () => getNetworkRoutePath(capabilitiesFetched, userHasMlUserPermissions),
     [capabilitiesFetched, userHasMlUserPermissions]
-  );
-
-  const getPathWithFlowType = useCallback(
-    (detailName: string) =>
-      `${NETWORK_PATH}/ip/${detailName}/${FlowTarget.source}/${NetworkRouteType.flows}`,
-    []
   );
 
   return (
@@ -58,20 +61,20 @@ const NetworkContainerComponent = () => {
           hasMlUserPermissions={userHasMlUserPermissions}
         />
       </Route>
-      <Route path={networkDetailsTabPath}>
+      <Route path={NETWORK_DETAILS_TAB_PATH}>
         <NetworkDetails />
       </Route>
       <Route
-        path={networkDetailsPagePath}
+        path={`${NETWORK_DETAILS_PAGE_PATH}/:flowTarget(${FLOW_TARGET_PARAM})?`}
         render={({
           match: {
-            params: { detailName },
+            params: { detailName, flowTarget },
           },
           location: { search = '' },
         }) => (
           <Redirect
             to={{
-              pathname: getPathWithFlowType(detailName),
+              pathname: getPathWithFlowType(detailName, flowTarget),
               search,
             }}
           />
