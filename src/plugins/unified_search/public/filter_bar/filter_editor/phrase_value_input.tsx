@@ -16,7 +16,7 @@ import { PhraseSuggestorUI, PhraseSuggestorProps } from './phrase_suggestor';
 import { ValueInputType } from './value_input_type';
 import { getFieldValidityAndErrorMessage } from '../../utils/helpers';
 
-export interface PhraseValueInputProps extends PhraseSuggestorProps {
+interface PhraseValueInputProps extends PhraseSuggestorProps {
   value?: string;
   onChange: (value: string | number | boolean) => void;
   intl: InjectedIntl;
