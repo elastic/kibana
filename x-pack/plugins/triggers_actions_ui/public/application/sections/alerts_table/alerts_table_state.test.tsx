@@ -26,6 +26,32 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 jest.mock('./hooks/use_fetch_alerts');
 jest.mock('@kbn/kibana-utils-plugin/public');
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: () => ({
+    services: {
+      application: {
+        capabilities: {
+          fake: true,
+        },
+      },
+      cases: {
+        ui: {
+          getCasesContext: () => null,
+        },
+        helpers: {
+          getUICapabilities: () => ({
+            all: true,
+            read: true,
+            create: true,
+            update: true,
+            delete: true,
+            push: true,
+          }),
+        },
+      },
+    },
+  }),
+}));
 
 const columns = [
   {
