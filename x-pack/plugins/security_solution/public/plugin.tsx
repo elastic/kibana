@@ -22,6 +22,7 @@ import type {
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TimelineState } from '@kbn/timelines-plugin/public';
+import type { ThreatIntelligence } from './threat_intelligence';
 import type {
   PluginSetup,
   PluginStart,
@@ -331,8 +332,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         management: new subPluginClasses.Management(),
         landingPages: new subPluginClasses.LandingPages(),
         cloudSecurityPosture: new subPluginClasses.CloudSecurityPosture(),
-        threatIntelligence: new subPluginClasses.ThreatIntelligence(),
       };
+
+      if (this.experimentalFeatures.threatIntelligenceEnabled) {
+        this._subPlugins.threatIntelligence = new subPluginClasses.ThreatIntelligence();
+      }
     }
     return this._subPlugins;
   }
@@ -346,7 +350,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     plugins: StartPlugins
   ): Promise<StartedSubPlugins> {
     const subPlugins = await this.subPlugins();
-    return {
+
+    const startPlugins: StartedSubPlugins = {
       overview: subPlugins.overview.start(),
       alerts: subPlugins.alerts.start(storage),
       cases: subPlugins.cases.start(),
@@ -360,8 +365,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       management: subPlugins.management.start(core, plugins),
       landingPages: subPlugins.landingPages.start(),
       cloudSecurityPosture: subPlugins.cloudSecurityPosture.start(),
-      threatIntelligence: subPlugins.threatIntelligence.start(),
     };
+
+    if (this.experimentalFeatures.threatIntelligenceEnabled) {
+      startPlugins.threatIntelligence = (
+        subPlugins.threatIntelligence as ThreatIntelligence
+      ).start();
+    }
+
+    return startPlugins;
   }
   /**
    * Lazily instantiate a `SecurityAppStore`. We lazily instantiate this because it requests large dynamic imports. We instantiate it once because each subPlugin needs to share the same reference.
@@ -513,7 +525,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       updateAppLinks(links, linksPermissions);
 
       // set filtered links asynchronously
-      const filteredLinks = await getFilteredLinks(core, plugins);
+      const filteredLinks = await getFilteredLinks(core, plugins, this.experimentalFeatures);
       updateAppLinks(filteredLinks, linksPermissions);
     });
   }

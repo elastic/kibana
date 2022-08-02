@@ -130,7 +130,7 @@ export interface SubPlugins {
   management: Management;
   landingPages: LandingPages;
   cloudSecurityPosture: CloudSecurityPosture;
-  threatIntelligence: ThreatIntelligence;
+  threatIntelligence?: ThreatIntelligence;
 }
 
 // TODO: find a better way to defined these types
@@ -148,5 +148,5 @@ export interface StartedSubPlugins {
   management: ReturnType<Management['start']>;
   landingPages: ReturnType<LandingPages['start']>;
   cloudSecurityPosture: ReturnType<CloudSecurityPosture['start']>;
-  threatIntelligence: ReturnType<ThreatIntelligence['start']>;
+  threatIntelligence?: ReturnType<ThreatIntelligence['start']>;
 }
