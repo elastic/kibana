@@ -13,11 +13,24 @@ import { EuiPopover, EuiContextMenuPanel } from '@elastic/eui';
 
 import { UserProfilesSelectable, UserProfilesSelectableProps } from './user_profiles_selectable';
 
+/**
+ * Props of `UserProfilesPopover` component
+ */
 export interface UserProfilesPopoverProps extends EuiPopoverProps {
+  /**
+   * @see EuiContextMenuPanelProps
+   */
   title?: EuiContextMenuPanelProps['title'];
+
+  /**
+   * @see UserProfilesSelectableProps
+   */
   selectableProps: UserProfilesSelectableProps;
 }
 
+/**
+ * Renders a selectable component inside a popover given a list of user profiles
+ */
 export const UserProfilesPopover: FunctionComponent<UserProfilesPopoverProps> = ({
   title,
   selectableProps,

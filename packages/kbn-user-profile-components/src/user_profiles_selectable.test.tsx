@@ -194,6 +194,6 @@ describe('UserProfilesSelectable', () => {
     const onSearchChange = jest.fn();
     const wrapper = mount(<UserProfilesSelectable onSearchChange={onSearchChange} />);
     wrapper.find('input[type="search"]').simulate('change', { target: { value: 'search' } });
-    expect(onSearchChange).toHaveBeenCalledWith('search');
+    expect(onSearchChange).toHaveBeenCalledWith('search', []);
   });
 });

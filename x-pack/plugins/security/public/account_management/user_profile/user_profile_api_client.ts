@@ -50,7 +50,7 @@ export interface UserProfileSuggestParams {
   name: string;
 
   /**
-   * Desired number of suggestion to return. The default value is 10.
+   * Desired number of suggestions to return. The default value is 10.
    */
   size?: number;
 
@@ -59,21 +59,6 @@ export interface UserProfileSuggestParams {
    * parameter can be used to return personal data for this user (within `kibana` namespace only).
    */
   dataPath?: string;
-}
-
-/**
- * The set of privileges that users associated with the suggested user profile should have for a specified space id.
- */
-export interface UserProfileRequiredPrivileges {
-  /**
-   * The id of the Kibana Space.
-   */
-  spaceId: string;
-
-  /**
-   * The set of the Kibana specific application privileges.
-   */
-  privileges: { kibana: string[] };
 }
 
 export class UserProfileAPIClient {
@@ -124,7 +109,7 @@ export class UserProfileAPIClient {
    * @param params Suggest operation parameters.
    * @param params.name Query string used to match name-related fields in user profiles. The
    * following fields are treated as name-related: username, full_name and email.
-   * @param params.size Desired number of suggestion to return. The default value is 10.
+   * @param params.size Desired number of suggestions to return. The default value is 10.
    * @param params.dataPath By default, suggest API returns user information, but does not return
    * any user data. The optional "dataPath" parameter can be used to return personal data for this
    * user (within `kibana` namespace only).

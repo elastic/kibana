@@ -9,7 +9,6 @@
 import type { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
-  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -25,14 +24,25 @@ import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { getUserDisplayName } from './imported_types/user';
-import type { UserProfile, UserProfileAvatarData } from './imported_types/user_profile';
+import { getUserDisplayName } from './user_profile';
+import type { UserProfile, UserProfileAvatarData } from './user_profile';
 import { UserAvatar } from './user_avatar';
 
 export type UserProfileWithAvatar = UserProfile<{ avatar?: UserProfileAvatarData }>;
 
+/**
+ * Props of `UserProfilesSelectable` component
+ */
 export interface UserProfilesSelectableProps
-  extends Pick<EuiSelectableProps, 'height' | 'singleSelection'> {
+  extends Pick<
+    EuiSelectableProps,
+    | 'height'
+    | 'singleSelection'
+    | 'loadingMessage'
+    | 'noMatchesMessage'
+    | 'emptyMessage'
+    | 'errorMessage'
+  > {
   /**
    * List of users to be rendered as suggestions.
    */
@@ -62,8 +72,26 @@ export interface UserProfilesSelectableProps
    * Loading indicator for asynchronous search operations.
    */
   isLoading?: boolean;
+
+  /**
+   * Placeholder text for search box.
+   */
+  searchPlaceholder?: string;
+
+  /**
+   * Placeholder text for search box.
+   */
+  selectedStatusMessage?(selectedCount: number): string;
+
+  /**
+   * Placeholder text for search box.
+   */
+  clearButtonLabel?: string;
 }
 
+/**
+ * Renders a selectable component given a list of user profiles
+ */
 export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectableProps> = ({
   selectedOptions,
   defaultOptions,
@@ -73,6 +101,13 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
   isLoading = false,
   singleSelection = false,
   height,
+  loadingMessage,
+  noMatchesMessage,
+  emptyMessage,
+  errorMessage,
+  searchPlaceholder,
+  selectedStatusMessage,
+  clearButtonLabel,
 }) => {
   const [displayedOptions, setDisplayedOptions] = useState<SelectableOption[]>([]);
 
@@ -164,65 +199,70 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
   return (
     <EuiSelectable
       options={displayedOptions}
-      searchable // We need to set `searchable` prop to true, despite implementing our own async search, since pressing space key would be used to toggle selection instead of typing space otherwise
-      // @ts-ignore: Type of `nextOptions` in EuiSelectable does not match what's actually being passed back so need to manually override it
+      // @ts-expect-error: Type of `nextOptions` in EuiSelectable does not match what's actually being passed back so need to manually override it
       onChange={(nextOptions: Array<EuiSelectableOption<{ data: UserProfileWithAvatar }>>) => {
-        if (onChange) {
-          // Take all selected options from `nextOptions` unless already in `props.selectedOptions`
-          const values: UserProfileWithAvatar[] = nextOptions
-            .filter((option) => {
-              if (option.isGroupLabel || option.checked !== 'on') {
-                return false;
-              }
-              if (selectedOptions && selectedOptions.find((p) => p.uid === option.key)) {
-                return false;
-              }
-              return true;
-            })
-            .map((option) => option.data);
-
-          // Add all options from `props.selectedOptions` unless they have been deselected in `nextOptions`
-          if (selectedOptions && !singleSelection) {
-            selectedOptions.forEach((profile) => {
-              const match = nextOptions.find((o) => o.key === profile.uid);
-              if (!match || match.checked === 'on') {
-                values.push(profile);
-              }
-            });
-          }
-
-          onChange(values);
+        if (!onChange) {
+          return;
         }
+
+        // Take all selected options from `nextOptions` unless already in `props.selectedOptions`
+        const values: UserProfileWithAvatar[] = nextOptions
+          .filter((option) => {
+            if (option.isGroupLabel || option.checked !== 'on') {
+              return false;
+            }
+            if (selectedOptions && selectedOptions.find((p) => p.uid === option.key)) {
+              return false;
+            }
+            return true;
+          })
+          .map((option) => option.data);
+
+        // Add all options from `props.selectedOptions` unless they have been deselected in `nextOptions`
+        if (selectedOptions && !singleSelection) {
+          selectedOptions.forEach((profile) => {
+            const match = nextOptions.find((o) => o.key === profile.uid);
+            if (!match || match.checked === 'on') {
+              values.push(profile);
+            }
+          });
+        }
+
+        onChange(values);
       }}
       height={height}
       singleSelection={singleSelection}
+      searchable
+      searchProps={{
+        placeholder: searchPlaceholder,
+        onChange: onSearchChange,
+        isLoading,
+        isClearable: !isLoading,
+      }}
       isPreFiltered
       listProps={{ onFocusBadge: false }}
+      loadingMessage={loadingMessage}
+      noMatchesMessage={noMatchesMessage}
+      emptyMessage={emptyMessage}
+      errorMessage={errorMessage}
     >
-      {(list) => (
+      {(list, search) => (
         <>
           <EuiPanel hasShadow={false} paddingSize="s">
-            <EuiFieldSearch
-              placeholder={i18n.translate(
-                'userProfileComponents.userProfilesSelectable.searchPlaceholder',
-                {
-                  defaultMessage: 'Search',
-                }
-              )}
-              onChange={(event) => onSearchChange?.(event.target.value)}
-              isLoading={isLoading}
-              isClearable={!isLoading}
-              fullWidth
-            />
+            {search}
             <EuiSpacer size="s" />
             <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued">
-                  <FormattedMessage
-                    id="userProfileComponents.userProfilesSelectable.selectedStatus"
-                    defaultMessage="{count, plural, one {# assignee} other {# assignees}}"
-                    values={{ count: selectedCount }}
-                  />
+                  {selectedStatusMessage ? (
+                    selectedStatusMessage(selectedCount)
+                  ) : (
+                    <FormattedMessage
+                      id="userProfileComponents.userProfilesSelectable.selectedStatusMessage"
+                      defaultMessage="{count, plural, one {# user} other {# users}}"
+                      values={{ count: selectedCount }}
+                    />
+                  )}
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -233,10 +273,12 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
                     onClick={() => onChange?.([])}
                     style={{ height: '1rem' }}
                   >
-                    <FormattedMessage
-                      id="userProfileComponents.userProfilesSelectable.clearButton"
-                      defaultMessage="Remove all assignees"
-                    />
+                    {clearButtonLabel ?? (
+                      <FormattedMessage
+                        id="userProfileComponents.userProfilesSelectable.clearButtonLabel"
+                        defaultMessage="Remove all users"
+                      />
+                    )}
                   </EuiButtonEmpty>
                 ) : undefined}
               </EuiFlexItem>

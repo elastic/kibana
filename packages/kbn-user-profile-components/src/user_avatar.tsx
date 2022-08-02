@@ -8,25 +8,44 @@
 
 import type { EuiAvatarProps } from '@elastic/eui';
 import { EuiAvatar, useEuiTheme } from '@elastic/eui';
-import type { FunctionComponent, HTMLAttributes } from 'react';
+import type { FunctionComponent } from 'react';
 import React from 'react';
 
-import type { UserProfile, UserProfileAvatarData } from './imported_types/user_profile';
+import type { UserProfile, UserProfileAvatarData } from './user_profile';
 import {
   getUserAvatarColor,
   getUserAvatarInitials,
+  getUserDisplayName,
   USER_AVATAR_MAX_INITIALS,
-} from './imported_types/user_profile';
-import { getUserDisplayName } from './imported_types/user';
+} from './user_profile';
 
 export type UserProfileWithAvatar = UserProfile<{ avatar?: UserProfileAvatarData }>;
 
-export interface UserAvatarProps extends Omit<HTMLAttributes<HTMLDivElement>, 'color'> {
+/**
+ * Props of `UserAvatar` component
+ */
+export interface UserAvatarProps
+  extends Omit<
+    EuiAvatarProps,
+    | 'initials'
+    | 'initialsLength'
+    | 'imageUrl'
+    | 'iconType'
+    | 'iconSize'
+    | 'iconColor'
+    | 'name'
+    | 'color'
+    | 'type'
+  > {
+  /**
+   * User profile for avatar to be rendered
+   */
   userProfile?: UserProfileWithAvatar;
-  size?: EuiAvatarProps['size'];
-  isDisabled?: EuiAvatarProps['isDisabled'];
 }
 
+/**
+ * Renders an avatar given a user profile
+ */
 export const UserAvatar: FunctionComponent<UserAvatarProps> = ({ userProfile, ...rest }) => {
   const { euiTheme } = useEuiTheme();
 

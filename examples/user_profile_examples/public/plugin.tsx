@@ -31,7 +31,7 @@ export class UserProfilesPlugin implements Plugin<void, void, SetupDeps, StartDe
       id: 'userProfileExamples',
       title: 'User profile components',
       async mount({ element }: AppMountParameters) {
-        // Feth user suggestions
+        // Fetch user suggestions
         // const [, depsStart] = await core.getStartServices();
         // depsStart.security.userProfiles.suggest('/internal/user_profiles_examples/_suggest', {
         //   name: 'a',
