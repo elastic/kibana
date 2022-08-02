@@ -49,7 +49,7 @@ describe('AnalyticsService', () => {
             },
             "eventName": Object {
               "_meta": Object {
-                "description": "Type of the event",
+                "description": "The name of the event that is tracked in the metrics i.e. kibana_loaded, kibana_started",
               },
               "type": "keyword",
             },
