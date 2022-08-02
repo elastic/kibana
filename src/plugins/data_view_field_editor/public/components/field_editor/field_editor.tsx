@@ -134,7 +134,6 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
   const [fieldsAndTypes, setFieldsAndTypes] = useState(savedSubfieldTypes);
 
   // todo - likely factor out
-
   useEffect(() => {
     setSubfields(fieldsAndTypes);
   }, [fieldsAndTypes, setSubfields]);
@@ -159,19 +158,17 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
     format: updatedFormat,
   } = formData;
   const { name: nameField, type: typeField } = getFields();
-  // todo how to do this for composite fields?
   const nameHasChanged = (Boolean(field?.name) && nameField?.isModified) ?? false;
   const typeHasChanged = (Boolean(field?.type) && typeField?.isModified) ?? false;
 
   const isValueVisible = get(formData, '__meta__.isValueVisible');
 
   useEffect(() => {
-    // console.log('useEffect', updatedType, form.getFormData().type);
     if (isLoadingPreview || !initialPreviewComplete || updatedType[0].value !== 'composite') {
       return;
     }
 
-    // sometimes we get null types, remove them
+    // sometimes we get undefined types, remove them
     const fieldsFitlered = fields.filter((item) => item.type !== undefined);
 
     // Take preview info, remove unneeded info for updating types, comparison
@@ -191,22 +188,11 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
       Object.keys(fieldsAndTypes).length !== fieldsFitlered.length ||
       Object.keys(update).length > 0;
 
-    // todo ensure works on opening saved field
-    // skip first update from initial preview, only update when there's a difference
-    // if (fieldTypeInfo === undefined || !isEqual(fieldTypeInfoUpdate, fieldTypeInfo)) {
-
-    // todo does this get fired with key removal?
-    // console.log('hasUpdates', hasUpdates);
     if (hasUpdates) {
-      // form.updateFieldValues({ subfields: { ...fieldsAndTypes, ...update } });
-
-      // const updatedFieldsAndTypes = { ...fieldsAndTypes, ...update };
-
       const updatedFieldsAndTypes = fieldTypeInfoUpdate.reduce((col, item) => {
         col[item.name] = update[item.name] || fieldsAndTypes[item.name];
         return col;
       }, {} as Record<string, string>);
-      // { ...fieldsAndTypes, ...update };
 
       // preview state
       setPreviousPreviewTypes(fieldTypeInfoUpdate);
