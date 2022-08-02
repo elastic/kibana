@@ -8,8 +8,6 @@
 import * as rt from 'io-ts';
 import { UserRT } from '../../user';
 
-// TODO: do we need this? can we build this based on the builderMap here:
-// x-pack/plugins/cases/server/services/user_actions/builder_factory.ts
 export const ActionTypes = {
   assignees: 'assignees',
   comment: 'comment',

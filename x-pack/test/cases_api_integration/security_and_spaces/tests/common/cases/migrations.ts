@@ -433,11 +433,17 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         await kibanaServer.importExport.load(
           'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_duration.json'
         );
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.5.0/cases_assignees.json'
+        );
       });
 
       after(async () => {
         await kibanaServer.importExport.unload(
           'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_duration.json'
+        );
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.5.0/cases_assignees.json'
         );
         await deleteAllCaseItems(es);
       });
@@ -451,6 +457,20 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
           expect(caseInfo).to.have.property('assignees');
           expect(caseInfo.assignees).to.eql([]);
+        });
+
+        it('does not overwrite the assignees field if it already exists', async () => {
+          const caseInfo = await getCase({
+            supertest,
+            caseId: '063d5820-1284-11ed-81af-63a2bdfb2bf9',
+          });
+
+          expect(caseInfo).to.have.property('assignees');
+          expect(caseInfo.assignees).to.eql([
+            {
+              uid: 'abc',
+            },
+          ]);
         });
       });
     });

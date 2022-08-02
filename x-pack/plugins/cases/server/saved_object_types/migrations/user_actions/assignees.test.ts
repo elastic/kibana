@@ -26,7 +26,7 @@ describe('assignees migration', () => {
   };
 
   it('adds the assignees field to the create_case user action', () => {
-    // @ts-expect-error
+    // @ts-expect-error payload does not include the required fields
     const migratedUserAction = addAssigneesToCreateUserAction(userAction);
     expect(migratedUserAction).toEqual({
       attributes: {

@@ -205,6 +205,8 @@ export const buildFilter = ({
 };
 
 /**
+ * Creates a KueryNode filter for the Saved Object find API's filter field. This handles constructing a filter for
+ * a nested field.
  *
  * @param filters is a string or array of strings that defines the values to search for
  * @param field is the location to search for

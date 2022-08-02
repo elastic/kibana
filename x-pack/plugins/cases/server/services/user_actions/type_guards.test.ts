@@ -47,7 +47,7 @@ describe('type_guards', () => {
       expect(isAssigneesArray([{ uid: 'a' }, { uid: 'b' }])).toBeTruthy();
     });
 
-    it('returns false when the value is an array of strings and numbers', () => {
+    it('returns false when the value is an array of assignees and numbers', () => {
       expect(isAssigneesArray([{ uid: 'a' }, 1])).toBeFalsy();
     });
 

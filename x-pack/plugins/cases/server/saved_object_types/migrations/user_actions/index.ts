@@ -99,7 +99,7 @@ export const createUserActionsMigrations = (
     '8.0.0': removeRuleInformation,
     '8.1.0': payloadMigration,
     '8.3.0': addSeverityToCreateUserAction,
-    '8.4.0': addAssigneesToCreateUserAction,
+    '8.5.0': addAssigneesToCreateUserAction,
   };
 
   return mergeSavedObjectMigrationMaps(persistableStateAttachmentMigrations, userActionsMigrations);

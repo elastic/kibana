@@ -1124,7 +1124,7 @@ describe('CaseUserActionService', () => {
       });
 
       it('creates the correct user actions when an assignee is removed', async () => {
-        const caseAssignees: Array<SavedObjectsUpdateResponse<CaseAttributes>> = [
+        const casesWithAssigneeRemoved: Array<SavedObjectsUpdateResponse<CaseAttributes>> = [
           {
             ...createCaseSavedObjectResponse(),
             id: '1',
@@ -1137,7 +1137,7 @@ describe('CaseUserActionService', () => {
         await service.bulkCreateUpdateCase({
           ...commonArgs,
           originalCases: originalCasesWithAssignee,
-          updatedCases: caseAssignees,
+          updatedCases: casesWithAssigneeRemoved,
           user: commonArgs.user,
         });
 

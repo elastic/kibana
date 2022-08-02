@@ -1138,7 +1138,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('8.4.0', () => {
+    describe('8.5.0', () => {
       const CASE_ID = '5257a000-5e7d-11ec-9ee9-cd64f0b77b3c';
       const CREATE_UA_ID = '5275af50-5e7d-11ec-9ee9-cd64f0b77b3c';
 

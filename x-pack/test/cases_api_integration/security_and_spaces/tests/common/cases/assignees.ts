@@ -165,7 +165,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    it("filters cases using the assigned users by constructor an or'd filter", async () => {
+    it("filters cases using the assigned users by constructing an or'd filter", async () => {
       const profileUidsToFilter = await suggestUserProfiles({
         supertest: supertestWithoutAuth,
         req: {
