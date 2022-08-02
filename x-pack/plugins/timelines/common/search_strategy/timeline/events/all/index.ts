@@ -25,7 +25,7 @@ export interface TimelineItem {
   ecs: Ecs;
 }
 
-export type TimelineNonEcsDataFieldValue = Maybe<string[] | number[] | object[] | string | number>;
+export type TimelineNonEcsDataFieldValue = Maybe<unknown[] | unknown>;
 
 export interface TimelineNonEcsData {
   field: string;

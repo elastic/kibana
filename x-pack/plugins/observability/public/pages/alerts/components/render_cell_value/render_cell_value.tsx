@@ -69,16 +69,11 @@ export const getRenderCellValue = ({
         }
         return <AlertStatusIndicator alertStatus={value} />;
       case TIMESTAMP:
-        return (
-          <TimestampTooltip
-            time={new Date((value as string) ?? '').getTime()}
-            timeUnit="milliseconds"
-          />
-        );
+        return <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />;
       case ALERT_DURATION:
         return asDuration(Number(value));
       case ALERT_SEVERITY:
-        return <SeverityBadge severityLevel={(value as string) ?? undefined} />;
+        return <SeverityBadge severityLevel={value ?? undefined} />;
       case ALERT_REASON:
         const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
         const alert = parseAlert(observabilityRuleTypeRegistry)(dataFieldEs);

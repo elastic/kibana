@@ -17,7 +17,7 @@ interface Event {
 }
 interface EventNonEcsData {
   field: string;
-  value?: Maybe<string[] | number[] | object[] | string | number>;
+  value?: Maybe<unknown[] | unknown>;
 }
 
 export const groupAlertsByRule = (items: Event[], owner: string): CaseAttachments => {

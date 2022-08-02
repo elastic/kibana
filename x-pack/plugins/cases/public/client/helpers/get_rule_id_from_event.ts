@@ -16,7 +16,7 @@ interface Event {
   ecs: Ecs;
 }
 
-type FieldValue = Maybe<string[] | number[] | object[] | string | number>;
+type FieldValue = Maybe<unknown[] | unknown>;
 
 interface EventNonEcsData {
   field: string;
