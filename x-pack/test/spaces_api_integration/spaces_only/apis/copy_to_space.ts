@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { copyToSpaceTestSuiteFactory } from '../../common/suites/copy_to_space';
 
 // eslint-disable-next-line import/no-default-export
-export default function copyToSpacesOnlySuite({ getService }: FtrProviderContext) {
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const esArchiver = getService('esArchiver');
-  const es = getService('es');
-
+export default function copyToSpacesOnlySuite(context: FtrProviderContext) {
   const {
     copyToSpaceTest,
     expectNoConflictsWithoutReferencesResult,
@@ -23,7 +19,7 @@ export default function copyToSpacesOnlySuite({ getService }: FtrProviderContext
     createExpectWithConflictsWithoutOverwritingResult,
     createMultiNamespaceTestCases,
     originSpaces,
-  } = copyToSpaceTestSuiteFactory(es, esArchiver, supertestWithoutAuth);
+  } = copyToSpaceTestSuiteFactory(context);
 
   describe('copy to spaces', () => {
     originSpaces.forEach((spaceId) => {
