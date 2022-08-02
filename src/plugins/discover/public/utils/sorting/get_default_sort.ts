@@ -7,7 +7,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { SortOrder } from '../../types';
+import { SortPairArr } from '../../types';
 import { isSortable } from './get_sort';
 
 /**
@@ -18,7 +18,7 @@ export function getDefaultSort(
   dataView: DataView | undefined,
   defaultSortOrder: string = 'desc',
   hidingTimeColumn: boolean = false
-): SortOrder[] {
+): SortPairArr[] {
   if (
     dataView?.timeFieldName &&
     isSortable(dataView.timeFieldName, dataView) &&

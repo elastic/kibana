@@ -9,7 +9,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiToolTip, EuiIconTip } from '@elastic/eui';
-import { SortOrder } from '../../../../types';
+import { SortPairArr } from '../../../../types';
 import { DocViewTableScoreSortWarning } from './score_sort_warning';
 
 interface Props {
@@ -21,10 +21,10 @@ interface Props {
   isTimeColumn: boolean;
   customLabel?: string;
   name: string;
-  onChangeSortOrder?: (sortOrder: SortOrder[]) => void;
+  onChangeSortOrder?: (sortOrder: SortPairArr[]) => void;
   onMoveColumn?: (name: string, idx: number) => void;
   onRemoveColumn?: (name: string) => void;
-  sortOrder: SortOrder[];
+  sortOrder: SortPairArr[];
 }
 
 interface IconProps {

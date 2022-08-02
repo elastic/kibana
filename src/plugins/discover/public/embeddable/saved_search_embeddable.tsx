@@ -30,7 +30,7 @@ import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-pl
 import { getSortForEmbeddable, SortPair } from '../utils/sorting';
 import { RecordRawType } from '../application/main/hooks/use_saved_search';
 import { buildDataTableRecord } from '../utils/build_data_record';
-import { DataTableRecord, SortOrder } from '../types';
+import { DataTableRecord, SortPairArr } from '../types';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SavedSearch } from '../services/saved_searches';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
@@ -97,7 +97,7 @@ export class SavedSearchEmbeddable
   private prevTimeRange?: TimeRange;
   private prevFilters?: Filter[];
   private prevQuery?: Query;
-  private prevSort?: SortOrder[];
+  private prevSort?: SortPairArr[];
   private prevSearchSessionId?: string;
   private searchProps?: SearchProps;
 
@@ -327,9 +327,9 @@ export class SavedSearchEmbeddable
         this.updateInput({ columns });
       },
       onSort: (sort: string[][]) => {
-        const sortOrderArr: SortOrder[] = [];
+        const sortOrderArr: SortPairArr[] = [];
         sort.forEach((arr) => {
-          sortOrderArr.push(arr as SortOrder);
+          sortOrderArr.push(arr as SortPairArr);
         });
         this.updateInput({ sort: sortOrderArr });
       },

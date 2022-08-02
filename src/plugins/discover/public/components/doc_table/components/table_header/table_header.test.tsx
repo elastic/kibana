@@ -14,7 +14,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../../common';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
-import { SortOrder } from '../../../../types';
+import { SortPairArr } from '../../../../types';
 
 const defaultUiSettings = {
   get: (key: string) => {
@@ -63,7 +63,7 @@ function getMockProps(props = {}) {
     hideTimeColumn: false,
     columns: ['first', 'middle', 'last'],
     defaultSortOrder: 'desc',
-    sortOrder: [['time', 'asc']] as SortOrder[],
+    sortOrder: [['time', 'asc']] as SortPairArr[],
     isShortDots: true,
     onRemoveColumn: jest.fn(),
     onChangeSortOrder: jest.fn(),

@@ -9,20 +9,20 @@
 import React, { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
-import { SortOrder } from '../../../../types';
+import { SortPairArr } from '../../../../types';
 import { TableHeaderColumn } from './table_header_column';
 import { getDisplayedColumns } from './helpers';
-import { getDefaultSort } from '../../../../utils/sorting/get_default_sort';
+import { getDefaultSort } from '../../../../utils/sorting';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
 
 interface Props {
   columns: string[];
   dataView: DataView;
-  onChangeSortOrder?: (sortOrder: SortOrder[]) => void;
+  onChangeSortOrder?: (sortOrder: SortPairArr[]) => void;
   onMoveColumn?: (name: string, index: number) => void;
   onRemoveColumn?: (name: string) => void;
-  sortOrder: SortOrder[];
+  sortOrder: SortPairArr[];
 }
 
 export function TableHeader({

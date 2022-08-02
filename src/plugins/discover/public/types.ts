@@ -39,4 +39,4 @@ export interface DataTableRecord {
   isAnchor?: boolean;
 }
 
-export type SortOrder = [string, string];
+export type SortPairArr = [string, string];

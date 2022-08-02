@@ -16,7 +16,7 @@ import { TableRow } from './components/table_row';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getFieldsToShow } from '../../utils/get_fields_to_show';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import type { DataTableRecord, SortOrder } from '../../types';
+import type { DataTableRecord, SortPairArr } from '../../types';
 
 export interface DocTableProps {
   /**
@@ -148,7 +148,7 @@ export const DocTableWrapper = forwardRef(
           onChangeSortOrder={onSort}
           onMoveColumn={onMoveColumn}
           onRemoveColumn={onRemoveColumn}
-          sortOrder={sort as SortOrder[]}
+          sortOrder={sort as SortPairArr[]}
         />
       ),
       [columns, dataView, onMoveColumn, onRemoveColumn, onSort, sort]

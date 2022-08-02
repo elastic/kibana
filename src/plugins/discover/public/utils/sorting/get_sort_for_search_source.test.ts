@@ -8,7 +8,7 @@
 
 import { getSortForSearchSource } from './get_sort_for_search_source';
 import { stubDataView, stubDataViewWithoutTimeField } from '@kbn/data-plugin/common/stubs';
-import { SortOrder } from '../../types';
+import { SortPairArr } from '../../types';
 
 describe('getSortForSearchSource function', function () {
   test('should be a function', function () {
@@ -16,7 +16,7 @@ describe('getSortForSearchSource function', function () {
   });
 
   test('should return an object to use for searchSource when columns are given', function () {
-    const cols = [['bytes', 'desc']] as SortOrder[];
+    const cols = [['bytes', 'desc']] as SortPairArr[];
     expect(getSortForSearchSource(cols, stubDataView)).toEqual([{ bytes: 'desc' }]);
     expect(getSortForSearchSource(cols, stubDataView, 'asc')).toEqual([{ bytes: 'desc' }]);
 
@@ -27,7 +27,7 @@ describe('getSortForSearchSource function', function () {
   });
 
   test('should return an object to use for searchSource when no columns are given', function () {
-    const cols = [] as SortOrder[];
+    const cols = [] as SortPairArr[];
     expect(getSortForSearchSource(cols, stubDataView)).toEqual([{ _doc: 'desc' }]);
     expect(getSortForSearchSource(cols, stubDataView, 'asc')).toEqual([{ _doc: 'asc' }]);
 
