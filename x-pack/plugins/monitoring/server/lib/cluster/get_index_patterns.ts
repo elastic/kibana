@@ -105,11 +105,12 @@ export function getDsIndexPattern({
   config: MonitoringConfig;
   ccs?: string;
 }): string {
-  let datasetsPattern = '';
+  let datasetsPattern = `${moduleType}.stack_monitoring`;
+
   if (dataset) {
-    datasetsPattern = `${moduleType}.${dataset}`;
+    datasetsPattern = `${datasetsPattern}.${dataset}`;
   } else {
-    datasetsPattern = `${moduleType}.*`;
+    datasetsPattern = `${datasetsPattern}.*`;
   }
   return prefixIndexPatternWithCcs(config, `${type}-${datasetsPattern}-${namespace}`, ccs);
 }

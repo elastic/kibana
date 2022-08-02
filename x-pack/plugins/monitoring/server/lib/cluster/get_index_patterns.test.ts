@@ -27,7 +27,7 @@ describe('getNewIndexPatterns', () => {
       config: getConfigWithCcs(true),
       moduleType: 'elasticsearch',
     });
-    expect(indexPatterns).toBe('.monitoring-es-*,metrics-elasticsearch.*-*');
+    expect(indexPatterns).toBe('.monitoring-es-*,metrics-elasticsearch.stack_monitoring.*-*');
   });
   it('returns ecs only elasticsearch index patterns when specifying ecsLegacyOnly: true', () => {
     const indexPatterns = getNewIndexPatterns({
@@ -35,28 +35,28 @@ describe('getNewIndexPatterns', () => {
       moduleType: 'elasticsearch',
       ecsLegacyOnly: true,
     });
-    expect(indexPatterns).toBe('.monitoring-es-8-*,metrics-elasticsearch.*-*');
+    expect(indexPatterns).toBe('.monitoring-es-8-*,metrics-elasticsearch.stack_monitoring.*-*');
   });
   it('returns local kibana index patterns when ccs is enabled with no ccs payload', () => {
     const indexPatterns = getNewIndexPatterns({
       config: getConfigWithCcs(true),
       moduleType: 'kibana',
     });
-    expect(indexPatterns).toBe('.monitoring-kibana-*,metrics-kibana.*-*');
+    expect(indexPatterns).toBe('.monitoring-kibana-*,metrics-kibana.stack_monitoring.*-*');
   });
   it('returns logstash index patterns when ccs is enabled and no ccs payload', () => {
     const indexPatterns = getNewIndexPatterns({
       config: getConfigWithCcs(true),
       moduleType: 'logstash',
     });
-    expect(indexPatterns).toBe('.monitoring-logstash-*,metrics-logstash.*-*');
+    expect(indexPatterns).toBe('.monitoring-logstash-*,metrics-logstash.stack_monitoring.*-*');
   });
   it('returns beats index patterns when ccs is enabled and no ccs payload', () => {
     const indexPatterns = getNewIndexPatterns({
       config: getConfigWithCcs(true),
       moduleType: 'beats',
     });
-    expect(indexPatterns).toBe('.monitoring-beats-*,metrics-beats.*-*');
+    expect(indexPatterns).toBe('.monitoring-beats-*,metrics-beats.stack_monitoring.*-*');
   });
   it('returns elasticsearch index patterns with dataset', () => {
     const indexPatterns = getNewIndexPatterns({
@@ -64,14 +64,16 @@ describe('getNewIndexPatterns', () => {
       moduleType: 'elasticsearch',
       dataset: 'cluster_stats',
     });
-    expect(indexPatterns).toBe('.monitoring-es-*,metrics-elasticsearch.cluster_stats-*');
+    expect(indexPatterns).toBe(
+      '.monitoring-es-*,metrics-elasticsearch.stack_monitoring.cluster_stats-*'
+    );
   });
   it('returns elasticsearch index patterns without ccs prefixes when ccs is disabled', () => {
     const indexPatterns = getNewIndexPatterns({
       config: getConfigWithCcs(false),
       moduleType: 'elasticsearch',
     });
-    expect(indexPatterns).toBe('.monitoring-es-*,metrics-elasticsearch.*-*');
+    expect(indexPatterns).toBe('.monitoring-es-*,metrics-elasticsearch.stack_monitoring.*-*');
   });
   it('returns elasticsearch index patterns without ccs prefixes when ccs is disabled but ccs request payload has a value', () => {
     const indexPatterns = getNewIndexPatterns({
@@ -79,7 +81,7 @@ describe('getNewIndexPatterns', () => {
       ccs: 'myccs',
       moduleType: 'elasticsearch',
     });
-    expect(indexPatterns).toBe('.monitoring-es-*,metrics-elasticsearch.*-*');
+    expect(indexPatterns).toBe('.monitoring-es-*,metrics-elasticsearch.stack_monitoring.*-*');
   });
   it('returns elasticsearch index patterns with custom ccs prefixes when ccs is enabled and ccs request payload has a value', () => {
     const indexPatterns = getNewIndexPatterns({
@@ -87,7 +89,9 @@ describe('getNewIndexPatterns', () => {
       ccs: 'myccs',
       moduleType: 'elasticsearch',
     });
-    expect(indexPatterns).toBe('myccs:.monitoring-es-*,myccs:metrics-elasticsearch.*-*');
+    expect(indexPatterns).toBe(
+      'myccs:.monitoring-es-*,myccs:metrics-elasticsearch.stack_monitoring.*-*'
+    );
   });
   it('returns elasticsearch index patterns with ccs prefixes and local index patterns when ccs is enabled and ccs request payload value is *', () => {
     const indexPatterns = getNewIndexPatterns({
@@ -96,7 +100,7 @@ describe('getNewIndexPatterns', () => {
       moduleType: 'elasticsearch',
     });
     expect(indexPatterns).toBe(
-      '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.*-*,metrics-elasticsearch.*-*'
+      '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.stack_monitoring.*-*,metrics-elasticsearch.stack_monitoring.*-*'
     );
   });
 });
