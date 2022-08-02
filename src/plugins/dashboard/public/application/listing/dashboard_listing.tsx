@@ -191,12 +191,7 @@ export const DashboardListing = ({
         </EuiFlexItem>
       </EuiFlexGroup>
     ) : (
-      <EuiButton
-        onClick={createItem}
-        fill
-        iconType="plusInCircle"
-        data-test-subj="newItemButton"
-      >
+      <EuiButton onClick={createItem} fill iconType="plusInCircle" data-test-subj="newItemButton">
         {noItemsStrings.getCreateNewDashboardText()}
       </EuiButton>
     );
