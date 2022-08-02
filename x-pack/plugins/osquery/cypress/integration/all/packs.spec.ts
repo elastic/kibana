@@ -98,26 +98,6 @@ describe('ALL - Packs', () => {
       cy.react('EuiFlyoutFooter').react('EuiButtonEmpty').contains('Cancel').click();
     });
 
-    it('should verify that packs are triggered', () => {
-      cy.waitForReact();
-      preparePack(PACK_NAME);
-      cy.contains(`${PACK_NAME} details`).should('exist');
-
-      cy.getBySel('docsLoading').should('exist');
-      cy.getBySel('docsLoading').should('not.exist');
-      cy.react('ScheduledQueryLastResults').within(() => {
-        cy.react('FormattedRelative');
-      });
-
-      cy.react('DocsColumnResults').within(() => {
-        cy.react('EuiNotificationBadge').contains('1');
-      });
-      cy.react('AgentsColumnResults').within(() => {
-        cy.react('EuiNotificationBadge').contains('1');
-      });
-      cy.getBySel('packResultsErrorsEmpty').should('have.length', 2);
-    });
-
     it.skip('should open lens in new tab', () => {
       let lensUrl = '';
       cy.window().then((win) => {
@@ -180,6 +160,28 @@ describe('ALL - Packs', () => {
       cy.getBySel('confirmModalConfirmButton').click();
       cy.contains(`Successfully activated "${PACK_NAME}" pack`).should('not.exist');
       cy.contains(`Successfully activated "${PACK_NAME}" pack`).should('exist');
+    });
+
+    it('should verify that packs are triggered', () => {
+      cy.waitForReact();
+      preparePack(PACK_NAME);
+      cy.contains(`${PACK_NAME} details`).should('exist');
+
+      cy.getBySel('docsLoading').should('exist');
+      cy.getBySel('docsLoading').should('not.exist');
+      cy.react('ScheduledQueryLastResults')
+        .should('exist')
+        .within(() => {
+          cy.react('FormattedRelative');
+        });
+
+      cy.react('DocsColumnResults').within(() => {
+        cy.react('EuiNotificationBadge').contains('1');
+      });
+      cy.react('AgentsColumnResults').within(() => {
+        cy.react('EuiNotificationBadge').contains('1');
+      });
+      cy.getBySel('packResultsErrorsEmpty').should('have.length', 2);
     });
 
     it('delete all queries in the pack', () => {

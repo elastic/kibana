@@ -109,6 +109,7 @@ describe('ALL - Add Integration', () => {
       .type('{downArrow} {enter}');
     cy.contains(/^Save$/).click();
     cy.contains(/^Save pack$/).click();
+    cy.contains(/^Successfully created "Integration" pack$/).click();
     cy.visit('app/fleet/policies');
     cy.contains('Agent policy 1').click();
     cy.contains('Upgrade').click();
@@ -119,6 +120,7 @@ describe('ALL - Add Integration', () => {
     cy.contains(/^Advanced$/).click();
     cy.contains('"Integration":');
     cy.contains('Cancel').click();
+    closeModalIfVisible();
     cy.get('tr')
       .should('contain', 'osquery_manager-2')
       .and('contain', 'Osquery Manager')
