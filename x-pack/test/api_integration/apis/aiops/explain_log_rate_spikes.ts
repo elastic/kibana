@@ -34,8 +34,8 @@ export default ({ getService }: FtrProviderContext) => {
   };
 
   const expected = {
-    chunksLength: 12,
-    actionsLength: 11,
+    chunksLength: 13,
+    actionsLength: 12,
     noIndexChunksLength: 4,
     noIndexActionsLength: 3,
     changePointFilter: 'add_change_points',
