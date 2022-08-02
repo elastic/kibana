@@ -398,9 +398,8 @@ export class CsvGenerator {
     this.logger.info(`Finished generating. Row count: ${this.csvRowCount}.`);
 
     if (!this.maxSizeReached && this.csvRowCount !== totalRecords) {
-      this.logger.warn(
-        `ES scroll returned fewer total hits than expected! ` +
-          `Search result total hits: ${totalRecords}. Row count: ${this.csvRowCount}.`
+      warnings.push(
+        i18nTexts.csvRowCountError({ expected: totalRecords, received: this.csvRowCount })
       );
     }
 
