@@ -16,7 +16,11 @@ import { ProfilingRequestHandlerContext } from '../types';
 import { createProfilingEsClient, ProfilingESClient } from '../utils/create_profiling_es_client';
 import { getClient } from './compat';
 import { findDownsampledIndex } from './downsampling';
-import { autoHistogramSumCountOnGroupByField, createCommonFilter } from './query';
+import {
+  aggregateByFieldAndTimestamp,
+  createCommonFilter,
+  findFixedIntervalForBucketsPerTimeRange,
+} from './query';
 import { mgetExecutables, mgetStackFrames, mgetStackTraces } from './stacktrace';
 
 export async function topNElasticSearchQuery({
@@ -25,19 +29,22 @@ export async function topNElasticSearchQuery({
   timeFrom,
   timeTo,
   searchField,
+  highCardinality,
   response,
   kuery,
 }: {
   client: ProfilingESClient;
   logger: Logger;
-  timeFrom: string;
-  timeTo: string;
+  timeFrom: number;
+  timeTo: number;
   searchField: string;
+  highCardinality: boolean;
   response: KibanaResponseFactory;
   kuery: string;
 }) {
   const filter = createCommonFilter({ timeFrom, timeTo, kuery });
   const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
+  const fixedInterval = findFixedIntervalForBucketsPerTimeRange(timeFrom, timeTo, 50);
 
   const eventsIndex = await findDownsampledIndex({
     logger,
@@ -52,7 +59,12 @@ export async function topNElasticSearchQuery({
     size: 0,
     query: filter,
     aggs: {
-      histogram: autoHistogramSumCountOnGroupByField(searchField),
+      histogram: aggregateByFieldAndTimestamp(searchField, highCardinality, fixedInterval),
+      total_count: {
+        sum: {
+          field: 'Count',
+        },
+      },
     },
     // Adrien and Dario found out this is a work-around for some bug in 8.1.
     // It reduces the query time by avoiding unneeded searches.
@@ -62,38 +74,40 @@ export async function topNElasticSearchQuery({
   if (!resEvents.aggregations) {
     return response.ok({
       body: {
+        TotalCount: 0,
         TopN: [],
         Metadata: {},
       },
     });
   }
 
-  const { histogram } = resEvents.aggregations;
+  const {
+    histogram,
+    total_count: { value: totalSampledStackTraces },
+  } = resEvents.aggregations;
   const topN = createTopNSamples(histogram);
+
+  logger.info('total sampled stacktraces: ' + totalSampledStackTraces);
 
   if (searchField !== 'StackTraceID') {
     return response.ok({
-      body: { TopN: topN, Metadata: {} },
+      body: { TotalCount: totalSampledStackTraces, TopN: topN, Metadata: {} },
     });
   }
 
-  let totalDocCount = 0;
-  let totalCount = 0;
   const stackTraceEvents = new Map<StackTraceID, number>();
-
   const histogramBuckets = histogram?.buckets ?? [];
+  let totalAggregatedStackTraces = 0;
+
   for (let i = 0; i < histogramBuckets.length; i++) {
-    totalDocCount += histogramBuckets[i].doc_count;
-    histogramBuckets[i].group_by.buckets.forEach((stackTraceItem) => {
-      const count = stackTraceItem.count.value ?? 0;
-      const oldCount = stackTraceEvents.get(String(stackTraceItem.key));
-      totalCount += count + (oldCount ?? 0);
-      stackTraceEvents.set(String(stackTraceItem.key), count + (oldCount ?? 0));
-    });
+    const stackTraceID = String(histogramBuckets[i].key);
+    const count = histogramBuckets[i].count.value ?? 0;
+    totalAggregatedStackTraces += count;
+    stackTraceEvents.set(stackTraceID, count);
   }
 
-  logger.info('events total count: ' + totalCount + ' (' + totalDocCount + ' docs)');
-  logger.info('unique stacktraces: ' + stackTraceEvents.size);
+  logger.info('total aggregated stacktraces: ' + totalAggregatedStackTraces);
+  logger.info('unique aggregated stacktraces: ' + stackTraceEvents.size);
 
   const { stackTraces, stackFrameDocIDs, executableDocIDs } = await mgetStackTraces({
     logger,
@@ -110,6 +124,7 @@ export async function topNElasticSearchQuery({
     );
     return response.ok({
       body: {
+        TotalCount: totalSampledStackTraces,
         TopN: topN,
         Metadata: metadata,
       },
@@ -121,15 +136,16 @@ export function queryTopNCommon(
   router: IRouter<ProfilingRequestHandlerContext>,
   logger: Logger,
   pathName: string,
-  searchField: string
+  searchField: string,
+  highCardinality: boolean
 ) {
   router.get(
     {
       path: pathName,
       validate: {
         query: schema.object({
-          timeFrom: schema.string(),
-          timeTo: schema.string(),
+          timeFrom: schema.number(),
+          timeTo: schema.number(),
           kuery: schema.string(),
         }),
       },
@@ -145,6 +161,7 @@ export function queryTopNCommon(
           timeFrom,
           timeTo,
           searchField,
+          highCardinality,
           response,
           kuery,
         });
@@ -169,7 +186,8 @@ export function registerTraceEventsTopNContainersSearchRoute({
     router,
     logger,
     paths.TopNContainers,
-    getFieldNameForTopNType(TopNType.Containers)
+    getFieldNameForTopNType(TopNType.Containers),
+    false
   );
 }
 
@@ -182,7 +200,8 @@ export function registerTraceEventsTopNDeploymentsSearchRoute({
     router,
     logger,
     paths.TopNDeployments,
-    getFieldNameForTopNType(TopNType.Deployments)
+    getFieldNameForTopNType(TopNType.Deployments),
+    false
   );
 }
 
@@ -191,7 +210,13 @@ export function registerTraceEventsTopNHostsSearchRoute({
   logger,
 }: RouteRegisterParameters) {
   const paths = getRoutePaths();
-  return queryTopNCommon(router, logger, paths.TopNHosts, getFieldNameForTopNType(TopNType.Hosts));
+  return queryTopNCommon(
+    router,
+    logger,
+    paths.TopNHosts,
+    getFieldNameForTopNType(TopNType.Hosts),
+    false
+  );
 }
 
 export function registerTraceEventsTopNStackTracesSearchRoute({
@@ -203,7 +228,8 @@ export function registerTraceEventsTopNStackTracesSearchRoute({
     router,
     logger,
     paths.TopNTraces,
-    getFieldNameForTopNType(TopNType.Traces)
+    getFieldNameForTopNType(TopNType.Traces),
+    false
   );
 }
 
@@ -216,6 +242,7 @@ export function registerTraceEventsTopNThreadsSearchRoute({
     router,
     logger,
     paths.TopNThreads,
-    getFieldNameForTopNType(TopNType.Threads)
+    getFieldNameForTopNType(TopNType.Threads),
+    true
   );
 }

@@ -62,8 +62,8 @@ export function registerFlameChartElasticSearchRoute({ router, logger }: RouteRe
       path: paths.FlamechartElastic,
       validate: {
         query: schema.object({
-          timeFrom: schema.string(),
-          timeTo: schema.string(),
+          timeFrom: schema.number(),
+          timeTo: schema.number(),
           kuery: schema.string(),
         }),
       },

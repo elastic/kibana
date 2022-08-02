@@ -51,8 +51,8 @@ async function queryTopNFunctions({
 }
 
 const querySchema = schema.object({
-  timeFrom: schema.string(),
-  timeTo: schema.string(),
+  timeFrom: schema.number(),
+  timeTo: schema.number(),
   startIndex: schema.number(),
   endIndex: schema.number(),
   kuery: schema.string(),

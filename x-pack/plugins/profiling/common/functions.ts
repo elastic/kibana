@@ -82,7 +82,7 @@ export function createTopNFunctions(
         topNFunction.CountInclusive += count;
       }
 
-      if (i === frames.length - 1) {
+      if (i === 0) {
         // Leaf frame: sum up counts for exclusive CPU.
         topNFunction.CountExclusive += count;
       }

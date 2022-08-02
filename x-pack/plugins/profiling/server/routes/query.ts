@@ -18,8 +18,8 @@ export function createCommonFilter({
   timeTo,
 }: {
   kuery: string;
-  timeFrom: string;
-  timeTo: string;
+  timeFrom: number;
+  timeTo: number;
 }): ProjectTimeQuery {
   return {
     bool: {
@@ -28,8 +28,8 @@ export function createCommonFilter({
         {
           range: {
             '@timestamp': {
-              gte: timeFrom,
-              lt: timeTo,
+              gte: String(timeFrom),
+              lt: String(timeTo),
               format: 'epoch_second',
               boost: 1.0,
             },
@@ -40,24 +40,37 @@ export function createCommonFilter({
   };
 }
 
-export function autoHistogramSumCountOnGroupByField(searchField: string) {
+export function findFixedIntervalForBucketsPerTimeRange(
+  timeFrom: number,
+  timeTo: number,
+  buckets: number
+): string {
+  const range = timeTo - timeFrom;
+  const interval = Math.max(Math.floor(range / buckets), 1);
+  return `${interval}s`;
+}
+
+export function aggregateByFieldAndTimestamp(
+  searchField: string,
+  highCardinality: boolean,
+  interval: string
+) {
+  // 'execution_hint: map' skips the slow building of ordinals that we don't need.
+  // Especially with high cardinality fields, this setting speeds up the aggregation.
+  const executionHint = highCardinality ? 'map' : 'global_ordinals';
+
   return {
-    auto_date_histogram: {
-      field: '@timestamp',
-      buckets: 50,
+    terms: {
+      field: searchField,
+      order: { count: 'desc' },
+      size: 100,
+      execution_hint: executionHint,
     },
     aggs: {
       group_by: {
-        terms: {
-          field: searchField,
-          // We remove the ordering since we will rely directly on the natural
-          // ordering of Elasticsearch: by default this will be the descending count
-          // of matched documents. This is not equal to the ordering by sum of Count field,
-          // but it's a good-enough approximation given the distribution of Count.
-          size: 100,
-          // 'execution_hint: map' skips the slow building of ordinals that we don't need.
-          // Especially with high cardinality fields, this setting speeds up the aggregation.
-          execution_hint: 'map',
+        date_histogram: {
+          field: '@timestamp',
+          fixed_interval: interval,
         },
         aggs: {
           count: {
@@ -65,6 +78,11 @@ export function autoHistogramSumCountOnGroupByField(searchField: string) {
               field: 'Count',
             },
           },
+        },
+      },
+      count: {
+        sum: {
+          field: 'Count',
         },
       },
     },

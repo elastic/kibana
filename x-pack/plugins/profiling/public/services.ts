@@ -9,7 +9,7 @@ import { CoreStart, HttpFetchQuery } from '@kbn/core/public';
 import { getRoutePaths } from '../common';
 import { ElasticFlameGraph } from '../common/flamegraph';
 import { TopNFunctions } from '../common/functions';
-import { TopNSamples } from '../common/topn';
+import { TopNResponse } from '../common/topn';
 
 export interface Services {
   fetchTopN: (params: {
@@ -17,7 +17,7 @@ export interface Services {
     timeFrom: number;
     timeTo: number;
     kuery: string;
-  }) => Promise<TopNSamples>;
+  }) => Promise<TopNResponse>;
   fetchTopNFunctions: (params: {
     timeFrom: number;
     timeTo: number;
