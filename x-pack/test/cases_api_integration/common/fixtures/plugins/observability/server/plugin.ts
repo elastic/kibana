@@ -31,7 +31,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       cases: ['observabilityFixture'],
       privileges: {
         all: {
-          api: ['casesSuggestAssignees'],
+          api: ['casesSuggestUserProfiles'],
           app: ['kibana'],
           cases: {
             all: ['observabilityFixture'],

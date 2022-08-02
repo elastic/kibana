@@ -663,7 +663,8 @@ describe('utils', () => {
     });
 
     it('returns null if originalValue is not an array', () => {
-      expect(arraysDifference('a string' as unknown as string[], [])).toBeNull();
+      // @ts-expect-error passing a string instead of an array
+      expect(arraysDifference('a string', [])).toBeNull();
     });
 
     it('returns null if updatedValue is null', () => {

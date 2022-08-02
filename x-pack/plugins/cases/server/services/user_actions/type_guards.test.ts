@@ -21,11 +21,11 @@ describe('type_guards', () => {
       expect(isStringArray(['a', 'b'])).toBeTruthy();
     });
 
-    it('returns true when the value is an array of strings and numbers', () => {
+    it('returns false when the value is an array of strings and numbers', () => {
       expect(isStringArray(['a', 1])).toBeFalsy();
     });
 
-    it('returns true when the value is an array of strings and objects', () => {
+    it('returns false when the value is an array of strings and objects', () => {
       expect(isStringArray(['a', {}])).toBeFalsy();
     });
   });

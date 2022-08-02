@@ -16,7 +16,7 @@ export const suggestUserProfilesRoute = (userProfileService: UserProfileService)
     method: 'post',
     path: INTERNAL_SUGGEST_USER_PROFILES_URL,
     routerOptions: {
-      tags: ['access:casesSuggestAssignees'],
+      tags: ['access:casesSuggestUserProfiles'],
     },
     params: {
       body: escapeHatch,
