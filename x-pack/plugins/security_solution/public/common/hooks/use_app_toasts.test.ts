@@ -7,10 +7,11 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import type { IEsError } from '@kbn/data-plugin/public';
-import { KibanaError, SecurityAppError } from '@kbn/securitysolution-t-grid';
+import type { KibanaError, SecurityAppError } from '@kbn/securitysolution-t-grid';
 
 import { useToasts } from '../lib/kibana';
 
+import type { MaybeESError } from './use_app_toasts';
 import {
   appErrorToErrorStack,
   convertErrorToEnumerable,
@@ -19,7 +20,6 @@ import {
   esErrorToErrorStack,
   getStringifiedStack,
   isEmptyObjectWhenStringified,
-  MaybeESError,
   unknownToErrorStack,
   useAppToasts,
 } from './use_app_toasts';

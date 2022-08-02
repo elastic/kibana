@@ -10,6 +10,17 @@ import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { AxisSettingsPopover, AxisSettingsPopoverProps } from './axis_settings_popover';
 import { ToolbarPopover } from '../../shared_components';
 import { layerTypes } from '../../../common';
+import { ShallowWrapper } from 'enzyme';
+
+function getRangeInputComponent(component: ShallowWrapper) {
+  return component
+    .find('[testSubjPrefix="lnsXY"]')
+    .shallow()
+    .find('RangeInputField')
+    .shallow()
+    .find('EuiFormControlLayoutDelimited')
+    .shallow();
+}
 
 describe('Axes Settings', () => {
   let props: AxisSettingsPopoverProps;
@@ -31,7 +42,6 @@ describe('Axes Settings', () => {
       areTickLabelsVisible: true,
       areGridlinesVisible: true,
       isAxisTitleVisible: true,
-      toggleAxisTitleVisibility: jest.fn(),
       toggleTickLabelsVisibility: jest.fn(),
       toggleGridlinesVisibility: jest.fn(),
       hasBarOrAreaOnAxis: false,
@@ -112,18 +122,64 @@ describe('Axes Settings', () => {
       expect(component.find('[data-test-subj="lnsXY_axisBounds_groups"]').length).toBe(0);
     });
 
-    it('renders bound inputs if mode is custom', () => {
+    it('renders 3 options for metric bound inputs', () => {
       const setSpy = jest.fn();
       const component = shallow(
         <AxisSettingsPopover
           {...props}
+          axis="yLeft"
           extent={{ mode: 'custom', lowerBound: 123, upperBound: 456 }}
           setExtent={setSpy}
         />
       );
-      const rangeInput = component
-        .find('[data-test-subj="lnsXY_axisExtent_customBounds"]')
-        .shallow();
+      const boundInput = component.find('[testSubjPrefix="lnsXY"]').shallow();
+      const buttonGroup = boundInput.find('[data-test-subj="lnsXY_axisBounds_groups"]');
+      expect(buttonGroup.prop('options')).toHaveLength(3);
+    });
+
+    it('renders metric (y) bound inputs if mode is custom', () => {
+      const setSpy = jest.fn();
+      const component = shallow(
+        <AxisSettingsPopover
+          {...props}
+          axis="yLeft"
+          extent={{ mode: 'custom', lowerBound: 123, upperBound: 456 }}
+          setExtent={setSpy}
+        />
+      );
+      const rangeInput = getRangeInputComponent(component);
+      const lower = rangeInput.find('[data-test-subj="lnsXY_axisExtent_lowerBound"]');
+      const upper = rangeInput.find('[data-test-subj="lnsXY_axisExtent_upperBound"]');
+      expect(lower.prop('value')).toEqual(123);
+      expect(upper.prop('value')).toEqual(456);
+    });
+
+    it('renders 2 options for metric bound inputs', () => {
+      const setSpy = jest.fn();
+      const component = shallow(
+        <AxisSettingsPopover
+          {...props}
+          axis="x"
+          extent={{ mode: 'custom', lowerBound: 123, upperBound: 456 }}
+          setExtent={setSpy}
+        />
+      );
+      const boundInput = component.find('[testSubjPrefix="lnsXY"]').shallow();
+      const buttonGroup = boundInput.find('[data-test-subj="lnsXY_axisBounds_groups"]');
+      expect(buttonGroup.prop('options')).toHaveLength(2);
+    });
+
+    it('renders bucket (x) bound inputs if mode is custom', () => {
+      const setSpy = jest.fn();
+      const component = shallow(
+        <AxisSettingsPopover
+          {...props}
+          axis="x"
+          extent={{ mode: 'custom', lowerBound: 123, upperBound: 456 }}
+          setExtent={setSpy}
+        />
+      );
+      const rangeInput = getRangeInputComponent(component);
       const lower = rangeInput.find('[data-test-subj="lnsXY_axisExtent_lowerBound"]');
       const upper = rangeInput.find('[data-test-subj="lnsXY_axisExtent_upperBound"]');
       expect(lower.prop('value')).toEqual(123);

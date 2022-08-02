@@ -109,6 +109,9 @@ export const useStyles = ({
         backgroundColor: bgColor,
         width: `calc(100% + ${depth} * ${TREE_INDENT} + ${PROCESS_TREE_LEFT_PADDING})`,
       },
+      '.euiToolTipAnchor': {
+        verticalAlign: 'middle',
+      },
     };
 
     const textSection: CSSObject = {

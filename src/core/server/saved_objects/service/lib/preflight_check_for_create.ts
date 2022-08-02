@@ -5,15 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
-import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
-import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import type {
+  ISavedObjectTypeRegistry,
   SavedObjectsRawDoc,
   SavedObjectsRawDocSource,
-  SavedObjectsSerializer,
-} from '../../serialization';
+} from '@kbn/core-saved-objects-server';
+import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
+import type { SavedObjectsSerializer } from '../../serialization';
 import { findLegacyUrlAliases } from './legacy_url_aliases';
 import { Either, rawDocExistsInNamespaces } from './internal_utils';
 import { getObjectKey, isLeft, isRight } from './internal_utils';
@@ -255,7 +256,7 @@ async function bulkGetObjectsAndAliases(
     docsToBulkGet.push({
       _id: serializer.generateRawId(undefined, type, id), // namespace is intentionally undefined because multi-namespace objects don't have a namespace in their raw ID
       _index: getIndexForType(type),
-      _source: ['type', 'namespaces'],
+      _source: ['type', 'namespaces', 'originId'],
     });
     if (checkAliases) {
       for (const space of spaces) {

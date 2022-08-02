@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CtiDataSourceRequestOptions } from '../../../../../../common/search_strategy/security_solution/cti';
+import type { CtiDataSourceRequestOptions } from '../../../../../../common/search_strategy/security_solution/cti';
 
 export const buildTiDataSourceQuery = ({
   timerange,

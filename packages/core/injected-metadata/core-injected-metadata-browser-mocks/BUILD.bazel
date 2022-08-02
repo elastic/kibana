@@ -32,8 +32,8 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
+  "//packages/kbn-utility-types:npm_module_types",
   "//packages/core/injected-metadata/core-injected-metadata-browser-internal:npm_module_types",
-
 ]
 
 jsts_transpiler(
@@ -64,6 +64,7 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",

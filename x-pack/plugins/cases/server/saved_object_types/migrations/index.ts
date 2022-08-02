@@ -10,7 +10,7 @@ import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 
 export { caseMigrations } from './cases';
 export { configureMigrations } from './configuration';
-export { userActionsMigrations } from './user_actions';
+export { createUserActionsMigrations } from './user_actions';
 export type { CreateCommentsMigrationsDeps } from './comments';
 export { createCommentsMigrations } from './comments';
 

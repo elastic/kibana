@@ -41,7 +41,6 @@ import {
 } from './math_completion';
 import { LANGUAGE_ID } from './math_tokenization';
 import { MemoizedFormulaHelp } from './formula_help';
-import { trackUiEvent } from '../../../../../lens_ui_telemetry';
 
 import './formula.scss';
 import { FormulaIndexPatternColumn } from '../formula';
@@ -66,6 +65,7 @@ export const WrappedFormulaEditor = ({
   ...rest
 }: ParamEditorProps<FormulaIndexPatternColumn>) => {
   const dateHistogramInterval = getDateHistogramInterval(
+    rest.data.datatableUtilities,
     rest.layer,
     rest.indexPattern,
     activeData,
@@ -84,7 +84,7 @@ const MemoizedFormulaEditor = React.memo(FormulaEditor);
 
 export function FormulaEditor({
   layer,
-  updateLayer,
+  paramEditorUpdater,
   currentColumn,
   columnId,
   indexPattern,
@@ -152,7 +152,7 @@ export function FormulaEditor({
     setIsCloseable(true);
     // If the text is not synced, update the column.
     if (text !== currentColumn.params.formula) {
-      updateLayer(
+      paramEditorUpdater(
         (prevLayer) =>
           insertOrReplaceFormulaColumn(
             columnId,
@@ -182,7 +182,7 @@ export function FormulaEditor({
         monaco.editor.setModelMarkers(editorModel.current, 'LENS', []);
         if (currentColumn.params.formula) {
           // Only submit if valid
-          updateLayer(
+          paramEditorUpdater(
             insertOrReplaceFormulaColumn(
               columnId,
               {
@@ -231,7 +231,7 @@ export function FormulaEditor({
         if (previousFormulaWasBroken || previousFormulaWasOkButNoData) {
           // If the formula is already broken, show the latest error message in the workspace
           if (currentColumn.params.formula !== text) {
-            updateLayer(
+            paramEditorUpdater(
               insertOrReplaceFormulaColumn(
                 columnId,
                 {
@@ -313,7 +313,7 @@ export function FormulaEditor({
           }
         );
 
-        updateLayer(newLayer);
+        paramEditorUpdater(newLayer);
 
         const managedColumns = getManagedColumnsFrom(columnId, newLayer.columns);
         const markers: monaco.editor.IMarkerData[] = managedColumns
@@ -699,7 +699,6 @@ export function FormulaEditor({
                       toggleFullscreen();
                       // Help text opens when entering full screen, and closes when leaving full screen
                       setIsHelpOpen(!isFullscreen);
-                      trackUiEvent('toggle_formula_fullscreen');
                     }}
                     iconType={isFullscreen ? 'fullScreenExit' : 'fullScreen'}
                     size="xs"
@@ -822,9 +821,6 @@ export function FormulaEditor({
                           <EuiButtonIcon
                             className="lnsFormula__editorHelp lnsFormula__editorHelp--overlay"
                             onClick={() => {
-                              if (!isHelpOpen) {
-                                trackUiEvent('open_formula_popover');
-                              }
                               setIsHelpOpen(!isHelpOpen);
                             }}
                             iconType="documentation"

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import React from 'react';
 
 import { DefaultDraggable } from '../../../common/components/draggables';

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { Reducer } from 'redux';
+import type { Reducer } from 'redux';
 import { unitsPerNudge, nudgeAnimationDuration } from './scaling_constants';
 import { animatePanning } from './methods';
 import * as vector2 from '../../models/vector2';
 import * as selectors from './selectors';
 import { clamp } from '../../lib/math';
 
-import { CameraState, Vector2 } from '../../types';
+import type { CameraState, Vector2 } from '../../types';
 import { scaleToZoom } from './scale_to_zoom';
-import { ResolverAction } from '../actions';
+import type { ResolverAction } from '../actions';
 
 /**
  * Used in tests.

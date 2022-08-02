@@ -15,7 +15,7 @@ import { OverviewHost } from '../overview_host';
 import { OverviewNetwork } from '../overview_network';
 import { useKibana } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
-import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import {
   hostNameExistsFilter,

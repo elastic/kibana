@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { CloudEcs } from '../../../../ecs/cloud';
-import { HostEcs, OsEcs } from '../../../../ecs/host';
-import { Hit, Hits, Maybe, SearchHit, StringOrNumber, TotalValue } from '../../../common';
-import { EndpointPendingActions, HostStatus } from '../../../../endpoint/types';
-import { CommonFields } from '../..';
+import type { CloudEcs } from '../../../../ecs/cloud';
+import type { HostEcs, OsEcs } from '../../../../ecs/host';
+import type { Hit, Hits, Maybe, SearchHit, StringOrNumber, TotalValue } from '../../../common';
+import type { EndpointPendingActions, HostStatus } from '../../../../endpoint/types';
+import type { CommonFields } from '../..';
 
 export enum HostPolicyResponseActionStatus {
   success = 'success',
@@ -102,18 +102,6 @@ export interface HostAggEsItem {
   host_type?: HostBuckets;
   key?: string;
   os?: HostOsHitsItem;
-}
-
-export interface HostEsData extends SearchHit {
-  sort: string[];
-  aggregations: {
-    host_count: {
-      value: number;
-    };
-    host_data: {
-      buckets: HostAggEsItem[];
-    };
-  };
 }
 
 export interface HostAggEsData extends SearchHit {

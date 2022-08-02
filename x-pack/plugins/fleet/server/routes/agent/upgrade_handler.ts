@@ -39,7 +39,6 @@ export const postAgentUpgradeHandler: RequestHandler<
   const kibanaVersion = appContextService.getKibanaVersion();
   try {
     checkKibanaVersion(version, kibanaVersion);
-    checkSourceUriAllowed(sourceUri);
   } catch (err) {
     return response.customError({
       statusCode: 400,
@@ -49,6 +48,7 @@ export const postAgentUpgradeHandler: RequestHandler<
     });
   }
   const agent = await getAgentById(esClient, request.params.agentId);
+
   if (agent.unenrollment_started_at || agent.unenrolled_at) {
     return response.customError({
       statusCode: 400,
@@ -97,11 +97,11 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
     force,
     rollout_duration_seconds: upgradeDurationSeconds,
     start_time: startTime,
+    batchSize,
   } = request.body;
   const kibanaVersion = appContextService.getKibanaVersion();
   try {
     checkKibanaVersion(version, kibanaVersion);
-    checkSourceUriAllowed(sourceUri);
     const fleetServerAgents = await getAllFleetServerAgents(soClient, esClient);
     checkFleetServerVersion(version, fleetServerAgents);
   } catch (err) {
@@ -122,6 +122,7 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
       force,
       upgradeDurationSeconds,
       startTime,
+      batchSize,
     };
     const results = await AgentService.sendUpgradeAgentsActions(soClient, esClient, upgradeOptions);
     const body = results.items.reduce<PostBulkAgentUpgradeResponse>((acc, so) => {
@@ -163,14 +164,6 @@ export const checkKibanaVersion = (version: string, kibanaVersion: string) => {
     throw new Error(
       `cannot upgrade agent to ${versionToUpgradeNumber} because it is higher than the installed kibana version ${kibanaVersionNumber}`
     );
-};
-
-const checkSourceUriAllowed = (sourceUri?: string) => {
-  if (sourceUri && !appContextService.getConfig()?.developer?.allowAgentUpgradeSourceUri) {
-    throw new Error(
-      `source_uri is not allowed or recommended in production. Set xpack.fleet.developer.allowAgentUpgradeSourceUri in kibana.yml to true.`
-    );
-  }
 };
 
 // Check the installed fleet server version

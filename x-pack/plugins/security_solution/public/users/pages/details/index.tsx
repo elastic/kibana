@@ -28,7 +28,7 @@ import { SpyRoute } from '../../../common/utils/route/spy_routes';
 
 import { UsersDetailsTabs } from './details_tabs';
 import { navTabsUsersDetails } from './nav_tabs';
-import { UsersDetailsProps } from './types';
+import type { UsersDetailsProps } from './types';
 import { type } from './utils';
 import { getUsersDetailsPageFilters } from './helpers';
 import { showGlobalFilters } from '../../../timelines/components/timeline/helpers';
@@ -83,7 +83,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   );
   const getFilters = () => [...usersDetailsPageFilters, ...filters];
 
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+  const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
 
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config: getEsQueryConfig(kibana.services.uiSettings),
@@ -132,7 +132,6 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               border
               subtitle={
                 <LastEventTime
-                  docValueFields={docValueFields}
                   indexKey={LastEventIndexKey.userDetails}
                   indexNames={selectedPatterns}
                   userName={detailName}
@@ -165,6 +164,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                       to: fromTo.to,
                     });
                   }}
+                  indexPatterns={selectedPatterns}
                 />
               )}
             </AnomalyTableProvider>
@@ -184,7 +184,6 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
             <UsersDetailsTabs
               deleteQuery={deleteQuery}
               detailName={detailName}
-              docValueFields={docValueFields}
               filterQuery={filterQuery}
               from={from}
               indexNames={selectedPatterns}

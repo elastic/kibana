@@ -3,7 +3,7 @@
 exports[`bulkCreate should display error message when bulkCreate request fails 1`] = `
 Array [
   <h2
-    class="euiTitle css-1w464ad-euiTitle-m"
+    class="euiTitle emotion-euiTitle-m"
   >
     Load Kibana objects
   </h2>,
@@ -14,7 +14,7 @@ Array [
       class="euiFlexItem"
     >
       <div
-        class="euiText euiText--medium"
+        class="euiText emotion-euiText-m"
       >
         <p>
           Imports index pattern, visualizations and pre-defined dashboards.
@@ -42,14 +42,14 @@ Array [
     </div>
   </div>,
   <div
-    class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />,
   <div
-    class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--warning euiPanel--noShadow euiPanel--noBorder euiCallOut euiCallOut--warning css-1flvw80-euiCallOut"
+    class="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning emotion-euiPanel-none-m-warning-euiCallOut"
     data-test-subj="loadSavedObjects_failed"
   >
     <p
-      class="euiTitle euiCallOutHeader__title css-nznt5c-euiTitle-xs-euiCallOutHeader-warning"
+      class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-warning"
     >
       Request failed, Error: simulated bulkRequest error
     </p>
@@ -60,7 +60,7 @@ Array [
 exports[`bulkCreate should display success message when bulkCreate is successful 1`] = `
 Array [
   <h2
-    class="euiTitle css-1w464ad-euiTitle-m"
+    class="euiTitle emotion-euiTitle-m"
   >
     Load Kibana objects
   </h2>,
@@ -71,7 +71,7 @@ Array [
       class="euiFlexItem"
     >
       <div
-        class="euiText euiText--medium"
+        class="euiText emotion-euiText-m"
       >
         <p>
           Imports index pattern, visualizations and pre-defined dashboards.
@@ -99,14 +99,14 @@ Array [
     </div>
   </div>,
   <div
-    class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />,
   <div
-    class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--success euiPanel--noShadow euiPanel--noBorder euiCallOut euiCallOut--success css-1flvw80-euiCallOut"
+    class="euiPanel euiPanel--success euiPanel--paddingMedium euiCallOut euiCallOut--success emotion-euiPanel-none-m-success-euiCallOut"
     data-test-subj="loadSavedObjects_success"
   >
     <p
-      class="euiTitle euiCallOutHeader__title css-8813xx-euiTitle-xs-euiCallOutHeader-success"
+      class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-success"
     >
       1 saved objects successfully added
     </p>

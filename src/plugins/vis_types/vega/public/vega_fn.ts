@@ -14,7 +14,8 @@ import {
   ExpressionFunctionDefinition,
   Render,
 } from '@kbn/expressions-plugin/public';
-import { KibanaContext, TimeRange, Query } from '@kbn/data-plugin/public';
+import { TimeRange, Query } from '@kbn/es-query';
+import { KibanaContext } from '@kbn/data-plugin/public';
 import { VegaVisualizationDependencies } from './plugin';
 import { VegaInspectorAdapters } from './vega_inspector';
 import { VegaParser } from './data_model/vega_parser';

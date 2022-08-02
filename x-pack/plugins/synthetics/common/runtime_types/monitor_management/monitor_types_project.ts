@@ -23,6 +23,7 @@ export const ProjectBrowserMonitorCodec = t.intersection([
     locations: t.array(t.string),
   }),
   t.partial({
+    privateLocations: t.array(t.string),
     throttling: ProjectMonitorThrottlingConfigCodec,
     screenshot: ScreenshotOptionCodec,
     tags: t.array(t.string),

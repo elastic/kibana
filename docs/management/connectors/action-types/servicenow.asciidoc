@@ -1,28 +1,34 @@
-[role="xpack"]
 [[servicenow-action-type]]
-=== ServiceNow ITSM connector and action
+== {sn-itsm} connector and action
 ++++
-<titleabbrev>ServiceNow ITSM</titleabbrev>
+<titleabbrev>{sn-itsm}</titleabbrev>
 ++++
 
-The {sn} ITSM connector uses the https://developer.servicenow.com/dev.do#!/reference/api/sandiego/rest/c_ImportSetAPI[Import Set API] to create {sn} incidents.
+The {sn-itsm} connector uses the
+https://developer.servicenow.com/dev.do#!/reference/api/sandiego/rest/c_ImportSetAPI[import set API]
+to create {sn} incidents.
 
 [float]
 [[servicenow-itsm-connector-prerequisites]]
-==== Prerequisites
-After upgrading from {stack} version 7.15.0 or earlier to version 7.16.0 or later, you must complete the following within your {sn} instance before creating a new {sn} ITSM connector or <<servicenow-itsm-connector-update, updating an existing one>>:
+=== Prerequisites
 
-* Install https://store.servicenow.com/sn_appstore_store.do#!/store/application/7148dbc91bf1f450ced060a7234bcb88[Elastic for ITSM] from the {sn} Store.
-* Create a {sn} integration user and assign it the appropriate roles.
-* Create a Cross-Origin Resource Sharing (CORS) rule.
+After upgrading from {stack} version 7.15.0 or earlier to version 7.16.0 or
+later, you must complete the following steps within your {sn} instance before
+creating a new {sn-itsm} connector or
+<<servicenow-itsm-connector-update,updating an existing one>>:
 
-If you use open authorization (OAuth), you must also:
-
-* Create an RSA keypair and add an X.509 Certificate.
-* Create an OAuth JWT API endpoint for external clients with a JWT Verifiers Map.
+. Install
+https://store.servicenow.com/sn_appstore_store.do#!/store/application/7148dbc91bf1f450ced060a7234bcb88[Elastic for ITSM]
+from the {sn} Store.
+. <<servicenow-itsm-connector-prerequisites-integration-user,Create a {sn} integration user and assign it the appropriate roles>>.
+. <<servicenow-itsm-connector-prerequisites-cors-rule,Create a Cross-Origin Resource Sharing (CORS) rule>>.
+. If you use open authorization (OAuth), you must also:
+.. <<servicenow-itsm-connector-prerequisites-rsa-key,Create an RSA keypair and add an X.509 Certificate>>.
+.. <<servicenow-itsm-connector-prerequisites-endpoint,Create an OAuth JWT API endpoint for external clients with a JWT Verifiers Map>>.
 
 [float]
-===== Create a {sn} integration user
+[[servicenow-itsm-connector-prerequisites-integration-user]]
+==== Create a {sn} integration user
 
 To ensure authenticated communication between Elastic and {sn}, create a {sn} integration user and assign it the appropriate roles.
 
@@ -38,7 +44,8 @@ To ensure authenticated communication between Elastic and {sn}, create a {sn} in
 . Click *Save*.
 
 [float]
-===== Create a CORS rule
+[[servicenow-itsm-connector-prerequisites-cors-rule]]
+==== Create a CORS rule
 
 A CORS rule is required for communication between Elastic and {sn}. To create a CORS rule:
 
@@ -52,10 +59,12 @@ A CORS rule is required for communication between Elastic and {sn}. To create a 
 . Click *Submit* to create the rule.
 
 [float]
-===== Create an RSA keypair and add an X.509 Certificate
+[[servicenow-itsm-connector-prerequisites-rsa-key]]
+==== Create an RSA keypair and add an X.509 certificate
 
 This step is required to use OAuth for authentication between Elastic and {sn}.
 
+// tag::servicenow-rsa-key[]
 *Create an RSA keypair:*
 
 . Use https://www.openssl.org/docs/man1.0.2/man1/genrsa.html[OpenSSL] to generate an RSA private key:
@@ -77,8 +86,9 @@ openssl genrsa -passout pass:foobar -out example-private-key-with-password.pem 3
 openssl req -new -x509 -key example-private-key.pem -out example-sn-cert.pem -days 360
 ----
 --
-
-*Add an X.509 Certificate to ServiceNow:*
+// end::servicenow-rsa-key[]
+// tag::servicenow-certificate[]
+*Add an X.509 certificate to ServiceNow:*
 
 . In your {sn} instance, go to *Certificates* and select *New*.
 . Configure the certificate as follows:
@@ -92,10 +102,13 @@ image::management/connectors/images/servicenow-new-certificate.png[Shows new cer
 --
 
 . Click *Submit* to create the certificate.
+// end::servicenow-certificate[]
 
 [float]
-===== Create an OAuth JWT API endpoint for external clients with a JWT Verifiers Map
+[[servicenow-itsm-connector-prerequisites-endpoint]]
+==== Create an OAuth JWT API endpoint for external clients with a JWT Verifiers Map
 
+// tag::servicenow-endpoint[]
 This step is required to use OAuth for authentication between Elastic and {sn}.
 
 . In your {sn} instance, go to *Application Registry* and select *New*.
@@ -138,12 +151,13 @@ image::management/connectors/images/servicenow-new-jwt-verifier-map.png[Shows ne
 [role="screenshot"]
 image::management/connectors/images/servicenow-oauth-values.png[Shows where to find OAuth values in ServiceNow]
 --
+// end::servicenow-endpoint[]
 
 [float]
 [[servicenow-itsm-connector-update]]
-==== Update a deprecated {sn} ITSM connector
+=== Update a deprecated {sn-itsm} connector
 
-{sn} ITSM connectors created in {stack} version 7.15.0 or earlier are marked as deprecated after you upgrade to version 7.16.0 or later. Deprecated connectors have a yellow icon after their name and display a warning message when selected.
+{sn-itsm} connectors created in {stack} version 7.15.0 or earlier are marked as deprecated after you upgrade to version 7.16.0 or later. Deprecated connectors have a yellow icon after their name and display a warning message when selected.
 
 [role="screenshot"]
 image::management/connectors/images/servicenow-sir-update-connector.png[Shows deprecated ServiceNow connectors]
@@ -163,9 +177,9 @@ To update a deprecated connector:
 
 [float]
 [[servicenow-connector-configuration]]
-==== Connector configuration
+=== Connector configuration
 
-{sn} ITSM connectors have the following configuration properties.
+{sn-itsm} connectors have the following configuration properties.
 
 Name::      The name of the connector. The name is used to identify a  connector in the **Stack Management** UI connector listing, and in the connector list when configuring an action.
 Is OAuth::  The type of authentication to use.
@@ -181,13 +195,13 @@ Private Key Password:: The password for the RSA private key generated during set
 
 [float]
 [[servicenow-connector-networking-configuration]]
-==== Connector networking configuration
+=== Connector networking configuration
 
 Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
 [float]
 [[Preconfigured-servicenow-configuration]]
-==== Preconfigured connector type
+=== Preconfigured connector type
 
 Connector using Basic Authentication
 [source,text]
@@ -243,9 +257,9 @@ Secrets defines sensitive information for the connector type.
 
 [float]
 [[define-servicenow-ui]]
-==== Define connector in Stack Management
+=== Define connector in Stack Management
 
-Define {sn} ITSM connector properties. Choose whether to use OAuth for authentication.
+Define {sn-itsm} connector properties. Choose whether to use OAuth for authentication.
 
 [role="screenshot"]
 image::management/connectors/images/servicenow-connector-basic.png[ServiceNow connector using basic auth]
@@ -253,16 +267,16 @@ image::management/connectors/images/servicenow-connector-basic.png[ServiceNow co
 [role="screenshot"]
 image::management/connectors/images/servicenow-connector-oauth.png[ServiceNow connector using OAuth]
 
-Test {sn} ITSM action parameters.
+Test {sn-itsm} action parameters.
 
 [role="screenshot"]
 image::management/connectors/images/servicenow-params-test.png[ServiceNow params test]
 
 [float]
 [[servicenow-action-configuration]]
-==== Action configuration
+=== Action configuration
 
-{sn} ITSM actions have the following configuration properties.
+{sn-itsm} actions have the following configuration properties.
 
 Urgency::              The extent to which the incident resolution can delay.
 Severity::             The severity of the incident.
@@ -280,6 +294,6 @@ Additional comments::  Additional information for the client, such as how to tro
 
 [float]
 [[configuring-servicenow]]
-==== Configure {sn}
+=== Configure {sn}
 
 {sn} offers free https://developer.servicenow.com/dev.do#!/guides/madrid/now-platform/pdi-guide/obtaining-a-pdi[Personal Developer Instances], which you can use to test incidents.

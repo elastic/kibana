@@ -7,7 +7,7 @@
     "declarationMap": true,
     "isolatedModules": true
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "config.ts"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "config.ts", ".storybook/**/*"],
   "references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../data_views/tsconfig.json" },

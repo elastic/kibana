@@ -11,7 +11,7 @@ import { renderToString } from 'react-dom/server';
 import { PrettyDuration } from '@elastic/eui';
 import { IEmbeddable, Embeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { TimeRange } from '@kbn/data-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import { doesInheritTimeRange } from './does_inherit_time_range';
 import { OpenModal, CommonlyUsedRange } from './types';
 

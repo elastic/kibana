@@ -210,14 +210,16 @@ export class VegaBaseView {
     const vegaLoader = loader();
     const originalSanitize = vegaLoader.sanitize.bind(vegaLoader);
     vegaLoader.sanitize = async (uri, options) => {
-      if (uri.bypassToken === bypassToken || this._externalUrl.isInternalUrl(uri)) {
+      if (uri.bypassToken === bypassToken) {
         // If uri has a bypass token, the uri was encoded by bypassExternalUrlCheck() above.
         // because user can only supply pure JSON data structure.
         uri = uri.url;
-      } else if (!this._enableExternalUrls) {
-        this.handleExternalUrlError(getExternalUrlsAreNotEnabledError());
-      } else if (!this._externalUrl.validateUrl(uri)) {
-        this.handleExternalUrlError(getExternalUrlServiceError(uri));
+      } else if (!this._externalUrl.isInternalUrl(uri)) {
+        if (!this._enableExternalUrls) {
+          this.handleExternalUrlError(getExternalUrlsAreNotEnabledError());
+        } else if (!this._externalUrl.validateUrl(uri)) {
+          this.handleExternalUrlError(getExternalUrlServiceError(uri));
+        }
       }
       const result = await originalSanitize(uri, options);
       // This will allow Vega users to load images from any domain.

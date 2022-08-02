@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
 import {
@@ -35,9 +35,12 @@ import {
   TRUSTED_APPLICATIONS,
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
-import { LinkItem } from '../common/links/types';
-import { StartPlugins } from '../types';
-
+import type { LinkItem } from '../common/links/types';
+import type { StartPlugins } from '../types';
+import {
+  manageCategories as cloudSecurityPostureCategories,
+  manageLinks as cloudSecurityPostureLinks,
+} from '../cloud_security_posture/links';
 import { IconBlocklist } from './icons/blocklist';
 import { IconEndpoints } from './icons/endpoints';
 import { IconEndpointPolicies } from './icons/endpoint_policies';
@@ -68,6 +71,7 @@ const categories = [
       SecurityPageName.blocklist,
     ],
   },
+  ...cloudSecurityPostureCategories,
 ];
 
 export const links: LinkItem = {
@@ -77,7 +81,7 @@ export const links: LinkItem = {
   skipUrlState: true,
   hideTimeline: true,
   globalNavEnabled: true,
-  globalNavOrder: 6,
+  globalNavOrder: 7,
   capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.manage', {
@@ -197,6 +201,7 @@ export const links: LinkItem = {
       skipUrlState: true,
       hideTimeline: true,
     },
+    cloudSecurityPostureLinks,
   ],
 };
 

@@ -208,8 +208,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await ml.jobTable.assertJobActionSingleMetricViewerButtonEnabled(adJobId, true);
             await ml.jobTable.assertJobActionAnomalyExplorerButtonEnabled(adJobId, true);
 
-            await ml.testExecution.logTestStep('should display disabled AD job row action button');
-            await ml.jobTable.assertJobActionsMenuButtonEnabled(adJobId, false);
+            await ml.testExecution.logTestStep(
+              'should display enabled AD job row view datafeed counts action'
+            );
+            await ml.jobTable.assertJobActionsMenuButtonEnabled(adJobId, true);
+            await ml.jobTable.assertJobActionViewDatafeedCountsButtonEnabled(adJobId, true);
+
+            await ml.testExecution.logTestStep(
+              'should display expected disabled AD job row actions'
+            );
+            await ml.jobTable.assertJobActionStartDatafeedButtonEnabled(adJobId, false);
+            await ml.jobTable.assertJobActionResetJobButtonEnabled(adJobId, false);
+            await ml.jobTable.assertJobActionCloneJobButtonEnabled(adJobId, false);
+            await ml.jobTable.assertJobActionEditJobButtonEnabled(adJobId, false);
+            await ml.jobTable.assertJobActionDeleteJobButtonEnabled(adJobId, false);
 
             await ml.testExecution.logTestStep('should select the job');
             await ml.jobTable.selectJobRow(adJobId);

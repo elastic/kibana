@@ -5,33 +5,38 @@
  * 2.0.
  */
 
-import React, { ReactPortal } from 'react';
-import { createMemoryHistory, MemoryHistory } from 'history';
-import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
-import { Action, Reducer, Store } from 'redux';
-import { AppDeepLink } from '@kbn/core/public';
+import type { ReactPortal } from 'react';
+import React from 'react';
+import type { MemoryHistory } from 'history';
+import { createMemoryHistory } from 'history';
+import type { RenderOptions, RenderResult } from '@testing-library/react';
+import { render as reactRender } from '@testing-library/react';
+import type { Action, Reducer, Store } from 'redux';
+import type { AppDeepLink } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider, setLogger } from 'react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
-import {
-  renderHook as reactRenderHoook,
-  RenderHookOptions,
-  RenderHookResult,
-} from '@testing-library/react-hooks';
-import { ReactHooksRenderer, WrapperComponent } from '@testing-library/react-hooks/src/types/react';
+import type { RenderHookOptions, RenderHookResult } from '@testing-library/react-hooks';
+import { renderHook as reactRenderHoook } from '@testing-library/react-hooks';
+import type {
+  ReactHooksRenderer,
+  WrapperComponent,
+} from '@testing-library/react-hooks/src/types/react';
 import type { UseBaseQueryResult } from 'react-query/types/react/types';
 import ReactDOM from 'react-dom';
 import { ConsoleManager } from '../../../management/components/console';
 import type { StartPlugins, StartServices } from '../../../types';
 import { depsStartMock } from './dependencies_start_mock';
-import { MiddlewareActionSpyHelper, createSpyMiddleware } from '../../store/test_utils';
+import type { MiddlewareActionSpyHelper } from '../../store/test_utils';
+import { createSpyMiddleware } from '../../store/test_utils';
 import { kibanaObservable } from '../test_providers';
-import { createStore, State } from '../../store';
+import type { State } from '../../store';
+import { createStore } from '../../store';
 import { AppRootProvider } from './app_root_provider';
 import { managementMiddlewareFactory } from '../../../management/store/middleware';
 import { createStartServicesMock } from '../../lib/kibana/kibana_react.mock';
 import { SUB_PLUGINS_REDUCER, mockGlobalState, createSecuritySolutionStorageMock } from '..';
-import { ExperimentalFeatures } from '../../../../common/experimental_features';
+import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { APP_UI_ID, APP_PATH } from '../../../../common/constants';
 import { KibanaContextProvider, KibanaServices } from '../../lib/kibana';
 import { getDeepLinks } from '../../../app/deep_links';

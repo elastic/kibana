@@ -41,6 +41,7 @@ RUNTIME_DEPS = [
   "//packages/kbn-test",
   "//packages/kbn-tooling-log",
   "@npm//@elastic/elasticsearch",
+  "@npm//moment",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -83,6 +84,7 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",

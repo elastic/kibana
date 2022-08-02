@@ -21,6 +21,7 @@ export default ({ getService }: FtrProviderContext) => {
     expect(ruleResponse.status).to.eql(200);
     return ruleResponse.body.id;
   }
+
   async function deleteRuleById(ruleId: string) {
     const ruleResponse = await supertest
       .delete(`${RULE_ENDPOINT}/${ruleId}`)
@@ -34,8 +35,8 @@ export default ({ getService }: FtrProviderContext) => {
     for (const euiTableRow of tableRows) {
       const $ = await euiTableRow.parseDomContent();
       rows.push({
-        name: $.findTestSubjects('rulesTableCell-name').find('a').text(),
-        enabled: $.findTestSubjects('rulesTableCell-ContextStatus').find('button').attr('title'),
+        name: $.findTestSubjects('rulesTableCell-name').text(),
+        enabled: $.findTestSubjects('rulesTableCell-status').find('button').attr('title'),
       });
     }
     return rows;
@@ -58,8 +59,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('Feature flag', () => {
-      // Related to the config inside x-pack/test/observability_functional/with_rac_write.config.ts
-      it('Link point to O11y Rules pages by default or when "xpack.observability.unsafe.rules.enabled: true"', async () => {
+      it('Link point to O11y Rules pages by default', async () => {
         const manageRulesPageHref = await observability.alerts.rulesPage.getManageRulesPageHref();
         expect(new URL(manageRulesPageHref).pathname).equal('/app/observability/alerts/rules');
       });
@@ -132,9 +132,9 @@ export default ({ getService }: FtrProviderContext) => {
         const tableRows = await find.allByCssSelector('.euiTableRow');
         const rows = await getRulesList(tableRows);
         expect(rows.length).to.be(2);
-        expect(rows[0].name).to.be('error-log');
+        expect(rows[0].name).to.contain('error-log');
         expect(rows[0].enabled).to.be('Enabled');
-        expect(rows[1].name).to.be('uptime');
+        expect(rows[1].name).to.contain('uptime');
         expect(rows[1].enabled).to.be('Enabled');
       });
 

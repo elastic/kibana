@@ -18,11 +18,12 @@ export interface MonitorListState {
   data: MonitorManagementListResult;
   pageState: MonitorListPageState;
   loading: boolean;
+  loaded: boolean;
   error: IHttpSerializedFetchError | null;
 }
 
 const initialState: MonitorListState = {
-  data: { page: 1, perPage: 10, total: null, monitors: [], syncErrors: [] },
+  data: { page: 1, perPage: 10, total: null, monitors: [], syncErrors: [], absoluteTotal: 0 },
   pageState: {
     pageIndex: 0,
     pageSize: 10,
@@ -30,6 +31,7 @@ const initialState: MonitorListState = {
     sortField: `${ConfigKey.NAME}.keyword`,
   },
   loading: false,
+  loaded: false,
   error: null,
 };
 
@@ -38,9 +40,11 @@ export const monitorListReducer = createReducer(initialState, (builder) => {
     .addCase(fetchMonitorListAction.get, (state, action) => {
       state.pageState = action.payload;
       state.loading = true;
+      state.loaded = false;
     })
     .addCase(fetchMonitorListAction.success, (state, action) => {
       state.loading = false;
+      state.loaded = true;
       state.data = action.payload;
     })
     .addCase(fetchMonitorListAction.fail, (state, action) => {
@@ -49,6 +53,7 @@ export const monitorListReducer = createReducer(initialState, (builder) => {
     });
 });
 
+export * from './api';
 export * from './models';
 export * from './actions';
 export * from './effects';

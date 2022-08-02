@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { TimelineType } from '../../../../../../common/types/timeline';
 
 import {

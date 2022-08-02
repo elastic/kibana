@@ -7,7 +7,6 @@
  */
 
 export const UI_SETTINGS = {
-  LEGACY_CHARTS_LIBRARY: 'timelion:legacyChartsLibrary',
   ES_TIMEFIELD: 'timelion:es.timefield',
   DEFAULT_INDEX: 'timelion:es.default_index',
   TARGET_BUCKETS: 'timelion:target_buckets',

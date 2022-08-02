@@ -24,7 +24,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 import { checkForDuplicateTitle } from '../persistence';
 import { createMemoryHistory } from 'history';
-import { FilterManager, Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
+import { FilterManager } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { buildExistsFilter, FilterStateStore } from '@kbn/es-query';
 import type { FieldSpec } from '@kbn/data-plugin/common';
@@ -185,8 +186,9 @@ describe('Lens App', () => {
           ],
         },
       });
-
-      const extraEntry = instance.find(services.navigation.ui.TopNavMenu).prop('config')[0];
+      const navigationComponent = services.navigation.ui
+        .TopNavMenu as unknown as React.ReactElement;
+      const extraEntry = instance.find(navigationComponent).prop('config')[0];
       expect(extraEntry.label).toEqual('My entry');
       expect(extraEntry.run).toBe(runFn);
     });
@@ -409,7 +411,7 @@ describe('Lens App', () => {
         expect.objectContaining({
           currentDataViewId: 'mockip',
           onChangeDataView: expect.any(Function),
-          onDataViewCreated: expect.any(Function),
+          onDataViewCreated: undefined,
           onAddField: undefined,
         })
       );
@@ -417,7 +419,7 @@ describe('Lens App', () => {
 
     it('calls the nav component with the correct dataview picker props if permissions are given', async () => {
       const { instance, lensStore, services } = await mountWith({ preloadedState: {} });
-      services.dataViewFieldEditor.userPermissions.editIndexPattern = () => true;
+      services.dataViewEditor.userPermissions.editDataView = () => true;
       const document = {
         savedObjectId: defaultSavedObjectId,
         state: {

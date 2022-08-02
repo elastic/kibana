@@ -8,6 +8,7 @@
     "unit": "m"
   },
   "service.name": "",
+  "config_id": "",
   "tags": [
     "cookie-test",
     "browser"
@@ -43,5 +44,7 @@
   "locations": [],
   "name": "Test HTTP Monitor 03",
   "namespace": "testnamespace",
-  "origin": "ui"
+  "origin": "ui",
+  "urls": "",
+  "url.port": null
 }

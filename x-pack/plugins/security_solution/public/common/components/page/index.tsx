@@ -153,6 +153,7 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
 
 export const DescriptionListStyled = styled(EuiDescriptionList)`
   ${({ theme }) => `
+    word-break: break-word;
     dt {
       font-size: ${theme.eui.euiFontSizeXS} !important;
     }

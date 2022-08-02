@@ -6,9 +6,16 @@
  */
 
 import { EsQueryAlertParams, SearchType } from './types';
-import { validateExpression } from './validation';
+import { validateExpression, hasExpressionValidationErrors } from './validation';
 
 describe('expression params validation', () => {
+  test('if params are not set should return a proper error message', () => {
+    const initialParams: EsQueryAlertParams<SearchType.esQuery> =
+      {} as EsQueryAlertParams<SearchType.esQuery>;
+    expect(validateExpression(initialParams).errors.searchType.length).toBeGreaterThan(0);
+    expect(validateExpression(initialParams).errors.searchType[0]).toBe('Query type is required.');
+  });
+
   test('if index property is invalid should return proper error message', () => {
     const initialParams: EsQueryAlertParams<SearchType.esQuery> = {
       index: [],
@@ -63,6 +70,7 @@ describe('expression params validation', () => {
     };
     expect(validateExpression(initialParams).errors.esQuery.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.esQuery[0]).toBe(`Query field is required.`);
+    expect(hasExpressionValidationErrors(initialParams)).toBe(true);
   });
 
   test('if searchConfiguration property is not set should return proper error message', () => {
@@ -156,5 +164,19 @@ describe('expression params validation', () => {
     expect(validateExpression(initialParams).errors.size[0]).toBe(
       'Size must be between 0 and 10,000.'
     );
+  });
+
+  test('should not return error messages if all is correct', () => {
+    const initialParams: EsQueryAlertParams<SearchType.esQuery> = {
+      index: ['test'],
+      esQuery: '{"query":{"match_all":{}}}',
+      size: 250,
+      timeWindowSize: 100,
+      timeWindowUnit: 's',
+      threshold: [0],
+      timeField: '@timestamp',
+    };
+    expect(validateExpression(initialParams).errors.size.length).toBe(0);
+    expect(hasExpressionValidationErrors(initialParams)).toBe(false);
   });
 });

@@ -18,7 +18,6 @@ import { mockHoverActions } from './mock_hover_actions';
 export const createTGridMocks = () => ({
   getHoverActions: () => mockHoverActions,
   getTGrid: () => <>{'hello grid'}</>,
-  getFieldBrowser: () => <div data-test-subj="field-browser" />,
   getLastUpdated: (props: LastUpdatedAtProps) => <LastUpdatedAt {...props} />,
   getLoadingPanel: (props: LoadingPanelProps) => <LoadingPanel {...props} />,
   getUseAddToTimeline: () => useAddToTimeline,

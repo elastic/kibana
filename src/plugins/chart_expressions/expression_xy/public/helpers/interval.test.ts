@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { DataLayerConfig, XYChartProps } from '../../common';
 import { sampleArgs } from '../../common/__mocks__';
 import { calculateMinInterval } from './interval';
 
 describe('calculateMinInterval', () => {
+  const datatableUtilities = createDatatableUtilitiesMock();
   let xyProps: XYChartProps;
   let layer: DataLayerConfig;
   beforeEach(() => {
@@ -29,7 +31,7 @@ describe('calculateMinInterval', () => {
       },
     };
     xyProps.args.layers[0] = layer;
-    const result = await calculateMinInterval(xyProps);
+    const result = await calculateMinInterval(datatableUtilities, xyProps);
     expect(result).toEqual(5 * 60 * 1000);
   });
 
@@ -48,7 +50,7 @@ describe('calculateMinInterval', () => {
       },
     };
     xyProps.args.layers[0] = layer;
-    const result = await calculateMinInterval(xyProps);
+    const result = await calculateMinInterval(datatableUtilities, xyProps);
     expect(result).toEqual(5);
   });
 
@@ -63,19 +65,19 @@ describe('calculateMinInterval', () => {
     };
 
     xyProps.args.layers[0] = layer;
-    const result = await calculateMinInterval(xyProps);
+    const result = await calculateMinInterval(datatableUtilities, xyProps);
     expect(result).toEqual(undefined);
   });
 
   it('should return undefined if interval can not be checked', async () => {
-    const result = await calculateMinInterval(xyProps);
+    const result = await calculateMinInterval(datatableUtilities, xyProps);
     expect(result).toEqual(undefined);
   });
 
   it('should return undefined if date column is not found', async () => {
     layer.table.columns.splice(2, 1);
     xyProps.args.layers[0] = layer;
-    const result = await calculateMinInterval(xyProps);
+    const result = await calculateMinInterval(datatableUtilities, xyProps);
     expect(result).toEqual(undefined);
   });
 
@@ -83,7 +85,7 @@ describe('calculateMinInterval', () => {
     layer.xScaleType = 'ordinal';
     xyProps.args.layers[0] = layer;
     xyProps.args.layers[0].table.columns.splice(2, 1);
-    const result = await calculateMinInterval(xyProps);
+    const result = await calculateMinInterval(datatableUtilities, xyProps);
     expect(result).toEqual(undefined);
   });
 
@@ -97,7 +99,7 @@ describe('calculateMinInterval', () => {
     };
     xyProps.args.layers[0] = layer;
     xyProps.args.minTimeBarInterval = '1h';
-    const result = await calculateMinInterval(xyProps);
+    const result = await calculateMinInterval(datatableUtilities, xyProps);
     expect(result).toEqual(60 * 60 * 1000);
   });
 });

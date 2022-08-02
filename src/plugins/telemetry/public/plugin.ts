@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { ElasticV3BrowserShipper } from '@kbn/analytics-shippers-elastic-v3-browser';
-
 import type {
   Plugin,
   CoreStart,
@@ -19,20 +17,16 @@ import type {
   ApplicationStart,
   DocLinksStart,
 } from '@kbn/core/public';
-
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
-
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { ElasticV3BrowserShipper } from '@kbn/analytics-shippers-elastic-v3-browser';
+
+import { of } from 'rxjs';
 import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
 import type {
   TelemetrySavedObjectAttributes,
   TelemetrySavedObject,
 } from '../common/telemetry_config/types';
-import {
-  getTelemetryAllowChangingOptInStatus,
-  getTelemetryOptIn,
-  getTelemetrySendUsageFrom,
-} from '../common/telemetry_config';
 import { getNotifyUserAboutOptInDefault } from '../common/telemetry_config/get_telemetry_notify_user_about_optin_default';
 import { renderWelcomeTelemetryNotice } from './render_welcome_telemetry_notice';
 
@@ -95,8 +89,6 @@ interface TelemetryPluginSetupDependencies {
  * Public-exposed configuration
  */
 export interface TelemetryPluginConfig {
-  /** Is the plugin enabled? **/
-  enabled: boolean;
   /** The banner is expected to be shown when needed **/
   banner: boolean;
   /** Does the cluster allow changing the opt-in/out status via the UI? **/
@@ -113,6 +105,8 @@ export interface TelemetryPluginConfig {
   userCanChangeSettings?: boolean;
   /** Should we hide the privacy statement notice? Useful on some environments, e.g. Cloud */
   hidePrivacyStatement?: boolean;
+  /** Extra labels to add to the telemetry context */
+  labels: Record<string, unknown>;
 }
 
 function getTelemetryConstants(docLinks: DocLinksStart): TelemetryConstants {
@@ -153,6 +147,19 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     getStartServices().then(([{ docLinks }]) => {
       telemetryConstants = getTelemetryConstants(docLinks);
+    });
+
+    analytics.registerContextProvider({
+      name: 'telemetry labels',
+      context$: of({ labels: this.config.labels }),
+      schema: {
+        labels: {
+          type: 'pass_through',
+          _meta: {
+            description: 'Custom labels added to the telemetry.labels config in the kibana.yml',
+          },
+        },
+      },
     });
 
     analytics.registerShipper(ElasticV3BrowserShipper, {
@@ -320,6 +327,9 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     const configTelemetryAllowChangingOptInStatus = this.config.allowChangingOptInStatus;
 
     const currentKibanaVersion = this.currentKibanaVersion;
+
+    const { getTelemetryAllowChangingOptInStatus, getTelemetryOptIn, getTelemetrySendUsageFrom } =
+      await import('../common/telemetry_config');
 
     const allowChangingOptInStatus = getTelemetryAllowChangingOptInStatus({
       configTelemetryAllowChangingOptInStatus,

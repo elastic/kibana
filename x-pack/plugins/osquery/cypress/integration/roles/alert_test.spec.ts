@@ -13,7 +13,7 @@ import { preparePack } from '../../tasks/packs';
 import { closeModalIfVisible } from '../../tasks/integrations';
 import { navigateTo } from '../../tasks/navigation';
 
-describe('Alert_Test', () => {
+describe.skip('Alert_Test', () => {
   before(() => {
     runKbnArchiverScript(ArchiverMethod.LOAD, 'pack');
     runKbnArchiverScript(ArchiverMethod.LOAD, 'rule');
@@ -27,7 +27,7 @@ describe('Alert_Test', () => {
     runKbnArchiverScript(ArchiverMethod.UNLOAD, 'rule');
   });
 
-  it.skip('should be able to run live query', () => {
+  it('should be able to run live query', () => {
     const PACK_NAME = 'testpack';
     const RULE_NAME = 'Test-rule';
     navigateTo('/app/osquery');

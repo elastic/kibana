@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     let event: Event;
     before(async () => {
       await common.navigateToApp('home');
-      [event] = await ebtUIHelper.getEvents(1, ['Loaded Kibana']); // Get the loaded Kibana event
+      [event] = await ebtUIHelper.getEvents(1, { eventTypes: ['Loaded Kibana'] }); // Get the loaded Kibana event
     });
 
     it('should have the properties provided by the "cluster info" context provider', () => {
@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should have the properties provided by the "license info" context provider', async () => {
       await common.clickAndValidate('kibanaChrome', 'kibanaChrome');
-      [event] = await ebtUIHelper.getEvents(1, ['click']); // Get a later event to ensure license has been obtained already.
+      [event] = await ebtUIHelper.getEvents(1, { eventTypes: ['click'] }); // Get a later event to ensure license has been obtained already.
       expect(event.context).to.have.property('license_id');
       expect(event.context.license_id).to.be.a('string');
       expect(event.context).to.have.property('license_status');

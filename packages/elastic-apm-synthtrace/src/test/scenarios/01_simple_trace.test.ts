@@ -17,7 +17,7 @@ describe('simple trace', () => {
 
   beforeEach(() => {
     const javaService = apm.service('opbeans-java', 'production', 'java');
-    const javaInstance = javaService.instance('instance-1');
+    const javaInstance = javaService.instance('instance-1').containerId('instance-1');
 
     const range = timerange(
       new Date('2021-01-01T00:00:00.000Z'),

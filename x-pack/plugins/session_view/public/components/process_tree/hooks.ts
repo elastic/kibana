@@ -41,7 +41,7 @@ export class ProcessImpl implements Process {
   children: Process[];
   parent: Process | undefined;
   autoExpand: boolean;
-  searchMatched: string | null;
+  searchMatched: number[] | null;
   orphans: Process[];
 
   constructor(id: string) {

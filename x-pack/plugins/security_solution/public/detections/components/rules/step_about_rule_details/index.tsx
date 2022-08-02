@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
   EuiPanel,
   EuiProgress,
   EuiButtonGroup,
-  EuiButtonGroupOptionProps,
   EuiSpacer,
   EuiFlexItem,
   EuiText,
@@ -22,7 +22,10 @@ import styled from 'styled-components';
 
 import { HeaderSection } from '../../../../common/components/header_section';
 import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
-import { AboutStepRule, AboutStepRuleDetails } from '../../../pages/detection_engine/rules/types';
+import type {
+  AboutStepRule,
+  AboutStepRuleDetails,
+} from '../../../pages/detection_engine/rules/types';
 import * as i18n from './translations';
 import { StepAboutRule } from '../step_about_rule';
 

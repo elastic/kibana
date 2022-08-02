@@ -7,9 +7,9 @@
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
-import { HostItem, HostsFields } from '../common';
-import { CursorType, Direction, Inspect, Maybe, PageInfoPaginated } from '../../../common';
-import { RequestOptionsPaginated } from '../..';
+import type { HostItem, HostsFields } from '../common';
+import type { CursorType, Direction, Inspect, Maybe, PageInfoPaginated } from '../../../common';
+import type { RequestOptionsPaginated } from '../..';
 
 export interface HostsEdges {
   node: HostItem;

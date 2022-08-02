@@ -10,7 +10,7 @@ import { FeatureCollection } from 'geojson';
 import _ from 'lodash';
 import type { Query } from '@kbn/data-plugin/common';
 import { Filter } from '@kbn/es-query';
-import { TimeRange } from '@kbn/data-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import { RasterTileLayer } from '../classes/layers/raster_tile_layer/raster_tile_layer';
 import { EmsVectorTileLayer } from '../classes/layers/ems_vector_tile_layer/ems_vector_tile_layer';
 import {
@@ -49,10 +49,10 @@ import {
   LayerDescriptor,
   MapCenter,
   MapExtent,
+  MapSettings,
   TooltipState,
   VectorLayerDescriptor,
 } from '../../common/descriptor_types';
-import { MapSettings } from '../reducers/map';
 import { ISource } from '../classes/sources/source';
 import { ITMSSource } from '../classes/sources/tms_source';
 import { IVectorSource } from '../classes/sources/vector_source';
@@ -172,8 +172,6 @@ export const getLayerListRaw = ({ map }: MapStoreState): LayerDescriptor[] =>
 
 export const getWaitingForMapReadyLayerListRaw = ({ map }: MapStoreState): LayerDescriptor[] =>
   map.waitingForMapReadyLayerList ? map.waitingForMapReadyLayerList : [];
-
-export const getScrollZoom = ({ map }: MapStoreState): boolean => map.mapState.scrollZoom;
 
 export const getMapExtent = ({ map }: MapStoreState): MapExtent | undefined => map.mapState.extent;
 

@@ -11,7 +11,7 @@ import { TestProviders } from '../../mock';
 
 import { NO_ALERT_INDEX } from '../../../../common/constants';
 import { ModalInspectQuery, formatIndexPatternRequested } from './modal';
-import { InputsModelId } from '../../store/inputs/constants';
+import type { InputsModelId } from '../../store/inputs/constants';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');

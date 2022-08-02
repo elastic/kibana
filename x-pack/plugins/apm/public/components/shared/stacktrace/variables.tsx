@@ -17,8 +17,7 @@ const VariablesContainer = euiStyled.div`
   background: ${({ theme }) => theme.eui.euiColorEmptyShade};
   border-radius: 0 0 ${({ theme }) =>
     `${theme.eui.euiBorderRadiusSmall} ${theme.eui.euiBorderRadiusSmall}`};
-  padding:  ${({ theme }) =>
-    `${theme.eui.paddingSizes.s} ${theme.eui.paddingSizes.m}`};
+  padding:  ${({ theme }) => `${theme.eui.euiSizeS} ${theme.eui.euiSizeM}`};
 `;
 
 interface Props {

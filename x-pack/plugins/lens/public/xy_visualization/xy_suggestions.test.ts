@@ -17,6 +17,7 @@ import {
 import { generateId } from '../id_generator';
 import { getXyVisualization } from './xy_visualization';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 import type { PaletteOutput } from '@kbn/coloring';
 import { layerTypes } from '../../common';
@@ -26,6 +27,7 @@ import { themeServiceMock } from '@kbn/core/public/mocks';
 jest.mock('../id_generator');
 
 const xyVisualization = getXyVisualization({
+  datatableUtilities: createDatatableUtilitiesMock(),
   paletteService: chartPluginMock.createPaletteRegistry(),
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
   useLegacyTimeAxis: false,

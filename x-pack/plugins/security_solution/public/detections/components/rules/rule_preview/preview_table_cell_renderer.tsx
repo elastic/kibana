@@ -6,8 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import { CellValueElementProps } from '@kbn/timelines-plugin/common';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import type { CellValueElementProps } from '@kbn/timelines-plugin/common';
 import { StyledContent } from '../../../../common/lib/cell_actions/expanded_cell_value_actions';
 import { getLinkColumnDefinition } from '../../../../common/lib/cell_actions/helpers';
 import { useGetMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';

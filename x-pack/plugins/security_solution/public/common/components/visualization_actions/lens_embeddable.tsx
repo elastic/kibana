@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useDispatch } from 'react-redux';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
@@ -13,7 +13,7 @@ import styled from 'styled-components';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { useKibana } from '../../lib/kibana';
 import { useLensAttributes } from './use_lens_attributes';
-import { LensEmbeddableComponentProps } from './types';
+import type { LensEmbeddableComponentProps } from './types';
 import { useActions } from './use_actions';
 
 const LensComponentWrapper = styled.div<{ height?: string }>`
@@ -31,7 +31,7 @@ const LensEmbeddableComponent = ({
 }: LensEmbeddableComponentProps) => {
   const { lens } = useKibana().services;
   const dispatch = useDispatch();
-  const { attributes, indexPattern } = useLensAttributes({
+  const { attributes } = useLensAttributes({
     lensAttributes,
     getLensAttributes,
     stackByField,
@@ -44,17 +44,6 @@ const LensEmbeddableComponent = ({
     attributes,
     timeRange: timerange,
   });
-
-  const inspectExtraInfo = useMemo(
-    () => ({
-      indexFilters: {
-        description: 'Active index patterns',
-        label: 'Index Pattern',
-        value: indexPattern.join(', '),
-      },
-    }),
-    [indexPattern]
-  );
 
   return attributes ? (
     <LensComponentWrapper height={height}>

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { SVGProps } from 'react';
+import type { SVGProps } from 'react';
+import React from 'react';
 
 export const EuiIconSpaces: React.FC<SVGProps<SVGSVGElement>> = ({ ...props }) => (
   <svg

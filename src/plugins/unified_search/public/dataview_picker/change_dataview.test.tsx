@@ -15,7 +15,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { ChangeDataView } from './change_dataview';
 import { EuiTourStep } from '@elastic/eui';
-import type { DataViewPickerProps } from '.';
+import { DataViewPickerPropsExtended, TextBasedLanguages } from '.';
 
 describe('DataView component', () => {
   const createMockWebStorage = () => ({
@@ -40,7 +40,11 @@ describe('DataView component', () => {
     return storage;
   };
 
-  function wrapDataViewComponentInContext(testProps: DataViewPickerProps, storageValue: boolean) {
+  function wrapDataViewComponentInContext(
+    testProps: DataViewPickerPropsExtended,
+    storageValue: boolean,
+    uiSettingValue: boolean = false
+  ) {
     let dataMock = dataPluginMock.createStartContract();
     dataMock = {
       ...dataMock,
@@ -52,6 +56,9 @@ describe('DataView component', () => {
     const services = {
       data: dataMock,
       storage: getStorage(storageValue),
+      uiSettings: {
+        get: jest.fn(() => uiSettingValue),
+      },
     };
 
     return (
@@ -62,7 +69,7 @@ describe('DataView component', () => {
       </I18nProvider>
     );
   }
-  let props: DataViewPickerProps;
+  let props: DataViewPickerPropsExtended;
   beforeEach(() => {
     props = {
       currentDataViewId: 'dataview-1',
@@ -73,6 +80,7 @@ describe('DataView component', () => {
         'data-test-subj': 'dataview-trigger',
       },
       onChangeDataView: jest.fn(),
+      onTextLangQuerySubmit: jest.fn(),
     };
   });
   it('should not render the tour component by default', async () => {
@@ -86,6 +94,13 @@ describe('DataView component', () => {
       wrapDataViewComponentInContext({ ...props, showNewMenuTour: true }, false)
     );
     expect(component.find(EuiTourStep).prop('isStepOpen')).toBe(true);
+  });
+
+  it('should not render the tour component if the showNewMenuTour is true but the hideAnnouncements setting is on', async () => {
+    const component = mount(
+      wrapDataViewComponentInContext({ ...props, showNewMenuTour: true }, false, true)
+    );
+    expect(component.find(EuiTourStep).prop('isStepOpen')).toBe(false);
   });
 
   it('should not render the add runtime field menu if addField is not given', async () => {
@@ -116,7 +131,7 @@ describe('DataView component', () => {
     await act(async () => {
       const component = mount(wrapDataViewComponentInContext(props, true));
       findTestSubject(component, 'dataview-trigger').simulate('click');
-      expect(component.find('[data-test-subj="idataview-create-new"]').length).toBe(0);
+      expect(component.find('[data-test-subj="dataview-create-new"]').length).toBe(0);
     });
   });
 
@@ -134,5 +149,22 @@ describe('DataView component', () => {
     );
     component.find('[data-test-subj="dataview-create-new"]').first().simulate('click');
     expect(addDataViewSpy).toHaveBeenCalled();
+  });
+
+  it('should render the text based languages panels if languages are given', async () => {
+    const component = mount(
+      wrapDataViewComponentInContext(
+        {
+          ...props,
+          showNewMenuTour: true,
+          textBasedLanguages: [TextBasedLanguages.ESQL, TextBasedLanguages.SQL],
+          textBasedLanguage: TextBasedLanguages.SQL,
+        },
+        false
+      )
+    );
+    findTestSubject(component, 'dataview-trigger').simulate('click');
+    const text = component.find('[data-test-subj="select-text-based-language-panel"]');
+    expect(text.length).not.toBe(0);
   });
 });

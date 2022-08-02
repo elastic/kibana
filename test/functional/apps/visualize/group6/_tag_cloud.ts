@@ -145,7 +145,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
-        await PageObjects.settings.filterField(termsField);
         await PageObjects.settings.openControlsByName(termsField);
         await (
           await (
@@ -168,7 +167,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
-        await PageObjects.settings.filterField(termsField);
         await PageObjects.settings.openControlsByName(termsField);
         await PageObjects.settings.setFieldFormat('');
         await PageObjects.settings.controlChangeSave();

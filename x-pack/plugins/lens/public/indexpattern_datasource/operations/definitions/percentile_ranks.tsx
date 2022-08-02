@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiFieldNumberProps, EuiFieldNumber } from '@elastic/eui';
+import { EuiFieldNumberProps, EuiFieldNumber } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
@@ -24,6 +24,7 @@ import { FieldBasedIndexPatternColumn } from './column_types';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { useDebouncedValue } from '../../../shared_components';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
+import { FormRow } from './shared_components';
 
 export interface PercentileRanksIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'percentile_rank';
@@ -52,9 +53,11 @@ const supportedFieldTypes = ['number', 'histogram'];
 export const percentileRanksOperation: OperationDefinition<
   PercentileRanksIndexPatternColumn,
   'field',
-  { value: number }
+  { value: number },
+  true
 > = {
   type: 'percentile_rank',
+  allowAsReference: true,
   displayName: i18n.translate('xpack.lens.indexPattern.percentileRank', {
     defaultMessage: 'Percentile rank',
   }),
@@ -143,40 +146,39 @@ export const percentileRanksOperation: OperationDefinition<
       getDisallowedPreviousShiftMessage(layer, columnId),
     ]),
   paramEditor: function PercentileParamEditor({
-    layer,
-    updateLayer,
+    paramEditorUpdater,
     currentColumn,
-    columnId,
     indexPattern,
+    paramEditorCustomProps,
   }) {
+    const { labels, isInline } = paramEditorCustomProps || {};
+    const percentileRanksLabel =
+      labels?.[0] ||
+      i18n.translate('xpack.lens.indexPattern.percentile.percentileRanksValue', {
+        defaultMessage: 'Percentile ranks value',
+      });
     const onChange = useCallback(
       (value) => {
         if (!isValidNumber(value) || Number(value) === currentColumn.params.value) {
           return;
         }
-        updateLayer({
-          ...layer,
-          columns: {
-            ...layer.columns,
-            [columnId]: {
-              ...currentColumn,
-              label: currentColumn.customLabel
-                ? currentColumn.label
-                : ofName(
-                    indexPattern.getFieldByName(currentColumn.sourceField)?.displayName ||
-                      currentColumn.sourceField,
-                    Number(value),
-                    currentColumn.timeShift
-                  ),
-              params: {
-                ...currentColumn.params,
-                value: Number(value),
-              },
-            } as PercentileRanksIndexPatternColumn,
+        paramEditorUpdater({
+          ...currentColumn,
+          label: currentColumn.customLabel
+            ? currentColumn.label
+            : ofName(
+                indexPattern.getFieldByName(currentColumn.sourceField)?.displayName ||
+                  currentColumn.sourceField,
+                Number(value),
+                currentColumn.timeShift
+              ),
+          params: {
+            ...currentColumn.params,
+            value: Number(value),
           },
-        });
+        } as PercentileRanksIndexPatternColumn);
       },
-      [updateLayer, layer, columnId, currentColumn, indexPattern]
+      [paramEditorUpdater, currentColumn, indexPattern]
     );
     const { inputValue, handleInputChange: handleInputChangeWithoutValidation } = useDebouncedValue<
       string | undefined
@@ -197,10 +199,9 @@ export const percentileRanksOperation: OperationDefinition<
     );
 
     return (
-      <EuiFormRow
-        label={i18n.translate('xpack.lens.indexPattern.percentile.percentileRanksValue', {
-          defaultMessage: 'Percentile ranks value',
-        })}
+      <FormRow
+        isInline={isInline}
+        label={percentileRanksLabel}
         data-test-subj="lns-indexPattern-percentile_ranks-form"
         display="rowCompressed"
         fullWidth
@@ -213,16 +214,15 @@ export const percentileRanksOperation: OperationDefinition<
         }
       >
         <EuiFieldNumber
+          fullWidth
           data-test-subj="lns-indexPattern-percentile_ranks-input"
           compressed
           value={inputValue ?? ''}
           onChange={handleInputChange}
           step="any"
-          aria-label={i18n.translate('xpack.lens.indexPattern.percentile.percentileRanksValue', {
-            defaultMessage: 'Percentile ranks value',
-          })}
+          aria-label={percentileRanksLabel}
         />
-      </EuiFormRow>
+      </FormRow>
     );
   },
   documentation: {

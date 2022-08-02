@@ -18,7 +18,7 @@ import {
   DEFAULT_INTERVAL_VALUE,
 } from '../../../common/constants';
 import { KibanaServices } from '../lib/kibana';
-import { Policy } from '../store/inputs/model';
+import type { Policy } from '../store/inputs/model';
 
 interface DefaultTimeRange {
   from?: string | null;

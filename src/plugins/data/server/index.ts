@@ -6,14 +6,10 @@
  * Side Public License, v 1.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/109904
-/* eslint-disable @kbn/eslint/no_export_all */
-
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { ConfigSchema, configSchema } from '../config';
 import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
-export * from './deprecated';
 export { getEsQueryConfig, DEFAULT_QUERY_LANGUAGE } from '../common';
 
 export { getRequestAbortedSignal } from './lib';
@@ -93,7 +89,6 @@ export const search = {
  * @public
  */
 
-export type { TimeRange } from '../common';
 export { getTime, parseInterval } from '../common';
 
 /**

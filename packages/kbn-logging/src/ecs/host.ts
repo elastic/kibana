@@ -21,6 +21,7 @@ interface NestedFields {
  */
 export interface EcsHost extends NestedFields {
   architecture?: string;
+  boot?: { id: string };
   cpu?: { usage: number };
   disk?: Disk;
   domain?: string;
@@ -30,6 +31,7 @@ export interface EcsHost extends NestedFields {
   mac?: string[];
   name?: string;
   network?: Network;
+  pid_ns_ino?: string;
   type?: string;
   uptime?: number;
 }

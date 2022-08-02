@@ -7,13 +7,14 @@
 
 import type { SavedObjectsClientContract, SavedObjectsFindOptions } from '@kbn/core/server';
 import semverGte from 'semver/functions/gte';
+import type { Logger } from '@kbn/core/server';
 
 import {
-  isPackageLimited,
   installationStatuses,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-} from '../../../../common';
-import type { PackageUsageStats, PackagePolicySOAttributes } from '../../../../common';
+} from '../../../../common/constants';
+import { isPackageLimited } from '../../../../common/services';
+import type { PackageUsageStats, PackagePolicySOAttributes } from '../../../../common/types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type {
   ArchivePackage,
@@ -22,7 +23,11 @@ import type {
   GetCategoriesRequest,
 } from '../../../../common/types';
 import type { Installation, PackageInfo } from '../../../types';
-import { IngestManagerError, PackageNotFoundError } from '../../../errors';
+import {
+  IngestManagerError,
+  PackageFailedVerificationError,
+  PackageNotFoundError,
+} from '../../../errors';
 import { appContextService } from '../..';
 import * as Registry from '../registry';
 import { getEsPackage } from '../archive/storage';
@@ -150,7 +155,7 @@ export async function getPackageInfo({
   // otherwise build it from the archive
   let paths: string[];
   let packageInfo: RegistryPackage | ArchivePackage | undefined = skipArchive
-    ? await Registry.fetchInfo(pkgName, pkgVersion).catch(() => undefined)
+    ? await Registry.fetchInfo(pkgName, resolvedPkgVersion).catch(() => undefined)
     : undefined;
 
   if (packageInfo) {
@@ -268,8 +273,10 @@ export async function getPackageFromSource(options: {
       try {
         res = await Registry.getRegistryPackage(pkgName, pkgVersion);
         logger.debug(`retrieved installed package ${pkgName}-${pkgVersion} from registry`);
-        // TODO: add to cache and storage here?
       } catch (error) {
+        if (error instanceof PackageFailedVerificationError) {
+          throw error;
+        }
         // treating this is a 404 as no status code returned
         // in the unlikely event its missing from cache, storage, and never installed from registry
       }
@@ -291,16 +298,19 @@ export async function getPackageFromSource(options: {
 export async function getInstallationObject(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
+  logger?: Logger;
 }) {
-  const { savedObjectsClient, pkgName } = options;
-  return savedObjectsClient
-    .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
-    .catch((e) => undefined);
+  const { savedObjectsClient, pkgName, logger } = options;
+  return savedObjectsClient.get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName).catch((e) => {
+    logger?.error(e);
+    return undefined;
+  });
 }
 
 export async function getInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
+  logger?: Logger;
 }) {
   const savedObject = await getInstallationObject(options);
   return savedObject?.attributes;

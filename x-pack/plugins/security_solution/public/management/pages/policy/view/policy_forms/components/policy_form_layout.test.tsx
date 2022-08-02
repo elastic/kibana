@@ -11,8 +11,8 @@ import { mount } from 'enzyme';
 import { PolicyFormLayout } from './policy_form_layout';
 import '../../../../../../common/mock/match_media';
 import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import {
-  AppContextTestRender,
   createAppRootMockRenderer,
   resetReactDomCreatePortalMock,
 } from '../../../../../../common/mock/endpoint';
@@ -320,9 +320,9 @@ describe('Policy Form Layout', () => {
         expect(ransomware).toHaveLength(0);
       });
 
-      it('shows the locked card in place of 1 paid feature', () => {
+      it('shows the locked card in place of paid features', () => {
         const lockedCard = policyFormLayoutView.find('EuiCard[data-test-subj="lockedPolicyCard"]');
-        expect(lockedCard).toHaveLength(3);
+        expect(lockedCard).toHaveLength(4);
       });
     });
   });

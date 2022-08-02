@@ -207,8 +207,11 @@ describe('ExpressionRow', () => {
   it('loads custom metrics passed in through the expression, even with an empty context', async () => {
     const { wrapper } = await setup(expression as InventoryMetricConditions);
     const [valueMatch] =
-      wrapper.html().match('<span class="euiExpression__value">Rate of some.system.field</span>') ??
-      [];
+      wrapper
+        .html()
+        .match(
+          '<span class="euiExpression__value css-xlzuv8-euiExpression__value">Rate of some.system.field</span>'
+        ) ?? [];
     expect(valueMatch).toBeTruthy();
   });
 });

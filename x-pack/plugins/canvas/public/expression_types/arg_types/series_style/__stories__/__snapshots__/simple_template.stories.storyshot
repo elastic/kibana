@@ -17,7 +17,7 @@ exports[`Storyshots arguments/SeriesStyle simple 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiText euiText--extraSmall"
+        className="euiText emotion-euiText-xs"
       >
         Color
       </div>
@@ -26,11 +26,11 @@ exports[`Storyshots arguments/SeriesStyle simple 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiText euiText--extraSmall"
+        className="euiText emotion-euiText-xs"
       >
         <button
           aria-label="Color: Auto"
-          className="euiLink css-102pf9n-euiLink-primary"
+          className="euiLink emotion-euiLink-primary"
           disabled={false}
           onClick={[Function]}
           type="button"
@@ -60,7 +60,7 @@ exports[`Storyshots arguments/SeriesStyle/components simple: defaults 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiText euiText--extraSmall"
+        className="euiText emotion-euiText-xs"
       >
         Color
       </div>
@@ -69,11 +69,11 @@ exports[`Storyshots arguments/SeriesStyle/components simple: defaults 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiText euiText--extraSmall"
+        className="euiText emotion-euiText-xs"
       >
         <button
           aria-label="Color: Auto"
-          className="euiLink css-102pf9n-euiLink-primary"
+          className="euiLink emotion-euiLink-primary"
           disabled={false}
           onClick={[Function]}
           type="button"
@@ -103,7 +103,7 @@ exports[`Storyshots arguments/SeriesStyle/components simple: no labels 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiText euiText--extraSmall"
+        className="euiText emotion-euiText-xs"
       >
         Color
       </div>
@@ -112,11 +112,11 @@ exports[`Storyshots arguments/SeriesStyle/components simple: no labels 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiText euiText--extraSmall"
+        className="euiText emotion-euiText-xs"
       >
         <button
           aria-label="Color: Auto"
-          className="euiLink css-102pf9n-euiLink-primary"
+          className="euiLink emotion-euiLink-primary"
           disabled={false}
           onClick={[Function]}
           type="button"
@@ -146,7 +146,7 @@ exports[`Storyshots arguments/SeriesStyle/components simple: no series 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiText euiText--extraSmall"
+        className="euiText emotion-euiText-xs"
       >
         Color
       </div>
@@ -155,11 +155,11 @@ exports[`Storyshots arguments/SeriesStyle/components simple: no series 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiText euiText--extraSmall"
+        className="euiText emotion-euiText-xs"
       >
         <button
           aria-label="Color: Auto"
-          className="euiLink css-102pf9n-euiLink-primary"
+          className="euiLink emotion-euiLink-primary"
           disabled={false}
           onClick={[Function]}
           type="button"
@@ -208,7 +208,7 @@ exports[`Storyshots arguments/SeriesStyle/components simple: with series 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiText euiText--extraSmall"
+        className="euiText emotion-euiText-xs"
       >
         Color
       </div>
@@ -217,11 +217,11 @@ exports[`Storyshots arguments/SeriesStyle/components simple: with series 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiText euiText--extraSmall"
+        className="euiText emotion-euiText-xs"
       >
         <button
           aria-label="Color: Auto"
-          className="euiLink css-102pf9n-euiLink-primary"
+          className="euiLink emotion-euiLink-primary"
           disabled={false}
           onClick={[Function]}
           type="button"

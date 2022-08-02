@@ -81,7 +81,6 @@ export const sampleAttributeWithReferenceLines = {
                   isFormulaBroken: false,
                 },
                 references: ['y-axis-column-layer0X3'],
-                scale: 'ratio',
               },
               'y-axis-column-layer0X0': {
                 customLabel: true,
@@ -92,10 +91,15 @@ export const sampleAttributeWithReferenceLines = {
                     'transaction.type: page-load and processor.event: transaction and transaction.type : * and service.name: (elastic or kibana)',
                 },
                 isBucketed: false,
-                label: 'Part of count() / overall_sum(count())',
+                label: 'Part of Pages loaded',
                 operationType: 'count',
+                params: {
+                  emptyAsNull: false,
+                },
                 scale: 'ratio',
                 sourceField: RECORDS_FIELD,
+                timeScale: undefined,
+                timeShift: undefined,
               },
               'y-axis-column-layer0X1': {
                 customLabel: true,
@@ -106,17 +110,23 @@ export const sampleAttributeWithReferenceLines = {
                     'transaction.type: page-load and processor.event: transaction and transaction.type : * and service.name: (elastic or kibana)',
                 },
                 isBucketed: false,
-                label: 'Part of count() / overall_sum(count())',
+                label: 'Part of Pages loaded',
                 operationType: 'count',
+                params: {
+                  emptyAsNull: false,
+                },
                 scale: 'ratio',
                 sourceField: RECORDS_FIELD,
+                timeScale: undefined,
+                timeShift: undefined,
               },
               'y-axis-column-layer0X2': {
                 customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
-                label: 'Part of count() / overall_sum(count())',
+                label: 'Part of Pages loaded',
                 operationType: 'overall_sum',
+                params: undefined,
                 references: ['y-axis-column-layer0X1'],
                 scale: 'ratio',
               },
@@ -124,13 +134,13 @@ export const sampleAttributeWithReferenceLines = {
                 customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
-                label: 'Part of count() / overall_sum(count())',
+                label: 'Part of Pages loaded',
                 operationType: 'math',
                 params: {
                   tinymathAst: {
                     args: ['y-axis-column-layer0X0', 'y-axis-column-layer0X2'],
                     location: {
-                      max: 30,
+                      max: 288,
                       min: 0,
                     },
                     name: 'divide',
@@ -227,14 +237,14 @@ export const sampleAttributeWithReferenceLines = {
     },
     visualization: {
       axisTitlesVisibilitySettings: {
-        x: true,
+        x: false,
         yLeft: true,
         yRight: true,
       },
       curveType: 'CURVE_MONOTONE_X',
       fittingFunction: 'Linear',
       gridlinesVisibilitySettings: {
-        x: true,
+        x: false,
         yLeft: true,
         yRight: true,
       },
@@ -243,6 +253,7 @@ export const sampleAttributeWithReferenceLines = {
           accessors: ['y-axis-column-layer0'],
           layerId: 'layer0',
           layerType: 'data',
+          palette: undefined,
           seriesType: 'line',
           xAccessor: 'x-axis-column-layer0',
           yConfig: [

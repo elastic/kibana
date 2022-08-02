@@ -7,39 +7,39 @@
 
 import pMap from 'p-map';
 import semver from 'semver';
-import LRU from 'lru-cache';
+import type LRU from 'lru-cache';
 import { isEqual, isEmpty } from 'lodash';
-import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import {
+  type Logger,
+  type SavedObjectsClientContract,
+  SavedObjectsErrorHelpers,
+} from '@kbn/core/server';
 import {
   ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
   ENDPOINT_BLOCKLISTS_LIST_ID,
   ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
-import { ListResult } from '@kbn/fleet-plugin/common';
-import { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
-import { ExceptionListClient } from '@kbn/lists-plugin/server';
-import { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
-import {
-  manifestDispatchSchema,
-  ManifestSchema,
-} from '../../../../../common/endpoint/schema/manifest';
+import type { ListResult } from '@kbn/fleet-plugin/common';
+import type { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import type { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
+import type { ManifestSchema } from '../../../../../common/endpoint/schema/manifest';
+import { manifestDispatchSchema } from '../../../../../common/endpoint/schema/manifest';
 
+import type { ArtifactListId } from '../../../lib/artifacts';
 import {
   ArtifactConstants,
   buildArtifact,
   getArtifactId,
   getEndpointExceptionList,
   Manifest,
-  ArtifactListId,
 } from '../../../lib/artifacts';
-import {
-  InternalArtifactCompleteSchema,
-  internalArtifactCompleteSchema,
-} from '../../../schemas/artifacts';
-import { EndpointArtifactClientInterface } from '../artifact_client';
+import type { InternalArtifactCompleteSchema } from '../../../schemas/artifacts';
+import { internalArtifactCompleteSchema } from '../../../schemas/artifacts';
+import type { EndpointArtifactClientInterface } from '../artifact_client';
 import { ManifestClient } from '../manifest_client';
-import { ExperimentalFeatures } from '../../../../../common/experimental_features';
+import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { InvalidInternalManifestError } from '../errors';
 import { wrapErrorIfNeeded } from '../../../utils';
 import { EndpointError } from '../../../../../common/endpoint/errors';
@@ -352,7 +352,7 @@ export class ManifestManager {
       // Cache the compressed body of the artifact
       this.cache.set(artifactId, Buffer.from(artifact.body, 'base64'));
     } catch (err) {
-      if (this.savedObjectsClient.errors.isConflictError(err)) {
+      if (SavedObjectsErrorHelpers.isConflictError(err)) {
         this.logger.debug(`Tried to create artifact ${artifactId}, but it already exists.`);
       } else {
         return [err, undefined];

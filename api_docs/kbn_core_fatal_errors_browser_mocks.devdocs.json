@@ -1,0 +1,90 @@
+{
+  "id": "@kbn/core-fatal-errors-browser-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-fatal-errors-browser-mocks",
+        "id": "def-common.fatalErrorsServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "fatalErrorsServiceMock",
+        "description": [],
+        "path": "packages/core/fatal-errors/core-fatal-errors-browser-mocks/src/fatal_errors_service.mock.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-fatal-errors-browser-mocks",
+            "id": "def-common.fatalErrorsServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<FatalErrorsServiceContract>"
+            ],
+            "path": "packages/core/fatal-errors/core-fatal-errors-browser-mocks/src/fatal_errors_service.mock.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-fatal-errors-browser-mocks",
+            "id": "def-common.fatalErrorsServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "FatalErrorsSetup",
+              ">"
+            ],
+            "path": "packages/core/fatal-errors/core-fatal-errors-browser-mocks/src/fatal_errors_service.mock.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-fatal-errors-browser-mocks",
+            "id": "def-common.fatalErrorsServiceMock.createStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createStartContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "FatalErrorsSetup",
+              ">"
+            ],
+            "path": "packages/core/fatal-errors/core-fatal-errors-browser-mocks/src/fatal_errors_service.mock.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

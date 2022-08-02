@@ -7,7 +7,7 @@
  */
 
 import { get, isEmpty } from 'lodash';
-import type { SearchResponse } from '@kbn/core/server';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { overwrite } from '../../helpers';
 import type { Annotation } from '../../../../../common/types';
 

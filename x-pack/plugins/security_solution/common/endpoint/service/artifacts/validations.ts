@@ -6,7 +6,7 @@
  */
 
 import { ConditionEntryField } from '@kbn/securitysolution-utils';
-import { TrustedAppConditionEntry } from '../../types';
+import type { TrustedAppConditionEntry } from '../../types';
 
 const HASH_LENGTHS: readonly number[] = [
   32, // MD5

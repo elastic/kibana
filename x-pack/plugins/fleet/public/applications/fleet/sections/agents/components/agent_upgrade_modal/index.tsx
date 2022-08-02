@@ -25,6 +25,7 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
 import semverCoerce from 'semver/functions/coerce';
 import semverGt from 'semver/functions/gt';
+import semverLt from 'semver/functions/lt';
 import semverValid from 'semver/functions/valid';
 
 import { getMinVersion } from '../../../../../../../common/services/get_min_max_version';
@@ -36,7 +37,11 @@ import {
   useKibanaVersion,
 } from '../../../../hooks';
 
-import { FALLBACK_VERSIONS, MAINTAINANCE_VALUES } from './constants';
+import {
+  FALLBACK_VERSIONS,
+  MAINTENANCE_VALUES,
+  ROLLING_UPGRADE_MINIMUM_SUPPORTED_VERSION,
+} from './constants';
 import { useScheduleDateTime } from './hooks';
 
 export interface AgentUpgradeAgentModalProps {
@@ -47,6 +52,14 @@ export interface AgentUpgradeAgentModalProps {
 }
 
 const getVersion = (version: Array<EuiComboBoxOptionOption<string>>) => version[0]?.value as string;
+
+function isVersionUnsupported(version?: string) {
+  if (!version) {
+    return false;
+  }
+
+  return semverLt(version, ROLLING_UPGRADE_MINIMUM_SUPPORTED_VERSION);
+}
 
 export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentModalProps> = ({
   onClose,
@@ -82,17 +95,22 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
     const displayVersions = minVersion
       ? fallbackVersions.filter((v) => semverGt(v, minVersion))
       : fallbackVersions;
-    return displayVersions.map((option) => ({
+    const options = displayVersions.map((option) => ({
       label: option,
       value: option,
     }));
+    if (options.length === 0) {
+      return [{ label: '', value: '' }];
+    }
+    return options;
   }, [fallbackVersions, minVersion]);
+  const noVersions = versionOptions[0]?.value === '';
 
-  const maintainanceOptions: Array<EuiComboBoxOptionOption<number>> = MAINTAINANCE_VALUES.map(
+  const maintenanceOptions: Array<EuiComboBoxOptionOption<number>> = MAINTENANCE_VALUES.map(
     (option) => ({
       label:
         option === 0
-          ? i18n.translate('xpack.fleet.upgradeAgents.noMaintainanceWindowOption', {
+          ? i18n.translate('xpack.fleet.upgradeAgents.noMaintenanceWindowOption', {
               defaultMessage: 'Immediately',
             })
           : i18n.translate('xpack.fleet.upgradeAgents.hourLabel', {
@@ -103,8 +121,8 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
     })
   );
   const [selectedVersion, setSelectedVersion] = useState([versionOptions[0]]);
-  const [selectedMantainanceWindow, setSelectedMantainanceWindow] = useState([
-    isSmallBatch ? maintainanceOptions[0] : maintainanceOptions[1],
+  const [selectedMaintenanceWindow, setSelectedMaintenanceWindow] = useState([
+    isSmallBatch ? maintenanceOptions[0] : maintenanceOptions[1],
   ]);
 
   const { startDatetime, onChangeStartDateTime, initialDatetime, minTime, maxTime } =
@@ -114,8 +132,8 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
     const version = getVersion(selectedVersion);
     const rolloutOptions = {
       rollout_duration_seconds:
-        selectedMantainanceWindow.length > 0 && (selectedMantainanceWindow[0]?.value as number) > 0
-          ? selectedMantainanceWindow[0].value
+        selectedMaintenanceWindow.length > 0 && (selectedMaintenanceWindow[0]?.value as number) > 0
+          ? selectedMaintenanceWindow[0].value
           : undefined,
       start_time: startDatetime.toISOString(),
     };
@@ -151,23 +169,14 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
         }
       );
       setIsSubmitting(false);
-      const successMessage = isSingleAgent
-        ? i18n.translate('xpack.fleet.upgradeAgents.successSingleNotificationTitle', {
+
+      if (isSingleAgent && counts.success === counts.total) {
+        notifications.toasts.addSuccess(
+          i18n.translate('xpack.fleet.upgradeAgents.successSingleNotificationTitle', {
             defaultMessage: 'Upgrading {count} agent',
             values: { count: 1 },
           })
-        : i18n.translate('xpack.fleet.upgradeAgents.successMultiNotificationTitle', {
-            defaultMessage:
-              'Upgrading {isMixed, select, true {{success} of {total}} other {{isAllAgents, select, true {all selected} other {{success}} }}} agents',
-            values: {
-              isMixed: counts.success !== counts.total,
-              success: counts.success,
-              total: counts.total,
-              isAllAgents,
-            },
-          });
-      if (counts.success === counts.total) {
-        notifications.toasts.addSuccess(successMessage);
+        );
       } else if (counts.error === counts.total) {
         notifications.toasts.addDanger(
           i18n.translate('xpack.fleet.upgradeAgents.bulkResultAllErrorsNotificationTitle', {
@@ -178,7 +187,6 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
         );
       } else {
         notifications.toasts.addWarning({
-          title: successMessage,
           text: i18n.translate('xpack.fleet.upgradeAgents.bulkResultErrorResultsSummary', {
             defaultMessage:
               '{count} {count, plural, one {agent was} other {agents were}} not successful',
@@ -252,7 +260,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
           defaultMessage="Cancel"
         />
       }
-      confirmButtonDisabled={isSubmitting}
+      confirmButtonDisabled={isSubmitting || noVersions}
       confirmButtonText={
         isSingleAgent ? (
           <FormattedMessage
@@ -274,7 +282,12 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       }
     >
       <p>
-        {isSingleAgent ? (
+        {noVersions ? (
+          <FormattedMessage
+            id="xpack.fleet.upgradeAgents.noVersionsText"
+            defaultMessage="No selected agents are eligible for an upgrade. Please select one or more eligible agents."
+          />
+        ) : isSingleAgent ? (
           <FormattedMessage
             id="xpack.fleet.upgradeAgents.upgradeSingleDescription"
             defaultMessage="This action will upgrade the agent running on '{hostName}' to version {version}. This action can not be undone. Are you sure you wish to continue?"
@@ -302,6 +315,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
           fullWidth
           singleSelection={{ asPlainText: true }}
           options={versionOptions}
+          isDisabled={noVersions}
           isClearable={false}
           selectedOptions={selectedVersion}
           onChange={(selected: Array<EuiComboBoxOptionOption<string>>) => {
@@ -314,14 +328,22 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
           customOptionText="Input the desired version"
         />
       </EuiFormRow>
-      {!isSingleAgent ? (
+      {!isSingleAgent &&
+      Array.isArray(agents) &&
+      agents.some((agent) =>
+        isVersionUnsupported(agent.local_metadata?.elastic?.agent?.version)
+      ) ? (
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
             color="warning"
-            title={i18n.translate('xpack.fleet.upgradeAgents.warningCallout', {
-              defaultMessage: 'Rolling upgrade only available for Elastic Agent versions 8.3+',
-            })}
+            title={
+              <FormattedMessage
+                id="xpack.fleet.upgradeAgents.warningCallout"
+                defaultMessage="Rolling upgrades are only available for Elastic Agent versions {version} and higher"
+                values={{ version: <strong>{ROLLING_UPGRADE_MINIMUM_SUPPORTED_VERSION}</strong> }}
+              />
+            }
           />
         </>
       ) : null}
@@ -354,21 +376,18 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
           label={
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={false}>
-                {i18n.translate('xpack.fleet.upgradeAgents.maintainanceAvailableLabel', {
-                  defaultMessage: 'Maintainance window available',
+                {i18n.translate('xpack.fleet.upgradeAgents.maintenanceAvailableLabel', {
+                  defaultMessage: 'Maintenance window available',
                 })}
               </EuiFlexItem>
               <EuiSpacer size="xs" />
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   position="top"
-                  content={i18n.translate(
-                    'xpack.fleet.upgradeAgents.maintainanceAvailableTooltip',
-                    {
-                      defaultMessage:
-                        'Defines the duration of time available to perform the upgrade. The agent upgrades are spread uniformly across this duration in order to avoid exhausting network resources.',
-                    }
-                  )}
+                  content={i18n.translate('xpack.fleet.upgradeAgents.maintenanceAvailableTooltip', {
+                    defaultMessage:
+                      'Defines the duration of time available to perform the upgrade. The agent upgrades are spread uniformly across this duration in order to avoid exhausting network resources.',
+                  })}
                 >
                   <EuiIcon type="iInCircle" title="TooltipIcon" />
                 </EuiToolTip>
@@ -378,23 +397,24 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
           fullWidth
         >
           <EuiComboBox
-            data-test-subj="agentUpgradeModal.MaintainanceCombobox"
+            data-test-subj="agentUpgradeModal.MaintenanceCombobox"
             fullWidth
             isClearable={false}
             singleSelection={{ asPlainText: true }}
-            options={maintainanceOptions}
-            selectedOptions={selectedMantainanceWindow}
+            options={maintenanceOptions}
+            selectedOptions={selectedMaintenanceWindow}
             onChange={(selected: Array<EuiComboBoxOptionOption<number>>) => {
               if (!selected.length) {
                 return;
               }
-              setSelectedMantainanceWindow(selected);
+              setSelectedMaintenanceWindow(selected);
             }}
           />
         </EuiFormRow>
       ) : null}
       {errors ? (
         <>
+          <EuiSpacer size="s" />
           <EuiCallOut
             color="danger"
             title={i18n.translate('xpack.fleet.upgradeAgents.warningCalloutErrors', {

@@ -11,20 +11,21 @@ import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 
-import { FilterStateStore, Filter, Query } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import type { FilterManager, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
 import { convertKueryToElasticSearchQuery } from '../../../../common/lib/keury';
-import { KqlMode } from '../../../store/timeline/model';
+import type { KqlMode } from '../../../store/timeline/model';
 import { useSavedQueryServices } from '../../../../common/utils/saved_query_services';
-import { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
+import type { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { QueryBar } from '../../../../common/components/query_bar';
-import { DataProvider } from '../data_providers/data_provider';
+import type { DataProvider } from '../data_providers/data_provider';
 import { buildGlobalQuery } from '../helpers';
 import { timelineActions } from '../../../store/timeline';
-import { KueryFilterQuery, KueryFilterQueryKind } from '../../../../../common/types/timeline';
+import type { KueryFilterQuery, KueryFilterQueryKind } from '../../../../../common/types/timeline';
 
 export interface QueryBarTimelineComponentProps {
   dataProviders: DataProvider[];

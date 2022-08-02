@@ -10,16 +10,16 @@ import { getOr } from 'lodash/fp';
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
-import {
+import type {
   AuthenticationHit,
   AuthenticationsEdges,
   UserAuthenticationsRequestOptions,
   UserAuthenticationsStrategyResponse,
 } from '../../../../../../common/search_strategy';
-import { UsersQueries } from '../../../../../../common/search_strategy/security_solution/users';
+import type { UsersQueries } from '../../../../../../common/search_strategy/security_solution/users';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
-import { SecuritySolutionFactory } from '../../types';
+import type { SecuritySolutionFactory } from '../../types';
 import { buildQuery as buildAuthenticationQuery } from './dsl/query.dsl';
 
 import { formatAuthenticationData, getHits } from './helpers';

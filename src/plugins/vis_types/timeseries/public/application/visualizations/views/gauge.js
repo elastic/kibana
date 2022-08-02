@@ -18,6 +18,8 @@ import { getValueBy } from '../lib/get_value_by';
 import { GaugeVis } from './gauge_vis';
 import { calculateCoordinates } from '../lib/calculate_coordinates';
 
+import './_gauge.scss';
+
 export class Gauge extends Component {
   constructor(props) {
     super(props);
@@ -37,23 +39,25 @@ export class Gauge extends Component {
       }
     }, 200);
   }
+  handledResize = false;
 
   componentWillUnmount() {
     clearTimeout(this.timeout);
   }
 
   componentDidMount() {
-    this.handleResize();
+    this.handleResize(true);
   }
 
   handleResize() {
     // Bingo!
     const newState = calculateCoordinates(this.inner, this.resize, this.state);
     this.setState(newState);
+    this.handledResize = true;
   }
 
   render() {
-    const { metric, type } = this.props;
+    const { metric, type, initialRender } = this.props;
     const { scale, translateX, translateY } = this.state;
     const value = getLastValue(metric?.data);
     const max = (metric && getValueBy('max', metric.data)) || 1;
@@ -77,6 +81,7 @@ export class Gauge extends Component {
       max: this.props.max || max,
       color: (metric && metric.color) || '#8ac336',
       type,
+      initialRender,
     };
 
     let metrics;

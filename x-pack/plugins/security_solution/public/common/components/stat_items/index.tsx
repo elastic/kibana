@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { ScaleType, Rotation, BrushEndListener, ElementClickListener } from '@elastic/charts';
+import type { Rotation, BrushEndListener, ElementClickListener } from '@elastic/charts';
+import { ScaleType } from '@elastic/charts';
+import type { IconType } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,7 +17,6 @@ import {
   EuiButtonIcon,
   EuiLoadingSpinner,
   EuiTitle,
-  IconType,
   EuiStat,
 } from '@elastic/eui';
 import { get, getOr } from 'lodash/fp';
@@ -24,19 +25,25 @@ import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 import { useQueryToggle } from '../../containers/query_toggle';
 
-import {
+import type {
   HostsKpiStrategyResponse,
   NetworkKpiStrategyResponse,
 } from '../../../../common/search_strategy';
 
-import { ChartSeriesData, ChartData, ChartSeriesConfigs, UpdateDateRange } from '../charts/common';
+import type {
+  ChartSeriesData,
+  ChartData,
+  ChartSeriesConfigs,
+  UpdateDateRange,
+} from '../charts/common';
 
 import { InspectButton } from '../inspect';
 
-import { LensAttributes } from '../visualization_actions/types';
+import type { LensAttributes } from '../visualization_actions/types';
 import * as i18n from '../../containers/query_toggle/translations';
-import { UserskKpiStrategyResponse } from '../../../../common/search_strategy/security_solution/users';
+import type { UserskKpiStrategyResponse } from '../../../../common/search_strategy/security_solution/users';
 import { LensEmbeddable } from '../visualization_actions/lens_embeddable';
+
 const FlexGroup = styled(EuiFlexGroup)`
   .no-margin {
     margin-top: 0 !important;
@@ -209,6 +216,7 @@ const StyledTitle = styled.h6`
   line-height: 200%;
 `;
 export const StatItemsComponent = React.memo<StatItemsProps>(
+  // eslint-disable-next-line complexity
   ({
     areaChart,
     barChart,
@@ -335,7 +343,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
 
               {(enableAreaChart || enableBarChart) && <EuiHorizontalRule />}
               <EuiFlexGroup>
-                {enableBarChart && (
+                {enableBarChart && barChartLensAttributes && (
                   <FlexItem>
                     <LensEmbeddable
                       lensAttributes={barChartLensAttributes}

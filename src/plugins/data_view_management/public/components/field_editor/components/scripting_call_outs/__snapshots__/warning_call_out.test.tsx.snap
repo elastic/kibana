@@ -3,13 +3,13 @@
 exports[`ScriptingWarningCallOut should render normally 1`] = `
 Array [
   <div
-    class="euiText euiText--small"
+    class="euiText emotion-euiText-s"
   >
     <p>
       <span>
         Familiarize yourself with 
         <button
-          class="euiLink css-102pf9n-euiLink-primary"
+          class="euiLink emotion-euiLink-primary"
           type="button"
         >
           <span>
@@ -18,7 +18,7 @@ Array [
         </button>
          and 
         <button
-          class="euiLink css-102pf9n-euiLink-primary"
+          class="euiLink emotion-euiLink-primary"
           type="button"
         >
           <span>
@@ -30,17 +30,17 @@ Array [
     </p>
   </div>,
   <div
-    class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />,
   <div
-    class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--warning euiPanel--noShadow euiPanel--noBorder euiCallOut euiCallOut--warning css-1flvw80-euiCallOut"
+    class="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning emotion-euiPanel-none-m-warning-euiCallOut"
   >
     <p
-      class="euiTitle euiCallOutHeader__title css-nznt5c-euiTitle-xs-euiCallOutHeader-warning"
+      class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-warning"
     >
       <span
         aria-hidden="true"
-        class="css-15maws8-euiCallOut__icon"
+        class="emotion-euiCallOut__icon"
         color="inherit"
         data-euiicon-type="alert"
       />
@@ -49,34 +49,30 @@ Array [
       </span>
     </p>
     <div
-      class="euiText euiText--small css-i7i3v9-euiCallOut__description"
+      class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
     >
       <div
-        class="euiTextColor euiTextColor--default"
+        class="euiText emotion-euiText-s"
       >
-        <div
-          class="euiText euiText--small"
-        >
-          <p>
-            <span>
-              For greater flexibility and Painless script support, use 
-              <button
-                class="euiLink css-102pf9n-euiLink-primary"
-                type="button"
-              >
-                <span>
-                  runtime fields
-                </span>
-              </button>
-              .
-            </span>
-          </p>
-        </div>
+        <p>
+          <span>
+            For greater flexibility and Painless script support, use 
+            <button
+              class="euiLink emotion-euiLink-primary"
+              type="button"
+            >
+              <span>
+                runtime fields
+              </span>
+            </button>
+            .
+          </span>
+        </p>
       </div>
     </div>
   </div>,
   <div
-    class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />,
 ]
 `;

@@ -8,21 +8,16 @@ import React, { Suspense, lazy, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlyout,
-  EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPagination,
   EuiProgress,
-  EuiFlyoutFooter,
+  EuiFlyoutSize,
 } from '@elastic/eui';
 import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
-import {
-  AlertsTableConfigurationRegistry,
-  AlertsTableFlyoutState,
-  AlertTableFlyoutComponent,
-} from '../../../../types';
+import { AlertsTableConfigurationRegistry } from '../../../../types';
 
 const AlertsFlyoutHeader = lazy(() => import('./alerts_flyout_header'));
 const PAGINATION_LABEL = i18n.translate(
@@ -36,9 +31,9 @@ interface AlertsFlyoutProps {
   alert: EcsFieldsResponse;
   alertsTableConfiguration: AlertsTableConfigurationRegistry;
   flyoutIndex: number;
+  flyoutSize?: EuiFlyoutSize;
   alertsCount: number;
   isLoading: boolean;
-  state: AlertsTableFlyoutState;
   onClose: () => void;
   onPaginate: (pageIndex: number) => void;
 }
@@ -46,38 +41,21 @@ export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
   alert,
   alertsTableConfiguration,
   flyoutIndex,
+  flyoutSize = 'm',
   alertsCount,
   isLoading,
-  state,
   onClose,
   onPaginate,
 }: AlertsFlyoutProps) => {
-  let Header: AlertTableFlyoutComponent;
-  let Body: AlertTableFlyoutComponent;
-  let Footer: AlertTableFlyoutComponent;
-
   const {
-    header: internalHeader,
-    body: internalBody,
-    footer: internalFooter,
+    header: Header,
+    body: Body,
+    footer: Footer,
   } = alertsTableConfiguration?.useInternalFlyout?.() ?? {
-    header: null,
+    header: AlertsFlyoutHeader,
     body: null,
     footer: null,
   };
-
-  switch (state) {
-    case AlertsTableFlyoutState.external:
-      Header = alertsTableConfiguration?.externalFlyout?.header ?? AlertsFlyoutHeader;
-      Body = alertsTableConfiguration?.externalFlyout?.body ?? null;
-      Footer = alertsTableConfiguration?.externalFlyout?.footer ?? null;
-      break;
-    case AlertsTableFlyoutState.internal:
-      Header = internalHeader ?? AlertsFlyoutHeader;
-      Body = internalBody ?? null;
-      Footer = internalFooter ?? null;
-      break;
-  }
 
   const passedProps = useMemo(
     () => ({
@@ -107,42 +85,22 @@ export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
     [Footer, passedProps]
   );
 
-  const FlyoutBodyMemo = useMemo(() => {
-    if (FlyoutBody) {
-      if (state === AlertsTableFlyoutState.external) {
-        return (
-          <EuiFlyoutBody>
-            <FlyoutBody />
-          </EuiFlyoutBody>
-        );
-      }
-      return <FlyoutBody />;
-    }
-  }, [FlyoutBody, state]);
-
-  const FlyoutFooterMemo = useMemo(() => {
-    if (FlyoutFooter) {
-      if (state === AlertsTableFlyoutState.external) {
-        return (
-          <EuiFlyoutFooter>
-            <FlyoutFooter />
-          </EuiFlyoutFooter>
-        );
-      }
-      return <FlyoutFooter />;
-    }
-  }, [FlyoutFooter, state]);
+  const FlyoutHeader = useCallback(
+    () =>
+      Header ? (
+        <Suspense fallback={null}>
+          <Header {...passedProps} />
+        </Suspense>
+      ) : null,
+    [Header, passedProps]
+  );
 
   return (
-    <EuiFlyout
-      onClose={onClose}
-      size={state === AlertsTableFlyoutState.external ? 's' : 'm'}
-      data-test-subj="alertsFlyout"
-    >
+    <EuiFlyout onClose={onClose} size={flyoutSize} data-test-subj="alertsFlyout">
       {isLoading && <EuiProgress size="xs" color="accent" data-test-subj="alertsFlyoutLoading" />}
       <EuiFlyoutHeader hasBorder>
         <Suspense fallback={null}>
-          <Header {...passedProps} />
+          <FlyoutHeader />
         </Suspense>
         <EuiSpacer size="m" />
         <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
@@ -158,8 +116,8 @@ export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
-      {FlyoutBodyMemo}
-      {FlyoutFooterMemo}
+      <FlyoutBody />
+      <FlyoutFooter />
     </EuiFlyout>
   );
 };

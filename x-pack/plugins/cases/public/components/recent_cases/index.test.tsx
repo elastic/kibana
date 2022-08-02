@@ -63,7 +63,7 @@ describe('RecentCases', () => {
         <RecentCases {...defaultProps} />
       </TestProviders>
     );
-    expect(getAllByTestId('case-details-link')).toHaveLength(7);
+    expect(getAllByTestId('case-details-link')).toHaveLength(8);
   });
 
   it('render max cases correctly', () => {

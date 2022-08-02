@@ -36,21 +36,21 @@ import type {
   ListWithKuery,
   NewPackagePolicy,
 } from '../types';
+import { packageToPackagePolicy } from '../../common/services';
 import {
   agentPolicyStatuses,
-  packageToPackagePolicy,
   AGENT_POLICY_INDEX,
   UUID_V5_NAMESPACE,
   FLEET_APM_PACKAGE,
   FLEET_ELASTIC_AGENT_PACKAGE,
-} from '../../common';
+} from '../../common/constants';
 import type {
   DeleteAgentPolicyResponse,
   FleetServerPolicy,
   Installation,
   Output,
   DeletePackagePoliciesResponse,
-} from '../../common';
+} from '../../common/types';
 import { AgentPolicyNameExistsError, HostedAgentPolicyRestrictionRelatedError } from '../errors';
 
 import type { FullAgentConfigMap } from '../../common/types/models/agent_cm';
@@ -613,7 +613,7 @@ class AgentPolicyService {
     id: string,
     packagePolicyIds: string[],
     options?: { user?: AuthenticatedUser; force?: boolean }
-  ): Promise<AgentPolicy> {
+  ) {
     const oldAgentPolicy = await this.get(soClient, id, false);
 
     if (!oldAgentPolicy) {
@@ -841,6 +841,79 @@ class AgentPolicyService {
     options?: { standalone: boolean }
   ): Promise<FullAgentPolicy | null> {
     return getFullAgentPolicy(soClient, id, options);
+  }
+
+  /**
+   * Remove a download source from all agent policies that are using it, and replace the output by the default ones.
+   * @param soClient
+   * @param esClient
+   * @param downloadSourceId
+   */
+  public async removeDefaultSourceFromAll(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    downloadSourceId: string
+  ) {
+    const agentPolicies = (
+      await soClient.find<AgentPolicySOAttributes>({
+        type: SAVED_OBJECT_TYPE,
+        fields: ['revision', 'download_source_id'],
+        searchFields: ['download_source_id'],
+        search: escapeSearchQueryPhrase(downloadSourceId),
+        perPage: SO_SEARCH_LIMIT,
+      })
+    ).saved_objects.map((so) => ({
+      id: so.id,
+      ...so.attributes,
+    }));
+
+    if (agentPolicies.length > 0) {
+      await pMap(
+        agentPolicies,
+        (agentPolicy) =>
+          this.update(soClient, esClient, agentPolicy.id, {
+            download_source_id:
+              agentPolicy.download_source_id === downloadSourceId
+                ? null
+                : agentPolicy.download_source_id,
+          }),
+        {
+          concurrency: 50,
+        }
+      );
+    }
+  }
+
+  public async bumpAllAgentPoliciesForDownloadSource(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    downloadSourceId: string,
+    options?: { user?: AuthenticatedUser }
+  ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
+    const currentPolicies = await soClient.find<AgentPolicySOAttributes>({
+      type: SAVED_OBJECT_TYPE,
+      fields: ['revision', 'download_source_id'],
+      searchFields: ['download_source_id'],
+      search: escapeSearchQueryPhrase(downloadSourceId),
+      perPage: SO_SEARCH_LIMIT,
+    });
+    const bumpedPolicies = currentPolicies.saved_objects.map((policy) => {
+      policy.attributes = {
+        ...policy.attributes,
+        revision: policy.attributes.revision + 1,
+        updated_at: new Date().toISOString(),
+        updated_by: options?.user ? options.user.username : 'system',
+      };
+      return policy;
+    });
+    const res = await soClient.bulkUpdate<AgentPolicySOAttributes>(bumpedPolicies);
+    await pMap(
+      currentPolicies.saved_objects,
+      (policy) => this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'updated', policy.id),
+      { concurrency: 50 }
+    );
+
+    return res;
   }
 }
 

@@ -48,7 +48,7 @@ interface Props<T> {
 }
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
-const INITIAL_PAGE_SIZE = 25;
+export const INITIAL_PAGE_SIZE = 25;
 
 function defaultSortFn<T extends any>(
   items: T[],

@@ -51,7 +51,7 @@ describe('Case View Page activity tab', () => {
             values: ['alert-id-1'],
           },
         },
-        flyoutState: 'internal',
+        flyoutSize: 'm',
         showExpandToDetails: true,
       });
     });
@@ -73,7 +73,7 @@ describe('Case View Page activity tab', () => {
             values: ['alert-id-1'],
           },
         },
-        flyoutState: 'external',
+        flyoutSize: 's',
         showExpandToDetails: false,
       });
     });

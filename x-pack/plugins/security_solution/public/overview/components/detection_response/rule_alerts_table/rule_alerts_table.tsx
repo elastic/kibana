@@ -7,9 +7,9 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { capitalize } from 'lodash';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiButton,
   EuiEmptyPrompt,
   EuiHealth,
@@ -19,13 +19,15 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
-import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { HeaderSection } from '../../../../common/components/header_section';
 
 import { LastUpdatedAt, SEVERITY_COLOR } from '../utils';
 import * as i18n from '../translations';
-import { useRuleAlertsItems, RuleAlertsItem } from './use_rule_alerts_items';
-import { useNavigation, NavigateTo, GetAppUrl } from '../../../../common/lib/kibana';
+import type { RuleAlertsItem } from './use_rule_alerts_items';
+import { useRuleAlertsItems } from './use_rule_alerts_items';
+import type { NavigateTo, GetAppUrl } from '../../../../common/lib/kibana';
+import { useNavigation } from '../../../../common/lib/kibana';
 import { SecurityPageName } from '../../../../../common/constants';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';

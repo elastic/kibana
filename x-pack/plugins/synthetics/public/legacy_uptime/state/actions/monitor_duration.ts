@@ -6,9 +6,9 @@
  */
 
 import { createAction } from 'redux-actions';
-import { IHttpFetchError } from '@kbn/core/public';
-import { QueryParams } from './types';
-import { MonitorDurationResult } from '../../../../common/types';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { QueryParams } from './types';
+import type { MonitorDurationResult } from '../../../../common/types';
 
 type MonitorQueryParams = QueryParams & { monitorId: string };
 

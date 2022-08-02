@@ -6,11 +6,8 @@
  * Side Public License, v 1.
  */
 
-import {
-  getFieldTypeName,
-  KNOWN_FIELD_TYPES,
-  UNKNOWN_FIELD_TYPE_MESSAGE,
-} from './get_field_type_name';
+import { getFieldTypeName, UNKNOWN_FIELD_TYPE_MESSAGE } from './get_field_type_name';
+import { KNOWN_FIELD_TYPES } from '../../common/field_types';
 
 describe('getFieldTypeName', () => {
   describe('known field types should be recognized', () => {
@@ -28,7 +25,11 @@ describe('getFieldTypeName', () => {
     expect(getFieldTypeName(undefined)).toBe(UNKNOWN_FIELD_TYPE_MESSAGE);
   });
 
-  it(`should return '${UNKNOWN_FIELD_TYPE_MESSAGE}' when passed an unknown field type`, () => {
-    expect(getFieldTypeName('unknown_field_type')).toBe(UNKNOWN_FIELD_TYPE_MESSAGE);
+  it(`should return '${UNKNOWN_FIELD_TYPE_MESSAGE}' when passed 'unknown'`, () => {
+    expect(getFieldTypeName('unknown')).toBe(UNKNOWN_FIELD_TYPE_MESSAGE);
+  });
+
+  it('should return the original type string back when passed an unknown field type', () => {
+    expect(getFieldTypeName('unknown_field_type')).toBe('unknown_field_type');
   });
 });
