@@ -15,10 +15,10 @@ export const getTabsOnHostsUrl = (tabName: HostsTableType, search?: string) =>
   `/${tabName}${appendSearch(search)}`;
 
 export const getHostDetailsUrl = (detailName: string, search?: string) =>
-  `name/${detailName}${appendSearch(search)}`;
+  `/name/${detailName}${appendSearch(search)}`;
 
 export const getTabsOnHostDetailsUrl = (
   detailName: string,
   tabName: HostsTableType,
   search?: string
-) => `name/${detailName}/${tabName}${appendSearch(search)}`;
+) => `/name/${detailName}/${tabName}${appendSearch(search)}`;
