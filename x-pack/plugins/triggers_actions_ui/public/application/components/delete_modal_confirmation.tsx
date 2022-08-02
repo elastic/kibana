@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiConfirmModal, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { HttpSetup } from '@kbn/core/public';
@@ -124,15 +124,10 @@ export const DeleteModalConfirmation = ({
       cancelButtonText={cancelButtonText}
       confirmButtonText={confirmButtonText}
     >
-      {showWarningText && (
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="alert" color="warning" />
-          </EuiFlexItem>
-          <p>{warningText}</p>
-        </EuiFlexGroup>
-      )}
       <p>{confirmModalText}</p>
+      {showWarningText && (
+        <EuiCallOut title={<>{warningText}</>} color="warning" iconType="alert" />
+      )}
     </EuiConfirmModal>
   );
 };

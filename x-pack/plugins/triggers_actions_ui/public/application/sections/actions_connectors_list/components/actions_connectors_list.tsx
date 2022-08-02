@@ -478,7 +478,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
           'xpack.triggersActionsUI.sections.actionsConnectorsList.warningText',
           {
             defaultMessage:
-              '{connectors, plural, one {This} other {At least one}} connector is used in a rule.',
+              'There are rules that use the selected {connectors, plural, one {connector} other {connectors}}.',
             values: {
               connectors: connectorsToDelete.length,
             },
