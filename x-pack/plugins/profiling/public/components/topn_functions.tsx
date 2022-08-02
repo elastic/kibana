@@ -114,7 +114,15 @@ export const TopNFunctionsTable = ({
     }
   );
 
-  const sortedRows = orderBy(rows, [sortField], [sortDirection]);
+  const sortedRows = orderBy(
+    rows,
+    (row) => {
+      return sortField === TopNFunctionSortField.Frame
+        ? getCalleeFunction(row.frame).toLowerCase()
+        : row[sortField];
+    },
+    [sortDirection]
+  );
 
   return (
     <>
