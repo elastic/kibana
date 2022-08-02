@@ -1177,7 +1177,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
               ...props.state.layers.first.columns,
               col2: expect.objectContaining({
                 timeScale: 'h',
-                label: 'Value count of bytes per hour',
+                label: 'Count of bytes per hour',
               }),
             },
           },
