@@ -57,5 +57,10 @@ describe('Caller-callee operations', () => {
   test('2', () => {
     const root = createCallerCalleeDiagram(events, stackTraces, stackFrames, executables);
     expect(root.Samples).toEqual(40);
+    expect(root.CountInclusive).toEqual(40);
+    expect(root.CountExclusive).toEqual(0);
+
+    expect(root.Callees[0].CountInclusive).toEqual(9);
+    expect(root.Callees[0].CountExclusive).toEqual(0);
   });
 });
