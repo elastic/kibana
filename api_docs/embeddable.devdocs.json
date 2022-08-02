@@ -227,13 +227,7 @@
                 "label": "notifications",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.NotificationsStart",
-                    "text": "NotificationsStart"
-                  }
+                  "NotificationsStart"
                 ],
                 "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
                 "deprecated": false,
@@ -490,13 +484,7 @@
                 "label": "toasts",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.IToasts",
-                    "text": "IToasts"
-                  }
+                  "IToasts"
                 ],
                 "path": "src/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx",
                 "deprecated": false,
@@ -5453,13 +5441,7 @@
           ">>; overlays: ",
           "OverlayStart",
           "; notifications: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.NotificationsStart",
-            "text": "NotificationsStart"
-          },
+          "NotificationsStart",
           "; SavedObjectFinder: React.ComponentType<any>; showCreateNewMenu?: boolean | undefined; reportUiCounter?: ((appName: string, type: string, eventNames: string | string[], count?: number | undefined) => void) | undefined; theme: ",
           "ThemeServiceStart",
           "; }) => ",
@@ -5684,13 +5666,7 @@
                 "label": "notifications",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.NotificationsStart",
-                    "text": "NotificationsStart"
-                  }
+                  "NotificationsStart"
                 ],
                 "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
                 "deprecated": false
