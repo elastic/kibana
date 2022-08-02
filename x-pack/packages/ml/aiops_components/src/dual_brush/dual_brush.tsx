@@ -169,8 +169,9 @@ export function DualBrush({
           };
 
           if (
-            baselineSelection[0] !== newBrushPx.baselineMin ||
-            baselineSelection[1] !== newBrushPx.baselineMax
+            id === 'baseline' &&
+            (baselineSelection[0] !== newBrushPx.baselineMin ||
+              baselineSelection[1] !== newBrushPx.baselineMax)
           ) {
             d3.select(this)
               .transition()
@@ -183,8 +184,9 @@ export function DualBrush({
           }
 
           if (
-            deviationSelection[0] !== newBrushPx.deviationMin ||
-            deviationSelection[1] !== newBrushPx.deviationMax
+            id === 'deviation' &&
+            (deviationSelection[0] !== newBrushPx.deviationMin ||
+              deviationSelection[1] !== newBrushPx.deviationMax)
           ) {
             d3.select(this)
               .transition()
@@ -195,7 +197,7 @@ export function DualBrush({
                 newBrushPx.deviationMax,
               ]);
           }
-
+          
           brushes.current[0].start = snappedWindowParameters.baselineMin;
           brushes.current[0].end = snappedWindowParameters.baselineMax;
           brushes.current[1].start = snappedWindowParameters.deviationMin;
