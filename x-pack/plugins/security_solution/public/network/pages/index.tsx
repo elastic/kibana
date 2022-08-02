@@ -25,7 +25,7 @@ import {
   NETWORK_DETAILS_TAB_PATH,
 } from './constants';
 
-const getPathWithFlowType = (detailName: string, flowTarget: FlowTargetSourceDest) =>
+const getPathWithFlowType = (detailName: string, flowTarget?: FlowTargetSourceDest) =>
   `${NETWORK_PATH}/ip/${detailName}/${flowTarget || FlowTargetSourceDest.source}/${
     NetworkRouteType.flows
   }`;
