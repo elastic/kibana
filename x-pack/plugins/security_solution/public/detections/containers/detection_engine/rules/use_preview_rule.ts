@@ -81,7 +81,7 @@ export const usePreviewRule = ({
     const duration = moment.duration(intervalValue, intervalUnit);
     const ruleIntervalDuration = duration.asMilliseconds();
 
-    invocationCount = Math.max(Math.floor(timeframeDuration / ruleIntervalDuration), 1);
+    invocationCount = Math.max(Math.ceil(timeframeDuration / ruleIntervalDuration), 1);
     interval = advancedOptions.interval;
 
     const { unit: lookbackUnit, value: lookbackValue } = getTimeTypeValue(advancedOptions.lookback);
