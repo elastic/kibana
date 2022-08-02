@@ -70,7 +70,6 @@ export type ZipUrlTLSFields = t.TypeOf<typeof ZipUrlTLSCodec>;
 // CommonFields
 export const CommonFieldsCodec = t.intersection([
   t.interface({
-    [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorTypeCodec,
     [ConfigKey.NAME]: t.string,
     [ConfigKey.NAMESPACE]: t.string,
     [ConfigKey.MONITOR_TYPE]: DataStreamCodec,
@@ -81,6 +80,7 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.LOCATIONS]: MonitorServiceLocationsCodec,
   }),
   t.partial({
+    [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorTypeCodec,
     [ConfigKey.TIMEOUT]: t.union([t.string, t.null]),
     [ConfigKey.REVISION]: t.number,
     [ConfigKey.MONITOR_SOURCE_TYPE]: SourceTypeCodec,
