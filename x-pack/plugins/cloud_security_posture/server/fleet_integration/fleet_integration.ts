@@ -24,10 +24,10 @@ import {
   CSP_RULE_SAVED_OBJECT_TYPE,
   CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
-import type { CspRule, CspRuleMetadata, CspRuleTemplate } from '../../common/schemas';
+import type { CspRule, CspRuleTemplate } from '../../common/schemas';
+import type { BenchmarkId } from '../../common/types';
 
 type CloudbeatInputType = keyof typeof CIS_INTEGRATION_INPUTS_MAP;
-type BenchmarkId = CspRuleMetadata['benchmark']['id'];
 
 const getBenchmarkTypeFilter = (type: BenchmarkId): string =>
   `${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id: "${type}"`;

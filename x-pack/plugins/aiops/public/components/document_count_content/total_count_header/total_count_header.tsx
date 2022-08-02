@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+// TODO Consolidate with duplicate component `TotalCountHeader` in
+// `x-pack/plugins/data_visualizer/public/application/common/components/document_count_content/total_count_header.tsx`
+
 import { EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';

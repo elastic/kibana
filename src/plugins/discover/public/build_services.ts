@@ -27,6 +27,7 @@ import {
   DataViewsContract,
   DataPublicPluginStart,
 } from '@kbn/data-plugin/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -63,7 +64,7 @@ export interface DiscoverServices {
   theme: ChartsPluginStart['theme'];
   filterManager: FilterManager;
   fieldFormats: FieldFormatsStart;
-  indexPatterns: DataViewsContract;
+  dataViews: DataViewsContract;
   inspector: InspectorPublicPluginStart;
   metadata: { branch: string };
   navigation: NavigationPublicPluginStart;
@@ -81,6 +82,7 @@ export interface DiscoverServices {
   spaces?: SpacesApi;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   locator: DiscoverAppLocator;
+  expressions: ExpressionsStart;
   charts: ChartsPluginStart;
 }
 
@@ -106,7 +108,7 @@ export const buildServices = memoize(function (
     fieldFormats: plugins.fieldFormats,
     filterManager: plugins.data.query.filterManager,
     history: getHistory,
-    indexPatterns: plugins.data.dataViews,
+    dataViews: plugins.data.dataViews,
     inspector: plugins.inspector,
     metadata: {
       branch: context.env.packageInfo.branch,
@@ -126,6 +128,7 @@ export const buildServices = memoize(function (
     dataViewEditor: plugins.dataViewEditor,
     triggersActionsUi: plugins.triggersActionsUi,
     locator,
+    expressions: plugins.expressions,
     charts: plugins.charts,
   };
 });

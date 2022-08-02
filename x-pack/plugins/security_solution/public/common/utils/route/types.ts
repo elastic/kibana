@@ -47,10 +47,6 @@ export interface NetworkRouteSpyState extends RouteSpyState {
   tabName: NetworkRouteType | undefined;
 }
 
-export interface TimelineRouteSpyState extends RouteSpyState {
-  tabName: TimelineType | undefined;
-}
-
 export interface AdministrationRouteSpyState extends RouteSpyState {
   tabName: AdministrationType | undefined;
 }

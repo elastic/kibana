@@ -30,7 +30,6 @@ import {
   TotalHits,
 } from '../../../../common/elasticsearch_util';
 import { encodeMvtResponseBody } from '../../../../common/mvt_request_body';
-// @ts-expect-error
 import { UpdateSourceEditor } from './update_source_editor';
 import {
   DEFAULT_MAX_BUCKETS_LIMIT,
@@ -640,7 +639,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       );
     }
 
-    const properties = indexPattern.flattenHit(hit);
+    const properties = indexPattern.flattenHit(hit) as Record<string, string>;
     indexPattern.metaFields.forEach((metaField: string) => {
       if (!this._getTooltipPropertyNames().includes(metaField)) {
         delete properties[metaField];

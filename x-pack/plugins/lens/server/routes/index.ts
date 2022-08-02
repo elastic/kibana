@@ -8,9 +8,7 @@
 import { CoreSetup, Logger } from '@kbn/core/server';
 import { PluginStartContract } from '../plugin';
 import { existingFieldsRoute } from './existing_fields';
-import { initLensUsageRoute } from './telemetry';
 
 export function setupRoutes(setup: CoreSetup<PluginStartContract>, logger: Logger) {
   existingFieldsRoute(setup, logger);
-  initLensUsageRoute(setup);
 }

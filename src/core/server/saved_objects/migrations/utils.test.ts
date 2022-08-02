@@ -6,9 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectMigrationContext, SavedObjectMigrationMap } from '.';
+import type {
+  SavedObjectMigrationContext,
+  SavedObjectMigrationMap,
+  SavedObjectUnsanitizedDoc,
+} from '@kbn/core-saved-objects-server';
 import { mergeSavedObjectMigrationMaps } from './utils';
-import { SavedObjectUnsanitizedDoc } from '..';
 
 describe('mergeSavedObjectMigrationMaps', () => {
   const obj1: SavedObjectMigrationMap = {

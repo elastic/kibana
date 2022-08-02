@@ -14,7 +14,6 @@ import {
   getFindRequest,
   getFindResultWithSingleHit,
   getEmptySavedObjectsResponse,
-  getRuleExecutionSummaries,
 } from '../__mocks__/request_responses';
 import { findRulesRoute } from './find_rules_route';
 
@@ -31,9 +30,6 @@ describe('find_rules', () => {
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
     clients.rulesClient.get.mockResolvedValue(getRuleMock(getQueryRuleParams()));
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
-    clients.ruleExecutionLog.getExecutionSummariesBulk.mockResolvedValue(
-      getRuleExecutionSummaries()
-    );
 
     findRulesRoute(server.router, logger);
   });

@@ -47,7 +47,14 @@
           "LensByValueInput",
           ", ",
           "LensByReferenceInput",
-          ">"
+          ">,",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.SelfStyledEmbeddable",
+            "text": "SelfStyledEmbeddable"
+          }
         ],
         "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
         "deprecated": false,
@@ -345,6 +352,23 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.Embeddable.getExecutionContext",
+            "type": "Function",
+            "tags": [],
+            "label": "getExecutionContext",
+            "description": [],
+            "signature": [
+              "() => ",
+              "KibanaExecutionContext",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.Embeddable.render",
             "type": "Function",
             "tags": [],
@@ -595,6 +619,21 @@
             "description": [],
             "signature": [
               "() => void"
+            ],
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Embeddable.getSelfStyledOptions",
+            "type": "Function",
+            "tags": [],
+            "label": "getSelfStyledOptions",
+            "description": [],
+            "signature": [
+              "() => { hideTitle: boolean | undefined; }"
             ],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
             "deprecated": false,
@@ -1377,6 +1416,38 @@
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.DatasourcePublicAPI.getMaxPossibleNumValues",
+            "type": "Function",
+            "tags": [],
+            "label": "getMaxPossibleNumValues",
+            "description": [
+              "\nReturns the maximum possible number of values for this column when it can be known, otherwise null\n(e.g. with a top 5 values operation, we can be sure that there will never be more than 5 values returned\n      or 6 if the \"Other\" bucket is enabled)"
+            ],
+            "signature": [
+              "(columnId: string) => number | null"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.DatasourcePublicAPI.getMaxPossibleNumValues.$1",
+                "type": "string",
+                "tags": [],
+                "label": "columnId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -3681,7 +3752,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ size: number; accuracyMode?: boolean | undefined; orderBy: { type: \"alphabetical\"; fallback?: boolean | undefined; } | { type: \"rare\"; maxDocCount: number; } | { type: \"column\"; columnId: string; } | { type: \"custom\"; }; orderAgg?: ",
+              "{ size: number; accuracyMode?: boolean | undefined; include?: number[] | string[] | undefined; exclude?: number[] | string[] | undefined; includeIsRegex?: boolean | undefined; excludeIsRegex?: boolean | undefined; orderBy: { type: \"alphabetical\"; fallback?: boolean | undefined; } | { type: \"rare\"; maxDocCount: number; } | { type: \"column\"; columnId: string; } | { type: \"custom\"; }; orderAgg?: ",
               {
                 "pluginId": "lens",
                 "scope": "public",
@@ -5242,6 +5313,57 @@
                   "<keyof ",
                   "LensEditContextMapping",
                   ">"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Visualization.getDisplayOptions",
+            "type": "Function",
+            "tags": [],
+            "label": "getDisplayOptions",
+            "description": [
+              "\nGets custom display options for showing the visualization."
+            ],
+            "signature": [
+              "(() => ",
+              "VisualizationDisplayOptions",
+              ") | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Visualization.getRenderEventCounters",
+            "type": "Function",
+            "tags": [],
+            "label": "getRenderEventCounters",
+            "description": [
+              "\nGet RenderEventCounters events for telemetry"
+            ],
+            "signature": [
+              "((state: T) => string[]) | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.getRenderEventCounters.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "T"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
@@ -8180,26 +8302,6 @@
         "path": "x-pack/plugins/lens/server/plugin.tsx",
         "deprecated": false,
         "children": [
-          {
-            "parentPluginId": "lens",
-            "id": "def-server.PluginSetupContract.usageCollection",
-            "type": "Object",
-            "tags": [],
-            "label": "usageCollection",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "usageCollection",
-                "scope": "server",
-                "docId": "kibUsageCollectionPluginApi",
-                "section": "def-server.UsageCollectionSetup",
-                "text": "UsageCollectionSetup"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/lens/server/plugin.tsx",
-            "deprecated": false
-          },
           {
             "parentPluginId": "lens",
             "id": "def-server.PluginSetupContract.taskManager",

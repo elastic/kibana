@@ -22,6 +22,8 @@ import {
   delayWhen,
   takeUntil,
   map,
+  BehaviorSubject,
+  exhaustMap,
 } from 'rxjs';
 import type {
   AnalyticsClientInitContext,
@@ -30,8 +32,8 @@ import type {
   IShipper,
   TelemetryCounter,
 } from '@kbn/analytics-client';
-import type { ElasticV3ShipperOptions } from '@kbn/analytics-shippers-elastic-v3-common';
 import {
+  type ElasticV3ShipperOptions,
   buildHeaders,
   buildUrl,
   createTelemetryCounterHelper,
@@ -62,6 +64,7 @@ export class ElasticV3ServerShipper implements IShipper {
 
   private readonly internalQueue: Event[] = [];
   private readonly shutdown$ = new ReplaySubject<void>(1);
+  private readonly isOptedIn$ = new BehaviorSubject<boolean | undefined>(undefined);
 
   private readonly url: string;
 
@@ -69,7 +72,6 @@ export class ElasticV3ServerShipper implements IShipper {
 
   private clusterUuid: string = 'UNKNOWN';
   private licenseId?: string;
-  private isOptedIn?: boolean;
 
   /**
    * Specifies when it went offline:
@@ -116,7 +118,7 @@ export class ElasticV3ServerShipper implements IShipper {
    * @param isOptedIn `true` for resume sending events. `false` to stop.
    */
   public optIn(isOptedIn: boolean) {
-    this.isOptedIn = isOptedIn;
+    this.isOptedIn$.next(isOptedIn);
 
     if (isOptedIn === false) {
       this.internalQueue.length = 0;
@@ -129,7 +131,7 @@ export class ElasticV3ServerShipper implements IShipper {
    */
   public reportEvents(events: Event[]) {
     if (
-      this.isOptedIn === false ||
+      this.isOptedIn$.value === false ||
       (this.firstTimeOffline && Date.now() - this.firstTimeOffline > 24 * HOUR)
     ) {
       return;
@@ -157,6 +159,7 @@ export class ElasticV3ServerShipper implements IShipper {
   public shutdown() {
     this.shutdown$.next();
     this.shutdown$.complete();
+    this.isOptedIn$.complete();
   }
 
   /**
@@ -169,11 +172,17 @@ export class ElasticV3ServerShipper implements IShipper {
    */
   private checkConnectivity() {
     let backoff = 1 * MINUTE;
-    timer(0, 1 * MINUTE)
+    merge(
+      timer(0, 1 * MINUTE),
+      // Also react to opt-in changes to avoid being stalled for 1 minute for the first connectivity check.
+      // More details in: https://github.com/elastic/kibana/issues/135647
+      this.isOptedIn$
+    )
       .pipe(
         takeUntil(this.shutdown$),
-        filter(() => this.isOptedIn === true && this.firstTimeOffline !== null),
-        concatMap(async () => {
+        filter(() => this.isOptedIn$.value === true && this.firstTimeOffline !== null),
+        // Using exhaustMap here because one request at a time is enough to check the connectivity.
+        exhaustMap(async () => {
           const { ok } = await fetch(this.url, {
             method: 'OPTIONS',
           });
@@ -215,7 +224,7 @@ export class ElasticV3ServerShipper implements IShipper {
     )
       .pipe(
         // Only move ahead if it's opted-in and online.
-        filter(() => this.isOptedIn === true && this.firstTimeOffline === null),
+        filter(() => this.isOptedIn$.value === true && this.firstTimeOffline === null),
 
         // Send the events now if (validations sorted from cheapest to most CPU expensive):
         // - We are shutting down.
@@ -241,6 +250,7 @@ export class ElasticV3ServerShipper implements IShipper {
         // 2. Skip empty buffers
         filter((events) => events.length > 0),
         // 3. Actually send the events
+        // Using `concatMap` here because we want to send events whenever the emitter says so. Otherwise, it'd skip sending some events.
         concatMap(async (eventsToSend) => await this.sendEvents(eventsToSend))
       )
       .subscribe();

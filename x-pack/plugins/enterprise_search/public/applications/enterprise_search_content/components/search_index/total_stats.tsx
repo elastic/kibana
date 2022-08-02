@@ -13,8 +13,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiStatProps } from '@ela
 
 import { i18n } from '@kbn/i18n';
 
-import { CustomFormattedTimestamp } from '../../../shared/custom_formatted_timestamp/custom_formatted_timestamp';
-
 import { OverviewLogic } from './overview.logic';
 
 interface TotalStatsProps {
@@ -24,12 +22,10 @@ interface TotalStatsProps {
 }
 
 export const TotalStats: React.FC<TotalStatsProps> = ({ ingestionType, additionalItems = [] }) => {
-  const { indexData, isSuccess } = useValues(OverviewLogic);
+  const { indexData, isError, isLoading } = useValues(OverviewLogic);
   const documentCount = indexData?.total.docs.count ?? 0;
-  const lastUpdated = (
-    <CustomFormattedTimestamp timestamp={Date.now() - 1000 * 60 * 12 /* TODO: Implement this */} />
-  );
-  const isLoading = !isSuccess;
+  const hideStats = isLoading || isError;
+
   const stats: EuiStatProps[] = [
     {
       description: i18n.translate(
@@ -38,7 +34,7 @@ export const TotalStats: React.FC<TotalStatsProps> = ({ ingestionType, additiona
           defaultMessage: 'Ingestion type',
         }
       ),
-      isLoading,
+      isLoading: hideStats,
       title: ingestionType,
     },
     {
@@ -48,18 +44,8 @@ export const TotalStats: React.FC<TotalStatsProps> = ({ ingestionType, additiona
           defaultMessage: 'Document count',
         }
       ),
-      isLoading,
+      isLoading: hideStats,
       title: documentCount,
-    },
-    {
-      description: i18n.translate(
-        'xpack.enterpriseSearch.content.searchIndex.totalStats.lastUpdatedCardLabel',
-        {
-          defaultMessage: 'Last updated',
-        }
-      ),
-      isLoading,
-      title: lastUpdated,
     },
     ...additionalItems,
   ];

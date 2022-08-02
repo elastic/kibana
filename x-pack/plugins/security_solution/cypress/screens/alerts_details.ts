@@ -28,15 +28,9 @@ export const INDICATOR_MATCH_ENRICHMENT_SECTION = '[data-test-subj="threat-match
 export const INVESTIGATION_TIME_ENRICHMENT_SECTION =
   '[data-test-subj="enriched-with-threat-intel"]';
 
-export const JSON_VIEW_WRAPPER = '[data-test-subj="jsonViewWrapper"]';
-
-export const JSON_LINES = '.euiCodeBlock__line';
-
 export const JSON_VIEW_TAB = '[data-test-subj="jsonViewTab"]';
 
 export const JSON_TEXT = '[data-test-subj="jsonView"]';
-
-export const OVERVIEW_HOST_NAME = '[data-test-subj="event-field-host.name"]';
 
 export const OVERVIEW_RISK_SCORE = '[data-test-subj="eventDetails"] [data-test-subj="riskScore"]';
 
@@ -47,12 +41,6 @@ export const OVERVIEW_RULE_TYPE = '[data-test-subj="event-field-kibana.alert.rul
 export const OVERVIEW_SEVERITY = '[data-test-subj="eventDetails"] [data-test-subj="severity"]';
 
 export const OVERVIEW_STATUS = '[data-test-subj="eventDetails"] [data-test-subj="alertStatus"]';
-
-export const OVERVIEW_THRESHOLD_COUNT =
-  '[data-test-subj="eventDetails"] [data-test-subj^=formatted][data-test-subj$=threshold_result\\.count]';
-
-export const OVERVIEW_THRESHOLD_VALUE =
-  '[data-test-subj="eventDetails"] [data-test-subj="formatted-field-kibana.alert.threshold_result.terms.field"]';
 
 export const SUMMARY_VIEW = '[data-test-subj="summary-view"]';
 
@@ -85,3 +73,7 @@ export const OVERVIEW_TAB = '[data-test-subj="overviewTab"]';
 export const SUMMARY_VIEW_PREVALENCE_CELL = `${SUMMARY_VIEW} [data-test-subj='alert-prevalence']`;
 
 export const SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON = `${SUMMARY_VIEW} [aria-label='Investigate in timeline']`;
+
+export const INSIGHTS_RELATED_ALERTS_BY_SESSION = `[data-test-subj='related-alerts-by-session']`;
+
+export const INSIGHTS_INVESTIGATE_IN_TIMELINE_BUTTON = `${INSIGHTS_RELATED_ALERTS_BY_SESSION} [aria-label='Investigate in timeline']`;

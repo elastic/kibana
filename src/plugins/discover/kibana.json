@@ -15,6 +15,7 @@
     "savedObjects",
     "dataViewFieldEditor",
     "dataViewEditor",
+    "expressions",
     "unifiedFieldList"
   ],
   "optionalPlugins": ["home", "share", "usageCollection", "spaces", "triggersActionsUi"],
