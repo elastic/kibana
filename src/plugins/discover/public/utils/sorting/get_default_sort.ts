@@ -7,7 +7,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { SortOrder } from '../types';
+import { SortOrder } from '../../types';
 import { isSortable } from './get_sort';
 
 /**

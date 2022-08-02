@@ -9,7 +9,7 @@
 import { isPlainObject } from 'lodash';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { IUiSettingsClient } from '@kbn/core/public';
-import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../common';
+import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
 import { getDefaultSort } from './get_default_sort';
 
 export type SortPairObj = Record<string, string>;

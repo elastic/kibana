@@ -11,7 +11,7 @@ import {
   stubDataView,
   stubDataViewWithoutTimeField,
 } from '@kbn/data-views-plugin/common/data_view.stub';
-import { uiSettingsMock } from '../__mocks__/ui_settings';
+import { uiSettingsMock } from '../../__mocks__/ui_settings';
 
 describe('docTable', function () {
   describe('getSort function', function () {

@@ -12,7 +12,7 @@ import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { SortOrder } from '../../../../types';
 import { TableHeaderColumn } from './table_header_column';
 import { getDisplayedColumns } from './helpers';
-import { getDefaultSort } from '../../../../utils/get_default_sort';
+import { getDefaultSort } from '../../../../utils/sorting/get_default_sort';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
 

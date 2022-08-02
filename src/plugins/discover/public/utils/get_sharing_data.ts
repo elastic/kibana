@@ -14,7 +14,7 @@ import type {
   SerializedSearchSourceFields,
 } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
-import { getSortForSearchSource } from './get_sort_for_search_source';
+import { getSortForSearchSource } from './sorting';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,

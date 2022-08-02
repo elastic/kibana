@@ -5,9 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-/*
- * Allows the getSharingData function to be lazy loadable
- */
-export async function loadSharingDataHelpers() {
-  return await import('./get_sharing_data');
-}
+export { getSort, getSortArray, getSortForEmbeddable } from './get_sort';
+export { getSortForSearchSource } from './get_sort_for_search_source';
+export { getDefaultSort } from './get_default_sort';
+export type { SortPairArr, SortPair } from './get_sort';
