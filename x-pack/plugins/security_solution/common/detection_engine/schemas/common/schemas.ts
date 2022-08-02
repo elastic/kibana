@@ -128,12 +128,12 @@ export const saved_id = t.string;
 export const savedIdOrUndefined = t.union([saved_id, t.undefined]);
 export type SavedIdOrUndefined = t.TypeOf<typeof savedIdOrUndefined>;
 
-export const timeline_id = t.string;
+export const timeline_id = t.union([t.null, t.string]);
 export type TimelineId = t.TypeOf<typeof timeline_id>;
 
 export const timelineIdOrUndefined = t.union([timeline_id, t.undefined]);
 
-export const timeline_title = t.string;
+export const timeline_title = t.union([t.null, t.string]);
 
 export const timelineTitleOrUndefined = t.union([timeline_title, t.undefined]);
 

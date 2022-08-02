@@ -134,8 +134,8 @@ export interface BaseFields800 {
   [ALERT_RULE_TAGS]: string[];
   [ALERT_RULE_THREAT]: Threats;
   [ALERT_RULE_THROTTLE]: string | undefined;
-  [ALERT_RULE_TIMELINE_ID]: string | undefined;
-  [ALERT_RULE_TIMELINE_TITLE]: string | undefined;
+  [ALERT_RULE_TIMELINE_ID]: string | undefined | null;
+  [ALERT_RULE_TIMELINE_TITLE]: string | undefined | null;
   [ALERT_RULE_TIMESTAMP_OVERRIDE]: string | undefined;
   [ALERT_RULE_TO]: string;
   [ALERT_RULE_TYPE]: Type;

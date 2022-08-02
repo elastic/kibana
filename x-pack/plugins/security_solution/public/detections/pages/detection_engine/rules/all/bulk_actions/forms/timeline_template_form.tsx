@@ -58,8 +58,8 @@ const TimelineTemplateFormComponent = (props: TimelineTemplateFormProps) => {
       return;
     }
 
-    const timelineId = data.timeline.id || '';
-    const timelineTitle = timelineId ? data.timeline.title : '';
+    const timelineId = data.timeline.id;
+    const timelineTitle = timelineId ? data.timeline.title : null;
 
     onConfirm({
       type: BulkActionEditType.set_timeline,

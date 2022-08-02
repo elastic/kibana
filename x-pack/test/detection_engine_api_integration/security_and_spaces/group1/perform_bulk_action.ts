@@ -635,7 +635,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should correctly remove timeline', async () => {
         const ruleId = 'ruleId';
-        await createRule(supertest, log, getSimpleRule(ruleId));
+        await createRule(supertest, log, {
+          ...getSimpleRule(ruleId),
+          timeline_id: 'test-id',
+          timeline_title: 'Test timeline template',
+        });
 
         const { body } = await postBulkAction()
           .send({
@@ -645,8 +649,8 @@ export default ({ getService }: FtrProviderContext): void => {
               {
                 type: BulkActionEditType.set_timeline,
                 value: {
-                  timeline_id: '',
-                  timeline_title: '',
+                  timeline_id: null,
+                  timeline_title: null,
                 },
               },
             ],
@@ -656,14 +660,14 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
 
         // Check that the updated rule is returned with the response
-        expect(body.attributes.results.updated[0].timeline_id).to.be(undefined);
-        expect(body.attributes.results.updated[0].timeline_title).to.be(undefined);
+        expect(body.attributes.results.updated[0].timeline_id).to.be(null);
+        expect(body.attributes.results.updated[0].timeline_title).to.be(null);
 
         // Check that the updates have been persisted
         const { body: rule } = await fetchRule(ruleId).expect(200);
 
-        expect(rule.timeline_id).to.be(undefined);
-        expect(rule.timeline_title).to.be(undefined);
+        expect(rule.timeline_id).to.be(null);
+        expect(rule.timeline_title).to.be(null);
       });
 
       it('should return error when trying to bulk edit immutable rule', async () => {

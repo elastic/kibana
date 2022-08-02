@@ -65,8 +65,8 @@ const applyBulkActionEditToRuleParams = (
     case BulkActionEditType.set_timeline:
       ruleParams = {
         ...ruleParams,
-        timelineId: action.value.timeline_id || undefined,
-        timelineTitle: action.value.timeline_title || undefined,
+        timelineId: action.value.timeline_id,
+        timelineTitle: action.value.timeline_title,
       };
       break;
   }

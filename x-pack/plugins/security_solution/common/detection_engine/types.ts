@@ -18,7 +18,7 @@ export type RuleAlertAction = Omit<RuleAction, 'actionTypeId'> & {
  * "| { [property: string]: SearchTypes }" to designate you can can sub-objects
  * or sub-sub-objects, etc...
  */
-export type SearchTypes = string | number | boolean | object | SearchTypes[] | undefined;
+export type SearchTypes = string | number | boolean | object | SearchTypes[] | undefined | null;
 
 export interface Explanation {
   value: number;

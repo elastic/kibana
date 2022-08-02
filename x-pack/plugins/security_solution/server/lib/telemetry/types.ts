@@ -7,7 +7,7 @@
 
 import type { AlertEvent, ResolverNode, SafeResolverEvent } from '../../../common/endpoint/types';
 
-type BaseSearchTypes = string | number | boolean | object;
+type BaseSearchTypes = string | number | boolean | object | null;
 export type SearchTypes = BaseSearchTypes | BaseSearchTypes[] | undefined;
 
 // For getting cluster info. Copied from telemetry_collection/get_cluster_info.ts
