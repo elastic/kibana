@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsFieldMapping, SavedObjectsType } from '@kbn/core/server';
-import type { FileShareSavedObjectAttributes } from '../../common/types';
+import type { FileShare } from '../../common/types';
 import { FILE_SHARE_SO_TYPE } from '../../common/constants';
 
 /**
@@ -16,7 +16,7 @@ import { FILE_SHARE_SO_TYPE } from '../../common/constants';
  * Internet.
  */
 
-type Properties = Record<keyof FileShareSavedObjectAttributes, SavedObjectsFieldMapping>;
+type Properties = Record<keyof FileShare, SavedObjectsFieldMapping>;
 
 const properties: Properties = {
   created: {
@@ -33,7 +33,7 @@ const properties: Properties = {
   },
 };
 
-export const fileShareObjectType: SavedObjectsType<FileShareSavedObjectAttributes> = {
+export const fileShareObjectType: SavedObjectsType<FileShare> = {
   name: FILE_SHARE_SO_TYPE,
   hidden: true,
   namespaceType: 'agnostic', // These saved objects should be visible everywhere

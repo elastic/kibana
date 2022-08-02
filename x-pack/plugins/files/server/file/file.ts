@@ -13,13 +13,11 @@ import type { FileCompression, FileShareJSON, FileShareJSONWithToken } from '../
 import type {
   File as IFile,
   FileKind,
-  FileSavedObject,
-  FileSavedObjectAttributes,
+  FileMetadata,
   FileStatus,
-  UpdatableFileAttributes,
+  UpdatableFileMetadata,
   FileJSON,
 } from '../../common';
-import { BlobStorageService } from '../blob_storage_service';
 import {
   fileAttributesReducer,
   Action,
@@ -28,8 +26,7 @@ import {
 import { createAuditEvent } from '../audit_events';
 import { InternalFileService } from '../file_service/internal_file_service';
 import { InternalFileShareService } from '../file_share_service';
-import { BlobStorage } from '../blob_storage_service/types';
-import { enforceMaxByteSizeTransform } from './stream_transforms';
+import type { FileClient } from '../file_client/file_client';
 import { toJSON } from './to_json';
 import {
   AlreadyDeletedError,
@@ -46,27 +43,24 @@ import {
  */
 export class File<M = unknown> implements IFile {
   private readonly logAuditEvent: InternalFileService['createAuditLog'];
-  private readonly blobStorage: BlobStorage;
 
   constructor(
-    private fileSO: FileSavedObject,
-    private readonly fileKindDescriptor: FileKind,
+    public readonly id: string,
+    private fileMetadata: FileMetadata,
+    private readonly fileClient: FileClient,
     private readonly internalFileService: InternalFileService,
-    private readonly blobStorageService: BlobStorageService,
     private readonly fileShareService: InternalFileShareService,
     private readonly logger: Logger
   ) {
     this.logAuditEvent = this.internalFileService.createAuditLog.bind(this.internalFileService);
-    this.blobStorage = this.blobStorageService.createBlobStorage(
-      fileKindDescriptor.blobStoreSettings
-    );
   }
 
   private async updateFileState(action: Action) {
-    this.fileSO = await this.internalFileService.updateSO(
-      this.id,
-      fileAttributesReducer(this.attributes, action)
-    );
+    const { metadata } = await this.fileClient.update({
+      id: this.id,
+      metadata: fileAttributesReducer(this.metadata, action),
+    });
+    this.fileMetadata = metadata;
   }
 
   private isReady(): boolean {
@@ -81,7 +75,7 @@ export class File<M = unknown> implements IFile {
     return this.status === 'UPLOADING';
   }
 
-  public async update(attrs: Partial<UpdatableFileAttributes>): Promise<IFile> {
+  public async update(attrs: Partial<UpdatableFileMetadata>): Promise<IFile> {
     await this.updateFileState({
       action: 'updateFile',
       payload: attrs,
@@ -102,9 +96,8 @@ export class File<M = unknown> implements IFile {
     });
 
     try {
-      const { size } = await this.blobStorage.upload(content, {
+      const { size } = await this.fileClient.upload(content, {
         id: this.id, // By sharing this ID with the blob content we can retrieve the content later
-        transforms: [enforceMaxByteSizeTransform(this.fileKindDescriptor.maxSizeBytes ?? Infinity)],
       });
       await this.updateFileState({
         action: 'uploaded',
@@ -112,18 +105,18 @@ export class File<M = unknown> implements IFile {
       });
     } catch (e) {
       await this.updateFileState({ action: 'uploadError' });
-      this.blobStorage.delete(this.id).catch(() => {}); // Best effort to remove any uploaded content
+      this.fileClient.deleteContent(this.id).catch(() => {}); // Best effort to remove any uploaded content
       throw e;
     }
   }
 
   public downloadContent(): Promise<Readable> {
-    const { size } = this.attributes;
+    const { size } = this.metadata;
     if (!this.isReady()) {
       throw new NoDownloadAvailableError('This file content is not available for download.');
     }
     // We pass through this file ID to retrieve blob content.
-    return this.blobStorage.download({ id: this.id, size });
+    return this.fileClient.downloadContent({ id: this.id, size });
   }
 
   public async delete(): Promise<void> {
@@ -138,10 +131,7 @@ export class File<M = unknown> implements IFile {
     });
     // Stop sharing this file
     await this.fileShareService.deleteForFile({ file: this });
-    if (this.isReady()) {
-      await this.blobStorage.delete(this.id);
-    }
-    await this.internalFileService.deleteSO(this.id);
+    await this.fileClient.delete({ id: this.id, hasContent: this.isReady() });
     this.logAuditEvent(
       createAuditEvent({
         action: 'delete',
@@ -184,63 +174,59 @@ export class File<M = unknown> implements IFile {
   }
 
   public toJSON(): FileJSON<M> {
-    return toJSON<M>(this.id, this.attributes);
+    return toJSON<M>(this.id, this.metadata);
   }
 
-  private get attributes(): FileSavedObjectAttributes {
-    return this.fileSO.attributes;
-  }
-
-  public get id(): string {
-    return this.fileSO.id;
+  private get metadata(): FileMetadata {
+    return this.fileMetadata;
   }
 
   public get created(): string {
-    return this.attributes.created;
+    return this.metadata.created;
   }
 
   public get updated(): string {
-    return this.attributes.Updated;
+    return this.metadata.Updated;
   }
 
   public get chunkSize(): number | undefined {
-    return this.attributes.ChunkSize;
+    return this.metadata.ChunkSize;
   }
 
   public get fileKind(): string {
-    return this.fileKindDescriptor.id;
+    return this.fileClient.fileKind;
   }
 
   public get name(): string {
-    return this.attributes.name;
+    return this.metadata.name;
   }
 
   public get status(): FileStatus {
-    return this.attributes.Status;
+    return this.metadata.Status;
   }
 
   public get compression(): undefined | FileCompression {
-    return this.attributes.Compression;
+    return this.metadata.Compression;
   }
 
   public get size(): undefined | number {
-    return this.attributes.size;
+    return this.metadata.size;
   }
 
   public get meta(): M {
-    return this.attributes.Meta as M;
+    return this.metadata.Meta as M;
   }
 
   public get alt(): undefined | string {
-    return this.attributes.Alt;
+    return this.metadata.Alt;
   }
 
   public get mimeType(): undefined | string {
-    return this.attributes.mime_type;
+    return this.metadata.mime_type;
   }
 
   public get extension(): undefined | string {
-    return this.attributes.extension;
+    return this.metadata.extension;
   }
 
   /**
@@ -255,19 +241,23 @@ export class File<M = unknown> implements IFile {
       meta,
       mime,
     }: { name: string; fileKind: FileKind; alt?: string; meta?: unknown; mime?: string },
-    internalFileService: InternalFileService
+    internalFileService: InternalFileService,
+    fileClient: FileClient
   ) {
-    const fileSO = await internalFileService.createSO(cuid(), {
-      ...createDefaultFileAttributes(),
-      name,
-      mime_type: mime,
-      Alt: alt,
-      Meta: meta,
-      FileKind: fileKind.id,
-      extension: (mime && mimeType.getExtension(mime)) ?? undefined,
+    const fileMeta = await fileClient.create({
+      id: cuid(),
+      metadata: {
+        ...createDefaultFileAttributes(),
+        name,
+        mime_type: mime,
+        Alt: alt,
+        Meta: meta,
+        FileKind: fileKind.id,
+        extension: (mime && mimeType.getExtension(mime)) ?? undefined,
+      },
     });
 
-    const file = internalFileService.toFile(fileSO, fileKind);
+    const file = internalFileService.toFile(fileMeta.id, fileMeta.metadata, fileKind);
 
     internalFileService.createAuditLog(
       createAuditEvent({

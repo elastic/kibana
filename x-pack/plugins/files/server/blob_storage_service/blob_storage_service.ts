@@ -7,8 +7,8 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { BlobStorageSettings, ES_FIXED_SIZE_INDEX_BLOB_STORE } from '../../common';
-import { BlobStorage } from './types';
-import { ElasticsearchBlobStorage, MAX_BLOB_STORE_SIZE_BYTES } from './adapters';
+import { BlobStorageClient } from './types';
+import { ElasticsearchBlobStorageClient, MAX_BLOB_STORE_SIZE_BYTES } from './adapters';
 
 interface ElasticsearchBlobStorageSettings {
   index?: string;
@@ -18,8 +18,11 @@ interface ElasticsearchBlobStorageSettings {
 export class BlobStorageService {
   constructor(private readonly esClient: ElasticsearchClient, private readonly logger: Logger) {}
 
-  private createESBlobStorage({ index, chunkSize }: ElasticsearchBlobStorageSettings): BlobStorage {
-    return new ElasticsearchBlobStorage(
+  private createESBlobStorage({
+    index,
+    chunkSize,
+  }: ElasticsearchBlobStorageSettings): BlobStorageClient {
+    return new ElasticsearchBlobStorageClient(
       this.esClient,
       index,
       chunkSize,
@@ -27,7 +30,7 @@ export class BlobStorageService {
     );
   }
 
-  public createBlobStorage(args?: BlobStorageSettings): BlobStorage {
+  public createBlobStorageClient(args?: BlobStorageSettings): BlobStorageClient {
     return this.createESBlobStorage({ ...args?.esFixedSizeIndex });
   }
 

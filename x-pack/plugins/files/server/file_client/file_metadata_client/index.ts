@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { ElasticsearchBlobStorageClient, MAX_BLOB_STORE_SIZE_BYTES } from './es';
+export type { FileMetadataClient, FileDescriptor } from './file_metadata_service';
+export { SavedObjectsFileMetadataService } from './adapters';

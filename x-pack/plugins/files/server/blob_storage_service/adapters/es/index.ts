@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ElasticsearchBlobStorage, MAX_BLOB_STORE_SIZE_BYTES } from './es';
+export { ElasticsearchBlobStorageClient, MAX_BLOB_STORE_SIZE_BYTES } from './es';

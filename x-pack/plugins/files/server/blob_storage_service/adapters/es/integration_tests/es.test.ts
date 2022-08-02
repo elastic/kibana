@@ -14,12 +14,12 @@ import {
   TestKibanaUtils,
 } from '@kbn/core/test_helpers/kbn_server';
 
-import { ElasticsearchBlobStorage, BLOB_STORAGE_SYSTEM_INDEX_NAME } from '../es';
+import { ElasticsearchBlobStorageClient, BLOB_STORAGE_SYSTEM_INDEX_NAME } from '../es';
 
 describe('Elasticsearch blob storage', () => {
   let manageES: TestElasticsearchUtils;
   let manageKbn: TestKibanaUtils;
-  let esBlobStorage: ElasticsearchBlobStorage;
+  let esBlobStorage: ElasticsearchBlobStorageClient;
   let esClient: ElasticsearchClient;
   const sandbox = sinon.createSandbox();
 
@@ -37,7 +37,7 @@ describe('Elasticsearch blob storage', () => {
   });
 
   const createEsBlobStorage = ({ chunkSize }: { chunkSize?: string } = {}) =>
-    new ElasticsearchBlobStorage(
+    new ElasticsearchBlobStorageClient(
       esClient,
       undefined,
       chunkSize,

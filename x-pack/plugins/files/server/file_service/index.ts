@@ -7,12 +7,12 @@
 
 export { FileServiceFactoryImpl as FileServiceFactory } from './file_service_factory';
 export type {
-  FileServiceStart,
   CreateFileArgs,
   DeleteFileArgs,
   FindFileArgs,
   GetByIdArgs,
   ListFilesArgs,
   UpdateFileArgs,
-} from './file_service';
+} from './file_action_types';
+export type { FileServiceStart } from './file_service';
 export * as errors from './errors';

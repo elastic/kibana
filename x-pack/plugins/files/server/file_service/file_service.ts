@@ -14,16 +14,7 @@ import type {
   GetByIdArgs,
   ListFilesArgs,
   FindFileArgs,
-} from './internal_file_service';
-
-export type {
-  CreateFileArgs,
-  UpdateFileArgs,
-  DeleteFileArgs,
-  GetByIdArgs,
-  ListFilesArgs,
-  FindFileArgs,
-};
+} from './file_action_types';
 
 /**
  * Public file service interface.

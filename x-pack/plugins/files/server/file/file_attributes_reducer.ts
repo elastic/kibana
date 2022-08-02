@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FileSavedObjectAttributes, UpdatableFileAttributes } from '../../common';
+import { FileMetadata, UpdatableFileMetadata } from '../../common';
 
 export type Action =
   | {
@@ -18,10 +18,10 @@ export type Action =
     }
   | { action: 'uploaded'; payload: { size: number } }
   | { action: 'uploadError'; payload?: undefined }
-  | { action: 'updateFile'; payload: Partial<UpdatableFileAttributes> };
+  | { action: 'updateFile'; payload: Partial<UpdatableFileMetadata> };
 
 export function createDefaultFileAttributes(): Pick<
-  FileSavedObjectAttributes,
+  FileMetadata,
   'created' | 'Updated' | 'Status'
 > {
   const dateString = new Date().toISOString();
@@ -33,9 +33,9 @@ export function createDefaultFileAttributes(): Pick<
 }
 
 export function fileAttributesReducer(
-  state: FileSavedObjectAttributes,
+  state: FileMetadata,
   { action, payload }: Action
-): FileSavedObjectAttributes {
+): FileMetadata {
   switch (action) {
     case 'delete':
       return { ...state, Status: 'DELETED' };

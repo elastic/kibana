@@ -12,7 +12,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { Readable, Transform } from 'stream';
 import { pipeline } from 'stream/promises';
 import { promisify } from 'util';
-import type { BlobStorage } from '../../types';
+import type { BlobStorageClient } from '../../types';
 import type { ReadableContentStream } from './content_stream';
 import { getReadableContentStream, getWritableContentStream } from './content_stream';
 import { mappings } from './mappings';
@@ -26,7 +26,7 @@ export const BLOB_STORAGE_SYSTEM_INDEX_NAME = '.kibana_blob_storage';
 
 export const MAX_BLOB_STORE_SIZE_BYTES = 50 * 1024 * 1024 * 1024; // 50 GiB
 
-export class ElasticsearchBlobStorage implements BlobStorage {
+export class ElasticsearchBlobStorageClient implements BlobStorageClient {
   constructor(
     private readonly esClient: ElasticsearchClient,
     private readonly index: string = BLOB_STORAGE_SYSTEM_INDEX_NAME,

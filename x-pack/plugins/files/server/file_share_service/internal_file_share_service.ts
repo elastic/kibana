@@ -16,7 +16,7 @@ import type {
   Pagination,
   FileShareJSON,
   FileShareJSONWithToken,
-  FileShareSavedObjectAttributes,
+  FileShare,
   UpdatableFileShareAttributes,
 } from '../../common/types';
 import { FILE_SO_TYPE } from '../../common/constants';
@@ -104,7 +104,7 @@ export interface UpdateArgs {
   attributes: UpdatableFileShareAttributes;
 }
 
-function toFileShareJSON(so: SavedObject<FileShareSavedObjectAttributes>): FileShareJSON {
+function toFileShareJSON(so: SavedObject<FileShare>): FileShareJSON {
   return {
     id: so.id,
     fileId: so.references[0]?.id, // Assuming a single file reference
@@ -135,7 +135,7 @@ export class InternalFileShareService implements FileShareServiceStart {
   public async share(args: CreateShareArgs): Promise<FileShareJSONWithToken> {
     validateCreateArgs(args);
     const { file, name, validUntil } = args;
-    const so = await this.savedObjects.create<FileShareSavedObjectAttributes>(
+    const so = await this.savedObjects.create<FileShare>(
       this.savedObjectsType,
       {
         created: new Date().toISOString(),
@@ -166,8 +166,8 @@ export class InternalFileShareService implements FileShareServiceStart {
     fileId,
     perPage,
     page,
-  }: ListArgs): Promise<Array<SavedObject<FileShareSavedObjectAttributes>>> {
-    const result = await this.savedObjects.find<FileShareSavedObjectAttributes>({
+  }: ListArgs): Promise<Array<SavedObject<FileShare>>> {
+    const result = await this.savedObjects.find<FileShare>({
       type: this.savedObjectsType,
       hasReference: fileId
         ? {
@@ -194,7 +194,7 @@ export class InternalFileShareService implements FileShareServiceStart {
   public async getByToken(token: string): Promise<FileShareJSON> {
     const {
       saved_objects: [share],
-    } = await this.savedObjects.find<FileShareSavedObjectAttributes>({
+    } = await this.savedObjects.find<FileShare>({
       type: this.savedObjectsType,
       filter: nodeBuilder.is(`${this.savedObjectsType}.attributes.token`, escapeKuery(token)),
     });
@@ -219,16 +219,9 @@ export class InternalFileShareService implements FileShareServiceStart {
     }
   }
 
-  public async update({
-    id,
-    attributes,
-  }: UpdateArgs): Promise<FileShareSavedObjectAttributes & { id: string }> {
-    const result = await this.savedObjects.update<FileShareSavedObjectAttributes>(
-      this.savedObjectsType,
-      id,
-      attributes
-    );
-    return { id, ...(result.attributes as FileShareSavedObjectAttributes) };
+  public async update({ id, attributes }: UpdateArgs): Promise<FileShare & { id: string }> {
+    const result = await this.savedObjects.update<FileShare>(this.savedObjectsType, id, attributes);
+    return { id, ...(result.attributes as FileShare) };
   }
 
   public async list(args: ListArgs): Promise<{ shares: FileShareJSON[] }> {

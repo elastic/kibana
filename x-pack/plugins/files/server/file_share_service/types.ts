@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FileShareJSON, FileShareSavedObjectAttributes } from '../../common/types';
+import type { FileShareJSON, FileShare } from '../../common/types';
 import type { GetArgs, UpdateArgs, DeleteArgs, ListArgs } from './internal_file_share_service';
 
 /**
@@ -32,7 +32,7 @@ export interface FileShareServiceStart {
    *
    * @param {UpdateArgs} args - the arguments to update a share instance
    */
-  update(args: UpdateArgs): Promise<FileShareSavedObjectAttributes & { id: string }>;
+  update(args: UpdateArgs): Promise<FileShare & { id: string }>;
 
   /**
    * Delete a share instance.

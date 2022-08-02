@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UpdatableFileAttributes } from '../../../../common/types';
+import type { UpdatableFileMetadata } from '../../../../common/types';
 import { setupIntegrationEnvironment, TestEnvironmentUtils } from '../../test_utils';
 
 describe('File kind HTTP API', () => {
@@ -80,7 +80,7 @@ describe('File kind HTTP API', () => {
     } = await request.get(root, `/api/files/files/${fileKind}/${id}`).expect(200);
     expect(file.name).toBe('acoolfilename');
 
-    const updatedFileAttrs: UpdatableFileAttributes = {
+    const updatedFileAttrs: UpdatableFileMetadata = {
       name: 'anothercoolfilename',
       alt: 'a picture of my cat',
       meta: {
