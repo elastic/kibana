@@ -87,6 +87,7 @@ describe('format', () => {
       __ui: {
         is_tls_enabled: false,
       },
+      config_id: '',
       'check.request.body': {
         type: 'text',
         value: '',
@@ -141,6 +142,7 @@ describe('format', () => {
       const browserFormFields = {
         type: 'browser',
         form_monitor_type: 'multistep',
+        config_id: '',
         enabled: true,
         schedule: {
           unit: 'm',
@@ -220,6 +222,7 @@ describe('format', () => {
             is_generated_script: isGeneratedScript,
           },
         },
+        config_id: '',
         enabled: true,
         'filter_journeys.match': '',
         'filter_journeys.tags': [],
@@ -296,6 +299,7 @@ describe('format', () => {
       __ui: {
         is_tls_enabled: isTLSEnabled,
       },
+      config_id: '',
       'check.request.body': {
         type: 'text',
         value: '',
