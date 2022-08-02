@@ -29,7 +29,7 @@ describe('Infrastracture feature flag', () => {
 
   describe('when infrastracture feature is enabled', () => {
     beforeEach(() => {
-      cy.loginAsEditorUser().then((resp) => {
+      cy.loginAsEditorUser().then(() => {
         // enables infrastructure view feature on advanced settings
         cy.updateAdvancedSettings({
           'observability:enableInfrastructureView': true,
@@ -45,7 +45,7 @@ describe('Infrastracture feature flag', () => {
 
   describe('when infrastracture feature is disabled', () => {
     beforeEach(() => {
-      cy.loginAsEditorUser().then((resp) => {
+      cy.loginAsEditorUser().then(() => {
         // enables infrastructure view feature on advanced settings
         cy.updateAdvancedSettings({
           'observability:enableInfrastructureView': false,
