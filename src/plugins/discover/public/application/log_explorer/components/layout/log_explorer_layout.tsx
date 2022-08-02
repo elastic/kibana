@@ -45,6 +45,7 @@ import { LogExplorer } from './log_explorer';
 import { useStateMachineContext } from '../../hooks/query_data/use_state_machine';
 import { RecordRawType } from '../../../main/hooks/use_saved_search';
 import { getRawRecordType } from '../../../main/utils/get_raw_record_type';
+import { useFieldCounts } from '../../hooks/use_field_counts';
 
 /**
  * Local storage key for sidebar persistence state
@@ -88,7 +89,8 @@ export function LogExplorerLayout({
 
   const stateMachine = useStateMachineContext();
   const [dataAccessState] = useActor(stateMachine);
-
+  const fieldCounts = useFieldCounts(dataAccessState.context);
+  console.log(dataAccessState);
   const dataState: DataMainMsg = useDataState(main$);
 
   // We treat rollup v1 data views as non time based in Discover, since we query them
@@ -251,12 +253,9 @@ export function LogExplorerLayout({
               onFieldEdited={onFieldEdited}
               onDataViewCreated={onDataViewCreated}
               viewMode={VIEW_MODE.LOG_EXPLORER}
-              /* Short circuit deriving fields from the documents, instead just use fields derived from the data view */
+              /* Short circuit deriving fields from the documents, just derive from the fieldCounts */
               documents={[]}
-              /* Log explorer entries are queried with the selected fields only, they don't return all fields, this makes the fieldCounts -> available fields connection
-              irrelevant in our use case. This means "hide empty fields" needs to be selected to make the fields visible. This is a POC stop gap until the sidebar consolidation
-              effort between Discover / Lens lands */
-              fieldCounts={{}}
+              fieldCounts={fieldCounts}
             />
           </EuiFlexItem>
           <EuiHideFor sizes={['xs', 's']}>

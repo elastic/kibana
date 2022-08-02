@@ -52,7 +52,8 @@ export const fetchEntriesAround =
     const commonSearchSource = searchSource
       .createCopy()
       .setField('filter', timeRangeFilter)
-      .setField('size', chunkSize);
+      .setField('size', chunkSize)
+      .setField('fields', ['*']); // NOTE: Requests all fields to help assist with populating "Available fields". This can likely be changed after the Lens / Discover field list consolidation efforts.
 
     // TODO: create and use point-in-time, not currently possible from client?
     const beforeResponse$ = commonSearchSource
