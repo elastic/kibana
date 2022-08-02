@@ -21,10 +21,15 @@ export interface TopNSamples {
   TopN: TopNSample[];
 }
 
+export interface TopNResponse extends TopNSamples {
+  TotalCount: number;
+}
+
 export interface TopNSamplesHistogramResponse {
   buckets: Array<{
     key: string | number;
     doc_count: number;
+    count: { value: number | null };
     group_by: {
       buckets: Array<{ doc_count: number; key: string | number; count: { value: number | null } }>;
     };
@@ -34,30 +39,30 @@ export interface TopNSamplesHistogramResponse {
 export function createTopNSamples(
   histogram: TopNSamplesHistogramResponse | undefined
 ): TopNSample[] {
-  const bucketsByTimestamp = new Map();
-  const uniqueCategories = new Set<string>();
+  const bucketsByCategories = new Map();
+  const uniqueTimestamps = new Set<number>();
 
-  // Convert the histogram into nested maps and record the unique categories
+  // Convert the histogram into nested maps and record the unique timestamps
   const histogramBuckets = histogram?.buckets ?? [];
   for (let i = 0; i < histogramBuckets.length; i++) {
-    const frameCountsByCategory = new Map();
+    const frameCountsByTimestamp = new Map();
     const items = histogramBuckets[i].group_by.buckets;
 
     for (let j = 0; j < items.length; j++) {
-      uniqueCategories.add(String(items[j].key));
-      frameCountsByCategory.set(items[j].key, items[j].count.value);
+      uniqueTimestamps.add(Number(items[j].key));
+      frameCountsByTimestamp.set(items[j].key, items[j].count.value);
     }
-    bucketsByTimestamp.set(histogramBuckets[i].key, frameCountsByCategory);
+    bucketsByCategories.set(histogramBuckets[i].key, frameCountsByTimestamp);
   }
 
   // Normalize samples so there are an equal number of data points per each timestamp
   const samples: TopNSample[] = [];
-  for (const timestamp of bucketsByTimestamp.keys()) {
-    for (const category of uniqueCategories.values()) {
-      const frameCountsByCategory = bucketsByTimestamp.get(timestamp);
+  for (const category of bucketsByCategories.keys()) {
+    for (const timestamp of uniqueTimestamps) {
+      const frameCountsByTimestamp = bucketsByCategories.get(category);
       const sample: TopNSample = {
         Timestamp: timestamp,
-        Count: frameCountsByCategory.get(category) ?? 0,
+        Count: frameCountsByTimestamp.get(timestamp) ?? 0,
         Category: category,
       };
       samples.push(sample);
@@ -75,9 +80,8 @@ export interface TopNSubchart {
   Index: number;
 }
 
-export function groupSamplesByCategory(samples: TopNSample[]): TopNSubchart[] {
+export function groupSamplesByCategory(samples: TopNSample[], totalCount: number): TopNSubchart[] {
   const seriesByCategory = new Map<string, CountPerTime[]>();
-  let total = 0;
 
   for (let i = 0; i < samples.length; i++) {
     const sample = samples[i];
@@ -87,8 +91,6 @@ export function groupSamplesByCategory(samples: TopNSample[]): TopNSubchart[] {
     }
     const series = seriesByCategory.get(sample.Category)!;
     series.push({ Timestamp: sample.Timestamp, Count: sample.Count });
-
-    total += sample.Count ?? 0;
   }
 
   const subcharts: Array<Omit<TopNSubchart, 'Color' | 'Index'>> = [];
@@ -97,7 +99,7 @@ export function groupSamplesByCategory(samples: TopNSample[]): TopNSubchart[] {
     const totalPerCategory = series.reduce((sum, { Count }) => sum + (Count ?? 0), 0);
     subcharts.push({
       Category: category,
-      Percentage: (totalPerCategory / total) * 100,
+      Percentage: (totalPerCategory / totalCount) * 100,
       Series: series,
     });
   }

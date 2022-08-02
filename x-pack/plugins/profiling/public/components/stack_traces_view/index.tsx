@@ -8,7 +8,7 @@ import { EuiButton, EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiPanel } from '
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { StackTracesDisplayOption } from '../../../common/stack_traces';
-import { groupSamplesByCategory, TopNSamples, TopNSubchart } from '../../../common/topn';
+import { groupSamplesByCategory, TopNResponse, TopNSubchart } from '../../../common/topn';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
@@ -64,9 +64,10 @@ export function StackTracesView() {
       timeFrom: new Date(timeRange.start).getTime() / 1000,
       timeTo: new Date(timeRange.end).getTime() / 1000,
       kuery,
-    }).then((response: TopNSamples) => {
+    }).then((response: TopNResponse) => {
+      const totalCount = response.TotalCount;
       const samples = response.TopN;
-      const charts = groupSamplesByCategory(samples);
+      const charts = groupSamplesByCategory(samples, totalCount);
       setTopN({ charts });
     });
   }, [topNType, timeRange.start, timeRange.end, fetchTopN, kuery]);

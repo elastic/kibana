@@ -13,13 +13,20 @@ import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { topNElasticSearchQuery } from './topn';
 
 const anyQuery = 'any::query';
+const smallestInterval = '1s';
 const testAgg = { aggs: { test: {} } };
 
 jest.mock('./query', () => ({
   createCommonFilter: ({}: {}) => {
     return anyQuery;
   },
-  autoHistogramSumCountOnGroupByField: (searchField: string): AggregationsAggregationContainer => {
+  findFixedIntervalForBucketsPerTimeRange: (from: number, to: number, buckets: number): string => {
+    return smallestInterval;
+  },
+  aggregateByFieldAndTimestamp: (
+    searchField: string,
+    interval: string
+  ): AggregationsAggregationContainer => {
     return testAgg;
   },
 }));
@@ -32,7 +39,7 @@ describe('TopN data from Elasticsearch', () => {
         context.elasticsearch.client.asCurrentUser.search(request) as Promise<any>
     ),
     mget: jest.fn(
-      (ooperationName, request) =>
+      (operationName, request) =>
         context.elasticsearch.client.asCurrentUser.search(request) as Promise<any>
     ),
   };
@@ -47,9 +54,10 @@ describe('TopN data from Elasticsearch', () => {
       const response = await topNElasticSearchQuery({
         client,
         logger,
-        timeFrom: '456',
-        timeTo: '789',
+        timeFrom: 456,
+        timeTo: 789,
         searchField: 'StackTraceID',
+        highCardinality: false,
         kuery: '',
         response: kibanaResponseFactory,
       });
