@@ -6,6 +6,8 @@
  */
 
 import type { DataViewBase } from '@kbn/es-query';
+import type { Optional } from 'utility-types';
+
 import type { NarrowDateRange } from '../../../common/components/ml/types';
 import type { ESTermQuery } from '../../../../common/typed_json';
 
@@ -62,21 +64,10 @@ export enum NetworkRouteType {
   anomalies = 'anomalies',
   tls = 'tls',
   http = 'http',
-  alerts = 'events', // changed officially to events in #136427
+  events = 'events',
 }
 
-export type KeyNetworkNavTabWithoutMlPermission = NetworkRouteType.dns &
-  NetworkRouteType.flows &
-  NetworkRouteType.http &
-  NetworkRouteType.tls &
-  NetworkRouteType.alerts;
-
-type KeyNetworkNavTabWithMlPermission = KeyNetworkNavTabWithoutMlPermission &
-  NetworkRouteType.anomalies;
-
-type KeyNetworkNavTab = KeyNetworkNavTabWithoutMlPermission | KeyNetworkNavTabWithMlPermission;
-
-export type NetworkNavTab = Record<KeyNetworkNavTab, NavTab>;
+export type NetworkNavTab = Optional<Record<`${NetworkRouteType}`, NavTab>, 'anomalies'>;
 
 export type GetNetworkRoutePath = (
   capabilitiesFetched: boolean,

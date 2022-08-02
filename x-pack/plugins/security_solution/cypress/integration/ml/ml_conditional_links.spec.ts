@@ -97,7 +97,7 @@ describe('ml conditional links', () => {
     visitWithoutDateRange(mlNetworkSingleIpNullKqlQuery);
     cy.url().should(
       'include',
-      'app/security/network/ip/127.0.0.1/source?sourcerer=(default:(id:security-solution-default,selectedPatterns:!(%27auditbeat-*%27)))&timerange=(global:(linkTo:!(timeline),timerange:(from:%272019-08-28T11:00:00.000Z%27,kind:absolute,to:%272019-08-28T13:59:59.999Z%27)),timeline:(linkTo:!(global),timerange:(from:%272019-08-28T11:00:00.000Z%27,kind:absolute,to:%272019-08-28T13:59:59.999Z%27)))'
+      'app/security/network/ip/127.0.0.1/source/flows?sourcerer=(default:(id:security-solution-default,selectedPatterns:!(%27auditbeat-*%27)))&timerange=(global:(linkTo:!(timeline),timerange:(from:%272019-08-28T11:00:00.000Z%27,kind:absolute,to:%272019-08-28T13:59:59.999Z%27)),timeline:(linkTo:!(global),timerange:(from:%272019-08-28T11:00:00.000Z%27,kind:absolute,to:%272019-08-28T13:59:59.999Z%27)))'
     );
   });
 
@@ -105,7 +105,7 @@ describe('ml conditional links', () => {
     visitWithoutDateRange(mlNetworkSingleIpKqlQuery);
     cy.url().should(
       'include',
-      '/app/security/network/ip/127.0.0.1/source?sourcerer=(default:(id:security-solution-default,selectedPatterns:!(%27auditbeat-*%27)))&query=(language:kuery,query:%27(process.name:%20%22conhost.exe%22%20or%20process.name:%20%22sc.exe%22)%27)&timerange=(global:(linkTo:!(timeline),timerange:(from:%272019-08-28T11:00:00.000Z%27,kind:absolute,to:%272019-08-28T13:59:59.999Z%27)),timeline:(linkTo:!(global),timerange:(from:%272019-08-28T11:00:00.000Z%27,kind:absolute,to:%272019-08-28T13:59:59.999Z%27)))'
+      '/app/security/network/ip/127.0.0.1/source/flows?sourcerer=(default:(id:security-solution-default,selectedPatterns:!(%27auditbeat-*%27)))&query=(language:kuery,query:%27(process.name:%20%22conhost.exe%22%20or%20process.name:%20%22sc.exe%22)%27)&timerange=(global:(linkTo:!(timeline),timerange:(from:%272019-08-28T11:00:00.000Z%27,kind:absolute,to:%272019-08-28T13:59:59.999Z%27)),timeline:(linkTo:!(global),timerange:(from:%272019-08-28T11:00:00.000Z%27,kind:absolute,to:%272019-08-28T13:59:59.999Z%27)))'
     );
   });
 

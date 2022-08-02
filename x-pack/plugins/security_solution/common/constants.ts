@@ -107,7 +107,7 @@ export enum SecurityPageName {
   network = 'network',
   networkAnomalies = 'network-anomalies',
   networkDns = 'network-dns',
-  networkExternalAlerts = 'network-external_alerts',
+  networkEvents = 'network-events',
   networkHttp = 'network-http',
   networkTls = 'network-tls',
   noPage = '',
@@ -126,7 +126,6 @@ export enum SecurityPageName {
   usersAnomalies = 'users-anomalies',
   usersAuthentications = 'users-authentications',
   usersEvents = 'users-events',
-  usersExternalAlerts = 'users-external_alerts',
   usersRisk = 'users-risk',
 }
 

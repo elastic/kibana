@@ -87,7 +87,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     const canUseMaps = kibana.services.application.capabilities.maps.show;
 
     const tabsFilters = useMemo(() => {
-      if (tabName === NetworkRouteType.alerts) {
+      if (tabName === NetworkRouteType.events) {
         return filters.length > 0
           ? [...filters, ...filterNetworkExternalAlertData]
           : filterNetworkExternalAlertData;
