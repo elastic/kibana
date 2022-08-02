@@ -13,7 +13,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 
 import type { Toast } from '@kbn/core/public';
-import { mountReactNode } from '@kbn/core/public/utils';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/schemas/common/schemas';
 import {
   BulkAction,
@@ -274,7 +274,7 @@ export const useBulkActions = ({
           longTimeWarningToast = toasts.addWarning(
             {
               title: i18n.BULK_EDIT_WARNING_TOAST_TITLE,
-              text: mountReactNode(
+              text: toMountPoint(
                 <>
                   <p>
                     {i18n.BULK_EDIT_WARNING_TOAST_DESCRIPTION(
