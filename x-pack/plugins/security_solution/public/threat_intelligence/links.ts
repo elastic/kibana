@@ -21,7 +21,6 @@ export const links: LinkItem = {
       'Elastic threat intelligence helps you see if you are open to or have been subject to current or historical known threats.',
   }),
   capabilities: [`${SERVER_APP_ID}.show`],
-  globalNavEnabled: false,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.threatIntelligence', {
       defaultMessage: 'Threat Intelligence',

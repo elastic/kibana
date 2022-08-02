@@ -24,7 +24,7 @@ const createMock = (): jest.Mocked<ExternalService> => {
         id: 'incident-1',
         title: 'CK-1',
         pushedDate: '2020-04-27T10:59:46.202Z',
-        url: 'https://siem-kibana.atlassian.net/browse/CK-1',
+        url: 'https://coolsite.net/browse/CK-1',
       })
     ),
     updateIncident: jest.fn().mockImplementation(() =>
@@ -32,7 +32,7 @@ const createMock = (): jest.Mocked<ExternalService> => {
         id: 'incident-1',
         title: 'CK-1',
         pushedDate: '2020-04-27T10:59:46.202Z',
-        url: 'https://siem-kibana.atlassian.net/browse/CK-1',
+        url: 'https://coolsite.net/browse/CK-1',
       })
     ),
     createComment: jest.fn(),

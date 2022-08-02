@@ -57,7 +57,7 @@ describe('Discover cell actions ', function () {
     const button = findTestSubject(component, 'filterForButton');
     await button.simulate('click');
     expect(discoverGridContextMock.onFilter).toHaveBeenCalledWith(
-      discoverGridContextMock.indexPattern.fields.getByName('extension'),
+      discoverGridContextMock.dataView.fields.getByName('extension'),
       'jpg',
       '+'
     );
@@ -78,7 +78,7 @@ describe('Discover cell actions ', function () {
     const button = findTestSubject(component, 'filterForButton');
     await button.simulate('click');
     expect(discoverGridContextMock.onFilter).toHaveBeenCalledWith(
-      discoverGridContextMock.indexPattern.fields.getByName('extension'),
+      discoverGridContextMock.dataView.fields.getByName('extension'),
       undefined,
       '+'
     );
@@ -99,7 +99,7 @@ describe('Discover cell actions ', function () {
     const button = findTestSubject(component, 'filterForButton');
     await button.simulate('click');
     expect(discoverGridContextMock.onFilter).toHaveBeenCalledWith(
-      discoverGridContextMock.indexPattern.fields.getByName('message'),
+      discoverGridContextMock.dataView.fields.getByName('message'),
       '',
       '+'
     );
@@ -120,7 +120,7 @@ describe('Discover cell actions ', function () {
     const button = findTestSubject(component, 'filterOutButton');
     await button.simulate('click');
     expect(discoverGridContextMock.onFilter).toHaveBeenCalledWith(
-      discoverGridContextMock.indexPattern.fields.getByName('extension'),
+      discoverGridContextMock.dataView.fields.getByName('extension'),
       'jpg',
       '-'
     );
