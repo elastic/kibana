@@ -53,7 +53,7 @@ function ofName(
   return adjustTimeScaleLabelSuffix(
     field?.type !== 'document'
       ? i18n.translate('xpack.lens.indexPattern.valueCountOf', {
-          defaultMessage: 'Value count of {name}',
+          defaultMessage: 'Count of {name}',
           values: {
             name: field?.displayName || '-',
           },
