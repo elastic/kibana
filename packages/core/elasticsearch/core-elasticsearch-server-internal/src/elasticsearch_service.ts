@@ -81,7 +81,7 @@ export class ElasticsearchService
           config.password !== undefined ||
           config.serviceAccountToken !== undefined,
       },
-      createClient: (type = DEFAULT_CLIENT_TYPE, clientConfig) =>
+      createClient: (type = 'preboot', clientConfig) =>
         this.createClusterClient(type, config, clientConfig),
     };
   }
