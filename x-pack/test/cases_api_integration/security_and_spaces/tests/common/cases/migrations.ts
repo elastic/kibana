@@ -427,5 +427,32 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         });
       });
     });
+
+    describe('8.5.0', () => {
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_duration.json'
+        );
+      });
+
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_duration.json'
+        );
+        await deleteAllCaseItems(es);
+      });
+
+      describe('assignees', () => {
+        it('adds the assignees field for existing documents', async () => {
+          const caseInfo = await getCase({
+            supertest,
+            caseId: '4537b380-a512-11ec-b92f-859b9e89e434',
+          });
+
+          expect(caseInfo).to.have.property('assignees');
+          expect(caseInfo.assignees).to.eql([]);
+        });
+      });
+    });
   });
 }

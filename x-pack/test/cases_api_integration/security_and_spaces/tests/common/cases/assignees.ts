@@ -32,6 +32,12 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteCasesByESQuery(es);
     });
 
+    it('allows the assignees field to be an empty array', async () => {
+      const postedCase = await createCase(supertest, getPostCaseRequest());
+
+      expect(postedCase.assignees).to.eql([]);
+    });
+
     it('assigns a user to a case and retrieves the users profile', async () => {
       const profile = await suggestUserProfiles({
         supertest: supertestWithoutAuth,
