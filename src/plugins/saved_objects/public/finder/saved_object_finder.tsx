@@ -36,6 +36,7 @@ import {
   IUiSettingsClient,
   SavedObjectsStart,
   SavedObject,
+  SimpleSavedObjectImpl,
 } from '@kbn/core/public';
 
 import { simpleSavedObjectToSavedObject } from '@kbn/data-views-plugin/public';
@@ -164,7 +165,7 @@ class SavedObjectFinderUi extends React.Component<
           ...simpleSavedObjectToSavedObject(savedObject),
           title: titleToUse,
           name: nameToUse,
-          simple: new SimpleSavedObject(this.props.savedObjects.client, savedObject),
+          simple: new SimpleSavedObjectImpl(this.props.savedObjects.client, savedObject),
         };
       })
       .filter((savedObject) => {
