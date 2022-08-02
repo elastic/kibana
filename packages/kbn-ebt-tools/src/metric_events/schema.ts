@@ -82,7 +82,7 @@ export interface MetricEvent {
 export const METRIC_EVENT_SCHEMA: RootSchema<MetricEvent> = {
   eventName: {
     type: 'keyword',
-    _meta: { description: 'Type of the event' },
+    _meta: { description: 'The name of the action that is tracked in the metrics' },
   },
   meta: {
     type: 'pass_through',

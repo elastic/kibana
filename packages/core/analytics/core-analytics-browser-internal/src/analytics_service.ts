@@ -35,7 +35,6 @@ export class AnalyticsService {
     });
 
     this.registerBuildInfoAnalyticsContext(core);
-    // Register special `performance_metrics` type
     registerPerformanceMetricEventType(this.analyticsClient);
 
     // We may eventually move the following to the client's package since they are not Kibana-specific

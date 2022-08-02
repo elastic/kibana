@@ -44,7 +44,7 @@ describe('AnalyticsService', () => {
     });
   });
 
-  test('should register the `metrics` and `clicks` event types on creation', () => {
+  test('should register the `performance_metric` and `click` event types on creation', () => {
     expect(analyticsClientMock.registerEventType).toHaveBeenCalledTimes(2);
     expect(analyticsClientMock.registerEventType.mock.calls[0]).toMatchInlineSnapshot(`
       Array [

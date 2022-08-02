@@ -12,7 +12,7 @@ import { type MetricEvent, METRIC_EVENT_SCHEMA } from './schema';
 const PERFORMANCE_METRIC_EVENT_TYPE = 'performance_metric';
 
 /**
- * Register the `metrics` event type
+ * Register the `performance_metric` event type
  * @param analytics The {@link AnalyticsClient} during the setup phase (it has the method `registerEventType`)
  * @private To be called only by core's Analytics Service
  */
@@ -26,7 +26,7 @@ export function registerPerformanceMetricEventType(
 }
 
 /**
- * Report a `metrics` event type.
+ * Report a `performance_metric` event type.
  * @param analytics The {@link AnalyticsClient} to report the events.
  * @param eventData The data to send, conforming the structure of a {@link MetricEvent}.
  */

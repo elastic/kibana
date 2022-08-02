@@ -30,7 +30,6 @@ export class AnalyticsService {
     });
 
     this.registerBuildInfoAnalyticsContext(core);
-    // Register special `metrics` type
     registerPerformanceMetricEventType(this.analyticsClient);
   }
 

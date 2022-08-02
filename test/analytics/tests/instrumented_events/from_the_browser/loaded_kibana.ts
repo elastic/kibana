@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(event.properties.protocol).to.be.a('string');
     });
 
-    it('should emit the new kibana-loaded events', async () => {
+    it('should emit the kibana_loaded event', async () => {
       const [event] = await ebtUIHelper.getEvents(1, {
         eventTypes: ['performance_metric'],
         filters: { 'properties.eventName': { eq: 'kibana_loaded' } },
