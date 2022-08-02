@@ -14,9 +14,12 @@ import {
   SearchHit,
 } from '@elastic/elasticsearch/lib/api/types';
 
+import { Meta } from '../../../../../common/types';
 import { HttpError, Status } from '../../../../../common/types/api';
 
+import { DEFAULT_META } from '../../../shared/constants';
 import { flashAPIErrors, clearFlashMessages } from '../../../shared/flash_messages';
+import { updateMetaPageIndex } from '../../../shared/table_pagination';
 
 import { MappingsApiLogic } from '../../api/mappings/mappings_logic';
 import { SearchDocumentsApiLogic } from '../../api/search_documents/search_documents_logic';
@@ -29,15 +32,17 @@ interface DocumentsLogicActions {
   makeMappingRequest: typeof MappingsApiLogic.actions.makeRequest;
   makeRequest: typeof SearchDocumentsApiLogic.actions.makeRequest;
   mappingsApiError(error: HttpError): HttpError;
+  onPaginate(newPageIndex: number): { newPageIndex: number };
   setSearchQuery(query: string): { query: string };
 }
 
-interface DocumentsLogicValues {
+export interface DocumentsLogicValues {
   data: typeof SearchDocumentsApiLogic.values.data;
   indexName: typeof IndexNameLogic.values.indexName;
   isLoading: boolean;
   mappingData: IndicesGetMappingIndexMappingRecord;
   mappingStatus: Status;
+  meta: Meta;
   query: string;
   results: SearchHit[];
   simplifiedMapping: Record<string, MappingProperty> | undefined;
@@ -46,6 +51,7 @@ interface DocumentsLogicValues {
 
 export const DocumentsLogic = kea<MakeLogicType<DocumentsLogicValues, DocumentsLogicActions>>({
   actions: {
+    onPaginate: (newPageIndex) => ({ newPageIndex }),
     setSearchQuery: (query) => ({ query }),
   },
   connect: {
@@ -75,6 +81,13 @@ export const DocumentsLogic = kea<MakeLogicType<DocumentsLogicValues, DocumentsL
   }),
   path: ['enterprise_search', 'search_index', 'documents'],
   reducers: () => ({
+    meta: [
+      DEFAULT_META,
+      {
+        apiSuccess: (_, { meta }) => meta,
+        onPaginate: (state, { newPageIndex }) => updateMetaPageIndex(state, newPageIndex),
+      },
+    ],
     query: [
       '',
       {
