@@ -381,10 +381,12 @@ image::management/connectors/images/cases-webhook-step4b.gif[Webhook - Case Mana
 === Implement connector in Kibana Cases
 Let's take a look at how our new Webhook - Case Management connector works within the Kibana Case Workflow.
 
+[float]
 ====  Create a case
 [role="screenshot"]
 image::management/connectors/images/cases-webhook-create.gif[Webhook - Case Management connector Create, Jira example]
 
+[float]
 ====  Update and comment on a case
 [role="screenshot"]
 image::management/connectors/images/cases-webhook-update.gif[Webhook - Case Management connector Update, Jira example]
