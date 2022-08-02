@@ -36,7 +36,7 @@ interface FilesMetricsAggs {
   extension: TermsAgg;
 }
 
-export class SavedObjectsFileMetadataService implements FileMetadataClient {
+export class SavedObjectsFileMetadataClient implements FileMetadataClient {
   constructor(
     private readonly soType: string,
     private readonly soClient: SavedObjectsClientContract | ISavedObjectsRepository,

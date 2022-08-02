@@ -24,9 +24,10 @@ import {
   ListFilesArgs,
   UpdateFileArgs,
 } from './file_action_types';
-import type { InternalFileService } from './internal_file_service';
+import { InternalFileService } from './internal_file_service';
 import { FileServiceStart } from './file_service';
 import { FileKindsRegistry } from '../file_kinds_registry';
+import { SavedObjectsFileMetadataClient } from '../file_client';
 
 /**
  * A simple interface for getting an instance of {@link FileServiceStart}
@@ -74,10 +75,14 @@ export class FileServiceFactoryImpl implements FileServiceFactory {
       : this.security?.audit.withoutRequest;
 
     const internalFileShareService = new InternalFileShareService(soClient);
-
-    const internalFileService = new InternalFileService(
+    const soMetadataClient = new SavedObjectsFileMetadataClient(
       fileObjectType.name,
       soClient,
+      this.logger.get('so-metadata-client')
+    );
+
+    const internalFileService = new InternalFileService(
+      soMetadataClient,
       this.blobStorageService,
       internalFileShareService,
       auditLogger,

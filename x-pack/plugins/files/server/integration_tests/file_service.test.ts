@@ -19,7 +19,8 @@ import type { FileStatus, File } from '../../common';
 
 import { fileKindsRegistry } from '../file_kinds_registry';
 import { BlobStorageService } from '../blob_storage_service';
-import { FileServiceStart, CreateFileArgs, FileServiceFactory } from '../file_service';
+import { FileServiceStart, FileServiceFactory } from '../file_service';
+import type { CreateFileArgs } from '../file_service/file_action_types';
 
 describe('FileService', () => {
   const fileKind: string = 'test';

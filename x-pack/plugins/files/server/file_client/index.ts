@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { FileMetadataClient } from './file_metadata_client';
+export { FileMetadataClient, SavedObjectsFileMetadataService } from './file_metadata_client';
 export type { FileDescriptor } from './file_metadata_client';
