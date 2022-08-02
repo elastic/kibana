@@ -28,26 +28,27 @@ import { useSearchStrategy } from '../../../common/containers/use_search_strateg
 export const ID = 'networkTlsQuery';
 
 export interface NetworkTlsArgs {
+  endDate: string;
   id: string;
   inspect: inputsModel.InspectQuery;
-  isInspected: boolean;
   loadPage: (newActivePage: number) => void;
   pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
+  startDate: string;
   tls: NetworkTlsStrategyResponse['edges'];
   totalCount: number | null | undefined;
 }
 
 interface UseNetworkTls {
+  endDate: string;
+  filterQuery?: ESTermQuery | string;
   flowTarget: FlowTargetSourceDest;
+  id: string;
   indexNames: string[];
   ip: string;
-  type: networkModel.NetworkType;
-  filterQuery?: ESTermQuery | string;
-  endDate: string;
-  startDate: string;
   skip: boolean;
-  id: string;
+  startDate: string;
+  type: networkModel.NetworkType;
 }
 
 export const useNetworkTls = ({
@@ -108,14 +109,13 @@ export const useNetworkTls = ({
   const networkTlsResponse = useMemo(
     () => ({
       endDate,
-      tls: response.edges,
       id,
       inspect,
-      isInspected: false,
       loadPage: wrappedLoadMore,
       pageInfo: response.pageInfo,
       refetch,
       startDate,
+      tls: response.edges,
       totalCount: response.totalCount,
     }),
     [

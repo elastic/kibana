@@ -64,7 +64,7 @@ export interface HeaderSectionProps extends HeaderProps {
   showInspectButton?: boolean;
   split?: boolean;
   stackHeader?: boolean;
-  subtitle?: string | React.ReactNode;
+  subtitle?: string | React.ReactNode | undefined;
   toggleQuery?: (status: boolean) => void;
   toggleStatus?: boolean;
   title: string | React.ReactNode;
@@ -211,7 +211,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        {!hideSubtitle && toggleStatus && (
+        {!hideSubtitle && toggleStatus && subtitle != null && (
           <EuiFlexItem>
             <Subtitle data-test-subj="header-section-subtitle" items={subtitle} />
           </EuiFlexItem>

@@ -26,7 +26,6 @@ interface TlsTableProps {
   data: NetworkTlsEdges[];
   fakeTotalCount: number;
   id: string;
-  isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
   setQuerySkip: (skip: boolean) => void;
@@ -52,7 +51,6 @@ const TlsTableComponent: React.FC<TlsTableProps> = ({
   data,
   fakeTotalCount,
   id,
-  isInspect,
   loading,
   loadPage,
   setQuerySkip,
@@ -124,9 +122,8 @@ const TlsTableComponent: React.FC<TlsTableProps> = ({
       showMorePagesIndicator={showMorePagesIndicator}
       headerCount={totalCount}
       headerTitle={i18n.TRANSPORT_LAYER_SECURITY}
-      headerUnit={totalCount ? i18n.UNIT(totalCount) : undefined}
+      headerUnit={totalCount != null ? i18n.UNIT(totalCount) : undefined}
       id={id}
-      isInspect={isInspect}
       itemsPerRow={rowItems}
       limit={limit}
       loading={loading}

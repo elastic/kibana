@@ -29,20 +29,22 @@ const props = {
   type: networkModel.NetworkType.page,
 };
 
+const initialResult = {
+  edges: [],
+  totalCount: undefined,
+  pageInfo: {
+    activePage: 0,
+    fakeTotalCount: 0,
+    showMorePagesIndicator: false,
+  },
+};
+
 describe('useNetworkTls', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseSearchStrategy.mockReturnValue({
       loading: false,
-      result: {
-        edges: [],
-        totalCount: -1,
-        pageInfo: {
-          activePage: 0,
-          fakeTotalCount: 0,
-          showMorePagesIndicator: false,
-        },
-      },
+      result: initialResult,
       search: mockSearch,
       refetch: jest.fn(),
       inspect: {},
@@ -54,7 +56,39 @@ describe('useNetworkTls', () => {
       wrapper: TestProviders,
     });
 
-    expect(mockSearch).toHaveBeenCalled();
+    expect(mockSearch).toHaveBeenCalledWith({
+      factoryQueryType: 'tls',
+      initialResult,
+      errorMessage: 'Failed to run search on network tls',
+      abort: false,
+    });
+  });
+
+  it('returns result', () => {
+    const mockInspect = {};
+    const mockRefetch = jest.fn();
+    mockUseSearchStrategy.mockReturnValue({
+      loading: true,
+      result: initialResult,
+      search: mockSearch,
+      refetch: mockRefetch,
+      inspect: mockInspect,
+    });
+
+    const { result } = renderHook(() => useNetworkTls(props), {
+      wrapper: TestProviders,
+    });
+    expect(result.current[0]).toEqual(true);
+
+    expect(result.current[1].endDate).toEqual(props.endDate);
+    expect(result.current[1].id).toEqual(props.id);
+    expect(result.current[1].inspect).toEqual(mockInspect);
+    expect(typeof result.current[1].loadPage).toEqual('function');
+    expect(result.current[1].pageInfo).toEqual(initialResult.pageInfo);
+    expect(result.current[1].refetch).toEqual(mockRefetch);
+    expect(result.current[1].startDate).toEqual(props.startDate);
+    expect(result.current[1].tls).toEqual(initialResult.edges);
+    expect(result.current[1].totalCount).toEqual(initialResult.totalCount);
   });
 
   it('does not run search when skip = true', () => {

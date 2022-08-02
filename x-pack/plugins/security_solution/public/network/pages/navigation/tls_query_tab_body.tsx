@@ -32,25 +32,23 @@ const TlsQueryTabBodyComponent: React.FC<FTQueryTabBodyProps> = ({
   useEffect(() => {
     setQuerySkip(skip || !toggleStatus);
   }, [skip, toggleStatus]);
-  const [loading, { id, inspect, isInspected, tls, totalCount, pageInfo, loadPage, refetch }] =
-    useNetworkTls({
-      endDate,
-      filterQuery,
-      flowTarget,
-      id: queryId,
-      indexNames,
-      ip,
-      skip: querySkip,
-      startDate,
-      type,
-    });
+  const [loading, { id, inspect, tls, totalCount, pageInfo, loadPage, refetch }] = useNetworkTls({
+    endDate,
+    filterQuery,
+    flowTarget,
+    id: queryId,
+    indexNames,
+    ip,
+    skip: querySkip,
+    startDate,
+    type,
+  });
 
   return (
     <TlsTableManage
       data={tls}
       id={id}
       inspect={inspect}
-      isInspect={isInspected}
       fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
       loading={loading}
       loadPage={loadPage}
