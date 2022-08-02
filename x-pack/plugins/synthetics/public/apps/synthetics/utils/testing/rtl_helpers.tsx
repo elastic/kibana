@@ -27,7 +27,7 @@ import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { KibanaContextProvider, KibanaServices } from '@kbn/kibana-react-plugin/public';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { mockState } from './__mocks__/syncthetics_store.mock';
+import { mockState } from './__mocks__/synthetics_store.mock';
 import { MountWithReduxProvider } from './helper_with_redux';
 import { AppState } from '../../state';
 import { stringifyUrlParams } from '../url_params';
