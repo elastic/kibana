@@ -17,8 +17,7 @@ import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_pol
 import { PrivateLocationTestService } from './services/private_location_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
-  // Failing: See https://github.com/elastic/kibana/issues/137328
-  describe.skip('PrivateLocationMonitor', function () {
+  describe('PrivateLocationMonitor', function () {
     this.tags('skipCloud');
     const kibanaServer = getService('kibanaServer');
     const supertestAPI = getService('supertest');
@@ -35,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await supertestAPI.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
       await supertestAPI
-        .post('/api/fleet/epm/packages/synthetics/0.9.5')
+        .post('/api/fleet/epm/packages/synthetics/0.9.4')
         .set('kbn-xsrf', 'true')
         .send({ force: true })
         .expect(200);
