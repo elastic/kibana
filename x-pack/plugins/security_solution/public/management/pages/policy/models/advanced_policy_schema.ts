@@ -944,7 +944,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.rollback.self_healing.enabled',
       {
         defaultMessage:
-          'Remediate malware artifacts when prevention alerts are triggered. Warning: data loss can occur.  Default: false',
+          'Self-healing erases attack artifacts when prevention alerts are triggered. Warning: data loss can occur. Default: false',
       }
     ),
     license: 'platinum',
