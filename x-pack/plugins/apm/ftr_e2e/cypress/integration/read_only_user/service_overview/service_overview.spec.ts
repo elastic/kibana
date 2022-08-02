@@ -213,7 +213,7 @@ describe('Service Overview', () => {
   describe('Calls APIs', () => {
     beforeEach(() => {
       cy.loginAsViewerUser();
-      cy.visit(baseUrl);
+
       apiRequestsToIntercept.map(({ endpoint, aliasName }) => {
         cy.intercept('GET', endpoint).as(aliasName);
       });
@@ -249,6 +249,8 @@ describe('Service Overview', () => {
     });
 
     it('when clicking the refresh button', () => {
+      cy.visit(baseUrl);
+      cy.contains('opbeans-node');
       cy.contains('Refresh').click();
       cy.wait(aliasNames, { requestTimeout: 10000 });
     });
@@ -272,6 +274,9 @@ describe('Service Overview', () => {
     });
 
     it('when selecting a different comparison window', () => {
+      cy.visit(baseUrl);
+      cy.contains('opbeans-node');
+
       cy.get('[data-test-subj="comparisonSelect"]').should('have.value', '1d');
 
       // selects another comparison type
