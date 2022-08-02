@@ -11,13 +11,16 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const REPORTS_FOLDER = path.resolve(__dirname, 'reports');
 
-export default function ({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({
+  getPageObjects,
+  getService,
+  updateBaselines,
+}: FtrProviderContext & { updateBaselines: boolean }) {
   const PageObjects = getPageObjects(['reporting', 'common', 'dashboard']);
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const browser = getService('browser');
   const log = getService('log');
-  const config = getService('config');
   const es = getService('es');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
@@ -36,7 +39,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await kibanaServer.importExport.unload(ecommerceSOPath);
   };
 
-  describe('Dashboard Reporting Screenshots', () => {
+  describe.only('Dashboard Reporting Screenshots', () => {
     before('initialize tests', async () => {
       await loadEcommerce();
       await browser.setWindowSize(1600, 850);
@@ -169,10 +172,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           reportData,
           REPORTS_FOLDER
         );
-        const percentDiff = await reporting.checkIfPngsMatch(
+
+        const percentDiff = await reporting.comparePngAgainstBaseline(
           sessionReportPath,
           PageObjects.reporting.getBaselineReportPath(reportFileName, 'png', REPORTS_FOLDER),
-          config.get('screenshots.directory'),
+          REPORTS_FOLDER,
+          updateBaselines,
           log
         );
 
@@ -198,10 +203,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           reportData,
           REPORTS_FOLDER
         );
-        const percentDiff = await reporting.checkIfPngsMatch(
+        const percentDiff = await reporting.comparePngAgainstBaseline(
           sessionReportPath,
           PageObjects.reporting.getBaselineReportPath(reportFileName, 'png', REPORTS_FOLDER),
-          config.get('screenshots.directory'),
+          REPORTS_FOLDER,
+          updateBaselines,
           log
         );
 
@@ -303,10 +309,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('PNG file matches the baseline image', async function () {
         this.timeout(300000);
-        const percentDiff = await reporting.checkIfPngsMatch(
+        const percentDiff = await reporting.comparePngAgainstBaseline(
           sessionReportPath,
           PageObjects.reporting.getBaselineReportPath(reportFileName, 'png', REPORTS_FOLDER),
-          config.get('screenshots.directory'),
+          REPORTS_FOLDER,
+          updateBaselines,
           log
         );
 

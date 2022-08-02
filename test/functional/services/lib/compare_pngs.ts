@@ -6,13 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { parse, join } from 'path';
+import { dirname, join, parse } from 'path';
 import sharp from 'sharp';
 import pixelmatch from 'pixelmatch';
 import { ToolingLog } from '@kbn/tooling-log';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { PNG } from 'pngjs';
+import { writeFile, readFileSync, mkdir } from 'fs';
+import { promisify } from 'util';
+
+const mkdirAsync = promisify(mkdir);
+const writeFileAsync = promisify(writeFile);
 
 interface PngDescriptor {
   path: string;
@@ -95,8 +100,8 @@ export async function comparePngs(
       sessionDirectory,
       `${parse(baselineDescriptor.path).name}-baseline-resized.png`
     );
-    await session.resize(testWidth, testHeight).png().toFile(sessionTestPath);
-    await baseline.resize(testWidth, testHeight).png().toFile(baselineTestPath);
+    await session.resize(testWidth, testHeight, { fit: 'fill' }).png().toFile(sessionTestPath);
+    await baseline.resize(testWidth, testHeight, { fit: 'fill' }).png().toFile(baselineTestPath);
   }
 
   log.debug(`calculating diff pixels...`);
@@ -177,4 +182,24 @@ export async function checkIfPngsMatch(
   );
 
   return diffTotal;
+}
+
+// async compareAgainstBaseline(name: string, updateBaselines: boolean, el?: WebElementWrapper) {
+export async function comparePngAgainstBaseline(
+  sessionPath: string,
+  baselinePath: string,
+  screenshotsDirectory: string,
+  updateBaselines: boolean,
+  log: any
+) {
+  log.debug(`comparePngAgainstBaseline: ${sessionPath} vs ${baselinePath}`);
+
+  if (updateBaselines) {
+    log.debug('Updating baseline PNG');
+    await mkdirAsync(dirname(baselinePath), { recursive: true });
+    await writeFileAsync(baselinePath, readFileSync(sessionPath));
+    return 0;
+  } else {
+    return await checkIfPngsMatch(sessionPath, baselinePath, screenshotsDirectory, log);
+  }
 }
