@@ -42,10 +42,25 @@ import { getRawRecordType } from '../../utils/get_raw_record_type';
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);
 
+// export needs for testing
+export const onResize = (
+  colSettings: { columnId: string; width: number },
+  stateContainer: GetStateReturn,
+  state: AppState
+) => {
+  const grid = { ...(state.grid || {}) };
+  const newColumns = { ...(grid.columns || {}) };
+  newColumns[colSettings.columnId] = {
+    width: Math.round(colSettings.width),
+  };
+  const newGrid = { ...grid, columns: newColumns };
+  stateContainer.setAppState({ grid: newGrid });
+};
+
 function DiscoverDocumentsComponent({
   documents$,
   expandedDoc,
-  indexPattern,
+  dataView,
   onAddFilter,
   savedSearch,
   setExpandedDoc,
@@ -55,7 +70,7 @@ function DiscoverDocumentsComponent({
 }: {
   documents$: DataDocuments$;
   expandedDoc?: DataTableRecord;
-  indexPattern: DataView;
+  dataView: DataView;
   navigateTo: (url: string) => void;
   onAddFilter?: DocViewFilterFn;
   savedSearch: SavedSearch;
@@ -64,7 +79,7 @@ function DiscoverDocumentsComponent({
   stateContainer: GetStateReturn;
   onFieldEdited?: () => void;
 }) {
-  const { capabilities, indexPatterns, uiSettings } = useDiscoverServices();
+  const { capabilities, dataViews, uiSettings } = useDiscoverServices();
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
   const hideAnnouncements = useMemo(() => uiSettings.get(HIDE_ANNOUNCEMENTS), [uiSettings]);
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
@@ -81,23 +96,15 @@ function DiscoverDocumentsComponent({
   const { columns, onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useColumns({
     capabilities,
     config: uiSettings,
-    indexPattern,
-    indexPatterns,
+    dataView,
+    dataViews,
     setAppState: stateContainer.setAppState,
     state,
     useNewFieldsApi,
   });
 
-  const onResize = useCallback(
-    (colSettings: { columnId: string; width: number }) => {
-      const grid = { ...(state.grid || {}) };
-      const newColumns = { ...(grid.columns || {}) };
-      newColumns[colSettings.columnId] = {
-        width: colSettings.width,
-      };
-      const newGrid = { ...grid, columns: newColumns };
-      stateContainer.setAppState({ grid: newGrid });
-    },
+  const onResizeDataGrid = useCallback(
+    (colSettings) => onResize(colSettings, stateContainer, state),
     [stateContainer, state]
   );
 
@@ -126,8 +133,8 @@ function DiscoverDocumentsComponent({
     () =>
       !isPlainRecord &&
       !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) &&
-      !!indexPattern.timeFieldName,
-    [isPlainRecord, uiSettings, indexPattern.timeFieldName]
+      !!dataView.timeFieldName,
+    [isPlainRecord, uiSettings, dataView.timeFieldName]
   );
 
   if (
@@ -157,7 +164,7 @@ function DiscoverDocumentsComponent({
           {!hideAnnouncements && <DocumentExplorerCallout />}
           <DocTableInfiniteMemoized
             columns={columns}
-            indexPattern={indexPattern}
+            dataView={dataView}
             rows={rows}
             sort={state.sort || []}
             isLoading={isLoading}
@@ -185,7 +192,7 @@ function DiscoverDocumentsComponent({
               ariaLabelledBy="documentsAriaLabel"
               columns={columns}
               expandedDoc={expandedDoc}
-              indexPattern={indexPattern}
+              dataView={dataView}
               isLoading={isLoading}
               rows={rows}
               sort={(state.sort as SortPairArr[]) || []}
@@ -200,7 +207,7 @@ function DiscoverDocumentsComponent({
               onRemoveColumn={onRemoveColumn}
               onSetColumns={onSetColumns}
               onSort={!isPlainRecord ? onSort : undefined}
-              onResize={onResize}
+              onResize={onResizeDataGrid}
               useNewFieldsApi={useNewFieldsApi}
               rowHeightState={state.rowHeight}
               onUpdateRowHeight={onUpdateRowHeight}

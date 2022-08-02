@@ -246,6 +246,26 @@
                 "id": "def-public.ControlGroupContainer.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
+                "label": "reduxEmbeddablePackage",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "presentationUtil",
+                    "scope": "public",
+                    "docId": "kibPresentationUtilPluginApi",
+                    "section": "def-public.ReduxEmbeddablePackage",
+                    "text": "ReduxEmbeddablePackage"
+                  }
+                ],
+                "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.ControlGroupContainer.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
                 "label": "initialInput",
                 "description": [],
                 "signature": [
@@ -263,7 +283,7 @@
               },
               {
                 "parentPluginId": "controls",
-                "id": "def-public.ControlGroupContainer.Unnamed.$2",
+                "id": "def-public.ControlGroupContainer.Unnamed.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "parent",
@@ -1071,6 +1091,26 @@
                 "id": "def-public.OptionsListEmbeddable.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
+                "label": "reduxEmbeddablePackage",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "presentationUtil",
+                    "scope": "public",
+                    "docId": "kibPresentationUtilPluginApi",
+                    "section": "def-public.ReduxEmbeddablePackage",
+                    "text": "ReduxEmbeddablePackage"
+                  }
+                ],
+                "path": "src/plugins/controls/public/control_types/options_list/options_list_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.OptionsListEmbeddable.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
                 "label": "input",
                 "description": [],
                 "signature": [
@@ -1088,7 +1128,7 @@
               },
               {
                 "parentPluginId": "controls",
-                "id": "def-public.OptionsListEmbeddable.Unnamed.$2",
+                "id": "def-public.OptionsListEmbeddable.Unnamed.$3",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "output",
@@ -1108,7 +1148,7 @@
               },
               {
                 "parentPluginId": "controls",
-                "id": "def-public.OptionsListEmbeddable.Unnamed.$3",
+                "id": "def-public.OptionsListEmbeddable.Unnamed.$4",
                 "type": "Object",
                 "tags": [],
                 "label": "parent",
@@ -1910,6 +1950,26 @@
                 "id": "def-public.RangeSliderEmbeddable.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
+                "label": "reduxEmbeddablePackage",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "presentationUtil",
+                    "scope": "public",
+                    "docId": "kibPresentationUtilPluginApi",
+                    "section": "def-public.ReduxEmbeddablePackage",
+                    "text": "ReduxEmbeddablePackage"
+                  }
+                ],
+                "path": "src/plugins/controls/public/control_types/range_slider/range_slider_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.RangeSliderEmbeddable.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
                 "label": "input",
                 "description": [],
                 "signature": [
@@ -1927,7 +1987,7 @@
               },
               {
                 "parentPluginId": "controls",
-                "id": "def-public.RangeSliderEmbeddable.Unnamed.$2",
+                "id": "def-public.RangeSliderEmbeddable.Unnamed.$3",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "output",
@@ -1947,7 +2007,7 @@
               },
               {
                 "parentPluginId": "controls",
-                "id": "def-public.RangeSliderEmbeddable.Unnamed.$3",
+                "id": "def-public.RangeSliderEmbeddable.Unnamed.$4",
                 "type": "Object",
                 "tags": [],
                 "label": "parent",
@@ -2708,20 +2768,13 @@
           },
           {
             "parentPluginId": "controls",
-            "id": "def-public.CommonControlOutput.dataViews",
-            "type": "Array",
+            "id": "def-public.CommonControlOutput.dataViewId",
+            "type": "string",
             "tags": [],
-            "label": "dataViews",
+            "label": "dataViewId",
             "description": [],
             "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              "[] | undefined"
+              "string | undefined"
             ],
             "path": "src/plugins/controls/public/types.ts",
             "deprecated": false
@@ -3141,19 +3194,6 @@
             ],
             "path": "src/plugins/controls/common/control_types/options_list/types.ts",
             "deprecated": false
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.OptionsListEmbeddableInput.loading",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "loading",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/controls/common/control_types/options_list/types.ts",
-            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -3364,14 +3404,15 @@
             "section": "def-public.ContainerOutput",
             "text": "ContainerOutput"
           },
-          " & ",
+          " & Omit<",
           {
             "pluginId": "controls",
             "scope": "public",
             "docId": "kibControlsPluginApi",
             "section": "def-public.CommonControlOutput",
             "text": "CommonControlOutput"
-          }
+          },
+          ", \"dataViewId\"> & { dataViewIds: string[]; }"
         ],
         "path": "src/plugins/controls/public/control_group/types.ts",
         "deprecated": false,
@@ -4194,19 +4235,6 @@
             "type": "CompoundType",
             "tags": [],
             "label": "singleSelect",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/controls/common/control_types/options_list/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-common.OptionsListEmbeddableInput.loading",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "loading",
             "description": [],
             "signature": [
               "boolean | undefined"

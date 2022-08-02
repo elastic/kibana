@@ -489,7 +489,9 @@ export class UserProfileService {
       const unknownUids = [];
       for (const profileUid of response.hasPrivilegeUids) {
         const filteredProfile = profilesBatch.get(profileUid);
-        if (filteredProfile) {
+        // We check privileges in batches and the batch can have more users than requested. We ignore "excessive" users,
+        // but still iterate through entire batch to collect and report all unknown uids.
+        if (filteredProfile && filteredProfiles.length < requiredSize) {
           filteredProfiles.push(filteredProfile);
         } else {
           unknownUids.push(profileUid);

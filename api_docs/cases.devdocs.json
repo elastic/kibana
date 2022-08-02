@@ -1515,7 +1515,7 @@
         "label": "CasesFeatures",
         "description": [],
         "signature": [
-          "{ alerts?: { sync?: boolean | undefined; enabled?: boolean | undefined; } | undefined; metrics?: ",
+          "{ alerts?: { sync?: boolean | undefined; enabled?: boolean | undefined; isExperimental?: boolean | undefined; } | undefined; metrics?: ",
           "SingleCaseMetricsFeature",
           "[] | undefined; }"
         ],
