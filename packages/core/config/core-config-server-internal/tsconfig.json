@@ -13,6 +13,7 @@
     ]
   },
   "include": [
-    "src/**/*"
-, "@kbn/core-test-helpers-deprecations-getters"  ]
+    "src/**/*",
+    "@kbn/core-test-helpers-deprecations-getters"
+  ]
 }
