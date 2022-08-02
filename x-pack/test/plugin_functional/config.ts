@@ -28,9 +28,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     // list paths to the files that contain your plugins tests
-    testFiles: [
-      resolve(__dirname, './test_suites/triggers_actions_ui'),
-    ],
+    testFiles: [resolve(__dirname, './test_suites/triggers_actions_ui')],
 
     services,
     pageObjects,
