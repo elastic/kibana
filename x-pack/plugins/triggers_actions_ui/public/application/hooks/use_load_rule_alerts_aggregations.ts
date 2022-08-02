@@ -214,11 +214,11 @@ export async function fetchRuleAlertsAggByTimeRange({
         (
           acc: AlertChartData[],
           dayAlerts: {
-            key_as_string: string;
+            key: number;
             doc_count: number;
             alertStatus: {
               buckets: Array<{
-                key: string;
+                key: 'active' | 'recovered';
                 doc_count: number;
               }>;
             };
@@ -226,23 +226,34 @@ export async function fetchRuleAlertsAggByTimeRange({
         ) => {
           // We are adding this to each day to construct the 30 days bars (background bar) when there is no data for a given day or to show the delta today alerts/total alerts.
           const totalDayAlerts = {
-            date: dayAlerts.key_as_string,
-            count: totalAlerts,
+            date: dayAlerts.key,
+            count: totalAlerts === 0 ? 1 : totalAlerts,
             status: 'total',
           };
 
           if (dayAlerts.doc_count > 0) {
+            const localAlertChartData = acc;
             // If there are alerts in this day, we construct the chart data.
-            return [
-              ...acc,
-              ...dayAlerts.alertStatus.buckets.map((alert) => ({
-                date: dayAlerts.key_as_string,
+            let countOfRecoveredActiveAlerts = 0;
+            dayAlerts.alertStatus.buckets.forEach((alert) => {
+              countOfRecoveredActiveAlerts += alert.doc_count;
+              localAlertChartData.push({
+                date: dayAlerts.key,
                 count: alert.doc_count,
                 status: alert.key,
-              })),
-            ];
+              });
+            });
+            const deltaAlertsCount = totalAlerts - countOfRecoveredActiveAlerts;
+            if (deltaAlertsCount > 0) {
+              localAlertChartData.push({
+                date: dayAlerts.key,
+                count: deltaAlertsCount,
+                status: 'total',
+              });
+            }
+            return localAlertChartData;
           }
-          return [...acc, { ...totalDayAlerts }];
+          return [...acc, totalDayAlerts];
         },
         []
       ),
@@ -251,7 +262,11 @@ export async function fetchRuleAlertsAggByTimeRange({
     return {
       active,
       recovered,
-      alertsChartData,
+      alertsChartData: [
+        ...alertsChartData.filter((acd) => acd.status === 'active'),
+        ...alertsChartData.filter((acd) => acd.status === 'recovered'),
+        ...alertsChartData.filter((acd) => acd.status === 'total'),
+      ],
     };
   } catch (error) {
     return {

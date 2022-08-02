@@ -32,18 +32,30 @@ import {
   EUI_SPARKLINE_THEME_PARTIAL,
 } from '@elastic/eui/dist/eui_charts_theme';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import moment from 'moment';
 import { useLoadRuleAlertsAggs } from '../../../../hooks/use_load_rule_alerts_aggregations';
 import { useLoadRuleTypes } from '../../../../hooks/use_load_rule_types';
 import { formatChartAlertData, getColorSeries } from '.';
 import { RuleAlertsSummaryProps } from '.';
+import { isP1DTFormatterSetting } from './helpers';
 
 const Y_ACCESSORS = ['y'];
 const X_ACCESSORS = ['x'];
 const G_ACCESSORS = ['g'];
-
+const FALLBACK_DATE_FORMAT_SCALED_P1DT = 'YYYY-MM-DD';
 export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummaryProps) => {
   const [features, setFeatures] = useState<string>('');
   const isDarkMode = useUiSetting<boolean>('theme:darkMode');
+
+  const scaledDateFormatPreference = useUiSetting<string[][]>('dateFormat:scaled');
+  const maybeP1DTFormatter = Array.isArray(scaledDateFormatPreference)
+    ? scaledDateFormatPreference.find(isP1DTFormatterSetting)
+    : null;
+  const p1dtFormat =
+    Array.isArray(maybeP1DTFormatter) && maybeP1DTFormatter.length === 2
+      ? maybeP1DTFormatter[1]
+      : FALLBACK_DATE_FORMAT_SCALED_P1DT;
+
   const theme = useMemo(
     () => [
       EUI_SPARKLINE_THEME_PARTIAL,
@@ -64,6 +76,15 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
     features,
   });
   const chartData = useMemo(() => formatChartAlertData(alertsChartData), [alertsChartData]);
+  const tooltipSettings = useMemo(
+    () => ({
+      type: TooltipType.VerticalCursor,
+      headerFormatter: ({ value }: { value: number }) => {
+        return <>{moment(value).format(p1dtFormat)}</>;
+      },
+    }),
+    [p1dtFormat]
+  );
 
   useEffect(() => {
     const matchedRuleType = ruleTypes.find((type) => type.id === rule.ruleTypeId);
@@ -184,7 +205,7 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <Chart size={{ height: 50 }}>
-        <Settings tooltip={TooltipType.VerticalCursor} theme={theme} />
+        <Settings tooltip={tooltipSettings} theme={theme} />
         <BarSeries
           id="bars"
           xScaleType={ScaleType.Time}
