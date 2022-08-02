@@ -66,12 +66,12 @@ const OverlayRootContainer = styled.div`
     padding: ${({ theme: { eui } }) => eui.euiSizeXL};
   }
 
-  .fullHeight {
+  &.fullScreen {
+    top: 0;
     height: 100%;
   }
 
-  &.fullScreen {
-    top: 0;
+  .fullHeight {
     height: 100%;
   }
 `;
