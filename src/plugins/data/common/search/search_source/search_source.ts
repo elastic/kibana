@@ -350,9 +350,9 @@ export class SearchSource {
    * Fetch this source from Elasticsearch, returning an observable over the response(s)
    * @param options
    */
-  fetch$(
+  fetch$<T = {}>(
     options: SearchSourceSearchOptions = {}
-  ): Observable<IKibanaSearchResponse<estypes.SearchResponse<any>>> {
+  ): Observable<IKibanaSearchResponse<estypes.SearchResponse<T>>> {
     const s$ = defer(() => this.requestIsStarting(options)).pipe(
       switchMap(() => {
         const searchRequest = this.flatten();
@@ -365,14 +365,16 @@ export class SearchSource {
       }),
       tap((response) => {
         // TODO: Remove casting when https://github.com/elastic/elasticsearch-js/issues/1287 is resolved
-        if (!response || (response as any).error) {
+        if (!response || (response as unknown as { error: string }).error) {
           throw new RequestFailure(null, response);
         }
       }),
       shareReplay()
     );
 
-    return this.inspectSearch(s$, options);
+    return this.inspectSearch(s$, options) as Observable<
+      IKibanaSearchResponse<estypes.SearchResponse<T>>
+    >;
   }
 
   /**
@@ -381,9 +383,9 @@ export class SearchSource {
    */
   async fetch(
     options: SearchSourceSearchOptions = {}
-  ): Promise<estypes.SearchResponse<any, Record<string, estypes.AggregationsAggregate>>> {
+  ): Promise<estypes.SearchResponse<unknown, Record<string, estypes.AggregationsAggregate>>> {
     const r = await lastValueFrom(this.fetch$(options));
-    return r.rawResponse as estypes.SearchResponse<any>;
+    return r.rawResponse as estypes.SearchResponse<unknown>;
   }
 
   /**
@@ -415,7 +417,7 @@ export class SearchSource {
    ******/
 
   private inspectSearch(
-    s$: Observable<IKibanaSearchResponse<any>>,
+    s$: Observable<IKibanaSearchResponse<unknown>>,
     options: SearchSourceSearchOptions
   ) {
     const { id, title, description, adapter } = options.inspector || { title: '' };
@@ -460,7 +462,8 @@ export class SearchSource {
         last(undefined, null),
         tap((finalResponse) => {
           if (finalResponse) {
-            requestResponder?.stats(getResponseInspectorStats(finalResponse.rawResponse, this));
+            const resp = finalResponse.rawResponse as estypes.SearchResponse<unknown>;
+            requestResponder?.stats(getResponseInspectorStats(resp, this));
             requestResponder?.ok({ json: finalResponse });
           }
         }),
@@ -484,7 +487,7 @@ export class SearchSource {
     }
   }
 
-  private postFlightTransform(response: IEsSearchResponse<any>) {
+  private postFlightTransform(response: IEsSearchResponse<unknown>) {
     const aggs = this.getField('aggs');
     if (aggs instanceof AggConfigs) {
       return aggs.postFlightTransform(response);
@@ -494,7 +497,7 @@ export class SearchSource {
   }
 
   private async fetchOthers(
-    response: estypes.SearchResponse<any>,
+    response: estypes.SearchResponse<unknown>,
     options: SearchSourceSearchOptions
   ) {
     const aggs = this.getField('aggs');
@@ -522,7 +525,7 @@ export class SearchSource {
   private fetchSearch$(
     searchRequest: SearchRequest,
     options: SearchSourceSearchOptions
-  ): Observable<IKibanaSearchResponse<any>> {
+  ): Observable<IKibanaSearchResponse<unknown>> {
     const { search, getConfig, onResponse } = this.dependencies;
 
     const params = getSearchParamsFromRequest(searchRequest, {
@@ -531,7 +534,7 @@ export class SearchSource {
 
     return search({ params, indexType: searchRequest.indexType }, options).pipe(
       switchMap((response) => {
-        return new Observable<IKibanaSearchResponse<any>>((obs) => {
+        return new Observable<IKibanaSearchResponse<unknown>>((obs) => {
           if (isErrorResponse(response)) {
             obs.error(response);
           } else if (isPartialResponse(response)) {
@@ -659,7 +662,7 @@ export class SearchSource {
         );
         return addToBody(key, sort);
       case 'aggs':
-        if ((val as any) instanceof AggConfigs) {
+        if ((val as unknown) instanceof AggConfigs) {
           return addToBody('aggs', val.toDsl());
         } else {
           return addToBody('aggs', val);
@@ -689,8 +692,8 @@ export class SearchSource {
     return this.shouldOverwriteDataViewType ? this.overwriteDataViewType : index?.type;
   }
 
-  private readonly getFieldName = (fld: string | Record<string, any>): string =>
-    typeof fld === 'string' ? fld : fld.field;
+  private readonly getFieldName = (fld: SearchFieldValue): string =>
+    typeof fld === 'string' ? fld : (fld.field as string);
 
   private getFieldsWithoutSourceFilters(
     index: DataView | undefined,
@@ -806,9 +809,7 @@ export class SearchSource {
 
     // specific fields were provided, so we need to exclude any others
     if (fieldListProvided || fieldsFromSource.length) {
-      const bodyFieldNames = body.fields.map((field: string | Record<string, any>) =>
-        this.getFieldName(field)
-      );
+      const bodyFieldNames = body.fields.map((field: SearchFieldValue) => this.getFieldName(field));
       const uniqFieldNames = [...new Set([...bodyFieldNames, ...fieldsFromSource])];
 
       if (!uniqFieldNames.includes('*')) {
@@ -847,7 +848,7 @@ export class SearchSource {
             return (
               fieldsFromSource.includes(this.getFieldName(fld)) &&
               !(body.docvalue_fields || [])
-                .map((d: string | Record<string, any>) => this.getFieldName(d))
+                .map((d: string | Record<string, SearchFieldValue>) => this.getFieldName(d))
                 .includes(this.getFieldName(fld))
             );
           }),

@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { i18n } from '@kbn/i18n';
-import { filter, map } from 'rxjs/operators';
-import { lastValueFrom } from 'rxjs';
 import { isCompleteResponse, ISearchSource } from '@kbn/data-plugin/public';
-import { buildDataTableRecordList } from '../../../utils/build_data_record';
+import { i18n } from '@kbn/i18n';
+import { lastValueFrom } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
 import { SAMPLE_SIZE_SETTING } from '../../../../common';
+import { EsHitRecord } from '../../../types';
+import { buildDataTableRecordList } from '../../../utils/build_data_record';
 import { FetchDeps } from './fetch_all';
 
 /**
@@ -56,7 +57,7 @@ export const fetchDocuments = (
     .pipe(
       filter((res) => isCompleteResponse(res)),
       map((res) => {
-        return buildDataTableRecordList(res.rawResponse.hits.hits, dataView);
+        return buildDataTableRecordList(res.rawResponse.hits.hits as EsHitRecord[], dataView);
       })
     );
 

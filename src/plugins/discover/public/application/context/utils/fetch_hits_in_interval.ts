@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { lastValueFrom } from 'rxjs';
-import { ISearchSource, EsQuerySortValue, SortDirection } from '@kbn/data-plugin/public';
 import { EsQuerySearchAfter } from '@kbn/data-plugin/common';
+import { EsQuerySortValue, ISearchSource, SortDirection } from '@kbn/data-plugin/public';
+import { lastValueFrom } from 'rxjs';
+import type { DataTableRecord } from '../../../types';
 import { buildDataTableRecord } from '../../../utils/build_data_record';
 import { convertTimeValueToIso } from './date_conversion';
 import { IntervalValue } from './generate_intervals';
-import type { DataTableRecord } from '../../../types';
 
 interface RangeQuery {
   format: string;
