@@ -14,5 +14,5 @@
   },
   "include": [
     "src/**/*"
-, "../../test-helpers/core-test-helpers-deprecations-getters/src/test_utils.ts"  ]
+, "@kbn/core-test-helpers-deprecations-getters"  ]
 }
