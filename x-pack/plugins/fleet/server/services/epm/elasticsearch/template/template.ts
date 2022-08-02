@@ -105,7 +105,7 @@ export function getTemplate({
  * @param fields
  */
 export function generateMappings(fields: Field[]): IndexTemplateMappings {
-  const dynamicTemplates: Array<{ [k: string]: Properties }> = [];
+  const dynamicTemplates: Array<Record<string, Properties>> = [];
   const dynamicTemplateNames = new Set<string>();
 
   const { properties } = _generateMappings(fields, {
