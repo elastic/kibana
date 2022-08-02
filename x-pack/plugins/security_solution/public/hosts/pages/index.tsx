@@ -72,16 +72,16 @@ export const HostsContainer = React.memo(() => (
       )}
     />
     <Route // Compatibility redirect for the old user detail path.
-      path={`${HOSTS_PATH}/:detailName`}
+      path={`${HOSTS_PATH}/:detailName/:tabName?`}
       render={({
         match: {
-          params: { detailName },
+          params: { detailName, tabName = HostsTableType.authentications },
         },
         location: { search = '' },
       }) => (
         <Redirect
           to={{
-            pathname: `${HOSTS_PATH}/name/${detailName}/${HostsTableType.authentications}`,
+            pathname: `${HOSTS_PATH}/name/${detailName}/${tabName}`,
             search,
           }}
         />
