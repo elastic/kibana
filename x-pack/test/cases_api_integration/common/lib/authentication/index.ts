@@ -105,7 +105,7 @@ export const deleteSpacesAndUsers = async (getService: CommonFtrProviderContext[
   await deleteUsersAndRoles(getService);
 };
 
-export const activeUserProfiles = async (getService: CommonFtrProviderContext['getService']) => {
+export const activateUserProfiles = async (getService: CommonFtrProviderContext['getService']) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   await loginUsers({
