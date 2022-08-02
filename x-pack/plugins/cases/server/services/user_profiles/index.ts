@@ -19,6 +19,9 @@ import { excess, SuggestUserProfilesRequestRt, throwErrors } from '../../../comm
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 
+const MAX_SUGGESTION_SIZE = 100;
+const MIN_SUGGESTION_SIZE = 0;
+
 interface UserProfileOptions {
   securityPluginSetup?: SecurityPluginSetup;
   securityPluginStart?: SecurityPluginStart;
@@ -61,7 +64,7 @@ export class UserProfileService {
       /**
        * The limit of 100 helps prevent DDoS attacks and is also enforced by the security plugin.
        */
-      if (size !== undefined && (size > 100 || size < 0)) {
+      if (size !== undefined && (size > MAX_SUGGESTION_SIZE || size < MIN_SUGGESTION_SIZE)) {
         throw Boom.badRequest('size must be between 0 and 100');
       }
 

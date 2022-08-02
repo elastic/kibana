@@ -187,7 +187,7 @@ export default function ({ getService }: FtrProviderContext) {
               "full_name": "sec only_no_delete",
               "username": "sec_only_no_delete",
             },
-          }
+          },
         ]
       `);
     });
