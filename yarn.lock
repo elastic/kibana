@@ -3319,6 +3319,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-mount-utils-browser-internal@link:bazel-bin/packages/core/mount-utils/core-mount-utils-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-mount-utils-browser@link:bazel-bin/packages/core/mount-utils/core-mount-utils-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-node-server-internal@link:bazel-bin/packages/core/node/core-node-server-internal":
   version "0.0.0"
   uid ""
@@ -3328,6 +3336,30 @@
   uid ""
 
 "@kbn/core-node-server@link:bazel-bin/packages/core/node/core-node-server":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-notifications-browser-internal@link:bazel-bin/packages/core/notifications/core-notifications-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-notifications-browser-mocks@link:bazel-bin/packages/core/notifications/core-notifications-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-notifications-browser@link:bazel-bin/packages/core/notifications/core-notifications-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-overlays-browser-internal@link:bazel-bin/packages/core/overlays/core-overlays-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-overlays-browser-mocks@link:bazel-bin/packages/core/overlays/core-overlays-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-overlays-browser@link:bazel-bin/packages/core/overlays/core-overlays-browser":
   version "0.0.0"
   uid ""
 
@@ -3671,7 +3703,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-button-exit-full-screen@link:bazel-bin/packages/shared-ux/button/exit_full_screen":
+"@kbn/shared-ux-button-exit-full-screen-mocks@link:bazel-bin/packages/shared-ux/button/exit_full_screen/mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-button-exit-full-screen-types@link:bazel-bin/packages/shared-ux/button/exit_full_screen/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-button-exit-full-screen@link:bazel-bin/packages/shared-ux/button/exit_full_screen/impl":
   version "0.0.0"
   uid ""
 
@@ -3679,7 +3719,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-card-no-data@link:bazel-bin/packages/shared-ux/card/no_data":
+"@kbn/shared-ux-card-no-data-mocks@link:bazel-bin/packages/shared-ux/card/no_data/mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-card-no-data-types@link:bazel-bin/packages/shared-ux/card/no_data/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-card-no-data@link:bazel-bin/packages/shared-ux/card/no_data/impl":
   version "0.0.0"
   uid ""
 
@@ -3687,15 +3735,39 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-link-redirect-app@link:bazel-bin/packages/shared-ux/link/redirect_app":
+"@kbn/shared-ux-link-redirect-app-mocks@link:bazel-bin/packages/shared-ux/link/redirect_app/mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-analytics-no-data@link:bazel-bin/packages/shared-ux/page/analytics_no_data":
+"@kbn/shared-ux-link-redirect-app-types@link:bazel-bin/packages/shared-ux/link/redirect_app/types":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-kibana-no-data@link:bazel-bin/packages/shared-ux/page/kibana_no_data":
+"@kbn/shared-ux-link-redirect-app@link:bazel-bin/packages/shared-ux/link/redirect_app/impl":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-page-analytics-no-data-mocks@link:bazel-bin/packages/shared-ux/page/analytics_no_data/mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-page-analytics-no-data-types@link:bazel-bin/packages/shared-ux/page/analytics_no_data/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-page-analytics-no-data@link:bazel-bin/packages/shared-ux/page/analytics_no_data/impl":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-page-kibana-no-data-mocks@link:bazel-bin/packages/shared-ux/page/kibana_no_data/mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-page-kibana-no-data-types@link:bazel-bin/packages/shared-ux/page/kibana_no_data/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-page-kibana-no-data@link:bazel-bin/packages/shared-ux/page/kibana_no_data/impl":
   version "0.0.0"
   uid ""
 
@@ -3703,11 +3775,23 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-prompt-no-data-views@link:bazel-bin/packages/shared-ux/prompt/no_data_views":
+"@kbn/shared-ux-prompt-no-data-views-mocks@link:bazel-bin/packages/shared-ux/prompt/no_data_views/mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-prompt-no-data-views-types@link:bazel-bin/packages/shared-ux/prompt/no_data_views/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-prompt-no-data-views@link:bazel-bin/packages/shared-ux/prompt/no_data_views/impl":
   version "0.0.0"
   uid ""
 
 "@kbn/shared-ux-services@link:bazel-bin/packages/kbn-shared-ux-services":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-storybook-mock@link:bazel-bin/packages/shared-ux/storybook/mock":
   version "0.0.0"
   uid ""
 
@@ -3822,6 +3906,18 @@
 "@kbn/yarn-lock-validator@link:bazel-bin/packages/kbn-yarn-lock-validator":
   version "0.0.0"
   uid ""
+
+"@kwsites/file-exists@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@kwsites/file-exists/-/file-exists-1.1.1.tgz#ad1efcac13e1987d8dbaf235ef3be5b0d96faa99"
+  integrity sha512-m9/5YGR18lIwxSFDwfE3oA7bWuq9kdau6ugN4H2rJeyhFQZcG9AgSHkQtSD15a8WvTgfz9aikZMrKPHvbpqFiw==
+  dependencies:
+    debug "^4.1.1"
+
+"@kwsites/promise-deferred@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@kwsites/promise-deferred/-/promise-deferred-1.1.1.tgz#8ace5259254426ccef57f3175bc64ed7095ed919"
+  integrity sha512-GaHYm+c0O9MjZRu0ongGBRbinu8gVAMd2UZjji6jVmqKtZluZnptXGWhz1E8j8D2HJ3f/yMxKAUC0b+57wncIw==
 
 "@leichtgewicht/ip-codec@^2.0.1":
   version "2.0.4"
@@ -6164,7 +6260,7 @@
   dependencies:
     "@types/color-name" "*"
 
-"@types/color-name@*", "@types/color-name@^1.1.1":
+"@types/color-name@*":
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/@types/color-name/-/color-name-1.1.1.tgz#1c1261bbeaa10a8055bbc5d8ab84b7b2afc846a0"
   integrity sha512-rr+OQyAjxze7GgWrSaJwydHStIhHq2lvY3BOC2Mj7KnzI7XK0Uw1TOOdI9lDoajEbSWLiYgoo4f1R51erQfhPQ==
@@ -7095,6 +7191,14 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-mount-utils-browser-internal@link:bazel-bin/packages/core/mount-utils/core-mount-utils-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-mount-utils-browser@link:bazel-bin/packages/core/mount-utils/core-mount-utils-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-node-server-internal@link:bazel-bin/packages/core/node/core-node-server-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7104,6 +7208,30 @@
   uid ""
 
 "@types/kbn__core-node-server@link:bazel-bin/packages/core/node/core-node-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-notifications-browser-internal@link:bazel-bin/packages/core/notifications/core-notifications-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-notifications-browser-mocks@link:bazel-bin/packages/core/notifications/core-notifications-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-notifications-browser@link:bazel-bin/packages/core/notifications/core-notifications-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-overlays-browser-internal@link:bazel-bin/packages/core/overlays/core-overlays-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-overlays-browser-mocks@link:bazel-bin/packages/core/overlays/core-overlays-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-overlays-browser@link:bazel-bin/packages/core/overlays/core-overlays-browser/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -7439,7 +7567,15 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__shared-ux-button-exit-full-screen@link:bazel-bin/packages/shared-ux/button/exit_full_screen/npm_module_types":
+"@types/kbn__shared-ux-button-exit-full-screen-mocks@link:bazel-bin/packages/shared-ux/button/exit_full_screen/mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-button-exit-full-screen-types@link:bazel-bin/packages/shared-ux/button/exit_full_screen/types/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-button-exit-full-screen@link:bazel-bin/packages/shared-ux/button/exit_full_screen/impl/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -7447,7 +7583,15 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__shared-ux-card-no-data@link:bazel-bin/packages/shared-ux/card/no_data/npm_module_types":
+"@types/kbn__shared-ux-card-no-data-mocks@link:bazel-bin/packages/shared-ux/card/no_data/mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-card-no-data-types@link:bazel-bin/packages/shared-ux/card/no_data/types/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-card-no-data@link:bazel-bin/packages/shared-ux/card/no_data/impl/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -7455,15 +7599,39 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__shared-ux-link-redirect-app@link:bazel-bin/packages/shared-ux/link/redirect_app/npm_module_types":
+"@types/kbn__shared-ux-link-redirect-app-mocks@link:bazel-bin/packages/shared-ux/link/redirect_app/mocks/npm_module_types":
   version "0.0.0"
   uid ""
 
-"@types/kbn__shared-ux-page-analytics-no-data@link:bazel-bin/packages/shared-ux/page/analytics_no_data/npm_module_types":
+"@types/kbn__shared-ux-link-redirect-app-types@link:bazel-bin/packages/shared-ux/link/redirect_app/types/npm_module_types":
   version "0.0.0"
   uid ""
 
-"@types/kbn__shared-ux-page-kibana-no-data@link:bazel-bin/packages/shared-ux/page/kibana_no_data/npm_module_types":
+"@types/kbn__shared-ux-link-redirect-app@link:bazel-bin/packages/shared-ux/link/redirect_app/impl/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-page-analytics-no-data-mocks@link:bazel-bin/packages/shared-ux/page/analytics_no_data/mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-page-analytics-no-data-types@link:bazel-bin/packages/shared-ux/page/analytics_no_data/types/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-page-analytics-no-data@link:bazel-bin/packages/shared-ux/page/analytics_no_data/impl/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-page-kibana-no-data-mocks@link:bazel-bin/packages/shared-ux/page/kibana_no_data/mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-page-kibana-no-data-types@link:bazel-bin/packages/shared-ux/page/kibana_no_data/types/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-page-kibana-no-data@link:bazel-bin/packages/shared-ux/page/kibana_no_data/impl/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -7471,11 +7639,23 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__shared-ux-prompt-no-data-views@link:bazel-bin/packages/shared-ux/prompt/no_data_views/npm_module_types":
+"@types/kbn__shared-ux-prompt-no-data-views-mocks@link:bazel-bin/packages/shared-ux/prompt/no_data_views/mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-prompt-no-data-views-types@link:bazel-bin/packages/shared-ux/prompt/no_data_views/types/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-prompt-no-data-views@link:bazel-bin/packages/shared-ux/prompt/no_data_views/impl/npm_module_types":
   version "0.0.0"
   uid ""
 
 "@types/kbn__shared-ux-services@link:bazel-bin/packages/kbn-shared-ux-services/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-storybook-mock@link:bazel-bin/packages/shared-ux/storybook/mock/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -8173,10 +8353,10 @@
   resolved "https://registry.yarnpkg.com/@types/seedrandom/-/seedrandom-2.4.28.tgz#9ce8fa048c1e8c85cb71d7fe4d704e000226036f"
   integrity sha512-SMA+fUwULwK7sd/ZJicUztiPs8F1yCPwF3O23Z9uQ32ME5Ha0NmDK9+QTsYE4O2tHXChzXomSWWeIhCnoN1LqA==
 
-"@types/selenium-webdriver@^4.1.1":
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.1.1.tgz#aefb038f0462fd880f9c9581b8b3b71ce385719c"
-  integrity sha512-NxxZZek50ylIACiXebKQYHD3D4One3WXOasEXWazL6aTfYbZob7ClNKxUpg8I4/oWArX87oPWvj1cHKqfel3Hg==
+"@types/selenium-webdriver@^4.1.2":
+  version "4.1.2"
+  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.1.2.tgz#9c6d8d6bea08b312e890aaa5915fb2228fa62486"
+  integrity sha512-NCn1vqHC2hDgZmOuiDa4xgyo3FBZuqB+wXg5t8YcwnjIi2ufGTowqcnbUAKGHxY7z/OFfv4MnaVfuJ7gJ/xBsw==
   dependencies:
     "@types/ws" "*"
 
@@ -9178,11 +9358,10 @@ ansi-styles@^3.2.0, ansi-styles@^3.2.1:
     color-convert "^1.9.0"
 
 ansi-styles@^4.0.0, ansi-styles@^4.1.0:
-  version "4.2.1"
-  resolved "https://registry.yarnpkg.com/ansi-styles/-/ansi-styles-4.2.1.tgz#90ae75c424d008d2624c5bf29ead3177ebfcf359"
-  integrity sha512-9VGjrMsG1vePxcSweQsN20KY/c4zN0h9fLjqAbwbPfahM3t+NL+M9HC8xeXG2I8pX5NoamTGNuomEUFI7fcUjA==
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/ansi-styles/-/ansi-styles-4.3.0.tgz#edd803628ae71c04c85ae7a0906edad34b648937"
+  integrity sha512-zbB9rCJAT1rbjiVDb2hqKFHNYLxgtk8NURxZ3IZwD3F6NtxbXZQCnnSi1Lkx+IDohdPlFp222wVALIheZJQSEg==
   dependencies:
-    "@types/color-name" "^1.1.1"
     color-convert "^2.0.1"
 
 ansi-styles@^5.0.0:
@@ -9729,20 +9908,15 @@ async-value@^1.2.2:
   resolved "https://registry.yarnpkg.com/async-value/-/async-value-1.2.2.tgz#84517a1e7cb6b1a5b5e181fa31be10437b7fb125"
   integrity sha1-hFF6Hny2saW14YH6Mb4QQ3t/sSU=
 
-async@0.9.x:
-  version "0.9.2"
-  resolved "https://registry.yarnpkg.com/async/-/async-0.9.2.tgz#aea74d5e61c1f899613bf64bda66d4c78f2fd17d"
-  integrity sha1-rqdNXmHB+JlhO/ZL2mbUx48v0X0=
-
 async@^1.4.2:
   version "1.5.2"
   resolved "https://registry.yarnpkg.com/async/-/async-1.5.2.tgz#ec6a61ae56480c0c3cb241c95618e20892f9672a"
   integrity sha1-7GphrlZIDAw8skHJVhjiCJL5Zyo=
 
 async@^3.2.0, async@^3.2.3:
-  version "3.2.3"
-  resolved "https://registry.yarnpkg.com/async/-/async-3.2.3.tgz#ac53dafd3f4720ee9e8a160628f18ea91df196c9"
-  integrity sha512-spZRyzKL5l5BZQrr/6m/SqFdBN0q3OCI0f9rjfBzCMBIP4p75P620rR3gTmaksNOhmzgdxcaxdNfMy6anrbM0g==
+  version "3.2.4"
+  resolved "https://registry.yarnpkg.com/async/-/async-3.2.4.tgz#2d22e00f8cddeb5fde5dd33522b56d1cf569a81c"
+  integrity sha512-iAB+JbDEGXhyIUavoDl9WP/Jj106Kz9DEn1DPgYw5ruDn0e3Wgi3sKFm55sASdGBNOQB8F59d9qQ7deqrHA8wQ==
 
 asynckit@^0.4.0:
   version "0.4.0"
@@ -10140,9 +10314,9 @@ bail@^1.0.0:
   integrity sha1-99bBcxYwqfnw1NNe0fli4gdKF2Q=
 
 balanced-match@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.0.tgz#89b4d199ab2bee49de164ea02b89ce462d71b767"
-  integrity sha1-ibTRmasr7kneFk6gK4nORi1xt2c=
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.2.tgz#e83e3a7e3f300b34cb9d87f615fa0cbf357690ee"
+  integrity sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==
 
 balanced-match@^2.0.0:
   version "2.0.0"
@@ -10330,9 +10504,9 @@ boxen@^5.0.0, boxen@^5.1.2:
     wrap-ansi "^7.0.0"
 
 brace-expansion@^1.1.7:
-  version "1.1.8"
-  resolved "https://registry.yarnpkg.com/brace-expansion/-/brace-expansion-1.1.8.tgz#c07b211c7c952ec1f8efd51a77ef0d1d3990a292"
-  integrity sha1-wHshHHyVLsH479Uad+8NHTmQopI=
+  version "1.1.11"
+  resolved "https://registry.yarnpkg.com/brace-expansion/-/brace-expansion-1.1.11.tgz#3c7fcbf529d87226f3d2f52b966ff5271eb441dd"
+  integrity sha512-iCuPHDFgrHX7H2vEI/5xpz07zSHB00TpugqhmYtVmMO6518mCuRMoOYFldEBl0g187ufozdaHgWKcYFb61qGiA==
   dependencies:
     balanced-match "^1.0.0"
     concat-map "0.0.1"
@@ -10980,7 +11154,7 @@ chalk@4.1.0:
     ansi-styles "^4.1.0"
     supports-color "^7.1.0"
 
-chalk@4.1.2, chalk@^4.0.0, chalk@^4.1.0, chalk@^4.1.1, chalk@^4.1.2:
+chalk@4.1.2, chalk@^4.0.0, chalk@^4.0.2, chalk@^4.1.0, chalk@^4.1.1, chalk@^4.1.2:
   version "4.1.2"
   resolved "https://registry.yarnpkg.com/chalk/-/chalk-4.1.2.tgz#aac4e2b7734a740867aeb16bf02aad556a1e7a01"
   integrity sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==
@@ -11664,7 +11838,7 @@ compute-scroll-into-view@^1.0.16, compute-scroll-into-view@^1.0.9:
 concat-map@0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/concat-map/-/concat-map-0.0.1.tgz#d8a96bd77fd68df7793a73036a3ba0d5405d477b"
-  integrity sha1-2Klr13/Wjfd5OnMDajug1UBdR3s=
+  integrity sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==
 
 concat-stream@^1.4.7, concat-stream@^1.5.0, concat-stream@^1.6.0, concat-stream@^1.6.1, concat-stream@~1.6.0:
   version "1.6.2"
@@ -13710,12 +13884,12 @@ ee-first@1.1.1:
   resolved "https://registry.yarnpkg.com/ee-first/-/ee-first-1.1.1.tgz#590c61156b0ae2f4f0255732a158b266bc56b21d"
   integrity sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=
 
-ejs@^3.1.6:
-  version "3.1.6"
-  resolved "https://registry.yarnpkg.com/ejs/-/ejs-3.1.6.tgz#5bfd0a0689743bb5268b3550cceeebbc1702822a"
-  integrity sha512-9lt9Zse4hPucPkoP7FHDF0LQAlGyF9JVpnClFLFH3aSSbxmyoqINRpp/9wePWJTUl4KOQwRL72Iw3InHPDkoGw==
+ejs@^3.1.6, ejs@^3.1.8:
+  version "3.1.8"
+  resolved "https://registry.yarnpkg.com/ejs/-/ejs-3.1.8.tgz#758d32910c78047585c7ef1f92f9ee041c1c190b"
+  integrity sha512-/sXZeMlhS0ArkfX2Aw780gJzXSMPnKjtspYZv+f3NiKLlubezAHDU5+9xz6gd3/NhG3txQCo6xlglmTS+oTGEQ==
   dependencies:
-    jake "^10.6.1"
+    jake "^10.8.5"
 
 elastic-apm-http-client@11.0.1:
   version "11.0.1"
@@ -15199,11 +15373,11 @@ file-type@^9.0.0:
   integrity sha512-Qe/5NJrgIOlwijpq3B7BEpzPFcgzggOTagZmkXQY4LA6bsXKTUstK7Wp12lEJ/mLKTpvIZxmIuRcLYWT6ov9lw==
 
 filelist@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/filelist/-/filelist-1.0.1.tgz#f10d1a3ae86c1694808e8f20906f43d4c9132dbb"
-  integrity sha512-8zSK6Nu0DQIC08mUC46sWGXi+q3GGpKydAG36k+JDba6VRpkevvOWUW5a/PhShij4+vHT9M+ghgG7eM+a9JDUQ==
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/filelist/-/filelist-1.0.4.tgz#f78978a1e944775ff9e62e744424f215e58352b5"
+  integrity sha512-w1cEuf3S+DrLCQL7ET6kz+gmlJdbq9J7yXCSjK/OZCPA+qEN1WyF4ZAf0YYJa4/shHJra2t/d/r8SV4Ji+x+8Q==
   dependencies:
-    minimatch "^3.0.4"
+    minimatch "^5.0.1"
 
 fill-range@^4.0.0:
   version "4.0.0"
@@ -18232,13 +18406,13 @@ its-name@1.0.0:
   resolved "https://registry.yarnpkg.com/its-name/-/its-name-1.0.0.tgz#2065f1883ecb568c65f7112ddbf123401fae4af0"
   integrity sha1-IGXxiD7LVoxl9xEt2/EjQB+uSvA=
 
-jake@^10.6.1:
-  version "10.8.2"
-  resolved "https://registry.yarnpkg.com/jake/-/jake-10.8.2.tgz#ebc9de8558160a66d82d0eadc6a2e58fbc500a7b"
-  integrity sha512-eLpKyrfG3mzvGE2Du8VoPbeSkRry093+tyNjdYaBbJS9v17knImYGNXQCUV0gLxQtF82m3E8iRb/wdSQZLoq7A==
+jake@^10.8.5:
+  version "10.8.5"
+  resolved "https://registry.yarnpkg.com/jake/-/jake-10.8.5.tgz#f2183d2c59382cb274226034543b9c03b8164c46"
+  integrity sha512-sVpxYeuAhWt0OTWITwT98oyV0GsXyMlXCF+3L1SuafBVUIr/uILGRB+NqwkzhgXKvoJpDIpQvqkUALgdmQsQxw==
   dependencies:
-    async "0.9.x"
-    chalk "^2.4.2"
+    async "^3.2.3"
+    chalk "^4.0.2"
     filelist "^1.0.1"
     minimatch "^3.0.4"
 
@@ -20612,7 +20786,7 @@ minimalistic-crypto-utils@^1.0.1:
   resolved "https://registry.yarnpkg.com/minimalistic-crypto-utils/-/minimalistic-crypto-utils-1.0.1.tgz#f6c00c1c0b082246e5c4d99dfb8c7c083b2b582a"
   integrity sha1-9sAMHAsIIkblxNmd+4x8CDsrWCo=
 
-"minimatch@2 || 3", minimatch@5.0.1, minimatch@^3.0.2, minimatch@^3.0.4, minimatch@^3.1.2, minimatch@~3.0.2:
+"minimatch@2 || 3", minimatch@5.0.1, minimatch@^3.0.2, minimatch@^3.0.4, minimatch@^3.1.2, minimatch@^5.0.1, minimatch@~3.0.2:
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-3.1.2.tgz#19cd194bfd3e428f049a70817c038d89ab4be35b"
   integrity sha512-J7p63hRiAjw1NDEww1W7i37+ByIrOWO5XQQAzZ3VOcL0PNybwpfmV/N05zFAzwQ9USyEcX6t3UO+K5aqBQOIHw==
@@ -25952,12 +26126,14 @@ simple-get@^4.0.0, simple-get@^4.0.1:
     once "^1.3.1"
     simple-concat "^1.0.0"
 
-simple-git@1.116.0:
-  version "1.116.0"
-  resolved "https://registry.yarnpkg.com/simple-git/-/simple-git-1.116.0.tgz#ea6e533466f1e0152186e306e004d4eefa6e3e00"
-  integrity sha512-Pbo3tceqMYy0j3U7jzMKabOWcx5+67GdgQUjpK83XUxGhA+1BX93UPvlWNzbCRoFwd7EJTyDSCC2XCoT4NTLYQ==
+simple-git@^3.10.0:
+  version "3.10.0"
+  resolved "https://registry.yarnpkg.com/simple-git/-/simple-git-3.10.0.tgz#f20031dd121d3c49e215ef0186a102bece3f89b2"
+  integrity sha512-2w35xrS5rVtAW0g67LqtxCZN5cdddz/woQRfS0OJXaljXEoTychZ4jnE+CQgra/wX4ZvHeiChTUMenCwfIYEYw==
   dependencies:
-    debug "^4.0.1"
+    "@kwsites/file-exists" "^1.1.1"
+    "@kwsites/promise-deferred" "^1.1.1"
+    debug "^4.3.4"
 
 simple-swizzle@^0.2.2:
   version "0.2.2"
@@ -27058,9 +27234,9 @@ supports-color@^5.0.0, supports-color@^5.3.0, supports-color@^5.4.0, supports-co
     has-flag "^3.0.0"
 
 supports-color@^7.0.0, supports-color@^7.1.0:
-  version "7.1.0"
-  resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-7.1.0.tgz#68e32591df73e25ad1c4b49108a2ec507962bfd1"
-  integrity sha512-oRSIpR8pxT1Wr2FquTNnGet79b3BWljqOuoW/h4oBhxJ/HUbX5nX6JSruTkvXDCFMwDPvsaTTbvMLKZWSy0R5g==
+  version "7.2.0"
+  resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-7.2.0.tgz#1b7dcdcb32b8138801b3e478ba6a51caa89648da"
+  integrity sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw==
   dependencies:
     has-flag "^4.0.0"
 
