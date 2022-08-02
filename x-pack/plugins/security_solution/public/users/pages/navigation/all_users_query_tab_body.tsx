@@ -32,7 +32,6 @@ export const AllUsersQueryTabBody = ({
   setQuery,
   startDate,
   type,
-  docValueFields,
   deleteQuery,
 }: UsersComponentsQueryProps) => {
   const { toggleStatus } = useQueryToggle(QUERY_ID);
@@ -70,7 +69,6 @@ export const AllUsersQueryTabBody = ({
       search({
         filterQuery,
         defaultIndex: indexNames,
-        docValueFields,
         timerange: {
           interval: '12h',
           from: startDate,
@@ -87,7 +85,6 @@ export const AllUsersQueryTabBody = ({
     filterQuery,
     indexNames,
     querySkip,
-    docValueFields,
     activePage,
     limit,
     sort,

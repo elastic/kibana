@@ -194,7 +194,6 @@ describe('Timeline', () => {
     test('it does render the timeline table when the source is loading with no events', () => {
       (useSourcererDataView as jest.Mock).mockReturnValue({
         browserFields: {},
-        docValueFields: [],
         loading: true,
         indexPattern: {},
         selectedPatterns: [],

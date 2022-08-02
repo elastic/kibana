@@ -6,7 +6,7 @@
  */
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { BrowserFields, DocValueFields } from '@kbn/timelines-plugin/common';
+import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import {
   EMPTY_BROWSER_FIELDS,
   EMPTY_DOCVALUE_FIELD,
@@ -64,8 +64,6 @@ export interface SourcererDataView extends KibanaDataView {
    * category, description, format
    * indices the field is included in etc*/
   browserFields: BrowserFields;
-  /** query DSL field and format */
-  docValueFields: DocValueFields[];
   /** comes from dataView.fields.toSpec() */
   indexFields: SecuritySolutionDataViewBase['fields'];
   /** set when data view fields are fetched */
@@ -84,7 +82,6 @@ export interface SourcererDataView extends KibanaDataView {
 export interface SelectedDataView {
   browserFields: SourcererDataView['browserFields'];
   dataViewId: string | null; // null if legacy pre-8.0 timeline
-  docValueFields: SourcererDataView['docValueFields'];
   /**
    * DataViewBase with enhanced index fields used in timelines
    */
@@ -131,7 +128,6 @@ export const initSourcererScope: Omit<SourcererScope, 'id'> = {
 };
 export const initDataView = {
   browserFields: EMPTY_BROWSER_FIELDS,
-  docValueFields: EMPTY_DOCVALUE_FIELD,
   id: '',
   indexFields: EMPTY_INDEX_FIELDS,
   loading: false,

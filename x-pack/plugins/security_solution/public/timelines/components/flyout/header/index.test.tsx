@@ -14,7 +14,7 @@ import { TimelineId } from '../../../../../common/types/timeline';
 import { useTimelineKpis } from '../../../containers/kpis';
 import { FlyoutHeader } from '.';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { mockBrowserFields, mockDocValueFields } from '../../../../common/containers/source/mock';
+import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import { allCasesPermissions, readCasesPermissions } from '../../../../cases_test_utils';
 
@@ -53,7 +53,6 @@ const mockUseTimelineLargeKpiResponse = {
 };
 const defaultMocks = {
   browserFields: mockBrowserFields,
-  docValueFields: mockDocValueFields,
   indexPattern: mockIndexPattern,
   loading: false,
   selectedPatterns: mockIndexNames,

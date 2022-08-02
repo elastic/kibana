@@ -7,10 +7,10 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type { JsonObject, JsonValue } from '@kbn/utility-types';
+import type { JsonObject } from '@kbn/utility-types';
 import type { FieldsObject, ResolverSchema } from '../../../../../../common/endpoint/types';
 import type { NodeID, TimeRange } from '../utils';
-import { docValueFields, validIDs } from '../utils';
+import { validIDs } from '../utils';
 
 interface DescendantsParams {
   schema: ResolverSchema;
@@ -26,11 +26,9 @@ export class DescendantsQuery {
   private readonly schema: ResolverSchema;
   private readonly indexPatterns: string | string[];
   private readonly timeRange: TimeRange;
-  private readonly docValueFields: JsonValue[];
   private readonly isInternalRequest: boolean;
 
   constructor({ schema, indexPatterns, timeRange, isInternalRequest }: DescendantsParams) {
-    this.docValueFields = docValueFields(schema);
     this.schema = schema;
     this.indexPatterns = indexPatterns;
     this.timeRange = timeRange;
@@ -40,7 +38,6 @@ export class DescendantsQuery {
   private query(nodes: NodeID[], size: number): JsonObject {
     return {
       _source: false,
-      docvalue_fields: this.docValueFields,
       size,
       collapse: {
         field: this.schema.id,
@@ -93,7 +90,6 @@ export class DescendantsQuery {
   private queryWithAncestryArray(nodes: NodeID[], ancestryField: string, size: number): JsonObject {
     return {
       _source: false,
-      docvalue_fields: this.docValueFields,
       size,
       collapse: {
         field: this.schema.id,

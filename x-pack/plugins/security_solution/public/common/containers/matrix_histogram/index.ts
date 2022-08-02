@@ -48,7 +48,6 @@ export interface UseMatrixHistogramArgs {
 }
 
 export const useMatrixHistogram = ({
-  docValueFields,
   endDate,
   errorMessage,
   filterQuery,
@@ -88,7 +87,6 @@ export const useMatrixHistogram = ({
       runtimeMappings,
       threshold,
       ...(isPtrIncluded != null ? { isPtrIncluded } : {}),
-      ...(!isEmpty(docValueFields) ? { docValueFields } : {}),
       ...(includeMissingData != null ? { includeMissingData } : {}),
     });
   const { addError, addWarning } = useAppToasts();
@@ -171,7 +169,6 @@ export const useMatrixHistogram = ({
         stackByField,
         threshold,
         ...(isPtrIncluded != null ? { isPtrIncluded } : {}),
-        ...(!isEmpty(docValueFields) ? { docValueFields } : {}),
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
@@ -187,7 +184,6 @@ export const useMatrixHistogram = ({
     histogramType,
     threshold,
     isPtrIncluded,
-    docValueFields,
   ]);
 
   useEffect(() => {

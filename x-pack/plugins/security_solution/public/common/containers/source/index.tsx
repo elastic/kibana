@@ -15,7 +15,6 @@ import { Subscription } from 'rxjs';
 import type {
   BrowserField,
   BrowserFields,
-  DocValueFields,
   IndexField,
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
@@ -26,7 +25,7 @@ import * as i18n from './translations';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { getDataViewStateFromIndexFields } from './use_data_view';
 
-export type { BrowserField, BrowserFields, DocValueFields };
+export type { BrowserField, BrowserFields };
 
 export function getAllBrowserFields(browserFields: BrowserFields): Array<Partial<BrowserField>> {
   const result: Array<Partial<BrowserField>> = [];
@@ -86,11 +85,8 @@ export const getBrowserFields = memoizeOne(
 
 const DEFAULT_BROWSER_FIELDS = {};
 const DEFAULT_INDEX_PATTERNS = { fields: [], title: '' };
-const DEFAULT_DOC_VALUE_FIELDS: DocValueFields[] = [];
-
 interface FetchIndexReturn {
   browserFields: BrowserFields;
-  docValueFields: DocValueFields[];
   indexes: string[];
   indexExists: boolean;
   indexPatterns: DataViewBase;
@@ -112,7 +108,6 @@ export const useFetchIndex = (
 
   const [state, setState] = useState<FetchIndexReturn>({
     browserFields: DEFAULT_BROWSER_FIELDS,
-    docValueFields: DEFAULT_DOC_VALUE_FIELDS,
     indexes: indexNames,
     indexExists: true,
     indexPatterns: DEFAULT_INDEX_PATTERNS,
@@ -140,14 +135,13 @@ export const useFetchIndex = (
                     const stringifyIndices = response.indicesExist.sort().join();
 
                     previousIndexesName.current = response.indicesExist;
-                    const { browserFields, docValueFields } = getDataViewStateFromIndexFields(
+                    const { browserFields } = getDataViewStateFromIndexFields(
                       stringifyIndices,
                       response.indexFields
                     );
                     setLoading(false);
                     setState({
                       browserFields,
-                      docValueFields,
                       indexes: response.indicesExist,
                       indexExists: response.indicesExist.length > 0,
                       indexPatterns: getIndexFields(stringifyIndices, response.indexFields),

@@ -36,7 +36,6 @@ describe('Index Fields', () => {
             aggregatable: true,
             category: 'base',
             indexes: ['auditbeat', 'filebeat', 'packetbeat'],
-            readFromDocValues: true,
             esTypes: [],
           },
           {
@@ -46,7 +45,6 @@ describe('Index Fields', () => {
             type: 'string',
             searchable: true,
             aggregatable: false,
-            readFromDocValues: false,
             category: 'base',
             indexes: ['auditbeat', 'filebeat', 'packetbeat'],
             esTypes: [],
@@ -59,7 +57,6 @@ describe('Index Fields', () => {
             type: 'string',
             searchable: true,
             aggregatable: true,
-            readFromDocValues: false,
             category: 'base',
             indexes: ['auditbeat', 'filebeat', 'packetbeat'],
             esTypes: [],
@@ -74,7 +71,6 @@ describe('Index Fields', () => {
             aggregatable: true,
             category: 'agent',
             indexes: ['auditbeat'],
-            readFromDocValues: false,
             esTypes: [],
           },
           {
@@ -85,7 +81,6 @@ describe('Index Fields', () => {
             aggregatable: true,
             category: 'agent',
             indexes: ['filebeat'],
-            readFromDocValues: false,
             esTypes: [],
           },
           {
@@ -98,7 +93,6 @@ describe('Index Fields', () => {
             aggregatable: true,
             category: 'agent',
             indexes: ['packetbeat'],
-            readFromDocValues: false,
             esTypes: [],
           },
           {
@@ -111,7 +105,6 @@ describe('Index Fields', () => {
             aggregatable: true,
             category: 'agent',
             indexes: ['auditbeat', 'filebeat'],
-            readFromDocValues: false,
             esTypes: [],
           },
           {
@@ -124,7 +117,6 @@ describe('Index Fields', () => {
             aggregatable: true,
             category: 'agent',
             indexes: ['auditbeat', 'packetbeat'],
-            readFromDocValues: false,
             esTypes: [],
           },
           {
@@ -136,7 +128,6 @@ describe('Index Fields', () => {
             aggregatable: true,
             category: 'agent',
             indexes: ['auditbeat', 'filebeat'],
-            readFromDocValues: false,
             esTypes: [],
           },
           {
@@ -145,7 +136,6 @@ describe('Index Fields', () => {
             esTypes: [],
             indexes: ['auditbeat'],
             name: 'agent.user.name',
-            readFromDocValues: false,
             searchable: true,
             type: 'string',
           },
@@ -158,7 +148,6 @@ describe('Index Fields', () => {
             example: 15169,
             indexes: ['auditbeat'],
             name: 'client.as.number.text',
-            readFromDocValues: false,
             searchable: true,
             type: 'string',
           },
@@ -176,7 +165,6 @@ describe('Index Fields', () => {
           type: 'string',
           searchable: true,
           aggregatable: false,
-          readFromDocValues: false,
           esTypes: [],
         },
         0
@@ -190,7 +178,6 @@ describe('Index Fields', () => {
         aggregatable: false,
         category: 'base',
         indexes: ['auditbeat'],
-        readFromDocValues: false,
         esTypes: [],
       });
     });

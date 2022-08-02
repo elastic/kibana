@@ -7,14 +7,12 @@
 import type { ActionCreator } from 'typescript-fsa';
 
 import type { Filter } from '@kbn/es-query';
-import type { DocValueFields } from '@kbn/timelines-plugin/common';
 import type { GlobalTimeArgs } from '../../common/containers/use_global_time';
 
 import type { usersModel } from '../store';
 import type { InputsModelId } from '../../common/store/inputs/constants';
 
 export type UsersTabsProps = GlobalTimeArgs & {
-  docValueFields: DocValueFields[];
   filterQuery: string;
   pageFilters?: Filter[];
   indexNames: string[];

@@ -10,7 +10,6 @@ import { buildEqlDsl, parseEqlResponse } from './helpers';
 import { eventsResponse, sequenceResponse } from './__mocks__';
 const defaultArgs = {
   defaultIndex: ['logs-endpoint.events*'],
-  docValueFields: [],
   runtimeMappings: {},
   fieldRequested: [
     '@timestamp',

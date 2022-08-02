@@ -57,7 +57,6 @@ const getHistogramAggregation = ({ from, to }: { from: string; to: string }) => 
 
 export const buildDnsHistogramQuery = ({
   defaultIndex,
-  docValueFields,
   filterQuery,
   isPtrIncluded = false,
   stackByField = 'dns.question.registered_domain',
@@ -81,7 +80,6 @@ export const buildDnsHistogramQuery = ({
     index: defaultIndex,
     ignore_unavailable: true,
     body: {
-      ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
         ...getCountAgg(),
         dns_name_query_count: {
@@ -111,6 +109,7 @@ export const buildDnsHistogramQuery = ({
     },
     size: 0,
     track_total_hits: false,
+    _source: null,
   };
 
   return dslQuery;

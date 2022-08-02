@@ -15,7 +15,6 @@ import type { networkModel } from '../../store';
 import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
 import type { SetAbsoluteRangeDatePicker } from '../types';
-import type { DocValueFields } from '../../../common/containers/source';
 
 export interface QueryTabBodyProps extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQuery'> {
   endDate: string;
@@ -28,9 +27,7 @@ export interface QueryTabBodyProps extends Pick<GlobalTimeArgs, 'setQuery' | 'de
   type: networkModel.NetworkType;
 }
 
-export type NetworkComponentQueryProps = QueryTabBodyProps & {
-  docValueFields?: DocValueFields[];
-};
+export type NetworkComponentQueryProps = QueryTabBodyProps;
 
 export type IPsQueryTabBodyProps = QueryTabBodyProps & {
   flowTarget: FlowTargetSourceDest;
@@ -48,7 +45,6 @@ export type IPQueryTabBodyProps = FTQueryTabBodyProps & {
 export type HttpQueryTabBodyProps = QueryTabBodyProps;
 
 export type NetworkRoutesProps = GlobalTimeArgs & {
-  docValueFields: DocValueFields[];
   type: networkModel.NetworkType;
   filterQuery?: string | ESTermQuery;
   indexPattern: DataViewBase;

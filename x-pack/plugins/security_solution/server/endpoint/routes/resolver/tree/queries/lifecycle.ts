@@ -6,10 +6,10 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type { JsonObject, JsonValue } from '@kbn/utility-types';
+import type { JsonObject } from '@kbn/utility-types';
 import type { FieldsObject, ResolverSchema } from '../../../../../../common/endpoint/types';
 import type { NodeID, TimeRange } from '../utils';
-import { docValueFields, validIDs } from '../utils';
+import { validIDs } from '../utils';
 
 interface LifecycleParams {
   schema: ResolverSchema;
@@ -25,10 +25,8 @@ export class LifecycleQuery {
   private readonly schema: ResolverSchema;
   private readonly indexPatterns: string | string[];
   private readonly timeRange: TimeRange;
-  private readonly docValueFields: JsonValue[];
   private readonly isInternalRequest: boolean;
   constructor({ schema, indexPatterns, timeRange, isInternalRequest }: LifecycleParams) {
-    this.docValueFields = docValueFields(schema);
     this.schema = schema;
     this.indexPatterns = indexPatterns;
     this.timeRange = timeRange;
@@ -38,7 +36,6 @@ export class LifecycleQuery {
   private query(nodes: NodeID[]): JsonObject {
     return {
       _source: false,
-      docvalue_fields: this.docValueFields,
       size: nodes.length,
       collapse: {
         field: this.schema.id,

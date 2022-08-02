@@ -36,7 +36,6 @@ import { allowedExperimentalValues } from '../../../common/experimental_features
 import { getScopePatternListSelection } from '../store/sourcerer/helpers';
 import {
   mockBrowserFields,
-  mockDocValueFields,
   mockIndexFields,
   mockRuntimeMappings,
 } from '../containers/source/mock';
@@ -49,7 +48,6 @@ export const mockSourcererState = {
   defaultDataView: {
     ...initialSourcererState.defaultDataView,
     browserFields: mockBrowserFields,
-    docValueFields: mockDocValueFields,
     id: DEFAULT_DATA_VIEW_ID,
     indexFields: mockIndexFields,
     loading: false,

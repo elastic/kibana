@@ -195,7 +195,6 @@ const missingFields: FieldSpec[] = [
     type: 'string',
     searchable: true,
     aggregatable: false,
-    readFromDocValues: false,
     esTypes: [],
   },
   {
@@ -203,7 +202,6 @@ const missingFields: FieldSpec[] = [
     type: 'string',
     searchable: true,
     aggregatable: true,
-    readFromDocValues: false,
     esTypes: [],
   },
 ];
