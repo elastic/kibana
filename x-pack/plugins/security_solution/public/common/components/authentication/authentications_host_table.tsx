@@ -110,7 +110,7 @@ const AuthenticationsHostTableComponent: React.FC<HostsComponentsQueryProps> = (
       dataTestSubj="authentications-host-table"
       headerCount={totalCount}
       headerTitle={i18n.AUTHENTICATIONS}
-      headerUnit={i18n.USERS_UNIT(totalCount)}
+      headerUnit={totalCount != null ? i18n.USERS_UNIT(totalCount) : undefined}
       id={TABLE_QUERY_ID}
       isInspect={isInspected}
       itemsPerRow={rowItems}

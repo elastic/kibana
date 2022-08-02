@@ -263,7 +263,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
                 itemsPerPage={itemsPerPage}
                 itemsPerPageOptions={itemsPerPageOptions}
                 onChangePage={loadPage}
-                totalCount={totalCount}
+                totalCount={totalCount ?? 0}
               />
             </StyledEuiFlyoutFooter>
           </EventDetailsWidthProvider>
