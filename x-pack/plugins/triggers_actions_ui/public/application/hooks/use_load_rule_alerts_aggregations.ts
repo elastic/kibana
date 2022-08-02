@@ -263,8 +263,8 @@ export async function fetchRuleAlertsAggByTimeRange({
       active,
       recovered,
       alertsChartData: [
-        ...alertsChartData.filter((acd) => acd.status === 'active'),
         ...alertsChartData.filter((acd) => acd.status === 'recovered'),
+        ...alertsChartData.filter((acd) => acd.status === 'active'),
         ...alertsChartData.filter((acd) => acd.status === 'total'),
       ],
     };
