@@ -14,8 +14,7 @@ export const createClusterDataCheck = () => {
     if (!clusterHasUserData) {
       try {
         const { indices = {} } = await esClient.indices.stats({
-          index: '*',
-          metric: 'docs',
+          filter_path: 'indices.*.total.docs.count',
         });
 
         const indexIds = Object.keys(indices);
@@ -25,7 +24,7 @@ export const createClusterDataCheck = () => {
           const isInternalIndex = indexId.startsWith('.') || indexId.startsWith('kibana_sample_');
 
           // Check index to see if it has any docs
-          const hasDocs = (indices[indexId].primaries?.docs?.count || 0) > 0;
+          const hasDocs = (indices[indexId].total?.docs?.count || 0) > 0;
 
           return !isInternalIndex && hasDocs;
         });
