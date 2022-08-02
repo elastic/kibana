@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
-import { LogExplorerChunk, LogExplorerEntry } from '../../types';
+import { LogExplorerChunk, LogExplorerRow } from '../../types';
 import { DataAccessService } from './state_machine';
 import { selectIsReloading } from './status_selectors';
 
-export const selectLoadedEntries = (
+export const selectRows = (
   state: DataAccessService['state']
 ): {
   startRowIndex: number | undefined;
   chunkBoundaryRowIndex: number | undefined;
   endRowIndex: number | undefined;
-  entries: LogExplorerEntry[];
+  rows: Map<number, LogExplorerRow>;
 } => {
   if (selectIsReloading(state)) {
     return {
       startRowIndex: undefined,
       chunkBoundaryRowIndex: undefined,
       endRowIndex: undefined,
-      entries: [],
+      rows: new Map(),
     };
   }
 
@@ -33,14 +33,13 @@ export const selectLoadedEntries = (
   const chunkBoundaryRowIndex = getStartRowIndex(bottomChunk);
   const endRowIndex = getEndRowIndex(bottomChunk);
 
+  const rows = new Map([...getRowsFromChunk(topChunk), ...getRowsFromChunk(bottomChunk)]);
+
   return {
     startRowIndex,
     chunkBoundaryRowIndex,
     endRowIndex,
-    entries: [
-      ...(topChunk.status === 'loaded' ? topChunk.entries : []),
-      ...(bottomChunk.status === 'loaded' ? bottomChunk.entries : []),
-    ],
+    rows,
   };
 };
 
@@ -69,5 +68,23 @@ const getEndRowIndex = (chunk: LogExplorerChunk): number => {
       return chunk.rowIndex;
     case 'uninitialized':
       return 0;
+  }
+};
+
+const getRowsFromChunk = (chunk: LogExplorerChunk): Array<[number, LogExplorerRow]> => {
+  const rowIndexOffset = getStartRowIndex(chunk);
+
+  switch (chunk.status) {
+    case 'loaded':
+      return chunk.entries.map((entry, indexInChunk) => [
+        indexInChunk + rowIndexOffset,
+        { type: 'loaded-entry', entry },
+      ]);
+    case 'uninitialized':
+    case 'empty':
+      return [[rowIndexOffset, { type: 'empty' }]];
+    case 'loading-top':
+    case 'loading-bottom':
+      return [[rowIndexOffset, { type: 'loading' }]];
   }
 };

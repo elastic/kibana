@@ -23,6 +23,24 @@ export interface LogExplorerPosition {
   tiebreaker: Tiebreaker;
 }
 
+export type LogExplorerRow =
+  | LogExplorerLoadedEntryRow
+  | LogExplorerLoadingRow
+  | LogExplorerEmptyRow;
+
+export interface LogExplorerLoadingRow {
+  type: 'loading';
+}
+
+export interface LogExplorerLoadedEntryRow {
+  type: 'loaded-entry';
+  entry: LogExplorerEntry;
+}
+
+export interface LogExplorerEmptyRow {
+  type: 'empty';
+}
+
 export interface LogExplorerEntry {
   position: LogExplorerPosition;
   fields: Record<string, unknown>;
