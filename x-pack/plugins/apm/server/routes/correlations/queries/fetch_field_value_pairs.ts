@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type {
   FieldValuePair,
   CommonCorrelationsQueryParams,
@@ -13,7 +14,6 @@ import { TERMS_SIZE } from '../../../../common/correlations/constants';
 
 import { splitAllSettledPromises } from '../utils';
 import { Setup } from '../../../lib/helpers/setup_request';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 
 export const fetchFieldValuePairs = async ({
