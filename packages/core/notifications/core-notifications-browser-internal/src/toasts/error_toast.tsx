@@ -21,7 +21,7 @@ import {
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { I18nStart } from '@kbn/core-i18n-browser';
-import { OverlayStart } from '../..';
+import type { OverlayStart } from '@kbn/core-overlays-browser';
 
 interface ErrorToastProps {
   title: string;
