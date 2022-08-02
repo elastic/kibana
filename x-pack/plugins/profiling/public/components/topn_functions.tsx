@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import React, { useContext, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-
 import {
+  EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiHorizontalRule,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
-
-import { orderBy } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { keyBy, orderBy } from 'lodash';
+import React, { useContext, useMemo } from 'react';
+import { TopNFunctions, TopNFunctionSortField } from '../../common/functions';
 import { getCalleeFunction, getCalleeSource, StackFrameMetadata } from '../../common/profiling';
 import { FunctionContext } from './contexts/function';
-import { TopNFunctionSortField } from '../../common/functions';
 
 interface Row {
   rank: number;
@@ -27,12 +29,38 @@ interface Row {
   samples: number;
   exclusiveCPU: number;
   inclusiveCPU: number;
+  diff?: {
+    rank: number;
+    exclusiveCPU: number;
+    inclusiveCPU: number;
+  };
+}
+
+function CPUStat({ cpu, diffCPU }: { cpu: number; diffCPU: number | undefined }) {
+  const cpuLabel = `${cpu.toFixed(2)}%`;
+  if (diffCPU === undefined) {
+    return <>{cpuLabel}</>;
+  }
+  const color = diffCPU < 0 ? 'success' : 'danger';
+  const label = Math.abs(diffCPU) <= 0.01 ? '<0.01' : Math.abs(diffCPU).toFixed(2);
+
+  return (
+    <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexItem>{cpuLabel}</EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText color={color} size="s">
+          ({label})
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 }
 
 export const TopNFunctionsTable = ({
   sortDirection,
   sortField,
   onSortChange,
+  comparisonTopNFunctions,
 }: {
   sortDirection: 'asc' | 'desc';
   sortField: TopNFunctionSortField;
@@ -40,6 +68,7 @@ export const TopNFunctionsTable = ({
     sortDirection: 'asc' | 'desc';
     sortField: TopNFunctionSortField;
   }) => void;
+  comparisonTopNFunctions?: TopNFunctions;
 }) => {
   const ctx = useContext(FunctionContext);
 
@@ -56,14 +85,41 @@ export const TopNFunctionsTable = ({
       return [];
     }
 
-    return ctx.TopN.filter((topN) => topN.CountExclusive > 0).map((topN, i) => ({
-      rank: i + 1,
-      frame: topN.Frame,
-      samples: topN.CountExclusive,
-      exclusiveCPU: (topN.CountExclusive / ctx.TotalCount) * 100,
-      inclusiveCPU: (topN.CountInclusive / ctx.TotalCount) * 100,
-    }));
-  }, [ctx]);
+    const comparisonDataById = comparisonTopNFunctions
+      ? keyBy(comparisonTopNFunctions.TopN, 'Id')
+      : {};
+
+    return ctx.TopN.filter((topN) => topN.CountExclusive > 0).map((topN, i) => {
+      const comparisonRow = comparisonDataById?.[topN.Id];
+
+      const inclusiveCPU = (topN.CountInclusive / ctx.TotalCount) * 100;
+      const exclusiveCPU = (topN.CountExclusive / ctx.TotalCount) * 100;
+
+      const diff =
+        comparisonTopNFunctions && comparisonRow
+          ? {
+              rank: topN.Rank - comparisonRow.Rank,
+              exclusiveCPU:
+                exclusiveCPU -
+                (comparisonRow.CountExclusive / comparisonTopNFunctions.TotalCount) * 100,
+              inclusiveCPU:
+                inclusiveCPU -
+                (comparisonRow.CountInclusive / comparisonTopNFunctions.TotalCount) * 100,
+            }
+          : undefined;
+
+      return {
+        rank: topN.Rank,
+        frame: topN.Frame,
+        samples: topN.CountExclusive,
+        exclusiveCPU,
+        inclusiveCPU,
+        diff,
+      };
+    });
+  }, [ctx, comparisonTopNFunctions]);
+
+  const theme = useEuiTheme();
 
   const columns: Array<EuiBasicTableColumn<Row>> = [
     {
@@ -79,10 +135,18 @@ export const TopNFunctionsTable = ({
       }),
       width: '100%',
       render: (_, { frame }) => (
-        <EuiText size="s">
-          <strong>{getCalleeFunction(frame)}</strong>
-          <p>{getCalleeSource(frame)}</p>
-        </EuiText>
+        <EuiFlexGroup direction="column" gutterSize="xs">
+          <EuiFlexItem>
+            <div>
+              <EuiText size="s" style={{ fontWeight: 'bold' }}>
+                {getCalleeFunction(frame)}
+              </EuiText>
+            </div>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="s">{getCalleeSource(frame) || '‎'}</EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ),
     },
     {
@@ -96,16 +160,57 @@ export const TopNFunctionsTable = ({
       name: i18n.translate('xpack.profiling.functionsView.exclusiveCpuColumnLabel', {
         defaultMessage: 'Exclusive CPU',
       }),
-      render: (_, { exclusiveCPU }) => `${exclusiveCPU.toFixed(2)}%`,
+      render: (_, { exclusiveCPU, diff }) => {
+        return <CPUStat cpu={exclusiveCPU} diffCPU={diff?.exclusiveCPU} />;
+      },
     },
     {
       field: TopNFunctionSortField.InclusiveCPU,
       name: i18n.translate('xpack.profiling.functionsView.inclusiveCpuColumnLabel', {
         defaultMessage: 'Inclusive CPU',
       }),
-      render: (_, { inclusiveCPU }) => `${inclusiveCPU.toFixed(2)}%`,
+      render: (_, { inclusiveCPU, diff }) => {
+        return <CPUStat cpu={inclusiveCPU} diffCPU={diff?.inclusiveCPU} />;
+      },
     },
   ];
+
+  if (comparisonTopNFunctions) {
+    columns.push({
+      field: TopNFunctionSortField.Diff,
+      name: i18n.translate('xpack.profiling.functionsView.diffColumnLabel', {
+        defaultMessage: 'Diff',
+      }),
+      align: 'right',
+      render: (_, { diff }) => {
+        if (!diff) {
+          return (
+            <EuiText size="xs" color={theme.euiTheme.colors.primaryText}>
+              {i18n.translate('xpack.profiling.functionsView.newLabel', { defaultMessage: 'New' })}
+            </EuiText>
+          );
+        }
+
+        if (diff.rank === 0) {
+          return null;
+        }
+
+        const color = diff.rank > 0 ? 'success' : 'danger';
+        const icon = diff.rank > 0 ? 'sortDown' : 'sortUp';
+
+        return (
+          <EuiBadge
+            color={color}
+            iconType={icon}
+            iconSide="right"
+            style={{ minWidth: '100%', textAlign: 'right' }}
+          >
+            {diff.rank}
+          </EuiBadge>
+        );
+      },
+    });
+  }
 
   const totalSampleCountLabel = i18n.translate(
     'xpack.profiling.functionsView.totalSampleCountLabel',

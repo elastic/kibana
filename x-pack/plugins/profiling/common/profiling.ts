@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import jsonStableStringify from 'json-stable-stringify';
 
 export type StackTraceID = string;
 export type StackFrameID = string;
@@ -247,5 +248,5 @@ export type FrameGroupID = string;
 
 export function hashFrameGroup(frameGroup: FrameGroup): FrameGroupID {
   // We use serialized JSON as the unique value of a frame group for now
-  return JSON.stringify(frameGroup);
+  return jsonStableStringify(frameGroup);
 }

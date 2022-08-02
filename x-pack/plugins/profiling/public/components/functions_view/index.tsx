@@ -8,7 +8,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiPageHeaderContentProps } from '@elastic/e
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { Redirect } from 'react-router-dom';
+import { TypeOf } from '@kbn/typed-react-router-config';
 import { TopNFunctions } from '../../../common/functions';
+import { TimeRange } from '../../../common/types';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
@@ -19,6 +21,7 @@ import { FunctionNavigation } from '../function_nav';
 import { PrimaryAndComparisonSearchBar } from '../primary_and_comparison_search_bar';
 import { ProfilingAppPageTemplate } from '../profiling_app_page_template';
 import { TopNFunctionsTable } from '../topn_functions';
+import { ProfilingRoutes } from '../../routing';
 
 export function FunctionsView({ children }: { children: React.ReactElement }) {
   const {
@@ -29,7 +32,17 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
 
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
 
+  const comparisonTimeRange = useTimeRange(
+    'comparisonRangeFrom' in query
+      ? { rangeFrom: query.comparisonRangeFrom, rangeTo: query.comparisonRangeTo, optional: true }
+      : { rangeFrom: undefined, rangeTo: undefined, optional: true }
+  );
+
+  const comparisonKuery = 'comparisonKuery' in query ? query.comparisonKuery : '';
+
   const [topnFunctions, setTopNFunctions] = useState<TopNFunctions>();
+
+  const [topnComparisonFunctions, setTopNComparisonFunctions] = useState<TopNFunctions>();
 
   const {
     services: { fetchTopNFunctions },
@@ -74,7 +87,7 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
 
   return (
     <ProfilingAppPageTemplate tabs={tabs} hideSearchBar={isDifferentialView}>
-      <FunctionContext.Provider value={topnFunctions}>
+      <>
         <EuiFlexGroup direction="column">
           {isDifferentialView ? (
             <EuiFlexItem>
@@ -82,30 +95,66 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem>
-            <FunctionNavigation
-              timeRange={timeRange}
-              kuery={kuery}
-              getter={fetchTopNFunctions}
-              setter={setTopNFunctions}
-            />
-            <TopNFunctionsTable
-              sortDirection={sortDirection}
-              sortField={sortField}
-              onSortChange={(nextSort) => {
-                profilingRouter.push(routePath, {
-                  path,
-                  query: {
-                    ...query,
-                    sortField: nextSort.sortField,
-                    sortDirection: nextSort.sortDirection,
-                  },
-                });
-              }}
-            />
-            {children}
+            <EuiFlexGroup direction="row" gutterSize="s">
+              <EuiFlexItem>
+                <FunctionContext.Provider value={topnFunctions}>
+                  <FunctionNavigation
+                    timeRange={timeRange}
+                    kuery={kuery}
+                    getter={fetchTopNFunctions}
+                    setter={setTopNFunctions}
+                  />
+                  <TopNFunctionsTable
+                    sortDirection={sortDirection}
+                    sortField={sortField}
+                    onSortChange={(nextSort) => {
+                      profilingRouter.push(routePath, {
+                        path,
+                        query: {
+                          ...query,
+                          sortField: nextSort.sortField,
+                          sortDirection: nextSort.sortDirection,
+                        },
+                      });
+                    }}
+                  />
+                </FunctionContext.Provider>
+              </EuiFlexItem>
+              {isDifferentialView && comparisonTimeRange.start && comparisonTimeRange.end ? (
+                <EuiFlexItem>
+                  <FunctionContext.Provider value={topnComparisonFunctions}>
+                    <FunctionNavigation
+                      timeRange={comparisonTimeRange as TimeRange}
+                      kuery={comparisonKuery}
+                      getter={fetchTopNFunctions}
+                      setter={setTopNComparisonFunctions}
+                    />
+                    <TopNFunctionsTable
+                      sortDirection={sortDirection}
+                      sortField={sortField}
+                      onSortChange={(nextSort) => {
+                        profilingRouter.push(routePath, {
+                          path,
+                          query: {
+                            ...(query as TypeOf<
+                              ProfilingRoutes,
+                              '/flamegraphs/differential'
+                            >['query']),
+                            sortField: nextSort.sortField,
+                            sortDirection: nextSort.sortDirection,
+                          },
+                        });
+                      }}
+                      comparisonTopNFunctions={topnFunctions}
+                    />
+                  </FunctionContext.Provider>
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </FunctionContext.Provider>
+        {children}
+      </>
     </ProfilingAppPageTemplate>
   );
 }
