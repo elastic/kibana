@@ -30,7 +30,7 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       if (pkgVersion) {
-        await supertest.delete(`/api/fleet/epm/packages/fleet_server-${pkgVersion}`);
+        await supertest.delete(`/api/fleet/epm/packages/fleet_server/${pkgVersion}`);
       }
     });
 
@@ -43,7 +43,7 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
       pkgVersion = getPkRes.body.item.version;
       await supertest
-        .post(`/api/fleet/epm/packages/fleet_server-${pkgVersion}`)
+        .post(`/api/fleet/epm/packages/fleet_server/${pkgVersion}`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
