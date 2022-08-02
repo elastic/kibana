@@ -97,6 +97,7 @@ export class SavedSearchEmbeddable
   private prevTimeRange?: TimeRange;
   private prevFilters?: Filter[];
   private prevQuery?: Query;
+  private prevSort?: SortOrder[];
   private prevSearchSessionId?: string;
   private searchProps?: SearchProps;
 
@@ -386,15 +387,15 @@ export class SavedSearchEmbeddable
   }
 
   private isFetchRequired(searchProps?: SearchProps) {
-    if (!searchProps) {
+    if (!searchProps || !searchProps.dataView) {
       return false;
     }
-    const sort = this.getSort(this.input.sort || this.savedSearch.sort, this.searchProps?.dataView);
+
     return (
       !onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
       !isEqual(this.prevQuery, this.input.query) ||
       !isEqual(this.prevTimeRange, this.input.timeRange) ||
-      !isEqual(searchProps.sort, sort) ||
+      !isEqual(this.prevSort, this.input.sort) ||
       this.prevSearchSessionId !== this.input.searchSessionId
     );
   }
@@ -439,6 +440,7 @@ export class SavedSearchEmbeddable
       this.prevQuery = this.input.query;
       this.prevTimeRange = this.input.timeRange;
       this.prevSearchSessionId = this.input.searchSessionId;
+      this.prevSort = this.input.sort;
       this.searchProps = searchProps;
       await this.fetch();
     } else if (this.searchProps && this.node) {
