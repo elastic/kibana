@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import React, { FC, useState } from 'react';
+import React, { FC, useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { Embeddable } from '@kbn/lens-plugin/public';
@@ -45,10 +45,7 @@ import { MlApiServices } from '../../../application/services/ml_api_service';
 import { basicJobValidation } from '../../../../common/util/job_utils';
 import { JOB_ID_MAX_LENGTH } from '../../../../common/constants/validation';
 import { invalidTimeIntervalMessage } from '../../../application/jobs/new_job/common/job_validator/util';
-
-// import { getMessages } from '../../../../common/constants/messages';
-// import {} from '../../../application/jobs/new_job/common/job_validator/util'
-// populateValidationMessages
+import { ML_APP_LOCATOR } from '../../../../common/constants/locator';
 
 interface Props {
   layerResults: LayerResult[];
@@ -85,6 +82,7 @@ export const FlyoutBody: FC<Props> = ({
   const [jobIdValid, setJobIdValid] = useState<string>('');
   const [bucketSpanValid, setBucketSpanValid] = useState<string>('');
   const [state, setState] = useState<STATE>(STATE.DEFAULT);
+  const [resultsLink, setResultsLink] = useState<string | null>(null);
 
   function createADJobInWizard(layerIndex: number) {
     convertLensToADJob(embeddable, share, layerIndex);
@@ -106,11 +104,31 @@ export const FlyoutBody: FC<Props> = ({
         layerIndex
       );
       setState(STATE.SAVE_SUCCESS);
+      const url = await createJobResultHref(layerResults[layerIndex].jobWizardType);
+      if (url !== undefined) {
+        setResultsLink(url);
+      }
     } catch (error) {
       setState(STATE.SAVE_FAILED);
       // console.error(error);
     }
   }
+
+  const createJobResultHref = useCallback(
+    (jobType: CREATED_BY_LABEL | null) => {
+      const { timeRange } = embeddable.getInput();
+      const page = jobType === CREATED_BY_LABEL.MULTI_METRIC ? 'explorer' : 'timeseriesexplorer';
+      const locator = share.url.locators.get(ML_APP_LOCATOR);
+      return locator?.getUrl({
+        page,
+        pageState: {
+          jobIds: [jobId],
+          timeRange,
+        },
+      });
+    },
+    [share, embeddable, jobId]
+  );
 
   function setStartJobWrapper(start: boolean) {
     setStartJob(start);
@@ -347,6 +365,23 @@ export const FlyoutBody: FC<Props> = ({
                         id="xpack.ml.embeddables.lensLayerFlyout.saveSuccess"
                         defaultMessage="Job created"
                       />
+                      {resultsLink === null ? null : (
+                        <>
+                          <EuiSpacer size="s" />
+                          <EuiButtonEmpty
+                            href={resultsLink}
+                            iconType="popout"
+                            iconSide="right"
+                            target="_blank"
+                            flush="left"
+                          >
+                            <FormattedMessage
+                              id="xpack.ml.embeddables.lensLayerFlyout.saveSuccess.resultsLink"
+                              defaultMessage="View results"
+                            />
+                          </EuiButtonEmpty>
+                        </>
+                      )}
                     </>
                   ) : null}
 

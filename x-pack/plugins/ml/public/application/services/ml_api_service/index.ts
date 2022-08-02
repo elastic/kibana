@@ -130,7 +130,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
 
     addJob({ jobId, job }: { jobId: string; job: Job }) {
       const body = JSON.stringify(job);
-      return httpService.http<any>({
+      return httpService.http<estypes.MlPutJobResponse>({
         path: `${basePath()}/anomaly_detectors/${jobId}`,
         method: 'PUT',
         body,
@@ -247,7 +247,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
 
     addDatafeed({ datafeedId, datafeedConfig }: { datafeedId: string; datafeedConfig: Datafeed }) {
       const body = JSON.stringify(datafeedConfig);
-      return httpService.http<any>({
+      return httpService.http<estypes.MlPutDatafeedResponse>({
         path: `${basePath()}/datafeeds/${datafeedId}`,
         method: 'PUT',
         body,

@@ -27,7 +27,7 @@ export async function createAndSaveJob(
 ) {
   const { query, filters, to, from, vis } = getJobsItemsFromEmbeddable(embeddable);
   if (query === undefined || filters === undefined) {
-    return;
+    throw new Error('Cannot create job, query and filters are undefined');
   }
 
   const { jobConfig, datafeedConfig, start, end } = await createJob(
@@ -49,10 +49,12 @@ export async function createAndSaveJob(
   const datafeedId = `datafeed-${jobId}`;
   const datafeed = { ...datafeedConfig, job_id: jobId, datafeed_id: datafeedId };
 
-  await ml.addJob({ jobId: job.job_id, job });
-  await ml.addDatafeed({ datafeedId, datafeedConfig: datafeed });
+  const createdJob = await ml.addJob({ jobId: job.job_id, job });
+  const createdDatafeed = await ml.addDatafeed({ datafeedId, datafeedConfig: datafeed });
   if (startJob) {
     await ml.openJob({ jobId });
     await ml.startDatafeed({ datafeedId, start, ...(runInRealTime ? {} : { end }) });
   }
+
+  return { job: createdJob, datafeed: createdDatafeed };
 }
