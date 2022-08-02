@@ -116,98 +116,98 @@ export function createExecutionHandler<
     const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
     let ephemeralActionsToSchedule = maxEphemeralActionsPerRule;
 
-    const chunkedActions = chunk(actions, 1000);
-    for (const chunkedAction of chunkedActions) {
-      const bulkActions = [];
-      for (const action of chunkedAction) {
-        const { actionTypeId } = action;
+    const bulkActions = [];
+    for (const action of actions) {
+      const { actionTypeId } = action;
 
-        ruleRunMetricsStore.incrementNumberOfGeneratedActionsByConnectorType(actionTypeId);
+      ruleRunMetricsStore.incrementNumberOfGeneratedActionsByConnectorType(actionTypeId);
 
-        if (ruleRunMetricsStore.hasReachedTheExecutableActionsLimit(actionsConfigMap)) {
-          ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
-            actionTypeId,
-            status: ActionsCompletion.PARTIAL,
-          });
+      if (ruleRunMetricsStore.hasReachedTheExecutableActionsLimit(actionsConfigMap)) {
+        ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
+          actionTypeId,
+          status: ActionsCompletion.PARTIAL,
+        });
+        logger.debug(
+          `Rule "${ruleId}" skipped scheduling action "${action.id}" because the maximum number of allowed actions has been reached.`
+        );
+        break;
+      }
+
+      if (
+        ruleRunMetricsStore.hasReachedTheExecutableActionsLimitByConnectorType({
+          actionTypeId,
+          actionsConfigMap,
+        })
+      ) {
+        if (!ruleRunMetricsStore.hasConnectorTypeReachedTheLimit(actionTypeId)) {
           logger.debug(
-            `Rule "${ruleId}" skipped scheduling action "${action.id}" because the maximum number of allowed actions has been reached.`
+            `Rule "${ruleId}" skipped scheduling action "${action.id}" because the maximum number of allowed actions for connector type ${actionTypeId} has been reached.`
           );
-          break;
         }
+        ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
+          actionTypeId,
+          status: ActionsCompletion.PARTIAL,
+        });
+        continue;
+      }
 
-        if (
-          ruleRunMetricsStore.hasReachedTheExecutableActionsLimitByConnectorType({
-            actionTypeId,
-            actionsConfigMap,
-          })
-        ) {
-          if (!ruleRunMetricsStore.hasConnectorTypeReachedTheLimit(actionTypeId)) {
-            logger.debug(
-              `Rule "${ruleId}" skipped scheduling action "${action.id}" because the maximum number of allowed actions for connector type ${actionTypeId} has been reached.`
-            );
-          }
-          ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
-            actionTypeId,
-            status: ActionsCompletion.PARTIAL,
-          });
-          continue;
-        }
+      if (!actionsPlugin.isActionExecutable(action.id, actionTypeId, { notifyUsage: true })) {
+        logger.warn(
+          `Rule "${ruleId}" skipped scheduling action "${action.id}" because it is disabled`
+        );
+        continue;
+      }
 
-        if (!actionsPlugin.isActionExecutable(action.id, actionTypeId, { notifyUsage: true })) {
-          logger.warn(
-            `Rule "${ruleId}" skipped scheduling action "${action.id}" because it is disabled`
-          );
-          continue;
-        }
+      ruleRunMetricsStore.incrementNumberOfTriggeredActions();
+      ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
 
-        ruleRunMetricsStore.incrementNumberOfTriggeredActions();
-        ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
+      const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
 
-        const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
-
-        const enqueueOptions = {
-          id: action.id,
-          params: action.params,
-          spaceId,
-          apiKey: apiKey ?? null,
-          consumer: ruleConsumer,
-          source: asSavedObjectExecutionSource({
+      const enqueueOptions = {
+        id: action.id,
+        params: action.params,
+        spaceId,
+        apiKey: apiKey ?? null,
+        consumer: ruleConsumer,
+        source: asSavedObjectExecutionSource({
+          id: ruleId,
+          type: 'alert',
+        }),
+        executionId,
+        relatedSavedObjects: [
+          {
             id: ruleId,
             type: 'alert',
-          }),
-          executionId,
-          relatedSavedObjects: [
-            {
-              id: ruleId,
-              type: 'alert',
-              namespace: namespace.namespace,
-              typeId: ruleType.id,
-            },
-          ],
-        };
+            namespace: namespace.namespace,
+            typeId: ruleType.id,
+          },
+        ],
+      };
 
-        if (supportsEphemeralTasks && ephemeralActionsToSchedule > 0) {
-          ephemeralActionsToSchedule--;
-          try {
-            await actionsClient.ephemeralEnqueuedExecution(enqueueOptions);
-          } catch (err) {
-            if (isEphemeralTaskRejectedDueToCapacityError(err)) {
-              bulkActions.push(enqueueOptions);
-            }
+      if (supportsEphemeralTasks && ephemeralActionsToSchedule > 0) {
+        ephemeralActionsToSchedule--;
+        try {
+          await actionsClient.ephemeralEnqueuedExecution(enqueueOptions);
+        } catch (err) {
+          if (isEphemeralTaskRejectedDueToCapacityError(err)) {
+            bulkActions.push(enqueueOptions);
           }
-        } else {
-          bulkActions.push(enqueueOptions);
         }
-
-        alertingEventLogger.logAction({
-          id: action.id,
-          typeId: actionTypeId,
-          alertId,
-          alertGroup: actionGroup,
-          alertSubgroup: actionSubgroup,
-        });
+      } else {
+        bulkActions.push(enqueueOptions);
       }
-      await actionsClient.bulkEnqueueExecution(bulkActions);
+
+      alertingEventLogger.logAction({
+        id: action.id,
+        typeId: actionTypeId,
+        alertId,
+        alertGroup: actionGroup,
+        alertSubgroup: actionSubgroup,
+      });
+    }
+
+    for (const c of chunk(bulkActions, 1000)) {
+      await actionsClient.bulkEnqueueExecution(c);
     }
   };
 }
