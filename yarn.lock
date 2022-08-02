@@ -3371,6 +3371,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-saved-objects-browser-internal@link:bazel-bin/packages/core/saved-objects/core-saved-objects-browser-internal":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-saved-objects-browser@link:bazel-bin/packages/core/saved-objects/core-saved-objects-browser":
   version "0.0.0"
   uid ""
@@ -7236,6 +7240,10 @@
   uid ""
 
 "@types/kbn__core-saved-objects-api-server@link:bazel-bin/packages/core/saved-objects/core-saved-objects-api-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-saved-objects-browser-internal@link:bazel-bin/packages/core/saved-objects/core-saved-objects-browser-internal/npm_module_types":
   version "0.0.0"
   uid ""
 

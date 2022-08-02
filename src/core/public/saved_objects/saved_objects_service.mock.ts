@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsService } from './saved_objects_service';
+import { SavedObjectsService } from '@kbn/core-saved-objects-browser-internal';
 import type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
 
 const createStartContractMock = () => {
