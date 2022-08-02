@@ -14,7 +14,7 @@ interface ErrorBoundaryProps {
 }
 
 interface ErrorBoundaryState {
-  originalError?: Error | undefined;
+  originalError?: Error;
 }
 
 const RecallError = ({ error }: { error: Error }) => {
