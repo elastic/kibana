@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import { GENERAL_CASES_OWNER } from '../../../common/constants';
 import { renderHook } from '@testing-library/react-hooks';
 import { useToasts } from '../../common/lib/kibana';
 import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
 import * as api from './api';
-import { useSuggestUserProfiles } from './use_suggest_user_profiles';
+import { useBulkGetUserProfiles } from './use_bulk_get_user_profiles';
+import { userProfilesIds } from './api.mock';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('./api');
 
-describe('useSuggestUserProfiles', () => {
+describe('useBulkGetUserProfiles', () => {
   const props = {
-    name: 'elastic',
-    owner: [GENERAL_CASES_OWNER],
+    uids: userProfilesIds,
   };
 
   const addSuccess = jest.fn();
@@ -26,43 +25,28 @@ describe('useSuggestUserProfiles', () => {
 
   let appMockRender: AppMockRenderer;
 
-  beforeAll(() => {
-    jest.useFakeTimers();
-  });
-
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
-  afterEach(() => {
-    jest.clearAllTimers();
-  });
+  it('calls bulkGetUserProfiles with correct arguments', async () => {
+    const spyOnSuggestUserProfiles = jest.spyOn(api, 'bulkGetUserProfiles');
 
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
-  it('calls suggestUserProfiles with correct arguments', async () => {
-    const spyOnSuggestUserProfiles = jest.spyOn(api, 'suggestUserProfiles');
-
-    const { result, waitFor } = renderHook(() => useSuggestUserProfiles(props), {
+    const { result, waitFor } = renderHook(() => useBulkGetUserProfiles(props), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    jest.advanceTimersByTime(500);
     await waitFor(() => result.current.isSuccess);
 
     expect(spyOnSuggestUserProfiles).toBeCalledWith({
       ...props,
-      size: 100,
-      http: expect.anything(),
-      signal: expect.anything(),
+      security: expect.anything(),
     });
   });
 
   it('shows a toast error message when an error occurs in the response', async () => {
-    const spyOnSuggestUserProfiles = jest.spyOn(api, 'suggestUserProfiles');
+    const spyOnSuggestUserProfiles = jest.spyOn(api, 'bulkGetUserProfiles');
 
     spyOnSuggestUserProfiles.mockImplementation(() => {
       throw new Error('Something went wrong');
@@ -71,11 +55,10 @@ describe('useSuggestUserProfiles', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
 
-    const { result, waitFor } = renderHook(() => useSuggestUserProfiles(props), {
+    const { result, waitFor } = renderHook(() => useBulkGetUserProfiles(props), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    jest.advanceTimersByTime(500);
     await waitFor(() => result.current.isError);
 
     expect(addError).toHaveBeenCalled();

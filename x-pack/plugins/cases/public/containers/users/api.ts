@@ -7,6 +7,7 @@
 
 import { HttpStart } from '@kbn/core/public';
 import { UserProfile } from '@kbn/security-plugin/common';
+import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { INTERNAL_SUGGEST_USER_PROFILES_URL, DEFAULT_USER_SIZE } from '../../../common/constants';
 
 export interface SuggestUserProfilesArgs {
@@ -30,4 +31,20 @@ export const suggestUserProfiles = async ({
   });
 
   return response;
+};
+
+export interface BulkGetUserProfilesArgs {
+  security?: SecurityPluginStart;
+  uids: string[];
+}
+
+export const bulkGetUserProfiles = async ({
+  security,
+  uids,
+}: BulkGetUserProfilesArgs): Promise<UserProfile[]> => {
+  if (security == null) {
+    return Promise.resolve([]);
+  }
+
+  return security.userProfiles.bulkGet({ uids: new Set(uids), dataPath: 'avatar' });
 };

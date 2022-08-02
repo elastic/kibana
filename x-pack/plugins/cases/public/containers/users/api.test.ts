@@ -7,8 +7,8 @@
 
 import { GENERAL_CASES_OWNER } from '../../../common/constants';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
-import { suggestUserProfiles } from './api';
-import { userProfiles } from './api.mock';
+import { bulkGetUserProfiles, suggestUserProfiles } from './api';
+import { userProfiles, userProfilesIds } from './api.mock';
 
 describe('User profiles API', () => {
   describe('suggestUserProfiles', () => {
@@ -42,6 +42,49 @@ describe('User profiles API', () => {
       expect(http.post).toHaveBeenCalledWith('/internal/cases/_suggest_user_profiles', {
         body: '{"name":"elastic","size":100,"owner":["cases"]}',
         signal: abortCtrl.signal,
+      });
+    });
+  });
+
+  describe('bulkGetUserProfiles', () => {
+    const { security } = createStartServicesMock();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      security.userProfiles.bulkGet = jest.fn().mockResolvedValue(userProfiles);
+    });
+
+    it('returns the user profiles correctly', async () => {
+      const res = await bulkGetUserProfiles({
+        security,
+        uids: userProfilesIds,
+      });
+
+      expect(res).toEqual(userProfiles);
+    });
+
+    it('returns an empty array if the security plugin is undefined', async () => {
+      const res = await bulkGetUserProfiles({
+        security: undefined,
+        uids: userProfilesIds,
+      });
+
+      expect(res).toEqual([]);
+    });
+
+    it('calls http.post correctly', async () => {
+      await bulkGetUserProfiles({
+        security,
+        uids: userProfilesIds,
+      });
+
+      expect(security.userProfiles.bulkGet).toHaveBeenCalledWith({
+        dataPath: 'avatar',
+        uids: new Set([
+          'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
+          'u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0',
+          'u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0',
+        ]),
       });
     });
   });

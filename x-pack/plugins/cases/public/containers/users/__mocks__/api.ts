@@ -10,3 +10,6 @@ import { userProfiles } from '../api.mock';
 
 export const suggestUserProfiles = async (): Promise<UserProfile[]> =>
   Promise.resolve(userProfiles);
+
+export const bulkGetUserProfiles = async (): Promise<UserProfile[]> =>
+  Promise.resolve(userProfiles);

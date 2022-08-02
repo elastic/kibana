@@ -39,3 +39,5 @@ export const userProfiles: UserProfile[] = [
     enabled: true,
   },
 ];
+
+export const userProfilesIds = userProfiles.map((profile) => profile.uid);
