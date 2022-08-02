@@ -296,7 +296,7 @@
 /packages/kbn-config/ @elastic/kibana-core
 /packages/kbn-logging/ @elastic/kibana-core
 /packages/kbn-logging-mocks/ @elastic/kibana-core
-/packages/kbn-http-tools/ @elastic/kibana-core
+/packages/kbn-server-http-tools/ @elastic/kibana-core
 /packages/kbn-es-errors/ @elastic/kibana-core
 /src/plugins/saved_objects_management/ @elastic/kibana-core
 /src/plugins/advanced_settings/ @elastic/kibana-core
