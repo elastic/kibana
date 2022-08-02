@@ -29,7 +29,7 @@ post:
             agents:
               oneOf:
                 - type: string
-                  description: KQL query string, can be empty
+                  description: KQL query string, leave empty to action all agents
                 - type: array
                   items:
                     type: string
@@ -46,3 +46,7 @@ post:
               type: number    
           required:
             - agents
+        example:
+          agents: [agent1, agent2]
+          tagsToAdd: [newTag]
+          tagsToRemove: [existingTag]    
