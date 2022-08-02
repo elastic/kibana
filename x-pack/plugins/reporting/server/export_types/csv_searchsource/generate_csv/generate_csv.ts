@@ -181,7 +181,7 @@ export class CsvGenerator {
     builder: MaxSizeStringBuilder,
     settings: CsvExportSettings
   ) {
-    this.logger.info(`Building CSV header row...`);
+    this.logger.debug(`Building CSV header row...`);
     const header = columns.map(this.escapeValues(settings)).join(settings.separator) + '\n';
 
     if (!builder.tryAppend(header)) {
@@ -203,7 +203,7 @@ export class CsvGenerator {
     formatters: Record<string, FieldFormat>,
     settings: CsvExportSettings
   ) {
-    this.logger.info(`Building ${table.rows.length} CSV data rows...`);
+    this.logger.debug(`Building ${table.rows.length} CSV data rows...`);
     for (const dataTableRow of table.rows) {
       if (this.cancellationToken.isCancelled()) {
         break;
@@ -310,7 +310,7 @@ export class CsvGenerator {
           scrollId = results?._scroll_id;
           if (results?.hits?.total != null) {
             totalRecords = results.hits.total as number;
-            this.logger.info(`Total search results: ${totalRecords}`);
+            this.logger.debug(`Total search results: ${totalRecords}`);
           }
         } else {
           // use the scroll cursor in Elasticsearch
@@ -385,7 +385,7 @@ export class CsvGenerator {
     } finally {
       // clear scrollID
       if (scrollId) {
-        this.logger.info(`Executing clearScroll request`);
+        this.logger.debug(`Executing clearScroll request`);
         try {
           await this.clients.es.asCurrentUser.clearScroll({ scroll_id: [scrollId] });
         } catch (err) {
@@ -396,7 +396,7 @@ export class CsvGenerator {
       }
     }
 
-    this.logger.info(`Finished generating. Row count: ${this.csvRowCount}.`);
+    this.logger.debug(`Finished generating. Row count: ${this.csvRowCount}.`);
 
     if (!this.maxSizeReached && this.csvRowCount !== totalRecords) {
       this.logger.warn(
