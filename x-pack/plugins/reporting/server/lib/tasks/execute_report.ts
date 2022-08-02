@@ -261,7 +261,7 @@ export class ExecuteReportTask implements ReportingTask {
     const queueTimeout = durationToNumber(this.config.queue.timeout);
     return Rx.lastValueFrom(
       Rx.from(runner.jobExecutor(task.id, task.payload, cancellationToken, stream)).pipe(
-        timeout(queueTimeout) // FIXME: CSV search request timeout should block this timeout
+        timeout(queueTimeout) // FIXME: CSV search request timeout should emit an error block this timeout
       ) // throw an error if a value is not emitted before timeout
     );
   }

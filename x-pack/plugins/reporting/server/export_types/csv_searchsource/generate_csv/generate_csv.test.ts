@@ -40,7 +40,6 @@ const createMockJob = (baseObj: any = {}): JobParamsCSV => ({
 let mockEsClient: IScopedClusterClient;
 let mockDataClient: IScopedSearchClient;
 let mockConfig: ReportingConfig;
-
 let mockLogger: jest.Mocked<Logger>;
 let uiSettingsClient: IUiSettingsClient;
 let stream: jest.Mocked<Writable>;
