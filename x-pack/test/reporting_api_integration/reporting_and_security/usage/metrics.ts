@@ -48,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
       await reportingAPI.teardownEcommerce();
     });
 
-    it('includes report stats', async () => {
+    it.only('includes report stats', async () => {
       // over all time
       expectSnapshot(reporting._all).toMatchInline(`undefined`);
       expect(reporting.output_size).keys(['1_0', '25_0', '50_0', '5_0', '75_0', '95_0', '99_0']);
