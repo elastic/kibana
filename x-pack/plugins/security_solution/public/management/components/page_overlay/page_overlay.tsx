@@ -13,6 +13,7 @@ import classnames from 'classnames';
 import { useLocation } from 'react-router-dom';
 import type { EuiPortalProps } from '@elastic/eui/src/components/portal/portal';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { useHasFullScreenContent } from '../../../common/containers/use_full_screen';
 import { TIMELINE_OVERRIDES_CSS_STYLESHEET } from '../../../common/components/page';
 import {
   SELECTOR_TIMELINE_IS_VISIBLE_CSS_CLASS_NAME,
@@ -63,6 +64,11 @@ const OverlayRootContainer = styled.div`
   }
 
   .fullHeight {
+    height: 100%;
+  }
+
+  &.fullScreen {
+    top: 0;
     height: 100%;
   }
 `;
@@ -182,6 +188,7 @@ export const PageOverlay = memo<PageOverlayProps>(
   }) => {
     const { pathname } = useLocation();
     const isMounted = useIsMounted();
+    const showInFullScreen = useHasFullScreenContent();
     const [openedOnPathName, setOpenedOnPathName] = useState<null | string>(null);
     const portalEleRef = useRef<Node>();
 
@@ -204,6 +211,7 @@ export const PageOverlay = memo<PageOverlayProps>(
         [PAGE_OVERLAY_CSS_CLASSNAME]: true,
         scrolling: enableScrolling,
         hidden: isHidden,
+        fullScreen: showInFullScreen,
         'eui-scrollBar': enableScrolling,
         'padding-xs': paddingSize === 'xs',
         'padding-s': paddingSize === 's',
@@ -211,7 +219,7 @@ export const PageOverlay = memo<PageOverlayProps>(
         'padding-l': paddingSize === 'l',
         'padding-xl': paddingSize === 'xl',
       });
-    }, [enableScrolling, isHidden, paddingSize]);
+    }, [enableScrolling, isHidden, paddingSize, showInFullScreen]);
 
     // Capture the URL `pathname` that the overlay was opened for
     useEffect(() => {
