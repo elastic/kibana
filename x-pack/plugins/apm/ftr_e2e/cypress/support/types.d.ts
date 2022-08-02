@@ -7,9 +7,12 @@
 
 declare namespace Cypress {
   interface Chainable {
-    loginAsViewerUser(): void;
-    loginAsEditorUser(): Promise<Cypress.Response<any>>;
-    loginAs(params: { username: string; password: string }): void;
+    loginAsViewerUser(): Cypress.Chainable<Cypress.Response<any>>;
+    loginAsEditorUser(): Cypress.Chainable<Cypress.Response<any>>;
+    loginAs(params: {
+      username: string;
+      password: string;
+    }): Cypress.Chainable<Cypress.Response<any>>;
     changeTimeRange(value: string): void;
     selectAbsoluteTimeRange(start: string, end: string): void;
     expectAPIsToHaveBeenCalledWith(params: {

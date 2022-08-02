@@ -11,11 +11,11 @@ import moment from 'moment';
 import { AXE_CONFIG, AXE_OPTIONS } from '@kbn/axe-config';
 
 Cypress.Commands.add('loginAsViewerUser', () => {
-  cy.loginAs({ username: 'viewer', password: 'changeme' });
+  return cy.loginAs({ username: 'viewer', password: 'changeme' });
 });
 
 Cypress.Commands.add('loginAsEditorUser', () => {
-  cy.loginAs({ username: 'editor', password: 'changeme' });
+  return cy.loginAs({ username: 'editor', password: 'changeme' });
 });
 
 Cypress.Commands.add(

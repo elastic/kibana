@@ -50,7 +50,7 @@ describe('Comparison feature flag', () => {
 
   describe('when comparison feature is disabled', () => {
     beforeEach(() => {
-      cy.loginAsEditorUser().then((resp) => {
+      cy.loginAsEditorUser().then(() => {
         // Disables comparison feature on advanced settings
         cy.updateAdvancedSettings({
           'observability:enableComparisonByDefault': false,
