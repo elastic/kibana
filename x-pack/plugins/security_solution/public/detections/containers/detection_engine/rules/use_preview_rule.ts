@@ -70,10 +70,6 @@ export const usePreviewRule = ({
     () => (advancedOptions ? advancedOptions.timeframeEnd.toISOString() : moment().toISOString()),
     [advancedOptions]
   );
-  const timeframeShift = useMemo(
-    () => (advancedOptions ? moment().valueOf() - advancedOptions.timeframeEnd.valueOf() : 0),
-    [advancedOptions]
-  );
 
   if (advancedOptions) {
     const timeframeDuration =
@@ -91,7 +87,7 @@ export const usePreviewRule = ({
     const { unit: lookbackUnit, value: lookbackValue } = getTimeTypeValue(advancedOptions.lookback);
     duration.add(lookbackValue, lookbackUnit);
 
-    from = `now-${duration.asSeconds() + Math.floor(timeframeShift / 1000)}s`;
+    from = `now-${duration.asSeconds()}s`;
   }
   const showInvocationCountWarning = invocationCount > REASONABLE_INVOCATION_COUNT;
 
