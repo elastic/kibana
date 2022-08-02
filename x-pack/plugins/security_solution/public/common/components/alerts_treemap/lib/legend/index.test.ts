@@ -16,12 +16,24 @@ import {
   getLegendItemFromFlattenedBucket,
   getLegendMap,
 } from '.';
-import type { FlattenedBucket } from '../../types';
+import type { FlattenedBucket, RawBucket } from '../../types';
 
 describe('legend', () => {
   const colorPalette = getRiskScorePalette(RISK_SCORE_STEPS);
 
   describe('getLegendItemFromRawBucket', () => {
+    const bucket: RawBucket = {
+      key: '1658955590866',
+      key_as_string: '2022-07-27T20:59:50.866Z', // <-- should be preferred over `key` when present
+      doc_count: 1,
+      maxRiskSubAggregation: { value: 21 },
+      stackByField1: {
+        doc_count_error_upper_bound: 0,
+        sum_other_doc_count: 0,
+        buckets: [{ key: 'Host-vmdx1cnu3m', doc_count: 1 }],
+      },
+    };
+
     it('returns an undefined color when showColor is false', () => {
       expect(
         getLegendItemFromRawBucket({
@@ -70,6 +82,30 @@ describe('legend', () => {
       ).toContain('draggable-legend-item-treemap-kibana_alert_rule_name-matches everything-');
     });
 
+    it('renders the expected label', () => {
+      const item = getLegendItemFromRawBucket({
+        bucket: bucketsWithStackByField1[0],
+        colorPalette,
+        maxRiskSubAggregations,
+        showColor: true,
+        stackByField0: 'kibana.alert.rule.name',
+      });
+
+      expect(item.render != null && item.render()).toEqual(`matches everything (Risk 21)`);
+    });
+
+    it('prefers `key_as_string` over `key` when rendering the label', () => {
+      const item = getLegendItemFromRawBucket({
+        bucket,
+        colorPalette,
+        maxRiskSubAggregations,
+        showColor: true,
+        stackByField0: '@timestamp',
+      });
+
+      expect(item.render != null && item.render()).toEqual(`${bucket.key_as_string} (Risk 21)`);
+    });
+
     it('returns the expected field', () => {
       expect(
         getLegendItemFromRawBucket({
@@ -92,6 +128,18 @@ describe('legend', () => {
           stackByField0: 'kibana.alert.rule.name',
         }).value
       ).toEqual('matches everything');
+    });
+
+    it('prefers `key_as_string` over `key` when populating value', () => {
+      expect(
+        getLegendItemFromRawBucket({
+          bucket,
+          colorPalette,
+          maxRiskSubAggregations,
+          showColor: true,
+          stackByField0: '@timestamp',
+        }).value
+      ).toEqual(bucket.key_as_string);
     });
   });
 

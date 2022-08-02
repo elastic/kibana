@@ -154,6 +154,10 @@
 /x-pack/plugins/apm/public/components/app/rum_dashboard @elastic/uptime
 /x-pack/test/apm_api_integration/tests/csm/ @elastic/uptime
 
+# Observability onboarding tour
+/x-pack/plugins/observability/public/components/shared/tour @elastic/platform-onboarding
+/x-pack/test/functional/apps/infra/tour.ts @elastic/platform-onboarding
+
 ### END Observability Plugins
 
 # Presentation
@@ -292,7 +296,7 @@
 /packages/kbn-config/ @elastic/kibana-core
 /packages/kbn-logging/ @elastic/kibana-core
 /packages/kbn-logging-mocks/ @elastic/kibana-core
-/packages/kbn-http-tools/ @elastic/kibana-core
+/packages/kbn-server-http-tools/ @elastic/kibana-core
 /packages/kbn-es-errors/ @elastic/kibana-core
 /src/plugins/saved_objects_management/ @elastic/kibana-core
 /src/plugins/advanced_settings/ @elastic/kibana-core
@@ -606,6 +610,10 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 /x-pack/plugins/cloud_security_posture/ @elastic/kibana-cloud-security-posture
 /x-pack/plugins/security_solution/public/cloud_security_posture @elastic/kibana-cloud-security-posture
 
+# Security Solution onboarding tour
+/x-pack/plugins/security_solution/public/common/components/guided_onboarding @elastic/platform-onboarding
+/x-pack/plugins/security_solution/cypress/integration/guided_onboarding @elastic/platform-onboarding
+
 # Design (at the bottom for specificity of SASS files)
 **/*.scss  @elastic/kibana-design
 #CC# /packages/kbn-ui-framework/ @elastic/kibana-design
@@ -665,6 +673,9 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 /src/plugins/home/public @elastic/shared-ux
 /src/plugins/home/server/*.ts @elastic/shared-ux
 /src/plugins/home/server/services/ @elastic/shared-ux
+
+# Landing page for guided onboarding in Home plugin
+/src/plugins/home/public/application/components/guided_onboarding @elastic/platform-onboarding
 
 ### Overview Plugin and Packages
 /src/plugins/kibana_overview/ @elastic/shared-ux
