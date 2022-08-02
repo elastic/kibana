@@ -26,7 +26,12 @@ export async function onComplete() {
     return;
   }
 
-  const report = await ciStats.getPrReport(process.env.CI_STATS_BUILD_ID);
+  const backfillJobIds: string[] = [];
+  if (process.env.KIBANA_REUSABLE_BUILD_JOB_ID) {
+    backfillJobIds.push(process.env.KIBANA_REUSABLE_BUILD_JOB_ID);
+  }
+
+  const report = await ciStats.getPrReport(process.env.CI_STATS_BUILD_ID, backfillJobIds);
   if (report?.md) {
     buildkite.setMetadata('pr_comment:ci_stats_report:body', report.md);
 
