@@ -6,7 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { Client, HttpConnection, ClusterConnectionPool } from '@elastic/elasticsearch';
+import {
+  Client,
+  HttpConnection,
+  ClusterConnectionPool,
+  HttpAgentOptions,
+  UndiciAgentOptions,
+} from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { parseClientOptions } from './client_config';
@@ -33,11 +39,21 @@ export const configureClient = (
   const clientOptions = parseClientOptions(config, scoped);
   const KibanaTransport = createTransport({ getExecutionContext });
 
-  const agentOptions = clientOptions || undefined;
+  const agentOptions = clientOptions.agent || undefined;
+
+  let agent;
+
+  if (typeof agentOptions === 'function') {
+    agent = agentOptions;
+  } else if (!agentOptions || isHttpAgentOptions(agentOptions)) {
+    agent = httpAgentFactory(type, agentOptions);
+  } else {
+    throw new Error('Unsupported agent options: UndiciAgentOptions');
+  }
 
   const client = new Client({
     ...clientOptions,
-    agent: httpAgentFactory(type, agentOptions),
+    agent,
     Transport: KibanaTransport,
     Connection: HttpConnection,
     // using ClusterConnectionPool until https://github.com/elastic/elasticsearch-js/issues/1714 is addressed
@@ -47,4 +63,17 @@ export const configureClient = (
   instrumentEsQueryAndDeprecationLogger({ logger, client, type });
 
   return client;
+};
+
+const isHttpAgentOptions = (
+  opts: HttpAgentOptions | UndiciAgentOptions
+): opts is HttpAgentOptions => {
+  return (
+    !('keepAliveTimeout' in opts) &&
+    !('keepAliveMaxTimeout' in opts) &&
+    !('keepAliveTimeoutThreshold' in opts) &&
+    !('pipelining' in opts) &&
+    !('maxHeaderSize' in opts) &&
+    !('connections' in opts)
+  );
 };

@@ -41,7 +41,6 @@ import { getClusterInfo$ } from './get_cluster_info';
 
 const DEFAULT_CLIENT_TYPE = 'data';
 
-/** @internal */
 export interface SetupDeps {
   analytics: AnalyticsServiceSetup;
   http: InternalHttpServiceSetup;
