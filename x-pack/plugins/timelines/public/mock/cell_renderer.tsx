@@ -6,14 +6,15 @@
  */
 
 import React from 'react';
-import { isArray, isString } from 'lodash';
 
 import { getMappedNonEcsValue } from '../components/t_grid/body/data_driven_columns';
 import type { CellValueElementProps } from '../../common/types/timeline';
 
-const isArrayOfStrings = (subj: unknown): subj is string[] => isArray(subj) && subj.every(isString);
-
-export const TestCellRenderer: React.FC<CellValueElementProps> = ({ columnId, data }) => {
-  const value = getMappedNonEcsValue({ data, fieldName: columnId });
-  return <>{(isArrayOfStrings(value) && value[0]) ?? ''}</>;
-};
+export const TestCellRenderer: React.FC<CellValueElementProps> = ({ columnId, data }) => (
+  <>
+    {getMappedNonEcsValue({
+      data,
+      fieldName: columnId,
+    })?.reduce((x) => x[0]) ?? ''}
+  </>
+);

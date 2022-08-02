@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  TimelineNonEcsData,
-  TimelineNonEcsDataFieldValue,
-} from '../../../../../common/search_strategy';
+import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 
 export const getMappedNonEcsValue = ({
   data,
@@ -16,7 +13,7 @@ export const getMappedNonEcsValue = ({
 }: {
   data: TimelineNonEcsData[];
   fieldName: string;
-}): TimelineNonEcsDataFieldValue | undefined => {
+}): string[] | undefined => {
   const item = data.find((d) => d.field === fieldName);
   if (item != null && item.value != null) {
     return item.value;

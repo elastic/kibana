@@ -20,7 +20,7 @@ import { EuiButtonIcon, EuiButtonEmpty } from '@elastic/eui';
 interface FilterForValueProps {
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   field: string;
-  value: unknown[] | unknown | undefined;
+  value: string[] | string | null | undefined;
   addToQuery: (value: string) => void;
 }
 

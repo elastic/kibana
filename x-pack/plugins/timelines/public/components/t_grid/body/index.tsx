@@ -241,10 +241,10 @@ const transformControlColumns = ({
           addBuildingBlockStyle(rowData.ecs, theme, setCellProps);
           if (columnId === 'checkbox-control-column' && hasAlertsCrudPermissions != null) {
             // FUTURE ENGINEER, the assumption here is you can only have one producer and consumer at this time
-            const ruleConsumers = (rowData.data.find((d) => d.field === ALERT_RULE_CONSUMER)
-              ?.value ?? []) as string[];
-            const ruleProducers = (rowData.data.find((d) => d.field === ALERT_RULE_PRODUCER)
-              ?.value ?? []) as string[];
+            const ruleConsumers =
+              rowData.data.find((d) => d.field === ALERT_RULE_CONSUMER)?.value ?? [];
+            const ruleProducers =
+              rowData.data.find((d) => d.field === ALERT_RULE_PRODUCER)?.value ?? [];
             disabled = !hasAlertsCrudPermissions({
               ruleConsumer: ruleConsumers.length > 0 ? ruleConsumers[0] : '',
               ruleProducer: ruleProducers.length > 0 ? ruleProducers[0] : undefined,
