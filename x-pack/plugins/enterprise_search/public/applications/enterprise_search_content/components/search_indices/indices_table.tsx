@@ -71,7 +71,7 @@ const columns: Array<EuiBasicTableColumn<ElasticsearchViewIndex>> = [
     truncateText: true,
   },
   {
-    field: 'total.docs.count',
+    field: 'count',
     name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.docsCount.columnTitle', {
       defaultMessage: 'Docs count',
     }),
