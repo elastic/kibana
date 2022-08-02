@@ -80,4 +80,5 @@ export const expectedDsl = {
   },
   size: 0,
   track_total_hits: false,
+  _source: null,
 };
