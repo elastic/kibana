@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { toNumberRt } from '@kbn/io-ts-utils';
 
 import { termQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 
 import { setupRequest } from '../../lib/helpers/setup_request';
@@ -19,7 +20,6 @@ import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { fetchDurationFieldCandidates } from './queries/fetch_duration_field_candidates';
-import { ProcessorEvent } from '../../../common/processor_event';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
