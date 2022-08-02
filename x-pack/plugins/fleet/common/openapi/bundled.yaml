@@ -1072,12 +1072,15 @@ paths:
               properties:
                 policy_id:
                   type: string
+                  description: new agent policy id
                 agents:
                   oneOf:
                     - type: string
+                      description: KQL query string, leave empty to action all agents
                     - type: array
                       items:
                         type: string
+                      description: list of agent IDs
               required:
                 - policy_id
                 - agents
@@ -1112,14 +1115,18 @@ paths:
               properties:
                 revoke:
                   type: boolean
+                  description: Revokes API keys of agents
                 force:
                   type: boolean
+                  description: Unenroll hosted agents too
                 agents:
                   oneOf:
                     - type: string
+                      description: KQL query string, leave empty to action all agents
                     - type: array
                       items:
                         type: string
+                      description: list of agent IDs
               required:
                 - agents
   /agents/bulk_update_agent_tags:
@@ -1154,7 +1161,7 @@ paths:
                 agents:
                   oneOf:
                     - type: string
-                      description: KQL query string, can be empty
+                      description: KQL query string, leave empty to action all agents
                     - type: array
                       items:
                         type: string
@@ -2666,6 +2673,7 @@ components:
       properties:
         version:
           type: string
+          description: version to upgrade to
         source_uri:
           type: string
         rollout_duration_seconds:
@@ -2674,10 +2682,12 @@ components:
           type: string
         agents:
           oneOf:
+            - type: string
+              description: KQL query string, leave empty to action all agents
             - type: array
               items:
                 type: string
-            - type: string
+              description: list of agent IDs
       required:
         - agents
         - version

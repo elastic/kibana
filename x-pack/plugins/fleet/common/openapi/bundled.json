@@ -1745,18 +1745,21 @@
                 "type": "object",
                 "properties": {
                   "policy_id": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "new agent policy id"
                   },
                   "agents": {
                     "oneOf": [
                       {
-                        "type": "string"
+                        "type": "string",
+                        "description": "KQL query string, leave empty to action all agents"
                       },
                       {
                         "type": "array",
                         "items": {
                           "type": "string"
-                        }
+                        },
+                        "description": "list of agent IDs"
                       }
                     ]
                   }
@@ -1814,21 +1817,25 @@
                 "type": "object",
                 "properties": {
                   "revoke": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "Revokes API keys of agents"
                   },
                   "force": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "Unenroll hosted agents too"
                   },
                   "agents": {
                     "oneOf": [
                       {
-                        "type": "string"
+                        "type": "string",
+                        "description": "KQL query string, leave empty to action all agents"
                       },
                       {
                         "type": "array",
                         "items": {
                           "type": "string"
-                        }
+                        },
+                        "description": "list of agent IDs"
                       }
                     ]
                   }
@@ -1888,7 +1895,7 @@
                     "oneOf": [
                       {
                         "type": "string",
-                        "description": "KQL query string, can be empty"
+                        "description": "KQL query string, leave empty to action all agents"
                       },
                       {
                         "type": "array",
@@ -4236,7 +4243,8 @@
         "type": "object",
         "properties": {
           "version": {
-            "type": "string"
+            "type": "string",
+            "description": "version to upgrade to"
           },
           "source_uri": {
             "type": "string"
@@ -4250,13 +4258,15 @@
           "agents": {
             "oneOf": [
               {
+                "type": "string",
+                "description": "KQL query string, leave empty to action all agents"
+              },
+              {
                 "type": "array",
                 "items": {
                   "type": "string"
-                }
-              },
-              {
-                "type": "string"
+                },
+                "description": "list of agent IDs"
               }
             ]
           }

@@ -3,6 +3,7 @@ type: object
 properties:
   version:
     type: string
+    description: version to upgrade to
   source_uri:
     type: string
   rollout_duration_seconds:
@@ -11,10 +12,12 @@ properties:
     type: string
   agents:
     oneOf:
+      - type: string
+        description: KQL query string, leave empty to action all agents
       - type: array
         items:
           type: string
-      - type: string
+        description: list of agent IDs
 required:
   - agents
   - version
