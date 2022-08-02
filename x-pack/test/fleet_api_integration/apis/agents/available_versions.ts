@@ -32,7 +32,6 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('GET /api/fleet/agents/available_versions', () => {
       it('should fail if no file was generated at build time', async () => {
-        await fs.unlink(path.resolve(VERSIONS_FILE_PATH, FILENAME));
         await supertest.get(`/api/fleet/agents/available_versions`).expect(500);
       });
 
