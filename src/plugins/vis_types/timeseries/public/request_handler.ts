@@ -84,7 +84,7 @@ export const metricsRequestHandler = async ({
           inspectorAdapters?.requests
             ?.start(query.label ?? key, { searchSessionId })
             .json(query.body)
-            .ok({ time: query.time });
+            .ok({ time: query.time, json: { rawResponse: query.response } });
 
           if (query.response && config.get(UI_SETTINGS.ALLOW_CHECKING_FOR_FAILED_SHARDS)) {
             handleResponse({ body: query.body }, { rawResponse: query.response }, theme);

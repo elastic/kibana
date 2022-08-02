@@ -39,6 +39,7 @@ import { mergeLayer } from './state_helpers';
 import { supportsRarityRanking } from './operations/definitions/terms';
 import { DEFAULT_MAX_DOC_COUNT } from './operations/definitions/terms/constants';
 import { getOriginalId } from '../../common/expressions';
+import { Adapters } from '@kbn/inspector-plugin/public';
 
 export function isColumnInvalid(
   layer: IndexPatternLayer,
@@ -158,6 +159,49 @@ const accuracyModeEnabledWarning = (columnName: string, docLink: string) => (
     }}
   />
 );
+
+export function getTSDBRollupWarningMessages(
+  datatableUtilities: DatatableUtilitiesService,
+  state: IndexPatternPrivateState,
+  { activeData }: FramePublicAPI,
+  docLinks: DocLinksStart,
+  adapters: Adapters,
+  setState: StateSetter<IndexPatternPrivateState>
+) {
+  if (state && adapters.requests) {
+    const hasTSDBRollupWarnings = adapters.requests
+      .getRequests()
+      .flatMap((r) =>
+        r.response?.json?.rawResponse?._shards?.failures
+          .filter((failure) => failure.reason?.type === 'illegal_argument_exception')
+          .map((failure) => failure.reason.reason)
+      )
+      .filter(Boolean);
+    if (!hasTSDBRollupWarnings) {
+      return [];
+    }
+    return Object.values(state.layers).flatMap((layer) =>
+      Object.values(layer.columns)
+        .filter(
+          (col) =>
+            'sourceField' in col &&
+            state.indexPatterns[layer.indexPatternId].getFieldByName(col.sourceField)
+              ?.softRestrictions?.[col.operationType]
+        )
+        .map((col) => (
+          <FormattedMessage
+            id="xpack.lens.indexPattern.tsdbRollupWarning"
+            defaultMessage="{name} does not work for all indices in the selected data view because it's using a function which is not supported on rolled up data. Please edit the visualization to use another function or change the time range."
+            values={{
+              name: <EuiTextColor color="accent">{col.label}</EuiTextColor>,
+            }}
+          />
+        ))
+    );
+  }
+
+  return [];
+}
 
 export function getPrecisionErrorWarningMessages(
   datatableUtilities: DatatableUtilitiesService,

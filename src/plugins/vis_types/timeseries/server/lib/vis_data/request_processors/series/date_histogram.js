@@ -51,6 +51,7 @@ export function dateHistogram(
           min: from.valueOf(),
           max: to.valueOf(),
         },
+        // TODO make sure it's using fixed interval for tsdb
         ...dateHistogramInterval(intervalString),
       });
 

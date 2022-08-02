@@ -41,6 +41,7 @@ import {
   LENS_EDIT_PAGESIZE_ACTION,
 } from './datatable_visualization/components/constants';
 import type { LensInspector } from './lens_inspector_service';
+import { Adapters } from '@kbn/inspector-plugin/public';
 
 export type ErrorCallback = (e: { message: string }) => void;
 
@@ -330,6 +331,7 @@ export interface Datasource<T = unknown, P = unknown> {
   getWarningMessages?: (
     state: T,
     frame: FramePublicAPI,
+    adapters: Adapters,
     setState: StateSetter<T>
   ) => React.ReactNode[] | undefined;
   /**

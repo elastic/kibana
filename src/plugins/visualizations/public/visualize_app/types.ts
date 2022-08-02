@@ -58,6 +58,7 @@ export interface VisualizeAppState {
   query: Query;
   savedQuery?: string;
   linked: boolean;
+  warnings?: string[];
 }
 
 export interface VisualizeAppStateTransitions {

@@ -16,6 +16,8 @@ import { ShardFailureOpenModalButton } from '../../shard_failure_modal';
 import { getNotifications } from '../../services';
 import type { SearchRequest } from '..';
 
+const SUPPRESSED_TYPES = ['illegal_argument_exception'];
+
 export function handleResponse(
   request: SearchRequest,
   response: IKibanaSearchResponse,
@@ -31,7 +33,13 @@ export function handleResponse(
     });
   }
 
-  if (rawResponse._shards && rawResponse._shards.failed) {
+  if (
+    rawResponse._shards &&
+    rawResponse._shards.failed &&
+    rawResponse._shards.failures.some(
+      (failure: any) => !SUPPRESSED_TYPES.includes(failure.reason?.type)
+    )
+  ) {
     const title = i18n.translate('data.search.searchSource.fetch.shardsFailedNotificationMessage', {
       defaultMessage: '{shardsFailed} of {shardsTotal} shards failed',
       values: {

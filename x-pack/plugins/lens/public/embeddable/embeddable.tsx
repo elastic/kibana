@@ -52,7 +52,7 @@ import type {
   ThemeServiceStart,
 } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { BrushTriggerEvent, ClickTriggerEvent } from '@kbn/charts-plugin/public';
+import { BrushTriggerEvent, ClickTriggerEvent, Warnings } from '@kbn/charts-plugin/public';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
@@ -75,6 +75,7 @@ import { getLensInspectorService, LensInspector } from '../lens_inspector_servic
 import { SharingSavedObjectProps, VisualizationDisplayOptions } from '../types';
 import { getActiveDatasourceIdFromDoc, getIndexPatternsObjects, inferTimeField } from '../utils';
 import { getLayerMetaInfo, combineQueryAndFilters } from '../app_plugin/show_underlying_data';
+import { css } from '@emotion/react';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -223,6 +224,7 @@ export class Embeddable
   private savedVis: Document | undefined;
   private expression: string | undefined | null;
   private domNode: HTMLElement | Element | undefined;
+  private warningDomNode: HTMLElement | Element | undefined;
   private subscription: Subscription;
   private isInitialized = false;
   private errors: ErrorMessage[] | undefined;
@@ -483,12 +485,26 @@ export class Embeddable
       this.input.onLoad(false);
     }
 
+    // TODO this should be calling into the datasource
+    const warnings = this.getInspectorAdapters()
+      .requests?.getRequests()
+      .flatMap((r) =>
+        r.response?.json?.rawResponse?._shards?.failures
+          .filter((failure) => failure.reason?.type === 'illegal_argument_exception')
+          .map((failure) => failure.reason.reason)
+      )
+      .filter(Boolean);
+
     const { type, error } = data as { type: string; error: ErrorLike };
     this.updateOutput({
       ...this.getOutput(),
       loading: false,
       error: type === 'error' ? error : undefined,
+      warnings,
     });
+    if (warnings && this.warningDomNode) {
+      render(<Warnings warnings={warnings} />, this.warningDomNode);
+    }
   };
 
   private onRender: ExpressionWrapperProps['onRender$'] = () => {
@@ -604,6 +620,19 @@ export class Embeddable
             this.logError('runtime');
           }}
           noPadding={this.visDisplayOptions?.noPadding}
+        />
+        <div
+          css={css({
+            position: 'absolute',
+            zIndex: 2,
+            right: 12,
+            bottom: 12,
+          })}
+          ref={(el) => {
+            if (el) {
+              this.warningDomNode = el;
+            }
+          }}
         />
       </KibanaThemeProvider>,
       domNode

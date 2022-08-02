@@ -603,6 +603,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       datasourceMap={datasourceMap}
       visualizationMap={visualizationMap}
       isFullscreen={isFullscreen}
+      lensInspector={lensInspector}
     >
       {renderWorkspace()}
     </WorkspacePanelWrapper>

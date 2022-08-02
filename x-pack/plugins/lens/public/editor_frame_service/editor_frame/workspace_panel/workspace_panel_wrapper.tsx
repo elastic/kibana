@@ -28,6 +28,7 @@ import {
 } from '../../../state_management';
 import { WorkspaceTitle } from './title';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../config_panel/dimension_container';
+import { LensInspector } from '@kbn/lens-plugin/public/lens_inspector_service';
 
 export const AUTO_APPLY_DISABLED_STORAGE_KEY = 'autoApplyDisabled';
 
@@ -40,6 +41,7 @@ export interface WorkspacePanelWrapperProps {
   datasourceMap: DatasourceMap;
   datasourceStates: DatasourceStates;
   isFullscreen: boolean;
+  lensInspector: LensInspector;
 }
 
 export function WorkspacePanelWrapper({
@@ -51,6 +53,7 @@ export function WorkspacePanelWrapper({
   datasourceMap,
   datasourceStates,
   isFullscreen,
+  lensInspector,
 }: WorkspacePanelWrapperProps) {
   const dispatchLens = useLensDispatch();
 
@@ -94,7 +97,7 @@ export function WorkspacePanelWrapper({
     const datasource = datasourceMap[datasourceId];
     if (!datasourceState.isLoading && datasource.getWarningMessages) {
       warningMessages.push(
-        ...(datasource.getWarningMessages(datasourceState.state, framePublicAPI, (updater) =>
+        ...(datasource.getWarningMessages(datasourceState.state, framePublicAPI, lensInspector.adapters, (updater) =>
           setDatasourceState(updater, datasourceId)
         ) || [])
       );

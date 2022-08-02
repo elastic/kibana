@@ -24,6 +24,8 @@ export class DefaultSearchStrategy extends AbstractSearchStrategy {
   ) {
     const uiSettings = (await requestContext.core).uiSettings.client;
 
+    // TODO pass in data view and check with the field from the request whether the time zone has to be switched to UTC
+
     return {
       isViable: true,
       capabilities: new DefaultSearchCapabilities({

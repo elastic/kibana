@@ -54,6 +54,7 @@ import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import { VisSavedObject } from '../types';
 import { toExpressionAst } from './to_ast';
+import { Warnings } from '@kbn/charts-plugin/public';
 
 export interface VisualizeEmbeddableConfiguration {
   vis: Vis;
@@ -110,6 +111,7 @@ export class VisualizeEmbeddable
   private expression?: ExpressionAstExpression;
   private vis: Vis;
   private domNode: any;
+  private warningDomNode: any;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
   private abortController?: AbortController;
   private readonly deps: VisualizeEmbeddableFactoryDeps;
@@ -304,10 +306,26 @@ export class VisualizeEmbeddable
   };
 
   onContainerData = () => {
+    const warnings = this.getInspectorAdapters()?.requests
+      ?.getRequests()
+      .flatMap((r) =>
+        r.response?.json?.rawResponse?._shards?.failures
+          .filter((failure) => failure.reason?.type === 'illegal_argument_exception')
+          .map((failure) => failure.reason.reason)
+      )
+      .filter(Boolean);
     this.updateOutput({
       ...this.getOutput(),
+      warnings,
       loading: false,
     });
+
+    if (warnings?.length && this.warningDomNode) {
+      render(
+        <Warnings warnings={warnings} />,
+        this.warningDomNode
+      );
+    }
   };
 
   onContainerRender = () => {
@@ -342,6 +360,11 @@ export class VisualizeEmbeddable
     const div = document.createElement('div');
     div.className = `visualize panel-content panel-content--fullWidth`;
     domNode.appendChild(div);
+
+    const warningDiv = document.createElement('div');
+    warningDiv.className = 'visPanel__warnings';
+    domNode.appendChild(warningDiv);
+    this.warningDomNode = warningDiv;
 
     this.domNode = div;
     super.render(this.domNode);
