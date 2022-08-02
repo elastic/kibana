@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsService, SavedObjectsStart } from './saved_objects_service';
+import { SavedObjectsService } from './saved_objects_service';
+import type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
 
 const createStartContractMock = () => {
   const mock: jest.Mocked<SavedObjectsStart> = {

@@ -5,8 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-browser';
 
-export { SavedObjectsService } from './saved_objects_service';
-export type { SavedObjectsClient } from './saved_objects_client';
-export { SimpleSavedObjectImpl } from './simple_saved_object';
-// export type { SavedObjectsStart } from './saved_objects_service';
+/**
+ * @public
+ */
+export interface SavedObjectsStart {
+  /** {@link SavedObjectsClientContract} */
+  client: SavedObjectsClientContract;
+}
