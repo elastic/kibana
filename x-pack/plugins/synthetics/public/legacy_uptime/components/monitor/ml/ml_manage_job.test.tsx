@@ -7,6 +7,7 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { ManageMLJobComponent } from './manage_ml_job';
 import {
   render,
@@ -53,6 +54,7 @@ describe('Manage ML Job', () => {
       const anomalyDetectionBtn = forNearestButton(getByText)(labels.ANOMALY_DETECTION);
       expect(anomalyDetectionBtn).toBeInTheDocument();
       userEvent.click(anomalyDetectionBtn as HTMLElement);
+      await waitForEuiPopoverOpen();
 
       userEvent.hover(getByText(labels.ENABLE_ANOMALY_ALERT));
 
@@ -91,6 +93,7 @@ describe('Manage ML Job', () => {
       const anomalyDetectionBtn = forNearestButton(getByText)(labels.ANOMALY_DETECTION);
       expect(anomalyDetectionBtn).toBeInTheDocument();
       userEvent.click(anomalyDetectionBtn as HTMLElement);
+      await waitForEuiPopoverOpen();
 
       userEvent.hover(getByText(labels.ENABLE_ANOMALY_ALERT));
 
