@@ -197,7 +197,7 @@ export function DualBrush({
                 newBrushPx.deviationMax,
               ]);
           }
-          
+
           brushes.current[0].start = snappedWindowParameters.baselineMin;
           brushes.current[0].end = snappedWindowParameters.baselineMax;
           brushes.current[1].start = snappedWindowParameters.deviationMin;

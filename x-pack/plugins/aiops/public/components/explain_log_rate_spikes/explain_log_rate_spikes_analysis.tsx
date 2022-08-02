@@ -62,7 +62,6 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
       currentAnalysisWindowParameters !== undefined &&
       !isEqual(currentAnalysisWindowParameters, windowParameters)
     ) {
-
       setShouldRerunAnalysis(true);
     }
   }, [currentAnalysisWindowParameters, windowParameters]);
