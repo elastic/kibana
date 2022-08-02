@@ -16,7 +16,7 @@ import {
   GaugeLabelMajorModes,
   GaugeTicksPositions,
 } from '../constants';
-import { ExecutionContext } from '@kbn/expressions-plugin';
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
 
 describe('interpreter/functions#gauge', () => {
   const fn = functionWrapper(gaugeFunction());

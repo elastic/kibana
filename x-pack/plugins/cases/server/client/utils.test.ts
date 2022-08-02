@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildRangeFilter, constructQueryOptions, sortToSnake } from './utils';
+import { arraysDifference, buildRangeFilter, constructQueryOptions, sortToSnake } from './utils';
 import { toElasticsearchQuery } from '@kbn/es-query';
 import { CaseStatuses } from '../../common';
 import { CaseSeverity } from '../../common/api';
@@ -231,16 +231,14 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "cases.attributes.tags",
                 },
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "tag1",
-                },
-                Object {
-                  "type": "literal",
-                  "value": false,
                 },
               ],
               "function": "is",
@@ -249,16 +247,14 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "cases.attributes.tags",
                 },
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "tag2",
-                },
-                Object {
-                  "type": "literal",
-                  "value": false,
                 },
               ],
               "function": "is",
@@ -278,16 +274,14 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "cases.attributes.created_by.username",
                 },
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "bob",
-                },
-                Object {
-                  "type": "literal",
-                  "value": false,
                 },
               ],
               "function": "is",
@@ -296,16 +290,14 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "cases.attributes.created_by.username",
                 },
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "sam",
-                },
-                Object {
-                  "type": "literal",
-                  "value": false,
                 },
               ],
               "function": "is",
@@ -323,16 +315,14 @@ describe('utils', () => {
         Object {
           "arguments": Array [
             Object {
+              "isQuoted": false,
               "type": "literal",
               "value": "cases.attributes.owner",
             },
             Object {
+              "isQuoted": false,
               "type": "literal",
               "value": "observability",
-            },
-            Object {
-              "type": "literal",
-              "value": false,
             },
           ],
           "function": "is",
@@ -346,16 +336,14 @@ describe('utils', () => {
         Object {
           "arguments": Array [
             Object {
+              "isQuoted": false,
               "type": "literal",
               "value": "cases.attributes.status",
             },
             Object {
+              "isQuoted": false,
               "type": "literal",
               "value": "open",
-            },
-            Object {
-              "type": "literal",
-              "value": false,
             },
           ],
           "function": "is",
@@ -370,16 +358,14 @@ describe('utils', () => {
         Object {
           "arguments": Array [
             Object {
+              "isQuoted": false,
               "type": "literal",
               "value": "cases.attributes.severity",
             },
             Object {
+              "isQuoted": false,
               "type": "literal",
               "value": "critical",
-            },
-            Object {
-              "type": "literal",
-              "value": false,
             },
           ],
           "function": "is",
@@ -395,11 +381,13 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "cases.attributes.created_at",
                 },
                 "gte",
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "now-1M",
                 },
@@ -410,11 +398,13 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "cases.attributes.created_at",
                 },
                 "lte",
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "now",
                 },
@@ -443,16 +433,14 @@ describe('utils', () => {
                 Object {
                   "arguments": Array [
                     Object {
+                      "isQuoted": false,
                       "type": "literal",
                       "value": "cases.attributes.tags",
                     },
                     Object {
+                      "isQuoted": false,
                       "type": "literal",
                       "value": "tag1",
-                    },
-                    Object {
-                      "type": "literal",
-                      "value": false,
                     },
                   ],
                   "function": "is",
@@ -461,16 +449,14 @@ describe('utils', () => {
                 Object {
                   "arguments": Array [
                     Object {
+                      "isQuoted": false,
                       "type": "literal",
                       "value": "cases.attributes.tags",
                     },
                     Object {
+                      "isQuoted": false,
                       "type": "literal",
                       "value": "tag2",
-                    },
-                    Object {
-                      "type": "literal",
-                      "value": false,
                     },
                   ],
                   "function": "is",
@@ -483,16 +469,14 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "cases.attributes.created_by.username",
                 },
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "sam",
-                },
-                Object {
-                  "type": "literal",
-                  "value": false,
                 },
               ],
               "function": "is",
@@ -503,6 +487,183 @@ describe('utils', () => {
           "type": "function",
         }
       `);
+    });
+  });
+
+  describe('arraysDifference', () => {
+    it('returns null if originalValue is null', () => {
+      expect(arraysDifference(null, [])).toBeNull();
+    });
+
+    it('returns null if originalValue is undefined', () => {
+      expect(arraysDifference(undefined, [])).toBeNull();
+    });
+
+    it('returns null if originalValue is not an array', () => {
+      // @ts-expect-error passing a string instead of an array
+      expect(arraysDifference('a string', [])).toBeNull();
+    });
+
+    it('returns null if updatedValue is null', () => {
+      expect(arraysDifference([], null)).toBeNull();
+    });
+
+    it('returns null if updatedValue is undefined', () => {
+      expect(arraysDifference([], undefined)).toBeNull();
+    });
+
+    it('returns null if updatedValue is not an array', () => {
+      expect(arraysDifference([], 'a string' as unknown as string[])).toBeNull();
+    });
+
+    it('returns null if the arrays are both empty', () => {
+      expect(arraysDifference([], [])).toBeNull();
+    });
+
+    describe('object arrays', () => {
+      it('returns null if the arrays are both equal with single string', () => {
+        expect(arraysDifference([{ uid: 'a' }], [{ uid: 'a' }])).toBeNull();
+      });
+
+      it('returns null if the arrays are both equal with multiple strings', () => {
+        expect(
+          arraysDifference([{ uid: 'a' }, { uid: 'b' }], [{ uid: 'a' }, { uid: 'b' }])
+        ).toBeNull();
+      });
+
+      it("returns 'b' in the added items when the updated value contains an added value", () => {
+        expect(arraysDifference([{ uid: 'a' }], [{ uid: 'a' }, { uid: 'b' }]))
+          .toMatchInlineSnapshot(`
+          Object {
+            "addedItems": Array [
+              Object {
+                "uid": "b",
+              },
+            ],
+            "deletedItems": Array [],
+          }
+        `);
+      });
+
+      it("returns 'b' in the deleted items when the updated value removes an item", () => {
+        expect(arraysDifference([{ uid: 'a' }, { uid: 'b' }], [{ uid: 'a' }]))
+          .toMatchInlineSnapshot(`
+          Object {
+            "addedItems": Array [],
+            "deletedItems": Array [
+              Object {
+                "uid": "b",
+              },
+            ],
+          }
+        `);
+      });
+
+      it("returns 'a' and 'b' in the added items when the updated value adds both", () => {
+        expect(arraysDifference([], [{ uid: 'a' }, { uid: 'b' }])).toMatchInlineSnapshot(`
+          Object {
+            "addedItems": Array [
+              Object {
+                "uid": "a",
+              },
+              Object {
+                "uid": "b",
+              },
+            ],
+            "deletedItems": Array [],
+          }
+        `);
+      });
+
+      it("returns 'a' and 'b' in the deleted items when the updated value removes both", () => {
+        expect(arraysDifference([{ uid: 'a' }, { uid: 'b' }], [])).toMatchInlineSnapshot(`
+          Object {
+            "addedItems": Array [],
+            "deletedItems": Array [
+              Object {
+                "uid": "a",
+              },
+              Object {
+                "uid": "b",
+              },
+            ],
+          }
+        `);
+      });
+
+      it('returns the added and deleted values if the type of objects are different', () => {
+        expect(arraysDifference([{ uid: 'a' }], [{ uid: 'a', hi: '1' }])).toMatchInlineSnapshot(`
+          Object {
+            "addedItems": Array [
+              Object {
+                "hi": "1",
+                "uid": "a",
+              },
+            ],
+            "deletedItems": Array [
+              Object {
+                "uid": "a",
+              },
+            ],
+          }
+        `);
+      });
+    });
+
+    describe('string arrays', () => {
+      it('returns null if the arrays are both equal with single string', () => {
+        expect(arraysDifference(['a'], ['a'])).toBeNull();
+      });
+
+      it('returns null if the arrays are both equal with multiple strings', () => {
+        expect(arraysDifference(['a', 'b'], ['a', 'b'])).toBeNull();
+      });
+
+      it("returns 'b' in the added items when the updated value contains an added value", () => {
+        expect(arraysDifference(['a'], ['a', 'b'])).toMatchInlineSnapshot(`
+          Object {
+            "addedItems": Array [
+              "b",
+            ],
+            "deletedItems": Array [],
+          }
+        `);
+      });
+
+      it("returns 'b' in the deleted items when the updated value removes an item", () => {
+        expect(arraysDifference(['a', 'b'], ['a'])).toMatchInlineSnapshot(`
+          Object {
+            "addedItems": Array [],
+            "deletedItems": Array [
+              "b",
+            ],
+          }
+        `);
+      });
+
+      it("returns 'a' and 'b' in the added items when the updated value adds both", () => {
+        expect(arraysDifference([], ['a', 'b'])).toMatchInlineSnapshot(`
+          Object {
+            "addedItems": Array [
+              "a",
+              "b",
+            ],
+            "deletedItems": Array [],
+          }
+        `);
+      });
+
+      it("returns 'a' and 'b' in the deleted items when the updated value removes both", () => {
+        expect(arraysDifference(['a', 'b'], [])).toMatchInlineSnapshot(`
+          Object {
+            "addedItems": Array [],
+            "deletedItems": Array [
+              "a",
+              "b",
+            ],
+          }
+        `);
+      });
     });
   });
 });

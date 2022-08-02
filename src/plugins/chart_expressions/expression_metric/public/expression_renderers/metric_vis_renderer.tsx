@@ -6,21 +6,43 @@
  * Side Public License, v 1.
  */
 
-import React, { lazy } from 'react';
+import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
-import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
 import { css } from '@emotion/react';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
+import type { IInterpreterRenderHandlers, Datatable } from '@kbn/expressions-plugin/common';
+import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { ExpressionMetricPluginStart } from '../plugin';
-import { EXPRESSION_METRIC_NAME, MetricVisRenderConfig } from '../../common';
+import { EXPRESSION_METRIC_NAME, MetricVisRenderConfig, VisParams } from '../../common';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { extractContainerType, extractVisualizationType } from '../../../common';
 
-const MetricVis = lazy(() => import('../components/metric_vis'));
-
+async function metricFilterable(
+  dimensions: VisParams['dimensions'],
+  table: Datatable,
+  hasCompatibleActions?: IInterpreterRenderHandlers['hasCompatibleActions']
+) {
+  const column = getColumnByAccessor(dimensions.breakdownBy ?? dimensions.metric, table.columns);
+  const colIndex = table.columns.indexOf(column!);
+  return Boolean(
+    await hasCompatibleActions?.({
+      name: 'filter',
+      data: {
+        data: [
+          {
+            table,
+            column: colIndex,
+            row: 0,
+          },
+        ],
+      },
+    })
+  );
+}
 interface ExpressionMetricVisRendererDependencies {
   getStartDeps: StartServicesGetter<ExpressionMetricPluginStart>;
 }
@@ -39,6 +61,13 @@ export const getMetricVisRenderer = (
         unmountComponentAtNode(domNode);
       });
 
+      const filterable = visData.rows.length
+        ? await metricFilterable(
+            visConfig.dimensions,
+            visData,
+            handlers.hasCompatibleActions?.bind(handlers)
+          )
+        : false;
       const renderComplete = () => {
         const executionContext = handlers.getExecutionContext();
         const containerType = extractContainerType(executionContext);
@@ -53,20 +82,28 @@ export const getMetricVisRenderer = (
         handlers.done();
       };
 
+      const { MetricVis } = await import('../components/metric_vis');
       render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
-          <VisualizationContainer
+          <div
             data-test-subj="mtrVis"
             css={css`
               height: 100%;
               width: 100%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
             `}
-            showNoResult={!visData.rows.length}
-            renderComplete={renderComplete}
-            handlers={handlers}
           >
-            <MetricVis data={visData} config={visConfig} renderComplete={renderComplete} />
-          </VisualizationContainer>
+            <MetricVis
+              data={visData}
+              config={visConfig}
+              renderComplete={renderComplete}
+              fireEvent={handlers.event}
+              renderMode={handlers.getRenderMode()}
+              filterable={filterable}
+            />
+          </div>
         </KibanaThemeProvider>,
         domNode
       );

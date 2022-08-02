@@ -18,7 +18,7 @@ import { ExpressionValueVisDimension, LegendSize } from '@kbn/visualizations-plu
 import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { pieVisFunction } from './pie_vis_function';
 import { PARTITION_LABELS_VALUE } from '../constants';
-import { ExecutionContext } from '@kbn/expressions-plugin';
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
 
 describe('interpreter/functions#pieVis', () => {
   const fn = functionWrapper(pieVisFunction());

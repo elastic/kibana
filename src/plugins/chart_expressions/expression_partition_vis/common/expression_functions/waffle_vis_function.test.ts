@@ -17,7 +17,7 @@ import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { waffleVisFunction } from './waffle_vis_function';
 import { PARTITION_LABELS_VALUE } from '../constants';
-import { ExecutionContext } from '@kbn/expressions-plugin';
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
 
 describe('interpreter/functions#waffleVis', () => {
   const fn = functionWrapper(waffleVisFunction());

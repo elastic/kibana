@@ -9,8 +9,6 @@ import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey'
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import type { Logger } from '@kbn/core/server';
-
 import type {
   AlertInstanceContext,
   AlertInstanceState,
@@ -34,10 +32,9 @@ import type {
   WrapHits,
 } from '../types';
 import { createSearchAfterReturnType } from '../utils';
-import type { BuildRuleMessage } from '../rule_messages';
-import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { buildThresholdSignalHistory } from '../threshold/build_signal_history';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 
 export const thresholdExecutor = async ({
   inputIndex,
@@ -45,11 +42,9 @@ export const thresholdExecutor = async ({
   completeRule,
   tuple,
   exceptionItems,
-  experimentalFeatures,
+  ruleExecutionLogger,
   services,
   version,
-  logger,
-  buildRuleMessage,
   startedAt,
   state,
   bulkCreate,
@@ -63,11 +58,9 @@ export const thresholdExecutor = async ({
   completeRule: CompleteRule<ThresholdRuleParams>;
   tuple: RuleRangeTuple;
   exceptionItems: ExceptionListItemSchema[];
-  experimentalFeatures: ExperimentalFeatures;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
   version: string;
-  logger: Logger;
-  buildRuleMessage: BuildRuleMessage;
   startedAt: Date;
   state: ThresholdAlertState;
   bulkCreate: BulkCreate;
@@ -136,10 +129,9 @@ export const thresholdExecutor = async ({
       to: tuple.to.toISOString(),
       maxSignals: tuple.maxSignals,
       services,
-      logger,
+      ruleExecutionLogger,
       filter: esFilter,
       threshold: ruleParams.threshold,
-      buildRuleMessage,
       runtimeMappings,
       primaryTimestamp,
       secondaryTimestamp,
@@ -152,7 +144,6 @@ export const thresholdExecutor = async ({
         completeRule,
         filter: esFilter,
         services,
-        logger,
         inputIndexPattern: inputIndex,
         signalsIndex: ruleParams.outputIndex,
         startedAt,

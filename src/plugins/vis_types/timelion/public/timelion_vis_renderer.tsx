@@ -9,7 +9,7 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { ExpressionRenderDefinition } from '@kbn/expressions-plugin';
+import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { RangeFilterParams } from '@kbn/es-query';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
