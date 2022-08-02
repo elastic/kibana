@@ -11,6 +11,7 @@ import {
   bucketsWithoutStackByField1,
   maxRiskSubAggregations,
 } from './mocks/mock_buckets';
+import type { RawBucket } from '../../types';
 
 describe('flattenBucket', () => {
   it(`returns the expected flattened buckets when stackByField1 has buckets`, () => {
@@ -42,6 +43,63 @@ describe('flattenBucket', () => {
         maxRiskSubAggregation: { value: 21 },
         stackByField1DocCount: 5,
         stackByField1Key: 'Host-r4y6xi92ob',
+      },
+    ]);
+  });
+
+  it(`it prefers to populate 'key' using the RawBucket's 'key_as_string' when available, because it contains formatted dates`, () => {
+    const bucketWithOptionalKeyAsString: RawBucket = {
+      key: '1658955590866',
+      key_as_string: '2022-07-27T20:59:50.866Z', // <-- should be preferred over `key` when present
+      doc_count: 1,
+      maxRiskSubAggregation: { value: 21 },
+      stackByField1: {
+        doc_count_error_upper_bound: 0,
+        sum_other_doc_count: 0,
+        buckets: [{ key: 'Host-vmdx1cnu3m', doc_count: 1 }],
+      },
+    };
+
+    expect(
+      flattenBucket({ bucket: bucketWithOptionalKeyAsString, maxRiskSubAggregations })
+    ).toEqual([
+      {
+        doc_count: 1,
+        key: bucketWithOptionalKeyAsString.key_as_string, // <-- uses the preferred `key_as_string`
+        maxRiskSubAggregation: { value: 21 },
+        stackByField1DocCount: 1,
+        stackByField1Key: 'Host-vmdx1cnu3m',
+      },
+    ]);
+  });
+
+  it(`it prefers to populate 'stackByField1Key' using the 'stackByField1.buckets[n].key_as_string' when available, because it contains formatted dates`, () => {
+    const keyAsString = '2022-07-27T09:33:19.329Z';
+
+    const bucketWithKeyAsString: RawBucket = {
+      key: 'Threshold rule',
+      doc_count: 1,
+      maxRiskSubAggregation: { value: 99 },
+      stackByField1: {
+        doc_count_error_upper_bound: 0,
+        sum_other_doc_count: 0,
+        buckets: [
+          {
+            key: '1658914399329',
+            key_as_string: keyAsString, // <-- should be preferred over `stackByField1.buckets[n].key` when present
+            doc_count: 1,
+          },
+        ],
+      },
+    };
+
+    expect(flattenBucket({ bucket: bucketWithKeyAsString, maxRiskSubAggregations })).toEqual([
+      {
+        doc_count: 1,
+        key: 'Threshold rule',
+        maxRiskSubAggregation: { value: 99 },
+        stackByField1DocCount: 1,
+        stackByField1Key: keyAsString, // <-- uses the preferred `stackByField1.buckets[n].key_as_string`
       },
     ]);
   });

@@ -16,8 +16,8 @@ export const flattenBucket = ({
 }): FlattenedBucket[] =>
   bucket.stackByField1?.buckets?.map<FlattenedBucket>((x) => ({
     doc_count: bucket.doc_count,
-    key: bucket.key,
+    key: bucket.key_as_string ?? bucket.key, // prefer key_as_string when available, because it contains a formatted date
     maxRiskSubAggregation: bucket.maxRiskSubAggregation,
-    stackByField1Key: x.key,
+    stackByField1Key: x.key_as_string ?? x.key,
     stackByField1DocCount: x.doc_count,
   })) ?? [];

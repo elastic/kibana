@@ -15,6 +15,7 @@ import { useAlertsLocalStorage } from './alerts_local_storage';
 import type { AlertsSettings } from './alerts_local_storage/types';
 import { ChartContextMenu } from './chart_context_menu';
 import { ChartSelect } from './chart_select';
+import { TABLE, TREEMAP, TREND } from './chart_select/translations';
 import { AlertsTreemapPanel } from '../../../../common/components/alerts_treemap_panel';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import { AlertsHistogramPanel } from '../../../components/alerts_kpis/alerts_histogram_panel';
@@ -28,10 +29,6 @@ import { GROUP_BY_LABEL } from '../../../components/alerts_kpis/common/translati
 const TABLE_PANEL_HEIGHT = 330; // px
 const TRENT_CHART_HEIGHT = 127; // px
 const TREND_CHART_PANEL_HEIGHT = 256; // px
-
-const AlertsCountPanelFlexItem = styled(EuiFlexItem)`
-  margin-left: ${({ theme }) => theme.eui.euiSizeM};
-`;
 
 const FullHeightFlexItem = styled(EuiFlexItem)`
   height: 100%;
@@ -132,6 +129,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
               chartOptionsContextMenu={chartOptionsContextMenu}
               defaultStackByOption={trendChartStackBy}
               filters={alertsHistogramDefaultFilters}
+              inspectTitle={TREND}
               onFieldSelected={updateCommonStackBy0}
               panelHeight={TREND_CHART_PANEL_HEIGHT}
               query={query}
@@ -150,7 +148,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
       )}
 
       {alertViewSelection === 'table' && (
-        <AlertsCountPanelFlexItem grow={1}>
+        <FullHeightFlexItem grow={1}>
           {isLoadingIndexPattern ? (
             <EuiLoadingSpinner data-test-subj="tableLoadingSpinner" size="xl" />
           ) : (
@@ -158,6 +156,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
               alignHeader="flexStart"
               chartOptionsContextMenu={chartOptionsContextMenu}
               filters={alertsHistogramDefaultFilters}
+              inspectTitle={TABLE}
               panelHeight={TABLE_PANEL_HEIGHT}
               query={query}
               runtimeMappings={runtimeMappings}
@@ -169,7 +168,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
               title={title}
             />
           )}
-        </AlertsCountPanelFlexItem>
+        </FullHeightFlexItem>
       )}
 
       {alertViewSelection === 'treemap' && (
@@ -181,6 +180,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
               addFilter={addFilter}
               alignHeader="flexStart"
               chartOptionsContextMenu={chartOptionsContextMenu}
+              inspectTitle={TREEMAP}
               isPanelExpanded={isTreemapPanelExpanded}
               filters={alertsHistogramDefaultFilters}
               query={query}
