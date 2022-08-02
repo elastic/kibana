@@ -20,6 +20,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { ActionGroup, RuleActionParam } from '@kbn/alerting-plugin/common';
+import { betaBadgeProps } from './beta_badge_props';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
 import {
   ActionTypeModel,
@@ -256,6 +257,10 @@ export const ActionForm = ({
             isDisabled={!checkEnabledResult.isEnabled}
             data-test-subj={`${item.id}-${featureId}-ActionTypeSelectOption`}
             label={actionTypesIndex[item.id].name}
+            betaBadgeLabel={item.isExperimental ? betaBadgeProps.label : undefined}
+            betaBadgeTooltipContent={
+              item.isExperimental ? betaBadgeProps.tooltipContent : undefined
+            }
             onClick={() => addActionType(item)}
           >
             <EuiIcon

@@ -372,6 +372,32 @@ describe('When using EPM `get` services', () => {
 
         expect(MockRegistry.getRegistryPackage).not.toHaveBeenCalled();
       });
+
+      // when calling the get package endpoint without a package version we
+      // were previously incorrectly getting the info from archive
+      it('avoids loading archive when skipArchive = true and no version supplied', async () => {
+        const soClient = savedObjectsClientMock.create();
+        soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+        MockRegistry.fetchInfo.mockResolvedValue({
+          name: 'my-package',
+          version: '1.0.0',
+          assets: [],
+        } as unknown as RegistryPackage);
+
+        await expect(
+          getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: 'my-package',
+            pkgVersion: '',
+            skipArchive: true,
+          })
+        ).resolves.toMatchObject({
+          latestVersion: '1.0.0',
+          status: 'not_installed',
+        });
+
+        expect(MockRegistry.getRegistryPackage).not.toHaveBeenCalled();
+      });
     });
   });
 });
