@@ -16,7 +16,7 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('Agent available_versions API', () => {
-    const VERSIONS_FILE_PATH = 'build/kibana/x-pack/plugins/fleet/target/';
+    const VERSIONS_FILE_PATH = 'x-pack/plugins/fleet/target/';
     const FILENAME = 'agent_versions_list.json';
     before(async () => {
       try {

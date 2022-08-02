@@ -43,7 +43,7 @@ import type {
 import { defaultIngestErrorHandler } from '../../errors';
 import * as AgentService from '../../services/agents';
 
-import { setCachedFile, getCachedVersionFile } from './utils';
+import { setCachedFile, getCachedVersionFile } from './versions_utils';
 
 export const getAgentHandler: RequestHandler<
   TypeOf<typeof GetOneAgentRequestSchema.params>
@@ -330,20 +330,17 @@ function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
 }
 
-interface VersionsType {
-  versions: string[];
-}
-
 // Read a static file generated at build time and cache it for subsequent calls
 export const getAvailableVersionsHandler: RequestHandler = async (context, request, response) => {
-  const versionsFile = 'build/kibana/x-pack/plugins/fleet/target/agent_versions_list.json';
+  const AGENT_VERSION_BUILD_FILE = 'x-pack/plugins/fleet/target/agent_versions_list.json';
   let versionsToDisplay: string[] = [];
+
   const kibanaVersion = appContextService.getKibanaVersion();
-  const kibanaVersionCoerced = semverCoerce(kibanaVersion)?.version;
+  const kibanaVersionCoerced = semverCoerce(kibanaVersion)?.version ?? kibanaVersion;
 
   if (!getCachedVersionFile('versions')) {
     try {
-      const file = await fs.readFile(versionsFile, 'utf-8');
+      const file = await fs.readFile(AGENT_VERSION_BUILD_FILE, 'utf-8');
       if (file) {
         setCachedFile('versions', file);
       }
@@ -356,10 +353,9 @@ export const getAvailableVersionsHandler: RequestHandler = async (context, reque
   // De-dup and sort in descending order
   const cachedFile = getCachedVersionFile('versions');
   if (cachedFile) {
-    const data: VersionsType = JSON.parse(cachedFile);
-    const versions = data.versions
-      .toString()
-      .split(',')
+    const data: string[] = JSON.parse(cachedFile);
+
+    const versions = data
       .map((item: any) => semverCoerce(item)?.version || '')
       .filter((v: any) => semverGte(v, MINIMUM_SUPPORTED_VERSION))
       .sort((a: any, b: any) => (semverGt(a, b) ? -1 : 1));

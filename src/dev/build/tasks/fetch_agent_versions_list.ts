@@ -26,17 +26,17 @@ const getAvailableVersions = async (log: ToolingLog) => {
 
     const jsonBody = await results.json();
 
-    const versions: string = (jsonBody.length ? jsonBody[0] : [])
+    const versions: string[] = (jsonBody.length ? jsonBody[0] : [])
       .filter((item: any) => item?.title?.includes('Elastic Agent'))
       .map((item: any) => item?.version_number);
 
     log.info(`Retrieved available versions`);
-    return { versions };
+    return versions;
   } catch (error) {
     log.warning(`Failed to fetch versions list`);
     log.warning(error);
   }
-  return {};
+  return [];
 };
 
 // Keep the elastic agent versions list in Fleet UI updated
@@ -45,11 +45,14 @@ export const FetchAgentVersionsList: Task = {
 
   async run(config, log, build) {
     const versionsList = await getAvailableVersions(log);
-    const path = 'x-pack/plugins/fleet/target/agent_versions_list.json';
+    const AGENT_VERSION_BUILD_FILE = 'x-pack/plugins/fleet/target/agent_versions_list.json';
 
-    if (versionsList !== '') {
-      log.info(`Writing versions list to ${path}`);
-      await write(build.resolvePath(path), JSON.stringify(versionsList, null, '  '));
+    if (versionsList !== []) {
+      log.info(`Writing versions list to ${AGENT_VERSION_BUILD_FILE}`);
+      await write(
+        build.resolvePath(AGENT_VERSION_BUILD_FILE),
+        JSON.stringify(versionsList, null, '  ')
+      );
     }
   },
 };
