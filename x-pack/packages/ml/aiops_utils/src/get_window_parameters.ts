@@ -67,27 +67,27 @@ export const getWindowParameters = (
 };
 
 export const getSnappedWindowParameters = (
-  d: WindowParameters,
+  windowParameters: WindowParameters,
   snapTimestamps: number[]
 ): WindowParameters => {
   const snappedBaselineMin = snapTimestamps.reduce((pts, cts) => {
-    if (Math.abs(cts - d.baselineMin) < Math.abs(pts - d.baselineMin)) {
+    if (Math.abs(cts - windowParameters.baselineMin) < Math.abs(pts - windowParameters.baselineMin)) {
       return cts;
     }
     return pts;
   }, snapTimestamps[0]);
-  const baselineMaxTss = snapTimestamps.filter((ts) => ts > snappedBaselineMin);
+  const baselineMaxTimestamps = snapTimestamps.filter((ts) => ts > snappedBaselineMin);
 
-  const snappedBaselineMax = baselineMaxTss.reduce((pts, cts) => {
-    if (Math.abs(cts - d.baselineMax) < Math.abs(pts - d.baselineMax)) {
+  const snappedBaselineMax = baselineMaxTimestamps.reduce((pts, cts) => {
+    if (Math.abs(cts - windowParameters.baselineMax) < Math.abs(pts - windowParameters.baselineMax)) {
       return cts;
     }
     return pts;
-  }, baselineMaxTss[0]);
-  const deviationMinTss = baselineMaxTss.filter((ts) => ts > snappedBaselineMax);
+  }, baselineMaxTimestamps[0]);
+  const deviationMinTss = baselineMaxTimestamps.filter((ts) => ts > snappedBaselineMax);
 
   const snappedDeviationMin = deviationMinTss.reduce((pts, cts) => {
-    if (Math.abs(cts - d.deviationMin) < Math.abs(pts - d.deviationMin)) {
+    if (Math.abs(cts - windowParameters.deviationMin) < Math.abs(pts - windowParameters.deviationMin)) {
       return cts;
     }
     return pts;
@@ -95,7 +95,7 @@ export const getSnappedWindowParameters = (
   const deviationMaxTss = deviationMinTss.filter((ts) => ts > snappedDeviationMin);
 
   const snappedDeviationMax = deviationMaxTss.reduce((pts, cts) => {
-    if (Math.abs(cts - d.deviationMax) < Math.abs(pts - d.deviationMax)) {
+    if (Math.abs(cts - windowParameters.deviationMax) < Math.abs(pts - windowParameters.deviationMax)) {
       return cts;
     }
     return pts;

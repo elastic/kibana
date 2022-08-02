@@ -86,7 +86,7 @@ export function ProgressControls({
                       color="warning"
                       content={i18n.translate('xpack.aiops.rerunAnalysisTooltipContent', {
                         defaultMessage:
-                          'Analysis data may be out of date due to selection update. Please rerun analysis.',
+                          'Analysis data may be out of date due to selection update. Rerun analysis.',
                       })}
                     />
                   </EuiFlexItem>
