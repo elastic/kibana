@@ -31,7 +31,13 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
     services: {
       application: {
         capabilities: {
-          fake: true,
+          fakeCases: {
+            create_cases: true,
+            read_cases: true,
+            update_cases: true,
+            delete_cases: true,
+            push_cases: true,
+          },
         },
       },
       cases: {
