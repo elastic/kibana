@@ -465,7 +465,7 @@ export class SettingsPageObject extends FtrService {
       // if (flyOut) {
       //   await this.testSubjects.click('createAnyway');
       // } else {
-        await this.clickAddNewIndexPatternButton();
+      await this.clickAddNewIndexPatternButton();
       // }
       await this.header.waitUntilLoadingHasFinished();
       if (!isStandardIndexPattern) {
