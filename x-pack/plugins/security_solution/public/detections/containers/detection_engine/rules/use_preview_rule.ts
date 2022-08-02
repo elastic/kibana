@@ -70,8 +70,11 @@ export const usePreviewRule = ({
     () => (advancedOptions ? advancedOptions.timeframeEnd.toISOString() : moment().toISOString()),
     [advancedOptions]
   );
+  const timeframeShift = useMemo(
+    () => (advancedOptions ? moment().valueOf() - advancedOptions.timeframeEnd.valueOf() : 0),
+    [advancedOptions]
+  );
 
-  let isInvalidInterval = false;
   if (advancedOptions) {
     const timeframeDuration =
       (advancedOptions.timeframeEnd.valueOf() / 1000 -
@@ -79,18 +82,16 @@ export const usePreviewRule = ({
       1000;
 
     const { unit: intervalUnit, value: intervalValue } = getTimeTypeValue(advancedOptions.interval);
-    const duration = moment.duration(intervalValue, intervalUnit as 's' | 'm' | 'h');
+    const duration = moment.duration(intervalValue, intervalUnit);
     const ruleIntervalDuration = duration.asMilliseconds();
-    if (ruleIntervalDuration > timeframeDuration) {
-      isInvalidInterval = true;
-    }
 
-    invocationCount = Math.max(Math.ceil(timeframeDuration / ruleIntervalDuration), 1);
+    invocationCount = Math.max(Math.floor(timeframeDuration / ruleIntervalDuration), 1);
     interval = advancedOptions.interval;
 
     const { unit: lookbackUnit, value: lookbackValue } = getTimeTypeValue(advancedOptions.lookback);
-    duration.add(lookbackValue, lookbackUnit as 's' | 'm' | 'h');
-    from = `now-${duration.asSeconds()}s`;
+    duration.add(lookbackValue, lookbackUnit);
+
+    from = `now-${duration.asSeconds() + Math.floor(timeframeShift / 1000)}s`;
   }
   const showInvocationCountWarning = invocationCount > REASONABLE_INVOCATION_COUNT;
 
@@ -142,5 +143,5 @@ export const usePreviewRule = ({
     };
   }, [rule, addError, invocationCount, from, interval, timeframeEnd]);
 
-  return { isLoading, isInvalidInterval, showInvocationCountWarning, response, rule, setRule };
+  return { isLoading, showInvocationCountWarning, response, rule, setRule };
 };

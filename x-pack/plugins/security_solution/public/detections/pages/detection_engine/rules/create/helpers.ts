@@ -50,9 +50,9 @@ import { stepActionsDefaultValue } from '../../../../components/rules/step_rule_
 import type { FieldValueThreshold } from '../../../../components/rules/threshold_input';
 import type { EqlOptionsSelected } from '../../../../../../common/search_strategy';
 
-export const getTimeTypeValue = (time: string): { unit: string; value: number } => {
-  const timeObj = {
-    unit: '',
+export const getTimeTypeValue = (time: string): { unit: Unit; value: number } => {
+  const timeObj: { unit: Unit; value: number } = {
+    unit: 's',
     value: 0,
   };
   const filterTimeVal = time.match(/\d+/g);
@@ -65,7 +65,7 @@ export const getTimeTypeValue = (time: string): { unit: string; value: number } 
     filterTimeType != null &&
     ['s', 'm', 'h'].includes(filterTimeType[0])
   ) {
-    timeObj.unit = filterTimeType[0];
+    timeObj.unit = filterTimeType[0] as Unit;
   }
   return timeObj;
 };

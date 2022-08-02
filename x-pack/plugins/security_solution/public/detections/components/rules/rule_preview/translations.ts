@@ -86,20 +86,6 @@ export const QUERY_PREVIEW_INVOCATION_COUNT_WARNING_MESSAGE = i18n.translate(
   }
 );
 
-export const QUERY_PREVIEW_INVALID_INTERVAL_ERROR_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewInvalidIntervalErrorTitle',
-  {
-    defaultMessage: 'Invalid rule interval',
-  }
-);
-
-export const QUERY_PREVIEW_INVALID_INTERVAL_ERROR_MESSAGE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewInvalidIntervalErrorMessage',
-  {
-    defaultMessage: `The rule interval should not exceed the duration of selected timeframe.`,
-  }
-);
-
 export const QUERY_GRAPH_COUNT = i18n.translate(
   'xpack.securitySolution.detectionEngine.queryPreview.queryGraphCountLabel',
   {
