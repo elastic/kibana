@@ -77,15 +77,9 @@ exports[`tests loading fields.yml: cockroachdb_dynamic_templates.yml 1`] = `
         "fields": [
           {
             "name": "labels",
-            "type": "group",
-            "fields": [
-              {
-                "name": "*",
-                "type": "object",
-                "object_type": "keyword",
-                "description": "Prometheus metric labels\\n"
-              }
-            ]
+            "type": "object",
+            "object_type": "keyword",
+            "description": "Prometheus metric labels\\n"
           },
           {
             "name": "*",
