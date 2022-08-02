@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { DocumentList } from './components/document_list/document_list';
-import { DocumentsLogic } from './documents_logic';
+import { DocumentsLogic, INDEX_DOCUMENTS_META_DEFAULT } from './documents_logic';
 import { IndexNameLogic } from './index_name_logic';
 
 import './documents.scss';
@@ -32,12 +32,12 @@ export const SearchIndexDocuments: React.FC = () => {
   const { makeRequest, makeMappingRequest, setSearchQuery } = useActions(DocumentsLogic);
 
   useEffect(() => {
-    makeRequest({ indexName, query: '' });
+    makeRequest({ indexName, meta: INDEX_DOCUMENTS_META_DEFAULT, query: '' });
     makeMappingRequest({ indexName });
   }, [indexName]);
 
   return (
-    <EuiPanel hasBorder={false} hasShadow={false}>
+    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
       <EuiSpacer />
       <EuiFlexGroup direction="column">
         <EuiFlexItem>

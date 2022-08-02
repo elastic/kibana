@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
+
 import { schema } from '@kbn/config-schema';
 
 import { fetchSearchResults } from '../../lib/fetch_search_results';
@@ -18,14 +20,47 @@ export function registerSearchRoute({ router }: RouteDependencies) {
         params: schema.object({
           index_name: schema.string(),
         }),
+        query: schema.object({
+          page: schema.number({ defaultValue: 0, min: 0 }),
+          size: schema.number({ defaultValue: 25, min: 0 }),
+        }),
       },
     },
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
+      const { page, size } = request.query;
+      const from = page * size;
       try {
-        const searchResults = await fetchSearchResults(client, request.params.index_name, '');
+        const searchResults: SearchResponseBody = await fetchSearchResults(
+          client,
+          request.params.index_name,
+          '',
+          from,
+          size
+        );
+
+        let totalResults = 0;
+        if (searchResults.hits.total === null || searchResults.hits.total === undefined) {
+          totalResults = 0;
+        } else if (typeof searchResults.hits.total === 'number') {
+          totalResults = searchResults.hits.total;
+        } else {
+          totalResults = searchResults.hits.total.value;
+        }
+        const totalPages = Math.ceil(totalResults / size) || 1;
+
         return response.ok({
-          body: searchResults,
+          body: {
+            meta: {
+              page: {
+                current: page,
+                size: searchResults.hits.hits.length,
+                total_pages: (Number.isFinite(totalPages) && totalPages) || 1,
+                total_results: totalResults,
+              },
+            },
+            results: searchResults,
+          },
           headers: { 'content-type': 'application/json' },
         });
       } catch (error) {
@@ -44,18 +79,46 @@ export function registerSearchRoute({ router }: RouteDependencies) {
           index_name: schema.string(),
           query: schema.string(),
         }),
+        query: schema.object({
+          page: schema.number({ defaultValue: 0, min: 0 }),
+          size: schema.number({ defaultValue: 25, min: 1 }),
+        }),
       },
     },
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
+      const { page, size } = request.query;
+      const from = page * size;
       try {
         const searchResults = await fetchSearchResults(
           client,
           request.params.index_name,
-          request.params.query
+          request.params.query,
+          from,
+          size
         );
+
+        let totalResults = 0;
+        if (searchResults.hits.total === null || searchResults.hits.total === undefined) {
+          totalResults = 0;
+        } else if (typeof searchResults.hits.total === 'number') {
+          totalResults = searchResults.hits.total;
+        } else {
+          totalResults = searchResults.hits.total.value;
+        }
+        const totalPages = Math.ceil(totalResults / size) || 1;
         return response.ok({
-          body: searchResults,
+          body: {
+            meta: {
+              page: {
+                current: page,
+                size: searchResults.hits.hits.length,
+                total_pages: (Number.isFinite(totalPages) && totalPages) || 1,
+                total_results: totalResults,
+              },
+            },
+            results: searchResults,
+          },
           headers: { 'content-type': 'application/json' },
         });
       } catch (error) {

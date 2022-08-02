@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 
-import { useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 
@@ -19,7 +19,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPagination,
+  EuiProgress,
   EuiPopover,
+  EuiText,
   EuiSpacer,
 } from '@elastic/eui';
 
@@ -38,7 +40,8 @@ interface DocumentListProps {
 }
 
 export const DocumentList: React.FC<DocumentListProps> = ({ mappings, results, meta }) => {
-  const { onPaginate } = useActions(DocumentsLogic);
+  const { isLoading } = useValues(DocumentsLogic);
+  const { onPaginate, setDocsPerPage } = useActions(DocumentsLogic);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const resultToField = (result: SearchHit) => {
     if (mappings && result._source && !Array.isArray(result._source)) {
@@ -66,7 +69,10 @@ export const DocumentList: React.FC<DocumentListProps> = ({ mappings, results, m
     >
       {i18n.translate(
         'xpack.enterpriseSearch.content.searchIndex.documents.documentList.pagination.itemsPerPage',
-        { defaultMessage: 'Documents per page: {docPerPage}', values: { docPerPage: '50' } }
+        {
+          defaultMessage: 'Documents per page: {docPerPage}',
+          values: { docPerPage: meta.page.size },
+        }
       )}
     </EuiButtonEmpty>
   );
@@ -77,34 +83,43 @@ export const DocumentList: React.FC<DocumentListProps> = ({ mappings, results, m
 
   const docsPerPageOptions = [
     <EuiContextMenuItem
-      key="20 rows"
-      icon={getIconType(20)}
-      onClick={() => setIsPopoverOpen(false)}
+      key="10 rows"
+      icon={getIconType(10)}
+      onClick={() => {
+        setIsPopoverOpen(false);
+        setDocsPerPage(10);
+      }}
     >
       {i18n.translate(
         'xpack.enterpriseSearch.content.searchIndex.documents.documentList.paginationOptions.option',
-        { defaultMessage: '{docCount} documents', values: { docCount: 20 } }
+        { defaultMessage: '{docCount} documents', values: { docCount: 10 } }
       )}
     </EuiContextMenuItem>,
 
     <EuiContextMenuItem
+      key="25 rows"
+      icon={getIconType(25)}
+      onClick={() => {
+        setIsPopoverOpen(false);
+        setDocsPerPage(25);
+      }}
+    >
+      {i18n.translate(
+        'xpack.enterpriseSearch.content.searchIndex.documents.documentList.paginationOptions.option',
+        { defaultMessage: '{docCount} documents', values: { docCount: 25 } }
+      )}
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
       key="50 rows"
       icon={getIconType(50)}
-      onClick={() => setIsPopoverOpen(false)}
+      onClick={() => {
+        setIsPopoverOpen(false);
+        setDocsPerPage(50);
+      }}
     >
       {i18n.translate(
         'xpack.enterpriseSearch.content.searchIndex.documents.documentList.paginationOptions.option',
         { defaultMessage: '{docCount} documents', values: { docCount: 50 } }
-      )}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="100 rows"
-      icon={getIconType(100)}
-      onClick={() => setIsPopoverOpen(false)}
-    >
-      {i18n.translate(
-        'xpack.enterpriseSearch.content.searchIndex.documents.documentList.paginationOptions.option',
-        { defaultMessage: '{docCount} documents', values: { docCount: 100 } }
       )}
     </EuiContextMenuItem>,
   ];
@@ -120,6 +135,15 @@ export const DocumentList: React.FC<DocumentListProps> = ({ mappings, results, m
         activePage={meta.page.current}
         onPageClick={onPaginate}
       />
+      <EuiSpacer size="m" />
+      <EuiText size="xs">
+        <p>
+          Showing <strong>{results.length}</strong> of <strong>{meta.page.total_results}</strong>.
+          Search results maxed at 10.000 documents.
+        </p>
+      </EuiText>
+      {isLoading && <EuiProgress size="xs" color="primary" />}
+      <EuiSpacer size="m" />
       {results.map((result) => {
         return (
           <>

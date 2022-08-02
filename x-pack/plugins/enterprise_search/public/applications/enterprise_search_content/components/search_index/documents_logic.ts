@@ -26,6 +26,13 @@ import { SearchDocumentsApiLogic } from '../../api/search_documents/search_docum
 
 import { IndexNameLogic } from './index_name_logic';
 
+export const INDEX_DOCUMENTS_META_DEFAULT = {
+  page: {
+    ...DEFAULT_META.page,
+    size: 25,
+  },
+};
+
 interface DocumentsLogicActions {
   apiError(error: HttpError): HttpError;
   apiReset: typeof SearchDocumentsApiLogic.actions.apiReset;
@@ -33,6 +40,7 @@ interface DocumentsLogicActions {
   makeRequest: typeof SearchDocumentsApiLogic.actions.makeRequest;
   mappingsApiError(error: HttpError): HttpError;
   onPaginate(newPageIndex: number): { newPageIndex: number };
+  setDocsPerPage(docsPerPage: number): { docsPerPage: number };
   setSearchQuery(query: string): { query: string };
 }
 
@@ -52,12 +60,13 @@ export interface DocumentsLogicValues {
 export const DocumentsLogic = kea<MakeLogicType<DocumentsLogicValues, DocumentsLogicActions>>({
   actions: {
     onPaginate: (newPageIndex) => ({ newPageIndex }),
+    setDocsPerPage: (docsPerPage) => ({ docsPerPage }),
     setSearchQuery: (query) => ({ query }),
   },
   connect: {
     actions: [
       SearchDocumentsApiLogic,
-      ['apiReset', 'makeRequest', 'apiError'],
+      ['apiReset', 'makeRequest', 'apiError', 'apiSuccess'],
       MappingsApiLogic,
       ['makeRequest as makeMappingRequest', 'apiError as mappingsApiError'],
     ],
@@ -74,18 +83,27 @@ export const DocumentsLogic = kea<MakeLogicType<DocumentsLogicValues, DocumentsL
     apiError: (e) => flashAPIErrors(e),
     makeRequest: () => clearFlashMessages(),
     mappingsApiError: (e) => flashAPIErrors(e),
+    onPaginate: () => {
+      actions.makeRequest({ indexName: values.indexName, meta: values.meta, query: values.query });
+    },
+    setDocsPerPage: () => {
+      actions.makeRequest({ indexName: values.indexName, meta: values.meta, query: values.query });
+    },
     setSearchQuery: async (_, breakpoint) => {
       await breakpoint(250);
-      actions.makeRequest({ indexName: values.indexName, query: values.query });
+      actions.makeRequest({ indexName: values.indexName, meta: values.meta, query: values.query });
     },
   }),
   path: ['enterprise_search', 'search_index', 'documents'],
   reducers: () => ({
     meta: [
-      DEFAULT_META,
+      INDEX_DOCUMENTS_META_DEFAULT,
       {
         apiSuccess: (_, { meta }) => meta,
         onPaginate: (state, { newPageIndex }) => updateMetaPageIndex(state, newPageIndex),
+        setDocsPerPage: (state, { docsPerPage }) => ({
+          page: { ...INDEX_DOCUMENTS_META_DEFAULT.page, size: docsPerPage },
+        }),
       },
     ],
     query: [
@@ -98,14 +116,12 @@ export const DocumentsLogic = kea<MakeLogicType<DocumentsLogicValues, DocumentsL
   selectors: ({ selectors }) => ({
     isLoading: [
       () => [selectors.status, selectors.mappingStatus],
-      (status, mappingStatus) => status !== Status.SUCCESS && mappingStatus !== Status.SUCCESS,
+      (status, mappingStatus) => status !== Status.SUCCESS || mappingStatus !== Status.SUCCESS,
     ],
     results: [
-      () => [selectors.data, selectors.isLoading],
-      (data: SearchResponseBody, isLoading) => {
-        if (isLoading) return [];
-
-        return data?.hits?.hits || [];
+      () => [selectors.data],
+      (data: { results: SearchResponseBody }) => {
+        return data?.results?.hits?.hits || [];
       },
     ],
     simplifiedMapping: [
