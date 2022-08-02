@@ -9,9 +9,10 @@
 import { compact, shuffle } from 'lodash';
 import { apm, ApmFields, EntityArrayIterable, timerange } from '..';
 import { generateLongId, generateShortId } from '../lib/utils/generate_id';
-import { Scenario } from '../scripts/scenario';
+import { Scenario } from '../cli/scenario';
+import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 
-const ENVIRONMENT = __filename;
+const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 function generateExternalSpanLinks() {
   // randomly creates external span links 0 - 10

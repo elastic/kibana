@@ -140,8 +140,33 @@ export default function ({ getService }: FtrProviderContext) {
       expect(profiles).to.be.empty();
     });
 
-    // TODO: unskip when security plugin implements fix for size issue
-    it.skip('limits the results to one, when the size is specified as one', async () => {
+    it('returns a 400 if size is greater than 100', async () => {
+      await suggestUserProfiles({
+        supertest: supertestWithoutAuth,
+        req: {
+          name: 'blah',
+          owners: ['securitySolutionFixture'],
+          size: 101,
+        },
+        auth: { user: superUser, space: 'space1' },
+        expectedHttpCode: 400,
+      });
+    });
+
+    it('returns a 400 if size is less than 0', async () => {
+      await suggestUserProfiles({
+        supertest: supertestWithoutAuth,
+        req: {
+          name: 'blah',
+          owners: ['securitySolutionFixture'],
+          size: -1,
+        },
+        auth: { user: superUser, space: 'space1' },
+        expectedHttpCode: 400,
+      });
+    });
+
+    it('limits the results to one, when the size is specified as one', async () => {
       const profiles = await suggestUserProfiles({
         supertest: supertestWithoutAuth,
         req: {
@@ -162,7 +187,7 @@ export default function ({ getService }: FtrProviderContext) {
               "full_name": "sec only_no_delete",
               "username": "sec_only_no_delete",
             },
-          }
+          },
         ]
       `);
     });
