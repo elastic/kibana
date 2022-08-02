@@ -130,7 +130,7 @@ export interface SubPlugins {
   management: Management;
   landingPages: LandingPages;
   cloudSecurityPosture: CloudSecurityPosture;
-  threatIntelligence?: ThreatIntelligence;
+  threatIntelligence?: ThreatIntelligence; // the Threat Intelligence plugin is temporarily hidden behind a feature flag
 }
 
 // TODO: find a better way to defined these types
