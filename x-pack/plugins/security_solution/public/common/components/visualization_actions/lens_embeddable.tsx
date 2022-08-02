@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
@@ -20,7 +20,7 @@ const LensComponentWrapper = styled.div<{ height?: string }>`
   height: ${({ height }) => height ?? 'auto'};
 `;
 
-const LensEmbeddableComponent = ({
+const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   getLensAttributes,
   height,
   id,
@@ -28,7 +28,7 @@ const LensEmbeddableComponent = ({
   lensAttributes,
   stackByField,
   timerange,
-}: LensEmbeddableComponentProps) => {
+}) => {
   const { lens } = useKibana().services;
   const dispatch = useDispatch();
   const { attributes } = useLensAttributes({
@@ -45,6 +45,18 @@ const LensEmbeddableComponent = ({
     timeRange: timerange,
   });
 
+  const onBrushEnd = useCallback(
+    ({ range }: { range: number[] }) => {
+      dispatch(
+        setAbsoluteRangeDatePicker({
+          id: inputsModelId,
+          from: new Date(range[0]).toISOString(),
+          to: new Date(range[1]).toISOString(),
+        })
+      );
+    },
+    [dispatch, inputsModelId]
+  );
   return attributes ? (
     <LensComponentWrapper height={height}>
       <LensComponent
@@ -53,28 +65,19 @@ const LensEmbeddableComponent = ({
         timeRange={timerange}
         attributes={attributes}
         // onLoad={(val) => {
-        //   setIsLoading(val);
         // }}
-        onBrushEnd={({ range }: { range: number[] }) => {
-          dispatch(
-            setAbsoluteRangeDatePicker({
-              id: inputsModelId,
-              from: new Date(range[0]).toISOString(),
-              to: new Date(range[1]).toISOString(),
-            })
-          );
-        }}
+        onBrushEnd={onBrushEnd}
         viewMode={ViewMode.VIEW}
-        onFilter={
-          (/* _data*/) => {
-            // call back event for on filter event
-          }
-        }
-        onTableRowClick={
-          (/* _data*/) => {
-            // call back event for on table row click event
-          }
-        }
+        // onFilter={
+        //   (/* _data*/) => {
+        //     // call back event for on filter event
+        //   }
+        // }
+        // onTableRowClick={
+        //   (/* _data*/) => {
+        //     // call back event for on table row click event
+        //   }
+        // }
         withDefaultActions={true}
         extraActions={actions}
       />

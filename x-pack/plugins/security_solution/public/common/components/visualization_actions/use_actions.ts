@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
-import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { useKibana } from '../../lib/kibana/kibana_react';
 import { useAddToExistingCase } from './use_add_to_existing_case';
 import { useAddToNewCase } from './use_add_to_new_case';
 
 import { useGetUserCasesPermissions } from '../../lib/kibana';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE, OPEN_IN_LENS } from './translations';
-import { LensAttributes } from './types';
+import type { LensAttributes } from './types';
 
 export type ActionTypes = 'addToExistingCase' | 'addToNewCase' | 'openInLens';
 
@@ -76,19 +76,25 @@ export function useActions({
     userCanCrud,
   });
 
-  return defaultActions.reduce<Action[]>((acc, action) => {
-    if (action === 'addToExistingCase') {
-      return [...acc, getAddToExistingCaseAction({ callback: onAddToExistingCaseClicked })];
-    }
-    if (action === 'addToNewCase') {
-      return [...acc, getAddToNewCaseAction({ callback: onAddToNewCaseClicked })];
-    }
-    if (action === 'openInLens') {
-      return [...acc, getOpenInLensAction({ callback: onOpenInLens })];
-    }
+  const actions = useMemo(
+    () =>
+      defaultActions.reduce<Action[]>((acc, action) => {
+        if (action === 'addToExistingCase') {
+          return [...acc, getAddToExistingCaseAction({ callback: onAddToExistingCaseClicked })];
+        }
+        if (action === 'addToNewCase') {
+          return [...acc, getAddToNewCaseAction({ callback: onAddToNewCaseClicked })];
+        }
+        if (action === 'openInLens') {
+          return [...acc, getOpenInLensAction({ callback: onOpenInLens })];
+        }
 
-    return acc;
-  }, []);
+        return acc;
+      }, []),
+    [defaultActions, onAddToExistingCaseClicked, onAddToNewCaseClicked, onOpenInLens]
+  );
+
+  return actions;
 }
 
 const getOpenInLensAction = ({ callback }: { callback: () => void }): Action => {

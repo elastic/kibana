@@ -103,5 +103,8 @@ export const useLensAttributes = ({
     dataViewId,
   ]);
 
-  return { attributes: lensAttrsWithInjectedData, indexPattern: selectedPatterns };
+  return useMemo(
+    () => ({ attributes: lensAttrsWithInjectedData, indexPattern: selectedPatterns }),
+    [lensAttrsWithInjectedData, selectedPatterns]
+  );
 };
