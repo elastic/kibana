@@ -1273,6 +1273,16 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/bulk_upgrade_agents"
+              },
+              "example": {
+                "version": "8.4.0",
+                "source_uri": "https://artifacts.elastic.co/downloads/beats/elastic-agent",
+                "rollout_duration_seconds": 3600,
+                "agents": [
+                  "agent1",
+                  "agent2"
+                ],
+                "start_time": "2022-08-03T14:00:00.000Z"
               }
             }
           }
@@ -1768,6 +1778,10 @@
                   "policy_id",
                   "agents"
                 ]
+              },
+              "example": {
+                "policy_id": "policy_id",
+                "agents": "fleet-agents.policy_id : (\"policy1\" or \"policy2\")"
               }
             }
           }
@@ -1842,6 +1856,14 @@
                 },
                 "required": [
                   "agents"
+                ]
+              },
+              "example": {
+                "revoke": true,
+                "force": false,
+                "agents": [
+                  "agent1",
+                  "agent2"
                 ]
               }
             }
@@ -1924,6 +1946,18 @@
                 },
                 "required": [
                   "agents"
+                ]
+              },
+              "example": {
+                "agents": [
+                  "agent1",
+                  "agent2"
+                ],
+                "tagsToAdd": [
+                  "newTag"
+                ],
+                "tagsToRemove": [
+                  "existingTag"
                 ]
               }
             }
@@ -4247,13 +4281,16 @@
             "description": "version to upgrade to"
           },
           "source_uri": {
-            "type": "string"
+            "type": "string",
+            "description": "alternative upgrade binary download url"
           },
           "rollout_duration_seconds": {
-            "type": "number"
+            "type": "number",
+            "description": "rolling upgrade window duration in seconds"
           },
           "start_time": {
-            "type": "string"
+            "type": "string",
+            "description": "start time of upgrade in ISO 8601 format"
           },
           "agents": {
             "oneOf": [

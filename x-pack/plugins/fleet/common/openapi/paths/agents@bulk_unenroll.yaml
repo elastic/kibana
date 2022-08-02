@@ -42,3 +42,7 @@ post:
                   description: list of agent IDs
           required:
             - agents
+        example:
+          revoke: true
+          force: false
+          agents: [agent1, agent2]

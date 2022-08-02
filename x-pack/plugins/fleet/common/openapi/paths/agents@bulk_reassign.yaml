@@ -40,3 +40,6 @@ post:
           required:
             - policy_id
             - agents
+        example:
+          policy_id: policy_id
+          agents: "fleet-agents.policy_id : (\"policy1\" or \"policy2\")"

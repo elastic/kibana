@@ -46,3 +46,7 @@ post:
               type: number    
           required:
             - agents
+        example:
+          agents: [agent1, agent2]
+          tagsToAdd: [newTag]
+          tagsToRemove: [existingTag]    
