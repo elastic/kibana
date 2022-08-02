@@ -7,10 +7,12 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 import { serializeApmGlobalLabels } from '../../utils';
 
+const JOURNEY_ECOMMERCE_DASHBOARD = 'ecommerce_dashboard';
+
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const performanceConfig = await readConfigFile(require.resolve('../base.config'));
 
-  const testFiles = [require.resolve('./ecommerce_dashboard')];
+  const testFiles = [require.resolve(`./${JOURNEY_ECOMMERCE_DASHBOARD}`)];
 
   const config = {
     testFiles,
@@ -19,15 +21,19 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   const apmGlobalLabels = {
     ...performanceConfig.get('kbnTestServer').env.ELASTIC_APM_GLOBAL_LABELS,
-    ftrConfig: `x-pack/test/performance/tests/journeys/ecommerce_dashboard/config.ts`,
+    ftrConfig: `x-pack/test/performance/tests/journeys/${JOURNEY_ECOMMERCE_DASHBOARD}/config.ts`,
     performancePhase: process.env.TEST_PERFORMANCE_PHASE,
-    journeyName: 'ecommerce_dashboard',
+    journeyName: JOURNEY_ECOMMERCE_DASHBOARD,
   };
 
   return {
     ...config,
     kbnTestServer: {
       ...config.kbnTestServer,
+      serverArgs: [
+        ...performanceConfig.get('kbnTestServer.serverArgs'),
+        `--telemetry.labels.journeyName=${JOURNEY_ECOMMERCE_DASHBOARD}`,
+      ],
       env: {
         ...config.kbnTestServer.env,
         ELASTIC_APM_GLOBAL_LABELS: serializeApmGlobalLabels(apmGlobalLabels),
