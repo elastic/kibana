@@ -330,7 +330,7 @@ export function MachineLearningCommonUIProvider({
     async changeToSpace(spaceId: string) {
       await PageObjects.spaceSelector.openSpacesNav();
       await PageObjects.spaceSelector.goToSpecificSpace(spaceId);
-      await PageObjects.spaceSelector.expectHomePage(spaceId);
+      await PageObjects.spaceSelector.expectSpace(spaceId);
     },
 
     async waitForDatePickerIndicatorLoaded() {
