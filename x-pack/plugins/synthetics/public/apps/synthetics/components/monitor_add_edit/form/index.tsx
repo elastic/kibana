@@ -29,12 +29,16 @@ export const MonitorForm: React.FC<{ defaultValues?: SyntheticsMonitor; space?: 
   });
 
   const {
-    formState: { isValid, isSubmitted },
+    formState: { isSubmitted, errors },
   } = methods;
 
   return (
     <FormProvider {...methods}>
-      <EuiForm isInvalid={isSubmitted && !isValid} component="form" noValidate>
+      <EuiForm
+        isInvalid={Boolean(isSubmitted && Object.keys(errors).length)}
+        component="form"
+        noValidate
+      >
         {children}
         <EuiSpacer />
         <ActionBar />
