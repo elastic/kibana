@@ -62,6 +62,16 @@ describe('Alert Event Details', () => {
     const TIMELINE_NAME = 'Untitled timeline';
     cy.visit('/app/security/alerts');
     cy.getBySel('header-page-title').contains('Alerts').should('exist');
+    cy.getBySel('expand-event')
+      .first()
+      .within(() => {
+        cy.get(`[data-is-loading="true"]`).should('exist');
+      });
+    cy.getBySel('expand-event')
+      .first()
+      .within(() => {
+        cy.get(`[data-is-loading="true"]`).should('not.exist');
+      });
     cy.getBySel('timeline-context-menu-button').first().click({ force: true });
     cy.contains('Run Osquery');
     cy.getBySel('expand-event').first().click({ force: true });
