@@ -35,7 +35,7 @@ interface NetworkDnsTableProps {
   loadPage: (newActivePage: number) => void;
   setQuerySkip: (skip: boolean) => void;
   showMorePagesIndicator: boolean;
-  totalCount: number;
+  totalCount: number | null | undefined;
   type: networkModel.NetworkType;
 }
 
@@ -147,7 +147,7 @@ const NetworkDnsTableComponent: React.FC<NetworkDnsTableProps> = ({
       headerSupplement={HeaderSupplement}
       headerTitle={i18n.TOP_DNS_DOMAINS}
       headerTooltip={i18n.TOOLTIP}
-      headerUnit={i18n.UNIT(totalCount)}
+      headerUnit={totalCount != null ? i18n.UNIT(totalCount) : undefined}
       id={id}
       itemsPerRow={rowItems}
       isInspect={isInspect}

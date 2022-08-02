@@ -57,10 +57,26 @@ describe('useNetworkTls', () => {
     });
 
     expect(mockSearch).toHaveBeenCalledWith({
+      defaultIndex: props.indexNames,
       factoryQueryType: 'tls',
-      initialResult,
-      errorMessage: 'Failed to run search on network tls',
-      abort: false,
+      filterQuery: undefined,
+      flowTarget: props.flowTarget,
+      ip: props.ip,
+      pagination: {
+        activePage: 0,
+        cursorStart: 0,
+        fakePossibleCount: 50,
+        querySize: 10,
+      },
+      sort: {
+        direction: 'desc',
+        field: '_id',
+      },
+      timerange: {
+        from: '2020-07-07T08:20:18.966Z',
+        interval: '12h',
+        to: '2020-07-08T08:20:18.966Z',
+      },
     });
   });
 

@@ -40,7 +40,7 @@ interface UsersTableProps {
   loadPage: (newActivePage: number) => void;
   setQuerySkip: (skip: boolean) => void;
   showMorePagesIndicator: boolean;
-  totalCount: number;
+  totalCount: number | null | undefined;
   type: networkModel.NetworkType;
 }
 
@@ -134,7 +134,7 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
       showMorePagesIndicator={showMorePagesIndicator}
       headerCount={totalCount}
       headerTitle={i18n.USERS}
-      headerUnit={i18n.UNIT(totalCount)}
+      headerUnit={totalCount != null ? i18n.UNIT(totalCount) : undefined}
       id={id}
       isInspect={isInspect}
       itemsPerRow={rowItems}

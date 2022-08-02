@@ -121,7 +121,7 @@ export interface BasicTableProps<T> {
   sorting?: SortingBasicTable;
   split?: boolean;
   stackHeader?: boolean;
-  totalCount: number | null | undefined;
+  totalCount: number;
   updateActivePage: (activePage: number) => void;
   updateLimitPagination: (limit: number) => void;
 }

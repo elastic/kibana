@@ -27,7 +27,7 @@ interface NetworkHttpTableProps {
   loadPage: (newActivePage: number) => void;
   setQuerySkip: (skip: boolean) => void;
   showMorePagesIndicator: boolean;
-  totalCount: number;
+  totalCount: number | null | undefined;
   type: networkModel.NetworkType;
 }
 
@@ -118,7 +118,7 @@ const NetworkHttpTableComponent: React.FC<NetworkHttpTableProps> = ({
       dataTestSubj={`table-${tableType}`}
       headerCount={totalCount}
       headerTitle={i18n.HTTP_REQUESTS}
-      headerUnit={i18n.UNIT(totalCount)}
+      headerUnit={totalCount != null ? i18n.UNIT(totalCount) : undefined}
       id={id}
       itemsPerRow={rowItems}
       isInspect={isInspect}

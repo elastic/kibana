@@ -132,7 +132,7 @@ export const PreviewHistogram = ({
   );
 
   useEffect(() => {
-    if (previousPreviewId !== previewId && totalCount > 0) {
+    if (previousPreviewId !== previewId && totalCount != null && totalCount > 0) {
       if (isNoisy(totalCount, timeFrame)) {
         addNoiseWarning();
       }

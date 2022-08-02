@@ -211,7 +211,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        {!hideSubtitle && toggleStatus && subtitle != null && (
+        {!hideSubtitle && toggleStatus && (
           <EuiFlexItem>
             <Subtitle data-test-subj="header-section-subtitle" items={subtitle} />
           </EuiFlexItem>

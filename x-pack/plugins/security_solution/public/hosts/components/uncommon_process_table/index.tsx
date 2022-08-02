@@ -31,7 +31,7 @@ interface UncommonProcessTableProps {
   loadPage: (newActivePage: number) => void;
   setQuerySkip: (skip: boolean) => void;
   showMorePagesIndicator: boolean;
-  totalCount: number;
+  totalCount: number | null | undefined;
   type: hostsModel.HostsType;
 }
 
@@ -118,7 +118,7 @@ const UncommonProcessTableComponent = React.memo<UncommonProcessTableProps>(
         dataTestSubj={`table-${tableType}`}
         headerCount={totalCount}
         headerTitle={i18n.UNCOMMON_PROCESSES}
-        headerUnit={i18n.UNIT(totalCount)}
+        headerUnit={totalCount != null ? i18n.UNIT(totalCount) : undefined}
         id={id}
         isInspect={isInspect}
         itemsPerRow={rowItems}

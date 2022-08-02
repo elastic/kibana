@@ -248,9 +248,12 @@ export const calculateTotalPages = ({
   itemsCount,
   itemsPerPage,
 }: {
-  itemsCount: number;
+  itemsCount: number | null | undefined;
   itemsPerPage: number;
-}): number => (itemsCount === 0 || itemsPerPage === 0 ? 0 : Math.ceil(itemsCount / itemsPerPage));
+}): number =>
+  itemsCount == null || itemsCount === 0 || itemsPerPage === 0
+    ? 0
+    : Math.ceil(itemsCount / itemsPerPage);
 
 /** Returns true if the events table has focus */
 export const tableHasFocus = (containerElement: HTMLElement | null): boolean =>

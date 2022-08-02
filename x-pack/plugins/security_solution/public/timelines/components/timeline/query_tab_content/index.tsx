@@ -336,7 +336,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   return (
     <>
       <InPortal node={timelineEventsCountPortalNode}>
-        {totalCount >= 0 ? <EventsCountBadge>{totalCount}</EventsCountBadge> : null}
+        {totalCount != null && totalCount >= 0 ? (
+          <EventsCountBadge>{totalCount}</EventsCountBadge>
+        ) : null}
       </InPortal>
       <TimelineRefetch
         id={`${timelineId}-${TimelineTabs.query}`}
@@ -431,7 +433,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                   itemsPerPage={itemsPerPage}
                   itemsPerPageOptions={itemsPerPageOptions}
                   onChangePage={loadPage}
-                  totalCount={isBlankTimeline ? 0 : totalCount}
+                  totalCount={isBlankTimeline || totalCount == null ? 0 : totalCount}
                 />
               )}
             </StyledEuiFlyoutFooter>

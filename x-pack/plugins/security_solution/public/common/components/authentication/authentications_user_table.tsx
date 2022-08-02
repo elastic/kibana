@@ -100,6 +100,13 @@ const AuthenticationsUserTableComponent: React.FC<AuthenticationsUserTableProps>
     inspect,
   });
 
+  const headerUnit =
+    totalCount != null
+      ? userName
+        ? i18n.HOSTS_UNIT(totalCount)
+        : i18n.USERS_UNIT(totalCount)
+      : undefined;
+
   return (
     <PaginatedTable
       activePage={activePage}
@@ -107,7 +114,7 @@ const AuthenticationsUserTableComponent: React.FC<AuthenticationsUserTableProps>
       dataTestSubj="table-users-authentications"
       headerCount={totalCount}
       headerTitle={i18n.AUTHENTICATIONS}
-      headerUnit={userName ? i18n.HOSTS_UNIT(totalCount) : i18n.USERS_UNIT(totalCount)}
+      headerUnit={headerUnit}
       id={TABLE_QUERY_ID}
       isInspect={isInspected}
       itemsPerRow={rowItems}
