@@ -33,6 +33,7 @@ export interface Props {
   addFilter?: ({ field, value }: { field: string; value: string | number }) => void;
   alignHeader?: 'center' | 'baseline' | 'stretch' | 'flexStart' | 'flexEnd';
   chartOptionsContextMenu?: (queryId: string) => React.ReactNode;
+  inspectTitle: string;
   isPanelExpanded: boolean;
   filters?: Filter[];
   height?: number;
@@ -53,6 +54,7 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
   addFilter,
   alignHeader,
   chartOptionsContextMenu,
+  inspectTitle,
   isPanelExpanded,
   filters,
   height = DEFAULT_HEIGHT,
@@ -155,6 +157,7 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
           alignHeader={alignHeader}
           hideSubtitle
           id={uniqueQueryId}
+          inspectTitle={inspectTitle}
           outerDirection="row"
           showInspectButton={chartOptionsContextMenu == null}
           title={title}
