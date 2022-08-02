@@ -10,7 +10,7 @@ import { registerFileKindRoutes } from './file_kind';
 
 import * as find from './find';
 import * as metrics from './metrics';
-import * as publicDownload from './public/download';
+import * as publicDownload from './public_facing/download';
 
 export function registerRoutes(router: FilesRouter) {
   registerFileKindRoutes(router);
