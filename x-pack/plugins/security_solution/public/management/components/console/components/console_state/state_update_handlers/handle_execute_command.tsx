@@ -186,6 +186,28 @@ export const handleExecuteCommand: ConsoleStoreReducer<
 
   // If args were entered, then validate them
   if (parsedInput.hasArgs) {
+    // Command supports no arguments
+    if (
+      !parsedInput.hasArg('help') &&
+      (!commandDefinition.args || Object.keys(commandDefinition.args).length === 0)
+    ) {
+      return updateStateWithNewCommandHistoryItem(
+        state,
+        createCommandHistoryEntry(
+          cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+          createCommandExecutionState({
+            errorMessage: i18n.translate(
+              'xpack.securitySolution.console.commandValidation.noArgumentsSupported',
+              {
+                defaultMessage: 'Command does not support any arguments',
+              }
+            ),
+          }),
+          false
+        )
+      );
+    }
+
     // no unknown arguments allowed
     const unknownInputArgs = getUnknownArguments(parsedInput.args, commandDefinition.args);
 
@@ -229,25 +251,6 @@ export const handleExecuteCommand: ConsoleStoreReducer<
         createCommandHistoryEntry(
           cloneCommandDefinitionWithNewRenderComponent(command, HelpCommandArgument),
           undefined,
-          false
-        )
-      );
-    }
-
-    // Command supports no arguments
-    if (!commandDefinition.args || Object.keys(commandDefinition.args).length === 0) {
-      return updateStateWithNewCommandHistoryItem(
-        state,
-        createCommandHistoryEntry(
-          cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
-          createCommandExecutionState({
-            errorMessage: i18n.translate(
-              'xpack.securitySolution.console.commandValidation.noArgumentsSupported',
-              {
-                defaultMessage: 'Command does not support any arguments',
-              }
-            ),
-          }),
           false
         )
       );
@@ -299,7 +302,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
 
     // Validate each argument given to the command
     for (const argName of Object.keys(parsedInput.args)) {
-      const argDefinition = commandDefinition.args[argName];
+      const argDefinition = commandDefinition.args?.[argName];
       const argInput = parsedInput.args[argName];
 
       // Unknown argument

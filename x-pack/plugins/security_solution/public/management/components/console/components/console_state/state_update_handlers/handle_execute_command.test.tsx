@@ -145,6 +145,17 @@ describe('When a Console command is entered by the user', () => {
     });
   });
 
+  it('should show error if unknown arguments are used along with the `--help` argument', async () => {
+    render();
+    enterCommand('cmd2 one two three --help');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+        'The following cmd2 argument is not supported by this command: --one'
+      );
+    });
+  });
+
   it('should show error if any required option is not set', async () => {
     render();
     enterCommand('cmd2 --ext one');
