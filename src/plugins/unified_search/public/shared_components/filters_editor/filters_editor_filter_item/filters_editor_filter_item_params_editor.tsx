@@ -8,6 +8,7 @@
 
 import React, { useCallback } from 'react';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { EuiFormRow } from '@elastic/eui';
 
 // @todo: {start} should be refactored cause shared component cannot be linked with non-shared components
 import { Operator } from '../../../filter_bar/filter_editor/lib/filter_operators';
@@ -57,15 +58,17 @@ export function ParamsEditor<TParams = unknown>({
       return null;
     case 'phrase':
       return (
-        <PhraseValueInput
-          compressed
-          indexPattern={dataView}
-          field={field!}
-          value={typeof params === 'string' ? params : undefined}
-          onChange={onParamsChange}
-          timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-          fullWidth
-        />
+        <EuiFormRow fullWidth>
+          <PhraseValueInput
+            compressed
+            indexPattern={dataView}
+            field={field!}
+            value={typeof params === 'string' ? params : undefined}
+            onChange={onParamsChange}
+            timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+            fullWidth
+          />
+        </EuiFormRow>
       );
     case 'phrases':
       return (

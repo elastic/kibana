@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { EuiFormRow } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { uniq } from 'lodash';
 import React from 'react';
@@ -14,7 +13,6 @@ import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import { PhraseSuggestorUI, PhraseSuggestorProps } from './phrase_suggestor';
 import { ValueInputType } from './value_input_type';
-import { getFieldValidityAndErrorMessage } from '../../utils/helpers';
 
 interface PhraseValueInputProps extends PhraseSuggestorProps {
   value?: string;
@@ -23,17 +21,13 @@ interface PhraseValueInputProps extends PhraseSuggestorProps {
   fullWidth?: boolean;
   compressed?: boolean;
   disabled?: boolean;
+  isInvalid?: boolean;
 }
 
 class PhraseValueInputUI extends PhraseSuggestorUI<PhraseValueInputProps> {
   public render() {
-    const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(
-      this.props.field,
-      this.props.value
-    );
-
     return (
-      <EuiFormRow fullWidth={this.props.fullWidth} isInvalid={isInvalid} error={errorMessage}>
+      <>
         {this.isSuggestingValues() ? (
           this.renderWithSuggestions()
         ) : (
@@ -48,10 +42,10 @@ class PhraseValueInputUI extends PhraseSuggestorUI<PhraseValueInputProps> {
             value={this.props.value}
             onChange={this.props.onChange}
             field={this.props.field}
-            isInvalid={isInvalid}
+            isInvalid={this.props.isInvalid}
           />
         )}
-      </EuiFormRow>
+      </>
     );
   }
 
