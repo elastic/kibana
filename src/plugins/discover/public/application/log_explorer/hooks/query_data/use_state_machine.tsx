@@ -35,6 +35,10 @@ export const useStateMachineService = ({
       const initialTimeRange = query.timefilter.timefilter.getAbsoluteTime();
 
       return dataAccessStateMachine.withContext({
+        configuration: {
+          chunkSize: 200,
+          minimumChunkOverscan: 50,
+        },
         dataView,
         timeRange: initialTimeRange,
         position: {

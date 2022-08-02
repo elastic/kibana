@@ -15,9 +15,14 @@ export const areVisibleEntriesNearStart: ConditionPredicate<
 > = (context, event) =>
   event.type === 'visibleEntriesChanged' &&
   context.topChunk.status === 'loaded' &&
-  context.topChunk.rowIndex === event.visibleStartRowIndex;
+  event.visibleStartRowIndex >=
+    context.topChunk.rowIndex - context.configuration.minimumChunkOverscan;
 
-export const areVisibleEntriesNearEnd: ConditionPredicate<
-  LogExplorerContext,
-  LogExplorerEvent
-> = () => false;
+export const areVisibleEntriesNearEnd: ConditionPredicate<LogExplorerContext, LogExplorerEvent> = (
+  context,
+  event
+) =>
+  event.type === 'visibleEntriesChanged' &&
+  context.bottomChunk.status === 'loaded' &&
+  event.visibleEndRowIndex >=
+    context.bottomChunk.rowIndex - context.configuration.minimumChunkOverscan;

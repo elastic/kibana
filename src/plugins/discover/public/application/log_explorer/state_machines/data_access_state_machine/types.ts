@@ -12,9 +12,14 @@ import { LogExplorerChunk, LogExplorerPosition } from '../../types';
 import { LoadAroundEvent } from './load_around_service';
 
 export interface LogExplorerContext {
+  configuration: {
+    chunkSize: number;
+    minimumChunkOverscan: number;
+  };
   dataView: DataView;
-  timeRange: TimeRange;
   position: LogExplorerPosition;
+  timeRange: TimeRange;
+
   topChunk: LogExplorerChunk;
   bottomChunk: LogExplorerChunk;
 }
