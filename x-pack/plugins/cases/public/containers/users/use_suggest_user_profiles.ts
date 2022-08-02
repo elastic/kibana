@@ -12,7 +12,7 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { UserProfile } from '@kbn/security-plugin/common';
 import { DEFAULT_USER_SIZE } from '../../../common/constants';
 import * as i18n from '../translations';
-import { useToasts } from '../../common/lib/kibana';
+import { useKibana, useToasts } from '../../common/lib/kibana';
 import { ServerError } from '../../types';
 import { USER_PROFILES_CACHE_KEY, USER_PROFILES_SUGGEST_CACHE_KEY } from '../constants';
 import { suggestUserProfiles, SuggestUserProfilesArgs } from './api';
@@ -23,7 +23,8 @@ export const useSuggestUserProfiles = ({
   name,
   owner,
   size = DEFAULT_USER_SIZE,
-}: Omit<SuggestUserProfilesArgs, 'signal'>) => {
+}: Omit<SuggestUserProfilesArgs, 'signal' | 'http'>) => {
+  const { http } = useKibana().services;
   const [debouncedName, setDebouncedName] = useState(name);
 
   useDebounce(() => setDebouncedName(name), DEBOUNCE_MS, [name]);
@@ -38,7 +39,13 @@ export const useSuggestUserProfiles = ({
     ],
     () => {
       const abortCtrlRef = new AbortController();
-      return suggestUserProfiles({ name, owner, size, signal: abortCtrlRef.signal });
+      return suggestUserProfiles({
+        http,
+        name: debouncedName,
+        owner,
+        size,
+        signal: abortCtrlRef.signal,
+      });
     },
     {
       enabled: !isEmpty(debouncedName),
