@@ -34,58 +34,60 @@ export const PolicyHostsField = ({
 }) => {
   const { data } = useSelector(selectAgentPolicies);
 
-  const policyHostsOptions = data?.items.map((item) => {
-    const hasLocation = privateLocations.find((location) => location.agentPolicyId === item.id);
-    return {
-      disabled: Boolean(hasLocation),
-      value: item.id,
-      inputDisplay: (
-        <EuiHealth
-          color={item.status === 'active' ? 'success' : 'warning'}
-          style={{ lineHeight: 'inherit' }}
-        >
-          {item.name}
-        </EuiHealth>
-      ),
-      'data-test-subj': item.name,
-      dropdownDisplay: (
-        <EuiToolTip
-          content={
-            hasLocation?.label
-              ? i18n.translate('xpack.synthetics.monitorManagement.anotherPrivateLocation', {
-                  defaultMessage:
-                    'This agent policy is already attached to location: {locationName}.',
-                  values: { locationName: hasLocation?.label },
-                })
-              : undefined
-          }
-        >
-          <>
-            <EuiHealth
-              color={item.status === 'active' ? 'success' : 'warning'}
-              style={{ lineHeight: 'inherit' }}
-            >
-              <strong>{item.name}</strong>
-            </EuiHealth>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiText size="s" color="subdued" className="eui-textNoWrap">
-                  <p>
-                    {AGENTS_LABEL} {item.agents}
-                  </p>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText size="s" color="subdued">
-                  <p>{item.description}</p>
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        </EuiToolTip>
-      ),
-    };
-  });
+  const policyHostsOptions = data?.items
+    .filter((item) => !item.is_managed)
+    .map((item) => {
+      const hasLocation = privateLocations.find((location) => location.agentPolicyId === item.id);
+      return {
+        disabled: Boolean(hasLocation),
+        value: item.id,
+        inputDisplay: (
+          <EuiHealth
+            color={item.status === 'active' ? 'success' : 'warning'}
+            style={{ lineHeight: 'inherit' }}
+          >
+            {item.name}
+          </EuiHealth>
+        ),
+        'data-test-subj': item.name,
+        dropdownDisplay: (
+          <EuiToolTip
+            content={
+              hasLocation?.label
+                ? i18n.translate('xpack.synthetics.monitorManagement.anotherPrivateLocation', {
+                    defaultMessage:
+                      'This agent policy is already attached to location: {locationName}.',
+                    values: { locationName: hasLocation?.label },
+                  })
+                : undefined
+            }
+          >
+            <>
+              <EuiHealth
+                color={item.status === 'active' ? 'success' : 'warning'}
+                style={{ lineHeight: 'inherit' }}
+              >
+                <strong>{item.name}</strong>
+              </EuiHealth>
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiText size="s" color="subdued" className="eui-textNoWrap">
+                    <p>
+                      {AGENTS_LABEL} {item.agents}
+                    </p>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText size="s" color="subdued">
+                    <p>{item.description}</p>
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          </EuiToolTip>
+        ),
+      };
+    });
 
   return (
     <EuiFormRow
