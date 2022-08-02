@@ -931,7 +931,7 @@ export class TaskRunner<
           continue;
         }
 
-        // Summary actions should not run every time
+        // Summary actions should not run on every rule run
         if (action.notifyWhen === NotifyWhen.ON_EVERY_RUN && action.isSummary) {
           this.logger.debug(
             `skipping action "${action.ref}" of "${ruleType.id}" as it is a summary and supposed to run every rule run`
