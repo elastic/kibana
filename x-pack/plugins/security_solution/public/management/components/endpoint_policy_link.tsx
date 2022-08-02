@@ -26,19 +26,17 @@ export const EndpointPolicyLink = memo<
     backLink?: PolicyDetailsRouteState['backLink'];
   }
 >(({ policyId, backLink, children, missingPolicies = {}, ...otherProps }) => {
-  const isPolicyIdMissing = policyId === undefined || policyId === '';
-
   const { getAppUrl } = useAppUrl();
   const { toRoutePath, toRouteUrl } = useMemo(() => {
-    const path = !isPolicyIdMissing ? getPolicyDetailPath(policyId) : '';
+    const path = policyId ? getPolicyDetailPath(policyId) : '';
     return {
       toRoutePath: backLink ? { pathname: path, state: { backLink } } : path,
       toRouteUrl: getAppUrl({ path }),
     };
-  }, [policyId, getAppUrl, backLink, isPolicyIdMissing]);
+  }, [policyId, getAppUrl, backLink]);
   const clickHandler = useNavigateByRouterEventHandler(toRoutePath);
 
-  if (isPolicyIdMissing || missingPolicies[policyId]) {
+  if (!policyId || missingPolicies[policyId]) {
     return (
       <span className={otherProps.className} data-test-subj={otherProps['data-test-subj']}>
         {children}

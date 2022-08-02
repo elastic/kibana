@@ -13,12 +13,7 @@ export const isPolicyOutOfDate = (
   reported: HostMetadata['Endpoint']['policy']['applied'],
   current: HostInfo['policy_info']
 ): boolean => {
-  if (
-    current === undefined ||
-    current === null ||
-    reported.id === undefined ||
-    reported.id === ''
-  ) {
+  if (!current || !reported.id) {
     return false; // we don't know, can't declare it out-of-date
   }
   return !(
