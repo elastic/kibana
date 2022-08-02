@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
-import { DataViewField } from '../../../../../../src/plugins/data_views/common';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 import {
   kbnTypeToMLJobType,

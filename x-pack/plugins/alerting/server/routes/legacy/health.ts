@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { AlertingRouter } from '../../types';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { AlertingFrameworkHealth } from '../../types';
-import { EncryptedSavedObjectsPluginSetup } from '../../../../encrypted_saved_objects/server';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 import { getSecurityHealth } from '../../lib/get_security_health';
 
@@ -32,15 +32,16 @@ export function healthRoute(
       }
       trackLegacyRouteUsage('health', usageCounter);
       try {
+        const alertingContext = await context.alerting;
         // Verify that user has access to at least one rule type
-        const ruleTypes = Array.from(await context.alerting.getRulesClient().listAlertTypes());
+        const ruleTypes = Array.from(await alertingContext.getRulesClient().listAlertTypes());
         if (ruleTypes.length > 0) {
-          const alertingFrameworkHealth = await context.alerting.getFrameworkHealth();
+          const alertingFrameworkHealth = await alertingContext.getFrameworkHealth();
 
           const securityHealth = await getSecurityHealth(
             async () => (licenseState ? licenseState.getIsSecurityEnabled() : null),
             async () => encryptedSavedObjects.canEncrypt,
-            context.alerting.areApiKeysEnabled
+            alertingContext.areApiKeysEnabled
           );
 
           const frameworkHealth: AlertingFrameworkHealth = {

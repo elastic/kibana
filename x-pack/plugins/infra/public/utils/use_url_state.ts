@@ -10,7 +10,7 @@ import { Location } from 'history';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { decode, encode, RisonValue } from 'rison-node';
 import { useHistory } from 'react-router-dom';
-import { url } from '../../../../../src/plugins/kibana_utils/public';
+import { url } from '@kbn/kibana-utils-plugin/public';
 
 export const useUrlState = <State>({
   defaultState,

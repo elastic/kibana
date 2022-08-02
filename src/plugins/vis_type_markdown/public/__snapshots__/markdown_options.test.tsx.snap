@@ -39,7 +39,7 @@ exports[`MarkdownOptions should match snapshot 1`] = `
             size="xs"
           >
             <EuiLink
-              href="https://help.github.com/articles/github-flavored-markdown/"
+              href="https://docs.github.com/en/get-started/writing-on-github/"
               target="_blank"
             >
               <FormattedMessage

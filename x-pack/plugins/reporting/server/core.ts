@@ -6,10 +6,9 @@
  */
 
 import Hapi from '@hapi/hapi';
-import * as Rx from 'rxjs';
-import { filter, first, map, switchMap, take } from 'rxjs/operators';
 import type {
-  BasePath,
+  DocLinksServiceSetup,
+  IBasePath,
   IClusterClient,
   Logger,
   PackageInfo,
@@ -18,42 +17,48 @@ import type {
   SavedObjectsServiceStart,
   StatusServiceSetup,
   UiSettingsServiceStart,
-} from 'src/core/server';
-import type { PluginStart as DataPluginStart } from 'src/plugins/data/server';
-import type { FieldFormatsStart } from 'src/plugins/field_formats/server';
-import { KibanaRequest, ServiceStatusLevels } from '../../../../src/core/server';
-import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import type { LicensingPluginStart } from '../../licensing/server';
-import type {
-  ScreenshottingStart,
-  PngScreenshotOptions as BasePngScreenshotOptions,
-  PngScreenshotResult,
+} from '@kbn/core/server';
+import { KibanaRequest, CoreKibanaRequest, ServiceStatusLevels } from '@kbn/core/server';
+import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import {
   PdfScreenshotResult,
-  UrlOrUrlWithContext,
-} from '../../screenshotting/server';
-import type { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
-import { DEFAULT_SPACE_ID } from '../../spaces/common/constants';
-import type { SpacesPluginSetup } from '../../spaces/server';
-import type { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
+  PngScreenshotResult,
+  ScreenshotOptions,
+  ScreenshottingStart,
+} from '@kbn/screenshotting-plugin/server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import * as Rx from 'rxjs';
+import { filter, first, map, switchMap, take } from 'rxjs/operators';
+import type { ReportingConfig, ReportingSetup } from '.';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
-import { durationToNumber } from '../common/schema_utils';
-import type { ReportingConfig, ReportingSetup } from './';
 import { ReportingConfigType } from './config';
 import { checkLicense, getExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
-import type { ReportingPluginRouter, PngScreenshotOptions, PdfScreenshotOptions } from './types';
+import type { PdfScreenshotOptions, PngScreenshotOptions, ReportingPluginRouter } from './types';
 
 export interface ReportingInternalSetup {
-  basePath: Pick<BasePath, 'set'>;
+  basePath: Pick<IBasePath, 'set'>;
   router: ReportingPluginRouter;
   features: FeaturesPluginSetup;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
+  usageCounter?: UsageCounter;
   taskManager: TaskManagerSetupContract;
   logger: Logger;
   status: StatusServiceSetup;
+  docLinks: DocLinksServiceSetup;
 }
 
 export interface ReportingInternalStart {
@@ -164,7 +169,7 @@ export class ReportingCore {
     if (this.pluginSetupDeps && this.config) {
       return true;
     }
-    return await this.pluginSetup$.pipe(take(2)).toPromise(); // once for pluginSetupDeps (sync) and twice for config (async)
+    return await Rx.firstValueFrom(this.pluginSetup$.pipe(take(2))); // once for pluginSetupDeps (sync) and twice for config (async)
   }
 
   /*
@@ -244,6 +249,14 @@ export class ReportingCore {
   }
 
   /*
+   *
+   * Track usage of code paths for telemetry
+   */
+  public getUsageCounter(): UsageCounter | undefined {
+    return this.pluginSetupDeps?.usageCounter;
+  }
+
+  /*
    * Gives async access to the startDeps
    */
   public async getPluginStartDeps() {
@@ -251,7 +264,7 @@ export class ReportingCore {
       return this.pluginStartDeps;
     }
 
-    return await this.pluginStart$.pipe(first()).toPromise();
+    return await Rx.firstValueFrom(this.pluginStart$);
   }
 
   public getExportTypesRegistry() {
@@ -270,12 +283,9 @@ export class ReportingCore {
     const { license$ } = (await this.getPluginStartDeps()).licensing;
     const registry = this.getExportTypesRegistry();
 
-    return await license$
-      .pipe(
-        map((license) => checkLicense(registry, license)),
-        first()
-      )
-      .toPromise();
+    return await Rx.firstValueFrom(
+      license$.pipe(map((license) => checkLicense(registry, license)))
+    );
   }
 
   /*
@@ -314,7 +324,7 @@ export class ReportingCore {
   }
 
   public getFakeRequest(baseRequest: object, spaceId: string | undefined, logger = this.logger) {
-    const fakeRequest = KibanaRequest.from({
+    const fakeRequest = CoreKibanaRequest.from({
       path: '/',
       route: { settings: {} },
       url: { href: '/' },
@@ -370,27 +380,14 @@ export class ReportingCore {
   ): Rx.Observable<PngScreenshotResult | PdfScreenshotResult> {
     return Rx.defer(() => this.getPluginStartDeps()).pipe(
       switchMap(({ screenshotting }) => {
-        const config = this.getConfig();
         return screenshotting.getScreenshots({
           ...options,
-          timeouts: {
-            loadDelay: durationToNumber(config.get('capture', 'loadDelay')),
-            openUrl: durationToNumber(config.get('capture', 'timeouts', 'openUrl')),
-            waitForElements: durationToNumber(config.get('capture', 'timeouts', 'waitForElements')),
-            renderComplete: durationToNumber(config.get('capture', 'timeouts', 'renderComplete')),
-          },
-
-          layout: {
-            zoom: config.get('capture', 'zoom'),
-            ...options.layout,
-          },
-
           urls: options.urls.map((url) =>
             typeof url === 'string'
               ? url
               : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
-          ) as UrlOrUrlWithContext[],
-        } as BasePngScreenshotOptions);
+          ),
+        } as ScreenshotOptions);
       })
     );
   }

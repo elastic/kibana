@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { Graph } from './';
+import { Graph } from '.';
 
 describe('Vertex', () => {
   let graph;

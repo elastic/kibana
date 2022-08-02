@@ -12,6 +12,7 @@ import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
 
+import { getViewableDetectors } from '../../timeseriesexplorer/timeseriesexplorer_utils/get_viewable_detectors';
 import { NavigateToPath, useNotifications } from '../../contexts/kibana';
 
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
@@ -46,6 +47,7 @@ import type { TimeSeriesExplorerAppState } from '../../../../common/types/locato
 import type { TimeRangeBounds } from '../../util/time_buckets';
 import { useJobSelectionFlyout } from '../../contexts/ml/use_job_selection_flyout';
 import { useRefresh } from '../use_refresh';
+import { TimeseriesexplorerNoChartData } from '../../timeseriesexplorer/components/timeseriesexplorer_no_chart_data';
 
 export const timeSeriesExplorerRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -151,12 +153,6 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   const previousSelectedJobIds = usePrevious(selectedJobIds);
   const isJobChange = !isEqual(previousSelectedJobIds, selectedJobIds);
 
-  // Next we get globalState and appState information to pass it on as props later.
-  // If a job change is going on, we fall back to defaults (as if appState was already cleared),
-  // otherwise the page could break.
-  const selectedDetectorIndex = isJobChange
-    ? 0
-    : timeSeriesExplorerUrlState?.mlTimeSeriesExplorer?.detectorIndex ?? 0;
   const selectedEntities = isJobChange
     ? undefined
     : timeSeriesExplorerUrlState?.mlTimeSeriesExplorer?.entities;
@@ -172,6 +168,15 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
 
   const selectedJob = selectedJobId !== undefined ? mlJobService.getJob(selectedJobId) : undefined;
   const timeSeriesJobs = createTimeSeriesJobData(mlJobService.jobs);
+
+  const viewableDetector = selectedJob ? getViewableDetectors(selectedJob)[0]?.index ?? 0 : 0;
+
+  // Next we get globalState and appState information to pass it on as props later.
+  // If a job change is going on, we fall back to defaults (as if appState was already cleared),
+  // otherwise the page could break.
+  const selectedDetectorIndex = isJobChange
+    ? viewableDetector
+    : timeSeriesExplorerUrlState?.mlTimeSeriesExplorer?.detectorIndex ?? viewableDetector;
 
   let autoZoomDuration: number | undefined;
   if (selectedJobId !== undefined && selectedJob !== undefined) {
@@ -317,6 +322,14 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
     return (
       <TimeSeriesExplorerPage dateFormatTz={dateFormatTz} noSingleMetricJobsFound>
         <TimeseriesexplorerNoJobsFound />
+      </TimeSeriesExplorerPage>
+    );
+  }
+
+  if (!bounds) {
+    return (
+      <TimeSeriesExplorerPage dateFormatTz={dateFormatTz}>
+        <TimeseriesexplorerNoChartData />
       </TimeSeriesExplorerPage>
     );
   }

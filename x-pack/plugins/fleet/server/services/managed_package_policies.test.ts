@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { upgradeManagedPackagePolicies } from './managed_package_policies';
 import { packagePolicyService } from './package_policy';

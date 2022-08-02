@@ -6,3 +6,5 @@
  */
 
 export const CUSTOM_TEMPLATES = '[data-test-subj="Custom templates"]';
+
+export const ROWS = '.euiTableRow';

@@ -11,12 +11,12 @@ import {
   getEsQueryFromSavedSearch,
 } from './saved_search_utils';
 import type { SavedSearchSavedObject } from '../../../../common/types';
-import type { SavedSearch } from '../../../../../../../src/plugins/discover/public';
+import type { SavedSearch } from '@kbn/discover-plugin/public';
 import type { Filter, FilterStateStore } from '@kbn/es-query';
-import { stubbedSavedObjectIndexPattern } from '../../../../../../../src/plugins/data_views/common/data_view.stub';
-import { DataView } from '../../../../../../../src/plugins/data_views/public';
-import { fieldFormatsMock } from '../../../../../../../src/plugins/field_formats/common/mocks';
-import { uiSettingsServiceMock } from 'src/core/public/mocks';
+import { stubbedSavedObjectIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
 
 // helper function to create data views
 function createMockDataView(id: string) {

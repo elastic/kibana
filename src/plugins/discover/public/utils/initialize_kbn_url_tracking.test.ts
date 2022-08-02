@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { AppUpdater } from 'kibana/public';
+import { AppUpdater } from '@kbn/core/public';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { DiscoverSetupPlugins } from '../plugin';
 import { initializeKbnUrlTracking } from './initialize_kbn_url_tracking';
 

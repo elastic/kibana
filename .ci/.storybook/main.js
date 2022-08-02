@@ -7,7 +7,7 @@
  */
 
 const config = require('@kbn/storybook').defaultConfig;
-const aliases = require('../../src/dev/storybook/aliases.ts').storybookAliases;
+const aliases = require('../../src/dev/storybook/aliases').storybookAliases;
 
 config.refs = {};
 

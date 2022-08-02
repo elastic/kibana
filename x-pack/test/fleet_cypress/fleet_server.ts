@@ -6,7 +6,7 @@
  */
 
 import { ChildProcess, spawn } from 'child_process';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import axios, { AxiosRequestConfig } from 'axios';
 import { Manager } from './resource_manager';
 import { getLatestVersion } from './artifact_manager';

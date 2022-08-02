@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Plugin, Logger, CoreSetup, PluginInitializerContext } from 'src/core/server';
+import { Plugin, Logger, CoreSetup, PluginInitializerContext } from '@kbn/core/server';
 
 import { StackAlertsDeps, StackAlertsStartDeps } from './types';
 import { registerBuiltInAlertTypes } from './alert_types';
@@ -29,6 +29,7 @@ export class AlertingBuiltinsPlugin
         .getStartServices()
         .then(async ([, { triggersActionsUi }]) => triggersActionsUi.data),
       alerting,
+      core,
     });
   }
 

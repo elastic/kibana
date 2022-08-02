@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
+import type { Logger } from '@kbn/core/server';
 
 import { PreviewTelemetryEventsSender } from '../../../../telemetry/preview_sender';
-import { ITelemetryReceiver } from '../../../../telemetry/receiver';
-import { ITelemetryEventsSender } from '../../../../telemetry/sender';
+import type { ITelemetryReceiver } from '../../../../telemetry/receiver';
+import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 import { createTelemetryEndpointTaskConfig } from '../../../../telemetry/tasks/endpoint';
 import { parseNdjson } from './parse_ndjson';
 

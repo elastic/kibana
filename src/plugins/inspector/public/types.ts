@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { OverlayRef } from '../../../core/public';
+import { OverlayRef } from '@kbn/core/public';
 import { Adapters } from '../common';
 
 /**

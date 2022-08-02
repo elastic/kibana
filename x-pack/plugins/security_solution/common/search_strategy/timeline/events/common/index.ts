@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export type {
-  TimelineEdges,
-  TimelineItem,
-  TimelineNonEcsData,
-} from '../../../../../../timelines/common';
+export type { TimelineEdges, TimelineItem, TimelineNonEcsData } from '@kbn/timelines-plugin/common';

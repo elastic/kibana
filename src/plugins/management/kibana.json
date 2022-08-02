@@ -4,7 +4,7 @@
   "server": true,
   "ui": true,
   "optionalPlugins": ["home", "share"],
-  "requiredBundles": ["kibanaReact", "kibanaUtils", "home"],
+  "requiredBundles": ["kibanaReact", "kibanaUtils"],
   "owner": {
     "name": "Vis Editors",
     "githubTeam": "kibana-vis-editors"

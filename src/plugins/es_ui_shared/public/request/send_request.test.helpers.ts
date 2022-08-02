@@ -8,7 +8,7 @@
 
 import sinon from 'sinon';
 
-import { HttpSetup, HttpFetchOptions } from '../../../../../src/core/public';
+import { HttpSetup, HttpFetchOptions } from '@kbn/core/public';
 import {
   SendRequestConfig,
   SendRequestResponse,

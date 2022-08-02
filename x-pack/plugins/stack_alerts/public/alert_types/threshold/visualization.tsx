@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment, useEffect, useState } from 'react';
-import { IUiSettingsClient, HttpSetup } from 'kibana/public';
+import { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import { interval } from 'rxjs';
 import {
   AnnotationDomainType,
@@ -29,16 +29,16 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ChartsPluginSetup } from 'src/plugins/charts/public';
-import { FieldFormatsStart } from 'src/plugins/field_formats/public';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { AggregationType, Comparator } from '@kbn/triggers-actions-ui-plugin/public';
+import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
 import {
   getThresholdAlertVisualizationData,
   GetThresholdAlertVisualizationDataParams,
 } from './index_threshold_api';
-import { AggregationType, Comparator } from '../../../../triggers_actions_ui/public';
 import { IndexThresholdAlertParams } from './types';
-import { parseDuration } from '../../../../alerting/common/parse_duration';
 
 const customTheme = () => {
   return {

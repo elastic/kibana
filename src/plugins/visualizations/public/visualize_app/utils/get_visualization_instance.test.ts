@@ -6,13 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getSavedSearch } from '../../../../discover/public';
-import type {
-  VisualizeInput,
-  VisSavedObject,
-  Vis,
-  VisParams,
-} from 'src/plugins/visualizations/public';
+import { getSavedSearch } from '@kbn/discover-plugin/public';
+import type { VisualizeInput, VisSavedObject, Vis, VisParams } from '../..';
 import {
   getVisualizationInstance,
   getVisualizationInstanceFromInput,
@@ -43,7 +38,7 @@ jest.mock('../../vis_async', () => ({
 }));
 const { createVisAsync } = jest.requireMock('../../vis_async');
 
-jest.mock('../../../../discover/public', () => ({
+jest.mock('@kbn/discover-plugin/public', () => ({
   getSavedSearch: jest.fn().mockResolvedValue({
     id: 'savedSearch',
     title: 'savedSearchTitle',

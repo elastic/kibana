@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { mockLogger, sampleDocWithSortId } from '../__mocks__/es_results';
+import { sampleDocWithSortId } from '../__mocks__/es_results';
 
-import { listMock } from '../../../../../../lists/server/mocks';
-import { getSearchListItemResponseMock } from '../../../../../../lists/common/schemas/response/search_list_item_schema.mock';
+import { listMock } from '@kbn/lists-plugin/server/mocks';
+import { getSearchListItemResponseMock } from '@kbn/lists-plugin/common/schemas/response/search_list_item_schema.mock';
 import { createSetToFilterAgainst } from './create_set_to_filter_against';
-import { buildRuleMessageMock as buildRuleMessage } from '../rule_messages.mock';
+import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 
 describe('createSetToFilterAgainst', () => {
   let listClient = listMock.getListClient();
   let events = [sampleDocWithSortId('123', undefined, '1.1.1.1')];
+  const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -42,8 +43,7 @@ describe('createSetToFilterAgainst', () => {
       listId: 'list-123',
       listType: 'ip',
       listClient,
-      logger: mockLogger,
-      buildRuleMessage,
+      ruleExecutionLogger,
     });
     expect([...field]).toEqual([]);
   });
@@ -56,8 +56,7 @@ describe('createSetToFilterAgainst', () => {
       listId: 'list-123',
       listType: 'ip',
       listClient,
-      logger: mockLogger,
-      buildRuleMessage,
+      ruleExecutionLogger,
     });
     expect(listClient.searchListItemByValues).toHaveBeenCalledWith({
       listId: 'list-123',
@@ -78,8 +77,7 @@ describe('createSetToFilterAgainst', () => {
       listId: 'list-123',
       listType: 'ip',
       listClient,
-      logger: mockLogger,
-      buildRuleMessage,
+      ruleExecutionLogger,
     });
     expect(listClient.searchListItemByValues).toHaveBeenCalledWith({
       listId: 'list-123',
@@ -100,8 +98,7 @@ describe('createSetToFilterAgainst', () => {
       listId: 'list-123',
       listType: 'ip',
       listClient,
-      logger: mockLogger,
-      buildRuleMessage,
+      ruleExecutionLogger,
     });
     expect(listClient.searchListItemByValues).toHaveBeenCalledWith({
       listId: 'list-123',

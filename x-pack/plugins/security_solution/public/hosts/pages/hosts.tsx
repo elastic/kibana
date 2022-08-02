@@ -11,10 +11,11 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { isTab } from '../../../../timelines/public';
-
+import type { Filter } from '@kbn/es-query';
+import { isTab } from '@kbn/timelines-plugin/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { SecurityPageName } from '../../app/types';
-import { UpdateDateRange } from '../../common/components/charts/common';
+import type { UpdateDateRange } from '../../common/components/charts/common';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { HeaderPage } from '../../common/components/header_page';
 import { LastEventTime } from '../../common/components/last_event_time';
@@ -29,13 +30,12 @@ import { TimelineId } from '../../../common/types/timeline';
 import { LastEventIndexKey } from '../../../common/search_strategy';
 import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/keury';
-import { inputsSelectors, State } from '../../common/store';
+import type { State } from '../../common/store';
+import { inputsSelectors } from '../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
 
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { getEsQueryConfig } from '../../../../../../src/plugins/data/common';
 import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
-import { OverviewEmpty } from '../../overview/components/overview_empty';
 import { Display } from './display';
 import { HostsTabs } from './hosts_tabs';
 import { navTabsHosts } from './nav_tabs';
@@ -55,7 +55,10 @@ import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hook
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { ID } from '../containers/hosts';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { filterHostExternalAlertData } from '../../common/components/visualization_actions/utils';
+
+import { LandingPageComponent } from '../../common/components/landing_page';
+import { Loader } from '../../common/components/loader';
+import { hostNameExistsFilter } from '../../common/components/visualization_actions/utils';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -71,12 +74,7 @@ const HostsComponent = () => {
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
-    (state) =>
-      (
-        getTimeline(state, TimelineId.hostsPageEvents) ??
-        getTimeline(state, TimelineId.hostsPageExternalAlerts) ??
-        timelineDefaults
-      ).graphEventId
+    (state) => (getTimeline(state, TimelineId.hostsPageEvents) ?? timelineDefaults).graphEventId
   );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -98,17 +96,15 @@ const HostsComponent = () => {
   const capabilities = useMlCapabilities();
   const { uiSettings } = useKibana().services;
   const { tabName } = useParams<{ tabName: string }>();
-  const tabsFilters = React.useMemo(() => {
-    if (tabName === HostsTableType.alerts) {
-      return filters.length > 0
-        ? [...filters, ...filterHostExternalAlertData]
-        : filterHostExternalAlertData;
+  const tabsFilters: Filter[] = React.useMemo(() => {
+    if (tabName === HostsTableType.events) {
+      return filters.length > 0 ? [...filters, ...hostNameExistsFilter] : hostNameExistsFilter;
     }
 
     if (tabName === HostsTableType.risk) {
       const severityFilter = generateSeverityFilter(severitySelection);
 
-      return [...severityFilter, ...filterHostExternalAlertData, ...filters];
+      return [...severityFilter, ...hostNameExistsFilter, ...filters];
     }
     return filters;
   }, [severitySelection, tabName, filters]);
@@ -128,7 +124,7 @@ const HostsComponent = () => {
     },
     [dispatch]
   );
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+  const { indicesExist, indexPattern, selectedPatterns, loading } = useSourcererDataView();
   const [filterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
@@ -151,7 +147,6 @@ const HostsComponent = () => {
   );
 
   const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
-  const usersEnabled = useIsExperimentalFeatureEnabled('usersEnabled');
 
   useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
 
@@ -179,6 +174,10 @@ const HostsComponent = () => {
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
 
+  if (loading) {
+    return <Loader data-test-subj="loadingPanelExploreHosts" overlay size="xl" />;
+  }
+
   return (
     <>
       {indicesExist ? (
@@ -192,11 +191,7 @@ const HostsComponent = () => {
             <Display show={!globalFullScreen}>
               <HeaderPage
                 subtitle={
-                  <LastEventTime
-                    docValueFields={docValueFields}
-                    indexKey={LastEventIndexKey.hosts}
-                    indexNames={selectedPatterns}
-                  />
+                  <LastEventTime indexKey={LastEventIndexKey.hosts} indexNames={selectedPatterns} />
                 }
                 title={i18n.PAGE_TITLE}
                 border
@@ -218,7 +213,6 @@ const HostsComponent = () => {
                 navTabs={navTabsHosts({
                   hasMlUserPermissions: hasMlUserPermissions(capabilities),
                   isRiskyHostsEnabled: riskyHostsFeatureEnabled,
-                  isUsersEnabled: usersEnabled,
                 })}
               />
 
@@ -227,7 +221,6 @@ const HostsComponent = () => {
 
             <HostsTabs
               deleteQuery={deleteQuery}
-              docValueFields={docValueFields}
               to={to}
               filterQuery={tabsFilterQuery || ''}
               isInitializing={isInitializing}
@@ -236,13 +229,12 @@ const HostsComponent = () => {
               setQuery={setQuery}
               from={from}
               type={hostsModel.HostsType.page}
+              pageFilters={tabsFilters}
             />
           </SecuritySolutionPageWrapper>
         </StyledFullHeightContainer>
       ) : (
-        <SecuritySolutionPageWrapper>
-          <OverviewEmpty />
-        </SecuritySolutionPageWrapper>
+        <LandingPageComponent />
       )}
 
       <SpyRoute pageName={SecurityPageName.hosts} />

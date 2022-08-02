@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 import { UsageCollectionPlugin } from './plugin';
 
 export type {

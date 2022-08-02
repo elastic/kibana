@@ -7,7 +7,7 @@
  */
 
 import { Subject } from 'rxjs';
-import { savedObjectsRepositoryMock, metricsServiceMock } from '../../../../../core/server/mocks';
+import { savedObjectsRepositoryMock, metricsServiceMock } from '@kbn/core/server/mocks';
 import { startTrackingEventLoopDelaysUsage } from './track_delays';
 
 describe('startTrackingEventLoopDelaysUsage', () => {

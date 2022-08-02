@@ -28,7 +28,7 @@ import {
   getLatestDataOrBucketTimestamp,
   isTimeSeriesViewJob,
 } from '../../../../../../../common/util/job_utils';
-import { withKibana } from '../../../../../../../../../../src/plugins/kibana_react/public';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../../../common/constants/locator';
 import { timeFormatter } from '../../../../../../../common/util/date_utils';
 

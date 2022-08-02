@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { Filter } from '@kbn/es-query';
+import { Filter, Query } from '@kbn/es-query';
 import {
   SavedObjectAttributes,
   SavedObjectsClientContract,
   SavedObjectReference,
   ResolvedSimpleSavedObject,
-} from 'kibana/public';
-import { Query } from '../../../../../src/plugins/data/public';
+} from '@kbn/core/public';
 import { DOC_TYPE } from '../../common';
 import { LensSavedObjectAttributes } from '../async_services';
 

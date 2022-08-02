@@ -9,13 +9,11 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
-import {
-  FilterManager,
-  UI_SETTINGS,
-  FilterLabel,
-} from '../../../../../../../../src/plugins/data/public';
-import { DataViewBase, FilterStateStore } from '@kbn/es-query';
+import { coreMock } from '@kbn/core/public/mocks';
+import { FilterManager, UI_SETTINGS } from '@kbn/data-plugin/public';
+import { FilterLabel } from '@kbn/unified-search-plugin/public';
+import type { DataViewBase } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import { SeverityBadge } from '../severity_badge';
 
 import * as i18n from './translations';
@@ -30,7 +28,7 @@ import {
   buildNoteDescription,
   buildRuleTypeDescription,
 } from './helpers';
-import { ListItems } from './types';
+import type { ListItems } from './types';
 
 const setupMock = coreMock.createSetup();
 const uiSettingsMock = (pinnedByDefault: boolean) => (key: string) => {

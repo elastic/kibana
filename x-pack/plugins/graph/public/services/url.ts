@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ChromeStart } from 'kibana/public';
+import { ChromeStart } from '@kbn/core/public';
 import { GraphWorkspaceSavedObject } from '../types';
 import { MetaDataState } from '../state_management';
 

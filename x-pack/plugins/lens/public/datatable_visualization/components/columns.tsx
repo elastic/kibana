@@ -13,7 +13,11 @@ import {
   EuiDataGridColumnCellActionProps,
   EuiListGroupItemProps,
 } from '@elastic/eui';
-import type { Datatable, DatatableColumn, DatatableColumnMeta } from 'src/plugins/expressions';
+import type {
+  Datatable,
+  DatatableColumn,
+  DatatableColumnMeta,
+} from '@kbn/expressions-plugin/common';
 import type { FormatFactory } from '../../../common';
 import type { ColumnConfig } from '../../../common/expressions';
 
@@ -43,7 +47,8 @@ export const createGridColumns = (
   onColumnHide: ((eventData: { columnId: string }) => void) | undefined,
   alignments: Record<string, 'left' | 'right' | 'center'>,
   headerRowHeight: 'auto' | 'single' | 'custom',
-  headerRowLines: number
+  headerRowLines: number,
+  closeCellPopover?: Function
 ) => {
   const columnsReverseLookup = table.columns.reduce<
     Record<string, { name: string; index: number; meta?: DatatableColumnMeta }>
@@ -73,7 +78,7 @@ export const createGridColumns = (
     const cellActions =
       filterable && handleFilterClick
         ? [
-            ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
+            ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
               const { rowValue, contentsIsDefined, cellContent } = getContentData({
                 rowIndex,
                 columnId,
@@ -102,7 +107,7 @@ export const createGridColumns = (
                     data-test-subj="lensDatatableFilterFor"
                     onClick={() => {
                       handleFilterClick(field, rowValue, colIndex, rowIndex);
-                      closePopover?.();
+                      closeCellPopover?.();
                     }}
                     iconType="plusInCircle"
                   >
@@ -111,7 +116,7 @@ export const createGridColumns = (
                 )
               );
             },
-            ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
+            ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
               const { rowValue, contentsIsDefined, cellContent } = getContentData({
                 rowIndex,
                 columnId,
@@ -140,7 +145,7 @@ export const createGridColumns = (
                     aria-label={filterOutAriaLabel}
                     onClick={() => {
                       handleFilterClick(field, rowValue, colIndex, rowIndex, true);
-                      closePopover?.();
+                      closeCellPopover?.();
                     }}
                     iconType="minusInCircle"
                   >

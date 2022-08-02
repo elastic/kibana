@@ -7,7 +7,7 @@
 
 import { FeaturesPlugin } from './plugin';
 
-import { coreMock, httpServiceMock } from 'src/core/public/mocks';
+import { coreMock, httpServiceMock } from '@kbn/core/public/mocks';
 
 jest.mock('./features_api_client', () => {
   const instance = {

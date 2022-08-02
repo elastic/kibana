@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { PRECONFIGURATION_API_ROUTES } from '../../../../plugins/fleet/common/constants';
+import { PRECONFIGURATION_API_ROUTES } from '@kbn/fleet-plugin/common/constants';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 

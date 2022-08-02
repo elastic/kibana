@@ -7,7 +7,7 @@
  */
 
 import type { Ast, AstWithMeta } from './ast';
-import { parse } from '../../../grammar';
+import { parse } from '../../../grammar/built_grammar.js';
 
 interface Options {
   startRule?: string;

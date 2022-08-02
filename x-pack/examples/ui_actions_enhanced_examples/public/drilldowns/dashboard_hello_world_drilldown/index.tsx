@@ -7,14 +7,14 @@
 
 import React from 'react';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
-import { reactToUiComponent } from '../../../../../../src/plugins/kibana_react/public';
-import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../../plugins/ui_actions_enhanced/public';
+import { reactToUiComponent } from '@kbn/kibana-react-plugin/public';
+import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '@kbn/ui-actions-enhanced-plugin/public';
 import {
   ChartActionContext,
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
-} from '../../../../../../src/plugins/embeddable/public';
-import { CollectConfigProps } from '../../../../../../src/plugins/kibana_utils/public';
+} from '@kbn/embeddable-plugin/public';
+import { CollectConfigProps } from '@kbn/kibana-utils-plugin/public';
 
 export type ActionContext = ChartActionContext;
 

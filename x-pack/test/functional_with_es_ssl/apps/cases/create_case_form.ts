@@ -7,17 +7,17 @@
 
 import expect from '@kbn/expect';
 import uuid from 'uuid';
+import { CaseSeverity } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default ({ getPageObject, getService }: FtrProviderContext) => {
+export default ({ getService }: FtrProviderContext) => {
   describe('Create case', function () {
-    const common = getPageObject('common');
     const find = getService('find');
     const cases = getService('cases');
     const testSubjects = getService('testSubjects');
 
     before(async () => {
-      await common.navigateToApp('cases');
+      await cases.navigation.navigateToApp();
     });
 
     after(async () => {
@@ -26,10 +26,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     it('creates a case from the stack management page', async () => {
       const caseTitle = 'test-' + uuid.v4();
-      await cases.common.createCaseFromCreateCasePage({
+      await cases.create.openCreateCasePage();
+      await cases.create.createCaseFromCreateCasePage({
         title: caseTitle,
         description: 'test description',
         tag: 'tagme',
+        severity: CaseSeverity.HIGH,
       });
 
       // validate title

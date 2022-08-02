@@ -6,8 +6,8 @@
  */
 
 import { FC } from 'react';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearchSavedObject } from '../../../../common/types/kibana';
-import type { DataView } from '../../../../../../../src/plugins/data_views/public';
 
 declare const DataRecognizer: FC<{
   indexPattern: DataView;

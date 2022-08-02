@@ -149,8 +149,12 @@ index.
 
 ### New control state
 1. Two conditions have to be met before migrations begin:
-    1. If replica allocation is set as a persistent or transient setting to "perimaries", "new_primaries" or "none" fail the migration. Without replica allocation enabled or not set to 'all', the migration will timeout when waiting for index yellow status before bulk indexing. The check only considers persistent and transient settings and does not take static configuration in `elasticsearch.yml` into account. If `cluster.routing.allocation.enable` is configured in `elaticsearch.yml` and not set to the default of 'all', the migration will timeout. Static settings can only be returned from the `nodes/info` API.
-      → `FATAL`
+    1. The Elasticsearch shard allocation cluster setting `cluster.routing.allocation.enable` needs to be unset or set to 'all'. When set to 'primaries', 'new_primaries' or 'none', the migration will timeout when waiting for index green status before bulk indexing because the replica cannot be allocated.
+
+    As per the Elasticsearch docs https://www.elastic.co/guide/en/elasticsearch/reference/8.2/restart-cluster.html#restart-cluster-rolling when Cloud performs a rolling restart such as during an upgrade, it will temporarily disable shard allocation. Kibana therefore keeps retrying the INIT step to wait for shard allocation to be enabled again.
+    
+    The check only considers persistent and transient settings and does not take static configuration in `elasticsearch.yml` into account since there are no known use cases for doing so. If `cluster.routing.allocation.enable` is configured in `elaticsearch.yml` and not set to the default of 'all', the migration will timeout. Static settings can only be returned from the `nodes/info` API.
+      → `INIT`
   
     2. If `.kibana` is pointing to an index that belongs to a later version of
     Kibana .e.g. a 7.11.0 instance found the `.kibana` alias pointing to
@@ -178,10 +182,14 @@ and the migration source index is the index the `.kibana` alias points to.
 ### Next action
 `createIndex`
 
-Create the target index. This operation is idempotent, if the index already exist, we wait until its status turns yellow
+Create the target index. This operation is idempotent, if the index already exist, we wait until its status turns green
 
 ### New control state
- → `MARK_VERSION_INDEX_READY`
+1. If the action succeeds
+  → `MARK_VERSION_INDEX_READY`
+2. If the action fails with a `index_not_green_timeout`
+  → `CREATE_NEW_TARGET`
+
 
 ## LEGACY_SET_WRITE_BLOCK
 ### Next action
@@ -209,8 +217,10 @@ Create a new `.kibana_pre6.5.0_001` index into which we can reindex the legacy
 index. (Since the task manager index was converted from a data index into a
 saved objects index in 7.4 it will be reindexed into `.kibana_pre7.4.0_001`)
 ### New control state
+1. If the index creation succeeds
   → `LEGACY_REINDEX`
-
+2. If the index creation task failed with a `index_not_green_timeout`
+  → `LEGACY_REINDEX_WAIT_FOR_TASK`
 ## LEGACY_REINDEX
 ### Next action
 `reindex`
@@ -251,13 +261,15 @@ new `.kibana` alias that points to `.kibana_pre6.5.0_001`.
 
 ## WAIT_FOR_YELLOW_SOURCE
 ### Next action
-`waitForIndexStatusYellow`
+`waitForIndexStatus` (status='yellow')
 
-Wait for the Elasticsearch cluster to be in "yellow" state. It means the index's primary shard is allocated and the index is ready for searching/indexing documents, but ES wasn't able to allocate the replicas. 
-We don't have as much data redundancy as we could have, but it's enough to start the migration.
+Wait for the source index to become yellow. This means the index's primary has been allocated and is ready for reading/searching. On a multi node cluster the replicas for this index might not be ready yet but since we're never writing to the source index it does not matter.
 
 ### New control state
+1. If the action succeeds
   → `SET_SOURCE_WRITE_BLOCK`
+2. If the action fails with a `index_not_yellow_timeout`
+  → `WAIT_FOR_YELLOW_SOURCE`
   
 ## SET_SOURCE_WRITE_BLOCK
 ### Next action
@@ -272,13 +284,16 @@ Set a write block on the source index to prevent any older Kibana instances from
 ### Next action
 `createIndex`
 
-This operation is idempotent, if the index already exist, we wait until its status turns yellow. 
+This operation is idempotent, if the index already exist, we wait until its status turns green. 
 
 - Because we will be transforming documents before writing them into this index, we can already set the mappings to the target mappings for this version. The source index might contain documents belonging to a disabled plugin. So set `dynamic: false` mappings for any unknown saved object types.
 - (Since we never query the temporary index we can potentially disable refresh to speed up indexing performance. Profile to see if gains justify complexity)
 
 ### New control state
+1. If the action succeeds
   → `REINDEX_SOURCE_TO_TEMP_OPEN_PIT`
+2. If the action fails with a `index_not_green_timeout`
+  → `CREATE_REINDEX_TEMP`
 
 ## REINDEX_SOURCE_TO_TEMP_OPEN_PIT
 ### Next action
@@ -352,12 +367,15 @@ Set a write block on the temporary index so that we can clone it.
 ### Next action
 `cloneIndex`
 
-Ask elasticsearch to clone the temporary index into the target index. If the target index already exists (because another node already started the clone operation), wait until the clone is complete by waiting for a yellow index status.
+Ask elasticsearch to clone the temporary index into the target index. If the target index already exists (because another node already started the clone operation), wait until the clone is complete by waiting for a green index status.
 
 We can’t use the temporary index as our target index because one instance can complete the migration, delete a document, and then a second instance starts the reindex operation and re-creates the deleted document. By cloning the temporary index and only accepting writes/deletes from the cloned target index, we prevent lost acknowledged deletes.
 
 ### New control state
+1. If the action succeeds
   → `OUTDATED_DOCUMENTS_SEARCH`
+2. If the action fails with a `index_not_green_timeout`
+  → `CLONE_TEMP_TO_TARGET`
 
 ## OUTDATED_DOCUMENTS_SEARCH
 ### Next action

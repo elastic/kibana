@@ -19,7 +19,7 @@ import {
   SOURCE_TYPES,
   STYLE_TYPE,
   SYMBOLIZE_AS_TYPES,
-} from '../../../../../../maps/common';
+} from '@kbn/maps-plugin/common';
 
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import {
@@ -120,6 +120,13 @@ export function useLayerList() {
           options: { orientation: 0 },
         },
         labelText: { type: STYLE_TYPE.STATIC, options: { value: '' } },
+        labelZoomRange: {
+          options: {
+            useLayerZoomRange: true,
+            minZoom: 0,
+            maxZoom: 24,
+          },
+        },
         labelColor: {
           type: STYLE_TYPE.STATIC,
           options: { color: '#000000' },

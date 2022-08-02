@@ -8,6 +8,7 @@
 import { curry } from 'lodash';
 import { schema, TypeOf } from '@kbn/config-schema';
 
+import { Logger } from '@kbn/core/server';
 import { validate } from './validators';
 import {
   ExternalIncidentServiceConfiguration,
@@ -31,7 +32,12 @@ import {
   ExecutorSubActionGetIncidentParams,
 } from './types';
 import * as i18n from './translations';
-import { Logger } from '../../../../../../src/core/server';
+import {
+  AlertingConnectorFeatureId,
+  CasesConnectorFeatureId,
+  UptimeConnectorFeatureId,
+  SecurityConnectorFeatureId,
+} from '../../../common';
 
 export type ActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
 interface GetActionTypeParams {
@@ -64,6 +70,12 @@ export function getActionType(
     id: ActionTypeId,
     minimumLicenseRequired: 'gold',
     name: i18n.NAME,
+    supportedFeatureIds: [
+      AlertingConnectorFeatureId,
+      CasesConnectorFeatureId,
+      UptimeConnectorFeatureId,
+      SecurityConnectorFeatureId,
+    ],
     validate: {
       config: schema.object(ExternalIncidentServiceConfiguration, {
         validate: curry(validate.config)(configurationUtilities),

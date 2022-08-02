@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
+import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { SemVer } from 'semver';
 
 import { ProxyConfigCollection } from './lib';
@@ -16,6 +16,7 @@ import { ConsoleConfig, ConsoleConfig7x } from './config';
 import { registerRoutes } from './routes';
 
 import { ESConfigForProxy, ConsoleSetup, ConsoleStart } from './types';
+import { handleEsError } from './shared_imports';
 
 export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
   log: Logger;
@@ -57,6 +58,9 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
       services: {
         esLegacyConfigService: this.esLegacyConfigService,
         specDefinitionService: this.specDefinitionsService,
+      },
+      lib: {
+        handleEsError,
       },
       proxy: {
         readLegacyESConfig: async (): Promise<ESConfigForProxy> => {

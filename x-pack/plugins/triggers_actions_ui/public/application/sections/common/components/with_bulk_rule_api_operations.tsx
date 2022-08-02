@@ -7,6 +7,7 @@
 
 import React from 'react';
 
+import { IExecutionLogResult, IExecutionErrorsResult } from '@kbn/alerting-plugin/common';
 import {
   Rule,
   RuleType,
@@ -14,6 +15,7 @@ import {
   RuleSummary,
   AlertingFrameworkHealth,
   ResolvedRule,
+  SnoozeSchedule,
 } from '../../../../types';
 import {
   deleteRules,
@@ -35,8 +37,11 @@ import {
   resolveRule,
   loadExecutionLogAggregations,
   LoadExecutionLogAggregationsProps,
+  loadActionErrorLog,
+  LoadActionErrorLogProps,
+  snoozeRule,
+  unsnoozeRule,
 } from '../../../lib/rule_api';
-import { IExecutionLogResult } from '../../../../../../alerting/common';
 import { useKibana } from '../../../../common/lib/kibana';
 
 export interface ComponentOpts {
@@ -65,8 +70,11 @@ export interface ComponentOpts {
   loadExecutionLogAggregations: (
     props: LoadExecutionLogAggregationsProps
   ) => Promise<IExecutionLogResult>;
+  loadActionErrorLog: (props: LoadActionErrorLogProps) => Promise<IExecutionErrorsResult>;
   getHealth: () => Promise<AlertingFrameworkHealth>;
   resolveRule: (id: Rule['id']) => Promise<ResolvedRule>;
+  snoozeRule: (rule: Rule, snoozeSchedule: SnoozeSchedule) => Promise<void>;
+  unsnoozeRule: (rule: Rule, scheduleIds?: string[]) => Promise<void>;
 }
 
 export type PropsWithOptionalApiHandlers<T> = Omit<T, keyof ComponentOpts> & Partial<ComponentOpts>;
@@ -143,8 +151,20 @@ export function withBulkRuleOperations<T>(
             http,
           })
         }
+        loadActionErrorLog={async (loadProps: LoadActionErrorLogProps) =>
+          loadActionErrorLog({
+            ...loadProps,
+            http,
+          })
+        }
         resolveRule={async (ruleId: Rule['id']) => resolveRule({ http, ruleId })}
         getHealth={async () => alertingFrameworkHealth({ http })}
+        snoozeRule={async (rule: Rule, snoozeSchedule: SnoozeSchedule) => {
+          return await snoozeRule({ http, id: rule.id, snoozeSchedule });
+        }}
+        unsnoozeRule={async (rule: Rule, scheduleIds?: string[]) => {
+          return await unsnoozeRule({ http, id: rule.id, scheduleIds });
+        }}
       />
     );
   };

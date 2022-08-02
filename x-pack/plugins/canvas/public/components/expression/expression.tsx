@@ -18,15 +18,19 @@ import {
   EuiPortal,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { monaco } from '@kbn/monaco';
 
 // @ts-expect-error
 import { Shortcuts } from 'react-shortcuts';
 
-import { ExpressionInputEditorRef } from 'src/plugins/presentation_util/public';
+import {
+  ExpressionInputEditorRef,
+  OnExpressionInputEditorDidMount,
+} from '@kbn/presentation-util-plugin/public';
 import { ExpressionInput } from '../expression_input';
 import { ToolTipShortcut } from '../tool_tip_shortcut';
 import { ExpressionFunction } from '../../../types';
-import { FormState } from './';
+import { FormState } from '.';
 
 const strings = {
   getCancelButtonLabel: () =>
@@ -105,6 +109,23 @@ export const Expression: FC<Props> = ({
     }
   };
 
+  const onEditorDidMount: OnExpressionInputEditorDidMount = (editor) => {
+    /*
+      To enable the CMD+ENTER keybinding, which is running the expression,
+      it is necessary to disable the `-editor.action.insertLineAfter`,
+      which has the same keybinding in the Monaco editor.
+      The only available way is adding the empty dynamic keybinding
+      (by using private monaco API, proposed by the monaco team), which is bubbling the event.
+    */
+    // @ts-expect-error
+    editor?._standaloneKeybindingService.addDynamicKeybinding(
+      '-editor.action.insertLineAfter',
+      // eslint-disable-next-line no-bitwise
+      monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+      () => {}
+    );
+  };
+
   const expressionPanel = (
     <EuiPanel
       className={`canvasTray__panel canvasTray__panel--holdingExpression canvasExpression--${
@@ -126,6 +147,7 @@ export const Expression: FC<Props> = ({
         error={error ? error : `\u00A0`}
         expression={formState.expression}
         onChange={updateValue}
+        onEditorDidMount={onEditorDidMount}
         editorRef={refExpressionInput}
       />
       <div className="canvasExpression__settings">

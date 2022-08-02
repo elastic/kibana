@@ -20,6 +20,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { LayerTOC } from './layer_toc';
+import { isScreenshotMode } from '../../../kibana_services';
 import { ILayer } from '../../../classes/layers/layer';
 
 export interface Props {
@@ -82,6 +83,9 @@ export function LayerControl({
   isFlyoutOpen,
 }: Props) {
   if (!isLayerTOCOpen) {
+    if (isScreenshotMode()) {
+      return null;
+    }
     const hasErrors = layerList.some((layer) => {
       return layer.hasErrors();
     });

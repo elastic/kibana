@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { CoreSetup } from 'kibana/public';
+import type { CoreSetup } from '@kbn/core/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { EditorFrameSetup } from '../types';
-import type { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 
 export interface HeatmapVisualizationPluginSetupPlugins {
   editorFrame: EditorFrameSetup;

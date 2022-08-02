@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Suspicious Explorer Child Process",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  (\n   process.name : (\"cscript.exe\", \"wscript.exe\", \"powershell.exe\", \"rundll32.exe\", \"cmd.exe\", \"mshta.exe\", \"regsvr32.exe\") or\n   process.pe.original_file_name in (\"cscript.exe\", \"wscript.exe\", \"PowerShell.EXE\", \"RUNDLL32.EXE\", \"Cmd.Exe\", \"MSHTA.EXE\", \"REGSVR32.EXE\")\n  ) and\n  /* Explorer started via DCOM */\n  process.parent.name : \"explorer.exe\" and process.parent.args : \"-Embedding\" and\n  not process.parent.args:\n          (\n            /* Noisy CLSID_SeparateSingleProcessExplorerHost Explorer COM Class IDs   */\n            \"/factory,{5BD95610-9434-43C2-886C-57852CC8A120}\",\n            \"/factory,{ceff45ee-c862-41de-aee2-a022c81eda92}\"\n          )\n",
   "risk_score": 47,
   "rule_id": "9a5b4e31-6cde-4295-9ff7-6be1b8567e1b",
@@ -54,5 +55,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 4
+  "version": 5
 }

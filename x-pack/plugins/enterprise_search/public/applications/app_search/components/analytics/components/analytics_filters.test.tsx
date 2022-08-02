@@ -16,7 +16,7 @@ import { EuiSelect, EuiDatePickerRange, EuiButton } from '@elastic/eui';
 
 import { DEFAULT_START_DATE, DEFAULT_END_DATE } from '../constants';
 
-import { AnalyticsFilters } from './';
+import { AnalyticsFilters } from '.';
 
 describe('AnalyticsFilters', () => {
   const { history } = mockKibanaValues;

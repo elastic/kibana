@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-import type { AppMount } from 'src/core/public';
-import { coreMock, scopedHistoryMock, themeServiceMock } from 'src/core/public/mocks';
+import type { AppMount } from '@kbn/core/public';
+import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 
+import { AnalyticsService } from '../../analytics';
 import { logoutApp } from './logout_app';
 
 describe('logoutApp', () => {
   beforeAll(() => {
     Object.defineProperty(window, 'sessionStorage', {
       value: { clear: jest.fn() },
+      writable: true,
+    });
+    Object.defineProperty(window, 'localStorage', {
+      value: { removeItem: jest.fn() },
       writable: true,
     });
     Object.defineProperty(window, 'location', {
@@ -59,6 +64,10 @@ describe('logoutApp', () => {
     });
 
     expect(window.sessionStorage.clear).toHaveBeenCalledTimes(1);
+    expect(window.localStorage.removeItem).toHaveBeenCalledTimes(1);
+    expect(window.localStorage.removeItem).toHaveBeenCalledWith(
+      AnalyticsService.AuthTypeInfoStorageKey
+    );
     expect(window.location.href).toBe('/mock-base-path/api/security/logout?arg=true');
   });
 });

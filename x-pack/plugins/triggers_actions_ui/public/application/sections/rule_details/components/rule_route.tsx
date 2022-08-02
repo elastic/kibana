@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ToastsApi } from 'kibana/public';
+import { ToastsApi } from '@kbn/core/public';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Rule, RuleSummary, RuleType } from '../../../../types';
 import {
@@ -77,6 +77,7 @@ export const RuleRoute: React.FunctionComponent<WithRuleSummaryProps> = ({
   return ruleSummary ? (
     <Rules
       requestRefresh={requestRefresh}
+      refreshToken={refreshToken}
       rule={rule}
       ruleType={ruleType}
       readOnly={readOnly}

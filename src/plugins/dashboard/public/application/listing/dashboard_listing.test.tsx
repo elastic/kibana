@@ -11,7 +11,7 @@ import { mount } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { DashboardAppServices } from '../../types';
-import { SimpleSavedObject } from '../../../../../core/public';
+import { SimpleSavedObject } from '@kbn/core/public';
 import { KibanaContextProvider } from '../../services/kibana_react';
 import { createKbnUrlStateStorage } from '../../services/kibana_utils';
 import { DashboardListing, DashboardListingProps } from './dashboard_listing';

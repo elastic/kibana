@@ -7,8 +7,8 @@
 
 import axios from 'axios';
 
-import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { Logger } from '../../../../../../src/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { Logger } from '@kbn/core/server';
 import { actionsConfigMock } from '../../actions_config.mock';
 import { request, createAxiosResponse } from '../lib/axios_utils';
 import { createExternalService } from './service';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LicensingPluginSetup } from '../../../../licensing/public';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import { MlLicense } from '../../../common/license';
 import { MlClientLicense } from './ml_client_license';
 
@@ -37,7 +37,7 @@ export function setLicenseCache(
 export async function checkFullLicense() {
   if (mlLicense === null) {
     // this should never happen
-    console.error('ML Licensing not initialized'); // eslint-disable-line
+    console.error('ML Licensing not initialized'); // eslint-disable-line no-console
     return Promise.reject();
   }
 
@@ -54,7 +54,7 @@ export async function checkFullLicense() {
 export async function checkBasicLicense() {
   if (mlLicense === null) {
     // this should never happen
-    console.error('ML Licensing not initialized'); // eslint-disable-line
+    console.error('ML Licensing not initialized'); // eslint-disable-line no-console
     return Promise.reject();
   }
 

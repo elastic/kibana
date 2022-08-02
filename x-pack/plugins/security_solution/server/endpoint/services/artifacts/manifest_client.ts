@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import {
+import type {
   SavedObject,
   SavedObjectsClientContract,
   SavedObjectsUpdateResponse,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
-import {
-  manifestSchemaVersion,
-  ManifestSchemaVersion,
-} from '../../../../common/endpoint/schema/common';
+import type { ManifestSchemaVersion } from '../../../../common/endpoint/schema/common';
+import { manifestSchemaVersion } from '../../../../common/endpoint/schema/common';
 import { ManifestConstants } from '../../lib/artifacts';
-import { InternalManifestSchema, InternalManifestCreateSchema } from '../../schemas/artifacts';
+import type { InternalManifestSchema, InternalManifestCreateSchema } from '../../schemas/artifacts';
 
 interface UpdateManifestOpts {
   version: string;

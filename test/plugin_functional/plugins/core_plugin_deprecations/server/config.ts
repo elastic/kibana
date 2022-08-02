@@ -8,7 +8,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { get } from 'lodash';
-import type { PluginConfigDescriptor } from 'kibana/server';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
 import type { ConfigDeprecation } from '@kbn/config';
 
 const configSchema = schema.object({

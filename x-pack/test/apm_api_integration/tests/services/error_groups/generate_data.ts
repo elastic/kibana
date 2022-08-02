@@ -45,48 +45,44 @@ export async function generateData({
     timerange(start, end)
       .interval('1m')
       .rate(PROD_LIST_RATE)
-      .spans((timestamp) =>
+      .generator((timestamp) =>
         serviceGoProdInstance
           .transaction(transactionNameProductList)
           .timestamp(timestamp)
           .duration(1000)
           .success()
-          .serialize()
       ),
     timerange(start, end)
       .interval('1m')
       .rate(PROD_LIST_ERROR_RATE)
-      .spans((timestamp) =>
+      .generator((timestamp) =>
         serviceGoProdInstance
           .transaction(transactionNameProductList)
           .errors(serviceGoProdInstance.error(ERROR_NAME_1, 'foo').timestamp(timestamp))
           .duration(1000)
           .timestamp(timestamp)
           .failure()
-          .serialize()
       ),
     timerange(start, end)
       .interval('1m')
       .rate(PROD_ID_RATE)
-      .spans((timestamp) =>
+      .generator((timestamp) =>
         serviceGoProdInstance
           .transaction(transactionNameProductId)
           .timestamp(timestamp)
           .duration(1000)
           .success()
-          .serialize()
       ),
     timerange(start, end)
       .interval('1m')
       .rate(PROD_ID_ERROR_RATE)
-      .spans((timestamp) =>
+      .generator((timestamp) =>
         serviceGoProdInstance
           .transaction(transactionNameProductId)
           .errors(serviceGoProdInstance.error(ERROR_NAME_2, 'bar').timestamp(timestamp))
           .duration(1000)
           .timestamp(timestamp)
           .failure()
-          .serialize()
       ),
   ]);
 }

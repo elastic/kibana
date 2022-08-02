@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientContract } from 'kibana/public';
+import { SavedObjectsClientContract } from '@kbn/core/public';
 
 import { EmbeddableStart } from '../services/embeddable';
 import { SavedObjectLoader, SavedObjectsStart } from '../services/saved_objects';

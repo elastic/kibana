@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IRouter } from 'src/core/server';
+import { IRouter } from '@kbn/core/server';
 import { CustomIntegrationRegistry } from '../custom_integration_registry';
 import {
   ROUTES_APPEND_CUSTOM_INTEGRATIONS,

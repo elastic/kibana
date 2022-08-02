@@ -6,12 +6,12 @@
  */
 
 import React, { ComponentType } from 'react';
-import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   ApmPluginContext,
   ApmPluginContextValue,
 } from '../../../../context/apm_plugin/apm_plugin_context';
-import { ErrorDistribution } from './';
+import { ErrorDistribution } from '.';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
 export default {

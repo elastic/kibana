@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CoreSetup, IRouter } from 'kibana/server';
+import { CoreSetup, IRouter } from '@kbn/core/server';
 
 /**
  * This endpoint maintains the legacy /goto/<short_url_id> route. It loads the

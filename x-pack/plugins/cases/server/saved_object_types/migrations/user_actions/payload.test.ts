@@ -7,8 +7,8 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from 'kibana/server';
-import { migrationMocks } from 'src/core/server/mocks';
+import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { migrationMocks } from '@kbn/core/server/mocks';
 import { CommentType } from '../../../../common/api';
 import {
   CASE_USER_ACTION_SAVED_OBJECT,

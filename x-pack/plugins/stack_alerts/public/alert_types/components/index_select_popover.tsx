@@ -21,15 +21,15 @@ import {
   EuiPopoverTitle,
   EuiSelect,
 } from '@elastic/eui';
-import { HttpSetup } from 'kibana/public';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { HttpSetup } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   firstFieldOption,
   getFields,
   getIndexOptions,
   getTimeFieldOptions,
   IErrorObject,
-} from '../../../../triggers_actions_ui/public';
+} from '@kbn/triggers-actions-ui-plugin/public';
 
 interface KibanaDeps {
   http: HttpSetup;
@@ -104,7 +104,13 @@ export const IndexSelectPopover: React.FunctionComponent<Props> = ({
           description={i18n.translate('xpack.stackAlerts.components.ui.alertParams.indexLabel', {
             defaultMessage: 'index',
           })}
-          value={index && index.length > 0 ? renderIndices(index) : firstFieldOption.text}
+          value={
+            index && index.length > 0
+              ? renderIndices(index)
+              : i18n.translate('xpack.stackAlerts.components.ui.alertParams.indexPlaceholder', {
+                  defaultMessage: 'Select an index',
+                })
+          }
           isActive={indexPopoverOpen}
           onClick={() => {
             setIndexPopoverOpen(true);

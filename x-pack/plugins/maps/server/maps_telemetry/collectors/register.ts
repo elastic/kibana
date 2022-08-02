@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { getMapsTelemetry, MapsUsage } from '../maps_telemetry';
 
 export function registerMapsUsageCollector(usageCollection?: UsageCollectionSetup): void {
@@ -104,6 +104,24 @@ export function registerMapsUsageCollector(usageCollection?: UsageCollectionSetu
           total: {
             type: 'long',
             _meta: { description: 'total number of es document layers in cluster' },
+          },
+        },
+        es_ml_anomalies: {
+          min: {
+            type: 'long',
+            _meta: { description: 'min number of es machine learning anomaly layers per map' },
+          },
+          max: {
+            type: 'long',
+            _meta: { description: 'max number of es machine learning anomaly layers per map' },
+          },
+          avg: {
+            type: 'float',
+            _meta: { description: 'avg number of es machine learning anomaly layers per map' },
+          },
+          total: {
+            type: 'long',
+            _meta: { description: 'total number of es machine learning anomaly layers in cluster' },
           },
         },
         es_point_to_point: {
@@ -474,6 +492,11 @@ export function registerMapsUsageCollector(usageCollection?: UsageCollectionSetu
         },
         emsVectorLayersCount: {
           DYNAMIC_KEY: { min: { type: 'long' }, max: { type: 'long' }, avg: { type: 'float' } },
+        },
+        customIconsCount: {
+          min: { type: 'long' },
+          max: { type: 'long' },
+          avg: { type: 'float' },
         },
       },
     },

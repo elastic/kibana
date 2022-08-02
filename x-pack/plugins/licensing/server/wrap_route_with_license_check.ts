@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { RequestHandler, KibanaRequest, RouteMethod, KibanaResponseFactory } from 'src/core/server';
+import {
+  RequestHandler,
+  KibanaRequest,
+  RouteMethod,
+  KibanaResponseFactory,
+} from '@kbn/core/server';
 
 import { ILicense } from '../common/types';
 import type { LicensingRequestHandlerContext } from './types';
@@ -23,7 +28,8 @@ export function wrapRouteWithLicenseCheck<P, Q, B, Context extends LicensingRequ
     request: KibanaRequest<P, Q, B, RouteMethod>,
     response: KibanaResponseFactory
   ) => {
-    const licenseCheckResult = checkLicense(context.licensing.license);
+    const { license } = await context.licensing;
+    const licenseCheckResult = checkLicense(license);
 
     if (licenseCheckResult.valid) {
       return handler(context, request, response);

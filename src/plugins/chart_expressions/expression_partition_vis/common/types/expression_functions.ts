@@ -7,18 +7,18 @@
  */
 
 import {
+  ExpressionFunctionDefinition,
+  Datatable,
+  ExpressionValueRender,
+  ExpressionValueBoxed,
+} from '@kbn/expressions-plugin/common';
+import {
   PARTITION_LABELS_VALUE,
   PIE_VIS_EXPRESSION_NAME,
   TREEMAP_VIS_EXPRESSION_NAME,
   MOSAIC_VIS_EXPRESSION_NAME,
   WAFFLE_VIS_EXPRESSION_NAME,
 } from '../constants';
-import {
-  ExpressionFunctionDefinition,
-  Datatable,
-  ExpressionValueRender,
-  ExpressionValueBoxed,
-} from '../../../../expressions/common';
 import {
   RenderValue,
   PieVisConfig,

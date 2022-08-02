@@ -17,6 +17,7 @@ import {
   EuiButton,
   EuiLoadingSpinner,
 } from '@elastic/eui';
+import { ApiKey } from '@kbn/security-plugin/common/model';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { PermissionDenied } from './prompts/permission_denied';
 import { ApiKeysNotEnabled } from './prompts/api_keys_not_enabled';
@@ -25,7 +26,6 @@ import { CreateAgentKeyFlyout } from './create_agent_key';
 import { AgentKeyCallOut } from './create_agent_key/agent_key_callout';
 import { CreateApiKeyResponse } from '../../../../../common/agent_key_types';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { ApiKey } from '../../../../../../security/common/model';
 
 const INITIAL_DATA = {
   areApiKeysEnabled: false,

@@ -9,9 +9,9 @@ import {
   SavedObject,
   SavedObjectMigrationContext,
   SavedObjectsMigrationLogger,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import { cloneDeep, omit, set } from 'lodash';
-import { migrationMocks } from 'src/core/server/mocks';
+import { migrationMocks } from '@kbn/core/server/mocks';
 import { removeRuleInformation } from './alerts';
 
 describe('alert user actions', () => {

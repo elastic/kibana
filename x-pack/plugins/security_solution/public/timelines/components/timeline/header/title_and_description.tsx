@@ -24,7 +24,7 @@ import usePrevious from 'react-use/lib/usePrevious';
 import { getUseField, Field, Form, useForm } from '../../../../shared_imports';
 import { TimelineId, TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
+import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { NOTES_PANEL_WIDTH } from '../properties/notes_size';
 import { useCreateTimeline } from '../properties/use_create_timeline';
 import * as commonI18n from '../properties/translations';

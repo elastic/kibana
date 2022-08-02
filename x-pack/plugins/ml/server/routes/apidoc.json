@@ -56,6 +56,7 @@
     "GetCategorizerStats",
     "GetCategoryStoppedPartitions",
     "GetAnomalyChartsData",
+    "GetAnomalyRecords",
 
     "Modules",
     "DataRecognizer",
@@ -171,8 +172,12 @@
     "StopTrainedModelDeployment",
     "PutTrainedModel",
     "DeleteTrainedModel",
+    "InferTrainedModelDeployment",
 
     "Alerting",
-    "PreviewAlert"
+    "PreviewAlert",
+
+    "Management",
+    "ManagementList"
   ]
 }

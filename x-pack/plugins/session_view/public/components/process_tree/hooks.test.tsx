@@ -12,7 +12,7 @@ import { ProcessImpl } from './hooks';
 describe('ProcessTree hooks', () => {
   describe('ProcessImpl.getDetails memoize will cache bust on new events', () => {
     it('should return the exec event details when this.events changes', () => {
-      const process = new ProcessImpl(mockEvents[0].process.entity_id);
+      const process = new ProcessImpl(mockEvents[0].process!.entity_id!);
 
       process.addEvent(mockEvents[0]);
 
@@ -23,7 +23,7 @@ describe('ProcessTree hooks', () => {
 
       result = process.getDetails();
 
-      expect(result.event.action).toEqual(EventAction.exec);
+      expect(result.event?.action).toEqual(EventAction.exec);
     });
   });
 });

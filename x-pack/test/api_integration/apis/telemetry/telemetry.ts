@@ -9,22 +9,22 @@ import expect from '@kbn/expect';
 import moment from 'moment';
 import type SuperTest from 'supertest';
 import deepmerge from 'deepmerge';
-import type { FtrProviderContext } from '../../ftr_provider_context';
-import type { SecurityService } from '../../../../../test/common/services/security/security';
 
-import multiClusterFixture from './fixtures/multicluster.json';
-import basicClusterFixture from './fixtures/basiccluster.json';
-import ossRootTelemetrySchema from '../../../../../src/plugins/telemetry/schema/oss_root.json';
-import xpackRootTelemetrySchema from '../../../../plugins/telemetry_collection_xpack/schema/xpack_root.json';
-import monitoringRootTelemetrySchema from '../../../../plugins/telemetry_collection_xpack/schema/xpack_monitoring.json';
-import ossPluginsTelemetrySchema from '../../../../../src/plugins/telemetry/schema/oss_plugins.json';
-import xpackPluginsTelemetrySchema from '../../../../plugins/telemetry_collection_xpack/schema/xpack_plugins.json';
-import { assertTelemetryPayload } from '../../../../../test/api_integration/apis/telemetry/utils';
-import type { UnencryptedTelemetryPayload } from '../../../../../src/plugins/telemetry/common/types';
+import ossRootTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_root.json';
+import xpackRootTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_root.json';
+import monitoringRootTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_monitoring.json';
+import ossPluginsTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_plugins.json';
+import xpackPluginsTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_plugins.json';
+import type { UnencryptedTelemetryPayload } from '@kbn/telemetry-plugin/common/types';
 import type {
   UsageStatsPayload,
   CacheDetails,
-} from '../../../../../src/plugins/telemetry_collection_manager/server/types';
+} from '@kbn/telemetry-collection-manager-plugin/server/types';
+import { assertTelemetryPayload } from '../../../../../test/api_integration/apis/telemetry/utils';
+import basicClusterFixture from './fixtures/basiccluster.json';
+import multiClusterFixture from './fixtures/multicluster.json';
+import type { SecurityService } from '../../../../../test/common/services/security/security';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 function omitCacheDetails(usagePayload: Array<Record<string, unknown>>) {
   return usagePayload.map(({ cacheDetails, ...item }) => item);

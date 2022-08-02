@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
-import type { ObservabilityRuleTypeRegistry } from '../../../../observability/public';
+import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import {
   getAlertUrlErrorCount,
   getAlertUrlTransaction,

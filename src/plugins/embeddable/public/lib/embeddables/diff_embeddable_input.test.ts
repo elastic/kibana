@@ -7,7 +7,7 @@
  */
 
 import { ViewMode } from '..';
-import { KibanaExecutionContext } from '../../../../../core/types';
+import { KibanaExecutionContext } from '@kbn/core/types';
 import { EmbeddableInput, omitGenericEmbeddableInput, genericEmbeddableInputIsEqual } from '.';
 
 const getGenericEmbeddableState = (state?: Partial<EmbeddableInput>): EmbeddableInput => {
@@ -20,6 +20,7 @@ const getGenericEmbeddableState = (state?: Partial<EmbeddableInput>): Embeddable
     disableTriggers: false,
     enhancements: undefined,
     syncColors: false,
+    syncTooltips: false,
     viewMode: ViewMode.VIEW,
     title: 'So Very Generic',
     id: 'soVeryGeneric',
@@ -44,6 +45,7 @@ test('Omitting generic embeddable input omits all generic input keys', () => {
     'disableTriggers',
     'enhancements',
     'syncColors',
+    'syncTooltips',
     'viewMode',
     'title',
     'id',

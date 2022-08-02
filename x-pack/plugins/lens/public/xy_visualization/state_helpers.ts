@@ -7,16 +7,13 @@
 
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { FramePublicAPI, DatasourcePublicAPI } from '../types';
-import type {
-  SeriesType,
-  YConfig,
-  ValidLayer,
-} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import {
   visualizationTypes,
   XYLayerConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
+  SeriesType,
+  YConfig,
 } from './types';
 import { getDataLayers, isAnnotationsLayer, isDataLayer } from './visualization_helpers';
 
@@ -83,7 +80,7 @@ export const getColumnToLabelMap = (
 };
 
 export function hasHistogramSeries(
-  layers: ValidLayer[] = [],
+  layers: XYDataLayerConfig[] = [],
   datasourceLayers?: FramePublicAPI['datasourceLayers']
 ) {
   if (!datasourceLayers) {
@@ -91,7 +88,11 @@ export function hasHistogramSeries(
   }
   const validLayers = layers.filter(({ accessors }) => accessors.length);
 
-  return validLayers.some(({ layerId, xAccessor }: ValidLayer) => {
+  return validLayers.some(({ layerId, xAccessor }: XYDataLayerConfig) => {
+    if (!xAccessor) {
+      return false;
+    }
+
     const xAxisOperation = datasourceLayers[layerId].getOperationForColumnId(xAccessor);
     return (
       xAxisOperation &&

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useState, useEffect } from 'react';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { fetchClusters } from '../../lib/fetch_clusters';
 import { useRequestErrorHandler } from './use_request_error_handler';
 

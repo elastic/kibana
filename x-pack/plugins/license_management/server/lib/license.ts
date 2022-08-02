@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
-import { LicensingPluginStart } from '../../../licensing/server';
+import { IScopedClusterClient } from '@kbn/core/server';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 
 interface PutLicenseArg {
   acknowledge: boolean;

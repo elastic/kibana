@@ -10,7 +10,7 @@ import React, { FunctionComponent, useState } from 'react';
 import PropTypes from 'prop-types';
 import { EuiContextMenu, EuiIcon, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { PrimaryActionPopover } from '../../../../../../../src/plugins/presentation_util/public';
+import { PrimaryActionPopover } from '@kbn/presentation-util-plugin/public';
 import { getId } from '../../../lib/get_id';
 import { CONTEXT_MENU_TOP_BORDER_CLASSNAME } from '../../../../common/lib';
 import { ElementSpec } from '../../../../types';

@@ -7,7 +7,9 @@
     "githubTeam": "kibana-reporting-services"
   },
   "description": "Kibana Screenshotting Plugin",
-  "requiredPlugins": ["screenshotMode"],
+  "optionalPlugins": ["cloud"],
+  "requiredPlugins": ["expressions", "screenshotMode"],
   "configPath": ["xpack", "screenshotting"],
-  "server": true
+  "server": true,
+  "ui": true
 }

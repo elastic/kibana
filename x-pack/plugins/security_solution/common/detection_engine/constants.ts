@@ -6,7 +6,7 @@
  */
 
 export enum RULE_PREVIEW_INVOCATION_COUNT {
-  HOUR = 20,
+  HOUR = 12,
   DAY = 24,
   WEEK = 168,
   MONTH = 30,

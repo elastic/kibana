@@ -10,7 +10,7 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsClosePointInTimeResponse,
   SavedObjectsOpenPointInTimeResponse,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import {
   ExceptionListItemSchema,
   ExceptionListSchema,
@@ -96,13 +96,34 @@ import { findExceptionListsItemPointInTimeFinder } from './find_exception_list_i
 import { findValueListExceptionListItemsPointInTimeFinder } from './find_value_list_exception_list_items_point_in_time_finder';
 import { findExceptionListItemPointInTimeFinder } from './find_exception_list_item_point_in_time_finder';
 
+/**
+ * Class for use for exceptions that are with trusted applications or
+ * with rules.
+ */
 export class ExceptionListClient {
+  /** User creating, modifying, deleting, or updating an exception list */
   private readonly user: string;
+
+  /** Saved objects client to create, modify, delete, an exception list */
   private readonly savedObjectsClient: SavedObjectsClientContract;
+
+  /** server extensions client that can be useful for injecting domain specific rules */
   private readonly serverExtensionsClient: ExtensionPointStorageClientInterface;
+
+  /** Set to true to enable the server extension points, otherwise false */
   private readonly enableServerExtensionPoints: boolean;
+
+  /** Optionally, the Kibana request which is useful for extension points */
   private readonly request?: KibanaRequest;
 
+  /**
+   * Constructs the exception list
+   * @param options
+   * @param options.user The user associated with the action for exception list
+   * @param options.savedObjectsClient The saved objects client to create, modify, delete, an exception list
+   * @param options.serverExtensionsClient The server extensions client that can be useful for injecting domain specific rules
+   * @param options.request optionally, the Kibana request which is useful for extension points
+   */
   constructor({
     user,
     savedObjectsClient,
@@ -142,10 +163,11 @@ export class ExceptionListClient {
 
   /**
    * Fetch an exception list parent container
-   * @params listId {string | undefined} the "list_id" of an exception list
-   * @params id {string | undefined} the "id" of an exception list
-   * @params namespaceType {string | undefined} saved object namespace (single | agnostic)
-   * @return {ExceptionListSchema | null} the found exception list or null if none exists
+   * @param options
+   * @param options.listId the "list_id" of an exception list
+   * @param options.id the "id" of an exception list
+   * @param options.namespaceType saved object namespace (single | agnostic)
+   * @returns The found exception list or null if none exists
    */
   public getExceptionList = async ({
     listId,
@@ -158,11 +180,12 @@ export class ExceptionListClient {
 
   /**
    * Fetch an exception list parent container
-   * @params filter {sting | undefined} kql "filter" expression
-   * @params listId {string | undefined} the "list_id" of an exception list
-   * @params id {string | undefined} the "id" of an exception list
-   * @params namespaceType {string | undefined} saved object namespace (single | agnostic)
-   * @return {ExceptionListSummarySchema | null} summary of exception list item os types
+   * @param options
+   * @param options.filter kql "filter" expression
+   * @param options.listId the "list_id" of an exception list
+   * @param options.id the "id" of an exception list
+   * @param options.namespaceType saved object namespace (single | agnostic)
+   * @returns Summary of exception list item os types
    */
   public getExceptionListSummary = async ({
     filter,
@@ -190,10 +213,11 @@ export class ExceptionListClient {
 
   /**
    * Fetch an exception list item container
-   * @params listId {string | undefined} the "list_id" of an exception list
-   * @params id {string | undefined} the "id" of an exception list
-   * @params namespaceType {string | undefined} saved object namespace (single | agnostic)
-   * @return {ExceptionListSummarySchema | null} the found exception list item or null if none exists
+   * @param options
+   * @param options.itemId the "item_id" of an exception list (Either this or id has to be defined)
+   * @param options.id the "id" of an exception list (Either this or itemId has to be defined)
+   * @param options.namespaceType saved object namespace (single | agnostic)
+   * @returns the found exception list item or null if none exists
    */
   public getExceptionListItem = async ({
     itemId,
@@ -230,6 +254,7 @@ export class ExceptionListClient {
 
   /**
    * Create the Trusted Apps Agnostic list if it does not yet exist (`null` is returned if it does exist)
+   * @returns The exception list schema or null if it does not exist
    */
   public createTrustedAppsList = async (): Promise<ExceptionListSchema | null> => {
     const { savedObjectsClient, user } = this;
@@ -244,6 +269,17 @@ export class ExceptionListClient {
    * This is the same as "createListItem" except it applies specifically to the agnostic endpoint list and will
    * auto-call the "createEndpointList" for you so that you have the best chance of the agnostic endpoint
    * being there and existing before the item is inserted into the agnostic endpoint list.
+   * @param options
+   * @param options.comments The comments of the endpoint list item
+   * @param options.description The description of the endpoint list item
+   * @param options.entries The entries of the endpoint list item
+   * @param options.itemId The item id of the list item
+   * @param options.meta Optional meta data of the list item
+   * @param options.name The name of the list item
+   * @param options.osTypes The OS type of the list item
+   * @param options.tags Tags of the endpoint list item
+   * @param options.type The type of the endpoint list item (Default is "simple")
+   * @returns The exception list item created, otherwise null if not created
    */
   public createEndpointListItem = async ({
     comments,
@@ -280,6 +316,19 @@ export class ExceptionListClient {
    * auto-call the "createEndpointList" for you so that you have the best chance of the endpoint
    * being there if it did not exist before. If the list did not exist before, then creating it here will still cause a
    * return of null but at least the list exists again.
+   * @param options
+   * @param options._version The version to update the endpoint list item to
+   * @param options.comments The comments of the endpoint list item
+   * @param options.description The description of the endpoint list item
+   * @param options.entries The entries of the endpoint list item
+   * @param options.id The id of the list item (Either this or itemId has to be defined)
+   * @param options.itemId The item id of the list item (Either this or id has to be defined)
+   * @param options.meta Optional meta data of the list item
+   * @param options.name The name of the list item
+   * @param options.osTypes The OS type of the list item
+   * @param options.tags Tags of the endpoint list item
+   * @param options.type The type of the endpoint list item (Default is "simple")
+   * @returns The exception list item updated, otherwise null if not updated
    */
   public updateEndpointListItem = async ({
     _version,
@@ -316,6 +365,10 @@ export class ExceptionListClient {
 
   /**
    * This is the same as "getExceptionListItem" except it applies specifically to the endpoint list.
+   * @param options
+   * @param options.itemId The item id (Either this or id has to be defined)
+   * @param options.id The id (Either this or itemId has to be defined)
+   * @returns The exception list item found, otherwise null
    */
   public getEndpointListItem = async ({
     itemId,
@@ -327,16 +380,17 @@ export class ExceptionListClient {
 
   /**
    * Create an exception list container
-   * @params description {string} a description of the exception list
-   * @params immutable {boolean} a description of the exception list
-   * @params listId {string} the "list_id" of the exception list
-   * @params meta {object | undefined}
-   * @params name {string} the "name" of the exception list
-   * @params namespaceType {string} saved object namespace (single | agnostic)
-   * @params tags {array} user assigned tags of exception list
-   * @params type {string} container type
-   * @params version {number} document version
-   * @return {ExceptionListSchema} the created exception list parent container
+   * @param options
+   * @param options.description a description of the exception list
+   * @param options.immutable True if it's a immutable list, otherwise false
+   * @param options.listId the "list_id" of the exception list
+   * @param options.meta Optional meta data to add to the exception list
+   * @param options.name the "name" of the exception list
+   * @param options.namespaceType saved object namespace (single | agnostic)
+   * @param options.tags user assigned tags of exception list
+   * @param options.type container type
+   * @param options.version document version
+   * @returns the created exception list parent container
    */
   public createExceptionList = async ({
     description,
@@ -367,17 +421,18 @@ export class ExceptionListClient {
 
   /**
    * Update an existing exception list container
-   * @params _version {string | undefined} document version
-   * @params id {string | undefined} the "id" of the exception list
-   * @params description {string | undefined} a description of the exception list
-   * @params listId {string | undefined} the "list_id" of the exception list
-   * @params meta {object | undefined}
-   * @params name {string | undefined} the "name" of the exception list
-   * @params namespaceType {string} saved object namespace (single | agnostic)
-   * @params tags {array | undefined} user assigned tags of exception list
-   * @params type {string | undefined} container type
-   * @params version {number | undefined} document version
-   * @return {ExceptionListSchema | null} the updated exception list parent container
+   * @param options
+   * @param options._version document version
+   * @param options.id the "id" of the exception list
+   * @param options.description a description of the exception list
+   * @param options.listId the "list_id" of the exception list
+   * @param options.meta Optional meta object
+   * @param options.name the "name" of the exception list
+   * @param options.namespaceType saved object namespace (single | agnostic)
+   * @param options.tags user assigned tags of exception list
+   * @param options.type container type
+   * @param options.version document version, if undefined the current version number will be auto-incremented
+   * @returns the updated exception list parent container
    */
   public updateExceptionList = async ({
     _version,
@@ -410,10 +465,11 @@ export class ExceptionListClient {
 
   /**
    * Delete an exception list container by either id or list_id
-   * @params listId {string | undefined} the "list_id" of an exception list
-   * @params id {string | undefined} the "id" of an exception list
-   * @params namespaceType {string} saved object namespace (single | agnostic)
-   * @return {ExceptionListSchema | null} the deleted exception list or null if none exists
+   * @param options
+   * @param options.listId the "list_id" of an exception list (Either this or id has to be defined)
+   * @param options.id the "id" of an exception list (Either this or listId has to be defined)
+   * @param options.namespaceType saved object namespace (single | agnostic)
+   * @returns the deleted exception list or null if none exists
    */
   public deleteExceptionList = async ({
     id,
@@ -431,17 +487,19 @@ export class ExceptionListClient {
 
   /**
    * Create an exception list item container
-   * @params description {string} a description of the exception list
-   * @params entries {array} an array with the exception list item entries
-   * @params itemId {string} the "item_id" of the exception list item
-   * @params listId {string} the "list_id" of the parent exception list
-   * @params meta {object | undefined}
-   * @params name {string} the "name" of the exception list
-   * @params namespaceType {string} saved object namespace (single | agnostic)
-   * @params osTypes {array} item os types to apply
-   * @params tags {array} user assigned tags of exception list
-   * @params type {string} container type
-   * @return {ExceptionListItemSchema} the created exception list item container
+   * @param options
+   * @param options.comments User comments for the exception list item
+   * @param options.description a description of the exception list
+   * @param options.entries an array with the exception list item entries
+   * @param options.itemId the "item_id" of the exception list item
+   * @param options.listId the "list_id" of the parent exception list
+   * @param options.meta Optional meta data about the list item
+   * @param options.name the "name" of the exception list
+   * @param options.namespaceType saved object namespace (single | agnostic)
+   * @param options.osTypes item os types to apply
+   * @param options.tags user assigned tags of exception list
+   * @param options.type container type
+   * @returns the created exception list item container
    */
   public createExceptionListItem = async ({
     comments,
@@ -494,19 +552,20 @@ export class ExceptionListClient {
 
   /**
    * Update an existing exception list item
-   * @params _version {string | undefined} document version
-   * @params comments {array} user comments attached to item
-   * @params entries {array} item exception entries logic
-   * @params id {string | undefined} the "id" of the exception list item
-   * @params description {string | undefined} a description of the exception list
-   * @params itemId {string | undefined} the "item_id" of the exception list item
-   * @params meta {object | undefined}
-   * @params name {string | undefined} the "name" of the exception list
-   * @params namespaceType {string} saved object namespace (single | agnostic)
-   * @params osTypes {array} item os types to apply
-   * @params tags {array | undefined} user assigned tags of exception list
-   * @params type {string | undefined} container type
-   * @return {ExceptionListItemSchema | null} the updated exception list item or null if none exists
+   * @param options
+   * @param options._version document version
+   * @param options.comments user comments attached to item
+   * @param options.entries item exception entries logic
+   * @param options.id the "id" of the exception list item
+   * @param options.description a description of the exception list
+   * @param options.itemId the "item_id" of the exception list item
+   * @param options.meta Optional meta data about the exception list item
+   * @param options.name the "name" of the exception list
+   * @param options.namespaceType saved object namespace (single | agnostic)
+   * @param options.osTypes item os types to apply
+   * @param options.tags user assigned tags of exception list
+   * @param options.type container type
+   * @returns the updated exception list item or null if none exists
    */
   public updateExceptionListItem = async ({
     _version,
@@ -561,10 +620,11 @@ export class ExceptionListClient {
 
   /**
    * Delete an exception list item by either id or item_id
-   * @params itemId {string | undefined} the "item_id" of an exception list item
-   * @params id {string | undefined} the "id" of an exception list item
-   * @params namespaceType {string} saved object namespace (single | agnostic)
-   * @return {ExceptionListItemSchema | null} the deleted exception list item or null if none exists
+   * @param options
+   * @param options.itemId the "item_id" of an exception list item (Either this or id has to be defined)
+   * @param options.id the "id" of an exception list item (Either this or itemId has to be defined)
+   * @param options.namespaceType saved object namespace (single | agnostic)
+   * @returns the deleted exception list item or null if none exists
    */
   public deleteExceptionListItem = async ({
     id,
@@ -591,9 +651,9 @@ export class ExceptionListClient {
 
   /**
    * Delete an exception list item by id
-   * @params id {string | undefined} the "id" of an exception list item
-   * @params namespaceType {string} saved object namespace (single | agnostic)
-   * @return {void}
+   * @param options
+   * @param options.id the "id" of an exception list item
+   * @param options.namespaceType saved object namespace (single | agnostic)
    */
   public deleteExceptionListItemById = async ({
     id,
@@ -618,6 +678,11 @@ export class ExceptionListClient {
 
   /**
    * This is the same as "deleteExceptionListItem" except it applies specifically to the endpoint list.
+   * Either id or itemId has to be defined to delete but not both is required. If both are provided, the id
+   * is preferred.
+   * @param options
+   * @param options.id The id of the endpoint list item (Either this or itemId has to be defined)
+   * @param options.itemId The item id of the endpoint list item (Either this or id has to be defined)
    */
   public deleteEndpointListItem = async ({
     id,
@@ -632,6 +697,20 @@ export class ExceptionListClient {
     });
   };
 
+  /**
+   * Finds an exception list item given a set of criteria.
+   * @param options
+   * @param options.listId The single list id to do the search against
+   * @param options.filter The filter to apply in the search
+   * @param options.perPage How many per page to return
+   * @param options.pit The Point in Time (pit) id if there is one, otherwise "undefined" can be send in
+   * @param options.page The page number or "undefined" if there is no page number to continue from
+   * @param options.searchAfter The search_after parameter if there is one, otherwise "undefined" can be sent in
+   * @param options.sortField The sort field string if there is one, otherwise "undefined" can be sent in
+   * @param options.sortOder The sort order string of "asc", "desc", otherwise "undefined" if there is no preference
+   * @param options.namespaceType Set the list type of either "agnostic" | "single"
+   * @returns The found exception list items or null if nothing is found
+   */
   public findExceptionListItem = async ({
     listId,
     filter,
@@ -677,6 +756,20 @@ export class ExceptionListClient {
     });
   };
 
+  /**
+   * Finds exception lists items given a set of criteria.
+   * @param options
+   * @param options.listId The multiple list id's to do the search against
+   * @param options.filter The filter to apply in the search
+   * @param options.perPage How many per page to return
+   * @param options.pit The Point in Time (pit) id if there is one, otherwise "undefined" can be sent in
+   * @param options.page The page number or "undefined" if there is no page number to continue from
+   * @param options.searchAfter The search_after parameter if there is one, otherwise "undefined" can be sent in
+   * @param options.sortField The sort field string if there is one, otherwise "undefined" can be sent in
+   * @param options.sortOder The sort order string of "asc", "desc", otherwise "undefined" if there is no preference
+   * @param options.namespaceType Set the list type of either "agnostic" | "single"
+   * @returns The found exception lists items or null if nothing is found
+   */
   public findExceptionListsItem = async ({
     listId,
     filter,
@@ -722,6 +815,18 @@ export class ExceptionListClient {
     });
   };
 
+  /**
+   * Finds value list exception items given a set of criteria.
+   * @param options
+   * @param options.perPage How many per page to return
+   * @param options.pit The Point in Time (pit) id if there is one, otherwise "undefined" can be send in
+   * @param options.page The page number or "undefined" if there is no page number to continue from
+   * @param options.searchAfter The search_after parameter if there is one, otherwise "undefined" can be sent in
+   * @param options.sortField The sort field string if there is one, otherwise "undefined" can be sent in
+   * @param options.sortOrder The sort order of "asc" or "desc", otherwise "undefined" can be sent in if there is no preference
+   * @param options.valueListId The value list id
+   * @returns The found value list exception list item or null if nothing is found
+   */
   public findValueListExceptionListItems = async ({
     perPage,
     pit,
@@ -744,6 +849,19 @@ export class ExceptionListClient {
     });
   };
 
+  /**
+   * Finds exception lists given a set of criteria.
+   * @param options
+   * @param options.filter The filter to apply in the search
+   * @param options.perPage How many per page to return
+   * @param options.page The page number or "undefined" if there is no page number to continue from
+   * @param options.pit The Point in Time (pit) id if there is one, otherwise "undefined" can be sent in
+   * @param options.searchAfter The search_after parameter if there is one, otherwise "undefined" can be sent in
+   * @param options.sortField The sort field string if there is one, otherwise "undefined" can be sent in
+   * @param options.sortOrder The sort order of "asc" or "desc", otherwise "undefined" can be sent in
+   * @param options.namespaceType Set the list type of either "agnostic" | "single"
+   * @returns The found exception lists or null if nothing is found
+   */
   public findExceptionList = async ({
     filter,
     perPage,
@@ -775,6 +893,15 @@ export class ExceptionListClient {
    * a good guarantee that you will get an empty record set rather than null. I keep the null as the return value in
    * the off chance that you still might somehow not get into a race condition where the  endpoint list does
    * not exist because someone deleted it in-between the initial create and then the find.
+   * @param options
+   * @param options.filter The filter to apply in the search
+   * @param options.perPage How many per page to return
+   * @param options.page The page number or "undefined" if there is no page number to continue from
+   * @param options.pit The Point in Time (pit) id if there is one, otherwise "undefined" can be sent in
+   * @param options.searchAfter The search_after parameter if there is one, otherwise "undefined" can be sent in
+   * @param options.sortField The sort field string if there is one, otherwise "undefined" can be sent in
+   * @param options.sortOrder The sort order of "asc" or "desc", otherwise "undefined" can be sent in
+   * @returns The found exception list items or null if nothing is found
    */
   public findEndpointListItem = async ({
     filter,
@@ -803,10 +930,11 @@ export class ExceptionListClient {
 
   /**
    * Export an exception list parent container and it's items
-   * @params listId {string | undefined} the "list_id" of an exception list
-   * @params id {string | undefined} the "id" of an exception list
-   * @params namespaceType {string | undefined} saved object namespace (single | agnostic)
-   * @return {ExportExceptionListAndItemsReturn | null} the ndjson of the list and items to export or null if none exists
+   * @param options
+   * @param options.listId the "list_id" of an exception list
+   * @param options.id the "id" of an exception list
+   * @param options.namespaceType saved object namespace (single | agnostic)
+   * @returns the ndjson of the list and items to export or null if none exists
    */
   public exportExceptionListAndItems = async ({
     listId,
@@ -837,10 +965,11 @@ export class ExceptionListClient {
 
   /**
    * Import exception lists parent containers and items as stream
-   * @params exceptionsToImport {stream} ndjson stream of lists and items
-   * @params maxExceptionsImportSize {number} the max number of lists and items to import, defaults to 10,000
-   * @params overwrite {boolean} whether or not to overwrite an exception list with imported list if a matching list_id found
-   * @return {ImportExceptionsResponseSchema} summary of imported count and errors
+   * @param options
+   * @param options.exceptionsToImport ndjson stream of lists and items
+   * @param options.maxExceptionsImportSize the max number of lists and items to import, defaults to 10,000
+   * @param options.overwrite whether or not to overwrite an exception list with imported list if a matching list_id found
+   * @returns summary of imported count and errors
    */
   public importExceptionListAndItems = async ({
     exceptionsToImport,
@@ -874,10 +1003,11 @@ export class ExceptionListClient {
 
   /**
    * Import exception lists parent containers and items as array
-   * @params exceptionsToImport {array} array of lists and items
-   * @params maxExceptionsImportSize {number} the max number of lists and items to import, defaults to 10,000
-   * @params overwrite {boolean} whether or not to overwrite an exception list with imported list if a matching list_id found
-   * @return {ImportExceptionsResponseSchema} summary of imported count and errors
+   * @param options
+   * @param options.exceptionsToImport array of lists and items
+   * @param options.maxExceptionsImportSize the max number of lists and items to import, defaults to 10,000
+   * @param options.overwrite whether or not to overwrite an exception list with imported list if a matching list_id found
+   * @returns summary of imported count and errors
    */
   public importExceptionListAndItemsAsArray = async ({
     exceptionsToImport,
@@ -908,9 +1038,10 @@ export class ExceptionListClient {
   /**
    * Opens a point in time (PIT) for either exception lists or exception list items.
    * See: https://www.elastic.co/guide/en/elasticsearch/reference/current/point-in-time-api.html
-   * @params namespaceType {string} "agnostic" or "single" depending on which namespace you are targeting
-   * @params options {Object} The saved object PIT options
-   * @return {SavedObjectsOpenPointInTimeResponse} The point in time (PIT)
+   * @param options
+   * @param options.namespaceType "agnostic" or "single" depending on which namespace you are targeting
+   * @param options.options The saved object PIT options
+   * @returns The point in time (PIT)
    */
   public openPointInTime = async ({
     namespaceType,
@@ -927,8 +1058,9 @@ export class ExceptionListClient {
   /**
    * Closes a point in time (PIT) for either exception lists or exception list items.
    * See: https://www.elastic.co/guide/en/elasticsearch/reference/current/point-in-time-api.html
-   * @params pit {string} The point in time to close
-   * @return {SavedObjectsOpenPointInTimeResponse} The point in time (PIT)
+   * @param options
+   * @param options.pit The point in time to close
+   * @returns The point in time (PIT)
    */
   public closePointInTime = async ({
     pit,
@@ -965,12 +1097,15 @@ export class ExceptionListClient {
    *   exe
    * });
    * ```
-   * @param filter {string} Your filter
-   * @param namespaceType {string} "agnostic" | "single" of your namespace
-   * @param perPage {number} The number of items per page. Typical value should be 1_000 here. Never go above 10_000
-   * @param maxSize {number of undefined} If given a max size, this will not exceeded. Otherwise if undefined is passed down, all records will be processed.
-   * @param sortField {string} String of the field to sort against
-   * @param sortOrder "asc" | "desc" The order to sort against
+   * @param options
+   * @param options.filter The filter to apply in the search
+   * @param options.listId The "list_id" to filter against and find against
+   * @param options.namespaceType "agnostic" | "single" of your namespace
+   * @param options.perPage The number of items per page. Typical value should be 1_000 here. Never go above 10_000
+   * @param options.maxSize If given a max size, this will not exceeded. Otherwise if undefined is passed down, all records will be processed.
+   * @param options.sortField String of the field to sort against
+   * @param options.sortOrder "asc" | "desc" The order to sort against, "undefined" if the order does not matter
+   * @param options.executeFunctionOnStream The function to execute which will have the streamed results
    */
   public findExceptionListItemPointInTimeFinder = async ({
     executeFunctionOnStream,
@@ -1021,12 +1156,14 @@ export class ExceptionListClient {
    *   exe
    * });
    * ```
-   * @param filter {string} Your filter
-   * @param namespaceType {string} "agnostic" | "single" of your namespace
-   * @param perPage {number} The number of items per page. Typical value should be 1_000 here. Never go above 10_000
-   * @param maxSize {number of undefined} If given a max size, this will not exceeded. Otherwise if undefined is passed down, all records will be processed.
-   * @param sortField {string} String of the field to sort against
-   * @param sortOrder "asc" | "desc" The order to sort against
+   * @param options
+   * @param options.filter The filter to apply in the search
+   * @param options.namespaceType "agnostic" | "single" of your namespace
+   * @param options.perPage The number of items per page. Typical value should be 1_000 here. Never go above 10_000
+   * @param options.maxSize If given a max size, this will not be exceeded. Otherwise if undefined is passed down, all records will be processed.
+   * @param options.sortField String of the field to sort against
+   * @param options.sortOrder "asc" | "desc" The order to sort against, "undefined" if the order does not matter
+   * @param options.executeFunctionOnStream The function to execute which will have the streamed results
    */
   public findExceptionListPointInTimeFinder = async ({
     executeFunctionOnStream,
@@ -1075,12 +1212,15 @@ export class ExceptionListClient {
    *   exe
    * });
    * ```
-   * @param filter {string} Your filter
-   * @param namespaceType {string} "agnostic" | "single" of your namespace
-   * @param perPage {number} The number of items per page. Typical value should be 1_000 here. Never go above 10_000
-   * @param maxSize {number of undefined} If given a max size, this will not exceeded. Otherwise if undefined is passed down, all records will be processed.
-   * @param sortField {string} String of the field to sort against
-   * @param sortOrder "asc" | "desc" The order to sort against
+   * @param options
+   * @param options.listId The "list_id" to find against
+   * @param options.filter The filter to apply in the search
+   * @param options.namespaceType "agnostic" | "single" of your namespace
+   * @param options.perPage The number of items per page. Typical value should be 1_000 here. Never go above 10_000
+   * @param options.maxSize If given a max size, this will not exceeded. Otherwise if undefined is passed down, all records will be processed.
+   * @param options.sortField String of the field to sort against
+   * @param options.sortOrder "asc" | "desc" The order to sort against, "undefined" if the order does not matter
+   * @param options.executeFunctionOnStream The function to execute which will have the streamed results
    */
   public findExceptionListsItemPointInTimeFinder = async ({
     listId,
@@ -1131,12 +1271,13 @@ export class ExceptionListClient {
    *   exe
    * });
    * ```
-   * @param valueListId {string} Your value list id
-   * @param namespaceType {string} "agnostic" | "single" of your namespace
-   * @param perPage {number} The number of items per page. Typical value should be 1_000 here. Never go above 10_000
-   * @param maxSize {number of undefined} If given a max size, this will not exceeded. Otherwise if undefined is passed down, all records will be processed.
-   * @param sortField {string} String of the field to sort against
-   * @param sortOrder "asc" | "desc" The order to sort against
+   * @param options
+   * @param options.valueListId The value list id
+   * @param options.namespaceType "agnostic" | "single" of your namespace
+   * @param options.perPage The number of items per page. Typical value should be 1_000 here. Never go above 10_000
+   * @param options.maxSize If given a max size, this will not exceeded. Otherwise if undefined is passed down, all records will be processed.
+   * @param options.sortField String of the field to sort against
+   * @param options.sortOrder "asc" | "desc" The order to sort against, "undefined" if the order does not matter
    */
   public findValueListExceptionListItemsPointInTimeFinder = async ({
     valueListId,

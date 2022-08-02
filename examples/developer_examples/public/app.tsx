@@ -22,7 +22,7 @@ import {
   EuiLink,
   EuiButtonIcon,
 } from '@elastic/eui';
-import { AppMountParameters } from '../../../src/core/public';
+import { AppMountParameters } from '@kbn/core/public';
 import { ExampleDefinition } from './types';
 
 interface Props {

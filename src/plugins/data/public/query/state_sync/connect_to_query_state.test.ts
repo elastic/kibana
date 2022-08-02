@@ -7,16 +7,17 @@
  */
 
 import { Subscription } from 'rxjs';
+import { Filter, FilterStateStore } from '@kbn/es-query';
 import { FilterManager } from '../filter_manager';
 import { getFilter } from '../filter_manager/test_helpers/get_stub_filter';
-import { Filter, FilterStateStore, UI_SETTINGS } from '../../../common';
-import { coreMock } from '../../../../../core/public/mocks';
-import { BaseStateContainer, createStateContainer, Storage } from '../../../../kibana_utils/public';
+import { UI_SETTINGS } from '../../../common';
+import { coreMock } from '@kbn/core/public/mocks';
+import { BaseStateContainer, createStateContainer, Storage } from '@kbn/kibana-utils-plugin/public';
 import { QueryService, QueryStart } from '../query_service';
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { connectToQueryState } from './connect_to_query_state';
 import { TimefilterContract } from '../timefilter';
-import { QueryState } from './types';
+import { QueryState } from '../query_state';
 import { createNowProviderMock } from '../../now_provider/mocks';
 
 const connectToQueryGlobalState = (query: QueryStart, state: BaseStateContainer<QueryState>) =>

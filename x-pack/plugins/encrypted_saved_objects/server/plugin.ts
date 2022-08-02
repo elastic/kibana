@@ -7,9 +7,9 @@
 
 import nodeCrypto from '@elastic/node-crypto';
 
-import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
+import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
-import type { SecurityPluginSetup } from '../../security/server';
 import type { ConfigType } from './config';
 import type { CreateEncryptedSavedObjectsMigrationFn } from './create_migration';
 import { getCreateMigration } from './create_migration';

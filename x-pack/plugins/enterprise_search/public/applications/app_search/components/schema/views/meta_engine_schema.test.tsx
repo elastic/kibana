@@ -17,7 +17,7 @@ import { EuiCallOut } from '@elastic/eui';
 
 import { MetaEnginesSchemaTable, MetaEnginesConflictsTable } from '../components';
 
-import { MetaEngineSchema } from './';
+import { MetaEngineSchema } from '.';
 
 describe('MetaEngineSchema', () => {
   const values = {

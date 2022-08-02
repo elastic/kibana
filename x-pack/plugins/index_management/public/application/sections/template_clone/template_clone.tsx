@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageContentBody } from '@elastic/eui';
-import { ScopedHistory } from 'kibana/public';
+import { ScopedHistory } from '@kbn/core/public';
 
 import { PageLoading, PageError, Error } from '../../../shared_imports';
 import { TemplateDeserialized } from '../../../../common';

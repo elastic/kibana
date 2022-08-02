@@ -7,10 +7,10 @@
  */
 
 import { QueryStringManager } from './query_string_manager';
-import { Storage } from '../../../../kibana_utils/public/storage';
+import { Storage } from '@kbn/kibana-utils-plugin/public/storage';
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
-import { coreMock } from '../../../../../core/public/mocks';
-import { Query } from '../../../common/query';
+import { coreMock } from '@kbn/core/public/mocks';
+import { Query, AggregateQuery } from '../../../common/query';
 
 describe('QueryStringManager', () => {
   let service: QueryStringManager;
@@ -24,7 +24,7 @@ describe('QueryStringManager', () => {
 
   test('getUpdates$ is a cold emits only after query changes', () => {
     const obs$ = service.getUpdates$();
-    const emittedValues: Query[] = [];
+    const emittedValues: Array<Query | AggregateQuery> = [];
     obs$.subscribe((v) => {
       emittedValues.push(v);
     });

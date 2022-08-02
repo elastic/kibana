@@ -12,9 +12,23 @@ export const executionLogSortableColumns = [
   'es_search_duration',
   'schedule_delay',
   'num_triggered_actions',
+  'num_generated_actions',
+  'num_active_alerts',
+  'num_recovered_alerts',
+  'num_new_alerts',
 ] as const;
 
+export const actionErrorLogSortableColumns = [
+  '@timestamp',
+  'event.start',
+  'event.end',
+  'event.duration',
+  'event.action',
+];
+
 export type ExecutionLogSortFields = typeof executionLogSortableColumns[number];
+
+export type ActionErrorLogSortFields = typeof actionErrorLogSortableColumns[number];
 
 export interface IExecutionLog {
   id: string;
@@ -22,16 +36,30 @@ export interface IExecutionLog {
   duration_ms: number;
   status: string;
   message: string;
+  version: string;
   num_active_alerts: number;
   num_new_alerts: number;
   num_recovered_alerts: number;
   num_triggered_actions: number;
+  num_generated_actions: number;
   num_succeeded_actions: number;
   num_errored_actions: number;
   total_search_duration_ms: number;
   es_search_duration_ms: number;
   schedule_delay_ms: number;
   timed_out: boolean;
+}
+
+export interface IExecutionErrors {
+  id: string;
+  timestamp: string;
+  type: string;
+  message: string;
+}
+
+export interface IExecutionErrorsResult {
+  totalErrors: number;
+  errors: IExecutionErrors[];
 }
 
 export interface IExecutionLogResult {

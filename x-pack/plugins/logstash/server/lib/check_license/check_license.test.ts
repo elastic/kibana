@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { licensingMock } from '../../../../licensing/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { checkLicense } from './check_license';
 
 describe('check_license', function () {

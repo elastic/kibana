@@ -9,7 +9,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { UserAddedInfo } from './';
+import { UserAddedInfo } from '.';
 
 describe('UserAddedInfo', () => {
   const props = {

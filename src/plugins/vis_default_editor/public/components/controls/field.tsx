@@ -13,13 +13,8 @@ import useMount from 'react-use/lib/useMount';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import {
-  AggParam,
-  IAggConfig,
-  IFieldParamType,
-  IndexPatternField,
-  KBN_FIELD_TYPES,
-} from '../../../../../plugins/data/public';
+import { AggParam, IAggConfig, IFieldParamType, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 import { formatListAsProse, parseCommaSeparatedList, useValidation } from './utils';
 import { AggParamEditorProps } from '../agg_param_props';
 import { ComboBoxGroupedOptions } from '../../utils';
@@ -28,7 +23,7 @@ const label = i18n.translate('visDefaultEditor.controls.field.fieldLabel', {
   defaultMessage: 'Field',
 });
 
-export interface FieldParamEditorProps extends AggParamEditorProps<IndexPatternField> {
+export interface FieldParamEditorProps extends AggParamEditorProps<DataViewField> {
   customError?: string;
   customLabel?: string;
 }
@@ -46,12 +41,12 @@ function FieldParamEditor({
   setValue,
 }: FieldParamEditorProps) {
   const [isDirty, setIsDirty] = useState(false);
-  const selectedOptions: ComboBoxGroupedOptions<IndexPatternField> = value
+  const selectedOptions: ComboBoxGroupedOptions<DataViewField> = value
     ? [{ label: value.displayName, target: value, key: value.name }]
     : [];
 
   const onChange = (options: EuiComboBoxOptionOption[]) => {
-    const selectedOption: IndexPatternField = get(options, '0.target');
+    const selectedOption: DataViewField = get(options, '0.target');
     if (!(aggParam.required && !selectedOption)) {
       setValue(selectedOption);
     }

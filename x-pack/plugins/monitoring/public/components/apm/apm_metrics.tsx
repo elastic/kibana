@@ -22,8 +22,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 // @ts-ignore could not find declaration file
 import { MonitoringTimeseriesContainer } from '../chart';
-// @ts-ignore could not find declaration file
-import { Status } from './instance/status';
 import { checkAgentTypeMetric } from '../../lib/apm_agent';
 
 interface TitleType {
@@ -63,12 +61,12 @@ const getHeading = (isFleetTypeMetric: boolean) => {
   const titles: TitleType = {};
   if (isFleetTypeMetric) {
     titles.title = i18n.translate('xpack.monitoring.apm.metrics.topCharts.agentTitle', {
-      defaultMessage: 'APM & Fleet Server - Resource Usage',
+      defaultMessage: 'Integrations Server - Resource Usage',
     });
     titles.heading = (
       <FormattedMessage
         id="xpack.monitoring.apm.metrics.agentHeading"
-        defaultMessage="APM & Fleet Server"
+        defaultMessage="Integrations Server"
       />
     );
     return titles;

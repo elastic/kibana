@@ -6,13 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { take } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
-import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
+import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
+import { termQuery } from '@kbn/observability-plugin/server';
 import {
   ENVIRONMENT_NOT_DEFINED,
   getEnvironmentEsField,
@@ -32,11 +33,10 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { getApmIndices } from '../../routes/settings/apm_indices/get_apm_indices';
+import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
 import { RegisterRuleDependencies } from './register_apm_alerts';
-import { termQuery } from '../../../../observability/server';
 
 const paramsSchema = schema.object({
   windowSize: schema.number(),
@@ -84,7 +84,7 @@ export function registerErrorCountAlertType({
       minimumLicenseRequired: 'basic',
       isExportable: true,
       executor: async ({ services, params }) => {
-        const config = await config$.pipe(take(1)).toPromise();
+        const config = await firstValueFrom(config$);
         const ruleParams = params;
 
         const indices = await getApmIndices({

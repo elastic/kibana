@@ -6,7 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KibanaEventsRateClusterMetric, KibanaMetric } from './classes';
+import {
+  KibanaEventsRateClusterMetric,
+  KibanaMetric,
+  KibanaClusterRuleMetric,
+  KibanaInstanceRuleMetric,
+  KibanaInstanceActionMetric,
+  KibanaClusterActionMetric,
+} from './classes';
 import { LARGE_FLOAT, SMALL_FLOAT, LARGE_BYTES } from '../../../../common/formatting';
 
 const clientResponseTimeTitle = i18n.translate(
@@ -36,6 +43,17 @@ const instanceClientResponseTimeTitle = i18n.translate(
 const msTimeUnitLabel = i18n.translate('xpack.monitoring.metrics.kibana.msTimeUnitLabel', {
   defaultMessage: 'ms',
 });
+
+const ruleQueueDurationTitle = i18n.translate('xpack.monitoring.metrics.kibana.ruleQueueDuration', {
+  defaultMessage: 'Rule Queue Duration',
+});
+
+const actionQueueDurationTitle = i18n.translate(
+  'xpack.monitoring.metrics.kibana.actionQueueDuration',
+  {
+    defaultMessage: 'Action Queue Duration',
+  }
+);
 
 export const metrics = {
   kibana_cluster_requests: new KibanaEventsRateClusterMetric({
@@ -252,5 +270,192 @@ export const metrics = {
     format: SMALL_FLOAT,
     metricAgg: 'max',
     units: '',
+  }),
+
+  kibana_instance_rule_failures: new KibanaInstanceRuleMetric({
+    derivative: true,
+    derivativeNormalizedUnits: false,
+    field: 'kibana.node_rules.failures',
+    label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.ruleInstanceFailuresLabel', {
+      defaultMessage: 'Rule Failures',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.kibanaInstance.ruleInstanceFailuresDescription',
+      {
+        defaultMessage: 'Total rule failures for the Kibana instance.',
+      }
+    ),
+    format: SMALL_FLOAT,
+    metricAgg: 'max',
+    units: '',
+    isNotSupportedInInternalCollection: true,
+    technicalPreview: true,
+  }),
+  kibana_instance_rule_executions: new KibanaInstanceRuleMetric({
+    derivative: true,
+    derivativeNormalizedUnits: false,
+    field: 'kibana.node_rules.executions',
+    label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.ruleInstanceExecutionsLabel', {
+      defaultMessage: 'Rule Executions',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.kibanaInstance.ruleInstanceExecutionsDescription',
+      {
+        defaultMessage: 'Total rule executions for the Kibana instance.',
+      }
+    ),
+    format: SMALL_FLOAT,
+    metricAgg: 'max',
+    units: '',
+    isNotSupportedInInternalCollection: true,
+    technicalPreview: true,
+  }),
+  kibana_instance_action_failures: new KibanaInstanceActionMetric({
+    derivative: true,
+    derivativeNormalizedUnits: false,
+    field: 'kibana.node_actions.failures',
+    label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.actionInstanceFailuresLabel', {
+      defaultMessage: 'Action Failures',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.kibanaInstance.actionInstanceFailuresDescription',
+      {
+        defaultMessage: 'Total action failures for the Kibana instance.',
+      }
+    ),
+    format: SMALL_FLOAT,
+    metricAgg: 'max',
+    units: '',
+    isNotSupportedInInternalCollection: true,
+    technicalPreview: true,
+  }),
+  kibana_instance_action_executions: new KibanaInstanceActionMetric({
+    derivative: true,
+    derivativeNormalizedUnits: false,
+    field: 'kibana.node_actions.executions',
+    label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.actionInstanceExecutionsLabel', {
+      defaultMessage: 'Action Executions',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.kibanaInstance.actionInstanceExecutionsDescription',
+      {
+        defaultMessage: 'Total action executions for the Kibana instance.',
+      }
+    ),
+    format: SMALL_FLOAT,
+    metricAgg: 'max',
+    units: '',
+    isNotSupportedInInternalCollection: true,
+    technicalPreview: true,
+  }),
+
+  kibana_cluster_rule_overdue_count: new KibanaClusterRuleMetric({
+    field: 'kibana.cluster_rules.overdue.count',
+    label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.clusterRuleOverdueCountLabel', {
+      defaultMessage: 'Rule Queue',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.kibanaInstance.clusterRuleOverdueCountDescription',
+      {
+        defaultMessage: 'Number of queued alerting rules.',
+      }
+    ),
+    format: SMALL_FLOAT,
+    metricAgg: 'max',
+    units: '',
+    isNotSupportedInInternalCollection: true,
+    technicalPreview: true,
+  }),
+  kibana_cluster_rule_overdue_p50: new KibanaClusterRuleMetric({
+    title: ruleQueueDurationTitle,
+    field: 'kibana.cluster_rules.overdue.delay.p50',
+    label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.clusterRuleOverdueP50Label', {
+      defaultMessage: 'Average Rule Queue Duration',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.kibanaInstance.clusterRuleOverdueP50Description',
+      {
+        defaultMessage: 'Average duration alerting rules are queued.',
+      }
+    ),
+    format: SMALL_FLOAT,
+    metricAgg: 'max',
+    units: msTimeUnitLabel,
+    isNotSupportedInInternalCollection: true,
+    technicalPreview: true,
+  }),
+  kibana_cluster_rule_overdue_p99: new KibanaClusterRuleMetric({
+    title: ruleQueueDurationTitle,
+    field: 'kibana.cluster_rules.overdue.delay.p99',
+    label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.clusterRuleOverdueP99Label', {
+      defaultMessage: 'Longest Rule Queue Duration',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.kibanaInstance.clusterRuleOverdueP99Description',
+      {
+        defaultMessage: 'Longest duration an alerting rule was queued.',
+      }
+    ),
+    format: SMALL_FLOAT,
+    metricAgg: 'max',
+    units: msTimeUnitLabel,
+    isNotSupportedInInternalCollection: true,
+    technicalPreview: true,
+  }),
+  kibana_cluster_action_overdue_count: new KibanaClusterActionMetric({
+    field: 'kibana.cluster_actions.overdue.count',
+    label: i18n.translate(
+      'xpack.monitoring.metrics.kibanaInstance.clusterActionOverdueCountLabel',
+      {
+        defaultMessage: 'Action Queue',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.kibanaInstance.clusterActionOverdueCountDescription',
+      {
+        defaultMessage: 'Number of actions queued.',
+      }
+    ),
+    format: SMALL_FLOAT,
+    metricAgg: 'max',
+    units: '',
+    isNotSupportedInInternalCollection: true,
+    technicalPreview: true,
+  }),
+  kibana_cluster_action_overdue_p50: new KibanaClusterActionMetric({
+    title: actionQueueDurationTitle,
+    field: 'kibana.cluster_actions.overdue.delay.p50',
+    label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.clusterActionOverdueP50Label', {
+      defaultMessage: 'Average Action Queue Duration',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.kibanaInstance.clusterActionOverdueP50Description',
+      {
+        defaultMessage: 'Average duration actions are queued.',
+      }
+    ),
+    format: SMALL_FLOAT,
+    metricAgg: 'max',
+    units: msTimeUnitLabel,
+    isNotSupportedInInternalCollection: true,
+    technicalPreview: true,
+  }),
+  kibana_cluster_action_overdue_p99: new KibanaClusterActionMetric({
+    title: actionQueueDurationTitle,
+    field: 'kibana.cluster_actions.overdue.delay.p99',
+    label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.clusterActionOverdueP99Label', {
+      defaultMessage: 'Longest Action Queue Duration',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.kibanaInstance.clusterActionOverdueP99Description',
+      {
+        defaultMessage: 'Longest duration an action was queued.',
+      }
+    ),
+    format: SMALL_FLOAT,
+    metricAgg: 'max',
+    units: msTimeUnitLabel,
+    isNotSupportedInInternalCollection: true,
+    technicalPreview: true,
   }),
 };

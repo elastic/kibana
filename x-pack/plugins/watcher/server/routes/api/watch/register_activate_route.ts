@@ -6,11 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import { RouteDependencies } from '../../../types';
 // @ts-ignore
-import { WatchStatus } from '../../../models/watch_status/index';
+import { WatchStatus } from '../../../models/watch_status';
 
 function activateWatch(dataClient: IScopedClusterClient, watchId: string) {
   return dataClient.asCurrentUser.watcher.activateWatch({
@@ -38,7 +38,8 @@ export function registerActivateRoute({
       const { watchId } = request.params;
 
       try {
-        const hit = await activateWatch(ctx.core.elasticsearch.client, watchId);
+        const esClient = (await ctx.core).elasticsearch.client;
+        const hit = await activateWatch(esClient, watchId);
         const watchStatusJson = get(hit, 'status');
         const json = {
           id: watchId,

@@ -6,28 +6,31 @@
  */
 
 import expect from '@kbn/expect';
-import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
+import archives from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
-  const supertest = getService('legacySupertestAsApmReadUser');
+  const apmApiClient = getService('apmApiClient');
 
   const archiveName = 'apm_8.0.0';
-  const metadata = archives_metadata[archiveName];
-
-  // url parameters
-  const start = encodeURIComponent(metadata.start);
-  const end = encodeURIComponent(metadata.end);
+  const { start, end } = archives[archiveName];
 
   registry.when(
     'Transaction types when data is not loaded',
     { config: 'basic', archives: [] },
     () => {
       it('handles empty state', async () => {
-        const response = await supertest.get(
-          `/internal/apm/services/opbeans-node/transaction_types?start=${start}&end=${end}`
-        );
+        const response = await apmApiClient.readUser({
+          endpoint: 'GET /internal/apm/services/{serviceName}/transaction_types',
+          params: {
+            path: { serviceName: 'opbeans-node' },
+            query: {
+              start,
+              end,
+            },
+          },
+        });
 
         expect(response.status).to.be(200);
 
@@ -41,9 +44,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: [archiveName] },
     () => {
       it('handles empty state', async () => {
-        const response = await supertest.get(
-          `/internal/apm/services/opbeans-node/transaction_types?start=${start}&end=${end}`
-        );
+        const response = await apmApiClient.readUser({
+          endpoint: 'GET /internal/apm/services/{serviceName}/transaction_types',
+          params: {
+            path: { serviceName: 'opbeans-node' },
+            query: {
+              start,
+              end,
+            },
+          },
+        });
 
         expect(response.status).to.be(200);
         expect(response.body.transactionTypes.length).to.be.greaterThan(0);

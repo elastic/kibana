@@ -7,16 +7,15 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
-
 import {
-  IExecutionLogResult,
   IExecutionLog,
   ExecutionLogSortFields,
-} from '../../../../../alerting/common';
-import { AsApiContract, RewriteRequestCase } from '../../../../../actions/common';
+  IExecutionLogResult,
+} from '@kbn/alerting-plugin/common';
+import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
+import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 
 const getRenamedLog = (data: IExecutionLog) => {
   const {
@@ -36,16 +35,24 @@ const getRenamedLog = (data: IExecutionLog) => {
   };
 };
 
-const rewriteBodyRes: RewriteRequestCase<IExecutionLogResult> = ({ data, total }: any) => ({
+const rewriteBodyRes: RewriteRequestCase<IExecutionLogResult> = ({ data, ...rest }: any) => ({
   data: data.map((log: IExecutionLog) => getRenamedLog(log)),
-  total,
+  ...rest,
 });
 
-const getFilter = (filter: string[] | undefined) => {
-  if (!filter || !filter.length) {
-    return;
+// TODO (Jiawei): Use node builder instead of strings
+const getFilter = ({ outcomeFilter, message }: { outcomeFilter?: string[]; message?: string }) => {
+  const filter: string[] = [];
+
+  if (outcomeFilter && outcomeFilter.length) {
+    filter.push(`event.provider: alerting AND event.outcome: ${outcomeFilter.join(' or ')}`);
   }
-  return filter.join(' OR ');
+
+  if (message) {
+    filter.push(`message: "${message.replace(/([\)\(\<\>\}\{\"\:\\])/gm, '\\$&')}"`);
+  }
+
+  return filter;
 };
 
 export type SortField = Record<
@@ -59,7 +66,8 @@ export interface LoadExecutionLogAggregationsProps {
   id: string;
   dateStart: string;
   dateEnd?: string;
-  filter?: string[];
+  outcomeFilter?: string[];
+  message?: string;
   perPage?: number;
   page?: number;
   sort?: SortField[];
@@ -70,12 +78,14 @@ export const loadExecutionLogAggregations = async ({
   http,
   dateStart,
   dateEnd,
-  filter,
+  outcomeFilter,
+  message,
   perPage = 10,
   page = 0,
   sort = [],
 }: LoadExecutionLogAggregationsProps & { http: HttpSetup }) => {
   const sortField: any[] = sort;
+  const filter = getFilter({ outcomeFilter, message });
 
   const result = await http.get<AsApiContract<IExecutionLogResult>>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${id}/_execution_log`,
@@ -83,7 +93,7 @@ export const loadExecutionLogAggregations = async ({
       query: {
         date_start: dateStart,
         date_end: dateEnd,
-        filter: getFilter(filter),
+        filter: filter.length ? filter.join(' and ') : undefined,
         per_page: perPage,
         // Need to add the + 1 for pages because APIs are 1 indexed,
         // whereas data grid sorts are 0 indexed.

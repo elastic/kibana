@@ -8,24 +8,25 @@
 import React from 'react';
 
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { DetailPanelAlertTab } from './index';
+import { DetailPanelAlertTab } from '.';
 import { mockAlerts } from '../../../common/mocks/constants/session_view_process.mock';
 import { fireEvent } from '@testing-library/dom';
-import {
-  INVESTIGATED_ALERT_TEST_ID,
-  VIEW_MODE_TOGGLE,
-  ALERTS_TAB_EMPTY_STATE_TEST_ID,
-} from './index';
+import { INVESTIGATED_ALERT_TEST_ID, VIEW_MODE_TOGGLE, ALERTS_TAB_EMPTY_STATE_TEST_ID } from '.';
 import {
   ALERT_LIST_ITEM_TEST_ID,
   ALERT_LIST_ITEM_ARGS_TEST_ID,
   ALERT_LIST_ITEM_TIMESTAMP_TEST_ID,
-} from '../detail_panel_alert_list_item/index';
+} from '../detail_panel_alert_list_item';
 import {
   ALERT_GROUP_ITEM_TEST_ID,
   ALERT_GROUP_ITEM_COUNT_TEST_ID,
   ALERT_GROUP_ITEM_TITLE_TEST_ID,
-} from '../detail_panel_alert_group_item/index';
+} from '../detail_panel_alert_group_item';
+import { useDateFormat } from '../../hooks';
+import { formatDate } from '@elastic/eui';
+
+jest.mock('../../hooks/use_date_format');
+const mockUseDateFormat = useDateFormat as jest.Mock;
 
 const ACCORDION_BUTTON_CLASS = '.euiAccordion__button';
 const VIEW_MODE_GROUP = 'groupView';
@@ -35,24 +36,27 @@ describe('DetailPanelAlertTab component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let mockedContext: AppContextTestRender;
-  let mockOnProcessSelected = jest.fn((process) => process);
-  let mockShowAlertDetails = jest.fn((alertId) => alertId);
+
+  const props = {
+    alerts: mockAlerts,
+    onJumpToEvent: jest.fn((process) => process),
+    onShowAlertDetails: jest.fn((alertId) => alertId),
+    isFetchingAlerts: false,
+    hasNextPageAlerts: false,
+    fetchNextPageAlerts: jest.fn(() => true),
+  };
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
-    mockOnProcessSelected = jest.fn((process) => process);
-    mockShowAlertDetails = jest.fn((alertId) => alertId);
+    props.onJumpToEvent.mockReset();
+    props.onShowAlertDetails.mockReset();
+    props.fetchNextPageAlerts.mockReset();
+    mockUseDateFormat.mockImplementation(() => 'YYYY-MM-DDTHH:mm:ss.SSS');
   });
 
   describe('When DetailPanelAlertTab is mounted', () => {
     it('renders a list of alerts for the session (defaulting to list view mode)', async () => {
-      renderResult = mockedContext.render(
-        <DetailPanelAlertTab
-          alerts={mockAlerts}
-          onProcessSelected={mockOnProcessSelected}
-          onShowAlertDetails={mockShowAlertDetails}
-        />
-      );
+      renderResult = mockedContext.render(<DetailPanelAlertTab {...props} />);
 
       expect(renderResult.queryAllByTestId(ALERT_LIST_ITEM_TEST_ID).length).toBe(mockAlerts.length);
       expect(renderResult.queryByTestId(ALERT_GROUP_ITEM_TEST_ID)).toBeFalsy();
@@ -65,13 +69,7 @@ describe('DetailPanelAlertTab component', () => {
     });
 
     it('renders a list of alerts grouped by rule when group-view clicked', async () => {
-      renderResult = mockedContext.render(
-        <DetailPanelAlertTab
-          alerts={mockAlerts}
-          onProcessSelected={mockOnProcessSelected}
-          onShowAlertDetails={mockShowAlertDetails}
-        />
-      );
+      renderResult = mockedContext.render(<DetailPanelAlertTab {...props} />);
 
       fireEvent.click(renderResult.getByTestId(VIEW_MODE_GROUP));
 
@@ -86,13 +84,10 @@ describe('DetailPanelAlertTab component', () => {
     });
 
     it('renders a sticky investigated alert (outside of main list) if one is set', async () => {
+      const investigatedAlertId = mockAlerts[0].kibana?.alert?.uuid;
+
       renderResult = mockedContext.render(
-        <DetailPanelAlertTab
-          alerts={mockAlerts}
-          onProcessSelected={mockOnProcessSelected}
-          onShowAlertDetails={mockShowAlertDetails}
-          investigatedAlert={mockAlerts[0]}
-        />
+        <DetailPanelAlertTab {...props} investigatedAlertId={investigatedAlertId} />
       );
 
       expect(renderResult.queryByTestId(INVESTIGATED_ALERT_TEST_ID)).toBeTruthy();
@@ -103,13 +98,10 @@ describe('DetailPanelAlertTab component', () => {
     });
 
     it('investigated alert should be collapsible', async () => {
+      const investigatedAlertId = mockAlerts[0].kibana?.alert?.uuid;
+
       renderResult = mockedContext.render(
-        <DetailPanelAlertTab
-          alerts={mockAlerts}
-          onProcessSelected={mockOnProcessSelected}
-          onShowAlertDetails={mockShowAlertDetails}
-          investigatedAlert={mockAlerts[0]}
-        />
+        <DetailPanelAlertTab {...props} investigatedAlertId={investigatedAlertId} />
       );
 
       expect(
@@ -136,13 +128,7 @@ describe('DetailPanelAlertTab component', () => {
     });
 
     it('non investigated alert should NOT be collapsible', async () => {
-      renderResult = mockedContext.render(
-        <DetailPanelAlertTab
-          alerts={mockAlerts}
-          onProcessSelected={mockOnProcessSelected}
-          onShowAlertDetails={mockShowAlertDetails}
-        />
-      );
+      renderResult = mockedContext.render(<DetailPanelAlertTab {...props} />);
 
       expect(
         renderResult
@@ -168,13 +154,7 @@ describe('DetailPanelAlertTab component', () => {
     });
 
     it('grouped alerts should be expandable/collapsible (default to collapsed)', async () => {
-      renderResult = mockedContext.render(
-        <DetailPanelAlertTab
-          alerts={mockAlerts}
-          onProcessSelected={mockOnProcessSelected}
-          onShowAlertDetails={mockShowAlertDetails}
-        />
-      );
+      renderResult = mockedContext.render(<DetailPanelAlertTab {...props} />);
 
       fireEvent.click(renderResult.getByTestId(VIEW_MODE_GROUP));
 
@@ -202,50 +182,41 @@ describe('DetailPanelAlertTab component', () => {
     });
 
     it('each alert list item should show a timestamp and process arguments', async () => {
-      renderResult = mockedContext.render(
-        <DetailPanelAlertTab
-          alerts={mockAlerts}
-          onProcessSelected={mockOnProcessSelected}
-          onShowAlertDetails={mockShowAlertDetails}
-        />
-      );
+      renderResult = mockedContext.render(<DetailPanelAlertTab {...props} />);
 
       expect(renderResult.queryAllByTestId(ALERT_LIST_ITEM_TIMESTAMP_TEST_ID)[0]).toHaveTextContent(
-        mockAlerts[0]['@timestamp']
+        formatDate(mockAlerts[0]['@timestamp']!, useDateFormat())
       );
 
       expect(renderResult.queryAllByTestId(ALERT_LIST_ITEM_ARGS_TEST_ID)[0]).toHaveTextContent(
-        mockAlerts[0].process.args.join(' ')
+        mockAlerts[0].process!.args!.join(' ')
       );
     });
 
     it('each alert group should show a rule title and alert count', async () => {
-      renderResult = mockedContext.render(
-        <DetailPanelAlertTab
-          alerts={mockAlerts}
-          onProcessSelected={mockOnProcessSelected}
-          onShowAlertDetails={mockShowAlertDetails}
-        />
-      );
+      renderResult = mockedContext.render(<DetailPanelAlertTab {...props} />);
 
       fireEvent.click(renderResult.getByTestId(VIEW_MODE_GROUP));
 
       expect(renderResult.queryByTestId(ALERT_GROUP_ITEM_COUNT_TEST_ID)).toHaveTextContent('2');
       expect(renderResult.queryByTestId(ALERT_GROUP_ITEM_TITLE_TEST_ID)).toHaveTextContent(
-        mockAlerts[0].kibana?.alert.rule.name || ''
+        mockAlerts[0].kibana!.alert!.rule!.name!
       );
     });
 
     it('renders an empty state when there are no alerts', async () => {
-      renderResult = mockedContext.render(
-        <DetailPanelAlertTab
-          alerts={[]}
-          onProcessSelected={mockOnProcessSelected}
-          onShowAlertDetails={mockShowAlertDetails}
-        />
-      );
+      renderResult = mockedContext.render(<DetailPanelAlertTab {...props} alerts={[]} />);
 
       expect(renderResult.queryByTestId(ALERTS_TAB_EMPTY_STATE_TEST_ID)).toBeTruthy();
+    });
+
+    it('renders a load more button when there are more pages of alerts', async () => {
+      renderResult = mockedContext.render(
+        <DetailPanelAlertTab {...props} hasNextPageAlerts={true} />
+      );
+      expect(renderResult.queryByTestId('alerts-details-load-more')).toBeTruthy();
+      renderResult.queryByTestId('alerts-details-load-more')?.click();
+      expect(props.fetchNextPageAlerts.mock.calls.length).toEqual(1);
     });
   });
 });

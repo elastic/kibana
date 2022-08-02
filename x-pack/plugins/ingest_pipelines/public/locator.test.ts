@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ManagementAppLocatorDefinition } from 'src/plugins/management/common/locator';
+import { ManagementAppLocatorDefinition } from '@kbn/management-plugin/common/locator';
 import { IngestPipelinesLocatorDefinition, INGEST_PIPELINES_PAGES } from './locator';
-import { sharePluginMock } from '../../../../src/plugins/share/public/mocks';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
 describe('Ingest pipeline locator', () => {
   const setup = () => {

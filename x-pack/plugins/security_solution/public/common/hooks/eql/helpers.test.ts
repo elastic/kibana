@@ -7,10 +7,10 @@
 
 import moment from 'moment';
 
-import type { EqlSearchStrategyResponse } from '../../../../../../../src/plugins/data/common';
-import { Source } from './types';
-import { EqlSearchResponse } from '../../../../common/detection_engine/types';
-import { inputsModel } from '../../../common/store';
+import type { EqlSearchStrategyResponse } from '@kbn/data-plugin/common';
+import type { Source } from './types';
+import type { EqlSearchResponse } from '../../../../common/detection_engine/types';
+import type { inputsModel } from '../../store';
 
 import {
   calculateBucketForHour,

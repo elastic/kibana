@@ -29,13 +29,13 @@ describe('ColorPicker', () => {
 
   it('should not render the clear button', () => {
     component = mount(<ColorPicker {...defaultProps} />);
-    expect(component.find('.tvbColorPicker__clear').length).toBe(0);
+    expect(findTestSubject(component, 'tvbColorPickerClear').length).toBe(0);
   });
 
   it('should render the correct value to the input text if the prop value is hex', () => {
     const props = { ...defaultProps, value: '#68BC00' };
     component = mount(<ColorPicker {...props} />);
-    component.find('.tvbColorPicker button').simulate('click');
+    findTestSubject(component, 'tvbColorPicker').find('button').simulate('click');
     const input = findTestSubject(component, 'euiColorPickerInput_top');
     expect(input.props().value).toBe('#68BC00');
   });
@@ -43,7 +43,7 @@ describe('ColorPicker', () => {
   it('should render the correct value to the input text if the prop value is rgba', () => {
     const props = { ...defaultProps, value: 'rgba(85,66,177,1)' };
     component = mount(<ColorPicker {...props} />);
-    component.find('.tvbColorPicker button').simulate('click');
+    findTestSubject(component, 'tvbColorPicker').find('button').simulate('click');
     const input = findTestSubject(component, 'euiColorPickerInput_top');
     expect(input.props().value).toBe('85,66,177,1');
   });
@@ -51,7 +51,7 @@ describe('ColorPicker', () => {
   it('should render the correct aria label to the color swatch button', () => {
     const props = { ...defaultProps, value: 'rgba(85,66,177,0.59)' };
     component = mount(<ColorPicker {...props} />);
-    const button = component.find('.tvbColorPicker button');
+    const button = findTestSubject(component, 'tvbColorPicker').find('button');
     expect(button.prop('aria-label')).toBe('Color picker (rgba(85,66,177,0.59)), not accessible');
   });
 
@@ -59,7 +59,7 @@ describe('ColorPicker', () => {
     const props = { ...defaultProps, disableTrash: false, value: 'rgba(85,66,177,1)' };
     component = mount(<ColorPicker {...props} />);
 
-    component.find('.tvbColorPicker__clear').simulate('click');
+    findTestSubject(component, 'tvbColorPickerClear').simulate('click');
 
     expect(component.find(EuiIconTip).length).toBe(1);
     expect(defaultProps.onChange).toHaveBeenCalled();

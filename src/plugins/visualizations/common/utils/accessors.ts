@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import { Datatable, DatatableColumn } from '../../../expressions/common';
+import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common/types';
 import { ExpressionValueVisDimension } from '../expression_functions';
 
 const getAccessorByIndex = (accessor: number, columns: Datatable['columns']) =>
@@ -66,11 +67,12 @@ export function getAccessor(dimension: string | ExpressionValueVisDimension) {
 
 export function getFormatByAccessor(
   dimension: string | ExpressionValueVisDimension,
-  columns: DatatableColumn[]
+  columns: DatatableColumn[],
+  defaultColumnFormat?: SerializedFieldFormat
 ) {
   return typeof dimension === 'string'
-    ? getColumnByAccessor(dimension, columns)?.meta.params
-    : dimension.format;
+    ? getColumnByAccessor(dimension, columns)?.meta.params || defaultColumnFormat
+    : dimension.format || defaultColumnFormat;
 }
 
 export const getColumnByAccessor = (

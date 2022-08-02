@@ -6,7 +6,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 export default async function clearAllApiKeys(esClient: Client, logger: ToolingLog) {
   const existingKeys = await esClient.security.queryApiKeys();

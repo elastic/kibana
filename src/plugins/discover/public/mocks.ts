@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { DiscoverSetup, DiscoverStart } from '.';
-import { sharePluginMock } from '../../share/public/mocks';
 
 export type Setup = jest.Mocked<DiscoverSetup>;
 export type Start = jest.Mocked<DiscoverStart>;

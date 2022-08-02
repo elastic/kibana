@@ -11,7 +11,7 @@ import type {
   SavedObjectMigrationContext,
   SavedObjectMigrationFn,
   SavedObjectUnsanitizedDoc,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
 import { EncryptionError } from './crypto';
 import type { EncryptedSavedObjectsService, EncryptedSavedObjectTypeRegistration } from './crypto';

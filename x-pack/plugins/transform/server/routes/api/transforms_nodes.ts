@@ -7,12 +7,13 @@
 
 import Boom from '@hapi/boom';
 
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+
 import { NODES_INFO_PRIVILEGES } from '../../../common/constants';
-import { isPopulatedObject } from '../../../common/shared_imports';
 
 import { RouteDependencies } from '../../types';
 
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 import { wrapError, wrapEsError } from './error_utils';
 
@@ -48,11 +49,12 @@ export function registerTransformNodesRoutes({ router, license }: RouteDependenc
     },
     license.guardApiRoute<undefined, undefined, undefined>(async (ctx, req, res) => {
       try {
+        const esClient = (await ctx.core).elasticsearch.client;
         // If security is enabled, check that the user has at least permission to
         // view transforms before calling the _nodes endpoint with the internal user.
         if (license.getStatus().isSecurityEnabled === true) {
           const { has_all_requested: hasAllPrivileges } =
-            await ctx.core.elasticsearch.client.asCurrentUser.security.hasPrivileges({
+            await esClient.asCurrentUser.security.hasPrivileges({
               body: {
                 // @ts-expect-error SecurityClusterPrivilege doesn’t contain all the priviledges
                 cluster: NODES_INFO_PRIVILEGES,
@@ -64,7 +66,7 @@ export function registerTransformNodesRoutes({ router, license }: RouteDependenc
           }
         }
 
-        const { nodes } = await ctx.core.elasticsearch.client.asInternalUser.nodes.info({
+        const { nodes } = await esClient.asInternalUser.nodes.info({
           filter_path: `nodes.*.${NODE_ROLES}`,
         });
 

@@ -8,7 +8,7 @@
 import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { DetailPanelListItem } from './index';
+import { DetailPanelListItem } from '.';
 
 const TEST_STRING = 'item title';
 const TEST_CHILD = <span>{TEST_STRING}</span>;

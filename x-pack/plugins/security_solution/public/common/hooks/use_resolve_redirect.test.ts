@@ -10,7 +10,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useDeepEqualSelector } from './use_selector';
 import { useKibana } from '../lib/kibana';
 import { useResolveRedirect } from './use_resolve_redirect';
-import * as urlHelpers from '../components/url_state/helpers';
+import * as urlHelpers from '../utils/global_query_string/helpers';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -22,7 +22,7 @@ jest.mock('react-router-dom', () => {
 });
 jest.mock('../lib/kibana');
 jest.mock('./use_selector');
-jest.mock('../../timelines/store/timeline/', () => ({
+jest.mock('../../timelines/store/timeline', () => ({
   timelineSelectors: {
     getTimelineByIdSelector: () => jest.fn(),
   },

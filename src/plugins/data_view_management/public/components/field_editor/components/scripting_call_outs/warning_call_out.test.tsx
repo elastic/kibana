@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { mockManagementPlugin } from '../../../../mocks';
 import { ScriptingWarningCallOut } from './warning_call_out';
 
@@ -23,7 +23,7 @@ describe('ScriptingWarningCallOut', () => {
       },
     });
 
-    expect(component).toMatchSnapshot();
+    expect(component.render()).toMatchSnapshot();
   });
 
   it('should render nothing if not visible', async () => {

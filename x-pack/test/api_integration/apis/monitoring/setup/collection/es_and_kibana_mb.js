@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import fixture from './fixtures/es_and_kibana_mb';
+import fixture from './fixtures/es_and_kibana_mb.json';
 import { getLifecycleMethods } from '../../data_stream';
 
 export default function ({ getService }) {

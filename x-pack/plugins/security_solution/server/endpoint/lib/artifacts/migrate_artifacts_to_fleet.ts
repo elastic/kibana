@@ -7,9 +7,9 @@
 
 import { inflate as _inflate } from 'zlib';
 import { promisify } from 'util';
-import { SavedObjectsClient, Logger } from 'kibana/server';
-import { EndpointArtifactClientInterface } from '../../services';
-import { InternalArtifactCompleteSchema, InternalArtifactSchema } from '../../schemas';
+import type { SavedObjectsClient, Logger } from '@kbn/core/server';
+import type { EndpointArtifactClientInterface } from '../../services';
+import type { InternalArtifactCompleteSchema, InternalArtifactSchema } from '../../schemas';
 import { ArtifactConstants } from './common';
 
 class ArtifactMigrationError extends Error {

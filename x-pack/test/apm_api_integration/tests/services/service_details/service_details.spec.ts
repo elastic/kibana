@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 import { first } from 'lodash';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { dataConfig, generateData } from './generate_data';
-import { APIReturnType } from '../../../../../plugins/apm/public/services/rest/create_call_apm_api';
 
 type ServiceDetails = APIReturnType<'GET /internal/apm/services/{serviceName}/metadata/details'>;
 

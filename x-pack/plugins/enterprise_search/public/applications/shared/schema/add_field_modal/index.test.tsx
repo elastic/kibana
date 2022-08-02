@@ -12,10 +12,10 @@ import { shallow, mount } from 'enzyme';
 import { EuiForm, EuiFieldText, EuiModal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { SchemaFieldTypeSelect } from '../index';
+import { SchemaFieldTypeSelect } from '..';
 import { SchemaType } from '../types';
 
-import { SchemaAddFieldModal } from './';
+import { SchemaAddFieldModal } from '.';
 
 describe('SchemaAddFieldModal', () => {
   const addNewField = jest.fn();

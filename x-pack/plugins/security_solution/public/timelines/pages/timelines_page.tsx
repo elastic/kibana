@@ -15,7 +15,6 @@ import { HeaderPage } from '../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useKibana } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { OverviewEmpty } from '../../overview/components/overview_empty';
 import { StatefulOpenTimeline } from '../components/open_timeline';
 import { NEW_TEMPLATE_TIMELINE } from '../components/timeline/properties/translations';
 import { NewTemplateTimeline } from '../components/timeline/properties/new_template_timeline';
@@ -23,6 +22,7 @@ import { NewTimeline } from '../components/timeline/properties/helpers';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../app/types';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { LandingPageComponent } from '../../common/components/landing_page';
 
 const TimelinesContainer = styled.div`
   width: 100%;
@@ -92,9 +92,7 @@ export const TimelinesPageComponent: React.FC = () => {
           </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <SecuritySolutionPageWrapper>
-          <OverviewEmpty />
-        </SecuritySolutionPageWrapper>
+        <LandingPageComponent />
       )}
 
       <SpyRoute pageName={SecurityPageName.timelines} />

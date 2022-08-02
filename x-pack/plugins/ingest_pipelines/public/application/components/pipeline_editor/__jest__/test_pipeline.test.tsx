@@ -6,6 +6,7 @@
  */
 
 import { Pipeline } from '../../../../../common/types';
+import { API_BASE_PATH } from '../../../../../common/constants';
 
 import { VerboseTestOutput, Document } from '../types';
 import { setup, SetupResult, setupEnvironment } from './test_pipeline.helpers';
@@ -21,7 +22,7 @@ describe('Test pipeline', () => {
   let onUpdate: jest.Mock;
   let testBed: SetupResult;
 
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   // This is a hack
   // We need to provide the processor id in the mocked output;
@@ -49,13 +50,12 @@ describe('Test pipeline', () => {
   });
 
   afterAll(() => {
-    server.restore();
     jest.useRealTimers();
   });
 
   beforeEach(async () => {
     onUpdate = jest.fn();
-    testBed = await setup({
+    testBed = await setup(httpSetup, {
       value: {
         ...PROCESSORS,
       },
@@ -87,8 +87,9 @@ describe('Test pipeline', () => {
       await actions.clickRunPipelineButton();
 
       // Verify request
-      const latestRequest = server.requests[server.requests.length - 1];
-      const requestBody: ReqBody = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+      const latestRequest: any = httpSetup.post.mock.calls.pop() || [];
+      const requestBody: ReqBody = JSON.parse(latestRequest[1]?.body);
+
       const {
         documents: reqDocuments,
         verbose: reqVerbose,
@@ -114,23 +115,26 @@ describe('Test pipeline', () => {
       expect(exists('outputTabContent')).toBe(true);
 
       // Click reload button and verify request
-      const totalRequests = server.requests.length;
       await actions.clickRefreshOutputButton();
       // There will be two requests made to the simulate API
       // the second request will have verbose enabled to update the processor results
-      expect(server.requests.length).toBe(totalRequests + 2);
-      expect(server.requests[server.requests.length - 2].url).toBe(
-        '/api/ingest_pipelines/simulate'
+      expect(httpSetup.post).toHaveBeenNthCalledWith(
+        1,
+        `${API_BASE_PATH}/simulate`,
+        expect.anything()
       );
-      expect(server.requests[server.requests.length - 1].url).toBe(
-        '/api/ingest_pipelines/simulate'
+      expect(httpSetup.post).toHaveBeenNthCalledWith(
+        2,
+        `${API_BASE_PATH}/simulate`,
+        expect.anything()
       );
 
       // Click verbose toggle and verify request
       await actions.toggleVerboseSwitch();
-      expect(server.requests.length).toBe(totalRequests + 3);
-      expect(server.requests[server.requests.length - 1].url).toBe(
-        '/api/ingest_pipelines/simulate'
+      // There will be one request made to the simulate API
+      expect(httpSetup.post).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/simulate`,
+        expect.anything()
       );
     });
 
@@ -163,12 +167,12 @@ describe('Test pipeline', () => {
       const { actions, find, exists } = testBed;
 
       const error = {
-        status: 500,
+        statusCode: 500,
         error: 'Internal server error',
         message: 'Internal server error',
       };
 
-      httpRequestsMockHelpers.setSimulatePipelineResponse(undefined, { body: error });
+      httpRequestsMockHelpers.setSimulatePipelineResponse(undefined, error);
 
       // Open flyout
       actions.clickAddDocumentsButton();
@@ -201,7 +205,7 @@ describe('Test pipeline', () => {
 
         const { _index: index, _id: documentId } = DOCUMENTS[0];
 
-        httpRequestsMockHelpers.setFetchDocumentsResponse(DOCUMENTS[0]);
+        httpRequestsMockHelpers.setFetchDocumentsResponse(index, documentId, DOCUMENTS[0]);
 
         // Open flyout
         actions.clickAddDocumentsButton();
@@ -220,9 +224,10 @@ describe('Test pipeline', () => {
         await actions.clickAddDocumentButton();
 
         // Verify request
-        const latestRequest = server.requests[server.requests.length - 1];
-        expect(latestRequest.status).toEqual(200);
-        expect(latestRequest.url).toEqual(`/api/ingest_pipelines/documents/${index}/${documentId}`);
+        expect(httpSetup.get).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/documents/${index}/${documentId}`,
+          expect.anything()
+        );
         // Verify success callout
         expect(exists('addDocumentSuccess')).toBe(true);
       });
@@ -236,12 +241,17 @@ describe('Test pipeline', () => {
         };
 
         const error = {
-          status: 404,
+          statusCode: 404,
           error: 'Not found',
           message: '[index_not_found_exception] no such index',
         };
 
-        httpRequestsMockHelpers.setFetchDocumentsResponse(undefined, { body: error });
+        httpRequestsMockHelpers.setFetchDocumentsResponse(
+          nonExistentDoc.index,
+          nonExistentDoc.id,
+          undefined,
+          error
+        );
 
         // Open flyout
         actions.clickAddDocumentsButton();
@@ -296,9 +306,8 @@ describe('Test pipeline', () => {
 
         // Dropdown should be visible and processor status should equal "success"
         expect(exists('documentsDropdown')).toBe(true);
-        const initialProcessorStatusLabel = find('processors>0.processorStatusIcon').props()[
-          'aria-label'
-        ];
+        const initialProcessorStatusLabel = find('processors>0.processorStatusIcon').props()
+          .children;
         expect(initialProcessorStatusLabel).toEqual('Success');
 
         // Open flyout and click clear all button
@@ -320,9 +329,8 @@ describe('Test pipeline', () => {
         // Verify documents and processors were reset
         expect(exists('documentsDropdown')).toBe(false);
         expect(exists('addDocumentsButton')).toBe(true);
-        const resetProcessorStatusIconLabel = find('processors>0.processorStatusIcon').props()[
-          'aria-label'
-        ];
+        const resetProcessorStatusIconLabel = find('processors>0.processorStatusIcon').props()
+          .children;
         expect(resetProcessorStatusIconLabel).toEqual('Not run');
       });
     });
@@ -332,7 +340,7 @@ describe('Test pipeline', () => {
     it('should show "inactive" processor status by default', async () => {
       const { find } = testBed;
 
-      const statusIconLabel = find('processors>0.processorStatusIcon').props()['aria-label'];
+      const statusIconLabel = find('processors>0.processorStatusIcon').props().children;
 
       expect(statusIconLabel).toEqual('Not run');
     });
@@ -352,7 +360,7 @@ describe('Test pipeline', () => {
       actions.closeTestPipelineFlyout();
 
       // Verify status
-      const statusIconLabel = find('processors>0.processorStatusIcon').props()['aria-label'];
+      const statusIconLabel = find('processors>0.processorStatusIcon').props().children;
       expect(statusIconLabel).toEqual('Success');
     });
 

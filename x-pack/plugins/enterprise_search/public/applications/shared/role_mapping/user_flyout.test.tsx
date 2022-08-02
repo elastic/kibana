@@ -19,7 +19,7 @@ import {
   UPDATE_USER_DESCRIPTION,
 } from './constants';
 
-import { UserFlyout } from './';
+import { UserFlyout } from '.';
 
 describe('UserFlyout', () => {
   const closeUserFlyout = jest.fn();

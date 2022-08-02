@@ -11,14 +11,13 @@ import {
   ROUTES_APPEND_CUSTOM_INTEGRATIONS,
   ROUTES_REPLACEMENT_CUSTOM_INTEGRATIONS,
 } from '../../../common';
-import { KibanaPluginServiceFactory } from '../../../../presentation_util/public';
+import { KibanaPluginServiceFactory } from '../types';
 
 import { CustomIntegrationsStartDependencies } from '../../types';
 import { CustomIntegrationsFindService, filterCustomIntegrations } from '../find';
 
 /**
  * A type definition for a factory to produce the `CustomIntegrationsFindService` for use in Kibana.
- * @see /src/plugins/presentation_util/public/services/create/factory.ts
  */
 export type CustomIntegrationsFindServiceFactory = KibanaPluginServiceFactory<
   CustomIntegrationsFindService,

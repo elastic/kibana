@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { download, paths } from '../plugins/screenshotting/server/utils';
+import { download, paths } from '@kbn/screenshotting-plugin/server/utils';
 
 export const downloadChromium = async () => {
   // eslint-disable-next-line no-console

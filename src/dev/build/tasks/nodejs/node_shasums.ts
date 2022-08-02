@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { downloadToString } from '../../lib/download';
 
 export async function getNodeShasums(log: ToolingLog, nodeVersion: string) {

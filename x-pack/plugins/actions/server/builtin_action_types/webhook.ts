@@ -11,14 +11,19 @@ import axios, { AxiosError, AxiosResponse } from 'axios';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
+import { Logger } from '@kbn/core/server';
 import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
 import { nullableType } from './lib/nullable';
 import { isOk, promiseResult, Result } from './lib/result_type';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
-import { Logger } from '../../../../../src/core/server';
 import { request } from './lib/axios_utils';
 import { renderMustacheString } from '../lib/mustache_renderer';
+import {
+  AlertingConnectorFeatureId,
+  UptimeConnectorFeatureId,
+  SecurityConnectorFeatureId,
+} from '../../common';
 
 // config definition
 export enum WebhookMethods {
@@ -88,6 +93,11 @@ export function getActionType({
     name: i18n.translate('xpack.actions.builtin.webhookTitle', {
       defaultMessage: 'Webhook',
     }),
+    supportedFeatureIds: [
+      AlertingConnectorFeatureId,
+      UptimeConnectorFeatureId,
+      SecurityConnectorFeatureId,
+    ],
     validate: {
       config: schema.object(configSchemaProps, {
         validate: curry(validateActionTypeConfig)(configurationUtilities),
@@ -158,7 +168,7 @@ export async function executor(
 
   const axiosInstance = axios.create();
 
-  const result: Result<AxiosResponse, AxiosError> = await promiseResult(
+  const result: Result<AxiosResponse, AxiosError<{ message: string }>> = await promiseResult(
     request({
       axios: axiosInstance,
       method,

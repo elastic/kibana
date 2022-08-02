@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { ConnectorTypes } from '../../../../../../plugins/cases/common/api';
+import { ConnectorTypes } from '@kbn/cases-plugin/common/api';
 import { getPostCaseRequest, nullUser, postCaseResp } from '../../../../common/lib/mock';
 import {
   deleteCasesByESQuery,
@@ -20,7 +20,7 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const authSpace1 = getAuthWithSuperUser();
 
@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should post a case in space1', async () => {
       const postedCase = await createCase(
-        supertest,
+        supertestWithoutAuth,
         getPostCaseRequest({
           connector: {
             id: '123',

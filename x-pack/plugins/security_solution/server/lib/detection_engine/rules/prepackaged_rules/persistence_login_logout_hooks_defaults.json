@@ -11,6 +11,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Persistence via Login or Logout Hook",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type == \"start\" and\n process.name == \"defaults\" and process.args == \"write\" and process.args in (\"LoginHook\", \"LogoutHook\") and\n not process.args :\n       (\n         \"Support/JAMF/ManagementFrameworkScripts/logouthook.sh\",\n         \"Support/JAMF/ManagementFrameworkScripts/loginhook.sh\",\n         \"/Library/Application Support/JAMF/ManagementFrameworkScripts/logouthook.sh\",\n         \"/Library/Application Support/JAMF/ManagementFrameworkScripts/loginhook.sh\"\n       )\n",
   "references": [
     "https://www.virusbulletin.com/uploads/pdf/conference_slides/2014/Wardle-VB2014.pdf",
@@ -45,5 +46,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 4
+  "version": 5
 }

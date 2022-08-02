@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataViewsService } from '../../../../../../src/plugins/data_views/common';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 
 export class DataViewHandler {
   constructor(private dataViewService: DataViewsService) {}

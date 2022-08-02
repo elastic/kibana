@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { NavigationPublicPluginStart } from '../../../src/plugins/navigation/public';
-import { DataPublicPluginStart } from '../../../src/plugins/data/public';
-import { DeveloperExamplesSetup } from '../../developer_examples/public';
-import { SharePluginSetup } from '../../../src/plugins/share/public';
+import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchExamplesPluginSetup {}
@@ -24,4 +25,5 @@ export interface AppPluginSetupDependencies {
 export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }

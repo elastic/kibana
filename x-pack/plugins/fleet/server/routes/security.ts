@@ -13,10 +13,11 @@ import type {
   RequestHandler,
   RequestHandlerContext,
   OnPostAuthHandler,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
 import type { FleetAuthz } from '../../common';
-import { calculateAuthz, INTEGRATIONS_PLUGIN_ID } from '../../common';
+import { INTEGRATIONS_PLUGIN_ID } from '../../common';
+import { calculateAuthz } from '../../common/authz';
 
 import { appContextService } from '../services';
 import type { FleetRequestHandlerContext } from '../types';

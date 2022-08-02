@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { ConnectorTypes } from '../../../../../../plugins/cases/common/api';
+import { ConnectorTypes } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  loggingSystemMock,
-  savedObjectsRepositoryMock,
-} from '../../../../../../src/core/server/mocks';
+import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { getAlertsTelemetryData } from './alerts';
 
 describe('alerts', () => {
@@ -106,14 +103,12 @@ describe('alerts', () => {
             {
               type: 'literal',
               value: 'cases-comments.attributes.type',
+              isQuoted: false,
             },
             {
               type: 'literal',
               value: 'alert',
-            },
-            {
-              type: 'literal',
-              value: false,
+              isQuoted: false,
             },
           ],
           function: 'is',

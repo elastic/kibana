@@ -7,39 +7,32 @@
 import { filter } from 'rxjs/operators';
 import { noop, omit } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useMemo } from 'react';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
-import { OptionalSignalArgs, useObservable } from '@kbn/securitysolution-hook-utils';
+import type { OptionalSignalArgs } from '@kbn/securitysolution-hook-utils';
+import { useObservable } from '@kbn/securitysolution-hook-utils';
 
+import type { IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/public';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import * as i18n from './translations';
 
-import {
+import type {
   FactoryQueryTypes,
   RequestBasicOptions,
   StrategyRequestType,
   StrategyResponseType,
 } from '../../../../common/search_strategy/security_solution';
-import { IKibanaSearchResponse } from '../../../../../../../src/plugins/data/common';
-import {
-  DataPublicPluginStart,
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../../src/plugins/data/public';
-import {
-  TransformChangesIfTheyExist,
-  useTransforms,
-} from '../../../transforms/containers/use_transforms';
 import { getInspectResponse } from '../../../helpers';
-import { inputsModel } from '../../store';
+import type { inputsModel } from '../../store';
 import { useKibana } from '../../lib/kibana';
 import { useAppToasts } from '../../hooks/use_app_toasts';
-import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 
 type UseSearchStrategyRequestArgs = RequestBasicOptions & {
   data: DataPublicPluginStart;
   signal: AbortSignal;
   factoryQueryType: FactoryQueryTypes;
-  getTransformChangesIfTheyExist: TransformChangesIfTheyExist;
 };
 
 const search = <ResponseType extends IKibanaSearchResponse>({
@@ -49,26 +42,14 @@ const search = <ResponseType extends IKibanaSearchResponse>({
   defaultIndex,
   filterQuery,
   timerange,
-  getTransformChangesIfTheyExist,
   ...requestProps
 }: UseSearchStrategyRequestArgs): Observable<ResponseType> => {
-  const {
-    indices: transformIndices,
-    factoryQueryType: transformFactoryQueryType,
-    timerange: transformTimerange,
-  } = getTransformChangesIfTheyExist({
-    factoryQueryType,
-    indices: defaultIndex,
-    filterQuery,
-    timerange,
-  });
-
   return data.search.search<RequestBasicOptions, ResponseType>(
     {
       ...requestProps,
-      factoryQueryType: transformFactoryQueryType,
-      defaultIndex: transformIndices,
-      timerange: transformTimerange,
+      factoryQueryType,
+      defaultIndex,
+      timerange,
       filterQuery,
     },
     {
@@ -114,7 +95,6 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
   abort?: boolean;
 }) => {
   const abortCtrl = useRef(new AbortController());
-  const { getTransformChangesIfTheyExist } = useTransforms();
 
   const refetch = useRef<inputsModel.Refetch>(noop);
   const { data } = useKibana().services;
@@ -141,7 +121,6 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
           ...props,
           data,
           factoryQueryType,
-          getTransformChangesIfTheyExist,
           signal: abortCtrl.current.signal,
         } as never); // This typescast is required because every StrategyRequestType instance has different fields.
       };
@@ -151,7 +130,7 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
 
       refetch.current = asyncSearch;
     },
-    [data, start, factoryQueryType, getTransformChangesIfTheyExist]
+    [data, start, factoryQueryType]
   );
 
   useEffect(() => {

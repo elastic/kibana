@@ -12,7 +12,7 @@ import React from 'react';
 
 import { mountWithIntl } from '../../test_helpers';
 
-import { ErrorStatePrompt } from './';
+import { ErrorStatePrompt } from '.';
 
 describe('ErrorState', () => {
   const values = {

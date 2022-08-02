@@ -9,6 +9,7 @@
 import { parseUsageCollection } from './ts_parser';
 import * as ts from 'typescript';
 import * as path from 'path';
+import { compilerHost } from './compiler_host';
 import { parsedWorkingCollector } from './__fixture__/parsed_working_collector';
 import { parsedNestedCollector } from './__fixture__/parsed_nested_collector';
 import { parsedExternallyDefinedCollector } from './__fixture__/parsed_externally_defined_collector';
@@ -30,7 +31,7 @@ export function loadFixtureProgram(fixtureName: string) {
   if (!tsConfig) {
     throw new Error('Could not find a valid tsconfig.json.');
   }
-  const program = ts.createProgram([fixturePath], tsConfig as any);
+  const program = ts.createProgram([fixturePath], tsConfig as any, compilerHost);
   const checker = program.getTypeChecker();
   const sourceFile = program.getSourceFile(fixturePath);
   if (!sourceFile) {

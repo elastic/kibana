@@ -9,10 +9,10 @@ import type { Observable, ObservableInput, Subscription } from 'rxjs';
 import { BehaviorSubject, combineLatest, concat, defer, of, timer } from 'rxjs';
 import { catchError, mergeMap, switchMap, tap } from 'rxjs/operators';
 
-import type { CoreSetup, Logger, SavedObjectsServiceStart, ServiceStatus } from 'src/core/server';
+import type { CoreSetup, Logger, SavedObjectsServiceStart, ServiceStatus } from '@kbn/core/server';
+import { ServiceStatusLevels } from '@kbn/core/server';
+import type { ILicense } from '@kbn/licensing-plugin/server';
 
-import { ServiceStatusLevels } from '../../../../../src/core/server';
-import type { ILicense } from '../../../licensing/server';
 import type { SpacesLicense } from '../../common/licensing';
 import { createDefaultSpace } from './create_default_space';
 

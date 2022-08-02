@@ -8,30 +8,34 @@
 
 import React from 'react';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
-import { indexPatternMock } from '../../__mocks__/index_pattern';
+import { dataViewMock } from '../../__mocks__/data_view';
 import { DocTableWrapper } from './doc_table_wrapper';
-import { DocTableRow } from './components/table_row';
 import { discoverServiceMock } from '../../__mocks__/services';
-import { KibanaContextProvider } from '../../../../kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { buildDataTableRecord } from '../../utils/build_data_record';
+import { EsHitRecord } from '../../types';
 
 describe('Doc table component', () => {
-  const mountComponent = (rows?: DocTableRow[]) => {
+  const mountComponent = (rows?: EsHitRecord[]) => {
     const props = {
       columns: ['_source'],
-      indexPattern: indexPatternMock,
-      rows: rows || [
-        {
-          _index: 'mock_index',
-          _id: '1',
-          _score: 1,
-          fields: [
-            {
-              timestamp: '2020-20-01T12:12:12.123',
-            },
-          ],
-          _source: { message: 'mock_message', bytes: 20 },
-        },
-      ],
+      dataView: dataViewMock,
+      rows: (
+        rows || [
+          {
+            _index: 'mock_index',
+            _id: '1',
+            _score: 1,
+            fields: [
+              {
+                timestamp: '2020-20-01T12:12:12.123',
+              },
+            ],
+            _source: { message: 'mock_message', bytes: 20 },
+          } as EsHitRecord,
+        ]
+      ).map((row) => buildDataTableRecord(row, dataViewMock)),
+
       sort: [['order_date', 'desc']],
       isLoading: false,
       searchDescription: '',

@@ -12,7 +12,7 @@ const settingsPath = '/app/management/kibana/settings';
 
 const start = '2021-10-10T00:00:00.000Z';
 const end = '2021-10-10T00:15:00.000Z';
-describe('Comparison feature flag', () => {
+describe.skip('Comparison feature flag', () => {
   const comparisonToggle =
     '[data-test-subj="advancedSetting-editField-observability:enableComparisonByDefault"]';
 
@@ -30,7 +30,7 @@ describe('Comparison feature flag', () => {
   });
 
   beforeEach(() => {
-    cy.loginAsPowerUser();
+    cy.loginAsEditorUser();
   });
 
   describe('when comparison feature is enabled', () => {
@@ -49,7 +49,7 @@ describe('Comparison feature flag', () => {
     });
 
     it('shows the comparison feature enabled in services overview', () => {
-      cy.visit('/app/apm/backends');
+      cy.visit('/app/apm/dependencies');
       cy.get('input[type="checkbox"]#comparison').should('be.checked');
       cy.get('[data-test-subj="comparisonSelect"]').should('not.be.disabled');
     });
@@ -62,6 +62,14 @@ describe('Comparison feature flag', () => {
   });
 
   describe('when comparison feature is disabled', () => {
+    // Reverts to default state, which is comparison enabled
+    after(() => {
+      cy.visit(settingsPath);
+      cy.get(comparisonToggle).click();
+      cy.contains('Save changes').should('not.be.disabled');
+      cy.contains('Save changes').click();
+    });
+
     it('shows the flag as disabled in kibana advanced settings', () => {
       cy.visit(settingsPath);
       cy.get(comparisonToggle).click();
@@ -81,7 +89,7 @@ describe('Comparison feature flag', () => {
     });
 
     it('shows the comparison feature disabled in dependencies overview page', () => {
-      cy.visit('/app/apm/backends');
+      cy.visit('/app/apm/dependencies');
       cy.get('input[type="checkbox"]#comparison').should('not.be.checked');
       cy.get('[data-test-subj="comparisonSelect"]').should('be.disabled');
     });

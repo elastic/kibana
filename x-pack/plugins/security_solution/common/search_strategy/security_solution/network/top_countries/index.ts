@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
-import { CursorType, Inspect, Maybe, PageInfoPaginated } from '../../../common';
-import { RequestOptionsPaginated } from '../..';
-import {
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { CursorType, Inspect, Maybe, PageInfoPaginated } from '../../../common';
+import type { RequestOptionsPaginated } from '../..';
+import type {
   GeoItem,
   FlowTargetSourceDest,
   NetworkTopTablesFields,

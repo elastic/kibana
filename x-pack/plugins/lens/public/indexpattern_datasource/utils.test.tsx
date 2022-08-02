@@ -7,14 +7,19 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { getPrecisionErrorWarningMessages } from './utils';
 import type { IndexPatternPrivateState, GenericIndexPatternColumn } from './types';
 import type { FramePublicAPI } from '../types';
-import type { DocLinksStart } from 'kibana/public';
+import type { DocLinksStart } from '@kbn/core/public';
 import { EuiButton } from '@elastic/eui';
+import { TermsIndexPatternColumn } from './operations';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 describe('indexpattern_datasource utils', () => {
   describe('getPrecisionErrorWarningMessages', () => {
+    const datatableUtilitites = createDatatableUtilitiesMock();
     let state: IndexPatternPrivateState;
     let framePublicAPI: FramePublicAPI;
     let docLinks: DocLinksStart;
@@ -32,7 +37,7 @@ describe('indexpattern_datasource utils', () => {
                     type: 'alphabetical',
                   },
                 },
-              },
+              } as TermsIndexPatternColumn,
             },
           },
         },
@@ -69,7 +74,13 @@ describe('indexpattern_datasource utils', () => {
     });
     test('should not show precisionError if hasPrecisionError is false', () => {
       expect(
-        getPrecisionErrorWarningMessages(state, framePublicAPI, docLinks, () => {})
+        getPrecisionErrorWarningMessages(
+          datatableUtilitites,
+          state,
+          framePublicAPI,
+          docLinks,
+          () => {}
+        )
       ).toHaveLength(0);
     });
 
@@ -77,16 +88,69 @@ describe('indexpattern_datasource utils', () => {
       delete framePublicAPI.activeData!.id.columns[0].meta.sourceParams!.hasPrecisionError;
 
       expect(
-        getPrecisionErrorWarningMessages(state, framePublicAPI, docLinks, () => {})
+        getPrecisionErrorWarningMessages(
+          datatableUtilitites,
+          state,
+          framePublicAPI,
+          docLinks,
+          () => {}
+        )
       ).toHaveLength(0);
     });
 
-    test('should show precisionError if hasPrecisionError is true', () => {
-      framePublicAPI.activeData!.id.columns[0].meta.sourceParams!.hasPrecisionError = true;
+    describe('precision error warning with accuracy mode', () => {
+      const enableAccuracyButtonSelector =
+        'button[data-test-subj="lnsPrecisionWarningEnableAccuracy"]';
 
-      expect(
-        getPrecisionErrorWarningMessages(state, framePublicAPI, docLinks, () => {})
-      ).toHaveLength(1);
+      test('should show accuracy mode prompt if currently disabled', async () => {
+        framePublicAPI.activeData!.id.columns[0].meta.sourceParams!.hasPrecisionError = true;
+        (state.layers.id.columns.col1 as TermsIndexPatternColumn).params.accuracyMode = false;
+
+        const setStateMock = jest.fn();
+
+        const warningMessages = getPrecisionErrorWarningMessages(
+          datatableUtilitites,
+          state,
+          framePublicAPI,
+          docLinks,
+          setStateMock
+        );
+
+        expect(warningMessages).toHaveLength(1);
+
+        const instance = mountWithIntl(<div>{warningMessages[0]!}</div>);
+
+        const enableAccuracyButton = instance.find(enableAccuracyButtonSelector);
+
+        expect(enableAccuracyButton.exists()).toBeTruthy();
+
+        enableAccuracyButton.simulate('click');
+
+        expect(setStateMock).toHaveBeenCalledTimes(1);
+      });
+
+      test('should other suggestions if accuracy mode already enabled', async () => {
+        framePublicAPI.activeData!.id.columns[0].meta.sourceParams!.hasPrecisionError = true;
+        (state.layers.id.columns.col1 as TermsIndexPatternColumn).params.accuracyMode = true;
+
+        const warningMessages = getPrecisionErrorWarningMessages(
+          datatableUtilitites,
+          state,
+          framePublicAPI,
+          docLinks,
+          () => {}
+        );
+
+        expect(warningMessages).toHaveLength(1);
+
+        const instance = shallow(<div>{warningMessages[0]!}</div>);
+
+        expect(instance.exists(enableAccuracyButtonSelector)).toBeFalsy();
+
+        expect(instance.find(FormattedMessage).props().id).toBe(
+          'xpack.lens.indexPattern.precisionErrorWarning.accuracyEnabled'
+        );
+      });
     });
 
     test('if has precision error and sorting is by count ascending, show fix action and switch to rare terms', () => {
@@ -109,7 +173,13 @@ describe('indexpattern_datasource utils', () => {
         } as unknown as GenericIndexPatternColumn,
       };
       const setState = jest.fn();
-      const warnings = getPrecisionErrorWarningMessages(state, framePublicAPI, docLinks, setState);
+      const warnings = getPrecisionErrorWarningMessages(
+        datatableUtilitites,
+        state,
+        framePublicAPI,
+        docLinks,
+        setState
+      );
 
       expect(warnings).toHaveLength(1);
       const DummyComponent = () => <>{warnings[0]}</>;

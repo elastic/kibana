@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import { FilterType, FilterViewSpec, SimpleFilterViewField } from '../../../../types';
 import { formatByKey } from '../utils';

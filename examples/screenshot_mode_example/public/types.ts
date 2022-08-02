@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { NavigationPublicPluginStart } from '../../../src/plugins/navigation/public';
-import { ScreenshotModePluginSetup } from '../../../src/plugins/screenshot_mode/public';
-import { UsageCollectionSetup } from '../../../src/plugins/usage_collection/public';
-import { DeveloperExamplesSetup } from '../../developer_examples/public';
+import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 
 export interface AppPluginSetupDependencies {
   usageCollection: UsageCollectionSetup;

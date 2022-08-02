@@ -7,18 +7,16 @@
 
 import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 import React from 'react';
-import type { CoreSetup, CoreStart } from 'kibana/public';
-import type { DataPublicPluginStart } from 'src/plugins/data/public';
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import type { ManagementAppMountParams } from '../../../../../../../src/plugins/management/public/';
+import type { CoreSetup, CoreStart } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { MlStartDependencies } from '../../../plugin';
 import { JobsListPage } from './components';
 import { getJobsListBreadcrumbs } from '../breadcrumbs';
-import { setDependencyCache, clearCache } from '../../util/dependency_cache';
-import './_index.scss';
-import type { SharePluginStart } from '../../../../../../../src/plugins/share/public';
-import type { SpacesPluginStart } from '../../../../../spaces/public';
-import type { FieldFormatsStart } from '../../../../../../../src/plugins/field_formats/public';
 
 const renderApp = (
   element: HTMLElement,
@@ -44,7 +42,6 @@ const renderApp = (
   );
   return () => {
     unmountComponentAtNode(element);
-    clearCache();
   };
 };
 
@@ -54,13 +51,6 @@ export async function mountApp(
   deps: { usageCollection?: UsageCollectionSetup }
 ) {
   const [coreStart, pluginsStart] = await core.getStartServices();
-
-  setDependencyCache({
-    docLinks: coreStart.docLinks!,
-    basePath: coreStart.http.basePath,
-    http: coreStart.http,
-    i18n: coreStart.i18n,
-  });
 
   params.setBreadcrumbs(getJobsListBreadcrumbs());
   return renderApp(

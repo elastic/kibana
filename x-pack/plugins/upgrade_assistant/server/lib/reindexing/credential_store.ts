@@ -8,9 +8,9 @@
 import { createHash } from 'crypto';
 import stringify from 'json-stable-stringify';
 
-import { KibanaRequest, Logger } from 'src/core/server';
+import { KibanaRequest, Logger } from '@kbn/core/server';
 
-import { SecurityPluginStart } from '../../../../security/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { ReindexSavedObject, ReindexStatus } from '../../../common/types';
 
 export type Credential = Record<string, any>;

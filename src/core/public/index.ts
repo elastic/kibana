@@ -26,7 +26,28 @@
 
 import './index.scss';
 
-import {
+import type {
+  InjectedMetadataSetup,
+  InjectedMetadataStart,
+} from '@kbn/core-injected-metadata-browser';
+import { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { ThemeServiceSetup, ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import { ExecutionContextSetup, ExecutionContextStart } from '@kbn/core-execution-context-browser';
+import type { HttpSetup, HttpStart } from '@kbn/core-http-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
+
+import type {
+  FatalErrorsSetup,
+  FatalErrorsStart,
+  FatalErrorInfo,
+} from '@kbn/core-fatal-errors-browser';
+import type { UiSettingsState, IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { DeprecationsServiceStart } from '@kbn/core-deprecations-browser';
+import type { Capabilities } from '@kbn/core-capabilities-common';
+import type { OverlayStart } from '@kbn/core-overlays-browser';
+import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
+import type {
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeHelpExtension,
@@ -46,30 +67,44 @@ import {
   ChromeRecentlyAccessedHistoryItem,
   ChromeUserBanner,
   NavType,
+  ChromeHelpMenuActions,
 } from './chrome';
-import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
-import { HttpSetup, HttpStart } from './http';
-import { I18nStart } from './i18n';
-import { NotificationsSetup, NotificationsStart } from './notifications';
-import { OverlayStart } from './overlays';
-import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
-import { UiSettingsState, IUiSettingsClient } from './ui_settings';
-import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
-import { DocLinksStart } from './doc_links';
-import { SavedObjectsStart } from './saved_objects';
-import { DeprecationsServiceStart } from './deprecations';
-import type { ThemeServiceSetup, ThemeServiceStart } from './theme';
-import { ExecutionContextSetup, ExecutionContextStart } from './execution_context';
+import type {
+  Plugin,
+  PluginInitializer,
+  PluginInitializerContext,
+  PluginOpaqueId,
+} from './plugins';
+import type { ApplicationSetup, ApplicationStart } from './application';
+import type { SavedObjectsStart } from './saved_objects';
 
-export type {
-  PackageInfo,
-  EnvironmentMode,
-  IExternalUrlPolicy,
-  DomainDeprecationDetails,
-} from '../server/types';
-export type { CoreContext, CoreSystem } from './core_system';
+export type { PackageInfo, EnvironmentMode } from '@kbn/config';
+export type { DomainDeprecationDetails } from '@kbn/core-deprecations-common';
+export type { CoreContext } from '@kbn/core-base-browser-internal';
+export type { CoreSystem } from './core_system';
 export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
-export type { AppCategory, UiSettingsParams, UserProvidedValues, UiSettingsType } from '../types';
+export type { AppCategory } from '../types';
+export type {
+  UiSettingsParams,
+  PublicUiSettingsParams,
+  UserProvidedValues,
+  UiSettingsType,
+} from '@kbn/core-ui-settings-common';
+
+export type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+export type {
+  AnalyticsClient,
+  Event,
+  EventContext,
+  EventType,
+  EventTypeOpts,
+  IShipper,
+  ShipperClassConstructor,
+  OptInConfig,
+  ContextProviderOpts,
+  TelemetryCounter,
+  TelemetryCounterType,
+} from '@kbn/analytics-client';
 
 export { AppNavLinkStatus, AppStatus, ScopedHistory } from './application';
 export type {
@@ -91,34 +126,36 @@ export type {
   PublicAppInfo,
   PublicAppDeepLinkInfo,
   NavigateToAppOptions,
+  NavigateToUrlOptions,
 } from './application';
 
-export { SimpleSavedObject } from './saved_objects';
-export type { ResolvedSimpleSavedObject } from './saved_objects';
+export { SimpleSavedObjectImpl } from './saved_objects';
 export type {
-  SavedObjectsBatchResponse,
-  SavedObjectsBulkCreateObject,
-  SavedObjectsBulkCreateOptions,
-  SavedObjectsBulkResolveObject,
-  SavedObjectsBulkResolveResponse,
-  SavedObjectsBulkUpdateObject,
-  SavedObjectsBulkUpdateOptions,
+  SavedObjectsClientContract,
+  SimpleSavedObject,
   SavedObjectsCreateOptions,
-  SavedObjectsFindResponsePublic,
-  SavedObjectsResolveResponse,
+  SavedObjectsDeleteOptions,
+  SavedObjectsBatchResponse,
+  SavedObjectsFindOptions,
+  SavedObjectsFindOptionsReference,
   SavedObjectsUpdateOptions,
+  ResolvedSimpleSavedObject,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsFindResponse,
+  SavedObjectsBulkCreateOptions,
+  SavedObjectsBulkUpdateOptions,
+  SavedObjectsBulkResolveResponse,
+  SavedObjectsBulkCreateObject,
+} from '@kbn/core-saved-objects-api-browser';
+export type {
   SavedObject,
+  SavedObjectTypeIdTuple,
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectAttributeSingle,
   SavedObjectError,
   SavedObjectReference,
-  SavedObjectsBaseOptions,
-  SavedObjectsFindOptions,
-  SavedObjectsFindOptionsReference,
   SavedObjectsMigrationVersion,
-  SavedObjectsClientContract,
-  SavedObjectsClient,
   SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
   SavedObjectsImportConflictError,
@@ -132,11 +169,7 @@ export type {
   SavedObjectsImportSimpleWarning,
   SavedObjectsImportActionRequiredWarning,
   SavedObjectsImportWarning,
-  SavedObjectReferenceWithContext,
-  SavedObjectsCollectMultiNamespaceReferencesResponse,
-} from './saved_objects';
-
-export { HttpFetchError } from './http';
+} from '@kbn/core-saved-objects-common';
 
 export type {
   HttpHeadersInit,
@@ -154,46 +187,51 @@ export type {
   IExternalUrl,
   IHttpInterceptController,
   ResponseErrorBody,
-  IHttpFetchError,
   IHttpResponseInterceptorOverrides,
-} from './http';
+} from '@kbn/core-http-browser';
+
+export type { IHttpFetchError } from '@kbn/core-http-browser';
 
 export type {
   OverlayStart,
   OverlayBannersStart,
-  OverlayRef,
   OverlayFlyoutStart,
   OverlayFlyoutOpenOptions,
   OverlayModalOpenOptions,
   OverlayModalConfirmOptions,
   OverlayModalStart,
-} from './overlays';
+} from '@kbn/core-overlays-browser';
 
 export type {
   Toast,
   ToastInput,
   IToasts,
-  ToastsApi,
   ToastInputFields,
   ToastsSetup,
   ToastsStart,
   ToastOptions,
   ErrorToastOptions,
-} from './notifications';
+} from '@kbn/core-notifications-browser';
 
-export type { ThemeServiceSetup, ThemeServiceStart, CoreTheme } from './theme';
+export type { ToastsApi } from '@kbn/core-notifications-browser-internal';
 
-export type { DeprecationsServiceStart, ResolveDeprecationResponse } from './deprecations';
+export type { ThemeServiceSetup, ThemeServiceStart, CoreTheme } from '@kbn/core-theme-browser';
 
-export type { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
+export type {
+  DeprecationsServiceStart,
+  ResolveDeprecationResponse,
+} from '@kbn/core-deprecations-browser';
+
+export type { MountPoint, UnmountCallback, OverlayRef } from '@kbn/core-mount-utils-browser';
 
 export { URL_MAX_LENGTH } from './core_app';
 
+export type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+
 export type {
-  KibanaExecutionContext,
   ExecutionContextSetup,
   ExecutionContextStart,
-} from './execution_context';
+} from '@kbn/core-execution-context-browser';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
@@ -210,6 +248,8 @@ export type {
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
+  /** {@link AnalyticsServiceSetup} */
+  analytics: AnalyticsServiceSetup;
   /** {@link ApplicationSetup} */
   application: ApplicationSetup;
   /** {@link FatalErrorsSetup} */
@@ -222,16 +262,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   uiSettings: IUiSettingsClient;
   /** {@link ExecutionContextSetup} */
   executionContext: ExecutionContextSetup;
-  /**
-   * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
-   * use *only* to retrieve config values. There is no way to set injected values
-   * in the new platform.
-   * @deprecated
-   * @removeBy 8.8.0
-   * */
-  injectedMetadata: {
-    getInjectedVar: (name: string, defaultValue?: any) => unknown;
-  };
+  /** {@link InjectedMetadataSetup} */
+  injectedMetadata: InjectedMetadataSetup;
   /** {@link ThemeServiceSetup} */
   theme: ThemeServiceSetup;
   /** {@link StartServicesAccessor} */
@@ -260,6 +292,8 @@ export type StartServicesAccessor<
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
 export interface CoreStart {
+  /** {@link AnalyticsServiceStart} */
+  analytics: AnalyticsServiceStart;
   /** {@link ApplicationStart} */
   application: ApplicationStart;
   /** {@link ChromeStart} */
@@ -286,16 +320,8 @@ export interface CoreStart {
   deprecations: DeprecationsServiceStart;
   /** {@link ThemeServiceStart} */
   theme: ThemeServiceStart;
-  /**
-   * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
-   * use *only* to retrieve config values. There is no way to set injected values
-   * in the new platform.
-   * @deprecated
-   * @removeBy 8.8.0
-   * */
-  injectedMetadata: {
-    getInjectedVar: (name: string, defaultValue?: any) => unknown;
-  };
+  /** {@link InjectedMetadataStart} */
+  injectedMetadata: InjectedMetadataStart;
 }
 
 export type {
@@ -303,6 +329,7 @@ export type {
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeHelpExtension,
+  ChromeHelpMenuActions,
   ChromeHelpExtensionMenuLink,
   ChromeHelpExtensionLinkBase,
   ChromeHelpExtensionMenuCustomLink,

@@ -21,9 +21,9 @@ import {
   EuiCode,
   EuiCopy,
 } from '@elastic/eui';
+import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { createFilebeatConfig } from './filebeat_config';
 import { useDataVisualizerKibana } from '../../../kibana_context'; // copy context?
-import { FindFileStructureResponse } from '../../../../../../file_upload/common';
 
 export enum EDITOR_MODE {
   HIDDEN,

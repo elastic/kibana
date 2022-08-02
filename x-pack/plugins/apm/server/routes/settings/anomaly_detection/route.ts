@@ -7,7 +7,8 @@
 
 import * as t from 'io-ts';
 import Boom from '@hapi/boom';
-import { maxSuggestions } from '../../../../../observability/common';
+import { maxSuggestions } from '@kbn/observability-plugin/common';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { ML_ERRORS } from '../../../../common/anomaly_detection';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
@@ -19,7 +20,6 @@ import { notifyFeatureUsage } from '../../../feature';
 import { updateToV3 } from './update_to_v3';
 import { environmentStringRt } from '../../../../common/environment_rt';
 import { getMlJobsWithAPMGroup } from '../../../lib/anomaly_detection/get_ml_jobs_with_apm_group';
-import { ElasticsearchClient } from '../../../../../../../src/core/server';
 
 // get ML anomaly detection jobs for each environment
 const anomalyDetectionJobsRoute = createApmServerRoute({
@@ -37,8 +37,9 @@ const anomalyDetectionJobsRoute = createApmServerRoute({
   }> => {
     const setup = await setupRequest(resources);
     const { context } = resources;
+    const licensingContext = await context.licensing;
 
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+    if (!isActivePlatinumLicense(licensingContext.license)) {
       throw Boom.forbidden(ML_ERRORS.INVALID_LICENSE);
     }
 
@@ -69,17 +70,18 @@ const createAnomalyDetectionJobsRoute = createApmServerRoute({
   handler: async (resources): Promise<{ jobCreated: true }> => {
     const { params, context, logger } = resources;
     const { environments } = params.body;
+    const licensingContext = await context.licensing;
 
     const setup = await setupRequest(resources);
 
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+    if (!isActivePlatinumLicense(licensingContext.license)) {
       throw Boom.forbidden(ML_ERRORS.INVALID_LICENSE);
     }
 
     await createAnomalyDetectionJobs(setup, environments, logger);
 
     notifyFeatureUsage({
-      licensingPlugin: context.licensing,
+      licensingPlugin: licensingContext,
       featureName: 'ml',
     });
 
@@ -93,13 +95,14 @@ const anomalyDetectionEnvironmentsRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<{ environments: string[] }> => {
     const setup = await setupRequest(resources);
+    const coreContext = await resources.context.core;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
       kuery: '',
     });
-    const size = await resources.context.core.uiSettings.client.get<number>(
+    const size = await coreContext.uiSettings.client.get<number>(
       maxSuggestions
     );
     const environments = await getAllEnvironments({

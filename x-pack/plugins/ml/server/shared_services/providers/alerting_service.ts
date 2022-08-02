@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
+import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { GetGuards } from '../shared_services';
 import { alertingServiceProvider, MlAlertingService } from '../../lib/alerts/alerting_service';
 import { datafeedsProvider } from '../../models/job_service/datafeeds';

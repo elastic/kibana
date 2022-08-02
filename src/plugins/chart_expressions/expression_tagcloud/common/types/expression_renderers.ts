@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ChartsPluginSetup } from '../../../../charts/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 
 export interface TagCloudTypeProps {
   palettes: ChartsPluginSetup['palettes'];

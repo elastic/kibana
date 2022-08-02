@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { updateAlertRoute } from './update';
-import { httpServiceMock } from 'src/core/server/mocks';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../lib/license_state.mock';
 import { verifyApiAccess } from '../../lib/license_api_access';
-import { mockHandlerArguments } from './../_mock_handler_arguments';
+import { mockHandlerArguments } from '../_mock_handler_arguments';
 import { rulesClientMock } from '../../rules_client.mock';
-import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
-import { AlertNotifyWhenType } from '../../../common';
+import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
+import { RuleNotifyWhenType } from '../../../common';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 const rulesClient = rulesClientMock.create();
-jest.mock('../../lib/license_api_access.ts', () => ({
+jest.mock('../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
@@ -50,7 +50,7 @@ describe('updateAlertRoute', () => {
         },
       },
     ],
-    notifyWhen: 'onActionGroupChange' as AlertNotifyWhenType,
+    notifyWhen: 'onActionGroupChange' as RuleNotifyWhenType,
   };
 
   it('updates an alert with proper parameters', async () => {
@@ -229,7 +229,7 @@ describe('updateAlertRoute', () => {
 
     const [, handler] = router.put.mock.calls[0];
 
-    rulesClient.update.mockRejectedValue(new AlertTypeDisabledError('Fail', 'license_invalid'));
+    rulesClient.update.mockRejectedValue(new RuleTypeDisabledError('Fail', 'license_invalid'));
 
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
       'ok',

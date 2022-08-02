@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { Logger } from '@kbn/core/server';
 import { TaskDefinition, taskDefinitionSchema, TaskRunCreatorFunction } from './task';
-import { Logger } from '../../../../src/core/server';
 
 /**
  * Types that are no longer registered and will be marked as unregistered

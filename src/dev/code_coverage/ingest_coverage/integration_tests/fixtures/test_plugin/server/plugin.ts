@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup } from 'kibana/server';
+import { CoreSetup } from '@kbn/core/server';
 
 export class Plugin {
   constructor() {}

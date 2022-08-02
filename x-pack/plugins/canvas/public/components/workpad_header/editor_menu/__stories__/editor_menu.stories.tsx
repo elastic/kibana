@@ -8,8 +8,8 @@
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
-import { EmbeddableFactoryDefinition, IEmbeddable } from 'src/plugins/embeddable/public';
-import { BaseVisType, VisTypeAlias } from 'src/plugins/visualizations/public';
+import { EmbeddableFactoryDefinition, IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import { EditorMenu } from '../editor_menu.component';
 
 const testFactories: EmbeddableFactoryDefinition[] = [

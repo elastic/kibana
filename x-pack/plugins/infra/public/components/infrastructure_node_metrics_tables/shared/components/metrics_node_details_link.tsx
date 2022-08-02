@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { parse } from '@elastic/datemath';
+import { parse } from '@kbn/datemath';
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
-import { useLinkProps } from '../../../../../../observability/public';
+import { useLinkProps } from '@kbn/observability-plugin/public';
 import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { getNodeDetailUrl } from '../../../../pages/link_to';
 import type { MetricsExplorerTimeOptions } from '../../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
@@ -17,12 +17,14 @@ type ExtractStrict<T, U extends T> = Extract<T, U>;
 
 interface MetricsNodeDetailsLinkProps {
   id: string;
+  label: string;
   nodeType: ExtractStrict<InventoryItemType, 'host' | 'container' | 'pod'>;
   timerange: Pick<MetricsExplorerTimeOptions, 'from' | 'to'>;
 }
 
 export const MetricsNodeDetailsLink = ({
   id,
+  label,
   nodeType,
   timerange,
 }: MetricsNodeDetailsLinkProps) => {
@@ -35,5 +37,5 @@ export const MetricsNodeDetailsLink = ({
     })
   );
 
-  return <EuiLink href={linkProps.href}>{id}</EuiLink>;
+  return <EuiLink href={linkProps.href}>{label}</EuiLink>;
 };

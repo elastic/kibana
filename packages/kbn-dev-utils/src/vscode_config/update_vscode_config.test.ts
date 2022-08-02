@@ -26,6 +26,10 @@ const TEST_KEYS: ManagedConfigKey[] = [
     key: 'stringKey',
     value: 'foo',
   },
+  {
+    key: 'arrayKey',
+    value: ['foo', 'bar'],
+  },
 ];
 
 const run = (json?: string) => updateVscodeConfig(TEST_KEYS, '', json);
@@ -41,7 +45,9 @@ it('updates the passed JSON with the managed settings', () => {
         "world": [1, 2, 3]
       },
       // @managed
-      "stringKey": "foo"
+      "stringKey": "foo",
+      // @managed
+      "arrayKey": ["foo", "bar"]
     }
 
   `);
@@ -58,7 +64,9 @@ it('initialized empty or undefined json values', () => {
         "world": [1, 2, 3]
       },
       // @managed
-      "stringKey": "foo"
+      "stringKey": "foo",
+      // @managed
+      "arrayKey": ["foo", "bar"]
     }
 
   `);
@@ -73,7 +81,9 @@ it('initialized empty or undefined json values', () => {
         "world": [1, 2, 3]
       },
       // @managed
-      "stringKey": "foo"
+      "stringKey": "foo",
+      // @managed
+      "arrayKey": ["foo", "bar"]
     }
 
   `);
@@ -90,7 +100,9 @@ it('replaces conflicting managed keys which do not have matching value types', (
         "world": [1, 2, 3]
       },
       // @managed
-      "stringKey": "foo"
+      "stringKey": "foo",
+      // @managed
+      "arrayKey": ["foo", "bar"]
     }
 
   `);
@@ -136,7 +148,9 @@ it('persists comments in the original file', () => {
         "world": [1, 2, 3]
       },
       // @managed
-      "stringKey": "foo"
+      "stringKey": "foo",
+      // @managed
+      "arrayKey": ["foo", "bar"]
     }
 
   `);
@@ -164,7 +178,9 @@ it('overrides old values for managed keys', () => {
         "world": [1, 2, 3]
       },
       // @managed
-      "stringKey": "foo"
+      "stringKey": "foo",
+      // @managed
+      "arrayKey": ["foo", "bar"]
     }
 
   `);
@@ -206,7 +222,9 @@ it('does not modify properties with leading `// self managed` comment', () => {
         "world": [5]
       },
       // self managed
-      "stringKey": "--"
+      "stringKey": "--",
+      // @managed
+      "arrayKey": ["foo", "bar"]
     }
 
   `);
@@ -232,7 +250,9 @@ it('does not modify child properties with leading `// self managed` comment', ()
         "hello": true
       },
       // @managed
-      "stringKey": "foo"
+      "stringKey": "foo",
+      // @managed
+      "arrayKey": ["foo", "bar"]
     }
 
   `);
@@ -260,7 +280,9 @@ it('does not modify unknown child properties', () => {
         "hello": true
       },
       // @managed
-      "stringKey": "foo"
+      "stringKey": "foo",
+      // @managed
+      "arrayKey": ["foo", "bar"]
     }
 
   `);
@@ -288,7 +310,9 @@ it('removes managed properties which are no longer managed', () => {
         "hello": true
       },
       // @managed
-      "stringKey": "foo"
+      "stringKey": "foo",
+      // @managed
+      "arrayKey": ["foo", "bar"]
     }
 
   `);
@@ -314,7 +338,9 @@ it('wipes out child keys which conflict with newly managed child keys', () => {
         "world": [1, 2, 3]
       },
       // @managed
-      "stringKey": "foo"
+      "stringKey": "foo",
+      // @managed
+      "arrayKey": ["foo", "bar"]
     }
 
   `);
@@ -338,7 +364,9 @@ it('correctly formats info text when specified', () => {
         "world": [1, 2, 3]
       },
       // @managed
-      "stringKey": "foo"
+      "stringKey": "foo",
+      // @managed
+      "arrayKey": ["foo", "bar"]
     }
 
   `);
@@ -368,7 +396,9 @@ it('allows "// self managed" comments conflicting with "// @managed" comments to
         "world": [1, 2, 3]
       },
       // self managed
-      "stringKey": 12345
+      "stringKey": 12345,
+      // @managed
+      "arrayKey": ["foo", "bar"]
     }
 
   `);

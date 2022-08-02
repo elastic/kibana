@@ -12,7 +12,7 @@ import {
   SavedObjectsImportUnknownError,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportResponse,
-} from 'src/core/public';
+} from '@kbn/core/public';
 import { processImportResponse } from './process_import_response';
 
 describe('processImportResponse()', () => {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { pow } = require('../../src/functions/pow.js');
+const { pow } = require('../../src/functions/pow');
 
 describe('Pow', () => {
   it('numbers', () => {

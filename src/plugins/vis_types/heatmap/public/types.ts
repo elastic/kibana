@@ -5,15 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { UiCounterMetricType } from '@kbn/analytics';
 import type { Position } from '@elastic/charts';
-import type { ChartsPluginSetup, Style, Labels, ColorSchemas } from '../../../charts/public';
-import { Range } from '../../../expressions/public';
+import type { ChartsPluginSetup, Style, Labels, ColorSchemas } from '@kbn/charts-plugin/public';
+import { Range } from '@kbn/expressions-plugin/public';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
 
 export interface HeatmapTypeProps {
   showElasticChartsOptions?: boolean;
   palettes?: ChartsPluginSetup['palettes'];
-  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
 }
 
 export interface HeatmapVisParams {
@@ -23,7 +22,7 @@ export interface HeatmapVisParams {
   legendPosition: Position;
   truncateLegend?: boolean;
   maxLegendLines?: number;
-  legendSize?: number;
+  legendSize?: LegendSize;
   lastRangeIsRightOpen: boolean;
   percentageMode: boolean;
   valueAxes: ValueAxis[];

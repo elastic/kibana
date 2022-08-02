@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 import { pick } from 'lodash';
+import { RewriteResponseCase, AsApiContract } from '@kbn/actions-plugin/common';
 import { BASE_ALERTING_API_PATH } from '../../constants';
 import { Rule, RuleUpdates } from '../../../types';
-import { RewriteResponseCase, AsApiContract } from '../../../../../actions/common';
 import { transformRule } from './common_transformations';
 
 type RuleUpdatesBody = Pick<

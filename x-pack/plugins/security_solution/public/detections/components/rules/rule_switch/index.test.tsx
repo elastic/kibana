@@ -10,7 +10,7 @@ import React from 'react';
 import { waitFor } from '@testing-library/react';
 
 import { performBulkAction } from '../../../containers/detection_engine/rules';
-import { RuleSwitchComponent } from './index';
+import { RuleSwitchComponent } from '.';
 import { getRulesSchemaMock } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { useRulesTableContextOptional } from '../../../pages/detection_engine/rules/all/rules_table/rules_table_context';
 import { useRulesTableContextMock } from '../../../pages/detection_engine/rules/all/rules_table/__mocks__/rules_table_context';
@@ -21,6 +21,7 @@ import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../../../containers/detection_engine/rules');
 jest.mock('../../../pages/detection_engine/rules/all/rules_table/rules_table_context');
+jest.mock('../../../../common/lib/apm/use_start_transaction');
 
 const useAppToastsValueMock = useAppToastsMock.create();
 

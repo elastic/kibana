@@ -12,7 +12,7 @@ import {
   LazyExpressionInput,
   ExpressionInputProps,
   withSuspense,
-} from '../../../../../../src/plugins/presentation_util/public';
+} from '@kbn/presentation-util-plugin/public';
 
 interface Props extends Omit<ExpressionInputProps, 'height'> {
   /** Optional string for displaying error messages */

@@ -9,7 +9,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 
-import type { PluginInitializer, PrebootPlugin } from 'kibana/server';
+import type { PluginInitializer, PrebootPlugin } from '@kbn/core/server';
 
 export const plugin: PluginInitializer<void, never> = (initializerContext): PrebootPlugin => ({
   setup: (core) => {

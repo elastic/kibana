@@ -8,7 +8,7 @@
 import axios from 'axios';
 import { isEmpty } from 'lodash';
 
-import { Logger } from '../../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import {
   CreateCommentParams,
   CreateIncidentParams,

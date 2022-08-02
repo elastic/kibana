@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { Plugin as ExpressionsPublicPlugin } from '../../../expressions/public';
-import { VisualizationsSetup } from '../../../visualizations/public';
-import { UsageCollectionSetup } from '../../../usage_collection/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
+import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
-import { DataPublicPluginStart } from '../../../data/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { setFormatService } from './services';
 import { registerTableVis } from './register_vis';
 
@@ -25,6 +25,7 @@ export interface TablePluginSetupDependencies {
 /** @internal */
 export interface TablePluginStartDependencies {
   data: DataPublicPluginStart;
+  usageCollection?: UsageCollectionStart;
 }
 
 /** @internal */

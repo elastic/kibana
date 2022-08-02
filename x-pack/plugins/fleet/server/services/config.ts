@@ -7,7 +7,7 @@
 
 import type { Observable, Subscription } from 'rxjs';
 
-import type { FleetConfigType } from '../';
+import type { FleetConfigType } from '..';
 
 /**
  * Kibana config observable service, *NOT* agent policy

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { rangeQuery } from '../../../../observability/server';
 import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../lib/helpers/setup_request';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';

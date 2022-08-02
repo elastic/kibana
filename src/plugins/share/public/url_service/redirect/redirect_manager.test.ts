@@ -8,7 +8,7 @@
 
 import { RedirectManager } from './redirect_manager';
 import { MockUrlService } from '../../mocks';
-import { MigrateFunction } from 'src/plugins/kibana_utils/common';
+import { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
 
 const setup = () => {
   const url = new MockUrlService();

@@ -1,0 +1,172 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": ".reporting-2022-03-13",
+    "mappings": {
+      "properties": {
+        "attempts": {
+          "type": "short"
+        },
+        "completed_at": {
+          "type": "date"
+        },
+        "created_at": {
+          "type": "date"
+        },
+        "created_by": {
+          "type": "keyword"
+        },
+        "jobtype": {
+          "type": "keyword"
+        },
+        "kibana_id": {
+          "type": "keyword"
+        },
+        "kibana_name": {
+          "type": "keyword"
+        },
+        "max_attempts": {
+          "type": "short"
+        },
+        "meta": {
+          "properties": {
+            "isDeprecated": {
+              "type": "boolean"
+            },
+            "layout": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "objectType": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "metrics": {
+          "properties": {
+            "csv": {
+              "properties": {
+                "rows": {
+                  "type": "long"
+                }
+              }
+            },
+            "pdf": {
+              "properties": {
+                "cpu": {
+                  "type": "double"
+                },
+                "cpuInPercentage": {
+                  "type": "double"
+                },
+                "memory": {
+                  "type": "long"
+                },
+                "memoryInMegabytes": {
+                  "type": "double"
+                },
+                "pages": {
+                  "type": "long"
+                }
+              }
+            },
+            "png": {
+              "properties": {
+                "cpu": {
+                  "type": "double"
+                },
+                "cpuInPercentage": {
+                  "type": "double"
+                },
+                "memory": {
+                  "type": "long"
+                },
+                "memoryInMegabytes": {
+                  "type": "double"
+                }
+              }
+            }
+          }
+        },
+        "migration_version": {
+          "type": "keyword"
+        },
+        "output": {
+          "properties": {
+            "chunk": {
+              "type": "long"
+            },
+            "content": {
+              "enabled": false,
+              "type": "object"
+            },
+            "content_type": {
+              "type": "keyword"
+            },
+            "error_code": {
+              "type": "keyword"
+            },
+            "size": {
+              "type": "long"
+            },
+            "warnings": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "parent_id": {
+          "type": "keyword"
+        },
+        "payload": {
+          "enabled": false,
+          "type": "object"
+        },
+        "priority": {
+          "type": "byte"
+        },
+        "process_expiration": {
+          "type": "date"
+        },
+        "started_at": {
+          "type": "date"
+        },
+        "status": {
+          "type": "keyword"
+        },
+        "timeout": {
+          "type": "long"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "auto_expand_replicas": "0-1",
+        "hidden": "true",
+        "lifecycle": {
+          "name": "kibana-reporting"
+        },
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

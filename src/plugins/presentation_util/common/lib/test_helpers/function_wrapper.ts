@@ -11,7 +11,7 @@ import {
   ExpressionValueBoxed,
   typeSpecs,
   ExpressionFunctionDefinition,
-} from '../../../../expressions/common';
+} from '@kbn/expressions-plugin/common';
 
 type DefaultFnResultType = typeof typeSpecs[number] &
   ExpressionFunctionDefinition<

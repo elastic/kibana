@@ -10,8 +10,8 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { TypesStart, VisGroups, BaseVisType } from '../vis_types';
 import NewVisModal from './new_vis_modal';
-import { ApplicationStart, SavedObjectsStart, DocLinksStart } from '../../../../core/public';
-import { embeddablePluginMock } from '../../../embeddable/public/mocks';
+import { ApplicationStart, SavedObjectsStart, DocLinksStart } from '@kbn/core/public';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 
 describe('NewVisModal', () => {
   const defaultVisTypeParams = {
@@ -151,7 +151,7 @@ describe('NewVisModal', () => {
           savedObjects={{} as SavedObjectsStart}
         />
       );
-      const visCard = wrapper.find('[data-test-subj="visType-vis"]').at(0);
+      const visCard = wrapper.find('[data-test-subj="visType-vis"]').last();
       visCard.simulate('click');
       expect(window.location.assign).toBeCalledWith('testbasepath/app/visualize#/create?type=vis');
     });
@@ -170,7 +170,7 @@ describe('NewVisModal', () => {
           savedObjects={{} as SavedObjectsStart}
         />
       );
-      const visCard = wrapper.find('[data-test-subj="visType-vis"]').at(0);
+      const visCard = wrapper.find('[data-test-subj="visType-vis"]').last();
       visCard.simulate('click');
       expect(window.location.assign).toBeCalledWith(
         'testbasepath/app/visualize#/create?type=vis&foo=true&bar=42'
@@ -196,7 +196,7 @@ describe('NewVisModal', () => {
           savedObjects={{} as SavedObjectsStart}
         />
       );
-      const visCard = wrapper.find('[data-test-subj="visType-visWithAliasUrl"]').at(0);
+      const visCard = wrapper.find('[data-test-subj="visType-visWithAliasUrl"]').last();
       visCard.simulate('click');
       expect(stateTransfer.navigateToEditor).toBeCalledWith('otherApp', {
         path: '#/aliasUrl',
@@ -221,7 +221,7 @@ describe('NewVisModal', () => {
           savedObjects={{} as SavedObjectsStart}
         />
       );
-      const visCard = wrapper.find('[data-test-subj="visType-visWithAliasUrl"]').at(0);
+      const visCard = wrapper.find('[data-test-subj="visType-visWithAliasUrl"]').last();
       visCard.simulate('click');
       expect(navigateToApp).toBeCalledWith('otherApp', { path: '#/aliasUrl' });
       expect(onClose).toHaveBeenCalled();
@@ -244,7 +244,7 @@ describe('NewVisModal', () => {
       );
       const aggBasedGroupCard = wrapper
         .find('[data-test-subj="visGroupAggBasedExploreLink"]')
-        .at(0);
+        .last();
       aggBasedGroupCard.simulate('click');
       expect(wrapper.find('[data-test-subj="visType-visWithSearch"]').exists()).toBe(true);
     });

@@ -7,13 +7,10 @@
  */
 
 import { cloneDeep, defaults, forOwn, assign } from 'lodash';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
+import { injectSearchSourceReferences, parseSearchSourceJSON } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { EsResponse, SavedObject, SavedObjectConfig, SavedObjectKibanaServices } from '../../types';
-import { SavedObjectNotFound } from '../../../../kibana_utils/public';
-import {
-  IndexPattern,
-  injectSearchSourceReferences,
-  parseSearchSourceJSON,
-} from '../../../../data/public';
 import { expandShorthand } from './field_mapping';
 
 /**
@@ -37,7 +34,7 @@ export async function applyESResp(
   delete resp._source.kibanaSavedObjectMeta;
 
   if (!config.indexPattern && savedObject._source.indexPattern) {
-    config.indexPattern = savedObject._source.indexPattern as IndexPattern;
+    config.indexPattern = savedObject._source.indexPattern as DataView;
     delete savedObject._source.indexPattern;
   }
 

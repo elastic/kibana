@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { AlertExecutionStatusErrorReasons } from '../types';
+import { RuleExecutionStatusErrorReasons } from '../types';
 
 export class ErrorWithReason extends Error {
-  public readonly reason: AlertExecutionStatusErrorReasons;
+  public readonly reason: RuleExecutionStatusErrorReasons;
   public readonly error: Error;
 
-  constructor(reason: AlertExecutionStatusErrorReasons, error: Error) {
+  constructor(reason: RuleExecutionStatusErrorReasons, error: Error) {
     super(error.message);
     this.error = error;
     this.reason = reason;
   }
 }
 
-export function getReasonFromError(error: Error): AlertExecutionStatusErrorReasons {
+export function getReasonFromError(error: Error): RuleExecutionStatusErrorReasons {
   if (isErrorWithReason(error)) {
     return error.reason;
   }
-  return AlertExecutionStatusErrorReasons.Unknown;
+  return RuleExecutionStatusErrorReasons.Unknown;
 }
 
 export function isErrorWithReason(error: Error | ErrorWithReason): error is ErrorWithReason {

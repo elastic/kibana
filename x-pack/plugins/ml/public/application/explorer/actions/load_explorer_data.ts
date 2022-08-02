@@ -13,6 +13,7 @@ import { forkJoin, of, Observable, Subject } from 'rxjs';
 import { switchMap, map } from 'rxjs/operators';
 
 import { useCallback, useMemo } from 'react';
+import { TimefilterContract } from '@kbn/data-plugin/public';
 import {
   getDateFormatTz,
   getSelectionInfluencers,
@@ -29,7 +30,6 @@ import {
 import { ExplorerState } from '../reducers';
 import { useMlKibana, useTimefilter } from '../../contexts/kibana';
 import { MlResultsService, mlResultsServiceProvider } from '../../services/results_service';
-import { TimefilterContract } from '../../../../../../../src/plugins/data/public';
 import { AnomalyExplorerChartsService } from '../../services/anomaly_explorer_charts_service';
 import type { InfluencersFilterQuery } from '../../../../common/types/es_client';
 import type { TimeBucketsInterval, TimeRangeBounds } from '../../util/time_buckets';

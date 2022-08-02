@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HttpHandler } from 'src/core/public';
+import type { HttpHandler } from '@kbn/core/public';
 
 import {
   getLogEntryCategoryDatasetsRequestPayloadRT,

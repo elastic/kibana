@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { taskManagerMock } from '../../task_manager/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ActionTypeRegistry, ActionTypeRegistryOpts } from './action_type_registry';
 import { ActionType, ExecutorType } from './types';
 import { ActionExecutor, ExecutorError, ILicenseState, TaskRunnerFactory } from './lib';
 import { actionsConfigMock } from './actions_config.mock';
 import { licenseStateMock } from './lib/license_state.mock';
 import { ActionsConfigurationUtilities } from './actions_config';
-import { licensingMock } from '../../licensing/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
 
 const mockTaskManager = taskManagerMock.createSetup();
@@ -42,6 +42,7 @@ beforeEach(() => {
         name: 'Slack #xyz',
         secrets: {},
         isPreconfigured: true,
+        isDeprecated: false,
       },
     ],
   };
@@ -58,6 +59,7 @@ describe('register()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'gold',
+      supportedFeatureIds: ['alerting'],
       executor,
     });
     expect(actionTypeRegistry.has('my-action-type')).toEqual(true);
@@ -85,6 +87,7 @@ describe('register()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
       executor,
     };
     const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
@@ -99,6 +102,7 @@ describe('register()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
       executor,
     });
     expect(() =>
@@ -106,10 +110,41 @@ describe('register()', () => {
         id: 'my-action-type',
         name: 'My action type',
         minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
         executor,
       })
     ).toThrowErrorMatchingInlineSnapshot(
       `"Action type \\"my-action-type\\" is already registered."`
+    );
+  });
+
+  test('throws if empty supported feature ids provided', () => {
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    expect(() =>
+      actionTypeRegistry.register({
+        id: 'my-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: [],
+        executor,
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"At least one \\"supportedFeatureId\\" value must be supplied for connector type \\"my-action-type\\"."`
+    );
+  });
+
+  test('throws if invalid feature ids provided', () => {
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    expect(() =>
+      actionTypeRegistry.register({
+        id: 'my-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['foo'],
+        executor,
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Invalid feature ids \\"foo\\" for connector type \\"my-action-type\\"."`
     );
   });
 
@@ -119,6 +154,7 @@ describe('register()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
       executor,
     });
     expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
@@ -139,6 +175,7 @@ describe('register()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'gold',
+      supportedFeatureIds: ['alerting'],
       executor,
     });
     expect(actionTypeRegistryParams.licensing.featureUsage.register).toHaveBeenCalledWith(
@@ -153,6 +190,7 @@ describe('register()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
       executor,
     });
     expect(actionTypeRegistryParams.licensing.featureUsage.register).not.toHaveBeenCalled();
@@ -166,6 +204,7 @@ describe('get()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
       executor,
     });
     const actionType = actionTypeRegistry.get('my-action-type');
@@ -175,6 +214,9 @@ describe('get()', () => {
         "id": "my-action-type",
         "minimumLicenseRequired": "basic",
         "name": "My action type",
+        "supportedFeatureIds": Array [
+          "alerting",
+        ],
       }
     `);
   });
@@ -195,6 +237,7 @@ describe('list()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
       executor,
     });
     const actionTypes = actionTypeRegistry.list();
@@ -206,6 +249,40 @@ describe('list()', () => {
         enabledInConfig: true,
         enabledInLicense: true,
         minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+      },
+    ]);
+    expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
+    expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalled();
+  });
+
+  test('returns list of connector types filtered by feature id if provided', () => {
+    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      executor,
+    });
+    actionTypeRegistry.register({
+      id: 'another-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['cases'],
+      executor,
+    });
+    const actionTypes = actionTypeRegistry.list('alerting');
+    expect(actionTypes).toEqual([
+      {
+        id: 'my-action-type',
+        name: 'My action type',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
       },
     ]);
     expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
@@ -225,6 +302,7 @@ describe('has()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
       executor,
     });
     expect(actionTypeRegistry.has('my-action-type'));
@@ -237,6 +315,7 @@ describe('isActionTypeEnabled', () => {
     id: 'foo',
     name: 'Foo',
     minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
     executor: async (options) => {
       return { status: 'ok', actionId: options.actionId };
     },
@@ -304,6 +383,7 @@ describe('ensureActionTypeEnabled', () => {
     id: 'foo',
     name: 'Foo',
     minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
     executor: async (options) => {
       return { status: 'ok', actionId: options.actionId };
     },
@@ -349,6 +429,7 @@ describe('isActionExecutable()', () => {
     id: 'foo',
     name: 'Foo',
     minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
     executor: async (options) => {
       return { status: 'ok', actionId: options.actionId };
     },

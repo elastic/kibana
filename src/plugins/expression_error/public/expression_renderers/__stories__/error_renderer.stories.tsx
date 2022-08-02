@@ -8,8 +8,8 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
+import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getErrorRenderer } from '../error_renderer';
-import { Render } from '../../../../presentation_util/public/__stories__';
 
 storiesOf('renderers/error', module).add('default', () => {
   const thrownError = new Error('There was an error');

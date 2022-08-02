@@ -11,7 +11,7 @@ import { cloneDeep } from 'lodash';
 import * as Rx from 'rxjs';
 import { merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs/operators';
-import { RenderCompleteDispatcher } from '../../../../kibana_utils/public';
+import { RenderCompleteDispatcher } from '@kbn/kibana-utils-plugin/public';
 import { Adapters } from '../types';
 import { IContainer } from '../containers';
 import { EmbeddableOutput, IEmbeddable } from './i_embeddable';
@@ -33,6 +33,7 @@ export abstract class Embeddable<
   public readonly parent?: IContainer;
   public readonly isContainer: boolean = false;
   public readonly deferEmbeddableLoad: boolean = false;
+
   public abstract readonly type: string;
   public readonly id: string;
   public fatalError?: Error;
@@ -53,8 +54,15 @@ export abstract class Embeddable<
 
   constructor(input: TEmbeddableInput, output: TEmbeddableOutput, parent?: IContainer) {
     this.id = input.id;
+
     this.output = {
       title: getPanelTitle(input, output),
+      ...(this.reportsEmbeddableLoad()
+        ? {}
+        : {
+            loading: false,
+            rendered: true,
+          }),
       ...output,
     };
     this.input = {
@@ -87,6 +95,10 @@ export abstract class Embeddable<
         },
         () => {}
       );
+  }
+
+  public reportsEmbeddableLoad() {
+    return false;
   }
 
   public refreshInputFromParent() {

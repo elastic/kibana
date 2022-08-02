@@ -10,9 +10,10 @@ export {
   indices,
   SectionLoading,
   EuiCodeEditor,
-} from '../../../../src/plugins/es_ui_shared/public';
+} from '@kbn/es-ui-shared-plugin/public';
 
 export {
   KibanaContextProvider,
   KibanaThemeProvider,
-} from '../../../../src/plugins/kibana_react/public';
+  useExecutionContext,
+} from '@kbn/kibana-react-plugin/public';

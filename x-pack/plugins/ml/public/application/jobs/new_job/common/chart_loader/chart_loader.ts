@@ -7,6 +7,7 @@
 
 import memoizeOne from 'memoize-one';
 import { isEqual } from 'lodash';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
 import { IndicesOptions } from '../../../../../../common/types/anomaly_detection_jobs';
 import {
@@ -19,7 +20,6 @@ import { ml } from '../../../../services/ml_api_service';
 import { mlResultsService } from '../../../../services/results_service';
 import { getCategoryFields as getCategoryFieldsOrig } from './searches';
 import { aggFieldPairsCanBeCharted } from '../job_creator/util/general';
-import type { DataView } from '../../../../../../../../../src/plugins/data_views/common';
 
 type DetectorIndex = number;
 export interface LineChartPoint {

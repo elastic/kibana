@@ -24,7 +24,7 @@ export const registerDeleteRoute = ({
       },
     },
     license.guardApiRoute(async (context, request, response) => {
-      const { client: clusterClient } = context.core.elasticsearch;
+      const { client: clusterClient } = (await context.core).elasticsearch;
       try {
         const { jobIds } = request.body;
         const data = await Promise.all(

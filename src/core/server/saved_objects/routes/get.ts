@@ -7,15 +7,18 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '../../http';
 import { InternalCoreUsageDataSetup } from '../../core_usage_data';
+import type { InternalSavedObjectRouter } from '../internal_types';
 import { catchAndReturnBoomErrors } from './utils';
 
 interface RouteDependencies {
   coreUsageData: InternalCoreUsageDataSetup;
 }
 
-export const registerGetRoute = (router: IRouter, { coreUsageData }: RouteDependencies) => {
+export const registerGetRoute = (
+  router: InternalSavedObjectRouter,
+  { coreUsageData }: RouteDependencies
+) => {
   router.get(
     {
       path: '/{type}/{id}',
@@ -32,8 +35,9 @@ export const registerGetRoute = (router: IRouter, { coreUsageData }: RouteDepend
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsGet({ request: req }).catch(() => {});
 
-      const savedObject = await context.core.savedObjects.client.get(type, id);
-      return res.ok({ body: savedObject });
+      const { savedObjects } = await context.core;
+      const object = await savedObjects.client.get(type, id);
+      return res.ok({ body: object });
     })
   );
 };

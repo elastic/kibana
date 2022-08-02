@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-import { Logger, ElasticsearchClient } from 'src/core/server';
+import { Logger, ElasticsearchClient } from '@kbn/core/server';
 
 import { EsNames, getEsNames } from './names';
 import { initializeEs } from './init';
 import { ClusterClientAdapter, IClusterClientAdapter } from './cluster_client_adapter';
 import { createReadySignal, ReadySignal } from '../lib/ready_signal';
 
+export const RETRY_DELAY = 2000;
+
 export interface EsContext {
-  logger: Logger;
-  esNames: EsNames;
-  esAdapter: IClusterClientAdapter;
+  readonly logger: Logger;
+  readonly esNames: EsNames;
+  readonly esAdapter: IClusterClientAdapter;
   initialize(): void;
   shutdown(): Promise<void>;
   waitTillReady(): Promise<boolean>;
-  initialized: boolean;
+  readonly initialized: boolean;
+  readonly retryDelay: number;
 }
 
 export interface EsError {
@@ -44,12 +47,14 @@ class EsContextImpl implements EsContext {
   public esAdapter: IClusterClientAdapter;
   private readonly readySignal: ReadySignal<boolean>;
   public initialized: boolean;
+  public readonly retryDelay: number;
 
   constructor(params: EsContextCtorParams) {
     this.logger = params.logger;
     this.esNames = getEsNames(params.indexNameRoot, params.kibanaVersion);
     this.readySignal = createReadySignal();
     this.initialized = false;
+    this.retryDelay = RETRY_DELAY;
     this.esAdapter = new ClusterClientAdapter({
       logger: params.logger,
       elasticsearchClientPromise: params.elasticsearchClientPromise,
@@ -70,13 +75,17 @@ class EsContextImpl implements EsContext {
         this.logger.debug(`readySignal.signal(${success})`);
         this.readySignal.signal(success);
       } catch (err) {
-        this.logger.debug('readySignal.signal(false)');
+        this.logger.debug(`readySignal.signal(false), reason: ${err.message}`);
         this.readySignal.signal(false);
       }
     });
   }
 
   async shutdown() {
+    if (!this.readySignal.isEmitted()) {
+      this.logger.debug('readySignal.signal(false); reason: Kibana server is shutting down');
+      this.readySignal.signal(false);
+    }
     await this.esAdapter.shutdown();
   }
 

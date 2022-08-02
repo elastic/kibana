@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { Logger, SavedObjectsRepository, SavedObjectsServiceStart } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import type { Logger, SavedObjectsRepository, SavedObjectsServiceStart } from 'src/core/server';
 
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 
 interface Deps {

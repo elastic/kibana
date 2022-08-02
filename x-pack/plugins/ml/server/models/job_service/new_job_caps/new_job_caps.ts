@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient } from 'kibana/server';
-import type { DataViewsService } from '../../../../../../../src/plugins/data_views/common';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { Aggregation, Field, NewJobCapsResponse } from '../../../../common/types/fields';
 import { _DOC_COUNT } from '../../../../common/constants/field_types';
 import { fieldServiceProvider } from './field_service';

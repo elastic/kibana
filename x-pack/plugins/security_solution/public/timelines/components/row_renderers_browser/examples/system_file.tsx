@@ -7,6 +7,7 @@
 
 import React from 'react';
 
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { mockEndgameFileDeleteEvent } from '../../../../common/mock/mock_endgame_ecs_data';
 import { createGenericFileRowRenderer } from '../../timeline/body/renderers/system/generic_row_renderer';
 import { DELETED_FILE } from '../../timeline/body/renderers/system/translations';
@@ -21,7 +22,6 @@ const SystemFileExampleComponent: React.FC = () => {
   return (
     <>
       {systemFileRowRenderer.renderRow({
-        browserFields: {},
         data: mockEndgameFileDeleteEvent,
         isDraggable: false,
         timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
 import { ArgumentType } from './arguments';
 import { TypeToString, TypeString, UnmappedTypeStrings } from '../types/common';
 import { ExecutionContext } from '../execution/types';
@@ -21,7 +22,6 @@ import {
   ExpressionFunctionOverallMetric,
 } from './specs';
 import { ExpressionAstFunction } from '../ast';
-import { PersistableStateDefinition } from '../../../kibana_utils/common';
 
 /**
  * `ExpressionFunctionDefinition` is the interface plugins have to implement to
@@ -38,6 +38,11 @@ export interface ExpressionFunctionDefinition<
    * The name of the function, as will be used in expression.
    */
   name: Name;
+
+  /**
+   * The flag to mark the function as deprecated.
+   */
+  deprecated?: boolean;
 
   /**
    * if set to true function will be disabled (but its migrate function will still be available)

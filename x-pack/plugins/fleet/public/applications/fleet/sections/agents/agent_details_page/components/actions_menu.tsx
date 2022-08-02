@@ -18,8 +18,7 @@ import {
   AgentUpgradeAgentModal,
 } from '../../components';
 import { useAgentRefresh } from '../hooks';
-import { isAgentUpgradeable } from '../../../../services';
-import { policyHasFleetServer } from '../../services/has_fleet_server';
+import { isAgentUpgradeable, policyHasFleetServer } from '../../../../services';
 
 export const AgentDetailsActionMenu: React.FunctionComponent<{
   agent: Agent;
@@ -71,7 +70,6 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
           <AgentUpgradeAgentModal
             agents={[agent]}
             agentCount={1}
-            version={kibanaVersion}
             onClose={() => {
               setIsUpgradeModalOpen(false);
               refreshAgent();
@@ -104,7 +102,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
             />
           </EuiContextMenuItem>,
           <EuiContextMenuItem
-            icon="cross"
+            icon="trash"
             disabled={!hasFleetAllPrivileges || !agent.active}
             onClick={() => {
               setIsUnenrollModalOpen(true);

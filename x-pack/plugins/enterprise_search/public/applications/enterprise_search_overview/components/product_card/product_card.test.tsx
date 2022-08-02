@@ -5,67 +5,83 @@
  * 2.0.
  */
 
-import { setMockValues, mockTelemetryActions } from '../../../__mocks__/kea_logic';
+import { mockTelemetryActions } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiCard } from '@elastic/eui';
+import { snakeCase } from 'lodash';
 
-import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
-import { EuiButtonTo } from '../../../shared/react_router_helpers';
+import { EuiListGroup, EuiPanel } from '@elastic/eui';
 
-import { ProductCard } from './';
+import { EuiButtonTo, EuiButtonEmptyTo } from '../../../shared/react_router_helpers';
+
+import { ProductCard, ProductCardProps } from './product_card';
+
+const MOCK_VALUES: ProductCardProps = {
+  cta: 'Click me',
+  description: 'Mock description',
+  features: ['first feature', 'second feature'],
+  icon: 'logoElasticsearch',
+  name: 'Mock product',
+  productId: 'mockProduct',
+  resourceLinks: [
+    {
+      label: 'Link one',
+      to: 'https://www.elastic.co/guide/one',
+    },
+    {
+      label: 'Link twwo',
+      to: 'https://www.elastic.co/guide/two',
+    },
+  ],
+  url: '/app/mock_app',
+};
 
 describe('ProductCard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders an App Search card', () => {
-    const wrapper = shallow(<ProductCard product={APP_SEARCH_PLUGIN} image="as.jpg" />);
-    const card = wrapper.find(EuiCard).dive().shallow();
+  it('renders a product card', () => {
+    const wrapper = shallow(<ProductCard {...MOCK_VALUES} />);
+    const card = wrapper.find(EuiPanel);
 
-    expect(card.find('h2').text()).toEqual('Elastic App Search');
-    expect(card.find('.productCard__image').prop('src')).toEqual('as.jpg');
+    expect(card.find('h3').text()).toEqual(MOCK_VALUES.name);
+    expect(card.find(EuiListGroup).children()).toHaveLength(MOCK_VALUES.features.length);
+    expect(card.find('[data-test-subj="productCard-resources"]').text()).toEqual('Resources');
+    expect(card.find('[data-test-subj="productCard-resourceLinks"]').children()).toHaveLength(
+      MOCK_VALUES.resourceLinks.length
+    );
 
+    const button = card.find(EuiButtonEmptyTo);
+
+    expect(button).toHaveLength(1);
+    expect(button.prop('to')).toEqual(MOCK_VALUES.url);
+    expect(card.find(EuiButtonTo)).toHaveLength(0);
+
+    button.simulate('click');
+
+    expect(mockTelemetryActions.sendEnterpriseSearchTelemetry).toHaveBeenCalledWith({
+      action: 'clicked',
+      metric: snakeCase(MOCK_VALUES.productId),
+    });
+  });
+
+  it('renders an empty cta', () => {
+    const wrapper = shallow(<ProductCard {...MOCK_VALUES} emptyCta />);
+    const card = wrapper.find(EuiPanel);
     const button = card.find(EuiButtonTo);
-    expect(button.prop('to')).toEqual('/app/enterprise_search/app_search');
-    expect(button.prop('children')).toEqual('Open App Search');
+
+    expect(button).toHaveLength(1);
+    expect(button.prop('to')).toEqual(MOCK_VALUES.url);
+    expect(card.find(EuiButtonEmptyTo)).toHaveLength(0);
 
     button.simulate('click');
     expect(mockTelemetryActions.sendEnterpriseSearchTelemetry).toHaveBeenCalledWith({
       action: 'clicked',
-      metric: 'app_search',
+      metric: snakeCase(MOCK_VALUES.productId),
     });
-  });
-
-  it('renders a Workplace Search card', () => {
-    const wrapper = shallow(<ProductCard product={WORKPLACE_SEARCH_PLUGIN} image="ws.jpg" />);
-    const card = wrapper.find(EuiCard).dive().shallow();
-
-    expect(card.find('h2').text()).toEqual('Elastic Workplace Search');
-    expect(card.find('.productCard__image').prop('src')).toEqual('ws.jpg');
-
-    const button = card.find(EuiButtonTo);
-    expect(button.prop('to')).toEqual('/app/enterprise_search/workplace_search');
-    expect(button.prop('children')).toEqual('Open Workplace Search');
-
-    button.simulate('click');
-    expect(mockTelemetryActions.sendEnterpriseSearchTelemetry).toHaveBeenCalledWith({
-      action: 'clicked',
-      metric: 'workplace_search',
-    });
-  });
-
-  it('renders correct button text when host not present', () => {
-    setMockValues({ config: { host: '' } });
-
-    const wrapper = shallow(<ProductCard product={WORKPLACE_SEARCH_PLUGIN} image="ws.jpg" />);
-    const card = wrapper.find(EuiCard).dive().shallow();
-    const button = card.find(EuiButtonTo);
-
-    expect(button.prop('children')).toEqual('Set up Workplace Search');
   });
 });

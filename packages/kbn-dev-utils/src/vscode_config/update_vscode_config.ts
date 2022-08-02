@@ -69,9 +69,9 @@ const createObjectPropOfManagedValues = (key: string, value: Record<string, any>
 const addManagedProp = (
   ast: t.ObjectExpression,
   key: string,
-  value: string | Record<string, any> | boolean | number
+  value: string | Record<string, any> | boolean | number | any[]
 ) => {
-  if (['number', 'string', 'boolean'].includes(typeof value)) {
+  if (['number', 'string', 'boolean'].includes(typeof value) || Array.isArray(value)) {
     ast.properties.push(createManagedProp(key, value));
   } else {
     ast.properties.push(createObjectPropOfManagedValues(key, value as Record<string, any>));
@@ -180,6 +180,20 @@ export function updateVscodeConfig(keys: ManagedConfigKey[], infoText: string, j
     const existingProp = ast.properties.filter(isBasicObjectProp).find((p) => p.key.value === key);
 
     if (isSelfManaged(existingProp)) {
+      continue;
+    }
+
+    if (Array.isArray(value)) {
+      if (!existingProp) {
+        addManagedProp(ast, key, value);
+        continue;
+      }
+
+      if (!isSelfManaged(existingProp)) {
+        replaceManagedProp(ast, existingProp, value);
+        continue;
+      }
+
       continue;
     }
 

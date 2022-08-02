@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 
+import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '@kbn/ml-plugin/common/constants/categorization_job';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../plugins/ml/common/constants/categorization_job';
 
 export function MachineLearningJobWizardCategorizationProvider({ getService }: FtrProviderContext) {
   const comboBox = getService('comboBox');

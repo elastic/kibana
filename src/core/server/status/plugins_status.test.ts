@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginName } from '../plugins';
+import type { PluginName } from '@kbn/core-base-common';
 import { PluginsStatusService } from './plugins_status';
 import { of, Observable, BehaviorSubject, ReplaySubject } from 'rxjs';
 import { ServiceStatusLevels, CoreStatus, ServiceStatus } from './types';
@@ -282,6 +282,32 @@ describe('PluginStatusService', () => {
         { a: { level: ServiceStatusLevels.degraded, summary: 'a degraded' } },
         { a: { level: ServiceStatusLevels.unavailable, summary: 'a unavailable' } },
         { a: { level: ServiceStatusLevels.available, summary: 'a available' } },
+      ]);
+    });
+
+    it('updates when a plugin status observable emits with the same level but a different summary', async () => {
+      const service = new PluginsStatusService({
+        core$: coreAllAvailable$,
+        pluginDependencies: new Map([['a', []]]),
+      });
+      const statusUpdates: Array<Record<PluginName, ServiceStatus>> = [];
+      const subscription = service
+        .getAll$()
+        // the first emission happens right after core services emit (see explanation above)
+        .pipe(skip(1))
+        .subscribe((pluginStatuses) => statusUpdates.push(pluginStatuses));
+
+      const aStatus$ = new BehaviorSubject<ServiceStatus>({
+        level: ServiceStatusLevels.available,
+        summary: 'summary initial',
+      });
+      service.set('a', aStatus$);
+      aStatus$.next({ level: ServiceStatusLevels.available, summary: 'summary updated' });
+      subscription.unsubscribe();
+
+      expect(statusUpdates).toEqual([
+        { a: { level: ServiceStatusLevels.available, summary: 'summary initial' } },
+        { a: { level: ServiceStatusLevels.available, summary: 'summary updated' } },
       ]);
     });
 

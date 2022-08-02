@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SampleDataRegistrySetup } from '../../../../../src/plugins/home/server';
+import { SampleDataRegistrySetup } from '@kbn/home-plugin/server';
 import { APP_ICON, createWorkspacePath } from '../../common/constants';
 
 const datasetId = 'logs';

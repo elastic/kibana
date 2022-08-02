@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { lastValueFrom } from 'rxjs';
 import { ExpressionsService } from './expressions_services';
 import { ExpressionsServiceFork } from './expressions_fork';
 
@@ -131,7 +132,7 @@ describe('ExpressionsService', () => {
         },
       });
 
-      const { result } = await forkStart.run('__test__', null).toPromise();
+      const { result } = await lastValueFrom(forkStart.run('__test__', null));
 
       expect(result).toBe('123');
     });

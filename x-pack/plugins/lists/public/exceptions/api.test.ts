@@ -19,8 +19,8 @@ import {
   updateExceptionList,
   updateExceptionListItem,
 } from '@kbn/securitysolution-list-api';
+import { coreMock } from '@kbn/core/public/mocks';
 
-import { coreMock } from '../../../../../src/core/public/mocks';
 import { getExceptionListSchemaMock } from '../../common/schemas/response/exception_list_schema.mock';
 import { getExceptionListItemSchemaMock } from '../../common/schemas/response/exception_list_item_schema.mock';
 import { getCreateExceptionListSchemaMock } from '../../common/schemas/request/create_exception_list_schema.mock';

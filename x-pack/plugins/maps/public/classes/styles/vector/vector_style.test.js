@@ -6,7 +6,6 @@
  */
 
 import { VectorStyle } from './vector_style';
-import { DataRequest } from '../../util/data_request';
 import {
   FIELD_ORIGIN,
   STYLE_TYPE,
@@ -35,6 +34,22 @@ class MockSource {
 describe('getDescriptorWithUpdatedStyleProps', () => {
   const previousFieldName = 'doIStillExist';
   const mapColors = [];
+  const layer = {
+    getMaxZoom: () => {
+      return 24;
+    },
+    getMinZoom: () => {
+      return 0;
+    },
+    getSource: () => {
+      return {
+        isMvt: () => {
+          return false;
+        },
+      };
+    },
+  };
+  const customIcons = [];
   const properties = {
     fillColor: {
       type: STYLE_TYPE.STATIC,
@@ -69,13 +84,13 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
 
   describe('When there is no mismatch in configuration', () => {
     it('Should return no changes when next ordinal fields contain existing style property fields', async () => {
-      const vectorStyle = new VectorStyle({ properties }, new MockSource());
+      const vectorStyle = new VectorStyle({ properties }, new MockSource(), layer, customIcons);
 
       const nextFields = [new MockField({ fieldName: previousFieldName, dataType: 'number' })];
       const { hasChanges } = await vectorStyle.getDescriptorWithUpdatedStyleProps(
         nextFields,
-        previousFields,
-        mapColors
+        mapColors,
+        previousFields
       );
       expect(hasChanges).toBe(false);
     });
@@ -83,11 +98,11 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
 
   describe('When styles should revert to static styling', () => {
     it('Should convert dynamic styles to static styles when there are no next fields', async () => {
-      const vectorStyle = new VectorStyle({ properties }, new MockSource());
+      const vectorStyle = new VectorStyle({ properties }, new MockSource(), layer, customIcons);
 
       const nextFields = [];
       const { hasChanges, nextStyleDescriptor } =
-        await vectorStyle.getDescriptorWithUpdatedStyleProps(nextFields, previousFields, mapColors);
+        await vectorStyle.getDescriptorWithUpdatedStyleProps(nextFields, mapColors, previousFields);
       expect(hasChanges).toBe(true);
       expect(nextStyleDescriptor.properties[VECTOR_STYLES.LINE_COLOR]).toEqual({
         options: {
@@ -104,7 +119,7 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
     });
 
     it('Should convert dynamic ICON_SIZE static style when there are no next ordinal fields', async () => {
-      const vectorStyle = new VectorStyle({ properties }, new MockSource());
+      const vectorStyle = new VectorStyle({ properties }, new MockSource(), layer, customIcons);
 
       const nextFields = [
         {
@@ -130,7 +145,7 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
         },
       ];
       const { hasChanges, nextStyleDescriptor } =
-        await vectorStyle.getDescriptorWithUpdatedStyleProps(nextFields, previousFields, mapColors);
+        await vectorStyle.getDescriptorWithUpdatedStyleProps(nextFields, mapColors, previousFields);
       expect(hasChanges).toBe(true);
       expect(nextStyleDescriptor.properties[VECTOR_STYLES.ICON_SIZE]).toEqual({
         options: {
@@ -143,11 +158,11 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
 
   describe('When styles should not be cleared', () => {
     it('Should update field in styles when the fields and style combination remains compatible', async () => {
-      const vectorStyle = new VectorStyle({ properties }, new MockSource());
+      const vectorStyle = new VectorStyle({ properties }, new MockSource(), layer, customIcons);
 
       const nextFields = [new MockField({ fieldName: 'someOtherField', dataType: 'number' })];
       const { hasChanges, nextStyleDescriptor } =
-        await vectorStyle.getDescriptorWithUpdatedStyleProps(nextFields, previousFields, mapColors);
+        await vectorStyle.getDescriptorWithUpdatedStyleProps(nextFields, mapColors, previousFields);
       expect(hasChanges).toBe(true);
       expect(nextStyleDescriptor.properties[VECTOR_STYLES.LINE_COLOR]).toEqual({
         options: {
@@ -168,150 +183,6 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
           },
         },
         type: 'DYNAMIC',
-      });
-    });
-  });
-});
-
-describe('pluckStyleMetaFromSourceDataRequest', () => {
-  describe('has features', () => {
-    it('Should identify when feature collection only contains points', async () => {
-      const sourceDataRequest = new DataRequest({
-        data: {
-          type: 'FeatureCollection',
-          features: [
-            {
-              geometry: {
-                type: 'Point',
-              },
-              properties: {},
-            },
-            {
-              geometry: {
-                type: 'MultiPoint',
-              },
-              properties: {},
-            },
-          ],
-        },
-      });
-      const vectorStyle = new VectorStyle({}, new MockSource());
-
-      const featuresMeta = await vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
-      expect(featuresMeta.geometryTypes.isPointsOnly).toBe(true);
-      expect(featuresMeta.geometryTypes.isLinesOnly).toBe(false);
-      expect(featuresMeta.geometryTypes.isPolygonsOnly).toBe(false);
-    });
-
-    it('Should identify when feature collection only contains lines', async () => {
-      const sourceDataRequest = new DataRequest({
-        data: {
-          type: 'FeatureCollection',
-          features: [
-            {
-              geometry: {
-                type: 'LineString',
-              },
-              properties: {},
-            },
-            {
-              geometry: {
-                type: 'MultiLineString',
-              },
-              properties: {},
-            },
-            {
-              geometry: {
-                type: 'Point',
-              },
-              properties: {
-                __kbn_is_centroid_feature__: true,
-              },
-            },
-          ],
-        },
-      });
-      const vectorStyle = new VectorStyle({}, new MockSource());
-
-      const featuresMeta = await vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
-      expect(featuresMeta.geometryTypes.isPointsOnly).toBe(false);
-      expect(featuresMeta.geometryTypes.isLinesOnly).toBe(true);
-      expect(featuresMeta.geometryTypes.isPolygonsOnly).toBe(false);
-    });
-  });
-
-  describe('scaled field range', () => {
-    const sourceDataRequest = new DataRequest({
-      data: {
-        type: 'FeatureCollection',
-        features: [
-          {
-            geometry: {
-              type: 'Point',
-            },
-            properties: {
-              myDynamicField: 1,
-            },
-          },
-          {
-            geometry: {
-              type: 'Point',
-            },
-            properties: {
-              myDynamicField: 10,
-            },
-          },
-        ],
-      },
-    });
-
-    it('Should not extract scaled field range when scaled field has no values', async () => {
-      const vectorStyle = new VectorStyle(
-        {
-          properties: {
-            fillColor: {
-              type: STYLE_TYPE.DYNAMIC,
-              options: {
-                field: {
-                  origin: FIELD_ORIGIN.SOURCE,
-                  name: 'myDynamicFieldWithNoValues',
-                },
-              },
-            },
-          },
-        },
-        new MockSource()
-      );
-
-      const featuresMeta = await vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
-      expect(featuresMeta.geometryTypes.isPointsOnly).toBe(true);
-      expect(featuresMeta.geometryTypes.isLinesOnly).toBe(false);
-      expect(featuresMeta.geometryTypes.isPolygonsOnly).toBe(false);
-    });
-
-    it('Should extract scaled field range', async () => {
-      const vectorStyle = new VectorStyle(
-        {
-          properties: {
-            fillColor: {
-              type: STYLE_TYPE.DYNAMIC,
-              options: {
-                field: {
-                  origin: FIELD_ORIGIN.SOURCE,
-                  name: 'myDynamicField',
-                },
-              },
-            },
-          },
-        },
-        new MockSource()
-      );
-
-      const styleMeta = await vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
-      expect(styleMeta.fieldMeta.myDynamicField.range).toEqual({
-        delta: 9,
-        max: 10,
-        min: 1,
       });
     });
   });

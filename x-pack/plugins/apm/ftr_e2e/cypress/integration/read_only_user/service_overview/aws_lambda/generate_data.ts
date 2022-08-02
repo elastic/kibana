@@ -24,7 +24,7 @@ export function generateData({ start, end }: { start: number; end: number }) {
   const traceEvents = timerange(start, end)
     .interval('1m')
     .rate(rate)
-    .spans((timestamp) =>
+    .generator((timestamp) =>
       instance
         .transaction(transaction.name)
         .defaults({
@@ -34,7 +34,6 @@ export function generateData({ start, end }: { start: number; end: number }) {
         .timestamp(timestamp)
         .duration(transaction.duration)
         .success()
-        .serialize()
     );
 
   return traceEvents;

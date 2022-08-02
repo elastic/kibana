@@ -25,8 +25,9 @@ import {
 import { serializeRestoreSettings } from '../../../../../common/lib';
 import { EuiCodeEditor } from '../../../../shared_imports';
 import { useServices } from '../../../app_context';
-import { StepProps } from './';
-import { CollapsibleIndicesList } from '../../collapsible_lists/collapsible_indices_list';
+import { StepProps } from '.';
+import { CollapsibleIndicesList } from '../../collapsible_lists';
+import { PolicyFeatureStatesSummary } from '../../summaries';
 
 export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
   restoreSettings,
@@ -39,6 +40,7 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
     renameReplacement,
     partial,
     includeGlobalState,
+    featureStates,
     ignoreIndexSettings,
   } = restoreSettings;
 
@@ -129,33 +131,8 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
         </Fragment>
       ) : null}
 
-      {partial !== undefined || includeGlobalState !== undefined ? (
+      {featureStates !== undefined || includeGlobalState !== undefined ? (
         <EuiFlexGroup>
-          {partial !== undefined ? (
-            <EuiFlexItem>
-              <EuiDescriptionList textStyle="reverse">
-                <EuiDescriptionListTitle>
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.partialLabel"
-                    defaultMessage="Partial restore"
-                  />
-                </EuiDescriptionListTitle>
-                <EuiDescriptionListDescription>
-                  {partial ? (
-                    <FormattedMessage
-                      id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.partialTrueValue"
-                      defaultMessage="Yes"
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.partialFalseValue"
-                      defaultMessage="No"
-                    />
-                  )}
-                </EuiDescriptionListDescription>
-              </EuiDescriptionList>
-            </EuiFlexItem>
-          ) : null}
           {includeGlobalState !== undefined ? (
             <EuiFlexItem>
               <EuiDescriptionList textStyle="reverse">
@@ -166,21 +143,52 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
                   />
                 </EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>
-                  {includeGlobalState ? (
-                    <FormattedMessage
-                      id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.includeGlobalStateTrueValue"
-                      defaultMessage="Yes"
-                    />
-                  ) : (
+                  {includeGlobalState === false ? (
                     <FormattedMessage
                       id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.includeGlobalStateFalseValue"
                       defaultMessage="No"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.includeGlobalStateTrueValue"
+                      defaultMessage="Yes"
                     />
                   )}
                 </EuiDescriptionListDescription>
               </EuiDescriptionList>
             </EuiFlexItem>
           ) : null}
+          {featureStates !== undefined ? (
+            <PolicyFeatureStatesSummary featureStates={featureStates} />
+          ) : null}
+        </EuiFlexGroup>
+      ) : null}
+
+      {partial !== undefined ? (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiDescriptionList textStyle="reverse">
+              <EuiDescriptionListTitle>
+                <FormattedMessage
+                  id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.partialLabel"
+                  defaultMessage="Partial restore"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                {partial ? (
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.partialTrueValue"
+                    defaultMessage="Yes"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.partialFalseValue"
+                    defaultMessage="No"
+                  />
+                )}
+              </EuiDescriptionListDescription>
+            </EuiDescriptionList>
+          </EuiFlexItem>
         </EuiFlexGroup>
       ) : null}
 

@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Execution of COM object via Xwizard",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and\n process.pe.original_file_name : \"xwizard.exe\" and\n (\n   (process.args : \"RunWizard\" and process.args : \"{*}\") or\n   (process.executable != null and\n     not process.executable : (\"C:\\\\Windows\\\\SysWOW64\\\\xwizard.exe\", \"C:\\\\Windows\\\\System32\\\\xwizard.exe\")\n   )\n )\n",
   "references": [
     "https://lolbas-project.github.io/lolbas/Binaries/Xwizard/",
@@ -53,5 +54,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 2
 }

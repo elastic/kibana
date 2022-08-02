@@ -27,6 +27,7 @@ const PlatformIconsComponent: React.FC<PlatformIconsProps> = ({ platform }) => {
         } catch (e) {
           return prevValue;
         }
+
         return platformArray;
       } else {
         return SUPPORTED_PLATFORMS;

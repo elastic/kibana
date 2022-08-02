@@ -9,9 +9,9 @@ import { EuiBadge, EuiInMemoryTable } from '@elastic/eui';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
+import { KibanaFeature } from '@kbn/features-plugin/public';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
-import { KibanaFeature } from '../../../../../../../../features/public';
 import type { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';

@@ -24,7 +24,7 @@ import { engines } from '../../app_search/__mocks__/engines.mock';
 
 import { UsersAndRolesRowActions } from './users_and_roles_row_actions';
 
-import { UsersTable } from './';
+import { UsersTable } from '.';
 
 describe('UsersTable', () => {
   const initializeSingleUserRoleMapping = jest.fn();

@@ -13,25 +13,27 @@ import {
   HasDataParams,
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
-} from '../../observability/public';
+} from '@kbn/observability-plugin/public';
 import {
   AppMountParameters,
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
   Plugin,
-} from '../../../../src/core/public';
+} from '@kbn/core/public';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
-} from '../../../../src/plugins/data/public';
-import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+} from '@kbn/data-plugin/public';
+import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 
-import { FeaturesPluginSetup } from '../../features/public';
-import { LicensingPluginSetup } from '../../licensing/public';
-import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import { MapsStartApi } from '../../maps/public';
-import { Start as InspectorPluginStart } from '../../../../src/plugins/inspector/public';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/public';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { MapsStartApi } from '@kbn/maps-plugin/public';
+import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
 
 export type UxPluginSetup = void;
 export type UxPluginStart = void;
@@ -52,6 +54,13 @@ export interface ApmPluginStartDeps {
   maps?: MapsStartApi;
   inspector: InspectorPluginStart;
   observability: ObservabilityPublicStart;
+  dataViews: DataViewsPublicPluginStart;
+  lens: LensPublicStart;
+}
+
+async function getDataStartPlugin(core: CoreSetup) {
+  const [_, startPlugins] = await core.getStartServices();
+  return (startPlugins as ApmPluginStartDeps).data;
 }
 
 export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
@@ -59,7 +68,6 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
 
   public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
     const pluginSetupDeps = plugins;
-
     if (plugins.observability) {
       const getUxDataHelper = async () => {
         const { fetchUxOverviewDate, hasRumData, createCallApmApi } =
@@ -74,11 +82,19 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
         appName: 'ux',
         hasData: async (params?: HasDataParams) => {
           const dataHelper = await getUxDataHelper();
-          return await dataHelper.hasRumData(params!);
+          const dataStartPlugin = await getDataStartPlugin(core);
+          return dataHelper.hasRumData({
+            ...params!,
+            dataStartPlugin,
+          });
         },
         fetchData: async (params: FetchDataParams) => {
+          const dataStartPlugin = await getDataStartPlugin(core);
           const dataHelper = await getUxDataHelper();
-          return await dataHelper.fetchUxOverviewDate(params);
+          return dataHelper.fetchUxOverviewDate({
+            ...params,
+            dataStartPlugin,
+          });
         },
       });
     }

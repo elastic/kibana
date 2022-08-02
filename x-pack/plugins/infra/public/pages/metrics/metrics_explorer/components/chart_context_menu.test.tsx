@@ -14,9 +14,9 @@ import {
   timeRange,
   chartOptions,
 } from '../../../../utils/fixtures/metrics_explorer';
-import { Capabilities } from 'src/core/public';
-import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
-import { coreMock } from 'src/core/public/mocks';
+import { Capabilities } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
 
 const coreStartMock = coreMock.createStart();
 const series = { id: 'exmaple-01', rows: [], columns: [] };

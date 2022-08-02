@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type { EndpointOf, ReturnOf, ServerRouteRepository } from '@kbn/server-route-repository';
-import { CoreSetup, CoreStart, KibanaRequest, Logger } from 'kibana/server';
-import { RuleDataPluginService } from '../../../rule_registry/server';
+import { CoreSetup, CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
+import { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 
 import { ObservabilityServerRouteRepository } from './get_global_observability_server_route_repository';
 import { ObservabilityRequestHandlerContext } from '../types';

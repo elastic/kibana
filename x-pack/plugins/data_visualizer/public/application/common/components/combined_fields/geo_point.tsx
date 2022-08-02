@@ -21,6 +21,7 @@ import {
   EuiFormErrorText,
 } from '@elastic/eui';
 
+import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { CombinedField } from './types';
 import {
   createGeoPointCombinedField,
@@ -29,7 +30,6 @@ import {
   getFieldNames,
   getNameCollisionMsg,
 } from './utils';
-import { FindFileStructureResponse } from '../../../../../../file_upload/common';
 
 interface Props {
   addCombinedField: (combinedField: CombinedField) => void;

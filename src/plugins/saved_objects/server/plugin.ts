@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin } from 'kibana/server';
+import { CoreSetup, Plugin } from '@kbn/core/server';
 import { uiSettings } from './ui_settings';
 
 export class SavedObjectsServerPlugin implements Plugin<object, object> {

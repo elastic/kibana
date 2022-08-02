@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { EuiCopy, EuiButtonIcon, EuiFieldText } from '@elastic/eui';
 
-import { CredentialItem } from './';
+import { CredentialItem } from '.';
 
 const label = 'Credential';
 const testSubj = 'CredentialItemTest';

@@ -15,7 +15,7 @@ import {
   expectedThresholdGroupWithCardinalityDsl,
   expectedIpIncludingMissingDataDsl,
   expectedIpNotIncludingMissingDataDsl,
-} from './__mocks__/';
+} from './__mocks__';
 
 describe('buildEventsHistogramQuery', () => {
   test('build query from options correctly', () => {

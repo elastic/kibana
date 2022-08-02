@@ -15,7 +15,7 @@ import { EuiTable, EuiTableHeaderCell, EuiTableRow, EuiHealth } from '@elastic/e
 
 import { SchemaFieldTypeSelect } from '../../../../shared/schema';
 
-import { SchemaTable } from './';
+import { SchemaTable } from '.';
 
 describe('SchemaTable', () => {
   const values = {

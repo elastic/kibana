@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { JOB_FIELD_TYPES } from '../../../../../common/constants';
+import { SUPPORTED_FIELD_TYPES } from '../../../../../common/constants';
 
 interface CommonFieldConfig {
   type: string;
@@ -32,6 +32,6 @@ export function filterFields<T extends CommonFieldConfig>(
   return {
     filteredFields: items,
     visibleFieldsCount: items.length,
-    visibleMetricsCount: items.filter((d) => d.type === JOB_FIELD_TYPES.NUMBER).length,
+    visibleMetricsCount: items.filter((d) => d.type === SUPPORTED_FIELD_TYPES.NUMBER).length,
   };
 }

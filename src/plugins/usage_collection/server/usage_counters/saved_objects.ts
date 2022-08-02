@@ -11,7 +11,7 @@ import type {
   SavedObjectsRepository,
   SavedObjectAttributes,
   SavedObjectsServiceSetup,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import moment from 'moment';
 import type { CounterMetric } from './usage_counter';
 

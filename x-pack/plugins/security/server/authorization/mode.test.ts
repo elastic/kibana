@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServerMock } from 'src/core/server/mocks';
+import { httpServerMock } from '@kbn/core/server/mocks';
 
 import type { SecurityLicense } from '../../common/licensing';
 import { licenseMock } from '../../common/licensing/index.mock';

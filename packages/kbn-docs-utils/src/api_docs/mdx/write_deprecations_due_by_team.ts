@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import moment from 'moment';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import dedent from 'dedent';
 import fs from 'fs';
 import Path from 'path';

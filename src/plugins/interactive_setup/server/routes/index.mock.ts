@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { coreMock, httpServiceMock, loggingSystemMock } from 'src/core/server/mocks';
+import { coreMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { ConfigSchema } from '../config';
 import { elasticsearchServiceMock } from '../elasticsearch_service.mock';

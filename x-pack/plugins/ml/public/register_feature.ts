@@ -6,10 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-} from '../../../../src/plugins/home/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { PLUGIN_ID } from '../common/constants/app';
 
 export const registerFeature = (home: HomePublicPluginSetup) => {
@@ -29,7 +26,7 @@ export const registerFeature = (home: HomePublicPluginSetup) => {
     icon: 'machineLearningApp',
     path: '/app/ml',
     showOnHomePage: false,
-    category: FeatureCatalogueCategory.DATA,
+    category: 'data',
     solutionId: 'kibana',
     order: 500,
   });

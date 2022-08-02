@@ -6,12 +6,13 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { setup, SetupResult, getProcessorValue } from './processor.helpers';
+import { setup, SetupResult, getProcessorValue, setupEnvironment } from './processor.helpers';
 
 const FAIL_TYPE = 'fail';
 describe('Processor: Fail', () => {
   let onUpdate: jest.Mock;
   let testBed: SetupResult;
+  const { httpSetup } = setupEnvironment();
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -25,7 +26,7 @@ describe('Processor: Fail', () => {
     onUpdate = jest.fn();
 
     await act(async () => {
-      testBed = await setup({
+      testBed = await setup(httpSetup, {
         value: {
           processors: [],
         },

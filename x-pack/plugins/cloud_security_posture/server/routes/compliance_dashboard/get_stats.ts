@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
 import type { ComplianceDashboardData, Score } from '../../../common/types';
 
 /**
@@ -29,17 +28,23 @@ export interface FindingsEvaluationsQueryResult {
 
 export const findingsEvaluationAggsQuery = {
   failed_findings: {
-    filter: { term: { 'result.evaluation.keyword': 'failed' } },
+    filter: { term: { 'result.evaluation': 'failed' } },
   },
   passed_findings: {
-    filter: { term: { 'result.evaluation.keyword': 'passed' } },
+    filter: { term: { 'result.evaluation': 'passed' } },
   },
 };
 
-export const getEvaluationsQuery = (query: QueryDslQueryContainer): SearchRequest => ({
-  index: CSP_KUBEBEAT_INDEX_PATTERN,
+export const getEvaluationsQuery = (
+  query: QueryDslQueryContainer,
+  pitId: string
+): SearchRequest => ({
   query,
+  size: 0,
   aggs: findingsEvaluationAggsQuery,
+  pit: {
+    id: pitId,
+  },
 });
 
 export const getStatsFromFindingsEvaluationsAggs = (
@@ -61,13 +66,14 @@ export const getStatsFromFindingsEvaluationsAggs = (
 
 export const getStats = async (
   esClient: ElasticsearchClient,
-  query: QueryDslQueryContainer
+  query: QueryDslQueryContainer,
+  pitId: string
 ): Promise<ComplianceDashboardData['stats']> => {
   const evaluationsQueryResult = await esClient.search<unknown, FindingsEvaluationsQueryResult>(
-    getEvaluationsQuery(query),
-    { meta: true }
+    getEvaluationsQuery(query, pitId)
   );
-  const findingsEvaluations = evaluationsQueryResult.body.aggregations;
+
+  const findingsEvaluations = evaluationsQueryResult.aggregations;
   if (!findingsEvaluations) throw new Error('missing findings evaluations');
 
   return getStatsFromFindingsEvaluationsAggs(findingsEvaluations);

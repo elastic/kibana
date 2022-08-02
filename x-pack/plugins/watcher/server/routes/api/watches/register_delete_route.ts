@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { RouteDependencies } from '../../../types';
 
 const bodySchema = schema.object({
@@ -56,7 +56,8 @@ export function registerDeleteRoute({ router, license }: RouteDependencies) {
       },
     },
     license.guardApiRoute(async (ctx, request, response) => {
-      const results = await deleteWatches(ctx.core.elasticsearch.client, request.body.watchIds);
+      const esClient = (await ctx.core).elasticsearch.client;
+      const results = await deleteWatches(esClient, request.body.watchIds);
       return response.ok({ body: { results } });
     })
   );

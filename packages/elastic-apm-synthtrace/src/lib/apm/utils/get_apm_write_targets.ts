@@ -18,12 +18,12 @@ export interface ApmElasticsearchOutputWriteTargets {
 
 export async function getApmWriteTargets({
   client,
-  forceDataStreams,
+  forceLegacyIndices,
 }: {
   client: Client;
-  forceDataStreams?: boolean;
+  forceLegacyIndices?: boolean;
 }): Promise<ApmElasticsearchOutputWriteTargets> {
-  if (forceDataStreams) {
+  if (!forceLegacyIndices) {
     return {
       transaction: 'traces-apm-default',
       span: 'traces-apm-default',

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { StartServicesAccessor } from 'src/core/public';
+import { StartServicesAccessor } from '@kbn/core/public';
 import {
   getIndexPatternLoadMeta,
   IndexPatternLoadExpressionFunctionDefinition,

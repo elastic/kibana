@@ -27,10 +27,11 @@ import {
   OnTimeChangeProps,
 } from '@elastic/eui';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
+import { withTheme } from '@kbn/kibana-react-plugin/common';
+import { useLinkProps } from '@kbn/observability-plugin/public';
+import { useUiTracker } from '@kbn/observability-plugin/public';
 import { datemathToEpochMillis } from '../../../../../../../utils/datemath';
 import { SnapshotMetricType } from '../../../../../../../../common/inventory_models/types';
-import { withTheme } from '../../../../../../../../../../../src/plugins/kibana_react/common';
-import { useLinkProps } from '../../../../../../../../../observability/public';
 import { useSorting } from '../../../../../../../hooks/use_sorting';
 import { useMetricsK8sAnomaliesResults } from '../../../../hooks/use_metrics_k8s_anomalies';
 import { useMetricsHostsAnomaliesResults } from '../../../../hooks/use_metrics_hosts_anomalies';
@@ -45,7 +46,6 @@ import { AnomalySeverityIndicator } from '../../../../../../../components/loggin
 import { useSourceContext } from '../../../../../../../containers/metrics_source';
 import { createResultsUrl } from '../flyout_home';
 import { useWaffleViewState, WaffleViewState } from '../../../../hooks/use_waffle_view_state';
-import { useUiTracker } from '../../../../../../../../../observability/public';
 type JobType = 'k8s' | 'hosts';
 type SortField = 'anomalyScore' | 'startTime';
 interface JobOption {

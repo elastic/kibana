@@ -7,8 +7,10 @@
  */
 
 import { assign, cloneDeep } from 'lodash';
-import { SavedObjectsClientContract } from 'kibana/public';
-import type { ResolvedSimpleSavedObject } from 'src/core/public';
+import { SavedObjectsClientContract } from '@kbn/core/public';
+import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
+import { SavedObjectAttributes, SavedObjectReference } from '@kbn/core/types';
+import { RawControlGroupAttributes } from '@kbn/controls-plugin/common';
 import { EmbeddableStart } from '../services/embeddable';
 import { SavedObject, SavedObjectsStart } from '../services/saved_objects';
 import { Filter, ISearchSource, Query, RefreshInterval } from '../services/data';
@@ -16,9 +18,7 @@ import { Filter, ISearchSource, Query, RefreshInterval } from '../services/data'
 import { createDashboardEditUrl } from '../dashboard_constants';
 import { extractReferences, injectReferences } from '../../common/saved_dashboard_references';
 
-import { SavedObjectAttributes, SavedObjectReference } from '../../../../core/types';
 import { DashboardOptions } from '../types';
-import { RawControlGroupAttributes } from '../application';
 
 export interface DashboardSavedObject extends SavedObject {
   id?: string;
@@ -52,6 +52,7 @@ const defaults = {
     // for BWC reasons we can't default dashboards that already exist without this setting to true.
     useMargins: true,
     syncColors: false,
+    syncTooltips: false,
     hidePanelTitles: false,
   } as DashboardOptions),
   version: 1,

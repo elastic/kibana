@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { maxSuggestions } from '../../../../observability/common';
+import { maxSuggestions } from '@kbn/observability-plugin/common';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getEnvironments } from './get_environments';
@@ -46,7 +46,8 @@ const environmentsRoute = createApmServerRoute({
       end,
       kuery: '',
     });
-    const size = await context.core.uiSettings.client.get<number>(
+    const coreContext = await context.core;
+    const size = await coreContext.uiSettings.client.get<number>(
       maxSuggestions
     );
     const environments = await getEnvironments({

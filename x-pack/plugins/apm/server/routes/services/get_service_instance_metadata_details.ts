@@ -5,13 +5,13 @@
  * 2.0.
  */
 import { merge } from 'lodash';
+import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '../../../common/processor_event';
 import {
   METRICSET_NAME,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { rangeQuery } from '../../../../observability/server';
 import { Setup } from '../../lib/helpers/setup_request';
 import { maybe } from '../../../common/utils/maybe';
 import {

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { Rule } from '@kbn/alerting-plugin/common';
 import { ThreadPoolRejectionsRuleBase } from './thread_pool_rejections_rule_base';
 import { RULE_THREAD_POOL_SEARCH_REJECTIONS, RULE_DETAILS } from '../../common/constants';
-import { Alert } from '../../../alerting/common';
 
 export class ThreadPoolSearchRejectionsRule extends ThreadPoolRejectionsRuleBase {
   private static TYPE = RULE_THREAD_POOL_SEARCH_REJECTIONS;
   private static THREAD_POOL_TYPE = 'search';
   private static readonly LABEL = RULE_DETAILS[RULE_THREAD_POOL_SEARCH_REJECTIONS].label;
-  constructor(sanitizedRule?: Alert) {
+  constructor(sanitizedRule?: Rule) {
     super(
       sanitizedRule,
       ThreadPoolSearchRejectionsRule.TYPE,

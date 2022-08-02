@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getAsLocalDateTimeString } from './';
+import { getAsLocalDateTimeString } from '.';
 
 describe('getAsLocalDateTimeString', () => {
   it('returns localized date if string can be parsed as date', () => {

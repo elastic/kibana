@@ -6,11 +6,11 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IEsSearchResponse, IEsSearchRequest } from 'src/plugins/data/public';
-import { FactoryQueryTypes } from '../..';
+import type { IEsSearchResponse, IEsSearchRequest } from '@kbn/data-plugin/public';
+import type { FactoryQueryTypes } from '../..';
 import { EVENT_ENRICHMENT_INDICATOR_FIELD_MAP } from '../../../cti/constants';
-import { Inspect, Maybe, TimerangeInput } from '../../common';
-import { RequestBasicOptions } from '..';
+import type { Inspect, Maybe, TimerangeInput } from '../../common';
+import type { RequestBasicOptions } from '..';
 
 export enum CtiQueries {
   eventEnrichment = 'eventEnrichment',

@@ -10,7 +10,7 @@ import type {
   SavedObjectsClientContract,
   SimpleSavedObject,
   SavedObjectAttributes,
-} from 'kibana/public';
+} from '@kbn/core/public';
 
 /** Returns an object matching a given title */
 export async function findObjectByTitle<T extends SavedObjectAttributes>(

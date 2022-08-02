@@ -69,7 +69,7 @@ const SourceArrow = React.memo<{
   return (
     <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="center">
       <EuiFlexItem grow={false}>
-        <ArrowBody height={sourceArrowHeight} />
+        <ArrowBody height={sourceArrowHeight ?? 0} />
       </EuiFlexItem>
 
       {sourceBytes != null && !isNaN(Number(sourceBytes)) ? (
@@ -82,11 +82,9 @@ const SourceArrow = React.memo<{
           >
             <Data size="xs">
               {sourceBytesPercent != null ? (
-                <Percent data-test-subj="source-bytes-percent">
-                  {`(${numeral(sourceBytesPercent).format('0.00')}%)`}
-                </Percent>
+                <Percent>{`(${numeral(sourceBytesPercent).format('0.00')}%)`}</Percent>
               ) : null}
-              <span data-test-subj="source-bytes">
+              <span>
                 <PreferenceFormattedBytes value={sourceBytes} />
               </span>
             </Data>
@@ -95,7 +93,7 @@ const SourceArrow = React.memo<{
       ) : null}
 
       <EuiFlexItem grow={false}>
-        <ArrowBody data-test-subj="source-arrow" height={sourceArrowHeight} />
+        <ArrowBody height={sourceArrowHeight ?? 0} />
       </EuiFlexItem>
 
       {sourcePackets != null && !isNaN(Number(sourcePackets)) ? (
@@ -107,14 +105,14 @@ const SourceArrow = React.memo<{
             value={sourcePackets}
           >
             <Data size="xs">
-              <span data-test-subj="source-packets">{`${sourcePackets} ${i18n.PACKETS}`}</span>
+              <span>{`${sourcePackets} ${i18n.PACKETS}`}</span>
             </Data>
           </DefaultDraggable>
         </EuiFlexItem>
       ) : null}
 
       <EuiFlexItem grow={false}>
-        <ArrowBody height={sourceArrowHeight} />
+        <ArrowBody height={sourceArrowHeight ?? 0} />
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
@@ -158,7 +156,7 @@ const DestinationArrow = React.memo<{
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <ArrowBody height={destinationArrowHeight} />
+          <ArrowBody height={destinationArrowHeight ?? 0} />
         </EuiFlexItem>
 
         {destinationBytes != null && !isNaN(Number(destinationBytes)) ? (
@@ -171,11 +169,9 @@ const DestinationArrow = React.memo<{
             >
               <Data size="xs">
                 {destinationBytesPercent != null ? (
-                  <Percent data-test-subj="destination-bytes-percent">
-                    {`(${numeral(destinationBytesPercent).format('0.00')}%)`}
-                  </Percent>
+                  <Percent>{`(${numeral(destinationBytesPercent).format('0.00')}%)`}</Percent>
                 ) : null}
-                <span data-test-subj="destination-bytes">
+                <span>
                   <PreferenceFormattedBytes value={destinationBytes} />
                 </span>
               </Data>
@@ -184,7 +180,7 @@ const DestinationArrow = React.memo<{
         ) : null}
 
         <EuiFlexItem grow={false}>
-          <ArrowBody height={destinationArrowHeight} />
+          <ArrowBody height={destinationArrowHeight ?? 0} />
         </EuiFlexItem>
 
         {destinationPackets != null && !isNaN(Number(destinationPackets)) ? (
@@ -196,16 +192,14 @@ const DestinationArrow = React.memo<{
               value={destinationPackets}
             >
               <Data size="xs">
-                <span data-test-subj="destination-packets">{`${numeral(destinationPackets).format(
-                  '0,0'
-                )} ${i18n.PACKETS}`}</span>
+                <span>{`${numeral(destinationPackets).format('0,0')} ${i18n.PACKETS}`}</span>
               </Data>
             </DefaultDraggable>
           </EuiFlexItem>
         ) : null}
 
         <EuiFlexItem grow={false}>
-          <ArrowBody height={destinationArrowHeight} />
+          <ArrowBody height={destinationArrowHeight ?? 0} />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -264,7 +258,6 @@ export const SourceDestinationArrows = React.memo<{
     return (
       <SourceDestinationArrowsContainer
         alignItems="center"
-        data-test-subj="source-destination-arrows-container"
         justifyContent="center"
         direction="column"
         gutterSize="none"

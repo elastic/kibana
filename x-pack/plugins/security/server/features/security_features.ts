@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchFeatureConfig } from '../../../features/server';
+import type { ElasticsearchFeatureConfig } from '@kbn/features-plugin/server';
 
 const userManagementFeature: ElasticsearchFeatureConfig = {
   id: 'users',

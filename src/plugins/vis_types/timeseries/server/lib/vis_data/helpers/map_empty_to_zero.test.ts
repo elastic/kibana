@@ -7,7 +7,7 @@
  */
 
 import { mapEmptyToZero } from './map_empty_to_zero';
-import { METRIC_TYPES } from '../../../../../../data/common';
+import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 
 describe('mapEmptyToZero(metric, buckets)', () => {

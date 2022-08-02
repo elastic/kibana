@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 import { BASE_ACTION_API_PATH } from '../../../constants';
 import { ConnectorExecutorResult, rewriteResponseToCamelCase } from '../rewrite_response_body';
 

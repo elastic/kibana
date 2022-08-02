@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
@@ -36,7 +36,8 @@ export function registerDeleteRoute({
       const { policyNames } = params;
 
       try {
-        await deletePolicies(context.core.elasticsearch.client.asCurrentUser, policyNames);
+        const esClient = (await context.core).elasticsearch.client;
+        await deletePolicies(esClient.asCurrentUser, policyNames);
         return response.ok();
       } catch (error) {
         return handleEsError({ error, response });

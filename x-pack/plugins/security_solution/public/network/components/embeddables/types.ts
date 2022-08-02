@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RenderTooltipContentParams } from '../../../../../maps/public';
+import type { RenderTooltipContentParams } from '@kbn/maps-plugin/public';
 
 export interface IndexPatternMapping {
   title: string;
@@ -26,16 +26,6 @@ export interface LayerMapping {
 
 export interface LayerMappingCollection {
   [indexPatternTitle: string]: LayerMapping;
-}
-
-export interface MapFeature {
-  id: number;
-  layerId: string;
-}
-
-export interface FeatureGeometry {
-  coordinates: [number];
-  type: string;
 }
 
 export type MapToolTipProps = Partial<RenderTooltipContentParams>;

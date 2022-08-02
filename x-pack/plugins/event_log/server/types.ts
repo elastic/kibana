@@ -6,7 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import type { IRouter, KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import type { IRouter, KibanaRequest, CustomRequestHandlerContext } from '@kbn/core/server';
 
 export type { IEvent, IValidatedEvent } from '../generated/schemas';
 export { EventSchema, ECS_VERSION } from '../generated/schemas';
@@ -16,6 +16,7 @@ import {
   AggregateEventsBySavedObjectResult,
   QueryEventsBySavedObjectResult,
 } from './es/cluster_client_adapter';
+
 export type {
   QueryEventsBySavedObjectResult,
   AggregateEventsBySavedObjectResult,
@@ -65,7 +66,7 @@ export interface IEventLogClient {
 
 export interface IEventLogger {
   logEvent(properties: IEvent): void;
-  startTiming(event: IEvent): void;
+  startTiming(event: IEvent, startTime?: Date): void;
   stopTiming(event: IEvent): void;
 }
 
@@ -79,9 +80,9 @@ export interface EventLogApiRequestHandlerContext {
 /**
  * @internal
  */
-export interface EventLogRequestHandlerContext extends RequestHandlerContext {
+export type EventLogRequestHandlerContext = CustomRequestHandlerContext<{
   eventLog: EventLogApiRequestHandlerContext;
-}
+}>;
 
 /**
  * @internal

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
+import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   Job,
   JobStats,

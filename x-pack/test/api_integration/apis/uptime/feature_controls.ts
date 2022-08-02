@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PINGS_DATE_RANGE_END, PINGS_DATE_RANGE_START } from './constants';
-import { API_URLS } from '../../../../plugins/uptime/common/constants';
 
 export default function featureControlsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
@@ -145,7 +145,8 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       }
     });
 
-    describe('spaces', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/136542
+    describe.skip('spaces', () => {
       // the following tests create a user_1 which has uptime read access to space_1 and dashboard all access to space_2
       const space1Id = 'space_1';
       const space2Id = 'space_2';

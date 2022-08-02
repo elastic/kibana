@@ -17,7 +17,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Microsoft Exchange Server UM Writing Suspicious Files",
-  "note": "## Triage and analysis\n\nPositive hits can be checked against the established Microsoft [baselines](https://github.com/microsoft/CSS-Exchange/tree/main/Security/Baselines).\n\nMicrosoft highly recommends that the best course of action is patching, but this may not protect already compromised systems\nfrom existing intrusions. Other tools for detecting and mitigating can be found within their Exchange support\n[repository](https://github.com/microsoft/CSS-Exchange/tree/main/Security)\n",
+  "note": "## Triage and analysis\n\nPositive hits can be checked against the established Microsoft [baselines](https://github.com/microsoft/CSS-Exchange/tree/main/Security/Baselines).\n\nMicrosoft highly recommends that the best course of action is patching, but this may not protect already compromised systems\nfrom existing intrusions. Other tools for detecting and mitigating can be found within their Exchange support\n[repository](https://github.com/microsoft/CSS-Exchange/tree/main/Security)\n\n\n## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "file where event.type == \"creation\" and\n  process.name : (\"UMWorkerProcess.exe\", \"umservice.exe\") and\n  file.extension : (\"php\", \"jsp\", \"js\", \"aspx\", \"asmx\", \"asax\", \"cfm\", \"shtml\") and\n  (\n    file.path : \"?:\\\\inetpub\\\\wwwroot\\\\aspnet_client\\\\*\" or\n\n    (file.path : \"?:\\\\*\\\\Microsoft\\\\Exchange Server*\\\\FrontEnd\\\\HttpProxy\\\\owa\\\\auth\\\\*\" and\n       not (file.path : \"?:\\\\*\\\\Microsoft\\\\Exchange Server*\\\\FrontEnd\\\\HttpProxy\\\\owa\\\\auth\\\\version\\\\*\" or\n            file.name : (\"errorFE.aspx\", \"expiredpassword.aspx\", \"frowny.aspx\", \"GetIdToken.htm\", \"logoff.aspx\",\n                        \"logon.aspx\", \"OutlookCN.aspx\", \"RedirSuiteServiceProxy.aspx\", \"signout.aspx\"))) or\n\n    (file.path : \"?:\\\\*\\\\Microsoft\\\\Exchange Server*\\\\FrontEnd\\\\HttpProxy\\\\ecp\\\\auth\\\\*\" and\n       not file.name : \"TimeoutLogoff.aspx\")\n  )\n",
   "references": [
     "https://www.microsoft.com/security/blog/2021/03/02/hafnium-targeting-exchange-servers",
@@ -52,5 +52,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

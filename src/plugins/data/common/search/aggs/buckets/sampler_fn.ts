@@ -7,8 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import { AggExpressionFunctionArgs, AggExpressionType, BUCKET_TYPES } from '../';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { AggExpressionFunctionArgs, AggExpressionType, BUCKET_TYPES } from '..';
 import { SAMPLER_AGG_NAME } from './sampler';
 
 export const aggSamplerFnName = 'aggSampler';

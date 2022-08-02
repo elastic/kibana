@@ -13,7 +13,8 @@
     "public/**/*.json",
     "server/**/*",
     "storybook/**/*",
-    "../../../typings/**/*"
+    "../../../typings/**/*",
+    "./jest_setup.ts"
   ],
   "references": [
     { "path": "../../core/tsconfig.json" },
@@ -22,6 +23,7 @@
     { "path": "../embeddable/tsconfig.json" },
     { "path": "../presentation_util/tsconfig.json" },
     { "path": "../kibana_react/tsconfig.json" },
-    { "path": "../data/tsconfig.json" }
+    { "path": "../data/tsconfig.json" },
+    { "path": "../unified_search/tsconfig.json" }
   ]
 }

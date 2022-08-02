@@ -7,7 +7,7 @@
 
 import type { ReactElement } from 'react';
 
-import type { CoreStart } from 'src/core/public';
+import type { CoreStart } from '@kbn/core/public';
 
 import type { CopyToSpaceFlyoutProps } from '../copy_saved_objects_to_space';
 import type {

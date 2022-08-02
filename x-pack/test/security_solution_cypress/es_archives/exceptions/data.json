@@ -6,7 +6,7 @@
     "source": {
       "@timestamp": "2019-09-01T00:41:06.527Z",
       "agent": {
-        "name": "bond"
+        "name": "foo"
       },
       "unique_value": {
         "test": "test field"

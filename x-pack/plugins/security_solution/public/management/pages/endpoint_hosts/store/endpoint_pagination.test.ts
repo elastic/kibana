@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import { CoreStart, HttpSetup } from 'kibana/public';
-import { History, createBrowserHistory } from 'history';
-import { applyMiddleware, Store, createStore } from 'redux';
+import type { CoreStart, HttpSetup } from '@kbn/core/public';
+import type { History } from 'history';
+import { createBrowserHistory } from 'history';
+import type { Store } from 'redux';
+import { applyMiddleware, createStore } from 'redux';
 
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
-import { AppLocation, MetadataListResponse } from '../../../../../common/endpoint/types';
-import { DepsStartMock, depsStartMock } from '../../../../common/mock/endpoint';
+import type { AppLocation, MetadataListResponse } from '../../../../../common/endpoint/types';
+import type { DepsStartMock } from '../../../../common/mock/endpoint';
+import { depsStartMock } from '../../../../common/mock/endpoint';
 
 import { endpointMiddlewareFactory } from './middleware';
 
@@ -23,15 +26,13 @@ import {
   mockEndpointResultList,
   setEndpointListApiMockImplementation,
 } from './mock_endpoint_result_list';
-import { EndpointState, EndpointIndexUIQueryParams } from '../types';
-import {
-  MiddlewareActionSpyHelper,
-  createSpyMiddleware,
-} from '../../../../common/store/test_utils';
+import type { EndpointState, EndpointIndexUIQueryParams } from '../types';
+import type { MiddlewareActionSpyHelper } from '../../../../common/store/test_utils';
+import { createSpyMiddleware } from '../../../../common/store/test_utils';
 import { getEndpointListPath } from '../../../common/routing';
 import { HOST_METADATA_LIST_ROUTE } from '../../../../../common/endpoint/constants';
 
-jest.mock('../../policy/store/services/ingest', () => ({
+jest.mock('../../../services/policies/ingest', () => ({
   sendGetAgentPolicyList: () => Promise.resolve({ items: [] }),
   sendGetEndpointSecurityPackage: () => Promise.resolve({}),
 }));

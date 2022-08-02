@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { CaseStatuses } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
-import { CaseStatuses } from '../../../../../../../plugins/cases/common/api';
 import { postCaseReq } from '../../../../../common/lib/mock';
 import {
   createCase,
@@ -20,7 +20,7 @@ import {
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const authSpace1 = getAuthWithSuperUser();
   const authSpace2 = getAuthWithSuperUser('space2');
@@ -40,13 +40,13 @@ export default ({ getService }: FtrProviderContext): void => {
        *  closed: 1
        */
       const [, inProgressCase, postedCase] = await Promise.all([
-        createCase(supertest, postCaseReq, 200, authSpace1),
-        createCase(supertest, postCaseReq, 200, authSpace1),
-        createCase(supertest, postCaseReq, 200, authSpace2),
+        createCase(supertestWithoutAuth, postCaseReq, 200, authSpace1),
+        createCase(supertestWithoutAuth, postCaseReq, 200, authSpace1),
+        createCase(supertestWithoutAuth, postCaseReq, 200, authSpace2),
       ]);
 
       await updateCase({
-        supertest,
+        supertest: supertestWithoutAuth,
         params: {
           cases: [
             {
@@ -60,7 +60,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       await updateCase({
-        supertest,
+        supertest: supertestWithoutAuth,
         params: {
           cases: [
             {
@@ -73,8 +73,14 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: authSpace2,
       });
 
-      const statusesSpace1 = await getAllCasesStatuses({ supertest, auth: authSpace1 });
-      const statusesSpace2 = await getAllCasesStatuses({ supertest, auth: authSpace2 });
+      const statusesSpace1 = await getAllCasesStatuses({
+        supertest: supertestWithoutAuth,
+        auth: authSpace1,
+      });
+      const statusesSpace2 = await getAllCasesStatuses({
+        supertest: supertestWithoutAuth,
+        auth: authSpace2,
+      });
 
       expect(statusesSpace1).to.eql({
         count_open_cases: 1,

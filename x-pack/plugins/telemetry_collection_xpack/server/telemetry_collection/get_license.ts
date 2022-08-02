@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from 'src/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 export type ESLicense = estypes.LicenseGetLicenseInformation;
 

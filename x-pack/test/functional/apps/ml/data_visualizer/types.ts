@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FieldVisConfig } from '../../../../../plugins/data_visualizer/public/application/common/components/stats_table/types';
+import type { FieldVisConfig } from '@kbn/data-visualizer-plugin/public/application/common/components/stats_table/types';
 
 export interface MetricFieldVisConfig extends FieldVisConfig {
   fieldName: string;

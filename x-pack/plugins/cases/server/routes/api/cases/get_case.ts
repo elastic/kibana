@@ -41,7 +41,8 @@ export const getCaseRoute = createCasesRoute({
         );
       }
 
-      const casesClient = await context.cases.getCasesClient();
+      const caseContext = await context.cases;
+      const casesClient = await caseContext.getCasesClient();
       const id = request.params.case_id;
 
       return response.ok({
@@ -70,7 +71,8 @@ export const resolveCaseRoute = createCasesRoute({
   params,
   handler: async ({ context, request, response }) => {
     try {
-      const casesClient = await context.cases.getCasesClient();
+      const caseContext = await context.cases;
+      const casesClient = await caseContext.getCasesClient();
       const id = request.params.case_id;
 
       return response.ok({

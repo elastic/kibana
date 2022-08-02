@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '../../../../src/core/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { SessionViewServices, SessionViewDeps } from './types';
 import { getSessionViewLazy } from './methods';
 

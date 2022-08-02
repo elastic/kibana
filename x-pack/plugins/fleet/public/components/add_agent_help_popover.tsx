@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { ReactElement } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -13,7 +13,7 @@ import type { NoArgCallback } from '@elastic/eui';
 import { EuiTourStep, EuiLink, EuiText } from '@elastic/eui';
 import { useTheme } from 'styled-components';
 
-import type { EuiTheme } from '../../../../../src/plugins/kibana_react/common';
+import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 
 import { useStartServices } from '../hooks';
 
@@ -28,15 +28,21 @@ export const AddAgentHelpPopover = ({
   offset?: number;
   closePopover: NoArgCallback<void>;
 }) => {
-  const { docLinks } = useStartServices();
+  const { docLinks, uiSettings } = useStartServices();
   const theme = useTheme() as EuiTheme;
   const optionalProps: { offset?: number } = {};
+  const hideAnnouncements: boolean = useMemo(
+    () => uiSettings.get('hideAnnouncements'),
+    [uiSettings]
+  );
 
   if (offset !== undefined) {
     optionalProps.offset = offset; // offset being present in props sets it to 0 so only add if specified
   }
 
-  return (
+  return hideAnnouncements ? (
+    button
+  ) : (
     <EuiTourStep
       {...optionalProps}
       content={

@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+jest.mock('../../../kibana_services', () => ({
+  isScreenshotMode: () => {
+    return false;
+  },
+}));
+
 import React from 'react';
 import { shallow } from 'enzyme';
 import { ILayer } from '../../../classes/layers/layer';

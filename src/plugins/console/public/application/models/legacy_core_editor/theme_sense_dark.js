@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-/* eslint import/no-unresolved: 0 */
 import ace from 'brace';
 
 ace.define('ace/theme/sense-dark', ['require', 'exports', 'module'], function (require, exports) {

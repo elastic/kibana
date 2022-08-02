@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { SavedObject, SavedObjectReference } from 'src/core/server';
-import { ActionTaskParams } from '../../../../../plugins/actions/server/types';
+import { SavedObject, SavedObjectReference } from '@kbn/core/server';
+import { ActionTaskParams } from '@kbn/actions-plugin/server/types';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export

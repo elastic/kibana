@@ -8,10 +8,16 @@
 import { curry, find } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { Logger } from '../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { renderMustacheObject } from '../lib/mustache_renderer';
-import { buildAlertHistoryDocument, AlertHistoryEsIndexConnectorId } from '../../common';
+import {
+  buildAlertHistoryDocument,
+  AlertHistoryEsIndexConnectorId,
+  AlertingConnectorFeatureId,
+  UptimeConnectorFeatureId,
+  SecurityConnectorFeatureId,
+} from '../../common';
 import { ALERT_HISTORY_PREFIX } from '../../common/alert_history_schema';
 
 export type ESIndexActionType = ActionType<ActionTypeConfigType, {}, ActionParamsType, unknown>;
@@ -60,6 +66,11 @@ export function getActionType({ logger }: { logger: Logger }): ESIndexActionType
     name: i18n.translate('xpack.actions.builtin.esIndexTitle', {
       defaultMessage: 'Index',
     }),
+    supportedFeatureIds: [
+      AlertingConnectorFeatureId,
+      UptimeConnectorFeatureId,
+      SecurityConnectorFeatureId,
+    ],
     validate: {
       config: ConfigSchema,
       params: ParamsSchema,
@@ -89,7 +100,7 @@ async function executor(
       document[timeField] = new Date();
     }
 
-    bulkBody.push({ index: {} });
+    bulkBody.push({ index: { op_type: 'create' } });
     bulkBody.push(document);
   }
 

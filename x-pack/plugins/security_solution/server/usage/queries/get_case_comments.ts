@@ -10,10 +10,10 @@ import type {
   SavedObjectsFindResult,
   Logger,
   SavedObjectsCreatePointInTimeFinderOptions,
-} from 'kibana/server';
+} from '@kbn/core/server';
 
-import { CASE_COMMENT_SAVED_OBJECT } from '../../../../cases/common/constants';
-import type { CommentAttributes } from '../../../../cases/common/api/cases/comment';
+import { CASE_COMMENT_SAVED_OBJECT } from '@kbn/cases-plugin/common/constants';
+import type { CommentAttributes } from '@kbn/cases-plugin/common/api/cases/comment';
 
 export interface GetCasesOptions {
   savedObjectsClient: SavedObjectsClientContract;

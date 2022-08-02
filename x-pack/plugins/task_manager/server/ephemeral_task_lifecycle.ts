@@ -7,7 +7,7 @@
 
 import { Subject, Observable, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { Logger, ExecutionContextStart } from '../../../../src/core/server';
+import { Logger, ExecutionContextStart } from '@kbn/core/server';
 
 import { Result, asErr, asOk } from './lib/result_type';
 import { TaskManagerConfig } from './config';

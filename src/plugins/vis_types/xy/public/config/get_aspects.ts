@@ -10,7 +10,7 @@ import { compact } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 
-import { DatatableColumn } from '../../../../expressions/public';
+import { DatatableColumn } from '@kbn/expressions-plugin/public';
 
 import { Aspect, Dimension, Aspects, Dimensions } from '../types';
 import { getFormatService } from '../services';

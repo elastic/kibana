@@ -9,7 +9,8 @@ const { resolve } = require('path');
 
 const del = require('del');
 const supportsColor = require('supports-color');
-const { run, withProcRunner } = require('@kbn/dev-utils');
+const { withProcRunner } = require('@kbn/dev-proc-runner');
+const { run } = require('@kbn/dev-cli-runner');
 
 const ROOT_DIR = resolve(__dirname, '..');
 const BUILD_DIR = resolve(ROOT_DIR, 'target');

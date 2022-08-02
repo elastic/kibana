@@ -20,7 +20,7 @@ export const registerInternalBulkDeleteRoute = (router: TagsPluginRouter) => {
     },
     router.handleLegacyErrors(async (ctx, req, res) => {
       const { ids: tagIds } = req.body;
-      const client = ctx.tags!.tagsClient;
+      const client = (await ctx.tags).tagsClient;
 
       for (const tagId of tagIds) {
         await client.delete(tagId);

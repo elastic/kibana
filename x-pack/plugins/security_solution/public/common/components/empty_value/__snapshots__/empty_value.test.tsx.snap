@@ -2,6 +2,6 @@
 
 exports[`EmptyValue it renders against snapshot 1`] = `
 <p>
-  (Empty String)
+  (Empty string)
 </p>
 `;

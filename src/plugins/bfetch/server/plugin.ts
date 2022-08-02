@@ -14,7 +14,7 @@ import type {
   Logger,
   KibanaRequest,
   StartServicesAccessor,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { map$ } from '@kbn/std';
 import {
@@ -28,10 +28,10 @@ import {
 import { createStream } from './streaming';
 import { getUiSettings } from './ui_settings';
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface BfetchServerSetupDependencies {}
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface BfetchServerStartDependencies {}
 
 export interface BatchProcessingRouteParams<BatchItemData, BatchItemResult> {
@@ -50,7 +50,7 @@ export interface BfetchServerSetup {
   ) => void;
 }
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface BfetchServerStart {}
 
 const streamingHeaders = {

@@ -8,11 +8,15 @@
 import { act } from '@testing-library/react';
 import React from 'react';
 
-import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
-import { httpServiceMock, notificationServiceMock, scopedHistoryMock } from 'src/core/public/mocks';
+import {
+  httpServiceMock,
+  notificationServiceMock,
+  scopedHistoryMock,
+} from '@kbn/core/public/mocks';
+import { KibanaFeature } from '@kbn/features-plugin/public';
+import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import { KibanaFeature } from '../../../../features/public';
-import { featuresPluginMock } from '../../../../features/public/mocks';
 import { SpaceAvatarInternal } from '../../space_avatar/space_avatar_internal';
 import type { SpacesManager } from '../../spaces_manager';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
@@ -58,29 +62,6 @@ describe('SpacesGridPage', () => {
   const getUrlForApp = (appId: string) => appId;
   const history = scopedHistoryMock.create();
 
-  it('renders as expected', () => {
-    const httpStart = httpServiceMock.createStartContract();
-    httpStart.get.mockResolvedValue([]);
-
-    expect(
-      shallowWithIntl(
-        <SpacesGridPage
-          spacesManager={spacesManager as unknown as SpacesManager}
-          getFeatures={featuresStart.getFeatures}
-          notifications={notificationServiceMock.createStartContract()}
-          getUrlForApp={getUrlForApp}
-          history={history}
-          capabilities={{
-            navLinks: {},
-            management: {},
-            catalogue: {},
-            spaces: { manage: true },
-          }}
-        />
-      )
-    ).toMatchSnapshot();
-  });
-
   it('renders the list of spaces', async () => {
     const httpStart = httpServiceMock.createStartContract();
     httpStart.get.mockResolvedValue([]);
@@ -106,7 +87,6 @@ describe('SpacesGridPage', () => {
     wrapper.update();
 
     expect(wrapper.find(SpaceAvatarInternal)).toHaveLength(spaces.length);
-    expect(wrapper.find(SpaceAvatarInternal)).toMatchSnapshot();
   });
 
   it('notifies when spaces fail to load', async () => {

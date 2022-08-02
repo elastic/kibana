@@ -7,12 +7,12 @@
 
 import { sampleDocWithSortId } from '../__mocks__/es_results';
 
-import { listMock } from '../../../../../../lists/server/mocks';
-import { getSearchListItemResponseMock } from '../../../../../../lists/common/schemas/response/search_list_item_schema.mock';
-import { filterEvents } from './filter_events';
-import { FieldSet } from './types';
+import { listMock } from '@kbn/lists-plugin/server/mocks';
+import { getSearchListItemResponseMock } from '@kbn/lists-plugin/common/schemas/response/search_list_item_schema.mock';
+import { partitionEvents } from './filter_events';
+import type { FieldSet } from './types';
 
-describe('filterEvents', () => {
+describe('partitionEvents', () => {
   let listClient = listMock.getListClient();
   let events = [sampleDocWithSortId('123', undefined, '1.1.1.1')];
 
@@ -43,11 +43,12 @@ describe('filterEvents', () => {
         matchedSet: new Set([JSON.stringify(['1.1.1.1'])]),
       },
     ];
-    const field = filterEvents({
+    const [included, excluded] = partitionEvents({
       events,
       fieldAndSetTuples,
     });
-    expect([...field]).toEqual([]);
+    expect(included).toEqual([]);
+    expect(excluded).toEqual(events);
   });
 
   test('it does not filter out the event if it is "excluded"', () => {
@@ -59,11 +60,12 @@ describe('filterEvents', () => {
         matchedSet: new Set([JSON.stringify(['1.1.1.1'])]),
       },
     ];
-    const field = filterEvents({
+    const [included, excluded] = partitionEvents({
       events,
       fieldAndSetTuples,
     });
-    expect([...field]).toEqual(events);
+    expect(included).toEqual(events);
+    expect(excluded).toEqual([]);
   });
 
   test('it does NOT filter out the event if the field is not found', () => {
@@ -75,11 +77,12 @@ describe('filterEvents', () => {
         matchedSet: new Set([JSON.stringify(['1.1.1.1'])]),
       },
     ];
-    const field = filterEvents({
+    const [included, excluded] = partitionEvents({
       events,
       fieldAndSetTuples,
     });
-    expect([...field]).toEqual(events);
+    expect(included).toEqual(events);
+    expect(excluded).toEqual([]);
   });
 
   test('it does NOT filter out the event if it is in both an inclusion and exclusion list', () => {
@@ -100,10 +103,11 @@ describe('filterEvents', () => {
       },
     ];
 
-    const field = filterEvents({
+    const [included, excluded] = partitionEvents({
       events,
       fieldAndSetTuples,
     });
-    expect([...field]).toEqual(events);
+    expect(included).toEqual(events);
+    expect(excluded).toEqual([]);
   });
 });

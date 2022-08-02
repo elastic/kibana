@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DiscoverStart } from '../../../../../../src/plugins/discover/public';
-import { ViewMode, IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
-import { StartServicesGetter } from '../../../../../../src/plugins/kibana_utils/public';
-import { CoreStart } from '../../../../../../src/core/public';
-import { KibanaLocation } from '../../../../../../src/plugins/share/public';
-import { DOC_TYPE as LENS_DOC_TYPE } from '../../../../lens/common/constants';
+import { DiscoverStart } from '@kbn/discover-plugin/public';
+import { ViewMode, IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { CoreStart } from '@kbn/core/public';
+import { KibanaLocation } from '@kbn/share-plugin/public';
+import { DOC_TYPE as LENS_DOC_TYPE } from '@kbn/lens-plugin/common/constants';
 import * as shared from './shared';
 
 export const ACTION_EXPLORE_DATA = 'ACTION_EXPLORE_DATA';

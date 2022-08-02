@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { savedObjectsRepositoryMock } from '../../../../../../src/core/server/mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import {
   findValueInBuckets,
   getAggregationsBuckets,
@@ -382,14 +382,12 @@ describe('utils', () => {
           {
             type: 'literal',
             value: 'cases-comments.attributes.type',
+            isQuoted: false,
           },
           {
             type: 'literal',
             value: 'alert',
-          },
-          {
-            type: 'literal',
-            value: false,
+            isQuoted: false,
           },
         ],
         function: 'is',
@@ -405,14 +403,12 @@ describe('utils', () => {
           {
             type: 'literal',
             value: 'cases-user-actions.attributes.type',
+            isQuoted: false,
           },
           {
             type: 'literal',
             value: 'connector',
-          },
-          {
-            type: 'literal',
-            value: false,
+            isQuoted: false,
           },
         ],
         function: 'is',

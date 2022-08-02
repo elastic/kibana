@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
+import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import { UIMetricUsage } from './telemetry_ui_metric_collector';
 
 const commonSchema: MakeSchemaFrom<UIMetricUsage>[string] = {

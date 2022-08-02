@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "Identifies remote execution via Windows PowerShell remoting. Windows PowerShell remoting allows for running any Windows PowerShell command on one or more remote computers. This could be an indication of lateral movement.",
+  "description": "Identifies remote execution via Windows PowerShell remoting. Windows PowerShell remoting allows a user to run any Windows PowerShell command on one or more remote computers. This could be an indication of lateral movement.",
   "false_positives": [
     "PowerShell remoting is a dual-use protocol that can be used for benign or malicious activity. It's important to baseline your environment to determine the amount of noise to expect from this tool."
   ],
@@ -47,5 +47,5 @@
     }
   ],
   "type": "eql",
-  "version": 4
+  "version": 5
 }

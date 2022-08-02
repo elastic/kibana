@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC } from 'react';
 
 import { EuiTitle, EuiSpacer, EuiDescriptionList } from '@elastic/eui';
-import type { FindFileStructureResponse } from '../../../../../../file_upload/common';
+import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { FILE_FORMATS } from '../../../../../common/constants';
 
 export const AnalysisSummary: FC<{ results: FindFileStructureResponse }> = ({ results }) => {

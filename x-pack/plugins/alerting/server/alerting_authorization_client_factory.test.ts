@@ -7,14 +7,14 @@
 
 import { Request } from '@hapi/hapi';
 import { ruleTypeRegistryMock } from './rule_type_registry.mock';
-import { KibanaRequest } from '../../../../src/core/server';
-import { savedObjectsClientMock } from '../../../../src/core/server/mocks';
-import { securityMock } from '../../security/server/mocks';
+import { CoreKibanaRequest } from '@kbn/core/server';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 import {
   AlertingAuthorizationClientFactory,
   AlertingAuthorizationClientFactoryOpts,
 } from './alerting_authorization_client_factory';
-import { featuresPluginMock } from '../../features/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 jest.mock('./authorization/alerting_authorization');
 
@@ -60,7 +60,7 @@ test('creates an alerting authorization client with proper constructor arguments
     securityPluginStart,
     ...alertingAuthorizationClientFactoryParams,
   });
-  const request = KibanaRequest.from(fakeRequest);
+  const request = CoreKibanaRequest.from(fakeRequest);
 
   factory.create(request);
 
@@ -78,7 +78,7 @@ test('creates an alerting authorization client with proper constructor arguments
 test('creates an alerting authorization client with proper constructor arguments', async () => {
   const factory = new AlertingAuthorizationClientFactory();
   factory.initialize(alertingAuthorizationClientFactoryParams);
-  const request = KibanaRequest.from(fakeRequest);
+  const request = CoreKibanaRequest.from(fakeRequest);
 
   factory.create(request);
 

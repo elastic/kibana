@@ -7,8 +7,8 @@
  */
 import React from 'react';
 
-jest.mock('../../kibana_react/public', () => {
-  const original = jest.requireActual('../../kibana_react/public');
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
 
   return {
     ...original,
@@ -16,10 +16,10 @@ jest.mock('../../kibana_react/public', () => {
   };
 });
 
-import { CoreStart } from 'src/core/public';
-import { coreMock } from 'src/core/public/mocks';
-import { dataPluginMock } from '../../data/public/mocks';
-import { usageCollectionPluginMock } from '../../usage_collection/public/mocks';
+import { CoreStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 
 import { DataViewEditorLazy } from './components/data_view_editor_lazy';
 import { DataViewEditorPlugin } from './plugin';

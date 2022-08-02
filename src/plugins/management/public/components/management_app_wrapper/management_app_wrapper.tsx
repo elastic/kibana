@@ -8,11 +8,11 @@
 
 import React, { createRef, Component } from 'react';
 
-import { ChromeBreadcrumb, AppMountParameters, ScopedHistory } from 'kibana/public';
+import { ChromeBreadcrumb, AppMountParameters, ScopedHistory } from '@kbn/core/public';
 import classNames from 'classnames';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { ManagementApp } from '../../utils';
 import { Unmount } from '../../types';
-import { APP_WRAPPER_CLASS } from '../../../../../../src/core/public';
 
 interface ManagementSectionWrapperProps {
   app: ManagementApp;

@@ -11,7 +11,7 @@ import { mockHandlerArguments } from './legacy/_mock_handler_arguments';
 import { actionsClientMock } from '../actions_client.mock';
 import { verifyAccessAndContext } from './verify_access_and_context';
 
-jest.mock('../lib/verify_api_access.ts', () => ({
+jest.mock('../lib/verify_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 

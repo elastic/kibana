@@ -7,14 +7,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-
-import { getBaseBreadcrumb } from '../../lib/breadcrumbs';
 import { resetWorkpad } from '../../state/actions/workpad';
 import { Home as Component } from './home.component';
-import { usePlatformService } from '../../services';
 
 export const Home = () => {
-  const { setBreadcrumbs } = usePlatformService();
   const [isMounted, setIsMounted] = useState(false);
   const dispatch = useDispatch();
 
@@ -24,10 +20,6 @@ export const Home = () => {
       setIsMounted(true);
     }
   }, [dispatch, isMounted, setIsMounted]);
-
-  useEffect(() => {
-    setBreadcrumbs([getBaseBreadcrumb()]);
-  }, [setBreadcrumbs]);
 
   return <Component />;
 };

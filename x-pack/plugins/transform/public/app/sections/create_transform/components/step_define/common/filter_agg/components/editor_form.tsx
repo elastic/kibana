@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { CodeEditor } from '../../../../../../../../../../../../src/plugins/kibana_react/public';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { FilterAggConfigEditor } from '../types';
 
 export const FilterEditorForm: FilterAggConfigEditor['aggTypeConfig']['FilterAggFormComponent'] = ({

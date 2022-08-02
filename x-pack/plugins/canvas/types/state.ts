@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaContext } from 'src/plugins/data/common';
+import { KibanaContext } from '@kbn/data-plugin/common';
 import {
   AnyExpressionFunctionDefinition,
   Datatable,
@@ -15,10 +15,10 @@ import {
   Render,
   Style,
   Range,
-} from 'src/plugins/expressions';
-import { Datasource, Model, Transform, View } from '../public/expression_types';
+} from '@kbn/expressions-plugin/common';
+import type { Datasource, Model, Transform, View } from '../public/expression_types';
 import { AssetType } from './assets';
-import { CanvasWorkpad, Sidebar } from './canvas';
+import { CanvasWorkpad, Sidebar, Flyouts } from './canvas';
 
 export enum AppStateKeys {
   FULLSCREEN = '__fullscreen',
@@ -91,6 +91,7 @@ export interface TransientState {
   };
   inFlight: boolean;
   sidebar: Sidebar;
+  flyouts: Flyouts;
 }
 
 interface PersistentState {

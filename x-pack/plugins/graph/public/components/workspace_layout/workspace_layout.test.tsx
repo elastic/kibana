@@ -8,11 +8,11 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { WorkspaceLayoutComponent } from '.';
-import { coreMock } from 'src/core/public/mocks';
-import { spacesPluginMock } from '../../../../spaces/public/mocks';
-import { NavigationPublicPluginStart as NavigationStart } from '../../../../../../src/plugins/navigation/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
+import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import { GraphSavePolicy, GraphWorkspaceSavedObject, IndexPatternProvider } from '../../types';
-import { OverlayStart, Capabilities } from 'kibana/public';
+import { OverlayStart, Capabilities } from '@kbn/core/public';
 import { SharingSavedObjectProps } from '../../helpers/use_workspace_loader';
 
 jest.mock('react-router-dom', () => {

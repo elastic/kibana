@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog, createAnyInstanceSerializer } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import { createAnyInstanceSerializer } from '@kbn/jest-serializers';
 
 import { readCliArgs } from './args';
 
@@ -36,6 +37,7 @@ it('build default and oss dist for current platform, without packages, by defaul
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": false,
+        "dockerContextUseLocalArtifact": null,
         "dockerCrossCompile": false,
         "dockerPush": false,
         "dockerTagQualifier": null,
@@ -68,6 +70,7 @@ it('builds packages if --all-platforms is passed', () => {
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": true,
+        "dockerContextUseLocalArtifact": null,
         "dockerCrossCompile": false,
         "dockerPush": false,
         "dockerTagQualifier": null,
@@ -100,6 +103,7 @@ it('limits packages if --rpm passed with --all-platforms', () => {
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": true,
+        "dockerContextUseLocalArtifact": null,
         "dockerCrossCompile": false,
         "dockerPush": false,
         "dockerTagQualifier": null,
@@ -132,6 +136,7 @@ it('limits packages if --deb passed with --all-platforms', () => {
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": false,
+        "dockerContextUseLocalArtifact": null,
         "dockerCrossCompile": false,
         "dockerPush": false,
         "dockerTagQualifier": null,
@@ -165,6 +170,7 @@ it('limits packages if --docker passed with --all-platforms', () => {
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": false,
+        "dockerContextUseLocalArtifact": null,
         "dockerCrossCompile": false,
         "dockerPush": false,
         "dockerTagQualifier": null,
@@ -205,6 +211,7 @@ it('limits packages if --docker passed with --skip-docker-ubi and --all-platform
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": false,
+        "dockerContextUseLocalArtifact": null,
         "dockerCrossCompile": false,
         "dockerPush": false,
         "dockerTagQualifier": null,
@@ -238,6 +245,7 @@ it('limits packages if --all-platforms passed with --skip-docker-ubuntu', () => 
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": true,
+        "dockerContextUseLocalArtifact": null,
         "dockerCrossCompile": false,
         "dockerPush": false,
         "dockerTagQualifier": null,

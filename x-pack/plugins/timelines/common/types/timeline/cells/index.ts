@@ -7,7 +7,7 @@
 
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import { RowRenderer } from '../../../types';
+import { RowRenderer } from '../..';
 import { Ecs } from '../../../ecs';
 import { BrowserFields, TimelineNonEcsData } from '../../../search_strategy';
 import { ColumnHeaderOptions } from '../columns';

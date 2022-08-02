@@ -10,7 +10,7 @@ import type {
   KibanaRequest,
   Logger,
   SessionStorageFactory,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
 import type { ConfigType } from '../config';
 

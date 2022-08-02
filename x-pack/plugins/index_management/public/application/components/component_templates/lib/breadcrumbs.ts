@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ManagementAppMountParams } from 'src/plugins/management/public';
+import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 
 export const getBreadcrumbs = (setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs']) => {
   const baseBreadcrumbs = [

@@ -10,5 +10,5 @@
   "requiredPlugins": ["management", "data", "dataViews"],
   "optionalPlugins": ["home", "savedObjectsTaggingOss", "spaces"],
   "extraPublicDirs": ["public/lib"],
-  "requiredBundles": ["kibanaReact", "home"]
+  "requiredBundles": ["kibanaReact"]
 }

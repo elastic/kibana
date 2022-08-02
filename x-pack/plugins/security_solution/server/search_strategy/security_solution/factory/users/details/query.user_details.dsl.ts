@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
-import { UserDetailsRequestOptions } from '../../../../../../common/search_strategy/security_solution/users/details';
+import type { ISearchRequestParams } from '@kbn/data-plugin/common';
+import type { UserDetailsRequestOptions } from '../../../../../../common/search_strategy/security_solution/users/details';
 import { buildFieldsTermAggregation } from '../../hosts/details/helpers';
 import { USER_FIELDS } from './helpers';
 
@@ -35,16 +35,6 @@ export const buildUserDetailsQuery = ({
     track_total_hits: false,
     body: {
       aggregations: {
-        first_seen: {
-          min: {
-            field: '@timestamp',
-          },
-        },
-        last_seen: {
-          max: {
-            field: '@timestamp',
-          },
-        },
         ...buildFieldsTermAggregation(USER_FIELDS),
       },
       query: { bool: { filter } },

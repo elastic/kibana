@@ -6,7 +6,9 @@
  */
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { RuleExecutorOptions, Alert } from '@kbn/alerting-plugin/server';
+import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { BaseRule } from './base_rule';
 import {
   AlertData,
@@ -20,18 +22,16 @@ import {
   AlertLicense,
   AlertLicenseState,
 } from '../../common/types/alerts';
-import { AlertExecutorOptions, Alert } from '../../../alerting/server';
 import { RULE_LICENSE_EXPIRATION, LEGACY_RULE_DETAILS } from '../../common/constants';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { AlertingDefaults } from './alert_helpers';
-import { SanitizedAlert } from '../../../alerting/common';
 import { Globals } from '../static_globals';
 import { fetchLicenses } from '../lib/alerts/fetch_licenses';
 
 const EXPIRES_DAYS = [60, 30, 14, 7];
 
 export class LicenseExpirationRule extends BaseRule {
-  constructor(public sanitizedRule?: SanitizedAlert) {
+  constructor(public sanitizedRule?: SanitizedRule) {
     super(sanitizedRule, {
       id: RULE_LICENSE_EXPIRATION,
       name: LEGACY_RULE_DETAILS[RULE_LICENSE_EXPIRATION].label,
@@ -64,7 +64,7 @@ export class LicenseExpirationRule extends BaseRule {
     });
   }
 
-  protected async execute(options: AlertExecutorOptions): Promise<any> {
+  protected async execute(options: RuleExecutorOptions): Promise<any> {
     if (!Globals.app.config.ui.show_license_expiration) {
       return;
     }

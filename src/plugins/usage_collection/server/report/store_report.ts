@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ISavedObjectsRepository } from 'src/core/server';
+import { ISavedObjectsRepository } from '@kbn/core/server';
 import moment from 'moment';
 import { chain, sumBy } from 'lodash';
 import { ReportSchemaType } from './schema';

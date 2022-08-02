@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { HttpResourcesRequestHandler, RouteConfig } from '@kbn/core/server';
+import { httpResourcesMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { HttpResourcesRequestHandler, RouteConfig } from 'src/core/server';
-import { httpResourcesMock, httpServerMock } from 'src/core/server/mocks';
 
 import type { Session } from '../../session_management';
 import { sessionMock } from '../../session_management/session.mock';

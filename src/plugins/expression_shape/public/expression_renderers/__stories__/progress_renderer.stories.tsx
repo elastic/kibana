@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { Render } from '../../../../presentation_util/public/__stories__';
+import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getProgressRenderer } from '../progress_renderer';
 import { Progress } from '../../../common';
 

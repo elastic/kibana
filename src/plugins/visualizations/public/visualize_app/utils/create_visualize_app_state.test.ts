@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IKbnUrlStateStorage } from 'src/plugins/kibana_utils/public';
+import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createVisualizeAppState } from './create_visualize_app_state';
 import { migrateAppState } from './migrate_app_state';
 import { visualizeAppStateStub } from './stubs';
@@ -14,7 +14,7 @@ import { visualizeAppStateStub } from './stubs';
 const mockStartStateSync = jest.fn();
 const mockStopStateSync = jest.fn();
 
-jest.mock('../../../../kibana_utils/public', () => ({
+jest.mock('@kbn/kibana-utils-plugin/public', () => ({
   createStateContainer: jest.fn(() => 'stateContainer'),
   syncState: jest.fn(() => ({
     start: mockStartStateSync,
@@ -25,7 +25,7 @@ jest.mock('./migrate_app_state', () => ({
   migrateAppState: jest.fn(() => 'migratedAppState'),
 }));
 
-const { createStateContainer, syncState } = jest.requireMock('../../../../kibana_utils/public');
+const { createStateContainer, syncState } = jest.requireMock('@kbn/kibana-utils-plugin/public');
 
 describe('createVisualizeAppState', () => {
   const kbnUrlStateStorage = {

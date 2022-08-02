@@ -7,7 +7,7 @@
 
 import { omit } from 'lodash/fp';
 import * as i18n from '../translations';
-import { HostDetailsNavTab } from './types';
+import type { HostDetailsNavTab } from './types';
 import { HostsTableType } from '../../store/model';
 import { HOSTS_PATH } from '../../../../common/constants';
 
@@ -50,12 +50,6 @@ export const navTabsHostDetails = ({
       href: getTabsOnHostDetailsUrl(hostName, HostsTableType.events),
       disabled: false,
     },
-    [HostsTableType.alerts]: {
-      id: HostsTableType.alerts,
-      name: i18n.NAVIGATION_ALERTS_TITLE,
-      href: getTabsOnHostDetailsUrl(hostName, HostsTableType.alerts),
-      disabled: false,
-    },
     [HostsTableType.risk]: {
       id: HostsTableType.risk,
       name: i18n.NAVIGATION_HOST_RISK_TITLE,
@@ -67,6 +61,7 @@ export const navTabsHostDetails = ({
       name: i18n.NAVIGATION_SESSIONS_TITLE,
       href: getTabsOnHostDetailsUrl(hostName, HostsTableType.sessions),
       disabled: false,
+      isBeta: true,
     },
   };
 

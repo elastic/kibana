@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { newJobLineChartProvider } from './line_chart';
 import { newJobPopulationChartProvider } from './population_chart';
 

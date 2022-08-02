@@ -8,10 +8,10 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
-import { CoreStart } from 'src/core/public';
-import { toMountPoint } from '../../../../../../kibana_react/public';
+import { CoreStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { EmbeddableFactoryDefinition } from '../../../embeddables';
 import { Container } from '../../../containers';
 import { ContactCardEmbeddable, ContactCardEmbeddableInput } from './contact_card_embeddable';

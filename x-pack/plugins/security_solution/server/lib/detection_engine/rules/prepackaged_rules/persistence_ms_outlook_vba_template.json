@@ -15,6 +15,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Persistence via Microsoft Outlook VBA",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "file where event.type != \"deletion\" and\n file.path : \"C:\\\\Users\\\\*\\\\AppData\\\\Roaming\\\\Microsoft\\\\Outlook\\\\VbaProject.OTM\"\n",
   "references": [
     "https://www.mdsec.co.uk/2020/11/a-fresh-outlook-on-mail-based-persistence/",
@@ -49,5 +50,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 4
 }

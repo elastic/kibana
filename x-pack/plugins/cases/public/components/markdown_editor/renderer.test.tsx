@@ -25,7 +25,7 @@ describe('Markdown', () => {
     test('it renders the expected link text', () => {
       const result = appMockRender.render(<MarkdownRenderer>{markdownWithLink}</MarkdownRenderer>);
 
-      expect(removeExternalLinkText(result.getByTestId('markdown-link').textContent)).toEqual(
+      expect(removeExternalLinkText(result.getByTestId('markdown-link').textContent)).toContain(
         'External Site'
       );
     });

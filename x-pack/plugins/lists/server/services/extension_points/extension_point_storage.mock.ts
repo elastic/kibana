@@ -6,8 +6,8 @@
  */
 
 import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
+import { httpServerMock } from '@kbn/core/server/mocks';
 
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { ExceptionListClient } from '../exception_lists/exception_list_client';
 
 import { ExtensionPointStorage } from './extension_point_storage';

@@ -9,7 +9,7 @@ import React from 'react';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { Datasource, DatasourceDataPanelProps } from '../../types';
 import { DragDropIdentifier } from '../../drag_drop';
-import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { mockStoreDeps, mountWithProvider } from '../../mocks';
 import { disableAutoApply } from '../../state_management/lens_slice';
 import { selectTriggerApplyChanges } from '../../state_management';

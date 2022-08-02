@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import ccrFixture from './fixtures/ccr';
+import ccrFixture from './fixtures/ccr.json';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');

@@ -7,9 +7,9 @@
 
 import { storiesOf } from '@storybook/react';
 import React from 'react';
+import { imageFunction } from '@kbn/expression-image-plugin/__fixtures__';
 import { ExampleContext } from '../../test/context_example';
 
-import { imageFunction } from '../../../../../../src/plugins/expression_image/__fixtures__';
 import { sharedWorkpads } from '../../test';
 import { RenderedElement, RenderedElementComponent } from '../rendered_element';
 

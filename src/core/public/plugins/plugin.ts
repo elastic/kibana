@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Subject } from 'rxjs';
-import { first } from 'rxjs/operators';
-import { DiscoveredPlugin, PluginOpaqueId } from '../../server';
+import { firstValueFrom, Subject } from 'rxjs';
+import type { DiscoveredPlugin, PluginOpaqueId } from '../../server';
 import { PluginInitializerContext } from './plugin_context';
 import { read } from './plugin_reader';
 import { CoreStart, CoreSetup } from '..';
@@ -61,7 +60,7 @@ export class PluginWrapper<
   private instance?: Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
   private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart, TStart]>();
-  public readonly startDependencies = this.startDependencies$.pipe(first()).toPromise();
+  public readonly startDependencies = firstValueFrom(this.startDependencies$);
 
   constructor(
     public readonly discoveredPlugin: DiscoveredPlugin,

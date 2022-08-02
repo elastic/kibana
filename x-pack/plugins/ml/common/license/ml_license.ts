@@ -6,7 +6,7 @@
  */
 
 import { Observable, Subscription } from 'rxjs';
-import { ILicense } from '../../../licensing/common/types';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { PLUGIN_ID } from '../constants/app';
 
 export const MINIMUM_LICENSE = 'basic';

@@ -12,14 +12,10 @@ import {
   SavedObjectsClientContract,
   SavedObjectAttributes,
   SavedObjectReference,
-} from 'kibana/public';
-import {
-  IndexPattern,
-  ISearchSource,
-  ISearchStart,
-  SerializedSearchSourceFields,
-} from '../../data/public';
-import { DataViewsContract } from '../../data_views/public';
+} from '@kbn/core/public';
+import { ISearchSource, ISearchStart, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 /**
  * @deprecated
@@ -37,7 +33,7 @@ export interface SavedObject {
   getDisplayName: () => string;
   getEsType: () => string;
   getFullPath: () => string;
-  hydrateIndexPattern?: (id?: string) => Promise<null | IndexPattern>;
+  hydrateIndexPattern?: (id?: string) => Promise<null | DataView>;
   id?: string;
   init?: () => Promise<SavedObject>;
   isSaving: boolean;
@@ -85,7 +81,7 @@ export interface SavedObjectConfig {
   injectReferences?: <T extends SavedObject>(object: T, references: SavedObjectReference[]) => void;
   id?: string;
   init?: () => void;
-  indexPattern?: IndexPattern;
+  indexPattern?: DataView;
   mapping?: Record<string, any>;
   migrationVersion?: Record<string, any>;
   path?: string;

@@ -7,18 +7,18 @@
  */
 
 import { updateSearchSource } from './context';
-import { indexPatternMock } from '../../../__mocks__/index_pattern';
-import { createSearchSourceMock } from '../../../../../data/public/mocks';
+import { dataViewMock } from '../../../__mocks__/data_view';
+import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 
 describe('context api', function () {
   test('createSearchSource when useFieldsApi is true', () => {
-    const newSearchSource = createSearchSourceMock({ index: indexPatternMock });
-    const searchSource = updateSearchSource(newSearchSource, indexPatternMock, [], true);
+    const newSearchSource = createSearchSourceMock({ index: dataViewMock });
+    const searchSource = updateSearchSource(newSearchSource, dataViewMock, [], true);
     expect(searchSource.getSearchRequestBody()).toMatchSnapshot();
   });
   test('createSearchSource when useFieldsApi is false', () => {
-    const newSearchSource = createSearchSourceMock({ index: indexPatternMock });
-    const searchSource = updateSearchSource(newSearchSource, indexPatternMock, [], false);
+    const newSearchSource = createSearchSourceMock({ index: dataViewMock });
+    const searchSource = updateSearchSource(newSearchSource, dataViewMock, [], false);
     expect(searchSource.getSearchRequestBody()).toMatchSnapshot();
   });
 });

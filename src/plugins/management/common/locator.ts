@@ -7,7 +7,7 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { LocatorDefinition, LocatorPublic } from 'src/plugins/share/common';
+import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 import { MANAGEMENT_APP_ID } from './contants';
 
 export const MANAGEMENT_APP_LOCATOR = 'MANAGEMENT_APP_LOCATOR';

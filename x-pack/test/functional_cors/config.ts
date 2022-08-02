@@ -16,7 +16,9 @@ const pluginPort = process.env.TEST_CORS_SERVER_PORT
   : 5699;
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const kibanaFunctionalConfig = await readConfigFile(require.resolve('../functional/config.js'));
+  const kibanaFunctionalConfig = await readConfigFile(
+    require.resolve('../functional/config.base.js')
+  );
 
   const corsTestPlugin = Path.resolve(__dirname, './plugins/kibana_cors_test');
 

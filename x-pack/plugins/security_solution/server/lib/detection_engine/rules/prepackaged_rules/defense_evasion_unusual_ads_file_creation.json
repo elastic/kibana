@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Unusual File Creation - Alternate Data Stream",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "file where event.type == \"creation\" and\n  file.path : \"C:\\\\*:*\" and\n  not file.path : \"C:\\\\*:zone.identifier*\" and\n  file.extension :\n    (\n      \"pdf\",\n      \"dll\",\n      \"png\",\n      \"exe\",\n      \"dat\",\n      \"com\",\n      \"bat\",\n      \"cmd\",\n      \"sys\",\n      \"vbs\",\n      \"ps1\",\n      \"hta\",\n      \"txt\",\n      \"vbe\",\n      \"js\",\n      \"wsh\",\n      \"docx\",\n      \"doc\",\n      \"xlsx\",\n      \"xls\",\n      \"pptx\",\n      \"ppt\",\n      \"rtf\",\n      \"gif\",\n      \"jpg\",\n      \"png\",\n      \"bmp\",\n      \"img\",\n      \"iso\"\n    )\n",
   "risk_score": 47,
   "rule_id": "71bccb61-e19b-452f-b104-79a60e546a95",
@@ -49,5 +50,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 2
 }

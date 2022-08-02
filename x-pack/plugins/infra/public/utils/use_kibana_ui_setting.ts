@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useUiSetting$ } from '../../../../../src/plugins/kibana_react/public';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 
 /**
  * This hook behaves like a `useState` hook in that it provides a requested

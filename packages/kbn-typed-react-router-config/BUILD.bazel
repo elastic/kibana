@@ -43,6 +43,7 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "//packages/kbn-io-ts-utils:npm_module_types",
   "@npm//fp-ts",
+  "@npm//io-ts",
   "@npm//query-string",
   "@npm//utility-types",
   "@npm//@types/history",
@@ -82,6 +83,7 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",

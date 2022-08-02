@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SharePluginStart, SharePluginSetup } from '../../../src/plugins/share/public';
-import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '../../../src/core/public';
+import { SharePluginStart, SharePluginSetup } from '@kbn/share-plugin/public';
+import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '@kbn/core/public';
 import { HelloLocator, HelloLocatorDefinition } from './locator';
 
 interface SetupDeps {

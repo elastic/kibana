@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
-import { TimefilterContract } from '../../../../../../../../src/plugins/data/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { TimefilterContract } from '@kbn/data-plugin/public';
 
 export const timefilterMock = dataPluginMock.createStartContract().query.timefilter
   .timefilter as jest.Mocked<TimefilterContract>;

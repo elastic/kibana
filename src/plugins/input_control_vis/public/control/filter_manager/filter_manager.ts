@@ -9,8 +9,8 @@
 import { Filter } from '@kbn/es-query';
 import _ from 'lodash';
 
-import { FilterManager as QueryFilterManager, DataViewsContract } from '../../../../data/public';
-import { DataView } from '../../../../data_views/public';
+import { FilterManager as QueryFilterManager, DataViewsContract } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 
 export abstract class FilterManager {
   protected indexPattern: DataView | undefined;

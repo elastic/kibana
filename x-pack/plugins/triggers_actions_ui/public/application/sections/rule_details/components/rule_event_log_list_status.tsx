@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
-import { EcsEventOutcome } from 'kibana/server';
+import type { EcsEventOutcome } from '@kbn/core/server';
 
 interface RuleEventLogListStatusProps {
   status: EcsEventOutcome;

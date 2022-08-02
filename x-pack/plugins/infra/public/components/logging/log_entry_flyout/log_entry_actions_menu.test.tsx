@@ -11,8 +11,8 @@ import { act } from 'react-dom/test-utils';
 
 import { mount } from 'enzyme';
 import { LogEntryActionsMenu } from './log_entry_actions_menu';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
-import { coreMock } from 'src/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
 
 const coreStartMock = coreMock.createStart();
 coreStartMock.application.getUrlForApp.mockImplementation((app, options) => {

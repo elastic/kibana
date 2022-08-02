@@ -7,14 +7,17 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '../../http';
 import { InternalCoreUsageDataSetup } from '../../core_usage_data';
+import type { InternalSavedObjectRouter } from '../internal_types';
 
 interface RouteDependencies {
   coreUsageData: InternalCoreUsageDataSetup;
 }
 
-export const registerResolveRoute = (router: IRouter, { coreUsageData }: RouteDependencies) => {
+export const registerResolveRoute = (
+  router: InternalSavedObjectRouter,
+  { coreUsageData }: RouteDependencies
+) => {
   router.get(
     {
       path: '/resolve/{type}/{id}',
@@ -27,11 +30,12 @@ export const registerResolveRoute = (router: IRouter, { coreUsageData }: RouteDe
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { type, id } = req.params;
+      const { savedObjects } = await context.core;
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsResolve({ request: req }).catch(() => {});
 
-      const result = await context.core.savedObjects.client.resolve(type, id);
+      const result = await savedObjects.client.resolve(type, id);
       return res.ok({ body: result });
     })
   );

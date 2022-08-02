@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { IUiSettingsClient } from '@kbn/core/server';
 import { FieldFormatInstanceType, FieldFormatsRegistry } from '../common';
-import { IUiSettingsClient } from '../../../core/server';
 
 export interface FieldFormatsSetup {
   /**

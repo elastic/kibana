@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { RuleParams } from '../../schemas/rule_schemas';
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeState,
-} from '../../../../../../alerting/common';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Alert } from '../../../../../../alerting/server/alert';
+  RuleTypeState,
+} from '@kbn/alerting-plugin/common';
+import { Alert } from '@kbn/alerting-plugin/server/alert';
+import type { RuleParams } from '../../schemas/rule_schemas';
 
 export const alertInstanceFactoryStub = <
   TParams extends RuleParams,
-  TState extends AlertTypeState,
+  TState extends RuleTypeState,
   TInstanceState extends AlertInstanceState,
   TInstanceContext extends AlertInstanceContext,
   TActionGroupIds extends string = ''

@@ -8,9 +8,9 @@
 import React from 'react';
 import { injectI18n } from '@kbn/i18n-react';
 import { Filter, buildPhrasesFilter, buildPhraseFilter } from '@kbn/es-query';
-import { FilterItem } from '../../../../../../../src/plugins/data/public';
-import type { DataView } from '../../../../../../../src/plugins/data_views/common';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { FilterItem } from '@kbn/unified-search-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 export function buildFilterLabel({
   field,

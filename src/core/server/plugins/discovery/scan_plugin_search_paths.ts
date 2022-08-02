@@ -10,11 +10,11 @@ import { PathLike, readdir, stat, Stats } from 'fs';
 import { resolve } from 'path';
 import { bindNodeCallback, from, Observable } from 'rxjs';
 import { catchError, mergeMap } from 'rxjs/operators';
-import { Logger } from '../../logging';
+import type { Logger } from '@kbn/logging';
 import { PluginDiscoveryError } from './plugin_discovery_error';
 
-const fsReadDir$ = bindNodeCallback<string, string[]>(readdir);
-const fsStat$ = bindNodeCallback<PathLike, Stats>(stat);
+const fsReadDir$ = bindNodeCallback<[string], [string[]]>(readdir);
+const fsStat$ = bindNodeCallback<[PathLike], [Stats]>(stat);
 
 const maxScanDepth = 5;
 

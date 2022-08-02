@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { CoreSetup, OverlayRef } from 'src/core/public';
+import { CoreSetup, OverlayRef } from '@kbn/core/public';
 
 import { toMountPoint, createKibanaReactContext } from './shared_imports';
 import { LoadEditorResponse, RuntimeField } from './types';

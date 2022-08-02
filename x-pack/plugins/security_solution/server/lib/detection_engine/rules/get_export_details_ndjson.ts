@@ -7,8 +7,8 @@
 
 import type { ExportExceptionDetails } from '@kbn/securitysolution-io-ts-list-types';
 
-import { ExportRulesDetails } from '../../../../common/detection_engine/schemas/response/export_rules_details_schema';
-import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
+import type { ExportRulesDetails } from '../../../../common/detection_engine/schemas/response/export_rules_details_schema';
+import type { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 
 export const getExportDetailsNdjson = (
   rules: Array<Partial<RulesSchema>>,

@@ -9,11 +9,13 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { EntityIndexExpression } from './expressions/entity_index_expression';
 import { BoundaryIndexExpression } from './expressions/boundary_index_expression';
-import { IErrorObject } from '../../../../../triggers_actions_ui/public';
-import { DataView } from '../../../../../../../src/plugins/data/common';
-import { dataPluginMock } from 'src/plugins/data/public/mocks';
+import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import { DataView } from '@kbn/data-plugin/common';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
 const dataStartMock = dataPluginMock.createStartContract();
+const unifiedSearchStartMock = unifiedSearchPluginMock.createStartContract();
 
 const alertParams = {
   index: '',
@@ -40,6 +42,7 @@ test('should render EntityIndexExpression', async () => {
       indexPattern={'' as unknown as DataView}
       isInvalid={false}
       data={dataStartMock}
+      unifiedSearch={unifiedSearchStartMock}
     />
   );
 
@@ -59,6 +62,7 @@ test('should render EntityIndexExpression w/ invalid flag if invalid', async () 
       indexPattern={'' as unknown as DataView}
       isInvalid={true}
       data={dataStartMock}
+      unifiedSearch={unifiedSearchStartMock}
     />
   );
 
@@ -76,6 +80,7 @@ test('should render BoundaryIndexExpression', async () => {
       setBoundaryNameField={() => {}}
       boundaryNameField={'testNameField'}
       data={dataStartMock}
+      unifiedSearch={unifiedSearchStartMock}
     />
   );
 

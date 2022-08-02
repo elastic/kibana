@@ -6,8 +6,8 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SavedObjectsServiceStart, KibanaRequest } from 'kibana/server';
-import { SavedObjectsClient } from '../../../../../src/core/server';
+import { SavedObjectsServiceStart, KibanaRequest } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
 import { ML_JOB_SAVED_OBJECT_TYPE } from '../../common/types/saved_objects';
 import type { TrainedModelJob } from './service';
 

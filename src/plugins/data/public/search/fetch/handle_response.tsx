@@ -9,10 +9,10 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
-import { IKibanaSearchResponse } from 'src/plugins/data/common';
-import { ShardFailureOpenModalButton } from '../../ui/shard_failure_modal';
-import { ThemeServiceStart } from '../../../../../core/public';
-import { toMountPoint } from '../../../../kibana_react/public';
+import { ThemeServiceStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { IKibanaSearchResponse } from '../../../common';
+import { ShardFailureOpenModalButton } from '../../shard_failure_modal';
 import { getNotifications } from '../../services';
 import type { SearchRequest } from '..';
 

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { ISavedObjectTypeRegistry } from 'src/core/server';
-
-import { SavedObjectsUtils } from '../../../../../src/core/server';
+import type { ISavedObjectTypeRegistry } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core/server';
 
 export const getDescriptorNamespace = (
   typeRegistry: ISavedObjectTypeRegistry,

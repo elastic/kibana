@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IndexPattern } from 'src/plugins/data/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 /**
  * A hidden parameter can be hidden from the UI completely.
@@ -49,7 +49,7 @@ export interface EditorConfig {
 }
 
 export function getEditorConfig(
-  indexPattern: IndexPattern,
+  indexPattern: DataView,
   aggTypeName: string,
   fieldName: string
 ): EditorConfig {

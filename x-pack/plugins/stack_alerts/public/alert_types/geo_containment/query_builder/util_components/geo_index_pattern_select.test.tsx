@@ -8,8 +8,8 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { GeoIndexPatternSelect } from './geo_index_pattern_select';
-import { DataViewsContract } from 'src/plugins/data/public';
-import { HttpSetup } from 'kibana/public';
+import { DataViewsContract } from '@kbn/data-plugin/public';
+import { HttpSetup } from '@kbn/core/public';
 
 class MockIndexPatternSelectComponent extends React.Component {
   render() {

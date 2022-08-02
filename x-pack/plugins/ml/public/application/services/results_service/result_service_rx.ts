@@ -15,16 +15,16 @@
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { each, get } from 'lodash';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { Dictionary } from '../../../../common/types/common';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 import { Datafeed, JobId } from '../../../../common/types/anomaly_detection_jobs';
 import { MlApiServices } from '../ml_api_service';
-import { CriteriaField } from './index';
+import { CriteriaField } from '.';
 import { findAggField } from '../../../../common/util/validation_utils';
 import { getDatafeedAggregations } from '../../../../common/util/datafeed_utils';
 import { aggregationTypeTransform, EntityField } from '../../../../common/util/anomaly_utils';
 import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
-import { isPopulatedObject } from '../../../../common/util/object_utils';
 import { InfluencersFilterQuery } from '../../../../common/types/es_client';
 import { RecordForInfluencer } from './results_service';
 import { isRuntimeMappings } from '../../../../common';

@@ -7,7 +7,7 @@
  */
 
 import { buildAggBody } from './agg_body';
-import { search, METRIC_TYPES } from '../../../../../../data/server';
+import { search, METRIC_TYPES } from '@kbn/data-plugin/server';
 
 const { dateHistogramInterval } = search.aggs;
 

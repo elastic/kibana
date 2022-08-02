@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { SavedObjectsFindResult, SavedObjectsSerializer } from 'kibana/server';
+import { SavedObjectsFindResult, ISavedObjectsSerializer } from '@kbn/core/server';
+import { TaskInstance } from '@kbn/task-manager-plugin/server';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { spaceIdToNamespace } from '../../lib';
-import { TaskInstance } from '../../../../task_manager/server';
-import { SpacesPluginStart } from '../../../../spaces/server';
 
 interface GetRawActionTaskParamsIdFromTaskOpts {
   task: SavedObjectsFindResult<TaskInstance>;
   spaces?: SpacesPluginStart;
-  savedObjectsSerializer: SavedObjectsSerializer;
+  savedObjectsSerializer: ISavedObjectsSerializer;
 }
 
 export function getRawActionTaskParamsIdFromTask({

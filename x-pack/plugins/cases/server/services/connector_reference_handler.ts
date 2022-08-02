@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from 'kibana/server';
+import { SavedObjectReference } from '@kbn/core/server';
 import { NONE_CONNECTOR_ID } from '../../common/api';
 
 interface Reference {

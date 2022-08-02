@@ -6,19 +6,20 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ElasticsearchClient } from 'src/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import {
+  CategoriesSort,
   compareDatasetsByMaximumAnomalyScore,
   getJobId,
   jobCustomSettingsRT,
   logEntryCategoriesJobTypes,
-  CategoriesSort,
 } from '../../../common/log_analysis';
 import { LogEntryContext } from '../../../common/log_entry';
-import type { ResolvedLogSourceConfiguration } from '../../../common/log_sources';
+import { ResolvedLogView } from '../../../common/log_views';
 import { startTracingSpan } from '../../../common/performance_tracing';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import type { MlAnomalyDetectors, MlSystem } from '../../types';
+import { fetchMlJob, getLogEntryDatasets } from './common';
 import { InsufficientLogAnalysisMlJobConfigurationError, UnknownCategoryError } from './errors';
 import {
   createLogEntryCategoriesQuery,
@@ -38,7 +39,6 @@ import {
   createTopLogEntryCategoriesQuery,
   topLogEntryCategoriesResponseRT,
 } from './queries/top_log_entry_categories';
-import { fetchMlJob, getLogEntryDatasets } from './common';
 
 export async function getTopLogEntryCategories(
   context: {
@@ -148,7 +148,7 @@ export async function getLogEntryCategoryExamples(
   endTime: number,
   categoryId: number,
   exampleCount: number,
-  resolvedSourceConfiguration: ResolvedLogSourceConfiguration
+  resolvedLogView: ResolvedLogView
 ) {
   const finalizeLogEntryCategoryExamplesSpan = startTracingSpan('get category example log entries');
 
@@ -166,7 +166,7 @@ export async function getLogEntryCategoryExamples(
   const customSettings = decodeOrThrow(jobCustomSettingsRT)(mlJob.custom_settings);
   const indices = customSettings?.logs_source_config?.indexPattern;
   const timestampField = customSettings?.logs_source_config?.timestampField;
-  const { tiebreakerField, runtimeMappings } = resolvedSourceConfiguration;
+  const { tiebreakerField, runtimeMappings } = resolvedLogView;
 
   if (indices == null || timestampField == null) {
     throw new InsufficientLogAnalysisMlJobConfigurationError(

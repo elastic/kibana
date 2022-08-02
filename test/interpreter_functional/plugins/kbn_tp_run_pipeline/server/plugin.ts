@@ -8,9 +8,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { pluck } from 'rxjs/operators';
-import { CoreSetup, Plugin, HttpResponsePayload } from '../../../../../src/core/server';
-import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
-import { ExpressionsServerStart } from '../../../../../src/plugins/expressions/server';
+import { CoreSetup, Plugin, HttpResponsePayload } from '@kbn/core/server';
+import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import { ExpressionsServerStart } from '@kbn/expressions-plugin/server';
 
 export interface TestStartDeps {
   data: DataPluginStart;

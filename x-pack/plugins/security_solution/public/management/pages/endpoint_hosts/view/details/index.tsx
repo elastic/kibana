@@ -31,7 +31,6 @@ export const EndpointDetailsFlyout = memo(() => {
   return (
     <EuiFlyout
       onClose={handleFlyoutClose}
-      style={{ zIndex: 4001 }}
       data-test-subj="endpointDetailsFlyout"
       size="m"
       paddingSize="l"

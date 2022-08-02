@@ -10,9 +10,9 @@ import type {
   InspectorOptions,
   InspectorSession,
   Start as InspectorStartContract,
-} from '../../../../src/plugins/inspector/public';
+} from '@kbn/inspector-plugin/public';
 
-import { createDefaultInspectorAdapters } from '../../../../src/plugins/expressions/public';
+import { createDefaultInspectorAdapters } from '@kbn/expressions-plugin/public';
 
 export const getLensInspectorService = (inspector: InspectorStartContract) => {
   const adapters: Adapters = createDefaultInspectorAdapters();

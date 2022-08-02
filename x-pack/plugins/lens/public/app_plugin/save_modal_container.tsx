@@ -7,17 +7,15 @@
 
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { isFilterPinned } from '@kbn/es-query';
 
-import type { SavedObjectReference } from 'kibana/public';
+import type { SavedObjectReference } from '@kbn/core/public';
 import { SaveModal } from './save_modal';
 import type { LensAppProps, LensAppServices } from './types';
 import type { SaveProps } from './app';
 import { Document, checkForDuplicateTitle } from '../persistence';
 import type { LensByReferenceInput, LensEmbeddableInput } from '../embeddable';
 import { APP_ID, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../common';
-import { trackUiEvent } from '../lens_ui_telemetry';
 import type { LensAppState } from '../state_management';
 import { getPersisted } from '../state_management/init_middleware/load_initial';
 
@@ -200,7 +198,6 @@ export const runSaveLensVisualization = async (
   const {
     chrome,
     initialInput,
-    originatingApp,
     lastKnownDoc,
     persistedDoc,
     savedObjectsClient,
@@ -208,7 +205,6 @@ export const runSaveLensVisualization = async (
     notifications,
     stateTransfer,
     attributeService,
-    usageCollection,
     savedObjectsTagging,
     getIsByValueMode,
     redirectToOrigin,
@@ -219,10 +215,6 @@ export const runSaveLensVisualization = async (
 
   if (!lastKnownDoc) {
     return;
-  }
-
-  if (usageCollection) {
-    usageCollection.reportUiCounter(originatingApp || 'visualize', METRIC_TYPE.CLICK, 'lens:save');
   }
 
   let references = lastKnownDoc.references;
@@ -345,7 +337,6 @@ export const runSaveLensVisualization = async (
   } catch (e) {
     // eslint-disable-next-line no-console
     console.dir(e);
-    trackUiEvent('save_failed');
     throw e;
   }
 };

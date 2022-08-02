@@ -63,7 +63,7 @@ export const updateExceptionListItemRoute = (router: ListsPluginRouter): void =>
             statusCode: 404,
           });
         } else {
-          const exceptionLists = getExceptionListClient(context);
+          const exceptionLists = await getExceptionListClient(context);
           const exceptionListItem = await exceptionLists.updateExceptionListItem({
             _version,
             comments,

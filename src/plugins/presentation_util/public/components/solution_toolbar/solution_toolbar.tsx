@@ -53,7 +53,7 @@ export const SolutionToolbar = ({ isDarkModeEnabled, children }: Props) => {
     >
       <EuiFlexItem grow={false}>{primaryActionButton}</EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
+        <EuiFlexGroup wrap={true} responsive={false} alignItems="center" gutterSize="xs">
           {quickButtonGroup ? <EuiFlexItem grow={false}>{quickButtonGroup}</EuiFlexItem> : null}
           {extra}
         </EuiFlexGroup>

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
-import { SecuritySolutionFactory } from '../../types';
+import type { SecuritySolutionFactory } from '../../types';
 import { buildUserDetailsQuery } from './query.user_details.dsl';
 
-import { UsersQueries } from '../../../../../../common/search_strategy/security_solution/users';
-import {
+import type { UsersQueries } from '../../../../../../common/search_strategy/security_solution/users';
+import type {
   UserDetailsRequestOptions,
   UserDetailsStrategyResponse,
 } from '../../../../../../common/search_strategy/security_solution/users/details';

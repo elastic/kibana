@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type { TransportResult } from '@elastic/elasticsearch';
 
 import { PolicyFromES, SerializedPolicy } from '../../../../common/types';
@@ -62,7 +62,7 @@ export function registerFetchRoute({ router, license, lib: { handleEsError } }: 
   router.get(
     { path: addBasePath('/policies'), validate: false },
     license.guardApiRoute(async (context, request, response) => {
-      const { asCurrentUser } = context.core.elasticsearch.client;
+      const { asCurrentUser } = (await context.core).elasticsearch.client;
 
       try {
         const policiesResponse = await fetchPolicies(asCurrentUser);

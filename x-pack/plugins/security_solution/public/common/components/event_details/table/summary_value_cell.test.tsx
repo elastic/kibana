@@ -8,12 +8,13 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { BrowserField } from '../../../containers/source';
+import type { BrowserField } from '../../../containers/source';
 import { SummaryValueCell } from './summary_value_cell';
 import { TestProviders } from '../../../mock';
-import { EventFieldsData } from '../types';
-import { AlertSummaryRow } from '../helpers';
+import type { EventFieldsData } from '../types';
+import type { AlertSummaryRow } from '../helpers';
 import { TimelineId } from '../../../../../common/types';
+import { AGENT_STATUS_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
 
 jest.mock('../../../lib/kibana');
 
@@ -52,6 +53,27 @@ const enrichedHostIpData: AlertSummaryRow['description'] = {
   values: [...hostIpValues],
 };
 
+const enrichedAgentStatusData: AlertSummaryRow['description'] = {
+  data: {
+    field: AGENT_STATUS_FIELD_NAME,
+    format: '',
+    type: '',
+    aggregatable: false,
+    description: '',
+    example: '',
+    category: '',
+    fields: {},
+    indexes: [],
+    name: AGENT_STATUS_FIELD_NAME,
+    searchable: false,
+    readFromDocValues: false,
+    isObjectArray: false,
+  },
+  eventId,
+  values: [],
+  timelineId: TimelineId.test,
+};
+
 describe('SummaryValueCell', () => {
   test('it should render', async () => {
     render(
@@ -64,14 +86,26 @@ describe('SummaryValueCell', () => {
     expect(screen.getAllByTestId('test-filter-out')).toHaveLength(1);
   });
 
-  describe('When in the timeline flyout with timelineId active', () => {
-    test('it should not render the default hover actions', async () => {
+  describe('Without hover actions', () => {
+    test('When in the timeline flyout with timelineId active', async () => {
       render(
         <TestProviders>
           <SummaryValueCell {...enrichedHostIpData} timelineId={TimelineId.active} />
         </TestProviders>
       );
       hostIpValues.forEach((ipValue) => expect(screen.getByText(ipValue)).toBeInTheDocument());
+      expect(screen.queryByTestId('test-filter-for')).toBeNull();
+      expect(screen.queryByTestId('test-filter-out')).toBeNull();
+    });
+
+    test('When rendering the host status field', async () => {
+      render(
+        <TestProviders>
+          <SummaryValueCell {...enrichedAgentStatusData} />
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId('event-field-agent.status')).toBeInTheDocument();
       expect(screen.queryByTestId('test-filter-for')).toBeNull();
       expect(screen.queryByTestId('test-filter-out')).toBeNull();
     });

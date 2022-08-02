@@ -6,8 +6,9 @@
  */
 
 import { transformError, BadRequestError } from '@kbn/securitysolution-es-utils';
+import type { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { SetupPlugins } from '../../../../plugin';
+import type { SetupPlugins } from '../../../../plugin';
 import { DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL } from '../../../../../common/constants';
 import { finalizeSignalsMigrationSchema } from '../../../../../common/detection_engine/schemas/request/finalize_signals_migration_schema';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
@@ -16,7 +17,6 @@ import { signalsMigrationService } from '../../migrations/migration_service';
 import { buildSiemResponse } from '../utils';
 
 import { getMigrationSavedObjectsById } from '../../migrations/get_migration_saved_objects_by_id';
-import { RuleDataPluginService } from '../../../../../../rule_registry/server';
 
 export const finalizeSignalsMigrationRoute = (
   router: SecuritySolutionPluginRouter,
@@ -35,12 +35,16 @@ export const finalizeSignalsMigrationRoute = (
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const esClient = context.core.elasticsearch.client.asCurrentUser;
-      const soClient = context.core.savedObjects.client;
+
+      const core = await context.core;
+      const securitySolution = await context.securitySolution;
+
+      const esClient = core.elasticsearch.client.asCurrentUser;
+      const soClient = core.savedObjects.client;
       const { migration_ids: migrationIds } = request.body;
 
       try {
-        const appClient = context.securitySolution?.getAppClient();
+        const appClient = securitySolution?.getAppClient();
         if (!appClient) {
           return siemResponse.error({ statusCode: 404 });
         }
@@ -55,7 +59,7 @@ export const finalizeSignalsMigrationRoute = (
           soClient,
         });
 
-        const spaceId = context.securitySolution.getSpaceId();
+        const spaceId = securitySolution.getSpaceId();
         const signalsAlias = ruleDataService.getResourceName(`security.alerts-${spaceId}`);
         const finalizeResults = await Promise.all(
           migrations.map(async (migration) => {

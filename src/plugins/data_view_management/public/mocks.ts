@@ -6,21 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from 'src/core/public';
-import { coreMock } from '../../../core/public/mocks';
-import { managementPluginMock } from '../../management/public/mocks';
-import { urlForwardingPluginMock } from '../../url_forwarding/public/mocks';
-import { dataPluginMock } from '../../data/public/mocks';
-import { indexPatternFieldEditorPluginMock } from '../../data_view_field_editor/public/mocks';
-import { indexPatternEditorPluginMock } from '../../data_view_editor/public/mocks';
-import { dataViewPluginMocks } from '../../data_views/public/mocks';
+import { PluginInitializerContext } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
+import { urlForwardingPluginMock } from '@kbn/url-forwarding-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
+import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/public/mocks';
 import {
   IndexPatternManagementSetup,
   IndexPatternManagementStart,
   IndexPatternManagementPlugin,
 } from './plugin';
 import { IndexPatternManagmentContext } from './types';
-import { fieldFormatsServiceMock } from '../../field_formats/public/mocks';
 
 const createSetupContract = (): IndexPatternManagementSetup => ({});
 
@@ -55,13 +57,17 @@ const docLinks = {
 const createIndexPatternManagmentContext = (): {
   [key in keyof IndexPatternManagmentContext]: any;
 } => {
-  const { chrome, uiSettings, notifications, overlays } = coreMock.createStart();
+  const { application, chrome, uiSettings, notifications, overlays, theme } =
+    coreMock.createStart();
   const { http } = coreMock.createSetup();
   const data = dataPluginMock.createStartContract();
   const dataViewFieldEditor = indexPatternFieldEditorPluginMock.createStartContract();
   const dataViews = dataViewPluginMocks.createStartContract();
+  const unifiedSearch = unifiedSearchPluginMock.createStartContract();
+  const savedObjectsManagement = savedObjectsManagementPluginMock.createStartContract();
 
   return {
+    application,
     chrome,
     uiSettings,
     notifications,
@@ -70,6 +76,7 @@ const createIndexPatternManagmentContext = (): {
     docLinks,
     data,
     dataViews,
+    unifiedSearch,
     dataViewFieldEditor,
     indexPatternManagementStart: createStartContract(),
     setBreadcrumbs: () => {},
@@ -77,6 +84,8 @@ const createIndexPatternManagmentContext = (): {
     IndexPatternEditor:
       indexPatternEditorPluginMock.createStartContract().IndexPatternEditorComponent,
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
+    theme,
+    savedObjectsManagement,
   };
 };
 

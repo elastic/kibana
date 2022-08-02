@@ -16,18 +16,22 @@ import {
   TIMELINE_ROW_RENDERERS_SURICATA_SIGNATURE_TOOLTIP,
   TIMELINE_ROW_RENDERERS_SURICATA_LINK_TOOLTIP,
 } from '../../screens/timeline';
-import { cleanKibana } from '../../tasks/common';
+import { cleanKibana, deleteTimelines } from '../../tasks/common';
 
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
 import { populateTimeline } from '../../tasks/timeline';
 
 import { HOSTS_URL } from '../../urls/navigation';
 
 describe('Row renderers', () => {
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
-    loginAndWaitForPage(HOSTS_URL);
+    login();
+  });
+  beforeEach(() => {
+    deleteTimelines();
+    visit(HOSTS_URL);
     openTimelineUsingToggle();
     populateTimeline();
     cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).should('exist');

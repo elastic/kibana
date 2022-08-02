@@ -7,8 +7,8 @@
 
 import { first } from 'rxjs/operators';
 
+import type { StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { StartServicesAccessor } from 'src/core/public';
 
 import { DEFAULT_OBJECT_NOUN } from '../constants';
 import type { PluginsStart } from '../plugin';

@@ -10,11 +10,11 @@ import React, { useCallback } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 
-import type { FilterManager } from '../../../../../../../../src/plugins/data/public';
-import { KqlMode } from '../../../../timelines/store/timeline/model';
-import { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
-import { KueryFilterQuery } from '../../../../../common/types/timeline';
-import { DataProvider } from '../data_providers/data_provider';
+import type { FilterManager } from '@kbn/data-plugin/public';
+import type { KqlMode } from '../../../store/timeline/model';
+import type { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
+import type { KueryFilterQuery } from '../../../../../common/types/timeline';
+import type { DataProvider } from '../data_providers/data_provider';
 import { QueryBarTimeline } from '../query_bar';
 
 import { EuiSuperSelect } from './super_select';
@@ -62,24 +62,13 @@ interface Props {
 
 const SearchOrFilterContainer = styled.div`
   ${({ theme }) => `margin-top: ${theme.eui.euiSizeXS};`}
-  user-select: none;
-  .globalQueryBar {
-    padding: 0px;
-    .kbnQueryBar {
-      div:first-child {
-        margin-right: 0px;
-      }
-    }
-    .globalFilterGroup__wrapper.globalFilterGroup__wrapper-isVisible {
-      height: auto !important;
-    }
-  }
+  user-select: none; // This should not be here, it makes the entire page inaccessible
 `;
 
 SearchOrFilterContainer.displayName = 'SearchOrFilterContainer';
 
 const ModeFlexItem = styled(EuiFlexItem)`
-  user-select: none;
+  user-select: none; // Again, why?
 `;
 
 ModeFlexItem.displayName = 'ModeFlexItem';

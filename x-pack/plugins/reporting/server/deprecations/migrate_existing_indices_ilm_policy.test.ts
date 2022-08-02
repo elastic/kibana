@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { GetDeprecationsContext } from 'src/core/server';
-import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
+import type { GetDeprecationsContext } from '@kbn/core/server';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { ReportingCore } from '../core';
 import { createMockConfigSchema, createMockReportingCore } from '../test_helpers';

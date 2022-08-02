@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { httpServiceMock } from 'src/core/server/mocks';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import { mockHandlerArguments, fakeEvent } from './_mock_handler_arguments';
 import { eventLogClientMock } from '../event_log_client.mock';
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { findByIdsRoute } from './find_by_ids';
 
 const eventLogClient = eventLogClientMock.create();

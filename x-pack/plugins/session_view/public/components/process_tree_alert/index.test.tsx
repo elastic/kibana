@@ -8,13 +8,13 @@
 import React from 'react';
 import { mockAlerts } from '../../../common/mocks/constants/session_view_process.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { ProcessTreeAlertDeps, ProcessTreeAlert } from './index';
+import { ProcessTreeAlertDeps, ProcessTreeAlert } from '.';
 
 const mockAlert = mockAlerts[0];
-const TEST_ID = `sessionView:sessionViewAlertDetail-${mockAlert.kibana?.alert.uuid}`;
-const ALERT_RULE_NAME = mockAlert.kibana?.alert.rule.name;
-const ALERT_STATUS = mockAlert.kibana?.alert.workflow_status;
-const EXPAND_BUTTON_TEST_ID = `sessionView:sessionViewAlertDetailExpand-${mockAlert.kibana?.alert.uuid}`;
+const TEST_ID = `sessionView:sessionViewAlertDetail-${mockAlert.kibana?.alert?.uuid}`;
+const ALERT_RULE_NAME = mockAlert.kibana?.alert?.rule?.name;
+const ALERT_STATUS = mockAlert.kibana?.alert?.workflow_status;
+const EXPAND_BUTTON_TEST_ID = `sessionView:sessionViewAlertDetailExpand-${mockAlert.kibana?.alert?.uuid}`;
 
 describe('ProcessTreeAlerts component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -40,6 +40,8 @@ describe('ProcessTreeAlerts component', () => {
       expect(renderResult.queryByTestId(TEST_ID)).toBeTruthy();
       expect(renderResult.queryByText(ALERT_RULE_NAME!)).toBeTruthy();
       expect(renderResult.queryByText(ALERT_STATUS!)).toBeTruthy();
+
+      expect(renderResult).toMatchSnapshot();
     });
 
     it('should execute onClick callback', async () => {

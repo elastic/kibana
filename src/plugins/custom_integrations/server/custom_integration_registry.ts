@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Logger } from 'kibana/server';
+import { Logger } from '@kbn/core/server';
 import { IntegrationCategory, INTEGRATION_CATEGORY_DISPLAY, CustomIntegration } from '../common';
 
 function isAddable(integration: CustomIntegration): boolean {

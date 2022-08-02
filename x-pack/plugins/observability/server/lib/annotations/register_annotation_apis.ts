@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 import { schema } from '@kbn/config-schema';
-import { CoreSetup, RequestHandler, Logger } from 'kibana/server';
+import { CoreSetup, RequestHandler, Logger } from '@kbn/core/server';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isLeft } from 'fp-ts/lib/Either';
 import {
@@ -57,13 +57,14 @@ export function registerAnnotationAPIs({
         });
       }
 
-      const esClient = context.core.elasticsearch.client.asCurrentUser;
+      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+      const license = (await context.licensing)?.license;
 
       const client = createAnnotationsClient({
         index,
         esClient,
         logger,
-        license: context.licensing?.license,
+        license,
       });
 
       try {

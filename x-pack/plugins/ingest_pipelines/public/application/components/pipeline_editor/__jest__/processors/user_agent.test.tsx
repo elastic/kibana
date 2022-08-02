@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { setup, SetupResult, getProcessorValue } from './processor.helpers';
+import { setup, SetupResult, getProcessorValue, setupEnvironment } from './processor.helpers';
 
 // Default parameter values automatically added to the user agent processor when saved
 const defaultUserAgentParameters = {
@@ -24,6 +24,7 @@ const USER_AGENT_TYPE = 'user_agent';
 describe('Processor: User Agent', () => {
   let onUpdate: jest.Mock;
   let testBed: SetupResult;
+  const { httpSetup } = setupEnvironment();
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -37,7 +38,7 @@ describe('Processor: User Agent', () => {
     onUpdate = jest.fn();
 
     await act(async () => {
-      testBed = await setup({
+      testBed = await setup(httpSetup, {
         value: {
           processors: [],
         },

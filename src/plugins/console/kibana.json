@@ -11,5 +11,5 @@
   "configPath": ["console"],
   "requiredPlugins": ["devTools", "share"],
   "optionalPlugins": ["usageCollection", "home"],
-  "requiredBundles": ["esUiShared", "kibanaReact", "kibanaUtils", "home"]
+  "requiredBundles": ["esUiShared", "kibanaReact", "kibanaUtils"]
 }

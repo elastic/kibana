@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ToastsSetup } from 'kibana/public';
+import { ToastsSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { ACTION_TYPES, WATCH_TYPES } from '../../../../common/constants';

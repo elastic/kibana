@@ -6,15 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import {
   IRouter,
-  StartServicesAccessor,
   RequestHandler,
   RouteValidatorFullConfig,
-} from '../../../../core/server';
-import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies } from '../types';
+  StartServicesAccessor,
+} from '@kbn/core/server';
 import { IndexPatternsFetcher } from '../fetcher';
+import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies } from '../types';
 
 const parseMetaFields = (metaFields: string | string[]) => {
   let parsedFields: string[] = [];
@@ -28,7 +29,7 @@ const parseMetaFields = (metaFields: string | string[]) => {
 
 const path = '/api/index_patterns/_fields_for_wildcard';
 
-type IBody = { index_filter?: any } | undefined;
+type IBody = { index_filter?: estypes.QueryDslQueryContainer } | undefined;
 interface IQuery {
   pattern: string;
   meta_fields: string[];
@@ -51,7 +52,7 @@ const validate: RouteValidatorFullConfig<{}, IQuery, IBody> = {
   body: schema.maybe(schema.object({ index_filter: schema.any() })),
 };
 const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, response) => {
-  const { asCurrentUser } = context.core.elasticsearch.client;
+  const { asCurrentUser } = (await context.core).elasticsearch.client;
   const indexPatterns = new IndexPatternsFetcher(asCurrentUser);
   const {
     pattern,

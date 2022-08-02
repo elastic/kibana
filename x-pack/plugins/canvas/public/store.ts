@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CoreSetup } from '@kbn/core/public';
 import {
   createStore as createReduxStore,
   destroyStore as destroy,
@@ -15,7 +16,6 @@ import {
 // @ts-expect-error untyped local
 import { getInitialState } from './state/initial_state';
 
-import { CoreSetup } from '../../../../src/core/public';
 import { API_ROUTE_FUNCTIONS } from '../common/lib/constants';
 
 export async function createStore(core: CoreSetup) {

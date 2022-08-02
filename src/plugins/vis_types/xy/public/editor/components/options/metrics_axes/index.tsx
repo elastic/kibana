@@ -12,7 +12,8 @@ import { cloneDeep, get } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 
-import { BUCKET_TYPES, IAggConfig } from '../../../../../../../data/public';
+import { BUCKET_TYPES, IAggConfig } from '@kbn/data-plugin/public';
+import { LEGACY_TIME_AXIS } from '@kbn/charts-plugin/common';
 import { getUISettings } from '../../../../services';
 
 import { VisParams, ValueAxis, SeriesParam, CategoryAxis } from '../../../../types';
@@ -29,7 +30,6 @@ import {
   mapPositionOpposingOpposite,
 } from './utils';
 import { getSeriesParams } from '../../../../utils/get_series_params';
-import { LEGACY_TIME_AXIS } from '../../../../../../../charts/common';
 
 export type SetParamByIndex = <P extends keyof ValueAxis, O extends keyof SeriesParam>(
   axesName: 'valueAxes' | 'seriesParams',

@@ -10,11 +10,11 @@ import '../../../__mocks__/shallow_useeffect.mock';
 import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
-import { Route, Switch, Redirect } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
-import { ADD_SOURCE_PATH, PRIVATE_SOURCES_PATH, SOURCES_PATH, getSourcesPath } from '../../routes';
+import { ADD_SOURCE_PATH, PRIVATE_SOURCES_PATH, getSourcesPath } from '../../routes';
 
 import { SourcesRouter } from './sources_router';
 
@@ -34,19 +34,14 @@ describe('SourcesRouter', () => {
   });
 
   it('renders sources routes', () => {
-    const TOTAL_ROUTES = 86;
     const wrapper = shallow(<SourcesRouter />);
 
-    expect(wrapper.find(Switch)).toHaveLength(1);
-    expect(wrapper.find(Route)).toHaveLength(TOTAL_ROUTES);
-  });
-
-  it('redirects when nonplatinum license and accountOnly context', () => {
-    setMockValues({ ...mockValues, hasPlatinumLicense: false });
-    const wrapper = shallow(<SourcesRouter />);
-
-    expect(wrapper.find(Redirect).last().prop('from')).toEqual(ADD_SOURCE_PATH);
-    expect(wrapper.find(Redirect).last().prop('to')).toEqual(SOURCES_PATH);
+    expect(wrapper.find('[data-test-subj="ConnectorBYOIntroRoute"]')).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="ConnectorIntroRoute"]')).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="ConnectorChoiceRoute"]')).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="ExternalConnectorConfigRoute"]')).toHaveLength(2);
+    expect(wrapper.find('[data-test-subj="AddCustomSourceRoute"]')).toHaveLength(2);
+    expect(wrapper.find('[data-test-subj="AddSourceRoute"]')).toHaveLength(1);
   });
 
   it('redirects when cannot create sources', () => {

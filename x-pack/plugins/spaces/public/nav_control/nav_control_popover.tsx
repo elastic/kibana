@@ -10,7 +10,7 @@ import { EuiHeaderSectionItemButton, EuiLoadingSpinner, EuiPopover } from '@elas
 import React, { Component, lazy, Suspense } from 'react';
 import type { Subscription } from 'rxjs';
 
-import type { ApplicationStart, Capabilities } from 'src/core/public';
+import type { ApplicationStart, Capabilities } from '@kbn/core/public';
 
 import type { Space } from '../../common';
 import { getSpaceAvatarComponent } from '../space_avatar';

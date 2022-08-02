@@ -160,6 +160,7 @@ export const mockEvents: ProcessEvent[] = [
       action: EventAction.fork,
       category: 'process',
       kind: EventKind.event,
+      id: '1',
     },
     host: {
       architecture: 'x86_64',
@@ -317,6 +318,7 @@ export const mockEvents: ProcessEvent[] = [
       action: EventAction.exec,
       category: 'process',
       kind: EventKind.event,
+      id: '2',
     },
   },
   {
@@ -459,6 +461,7 @@ export const mockEvents: ProcessEvent[] = [
       action: EventAction.end,
       category: 'process',
       kind: EventKind.event,
+      id: '3',
     },
     host: {
       architecture: 'x86_64',
@@ -621,6 +624,7 @@ export const mockEvents: ProcessEvent[] = [
       action: EventAction.end,
       category: 'process',
       kind: EventKind.event,
+      id: '4',
     },
     host: {
       architecture: 'x86_64',
@@ -659,7 +663,7 @@ export const mockAlerts: ProcessEvent[] = [
         status: 'active',
         workflow_status: 'open',
         reason: 'process event created low alert cmd test alert.',
-        original_time: new Date('2021-11-23T15:25:04.218Z'),
+        original_time: '2021-11-23T15:25:04.218Z',
         original_event: {
           action: 'exec',
         },
@@ -809,13 +813,14 @@ export const mockAlerts: ProcessEvent[] = [
       action: EventAction.exec,
       category: 'process',
       kind: EventKind.signal,
+      id: '5',
     },
     host: {
       architecture: 'x86_64',
       hostname: 'james-fleet-714-2',
       id: '48c1b3f1ac5da4e0057fc9f60f4d1d5d',
-      ip: '127.0.0.1,::1,10.132.0.50,fe80::7d39:3147:4d9a:f809',
-      mac: '42:01:0a:84:00:32',
+      ip: ['127.0.0.1', '::1', '10.132.0.50', 'fe80::7d39:3147:4d9a:f809'],
+      mac: ['42:01:0a:84:00:32'],
       name: 'james-fleet-714-2',
       os: {
         family: 'centos',
@@ -844,7 +849,7 @@ export const mockAlerts: ProcessEvent[] = [
         status: 'active',
         workflow_status: 'open',
         reason: 'process event created low alert cmd test alert.',
-        original_time: new Date('2021-11-23T15:25:05.202Z'),
+        original_time: '2021-11-23T15:25:05.202Z',
         original_event: {
           action: 'exit',
         },
@@ -995,13 +1000,14 @@ export const mockAlerts: ProcessEvent[] = [
       action: EventAction.end,
       category: 'process',
       kind: EventKind.signal,
+      id: '6',
     },
     host: {
       architecture: 'x86_64',
       hostname: 'james-fleet-714-2',
       id: '48c1b3f1ac5da4e0057fc9f60f4d1d5d',
-      ip: '127.0.0.1,::1,10.132.0.50,fe80::7d39:3147:4d9a:f809',
-      mac: '42:01:0a:84:00:32',
+      ip: ['127.0.0.1', '::1', '10.132.0.50', 'fe80::7d39:3147:4d9a:f809'],
+      mac: ['42:01:0a:84:00:32'],
       name: 'james-fleet-714-2',
       os: {
         family: 'centos',
@@ -1022,6 +1028,230 @@ export const mockData: ProcessEventsPage[] = [
   },
 ];
 
+export const nullMockEvents: ProcessEvent[] = [
+  {
+    '@timestamp': null!,
+    user: {
+      name: null!,
+      id: null!,
+    },
+    group: {
+      id: null!,
+      name: null!,
+    },
+    process: {
+      pid: null!,
+      user: null!,
+      group: null!,
+      executable: null!,
+      command_line: null!,
+      interactive: null!,
+      entity_id: null!,
+      tty: null!,
+      parent: null!,
+      session_leader: null!,
+      entry_leader: null!,
+      group_leader: null!,
+      name: null!,
+      args_count: null!,
+      args: null!,
+      working_directory: null!,
+      start: null!,
+    },
+    event: {
+      action: null!,
+      category: null!,
+      kind: null!,
+    },
+    host: {
+      architecture: null!,
+      hostname: null!,
+      id: null!,
+      ip: null!,
+      mac: null!,
+      name: null!,
+      os: null!,
+    },
+  },
+];
+
+export const nullMockData: ProcessEventsPage[] = [
+  {
+    events: nullMockEvents,
+    cursor: undefined,
+  },
+];
+
+export const deepNullMockEvents: ProcessEvent[] = [
+  {
+    '@timestamp': null!,
+    event: {
+      action: null!,
+      category: null!,
+      kind: null!,
+    },
+    group: {
+      id: null!,
+      name: null!,
+    },
+    host: {
+      architecture: null!,
+      hostname: null!,
+      id: null!,
+      ip: null!,
+      mac: null!,
+      name: null!,
+      os: {
+        family: null!,
+        full: null!,
+        kernel: null!,
+        name: null!,
+        platform: null!,
+        version: null!,
+      },
+    },
+    process: {
+      args: [null!, null!],
+      args_count: null!,
+      command_line: null!,
+      entity_id: null!,
+      entry_leader: {
+        args: [null!],
+        args_count: null!,
+        command_line: null!,
+        entity_id: null!,
+        entry_meta: {
+          source: {
+            ip: null!,
+          },
+          type: null!,
+        },
+        executable: null!,
+        group: {
+          id: null!,
+          name: null!,
+        },
+        interactive: null!,
+        name: null!,
+        pid: null!,
+        start: null!,
+        tty: {
+          char_device: {
+            major: null!,
+            minor: null!,
+          },
+        },
+        user: {
+          id: null!,
+          name: null!,
+        },
+        working_directory: null!,
+      },
+      executable: null!,
+      group_leader: {
+        args: [null!, null!],
+        args_count: null!,
+        command_line: null!,
+        entity_id: null!,
+        executable: null!,
+        group: {
+          id: null!,
+          name: null!,
+        },
+        interactive: null!,
+        name: null!,
+        pid: null!,
+        start: null!,
+        tty: {
+          char_device: {
+            major: null!,
+            minor: null!,
+          },
+        },
+        user: {
+          id: null!,
+          name: null!,
+        },
+        working_directory: null!,
+      },
+      interactive: null!,
+      name: null!,
+      parent: {
+        args: [null!],
+        args_count: null!,
+        command_line: null!,
+        entity_id: null!,
+        executable: null!,
+        group: {
+          id: null!,
+          name: null!,
+        },
+        interactive: null!,
+        name: null!,
+        pid: null!,
+        start: null!,
+        tty: {
+          char_device: {
+            major: null!,
+            minor: null!,
+          },
+        },
+        user: {
+          id: null!,
+          name: null!,
+        },
+        working_directory: null!,
+      },
+      pid: null!,
+      session_leader: {
+        args: [null!],
+        args_count: null!,
+        command_line: null!,
+        entity_id: null!,
+        executable: null!,
+        group: {
+          id: null!,
+          name: null!,
+        },
+        interactive: null!,
+        name: null!,
+        pid: null!,
+        start: null!,
+        tty: {
+          char_device: {
+            major: null!,
+            minor: null!,
+          },
+        },
+        user: {
+          id: null!,
+          name: null!,
+        },
+        working_directory: null!,
+      },
+      start: null!,
+      tty: {
+        char_device: {
+          major: null!,
+          minor: null!,
+        },
+      },
+      working_directory: null!,
+    },
+    user: {
+      id: null!,
+      name: null!,
+    },
+  },
+];
+
+export const deepNullMockData: ProcessEventsPage[] = [
+  {
+    events: deepNullMockEvents,
+    cursor: undefined,
+  },
+];
+
 export const childProcessMock: Process = {
   id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bd',
   events: [],
@@ -1033,6 +1263,7 @@ export const childProcessMock: Process = {
   orphans: [],
   addEvent: (_) => undefined,
   addAlert: (_) => undefined,
+  addChild: (_) => undefined,
   clearSearch: () => undefined,
   getChildren: () => [],
   hasOutput: () => false,
@@ -1040,6 +1271,7 @@ export const childProcessMock: Process = {
   getAlerts: () => [],
   updateAlertsStatus: (_) => undefined,
   hasExec: () => false,
+  isVerbose: () => true,
   getOutput: () => '',
   getDetails: () =>
     ({
@@ -1048,13 +1280,14 @@ export const childProcessMock: Process = {
         kind: EventKind.event,
         category: 'process',
         action: EventAction.exec,
+        id: '1',
       },
       host: {
         architecture: 'x86_64',
         hostname: 'james-fleet-714-2',
         id: '48c1b3f1ac5da4e0057fc9f60f4d1d5d',
-        ip: '127.0.0.1,::1,10.132.0.50,fe80::7d39:3147:4d9a:f809',
-        mac: '42:01:0a:84:00:32',
+        ip: ['127.0.0.1', '::1', '10.132.0.50', 'fe80::7d39:3147:4d9a:f809'],
+        mac: ['42:01:0a:84:00:32'],
         name: 'james-fleet-714-2',
         os: {
           family: 'centos',
@@ -1101,6 +1334,8 @@ export const childProcessMock: Process = {
     } as ProcessEvent),
   isUserEntered: () => false,
   getMaxAlertLevel: () => null,
+  getEndTime: () => '',
+  isDescendantOf: () => false,
 };
 
 export const processMock: Process = {
@@ -1114,6 +1349,7 @@ export const processMock: Process = {
   orphans: [],
   addEvent: (_) => undefined,
   addAlert: (_) => undefined,
+  addChild: (_) => undefined,
   clearSearch: () => undefined,
   getChildren: () => [],
   hasOutput: () => false,
@@ -1121,6 +1357,7 @@ export const processMock: Process = {
   getAlerts: () => [],
   updateAlertsStatus: (_) => undefined,
   hasExec: () => false,
+  isVerbose: () => true,
   getOutput: () => '',
   getDetails: () =>
     ({
@@ -1129,13 +1366,14 @@ export const processMock: Process = {
         kind: EventKind.event,
         category: 'process',
         action: EventAction.exec,
+        id: '2',
       },
       host: {
         architecture: 'x86_64',
         hostname: 'james-fleet-714-2',
         id: '48c1b3f1ac5da4e0057fc9f60f4d1d5d',
-        ip: '127.0.0.1,::1,10.132.0.50,fe80::7d39:3147:4d9a:f809',
-        mac: '42:01:0a:84:00:32',
+        ip: ['127.0.0.1', '::1', '10.132.0.50', 'fe80::7d39:3147:4d9a:f809'],
+        mac: ['42:01:0a:84:00:32'],
         name: 'james-fleet-714-2',
         os: {
           family: 'centos',
@@ -1165,6 +1403,14 @@ export const processMock: Process = {
         working_directory: '/home/vagrant',
         start: '2021-11-23T15:25:04.210Z',
         pid: 1,
+        user: {
+          id: '1000',
+          name: 'vagrant',
+        },
+        group: {
+          id: '1000',
+          name: 'vagrant',
+        },
         parent: {
           pid: 2442,
           user: {
@@ -1273,6 +1519,8 @@ export const processMock: Process = {
     } as ProcessEvent),
   isUserEntered: () => false,
   getMaxAlertLevel: () => null,
+  getEndTime: () => '',
+  isDescendantOf: () => false,
 };
 
 export const sessionViewBasicProcessMock: Process = {
@@ -1280,6 +1528,7 @@ export const sessionViewBasicProcessMock: Process = {
   events: mockEvents,
   hasExec: () => true,
   isUserEntered: () => true,
+  getEndTime: () => '',
 };
 
 export const sessionViewAlertProcessMock: Process = {
@@ -1290,12 +1539,13 @@ export const sessionViewAlertProcessMock: Process = {
   getAlerts: () => mockAlerts,
   hasExec: () => true,
   isUserEntered: () => true,
+  getEndTime: () => '',
 };
 
 export const mockProcessMap = mockEvents.reduce(
   (processMap, event) => {
-    processMap[event.process.entity_id] = {
-      id: event.process.entity_id,
+    processMap[event.process!.entity_id!] = {
+      id: event.process!.entity_id!,
       events: [event],
       alerts: [],
       children: [],
@@ -1305,6 +1555,7 @@ export const mockProcessMap = mockEvents.reduce(
       orphans: [],
       addEvent: (_) => undefined,
       addAlert: (_) => undefined,
+      addChild: (_) => undefined,
       clearSearch: () => undefined,
       getChildren: () => [],
       hasOutput: () => false,
@@ -1316,6 +1567,9 @@ export const mockProcessMap = mockEvents.reduce(
       getDetails: () => event,
       isUserEntered: () => false,
       getMaxAlertLevel: () => null,
+      isVerbose: () => true,
+      getEndTime: () => '',
+      isDescendantOf: () => false,
     };
     return processMap;
   },

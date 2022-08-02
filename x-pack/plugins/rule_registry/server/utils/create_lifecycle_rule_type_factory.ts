@@ -5,20 +5,20 @@
  * 2.0.
  */
 import { Logger } from '@kbn/logging';
-import { IRuleDataClient } from '../rule_data_client';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeParams,
-  AlertTypeState,
-} from '../../../alerting/common';
+  RuleTypeParams,
+  RuleTypeState,
+} from '@kbn/alerting-plugin/common';
+import { IRuleDataClient } from '../rule_data_client';
 import { AlertTypeWithExecutor } from '../types';
 import { LifecycleAlertService, createLifecycleExecutor } from './create_lifecycle_executor';
 
 export const createLifecycleRuleTypeFactory =
   ({ logger, ruleDataClient }: { logger: Logger; ruleDataClient: IRuleDataClient }) =>
   <
-    TParams extends AlertTypeParams,
+    TParams extends RuleTypeParams,
     TAlertInstanceContext extends AlertInstanceContext,
     TServices extends {
       alertWithLifecycle: LifecycleAlertService<Record<string, any>, TAlertInstanceContext, string>;
@@ -29,7 +29,7 @@ export const createLifecycleRuleTypeFactory =
     const createBoundLifecycleExecutor = createLifecycleExecutor(logger, ruleDataClient);
     const executor = createBoundLifecycleExecutor<
       TParams,
-      AlertTypeState,
+      RuleTypeState,
       AlertInstanceState,
       TAlertInstanceContext,
       string

@@ -11,9 +11,9 @@ import { promisify } from 'util';
 import type { BinaryLike } from 'crypto';
 import { createHash } from 'crypto';
 
-import type { ElasticsearchClient } from 'kibana/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
-import type { ListResult } from '../../../common';
+import type { ListResult } from '../../../common/types';
 import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
 
 import { ArtifactsElasticsearchError } from '../../errors';

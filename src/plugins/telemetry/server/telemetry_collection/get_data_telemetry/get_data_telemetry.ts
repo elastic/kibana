@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient } from 'src/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 import {
   DATA_DATASETS_INDEX_PATTERNS_UNIQUE,
@@ -228,6 +228,7 @@ export async function getDataTelemetry(esClient: ElasticsearchClient) {
     const indices = indexNames.map((name) => {
       const baseIndexInfo = {
         name,
+        // @ts-expect-error 'properties' does not exist on type 'MappingMatchOnlyTextProperty'
         isECS: !!indexMappings[name]?.mappings?.properties?.ecs?.properties?.version?.type,
         shipper: indexMappings[name]?.mappings?._meta?.beat,
         packageName: indexMappings[name]?.mappings?._meta?.package?.name,

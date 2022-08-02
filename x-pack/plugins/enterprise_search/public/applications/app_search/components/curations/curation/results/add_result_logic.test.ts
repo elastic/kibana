@@ -8,7 +8,7 @@
 import { LogicMounter } from '../../../../../__mocks__/kea_logic';
 import '../../../../__mocks__/engine_logic.mock';
 
-import { AddResultLogic } from './';
+import { AddResultLogic } from '.';
 
 describe('AddResultLogic', () => {
   const { mount } = new LogicMounter(AddResultLogic);

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Action, createAction } from '../../../../../src/plugins/ui_actions/public';
+import { Action, createAction } from '@kbn/ui-actions-plugin/public';
 
 export const SAMPLE_PANEL_LINK = 'samplePanelLink';
 

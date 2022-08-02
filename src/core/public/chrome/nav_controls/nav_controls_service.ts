@@ -9,7 +9,7 @@
 import { sortBy } from 'lodash';
 import { BehaviorSubject, ReplaySubject, Observable } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
-import { MountPoint } from '../../types';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 
 /** @public */
 export interface ChromeNavControl {
@@ -50,7 +50,7 @@ export interface ChromeNavControls {
 
 /** @internal */
 export class NavControlsService {
-  private readonly stop$ = new ReplaySubject(1);
+  private readonly stop$ = new ReplaySubject<void>(1);
 
   public start() {
     const navControlsLeft$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(new Set());

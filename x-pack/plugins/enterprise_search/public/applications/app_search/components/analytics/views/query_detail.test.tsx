@@ -15,7 +15,7 @@ import { shallow } from 'enzyme';
 import { AnalyticsLayout } from '../analytics_layout';
 import { AnalyticsCards, AnalyticsChart, QueryClicksTable } from '../components';
 
-import { QueryDetail } from './';
+import { QueryDetail } from '.';
 
 describe('QueryDetail', () => {
   beforeEach(() => {

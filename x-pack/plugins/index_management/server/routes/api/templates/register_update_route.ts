@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { TemplateDeserialized } from '../../../../common';
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 import { templateSchema } from './validate_schemas';
 import { saveTemplate, doesTemplateExist } from './lib';
 
@@ -25,7 +25,7 @@ export function registerUpdateRoute({ router, lib: { handleEsError } }: RouteDep
       validate: { body: bodySchema, params: paramsSchema },
     },
     async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
       const { name } = request.params as typeof paramsSchema.type;
       const template = request.body as TemplateDeserialized;
 

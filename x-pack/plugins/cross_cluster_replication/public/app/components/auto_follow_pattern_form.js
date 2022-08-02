@@ -30,7 +30,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { indexPatterns } from '../../../../../../src/plugins/data/public';
+import { indexPatterns } from '@kbn/data-plugin/public';
 
 import { extractQueryParams, indices } from '../../shared_imports';
 import { routing } from '../services/routing';

@@ -7,7 +7,7 @@
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { AttributeName, ElasticsearchUser } from '../../shared/types';
+import { AttributeName, ElasticsearchUser } from '../types';
 
 export interface RoleMappingsBaseServerDetails {
   attributes: string[];

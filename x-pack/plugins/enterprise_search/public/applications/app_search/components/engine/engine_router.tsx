@@ -46,7 +46,7 @@ import { SearchUI } from '../search_ui';
 import { SourceEngines } from '../source_engines';
 import { Synonyms } from '../synonyms';
 
-import { EngineLogic, getEngineBreadcrumbs } from './';
+import { EngineLogic, getEngineBreadcrumbs } from '.';
 
 export const EngineRouter: React.FC = () => {
   const {

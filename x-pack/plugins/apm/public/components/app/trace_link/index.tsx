@@ -8,7 +8,7 @@
 import { EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { getRedirectToTransactionDetailPageUrl } from './get_redirect_to_transaction_detail_page_url';
 import { getRedirectToTracePageUrl } from './get_redirect_to_trace_page_url';

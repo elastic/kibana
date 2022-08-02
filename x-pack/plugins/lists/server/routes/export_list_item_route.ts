@@ -32,7 +32,7 @@ export const exportListItemRoute = (router: ListsPluginRouter): void => {
       const siemResponse = buildSiemResponse(response);
       try {
         const { list_id: listId } = request.query;
-        const lists = getListClient(context);
+        const lists = await getListClient(context);
         const list = await lists.getList({ id: listId });
         if (list == null) {
           return siemResponse.error({

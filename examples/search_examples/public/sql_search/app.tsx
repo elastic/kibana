@@ -24,19 +24,19 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { CoreStart } from '../../../../src/core/public';
+import { CoreStart } from '@kbn/core/public';
 
 import {
   DataPublicPluginStart,
   IKibanaSearchResponse,
   isCompleteResponse,
   isErrorResponse,
-} from '../../../../src/plugins/data/public';
+} from '@kbn/data-plugin/public';
 import {
   SQL_SEARCH_STRATEGY,
   SqlSearchStrategyRequest,
   SqlSearchStrategyResponse,
-} from '../../../../src/plugins/data/common';
+} from '@kbn/data-plugin/common';
 
 interface SearchExamplesAppDeps {
   notifications: CoreStart['notifications'];

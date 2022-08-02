@@ -9,10 +9,10 @@ import type {
   SavedObjectsClientContract,
   KibanaRequest,
   IScopedClusterClient,
-} from 'kibana/server';
-import type { DataViewsService } from '../../../../../../src/plugins/data_views/common';
+} from '@kbn/core/server';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { Module } from '../../../common/types/modules';
-import { DataRecognizer } from '../data_recognizer';
+import { DataRecognizer } from '.';
 import type { MlClient } from '../../lib/ml_client';
 import type { MLSavedObjectService } from '../../saved_objects';
 

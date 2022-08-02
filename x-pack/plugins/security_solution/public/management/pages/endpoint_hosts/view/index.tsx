@@ -7,15 +7,14 @@
 
 import React, { useMemo, useCallback, memo, useEffect, useState } from 'react';
 import styled from 'styled-components';
+import type { EuiBasicTableColumn, EuiSelectableProps } from '@elastic/eui';
 import {
   EuiHorizontalRule,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiText,
   EuiLink,
   EuiHealth,
   EuiToolTip,
-  EuiSelectableProps,
   EuiSuperDatePicker,
   EuiSpacer,
   EuiFlexGroup,
@@ -27,24 +26,29 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { createStructuredSelector } from 'reselect';
 import { useDispatch } from 'react-redux';
+import type {
+  CreatePackagePolicyRouteState,
+  AgentPolicyDetailsDeployAgentAction,
+} from '@kbn/fleet-plugin/public';
+import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
 import { useEndpointSelector } from './hooks';
 import { isPolicyOutOfDate } from '../utils';
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
 import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
-import { CreateStructuredSelector } from '../../../../common/store';
-import { Immutable, HostInfo, PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
+import type { CreateStructuredSelector } from '../../../../common/store';
+import type {
+  Immutable,
+  HostInfo,
+  PolicyDetailsRouteState,
+} from '../../../../../common/endpoint/types';
 import { DEFAULT_POLL_INTERVAL, MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
 import { PolicyEmptyState, HostsEmptyState } from '../../../components/management_empty_state';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { EndpointPolicyLink } from '../../../components/endpoint_policy_link';
-import {
-  CreatePackagePolicyRouteState,
-  AgentPolicyDetailsDeployAgentAction,
-  pagePathGetters,
-} from '../../../../../../fleet/public';
 import { SecurityPageName } from '../../../../app/types';
 import {
   getEndpointListPath,
@@ -53,22 +57,19 @@ import {
 } from '../../../common/routing';
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { useAppUrl } from '../../../../common/lib/kibana/hooks';
-import { EndpointAction } from '../store/action';
+import type { EndpointAction } from '../store/action';
 import { OutOfDate } from './components/out_of_date';
 import { AdminSearchBar } from './components/search_bar';
 import { AdministrationListPage } from '../../../components/administration_list_page';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { LinkToApp } from '../../../../common/components/endpoint/link_to_app';
 import { TableRowActions } from './components/table_row_actions';
 import { EndpointAgentStatus } from './components/endpoint_agent_status';
 import { CallOut } from '../../../../common/components/callouts';
 import { metadataTransformPrefix } from '../../../../../common/endpoint/constants';
 import { WARNING_TRANSFORM_STATES, APP_UI_ID } from '../../../../../common/constants';
-import {
-  BackToExternalAppButton,
-  BackToExternalAppButtonProps,
-} from '../../../components/back_to_external_app_button/back_to_external_app_button';
-import { DevConsole } from './dev_console';
+import type { BackToExternalAppButtonProps } from '../../../components/back_to_external_app_button/back_to_external_app_button';
+import { BackToExternalAppButton } from '../../../components/back_to_external_app_button/back_to_external_app_button';
+import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
 
 const MAX_PAGINATED_ITEM = 9999;
 const TRANSFORM_URL = '/data/transform';
@@ -320,6 +321,12 @@ export const EndpointList = () => {
     [dispatch]
   );
 
+  const setTableRowProps = useCallback((endpoint: HostInfo) => {
+    return {
+      'data-endpoint-Id': endpoint.metadata.agent.id,
+    };
+  }, []);
+
   const columns: Array<EuiBasicTableColumn<Immutable<HostInfo>>> = useMemo(() => {
     const lastActiveColumnName = i18n.translate('xpack.securitySolution.endpoint.list.lastActive', {
       defaultMessage: 'Last active',
@@ -537,6 +544,7 @@ export const EndpointList = () => {
           pagination={paginationSetup}
           onChange={onTableChange}
           loading={loading}
+          rowProps={setTableRowProps}
         />
       );
     } else if (!policyItemsLoading && policyItems && policyItems.length > 0) {
@@ -551,12 +559,14 @@ export const EndpointList = () => {
       );
     } else {
       return (
-        <PolicyEmptyState loading={policyItemsLoading} onActionClick={handleCreatePolicyClick} />
+        <ManagementEmptyStateWrapper>
+          <PolicyEmptyState loading={policyItemsLoading} onActionClick={handleCreatePolicyClick} />
+        </ManagementEmptyStateWrapper>
       );
     }
   }, [
-    loading,
     endpointsExist,
+    areEndpointsEnrolling,
     policyItemsLoading,
     policyItems,
     listData,
@@ -564,12 +574,13 @@ export const EndpointList = () => {
     listError?.message,
     paginationSetup,
     onTableChange,
+    loading,
+    setTableRowProps,
     handleDeployEndpointsClick,
     selectedPolicyId,
     handleSelectableOnChange,
     selectionOptions,
     handleCreatePolicyClick,
-    areEndpointsEnrolling,
   ]);
 
   const hasListData = listData && listData.length > 0;
@@ -671,6 +682,7 @@ export const EndpointList = () => {
   return (
     <AdministrationListPage
       data-test-subj="endpointPage"
+      hideHeader={!(endpointsExist || areEndpointsEnrolling)}
       title={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.list.pageTitle"
@@ -685,9 +697,6 @@ export const EndpointList = () => {
       }
       headerBackComponent={routeState.backLink && backToPolicyList}
     >
-      {/* FIXME: Remove once Console is implemented via ConsoleManagementProvider */}
-      <DevConsole />
-
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
       <>
         {areEndpointsEnrolling && !hasErrorFindingTotals && (
@@ -722,7 +731,7 @@ export const EndpointList = () => {
           </>
         )}
         {transformFailedCallout}
-        <EuiFlexGroup gutterSize="s">
+        <EuiFlexGroup gutterSize="s" alignItems="center">
           {shouldShowKQLBar && (
             <EuiFlexItem>
               <AdminSearchBar />

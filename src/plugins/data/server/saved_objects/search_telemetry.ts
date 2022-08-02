@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsType } from 'kibana/server';
+import { SavedObjectsType } from '@kbn/core/server';
 import { migrate712 } from './migrations/to_v7_12_0';
 
 export const searchTelemetry: SavedObjectsType = {

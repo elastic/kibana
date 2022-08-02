@@ -14,7 +14,7 @@ import { PropTypes } from 'prop-types';
 
 import { i18n } from '@kbn/i18n';
 
-import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 
 import { FilterListsHeader } from './header';
 import { FilterListsTable } from './table';

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { AggConfigs } from '../../../../data/public';
+import type { AggConfigs } from '@kbn/data-plugin/public';
 import type { SeriesParam } from '../types';
 import { getSeriesParams } from './get_series_params';
 import { sampleAreaVis } from '../sample_vis.test.mocks';

@@ -9,7 +9,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
+import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { MarkdownVisParams } from './types';
 import { MarkdownOptions } from './markdown_options';
 

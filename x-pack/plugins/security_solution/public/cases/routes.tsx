@@ -7,8 +7,8 @@
 
 import React from 'react';
 
-import { TrackApplicationView } from '../../../../../src/plugins/usage_collection/public';
-import { SecuritySubPluginRoutes } from '../app/types';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+import type { SecuritySubPluginRoutes } from '../app/types';
 import { CASES_PATH } from '../../common/constants';
 import { Cases } from './pages';
 

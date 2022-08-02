@@ -8,13 +8,13 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 
-import { CoreStart } from 'src/core/public';
-import { themeServiceMock } from 'src/core/public/mocks';
+import { CoreStart } from '@kbn/core/public';
+import { themeServiceMock } from '@kbn/core/public/mocks';
 
 import { ToastNotificationText } from './toast_notification_text';
 
 jest.mock('../../shared_imports');
-jest.mock('../../app/app_dependencies');
+jest.mock('../app_dependencies');
 
 describe('ToastNotificationText', () => {
   test('should render the text as plain text', () => {

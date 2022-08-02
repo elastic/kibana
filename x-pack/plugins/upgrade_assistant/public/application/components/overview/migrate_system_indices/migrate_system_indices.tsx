@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
-import { DocLinksStart } from 'kibana/public';
+import { DocLinksStart } from '@kbn/core/public';
 import type { SystemIndicesMigrationFeature } from '../../../../../common/types';
 import type { OverviewStepProps } from '../../types';
 import { useMigrateSystemIndices } from './use_migrate_system_indices';

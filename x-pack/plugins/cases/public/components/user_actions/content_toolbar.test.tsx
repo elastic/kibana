@@ -8,6 +8,7 @@
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { UserActionContentToolbar, UserActionContentToolbarProps } from './content_toolbar';
+import { TestProviders } from '../../common/mock';
 
 jest.mock('../../common/navigation/hooks');
 jest.mock('../../common/lib/kibana');
@@ -17,7 +18,6 @@ const props: UserActionContentToolbarProps = {
   id: '1',
   editLabel: 'edit',
   quoteLabel: 'quote',
-  userCanCrud: true,
   isLoading: false,
   onEdit: jest.fn(),
   onQuote: jest.fn(),
@@ -27,7 +27,11 @@ describe('UserActionContentToolbar ', () => {
   let wrapper: ReactWrapper;
 
   beforeAll(() => {
-    wrapper = mount(<UserActionContentToolbar {...props} />);
+    wrapper = mount(
+      <TestProviders>
+        <UserActionContentToolbar {...props} />
+      </TestProviders>
+    );
   });
 
   it('it renders', async () => {

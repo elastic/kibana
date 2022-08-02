@@ -7,6 +7,8 @@
     "ml"
   ],
   "requiredPlugins": [
+    "aiops",
+    "charts",
     "cloud",
     "data",
     "dataViews",
@@ -19,13 +21,14 @@
     "share",
     "taskManager",
     "triggersActionsUi",
-    "uiActions"
+    "uiActions",
+    "unifiedSearch"
   ],
   "optionalPlugins": [
     "alerting",
-    "charts",
     "dashboard",
     "home",
+    "lens",
     "licenseManagement",
     "management",
     "maps",
@@ -40,12 +43,13 @@
     "dashboard",
     "esUiShared",
     "fieldFormats",
-    "home",
     "kibanaReact",
     "kibanaUtils",
+    "lens",
     "maps",
     "savedObjects",
-    "usageCollection"
+    "usageCollection",
+    "unifiedSearch"
   ],
   "extraPublicDirs": [
     "common"

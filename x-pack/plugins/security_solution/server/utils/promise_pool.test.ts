@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AbortError } from '../../../../../src/plugins/kibana_utils/common';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { initPromisePool } from './promise_pool';
 
 const nextTick = () => new Promise((resolve) => setImmediate(resolve));

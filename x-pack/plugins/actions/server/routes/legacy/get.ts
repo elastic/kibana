@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { UsageCounter } from 'src/plugins/usage_collection/server';
-import { IRouter } from 'kibana/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { IRouter } from '@kbn/core/server';
 import { ILicenseState, verifyApiAccess } from '../../lib';
 import { BASE_ACTION_API_PATH } from '../../../common';
 import { ActionsRequestHandlerContext } from '../../types';
@@ -34,7 +34,7 @@ export const getActionRoute = (
       if (!context.actions) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for actions' });
       }
-      const actionsClient = context.actions.getActionsClient();
+      const actionsClient = (await context.actions).getActionsClient();
       const { id } = req.params;
       trackLegacyRouteUsage('get', usageCounter);
       return res.ok({

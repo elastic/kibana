@@ -10,13 +10,16 @@ import { getBucketSize } from '../helpers/get_bucket_size';
 export function getAnomalyResultBucketSize({
   start,
   end,
+  minBucketSize,
 }: {
   start: number;
   end: number;
+  minBucketSize?: number;
 }) {
   return getBucketSize({
     start,
     end,
     numBuckets: 100,
+    minBucketSize,
   });
 }

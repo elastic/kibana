@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { ErrorStatePrompt } from '../../../shared/error_state';
 
-import { ErrorConnecting } from './';
+import { ErrorConnecting } from '.';
 
 describe('ErrorConnecting', () => {
   it('renders', () => {

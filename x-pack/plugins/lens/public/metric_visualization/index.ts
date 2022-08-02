@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import type { CoreSetup } from 'kibana/public';
-import type { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
+import type { CoreSetup } from '@kbn/core/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { EditorFrameSetup } from '../types';
 
-export interface MetricVisualizationPluginSetupPlugins {
+export interface LegacyMetricVisualizationPluginSetupPlugins {
   editorFrame: EditorFrameSetup;
   charts: ChartsPluginSetup;
 }
 
-export class MetricVisualization {
-  setup(core: CoreSetup, { editorFrame, charts }: MetricVisualizationPluginSetupPlugins) {
+export class LegacyMetricVisualization {
+  setup(core: CoreSetup, { editorFrame, charts }: LegacyMetricVisualizationPluginSetupPlugins) {
     editorFrame.registerVisualization(async () => {
-      const { getMetricVisualization } = await import('../async_services');
+      const { getLegacyMetricVisualization: getMetricVisualization } = await import(
+        '../async_services'
+      );
       const palettes = await charts.palettes.getPalettes();
 
       return getMetricVisualization({ paletteService: palettes, theme: core.theme });

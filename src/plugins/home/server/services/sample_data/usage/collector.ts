@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { UsageCollectionSetup } from '../../../../../usage_collection/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { fetchProvider, TelemetryResponse } from './collector_fetch';
 
 export function makeSampleDataUsageCollector(

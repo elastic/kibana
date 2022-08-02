@@ -7,9 +7,9 @@
  */
 
 import { omit } from 'lodash';
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import type { StatsCollectionContext } from 'src/plugins/telemetry_collection_manager/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { StatsCollectionContext } from '@kbn/telemetry-collection-manager-plugin/server';
 
 export interface KibanaUsageStats {
   kibana: {

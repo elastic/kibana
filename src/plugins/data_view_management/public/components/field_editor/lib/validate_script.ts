@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { HttpStart } from 'src/core/public';
+import { HttpStart } from '@kbn/core/public';
 import { ExecuteScriptParams, ExecuteScriptResult } from '../types';
 
 export const executeScript = async ({

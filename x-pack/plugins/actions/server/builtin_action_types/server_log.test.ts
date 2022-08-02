@@ -6,7 +6,7 @@
  */
 
 import { validateParams } from '../lib';
-import { Logger } from '../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import { createActionTypeRegistry } from './index.test';
 import { actionsMock } from '../mocks';
 import {

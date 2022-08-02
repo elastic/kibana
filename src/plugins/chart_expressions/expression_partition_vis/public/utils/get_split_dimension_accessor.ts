@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 import { AccessorFn } from '@elastic/charts';
-import { DatatableColumn } from '../../../../expressions/public';
-import { FieldFormat, FormatFactory } from '../../../../field_formats/common';
-import { ExpressionValueVisDimension } from '../../../../visualizations/common';
-import { getColumnByAccessor } from '../../../../visualizations/common/utils';
+import { DatatableColumn } from '@kbn/expressions-plugin/public';
+import { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { getFormatter } from './formatters';
 
 export const getSplitDimensionAccessor = (

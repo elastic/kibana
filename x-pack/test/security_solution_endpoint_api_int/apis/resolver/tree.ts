@@ -6,17 +6,17 @@
  */
 
 import expect from '@kbn/expect';
-import { getNameField } from '../../../../plugins/security_solution/server/endpoint/routes/resolver/tree/utils/fetch';
-import { ResolverNode } from '../../../../plugins/security_solution/common/endpoint/types';
+import { getNameField } from '@kbn/security-solution-plugin/server/endpoint/routes/resolver/tree/utils/fetch';
+import { ResolverNode } from '@kbn/security-solution-plugin/common/endpoint/types';
 import {
   parentEntityIDSafeVersion,
   timestampSafeVersion,
-} from '../../../../plugins/security_solution/common/endpoint/models/event';
-import { FtrProviderContext } from '../../ftr_provider_context';
+} from '@kbn/security-solution-plugin/common/endpoint/models/event';
 import {
   Tree,
   RelatedEventCategory,
-} from '../../../../plugins/security_solution/common/endpoint/generate_data';
+} from '@kbn/security-solution-plugin/common/endpoint/generate_data';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { Options, GeneratedTrees } from '../../services/resolver';
 import { schemaWithAncestry, schemaWithName, schemaWithoutAncestry, verifyTree } from './common';
 

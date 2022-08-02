@@ -6,19 +6,27 @@
  */
 
 import * as t from 'io-ts';
+import { TraceSearchType } from '../../../common/trace_explorer';
 import { setupRequest } from '../../lib/helpers/setup_request';
-import { getTraceItems } from './get_trace_items';
-import { getTopTracesPrimaryStats } from './get_top_traces_primary_stats';
-import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
-import { getRootTransactionByTraceId } from '../transactions/get_transaction_by_trace';
+import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
+import {
+  environmentRt,
+  kueryRt,
+  probabilityRt,
+  rangeRt,
+} from '../default_api_types';
 import { getTransaction } from '../transactions/get_transaction';
+import { getRootTransactionByTraceId } from '../transactions/get_transaction_by_trace';
+import { getTopTracesPrimaryStats } from './get_top_traces_primary_stats';
+import { getTraceItems } from './get_trace_items';
+import { getTraceSamplesByQuery } from './get_trace_samples_by_query';
+import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 
 const tracesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces',
   params: t.type({
-    query: t.intersection([environmentRt, kueryRt, rangeRt]),
+    query: t.intersection([environmentRt, kueryRt, rangeRt, probabilityRt]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (
@@ -35,9 +43,19 @@ const tracesRoute = createApmServerRoute({
       agentName: import('./../../../typings/es_schemas/ui/fields/agent').AgentName;
     }>;
   }> => {
-    const setup = await setupRequest(resources);
-    const { params } = resources;
-    const { environment, kuery, start, end } = params.query;
+    const {
+      params,
+      request,
+      plugins: { security },
+    } = resources;
+
+    const { environment, kuery, start, end, probability } = params.query;
+
+    const [setup, randomSampler] = await Promise.all([
+      setupRequest(resources),
+      getRandomSampler({ security, request, probability }),
+    ]);
+
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       ...setup,
       kuery,
@@ -52,6 +70,7 @@ const tracesRoute = createApmServerRoute({
       searchAggregatedTransactions,
       start,
       end,
+      randomSampler,
     });
   },
 });
@@ -76,6 +95,7 @@ const tracesByIdRoute = createApmServerRoute({
     errorDocs: Array<
       import('./../../../typings/es_schemas/ui/apm_error').APMError
     >;
+    linkedChildrenOfSpanCountBySpanId: Record<string, number>;
   }> => {
     const setup = await setupRequest(resources);
     const { params } = resources;
@@ -128,9 +148,50 @@ const transactionByIdRoute = createApmServerRoute({
   },
 });
 
+const findTracesRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/traces/find',
+  params: t.type({
+    query: t.intersection([
+      rangeRt,
+      environmentRt,
+      t.type({
+        query: t.string,
+        type: t.union([
+          t.literal(TraceSearchType.kql),
+          t.literal(TraceSearchType.eql),
+        ]),
+      }),
+    ]),
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async (
+    resources
+  ): Promise<{
+    samples: Array<{ traceId: string; transactionId: string }>;
+  }> => {
+    const { start, end, environment, query, type } = resources.params.query;
+
+    const setup = await setupRequest(resources);
+
+    return {
+      samples: await getTraceSamplesByQuery({
+        setup,
+        start,
+        end,
+        environment,
+        query,
+        type,
+      }),
+    };
+  },
+});
+
 export const traceRouteRepository = {
   ...tracesByIdRoute,
   ...tracesRoute,
   ...rootTransactionByTraceIdRoute,
   ...transactionByIdRoute,
+  ...findTracesRoute,
 };

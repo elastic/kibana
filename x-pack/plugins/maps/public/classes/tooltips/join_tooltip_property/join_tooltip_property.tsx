@@ -41,7 +41,7 @@ export class JoinTooltipProperty implements ITooltipProperty {
     return this._tooltipProperty.getRawValue();
   }
 
-  getHtmlDisplayValue(): string {
+  getHtmlDisplayValue(): ReactNode {
     return this._tooltipProperty.getHtmlDisplayValue();
   }
 

@@ -10,8 +10,9 @@ import type {
   SavedObjectsExportTransformContext,
   SavedObjectsServiceSetup,
   SavedObjectsTypeMappingDefinition,
-} from 'kibana/server';
-import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
+} from '@kbn/core/server';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import { getOldestIdleActionTask } from '@kbn/task-manager-plugin/server';
 import mappings from './mappings.json';
 import { getActionsMigrations } from './actions_migrations';
 import { getActionTaskParamsMigrations } from './action_task_params_migrations';
@@ -24,7 +25,6 @@ import {
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 } from '../constants/saved_objects';
-import { getOldestIdleActionTask } from '../../../task_manager/server';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,

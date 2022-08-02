@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, ElasticsearchClient, Logger, PluginInitializerContext } from 'kibana/server';
-import url from 'url';
+import { CoreSetup, ElasticsearchClient, Logger, PluginInitializerContext } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MonitoringConfig } from './config';
 import { PluginsSetup } from './types';
@@ -32,7 +31,7 @@ export type EndpointTypes =
 export type ClientParams = estypes.SearchRequest | undefined;
 
 interface IAppGlobals {
-  url: string;
+  url?: string;
   isCloud: boolean;
   config: MonitoringConfig;
   getLogger: GetLogger;
@@ -79,11 +78,8 @@ export class Globals {
         return body;
       });
 
-    const { protocol, hostname, port } = coreSetup.http.getServerInfo();
-    const pathname = coreSetup.http.basePath.serverBasePath;
-
     Globals._app = {
-      url: url.format({ protocol, hostname, port, pathname }),
+      url: coreSetup.http.basePath.publicBaseUrl,
       isCloud: setupPlugins.cloud?.isCloudEnabled || false,
       config,
       getLogger,

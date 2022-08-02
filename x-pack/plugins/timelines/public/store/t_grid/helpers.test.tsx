@@ -24,7 +24,7 @@ const defaultTimelineById = {
 describe('setInitializeTgridSettings', () => {
   test('it returns the expected sort when tGridSettingsProps has an override', () => {
     const sort: SortColumnTimeline[] = [
-      { columnId: 'foozle', columnType: 'date', sortDirection: 'asc' },
+      { columnId: 'foozle', columnType: 'date', esTypes: ['date'], sortDirection: 'asc' },
     ];
 
     const tGridSettingsProps: Partial<TGridModelSettings> = {

@@ -25,6 +25,7 @@ exports[`AddItemPopover calls addItems with multiple items on clicking Add butto
     display="inlineBlock"
     hasArrow={true}
     id="add_item_popover"
+    initialFocus="#filter_list_add_item_input_row"
     isOpen={false}
     ownFocus={true}
     panelClassName="ml-add-filter-item-popover"
@@ -37,6 +38,7 @@ exports[`AddItemPopover calls addItems with multiple items on clicking Add butto
         fullWidth={false}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
+        id="filter_list_add_item_input_row"
         label={
           <FormattedMessage
             defaultMessage="Items"
@@ -113,6 +115,7 @@ exports[`AddItemPopover opens the popover onButtonClick 1`] = `
     display="inlineBlock"
     hasArrow={true}
     id="add_item_popover"
+    initialFocus="#filter_list_add_item_input_row"
     isOpen={true}
     ownFocus={true}
     panelClassName="ml-add-filter-item-popover"
@@ -125,6 +128,7 @@ exports[`AddItemPopover opens the popover onButtonClick 1`] = `
         fullWidth={false}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
+        id="filter_list_add_item_input_row"
         label={
           <FormattedMessage
             defaultMessage="Items"
@@ -201,6 +205,7 @@ exports[`AddItemPopover renders the popover 1`] = `
     display="inlineBlock"
     hasArrow={true}
     id="add_item_popover"
+    initialFocus="#filter_list_add_item_input_row"
     isOpen={false}
     ownFocus={true}
     panelClassName="ml-add-filter-item-popover"
@@ -213,6 +218,7 @@ exports[`AddItemPopover renders the popover 1`] = `
         fullWidth={false}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
+        id="filter_list_add_item_input_row"
         label={
           <FormattedMessage
             defaultMessage="Items"

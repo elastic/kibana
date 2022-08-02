@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { KibanaRequest } from 'kibana/server';
-import type { RequestStatistics, RequestStatus } from '../../../../../src/plugins/inspector';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { RequestStatistics, RequestStatus } from '@kbn/inspector-plugin/common';
 import { InspectResponse } from '../../typings/common';
 import { WrappedElasticsearchClientError } from './unwrap_es_response';
 
@@ -70,7 +70,7 @@ function getStats({
     },
   };
 
-  if (esResponse?.hits) {
+  if (esResponse?.hits?.hits) {
     stats.hits = {
       label: i18n.translate('xpack.observability.inspector.stats.hitsLabel', {
         defaultMessage: 'Hits',

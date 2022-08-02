@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
 import { connect } from 'react-redux';
 import { useLocation } from 'react-router-dom';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { SearchBar } from '../search_bar';
 import {
   GraphState,
@@ -17,14 +18,7 @@ import {
   workspaceInitializedSelector,
 } from '../../state_management';
 import { FieldManager } from '../field_manager';
-import type { DataView } from '../../../../../../src/plugins/data_views/public';
-import {
-  ControlType,
-  IndexPatternProvider,
-  IndexPatternSavedObject,
-  TermIntersect,
-  WorkspaceNode,
-} from '../../types';
+import { ControlType, IndexPatternProvider, TermIntersect, WorkspaceNode } from '../../types';
 import { WorkspaceTopNavMenu } from './workspace_top_nav_menu';
 import { InspectPanel } from '../inspect_panel';
 import { GuidancePanel } from '../guidance_panel';
@@ -59,7 +53,6 @@ type WorkspaceLayoutProps = Pick<
   renderCounter: number;
   workspace?: Workspace;
   loading: boolean;
-  indexPatterns: IndexPatternSavedObject[];
   savedWorkspace: GraphWorkspaceSavedObject;
   indexPatternProvider: IndexPatternProvider;
   sharingSavedObjectProps?: SharingSavedObjectProps;
@@ -78,7 +71,6 @@ export const WorkspaceLayoutComponent = ({
   hasFields,
   overlays,
   workspaceInitialized,
-  indexPatterns,
   indexPatternProvider,
   capabilities,
   coreStart,
@@ -222,10 +214,7 @@ export const WorkspaceLayoutComponent = ({
       {getLegacyUrlConflictCallout()}
       {!isInitialized && (
         <div>
-          <GuidancePanelMemoized
-            noIndexPatterns={indexPatterns.length === 0}
-            onOpenFieldPicker={onOpenFieldPicker}
-          />
+          <GuidancePanelMemoized onOpenFieldPicker={onOpenFieldPicker} />
         </div>
       )}
 

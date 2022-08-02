@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AbstractESAggSource } from '../es_agg_source';
+import { AbstractESAggSource } from '.';
 import { IField } from '../../fields/field';
 import { IESAggField } from '../../fields/agg';
 import _ from 'lodash';
@@ -32,18 +32,15 @@ const metricExamples = [
 
 class TestESAggSource extends AbstractESAggSource {
   constructor(metrics: AggDescriptor[]) {
-    super(
-      {
-        type: 'test',
-        id: 'foobar',
-        indexPatternId: 'foobarid',
-        metrics,
-        applyGlobalQuery: true,
-        applyGlobalTime: true,
-        applyForceRefresh: true,
-      },
-      []
-    );
+    super({
+      type: 'test',
+      id: 'foobar',
+      indexPatternId: 'foobarid',
+      metrics,
+      applyGlobalQuery: true,
+      applyGlobalTime: true,
+      applyForceRefresh: true,
+    });
   }
 }
 

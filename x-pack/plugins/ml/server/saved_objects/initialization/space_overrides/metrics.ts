@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import RE2 from 're2';
 import { mlLog } from '../../../lib/log';
 

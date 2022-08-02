@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { reduce, size } from 'lodash';
 import { RouteDependencies } from '../../../types';
 
@@ -87,7 +87,8 @@ export function registerGetRoute({ router, license, lib: { handleEsError } }: Ro
       const { pattern } = request.body;
 
       try {
-        const indices = await getIndices(ctx.core.elasticsearch.client, pattern);
+        const esClient = (await ctx.core).elasticsearch.client;
+        const indices = await getIndices(esClient, pattern);
         return response.ok({ body: { indices } });
       } catch (e) {
         return handleEsError({ error: e, response });

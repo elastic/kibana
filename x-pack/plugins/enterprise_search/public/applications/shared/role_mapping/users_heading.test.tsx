@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { EuiButton, EuiText, EuiTitle } from '@elastic/eui';
 
-import { UsersHeading } from './';
+import { UsersHeading } from '.';
 
 describe('UsersHeading', () => {
   const onClick = jest.fn();

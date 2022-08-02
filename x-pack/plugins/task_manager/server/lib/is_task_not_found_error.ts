@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 export function isTaskSavedObjectNotFoundError(err: Error, taskId: string) {
   return SavedObjectsErrorHelpers.isNotFoundError(err) && `${err}`.includes(taskId);

@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { IndicesList } from '../indices_list';
+import { IndicesList } from '.';
 import { shallow } from 'enzyme';
 import { MatchedItem } from '../../../types';
 

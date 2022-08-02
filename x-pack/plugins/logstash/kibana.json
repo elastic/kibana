@@ -11,5 +11,5 @@
   "optionalPlugins": ["home", "monitoring", "security"],
   "server": true,
   "ui": true,
-  "requiredBundles": ["esUiShared", "home", "kibanaReact"]
+  "requiredBundles": ["esUiShared", "kibanaReact"]
 }

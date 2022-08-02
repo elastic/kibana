@@ -27,7 +27,7 @@ export const registerDocumentsRoute = ({
       },
     },
     async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { index, id } = req.params;
 
       try {

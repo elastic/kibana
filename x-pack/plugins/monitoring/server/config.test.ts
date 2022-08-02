@@ -8,23 +8,6 @@
 import fs from 'fs';
 import { configSchema, createConfig } from './config';
 
-const MOCKED_PATHS = [
-  '/proc/self/cgroup',
-  'packages/kbn-dev-utils/certs/ca.crt',
-  'packages/kbn-dev-utils/certs/elasticsearch.crt',
-  'packages/kbn-dev-utils/certs/elasticsearch.key',
-];
-
-beforeEach(() => {
-  jest.spyOn(fs, 'readFileSync').mockImplementation((path, enc) => {
-    if (typeof path === 'string' && MOCKED_PATHS.includes(path) && enc === 'utf8') {
-      return `contents-of-${path}`;
-    }
-
-    throw new Error(`unpexpected arguments to fs.readFileSync: ${path}, ${enc}`);
-  });
-});
-
 describe('config schema', () => {
   it('generates proper defaults', () => {
     expect(configSchema.validate({})).toMatchInlineSnapshot(`
@@ -99,6 +82,11 @@ describe('config schema', () => {
             },
           },
           "enabled": true,
+          "kibana": Object {
+            "reporting": Object {
+              "stale_status_threshold_seconds": 120,
+            },
+          },
           "logs": Object {
             "index": "filebeat-*",
           },
@@ -115,6 +103,22 @@ describe('config schema', () => {
 });
 
 describe('createConfig()', () => {
+  const MOCKED_PATHS = [
+    'packages/kbn-dev-utils/certs/ca.crt',
+    'packages/kbn-dev-utils/certs/elasticsearch.crt',
+    'packages/kbn-dev-utils/certs/elasticsearch.key',
+  ];
+
+  beforeEach(() => {
+    jest.spyOn(fs, 'readFileSync').mockImplementation((path, enc) => {
+      if (typeof path === 'string' && MOCKED_PATHS.includes(path) && enc === 'utf8') {
+        return `contents-of-${path}`;
+      }
+
+      throw new Error(`unpexpected arguments to fs.readFileSync: ${path}, ${enc}`);
+    });
+  });
+
   it('should wrap in Elasticsearch config', async () => {
     const config = createConfig(
       configSchema.validate({

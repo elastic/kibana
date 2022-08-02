@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { square } = require('../../src/functions/square.js');
+const { square } = require('../../src/functions/square');
 
 describe('Square', () => {
   it('numbers', () => {

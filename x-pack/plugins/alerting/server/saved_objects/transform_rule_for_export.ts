@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObject } from 'kibana/server';
+import { SavedObject } from '@kbn/core/server';
 import { getRuleExecutionStatusPending } from '../lib/rule_execution_status';
 import { RawRule } from '../types';
 

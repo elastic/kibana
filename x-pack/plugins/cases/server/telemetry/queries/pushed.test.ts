@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  savedObjectsRepositoryMock,
-  loggingSystemMock,
-} from '../../../../../../src/core/server/mocks';
+import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { getPushedTelemetryData } from './pushes';
 
 describe('pushes', () => {
@@ -75,14 +72,12 @@ describe('pushes', () => {
             {
               type: 'literal',
               value: 'cases-user-actions.attributes.type',
+              isQuoted: false,
             },
             {
               type: 'literal',
               value: 'pushed',
-            },
-            {
-              type: 'literal',
-              value: false,
+              isQuoted: false,
             },
           ],
           function: 'is',

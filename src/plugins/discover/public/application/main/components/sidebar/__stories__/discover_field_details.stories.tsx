@@ -9,9 +9,9 @@
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { DataViewField } from '@kbn/data-views-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { DiscoverFieldDetails } from '../discover_field_details';
-import { DataViewField } from '../../../../../../../data_views/public';
-import { DataView } from '../../../../../../../data_views/public';
 import { fieldSpecMap } from './fields';
 import { numericField as field } from './fields';
 import { Bucket } from '../types';
@@ -66,7 +66,7 @@ storiesOf('components/sidebar/DiscoverFieldDetails', module)
     <div style={{ width: '50%' }}>
       <DiscoverFieldDetails
         field={field}
-        indexPattern={dataView}
+        dataView={dataView}
         details={details}
         onAddFilter={() => {
           alert('On add filter clicked');
@@ -78,7 +78,7 @@ storiesOf('components/sidebar/DiscoverFieldDetails', module)
     <div style={{ width: '50%' }}>
       <DiscoverFieldDetails
         field={scriptedField}
-        indexPattern={dataView}
+        dataView={dataView}
         details={details}
         onAddFilter={() => {}}
       />
@@ -87,7 +87,7 @@ storiesOf('components/sidebar/DiscoverFieldDetails', module)
   .add('error', () => (
     <DiscoverFieldDetails
       field={field}
-      indexPattern={dataView}
+      dataView={dataView}
       details={{ buckets: [], error: 'An error occurred', exists: 1, total: 2, columns: [] }}
       onAddFilter={() => {}}
     />

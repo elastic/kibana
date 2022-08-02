@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { ControlEmbeddable, ControlFactory, ControlInput, ControlOutput } from '.';
-import { EmbeddableFactory } from '../../embeddable/public';
 import { ControlTypeRegistry } from './services/controls';
 
 export class ControlsService {

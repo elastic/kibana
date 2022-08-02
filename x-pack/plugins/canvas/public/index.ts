@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
-import { CoreStart } from '../../../../src/core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { CanvasServices } from './services';
 import { CanvasSetup, CanvasStart, CanvasStartDeps, CanvasPlugin } from './plugin';
 

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { SavedObjectsServiceSetup, SavedObjectsTypeMappingDefinition } from 'kibana/server';
+import type { SavedObjectsServiceSetup, SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import mappings from './mappings.json';
 import { getMigrations } from './migrations';
-import { TaskManagerConfig } from '../config.js';
+import { TaskManagerConfig } from '../config';
 import { getOldestIdleActionTask } from '../queries/oldest_idle_action_task';
 import { TASK_MANAGER_INDEX } from '../constants';
 

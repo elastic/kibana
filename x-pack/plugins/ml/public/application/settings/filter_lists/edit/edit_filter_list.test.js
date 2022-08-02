@@ -45,7 +45,7 @@ jest.mock('../../../services/ml_api_service', () => ({
   },
 }));
 
-jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => ({
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
   withKibana: (node) => {
     return node;
   },

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { dataPluginMock } from '../../../../data/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { DashboardSavedObject } from '../../saved_dashboards';
 
 export function getSavedDashboardMock(

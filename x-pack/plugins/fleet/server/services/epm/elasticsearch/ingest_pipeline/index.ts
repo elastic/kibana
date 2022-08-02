@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { installPipelines, isTopLevelPipeline } from './install';
-
+export { prepareToInstallPipelines } from './install';
+export { isTopLevelPipeline } from './helpers';
 export { deletePreviousPipelines, deletePipeline } from './remove';

@@ -8,7 +8,7 @@
 
 import { RollupSearchStrategy } from './rollup_search_strategy';
 
-import type { DataViewsService } from '../../../../../../data_views/common';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { CachedIndexPatternFetcher } from '../lib/cached_index_pattern_fetcher';
 import type {
   VisTypeTimeseriesRequestHandlerContext,

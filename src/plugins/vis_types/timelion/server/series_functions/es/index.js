@@ -104,7 +104,7 @@ export default new Datasource('es', {
       fit: 'nearest',
     });
     const indexPatternsService = tlConfig.getIndexPatternsService();
-    const indexPatternSpec = (await indexPatternsService.find(config.index)).find(
+    const indexPatternSpec = (await indexPatternsService.find(config.index, 1)).find(
       (index) => index.title === config.index
     );
 
@@ -117,7 +117,8 @@ export default new Datasource('es', {
     // we need to handle this scenario by aborting underlying server requests
     const abortSignal = getRequestAbortedSignal(tlConfig.request.events.aborted$);
 
-    const resp = await tlConfig.context.search
+    const searchContext = await tlConfig.context.search;
+    const resp = await searchContext
       .search(
         body,
         {

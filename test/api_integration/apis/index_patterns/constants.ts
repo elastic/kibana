@@ -13,7 +13,7 @@ import {
   SERVICE_KEY,
   SERVICE_PATH,
   SERVICE_PATH_LEGACY,
-} from '../../../../src/plugins/data_views/server';
+} from '@kbn/data-views-plugin/server';
 
 const legacyConfig = {
   name: 'legacy index pattern api',
@@ -22,7 +22,7 @@ const legacyConfig = {
   serviceKey: SERVICE_KEY_LEGACY,
 };
 
-const dataViewConfig = {
+export const dataViewConfig = {
   name: 'data view api',
   path: DATA_VIEW_PATH,
   basePath: SERVICE_PATH,

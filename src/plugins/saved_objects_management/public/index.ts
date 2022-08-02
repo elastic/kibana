@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { SavedObjectsManagementPlugin } from './plugin';
 
 export type {
@@ -24,7 +24,12 @@ export type {
 export { SavedObjectsManagementAction } from './services';
 export type { ProcessedImportResponse, FailedImport } from './lib';
 export { processImportResponse } from './lib';
-export type { SavedObjectRelation, SavedObjectWithMetadata, SavedObjectMetadata } from './types';
+export type {
+  SavedObjectRelation,
+  SavedObjectWithMetadata,
+  SavedObjectMetadata,
+  SavedObjectManagementTypeInfo,
+} from './types';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new SavedObjectsManagementPlugin();

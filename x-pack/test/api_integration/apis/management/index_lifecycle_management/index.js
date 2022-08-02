@@ -11,5 +11,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./templates'));
     loadTestFile(require.resolve('./indices'));
     loadTestFile(require.resolve('./nodes'));
+    loadTestFile(require.resolve('./snapshot_policies'));
+    loadTestFile(require.resolve('./snapshot_repositories'));
   });
 }

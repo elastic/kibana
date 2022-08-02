@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Visualize', () => {
     it('visualize', async () => {
+      await PageObjects.visualize.gotoVisualizationLandingPage();
       await a11y.testAppSnapshot();
     });
 
@@ -22,8 +23,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it.skip('create visualize button', async () => {
-      await PageObjects.visualize.clickNewVisualization();
+    it('create visualize button', async () => {
+      await PageObjects.visualize.clickAggBasedVisualizations();
+      await PageObjects.visualize.waitForVisualizationSelectPage();
+      await PageObjects.visualize.clickAreaChart();
       await a11y.testAppSnapshot();
     });
   });

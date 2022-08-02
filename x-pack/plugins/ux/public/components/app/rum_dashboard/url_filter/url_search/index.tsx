@@ -8,11 +8,11 @@
 import React, { useEffect, useState } from 'react';
 import { isEqual, map } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { SelectableUrlList } from '@kbn/observability-plugin/public';
 import { useLegacyUrlParams } from '../../../../../context/url_params_context/use_url_params';
 import { I18LABELS } from '../../translations';
 import { formatToSec } from '../../ux_metrics/key_ux_metrics';
 import { getPercentileLabel } from '../../ux_metrics/translations';
-import { SelectableUrlList } from '../../../../../../../observability/public';
 import { selectableRenderOptions, UrlOption } from './render_option';
 import { useUrlSearch } from './use_url_search';
 
@@ -103,7 +103,7 @@ export function URLSearch({
 
   const [items, setItems] = useState<UrlOption[]>([]);
 
-  const { data, status } = useUrlSearch({ query: searchValue, popoverIsOpen });
+  const { data, loading } = useUrlSearch({ query: searchValue, popoverIsOpen });
 
   useEffect(() => {
     const newItems = formatOptions(
@@ -151,8 +151,6 @@ export function URLSearch({
     setSearchValue(val);
   };
 
-  const isLoading = status !== 'success';
-
   const onApply = () => {
     const { includedItems, excludedItems } = processItems(items);
 
@@ -184,7 +182,7 @@ export function URLSearch({
 
   return (
     <SelectableUrlList
-      loading={isLoading}
+      loading={loading ?? true}
       onInputChange={onInputChange}
       data={{ items, total: data?.total ?? 0 }}
       onSelectionChange={onChange}

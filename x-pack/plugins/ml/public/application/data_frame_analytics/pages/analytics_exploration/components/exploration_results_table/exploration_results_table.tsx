@@ -7,7 +7,7 @@
 
 import React, { FC } from 'react';
 
-import type { DataView } from '../../../../../../../../../../src/plugins/data_views/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 import { useMlKibana } from '../../../../../contexts/kibana';

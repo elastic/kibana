@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionValueVisDimension } from '../../../../visualizations/common';
-import { getColumnByAccessor, getFormatByAccessor } from '../../../../visualizations/common/utils';
-import { DatatableColumn, Datatable } from '../../../../expressions/public';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { DatatableColumn, Datatable } from '@kbn/expressions-plugin/public';
 import { BucketColumns, PartitionVisParams } from '../../common/types';
 
 const getMetricColumn = (

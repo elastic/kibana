@@ -17,8 +17,7 @@ import {
   EuiFormRow,
   EuiTextArea,
 } from '@elastic/eui';
-import { HttpFetchError } from '../../../src/core/public';
-import { isError } from './is_error';
+import { type IHttpFetchError, isHttpFetchError } from '@kbn/core-http-browser';
 import { Services } from './services';
 
 interface Props {
@@ -27,7 +26,7 @@ interface Props {
 }
 
 export function PostMessageRouteExample({ postMessage, addSuccessToast }: Props) {
-  const [error, setError] = useState<HttpFetchError | undefined>();
+  const [error, setError] = useState<IHttpFetchError | undefined>();
   const [isPosting, setIsPosting] = useState<boolean>(false);
   const [message, setMessage] = useState<string>('');
   const [id, setId] = useState<string>('');
@@ -37,7 +36,7 @@ export function PostMessageRouteExample({ postMessage, addSuccessToast }: Props)
     setIsPosting(true);
     const response = await postMessage(message, id);
 
-    if (response && isError(response)) {
+    if (response && isHttpFetchError(response)) {
       setError(response);
     } else {
       setError(undefined);

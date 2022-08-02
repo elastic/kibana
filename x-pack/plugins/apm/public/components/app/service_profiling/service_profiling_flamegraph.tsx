@@ -30,8 +30,8 @@ import { find, sumBy } from 'lodash';
 import { rgba } from 'polished';
 import React, { useMemo, useState } from 'react';
 import seedrandom from 'seedrandom';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { useChartTheme } from '../../../../../observability/public';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { useChartTheme } from '@kbn/observability-plugin/public';
 import {
   getValueTypeConfig,
   ProfileNode,
@@ -60,7 +60,7 @@ const TooltipContainer = euiStyled.div`
   background-color: ${(props) => props.theme.eui.euiColorDarkestShade};
   border-radius: ${(props) => props.theme.eui.euiBorderRadius};
   color: ${(props) => props.theme.eui.euiColorLightestShade};
-  padding: ${(props) => props.theme.eui.paddingSizes.s};
+  padding: ${(props) => props.theme.eui.euiSizeS};
 `;
 
 const formatValue = (

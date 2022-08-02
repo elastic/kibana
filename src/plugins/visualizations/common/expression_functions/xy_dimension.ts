@@ -7,15 +7,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionValueVisDimension } from './vis_dimension';
 
 import type {
   ExpressionFunctionDefinition,
   ExpressionValueBoxed,
   Datatable,
   DatatableColumn,
-} from '../../../expressions/common';
-import type { SerializedFieldFormat } from '../../../field_formats/common';
+} from '@kbn/expressions-plugin/common';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { ExpressionValueVisDimension } from './vis_dimension';
 
 export interface DateHistogramParams {
   date: boolean;

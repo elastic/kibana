@@ -16,6 +16,7 @@ import {
   buildExistsClause,
   buildMatchAnyClause,
   buildMatchClause,
+  buildMatchWildcardClause,
   buildNestedClause,
   createOrClauses,
 } from '@kbn/securitysolution-list-utils';
@@ -32,6 +33,10 @@ import {
   getEntryNestedMock,
 } from '../schemas/types/entry_nested.mock';
 import { getExceptionListItemSchemaMock } from '../schemas/response/exception_list_item_schema.mock';
+import {
+  getEntryMatchWildcardExcludeMock,
+  getEntryMatchWildcardMock,
+} from '../schemas/types/entry_match_wildcard.mock';
 
 // TODO: Port the test over to packages/kbn-securitysolution-list-utils/src/build_exception_filter/index.test.ts once the mocks are ported to kbn
 
@@ -45,6 +50,7 @@ describe('build_exceptions_filter', () => {
   describe('buildExceptionFilter', () => {
     test('it should return undefined if no exception items', () => {
       const booleanFilter = buildExceptionFilter({
+        alias: null,
         chunkSize: 1,
         excludeExceptions: false,
         lists: [],
@@ -54,6 +60,7 @@ describe('build_exceptions_filter', () => {
 
     test('it should build a filter given an exception list', () => {
       const booleanFilter = buildExceptionFilter({
+        alias: null,
         chunkSize: 1,
         excludeExceptions: false,
         lists: [getExceptionListItemSchemaMock()],
@@ -109,6 +116,7 @@ describe('build_exceptions_filter', () => {
         entries: [{ field: 'user.name', operator: 'included', type: 'match', value: 'name' }],
       };
       const exceptionFilter = buildExceptionFilter({
+        alias: null,
         chunkSize: 2,
         excludeExceptions: true,
         lists: [exceptionItem1, exceptionItem2],
@@ -187,6 +195,7 @@ describe('build_exceptions_filter', () => {
         entries: [{ field: 'file.path', operator: 'included', type: 'match', value: '/safe/path' }],
       };
       const exceptionFilter = buildExceptionFilter({
+        alias: null,
         chunkSize: 2,
         excludeExceptions: true,
         lists: [exceptionItem1, exceptionItem2, exceptionItem3],
@@ -284,6 +293,7 @@ describe('build_exceptions_filter', () => {
       ];
 
       const booleanFilter = buildExceptionFilter({
+        alias: null,
         chunkSize: 1,
         excludeExceptions: true,
         lists: exceptions,
@@ -1031,6 +1041,40 @@ describe('build_exceptions_filter', () => {
             },
           },
           score_mode: 'none',
+        },
+      });
+    });
+  });
+
+  describe('buildWildcardClause', () => {
+    test('it should build wildcard filter when operator is "included"', () => {
+      const booleanFilter = buildMatchWildcardClause(getEntryMatchWildcardMock());
+
+      expect(booleanFilter).toEqual({
+        bool: {
+          filter: {
+            wildcard: {
+              'host.name': 'some host name',
+            },
+          },
+        },
+      });
+    });
+
+    test('it should build boolean filter when operator is "excluded"', () => {
+      const booleanFilter = buildMatchWildcardClause(getEntryMatchWildcardExcludeMock());
+
+      expect(booleanFilter).toEqual({
+        bool: {
+          must_not: {
+            bool: {
+              filter: {
+                wildcard: {
+                  'host.name': 'some host name',
+                },
+              },
+            },
+          },
         },
       });
     });

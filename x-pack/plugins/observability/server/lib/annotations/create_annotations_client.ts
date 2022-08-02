@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from 'kibana/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import * as t from 'io-ts';
 import Boom from '@hapi/boom';
-import { ILicense } from '../../../../licensing/server';
+import { ILicense } from '@kbn/licensing-plugin/server';
 import {
   createAnnotationRt,
   deleteAnnotationRt,

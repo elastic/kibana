@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { CombinedJob, Detector } from '../../../common/types/anomaly_detection_jobs';
 import { ModelMemoryEstimateResponse } from '../calculate_model_memory_limit/calculate_model_memory_limit';
 import { validateModelMemoryLimit } from './validate_model_memory_limit';

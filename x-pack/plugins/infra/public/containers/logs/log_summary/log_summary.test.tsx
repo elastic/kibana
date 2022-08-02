@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 // We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
-import { coreMock as mockCoreMock } from 'src/core/public/mocks';
+import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
 
 import { useLogSummary } from './log_summary';
 

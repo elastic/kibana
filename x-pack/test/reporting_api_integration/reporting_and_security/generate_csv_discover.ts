@@ -6,12 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-import { SerializedSearchSourceFields } from 'src/plugins/data/common';
-import { ReportApiJSON } from '../../../plugins/reporting/common/types';
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { ReportApiJSON } from '@kbn/reporting-plugin/common/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const reportingAPI = getService('reportingAPI');
 
   describe('Generate CSV from SearchSource', () => {
@@ -70,6 +72,64 @@ export default function ({ getService }: FtrProviderContext) {
 
       await reportingAPI.teardownEcommerce();
       await reportingAPI.deleteAllReports();
+    });
+
+    describe('with unmapped fields', () => {
+      before(async () => {
+        await esArchiver.loadIfNeeded(
+          'x-pack/test/functional/es_archives/reporting/unmapped_fields'
+        );
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/reporting/unmapped_fields.json'
+        );
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/unmapped_fields');
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/reporting/unmapped_fields.json'
+        );
+      });
+
+      async function generateCsvReport(fields: string[]) {
+        const { text } = await reportingAPI.generateCsv({
+          title: 'CSV Report',
+          browserTimezone: 'UTC',
+          objectType: 'search',
+          version: '7.15.0',
+          searchSource: {
+            version: true,
+            query: { query: '', language: 'kuery' },
+            index: '5c620ea0-dc4f-11ec-972a-bf98ce1eebd7',
+            sort: [{ order_date: 'desc' }],
+            fields: fields.map((field) => ({ field, include_unmapped: 'true' })),
+            filter: [],
+          } as SerializedSearchSourceFields,
+        });
+
+        const { path } = JSON.parse(text) as { path: string };
+        await reportingAPI.waitForJobToFinish(path);
+
+        return reportingAPI.getCompletedJobOutput(path);
+      }
+
+      it('includes an unmapped field to the report', async () => {
+        const csvFile = await generateCsvReport(['text', 'unmapped']);
+
+        expectSnapshot(csvFile).toMatch();
+      });
+
+      it('includes an unmapped nested field to the report', async () => {
+        const csvFile = await generateCsvReport(['text', 'nested.unmapped']);
+
+        expectSnapshot(csvFile).toMatch();
+      });
+
+      it('includes all unmapped fields to the report', async () => {
+        const csvFile = await generateCsvReport(['*']);
+
+        expectSnapshot(csvFile).toMatch();
+      });
     });
   });
 }

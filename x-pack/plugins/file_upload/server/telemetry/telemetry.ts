@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import { ISavedObjectsRepository } from 'kibana/server';
+import { ISavedObjectsRepository } from '@kbn/core/server';
 
 import { getInternalRepository } from './internal_repository';
 

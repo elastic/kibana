@@ -7,16 +7,17 @@
 
 import { useMemo } from 'react';
 import { SecurityPageName } from '../../../../common/constants';
+import { HostsTableType } from '../../../hosts/store/model';
 import { NetworkRouteType } from '../../../network/pages/navigation/types';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
-import { LensAttributes, GetLensAttributes } from './types';
+import type { LensAttributes, GetLensAttributes } from './types';
 import {
   getHostDetailsPageFilter,
   filterNetworkExternalAlertData,
-  filterHostExternalAlertData,
+  hostNameExistsFilter,
   getIndexFilters,
 } from './utils';
 
@@ -40,8 +41,8 @@ export const useLensAttributes = ({
   const [{ detailName, pageName, tabName }] = useRouteSpy();
 
   const tabsFilters = useMemo(() => {
-    if (pageName === SecurityPageName.hosts && tabName === 'externalAlerts') {
-      return filterHostExternalAlertData;
+    if (pageName === SecurityPageName.hosts && tabName === HostsTableType.events) {
+      return hostNameExistsFilter;
     }
 
     if (pageName === SecurityPageName.network && tabName === NetworkRouteType.alerts) {

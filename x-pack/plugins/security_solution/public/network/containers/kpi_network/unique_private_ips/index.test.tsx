@@ -7,7 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../../common/mock';
-import { useNetworkKpiUniquePrivateIps } from './index';
+import { useNetworkKpiUniquePrivateIps } from '.';
 
 describe('kpi network - unique private ips', () => {
   it('skip = true will cancel any running request', () => {

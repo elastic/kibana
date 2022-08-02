@@ -8,11 +8,10 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { getSupportedActions, RuleActionsField } from './index';
+import { RuleActionsField } from '.';
 import { useForm, Form } from '../../../../shared_imports';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useFormFieldMock } from '../../../../common/mock';
-import { ActionType } from '../../../../../../actions/common';
 jest.mock('../../../../common/lib/kibana');
 
 describe('RuleActionsField', () => {
@@ -46,52 +45,12 @@ describe('RuleActionsField', () => {
 
       return (
         <Form form={form}>
-          <RuleActionsField
-            field={field}
-            messageVariables={messageVariables}
-            hasErrorOnCreationCaseAction={false}
-          />
+          <RuleActionsField field={field} messageVariables={messageVariables} />
         </Form>
       );
     };
     const wrapper = shallow(<Component />);
 
     expect(wrapper.dive().find('ActionForm')).toHaveLength(0);
-  });
-
-  describe('#getSupportedActions', () => {
-    const actions: ActionType[] = [
-      {
-        id: '.jira',
-        name: 'My Jira',
-        enabled: true,
-        enabledInConfig: false,
-        enabledInLicense: true,
-        minimumLicenseRequired: 'gold',
-      },
-      {
-        id: '.case',
-        name: 'Cases',
-        enabled: true,
-        enabledInConfig: false,
-        enabledInLicense: true,
-        minimumLicenseRequired: 'basic',
-      },
-    ];
-
-    it('if we have an error on case action creation, we do not support case connector', () => {
-      expect(getSupportedActions(actions, true)).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "enabled": true,
-            "enabledInConfig": false,
-            "enabledInLicense": true,
-            "id": ".jira",
-            "minimumLicenseRequired": "gold",
-            "name": "My Jira",
-          },
-        ]
-      `);
-    });
   });
 });

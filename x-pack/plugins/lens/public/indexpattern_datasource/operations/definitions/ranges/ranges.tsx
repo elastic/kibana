@@ -8,17 +8,11 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { AggFunctionsMapping, UI_SETTINGS } from '../../../../../../../../src/plugins/data/public';
-import {
-  extendedBoundsToAst,
-  numericalRangeToAst,
-} from '../../../../../../../../src/plugins/data/common';
-import {
-  buildExpressionFunction,
-  Range,
-} from '../../../../../../../../src/plugins/expressions/public';
+import { AggFunctionsMapping, UI_SETTINGS } from '@kbn/data-plugin/public';
+import { extendedBoundsToAst, numericalRangeToAst } from '@kbn/data-plugin/common';
+import { buildExpressionFunction, Range } from '@kbn/expressions-plugin/public';
 import { RangeEditor } from './range_editor';
-import { OperationDefinition } from '../index';
+import { OperationDefinition } from '..';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { updateColumnParam } from '../../layer_helpers';
 import { supportedFormats } from '../../../../../common/expressions/format_column/supported_formats';
@@ -186,7 +180,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
     layer,
     columnId,
     currentColumn,
-    updateLayer,
+    paramEditorUpdater,
     indexPattern,
     uiSettings,
     data,
@@ -214,7 +208,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
 
     // Used to change one param at the time
     const setParam: UpdateParamsFnType = (paramName, value) => {
-      updateLayer(
+      paramEditorUpdater(
         updateColumnParam({
           layer,
           columnId,
@@ -232,7 +226,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
         newMode === MODES.Range
           ? { id: 'range', params: { template: 'arrow_right', replaceInfinity: true } }
           : undefined;
-      updateLayer({
+      paramEditorUpdater({
         ...layer,
         columns: {
           ...layer.columns,

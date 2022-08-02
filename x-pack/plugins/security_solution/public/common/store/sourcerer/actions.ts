@@ -7,8 +7,13 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
-import { KibanaDataView, SelectedDataView, SourcererDataView, SourcererScopeName } from './model';
-import { SecurityDataView } from '../../containers/sourcerer/api';
+import type {
+  KibanaDataView,
+  SelectedDataView,
+  SourcererDataView,
+  SourcererScopeName,
+} from './model';
+import type { SecurityDataView } from '../../containers/sourcerer/api';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/sourcerer');
 
@@ -26,8 +31,9 @@ export const setDataViewLoading = actionCreator<{
   loading: boolean;
 }>('SET_DATA_VIEW_LOADING');
 
-export const setSignalIndexName =
-  actionCreator<{ signalIndexName: string }>('SET_SIGNAL_INDEX_NAME');
+export const setSignalIndexName = actionCreator<{ signalIndexName: string }>(
+  'SET_SIGNAL_INDEX_NAME'
+);
 
 export const setSourcererDataViews = actionCreator<SecurityDataView>('SET_SOURCERER_DATA_VIEWS');
 

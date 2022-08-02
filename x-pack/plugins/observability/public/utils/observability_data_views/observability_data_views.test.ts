@@ -7,7 +7,7 @@
 
 import { dataViewList, ObservabilityDataViews } from './observability_data_views';
 import { mockCore, mockDataView } from '../../components/shared/exploratory_view/rtl_helpers';
-import { SavedObjectNotFound } from '../../../../../../src/plugins/kibana_utils/public';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 
 const fieldFormats = {
   'transaction.duration.us': {

@@ -11,7 +11,7 @@ import {
   SavedObjectsFindResponse,
   SavedObjectsClientContract,
   ElasticsearchClient,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import {
   REINDEX_OP_TYPE,
   ReindexOperation,

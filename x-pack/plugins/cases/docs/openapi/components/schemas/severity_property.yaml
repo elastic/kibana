@@ -1,0 +1,8 @@
+type: string
+description: The severity of the case.
+enum:
+  - critical
+  - high
+  - low
+  - medium
+default: low

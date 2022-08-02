@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { CoreStart } from 'kibana/server';
+import { CoreStart } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { ActionsConfig } from '../config';
 import { ActionsPluginsStart } from '../plugin';
-import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager/server';
-import { loggingSystemMock, coreMock } from '../../../../../src/core/server/mocks';
+import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
+import { loggingSystemMock, coreMock } from '@kbn/core/server/mocks';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { taskRunner, TaskRunnerOpts } from './task_runner';
 

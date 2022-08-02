@@ -6,7 +6,7 @@
  */
 
 import React, { FunctionComponent, useState } from 'react';
-import { EuiLink, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useEditPolicyContext } from '../edit_policy_context';
 import { getIndicesListPath } from '../../../services/navigation';
@@ -14,7 +14,7 @@ import { useKibana } from '../../../../shared_imports';
 import { IndexTemplatesFlyout } from '../../../components/index_templates_flyout';
 
 export const EditWarning: FunctionComponent = () => {
-  const { isNewPolicy, indices, indexTemplates, policyName } = useEditPolicyContext();
+  const { isNewPolicy, indices, indexTemplates, policyName, policy } = useEditPolicyContext();
   const {
     services: { getUrlForApp },
   } = useKibana();
@@ -67,6 +67,8 @@ export const EditWarning: FunctionComponent = () => {
   ) : (
     indexTemplatesLink
   );
+  const isManagedPolicy = policy?._meta?.managed;
+
   return (
     <>
       {isIndexTemplatesFlyoutShown && (
@@ -77,6 +79,29 @@ export const EditWarning: FunctionComponent = () => {
         />
       )}
       <EuiText data-test-subj="editWarning">
+        {isManagedPolicy && (
+          <>
+            <EuiCallOut
+              title={
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.editPolicyModal.proceedWithCautionCallOutTitle"
+                  defaultMessage="Editing a managed policy can break Kibana"
+                />
+              }
+              color="danger"
+              iconType="alert"
+              data-test-subj="editManagedPolicyCallOut"
+            >
+              <p>
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.editPolicyModal.proceedWithCautionCallOutDescription"
+                  defaultMessage="Managed policies are critical for internal operations."
+                />
+              </p>
+            </EuiCallOut>
+            <EuiSpacer />
+          </>
+        )}
         <p>
           <strong>
             <FormattedMessage

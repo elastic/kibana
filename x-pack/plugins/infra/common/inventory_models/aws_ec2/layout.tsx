@@ -7,18 +7,17 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LayoutPropsWithTheme } from '../../../public/pages/metrics/metric_detail/types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { withTheme } from '@kbn/kibana-react-plugin/common';
+import type { LayoutPropsWithTheme } from '../../../public/pages/metrics/metric_detail/types';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { Section } from '../../../public/pages/metrics/metric_detail/components/section';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { SubSection } from '../../../public/pages/metrics/metric_detail/components/sub_section';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { LayoutContent } from '../../../public/pages/metrics/metric_detail/components/layout_content';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { ChartSectionVis } from '../../../public/pages/metrics/metric_detail/components/chart_section_vis';
-import { withTheme } from '../../../../../../src/plugins/kibana_react/common';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { MetadataDetails } from '../../../public/pages/metrics/metric_detail/components/metadata_details';
 
 export const Layout = withTheme(({ metrics, theme, onChangeRangeTime }: LayoutPropsWithTheme) => (

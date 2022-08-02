@@ -8,7 +8,7 @@
 
 import { extractTagReferencesMock, injectTagReferencesMock } from './decorate_config.test.mocks';
 
-import { SavedObjectConfig } from '../../../saved_objects/public';
+import { SavedObjectConfig } from '@kbn/saved-objects-plugin/public';
 import { decorateConfig } from './decorate_config';
 
 describe('decorateConfig', () => {

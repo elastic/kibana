@@ -10,13 +10,14 @@ import React, { ReactNode, Suspense, lazy } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import classNames from 'classnames';
 
-import { IInterpreterRenderHandlers } from '../../../expressions/common';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 
 export interface VisualizationContainerProps {
   'data-test-subj'?: string;
   className?: string;
   children: ReactNode;
   handlers: IInterpreterRenderHandlers;
+  renderComplete?: () => void;
   showNoResult?: boolean;
   error?: string;
 }
@@ -31,6 +32,7 @@ export const VisualizationContainer = ({
   handlers,
   showNoResult = false,
   error,
+  renderComplete,
 }: VisualizationContainerProps) => {
   const classes = classNames('visualization', className);
 
@@ -46,7 +48,9 @@ export const VisualizationContainer = ({
         {error ? (
           <VisualizationError onInit={() => handlers.done()} error={error} />
         ) : showNoResult ? (
-          <VisualizationNoResults onInit={() => handlers.done()} />
+          <VisualizationNoResults
+            onInit={() => (renderComplete ? renderComplete() : handlers.done())}
+          />
         ) : (
           children
         )}

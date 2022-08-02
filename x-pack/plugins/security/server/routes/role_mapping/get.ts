@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import type { RouteDefinitionParams } from '../';
+import type { RouteDefinitionParams } from '..';
 import type { RoleMapping } from '../../../common/model';
 import { wrapError } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
@@ -28,10 +28,10 @@ export function defineRoleMappingGetRoutes(params: RouteDefinitionParams) {
       const expectSingleEntity = typeof request.params.name === 'string';
 
       try {
-        const roleMappingsResponse =
-          await context.core.elasticsearch.client.asCurrentUser.security.getRoleMapping({
-            name: request.params.name,
-          });
+        const esClient = (await context.core).elasticsearch.client;
+        const roleMappingsResponse = await esClient.asCurrentUser.security.getRoleMapping({
+          name: request.params.name,
+        });
 
         const mappings = Object.entries(roleMappingsResponse).map(([name, mapping]) => {
           return {

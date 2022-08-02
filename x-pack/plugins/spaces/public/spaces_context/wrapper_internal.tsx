@@ -8,7 +8,7 @@
 import type { PropsWithChildren } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 
-import type { ApplicationStart, DocLinksStart, NotificationsStart } from 'src/core/public';
+import type { ApplicationStart, DocLinksStart, NotificationsStart } from '@kbn/core/public';
 
 import type { GetAllSpacesPurpose } from '../../common';
 import type { SpacesManager } from '../spaces_manager';

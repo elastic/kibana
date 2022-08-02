@@ -7,7 +7,7 @@
  */
 
 import { createExtract, createInject } from './dashboard_container_persistable_state';
-import { createEmbeddablePersistableStateServiceMock } from '../../../embeddable/common/mocks';
+import { createEmbeddablePersistableStateServiceMock } from '@kbn/embeddable-plugin/common/mocks';
 import { DashboardContainerStateWithType } from '../types';
 
 const persistableStateService = createEmbeddablePersistableStateServiceMock();

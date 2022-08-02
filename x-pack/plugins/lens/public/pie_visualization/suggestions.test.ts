@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PaletteOutput } from 'src/plugins/charts/public';
+import type { PaletteOutput } from '@kbn/coloring';
 import { suggestions } from './suggestions';
 import type { DataType, SuggestionRequest } from '../types';
 import {

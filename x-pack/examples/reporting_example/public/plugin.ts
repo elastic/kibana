@@ -11,7 +11,7 @@ import {
   CoreSetup,
   CoreStart,
   Plugin,
-} from '../../../../src/core/public';
+} from '@kbn/core/public';
 import { PLUGIN_ID, PLUGIN_NAME, ReportingExampleLocatorDefinition } from '../common';
 import { SetupDeps, StartDeps, MyForwardableState } from './types';
 

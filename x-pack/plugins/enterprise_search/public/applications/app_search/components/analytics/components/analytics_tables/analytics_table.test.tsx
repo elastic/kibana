@@ -17,7 +17,7 @@ import { mountWithIntl } from '../../../../../test_helpers';
 
 import { runActionColumnTests } from './test_helpers/shared_columns_tests';
 
-import { AnalyticsTable } from './';
+import { AnalyticsTable } from '.';
 
 describe('AnalyticsTable', () => {
   const items = [

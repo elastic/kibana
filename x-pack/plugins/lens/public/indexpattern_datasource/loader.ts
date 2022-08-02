@@ -6,8 +6,19 @@
  */
 
 import { uniq, mapValues, difference } from 'lodash';
-import type { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import type { HttpSetup, SavedObjectReference } from 'kibana/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { HttpSetup, SavedObjectReference } from '@kbn/core/public';
+import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
+import { isNestedField } from '@kbn/data-views-plugin/common';
+import {
+  UPDATE_FILTER_REFERENCES_ACTION,
+  UPDATE_FILTER_REFERENCES_TRIGGER,
+} from '@kbn/unified-search-plugin/public';
+import {
+  ActionExecutionContext,
+  UiActionsStart,
+  VisualizeFieldContext,
+} from '@kbn/ui-actions-plugin/public';
 import type {
   DatasourceDataPanelProps,
   InitializationOptions,
@@ -25,9 +36,6 @@ import {
 import { updateLayerIndexPattern, translateToOperationName } from './operations';
 import { DateRange, ExistingFields } from '../../common/types';
 import { BASE_API_URL } from '../../common';
-import type { DataViewsContract, DataView } from '../../../../../src/plugins/data_views/public';
-import { isNestedField } from '../../../../../src/plugins/data_views/common';
-import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
 import { documentField } from './document_field';
 import { readFromStorage, writeToStorage } from '../settings_storage';
 import { getFieldByNameFactory } from './pure_helpers';
@@ -65,7 +73,7 @@ export function convertDataViewIntoLensIndexPattern(dataView: DataView): IndexPa
     })
     .concat(documentField);
 
-  const { typeMeta, title, timeFieldName, fieldFormatMap } = dataView;
+  const { typeMeta, title, name, timeFieldName, fieldFormatMap } = dataView;
   if (typeMeta?.aggs) {
     const aggs = Object.keys(typeMeta.aggs);
     newFields.forEach((field, index) => {
@@ -85,17 +93,19 @@ export function convertDataViewIntoLensIndexPattern(dataView: DataView): IndexPa
   return {
     id: dataView.id!, // id exists for sure because we got index patterns by id
     title,
+    name: name ? name : title,
     timeFieldName,
     fieldFormatMap:
       fieldFormatMap &&
       Object.fromEntries(
         Object.entries(fieldFormatMap).map(([id, format]) => [
           id,
+          // @ts-expect-error FIXME Property 'toJSON' does not exist on type 'SerializedFieldFormat'
           'toJSON' in format ? format.toJSON() : format,
         ])
       ),
     fields: newFields,
-    getFieldByName: getFieldByNameFactory(newFields),
+    getFieldByName: getFieldByNameFactory(newFields, false),
     hasRestrictions: !!typeMeta?.aggs,
   };
 }
@@ -165,18 +175,12 @@ const setLastUsedIndexPatternId = (storage: IStorageWrapper, value: string) => {
   writeToStorage(storage, 'indexPatternId', value);
 };
 
-const CURRENT_PATTERN_REFERENCE_NAME = 'indexpattern-datasource-current-indexpattern';
 function getLayerReferenceName(layerId: string) {
   return `indexpattern-datasource-layer-${layerId}`;
 }
 
-export function extractReferences({ currentIndexPatternId, layers }: IndexPatternPrivateState) {
+export function extractReferences({ layers }: IndexPatternPrivateState) {
   const savedObjectReferences: SavedObjectReference[] = [];
-  savedObjectReferences.push({
-    type: 'index-pattern',
-    id: currentIndexPatternId,
-    name: CURRENT_PATTERN_REFERENCE_NAME,
-  });
   const persistableLayers: Record<string, Omit<IndexPatternLayer, 'indexPatternId'>> = {};
   Object.entries(layers).forEach(([layerId, { indexPatternId, ...persistableLayer }]) => {
     savedObjectReferences.push({
@@ -201,8 +205,6 @@ export function injectReferences(
     };
   });
   return {
-    currentIndexPatternId: references.find(({ name }) => name === CURRENT_PATTERN_REFERENCE_NAME)!
-      .id,
     layers,
   };
 }
@@ -246,13 +248,7 @@ export async function loadInitialState({
   const usedPatterns = (
     initialContext
       ? indexPatternIds
-      : uniq(
-          state
-            ? Object.values(state.layers)
-                .map((l) => l.indexPatternId)
-                .concat(state.currentIndexPatternId)
-            : [fallbackId]
-        )
+      : uniq(state ? Object.values(state.layers).map((l) => l.indexPatternId) : [fallbackId])
   )
     // take out the undefined from the list
     .filter(Boolean);
@@ -351,6 +347,7 @@ export async function changeLayerIndexPattern({
   replaceIfPossible,
   storage,
   indexPatternsService,
+  uiActions,
 }: {
   indexPatternId: string;
   layerId: string;
@@ -360,7 +357,22 @@ export async function changeLayerIndexPattern({
   replaceIfPossible?: boolean;
   storage: IStorageWrapper;
   indexPatternsService: IndexPatternsService;
+  uiActions: UiActionsStart;
 }) {
+  const fromDataView = state.layers[layerId].indexPatternId;
+  const toDataView = indexPatternId;
+
+  const trigger = uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
+  const action = uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
+
+  action?.execute({
+    trigger,
+    fromDataView,
+    toDataView,
+    defaultDataView: toDataView,
+    usedDataViews: Object.values(Object.values(state.layers).map((layer) => layer.indexPatternId)),
+  } as ActionExecutionContext);
+
   const indexPatterns = await loadIndexPatterns({
     indexPatternsService,
     cache: state.indexPatterns,

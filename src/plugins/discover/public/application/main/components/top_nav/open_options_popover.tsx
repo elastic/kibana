@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import ReactDOM from 'react-dom';
-import { CoreTheme, I18nStart } from 'kibana/public';
+import { CoreTheme, I18nStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -23,10 +23,10 @@ import {
 } from '@elastic/eui';
 import './open_options_popover.scss';
 import { Observable } from 'rxjs';
-import { useDiscoverServices } from '../../../../utils/use_discover_services';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverServices } from '../../../../build_services';
 import { DOC_TABLE_LEGACY } from '../../../../../common';
-import { KibanaContextProvider, KibanaThemeProvider } from '../../../../../../kibana_react/public';
 
 const container = document.createElement('div');
 let isOpen = false;
@@ -51,8 +51,14 @@ export function OptionsPopover(props: OptionsPopoverProps) {
         defaultMessage: 'Document Explorer',
       });
 
+  const { anchorElement, onClose: originalOnClose } = props;
+  const closePopover = useCallback(() => {
+    originalOnClose();
+    anchorElement?.focus();
+  }, [anchorElement, originalOnClose]);
+
   return (
-    <EuiWrappingPopover ownFocus button={props.anchorElement} closePopover={props.onClose} isOpen>
+    <EuiWrappingPopover ownFocus button={props.anchorElement} closePopover={closePopover} isOpen>
       <div className="dscOptionsPopover">
         <EuiText color="subdued" size="s">
           <p>

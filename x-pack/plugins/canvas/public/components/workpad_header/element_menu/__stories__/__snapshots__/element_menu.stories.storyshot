@@ -28,7 +28,9 @@ exports[`Storyshots components/WorkpadHeader/ElementMenu default 1`] = `
           color="inherit"
           data-euiicon-type="plusInCircle"
           size="m"
-        />
+        >
+          
+        </span>
         <span
           className="euiButton__text"
         >

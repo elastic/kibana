@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { DurationFormatEditor } from './duration';
-import { FieldFormat } from 'src/plugins/field_formats/common';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { EuiSwitch } from '@elastic/eui';
 
 const fieldType = 'number';

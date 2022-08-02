@@ -10,7 +10,7 @@ import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import React from 'react';
-import { NetworkKpiDns } from './index';
+import { NetworkKpiDns } from '.';
 
 jest.mock('../../../../common/containers/query_toggle');
 jest.mock('../../../containers/kpi_network/dns');

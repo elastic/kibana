@@ -13,6 +13,9 @@ import {
   modelIdSchema,
   optionalModelIdSchema,
   putTrainedModelQuerySchema,
+  inferTrainedModelQuery,
+  inferTrainedModelBody,
+  threadingParamsSchema,
 } from './schemas/inference_schema';
 import { modelsProvider } from '../models/data_frame_analytics';
 import { TrainedModelConfigResponse } from '../../common/types/trained_models';
@@ -299,6 +302,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
       path: '/api/ml/trained_models/{modelId}/deployment/_start',
       validate: {
         params: modelIdSchema,
+        query: threadingParamsSchema,
       },
       options: {
         tags: ['access:ml:canStartStopTrainedModels'],
@@ -309,6 +313,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         const { modelId } = request.params;
         const body = await mlClient.startTrainedModelDeployment({
           model_id: modelId,
+          ...(request.query ? request.query : {}),
         });
         return response.ok({
           body,
@@ -343,6 +348,47 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         const body = await mlClient.stopTrainedModelDeployment({
           model_id: modelId,
           force: request.query.force ?? false,
+        });
+        return response.ok({
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {post} /api/ml/trained_models/infer/:modelId Evaluates a trained model
+   * @apiName InferTrainedModelDeployment
+   * @apiDescription Evaluates a trained model.
+   */
+  router.post(
+    {
+      path: '/api/ml/trained_models/infer/{modelId}',
+      validate: {
+        params: modelIdSchema,
+        query: inferTrainedModelQuery,
+        body: inferTrainedModelBody,
+      },
+      options: {
+        tags: ['access:ml:canTestTrainedModels'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+      try {
+        const { modelId } = request.params;
+        const body = await mlClient.inferTrainedModel({
+          model_id: modelId,
+          body: {
+            docs: request.body.docs,
+            ...(request.body.inference_config
+              ? { inference_config: request.body.inference_config }
+              : {}),
+          },
+          ...(request.query.timeout ? { timeout: request.query.timeout } : {}),
         });
         return response.ok({
           body,

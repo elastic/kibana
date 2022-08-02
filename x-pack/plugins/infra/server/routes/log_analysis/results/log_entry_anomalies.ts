@@ -42,7 +42,7 @@ export const initGetLogEntryAnomaliesRoute = ({ framework }: InfraBackendLibs) =
       const { sort, pagination } = getSortAndPagination(sortParam, paginationParam);
 
       try {
-        assertHasInfraMlPlugins(requestContext);
+        const infraMlContext = await assertHasInfraMlPlugins(requestContext);
 
         const {
           data: logEntryAnomalies,
@@ -50,7 +50,7 @@ export const initGetLogEntryAnomaliesRoute = ({ framework }: InfraBackendLibs) =
           hasMoreEntries,
           timing,
         } = await getLogEntryAnomalies(
-          requestContext,
+          infraMlContext,
           sourceId,
           startTime,
           endTime,

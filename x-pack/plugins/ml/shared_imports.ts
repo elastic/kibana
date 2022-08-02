@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-export { EuiCodeEditor } from '../../../src/plugins/es_ui_shared/public';
-export type { EuiCodeEditorProps } from '../../../src/plugins/es_ui_shared/public';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+export { EuiCodeEditor } from '@kbn/es-ui-shared-plugin/public';
+export type { EuiCodeEditorProps } from '@kbn/es-ui-shared-plugin/public';
 
-import { XJson } from '../../../src/plugins/es_ui_shared/public';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
 const { collapseLiteralStrings, expandLiteralStrings } = XJson;
 
 export { XJsonMode } from '@kbn/ace';

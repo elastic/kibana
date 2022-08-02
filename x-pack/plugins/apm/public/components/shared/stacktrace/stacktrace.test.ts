@@ -6,7 +6,7 @@
  */
 
 import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
-import { getGroupedStackframes } from './';
+import { getGroupedStackframes } from '.';
 import stacktracesMock from './__fixtures__/stacktraces.json';
 
 describe('Stacktrace', () => {

@@ -10,7 +10,7 @@ import { generateEncodedPath } from '../../utils/encode_path_params';
 
 import { ENGINES_TITLE } from '../engines';
 
-import { EngineLogic } from './';
+import { EngineLogic } from '.';
 
 /**
  * Generate a path with engineName automatically filled from EngineLogic state

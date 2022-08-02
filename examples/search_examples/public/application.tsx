@@ -10,12 +10,12 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Route, Redirect } from 'react-router-dom';
 import { I18nProvider } from '@kbn/i18n-react';
-import { AppMountParameters, CoreStart } from '../../../src/core/public';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 import { AppPluginStartDependencies } from './types';
 import { SearchExamplePage, ExampleLink } from './common/example_page';
 import { SearchExamplesApp } from './search/app';
 import { SearchSessionsExampleApp } from './search_sessions/app';
-import { RedirectAppLinks } from '../../../src/plugins/kibana_react/public';
 import { SqlSearchExampleApp } from './sql_search/app';
 
 const LINKS: ExampleLink[] = [
@@ -39,7 +39,7 @@ const LINKS: ExampleLink[] = [
 
 export const renderApp = (
   { notifications, savedObjects, http, application }: CoreStart,
-  { data, navigation }: AppPluginStartDependencies,
+  { data, navigation, unifiedSearch }: AppPluginStartDependencies,
   { element, history }: AppMountParameters
 ) => {
   ReactDOM.render(
@@ -53,6 +53,7 @@ export const renderApp = (
                 navigation={navigation}
                 data={data}
                 http={http}
+                unifiedSearch={unifiedSearch}
               />
             </Route>
             <Route path={LINKS[1].path}>
@@ -63,6 +64,7 @@ export const renderApp = (
                 navigation={navigation}
                 notifications={notifications}
                 data={data}
+                unifiedSearch={unifiedSearch}
               />
             </Route>
 

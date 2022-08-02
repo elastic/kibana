@@ -6,15 +6,15 @@
  */
 
 import { isString } from 'lodash/fp';
-import {
+import type {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
   SavedObjectAttributes,
   SavedObjectReference,
-} from '../../../../../../../src/core/server';
+} from '@kbn/core/server';
 
 // eslint-disable-next-line no-restricted-imports
-import {
+import type {
   LegacyIRuleActionsAttributesSavedObjectAttributes,
   LegacyRuleAlertAction,
   LegacyRuleAlertSavedObjectAction,

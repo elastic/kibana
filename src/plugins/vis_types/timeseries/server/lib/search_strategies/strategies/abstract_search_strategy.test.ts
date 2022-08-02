@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { DataViewsService } from '../../../../../../data_views/common';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 import { from } from 'rxjs';
 
 import { AbstractSearchStrategy, EsSearchRequest } from './abstract_search_strategy';
-import type { FieldSpec } from '../../../../../../data/common';
+import type { FieldSpec } from '@kbn/data-plugin/common';
 import type { CachedIndexPatternFetcher } from '../lib/cached_index_pattern_fetcher';
 import type {
   VisTypeTimeseriesRequestHandlerContext,
@@ -84,7 +84,7 @@ describe('AbstractSearchStrategy', () => {
     );
 
     expect(responses).toEqual([{}]);
-    expect(requestContext.search.search).toHaveBeenCalledWith(
+    expect((await requestContext.search).search).toHaveBeenCalledWith(
       {
         params: {
           body: {},

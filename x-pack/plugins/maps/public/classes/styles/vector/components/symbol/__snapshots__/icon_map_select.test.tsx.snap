@@ -3,6 +3,7 @@
 exports[`Should not render icon map select when isCustomOnly 1`] = `
 <Fragment>
   <IconStops
+    customIcons={Array []}
     field={
       MockField {
         "_fieldName": "myField",
@@ -15,14 +16,15 @@ exports[`Should not render icon map select when isCustomOnly 1`] = `
         Object {
           "icon": "circle",
           "stop": null,
-        },
-        Object {
-          "icon": undefined,
-          "stop": "",
+          "svg": "<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>
+<svg version=\\"1.1\\" id=\\"circle-15\\" xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"15px\\" height=\\"15px\\" viewBox=\\"0 0 15 15\\">
+  <path d=\\"M14,7.5c0,3.5899-2.9101,6.5-6.5,6.5S1,11.0899,1,7.5S3.9101,1,7.5,1S14,3.9101,14,7.5z\\"/>
+</svg>",
         },
       ]
     }
     onChange={[Function]}
+    onCustomIconsChange={[Function]}
   />
 </Fragment>
 `;
@@ -62,6 +64,7 @@ exports[`Should render custom stops input when useCustomIconMap 1`] = `
     size="s"
   />
   <IconStops
+    customIcons={Array []}
     field={
       MockField {
         "_fieldName": "myField",
@@ -82,11 +85,49 @@ exports[`Should render custom stops input when useCustomIconMap 1`] = `
       ]
     }
     onChange={[Function]}
+    onCustomIconsChange={[Function]}
   />
 </Fragment>
 `;
 
 exports[`Should render default props 1`] = `
+<Fragment>
+  <EuiSuperSelect
+    compressed={true}
+    fullWidth={false}
+    hasDividers={true}
+    isInvalid={false}
+    isLoading={false}
+    onChange={[Function]}
+    options={
+      Array [
+        Object {
+          "inputDisplay": "Custom icon palette",
+          "value": "CUSTOM_MAP_ID",
+        },
+        Object {
+          "inputDisplay": <div>
+            mock filledShapes option
+          </div>,
+          "value": "filledShapes",
+        },
+        Object {
+          "inputDisplay": <div>
+            mock hollowShapes option
+          </div>,
+          "value": "hollowShapes",
+        },
+      ]
+    }
+    valueOfSelected="filledShapes"
+  />
+  <EuiSpacer
+    size="s"
+  />
+</Fragment>
+`;
+
+exports[`Should render icon map select with custom icons 1`] = `
 <Fragment>
   <EuiSuperSelect
     compressed={true}

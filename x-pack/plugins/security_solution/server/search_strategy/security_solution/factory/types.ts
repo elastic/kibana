@@ -9,11 +9,8 @@ import type {
   IScopedClusterClient,
   KibanaRequest,
   SavedObjectsClientContract,
-} from '../../../../../../../src/core/server';
-import type {
-  IEsSearchResponse,
-  ISearchRequestParams,
-} from '../../../../../../../src/plugins/data/common';
+} from '@kbn/core/server';
+import type { IEsSearchResponse, ISearchRequestParams } from '@kbn/data-plugin/common';
 import type {
   FactoryQueryTypes,
   StrategyRequestType,

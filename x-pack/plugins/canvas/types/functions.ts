@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import { functions as commonFunctions } from '../canvas_plugin_src/functions/common';
-import { functions as browserFunctions } from '../canvas_plugin_src/functions/browser';
-import { functions as serverFunctions } from '../canvas_plugin_src/functions/server';
-import { initFunctions as initExternalFunctions } from '../canvas_plugin_src/functions/external';
-import { initFunctions as initClientFunctions } from '../public/functions';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { functions as commonFunctions } from '../canvas_plugin_src/functions/common';
+import type { functions as browserFunctions } from '../canvas_plugin_src/functions/browser';
+import type { functions as serverFunctions } from '../canvas_plugin_src/functions/server';
+import type { initFunctions as initExternalFunctions } from '../canvas_plugin_src/functions/external';
+import type { initFunctions as initClientFunctions } from '../public/functions';
 
 /**
  * A `ExpressionFunctionFactory` is a powerful type used for any function that produces

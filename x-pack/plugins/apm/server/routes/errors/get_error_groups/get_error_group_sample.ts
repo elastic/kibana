@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import {
   ERROR_GROUP_ID,
@@ -12,7 +13,6 @@ import {
   TRANSACTION_SAMPLED,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { rangeQuery, kqlQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getTransaction } from '../../transactions/get_transaction';
 import { Setup } from '../../../lib/helpers/setup_request';

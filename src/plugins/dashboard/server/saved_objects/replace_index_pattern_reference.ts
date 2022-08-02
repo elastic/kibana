@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectMigrationFn } from 'kibana/server';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../../data/common';
+import type { SavedObjectMigrationFn } from '@kbn/core/server';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-plugin/common';
 
 export const replaceIndexPatternReference: SavedObjectMigrationFn<any, any> = (doc) => ({
   ...doc,

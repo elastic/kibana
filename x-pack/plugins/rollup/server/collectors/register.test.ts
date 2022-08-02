@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createUsageCollectionSetupMock } from 'src/plugins/usage_collection/server/mocks';
+import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { registerRollupUsageCollector } from './register';
 
 describe('registerRollupUsageCollector', () => {

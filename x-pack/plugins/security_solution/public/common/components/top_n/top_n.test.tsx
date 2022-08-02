@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 
@@ -14,7 +15,8 @@ import '../../mock/match_media';
 import { TestProviders, mockIndexPattern } from '../../mock';
 
 import { allEvents, defaultOptions } from './helpers';
-import { TopN, Props as TopNProps } from './top_n';
+import type { Props as TopNProps } from './top_n';
+import { TopN } from './top_n';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -141,8 +143,7 @@ describe('TopN', () => {
 
     const nonDetectionAlertTables = [
       TimelineId.hostsPageEvents,
-      TimelineId.hostsPageExternalAlerts,
-      TimelineId.networkPageExternalAlerts,
+      TimelineId.networkPageEvents,
       TimelineId.casePage,
     ];
 
@@ -199,9 +200,9 @@ describe('TopN', () => {
     });
 
     test(`it renders EventsByDataset when defaultView is 'raw'`, () => {
-      expect(
-        wrapper.find('[data-test-subj="eventsByDatasetOverview-uuid.v4()Panel"]').exists()
-      ).toBe(true);
+      expect(wrapper.find('[data-test-subj="eventsByDatasetOverview-topNPanel"]').exists()).toBe(
+        true
+      );
     });
 
     test(`it does NOT render SignalsByCategory when defaultView is 'raw'`, () => {
@@ -235,9 +236,9 @@ describe('TopN', () => {
         </TestProviders>
       );
       await waitFor(() => {
-        expect(
-          wrapper.find('[data-test-subj="eventsByDatasetOverview-uuid.v4()Panel"]').exists()
-        ).toBe(false);
+        expect(wrapper.find('[data-test-subj="eventsByDatasetOverview-topNPanel"]').exists()).toBe(
+          false
+        );
       });
     });
   });
@@ -259,9 +260,9 @@ describe('TopN', () => {
     });
 
     test(`it renders EventsByDataset when defaultView is 'all'`, () => {
-      expect(
-        wrapper.find('[data-test-subj="eventsByDatasetOverview-uuid.v4()Panel"]').exists()
-      ).toBe(true);
+      expect(wrapper.find('[data-test-subj="eventsByDatasetOverview-topNPanel"]').exists()).toBe(
+        true
+      );
     });
 
     test(`it does NOT render SignalsByCategory when defaultView is 'all'`, () => {

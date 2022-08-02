@@ -18,7 +18,7 @@ import { rerender } from '../../../test_helpers';
 import { ReindexJob } from './reindex_job';
 import { Schema, MetaEngineSchema } from './views';
 
-import { SchemaRouter } from './';
+import { SchemaRouter } from '.';
 
 describe('SchemaRouter', () => {
   const wrapper = shallow(<SchemaRouter />);

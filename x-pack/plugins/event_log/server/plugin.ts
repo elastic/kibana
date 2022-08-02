@@ -13,8 +13,8 @@ import {
   PluginInitializerContext,
   IClusterClient,
   IContextProvider,
-} from 'src/core/server';
-import { SpacesPluginStart } from '../../spaces/server';
+} from '@kbn/core/server';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 import type {
   EventLogRequestHandlerContext,

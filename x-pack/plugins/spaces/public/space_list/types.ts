@@ -32,4 +32,8 @@ export interface SpaceListProps {
    * Click handler for spaces list, specifically excluding expand and contract buttons.
    */
   listOnClick?: () => void;
+  /**
+   * Style for the cursor when mousing over space avatars.
+   */
+  cursorStyle?: string;
 }

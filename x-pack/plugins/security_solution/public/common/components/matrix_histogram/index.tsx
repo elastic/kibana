@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Position } from '@elastic/charts';
+import type { Position } from '@elastic/charts';
 import styled from 'styled-components';
 
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSelect, EuiSpacer } from '@elastic/eui';
@@ -18,21 +18,22 @@ import { MatrixLoader } from './matrix_loader';
 import { Panel } from '../panel';
 import { getBarchartConfigs, getCustomChartData } from './utils';
 import { useMatrixHistogramCombined } from '../../containers/matrix_histogram';
-import { MatrixHistogramProps, MatrixHistogramOption, MatrixHistogramQueryProps } from './types';
-import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
-import {
+import type {
+  MatrixHistogramProps,
+  MatrixHistogramOption,
+  MatrixHistogramQueryProps,
   MatrixHistogramMappingTypes,
   GetTitle,
   GetSubTitle,
-} from '../../components/matrix_histogram/types';
-import { GlobalTimeArgs } from '../../containers/use_global_time';
+} from './types';
+import type { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
+import type { GlobalTimeArgs } from '../../containers/use_global_time';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
-import { InputsModelId } from '../../store/inputs/constants';
+import type { InputsModelId } from '../../store/inputs/constants';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
 import { HISTOGRAM_ACTIONS_BUTTON_CLASS, VisualizationActions } from '../visualization_actions';
-import { GetLensAttributes, LensAttributes } from '../visualization_actions/types';
-import { useKibana, useGetUserCasesPermissions } from '../../lib/kibana';
-import { APP_ID, SecurityPageName } from '../../../../common/constants';
+import type { GetLensAttributes, LensAttributes } from '../visualization_actions/types';
+import { SecurityPageName } from '../../../../common/constants';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 import { useQueryToggle } from '../../containers/query_toggle';
 
@@ -104,10 +105,6 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   skip,
 }) => {
   const dispatch = useDispatch();
-  const { cases } = useKibana().services;
-  const CasesContext = cases.ui.getCasesContext();
-  const userPermissions = useGetUserCasesPermissions();
-  const userCanCrud = userPermissions?.crud ?? false;
 
   const handleBrushEnd = useCallback(
     ({ x }) => {
@@ -141,6 +138,11 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [selectedStackByOption, setSelectedStackByOption] =
     useState<MatrixHistogramOption>(defaultStackByOption);
+
+  useEffect(() => {
+    setSelectedStackByOption(defaultStackByOption);
+  }, [defaultStackByOption]);
+
   const setSelectedChartOptionCallback = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
       setSelectedStackByOption(
@@ -181,8 +183,10 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     useMatrixHistogramCombined(matrixHistogramRequest);
   const [{ pageName }] = useRouteSpy();
 
-  const onHostOrNetworkPage =
-    pageName === SecurityPageName.hosts || pageName === SecurityPageName.network;
+  const onHostOrNetworkOrUserPage =
+    pageName === SecurityPageName.hosts ||
+    pageName === SecurityPageName.network ||
+    pageName === SecurityPageName.users;
 
   const titleWithStackByField = useMemo(
     () => (title != null && typeof title === 'function' ? title(selectedStackByOption) : title),
@@ -259,24 +263,22 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
             toggleQuery={toggleQuery}
             subtitle={subtitleWithCounts}
             inspectMultiple
-            showInspectButton={showInspectButton || !onHostOrNetworkPage}
+            showInspectButton={showInspectButton || !onHostOrNetworkOrUserPage}
             isInspectDisabled={filterQuery === undefined}
           >
             <EuiFlexGroup alignItems="center" gutterSize="none">
-              {onHostOrNetworkPage && (getLensAttributes || lensAttributes) && timerange && (
+              {onHostOrNetworkOrUserPage && (getLensAttributes || lensAttributes) && timerange && (
                 <EuiFlexItem grow={false}>
-                  <CasesContext owner={[APP_ID]} userCanCrud={userCanCrud ?? false}>
-                    <VisualizationActions
-                      className="histogram-viz-actions"
-                      getLensAttributes={getLensAttributes}
-                      isInspectButtonDisabled={filterQuery === undefined}
-                      lensAttributes={lensAttributes}
-                      queryId={id}
-                      stackByField={selectedStackByOption.value}
-                      timerange={timerange}
-                      title={title}
-                    />
-                  </CasesContext>
+                  <VisualizationActions
+                    className="histogram-viz-actions"
+                    getLensAttributes={getLensAttributes}
+                    isInspectButtonDisabled={filterQuery === undefined}
+                    lensAttributes={lensAttributes}
+                    queryId={id}
+                    stackByField={selectedStackByOption.value}
+                    timerange={timerange}
+                    title={title}
+                  />
                 </EuiFlexItem>
               )}
               <EuiFlexItem grow={false}>

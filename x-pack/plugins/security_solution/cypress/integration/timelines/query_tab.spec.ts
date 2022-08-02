@@ -19,7 +19,7 @@ import { createTimeline } from '../../tasks/api_calls/timelines';
 
 import { cleanKibana } from '../../tasks/common';
 
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 import {
   addFilter,
   closeTimeline,
@@ -28,16 +28,14 @@ import {
   pinFirstEvent,
   refreshTimelinesUntilTimeLinePresent,
 } from '../../tasks/timeline';
-import { waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
 
 import { TIMELINES_URL } from '../../urls/navigation';
 
 describe('Timeline query tab', () => {
   before(() => {
     cleanKibana();
-    loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
-    waitForTimelinesPanelToBeLoaded();
-
+    login();
+    visitWithoutDateRange(TIMELINES_URL);
     createTimeline(getTimeline())
       .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
       .then((timelineId: string) => {

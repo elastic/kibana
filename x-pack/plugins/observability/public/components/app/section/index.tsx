@@ -15,7 +15,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import React from 'react';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ObservabilityAppServices } from '../../../application/types';
 import { ErrorPanel } from './error_panel';
 import { ExperimentalBadge } from '../../shared/experimental_badge';
@@ -29,6 +29,7 @@ interface Props {
   title: string;
   hasError: boolean;
   children: React.ReactNode;
+  initialIsOpen?: boolean;
   appLink?: AppLink;
   showExperimentalBadge?: boolean;
 }
@@ -38,13 +39,14 @@ export function SectionContainer({
   appLink,
   children,
   hasError,
+  initialIsOpen = true,
   showExperimentalBadge = false,
 }: Props) {
   const { http } = useKibana<ObservabilityAppServices>().services;
   return (
-    <EuiPanel hasShadow={true} color="subdued">
+    <EuiPanel color="subdued">
       <EuiAccordion
-        initialIsOpen
+        initialIsOpen={initialIsOpen}
         id={title}
         buttonContentClassName="accordion-button"
         buttonContent={
@@ -79,7 +81,7 @@ export function SectionContainer({
       >
         <>
           <EuiSpacer size="s" />
-          <EuiPanel hasShadow={true}>{hasError ? <ErrorPanel /> : <>{children}</>}</EuiPanel>
+          <EuiPanel hasBorder={true}>{hasError ? <ErrorPanel /> : <>{children}</>}</EuiPanel>
         </>
       </EuiAccordion>
     </EuiPanel>

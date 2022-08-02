@@ -7,10 +7,10 @@
  */
 
 import { take } from 'rxjs/operators';
-import { coreMock } from '../../../core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { NewsfeedPublicPlugin } from './plugin';
 import { NewsfeedApiEndpoint } from './lib/api';
-import { screenshotModePluginMock } from '../../screenshot_mode/public/mocks';
+import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 
 describe('Newsfeed plugin', () => {
   let plugin: NewsfeedPublicPlugin;

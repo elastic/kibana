@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
-import type { ISearchRequestParams } from 'src/plugins/data/common';
+import type { ISearchRequestParams } from '@kbn/data-plugin/common';
 import {
   TimelineEventsLastEventTimeRequestOptions,
   LastEventIndexKey,
@@ -22,7 +21,6 @@ export const buildLastEventTimeQuery = ({
   indexKey,
   details,
   defaultIndex,
-  docValueFields,
 }: TimelineEventsLastEventTimeRequestOptions) => {
   const indicesToQuery: EventIndices = {
     hosts: defaultIndex,
@@ -44,9 +42,14 @@ export const buildLastEventTimeQuery = ({
             ignore_unavailable: true,
             track_total_hits: false,
             body: {
-              ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
               query: { bool: { filter: { bool: { should: getIpDetailsFilter(details.ip) } } } },
-              _source: ['@timestamp'],
+              _source: false,
+              fields: [
+                {
+                  field: '@timestamp',
+                  format: 'strict_date_optional_time',
+                },
+              ],
               size: 1,
               sort: [
                 {
@@ -67,9 +70,14 @@ export const buildLastEventTimeQuery = ({
             ignore_unavailable: true,
             track_total_hits: false,
             body: {
-              ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
               query: { bool: { filter: getHostDetailsFilter(details.hostName) } },
-              _source: ['@timestamp'],
+              _source: false,
+              fields: [
+                {
+                  field: '@timestamp',
+                  format: 'strict_date_optional_time',
+                },
+              ],
               size: 1,
               sort: [
                 {
@@ -90,9 +98,14 @@ export const buildLastEventTimeQuery = ({
             ignore_unavailable: true,
             track_total_hits: false,
             body: {
-              ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
               query: { bool: { filter: getUserDetailsFilter(details.userName) } },
-              _source: ['@timestamp'],
+              _source: false,
+              fields: [
+                {
+                  field: '@timestamp',
+                  format: 'strict_date_optional_time',
+                },
+              ],
               size: 1,
               sort: [
                 {
@@ -114,9 +127,14 @@ export const buildLastEventTimeQuery = ({
           ignore_unavailable: true,
           track_total_hits: false,
           body: {
-            ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
             query: { match_all: {} },
-            _source: ['@timestamp'],
+            _source: false,
+            fields: [
+              {
+                field: '@timestamp',
+                format: 'strict_date_optional_time',
+              },
+            ],
             size: 1,
             sort: [
               {

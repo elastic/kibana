@@ -6,7 +6,7 @@
  */
 
 import { UnionToIntersection } from '@kbn/utility-types';
-import { KibanaRequest } from 'kibana/server';
+import { KibanaRequest } from '@kbn/core/server';
 
 import {
   CreateExceptionListItemOptions,

@@ -9,7 +9,7 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import { TestProviders } from '../../common/mock';
-import { UtilityBarGroup, UtilityBarText } from './index';
+import { UtilityBarGroup, UtilityBarText } from '.';
 
 describe('UtilityBarGroup', () => {
   test('it renders', () => {

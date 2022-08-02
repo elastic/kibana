@@ -8,7 +8,7 @@
 import { EuiCard, EuiLink, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ObservabilityAppServices } from '../../../application/types';
 
 export function FleetPanel() {

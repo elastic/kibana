@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { HttpFetchOptions, HttpFetchOptionsWithPath, HttpStart } from 'kibana/public';
+import type { HttpFetchOptions, HttpFetchOptionsWithPath, HttpStart } from '@kbn/core/public';
 import { merge } from 'lodash';
 import { act } from '@testing-library/react';
 
@@ -92,6 +92,7 @@ interface RouteMock<R extends ResponseProvidersInterface = ResponseProvidersInte
    */
   id: keyof R;
   method: HttpMethods;
+  /** The API path to match on. This value could can have tokens in the format of `{token_name}` */
   path: string;
   /**
    * The handler for providing a response to for this API call.

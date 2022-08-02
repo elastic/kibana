@@ -6,11 +6,11 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ByteSizeValue } from '@kbn/config-schema';
-import type { ElasticsearchClient, Logger } from 'kibana/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { defaults, get } from 'lodash';
 import Puid from 'puid';
 import { Duplex } from 'stream';
-import type { ReportingCore } from '../';
+import type { ReportingCore } from '..';
 import type { ReportSource } from '../../common/types';
 
 /**

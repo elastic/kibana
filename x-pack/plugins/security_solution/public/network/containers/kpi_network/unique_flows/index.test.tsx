@@ -7,7 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../../common/mock';
-import { useNetworkKpiUniqueFlows } from './index';
+import { useNetworkKpiUniqueFlows } from '.';
 
 describe('kpi network - unique flows', () => {
   it('skip = true will cancel any running request', () => {

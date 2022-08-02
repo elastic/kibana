@@ -7,10 +7,10 @@
  */
 
 import { registerTelemetryUsageStatsRoutes } from './telemetry_usage_stats';
-import { coreMock, httpServerMock } from 'src/core/server/mocks';
-import type { RequestHandlerContext, IRouter } from 'src/core/server';
-import { securityMock } from '../../../../../x-pack/plugins/security/server/mocks';
-import { telemetryCollectionManagerPluginMock } from '../../../telemetry_collection_manager/server/mocks';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import type { RequestHandlerContext, IRouter } from '@kbn/core/server';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { telemetryCollectionManagerPluginMock } from '@kbn/telemetry-collection-manager-plugin/server/mocks';
 
 async function runRequest(
   mockRouter: IRouter<RequestHandlerContext>,
@@ -38,6 +38,7 @@ describe('registerTelemetryUsageStatsRoutes', () => {
   const mockCoreSetup = coreMock.createSetup();
   const mockStats = [{ clusterUuid: 'text', stats: 'enc_str' }];
   telemetryCollectionManager.getStats.mockResolvedValue(mockStats);
+  telemetryCollectionManager.shouldGetTelemetry.mockResolvedValue(true);
   const getSecurity = jest.fn();
 
   let mockRouter: IRouter;
@@ -117,6 +118,21 @@ describe('registerTelemetryUsageStatsRoutes', () => {
         unencrypted: true,
       });
       expect(mockResponse.forbidden).toBeCalled();
+    });
+
+    it('returns 503 when Kibana is not healthy enough to generate the Telemetry report', async () => {
+      telemetryCollectionManager.shouldGetTelemetry.mockResolvedValueOnce(false);
+
+      registerTelemetryUsageStatsRoutes(mockRouter, telemetryCollectionManager, true, () => void 0);
+      const { mockResponse } = await runRequest(mockRouter, {
+        refreshCache: false,
+        unencrypted: true,
+      });
+      expect(mockResponse.customError).toBeCalledTimes(1);
+      expect(mockResponse.customError).toBeCalledWith({
+        statusCode: 503,
+        body: `Can't fetch telemetry at the moment because some services are down. Check the /status page for more details.`,
+      });
     });
 
     it('returns 200 when the user has enough permissions to request unencrypted telemetry', async () => {

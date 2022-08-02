@@ -39,6 +39,7 @@ const connector = {
   actionTypeId: '.test',
   name: 'Test',
   isPreconfigured: false,
+  isDeprecated: false,
 };
 
 const editAction = jest.fn();

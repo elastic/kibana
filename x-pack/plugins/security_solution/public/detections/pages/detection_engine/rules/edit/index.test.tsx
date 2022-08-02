@@ -10,7 +10,7 @@ import { shallow } from 'enzyme';
 
 import '../../../../../common/mock/match_media';
 import { TestProviders } from '../../../../../common/mock';
-import { EditRulePage } from './index';
+import { EditRulePage } from '.';
 import { useUserData } from '../../../../components/user_info';
 import { useParams } from 'react-router-dom';
 import { useAppToastsMock } from '../../../../../common/hooks/use_app_toasts.mock';

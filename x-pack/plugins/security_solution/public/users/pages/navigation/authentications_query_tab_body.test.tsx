@@ -8,12 +8,12 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
-import { useAuthentications } from '../../../hosts/containers/authentications';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { AuthenticationsQueryTabBody } from './authentications_query_tab_body';
 import { UsersType } from '../../store/model';
+import { useAuthentications } from '../../../common/containers/authentications';
 
-jest.mock('../../../hosts/containers/authentications');
+jest.mock('../../../common/containers/authentications');
 jest.mock('../../../common/containers/query_toggle');
 jest.mock('../../../common/lib/kibana');
 

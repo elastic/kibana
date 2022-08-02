@@ -14,8 +14,8 @@ import {
   Logger,
   Plugin,
   PluginInitializerContext,
-} from '../../../../src/core/server';
-import { Capabilities as UICapabilities } from '../../../../src/core/server';
+} from '@kbn/core/server';
+import { Capabilities as UICapabilities } from '@kbn/core/server';
 import { FeatureRegistry } from './feature_registry';
 import { uiCapabilitiesForFeatures } from './ui_capabilities_for_features';
 import { buildOSSFeatures } from './oss_features';

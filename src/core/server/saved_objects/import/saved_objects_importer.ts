@@ -6,27 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { SavedObjectsClientContract } from '../types';
-import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import { importSavedObjectsFromStream } from './import_saved_objects';
-import { resolveSavedObjectsImportErrors } from './resolve_import_errors';
-import {
-  SavedObjectsImportResponse,
+import type { SavedObjectsImportResponse } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type {
+  ISavedObjectTypeRegistry,
+  ISavedObjectsImporter,
   SavedObjectsImportOptions,
   SavedObjectsResolveImportErrorsOptions,
   SavedObjectsImportHook,
-} from './types';
+} from '@kbn/core-saved-objects-server';
+import { importSavedObjectsFromStream } from './import_saved_objects';
+import { resolveSavedObjectsImportErrors } from './resolve_import_errors';
 
 /**
- * @public
+ * @internal
  */
-export type ISavedObjectsImporter = PublicMethodsOf<SavedObjectsImporter>;
-
-/**
- * @public
- */
-export class SavedObjectsImporter {
+export class SavedObjectsImporter implements ISavedObjectsImporter {
   readonly #savedObjectsClient: SavedObjectsClientContract;
   readonly #typeRegistry: ISavedObjectTypeRegistry;
   readonly #importSizeLimit: number;
@@ -55,23 +50,19 @@ export class SavedObjectsImporter {
     }, {} as Record<string, SavedObjectsImportHook[]>);
   }
 
-  /**
-   * Import saved objects from given stream. See the {@link SavedObjectsImportOptions | options} for more
-   * detailed information.
-   *
-   * @throws SavedObjectsImportError
-   */
-  import({
+  public import({
     readStream,
     createNewCopies,
     namespace,
     overwrite,
+    refresh,
   }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse> {
     return importSavedObjectsFromStream({
       readStream,
       createNewCopies,
       namespace,
       overwrite,
+      refresh,
       objectLimit: this.#importSizeLimit,
       savedObjectsClient: this.#savedObjectsClient,
       typeRegistry: this.#typeRegistry,
@@ -79,13 +70,7 @@ export class SavedObjectsImporter {
     });
   }
 
-  /**
-   * Resolve and return saved object import errors.
-   * See the {@link SavedObjectsResolveImportErrorsOptions | options} for more detailed information.
-   *
-   * @throws SavedObjectsImportError
-   */
-  resolveImportErrors({
+  public resolveImportErrors({
     readStream,
     createNewCopies,
     namespace,

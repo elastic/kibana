@@ -7,22 +7,47 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import classNames from 'classnames';
-
 import { i18n } from '@kbn/i18n';
-import { htmlIdGenerator, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 import { Position } from '@elastic/charts';
+import { css } from '@emotion/react';
 
-import './legend_toggle.scss';
-
-interface LegendToggleProps {
+export interface LegendToggleProps {
   onClick: () => void;
   showLegend: boolean;
   legendPosition: Position;
 }
 
 const LegendToggleComponent = ({ onClick, showLegend, legendPosition }: LegendToggleProps) => {
-  const legendId = useMemo(() => htmlIdGenerator()('legend'), []);
+  const { euiTheme } = useEuiTheme();
+
+  const baseStyles = useMemo(
+    () => css`
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      z-index: 1;
+      margin: ${euiTheme.size.xs};
+    `,
+    [euiTheme.size.xs]
+  );
+
+  const isOpenStyle = useMemo(
+    () => css`
+      background-color: ${euiTheme.colors.lightestShade};
+    `,
+    [euiTheme.colors.lightestShade]
+  );
+
+  const positionStyle = useMemo(
+    () => css`
+      left: auto;
+      bottom: auto;
+      right: 0;
+      top: 0;
+    `,
+    []
+  );
 
   return (
     <EuiButtonIcon
@@ -30,14 +55,15 @@ const LegendToggleComponent = ({ onClick, showLegend, legendPosition }: LegendTo
       iconType="list"
       color="text"
       onClick={onClick}
-      className={classNames('echLegend__toggle', `echLegend__toggle--position-${legendPosition}`, {
-        'echLegend__toggle--isOpen': showLegend,
-      })}
+      css={[
+        baseStyles,
+        showLegend ? isOpenStyle : null,
+        ['left', 'bottom'].includes(legendPosition) ? positionStyle : null,
+      ]}
       aria-label={i18n.translate('charts.legend.toggleLegendButtonAriaLabel', {
         defaultMessage: 'Toggle legend',
       })}
       aria-expanded={showLegend}
-      aria-controls={legendId}
       isSelected={showLegend}
       data-test-subj="vislibToggleLegend"
       title={i18n.translate('charts.legend.toggleLegendButtonTitle', {

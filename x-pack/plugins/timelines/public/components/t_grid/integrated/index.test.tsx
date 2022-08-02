@@ -8,7 +8,7 @@
 import { euiDarkVars } from '@kbn/ui-theme';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { TGridIntegrated, TGridIntegratedProps } from './index';
+import { TGridIntegrated, TGridIntegratedProps } from '.';
 import { TestProviders, tGridIntegratedProps } from '../../../mock';
 
 const mockId = tGridIntegratedProps.id;
@@ -75,7 +75,16 @@ describe('integrated t_grid', () => {
 
     expect(screen.queryByTestId('updated-flex-group')).toHaveStyleRule(
       `margin-right`,
-      euiDarkVars.paddingSizes.xl
+      euiDarkVars.euiSizeXL
     );
+  });
+  it(`does not render the empty state when the graph overlay is open`, () => {
+    render(
+      <TestProviders>
+        <TGridIntegrated {...defaultProps} graphOverlay={<div />} />
+      </TestProviders>
+    );
+
+    expect(screen.queryByTestId('tGridEmptyState')).toBeNull();
   });
 });

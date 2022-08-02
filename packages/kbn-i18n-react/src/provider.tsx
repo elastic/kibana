@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as PropTypes from 'prop-types';
-import * as React from 'react';
+import React from 'react';
 
 // eslint-disable-next-line @kbn/eslint/module_migration
 import { IntlProvider } from 'react-intl';
@@ -20,20 +19,15 @@ import { PseudoLocaleWrapper } from './pseudo_locale_wrapper';
  * of components. This component is used to setup the i18n context for a tree.
  * IntlProvider should wrap react app's root component (inside each react render method).
  */
-export class I18nProvider extends React.PureComponent {
-  public static propTypes = { children: PropTypes.element.isRequired };
 
-  public render() {
-    return (
-      <IntlProvider
-        locale={i18n.getLocale()}
-        messages={i18n.getTranslation().messages}
-        defaultLocale={i18n.getDefaultLocale()}
-        formats={i18n.getFormats()}
-        textComponent={React.Fragment}
-      >
-        <PseudoLocaleWrapper>{this.props.children}</PseudoLocaleWrapper>
-      </IntlProvider>
-    );
-  }
-}
+export const I18nProvider: React.FC = ({ children }) => (
+  <IntlProvider
+    locale={i18n.getLocale()}
+    messages={i18n.getTranslation().messages}
+    defaultLocale={i18n.getDefaultLocale()}
+    formats={i18n.getFormats()}
+    textComponent={React.Fragment}
+  >
+    <PseudoLocaleWrapper>{children}</PseudoLocaleWrapper>
+  </IntlProvider>
+);

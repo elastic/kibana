@@ -13,7 +13,7 @@ import { EuiText } from '@elastic/eui';
 import { EuiAvatar } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
 import { EuiFlexGrid } from '@elastic/eui';
-import { withEmbeddableSubscription } from '../../../../src/plugins/embeddable/public';
+import { withEmbeddableSubscription } from '@kbn/embeddable-plugin/public';
 import { TodoRefInput, TodoRefOutput, TodoRefEmbeddable } from './todo_ref_embeddable';
 
 interface Props {

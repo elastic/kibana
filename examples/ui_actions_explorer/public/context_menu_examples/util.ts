@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Action } from '../../../../src/plugins/ui_actions/public';
+import { Action } from '@kbn/ui-actions-plugin/public';
 
 export const sampleAction = (
   id: string,

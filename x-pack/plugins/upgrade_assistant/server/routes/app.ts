@@ -30,50 +30,43 @@ export function registerAppRoutes({
       path: `${API_BASE_PATH}/privileges`,
       validate: false,
     },
-    versionCheckHandlerWrapper(
-      async (
-        {
-          core: {
-            elasticsearch: { client },
-          },
+    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+      const {
+        elasticsearch: { client },
+      } = await core;
+      const privilegesResult: Privileges = {
+        hasAllPrivileges: true,
+        missingPrivileges: {
+          index: [],
         },
-        request,
-        response
-      ) => {
-        const privilegesResult: Privileges = {
-          hasAllPrivileges: true,
-          missingPrivileges: {
-            index: [],
-          },
-        };
+      };
 
-        if (!isSecurityEnabled()) {
-          return response.ok({ body: privilegesResult });
-        }
-
-        try {
-          const { has_all_requested: hasAllPrivileges, index } =
-            await client.asCurrentUser.security.hasPrivileges({
-              body: {
-                index: [
-                  {
-                    names: [DEPRECATION_LOGS_INDEX],
-                    privileges: ['read'],
-                  },
-                ],
-              },
-            });
-
-          if (!hasAllPrivileges) {
-            privilegesResult.missingPrivileges.index = extractMissingPrivileges(index);
-          }
-
-          privilegesResult.hasAllPrivileges = hasAllPrivileges;
-          return response.ok({ body: privilegesResult });
-        } catch (error) {
-          return handleEsError({ error, response });
-        }
+      if (!isSecurityEnabled()) {
+        return response.ok({ body: privilegesResult });
       }
-    )
+
+      try {
+        const { has_all_requested: hasAllPrivileges, index } =
+          await client.asCurrentUser.security.hasPrivileges({
+            body: {
+              index: [
+                {
+                  names: [DEPRECATION_LOGS_INDEX],
+                  privileges: ['read'],
+                },
+              ],
+            },
+          });
+
+        if (!hasAllPrivileges) {
+          privilegesResult.missingPrivileges.index = extractMissingPrivileges(index);
+        }
+
+        privilegesResult.hasAllPrivileges = hasAllPrivileges;
+        return response.ok({ body: privilegesResult });
+      } catch (error) {
+        return handleEsError({ error, response });
+      }
+    })
   );
 }

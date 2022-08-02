@@ -7,10 +7,12 @@
 
 import React from 'react';
 
+import { EuiSideNavItemType } from '@elastic/eui';
+
 import { HttpLogic } from '../http';
 import { KibanaLogic } from '../kibana';
 
-import { letBrowserHandleEvent, createHref } from './';
+import { letBrowserHandleEvent, createHref } from '.';
 
 /**
  * Generates the `href` and `onClick` props for React-Router-friendly links
@@ -29,11 +31,15 @@ export interface ReactRouterProps {
   shouldNotCreateHref?: boolean;
 }
 
+export type GeneratedReactRouterProps<T> = Required<
+  Pick<EuiSideNavItemType<T>, 'href' | 'onClick'>
+>;
+
 export const generateReactRouterProps = ({
   to,
   onClick,
-  shouldNotCreateHref,
-}: ReactRouterProps) => {
+  shouldNotCreateHref = false,
+}: ReactRouterProps): GeneratedReactRouterProps<unknown> => {
   const { navigateToUrl, history } = KibanaLogic.values;
   const { http } = HttpLogic.values;
 

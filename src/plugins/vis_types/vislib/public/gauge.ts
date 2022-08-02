@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ColorSchemaParams, Labels, Style } from '../../../charts/public';
-import { RangeValues } from '../../../vis_default_editor/public';
-import { gaugeVisType } from '../../gauge/public';
-import { VisTypeDefinition } from '../../../visualizations/public';
+import { ColorSchemaParams, Labels, Style } from '@kbn/charts-plugin/public';
+import { RangeValues } from '@kbn/vis-default-editor-plugin/public';
+import { gaugeVisType } from '@kbn/vis-type-gauge-plugin/public';
+import { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 
 import { Alignment, GaugeType } from './types';
 import { toExpressionAst } from './to_ast';

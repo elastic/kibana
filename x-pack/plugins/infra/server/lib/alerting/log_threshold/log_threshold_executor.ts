@@ -12,15 +12,15 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient, IBasePath } from '@kbn/core/server';
 import {
   ActionGroup,
   ActionGroupIdsOf,
   Alert,
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
-  AlertTypeState as RuleTypeState,
-} from '../../../../../alerting/server';
+  RuleTypeState,
+} from '@kbn/alerting-plugin/server';
 
 import {
   RuleParams,
@@ -42,7 +42,6 @@ import {
   UngroupedSearchQueryResponse,
   UngroupedSearchQueryResponseRT,
 } from '../../../../common/alerting/logs/log_threshold';
-import { resolveLogSourceConfiguration } from '../../../../common/log_sources';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import { getLogsAppAlertUrl } from '../../../../common/formatters/alert_link';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
@@ -99,7 +98,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
   >(async ({ services, params, startedAt }) => {
     const { alertWithLifecycle, savedObjectsClient, scopedClusterClient, getAlertStartedDate } =
       services;
-    const { sources, basePath } = libs;
+    const { basePath } = libs;
 
     const alertFactory: LogThresholdAlertFactory = (id, reason, value, threshold, actions) => {
       const alert = alertWithLifecycle({
@@ -119,7 +118,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           : relativeViewInAppUrl;
 
         const sharedContext = {
-          timestamp: new Date().toISOString(),
+          timestamp: startedAt.toISOString(),
           viewInAppUrl,
         };
         actions.forEach((actionSet) => {
@@ -131,16 +130,14 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
       alert.replaceState({
         alertState: AlertStates.ALERT,
       });
+
       return alert;
     };
-    const sourceConfiguration = await sources.getSourceConfiguration(savedObjectsClient, 'default');
-    const { indices, timestampField, runtimeMappings } = await resolveLogSourceConfiguration(
-      sourceConfiguration.configuration,
-      await libs.framework.getIndexPatternsService(
-        savedObjectsClient,
-        scopedClusterClient.asCurrentUser
-      )
-    );
+
+    const [, , { logViews }] = await libs.getStartServices();
+    const { indices, timestampField, runtimeMappings } = await logViews
+      .getClient(savedObjectsClient, scopedClusterClient.asCurrentUser)
+      .getResolvedLogView('default'); // TODO: move to params
 
     try {
       const validatedParams = decodeOrThrow(ruleParamsRT)(params);
@@ -152,7 +149,8 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           indices,
           runtimeMappings,
           scopedClusterClient.asCurrentUser,
-          alertFactory
+          alertFactory,
+          startedAt.valueOf()
         );
       } else {
         await executeRatioAlert(
@@ -161,23 +159,41 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           indices,
           runtimeMappings,
           scopedClusterClient.asCurrentUser,
-          alertFactory
+          alertFactory,
+          startedAt.valueOf()
         );
       }
+
+      const { getRecoveredAlerts } = services.alertFactory.done();
+      const recoveredAlerts = getRecoveredAlerts();
+      processRecoveredAlerts(
+        recoveredAlerts,
+        startedAt,
+        getAlertStartedDate,
+        basePath,
+        validatedParams
+      );
     } catch (e) {
       throw new Error(e);
     }
   });
 
-async function executeAlert(
+export async function executeAlert(
   ruleParams: CountRuleParams,
   timestampField: string,
   indexPattern: string,
   runtimeMappings: estypes.MappingRuntimeFields,
   esClient: ElasticsearchClient,
-  alertFactory: LogThresholdAlertFactory
+  alertFactory: LogThresholdAlertFactory,
+  executionTimestamp: number
 ) {
-  const query = getESQuery(ruleParams, timestampField, indexPattern, runtimeMappings);
+  const query = getESQuery(
+    ruleParams,
+    timestampField,
+    indexPattern,
+    runtimeMappings,
+    executionTimestamp
+  );
 
   if (!query) {
     throw new Error('ES query could not be built from the provided alert params');
@@ -190,13 +206,14 @@ async function executeAlert(
   }
 }
 
-async function executeRatioAlert(
+export async function executeRatioAlert(
   ruleParams: RatioRuleParams,
   timestampField: string,
   indexPattern: string,
   runtimeMappings: estypes.MappingRuntimeFields,
   esClient: ElasticsearchClient,
-  alertFactory: LogThresholdAlertFactory
+  alertFactory: LogThresholdAlertFactory,
+  executionTimestamp: number
 ) {
   // Ratio alert params are separated out into two standard sets of alert params
   const numeratorParams: RuleParams = {
@@ -209,12 +226,19 @@ async function executeRatioAlert(
     criteria: getDenominator(ruleParams.criteria),
   };
 
-  const numeratorQuery = getESQuery(numeratorParams, timestampField, indexPattern, runtimeMappings);
+  const numeratorQuery = getESQuery(
+    numeratorParams,
+    timestampField,
+    indexPattern,
+    runtimeMappings,
+    executionTimestamp
+  );
   const denominatorQuery = getESQuery(
     denominatorParams,
     timestampField,
     indexPattern,
-    runtimeMappings
+    runtimeMappings,
+    executionTimestamp
   );
 
   if (!numeratorQuery || !denominatorQuery) {
@@ -250,11 +274,24 @@ const getESQuery = (
   alertParams: Omit<RuleParams, 'criteria'> & { criteria: CountCriteria },
   timestampField: string,
   indexPattern: string,
-  runtimeMappings: estypes.MappingRuntimeFields
+  runtimeMappings: estypes.MappingRuntimeFields,
+  executionTimestamp: number
 ) => {
   return hasGroupBy(alertParams)
-    ? getGroupedESQuery(alertParams, timestampField, indexPattern, runtimeMappings)
-    : getUngroupedESQuery(alertParams, timestampField, indexPattern, runtimeMappings);
+    ? getGroupedESQuery(
+        alertParams,
+        timestampField,
+        indexPattern,
+        runtimeMappings,
+        executionTimestamp
+      )
+    : getUngroupedESQuery(
+        alertParams,
+        timestampField,
+        indexPattern,
+        runtimeMappings,
+        executionTimestamp
+      );
 };
 
 export const processUngroupedResults = (
@@ -455,13 +492,14 @@ export const processGroupByRatioResults = (
 
 export const buildFiltersFromCriteria = (
   params: Pick<RuleParams, 'timeSize' | 'timeUnit'> & { criteria: CountCriteria },
-  timestampField: string
+  timestampField: string,
+  executionTimestamp: number
 ) => {
   const { timeSize, timeUnit, criteria } = params;
   const interval = `${timeSize}${timeUnit}`;
   const intervalAsSeconds = getIntervalInSeconds(interval);
   const intervalAsMs = intervalAsSeconds * 1000;
-  const to = Date.now();
+  const to = executionTimestamp;
   const from = to - intervalAsMs;
 
   const positiveComparators = getPositiveComparators();
@@ -514,7 +552,8 @@ export const getGroupedESQuery = (
   },
   timestampField: string,
   index: string,
-  runtimeMappings: estypes.MappingRuntimeFields
+  runtimeMappings: estypes.MappingRuntimeFields,
+  executionTimestamp: number
 ): estypes.SearchRequest | undefined => {
   // IMPORTANT:
   // For the group by scenario we need to account for users utilizing "less than" configurations
@@ -535,7 +574,8 @@ export const getGroupedESQuery = (
 
   const { rangeFilter, groupedRangeFilter, mustFilters, mustNotFilters } = buildFiltersFromCriteria(
     params,
-    timestampField
+    timestampField,
+    executionTimestamp
   );
 
   if (isOptimizableGroupedThreshold(comparator, value)) {
@@ -619,11 +659,13 @@ export const getUngroupedESQuery = (
   params: Pick<RuleParams, 'timeSize' | 'timeUnit'> & { criteria: CountCriteria },
   timestampField: string,
   index: string,
-  runtimeMappings: estypes.MappingRuntimeFields
+  runtimeMappings: estypes.MappingRuntimeFields,
+  executionTimestamp: number
 ): object => {
   const { rangeFilter, mustFilters, mustNotFilters } = buildFiltersFromCriteria(
     params,
-    timestampField
+    timestampField,
+    executionTimestamp
   );
 
   const body: estypes.SearchRequest['body'] = {
@@ -773,6 +815,52 @@ const getGroupedResults = async (query: object, esClient: ElasticsearchClient) =
   }
 
   return compositeGroupBuckets;
+};
+
+type LogThresholdRecoveredAlert = {
+  getId: () => string;
+} & LogThresholdAlert;
+
+const processRecoveredAlerts = (
+  recoveredAlerts: LogThresholdRecoveredAlert[],
+  startedAt: Date,
+  getAlertStartedDate: (alertId: string) => string | null,
+  basePath: IBasePath,
+  validatedParams: RuleParams
+) => {
+  for (const alert of recoveredAlerts) {
+    const recoveredAlertId = alert.getId();
+    const indexedStartedAt = getAlertStartedDate(recoveredAlertId) ?? startedAt.toISOString();
+    const relativeViewInAppUrl = getLogsAppAlertUrl(new Date(indexedStartedAt).getTime());
+    const viewInAppUrl = basePath.publicBaseUrl
+      ? new URL(basePath.prepend(relativeViewInAppUrl), basePath.publicBaseUrl).toString()
+      : relativeViewInAppUrl;
+
+    const baseContext = {
+      group: hasGroupBy(validatedParams) ? recoveredAlertId : null,
+      timestamp: startedAt.toISOString(),
+      viewInAppUrl,
+    };
+
+    if (isRatioRuleParams(validatedParams)) {
+      const { criteria } = validatedParams;
+      const context = {
+        ...baseContext,
+        numeratorConditions: createConditionsMessageForCriteria(getNumerator(criteria)),
+        denominatorConditions: createConditionsMessageForCriteria(getDenominator(criteria)),
+        isRatio: true,
+      };
+      alert.setContext(context);
+    } else {
+      const { criteria } = validatedParams;
+      const context = {
+        ...baseContext,
+        conditions: createConditionsMessageForCriteria(criteria),
+        isRatio: false,
+      };
+      alert.setContext(context);
+    }
+  }
 };
 
 const createConditionsMessageForCriteria = (criteria: CountCriteria) =>

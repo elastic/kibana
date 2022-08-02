@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { mergeMigrationFunctionMaps } from '@kbn/kibana-utils-plugin/common';
 import {
   customElementExpressionsMigrationsFactory,
   templateWorkpadExpressionsMigrationsFactory,
@@ -11,7 +12,6 @@ import {
 } from './expressions';
 import { CanvasSavedObjectTypeMigrationsDeps } from './types';
 import { workpadMigrationsFactory as workpadMigrationsFactoryFn } from './workpad';
-import { mergeMigrationFunctionMaps } from '../../../../../../src/plugins/kibana_utils/common';
 
 export const workpadMigrationsFactory = (deps: CanvasSavedObjectTypeMigrationsDeps) =>
   mergeMigrationFunctionMaps(

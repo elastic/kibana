@@ -7,7 +7,7 @@
 
 import { resolve } from 'path';
 import consumeState from './consume_state';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/utils';
 import chalk from 'chalk';
 import { esTestConfig, kbnTestConfig } from '@kbn/test';
@@ -25,7 +25,9 @@ const testsFolder = '../apps';
 const prepend = (testFile) => require.resolve(`${testsFolder}/${testFile}`);
 
 export default async ({ readConfigFile }) => {
-  const xpackFunctionalConfig = await readConfigFile(require.resolve('../../functional/config'));
+  const xpackFunctionalConfig = await readConfigFile(
+    require.resolve('../../functional/config.base.js')
+  );
   const externalConf = consumeState(resolve(__dirname, stateFilePath));
   process.env.stack_functional_integration = true;
   logAll(log);

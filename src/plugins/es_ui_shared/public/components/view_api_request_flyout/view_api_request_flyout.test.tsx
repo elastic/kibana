@@ -13,9 +13,9 @@ import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
 import { compressToEncodedURIComponent } from 'lz-string';
 
 import { ViewApiRequestFlyout } from './view_api_request_flyout';
-import type { UrlService } from 'src/plugins/share/common/url_service';
-import { ApplicationStart } from 'src/core/public';
-import { applicationServiceMock } from 'src/core/public/mocks';
+import type { UrlService } from '@kbn/share-plugin/common/url_service';
+import { ApplicationStart } from '@kbn/core/public';
+import { applicationServiceMock } from '@kbn/core/public/mocks';
 
 const payload = {
   title: 'Test title',

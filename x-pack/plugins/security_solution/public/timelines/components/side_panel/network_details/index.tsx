@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
-import { FlowTarget } from '../../../../../common/search_strategy';
+import type { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 import {
   ExpandableNetworkDetailsTitle,
   ExpandableNetworkDetailsPageLink,
@@ -36,7 +36,7 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
       flex: 1;
       overflow-x: hidden;
       overflow-y: scroll;
-      padding: ${({ theme }) => `${theme.eui.paddingSizes.xs} ${theme.eui.paddingSizes.m} 64px`};
+      padding: ${({ theme }) => `${theme.eui.euiSizeXS} ${theme.eui.euiSizeM} 64px`};
     }
   }
 `;
@@ -59,7 +59,7 @@ const StyledPanelContent = styled.div`
 
 interface NetworkDetailsProps {
   contextID: string;
-  expandedNetwork: { ip: string; flowTarget: FlowTarget };
+  expandedNetwork: { ip: string; flowTarget: FlowTargetSourceDest };
   handleOnNetworkClosed: () => void;
   isFlyoutView?: boolean;
   isDraggable?: boolean;

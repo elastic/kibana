@@ -7,15 +7,15 @@
 
 import expect from '@kbn/expect';
 
+import { MlCapabilitiesResponse } from '@kbn/ml-plugin/common/types/capabilities';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { MlCapabilitiesResponse } from '../../../../../plugins/ml/common/types/capabilities';
 
 const idSpaceWithMl = 'space_with_ml';
 const idSpaceNoMl = 'space_no_ml';
 
-const NUMBER_OF_CAPABILITIES = 36;
+const NUMBER_OF_CAPABILITIES = 37;
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
@@ -116,6 +116,7 @@ export default ({ getService }: FtrProviderContext) => {
           canDeleteAnnotation: true,
           canViewMlNodes: false,
           canGetTrainedModels: true,
+          canTestTrainedModels: true,
           canCreateTrainedModels: false,
           canDeleteTrainedModels: false,
           canStartStopTrainedModels: false,
@@ -158,6 +159,7 @@ export default ({ getService }: FtrProviderContext) => {
           canDeleteAnnotation: false,
           canViewMlNodes: false,
           canGetTrainedModels: false,
+          canTestTrainedModels: false,
           canCreateTrainedModels: false,
           canDeleteTrainedModels: false,
           canStartStopTrainedModels: false,
@@ -200,6 +202,7 @@ export default ({ getService }: FtrProviderContext) => {
           canDeleteAnnotation: true,
           canViewMlNodes: true,
           canGetTrainedModels: true,
+          canTestTrainedModels: true,
           canCreateTrainedModels: true,
           canDeleteTrainedModels: true,
           canStartStopTrainedModels: true,
@@ -242,6 +245,7 @@ export default ({ getService }: FtrProviderContext) => {
           canDeleteAnnotation: false,
           canViewMlNodes: false,
           canGetTrainedModels: false,
+          canTestTrainedModels: false,
           canCreateTrainedModels: false,
           canDeleteTrainedModels: false,
           canStartStopTrainedModels: false,

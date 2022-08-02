@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
-import { TriggersAndActionsUIPublicPluginSetup } from '../../../plugins/triggers_actions_ui/public';
+import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
+import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import { registerAlertTypes } from './alert_types';
 import { Config } from '../common';
 
@@ -15,6 +16,7 @@ export type Start = void;
 
 export interface StackAlertsPublicSetupDeps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  alerting: AlertingSetup;
 }
 
 export class StackAlertsPublicPlugin implements Plugin<Setup, Start, StackAlertsPublicSetupDeps> {
@@ -24,10 +26,11 @@ export class StackAlertsPublicPlugin implements Plugin<Setup, Start, StackAlerts
     this.initializerContext = initializerContext;
   }
 
-  public setup(core: CoreSetup, { triggersActionsUi }: StackAlertsPublicSetupDeps) {
+  public setup(core: CoreSetup, { triggersActionsUi, alerting }: StackAlertsPublicSetupDeps) {
     registerAlertTypes({
       ruleTypeRegistry: triggersActionsUi.ruleTypeRegistry,
       config: this.initializerContext.config.get<Config>(),
+      alerting,
     });
   }
 

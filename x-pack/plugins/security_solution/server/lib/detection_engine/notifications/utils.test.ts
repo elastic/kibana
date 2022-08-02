@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { SignalSource } from '../signals/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { SignalSource } from '../signals/types';
 import { deconflictSignalsAndResults, getNotificationResultsLink } from './utils';
 
 describe('utils', () => {

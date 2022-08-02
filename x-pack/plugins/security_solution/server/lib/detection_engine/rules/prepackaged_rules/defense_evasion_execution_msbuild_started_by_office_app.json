@@ -15,6 +15,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Microsoft Build Engine Started by an Office Application",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name : \"MSBuild.exe\" and\n  process.parent.name : (\"eqnedt32.exe\",\n                         \"excel.exe\",\n                         \"fltldr.exe\",\n                         \"msaccess.exe\",\n                         \"mspub.exe\",\n                         \"outlook.exe\",\n                         \"powerpnt.exe\",\n                         \"winword.exe\" )\n",
   "references": [
     "https://blog.talosintelligence.com/2020/02/building-bypass-with-msbuild.html"
@@ -64,5 +65,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 9
+  "version": 10
 }

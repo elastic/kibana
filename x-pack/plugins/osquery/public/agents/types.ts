@@ -6,8 +6,8 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { EuiComboBoxOptionOption } from '@elastic/eui';
-import { Agent } from '../../common/shared_imports';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { Agent } from '../../common/shared_imports';
 
 interface BaseDataPoint {
   key: string;
@@ -64,6 +64,5 @@ export enum AGENT_GROUP_KEY {
   All,
   Platform,
   Policy,
-  // eslint-disable-next-line @typescript-eslint/no-shadow
   Agent,
 }

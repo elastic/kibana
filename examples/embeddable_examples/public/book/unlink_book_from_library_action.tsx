@@ -7,10 +7,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { createAction, IncompatibleActionError } from '../../../../src/plugins/ui_actions/public';
+import { createAction, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { ViewMode, isReferenceOrValueEmbeddable } from '@kbn/embeddable-plugin/public';
+import { DASHBOARD_CONTAINER_TYPE } from '@kbn/dashboard-plugin/public';
 import { BookEmbeddable, BOOK_EMBEDDABLE } from './book_embeddable';
-import { ViewMode, isReferenceOrValueEmbeddable } from '../../../../src/plugins/embeddable/public';
-import { DASHBOARD_CONTAINER_TYPE } from '../../../../src/plugins/dashboard/public';
 
 interface ActionContext {
   embeddable: BookEmbeddable;

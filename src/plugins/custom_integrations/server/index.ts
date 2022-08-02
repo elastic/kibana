@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { PluginInitializerContext } from '../../../core/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 import { CustomIntegrationsPlugin } from './plugin';
 
 //  This exports static code and TypeScript types,

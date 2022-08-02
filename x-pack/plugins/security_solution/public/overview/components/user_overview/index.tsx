@@ -10,22 +10,24 @@ import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-th
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { buildUserNamesFilter, RiskSeverity } from '../../../../common/search_strategy';
+import type { RiskSeverity } from '../../../../common/search_strategy';
+import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import { DEFAULT_DARK_MODE } from '../../../../common/constants';
-import { DescriptionList } from '../../../../common/utility_types';
+import type { DescriptionList } from '../../../../common/utility_types';
 import { useUiSetting$ } from '../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
+import { DefaultFieldRenderer } from '../../../timelines/components/field_renderers/field_renderers';
 import {
-  dateRenderer,
-  DefaultFieldRenderer,
-} from '../../../timelines/components/field_renderers/field_renderers';
+  FirstLastSeen,
+  FirstLastSeenType,
+} from '../../../common/components/first_last_seen/first_last_seen';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import { Loader } from '../../../common/components/loader';
 import { NetworkDetailsLink } from '../../../common/components/links';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { AnomalyScores } from '../../../common/components/ml/score/anomaly_scores';
-import { Anomalies, NarrowDateRange } from '../../../common/components/ml/types';
+import type { Anomalies, NarrowDateRange } from '../../../common/components/ml/types';
 import { DescriptionListStyled, OverviewWrapper } from '../../../common/components/page';
 
 import * as i18n from './translations';
@@ -33,7 +35,7 @@ import * as i18n from './translations';
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
 import { useUserRiskScore } from '../../../risk_score/containers';
 import { RiskScore } from '../../../common/components/severity/common';
-import { UserItem } from '../../../../common/search_strategy/security_solution/users/common';
+import type { UserItem } from '../../../../common/search_strategy/security_solution/users/common';
 
 export interface UserSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
@@ -48,6 +50,7 @@ export interface UserSummaryProps {
   endDate: string;
   narrowDateRange: NarrowDateRange;
   userName: string;
+  indexPatterns: string[];
 }
 
 const UserRiskOverviewWrapper = styled(EuiFlexGroup)`
@@ -69,6 +72,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
     startDate,
     endDate,
     userName,
+    indexPatterns,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
@@ -169,11 +173,25 @@ export const UserOverview = React.memo<UserSummaryProps>(
         [
           {
             title: i18n.FIRST_SEEN,
-            description: data ? dateRenderer(data.firstSeen) : getEmptyTagValue(),
+            description: (
+              <FirstLastSeen
+                indexPatterns={indexPatterns}
+                field={'user.name'}
+                value={userName}
+                type={FirstLastSeenType.FIRST_SEEN}
+              />
+            ),
           },
           {
             title: i18n.LAST_SEEN,
-            description: data ? dateRenderer(data.lastSeen) : getEmptyTagValue(),
+            description: (
+              <FirstLastSeen
+                indexPatterns={indexPatterns}
+                field={'user.name'}
+                value={userName}
+                type={FirstLastSeenType.LAST_SEEN}
+              />
+            ),
           },
         ],
         [
@@ -200,7 +218,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
           },
         ],
       ],
-      [data, getDefaultRenderer, contextID, isDraggable, firstColumn]
+      [data, indexPatterns, getDefaultRenderer, contextID, isDraggable, userName, firstColumn]
     );
     return (
       <>

@@ -7,7 +7,7 @@
 
 import { JobsHealthService, jobsHealthServiceProvider } from './jobs_health_service';
 import type { DatafeedsService } from '../../models/job_service/datafeeds';
-import type { Logger } from 'kibana/server';
+import type { Logger } from '@kbn/core/server';
 import { MlClient } from '../ml_client';
 import { MlJob, MlJobStats } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AnnotationService } from '../../models/annotation_service/annotation';
@@ -248,7 +248,16 @@ describe('JobsHealthService', () => {
     expect(logger.warn).not.toHaveBeenCalled();
     expect(logger.debug).toHaveBeenCalledWith(`Performing health checks for job IDs: test_job_01`);
     expect(datafeedsService.getDatafeedByJobId).not.toHaveBeenCalled();
-    expect(executionResult).toEqual([]);
+    expect(executionResult).toEqual([
+      {
+        context: {
+          message: 'No errors in the jobs messages.',
+          results: [],
+        },
+        isHealthy: true,
+        name: 'Errors in job messages',
+      },
+    ]);
   });
 
   test('takes into account delayed data params', async () => {
@@ -287,6 +296,7 @@ describe('JobsHealthService', () => {
 
     expect(executionResult).toEqual([
       {
+        isHealthy: false,
         name: 'Data delay has occurred',
         context: {
           results: [
@@ -342,6 +352,7 @@ describe('JobsHealthService', () => {
 
     expect(executionResult).toEqual([
       {
+        isHealthy: false,
         name: 'Datafeed is not started',
         context: {
           results: [
@@ -356,6 +367,7 @@ describe('JobsHealthService', () => {
         },
       },
       {
+        isHealthy: false,
         name: 'Model memory limit reached',
         context: {
           results: [
@@ -370,10 +382,11 @@ describe('JobsHealthService', () => {
             },
           ],
           message:
-            'Job test_job_01 reached the hard model memory limit. Assign the job more memory and restore from a snapshot from prior to reaching the hard limit.',
+            'Job test_job_01 reached the hard model memory limit. Assign more memory to the job and restore it from a snapshot taken prior to reaching the hard limit.',
         },
       },
       {
+        isHealthy: false,
         name: 'Data delay has occurred',
         context: {
           results: [
@@ -393,6 +406,14 @@ describe('JobsHealthService', () => {
             },
           ],
           message: 'Jobs test_job_01, test_job_02 are suffering from delayed data.',
+        },
+      },
+      {
+        isHealthy: true,
+        name: 'Errors in job messages',
+        context: {
+          message: 'No errors in the jobs messages.',
+          results: [],
         },
       },
     ]);

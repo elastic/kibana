@@ -7,8 +7,8 @@
 
 import React, { FC, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { SavedObject } from 'src/core/types';
-import { TagListComponentProps } from '../../../../../../src/plugins/saved_objects_tagging_oss/public';
+import { SavedObject } from '@kbn/core/types';
+import { TagListComponentProps } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { Tag } from '../../../common/types';
 import { getObjectTags } from '../../utils';
 import { TagList } from '../base';

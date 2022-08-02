@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { kibanaResponseFactory } from 'src/core/server';
-import { coreMock, httpServerMock, httpServiceMock } from 'src/core/server/mocks';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 
 import { spacesClientServiceMock } from '../../../spaces_client/spaces_client_service.mock';
 import { SpacesService } from '../../../spaces_service';

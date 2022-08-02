@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import type { RecursiveReadonly, Writable } from '@kbn/utility-types';
-import { Capabilities as UICapabilities } from '../../../../src/core/server';
+import { Capabilities as UICapabilities } from '@kbn/core/server';
 import { ElasticsearchFeature, KibanaFeature } from '../common';
 
 const ELIGIBLE_FLAT_MERGE_KEYS = ['catalogue'] as const;

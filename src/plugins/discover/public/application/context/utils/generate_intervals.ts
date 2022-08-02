@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SortDirection } from '../../../../../data/public';
+import { SortDirection } from '@kbn/data-plugin/public';
 import { SurrDocType } from '../services/context';
 
 export type IntervalValue = number | null;

@@ -12,15 +12,17 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DataViewBase, Filter, Query } from '@kbn/es-query';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { Direction, EntityType } from '../../../../common/search_strategy';
-import type { DocValueFields } from '../../../../common/search_strategy';
-import type { CoreStart } from '../../../../../../../src/core/public';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import {
   BulkActionsProp,
+  FieldBrowserOptions,
   TGridCellAction,
   TimelineId,
   TimelineTabs,
@@ -35,14 +37,11 @@ import type {
   AlertStatus,
 } from '../../../../common/types/timeline';
 
-import type { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
-import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { buildCombinedQuery, getCombinedFilterQuery, resolverIsShowing } from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
 import { useTimelineEvents, InspectResponse, Refetch } from '../../../container';
-import { FieldBrowserOptions } from '../../fields_browser';
 import { StatefulBody } from '../body';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexGroup, UpdatedFlexItem } from '../styles';
 import { Sort } from '../body/sort';
@@ -58,6 +57,7 @@ const StyledEuiPanel = styled(EuiPanel)<{ $isFullScreen: boolean }>`
   display: flex;
   flex-direction: column;
   position: relative;
+  width: 100%;
 
   ${({ $isFullScreen }) =>
     $isFullScreen &&
@@ -104,7 +104,6 @@ export interface TGridIntegratedProps {
   defaultCellActions?: TGridCellAction[];
   deletedEventIds: Readonly<string[]>;
   disabledCellActions: string[];
-  docValueFields: DocValueFields[];
   end: string;
   entityType: EntityType;
   fieldBrowserOptions?: FieldBrowserOptions;
@@ -112,7 +111,7 @@ export interface TGridIntegratedProps {
   filterStatus?: AlertStatus;
   globalFullScreen: boolean;
   // If truthy, the graph viewer (Resolver) is showing
-  graphEventId: string | undefined;
+  graphEventId?: string;
   graphOverlay?: React.ReactNode;
   hasAlertsCrud: boolean;
   height?: number;
@@ -150,7 +149,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   defaultCellActions,
   deletedEventIds,
   disabledCellActions,
-  docValueFields,
   end,
   entityType,
   fieldBrowserOptions,
@@ -225,10 +223,11 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
 
   const sortField = useMemo(
     () =>
-      sort.map(({ columnId, columnType, sortDirection }) => ({
+      sort.map(({ columnId, columnType, esTypes, sortDirection }) => ({
         field: columnId,
         type: columnType,
         direction: sortDirection as Direction,
+        esTypes: esTypes ?? [],
       })),
     [sort]
   );
@@ -239,7 +238,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
       alertConsumers: SECURITY_ALERTS_CONSUMERS,
       data,
       dataViewId,
-      docValueFields,
       endDate: end,
       entityType,
       fields,
@@ -351,7 +349,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                   )}
               </UpdatedFlexGroup>
               <>
-                {!hasAlerts && !loading && <TGridEmpty height="short" />}
+                {!hasAlerts && !loading && !graphOverlay && <TGridEmpty height="short" />}
                 {hasAlerts && (
                   <FullWidthFlexGroup
                     $visible={!graphEventId && graphOverlay == null}

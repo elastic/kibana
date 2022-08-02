@@ -28,7 +28,7 @@ import { i18n } from '@kbn/i18n';
 
 import { getStatusColor, attemptToFormatJson } from '../utils';
 
-import { ApiLogLogic } from './';
+import { ApiLogLogic } from '.';
 
 export const ApiLogFlyout: React.FC = () => {
   const { isFlyoutOpen, apiLog } = useValues(ApiLogLogic);

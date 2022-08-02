@@ -10,10 +10,10 @@ import React, { FC } from 'react';
 
 import { EuiTabbedContent, EuiSpacer } from '@elastic/eui';
 
+import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { SimpleSettings } from './simple';
 import { AdvancedSettings } from './advanced';
 import { CombinedField } from '../../../common/components/combined_fields';
-import { FindFileStructureResponse } from '../../../../../../file_upload/common';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 
 interface Props {

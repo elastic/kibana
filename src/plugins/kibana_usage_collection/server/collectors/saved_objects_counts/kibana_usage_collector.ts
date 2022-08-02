@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { ElasticsearchClient } from 'src/core/server';
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { snakeCase } from 'lodash';
 import { getSavedObjectsCounts } from './get_saved_object_counts';
 
@@ -29,7 +29,7 @@ export async function getKibanaSavedObjectCounts(
   esClient: ElasticsearchClient,
   kibanaIndex: string
 ): Promise<KibanaSavedObjectCounts> {
-  const buckets = await getSavedObjectsCounts(esClient, kibanaIndex, TYPES);
+  const { per_type: buckets } = await getSavedObjectsCounts(esClient, kibanaIndex, TYPES, true);
 
   const allZeros = Object.fromEntries(
     TYPES.map((type) => [snakeCase(type), { total: 0 }])

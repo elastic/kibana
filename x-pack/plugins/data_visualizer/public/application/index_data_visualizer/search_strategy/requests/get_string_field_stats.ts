@@ -9,12 +9,15 @@ import { get } from 'lodash';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { AggregationsTermsAggregation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchOptions,
+  ISearchStart,
+} from '@kbn/data-plugin/public';
+import { buildSamplerAggregation, getSamplerAggregationsResponsePath } from '@kbn/ml-agg-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { SAMPLER_TOP_TERMS_SHARD_SIZE, SAMPLER_TOP_TERMS_THRESHOLD } from './constants';
-import {
-  buildSamplerAggregation,
-  getSamplerAggregationsResponsePath,
-} from '../../../../../common/utils/query_utils';
-import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 import type {
   Aggs,
   Bucket,
@@ -22,12 +25,6 @@ import type {
   FieldStatsCommonRequestParams,
   StringFieldStats,
 } from '../../../../../common/types/field_stats';
-import type {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-  ISearchOptions,
-  ISearchStart,
-} from '../../../../../../../../src/plugins/data/public';
 import { FieldStatsError, isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
 import { extractErrorProperties } from '../../utils/error_utils';
 

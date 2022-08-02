@@ -6,8 +6,8 @@
  */
 
 import { Observable } from 'rxjs';
-import { getTableActions } from './index';
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import { getTableActions } from '.';
+import { coreMock } from '@kbn/core/public/mocks';
 import { createTagCapabilities } from '../../../common/test_utils';
 import { TagsCapabilities } from '../../../common/capabilities';
 import { tagClientMock } from '../../services/tags/tags_client.mock';

@@ -9,14 +9,15 @@ import React from 'react';
 import { merge } from 'lodash';
 import SemVer from 'semver/classes/semver';
 
-import { HttpSetup } from 'src/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import {
   notificationServiceMock,
   docLinksServiceMock,
   uiSettingsServiceMock,
-} from '../../../../../../src/core/public/mocks';
-import { GlobalFlyout } from '../../../../../../src/plugins/es_ui_shared/public';
-import { createKibanaReactContext } from '../../../../../../src/plugins/kibana_react/public';
+  executionContextServiceMock,
+} from '@kbn/core/public/mocks';
+import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 
 import { MAJOR_VERSION } from '../../../common';
 import { AppContextProvider } from '../../../public/application/app_context';
@@ -48,7 +49,10 @@ setUiMetricService(services.uiMetricService);
 
 const appDependencies = {
   services,
-  core: { getUrlForApp: () => {} },
+  core: {
+    getUrlForApp: () => {},
+    executionContext: executionContextServiceMock.createStartContract(),
+  },
   plugins: {},
 } as any;
 

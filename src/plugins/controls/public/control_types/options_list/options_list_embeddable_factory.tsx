@@ -8,10 +8,12 @@
 
 import deepEqual from 'fast-deep-equal';
 
-import { OptionsListEditor } from './options_list_editor';
-import { ControlEmbeddable, IEditableControlFactory } from '../../types';
+import { lazyLoadReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
+import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
+
+import { OptionsListEditorOptions } from './options_list_editor_options';
+import { ControlEmbeddable, DataControlField, IEditableControlFactory } from '../../types';
 import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from './types';
-import { EmbeddableFactoryDefinition, IContainer } from '../../../../embeddable/public';
 import {
   createOptionsListExtract,
   createOptionsListInject,
@@ -27,8 +29,11 @@ export class OptionsListEmbeddableFactory
   constructor() {}
 
   public async create(initialInput: OptionsListEmbeddableInput, parent?: IContainer) {
+    const reduxEmbeddablePackage = await lazyLoadReduxEmbeddablePackage();
     const { OptionsListEmbeddable } = await import('./options_list_embeddable');
-    return Promise.resolve(new OptionsListEmbeddable(initialInput, {}, parent));
+    return Promise.resolve(
+      new OptionsListEmbeddable(reduxEmbeddablePackage, initialInput, {}, parent)
+    );
   }
 
   public presaveTransformFunction = (
@@ -37,8 +42,8 @@ export class OptionsListEmbeddableFactory
   ) => {
     if (
       embeddable &&
-      (!deepEqual(newInput.fieldName, embeddable.getInput().fieldName) ||
-        !deepEqual(newInput.dataViewId, embeddable.getInput().dataViewId))
+      ((newInput.fieldName && !deepEqual(newInput.fieldName, embeddable.getInput().fieldName)) ||
+        (newInput.dataViewId && !deepEqual(newInput.dataViewId, embeddable.getInput().dataViewId)))
     ) {
       // if the field name or data view id has changed in this editing session, selected options are invalid, so reset them.
       newInput.selectedOptions = [];
@@ -46,12 +51,21 @@ export class OptionsListEmbeddableFactory
     return newInput;
   };
 
-  public controlEditorComponent = OptionsListEditor;
+  public isFieldCompatible = (dataControlField: DataControlField) => {
+    if (
+      (dataControlField.field.aggregatable && dataControlField.field.type === 'string') ||
+      dataControlField.field.type === 'boolean'
+    ) {
+      dataControlField.compatibleControlTypes.push(this.type);
+    }
+  };
+
+  public controlEditorOptionsComponent = OptionsListEditorOptions;
 
   public isEditable = () => Promise.resolve(false);
 
   public getDisplayName = () => OptionsListStrings.getDisplayName();
-  public getIconType = () => 'list';
+  public getIconType = () => 'editorChecklist';
   public getDescription = () => OptionsListStrings.getDescription();
 
   public inject = createOptionsListInject();

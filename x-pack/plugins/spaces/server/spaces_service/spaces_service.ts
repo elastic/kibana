@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IBasePath, KibanaRequest } from 'src/core/server';
+import type { IBasePath, KibanaRequest } from '@kbn/core/server';
 
 import type { Space } from '../../common';
 import { getSpaceIdFromPath } from '../../common';

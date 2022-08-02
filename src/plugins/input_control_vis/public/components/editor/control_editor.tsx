@@ -19,10 +19,10 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { DataView } from '@kbn/data-views-plugin/public';
 import { RangeControlEditor } from './range_control_editor';
 import { ListControlEditor } from './list_control_editor';
 import { getTitle, ControlParams, CONTROL_TYPES, ControlParamsOptions } from '../../editor_utils';
-import { DataView } from '../../../../data_views/public';
 import { InputControlVisDependencies } from '../../plugin';
 
 import './control_editor.scss';

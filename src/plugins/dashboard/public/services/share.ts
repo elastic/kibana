@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export type { SharePluginStart, SharePluginSetup } from '../../../share/public';
-export { downloadMultipleAs } from '../../../share/public';
+export type { SharePluginStart, SharePluginSetup } from '@kbn/share-plugin/public';
+export { downloadMultipleAs } from '@kbn/share-plugin/public';

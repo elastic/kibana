@@ -9,14 +9,19 @@ import React from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 
+import { QueryClientProvider } from 'react-query';
 import * as i18n from '../translations';
 import { Case } from '../../../../common/ui/types';
 import { CreateCaseForm } from '../form';
-import { UsePostComment } from '../../../containers/use_post_comment';
+import { UseCreateAttachments } from '../../../containers/use_create_attachments';
 import { CaseAttachments } from '../../../types';
+import { casesQueryClient } from '../../cases_context/query_client';
 
 export interface CreateCaseFlyoutProps {
-  afterCaseCreated?: (theCase: Case, postComment: UsePostComment['postComment']) => Promise<void>;
+  afterCaseCreated?: (
+    theCase: Case,
+    createAttachments: UseCreateAttachments['createAttachments']
+  ) => Promise<void>;
   onClose?: () => void;
   onSuccess?: (theCase: Case) => Promise<void>;
   attachments?: CaseAttachments;
@@ -55,7 +60,7 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
 
       && .euiFlyoutBody__overflowContent {
         display: block;
-        padding: ${theme.eui.paddingSizes.l} ${theme.eui.paddingSizes.l} 70px;
+        padding: ${theme.eui.euiSizeL} ${theme.eui.euiSizeL} 70px;
         height: auto;
       }
     `}
@@ -70,7 +75,7 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
     const handleCancel = onClose || function () {};
     const handleOnSuccess = onSuccess || async function () {};
     return (
-      <>
+      <QueryClientProvider client={casesQueryClient}>
         <GlobalStyle />
         <StyledFlyout
           onClose={onClose}
@@ -95,7 +100,7 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
             </FormWrapper>
           </StyledEuiFlyoutBody>
         </StyledFlyout>
-      </>
+      </QueryClientProvider>
     );
   }
 );

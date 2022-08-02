@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { CorePreboot, PrebootPlugin, PluginInitializerContext } from 'src/core/server';
+import type { CorePreboot, PrebootPlugin, PluginInitializerContext } from '@kbn/core/server';
 import fs from 'fs/promises';
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';

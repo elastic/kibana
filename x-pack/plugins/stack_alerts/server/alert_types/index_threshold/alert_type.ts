@@ -6,15 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Logger } from 'src/core/server';
-import { RuleType, AlertExecutorOptions, StackAlertsStartDeps } from '../../types';
-import { Params, ParamsSchema } from './alert_type_params';
-import { ActionContext, BaseActionContext, addMessages } from './action_context';
-import { STACK_ALERTS_FEATURE_ID } from '../../../common';
+import { Logger } from '@kbn/core/server';
 import {
   CoreQueryParamsSchemaProperties,
   TimeSeriesQuery,
-} from '../../../../triggers_actions_ui/server';
+} from '@kbn/triggers-actions-ui-plugin/server';
+import { RuleType, RuleExecutorOptions, StackAlertsStartDeps } from '../../types';
+import { Params, ParamsSchema } from './alert_type_params';
+import { ActionContext, BaseActionContext, addMessages } from './action_context';
+import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { ComparatorFns, getHumanReadableComparator } from '../lib';
 
 export const ID = '.index-threshold';
@@ -132,7 +132,7 @@ export function getAlertType(
   };
 
   async function executor(
-    options: AlertExecutorOptions<Params, {}, {}, ActionContext, typeof ActionGroupId>
+    options: RuleExecutorOptions<Params, {}, {}, ActionContext, typeof ActionGroupId>
   ) {
     const { alertId: ruleId, name, services, params } = options;
     const { alertFactory, scopedClusterClient } = services;

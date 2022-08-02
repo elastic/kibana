@@ -17,7 +17,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
-import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { OBSERVABILITY_OWNER, OWNER_INFO } from '../../../common/constants';
 

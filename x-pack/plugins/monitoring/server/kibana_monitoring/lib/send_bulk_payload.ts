@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from 'src/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { MONITORING_SYSTEM_API_VERSION, KIBANA_SYSTEM_ID } from '../../../common/constants';
 
 /*

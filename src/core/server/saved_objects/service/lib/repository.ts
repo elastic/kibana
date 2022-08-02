@@ -9,63 +9,68 @@
 import { omit, isObject } from 'lodash';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import * as esKuery from '@kbn/es-query';
-import type { ElasticsearchClient } from '../../../elasticsearch/';
-import { isSupportedEsServer, isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
-import type { Logger } from '../../../logging';
-import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
+import type { Logger } from '@kbn/logging';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
+  isSupportedEsServer,
+  isNotFoundFromUnsupportedServer,
+} from '@kbn/core-elasticsearch-server-internal';
+import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type {
+  ISavedObjectsRepository,
+  SavedObjectsBaseOptions,
+  SavedObjectsIncrementCounterOptions,
+  SavedObjectsDeleteByNamespaceOptions,
+  SavedObjectsBulkResponse,
+  SavedObjectsUpdateResponse,
+  SavedObjectsBulkGetObject,
+  SavedObjectsBulkResolveObject,
+  SavedObjectsIncrementCounterField,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsBulkResolveResponse,
+  SavedObjectsCreateOptions,
+  SavedObjectsFindResponse,
+  SavedObjectsBulkUpdateResponse,
+  SavedObjectsUpdateObjectsSpacesOptions,
+  SavedObjectsCollectMultiNamespaceReferencesOptions,
+  SavedObjectsRemoveReferencesToResponse,
+  SavedObjectsCheckConflictsObject,
+  SavedObjectsCheckConflictsResponse,
+  SavedObjectsBulkUpdateOptions,
+  SavedObjectsFindResult,
+  SavedObjectsRemoveReferencesToOptions,
+  SavedObjectsDeleteOptions,
+  SavedObjectsOpenPointInTimeResponse,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsClosePointInTimeResponse,
   ISavedObjectsPointInTimeFinder,
-  PointInTimeFinder,
-  SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsCreatePointInTimeFinderDependencies,
-} from './point_in_time_finder';
+  SavedObjectsResolveResponse,
+  SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsUpdateObjectsSpacesObject,
+  SavedObjectsUpdateOptions,
+  SavedObjectsOpenPointInTimeOptions,
+  SavedObjectsClosePointInTimeOptions,
+  SavedObjectsCreatePointInTimeFinderOptions,
+  SavedObjectsFindOptions,
+} from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectSanitizedDoc,
+  SavedObjectsRawDoc,
+  SavedObjectsRawDocSource,
+  ISavedObjectTypeRegistry,
+} from '@kbn/core-saved-objects-server';
+import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
+import { PointInTimeFinder } from './point_in_time_finder';
 import { createRepositoryEsClient, RepositoryEsClient } from './repository_es_client';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
 import { SavedObjectsErrorHelpers, DecoratedError } from './errors';
 import { decodeRequestVersion, encodeVersion, encodeHitVersion } from '../../version';
 import { IKibanaMigrator } from '../../migrations';
-import {
-  SavedObjectsSerializer,
-  SavedObjectSanitizedDoc,
-  SavedObjectsRawDoc,
-  SavedObjectsRawDocSource,
-} from '../../serialization';
-import {
-  SavedObjectsBulkCreateObject,
-  SavedObjectsBulkGetObject,
-  SavedObjectsBulkResponse,
-  SavedObjectsBulkUpdateResponse,
-  SavedObjectsCheckConflictsObject,
-  SavedObjectsCheckConflictsResponse,
-  SavedObjectsCreateOptions,
-  SavedObjectsFindResponse,
-  SavedObjectsFindResult,
-  SavedObjectsClosePointInTimeOptions,
-  SavedObjectsClosePointInTimeResponse,
-  SavedObjectsOpenPointInTimeOptions,
-  SavedObjectsOpenPointInTimeResponse,
-  SavedObjectsUpdateOptions,
-  SavedObjectsUpdateResponse,
-  SavedObjectsBulkUpdateObject,
-  SavedObjectsBulkUpdateOptions,
-  SavedObjectsDeleteOptions,
-  SavedObjectsRemoveReferencesToOptions,
-  SavedObjectsRemoveReferencesToResponse,
-  SavedObjectsResolveResponse,
-  SavedObjectsBulkResolveObject,
-  SavedObjectsBulkResolveResponse,
-} from '../saved_objects_client';
+import { SavedObjectsSerializer } from '../../serialization';
 import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
-import {
-  SavedObject,
-  SavedObjectsBaseOptions,
-  SavedObjectsFindOptions,
-  SavedObjectsMigrationVersion,
-  MutatingOperationRefreshSetting,
-} from '../../types';
 import { SavedObjectsTypeValidator } from '../../validation';
-import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { internalBulkResolve, InternalBulkResolveError } from './internal_bulk_resolve';
 import { validateConvertFilterToKueryNode } from './filter_utils';
 import { validateAndConvertAggregations } from './aggregations';
@@ -87,16 +92,8 @@ import {
   FIND_DEFAULT_PER_PAGE,
   SavedObjectsUtils,
 } from './utils';
-import {
-  collectMultiNamespaceReferences,
-  SavedObjectsCollectMultiNamespaceReferencesObject,
-  SavedObjectsCollectMultiNamespaceReferencesOptions,
-} from './collect_multi_namespace_references';
-import {
-  updateObjectsSpaces,
-  SavedObjectsUpdateObjectsSpacesObject,
-  SavedObjectsUpdateObjectsSpacesOptions,
-} from './update_objects_spaces';
+import { collectMultiNamespaceReferences } from './collect_multi_namespace_references';
+import { updateObjectsSpaces } from './update_objects_spaces';
 import { getIndexForType } from './get_index_for_type';
 import {
   preflightCheckForCreate,
@@ -118,56 +115,8 @@ export interface SavedObjectsRepositoryOptions {
   logger: Logger;
 }
 
-/**
- * @public
- */
-export interface SavedObjectsIncrementCounterOptions<Attributes = unknown>
-  extends SavedObjectsBaseOptions {
-  /**
-   * (default=false) If true, sets all the counter fields to 0 if they don't
-   * already exist. Existing fields will be left as-is and won't be incremented.
-   */
-  initialize?: boolean;
-  /** {@link SavedObjectsMigrationVersion} */
-  migrationVersion?: SavedObjectsMigrationVersion;
-  /**
-   * (default='wait_for') The Elasticsearch refresh setting for this
-   * operation. See {@link MutatingOperationRefreshSetting}
-   */
-  refresh?: MutatingOperationRefreshSetting;
-  /**
-   * Attributes to use when upserting the document if it doesn't exist.
-   */
-  upsertAttributes?: Attributes;
-}
-
-/**
- *
- * @public
- */
-export interface SavedObjectsDeleteByNamespaceOptions extends SavedObjectsBaseOptions {
-  /** The Elasticsearch supports only boolean flag for this operation */
-  refresh?: boolean;
-}
-
 export const DEFAULT_REFRESH_SETTING = 'wait_for';
-
-/**
- * See {@link SavedObjectsRepository}
- *
- * @public
- */
-export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedObjectsRepository>;
-
-/**
- * @public
- */
-export interface SavedObjectsIncrementCounterField {
-  /** The field name to increment the counter by.*/
-  fieldName: string;
-  /** The number to increment the field by (defaults to 1).*/
-  incrementBy?: number;
-}
+export const DEFAULT_RETRY_COUNT = 3;
 
 /**
  * @internal
@@ -205,7 +154,7 @@ function isMgetDoc(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.GetG
 /**
  * @public
  */
-export class SavedObjectsRepository {
+export class SavedObjectsRepository implements ISavedObjectsRepository {
   private _migrator: IKibanaMigrator;
   private _index: string;
   private _mappings: IndexMapping;
@@ -291,17 +240,7 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * Persists an object
-   *
-   * @param {string} type
-   * @param {object} attributes
-   * @param {object} [options={}]
-   * @property {string} [options.id] - force id on creation, not recommended
-   * @property {boolean} [options.overwrite=false]
-   * @property {object} [options.migrationVersion=undefined]
-   * @property {string} [options.namespace]
-   * @property {array} [options.references=[]] - [{ name, type, id }]
-   * @returns {promise} - { id, type, version, attributes }
+   * {@inheritDoc ISavedObjectsRepository.create}
    */
   public async create<T = unknown>(
     type: string,
@@ -314,7 +253,6 @@ export class SavedObjectsRepository {
       overwrite = false,
       references = [],
       refresh = DEFAULT_REFRESH_SETTING,
-      originId,
       initialNamespaces,
       version,
     } = options;
@@ -322,6 +260,7 @@ export class SavedObjectsRepository {
     const namespace = normalizeNamespace(options.namespace);
 
     this.validateInitialNamespaces(type, initialNamespaces);
+    this.validateOriginId(type, options);
 
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
@@ -330,6 +269,7 @@ export class SavedObjectsRepository {
     const time = getCurrentTime();
     let savedObjectNamespace: string | undefined;
     let savedObjectNamespaces: string[] | undefined;
+    let existingOriginId: string | undefined;
 
     if (this._registry.isSingleNamespace(type)) {
       savedObjectNamespace = initialNamespaces
@@ -353,11 +293,17 @@ export class SavedObjectsRepository {
         }
         savedObjectNamespaces =
           initialNamespaces || getSavedObjectNamespaces(namespace, existingDocument);
+        existingOriginId = existingDocument?._source?.originId;
       } else {
         savedObjectNamespaces = initialNamespaces || getSavedObjectNamespaces(namespace);
       }
     }
 
+    // 1. If the originId has been *explicitly set* in the options (defined or undefined), respect that.
+    // 2. Otherwise, preserve the originId of the existing object that is being overwritten, if any.
+    const originId = Object.keys(options).includes('originId')
+      ? options.originId
+      : existingOriginId;
     const migrated = this._migrator.migrateDocument({
       id,
       type,
@@ -407,13 +353,7 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * Creates multiple documents at once
-   *
-   * @param {array} objects - [{ type, id, attributes, references, migrationVersion }]
-   * @param {object} [options={}]
-   * @property {boolean} [options.overwrite=false] - overwrites existing documents
-   * @property {string} [options.namespace]
-   * @returns {promise} -  {saved_objects: [[{ id, type, version, references, attributes, error: { message } }]}
+   * {@inheritDoc ISavedObjectsRepository.bulkCreate}
    */
   async bulkCreate<T = unknown>(
     objects: Array<SavedObjectsBulkCreateObject<T>>,
@@ -441,6 +381,7 @@ export class SavedObjectsRepository {
       } else {
         try {
           this.validateInitialNamespaces(type, initialNamespaces);
+          this.validateOriginId(type, object);
         } catch (e) {
           error = e;
         }
@@ -498,6 +439,7 @@ export class SavedObjectsRepository {
 
       let savedObjectNamespace: string | undefined;
       let savedObjectNamespaces: string[] | undefined;
+      let existingOriginId: string | undefined;
       let versionProperties;
       const {
         preflightCheckIndex,
@@ -523,7 +465,8 @@ export class SavedObjectsRepository {
         }
         savedObjectNamespaces =
           initialNamespaces || getSavedObjectNamespaces(namespace, existingDocument);
-        versionProperties = getExpectedVersionProperties(version, existingDocument);
+        versionProperties = getExpectedVersionProperties(version);
+        existingOriginId = existingDocument?._source?.originId;
       } else {
         if (this._registry.isSingleNamespace(object.type)) {
           savedObjectNamespace = initialNamespaces
@@ -535,6 +478,11 @@ export class SavedObjectsRepository {
         versionProperties = getExpectedVersionProperties(version);
       }
 
+      // 1. If the originId has been *explicitly set* for the object (defined or undefined), respect that.
+      // 2. Otherwise, preserve the originId of the existing object that is being overwritten, if any.
+      const originId = Object.keys(object).includes('originId')
+        ? object.originId
+        : existingOriginId;
       const migrated = this._migrator.migrateDocument({
         id: object.id,
         type: object.type,
@@ -545,7 +493,7 @@ export class SavedObjectsRepository {
         ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
         updated_at: time,
         references: object.references || [],
-        originId: object.originId,
+        originId,
       }) as SavedObjectSanitizedDoc<T>;
 
       /**
@@ -621,8 +569,7 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * Check what conflicts will result when creating a given array of saved objects. This includes "unresolvable conflicts", which are
-   * multi-namespace objects that exist in a different namespace; such conflicts cannot be resolved/overwritten.
+   * {@inheritDoc ISavedObjectsRepository.checkConflicts}
    */
   async checkConflicts(
     objects: SavedObjectsCheckConflictsObject[] = [],
@@ -714,13 +661,7 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * Deletes an object
-   *
-   * @param {string} type
-   * @param {string} id
-   * @param {object} [options={}]
-   * @property {string} [options.namespace]
-   * @returns {promise}
+   * {@inheritDoc ISavedObjectsRepository.delete}
    */
   async delete(type: string, id: string, options: SavedObjectsDeleteOptions = {}): Promise<{}> {
     if (!this._allowedTypes.includes(type)) {
@@ -761,7 +702,7 @@ export class SavedObjectsRepository {
       {
         id: rawId,
         index: this.getIndexForType(type),
-        ...getExpectedVersionProperties(undefined, preflightResult?.rawDocSource),
+        ...getExpectedVersionProperties(undefined),
         refresh,
       },
       { ignore: [404], meta: true }
@@ -813,10 +754,7 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * Deletes all objects from the provided namespace.
-   *
-   * @param {string} namespace
-   * @returns {promise} - { took, timed_out, total, deleted, batches, version_conflicts, noops, retries, failures }
+   * {@inheritDoc ISavedObjectsRepository.deleteByNamespace}
    */
   async deleteByNamespace(
     namespace: string,
@@ -876,23 +814,7 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * @param {object} [options={}]
-   * @property {(string|Array<string>)} [options.type]
-   * @property {string} [options.search]
-   * @property {string} [options.defaultSearchOperator]
-   * @property {Array<string>} [options.searchFields] - see Elasticsearch Simple Query String
-   *                                        Query field argument for more information
-   * @property {integer} [options.page=1]
-   * @property {integer} [options.perPage=20]
-   * @property {Array<unknown>} [options.searchAfter]
-   * @property {string} [options.sortField]
-   * @property {string} [options.sortOrder]
-   * @property {Array<string>} [options.fields]
-   * @property {string} [options.namespace]
-   * @property {object} [options.hasReference] - { type, id }
-   * @property {string} [options.pit]
-   * @property {string} [options.preference]
-   * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
+   * {@inheritDoc ISavedObjectsRepository.find}
    */
   async find<T = unknown, A = unknown>(
     options: SavedObjectsFindOptions
@@ -1055,18 +977,7 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * Returns an array of objects by id
-   *
-   * @param {array} objects - an array of objects containing id, type and optionally fields
-   * @param {object} [options={}]
-   * @property {string} [options.namespace]
-   * @returns {promise} - { saved_objects: [{ id, type, version, attributes }] }
-   * @example
-   *
-   * bulkGet([
-   *   { id: 'one', type: 'config' },
-   *   { id: 'foo', type: 'index-pattern' }
-   * ])
+   * {@inheritDoc ISavedObjectsRepository.bulkGet}
    */
   async bulkGet<T = unknown>(
     objects: SavedObjectsBulkGetObject[] = [],
@@ -1173,18 +1084,7 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * Resolves an array of objects by id, using any legacy URL aliases if they exist
-   *
-   * @param {array} objects - an array of objects containing id, type
-   * @param {object} [options={}]
-   * @property {string} [options.namespace]
-   * @returns {promise} - { resolved_objects: [{ saved_object, outcome }] }
-   * @example
-   *
-   * bulkResolve([
-   *   { id: 'one', type: 'config' },
-   *   { id: 'foo', type: 'index-pattern' }
-   * ])
+   * {@inheritDoc ISavedObjectsRepository.bulkResolve}
    */
   async bulkResolve<T = unknown>(
     objects: SavedObjectsBulkResolveObject[],
@@ -1216,13 +1116,7 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * Gets a single object
-   *
-   * @param {string} type
-   * @param {string} id
-   * @param {object} [options={}]
-   * @property {string} [options.namespace]
-   * @returns {promise} - { id, type, version, attributes }
+   * {@inheritDoc ISavedObjectsRepository.get}
    */
   async get<T = unknown>(
     type: string,
@@ -1258,13 +1152,7 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * Resolves a single object, using any legacy URL alias if it exists
-   *
-   * @param {string} type
-   * @param {string} id
-   * @param {object} [options={}]
-   * @property {string} [options.namespace]
-   * @returns {promise} - { saved_object, outcome }
+   * {@inheritDoc ISavedObjectsRepository.resolve}
    */
   async resolve<T = unknown>(
     type: string,
@@ -1289,15 +1177,7 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * Updates an object
-   *
-   * @param {string} type
-   * @param {string} id
-   * @param {object} [options={}]
-   * @property {string} options.version - ensures version matches that of persisted object
-   * @property {string} [options.namespace]
-   * @property {array} [options.references] - [{ name, type, id }]
-   * @returns {promise}
+   * {@inheritDoc ISavedObjectsRepository.update}
    */
   async update<T = unknown>(
     type: string,
@@ -1312,7 +1192,13 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createBadRequestError('id cannot be empty'); // prevent potentially upserting a saved object with an empty ID
     }
 
-    const { version, references, upsert, refresh = DEFAULT_REFRESH_SETTING } = options;
+    const {
+      version,
+      references,
+      upsert,
+      refresh = DEFAULT_REFRESH_SETTING,
+      retryOnConflict = version ? 0 : DEFAULT_RETRY_COUNT,
+    } = options;
     const namespace = normalizeNamespace(options.namespace);
 
     let preflightResult: PreflightCheckNamespacesResult | undefined;
@@ -1373,8 +1259,9 @@ export class SavedObjectsRepository {
       .update<unknown, unknown, SavedObjectsRawDocSource>({
         id: this._serializer.generateRawId(namespace, type, id),
         index: this.getIndexForType(type),
-        ...getExpectedVersionProperties(version, preflightResult?.rawDocSource),
+        ...getExpectedVersionProperties(version),
         refresh,
+        retry_on_conflict: retryOnConflict,
         body: {
           doc,
           ...(rawUpsert && { upsert: rawUpsert._source }),
@@ -1414,10 +1301,7 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * Gets all references and transitive references of the given objects. Ignores any object and/or reference that is not a multi-namespace
-   * type.
-   *
-   * @param objects The objects to get the references for.
+   * {@inheritDoc ISavedObjectsRepository.collectMultiNamespaceReferences}
    */
   async collectMultiNamespaceReferences(
     objects: SavedObjectsCollectMultiNamespaceReferencesObject[],
@@ -1436,12 +1320,7 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * Updates one or more objects to add and/or remove them from specified spaces.
-   *
-   * @param objects
-   * @param spacesToAdd
-   * @param spacesToRemove
-   * @param options
+   * {@inheritDoc ISavedObjectsRepository.updateObjectsSpaces}
    */
   async updateObjectsSpaces(
     objects: SavedObjectsUpdateObjectsSpacesObject[],
@@ -1465,12 +1344,7 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * Updates multiple objects in bulk
-   *
-   * @param {array} objects - [{ type, id, attributes, options: { version, namespace } references }]
-   * @property {string} options.version - ensures version matches that of persisted object
-   * @property {string} [options.namespace]
-   * @returns {promise} -  {saved_objects: [[{ id, type, version, references, attributes, error: { message } }]}
+   * {@inheritDoc ISavedObjectsRepository.bulkUpdate}
    */
   async bulkUpdate<T = unknown>(
     objects: Array<SavedObjectsBulkUpdateObject<T>>,
@@ -1608,8 +1482,7 @@ export class SavedObjectsRepository {
             // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
             SavedObjectsUtils.namespaceIdToString(actualResult!._source.namespace),
           ];
-          // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
-          versionProperties = getExpectedVersionProperties(version, actualResult!);
+          versionProperties = getExpectedVersionProperties(version);
         } else {
           if (this._registry.isSingleNamespace(type)) {
             // if `objectNamespace` is undefined, fall back to `options.namespace`
@@ -1688,11 +1561,7 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * Updates all objects containing a reference to the given {type, id} tuple to remove the said reference.
-   *
-   * @remarks Will throw a conflict error if the `update_by_query` operation returns any failure. In that case
-   *          some references might have been removed, and some were not. It is the caller's responsibility
-   *          to handle and fix this situation if it was to happen.
+   * {@inheritDoc ISavedObjectsRepository.removeReferencesTo}
    */
   async removeReferencesTo(
     type: string,
@@ -1757,57 +1626,7 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * Increments all the specified counter fields (by one by default). Creates the document
-   * if one doesn't exist for the given id.
-   *
-   * @remarks
-   * When supplying a field name like `stats.api.counter` the field name will
-   * be used as-is to create a document like:
-   *   `{attributes: {'stats.api.counter': 1}}`
-   * It will not create a nested structure like:
-   *   `{attributes: {stats: {api: {counter: 1}}}}`
-   *
-   * When using incrementCounter for collecting usage data, you need to ensure
-   * that usage collection happens on a best-effort basis and doesn't
-   * negatively affect your plugin or users. See https://github.com/elastic/kibana/blob/main/src/plugins/usage_collection/README.mdx#tracking-interactions-with-incrementcounter)
-   *
-   * @example
-   * ```ts
-   * const repository = coreStart.savedObjects.createInternalRepository();
-   *
-   * // Initialize all fields to 0
-   * repository
-   *   .incrementCounter('dashboard_counter_type', 'counter_id', [
-   *     'stats.apiCalls',
-   *     'stats.sampleDataInstalled',
-   *   ], {initialize: true});
-   *
-   * // Increment the apiCalls field counter
-   * repository
-   *   .incrementCounter('dashboard_counter_type', 'counter_id', [
-   *     'stats.apiCalls',
-   *   ])
-   *
-   * // Increment the apiCalls field counter by 4
-   * repository
-   *   .incrementCounter('dashboard_counter_type', 'counter_id', [
-   *     { fieldName: 'stats.apiCalls' incrementBy: 4 },
-   *   ])
-   *
-   * // Initialize the document with arbitrary fields if not present
-   * repository.incrementCounter<{ appId: string }>(
-   *   'dashboard_counter_type',
-   *   'counter_id',
-   *   [ 'stats.apiCalls'],
-   *   { upsertAttributes: { appId: 'myId' } }
-   * )
-   * ```
-   *
-   * @param type - The type of saved object whose fields should be incremented
-   * @param id - The id of the document whose fields should be incremented
-   * @param counterFields - An array of field names to increment or an array of {@link SavedObjectsIncrementCounterField}
-   * @param options - {@link SavedObjectsIncrementCounterOptions}
-   * @returns The saved object after the specified fields were incremented
+   * {@inheritDoc ISavedObjectsRepository.incrementCounter}
    */
   async incrementCounter<T = unknown>(
     type: string,
@@ -1977,40 +1796,7 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * Opens a Point In Time (PIT) against the indices for the specified Saved Object types.
-   * The returned `id` can then be passed to `SavedObjects.find` to search against that PIT.
-   *
-   * Only use this API if you have an advanced use case that's not solved by the
-   * {@link SavedObjectsRepository.createPointInTimeFinder} method.
-   *
-   * @example
-   * ```ts
-   * const { id } = await savedObjectsClient.openPointInTimeForType(
-   *   type: 'visualization',
-   *   { keepAlive: '5m' },
-   * );
-   * const page1 = await savedObjectsClient.find({
-   *   type: 'visualization',
-   *   sortField: 'updated_at',
-   *   sortOrder: 'asc',
-   *   pit: { id, keepAlive: '2m' },
-   * });
-   * const lastHit = page1.saved_objects[page1.saved_objects.length - 1];
-   * const page2 = await savedObjectsClient.find({
-   *   type: 'visualization',
-   *   sortField: 'updated_at',
-   *   sortOrder: 'asc',
-   *   pit: { id: page1.pit_id },
-   *   searchAfter: lastHit.sort,
-   * });
-   * await savedObjectsClient.closePointInTime(page2.pit_id);
-   * ```
-   *
-   * @param {string|Array<string>} type
-   * @param {object} [options] - {@link SavedObjectsOpenPointInTimeOptions}
-   * @property {string} [options.keepAlive]
-   * @property {string} [options.preference]
-   * @returns {promise} - { id: string }
+   * {@inheritDoc ISavedObjectsRepository.openPointInTimeForType}
    */
   async openPointInTimeForType(
     type: string | string[],
@@ -2047,45 +1833,7 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * Closes a Point In Time (PIT) by ID. This simply proxies the request to ES
-   * via the Elasticsearch client, and is included in the Saved Objects Client
-   * as a convenience for consumers who are using `openPointInTimeForType`.
-   *
-   * Only use this API if you have an advanced use case that's not solved by the
-   * {@link SavedObjectsRepository.createPointInTimeFinder} method.
-   *
-   * @remarks
-   * While the `keepAlive` that is provided will cause a PIT to automatically close,
-   * it is highly recommended to explicitly close a PIT when you are done with it
-   * in order to avoid consuming unneeded resources in Elasticsearch.
-   *
-   * @example
-   * ```ts
-   * const repository = coreStart.savedObjects.createInternalRepository();
-   *
-   * const { id } = await repository.openPointInTimeForType(
-   *   type: 'index-pattern',
-   *   { keepAlive: '2m' },
-   * );
-   *
-   * const response = await repository.find({
-   *   type: 'index-pattern',
-   *   search: 'foo*',
-   *   sortField: 'name',
-   *   sortOrder: 'desc',
-   *   pit: {
-   *     id: 'abc123',
-   *     keepAlive: '2m',
-   *   },
-   *   searchAfter: [1234, 'abcd'],
-   * });
-   *
-   * await repository.closePointInTime(response.pit_id);
-   * ```
-   *
-   * @param {string} id
-   * @param {object} [options] - {@link SavedObjectsClosePointInTimeOptions}
-   * @returns {promise} - {@link SavedObjectsClosePointInTimeResponse}
+   * {@inheritDoc ISavedObjectsRepository.closePointInTime}
    */
   async closePointInTime(
     id: string,
@@ -2097,49 +1845,7 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * Returns a {@link ISavedObjectsPointInTimeFinder} to help page through
-   * large sets of saved objects. We strongly recommend using this API for
-   * any `find` queries that might return more than 1000 saved objects,
-   * however this API is only intended for use in server-side "batch"
-   * processing of objects where you are collecting all objects in memory
-   * or streaming them back to the client.
-   *
-   * Do NOT use this API in a route handler to facilitate paging through
-   * saved objects on the client-side unless you are streaming all of the
-   * results back to the client at once. Because the returned generator is
-   * stateful, you cannot rely on subsequent http requests retrieving new
-   * pages from the same Kibana server in multi-instance deployments.
-   *
-   * This generator wraps calls to {@link SavedObjectsRepository.find} and
-   * iterates over multiple pages of results using `_pit` and `search_after`.
-   * This will open a new Point-In-Time (PIT), and continue paging until a
-   * set of results is received that's smaller than the designated `perPage`.
-   *
-   * Once you have retrieved all of the results you need, it is recommended
-   * to call `close()` to clean up the PIT and prevent Elasticsearch from
-   * consuming resources unnecessarily. This is only required if you are
-   * done iterating and have not yet paged through all of the results: the
-   * PIT will automatically be closed for you once you reach the last page
-   * of results, or if the underlying call to `find` fails for any reason.
-   *
-   * @example
-   * ```ts
-   * const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
-   *   type: 'visualization',
-   *   search: 'foo*',
-   *   perPage: 100,
-   * };
-   *
-   * const finder = savedObjectsClient.createPointInTimeFinder(findOptions);
-   *
-   * const responses: SavedObjectFindResponse[] = [];
-   * for await (const response of finder.find()) {
-   *   responses.push(...response);
-   *   if (doneSearching) {
-   *     await finder.close();
-   *   }
-   * }
-   * ```
+   * {@inheritDoc ISavedObjectsRepository.createPointInTimeFinder}
    */
   createPointInTimeFinder<T = unknown, A = unknown>(
     findOptions: SavedObjectsCreatePointInTimeFinderOptions,
@@ -2326,6 +2032,18 @@ export class SavedObjectsRepository {
       validator.validate(this._migrator.kibanaVersion, doc);
     } catch (error) {
       throw SavedObjectsErrorHelpers.createBadRequestError(error.message);
+    }
+  }
+
+  /** This is used when objects are created. */
+  private validateOriginId(type: string, objectOrOptions: { originId?: string }) {
+    if (
+      Object.keys(objectOrOptions).includes('originId') &&
+      !this._registry.isMultiNamespace(type)
+    ) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        '"originId" can only be set for multi-namespace object types'
+      );
     }
   }
 }

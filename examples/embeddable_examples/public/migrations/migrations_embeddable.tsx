@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { SIMPLE_EMBEDDABLE, SimpleEmbeddableInput } from '.';
-import { Embeddable, IContainer } from '../../../../src/plugins/embeddable/public';
 
 export class SimpleEmbeddable extends Embeddable<SimpleEmbeddableInput> {
   // The type of this embeddable. This will be used to find the appropriate factory

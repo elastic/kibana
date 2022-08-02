@@ -8,9 +8,10 @@
 import * as Option from 'fp-ts/lib/Option';
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 import { errors as EsErrors } from '@elastic/elasticsearch';
-jest.mock('./catch_retryable_es_client_errors');
-import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { reindex } from './reindex';
+
+jest.mock('./catch_retryable_es_client_errors');
 
 describe('reindex', () => {
   beforeEach(() => {
@@ -36,7 +37,7 @@ describe('reindex', () => {
       targetIndex: 'my_target_index',
       reindexScript: Option.none,
       requireAlias: false,
-      unusedTypesQuery: {},
+      excludeOnUpgradeQuery: {},
     });
     try {
       await task();

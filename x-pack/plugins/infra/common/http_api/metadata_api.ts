@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { ItemTypeRT } from '../../common/inventory_models/types';
+import { ItemTypeRT } from '../inventory_models/types';
 
 export const InfraMetadataRequestRT = rt.type({
   nodeId: rt.string,

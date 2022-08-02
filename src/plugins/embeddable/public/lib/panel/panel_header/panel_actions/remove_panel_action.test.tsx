@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddableOutput, isErrorEmbeddable } from '../../../';
+import { EmbeddableOutput, isErrorEmbeddable } from '../../..';
 import { RemovePanelAction } from './remove_panel_action';
 import { EmbeddableStart } from '../../../../plugin';
 import {

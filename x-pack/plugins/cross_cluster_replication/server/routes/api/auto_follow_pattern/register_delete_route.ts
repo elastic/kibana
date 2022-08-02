@@ -30,7 +30,7 @@ export const registerDeleteRoute = ({
       },
     },
     license.guardApiRoute(async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
       const { id } = request.params;
       const ids = id.split(',');
 

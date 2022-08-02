@@ -11,8 +11,8 @@ import type {
   IScopedClusterClient,
   KibanaRequest,
   SavedObjectsClientContract,
-} from 'kibana/server';
-import type { DataViewsService } from '../../../../../src/plugins/data_views/common';
+} from '@kbn/core/server';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { DatafeedOverride, JobOverride } from '../../common/types/modules';
 import { wrapError } from '../client/error_wrapper';
 import { dataRecognizerFactory } from '../models/data_recognizer';
@@ -190,11 +190,12 @@ export function dataRecognizer({ router, routeGuard }: RouteInitialization) {
       }) => {
         try {
           const { indexPatternTitle } = request.params;
+          const soClient = (await context.core).savedObjects.client;
           const dataViewService = await getDataViewsService();
           const results = await recognize(
             client,
             mlClient,
-            context.core.savedObjects.client,
+            soClient,
             dataViewService,
             mlSavedObjectService,
             request,
@@ -344,11 +345,12 @@ export function dataRecognizer({ router, routeGuard }: RouteInitialization) {
             // the moduleId will be an empty string.
             moduleId = undefined;
           }
+          const soClient = (await context.core).savedObjects.client;
           const dataViewService = await getDataViewsService();
           const results = await getModule(
             client,
             mlClient,
-            context.core.savedObjects.client,
+            soClient,
             dataViewService,
             mlSavedObjectService,
             request,
@@ -541,13 +543,13 @@ export function dataRecognizer({ router, routeGuard }: RouteInitialization) {
             estimateModelMemory,
             applyToAllSpaces,
           } = request.body as TypeOf<typeof setupModuleBodySchema>;
-
+          const soClient = (await context.core).savedObjects.client;
           const dataViewService = await getDataViewsService();
 
           const result = await setup(
             client,
             mlClient,
-            context.core.savedObjects.client,
+            soClient,
             dataViewService,
             mlSavedObjectService,
             request,
@@ -648,11 +650,12 @@ export function dataRecognizer({ router, routeGuard }: RouteInitialization) {
       }) => {
         try {
           const { moduleId } = request.params;
+          const soClient = (await context.core).savedObjects.client;
           const dataViewService = await getDataViewsService();
           const result = await dataRecognizerJobsExist(
             client,
             mlClient,
-            context.core.savedObjects.client,
+            soClient,
             dataViewService,
             mlSavedObjectService,
             request,

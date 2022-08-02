@@ -7,12 +7,12 @@
  */
 
 import { from } from 'rxjs';
-import type { MockedKeys } from '@kbn/utility-types/jest';
-import type { Filter } from '../../../es_query';
-import type { IndexPattern } from '../../..';
+import type { MockedKeys } from '@kbn/utility-types-jest';
+import type { Filter } from '@kbn/es-query';
 import type { IAggConfigs } from '../../aggs';
 import type { ISearchSource } from '../../search_source';
 import { searchSourceCommonMock, searchSourceInstanceMock } from '../../search_source/mocks';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 import { handleRequest } from './request_handler';
 
@@ -40,6 +40,7 @@ describe('esaggs expression function - public', () => {
       abortSignal: jest.fn() as unknown as jest.Mocked<AbortSignal>,
       aggs: {
         aggs: [{ type: { name: 'terms', postFlightRequest: jest.fn().mockResolvedValue({}) } }],
+        partialRows: false,
         setTimeRange: jest.fn(),
         toDsl: jest.fn().mockReturnValue({ aggs: {} }),
         onSearchRequestStart: jest.fn(),
@@ -47,9 +48,8 @@ describe('esaggs expression function - public', () => {
         setForceNow: jest.fn(),
       } as unknown as jest.Mocked<IAggConfigs>,
       filters: undefined,
-      indexPattern: { id: 'logstash-*' } as unknown as jest.Mocked<IndexPattern>,
+      indexPattern: { id: 'logstash-*' } as unknown as jest.Mocked<DataView>,
       inspectorAdapters: {},
-      partialRows: false,
       query: undefined,
       searchSessionId: 'abc123',
       searchSourceService: searchSourceCommonMock,
@@ -147,7 +147,7 @@ describe('esaggs expression function - public', () => {
       mockParams.aggs,
       {},
       {
-        partialRows: mockParams.partialRows,
+        partialRows: mockParams.aggs.partialRows,
         timeRange: mockParams.timeRange,
       }
     );

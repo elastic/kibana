@@ -10,11 +10,13 @@ import React from 'react';
 import { act, waitFor, within } from '@testing-library/react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import userEvent from '@testing-library/user-event';
-import { ArtifactFormComponentProps } from './types';
-import { ArtifactListPage, ArtifactListPageProps } from './artifact_list_page';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import { trustedAppsAllHttpMocks } from '../../pages/mocks';
-import { TrustedAppsApiClient } from '../../pages/trusted_apps/service/trusted_apps_api_client';
+import type { ArtifactFormComponentProps } from './types';
+import type { ArtifactListPageProps } from './artifact_list_page';
+import { ArtifactListPage } from './artifact_list_page';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import { trustedAppsAllHttpMocks } from '../../mocks';
+import { TrustedAppsApiClient } from '../../pages/trusted_apps/service/api_client';
 import { artifactListPageLabels } from './translations';
 
 export const getFormComponentMock = (): {
@@ -49,23 +51,32 @@ export const getFormComponentMock = (): {
   };
 };
 
-interface DeferredInterface<T = void> {
-  promise: Promise<T>;
-  resolve: (data: T) => void;
-  reject: (e: Error) => void;
-}
+export const getFirstCard = async (
+  renderResult: ReturnType<AppContextTestRender['render']>,
+  {
+    showActions = false,
+    testId = 'testPage',
+  }: Partial<{ showActions: boolean; testId: string }> = {}
+): Promise<HTMLElement> => {
+  const cards = await renderResult.findAllByTestId(`${testId}-card`);
 
-export const getDeferred = function <T = void>(): DeferredInterface<T> {
-  let resolve: DeferredInterface<T>['resolve'];
-  let reject: DeferredInterface<T>['reject'];
+  if (cards.length === 0) {
+    throw new Error('No cards found!');
+  }
 
-  const promise = new Promise<T>((_resolve, _reject) => {
-    resolve = _resolve;
-    reject = _reject;
-  });
+  const card = cards[0];
 
-  // @ts-ignore
-  return { promise, resolve, reject };
+  if (showActions) {
+    await act(async () => {
+      userEvent.click(within(card).getByTestId(`${testId}-card-header-actions-button`));
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId(`${testId}-card-header-actions-contextMenuPanel`));
+      });
+    });
+  }
+
+  return card;
 };
 
 export interface ArtifactListPageRenderingSetup {
@@ -112,28 +123,8 @@ export const getArtifactListPageRenderingSetup = (): ArtifactListPageRenderingSe
     return renderResult;
   };
 
-  const getFirstCard = async ({
-    showActions = false,
-  }: Partial<{ showActions: boolean }> = {}): Promise<HTMLElement> => {
-    const cards = await renderResult.findAllByTestId('testPage-card');
-
-    if (cards.length === 0) {
-      throw new Error('No cards found!');
-    }
-
-    const card = cards[0];
-
-    if (showActions) {
-      await act(async () => {
-        userEvent.click(within(card).getByTestId('testPage-card-header-actions-button'));
-
-        await waitFor(() => {
-          expect(renderResult.getByTestId('testPage-card-header-actions-contextMenuPanel'));
-        });
-      });
-    }
-
-    return card;
+  const getCard: ArtifactListPageRenderingSetup['getFirstCard'] = (props) => {
+    return getFirstCard(renderResult, props);
   };
 
   return {
@@ -143,6 +134,6 @@ export const getArtifactListPageRenderingSetup = (): ArtifactListPageRenderingSe
     mockedApi,
     FormComponentMock,
     getLastFormComponentProps,
-    getFirstCard,
+    getFirstCard: getCard,
   };
 };

@@ -6,10 +6,10 @@
  */
 
 import type { Meta, Story } from '@storybook/react';
-import type { CoreStart, DocLinksStart } from 'kibana/public';
+import type { CoreStart, DocLinksStart } from '@kbn/core/public';
 import React, { ComponentProps } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { SettingsTemplate } from './settings_template';

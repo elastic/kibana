@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { SavedObjectsUpdateResponse } from 'kibana/server';
-import { Logger } from 'src/core/server';
+import type { SavedObjectsUpdateResponse, Logger } from '@kbn/core/server';
 
-import { AlertAction } from '../../../../../alerting/common';
+import type { RuleAction } from '@kbn/alerting-plugin/common';
 
 // eslint-disable-next-line no-restricted-imports
-import {
+import type {
   LegacyIRuleActionsAttributesSavedObjectAttributes,
   LegacyRuleAlertAction,
   LegacyRuleAlertSavedObjectAction,
@@ -112,7 +111,7 @@ export const legacyGetActionReference = (id: string, index: number) => ({
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export const legacyTransformActionToReference = (
-  alertAction: AlertAction,
+  alertAction: RuleAction,
   index: number
 ): LegacyRuleAlertSavedObjectAction => ({
   actionRef: `action_${index}`,

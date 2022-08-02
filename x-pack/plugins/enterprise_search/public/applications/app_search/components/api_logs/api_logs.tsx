@@ -19,7 +19,7 @@ import { ApiLogFlyout } from './api_log';
 import { ApiLogsTable, NewApiEventsPrompt, EmptyState } from './components';
 import { API_LOGS_TITLE, RECENT_API_EVENTS } from './constants';
 
-import { ApiLogsLogic } from './';
+import { ApiLogsLogic } from '.';
 
 export const ApiLogs: React.FC = () => {
   const { dataLoading, apiLogs, meta } = useValues(ApiLogsLogic);

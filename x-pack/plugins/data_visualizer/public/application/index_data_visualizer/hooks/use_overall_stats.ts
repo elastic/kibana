@@ -6,25 +6,27 @@
  */
 
 import { useCallback, useEffect, useState, useRef, useMemo, useReducer } from 'react';
-import { from, of, Subscription, Observable } from 'rxjs';
+import { from, Subscription, Observable } from 'rxjs';
 import { mergeMap, last, map, toArray } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import type { ToastsStart } from 'kibana/public';
+import type { ToastsStart } from '@kbn/core/public';
 import { chunk } from 'lodash';
+import type {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchOptions,
+} from '@kbn/data-plugin/common';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import {
   AggregatableFieldOverallStats,
   checkAggregatableFieldsExistRequest,
   checkNonAggregatableFieldExistsRequest,
   isAggregatableFieldOverallStats,
+  isNonAggregatableFieldOverallStats,
+  NonAggregatableFieldOverallStats,
   processAggregatableFieldsExistResponse,
   processNonAggregatableFieldsExistResponse,
 } from '../search_strategy/requests/overall_stats';
-import type {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-  ISearchOptions,
-} from '../../../../../../../src/plugins/data/common';
 import type { OverallStats } from '../types/overall_stats';
 import { getDefaultPageState } from '../components/index_data_visualizer_view/index_data_visualizer_view';
 import { extractErrorProperties } from '../utils/error_utils';
@@ -32,12 +34,10 @@ import type {
   DataStatsFetchProgress,
   OverallStatsSearchStrategyParams,
 } from '../../../../common/types/field_stats';
-import {
-  getDocumentCountStatsRequest,
-  processDocumentCountStats,
-} from '../search_strategy/requests/get_document_stats';
+import { getDocumentCountStats } from '../search_strategy/requests/get_document_stats';
 import { getInitialProgress, getReducer } from '../progress_utils';
 import { MAX_CONCURRENT_REQUESTS } from '../constants/index_data_visualizer_viewer';
+import { DocumentCountStats } from '../../../../common/types/field_stats';
 
 /**
  * Helper function to run forkJoin
@@ -91,7 +91,9 @@ function displayError(toastNotifications: ToastsStart, index: string, err: any) 
 
 export function useOverallStats<TParams extends OverallStatsSearchStrategyParams>(
   searchStrategyParams: TParams | undefined,
-  lastRefresh: number
+  lastRefresh: number,
+  browserSessionSeed: number,
+  probability?: number | null
 ): {
   progress: DataStatsFetchProgress;
   overallStats: OverallStats;
@@ -132,10 +134,8 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       timeFieldName,
       earliest,
       latest,
-      intervalMs,
       runtimeFieldMap,
       samplerShardSize,
-      fieldsToFetch,
     } = searchStrategyParams;
 
     const searchOptions: ISearchOptions = {
@@ -199,59 +199,66 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           })
         )
     );
-    const documentCountStats$ =
-      !fieldsToFetch && timeFieldName !== undefined && intervalMs !== undefined && intervalMs > 0
-        ? data.search.search(
-            {
-              params: getDocumentCountStatsRequest(searchStrategyParams),
-            },
-            searchOptions
-          )
-        : of(undefined);
 
     const sub = rateLimitingForkJoin<
-      AggregatableFieldOverallStats | IKibanaSearchResponse | undefined
+      | DocumentCountStats
+      | AggregatableFieldOverallStats
+      | NonAggregatableFieldOverallStats
+      | undefined
     >(
-      [documentCountStats$, ...aggregatableOverallStatsObs, ...nonAggregatableFieldsObs],
+      [
+        from(
+          getDocumentCountStats(
+            data.search,
+            searchStrategyParams,
+            searchOptions,
+            browserSessionSeed,
+            probability
+          )
+        ),
+        ...aggregatableOverallStatsObs,
+        ...nonAggregatableFieldsObs,
+      ],
       MAX_CONCURRENT_REQUESTS
     );
 
     searchSubscription$.current = sub.subscribe({
       next: (value) => {
-        {
-          const aggregatableOverallStatsResp: AggregatableFieldOverallStats[] = [];
-          const nonAggregatableOverallStatsResp: IKibanaSearchResponse[] = [];
-          const documentCountStatsResp = value[0];
+        const aggregatableOverallStatsResp: AggregatableFieldOverallStats[] = [];
+        const nonAggregatableOverallStatsResp: NonAggregatableFieldOverallStats[] = [];
+        const documentCountStats = value[0] as DocumentCountStats;
 
-          value.forEach((resp, idx) => {
-            if (!resp) return;
-            if (isAggregatableFieldOverallStats(resp)) {
-              aggregatableOverallStatsResp.push(resp);
-            } else {
-              nonAggregatableOverallStatsResp.push(resp);
-            }
-          });
+        value.forEach((resp, idx) => {
+          if (!resp || idx === 0) return;
+          if (isAggregatableFieldOverallStats(resp)) {
+            aggregatableOverallStatsResp.push(resp);
+          }
 
-          const aggregatableOverallStats = processAggregatableFieldsExistResponse(
-            aggregatableOverallStatsResp,
-            aggregatableFields,
-            samplerShardSize
-          );
+          if (isNonAggregatableFieldOverallStats(resp)) {
+            nonAggregatableOverallStatsResp.push(resp);
+          }
+        });
 
-          const nonAggregatableOverallStats = processNonAggregatableFieldsExistResponse(
-            nonAggregatableOverallStatsResp,
-            nonAggregatableFields
-          );
+        const totalCount = documentCountStats?.totalCount ?? 0;
 
-          setOverallStats({
-            documentCountStats: processDocumentCountStats(
-              documentCountStatsResp?.rawResponse,
-              searchStrategyParams
-            ),
-            ...nonAggregatableOverallStats,
-            ...aggregatableOverallStats,
-          });
-        }
+        const aggregatableOverallStats = processAggregatableFieldsExistResponse(
+          aggregatableOverallStatsResp,
+          aggregatableFields,
+          samplerShardSize,
+          totalCount
+        );
+
+        const nonAggregatableOverallStats = processNonAggregatableFieldsExistResponse(
+          nonAggregatableOverallStatsResp,
+          nonAggregatableFields
+        );
+
+        setOverallStats({
+          documentCountStats,
+          ...nonAggregatableOverallStats,
+          ...aggregatableOverallStats,
+          totalCount,
+        });
       },
       error: (error) => {
         displayError(toasts, searchStrategyParams.index, extractErrorProperties(error));
@@ -267,7 +274,8 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         });
       },
     });
-  }, [data.search, searchStrategyParams, toasts, lastRefresh]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.search, searchStrategyParams, toasts, lastRefresh, probability]);
 
   const cancelFetch = useCallback(() => {
     searchSubscription$.current?.unsubscribe();

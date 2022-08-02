@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { OverlayStart } from 'kibana/public';
+import { OverlayStart } from '@kbn/core/public';
 import { SAVE_DUPLICATE_REJECTED } from '../../constants';
 import { confirmModalPromise } from './confirm_modal_promise';
 import { SavedObject } from '../../types';

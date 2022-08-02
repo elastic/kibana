@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import { DevToolsSetup } from '../../../../src/plugins/dev_tools/public';
-import { SharePluginSetup } from '../../../../src/plugins/share/public';
-import { LicensingPluginSetup } from '../../licensing/public';
+import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { DevToolsSetup } from '@kbn/dev-tools-plugin/public';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 
 export interface AppPublicPluginDependencies {
   licensing: LicensingPluginSetup;

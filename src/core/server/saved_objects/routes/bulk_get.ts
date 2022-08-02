@@ -7,15 +7,18 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '../../http';
 import { InternalCoreUsageDataSetup } from '../../core_usage_data';
+import type { InternalSavedObjectRouter } from '../internal_types';
 import { catchAndReturnBoomErrors } from './utils';
 
 interface RouteDependencies {
   coreUsageData: InternalCoreUsageDataSetup;
 }
 
-export const registerBulkGetRoute = (router: IRouter, { coreUsageData }: RouteDependencies) => {
+export const registerBulkGetRoute = (
+  router: InternalSavedObjectRouter,
+  { coreUsageData }: RouteDependencies
+) => {
   router.post(
     {
       path: '/_bulk_get',
@@ -34,7 +37,8 @@ export const registerBulkGetRoute = (router: IRouter, { coreUsageData }: RouteDe
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsBulkGet({ request: req }).catch(() => {});
 
-      const result = await context.core.savedObjects.client.bulkGet(req.body);
+      const { savedObjects } = await context.core;
+      const result = await savedObjects.client.bulkGet(req.body);
       return res.ok({ body: result });
     })
   );

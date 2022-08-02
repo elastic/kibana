@@ -4,7 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { MetricResult } from '../../../monitoring_collection/server';
+import { MetricResult } from '@kbn/monitoring-collection-plugin/server';
+
+export const EMPTY_CLUSTER_ACTIONS_METRICS: ClusterActionsMetric = {
+  overdue: {
+    count: 0,
+    delay: {
+      p50: 0,
+      p99: 0,
+    },
+  },
+};
 
 export type ClusterActionsMetric = MetricResult<{
   overdue: {

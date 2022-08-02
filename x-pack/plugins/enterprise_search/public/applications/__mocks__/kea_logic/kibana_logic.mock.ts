@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { chartPluginMock } from '../../../../../../../src/plugins/charts/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 
-import { securityMock } from '../../../../../security/public/mocks';
+import { securityMock } from '@kbn/security-plugin/public/mocks';
 
 import { mockHistory } from '../react_router/state.mock';
 

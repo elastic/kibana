@@ -6,10 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { wrapRouteWithLicenseCheck } from '@kbn/licensing-plugin/server';
 import type { LogstashPluginRouter } from '../../types';
 
 import { Pipeline } from '../../models/pipeline';
-import { wrapRouteWithLicenseCheck } from '../../../../licensing/server';
 import { checkLicense } from '../../lib/check_license';
 
 export function registerPipelineLoadRoute(router: LogstashPluginRouter) {
@@ -26,7 +26,7 @@ export function registerPipelineLoadRoute(router: LogstashPluginRouter) {
       checkLicense,
       router.handleLegacyErrors(async (context, request, response) => {
         const { id } = request.params;
-        const { client } = context.core.elasticsearch;
+        const { client } = (await context.core).elasticsearch;
 
         const result = await client.asCurrentUser.logstash.getPipeline({ id }, { ignore: [404] });
 

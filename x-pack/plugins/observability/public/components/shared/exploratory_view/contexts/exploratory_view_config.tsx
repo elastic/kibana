@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { createContext, useContext } from 'react';
-import { AppMountParameters } from 'kibana/public';
+import React, { createContext, useContext, useState } from 'react';
+import { AppMountParameters } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { AppDataType, ConfigProps, ReportViewType, SeriesConfig } from '../types';
 
@@ -20,8 +20,11 @@ interface ExploratoryViewContextValue {
   }>;
   dataViews: Record<string, string>;
   reportConfigMap: ReportConfigMap;
+  asPanel?: boolean;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   theme$: AppMountParameters['theme$'];
+  isEditMode?: boolean;
+  setIsEditMode?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const ExploratoryViewContext = createContext<ExploratoryViewContextValue>({
@@ -35,15 +38,21 @@ export function ExploratoryViewContextProvider({
   dataViews,
   reportConfigMap,
   setHeaderActionMenu,
+  asPanel = true,
   theme$,
 }: { children: JSX.Element } & ExploratoryViewContextValue) {
+  const [isEditMode, setIsEditMode] = useState(false);
+
   const value = {
+    asPanel,
     reportTypes,
     dataTypes,
     dataViews,
     reportConfigMap,
     setHeaderActionMenu,
     theme$,
+    isEditMode,
+    setIsEditMode,
   };
 
   return (

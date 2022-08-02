@@ -6,6 +6,7 @@ exports[`AddFilter should ignore strings with just spaces 1`] = `
     grow={10}
   >
     <EuiFieldText
+      data-test-subj="fieldFilterInput"
       fullWidth={true}
       onChange={[Function]}
       placeholder="field filter, accepts wildcards (e.g., \`user*\` to filter fields starting with 'user')"
@@ -14,6 +15,7 @@ exports[`AddFilter should ignore strings with just spaces 1`] = `
   </EuiFlexItem>
   <EuiFlexItem>
     <EuiButton
+      data-test-subj="addFieldFilterButton"
       isDisabled={true}
       onClick={[Function]}
     >
@@ -33,6 +35,7 @@ exports[`AddFilter should render normally 1`] = `
     grow={10}
   >
     <EuiFieldText
+      data-test-subj="fieldFilterInput"
       fullWidth={true}
       onChange={[Function]}
       placeholder="field filter, accepts wildcards (e.g., \`user*\` to filter fields starting with 'user')"
@@ -41,6 +44,7 @@ exports[`AddFilter should render normally 1`] = `
   </EuiFlexItem>
   <EuiFlexItem>
     <EuiButton
+      data-test-subj="addFieldFilterButton"
       isDisabled={true}
       onClick={[Function]}
     >

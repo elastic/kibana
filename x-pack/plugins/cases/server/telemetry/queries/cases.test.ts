@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectsFindResponse } from 'kibana/server';
-import {
-  savedObjectsRepositoryMock,
-  loggingSystemMock,
-} from '../../../../../../src/core/server/mocks';
+import { SavedObjectsFindResponse } from '@kbn/core/server';
+import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { getCasesTelemetryData } from './cases';
 
 describe('getCasesTelemetryData', () => {
@@ -351,14 +348,12 @@ describe('getCasesTelemetryData', () => {
             {
               type: 'literal',
               value: 'cases-comments.attributes.type',
+              isQuoted: false,
             },
             {
               type: 'literal',
               value: 'alert',
-            },
-            {
-              type: 'literal',
-              value: false,
+              isQuoted: false,
             },
           ],
           function: 'is',
@@ -398,14 +393,12 @@ describe('getCasesTelemetryData', () => {
             {
               type: 'literal',
               value: 'cases-user-actions.attributes.type',
+              isQuoted: false,
             },
             {
               type: 'literal',
               value: 'connector',
-            },
-            {
-              type: 'literal',
-              value: false,
+              isQuoted: false,
             },
           ],
           function: 'is',

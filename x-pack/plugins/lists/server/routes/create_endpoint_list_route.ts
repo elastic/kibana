@@ -36,7 +36,7 @@ export const createEndpointListRoute = (router: ListsPluginRouter): void => {
     async (context, _, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const exceptionLists = getExceptionListClient(context);
+        const exceptionLists = await getExceptionListClient(context);
         const createdList = await exceptionLists.createEndpointList();
         // We always return ok on a create  endpoint list route but with an empty body as
         // an additional fetch of the full list would be slower and the UI has everything hard coded

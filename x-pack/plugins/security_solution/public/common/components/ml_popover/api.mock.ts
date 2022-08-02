@@ -5,32 +5,8 @@
  * 2.0.
  */
 
-import { MlSummaryJob } from '../../../../../ml/public';
-import {
-  Group,
-  Module,
-  RecognizerModule,
-  SetupMlResponse,
-  SecurityJob,
-  StartDatafeedResponse,
-  StopDatafeedResponse,
-} from './types';
-
-export const mockGroupsResponse: Group[] = [
-  {
-    id: 'siem',
-    jobIds: [
-      'rc-original-suspicious-login-activity-2',
-      'rc-rare-process-linux-7',
-      'rc-rare-process-windows-5',
-      'siem-api-rare_process_linux_ecs',
-      'siem-api-rare_process_windows_ecs',
-      'siem-api-suspicious_login_activity_ecs',
-    ],
-    calendarIds: [],
-  },
-  { id: 'suricata', jobIds: ['suricata_alert_rate'], calendarIds: [] },
-];
+import type { MlSummaryJob } from '@kbn/ml-plugin/public';
+import type { Module, RecognizerModule, SecurityJob } from './types';
 
 export const mockOpenedJob: MlSummaryJob = {
   datafeedId: 'datafeed-siem-api-rare_process_linux_ecs',
@@ -126,7 +102,7 @@ export const mockJobsSummaryResponse: MlSummaryJob[] = [
 
 export const mockGetModuleResponse: Module[] = [
   {
-    id: 'siem_auditbeat',
+    id: 'security_linux_v3',
     title: 'SIEM Auditbeat',
     description:
       'Detect suspicious network activity and unusual processes in Auditbeat data (beta)',
@@ -136,7 +112,7 @@ export const mockGetModuleResponse: Module[] = [
     query: { bool: { filter: [{ term: { 'agent.type': 'auditbeat' } }] } },
     jobs: [
       {
-        id: 'rare_process_by_host_linux_ecs',
+        id: 'rare_process_by_host_linux',
         config: {
           job_type: 'anomaly_detector',
           description: 'SIEM Auditbeat: Detect unusually rare processes on Linux (beta)',
@@ -203,7 +179,7 @@ export const mockGetModuleResponse: Module[] = [
     kibana: {},
   },
   {
-    id: 'siem_winlogbeat',
+    id: 'security_windows_v3',
     title: 'SIEM Winlogbeat',
     description: 'Detect unusual processes and network activity in Winlogbeat data (beta)',
     type: 'Winlogbeat data',
@@ -356,7 +332,7 @@ export const mockGetModuleResponse: Module[] = [
 
 export const checkRecognizerSuccess: RecognizerModule[] = [
   {
-    id: 'siem_auditbeat',
+    id: 'security_linux_v3',
     title: 'SIEM Auditbeat',
     query: { bool: { filter: [{ term: { 'agent.type': 'auditbeat' } }] } },
     description:
@@ -364,136 +340,6 @@ export const checkRecognizerSuccess: RecognizerModule[] = [
     logo: { icon: 'securityAnalyticsApp' },
   },
 ];
-
-export const mockSetupMlJobAllError: SetupMlResponse = {
-  jobs: [
-    {
-      id: 'linux_anomalous_network_url_activity_ecs',
-      success: false,
-      error: {
-        msg: "[resource_already_exists_exception] The job cannot be created with the Id 'linux_anomalous_network_url_activity_ecs'. The Id is already used.",
-        path: '/_ml/anomaly_detectors/linux_anomalous_network_url_activity_ecs',
-        query: {},
-        body: '{"job_type":"anomaly_detector","groups":["siem","auditbeat","process"],"description":"SIEM Auditbeat: Looks for an unusual web URL request from a Linux instance. Curl and wget web request activity is very common but unusual web requests from a Linux server can sometimes be malware delivery or execution (beta)","analysis_config":{"bucket_span":"15m","detectors":[{"detector_description":"rare by \\"process.title\\"","function":"rare","by_field_name":"process.title"}],"influencers":["host.name","destination.ip","destination.port"]},"analysis_limits":{"model_memory_limit":"32mb"},"data_description":{"time_field":"@timestamp"},"custom_settings":{"created_by":"ml-module-siem-auditbeat","custom_urls":[{"url_name":"Host Details","url_value":"siem#/ml-hosts/$host.name$?timerange=(global:(linkTo:!(timeline),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')),timeline:(linkTo:!(global),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')))"}]},"results_index_name":"linux_anomalous_network_url_activity_ecs"}',
-        statusCode: 400,
-        response:
-          '{"error":{"root_cause":[{"type":"resource_already_exists_exception","reason":"The job cannot be created with the Id \'linux_anomalous_network_url_activity_ecs\'. The Id is already used."}],"type":"resource_already_exists_exception","reason":"The job cannot be created with the Id \'linux_anomalous_network_url_activity_ecs\'. The Id is already used."},"status":400}',
-      },
-    },
-    {
-      id: 'linux_anomalous_network_port_activity_ecs',
-      success: false,
-      error: {
-        msg: "[resource_already_exists_exception] The job cannot be created with the Id 'linux_anomalous_network_port_activity_ecs'. The Id is already used.",
-        path: '/_ml/anomaly_detectors/linux_anomalous_network_port_activity_ecs',
-        query: {},
-        body: '{"job_type":"anomaly_detector","description":"SIEM Auditbeat: Looks for unusual destination port activity that could indicate command-and-control, persistence mechanism, or data exfiltration activity (beta)","groups":["siem","auditbeat","process"],"analysis_config":{"bucket_span":"15m","detectors":[{"detector_description":"rare by \\"destination.port\\"","function":"rare","by_field_name":"destination.port"}],"influencers":["host.name","process.name","user.name","destination.ip"]},"analysis_limits":{"model_memory_limit":"32mb"},"data_description":{"time_field":"@timestamp"},"custom_settings":{"created_by":"ml-module-siem-auditbeat","custom_urls":[{"url_name":"Host Details by process name","url_value":"siem#/ml-hosts/$host.name$?kqlQuery=(filterQuery:(expression:\'process.name%20:%20%22$process.name$%22\',kind:kuery),queryLocation:hosts.details,type:details)&timerange=(global:(linkTo:!(timeline),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')),timeline:(linkTo:!(global),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')))"},{"url_name":"Host Details by user name","url_value":"siem#/ml-hosts/$host.name$?kqlQuery=(filterQuery:(expression:\'user.name%20:%20%22$user.name$%22\',kind:kuery),queryLocation:hosts.details,type:details)&timerange=(global:(linkTo:!(timeline),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')),timeline:(linkTo:!(global),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')))"},{"url_name":"Hosts Overview by process name","url_value":"siem#/ml-hosts?kqlQuery=(filterQuery:(expression:\'process.name%20:%20%22$process.name$%22\',kind:kuery),queryLocation:hosts.page,type:page)&timerange=(global:(linkTo:!(timeline),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')),timeline:(linkTo:!(global),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')))"},{"url_name":"Hosts Overview by user name","url_value":"siem#/ml-hosts?kqlQuery=(filterQuery:(expression:\'user.name%20:%20%22$user.name$%22\',kind:kuery),queryLocation:hosts.page,type:page)&timerange=(global:(linkTo:!(timeline),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')),timeline:(linkTo:!(global),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')))"}]},"results_index_name":"linux_anomalous_network_port_activity_ecs"}',
-        statusCode: 400,
-        response:
-          '{"error":{"root_cause":[{"type":"resource_already_exists_exception","reason":"The job cannot be created with the Id \'linux_anomalous_network_port_activity_ecs\'. The Id is already used."}],"type":"resource_already_exists_exception","reason":"The job cannot be created with the Id \'linux_anomalous_network_port_activity_ecs\'. The Id is already used."},"status":400}',
-      },
-    },
-  ],
-  datafeeds: [
-    {
-      id: 'datafeed-linux_anomalous_network_activity_ecs',
-      success: false,
-      started: false,
-      error: {
-        msg: '[status_exception] A datafeed [datafeed-linux_anomalous_network_activity_ecs] already exists for job [linux_anomalous_network_activity_ecs]',
-        path: '/_ml/datafeeds/datafeed-linux_anomalous_network_activity_ecs',
-        query: {},
-        body: '{"job_id":"linux_anomalous_network_activity_ecs","indices":["auditbeat-*"],"query":{"bool":{"filter":[{"term":{"event.action":"connected-to"}},{"term":{"agent.type":"auditbeat"}}],"must_not":[{"bool":{"should":[{"term":{"destination.ip":"127.0.0.1"}},{"term":{"destination.ip":"127.0.0.53"}},{"term":{"destination.ip":"::1"}}],"minimum_should_match":1}}]}}}',
-        statusCode: 409,
-        response:
-          '{"error":{"root_cause":[{"type":"status_exception","reason":"A datafeed [datafeed-linux_anomalous_network_activity_ecs] already exists for job [linux_anomalous_network_activity_ecs]"}],"type":"status_exception","reason":"A datafeed [datafeed-linux_anomalous_network_activity_ecs] already exists for job [linux_anomalous_network_activity_ecs]"},"status":409}',
-      },
-    },
-    {
-      id: 'datafeed-linux_anomalous_network_port_activity_ecs',
-      success: false,
-      started: false,
-      error: {
-        msg: '[status_exception] A datafeed [datafeed-linux_anomalous_network_port_activity_ecs] already exists for job [linux_anomalous_network_port_activity_ecs]',
-        path: '/_ml/datafeeds/datafeed-linux_anomalous_network_port_activity_ecs',
-        query: {},
-        body: '{"job_id":"linux_anomalous_network_port_activity_ecs","indices":["auditbeat-*"],"query":{"bool":{"filter":[{"term":{"event.action":"connected-to"}},{"term":{"agent.type":"auditbeat"}}],"must_not":[{"bool":{"should":[{"term":{"destination.ip":"::1"}},{"term":{"destination.ip":"127.0.0.1"}},{"term":{"destination.ip":"::"}},{"term":{"user.name_map.uid":"jenkins"}}],"minimum_should_match":1}}]}}}',
-        statusCode: 409,
-        response:
-          '{"error":{"root_cause":[{"type":"status_exception","reason":"A datafeed [datafeed-linux_anomalous_network_port_activity_ecs] already exists for job [linux_anomalous_network_port_activity_ecs]"}],"type":"status_exception","reason":"A datafeed [datafeed-linux_anomalous_network_port_activity_ecs] already exists for job [linux_anomalous_network_port_activity_ecs]"},"status":409}',
-      },
-    },
-  ],
-  kibana: {},
-};
-
-export const mockSetupMlJobSingleErrorSingleSuccess: SetupMlResponse = {
-  jobs: [
-    {
-      id: 'linux_anomalous_network_activity_ecs',
-      success: false,
-      error: {
-        msg: "[resource_already_exists_exception] The job cannot be created with the Id 'linux_anomalous_network_activity_ecs'. The Id is already used.",
-        path: '/_ml/anomaly_detectors/linux_anomalous_network_activity_ecs',
-        query: {},
-        body: '{"job_type":"anomaly_detector","description":"SIEM Auditbeat: Looks for unusual processes using the network which could indicate command-and-control, lateral movement, persistence, or data exfiltration activity (beta)","groups":["siem","auditbeat","network"],"analysis_config":{"bucket_span":"15m","detectors":[{"detector_description":"rare by \\"process.name\\"","function":"rare","by_field_name":"process.name"}],"influencers":["host.name","process.name","user.name","destination.ip"]},"analysis_limits":{"model_memory_limit":"64mb"},"data_description":{"time_field":"@timestamp"},"custom_settings":{"created_by":"ml-module-siem-auditbeat","custom_urls":[{"url_name":"Host Details by process name","url_value":"siem#/ml-hosts/$host.name$?kqlQuery=(filterQuery:(expression:\'process.name%20:%20%22$process.name$%22\',kind:kuery),queryLocation:hosts.details,type:details)&timerange=(global:(linkTo:!(timeline),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')),timeline:(linkTo:!(global),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')))"},{"url_name":"Host Details by user name","url_value":"siem#/ml-hosts/$host.name$?kqlQuery=(filterQuery:(expression:\'user.name%20:%20%22$user.name$%22\',kind:kuery),queryLocation:hosts.details,type:details)&timerange=(global:(linkTo:!(timeline),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')),timeline:(linkTo:!(global),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')))"},{"url_name":"Hosts Overview by process name","url_value":"siem#/ml-hosts?kqlQuery=(filterQuery:(expression:\'process.name%20:%20%22$process.name$%22\',kind:kuery),queryLocation:hosts.page,type:page)&timerange=(global:(linkTo:!(timeline),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')),timeline:(linkTo:!(global),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')))"},{"url_name":"Hosts Overview by user name","url_value":"siem#/ml-hosts?kqlQuery=(filterQuery:(expression:\'user.name%20:%20%22$user.name$%22\',kind:kuery),queryLocation:hosts.page,type:page)&timerange=(global:(linkTo:!(timeline),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')),timeline:(linkTo:!(global),timerange:(from:\'$earliest$\',kind:absolute,to:\'$latest$\')))"}]},"results_index_name":"linux_anomalous_network_activity_ecs"}',
-        statusCode: 400,
-        response:
-          '{"error":{"root_cause":[{"type":"resource_already_exists_exception","reason":"The job cannot be created with the Id \'linux_anomalous_network_activity_ecs\'. The Id is already used."}],"type":"resource_already_exists_exception","reason":"The job cannot be created with the Id \'linux_anomalous_network_activity_ecs\'. The Id is already used."},"status":400}',
-      },
-    },
-    { id: 'linux_anomalous_network_port_activity_ecs', success: true },
-  ],
-  datafeeds: [
-    {
-      id: 'datafeed-linux_anomalous_network_activity_ecs',
-      success: false,
-      started: false,
-      error: {
-        msg: '[status_exception] A datafeed [datafeed-linux_anomalous_network_activity_ecs] already exists for job [linux_anomalous_network_activity_ecs]',
-        path: '/_ml/datafeeds/datafeed-linux_anomalous_network_activity_ecs',
-        query: {},
-        body: '{"job_id":"linux_anomalous_network_activity_ecs","indices":["auditbeat-*"],"query":{"bool":{"filter":[{"term":{"event.action":"connected-to"}},{"term":{"agent.type":"auditbeat"}}],"must_not":[{"bool":{"should":[{"term":{"destination.ip":"127.0.0.1"}},{"term":{"destination.ip":"127.0.0.53"}},{"term":{"destination.ip":"::1"}}],"minimum_should_match":1}}]}}}',
-        statusCode: 409,
-        response:
-          '{"error":{"root_cause":[{"type":"status_exception","reason":"A datafeed [datafeed-linux_anomalous_network_activity_ecs] already exists for job [linux_anomalous_network_activity_ecs]"}],"type":"status_exception","reason":"A datafeed [datafeed-linux_anomalous_network_activity_ecs] already exists for job [linux_anomalous_network_activity_ecs]"},"status":409}',
-      },
-    },
-
-    { id: 'datafeed-linux_anomalous_network_port_activity_ecs', success: true, started: false },
-  ],
-  kibana: {},
-};
-
-export const mockSetupMlJobAllSuccess: SetupMlResponse = {
-  jobs: [
-    {
-      id: 'linux_anomalous_network_activity_ecs',
-      success: true,
-    },
-    { id: 'linux_anomalous_network_port_activity_ecs', success: true },
-  ],
-  datafeeds: [
-    { id: 'datafeed-linux_anomalous_network_activity_ecs', success: true, started: false },
-
-    { id: 'datafeed-linux_anomalous_network_port_activity_ecs', success: true, started: false },
-  ],
-  kibana: {},
-};
-
-export const mockStartDatafeedsError: StartDatafeedResponse = {
-  'datafeed-linux_anomalous_network_service': { started: false, error: 'Job has no datafeed' },
-};
-
-export const mockStartDatafeedsSuccess: StartDatafeedResponse = {
-  'datafeed-linux_anomalous_network_service': { started: true },
-};
-
-export const mockStopDatafeedsErrorDoesNotExist: StopDatafeedResponse = {};
-
-export const mockStopDatafeedsSuccess: StopDatafeedResponse = {
-  'datafeed-linux_anomalous_network_service': { stopped: true },
-};
 
 export const mockSecurityJobs: SecurityJob[] = [
   {
@@ -512,7 +358,7 @@ export const mockSecurityJobs: SecurityJob[] = [
     earliestTimestampMs: 1569812391387,
     latestResultsTimestampMs: 1571022900000,
     isSingleMetricViewerJob: true,
-    moduleId: 'siem_auditbeat',
+    moduleId: 'security_linux_v3',
     defaultIndexPattern: 'auditbeat-*',
     isCompatible: true,
     isInstalled: true,
@@ -533,7 +379,7 @@ export const mockSecurityJobs: SecurityJob[] = [
     datafeedIndices: ['auditbeat-*'],
     datafeedState: 'stopped',
     isSingleMetricViewerJob: true,
-    moduleId: 'siem_auditbeat',
+    moduleId: 'security_linux_v3',
     defaultIndexPattern: 'auditbeat-*',
     isCompatible: true,
     isInstalled: true,
@@ -548,14 +394,14 @@ export const mockSecurityJobs: SecurityJob[] = [
     datafeedState: '',
     hasDatafeed: false,
     isSingleMetricViewerJob: false,
-    jobState: '',
+    jobState: 'closed',
     memory_status: '',
     processed_record_count: 0,
     id: 'rare_process_by_host_windows_ecs',
     description: 'SIEM Winlogbeat: Detect unusually rare processes on Windows (beta)',
     groups: ['process', 'siem', 'winlogbeat'],
     defaultIndexPattern: 'winlogbeat-*',
-    moduleId: 'siem_winlogbeat',
+    moduleId: 'security_windows_v3',
     isCompatible: false,
     isInstalled: false,
     isElasticJob: true,

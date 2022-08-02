@@ -20,6 +20,8 @@ if (len(sys.argv) < 2):
 
 src_path = path.abspath(path.join(os.curdir, 'chromium', 'src'))
 build_path = path.abspath(path.join(src_path, '..', '..'))
+en_us_locale_pak_file_name = 'en-US.pak'
+en_us_locale_file_path = path.abspath(en_us_locale_pak_file_name)
 build_chromium_path = path.abspath(path.dirname(__file__))
 argsgn_file = path.join(build_chromium_path, platform.system().lower(), 'args.gn')
 
@@ -34,6 +36,9 @@ arch_name = sys.argv[2] if len(sys.argv) >= 3 else 'unknown'
 
 if arch_name != 'x64' and arch_name != 'arm64':
   raise Exception('Unexpected architecture: ' + arch_name + '. `x64` and `arm64` are supported.')
+
+print('Fetching locale files')
+runcmd('gsutil cp gs://headless_shell_staging/en-US.pak .')
 
 print('Building Chromium ' + source_version + ' for ' + arch_name + ' from ' + src_path)
 print('src path: ' + src_path)
@@ -104,17 +109,13 @@ md5_filename = base_filename + '.md5'
 print('Creating '  + path.join(src_path, zip_filename))
 archive = zipfile.ZipFile(zip_filename, mode='w', compression=zipfile.ZIP_DEFLATED)
 
-def archive_file(name):
-  """A little helper function to write individual files to the zip file"""
-  from_path = path.join('out/headless', name)
-  to_path = path.join('headless_shell-' + platform.system().lower() + '_' + arch_name, name)
-  archive.write(from_path, to_path)
-  return to_path
+path_prefix = 'headless_shell-' + platform.system().lower() + '_' + arch_name
 
 # Add dependencies that must be bundled with the Chromium executable.
-archive_file('headless_shell')
-archive_file(path.join('swiftshader', 'libEGL.so'))
-archive_file(path.join('swiftshader', 'libGLESv2.so'))
+archive.write('out/headless/headless_shell', path.join(path_prefix, 'headless_shell'))
+archive.write('out/headless/libEGL.so', path.join(path_prefix, 'libEGL.so'))
+archive.write('out/headless/libGLESv2.so', path.join(path_prefix, 'libGLESv2.so'))
+archive.write(en_us_locale_file_path, path.join(path_prefix, 'locales', en_us_locale_pak_file_name))
 
 archive.close()
 

@@ -34,7 +34,7 @@ import {
   tagNameMaxLength,
   tagDescriptionMaxLength,
 } from '../../../common';
-import { TagBadge } from '../../components';
+import { TagBadge } from '..';
 import { getRandomColor, useIfMounted } from './utils';
 
 interface CreateOrEditModalProps {

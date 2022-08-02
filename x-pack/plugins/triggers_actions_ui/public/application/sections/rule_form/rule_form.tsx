@@ -36,13 +36,20 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { capitalize } from 'lodash';
-import { KibanaFeature } from '../../../../../features/public';
+import { KibanaFeature } from '@kbn/features-plugin/public';
 import {
   formatDuration,
   getDurationNumberInItsUnit,
   getDurationUnitValue,
   parseDuration,
-} from '../../../../../alerting/common/parse_duration';
+} from '@kbn/alerting-plugin/common/parse_duration';
+import {
+  RuleActionParam,
+  ALERTS_FEATURE_ID,
+  RecoveredActionGroup,
+  isActionGroupDisabledForActionTypeId,
+} from '@kbn/alerting-plugin/common';
+import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { RuleReducerAction, InitialRule } from './rule_reducer';
 import {
   RuleTypeModel,
@@ -56,12 +63,6 @@ import {
 } from '../../../types';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { ActionForm } from '../action_connector_form';
-import {
-  AlertActionParam as RuleActionParam,
-  ALERTS_FEATURE_ID,
-  RecoveredActionGroup,
-  isActionGroupDisabledForActionTypeId,
-} from '../../../../../alerting/common';
 import { hasAllPrivilege, hasShowActionsCapability } from '../../lib/capabilities';
 import { SolutionFilter } from './solution_filter';
 import './rule_form.scss';
@@ -95,7 +96,8 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   setHasActionsDisabled?: (value: boolean) => void;
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
   metadata?: MetaData;
-  filteredSolutions?: string[] | undefined;
+  filteredRuleTypes?: string[];
+  connectorFeatureId?: string;
 }
 
 export const RuleForm = ({
@@ -110,7 +112,8 @@ export const RuleForm = ({
   ruleTypeRegistry,
   actionTypeRegistry,
   metadata,
-  filteredSolutions,
+  filteredRuleTypes: ruleTypeToFilter,
+  connectorFeatureId = AlertingConnectorFeatureId,
 }: RuleFormProps) => {
   const {
     notifications: { toasts },
@@ -119,6 +122,8 @@ export const RuleForm = ({
     kibanaFeatures,
     charts,
     data,
+    unifiedSearch,
+    dataViews,
   } = useKibana().services;
   const canShowActions = hasShowActionsCapability(capabilities);
 
@@ -161,7 +166,7 @@ export const RuleForm = ({
     ruleTypes,
     error: loadRuleTypesError,
     ruleTypeIndex,
-  } = useLoadRuleTypes({ filteredSolutions });
+  } = useLoadRuleTypes({ filteredRuleTypes: ruleTypeToFilter });
 
   // load rule types
   useEffect(() => {
@@ -486,7 +491,7 @@ export const RuleForm = ({
                 >
                   <FormattedMessage
                     id="xpack.triggersActionsUI.sections.ruleForm.documentationLabel"
-                    defaultMessage="Documentation"
+                    defaultMessage="Learn more"
                   />
                 </EuiLink>
               )}
@@ -523,6 +528,8 @@ export const RuleForm = ({
               metadata={metadata}
               charts={charts}
               data={data}
+              dataViews={dataViews}
+              unifiedSearch={unifiedSearch}
             />
           </Suspense>
         </EuiErrorBoundary>
@@ -546,6 +553,7 @@ export const RuleForm = ({
             setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
             messageVariables={selectedRuleType.actionVariables}
             defaultActionGroupId={defaultActionGroupId}
+            featureId={connectorFeatureId}
             isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) =>
               isActionGroupDisabledForActionType(selectedRuleType, actionGroupId, actionTypeId)
             }
@@ -556,7 +564,8 @@ export const RuleForm = ({
                     omitMessageVariables: selectedRuleType.doesSetRecoveryContext
                       ? 'keepContext'
                       : 'all',
-                    defaultActionMessage: recoveredActionGroupMessage,
+                    defaultActionMessage:
+                      ruleTypeModel?.defaultRecoveryMessage || recoveredActionGroupMessage,
                   }
                 : { ...actionGroup, defaultActionMessage: ruleTypeModel?.defaultActionMessage }
             )}
@@ -585,7 +594,7 @@ export const RuleForm = ({
         type="questionInCircle"
         content={i18n.translate('xpack.triggersActionsUI.sections.ruleForm.checkWithTooltip', {
           defaultMessage:
-            'Define how often to evaluate the condition. Checks are queued; they run as close to the defined value as capacity allows. The xpack.alerting.rules.minimumScheduleInterval.value setting defines the minimum value. The xpack.alerting.rules.minimumScheduleInterval.enforce setting defines whether this minimum is required or suggested.',
+            'Define how often to evaluate the condition. Checks are queued; they run as close to the defined value as capacity allows.',
         })}
       />
     </>
@@ -719,10 +728,10 @@ export const RuleForm = ({
                   name="interval"
                   data-test-subj="intervalInput"
                   onChange={(e) => {
-                    const interval =
-                      e.target.value !== '' ? parseInt(e.target.value, 10) : undefined;
+                    const value = e.target.value;
+                    const interval = value !== '' ? parseInt(value, 10) : undefined;
                     setRuleInterval(interval);
-                    setScheduleProperty('interval', `${e.target.value}${ruleIntervalUnit}`);
+                    setScheduleProperty('interval', `${value}${ruleIntervalUnit}`);
                   }}
                 />
               </EuiFlexItem>

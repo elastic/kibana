@@ -9,15 +9,15 @@
 import React, { useState } from 'react';
 import { EuiModalBody } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { OverlayStart } from 'kibana/public';
+import { OverlayStart } from '@kbn/core/public';
 import { EuiFieldText } from '@elastic/eui';
 import { EuiButton } from '@elastic/eui';
-import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import {
   IContainer,
   EmbeddableFactoryDefinition,
   EmbeddableFactory,
-} from '../../../../src/plugins/embeddable/public';
+} from '@kbn/embeddable-plugin/public';
 import { TodoEmbeddable, TODO_EMBEDDABLE, TodoInput, TodoOutput } from './todo_embeddable';
 
 function TaskInput({ onSave }: { onSave: (task: string) => void }) {

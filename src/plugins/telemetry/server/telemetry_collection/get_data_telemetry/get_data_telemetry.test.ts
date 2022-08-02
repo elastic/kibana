@@ -8,7 +8,7 @@
 
 import { buildDataTelemetryPayload, getDataTelemetry } from './get_data_telemetry';
 import { DATA_DATASETS_INDEX_PATTERNS, DATA_DATASETS_INDEX_PATTERNS_UNIQUE } from './constants';
-import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 describe('get_data_telemetry', () => {
   describe('DATA_DATASETS_INDEX_PATTERNS', () => {

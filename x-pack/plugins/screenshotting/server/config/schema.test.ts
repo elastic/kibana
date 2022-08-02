@@ -19,6 +19,15 @@ describe('ConfigSchema', () => {
             },
           },
         },
+        "capture": Object {
+          "loadDelay": "PT3S",
+          "timeouts": Object {
+            "openUrl": "PT1M",
+            "renderComplete": "PT30S",
+            "waitForElements": "PT30S",
+          },
+          "zoom": 2,
+        },
         "networkPolicy": Object {
           "enabled": true,
           "rules": Array [
@@ -70,6 +79,15 @@ describe('ConfigSchema', () => {
               "enabled": false,
             },
           },
+        },
+        "capture": Object {
+          "loadDelay": "PT3S",
+          "timeouts": Object {
+            "openUrl": "PT1M",
+            "renderComplete": "PT30S",
+            "waitForElements": "PT30S",
+          },
+          "zoom": 2,
         },
         "networkPolicy": Object {
           "enabled": true,
@@ -142,6 +160,30 @@ describe('ConfigSchema', () => {
         ],
         "enabled": true,
         "server": "http://example.com:8080",
+      }
+    `);
+  });
+
+  it('allows Duration values for certain keys', () => {
+    expect(
+      ConfigSchema.validate({ capture: { loadDelay: '3s' } }).capture.loadDelay
+    ).toMatchInlineSnapshot(`"PT3S"`);
+
+    expect(
+      ConfigSchema.validate({
+        capture: {
+          timeouts: {
+            openUrl: '1m',
+            waitForElements: '30s',
+            renderComplete: '10s',
+          },
+        },
+      }).capture.timeouts
+    ).toMatchInlineSnapshot(`
+      Object {
+        "openUrl": "PT1M",
+        "renderComplete": "PT10S",
+        "waitForElements": "PT30S",
       }
     `);
   });

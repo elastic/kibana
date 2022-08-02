@@ -6,7 +6,8 @@
  */
 
 import { EuiButtonEmpty } from '@elastic/eui';
-import React, { useState, useCallback, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
 import { useIsOverflow } from '../../hooks/use_is_overflow';
 import * as i18n from './translations';

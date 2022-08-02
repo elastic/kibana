@@ -6,7 +6,7 @@
  */
 
 import type { outputType } from '../../constants';
-import type { ValueOf } from '../index';
+import type { ValueOf } from '..';
 
 export type OutputType = typeof outputType;
 
@@ -29,6 +29,7 @@ export interface NewOutput {
 
 export type OutputSOAttributes = NewOutput & {
   output_id?: string;
+  ssl?: string; // encrypted ssl field
 };
 
 export type Output = NewOutput & {

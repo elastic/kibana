@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import sinon from 'sinon';
 import { shouldBeOneOf, mustBeAllOf } from './query_clauses';
 

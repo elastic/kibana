@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SpacesPluginStart } from '../../../spaces/server';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 export function spaceIdToNamespace(spaces?: SpacesPluginStart, spaceId?: string) {
   return spaces && spaceId ? spaces.spacesService.spaceIdToNamespace(spaceId) : undefined;

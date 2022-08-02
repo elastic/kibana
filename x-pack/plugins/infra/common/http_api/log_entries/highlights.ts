@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 import { logEntryCursorRT, logEntryRT } from '../../log_entry';
-import { logSourceColumnConfigurationRT } from '../../log_sources/log_source_configuration';
+import { logViewColumnConfigurationRT } from '../../log_views';
 
 export const LOG_ENTRIES_HIGHLIGHTS_PATH = '/api/log_entries/highlights';
 
@@ -21,7 +21,7 @@ export const logEntriesHighlightsBaseRequestRT = rt.intersection([
   rt.partial({
     query: rt.union([rt.string, rt.null]),
     size: rt.number,
-    columns: rt.array(logSourceColumnConfigurationRT),
+    columns: rt.array(logViewColumnConfigurationRT),
   }),
 ]);
 

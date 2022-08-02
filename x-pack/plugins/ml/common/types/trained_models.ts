@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataFrameAnalyticsConfig } from './data_frame_analytics';
 import type { FeatureImportanceBaseline, TotalFeatureImportance } from './feature_importance';
 import type { XOR } from './common';
@@ -66,6 +66,7 @@ export type PutTrainedModelConfig = {
     model_aliases?: string[];
   } & Record<string, unknown>;
   tags?: string[];
+  model_type?: TrainedModelType;
   inference_config?: Record<string, unknown>;
   input: { field_names: string[] };
 } & XOR<
@@ -87,14 +88,12 @@ export type PutTrainedModelConfig = {
   }
 >; // compressed_definition and definition are mutually exclusive
 
-export interface TrainedModelConfigResponse {
-  description?: string;
-  created_by: string;
-  create_time: string;
-  default_field_map: Record<string, string>;
-  estimated_heap_memory_usage_bytes: number;
-  estimated_operations: number;
-  license_level: string;
+export type TrainedModelConfigResponse = estypes.MlTrainedModelConfig & {
+  /**
+   * Associated pipelines. Extends response from the ES endpoint.
+   */
+  pipelines?: Record<string, PipelineDefinition> | null;
+
   metadata?: {
     analytics_config: DataFrameAnalyticsConfig;
     input: unknown;
@@ -107,11 +106,7 @@ export interface TrainedModelConfigResponse {
   tags: string[];
   version: string;
   inference_config?: Record<string, any>;
-  /**
-   * Associated pipelines. Extends response from the ES endpoint.
-   */
-  pipelines?: Record<string, PipelineDefinition> | null;
-}
+};
 
 export interface PipelineDefinition {
   processors?: Array<Record<string, any>>;
@@ -135,6 +130,8 @@ export interface TrainedModelDeploymentStatsResponse {
   inference_threads: number;
   model_threads: number;
   state: DeploymentState;
+  threads_per_allocation: number;
+  number_of_allocations: number;
   allocation_status: { target_allocation_count: number; state: string; allocation_count: number };
   nodes: Array<{
     node: Record<
@@ -159,6 +156,8 @@ export interface TrainedModelDeploymentStatsResponse {
     number_of_pending_requests: number;
     start_time: number;
     throughput_last_minute: number;
+    threads_per_allocation: number;
+    number_of_allocations: number;
   }>;
 }
 
@@ -169,6 +168,8 @@ export interface AllocatedModel {
     state: string;
     allocation_count: number;
   };
+  number_of_allocations: number;
+  threads_per_allocation: number;
   /**
    * Not required for rendering in the Model stats
    */
@@ -192,6 +193,8 @@ export interface AllocatedModel {
     number_of_pending_requests: number;
     start_time: number;
     throughput_last_minute: number;
+    number_of_allocations: number;
+    threads_per_allocation: number;
   };
 }
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpSetup } from 'src/core/public';
+import { HttpSetup } from '@kbn/core/public';
 
 import {
   UseRequestConfig,
@@ -20,7 +20,9 @@ import {
 export type UseRequestHook = <T = any, E = Error>(
   config: UseRequestConfig
 ) => UseRequestResponse<T, E>;
-export type SendRequestHook = (config: SendRequestConfig) => Promise<SendRequestResponse>;
+export type SendRequestHook = <T = any>(
+  config: SendRequestConfig
+) => Promise<SendRequestResponse<T>>;
 
 export const getUseRequest =
   (httpClient: HttpSetup): UseRequestHook =>

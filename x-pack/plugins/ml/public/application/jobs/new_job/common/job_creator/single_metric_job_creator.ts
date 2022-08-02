@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { JobCreator } from './job_creator';
@@ -21,8 +22,8 @@ import {
   ES_AGGREGATION,
 } from '../../../../../../common/constants/aggregation_types';
 import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
+import { DOC_COUNT } from '../../../../../../common/constants/field_types';
 import { getRichDetectors } from './util/general';
-import type { DataView } from '../../../../../../../../../src/plugins/data_views/public';
 import { isSparseDataJob } from './util/general';
 
 export class SingleMetricJobCreator extends JobCreator {
@@ -71,6 +72,11 @@ export class SingleMetricJobCreator extends JobCreator {
       delete this._job_config.analysis_config.summary_count_field_name;
       delete this._datafeed_config.aggregations;
 
+      // if the selected field is called doc_count, we cannot use aggregations
+      if (this._fields[0]?.name === DOC_COUNT) {
+        return;
+      }
+
       const functionName = this._aggs[0].dslName;
       const timeField = this._job_config.data_description.time_field!;
 
@@ -86,7 +92,7 @@ export class SingleMetricJobCreator extends JobCreator {
 
       switch (functionName) {
         case ES_AGGREGATION.COUNT:
-          this._job_config.analysis_config.summary_count_field_name = 'doc_count';
+          this._job_config.analysis_config.summary_count_field_name = DOC_COUNT;
 
           this._datafeed_config.aggregations = {
             buckets: {
@@ -113,7 +119,7 @@ export class SingleMetricJobCreator extends JobCreator {
           field = this._fields[0];
           if (field !== null) {
             const fieldName = field.name;
-            this._job_config.analysis_config.summary_count_field_name = 'doc_count';
+            this._job_config.analysis_config.summary_count_field_name = DOC_COUNT;
 
             this._datafeed_config.aggregations = {
               buckets: {

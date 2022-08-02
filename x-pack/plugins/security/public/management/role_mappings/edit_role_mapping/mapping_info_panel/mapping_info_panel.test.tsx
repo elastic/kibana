@@ -7,9 +7,9 @@
 
 import React from 'react';
 
+import { coreMock } from '@kbn/core/public/mocks';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { coreMock } from 'src/core/public/mocks';
 
 import type { Role, RoleMapping } from '../../../../../common/model';
 import type { RolesAPIClient } from '../../../roles';

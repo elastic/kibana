@@ -9,4 +9,4 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 require('@kbn/optimizer').registerNodeAutoTranspilation();
 
-require('./upload_telemetry_data/index.ts');
+require('./upload_telemetry_data');

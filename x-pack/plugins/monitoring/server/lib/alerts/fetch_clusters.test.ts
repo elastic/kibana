@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchClusters } from './fetch_clusters';
 
 jest.mock('../../static_globals', () => ({

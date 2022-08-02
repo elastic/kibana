@@ -8,17 +8,20 @@
 
 import './index.scss';
 
-import { PluginInitializerContext } from 'src/core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { EmbeddablePublicPlugin } from './plugin';
 
 export type {
   Adapters,
   ReferenceOrValueEmbeddable,
+  SelfStyledEmbeddable,
   ChartActionContext,
   ContainerInput,
   ContainerOutput,
   EmbeddableChildPanelProps,
   EmbeddableContext,
+  EmbeddablePhaseEvent,
+  EmbeddablePhase,
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
   EmbeddableInput,

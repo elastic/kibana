@@ -6,9 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import { CASES_URL } from '@kbn/cases-plugin/common/constants';
+import { CaseResponse } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import { getPostCaseRequest, postCommentAlertReq } from '../../../../common/lib/mock';
 import {
   createCase,
@@ -17,7 +18,6 @@ import {
   deleteAllCaseItems,
 } from '../../../../common/lib/utils';
 import { validateCasesFromAlertIDResponse } from '../../../../common/lib/validation';
-import { CaseResponse } from '../../../../../../plugins/cases/common/api';
 import {
   globalRead,
   noKibanaPrivileges,

@@ -6,38 +6,38 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { InfraPluginRequestHandlerContext } from '../../../types';
-import { KibanaFramework } from '../../adapters/framework/kibana_framework_adapter';
 import {
-  GetLogAlertsChartPreviewDataAlertParamsSubset,
-  Series,
-  Point,
-} from '../../../../common/http_api/log_alerts';
-import {
-  getGroupedESQuery,
-  getUngroupedESQuery,
-  buildFiltersFromCriteria,
-} from './log_threshold_executor';
-import {
-  UngroupedSearchQueryResponseRT,
-  UngroupedSearchQueryResponse,
   GroupedSearchQueryResponse,
   GroupedSearchQueryResponseRT,
   isOptimizedGroupedSearchQueryResponse,
+  UngroupedSearchQueryResponse,
+  UngroupedSearchQueryResponseRT,
 } from '../../../../common/alerting/logs/log_threshold/types';
+import {
+  GetLogAlertsChartPreviewDataAlertParamsSubset,
+  Point,
+  Series,
+} from '../../../../common/http_api/log_alerts';
+import { ResolvedLogView } from '../../../../common/log_views';
 import { decodeOrThrow } from '../../../../common/runtime_types';
-import { ResolvedLogSourceConfiguration } from '../../../../common/log_sources';
+import type { InfraPluginRequestHandlerContext } from '../../../types';
+import { KibanaFramework } from '../../adapters/framework/kibana_framework_adapter';
+import {
+  buildFiltersFromCriteria,
+  getGroupedESQuery,
+  getUngroupedESQuery,
+} from './log_threshold_executor';
 
 const COMPOSITE_GROUP_SIZE = 40;
 
 export async function getChartPreviewData(
   requestContext: InfraPluginRequestHandlerContext,
-  resolvedLogSourceConfiguration: ResolvedLogSourceConfiguration,
+  resolvedLogView: ResolvedLogView,
   callWithRequest: KibanaFramework['callWithRequest'],
   alertParams: GetLogAlertsChartPreviewDataAlertParamsSubset,
   buckets: number
 ) {
-  const { indices, timestampField, runtimeMappings } = resolvedLogSourceConfiguration;
+  const { indices, timestampField, runtimeMappings } = resolvedLogView;
   const { groupBy, timeSize, timeUnit } = alertParams;
   const isGrouped = groupBy && groupBy.length > 0 ? true : false;
 
@@ -47,11 +47,28 @@ export async function getChartPreviewData(
     timeSize: timeSize * buckets,
   };
 
-  const { rangeFilter } = buildFiltersFromCriteria(expandedAlertParams, timestampField);
+  const executionTimestamp = Date.now();
+  const { rangeFilter } = buildFiltersFromCriteria(
+    expandedAlertParams,
+    timestampField,
+    executionTimestamp
+  );
 
   const query = isGrouped
-    ? getGroupedESQuery(expandedAlertParams, timestampField, indices, runtimeMappings)
-    : getUngroupedESQuery(expandedAlertParams, timestampField, indices, runtimeMappings);
+    ? getGroupedESQuery(
+        expandedAlertParams,
+        timestampField,
+        indices,
+        runtimeMappings,
+        executionTimestamp
+      )
+    : getUngroupedESQuery(
+        expandedAlertParams,
+        timestampField,
+        indices,
+        runtimeMappings,
+        executionTimestamp
+      );
 
   if (!query) {
     throw new Error('ES query could not be built from the provided alert params');

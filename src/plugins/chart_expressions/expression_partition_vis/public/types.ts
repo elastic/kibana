@@ -5,12 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ValueClickContext } from '../../../embeddable/public';
-import { ChartsPluginSetup } from '../../../charts/public';
+import type { ValueClickContext } from '@kbn/embeddable-plugin/public';
+import { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
 import {
   Plugin as ExpressionsPublicPlugin,
   ExpressionsServiceStart,
-} from '../../../expressions/public';
+} from '@kbn/expressions-plugin/public';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 export type ExpressionPartitionVisPluginSetup = void;
 export type ExpressionPartitionVisPluginStart = void;
@@ -22,6 +25,10 @@ export interface SetupDeps {
 
 export interface StartDeps {
   expression: ExpressionsServiceStart;
+  charts: ChartsPluginStart;
+  data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
+  usageCollection?: UsageCollectionStart;
 }
 
 export interface FilterEvent {

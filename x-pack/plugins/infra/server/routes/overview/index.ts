@@ -24,10 +24,8 @@ export const initOverviewRoute = (libs: InfraBackendLibs) => {
     async (requestContext, request, response) => {
       const options = request.body;
       const client = createSearchClient(requestContext, framework);
-      const source = await libs.sources.getSourceConfiguration(
-        requestContext.core.savedObjects.client,
-        options.sourceId
-      );
+      const soClient = (await requestContext.core).savedObjects.client;
+      const source = await libs.sources.getSourceConfiguration(soClient, options.sourceId);
 
       const topNResponse = await queryTopNodes(options, client, source);
 

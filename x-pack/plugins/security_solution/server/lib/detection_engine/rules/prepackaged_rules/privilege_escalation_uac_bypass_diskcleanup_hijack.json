@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "UAC Bypass via DiskCleanup Scheduled Task Hijack",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type == \"start\" and\n process.args : \"/autoclean\" and process.args : \"/d\" and\n not process.executable : (\"C:\\\\Windows\\\\System32\\\\cleanmgr.exe\",\n                           \"C:\\\\Windows\\\\SysWOW64\\\\cleanmgr.exe\",\n                           \"C:\\\\Windows\\\\System32\\\\taskhostw.exe\")\n",
   "risk_score": 47,
   "rule_id": "1dcc51f6-ba26-49e7-9ef4-2655abb2361e",
@@ -49,5 +50,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 6
+  "version": 7
 }

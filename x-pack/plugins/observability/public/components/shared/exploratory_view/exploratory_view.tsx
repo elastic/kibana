@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiResizableContainer,
   EuiTitle,
@@ -17,18 +16,18 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { PanelDirection } from '@elastic/eui/src/components/resizable_container/types';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { useSeriesStorage } from './hooks/use_series_storage';
 import { useLensAttributes } from './hooks/use_lens_attributes';
-import { TypedLensByValueInput } from '../../../../../lens/public';
 import { useAppDataViewContext } from './hooks/use_app_data_view';
 import { SeriesViews } from './views/series_views';
 import { LensEmbeddable } from './lens_embeddable';
 import { EmptyView } from './components/empty_view';
-import { ChartTimeRange, LastUpdated } from './header/last_updated';
 import { useExpViewTimeRange } from './hooks/use_time_range';
 import { ExpViewActionMenu } from './components/action_menu';
+import { useExploratoryView } from './contexts/exploratory_view_config';
 
 export type PanelId = 'seriesPanel' | 'chartPanel';
 
@@ -46,7 +45,7 @@ export function ExploratoryView({
 
   const [height, setHeight] = useState<string>('100vh');
 
-  const [chartTimeRangeContext, setChartTimeRangeContext] = useState<ChartTimeRange | undefined>();
+  const { isEditMode } = useExploratoryView();
 
   const [lensAttributes, setLensAttributes] = useState<TypedLensByValueInput['attributes'] | null>(
     null
@@ -54,7 +53,8 @@ export function ExploratoryView({
 
   const { loadDataView, loading } = useAppDataViewContext();
 
-  const { firstSeries, allSeries, lastRefresh, reportType, setLastRefresh } = useSeriesStorage();
+  const { firstSeries, allSeries, lastRefresh, reportType, setChartTimeRangeContext } =
+    useSeriesStorage();
 
   const lensAttributesT = useLensAttributes();
   const timeRange = useExpViewTimeRange();
@@ -112,9 +112,10 @@ export function ExploratoryView({
 
             return (
               <>
-                <EuiFlexGroup alignItems="center">
+                <EuiFlexGroup alignItems="center" gutterSize="none">
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
+                      size="xs"
                       {...(hiddenPanel === 'chartPanel'
                         ? { iconType: 'arrowRight' }
                         : { iconType: 'arrowDown' })}
@@ -123,25 +124,14 @@ export function ExploratoryView({
                       {hiddenPanel === 'chartPanel' ? SHOW_CHART_LABEL : HIDE_CHART_LABEL}
                     </EuiButtonEmpty>
                   </EuiFlexItem>
-                  {hiddenPanel === 'chartPanel' ? null : (
-                    <>
-                      <EuiFlexItem style={{ textAlign: 'right' }}>
-                        <LastUpdated chartTimeRange={chartTimeRangeContext} />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiButton iconType="refresh" onClick={() => setLastRefresh(Date.now())}>
-                          {REFRESH_LABEL}
-                        </EuiButton>
-                      </EuiFlexItem>
-                    </>
-                  )}
                 </EuiFlexGroup>
 
                 <EuiResizablePanel
-                  initialSize={40}
+                  initialSize={isEditMode ? 40 : 60}
                   minSize={'30%'}
                   mode={'collapsible'}
                   id="chartPanel"
+                  paddingSize="s"
                 >
                   {lensAttributes ? (
                     <LensEmbeddable
@@ -154,7 +144,7 @@ export function ExploratoryView({
                 </EuiResizablePanel>
 
                 <EuiResizablePanel
-                  initialSize={60}
+                  initialSize={isEditMode ? 60 : 40}
                   minSize="10%"
                   mode={'main'}
                   id="seriesPanel"
@@ -197,6 +187,16 @@ const ResizableContainer = styled(EuiResizableContainer)`
   &&& .paddingTopSmall {
     padding-top: 8px;
   }
+  #chartPanel {
+    > .euiPanel {
+      padding-bottom: 0;
+      padding-top: 0;
+    }
+    .expExpressionRenderer__expression {
+      padding-bottom: 0 !important;
+      padding-top: 0 !important;
+    }
+  }
 `;
 
 const ShowPreview = styled(EuiButtonEmpty)`
@@ -204,20 +204,16 @@ const ShowPreview = styled(EuiButtonEmpty)`
   bottom: 34px;
 `;
 
+const PREVIEW_LABEL = i18n.translate('xpack.observability.overview.exploratoryView.preview', {
+  defaultMessage: 'Preview',
+});
+
 const HIDE_CHART_LABEL = i18n.translate('xpack.observability.overview.exploratoryView.hideChart', {
   defaultMessage: 'Hide chart',
 });
 
 const SHOW_CHART_LABEL = i18n.translate('xpack.observability.overview.exploratoryView.showChart', {
   defaultMessage: 'Show chart',
-});
-
-const PREVIEW_LABEL = i18n.translate('xpack.observability.overview.exploratoryView.preview', {
-  defaultMessage: 'Preview',
-});
-
-const REFRESH_LABEL = i18n.translate('xpack.observability.overview.exploratoryView.refresh', {
-  defaultMessage: 'Refresh',
 });
 
 const LENS_NOT_AVAILABLE = i18n.translate(

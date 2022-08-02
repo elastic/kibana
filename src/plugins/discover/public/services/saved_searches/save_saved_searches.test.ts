@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsStart } from 'kibana/public';
+import type { SavedObjectsStart } from '@kbn/core/public';
 
-import { savedObjectsServiceMock } from '../../../../../core/public/mocks';
-import { dataPluginMock } from '../../../../data/public/mocks';
+import { savedObjectsServiceMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 import { saveSavedSearch } from './save_saved_searches';
 import type { SavedSearch } from './types';
@@ -87,6 +87,7 @@ describe('saveSavedSearch', () => {
         columns: [],
         description: '',
         grid: {},
+        isTextBasedQuery: false,
         hideChart: false,
         kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
         sort: [],
@@ -106,6 +107,7 @@ describe('saveSavedSearch', () => {
         columns: [],
         description: '',
         grid: {},
+        isTextBasedQuery: false,
         hideChart: false,
         kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
         sort: [],

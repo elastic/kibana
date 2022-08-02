@@ -8,10 +8,10 @@
 import React from 'react';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { debounce, findIndex } from 'lodash';
-import { SimpleSavedObject } from '../../../../../../../../src/core/public';
+import { SimpleSavedObject } from '@kbn/core/public';
+import { CollectConfigProps } from '@kbn/kibana-utils-plugin/public';
 import { DashboardDrilldownConfig } from './dashboard_drilldown_config';
 import { txtDestinationDashboardNotFound } from './i18n';
-import { CollectConfigProps } from '../../../../../../../../src/plugins/kibana_utils/public';
 import { Config } from '../types';
 import { Params } from '../abstract_dashboard_drilldown';
 

@@ -6,21 +6,20 @@
  * Side Public License, v 1.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/109904
-/* eslint-disable @kbn/eslint/no_export_all */
-
-import { PluginInitializerContext } from '../../../core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { ConfigSchema } from '../config';
-
-export * from './deprecated';
 
 /*
  * Filters:
  */
 
-export { getEsQueryConfig, FilterStateStore } from '../common';
-export { FilterLabel, FilterItem } from './ui';
-export { getDisplayValueFromFilter, generateFilters, extractTimeRange } from './query';
+export { getEsQueryConfig } from '../common';
+export {
+  getDisplayValueFromFilter,
+  getFieldDisplayValueFromFilter,
+  generateFilters,
+  getIndexPatternFromFilter,
+} from './query';
 
 /**
  * Exporters (CSV)
@@ -54,8 +53,6 @@ import {
   validateDataView,
 } from './data_views';
 
-export type { IndexPatternsService } from './data_views';
-
 // Index patterns namespace:
 export const indexPatterns = {
   ILLEGAL_CHARACTERS_KEY,
@@ -70,13 +67,9 @@ export const indexPatterns = {
   validate: validateDataView,
 };
 
-export type { IndexPatternsContract, DataViewsContract, TypeMeta } from './data_views';
-export { IndexPattern, IndexPatternField } from './data_views';
+export type { DataViewsContract, TypeMeta } from './data_views';
 
 export type {
-  IIndexPattern,
-  IFieldType,
-  IndexPatternAttributes,
   AggregationRestrictions as IndexPatternAggRestrictions,
   IndexPatternLoadExpressionFunctionDefinition,
   GetFieldsOptions,
@@ -91,20 +84,6 @@ export {
   DuplicateDataViewError,
 } from '../common';
 
-/*
- * Autocomplete query suggestions:
- */
-
-export type {
-  QuerySuggestion,
-  QuerySuggestionGetFn,
-  QuerySuggestionGetFnArgs,
-  QuerySuggestionBasic,
-  QuerySuggestionField,
-  AutocompleteStart,
-} from './autocomplete';
-
-export { QuerySuggestionTypes } from './autocomplete';
 /*
  * Search:
  */
@@ -131,13 +110,10 @@ import {
   parseInterval,
   toAbsoluteDates,
   boundsDescendingRaw,
-  getNumberHistogramIntervalByDatatableColumn,
-  getDateHistogramMetaDataByDatatableColumn,
   getResponseInspectorStats,
   // tabify
   tabifyAggResponse,
   tabifyGetColumns,
-  checkColumnForPrecisionError,
 } from '../common';
 
 export { AggGroupLabels, AggGroupNames, METRIC_TYPES, BUCKET_TYPES } from '../common';
@@ -241,45 +217,41 @@ export const search = {
     termsAggFilter,
     toAbsoluteDates,
     boundsDescendingRaw,
-    getNumberHistogramIntervalByDatatableColumn,
-    getDateHistogramMetaDataByDatatableColumn,
   },
   getResponseInspectorStats,
   tabifyAggResponse,
   tabifyGetColumns,
-  checkColumnForPrecisionError,
 };
 
 /*
  * UI components
  */
 
-export type {
-  SearchBarProps,
-  StatefulSearchBarProps,
-  IndexPatternSelectProps,
-  QueryStringInputProps,
-} from './ui';
-
-export { QueryStringInput, SearchBar } from './ui';
-
 /**
  * Types to be shared externally
  * @public
  */
-export type { RefreshInterval, TimeRange } from '../common';
+export type { RefreshInterval } from '../common';
 
 export {
   createSavedQueryService,
   connectToQueryState,
   syncQueryStateWithUrl,
+  syncGlobalQueryStateWithUrl,
   getDefaultQuery,
   FilterManager,
   TimeHistory,
+  getQueryLog,
+  mapAndFlattenFilters,
+  QueryService,
 } from './query';
+
+export { NowProvider } from './now_provider';
+export type { NowProviderInternalContract, NowProviderPublicContract } from './now_provider';
 
 export type {
   QueryState,
+  QueryState$,
   SavedQuery,
   SavedQueryService,
   SavedQueryTimeFilter,
@@ -288,6 +260,11 @@ export type {
   QueryStateChange,
   QueryStart,
   AutoRefreshDoneFn,
+  PersistedLog,
+  QueryStringContract,
+  QuerySetup,
+  TimefilterSetup,
+  GlobalQueryStateFromUrl,
 } from './query';
 
 export type { AggsStart } from './search/aggs';
@@ -298,8 +275,6 @@ export type { SavedObject } from '../common';
 
 export { isTimeRange, isQuery, flattenHit, calculateBounds, tabifyAggResponse } from '../common';
 
-export type { ApplyGlobalFilterActionContext } from './actions';
-export { ACTION_GLOBAL_APPLY_FILTER } from './actions';
 export { APPLY_FILTER_TRIGGER } from './triggers';
 
 /*
@@ -316,7 +291,6 @@ export type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
   IDataPluginServices,
-  DataPublicPluginStartUi,
   DataPublicPluginStartActions,
 } from './types';
 

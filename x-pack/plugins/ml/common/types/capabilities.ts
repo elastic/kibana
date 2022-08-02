@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'kibana/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { PLUGIN_ID } from '../constants/app';
 import {
   ML_JOB_SAVED_OBJECT_TYPE,
@@ -38,6 +38,7 @@ export const userMlCapabilities = {
   canUseMlAlerts: false,
   // Trained models
   canGetTrainedModels: false,
+  canTestTrainedModels: false,
 };
 
 export const adminMlCapabilities = {

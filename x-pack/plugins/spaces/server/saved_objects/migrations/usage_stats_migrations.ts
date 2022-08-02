@@ -7,7 +7,7 @@
 
 import { cloneDeep } from 'lodash';
 
-import type { SavedObjectUnsanitizedDoc } from 'src/core/server';
+import type { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 
 import type { UsageStats } from '../../usage_stats';
 

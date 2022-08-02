@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Suspicious Process Execution via Renamed PsExec Executable",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\", \"info\") and\n  process.pe.original_file_name : \"psexesvc.exe\" and not process.name : \"PSEXESVC.exe\"\n",
   "risk_score": 47,
   "rule_id": "e2f9fdf5-8076-45ad-9427-41e0e03dc9c2",
@@ -49,5 +50,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 4
+  "version": 5
 }

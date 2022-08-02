@@ -10,13 +10,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
 import { EuiPageContent, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
-import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 import { Repository } from '../../../../../common/types';
-import { PageLoading, PageError, Error } from '../../../../shared_imports';
+import { PageLoading, PageError, Error, useExecutionContext } from '../../../../shared_imports';
 import { useDecodedParams } from '../../../lib';
 import { BASE_PATH, UIM_REPOSITORY_LIST_LOAD } from '../../../constants';
-import { useServices } from '../../../app_context';
+import { useAppContext, useServices } from '../../../app_context';
 import { useLoadRepositories } from '../../../services/http';
 import { linkToAddRepository, linkToRepository } from '../../../services/navigation';
 
@@ -44,6 +44,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
   } = useLoadRepositories();
 
   const { uiMetricService } = useServices();
+  const { core } = useAppContext();
 
   const openRepositoryDetailsUrl = (newRepositoryName: Repository['name']): string => {
     return linkToRepository(newRepositoryName);
@@ -66,6 +67,11 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
   useEffect(() => {
     uiMetricService.trackUiMetric(UIM_REPOSITORY_LIST_LOAD);
   }, [uiMetricService]);
+
+  useExecutionContext(core.executionContext, {
+    type: 'application',
+    page: 'snapshotRestoreRepositoryTab',
+  });
 
   let content;
 

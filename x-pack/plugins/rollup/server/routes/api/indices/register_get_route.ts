@@ -23,7 +23,7 @@ export const registerGetRoute = ({
     },
     license.guardApiRoute(async (context, request, response) => {
       try {
-        const { client: clusterClient } = context.core.elasticsearch;
+        const { client: clusterClient } = (await context.core).elasticsearch;
         const data = await clusterClient.asCurrentUser.rollup.getRollupIndexCaps({
           index: '_all',
         });

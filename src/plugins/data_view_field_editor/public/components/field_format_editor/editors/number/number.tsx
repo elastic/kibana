@@ -11,12 +11,11 @@ import React, { Fragment } from 'react';
 import { EuiCode, EuiFieldText, EuiFormRow, EuiIcon, EuiLink } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { context as contextType } from '@kbn/kibana-react-plugin/public';
 import { DefaultFormatEditor, defaultState } from '../default/default';
 
 import { FormatEditorSamples } from '../../samples';
 import { formatId } from './constants';
-
-import { context as contextType } from '../../../../../../kibana_react/public';
 
 export interface NumberFormatEditorParams {
   pattern: string;
@@ -35,7 +34,7 @@ export class NumberFormatEditor extends DefaultFormatEditor<NumberFormatEditorPa
   render() {
     const { format, formatParams } = this.props;
     const { error, samples } = this.state;
-    const defaultPattern = format.getParamDefaults().pattern;
+    const defaultPattern = `${format.getParamDefaults().pattern}`;
 
     return (
       <Fragment>

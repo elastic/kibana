@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { ApplicationStart } from 'src/core/public';
+import { ApplicationStart } from '@kbn/core/public';
 import { getClosestLink, hasActiveModifierKey } from './utils';
 
 interface CreateCrossAppClickHandlerOptions {

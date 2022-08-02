@@ -12,7 +12,7 @@ import React, { useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { EuiCallOut, EuiButton, EuiCode } from '@elastic/eui';
 
-import type { NotificationsSetup } from 'src/core/public';
+import type { NotificationsSetup } from '@kbn/core/public';
 
 import { ILM_POLICY_NAME } from '../../../../common/constants';
 

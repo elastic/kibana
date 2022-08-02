@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getInfrastructureKQLFilter } from './';
+import { getInfrastructureKQLFilter } from '.';
 
 describe('service logs', () => {
   const serviceName = 'opbeans-node';
@@ -14,10 +14,9 @@ describe('service logs', () => {
       expect(
         getInfrastructureKQLFilter(
           {
-            serviceInfrastructure: {
-              containerIds: [],
-              hostNames: [],
-            },
+            containerIds: [],
+            hostNames: [],
+            podNames: [],
           },
           serviceName
         )
@@ -28,10 +27,9 @@ describe('service logs', () => {
       expect(
         getInfrastructureKQLFilter(
           {
-            serviceInfrastructure: {
-              containerIds: ['foo', 'bar'],
-              hostNames: ['baz', `quz`],
-            },
+            containerIds: ['foo', 'bar'],
+            hostNames: ['baz', `quz`],
+            podNames: [],
           },
           serviceName
         )
@@ -44,10 +42,9 @@ describe('service logs', () => {
       expect(
         getInfrastructureKQLFilter(
           {
-            serviceInfrastructure: {
-              containerIds: [],
-              hostNames: ['baz', `quz`],
-            },
+            containerIds: [],
+            hostNames: ['baz', `quz`],
+            podNames: [],
           },
           serviceName
         )

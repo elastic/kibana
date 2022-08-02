@@ -11,12 +11,12 @@ import {
   UI_SETTINGS_CSV_SEPARATOR,
   UI_SETTINGS_SEARCH_INCLUDE_FROZEN,
 } from '../../../../common/constants';
-import { IUiSettingsClient } from 'kibana/server';
+import { IUiSettingsClient } from '@kbn/core/server';
 import {
   loggingSystemMock,
   savedObjectsClientMock,
   uiSettingsServiceMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 import { createMockConfig, createMockConfigSchema } from '../../../test_helpers';
 import { getExportSettings } from './get_export_settings';
 

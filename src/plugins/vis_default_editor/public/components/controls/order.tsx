@@ -10,7 +10,7 @@ import React, { useEffect } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { OptionedValueProp } from 'src/plugins/data/public';
+import { OptionedValueProp } from '@kbn/data-plugin/public';
 import { AggParamEditorProps, OptionedParamEditorProps } from '../agg_param_props';
 
 function OrderParamEditor({

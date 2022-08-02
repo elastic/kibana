@@ -9,17 +9,17 @@ import expect from '@kbn/expect';
 import {
   entityIDSafeVersion,
   timestampAsDateSafeVersion,
-} from '../../../../plugins/security_solution/common/endpoint/models/event';
-import { eventsIndexPattern } from '../../../../plugins/security_solution/common/endpoint/constants';
+} from '@kbn/security-solution-plugin/common/endpoint/models/event';
+import { eventsIndexPattern } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import {
   ResolverEntityIndex,
   ResolverNode,
-} from '../../../../plugins/security_solution/common/endpoint/types';
-import { FtrProviderContext } from '../../ftr_provider_context';
+} from '@kbn/security-solution-plugin/common/endpoint/types';
 import {
   EndpointDocGenerator,
   Event,
-} from '../../../../plugins/security_solution/common/endpoint/generate_data';
+} from '@kbn/security-solution-plugin/common/endpoint/generate_data';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { InsertedEvents, processEventsIndex } from '../../services/resolver';
 import { createAncestryArray, schemaWithAncestry } from './common';
 

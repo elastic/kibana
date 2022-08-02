@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { chartPluginMock } from '../../../../../charts/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { getSplitByTermsColor, SplitByTermsColorProps } from './get_split_by_terms_color';
 
 const chartsRegistry = chartPluginMock.createPaletteRegistry();

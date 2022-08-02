@@ -9,14 +9,14 @@ import expect from '@kbn/expect';
 import { pick, sortBy } from 'lodash';
 import moment from 'moment';
 import { apm, timerange } from '@elastic/apm-synthtrace';
-import { APIReturnType } from '../../../../plugins/apm/public/services/rest/create_call_apm_api';
-import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import archives from '../../common/fixtures/es_archiver/archives_metadata';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
 
-import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_aggregation_types';
-import { ENVIRONMENT_ALL } from '../../../../plugins/apm/common/environment_filter_values';
-import { SERVICE_NODE_NAME_MISSING } from '../../../../plugins/apm/common/service_nodes';
+import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
+import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
+import { SERVICE_NODE_NAME_MISSING } from '@kbn/apm-plugin/common/service_nodes';
+import archives from '../../common/fixtures/es_archiver/archives_metadata';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -319,41 +319,37 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           }
 
           return synthtraceEsClient.index([
-            interval.rate(GO_A_INSTANCE_RATE_SUCCESS).spans((timestamp) =>
+            interval.rate(GO_A_INSTANCE_RATE_SUCCESS).generator((timestamp) =>
               goInstanceA
                 .transaction('GET /api/product/list')
                 .success()
                 .duration(500)
                 .timestamp(timestamp)
                 .children(...withSpans(timestamp))
-                .serialize()
             ),
-            interval.rate(GO_A_INSTANCE_RATE_FAILURE).spans((timestamp) =>
+            interval.rate(GO_A_INSTANCE_RATE_FAILURE).generator((timestamp) =>
               goInstanceA
                 .transaction('GET /api/product/list')
                 .failure()
                 .duration(500)
                 .timestamp(timestamp)
                 .children(...withSpans(timestamp))
-                .serialize()
             ),
-            interval.rate(GO_B_INSTANCE_RATE_SUCCESS).spans((timestamp) =>
+            interval.rate(GO_B_INSTANCE_RATE_SUCCESS).generator((timestamp) =>
               goInstanceB
                 .transaction('GET /api/product/list')
                 .success()
                 .duration(500)
                 .timestamp(timestamp)
                 .children(...withSpans(timestamp))
-                .serialize()
             ),
-            interval.rate(JAVA_INSTANCE_RATE).spans((timestamp) =>
+            interval.rate(JAVA_INSTANCE_RATE).generator((timestamp) =>
               javaInstance
                 .transaction('GET /api/product/list')
                 .success()
                 .duration(500)
                 .timestamp(timestamp)
                 .children(...withSpans(timestamp))
-                .serialize()
             ),
           ]);
         });

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  getSelectOptions,
-  replaceTemplateVariables,
-} from '../create_edit_custom_link_flyout/helper';
+import { getSelectOptions, replaceTemplateVariables } from './helper';
 import { Transaction } from '../../../../../../typings/es_schemas/ui/transaction';
 
 describe('Custom link helper', () => {

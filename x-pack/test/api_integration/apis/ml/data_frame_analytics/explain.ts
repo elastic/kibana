@@ -5,10 +5,10 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
+import { DeepPartial } from '@kbn/ml-plugin/common/types/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { DataFrameAnalyticsConfig } from '../../../../../plugins/ml/public/application/data_frame_analytics/common';
-import { DeepPartial } from '../../../../../plugins/ml/common/types/common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -98,7 +98,7 @@ export default ({ getService }: FtrProviderContext) => {
           ml.api.assertResponseStatusCode(200, status, body);
 
           expect(body).to.have.property('field_selection');
-          // eslint-disable-next-line
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           const { memory_estimation, field_selection } = body;
           const fieldObject = field_selection[0];
           expect(memory_estimation).to.have.property('expected_memory_with_disk');

@@ -37,7 +37,8 @@ describe('Significant Text Agg', () => {
       ],
       {
         typesRegistry: mockAggTypesRegistry(),
-      }
+      },
+      jest.fn()
     );
   };
 

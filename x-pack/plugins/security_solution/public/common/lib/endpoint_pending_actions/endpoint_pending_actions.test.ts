@@ -6,7 +6,7 @@
  */
 
 import { KibanaServices } from '../kibana';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { fetchPendingActionsByAgentId } from './endpoint_pending_actions';
 import { pendingActionsHttpMock, pendingActionsResponseMock } from './mocks';
 import { ACTION_STATUS_ROUTE } from '../../../../common/endpoint/constants';

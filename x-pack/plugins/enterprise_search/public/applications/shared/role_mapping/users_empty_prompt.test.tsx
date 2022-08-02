@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 
-import { UsersEmptyPrompt } from './';
+import { UsersEmptyPrompt } from '.';
 
 describe('UsersEmptyPrompt', () => {
   it('renders', () => {

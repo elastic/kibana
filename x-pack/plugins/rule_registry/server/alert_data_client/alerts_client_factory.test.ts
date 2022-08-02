@@ -8,11 +8,11 @@
 import { Request } from '@hapi/hapi';
 
 import { AlertsClientFactory, AlertsClientFactoryProps } from './alerts_client_factory';
-import { ElasticsearchClient, KibanaRequest } from 'src/core/server';
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { securityMock } from '../../../security/server/mocks';
-import { auditLoggerMock } from '../../../security/server/audit/mocks';
-import { alertingAuthorizationMock } from '../../../alerting/server/authorization/alerting_authorization.mock';
+import { ElasticsearchClient, KibanaRequest, CoreKibanaRequest } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';
 import { ruleDataServiceMock } from '../rule_data_plugin_service/rule_data_plugin_service.mock';
 
 jest.mock('./alerts_client');
@@ -56,7 +56,7 @@ describe('AlertsClientFactory', () => {
   test('creates an alerts client with proper constructor arguments', async () => {
     const factory = new AlertsClientFactory();
     factory.initialize({ ...alertsClientFactoryParams });
-    const request = KibanaRequest.from(fakeRequest);
+    const request = CoreKibanaRequest.from(fakeRequest);
     await factory.create(request);
 
     expect(jest.requireMock('./alerts_client').AlertsClient).toHaveBeenCalledWith({

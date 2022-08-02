@@ -6,21 +6,21 @@
  */
 
 import { useState, useEffect } from 'react';
-import type { HttpSetup } from 'src/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 
 import {
   sendRequest as _sendRequest,
   useRequest as _useRequest,
-} from '../../../../../../src/plugins/es_ui_shared/public';
+} from '@kbn/es-ui-shared-plugin/public';
 import type {
   SendRequestConfig,
   SendRequestResponse,
   UseRequestConfig,
-} from '../../../../../../src/plugins/es_ui_shared/public';
+} from '@kbn/es-ui-shared-plugin/public';
 
 let httpClient: HttpSetup;
 
-export type { UseRequestConfig } from '../../../../../../src/plugins/es_ui_shared/public';
+export type { UseRequestConfig } from '@kbn/es-ui-shared-plugin/public';
 
 /**
  * @internal

@@ -12,7 +12,6 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-// @ts-expect-error types are not available for this package yet
 import { SearchProvider, Facet } from '@elastic/react-search-ui';
 
 jest.mock('../../../../shared/use_local_storage', () => ({
@@ -25,7 +24,7 @@ import { CustomizationModal } from './customization_modal';
 import { SearchExperienceContent } from './search_experience_content';
 import { Fields } from './types';
 
-import { SearchExperience } from './';
+import { SearchExperience } from '.';
 
 describe('SearchExperience', () => {
   const values = {

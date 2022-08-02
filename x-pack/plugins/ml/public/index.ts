@@ -9,7 +9,7 @@
 // the ML plugin's page load bundle. You should either just export types or
 // use `getMlSharedImports()` to export static code.
 
-import { PluginInitializer, PluginInitializerContext } from 'kibana/public';
+import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import {
   MlPlugin,
   MlPluginSetup,

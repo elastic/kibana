@@ -31,7 +31,8 @@ export const patchCommentRoute = createCasesRoute({
         fold(throwErrors(Boom.badRequest), identity)
       );
 
-      const client = await context.cases.getCasesClient();
+      const caseContext = await context.cases;
+      const client = await caseContext.getCasesClient();
 
       return response.ok({
         body: await client.attachments.update({

@@ -14,7 +14,7 @@ import { validateConfig, validateSecrets, validateParams, validateConnector } fr
 import { postXmatters } from './lib/post_xmatters';
 import { actionsConfigMock } from '../actions_config.mock';
 import { createActionTypeRegistry } from './index.test';
-import { Logger } from '../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import { actionsMock } from '../mocks';
 import {
   ActionParamsType,

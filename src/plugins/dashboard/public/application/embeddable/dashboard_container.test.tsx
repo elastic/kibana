@@ -13,7 +13,7 @@ import { findTestSubject, nextTick } from '@kbn/test-jest-helpers';
 import { DashboardContainer, DashboardContainerServices } from './dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 import { I18nProvider } from '@kbn/i18n-react';
-import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 
 import { KibanaContextProvider } from '../../services/kibana_react';
 import {
@@ -31,14 +31,10 @@ import {
   ContactCardEmbeddableOutput,
   createEditModeAction,
 } from '../../services/embeddable_test_samples';
-import {
-  applicationServiceMock,
-  coreMock,
-  uiSettingsServiceMock,
-} from '../../../../../core/public/mocks';
-import { inspectorPluginMock } from '../../../../inspector/public/mocks';
-import { uiActionsPluginMock } from '../../../../ui_actions/public/mocks';
-import { getStubPluginServices } from '../../../../presentation_util/public';
+import { applicationServiceMock, coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
+import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { getStubPluginServices } from '@kbn/presentation-util-plugin/public';
 
 const presentationUtil = getStubPluginServices();
 const theme = coreMock.createStart().theme;

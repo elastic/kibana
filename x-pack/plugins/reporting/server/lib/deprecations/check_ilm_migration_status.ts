@@ -7,7 +7,7 @@
 
 import { ILM_POLICY_NAME } from '../../../common/constants';
 import { IlmPolicyMigrationStatus } from '../../../common/types';
-import { IlmPolicyManager } from '../../lib/store/ilm_policy_manager';
+import { IlmPolicyManager } from '../store/ilm_policy_manager';
 import type { DeprecationsDependencies } from './types';
 
 export const checkIlmMigrationStatus = async ({

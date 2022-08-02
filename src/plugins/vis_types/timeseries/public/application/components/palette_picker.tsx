@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
+import type { PaletteRegistry, PaletteOutput } from '@kbn/coloring';
 import { EuiColorPalettePicker } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { rainbowColors } from '../lib/rainbow_colors';

@@ -14,10 +14,10 @@ import {
   LegendDisplay,
 } from '../../common';
 import { layerTypes } from '../../common';
-import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { FramePublicAPI } from '../types';
-import { themeServiceMock } from '../../../../../src/core/public/mocks';
+import { themeServiceMock } from '@kbn/core/public/mocks';
 
 jest.mock('../id_generator');
 

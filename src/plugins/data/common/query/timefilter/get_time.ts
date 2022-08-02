@@ -6,13 +6,15 @@
  * Side Public License, v 1.
  */
 
-import dateMath from '@elastic/datemath';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import dateMath from '@kbn/datemath';
 import { omitBy } from 'lodash';
-import { buildRangeFilter } from '@kbn/es-query';
+import { buildRangeFilter, TimeRange, RangeFilterParams } from '@kbn/es-query';
 import type { Moment } from 'moment';
-import type { IIndexPattern, TimeRange, TimeRangeBounds, RangeFilterParams } from '../..';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { TimeRangeBounds } from '../..';
 
-interface CalculateBoundsOptions {
+export interface CalculateBoundsOptions {
   forceNow?: Date;
 }
 
@@ -46,7 +48,7 @@ export function getAbsoluteTimeRange(
 }
 
 export function getTime(
-  indexPattern: IIndexPattern | undefined,
+  indexPattern: DataView | undefined,
   timeRange: TimeRange,
   options?: { forceNow?: Date; fieldName?: string }
 ) {
@@ -60,7 +62,7 @@ export function getTime(
 }
 
 export function getRelativeTime(
-  indexPattern: IIndexPattern | undefined,
+  indexPattern: DataView | undefined,
   timeRange: TimeRange,
   options?: { forceNow?: Date; fieldName?: string }
 ) {
@@ -73,19 +75,26 @@ export function getRelativeTime(
   );
 }
 
+function getTimeField(indexPattern?: DataView, fieldName?: string) {
+  if (!indexPattern && fieldName) {
+    return { name: fieldName, type: KBN_FIELD_TYPES.DATE };
+  }
+
+  if (!indexPattern) {
+    return;
+  }
+
+  return indexPattern.fields.find((f) => f.name === (fieldName || indexPattern.timeFieldName));
+}
+
 function createTimeRangeFilter(
-  indexPattern: IIndexPattern | undefined,
+  indexPattern: DataView | undefined,
   timeRange: TimeRange,
   fieldName?: string,
   forceNow?: Date,
   coerceRelativeTimeToAbsoluteTime: boolean = true
 ) {
-  if (!indexPattern) {
-    return;
-  }
-  const field = indexPattern.fields.find(
-    (f) => f.name === (fieldName || indexPattern.timeFieldName)
-  );
+  const field = getTimeField(indexPattern, fieldName);
   if (!field) {
     return;
   }
@@ -113,5 +122,5 @@ function createTimeRangeFilter(
 
   rangeFilterParams = omitBy(rangeFilterParams, (v) => v == null);
 
-  return buildRangeFilter(field, rangeFilterParams, indexPattern);
+  return buildRangeFilter(field, rangeFilterParams, indexPattern!);
 }

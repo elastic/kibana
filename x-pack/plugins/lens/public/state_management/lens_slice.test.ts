@@ -6,7 +6,7 @@
  */
 
 import { EnhancedStore } from '@reduxjs/toolkit';
-import { Query } from 'src/plugins/data/public';
+import type { Query } from '@kbn/es-query';
 import {
   switchDatasource,
   switchVisualization,

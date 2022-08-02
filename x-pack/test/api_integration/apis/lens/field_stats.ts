@@ -17,6 +17,7 @@ const COMMON_HEADERS = {
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
 
   describe('index stats apis', () => {
@@ -29,10 +30,13 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('field distribution', () => {
       before(async () => {
-        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/visualize/default');
+        await kibanaServer.savedObjects.cleanStandardList();
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/visualize/default'
+        );
       });
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/visualize/default');
+        await kibanaServer.savedObjects.cleanStandardList();
       });
 
       it('should return a 404 for missing index patterns', async () => {

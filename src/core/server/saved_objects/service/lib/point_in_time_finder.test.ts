@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { loggerMock, MockedLogger } from '../../../logging/logger.mock';
-import type { SavedObjectsFindResult } from '../';
+import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import type {
+  SavedObjectsFindResult,
+  SavedObjectsCreatePointInTimeFinderOptions,
+} from '@kbn/core-saved-objects-api-server';
 import { savedObjectsRepositoryMock } from './repository.mock';
 
-import {
-  PointInTimeFinder,
-  SavedObjectsCreatePointInTimeFinderOptions,
-} from './point_in_time_finder';
+import { PointInTimeFinder } from './point_in_time_finder';
 
 const mockHits = [
   {

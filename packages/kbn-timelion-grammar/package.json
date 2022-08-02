@@ -3,5 +3,5 @@
   "version": "1.0.0",
   "license": "SSPL-1.0 OR Elastic License 2.0",
   "private": true,
-  "main": "grammar/chain.js"
+  "main": "grammar/built_grammar.js"
 }

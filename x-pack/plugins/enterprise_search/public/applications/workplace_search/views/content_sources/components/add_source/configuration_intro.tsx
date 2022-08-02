@@ -9,7 +9,6 @@ import React from 'react';
 
 import {
   EuiBadge,
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -18,8 +17,11 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+
+import { EuiButtonTo } from '../../../../../shared/react_router_helpers';
 
 import connectionIllustration from '../../../../assets/connection_illustration.svg';
 
@@ -37,12 +39,12 @@ import {
 interface ConfigurationIntroProps {
   header: React.ReactNode;
   name: string;
-  advanceStep(): void;
+  advanceStepTo: string;
 }
 
 export const ConfigurationIntro: React.FC<ConfigurationIntroProps> = ({
   name,
-  advanceStep,
+  advanceStepTo,
   header,
 }) => (
   <>
@@ -144,11 +146,11 @@ export const ConfigurationIntro: React.FC<ConfigurationIntroProps> = ({
                 <EuiFlexItem>
                   <EuiSpacer size="l" />
                   <EuiFormRow>
-                    <EuiButton
+                    <EuiButtonTo
                       color="primary"
                       data-test-subj="ConfigureStepButton"
                       fill
-                      onClick={advanceStep}
+                      to={advanceStepTo}
                     >
                       {i18n.translate(
                         'xpack.enterpriseSearch.workplaceSearch.contentSource.configIntro.configure.button',
@@ -157,7 +159,7 @@ export const ConfigurationIntro: React.FC<ConfigurationIntroProps> = ({
                           values: { name },
                         }
                       )}
-                    </EuiButton>
+                    </EuiButtonTo>
                   </EuiFormRow>
                   <EuiSpacer size="xl" />
                 </EuiFlexItem>

@@ -7,6 +7,7 @@
 
 import React from 'react';
 
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { getMockNetflowData } from '../../../../common/mock/netflow';
 import { netflowRowRenderer } from '../../timeline/body/renderers/netflow/netflow_row_renderer';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
@@ -14,7 +15,6 @@ import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 const NetflowExampleComponent: React.FC = () => (
   <>
     {netflowRowRenderer.renderRow({
-      browserFields: {},
       data: getMockNetflowData(),
       isDraggable: false,
       timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,

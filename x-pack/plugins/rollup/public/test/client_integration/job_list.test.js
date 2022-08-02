@@ -10,7 +10,7 @@ import { mockHttpRequest, pageHelpers } from './helpers';
 import { act } from 'react-dom/test-utils';
 import { getRouter, setHttp, init as initDocumentation } from '../../crud_app/services';
 import { JOBS } from './helpers/constants';
-import { coreMock, docLinksServiceMock } from '../../../../../../src/core/public/mocks';
+import { coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';
 
 jest.mock('../../crud_app/services', () => {
   const services = jest.requireActual('../../crud_app/services');

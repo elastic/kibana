@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { PluginConfigDescriptor } from 'kibana/server';
+import { PluginConfigDescriptor } from '@kbn/core/server';
 import { get } from 'lodash';
 import { ConfigSchema, ReportingConfigType } from './schema';
 export { buildConfig } from './config';
@@ -64,11 +64,7 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
     },
   ],
   exposeToUsage: {
-    capture: {
-      maxAttempts: true,
-      timeouts: { openUrl: true, renderComplete: true, waitForElements: true },
-      zoom: true,
-    },
+    capture: { maxAttempts: true },
     csv: { maxSizeBytes: true, scroll: { size: true, duration: true } },
     kibanaServer: false, // show as [redacted]
     queue: { indexInterval: true, pollEnabled: true, timeout: true },

@@ -95,6 +95,7 @@ describe('IgnoredQueriesLogic', () => {
   describe('listeners', () => {
     describe('loadIgnoredQueries', () => {
       it('should make an API call and set suggestions & meta state', async () => {
+        mount({ ...DEFAULT_VALUES, dataLoading: false });
         http.post.mockReturnValueOnce(
           Promise.resolve({
             results: [{ query: 'first query' }, { query: 'second query' }],
@@ -111,6 +112,8 @@ describe('IgnoredQueriesLogic', () => {
         jest.spyOn(IgnoredQueriesLogic.actions, 'onIgnoredQueriesLoad');
 
         IgnoredQueriesLogic.actions.loadIgnoredQueries();
+        expect(IgnoredQueriesLogic.values).toEqual({ ...DEFAULT_VALUES, dataLoading: true });
+
         await nextTick();
 
         expect(http.post).toHaveBeenCalledWith(

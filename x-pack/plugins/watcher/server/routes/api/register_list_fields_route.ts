@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 // @ts-ignore
-import { Fields } from '../../models/fields/index';
+import { Fields } from '../../models/fields';
 import { RouteDependencies } from '../../types';
 
 const bodySchema = schema.object({
@@ -43,7 +43,8 @@ export function registerListFieldsRoute({
       const { indexes } = request.body;
 
       try {
-        const fieldsResponse = await fetchFields(ctx.core.elasticsearch.client, indexes);
+        const esClient = (await ctx.core).elasticsearch.client;
+        const fieldsResponse = await fetchFields(esClient, indexes);
         const json = fieldsResponse.statusCode === 404 ? { fields: [] } : fieldsResponse.body;
         const fields = Fields.fromUpstreamJson(json);
         return response.ok({ body: fields.downstreamJson });

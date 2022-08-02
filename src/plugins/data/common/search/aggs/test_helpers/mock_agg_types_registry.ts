@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { fieldFormatsMock } from '../../../../../field_formats/common/mocks';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
 import { AggTypesRegistry, AggTypesRegistryStart } from '../agg_types_registry';
 import { AggTypesDependencies, getAggTypes } from '../agg_types';
@@ -45,7 +45,6 @@ export const mockAggTypesDependencies: AggTypesDependencies = {
   calculateBounds: jest.fn(),
   getFieldFormatsStart: mockGetFieldFormatsStart,
   getConfig: mockGetConfig,
-  isDefaultTimezone: () => true,
 };
 
 /**
@@ -70,15 +69,15 @@ export function mockAggTypesRegistry(deps?: AggTypesDependencies): AggTypesRegis
   aggTypes.buckets.forEach(({ name, fn }) => registrySetup.registerBucket(name, fn));
   aggTypes.metrics.forEach(({ name, fn }) => registrySetup.registerMetric(name, fn));
 
-  const registryStart = registry.start();
+  const registryStart = registry.start(deps ?? mockAggTypesDependencies);
 
   // initialize each agg type and store in memory
   registryStart.getAll().buckets.forEach((type) => {
-    const agg = type(deps ?? mockAggTypesDependencies);
+    const agg = type;
     initializedAggTypes.set(agg.name, agg);
   });
   registryStart.getAll().metrics.forEach((type) => {
-    const agg = type(deps ?? mockAggTypesDependencies);
+    const agg = type;
     initializedAggTypes.set(agg.name, agg);
   });
 

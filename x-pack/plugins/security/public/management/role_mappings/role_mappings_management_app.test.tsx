@@ -8,8 +8,8 @@
 import { act } from '@testing-library/react';
 import { noop } from 'lodash';
 
-import { coreMock, scopedHistoryMock, themeServiceMock } from 'src/core/public/mocks';
-import type { Unmount } from 'src/plugins/management/public/types';
+import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
+import type { Unmount } from '@kbn/management-plugin/public/types';
 
 import { roleMappingsManagementApp } from './role_mappings_management_app';
 

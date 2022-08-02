@@ -5,5 +5,5 @@
  * See `packages/elastic-safer-lodash-set/LICENSE` for more information.
  */
 
-import { assocPath } from './index';
+import { assocPath } from '.';
 export = assocPath;

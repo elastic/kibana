@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Potential Remote Desktop Shadowing Activity",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "/* Identifies the modification of RDP Shadow registry or\n  the execution of processes indicative of active shadow RDP session */\n\nany where \n  (event.category == \"registry\" and\n     registry.path : \"HKLM\\\\Software\\\\Policies\\\\Microsoft\\\\Windows NT\\\\Terminal Services\\\\Shadow\"\n  ) or\n  (event.category == \"process\" and \n     (process.name : (\"RdpSaUacHelper.exe\", \"RdpSaProxy.exe\") and process.parent.name : \"svchost.exe\") or\n     (process.pe.original_file_name : \"mstsc.exe\" and process.args : \"/shadow:*\")\n  )\n",
   "references": [
     "https://bitsadm.in/blog/spying-on-users-using-rdp-shadowing",
@@ -46,5 +47,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 2
 }

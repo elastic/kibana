@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { AccordionTitle } from './index';
+import { AccordionTitle } from '.';
 
 describe('AccordionTitle', () => {
   it('renders correctly', () => {

@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { PrePackagedRulesAndTimelinesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/response';
+import { PrePackagedRulesAndTimelinesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/response';
 
-import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../plugins/security_solution/common/constants';
+import { DETECTION_ENGINE_PREPACKAGED_URL } from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,

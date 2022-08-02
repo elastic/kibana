@@ -18,7 +18,7 @@ import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
 import { ActiveField } from './types';
 
-import { SearchUILogic } from './';
+import { SearchUILogic } from '.';
 
 describe('SearchUILogic', () => {
   const { mount } = new LogicMounter(SearchUILogic);

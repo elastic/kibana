@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient } from 'kibana/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
 import type { RouteInitialization } from '../types';
@@ -36,7 +37,6 @@ import { fieldServiceProvider } from '../models/job_service/new_job_caps/field_s
 import type { DeleteDataFrameAnalyticsWithIndexStatus } from '../../common/types/data_frame_analytics';
 import { getAuthorizationHeader } from '../lib/request_authorization';
 import type { MlClient } from '../lib/ml_client';
-import type { DataViewsService } from '../../../../../src/plugins/data_views/common';
 
 function getDataViewId(dataViewsService: DataViewsService, patternName: string) {
   const iph = new DataViewHandler(dataViewsService);

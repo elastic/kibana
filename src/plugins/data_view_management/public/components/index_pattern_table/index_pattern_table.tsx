@@ -13,19 +13,23 @@ import {
   EuiInMemoryTable,
   EuiPageHeader,
   EuiSpacer,
+  EuiIconTip,
   EuiBasicTableColumn,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps, withRouter, useLocation } from 'react-router-dom';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { reactRouterNavigate, useKibana } from '../../../../../plugins/kibana_react/public';
+import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
+import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
+import { NoDataViewsPromptComponent } from '@kbn/shared-ux-prompt-no-data-views';
+import { EmptyIndexListPrompt } from '../empty_index_list_prompt';
 import { IndexPatternManagmentContext } from '../../types';
 import { IndexPatternTableItem } from '../types';
 import { getIndexPatterns } from '../utils';
 import { getListBreadcrumbs } from '../breadcrumbs';
 import { SpacesList } from './spaces_list';
-import type { SpacesContextProps } from '../../../../../../x-pack/plugins/spaces/public';
 import { removeDataView, RemoveDataViewProps } from '../edit_index_pattern';
 import { deleteModalMsg } from './delete_modal_msg';
 
@@ -59,6 +63,11 @@ interface Props extends RouteComponentProps {
   showCreateDialog?: boolean;
 }
 
+interface DataState {
+  hasDataView?: boolean;
+  hasESData?: boolean;
+}
+
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
 export const IndexPatternTable = ({
@@ -70,17 +79,21 @@ export const IndexPatternTable = ({
     setBreadcrumbs,
     uiSettings,
     indexPatternManagementStart,
+    application,
     chrome,
     dataViews,
     IndexPatternEditor,
     spaces,
     overlays,
+    docLinks,
   } = useKibana<IndexPatternManagmentContext>().services;
   const [query, setQuery] = useState('');
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
   const [showCreateDialog, setShowCreateDialog] = useState<boolean>(showCreateDialogProp);
   const [selectedItems, setSelectedItems] = useState<IndexPatternTableItem[]>([]);
+  const [isLoadingDataState, setIsLoadingDataState] = useState<boolean>(true);
+  const [dataState, setDataState] = useState<DataState>({});
 
   const handleOnChange = ({ queryText, error }: { queryText: string; error: unknown }) => {
     if (!error) {
@@ -88,12 +101,17 @@ export const IndexPatternTable = ({
     }
   };
 
+  const { hasDataView, hasESData } = dataState;
+
   const renderDeleteButton = () => {
     const clickHandler = removeDataView({
       dataViews,
       overlays,
       uiSettings,
-      onDelete: () => loadDataViews(),
+      onDelete: () => {
+        setSelectedItems([]);
+        loadDataViews();
+      },
     });
     if (selectedItems.length === 0) {
       return;
@@ -132,6 +150,11 @@ export const IndexPatternTable = ({
 
   const loadDataViews = useCallback(async () => {
     setIsLoadingIndexPatterns(true);
+    setDataState({
+      hasDataView: await dataViews.hasData.hasDataView(),
+      hasESData: await dataViews.hasData.hasESData(),
+    });
+    setIsLoadingDataState(false);
     const gettedIndexPatterns: IndexPatternTableItem[] = await getIndexPatterns(
       uiSettings.get('defaultIndex'),
       dataViews
@@ -142,17 +165,12 @@ export const IndexPatternTable = ({
   }, [dataViews, uiSettings]);
 
   setBreadcrumbs(getListBreadcrumbs());
+
   useEffect(() => {
     (async function () {
-      const gettedIndexPatterns = await loadDataViews();
-      if (
-        gettedIndexPatterns.length === 0 ||
-        !(await dataViews.hasUserDataView().catch(() => false))
-      ) {
-        setShowCreateDialog(true);
-      }
+      await loadDataViews();
     })();
-  }, [indexPatternManagementStart, uiSettings, dataViews, loadDataViews]);
+  }, [indexPatternManagementStart, uiSettings, loadDataViews]);
 
   chrome.docTitle.change(title);
 
@@ -205,7 +223,20 @@ export const IndexPatternTable = ({
       width: '70%',
       render: (name: string, dataView: IndexPatternTableItem) => (
         <div>
-          <EuiLink {...reactRouterNavigate(history, `patterns/${dataView.id}`)}>{name}</EuiLink>
+          <EuiLink {...reactRouterNavigate(history, `patterns/${dataView.id}`)}>
+            {dataView.getName()}
+            {dataView.name ? (
+              <>
+                &nbsp;
+                <EuiIconTip
+                  type="iInCircle"
+                  color="text"
+                  aria-label={dataView.title}
+                  content={dataView.title}
+                />
+              </>
+            ) : null}
+          </EuiLink>
           {dataView?.id?.indexOf(securitySolution) === 0 && (
             <>
               &emsp;<EuiBadge>{securityDataView}</EuiBadge>
@@ -231,11 +262,12 @@ export const IndexPatternTable = ({
         return spaces ? (
           <SpacesList
             spacesApi={spaces}
+            capabilities={application?.capabilities}
             spaceIds={dataView.namespaces || []}
             id={dataView.id}
             title={dataView.title}
             refresh={() => {
-              dataViews.clearCache(dataView.id);
+              dataViews.clearInstanceCache(dataView.id);
               loadDataViews();
             }}
           />
@@ -286,8 +318,8 @@ export const IndexPatternTable = ({
     onSelectionChange: setSelectedItems,
   };
 
-  return (
-    <div data-test-subj="indexPatternTable" role="region" aria-label={title}>
+  let displayIndexPatternSection = (
+    <>
       <EuiPageHeader
         pageTitle={title}
         description={
@@ -311,9 +343,46 @@ export const IndexPatternTable = ({
           pagination={pagination}
           sorting={sorting}
           search={search}
-          selection={selection}
+          selection={dataViews.getCanSaveSync() ? selection : undefined}
         />
       </ContextWrapper>
+    </>
+  );
+  if (!hasDataView)
+    displayIndexPatternSection = (
+      <>
+        <EuiSpacer size="xxl" />
+        <NoDataViewsPromptComponent
+          onClickCreate={() => setShowCreateDialog(true)}
+          canCreateNewDataView={application.capabilities.indexPatterns.save as boolean}
+          dataViewsDocLink={docLinks.links.indexPatterns.introduction}
+          emptyPromptColor={'subdued'}
+        />
+      </>
+    );
+  if (!hasDataView && !hasESData)
+    displayIndexPatternSection = (
+      <>
+        <EuiSpacer size="xxl" />
+        <EmptyIndexListPrompt
+          onRefresh={loadDataViews}
+          createAnyway={() => setShowCreateDialog(true)}
+          canSaveIndexPattern={!!application.capabilities.indexPatterns.save}
+          navigateToApp={application.navigateToApp}
+          addDataUrl={docLinks.links.indexPatterns.introduction}
+        />
+      </>
+    );
+
+  return (
+    <div data-test-subj="indexPatternTable" role="region" aria-label={title}>
+      {isLoadingDataState ? (
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <EuiLoadingSpinner size="xxl" />
+        </div>
+      ) : (
+        displayIndexPatternSection
+      )}
       {displayIndexPatternEditor}
     </div>
   );

@@ -8,7 +8,7 @@
 import { createAction } from 'redux-actions';
 import { i18n } from '@kbn/i18n';
 import { openIndices as request } from '../../services';
-import { clearRowStatus, reloadIndices } from '../actions';
+import { clearRowStatus, reloadIndices } from '.';
 import { notificationService } from '../../services/notification';
 
 export const openIndicesStart = createAction('INDEX_MANAGEMENT_OPEN_INDICES_START');

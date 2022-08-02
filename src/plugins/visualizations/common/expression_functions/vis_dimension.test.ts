@@ -7,8 +7,8 @@
  */
 
 import { Arguments, visDimension } from './vis_dimension';
-import { functionWrapper } from '../../../expressions/common/expression_functions/specs/tests/utils';
-import { Datatable } from '../../../expressions/common';
+import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import moment from 'moment';
 
 describe('interpreter/functions#vis_dimension', () => {

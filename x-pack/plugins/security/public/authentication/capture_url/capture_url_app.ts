@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ApplicationSetup, FatalErrorsSetup, HttpSetup } from 'src/core/public';
+import type { ApplicationSetup, FatalErrorsSetup, HttpSetup } from '@kbn/core/public';
 
 import { AUTH_URL_HASH_QUERY_STRING_PARAMETER } from '../../../common/constants';
 

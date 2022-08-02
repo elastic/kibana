@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ReportingStart } from '../../reporting/server/types';
+import { ReportingStart } from '@kbn/reporting-plugin/server/types';
 import { getCanvasFeature } from './feature';
 
 let mockReportingPlugin: ReportingStart;
@@ -173,7 +173,7 @@ it(`Calls on Reporting whether to include Generate PDF as a sub-feature`, () => 
                       "reporting",
                     ],
                   },
-                  "minimumLicense": "platinum",
+                  "minimumLicense": "gold",
                   "name": "Generate PDF reports",
                   "savedObject": Object {
                     "all": Array [],

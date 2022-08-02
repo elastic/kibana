@@ -23,7 +23,7 @@ import { ErrorState } from './views/error_state';
 import { Overview } from './views/overview';
 import { SetupGuide } from './views/setup_guide';
 
-import { WorkplaceSearch, WorkplaceSearchUnconfigured, WorkplaceSearchConfigured } from './';
+import { WorkplaceSearch, WorkplaceSearchUnconfigured, WorkplaceSearchConfigured } from '.';
 
 describe('WorkplaceSearch', () => {
   it('renders VersionMismatchPage when there are mismatching versions', () => {

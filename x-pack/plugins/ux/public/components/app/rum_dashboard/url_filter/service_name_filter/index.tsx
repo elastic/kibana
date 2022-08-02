@@ -9,8 +9,8 @@ import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
+import { fromQuery, toQuery } from '@kbn/observability-plugin/public';
 import { useLegacyUrlParams } from '../../../../../context/url_params_context/use_url_params';
-import { fromQuery, toQuery } from '../../../../../../../observability/public';
 
 interface Props {
   serviceNames?: string[];

@@ -6,20 +6,20 @@
  */
 
 import React, { useContext } from 'react';
-
+import { LogFilterState, WithLogFilterUrlState } from '../../../containers/logs/log_filter';
 import { LogFlyout } from '../../../containers/logs/log_flyout';
-import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
 import { LogHighlightsState } from '../../../containers/logs/log_highlights/log_highlights';
 import { LogPositionState, WithLogPositionUrlState } from '../../../containers/logs/log_position';
-import { LogFilterState, WithLogFilterUrlState } from '../../../containers/logs/log_filter';
-import { useLogSourceContext } from '../../../containers/logs/log_source';
-import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
 import { LogStreamProvider, useLogStreamContext } from '../../../containers/logs/log_stream';
+import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
+import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
+import { useLogViewContext } from '../../../hooks/use_log_view';
 
 const LogFilterStateProvider: React.FC = ({ children }) => {
-  const { derivedIndexPattern } = useLogSourceContext();
+  const { derivedDataView } = useLogViewContext();
+
   return (
-    <LogFilterState.Provider indexPattern={derivedIndexPattern}>
+    <LogFilterState.Provider indexPattern={derivedDataView}>
       <WithLogFilterUrlState />
       {children}
     </LogFilterState.Provider>
@@ -28,7 +28,7 @@ const LogFilterStateProvider: React.FC = ({ children }) => {
 
 const ViewLogInContextProvider: React.FC = ({ children }) => {
   const { startTimestamp, endTimestamp } = useContext(LogPositionState.Context);
-  const { sourceId } = useLogSourceContext();
+  const { logViewId } = useLogViewContext();
 
   if (!startTimestamp || !endTimestamp) {
     return null;
@@ -38,7 +38,7 @@ const ViewLogInContextProvider: React.FC = ({ children }) => {
     <ViewLogInContext.Provider
       startTimestamp={startTimestamp}
       endTimestamp={endTimestamp}
-      sourceId={sourceId}
+      sourceId={logViewId}
     >
       {children}
     </ViewLogInContext.Provider>
@@ -46,7 +46,7 @@ const ViewLogInContextProvider: React.FC = ({ children }) => {
 };
 
 const LogEntriesStateProvider: React.FC = ({ children }) => {
-  const { sourceId } = useLogSourceContext();
+  const { logViewId } = useLogViewContext();
   const { startTimestamp, endTimestamp, targetPosition, isInitialized } = useContext(
     LogPositionState.Context
   );
@@ -65,7 +65,7 @@ const LogEntriesStateProvider: React.FC = ({ children }) => {
 
   return (
     <LogStreamProvider
-      sourceId={sourceId}
+      sourceId={logViewId}
       startTimestamp={startTimestamp}
       endTimestamp={endTimestamp}
       query={filterQuery?.parsedQuery}
@@ -77,13 +77,13 @@ const LogEntriesStateProvider: React.FC = ({ children }) => {
 };
 
 const LogHighlightsStateProvider: React.FC = ({ children }) => {
-  const { sourceId, sourceConfiguration } = useLogSourceContext();
+  const { logViewId, logView } = useLogViewContext();
   const { topCursor, bottomCursor, entries } = useLogStreamContext();
   const { filterQuery } = useContext(LogFilterState.Context);
 
   const highlightsProps = {
-    sourceId,
-    sourceVersion: sourceConfiguration?.version,
+    sourceId: logViewId,
+    sourceVersion: logView?.version,
     entriesStart: topCursor,
     entriesEnd: bottomCursor,
     centerCursor: entries.length > 0 ? entries[Math.floor(entries.length / 2)].cursor : null,
@@ -94,10 +94,10 @@ const LogHighlightsStateProvider: React.FC = ({ children }) => {
 };
 
 export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
-  const { sourceStatus } = useLogSourceContext();
+  const { logViewStatus } = useLogViewContext();
 
   // The providers assume the source is loaded, so short-circuit them otherwise
-  if (sourceStatus?.logIndexStatus === 'missing') {
+  if (logViewStatus?.index === 'missing') {
     return <>{children}</>;
   }
 

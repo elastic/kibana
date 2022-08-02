@@ -6,8 +6,9 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchHit } from '@kbn/core/types/elasticsearch';
 
-import type { SearchHit } from '../../../../../../src/core/types/elasticsearch';
 import type { Agent, AgentSOAttributes, FleetServerAgent } from '../../types';
 import { getAgentStatus } from '../../../common/services/agent_status';
 
@@ -16,7 +17,7 @@ type FleetServerAgentESResponse =
   | estypes.SearchResponse<FleetServerAgent>['hits']['hits'][0]
   | SearchHit<FleetServerAgent>;
 
-export function searchHitToAgent(hit: FleetServerAgentESResponse): Agent {
+export function searchHitToAgent(hit: FleetServerAgentESResponse & { sort?: SortResults }): Agent {
   // @ts-expect-error @elastic/elasticsearch MultiGetHit._source is optional
   const agent: Agent = {
     id: hit._id,
@@ -25,6 +26,7 @@ export function searchHitToAgent(hit: FleetServerAgentESResponse): Agent {
     access_api_key: undefined,
     status: undefined,
     packages: hit._source?.packages ?? [],
+    sort: hit.sort,
   };
 
   agent.status = getAgentStatus(agent);

@@ -16,28 +16,6 @@ describe('Reporting Config Schema', () => {
     expect(ConfigSchema.validate({}, { dev: false, dist: true })).toMatchSnapshot();
   });
 
-  it('allows Duration values for certain keys', () => {
-    expect(ConfigSchema.validate({ queue: { timeout: '2m' } }).queue.timeout).toMatchInlineSnapshot(
-      `"PT2M"`
-    );
-
-    expect(
-      ConfigSchema.validate({ capture: { loadDelay: '3s' } }).capture.loadDelay
-    ).toMatchInlineSnapshot(`"PT3S"`);
-
-    expect(
-      ConfigSchema.validate({
-        capture: { timeouts: { openUrl: '1m', waitForElements: '30s', renderComplete: '10s' } },
-      }).capture.timeouts
-    ).toMatchInlineSnapshot(`
-      Object {
-        "openUrl": "PT1M",
-        "renderComplete": "PT10S",
-        "waitForElements": "PT30S",
-      }
-    `);
-  });
-
   it('allows ByteSizeValue values for certain keys', () => {
     expect(ConfigSchema.validate({ csv: { maxSizeBytes: '12mb' } }).csv.maxSizeBytes)
       .toMatchInlineSnapshot(`

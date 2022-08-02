@@ -95,14 +95,17 @@ export class GeoPointFormat extends FieldFormat {
     };
   }
 
-  textConvert: TextContextTypeConvert = (val: Point | { lat: number; lon: number } | string) => {
+  textConvert: TextContextTypeConvert = (
+    val: Point | { lat: number; lon: number } | string,
+    options
+  ) => {
     if (!val) {
       return '';
     }
 
     const point: Point | null = isPoint(val) ? (val as Point) : toPoint(val);
     if (!point) {
-      return asPrettyString(val);
+      return asPrettyString(val, options);
     }
 
     switch (this.param('transform')) {
@@ -111,7 +114,7 @@ export class GeoPointFormat extends FieldFormat {
       case 'wkt':
         return `POINT (${point.coordinates[0]} ${point.coordinates[1]})`;
       default:
-        return asPrettyString(val);
+        return asPrettyString(val, options);
     }
   };
 }

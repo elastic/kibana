@@ -7,10 +7,10 @@
     "declarationMap": true,
     "isolatedModules": true
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "config.ts"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "config.ts", ".storybook/**/*"],
   "references": [
     { "path": "../../core/tsconfig.json" },
-    { "path": "../data/tsconfig.json" },
+    { "path": "../data_views/tsconfig.json" },
     { "path": "../custom_integrations/tsconfig.json" },
     { "path": "../kibana_react/tsconfig.json" },
     { "path": "../share/tsconfig.json" },

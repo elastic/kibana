@@ -11,7 +11,7 @@ import React from 'react';
 import {
   useInspectorContext,
   enableInspectEsQueries,
-} from '../../../../../../observability/public';
+} from '@kbn/observability-plugin/public';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 
 export function UxInspectorHeaderLink() {

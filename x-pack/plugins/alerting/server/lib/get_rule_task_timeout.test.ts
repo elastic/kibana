@@ -14,7 +14,7 @@ const config = {
     value: '2m',
     enforce: false,
   },
-  execution: {
+  run: {
     timeout: '1m',
     actions: { max: 1000 },
   },
@@ -22,8 +22,8 @@ const config = {
 
 const configWithRuleType = {
   ...config,
-  execution: {
-    ...config.execution,
+  run: {
+    ...config.run,
     ruleTypeOverrides: [
       {
         id: ruleTypeId,
@@ -35,7 +35,7 @@ const configWithRuleType = {
 
 const configWithoutTimeout = {
   ...config,
-  execution: {
+  run: {
     actions: { max: 1000 },
   },
 };

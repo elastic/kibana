@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Observable, Subscription } from 'rxjs';
-import { first } from 'rxjs/operators';
-import { ElasticsearchConfig } from 'kibana/server';
+import { firstValueFrom, Observable, Subscription } from 'rxjs';
+import { ElasticsearchConfig } from '@kbn/core/server';
 
 export class EsLegacyConfigService {
   /**
@@ -45,7 +44,7 @@ export class EsLegacyConfigService {
     }
 
     if (!this.config) {
-      return this.config$.pipe(first()).toPromise();
+      return firstValueFrom(this.config$);
     }
 
     return this.config;

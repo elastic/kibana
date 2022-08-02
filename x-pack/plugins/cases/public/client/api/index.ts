@@ -5,8 +5,17 @@
  * 2.0.
  */
 
-import { HttpStart } from 'kibana/public';
-import { CasesByAlertId, CasesByAlertIDRequest, getCasesFromAlertsUrl } from '../../../common/api';
+import { HttpStart } from '@kbn/core/public';
+import {
+  CasesByAlertId,
+  CasesByAlertIDRequest,
+  CasesFindRequest,
+  getCasesFromAlertsUrl,
+  CasesStatusRequest,
+  CasesMetricsRequest,
+} from '../../../common/api';
+import { Cases, CasesStatus, CasesMetrics } from '../../../common/ui';
+import { getCases, getCasesMetrics, getCasesStatus } from '../../api';
 import { CasesUiStart } from '../../types';
 
 export const createClientAPI = ({ http }: { http: HttpStart }): CasesUiStart['api'] => {
@@ -16,5 +25,13 @@ export const createClientAPI = ({ http }: { http: HttpStart }): CasesUiStart['ap
       query: CasesByAlertIDRequest
     ): Promise<CasesByAlertId> =>
       http.get<CasesByAlertId>(getCasesFromAlertsUrl(alertId), { query }),
+    cases: {
+      find: (query: CasesFindRequest, signal?: AbortSignal): Promise<Cases> =>
+        getCases({ http, query, signal }),
+      getCasesStatus: (query: CasesStatusRequest, signal?: AbortSignal): Promise<CasesStatus> =>
+        getCasesStatus({ http, query, signal }),
+      getCasesMetrics: (query: CasesMetricsRequest, signal?: AbortSignal): Promise<CasesMetrics> =>
+        getCasesMetrics({ http, signal, query }),
+    },
   };
 };

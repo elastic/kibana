@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { datafeedsProvider } from './datafeeds';
 import { jobsProvider } from './jobs';
 import { groupsProvider } from './groups';
@@ -13,7 +14,6 @@ import { newJobCapsProvider } from './new_job_caps';
 import { newJobChartsProvider, topCategoriesProvider } from './new_job';
 import { modelSnapshotProvider } from './model_snapshots';
 import type { MlClient } from '../../lib/ml_client';
-import type { RulesClient } from '../../../../alerting/server';
 
 export function jobServiceProvider(
   client: IScopedClusterClient,

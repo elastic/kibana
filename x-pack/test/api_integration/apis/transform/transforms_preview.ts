@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import type { PostTransformsPreviewRequestSchema } from '../../../../plugins/transform/common/api_schemas/transforms';
+import type { PostTransformsPreviewRequestSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';

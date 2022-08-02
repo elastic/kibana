@@ -7,8 +7,8 @@
 
 import uuid from 'uuid';
 import { getMigrations } from './migrations';
-import { SavedObjectUnsanitizedDoc } from 'kibana/server';
-import { migrationMocks } from 'src/core/server/mocks';
+import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { migrationMocks } from '@kbn/core/server/mocks';
 import { TaskInstanceWithDeprecatedFields } from '../task';
 
 const migrationContext = migrationMocks.createContext();

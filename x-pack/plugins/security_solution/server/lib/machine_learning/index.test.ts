@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
-import { getExceptionListItemSchemaMock } from '../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { getAnomalies, AnomaliesSearchParams } from '.';
+import type { ESFilter } from '@kbn/core/types/elasticsearch';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
+import type { AnomaliesSearchParams } from '.';
+import { getAnomalies } from '.';
 
 const getFiltersFromMock = (mock: jest.Mock) => {
   const [[searchParams]] = mock.mock.calls;

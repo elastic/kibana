@@ -4,7 +4,6 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
 <span>
   <RowRendererContainer>
     <SystemGenericFileDetails
-      browserFields={Object {}}
       contextId="user_login-test"
       data={
         Object {
@@ -68,7 +67,6 @@ exports[`GenericRowRenderer #createGenericSystemRowRenderer renders correctly ag
 <span>
   <RowRendererContainer>
     <SystemGenericDetails
-      browserFields={Object {}}
       contextId="process_started-test"
       data={
         Object {

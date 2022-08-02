@@ -10,7 +10,7 @@ import React from 'react';
 
 import { TestProviders } from '../../../../common/mock/test_providers';
 
-import { FooterComponent, PagingControlComponent } from './index';
+import { FooterComponent, PagingControlComponent } from '.';
 
 jest.mock('../../../../common/lib/kibana');
 

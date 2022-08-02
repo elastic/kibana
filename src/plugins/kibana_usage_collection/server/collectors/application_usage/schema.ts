@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
+import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import { ApplicationUsageTelemetryReport } from './types';
 
 const commonSchema: MakeSchemaFrom<ApplicationUsageTelemetryReport[string]> = {
@@ -134,6 +134,8 @@ export const applicationUsageSchema = {
   apm: commonSchema,
   canvas: commonSchema,
   enterpriseSearch: commonSchema,
+  enterpriseSearchContent: commonSchema,
+  elasticsearch: commonSchema,
   appSearch: commonSchema,
   workplaceSearch: commonSchema,
   graph: commonSchema,
@@ -165,5 +167,6 @@ export const applicationUsageSchema = {
   siem: commonSchema,
   space_selector: commonSchema,
   uptime: commonSchema,
+  synthetics: commonSchema,
   ux: commonSchema,
 };

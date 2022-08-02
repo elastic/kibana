@@ -7,13 +7,13 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { AggConfigSerialized, IAggConfigs } from 'src/plugins/data/public';
+import { Query, AggregateQuery } from '@kbn/es-query';
 import { SerializableRecord } from '@kbn/utility-types';
-import { Query } from '../..';
-import { Filter } from '../../es_query';
-import { IndexPattern } from '../..';
+import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
+import type { Filter } from '@kbn/es-query';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { AggConfigSerialized, IAggConfigs } from '../../../public';
 import type { SearchSource } from './search_source';
-import { PersistableStateService } from '../../../../kibana_utils/common';
 
 /**
  * search source interface
@@ -77,7 +77,7 @@ export interface SearchSourceFields {
   /**
    * {@link Query}
    */
-  query?: Query;
+  query?: Query | AggregateQuery;
   /**
    * {@link Filter}
    */
@@ -110,7 +110,7 @@ export interface SearchSourceFields {
   /**
    * {@link IndexPatternService}
    */
-  index?: IndexPattern;
+  index?: DataView;
   searchAfter?: EsQuerySearchAfter;
   timeout?: string;
   terminate_after?: number;
@@ -124,7 +124,7 @@ export type SerializedSearchSourceFields = {
   /**
    * {@link Query}
    */
-  query?: Query;
+  query?: Query | AggregateQuery;
   /**
    * {@link Filter}
    */
@@ -158,7 +158,7 @@ export type SerializedSearchSourceFields = {
   /**
    * {@link IndexPatternService}
    */
-  index?: string;
+  index?: string | DataViewSpec;
   searchAfter?: EsQuerySearchAfter;
   timeout?: string;
   terminate_after?: number;
@@ -215,4 +215,14 @@ export interface ShardFailure {
     type: string;
   };
   shard: number;
+}
+
+export function isSerializedSearchSource(
+  maybeSerializedSearchSource: unknown
+): maybeSerializedSearchSource is SerializedSearchSourceFields {
+  return (
+    typeof maybeSerializedSearchSource === 'object' &&
+    maybeSerializedSearchSource !== null &&
+    !Array.isArray(maybeSerializedSearchSource)
+  );
 }

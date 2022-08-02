@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup, CoreStart } from 'kibana/server';
+import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
+import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { todoSavedObject } from './todo_saved_object';
 import { bookSavedObject } from './book_saved_object';
 import { searchableListSavedObject } from './searchable_list_saved_object';
-import { EmbeddableSetup } from '../../../src/plugins/embeddable/server';
 
 export interface EmbeddableExamplesSetupDependencies {
   embeddable: EmbeddableSetup;

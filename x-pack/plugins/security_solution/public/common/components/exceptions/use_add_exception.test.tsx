@@ -5,34 +5,35 @@
  * 2.0.
  */
 
-import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { KibanaServices } from '../../../common/lib/kibana';
+import { coreMock } from '@kbn/core/public/mocks';
+import { KibanaServices } from '../../lib/kibana';
 
 import * as alertsApi from '../../../detections/containers/detection_engine/alerts/api';
 import * as listsApi from '@kbn/securitysolution-list-api';
 import * as getQueryFilterHelper from '../../../../common/detection_engine/get_query_filter';
 import * as buildFilterHelpers from '../../../detections/components/alerts_table/default_config';
-import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { getCreateExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/request/create_exception_list_item_schema.mock';
-import { getUpdateExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/request/update_exception_list_item_schema.mock';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
+import { getCreateExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
+import { getUpdateExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/request/update_exception_list_item_schema.mock';
 import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { TestProviders } from '../../mock';
-import {
-  useAddOrUpdateException,
+import type {
   UseAddOrUpdateExceptionProps,
   ReturnUseAddOrUpdateException,
   AddOrUpdateExceptionItemsFunc,
 } from './use_add_exception';
+import { useAddOrUpdateException } from './use_add_exception';
 
 const mockKibanaHttpService = coreMock.createStart().http;
 const mockKibanaServices = KibanaServices.get as jest.Mock;
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../lib/kibana');
 jest.mock('@kbn/securitysolution-list-api');
 
 const fetchMock = jest.fn();

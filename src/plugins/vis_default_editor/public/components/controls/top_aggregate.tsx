@@ -16,7 +16,7 @@ import {
   AggParam,
   OptionedValueProp,
   OptionedParamType,
-} from 'src/plugins/data/public';
+} from '@kbn/data-plugin/public';
 import { AggParamEditorProps, OptionedParamEditorProps } from '../agg_param_props';
 
 export interface AggregateValueProp extends OptionedValueProp {

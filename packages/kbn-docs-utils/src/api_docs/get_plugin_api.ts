@@ -8,7 +8,7 @@
 
 import Path from 'path';
 import { Node, Project } from 'ts-morph';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { ApiScope, Lifecycle, PluginOrPackage } from './types';
 import { ApiDeclaration, PluginApi } from './types';
 import { buildApiDeclarationTopNode } from './build_api_declarations/build_api_declaration';

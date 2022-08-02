@@ -8,7 +8,7 @@
 import { scaleLinear } from 'd3-scale';
 import * as React from 'react';
 
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { LogEntryTime } from '../../../../common/log_entry';
 import { DensityChart } from './density_chart';
 import { HighlightedInterval } from './highlighted_interval';
@@ -78,7 +78,7 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
   };
 
   public getPositionOfTime = (time: number) => {
-    return this.getYScale()(time);
+    return this.getYScale()(time) ?? 0;
   };
 
   private updateTimeCursor: React.MouseEventHandler<SVGSVGElement> = (event) => {

@@ -1,0 +1,81 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getting started should render getting started component 1`] = `
+<KibanaPageTemplate
+  template="centeredBody"
+>
+  <div
+    css={
+      Object {
+        "map": undefined,
+        "name": "hdi05h",
+        "next": undefined,
+        "styles": "
+    padding: calc(16px*3) calc(16px*4);
+  ",
+        "toString": [Function],
+      }
+    }
+  >
+    <EuiTitle
+      className="eui-textCenter"
+      size="l"
+    >
+      <h1>
+        What would you like to do first?
+      </h1>
+    </EuiTitle>
+    <EuiSpacer
+      size="s"
+    />
+    <EuiText
+      color="subdued"
+      size="s"
+      textAlign="center"
+    >
+      <p>
+        Select a starting point for a quick tour of how Elastic can help you do even more with your data.
+      </p>
+    </EuiText>
+    <EuiSpacer
+      size="s"
+    />
+    <EuiSpacer
+      size="xxl"
+    />
+    <EuiFlexGrid
+      columns={3}
+      gutterSize="xl"
+    >
+      <EuiFlexItem>
+        <UseCaseCard
+          useCase="search"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <UseCaseCard
+          useCase="observability"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <UseCaseCard
+          useCase="security"
+        />
+      </EuiFlexItem>
+    </EuiFlexGrid>
+    <EuiSpacer />
+    <EuiHorizontalRule />
+    <EuiSpacer />
+    <div
+      className="eui-textCenter"
+    >
+      <EuiLink
+        data-test-subj="onboarding--skipUseCaseTourLink"
+        onClick={[Function]}
+      >
+        No thanks, I’ll explore on my own.
+      </EuiLink>
+    </div>
+  </div>
+</KibanaPageTemplate>
+`;

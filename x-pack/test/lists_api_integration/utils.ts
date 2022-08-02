@@ -21,13 +21,16 @@ import {
   LIST_INDEX,
   LIST_ITEM_URL,
 } from '@kbn/securitysolution-list-constants';
-import { ToolingLog } from '@kbn/dev-utils';
-import { getImportListItemAsBuffer } from '../../plugins/lists/common/schemas/request/import_list_item_schema.mock';
+import { setPolicy, setTemplate, createBootstrapIndex } from '@kbn/securitysolution-es-utils';
+import { Client } from '@elastic/elasticsearch';
+import { ToolingLog } from '@kbn/tooling-log';
+import { getImportListItemAsBuffer } from '@kbn/lists-plugin/common/schemas/request/import_list_item_schema.mock';
+
 import { countDownTest } from '../detection_engine_api_integration/utils';
 
 /**
  * Creates the lists and lists items index for use inside of beforeEach blocks of tests
- * This will retry 20 times before giving up and hopefully still not interfere with other tests
+ * This will retry 50 times before giving up and hopefully still not interfere with other tests
  * @param supertest The supertest client library
  */
 export const createListsIndex = async (
@@ -37,7 +40,9 @@ export const createListsIndex = async (
   return countDownTest(
     async () => {
       await supertest.post(LIST_INDEX).set('kbn-xsrf', 'true').send();
-      return true;
+      return {
+        passed: true,
+      };
     },
     'createListsIndex',
     log
@@ -55,7 +60,9 @@ export const deleteListsIndex = async (
   return countDownTest(
     async () => {
       await supertest.delete(LIST_INDEX).set('kbn-xsrf', 'true').send();
-      return true;
+      return {
+        passed: true,
+      };
     },
     'deleteListsIndex',
     log
@@ -64,7 +71,7 @@ export const deleteListsIndex = async (
 
 /**
  * Creates the exception lists and lists items index for use inside of beforeEach blocks of tests
- * This will retry 20 times before giving up and hopefully still not interfere with other tests
+ * This will retry 50 times before giving up and hopefully still not interfere with other tests
  * @param supertest The supertest client library
  */
 export const createExceptionListsIndex = async (
@@ -74,7 +81,9 @@ export const createExceptionListsIndex = async (
   return countDownTest(
     async () => {
       await supertest.post(LIST_INDEX).set('kbn-xsrf', 'true').send();
-      return true;
+      return {
+        passed: true,
+      };
     },
     'createListsIndex',
     log
@@ -223,7 +232,9 @@ export const deleteAllExceptionsByType = async (
         .get(`${EXCEPTION_LIST_URL}/_find?namespace_type=${type}`)
         .set('kbn-xsrf', 'true')
         .send();
-      return finalCheck.data.length === 0;
+      return {
+        passed: finalCheck.data.length === 0,
+      };
     },
     `deleteAllExceptions by type: "${type}"`,
     log,
@@ -405,4 +416,145 @@ export const waitForTextListItems = async (
   fileName: string
 ): Promise<void> => {
   await Promise.all(itemValues.map((item) => waitForTextListItem(supertest, log, item, fileName)));
+};
+
+/**
+ * Convenience function for creating legacy index templates to
+ * test out logic updating to new index templates
+ * @param es es client
+ */
+export const createLegacyListsIndices = async (es: Client) => {
+  await setPolicy(es, '.lists-default', {
+    policy: {
+      phases: {
+        hot: {
+          min_age: '0ms',
+          actions: {
+            rollover: {
+              max_size: '50gb',
+            },
+          },
+        },
+      },
+    },
+  });
+  await setPolicy(es, '.items-default', {
+    policy: {
+      phases: {
+        hot: {
+          min_age: '0ms',
+          actions: {
+            rollover: {
+              max_size: '50gb',
+            },
+          },
+        },
+      },
+    },
+  });
+  await setTemplate(es, '.lists-default', {
+    index_patterns: [`.lists-default-*`],
+    mappings: {
+      dynamic: 'strict',
+      properties: {
+        name: {
+          type: 'keyword',
+        },
+        deserializer: {
+          type: 'keyword',
+        },
+        serializer: {
+          type: 'keyword',
+        },
+        description: {
+          type: 'keyword',
+        },
+        type: {
+          type: 'keyword',
+        },
+        tie_breaker_id: {
+          type: 'keyword',
+        },
+        meta: {
+          enabled: 'false',
+          type: 'object',
+        },
+        created_at: {
+          type: 'date',
+        },
+        updated_at: {
+          type: 'date',
+        },
+        created_by: {
+          type: 'keyword',
+        },
+        updated_by: {
+          type: 'keyword',
+        },
+        version: {
+          type: 'keyword',
+        },
+        immutable: {
+          type: 'boolean',
+        },
+      },
+    },
+    settings: {
+      index: {
+        lifecycle: {
+          name: '.lists-default',
+          rollover_alias: '.lists-default',
+        },
+      },
+    },
+  });
+  await setTemplate(es, '.items-default', {
+    index_patterns: [`.items-default-*`],
+    mappings: {
+      dynamic: 'strict',
+      properties: {
+        tie_breaker_id: {
+          type: 'keyword',
+        },
+        list_id: {
+          type: 'keyword',
+        },
+        deserializer: {
+          type: 'keyword',
+        },
+        serializer: {
+          type: 'keyword',
+        },
+        meta: {
+          enabled: 'false',
+          type: 'object',
+        },
+        created_at: {
+          type: 'date',
+        },
+        updated_at: {
+          type: 'date',
+        },
+        created_by: {
+          type: 'keyword',
+        },
+        updated_by: {
+          type: 'keyword',
+        },
+        ip: {
+          type: 'ip',
+        },
+      },
+    },
+    settings: {
+      index: {
+        lifecycle: {
+          name: '.items-default',
+          rollover_alias: '.items-default',
+        },
+      },
+    },
+  });
+  await createBootstrapIndex(es, '.lists-default');
+  await createBootstrapIndex(es, '.items-default');
 };

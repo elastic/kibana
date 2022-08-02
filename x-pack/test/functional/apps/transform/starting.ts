@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
-import { getLatestTransformConfig, getPivotTransformConfig } from './index';
+import { getLatestTransformConfig, getPivotTransformConfig } from '.';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

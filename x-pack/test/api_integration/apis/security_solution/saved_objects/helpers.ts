@@ -7,7 +7,7 @@
 
 import type SuperTest from 'supertest';
 import uuid from 'uuid';
-import { TimelineType } from '../../../../../plugins/security_solution/common/types/timeline';
+import { TimelineType } from '@kbn/security-solution-plugin/common/types/timeline';
 
 export const createBasicTimeline = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,

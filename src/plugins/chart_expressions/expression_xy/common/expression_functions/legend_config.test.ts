@@ -7,14 +7,14 @@
  */
 
 import { Position } from '@elastic/charts';
-import { createMockExecutionContext } from '../../../../expressions/common/mocks';
+import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
 import { LegendConfig } from '../types';
 import { legendConfigFunction } from './legend_config';
 
 describe('legendConfigFunction', () => {
-  test('produces the correct arguments', () => {
+  test('produces the correct arguments', async () => {
     const args: LegendConfig = { isVisible: true, position: Position.Left };
-    const result = legendConfigFunction.fn(null, args, createMockExecutionContext());
+    const result = await legendConfigFunction.fn(null, args, createMockExecutionContext());
 
     expect(result).toEqual({ type: 'legendConfig', ...args });
   });

@@ -15,9 +15,21 @@ export interface TitlePositionProps {
   setState: (newState: MetricState) => void;
 }
 
+export const DEFAULT_TITLE_POSITION = 'top';
+
 const titlePositions = [
-  { id: 'top', label: 'Top' },
-  { id: 'bottom', label: 'Bottom' },
+  {
+    id: 'top',
+    label: i18n.translate('xpack.lens.legacyMetric.titlePositions.top', {
+      defaultMessage: 'Top',
+    }),
+  },
+  {
+    id: 'bottom',
+    label: i18n.translate('xpack.lens.legacyMetric.titlePositions.bottom', {
+      defaultMessage: 'Bottom',
+    }),
+  },
 ];
 
 export const TitlePositionOptions: React.FC<TitlePositionProps> = ({ state, setState }) => {
@@ -27,7 +39,7 @@ export const TitlePositionOptions: React.FC<TitlePositionProps> = ({ state, setS
       fullWidth
       label={
         <>
-          {i18n.translate('xpack.lens.metricChart.titlePositionLabel', {
+          {i18n.translate('xpack.lens.legacyMetric.titlePositionLabel', {
             defaultMessage: 'Title position',
           })}
         </>
@@ -38,7 +50,7 @@ export const TitlePositionOptions: React.FC<TitlePositionProps> = ({ state, setS
         data-test-subj="lnsMissingValuesSelect"
         legend="This is a basic group"
         options={titlePositions}
-        idSelected={state.titlePosition ?? 'bottom'}
+        idSelected={state.titlePosition ?? DEFAULT_TITLE_POSITION}
         onChange={(value) => {
           setState({ ...state, titlePosition: value as MetricState['titlePosition'] });
         }}

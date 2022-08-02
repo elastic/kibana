@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '../../../src/core/server';
-import { FieldFormatsSetup, FieldFormatsStart } from '../../../src/plugins/field_formats/server';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import { registerExampleFormat } from './examples/2_creating_custom_formatter';
 
 interface SetupDeps {

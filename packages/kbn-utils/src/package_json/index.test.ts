@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { kibanaPackageJson } from './index';
+import { kibanaPackageJson } from '.';
 
 it('parses package.json', () => {
   expect(kibanaPackageJson.name).toEqual('kibana');

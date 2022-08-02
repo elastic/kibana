@@ -12,20 +12,28 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
-  const supertest = getService('legacySupertestAsApmReadUser');
+  const apmApiClient = getService('apmApiClient');
 
   const archiveName = 'apm_8.0.0';
   const metadata = archives_metadata[archiveName];
 
   // url parameters
-  const start = encodeURIComponent(metadata.start);
-  const end = encodeURIComponent(metadata.end);
+  const { start, end } = metadata;
 
   registry.when('Top traces when data is not loaded', { config: 'basic', archives: [] }, () => {
     it('handles empty state', async () => {
-      const response = await supertest.get(
-        `/internal/apm/traces?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
-      );
+      const response = await apmApiClient.readUser({
+        endpoint: `GET /internal/apm/traces`,
+        params: {
+          query: {
+            start,
+            end,
+            kuery: '',
+            environment: 'ENVIRONMENT_ALL',
+            probability: 1,
+          },
+        },
+      });
 
       expect(response.status).to.be(200);
       expect(response.body.items.length).to.be(0);
@@ -38,9 +46,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       let response: any;
       before(async () => {
-        response = await supertest.get(
-          `/internal/apm/traces?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
-        );
+        response = await apmApiClient.readUser({
+          endpoint: 'GET /internal/apm/traces',
+          params: {
+            query: {
+              start,
+              end,
+              kuery: '',
+              environment: 'ENVIRONMENT_ALL',
+              probability: 1,
+            },
+          },
+        });
       });
 
       it('returns the correct status code', async () => {

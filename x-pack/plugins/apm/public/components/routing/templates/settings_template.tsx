@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { History } from 'history';
 import { useHistory } from 'react-router-dom';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import { ApmMainTemplate } from './apm_main_template';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { getLegacyApmHref } from '../../shared/links/apm/apm_link';

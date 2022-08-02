@@ -6,18 +6,24 @@
  */
 
 import type { RouteDefinitionParams } from '../..';
+import { transformElasticsearchRoleToRole } from '../../../authorization';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
-import { transformElasticsearchRoleToRole } from './model';
 
-export function defineGetAllRolesRoutes({ router, authz, getFeatures }: RouteDefinitionParams) {
+export function defineGetAllRolesRoutes({
+  router,
+  authz,
+  getFeatures,
+  logger,
+}: RouteDefinitionParams) {
   router.get(
     { path: '/api/security/role', validate: false },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
+        const esClient = (await context.core).elasticsearch.client;
         const [features, elasticsearchRoles] = await Promise.all([
           getFeatures(),
-          await context.core.elasticsearch.client.asCurrentUser.security.getRole(),
+          await esClient.asCurrentUser.security.getRole(),
         ]);
 
         // Transform elasticsearch roles into Kibana roles and return in a list sorted by the role name.
@@ -29,7 +35,8 @@ export function defineGetAllRolesRoutes({ router, authz, getFeatures }: RouteDef
                 // @ts-expect-error @elastic/elasticsearch SecurityIndicesPrivileges.names expected to be string[]
                 elasticsearchRole,
                 roleName,
-                authz.applicationName
+                authz.applicationName,
+                logger
               )
             )
             .sort((roleA, roleB) => {

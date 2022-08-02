@@ -7,7 +7,8 @@
  */
 
 import { nodeBuilder } from './node_builder';
-import { toElasticsearchQuery } from '../index';
+import { toElasticsearchQuery } from '..';
+import { buildNode } from './literal';
 
 jest.mock('../grammar');
 
@@ -33,10 +34,7 @@ describe('nodeBuilder', () => {
     });
 
     test('KueryNode value', () => {
-      const literalValue = {
-        type: 'literal' as 'literal',
-        value: 'bar',
-      };
+      const literalValue = buildNode('bar');
       const nodes = nodeBuilder.is('foo', literalValue);
       const query = toElasticsearchQuery(nodes);
       expect(query).toMatchInlineSnapshot(`

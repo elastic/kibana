@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'src/core/server';
+import { KibanaRequest } from '@kbn/core/server';
 import uuid from 'uuid';
-import { taskManagerMock } from '../../task_manager/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { createExecutionEnqueuerFunction } from './create_execute_function';
-import { savedObjectsClientMock } from '../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { actionTypeRegistryMock } from './action_type_registry.mock';
 import {
   asHttpRequestExecutionSource,
@@ -247,6 +247,7 @@ describe('execute()', () => {
           actionTypeId: 'mock-action-preconfigured',
           config: {},
           isPreconfigured: true,
+          isDeprecated: false,
           name: 'x',
           secrets: {},
         },
@@ -324,6 +325,7 @@ describe('execute()', () => {
           actionTypeId: 'mock-action-preconfigured',
           config: {},
           isPreconfigured: true,
+          isDeprecated: false,
           name: 'x',
           secrets: {},
         },
@@ -506,6 +508,7 @@ describe('execute()', () => {
           name: 'Slack #xyz',
           secrets: {},
           isPreconfigured: true,
+          isDeprecated: false,
         },
       ],
     });

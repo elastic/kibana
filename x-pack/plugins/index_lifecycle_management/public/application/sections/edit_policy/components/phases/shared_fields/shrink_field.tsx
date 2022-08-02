@@ -16,7 +16,7 @@ import { useEditPolicyContext } from '../../../edit_policy_context';
 import { UseField, useGlobalFields } from '../../../form';
 import { i18nTexts } from '../../../i18n_texts';
 
-import { LearnMoreLink, DescribedFormRow } from '../../';
+import { LearnMoreLink, DescribedFormRow } from '../..';
 import { byteSizeUnits } from '../../../constants';
 import { UnitField } from './unit_field';
 import { useKibana } from '../../../../../../shared_imports';

@@ -7,8 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
+import type { RouteDefinitionParams } from '../..';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
-import type { RouteDefinitionParams } from '../../index';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
 
 export function defineDeleteRolesRoutes({ router }: RouteDefinitionParams) {
@@ -21,7 +21,8 @@ export function defineDeleteRolesRoutes({ router }: RouteDefinitionParams) {
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        await context.core.elasticsearch.client.asCurrentUser.security.deleteRole({
+        const esClient = (await context.core).elasticsearch.client;
+        await esClient.asCurrentUser.security.deleteRole({
           name: request.params.name,
         });
 

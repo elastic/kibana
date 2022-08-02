@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { PluginServiceFactory } from '../create';
 import { PresentationDataViewsService } from '../data_views';
-import { DataViewsPublicPluginStart } from '../../../../data_views/public';
-import { DataView } from '../../../../data_views/common';
 
 export type DataViewsServiceFactory = PluginServiceFactory<PresentationDataViewsService>;
 

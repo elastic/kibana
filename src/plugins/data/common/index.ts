@@ -12,59 +12,7 @@
 export { DEFAULT_QUERY_LANGUAGE, KIBANA_USER_QUERY_LANGUAGE_KEY, UI_SETTINGS } from './constants';
 export type { ValueSuggestionsMethod } from './constants';
 export { DatatableUtilitiesService } from './datatable_utilities';
-export {
-  buildEmptyFilter,
-  buildCustomFilter,
-  buildExistsFilter,
-  buildPhraseFilter,
-  buildPhrasesFilter,
-  buildQueryFilter,
-  buildQueryFromFilters,
-  buildRangeFilter,
-  buildFilter,
-  buildEsQuery,
-  getPhraseFilterField,
-  getPhraseFilterValue,
-  isExistsFilter,
-  compareFilters,
-  dedupFilters,
-  disableFilter,
-  enableFilter,
-  isPhraseFilter,
-  isFilters,
-  isQueryStringFilter,
-  isRangeFilter,
-  isPhrasesFilter,
-  decorateQuery,
-  fromKueryExpression,
-  isFilterDisabled,
-  isFilterPinned,
-  isMatchAllFilter,
-  FilterStateStore,
-  COMPARE_ALL_OPTIONS,
-  FILTERS,
-  getEsQueryConfig,
-  luceneStringToDsl,
-  nodeBuilder,
-  nodeTypes,
-  onlyDisabledFiltersChanged,
-  pinFilter,
-  toElasticsearchQuery,
-  toggleFilterDisabled,
-  toggleFilterNegated,
-  uniqFilters,
-} from './es_query';
-export type {
-  ExistsFilter,
-  Filter,
-  MatchAllFilter,
-  FilterMeta,
-  PhraseFilter,
-  RangeFilter,
-  RangeFilterParams,
-  KueryNode,
-  EsQueryConfig,
-} from './es_query';
+export { getEsQueryConfig } from './es_query';
 export { KbnFieldType } from './kbn_field_types';
 export {
   calculateBounds,
@@ -73,12 +21,14 @@ export {
   getTime,
   isQuery,
   isTimeRange,
+  queryStateToExpressionAst,
 } from './query';
+export type { QueryState } from './query';
 export * from './search';
 export type {
   RefreshInterval,
-  TimeRange,
   TimeRangeBounds,
+  TimeRange,
   GetConfigFn,
   SavedQuery,
   SavedQueryAttributes,
@@ -98,29 +48,16 @@ export {
   CSV_MIME_TYPE,
 } from './exports';
 export type {
-  IFieldType,
-  IIndexPatternFieldList,
-  FieldFormatMap,
-  RuntimeType,
-  RuntimeField,
-  IIndexPattern,
   DataViewAttributes,
-  IndexPatternAttributes,
   FieldAttrs,
   FieldAttrSet,
-  OnNotification,
-  OnError,
   UiSettingsCommon,
-  SavedObjectsClientCommonFindArgs,
-  SavedObjectsClientCommon,
   GetFieldsOptions,
-  GetFieldsOptionsTimePattern,
   IDataViewsApiClient,
   SavedObject,
   AggregationRestrictions,
   TypeMeta,
   FieldSpecConflictDescriptions,
-  FieldSpecExportFmt,
   FieldSpec,
   DataViewFieldMap,
   DataViewSpec,
@@ -128,26 +65,18 @@ export type {
   IndexPatternExpressionType,
   IndexPatternLoadStartDependencies,
   IndexPatternLoadExpressionFunctionDefinition,
-} from '../../data_views/common';
-export type {
-  IndexPatternsContract,
-  DataViewsContract,
-  DataViewListItem,
-} from '../../data_views/common';
+} from '@kbn/data-views-plugin/common';
+export type { DataViewsContract, DataViewListItem } from '@kbn/data-views-plugin/common';
 export {
   RUNTIME_FIELD_TYPES,
   DEFAULT_ASSETS_TO_IGNORE,
   META_FIELDS,
   DATA_VIEW_SAVED_OBJECT_TYPE,
-  INDEX_PATTERN_SAVED_OBJECT_TYPE,
   isFilterable,
   fieldList,
   DataViewField,
-  IndexPatternField,
   DataViewType,
-  IndexPatternsService,
   DataViewsService,
-  IndexPattern,
   DataView,
   DuplicateDataViewError,
   DataViewSavedObjectConflictError,
@@ -156,4 +85,4 @@ export {
   isMultiField,
   getFieldSubtypeMulti,
   getFieldSubtypeNested,
-} from '../../data_views/common';
+} from '@kbn/data-views-plugin/common';

@@ -15,7 +15,7 @@ import {
   FilterableEmbeddable,
   ContactCardEmbeddable,
 } from '../../../test_samples';
-import { inspectorPluginMock } from '../../../../../../../plugins/inspector/public/mocks';
+import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { EmbeddableOutput, isErrorEmbeddable, ErrorEmbeddable } from '../../../embeddables';
 import { of } from '../../../../tests/helpers';
 import { embeddablePluginMock } from '../../../../mocks';

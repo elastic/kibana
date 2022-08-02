@@ -30,7 +30,7 @@ export const Bar = styled.aside.attrs({
     ${border &&
     css`
       border-bottom: ${theme.eui.euiBorderThin};
-      padding-bottom: ${theme.eui.paddingSizes.s};
+      padding-bottom: ${theme.eui.euiSizeS};
     `}
 
     @media only screen and (min-width: ${theme.eui.euiBreakpoints.l}) {
@@ -83,8 +83,8 @@ export const BarGroup = styled.div.attrs({
     @media only screen and (min-width: ${theme.eui.euiBreakpoints.m}) {
       border-right: ${theme.eui.euiBorderThin};
       flex-wrap: nowrap;
-      margin-right: ${theme.eui.paddingSizes.m};
-      padding-right: ${theme.eui.paddingSizes.m};
+      margin-right: ${theme.eui.euiSizeM};
+      padding-right: ${theme.eui.euiSizeM};
 
       & + & {
         margin-top: 0;
@@ -114,12 +114,12 @@ BarGroup.displayName = 'BarGroup';
 
 export const BarText = styled.p.attrs({
   className: 'siemUtilityBar__text',
-})`
-  ${({ theme }) => css`
+})<{ shouldWrap: boolean }>`
+  ${({ shouldWrap, theme }) => css`
     color: ${theme.eui.euiTextSubduedColor};
     font-size: ${theme.eui.euiFontSizeXS};
     line-height: ${theme.eui.euiLineHeight};
-    white-space: nowrap;
+    white-space: ${shouldWrap ? 'normal' : 'nowrap'};
   `}
 `;
 BarText.displayName = 'BarText';

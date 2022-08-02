@@ -7,7 +7,7 @@
  */
 
 import moment, { Moment } from 'moment';
-import { MakeSchemaFrom } from '../../plugins/usage_collection/server';
+import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 
 export interface Usage {
   locale: string;

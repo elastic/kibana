@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import datemath from '@elastic/datemath';
+import datemath from '@kbn/datemath';
 
 export function getAbsoluteTime(range: string, opts: Parameters<typeof datemath.parse>[1] = {}) {
   const parsed = datemath.parse(range, opts);

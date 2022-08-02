@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 /**
   Function for collecting information about canvas usage

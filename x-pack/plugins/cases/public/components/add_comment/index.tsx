@@ -18,7 +18,7 @@ import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
 import { CommentType } from '../../../common/api';
-import { usePostComment } from '../../containers/use_post_comment';
+import { useCreateAttachments } from '../../containers/use_create_attachments';
 import { Case } from '../../containers/types';
 import { EuiMarkdownEditorRef, MarkdownEditorForm } from '../markdown_editor';
 import { Form, useForm, UseField, useFormData } from '../../common/shared_imports';
@@ -47,7 +47,6 @@ export interface AddCommentRefObject {
 export interface AddCommentProps {
   id: string;
   caseId: string;
-  userCanCrud?: boolean;
   onCommentSaving?: () => void;
   onCommentPosted: (newCase: Case) => void;
   showLoading?: boolean;
@@ -57,21 +56,13 @@ export interface AddCommentProps {
 export const AddComment = React.memo(
   forwardRef<AddCommentRefObject, AddCommentProps>(
     (
-      {
-        id,
-        caseId,
-        userCanCrud,
-        onCommentPosted,
-        onCommentSaving,
-        showLoading = true,
-        statusActionButton,
-      },
+      { id, caseId, onCommentPosted, onCommentSaving, showLoading = true, statusActionButton },
       ref
     ) => {
       const editorRef = useRef<EuiMarkdownEditorRef>(null);
       const [focusOnContext, setFocusOnContext] = useState(false);
-      const { owner } = useCasesContext();
-      const { isLoading, postComment } = usePostComment();
+      const { permissions, owner } = useCasesContext();
+      const { isLoading, createAttachments } = useCreateAttachments();
 
       const { form } = useForm<AddCommentFormSchema>({
         defaultValue: initialCommentValue,
@@ -112,14 +103,14 @@ export const AddComment = React.memo(
           if (onCommentSaving != null) {
             onCommentSaving();
           }
-          postComment({
+          createAttachments({
             caseId,
-            data: { ...data, type: CommentType.user, owner: owner[0] },
+            data: [{ ...data, type: CommentType.user, owner: owner[0] }],
             updateCase: onCommentPosted,
           });
           reset();
         }
-      }, [submit, onCommentSaving, postComment, caseId, owner, onCommentPosted, reset]);
+      }, [submit, onCommentSaving, createAttachments, caseId, owner, onCommentPosted, reset]);
 
       /**
        * Focus on the text area when a quote has been added.
@@ -156,7 +147,7 @@ export const AddComment = React.memo(
       return (
         <span id="add-comment-permLink">
           {isLoading && showLoading && <MySpinner data-test-subj="loading-spinner" size="xl" />}
-          {userCanCrud && (
+          {permissions.create && (
             <Form form={form}>
               <UseField
                 path={fieldName}

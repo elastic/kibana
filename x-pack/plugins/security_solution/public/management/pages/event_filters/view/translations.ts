@@ -5,54 +5,20 @@
  * 2.0.
  */
 
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
+import type { ArtifactFormComponentProps } from '../../../components/artifact_list_page';
 
-import type {
-  CreateExceptionListItemSchema,
-  UpdateExceptionListItemSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
-import { ServerApiError } from '../../../../common/types';
-
-export const getCreationSuccessMessage = (
-  entry: CreateExceptionListItemSchema | UpdateExceptionListItemSchema | undefined
-) => {
-  return i18n.translate('xpack.securitySolution.eventFilter.form.creationSuccessToastTitle', {
+export const getCreationSuccessMessage = (item: ArtifactFormComponentProps['item']) => {
+  return i18n.translate('xpack.securitySolution.eventFilter.flyoutForm.creationSuccessToastTitle', {
     defaultMessage: '"{name}" has been added to the event filters list.',
-    values: { name: entry?.name },
+    values: { name: item?.name },
   });
 };
 
-export const getUpdateSuccessMessage = (
-  entry: CreateExceptionListItemSchema | UpdateExceptionListItemSchema | undefined
-) => {
-  return i18n.translate('xpack.securitySolution.eventFilter.form.updateSuccessToastTitle', {
-    defaultMessage: '"{name}" has been updated successfully.',
-    values: { name: entry?.name },
-  });
+export const getCreationErrorMessage = (creationError: IHttpFetchError) => {
+  return {
+    title: 'There was an error creating the new event filter: "{error}"',
+    message: { error: creationError.message },
+  };
 };
-
-export const getCreationErrorMessage = (creationError: ServerApiError) => {
-  return i18n.translate('xpack.securitySolution.eventFilter.form.failedToastTitle.create', {
-    defaultMessage: 'There was an error creating the new event filter: "{error}"',
-    values: { error: creationError.message },
-  });
-};
-
-export const getUpdateErrorMessage = (updateError: ServerApiError) => {
-  return i18n.translate('xpack.securitySolution.eventFilter.form.failedToastTitle.update', {
-    defaultMessage: 'There was an error updating the event filter: "{error}"',
-    values: { error: updateError.message },
-  });
-};
-
-export const getGetErrorMessage = (getError: ServerApiError) => {
-  return i18n.translate('xpack.securitySolution.eventFilter.form.failedToastTitle.get', {
-    defaultMessage: 'Unable to edit event filter: "{error}"',
-    values: { error: getError.message },
-  });
-};
-
-export const ABOUT_EVENT_FILTERS = i18n.translate('xpack.securitySolution.eventFilters.aboutInfo', {
-  defaultMessage:
-    'Add an event filter to exclude high volume or unwanted events from being written to Elasticsearch.',
-});

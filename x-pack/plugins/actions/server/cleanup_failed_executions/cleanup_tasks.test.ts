@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { SavedObjectsFindResult, SavedObjectsSerializer } from 'kibana/server';
-import { loggingSystemMock, elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
-import { spacesMock } from '../../../spaces/server/mocks';
+import type { SavedObjectsFindResult, ISavedObjectsSerializer } from '@kbn/core/server';
+import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { CleanupTasksOpts, cleanupTasks } from './cleanup_tasks';
-import { TaskInstance } from '../../../task_manager/server';
+import { TaskInstance } from '@kbn/task-manager-plugin/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 describe('cleanupTasks', () => {
@@ -23,7 +23,7 @@ describe('cleanupTasks', () => {
         const namespacePrefix = namespace ? `${namespace}:` : '';
         return `${namespacePrefix}${type}:${id}`;
       }),
-  } as unknown as SavedObjectsSerializer;
+  } as unknown as ISavedObjectsSerializer;
 
   const cleanupTasksOpts: CleanupTasksOpts = {
     logger,

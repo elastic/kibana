@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { KibanaRequest, Logger } from 'src/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
-} from '../../../../../../alerting/server';
-import { ListClient } from '../../../../../../lists/server';
+  RuleExecutorServices,
+} from '@kbn/alerting-plugin/server';
+import type { ListClient } from '@kbn/lists-plugin/server';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
-import { CompleteRule, MachineLearningRuleParams } from '../../schemas/rule_schemas';
+import type { CompleteRule, MachineLearningRuleParams } from '../../schemas/rule_schemas';
 import { bulkCreateMlSignals } from '../bulk_create_ml_signals';
 import { filterEventsAgainstList } from '../filters/filter_events_against_list';
 import { findMlSignals } from '../find_ml_signals';
-import { BuildRuleMessage } from '../rule_messages';
-import { BulkCreate, RuleRangeTuple, WrapHits } from '../types';
+import type { BulkCreate, RuleRangeTuple, WrapHits } from '../types';
 import { createErrorsFromShard, createSearchAfterReturnType, mergeReturns } from '../utils';
-import { SetupPlugins } from '../../../../plugin';
+import type { SetupPlugins } from '../../../../plugin';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 
 export const mlExecutor = async ({
   completeRule,
@@ -31,8 +31,7 @@ export const mlExecutor = async ({
   listClient,
   exceptionItems,
   services,
-  logger,
-  buildRuleMessage,
+  ruleExecutionLogger,
   bulkCreate,
   wrapHits,
 }: {
@@ -41,9 +40,8 @@ export const mlExecutor = async ({
   ml: SetupPlugins['ml'];
   listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[];
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  logger: Logger;
-  buildRuleMessage: BuildRuleMessage;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
 }) => {
@@ -69,7 +67,7 @@ export const mlExecutor = async ({
       jobSummaries.length < 1 ||
       jobSummaries.some((job) => !isJobStarted(job.jobState, job.datafeedState))
     ) {
-      const warningMessage = buildRuleMessage(
+      const warningMessage = [
         'Machine learning job(s) are not started:',
         ...jobSummaries.map((job) =>
           [
@@ -77,10 +75,11 @@ export const mlExecutor = async ({
             `job status: "${job.jobState}"`,
             `datafeed status: "${job.datafeedState}"`,
           ].join(', ')
-        )
-      );
+        ),
+      ].join(' ');
+
       result.warningMessages.push(warningMessage);
-      logger.warn(warningMessage);
+      ruleExecutionLogger.warn(warningMessage);
       result.warning = true;
     }
 
@@ -97,34 +96,33 @@ export const mlExecutor = async ({
       exceptionItems,
     });
 
-    const filteredAnomalyResults = await filterEventsAgainstList({
+    const [filteredAnomalyHits, _] = await filterEventsAgainstList({
       listClient,
       exceptionsList: exceptionItems,
-      logger,
-      eventSearchResult: anomalyResults,
-      buildRuleMessage,
+      ruleExecutionLogger,
+      events: anomalyResults.hits.hits,
     });
 
-    const anomalyCount = filteredAnomalyResults.hits.hits.length;
+    const anomalyCount = filteredAnomalyHits.length;
     if (anomalyCount) {
-      logger.debug(buildRuleMessage(`Found ${anomalyCount} signals from ML anomalies.`));
+      ruleExecutionLogger.debug(`Found ${anomalyCount} signals from ML anomalies`);
     }
+
     const { success, errors, bulkCreateDuration, createdItemsCount, createdItems } =
       await bulkCreateMlSignals({
-        someResult: filteredAnomalyResults,
+        anomalyHits: filteredAnomalyHits,
         completeRule,
         services,
-        logger,
+        ruleExecutionLogger,
         id: completeRule.alertId,
         signalsIndex: ruleParams.outputIndex,
-        buildRuleMessage,
         bulkCreate,
         wrapHits,
       });
     // The legacy ES client does not define failures when it can be present on the structure, hence why I have the & { failures: [] }
     const shardFailures =
       (
-        filteredAnomalyResults._shards as typeof filteredAnomalyResults._shards & {
+        anomalyResults._shards as typeof anomalyResults._shards & {
           failures: [];
         }
       ).failures ?? [];
@@ -134,7 +132,7 @@ export const mlExecutor = async ({
     return mergeReturns([
       result,
       createSearchAfterReturnType({
-        success: success && filteredAnomalyResults._shards.failed === 0,
+        success: success && anomalyResults._shards.failed === 0,
         errors: [...errors, ...searchErrors],
         createdSignalsCount: createdItemsCount,
         createdSignals: createdItems,

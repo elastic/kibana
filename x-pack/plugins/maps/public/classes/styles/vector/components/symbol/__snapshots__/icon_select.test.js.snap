@@ -1,76 +1,204 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Should render icon select 1`] = `
-<EuiPopover
-  anchorPosition="downLeft"
-  button={
-    <EuiFormControlLayout
-      compressed={true}
-      fullWidth={true}
-      icon={
-        Object {
-          "side": "right",
-          "type": "arrowDown",
-        }
-      }
-      onKeyDown={[Function]}
-      readOnly={true}
-    >
-      <EuiFieldText
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <EuiFormControlLayout
         compressed={true}
         fullWidth={true}
-        onClick={[Function]}
-        onKeyDown={[Function]}
-        prepend={
-          <SymbolIcon
-            className="mapIconSelectSymbol__inputButton"
-            fill="rgb(52, 55, 65)"
-            symbolId="symbol1"
-          />
-        }
-        readOnly={true}
-        value="symbol1"
-      />
-    </EuiFormControlLayout>
-  }
-  closePopover={[Function]}
-  display="block"
-  hasArrow={true}
-  isOpen={false}
-  ownFocus={true}
-  panelPaddingSize="s"
->
-  <EuiFocusTrap
-    clickOutsideDisables={true}
-  >
-    <EuiSelectable
-      isPreFiltered={false}
-      onChange={[Function]}
-      options={
-        Array [
+        icon={
           Object {
-            "label": "symbol1",
-            "prepend": <SymbolIcon
+            "side": "right",
+            "type": "arrowDown",
+          }
+        }
+        onKeyDown={[Function]}
+        readOnly={true}
+      >
+        <EuiFieldText
+          compressed={true}
+          fullWidth={true}
+          onClick={[Function]}
+          onKeyDown={[Function]}
+          prepend={
+            <SymbolIcon
+              className="mapIconSelectSymbol__inputButton"
               fill="rgb(52, 55, 65)"
               symbolId="symbol1"
-            />,
-            "value": "symbol1",
-          },
-          Object {
-            "label": "symbol2",
-            "prepend": <SymbolIcon
-              fill="rgb(52, 55, 65)"
-              symbolId="symbol2"
-            />,
-            "value": "symbol2",
-          },
-        ]
-      }
-      searchable={true}
-      singleSelection={false}
+            />
+          }
+          readOnly={true}
+          value="symbol1"
+        />
+      </EuiFormControlLayout>
+    }
+    closePopover={[Function]}
+    display="block"
+    hasArrow={true}
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="s"
+  >
+    <EuiFocusTrap
+      clickOutsideDisables={true}
     >
-      <Component />
-    </EuiSelectable>
-  </EuiFocusTrap>
-</EuiPopover>
+      <EuiSelectable
+        compressed={true}
+        isPreFiltered={false}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "isGroupLabel": true,
+              "label": "Kibana icons",
+            },
+            Object {
+              "key": "symbol1",
+              "label": "symbol1",
+              "prepend": <SymbolIcon
+                fill="rgb(52, 55, 65)"
+                svg="<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>
+<svg version=\\"1.1\\" id=\\"square-15\\" xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"15px\\" height=\\"15px\\" viewBox=\\"0 0 15 15\\">
+  <path d=\\"M13,14H2c-0.5523,0-1-0.4477-1-1V2c0-0.5523,0.4477-1,1-1h11c0.5523,0,1,0.4477,1,1v11C14,13.5523,13.5523,14,13,14z\\"/>
+</svg>"
+                symbolId="symbol1"
+              />,
+            },
+            Object {
+              "key": "symbol2",
+              "label": "symbol2",
+              "prepend": <SymbolIcon
+                fill="rgb(52, 55, 65)"
+                svg="<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>
+<svg version=\\"1.1\\" id=\\"triangle-15\\" xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"15px\\" height=\\"15px\\" viewBox=\\"0 0 15 15\\">
+  <path id=\\"path21090-9\\" d=\\"M7.5385,2&#xA;&#x9;C7.2437,2,7.0502,2.1772,6.9231,2.3846l-5.8462,9.5385C1,12,1,12.1538,1,12.3077C1,12.8462,1.3846,13,1.6923,13h11.6154&#xA;&#x9;C13.6923,13,14,12.8462,14,12.3077c0-0.1538,0-0.2308-0.0769-0.3846L8.1538,2.3846C8.028,2.1765,7.7882,2,7.5385,2z\\"/>
+</svg>"
+                symbolId="symbol2"
+              />,
+            },
+          ]
+        }
+        searchable={true}
+        singleSelection={false}
+      >
+        <Component />
+      </EuiSelectable>
+    </EuiFocusTrap>
+  </EuiPopover>
+</Fragment>
+`;
+
+exports[`Should render icon select with custom icons 1`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <EuiFormControlLayout
+        compressed={true}
+        fullWidth={true}
+        icon={
+          Object {
+            "side": "right",
+            "type": "arrowDown",
+          }
+        }
+        onKeyDown={[Function]}
+        readOnly={true}
+      >
+        <EuiFieldText
+          compressed={true}
+          fullWidth={true}
+          onClick={[Function]}
+          onKeyDown={[Function]}
+          prepend={
+            <SymbolIcon
+              className="mapIconSelectSymbol__inputButton"
+              fill="rgb(52, 55, 65)"
+              svg="<svg width=\\"200\\" height=\\"250\\" xmlns=\\"http://www.w3.org/2000/svg\\"><path stroke=\\"#000\\" fill=\\"transparent\\" stroke-width=\\"5\\" d=\\"M10 10h30v30H10z\\"/></svg>"
+              symbolId="__kbn__custom_icon_sdf__foobar"
+            />
+          }
+          readOnly={true}
+          value="My Custom Icon"
+        />
+      </EuiFormControlLayout>
+    }
+    closePopover={[Function]}
+    display="block"
+    hasArrow={true}
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="s"
+  >
+    <EuiFocusTrap
+      clickOutsideDisables={true}
+    >
+      <EuiSelectable
+        compressed={true}
+        isPreFiltered={false}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "isGroupLabel": true,
+              "label": "Custom icons",
+            },
+            Object {
+              "key": "__kbn__custom_icon_sdf__foobar",
+              "label": "My Custom Icon",
+              "prepend": <SymbolIcon
+                fill="rgb(52, 55, 65)"
+                svg="<svg width=\\"200\\" height=\\"250\\" xmlns=\\"http://www.w3.org/2000/svg\\"><path stroke=\\"#000\\" fill=\\"transparent\\" stroke-width=\\"5\\" d=\\"M10 10h30v30H10z\\"/></svg>"
+                symbolId="__kbn__custom_icon_sdf__foobar"
+              />,
+            },
+            Object {
+              "key": "__kbn__custom_icon_sdf__bizzbuzz",
+              "label": "My Other Custom Icon",
+              "prepend": <SymbolIcon
+                fill="rgb(52, 55, 65)"
+                svg="<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?><svg xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"531.74\\" height=\\"460.5\\" overflow=\\"visible\\" xml:space=\\"preserve\\"><path stroke=\\"#000\\" d=\\"M.866 460 265.87 1l265.004 459z\\"/></svg>"
+                symbolId="__kbn__custom_icon_sdf__bizzbuzz"
+              />,
+            },
+            Object {
+              "isGroupLabel": true,
+              "label": "Kibana icons",
+            },
+            Object {
+              "key": "symbol1",
+              "label": "symbol1",
+              "prepend": <SymbolIcon
+                fill="rgb(52, 55, 65)"
+                svg="<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>
+<svg version=\\"1.1\\" id=\\"square-15\\" xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"15px\\" height=\\"15px\\" viewBox=\\"0 0 15 15\\">
+  <path d=\\"M13,14H2c-0.5523,0-1-0.4477-1-1V2c0-0.5523,0.4477-1,1-1h11c0.5523,0,1,0.4477,1,1v11C14,13.5523,13.5523,14,13,14z\\"/>
+</svg>"
+                symbolId="symbol1"
+              />,
+            },
+            Object {
+              "key": "symbol2",
+              "label": "symbol2",
+              "prepend": <SymbolIcon
+                fill="rgb(52, 55, 65)"
+                svg="<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>
+<svg version=\\"1.1\\" id=\\"triangle-15\\" xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"15px\\" height=\\"15px\\" viewBox=\\"0 0 15 15\\">
+  <path id=\\"path21090-9\\" d=\\"M7.5385,2&#xA;&#x9;C7.2437,2,7.0502,2.1772,6.9231,2.3846l-5.8462,9.5385C1,12,1,12.1538,1,12.3077C1,12.8462,1.3846,13,1.6923,13h11.6154&#xA;&#x9;C13.6923,13,14,12.8462,14,12.3077c0-0.1538,0-0.2308-0.0769-0.3846L8.1538,2.3846C8.028,2.1765,7.7882,2,7.5385,2z\\"/>
+</svg>"
+                symbolId="symbol2"
+              />,
+            },
+          ]
+        }
+        searchable={true}
+        singleSelection={false}
+      >
+        <Component />
+      </EuiSelectable>
+    </EuiFocusTrap>
+  </EuiPopover>
+</Fragment>
 `;

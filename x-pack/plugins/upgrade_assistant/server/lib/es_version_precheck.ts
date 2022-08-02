@@ -13,7 +13,7 @@ import {
   KibanaResponseFactory,
   RequestHandler,
   RequestHandlerContext,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import { versionService } from './version';
 
 /**
@@ -65,7 +65,7 @@ export const esVersionCheck = async (
   ctx: RequestHandlerContext,
   response: KibanaResponseFactory
 ) => {
-  const { client } = ctx.core.elasticsearch;
+  const { client } = (await ctx.core).elasticsearch;
   let allNodeVersions: SemVer[];
 
   try {

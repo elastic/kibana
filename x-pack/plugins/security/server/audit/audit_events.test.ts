@@ -7,7 +7,7 @@
 
 import { URL } from 'url';
 
-import { httpServerMock } from 'src/core/server/mocks';
+import { httpServerMock } from '@kbn/core/server/mocks';
 
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { AuthenticationResult } from '../authentication';

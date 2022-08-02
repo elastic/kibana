@@ -9,10 +9,11 @@ import { navigateTo } from '../../tasks/navigation';
 import { login } from '../../tasks/login';
 import { checkResults, inputQuery, submitQuery } from '../../tasks/live_query';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
+import { ROLES } from '../../test';
 
-describe('ALL - Metrics', () => {
+describe('ALL - Inventory', () => {
   beforeEach(() => {
-    login();
+    login(ROLES.soc_manager);
     navigateTo('/app/osquery');
   });
   before(() => {
@@ -24,7 +25,7 @@ describe('ALL - Metrics', () => {
 
   it('should be able to run the query', () => {
     cy.getBySel('toggleNavButton').click();
-    cy.contains('Metrics').click();
+    cy.contains('Infrastructure').click();
 
     cy.wait(1000);
 
@@ -37,7 +38,7 @@ describe('ALL - Metrics', () => {
   });
   it('should be able to run the previously saved query', () => {
     cy.getBySel('toggleNavButton').click();
-    cy.getBySel('collapsibleNavAppLink').contains('Metrics').click();
+    cy.getBySel('collapsibleNavAppLink').contains('Infrastructure').click();
 
     cy.wait(500);
     cy.getBySel('nodeContainer').click();

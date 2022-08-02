@@ -7,20 +7,18 @@
 
 import { filter, map } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import { PackSavedObjectAttributes } from '../../common/types';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { IRouter } from '@kbn/core/server';
+import type { PackSavedObjectAttributes } from '../../common/types';
 import { PLUGIN_ID } from '../../../common';
 
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../fleet/common';
-import { IRouter } from '../../../../../../src/core/server';
 import { packSavedObjectType } from '../../../common/types';
-import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertSOQueriesToPack } from './utils';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
+export const readPackRoute = (router: IRouter) => {
   router.get(
     {
-      path: '/internal/osquery/packs/{id}',
+      path: '/api/osquery/packs/{id}',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -29,7 +27,8 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
       options: { tags: [`access:${PLUGIN_ID}-readPacks`] },
     },
     async (context, request, response) => {
-      const savedObjectsClient = context.core.savedObjects.client;
+      const coreContext = await context.core;
+      const savedObjectsClient = coreContext.savedObjects.client;
 
       const { attributes, references, ...rest } =
         await savedObjectsClient.get<PackSavedObjectAttributes>(
@@ -42,11 +41,13 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
 
       return response.ok({
         body: {
-          ...rest,
-          ...attributes,
-          queries: convertSOQueriesToPack(attributes.queries),
-          policy_ids: policyIds,
-          read_only: attributes.version !== undefined && osqueryPackAssetReference,
+          data: {
+            ...rest,
+            ...attributes,
+            queries: convertSOQueriesToPack(attributes.queries),
+            policy_ids: policyIds,
+            read_only: attributes.version !== undefined && osqueryPackAssetReference,
+          },
         },
       });
     }

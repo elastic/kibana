@@ -6,13 +6,13 @@
  */
 
 import _ from 'lodash';
-import { loggingSystemMock, elasticsearchServiceMock } from 'src/core/server/mocks';
-import { AlertServicesMock, alertsMock } from '../../../../../alerting/server/mocks';
+import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import sampleAggsJsonResponse from './es_sample_response.json';
 import sampleShapesJsonResponse from './es_sample_response_shapes.json';
 import sampleAggsJsonResponseWithNesting from './es_sample_response_with_nesting.json';
 import {
-  getActiveEntriesAndGenerateAlerts,
+  getEntitiesAndGenerateAlerts,
   transformResults,
   getGeoContainmentExecutor,
 } from '../geo_containment';
@@ -170,7 +170,7 @@ describe('geo_containment', () => {
     });
   });
 
-  describe('getActiveEntriesAndGenerateAlerts', () => {
+  describe('getEntitiesAndGenerateAlerts', () => {
     const testAlertActionArr: unknown[] = [];
     beforeEach(() => {
       jest.clearAllMocks();
@@ -252,14 +252,14 @@ describe('geo_containment', () => {
 
     it('should use currently active entities if no older entity entries', () => {
       const emptyPrevLocationMap = new Map();
-      const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
+      const { activeEntities } = getEntitiesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMap,
         alertFactory(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
-      expect(allActiveEntriesMap).toEqual(currLocationMap);
+      expect(activeEntities).toEqual(currLocationMap);
       expect(testAlertActionArr).toMatchObject(expectedAlertResults);
     });
 
@@ -277,14 +277,14 @@ describe('geo_containment', () => {
           ],
         ],
       ]);
-      const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
+      const { activeEntities } = getEntitiesAndGenerateAlerts(
         prevLocationMapWithIdenticalEntityEntry,
         currLocationMap,
         alertFactory(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
-      expect(allActiveEntriesMap).toEqual(currLocationMap);
+      expect(activeEntities).toEqual(currLocationMap);
       expect(testAlertActionArr).toMatchObject(expectedAlertResults);
     });
 
@@ -316,15 +316,15 @@ describe('geo_containment', () => {
         ...expectedAlertResults,
       ];
 
-      const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
+      const { activeEntities } = getEntitiesAndGenerateAlerts(
         prevLocationMapWithNonIdenticalEntityEntry,
         currLocationMap,
         alertFactory(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
-      expect(allActiveEntriesMap).not.toEqual(currLocationMap);
-      expect(allActiveEntriesMap.has('d')).toBeTruthy();
+      expect(activeEntities).not.toEqual(currLocationMap);
+      expect(activeEntities.has('d')).toBeTruthy();
       expect(testAlertActionArr).toMatchObject(expectedAlertResultsPlusD);
     });
 
@@ -339,14 +339,29 @@ describe('geo_containment', () => {
         },
       ]);
       expect(currLocationMapWithOther).not.toEqual(currLocationMap);
-      const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
+      const { activeEntities, inactiveEntities } = getEntitiesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMapWithOther,
         alertFactory(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
-      expect(allActiveEntriesMap).toEqual(currLocationMap);
+      expect(activeEntities).toEqual(currLocationMap);
+      expect(inactiveEntities).toEqual(
+        new Map([
+          [
+            'd',
+            [
+              {
+                location: [0, 0],
+                shapeLocationId: 'other',
+                dateInShape: 'Wed Dec 09 2020 14:31:31 GMT-0700 (Mountain Standard Time)',
+                docId: 'docId1',
+              },
+            ],
+          ],
+        ])
+      );
       expect(testAlertActionArr).toMatchObject(expectedAlertResults);
     });
 
@@ -372,7 +387,7 @@ describe('geo_containment', () => {
           docId: 'docId3',
         },
       ]);
-      getActiveEntriesAndGenerateAlerts(
+      getEntitiesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMapWithThreeMore,
         alertFactory(contextKeys, testAlertActionArr),
@@ -409,14 +424,14 @@ describe('geo_containment', () => {
         },
       ]);
       expect(currLocationMapWithOther).not.toEqual(currLocationMap);
-      const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
+      const { activeEntities } = getEntitiesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMapWithOther,
         alertFactory(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
-      expect(allActiveEntriesMap).toEqual(currLocationMap);
+      expect(activeEntities).toEqual(currLocationMap);
     });
 
     it('should return entity as active entry if "other" not the latest location but remove "other" and earlier entries', () => {
@@ -441,14 +456,14 @@ describe('geo_containment', () => {
           docId: 'docId1',
         },
       ]);
-      const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
+      const { activeEntities } = getEntitiesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMapWithOther,
         alertFactory(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
-      expect(allActiveEntriesMap).toEqual(
+      expect(activeEntities).toEqual(
         new Map([...currLocationMap]).set('d', [
           {
             location: [0, 0],
@@ -525,8 +540,8 @@ describe('geo_containment', () => {
       }
     });
 
-    const alertServicesWithSearchMock: AlertServicesMock = {
-      ...alertsMock.createAlertServices(),
+    const alertServicesWithSearchMock: RuleExecutorServicesMock = {
+      ...alertsMock.createRuleExecutorServices(),
       // @ts-ignore
       alertFactory: alertFactory(contextKeys, testAlertActionArr),
       // @ts-ignore

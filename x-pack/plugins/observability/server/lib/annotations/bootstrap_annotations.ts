@@ -10,8 +10,8 @@ import {
   PluginInitializerContext,
   KibanaRequest,
   RequestHandlerContext,
-} from 'kibana/server';
-import { LicensingApiRequestHandlerContext } from '../../../../licensing/server';
+} from '@kbn/core/server';
+import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import { createAnnotationsClient } from './create_annotations_client';
 import { registerAnnotationAPIs } from './register_annotation_apis';
 
@@ -25,7 +25,7 @@ export type ScopedAnnotationsClientFactory = Awaited<
   ReturnType<typeof bootstrapAnnotations>
 >['getScopedAnnotationsClient'];
 
-export type ScopedAnnotationsClient = ReturnType<ScopedAnnotationsClientFactory>;
+export type ScopedAnnotationsClient = Awaited<ReturnType<ScopedAnnotationsClientFactory>>;
 export type AnnotationsAPI = Awaited<ReturnType<typeof bootstrapAnnotations>>;
 
 export async function bootstrapAnnotations({ index, core, context }: Params) {
@@ -38,15 +38,19 @@ export async function bootstrapAnnotations({ index, core, context }: Params) {
   });
 
   return {
-    getScopedAnnotationsClient: (
-      requestContext: RequestHandlerContext & { licensing: LicensingApiRequestHandlerContext },
+    getScopedAnnotationsClient: async (
+      requestContext: RequestHandlerContext & {
+        licensing: Promise<LicensingApiRequestHandlerContext>;
+      },
       request: KibanaRequest
     ) => {
+      const esClient = (await requestContext.core).elasticsearch.client;
+      const { license } = await requestContext.licensing;
       return createAnnotationsClient({
         index,
-        esClient: requestContext.core.elasticsearch.client.asCurrentUser,
+        esClient: esClient.asCurrentUser,
         logger,
-        license: requestContext.licensing?.license,
+        license,
       });
     },
   };

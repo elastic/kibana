@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { SubFeatureConfig } from '../../../../../features/common';
-import { SubFeature } from '../../../../../features/common';
+import type { SubFeatureConfig } from '@kbn/features-plugin/common';
+import { SubFeature } from '@kbn/features-plugin/common';
+
 import { SubFeaturePrivilege } from './sub_feature_privilege';
 import { SubFeaturePrivilegeGroup } from './sub_feature_privilege_group';
 

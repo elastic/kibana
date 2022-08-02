@@ -3,12 +3,12 @@
 .mapContainer {
   flex-grow: 1;
 
-  .mapboxgl-ctrl-top-left .mapboxgl-ctrl {
+  .maplibregl-ctrl-top-left .maplibregl-ctrl {
     margin-left: $euiSizeM;
     margin-top: $euiSizeM;
   }
 
-  .mapboxgl-ctrl-group:not(:empty) {
+  .maplibregl-ctrl-group:not(:empty) {
     @include euiBottomShadowLarge;
     @include mapToolbarButtonGroupBorderRadius;
     background-color: $euiColorEmptyShade;
@@ -27,7 +27,7 @@
     }
   }
 
-  .mapboxgl-ctrl button:not(:disabled) {
+  .maplibregl-ctrl button:not(:disabled) {
     transition: background $euiAnimSpeedNormal ease-in-out;
 
     &:hover {
@@ -35,14 +35,14 @@
     }
   }
 
-  .mapboxgl-ctrl-group button:focus:focus-visible {
+  .maplibregl-ctrl-group button:focus:focus-visible {
     box-shadow: none;
   }
 }
 
 // Custom SVG as background for zoom controls based off of EUI glyphs plusInCircleFilled and minusInCircleFilled
 // Also fixes dark mode
-.mapboxgl-ctrl-zoom-in .mapboxgl-ctrl-icon {
+.maplibregl-ctrl-zoom-in .maplibregl-ctrl-icon {
   // sass-lint:disable-block no-important
   background-repeat: no-repeat !important;
   // sass-lint:disable-block quotes
@@ -50,7 +50,7 @@
   background-position: center !important;
 }
 
-.mapboxgl-ctrl-zoom-out .mapboxgl-ctrl-icon {
+.maplibregl-ctrl-zoom-out .maplibregl-ctrl-icon {
   // sass-lint:disable-block no-important
   background-repeat: no-repeat !important;
   // sass-lint:disable-block quotes

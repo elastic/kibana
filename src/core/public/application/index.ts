@@ -9,8 +9,6 @@
 export { ApplicationService } from './application_service';
 export { ScopedHistory } from './scoped_history';
 export { AppNavLinkStatus, AppStatus } from './types';
-
-export type { Capabilities } from './capabilities';
 export type {
   App,
   AppMount,
@@ -28,6 +26,7 @@ export type {
   AppLeaveDefaultAction,
   AppLeaveConfirmAction,
   NavigateToAppOptions,
+  NavigateToUrlOptions,
   PublicAppInfo,
   PublicAppDeepLinkInfo,
   // Internal types

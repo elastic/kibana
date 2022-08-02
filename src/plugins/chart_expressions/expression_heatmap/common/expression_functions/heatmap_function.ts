@@ -7,13 +7,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DatatableColumn } from '../../../../expressions/public';
-import { ExpressionValueVisDimension } from '../../../../visualizations/common';
+import type { DatatableColumn } from '@kbn/expressions-plugin/public';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import {
   prepareLogTable,
   Dimension,
   validateAccessor,
-} from '../../../../visualizations/common/utils';
+} from '@kbn/visualizations-plugin/common/utils';
 import { HeatmapExpressionFunctionDefinition } from '../types';
 import {
   EXPRESSION_HEATMAP_NAME,
@@ -161,6 +161,9 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
     validateAccessor(args.splitColumnAccessor, data.columns);
 
     if (handlers?.inspectorAdapters?.tables) {
+      handlers.inspectorAdapters.tables.reset();
+      handlers.inspectorAdapters.tables.allowCsvExport = true;
+
       const argsTable: Dimension[] = [];
       if (args.valueAccessor) {
         prepareHeatmapLogTable(

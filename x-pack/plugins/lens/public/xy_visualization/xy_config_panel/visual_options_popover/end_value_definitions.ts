@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { EndValue } from '../../../../../../../src/plugins/chart_expressions/expression_xy/common';
+import type { EndValue } from '@kbn/expression-xy-plugin/common';
 
 export const endValueDefinitions: Array<{ id: EndValue } & Record<string, string>> = [
   {

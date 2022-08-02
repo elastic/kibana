@@ -7,7 +7,7 @@
  */
 import { SemVer } from 'semver';
 
-import { kibanaResponseFactory } from '../../../../../../../core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
 import { getProxyRouteHandlerDeps } from './mocks'; // import need to come first
 import { createResponseStub } from './stubs'; // import needs to come first
 import { MAJOR_VERSION } from '../../../../../common/constants';

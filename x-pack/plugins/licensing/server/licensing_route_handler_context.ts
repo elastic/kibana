@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { IContextProvider, StartServicesAccessor } from 'src/core/server';
-import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+import type { IContextProvider, StartServicesAccessor } from '@kbn/core/server';
+import { firstValueFrom, Observable } from 'rxjs';
 
 import type { ILicense } from '../common/types';
 import type { LicensingPluginStart, LicensingRequestHandlerContext } from './types';
@@ -23,7 +22,7 @@ export function createRouteHandlerContext(
 ): IContextProvider<LicensingRequestHandlerContext, 'licensing'> {
   return async function licensingRouteHandlerContext() {
     const [, , { featureUsage }] = await getStartServices();
-    const license = await license$.pipe(take(1)).toPromise();
+    const license = await firstValueFrom(license$);
 
     return {
       featureUsage,

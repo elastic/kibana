@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 const startMock = coreMock.createStart();
 
 import { mount } from 'enzyme';

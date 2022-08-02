@@ -9,11 +9,11 @@ import rison, { RisonValue } from 'rison-node';
 import {
   API_GET_ILM_POLICY_STATUS,
   API_MIGRATE_ILM_POLICY_URL,
-} from '../../../plugins/reporting/common/constants';
-import { JobParamsCSV } from '../../../plugins/reporting/server/export_types/csv_searchsource/types';
-import { JobParamsDownloadCSV } from '../../../plugins/reporting/server/export_types/csv_searchsource_immediate/types';
-import { JobParamsPNGDeprecated } from '../../../plugins/reporting/server/export_types/png/types';
-import { JobParamsPDFDeprecated } from '../../../plugins/reporting/server/export_types/printable_pdf/types';
+} from '@kbn/reporting-plugin/common/constants';
+import { JobParamsCSV } from '@kbn/reporting-plugin/server/export_types/csv_searchsource/types';
+import { JobParamsDownloadCSV } from '@kbn/reporting-plugin/server/export_types/csv_searchsource_immediate/types';
+import { JobParamsPNGDeprecated } from '@kbn/reporting-plugin/server/export_types/png/types';
+import { JobParamsPDFDeprecated } from '@kbn/reporting-plugin/server/export_types/printable_pdf/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 function removeWhitespace(str: string) {

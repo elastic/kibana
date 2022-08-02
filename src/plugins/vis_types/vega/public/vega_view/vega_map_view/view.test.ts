@@ -14,11 +14,11 @@ import { VegaParser } from '../../data_model/vega_parser';
 import { TimeCache } from '../../data_model/time_cache';
 import { SearchAPI } from '../../data_model/search_api';
 import vegaMap from '../../test_utils/vega_map_test.json';
-import { coreMock } from '../../../../../../core/public/mocks';
-import { dataPluginMock } from '../../../../../data/public/mocks';
-import { dataViewPluginMocks } from '../../../../../data_views/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
-import type { IServiceSettings } from '../vega_map_view/service_settings/service_settings_types';
+import type { IServiceSettings } from './service_settings/service_settings_types';
 
 import {
   setInjectedVars,
@@ -29,32 +29,45 @@ import {
 } from '../../services';
 import { initVegaLayer, initTmsRasterLayer } from './layers';
 
-import { mapboxgl } from '@kbn/mapbox-gl';
+import { maplibregl } from '@kbn/mapbox-gl';
 
-jest.mock('@kbn/mapbox-gl', () => ({
-  mapboxgl: {
-    setRTLTextPlugin: jest.fn(),
-    Map: jest.fn().mockImplementation(() => ({
-      getLayer: () => '',
-      removeLayer: jest.fn(),
-      once: (eventName: string, handler: Function) => handler(),
-      remove: () => jest.fn(),
-      getCanvas: () => ({ clientWidth: 512, clientHeight: 512 }),
-      getCenter: () => ({ lat: 20, lng: 20 }),
-      getZoom: () => 3,
-      addControl: jest.fn(),
-      addLayer: jest.fn(),
-      dragRotate: {
-        disable: jest.fn(),
+jest.mock('@kbn/mapbox-gl', () => {
+  const zoomTo = jest.fn();
+  const setCenter = jest.fn();
+  const fitBounds = jest.fn();
+  return {
+    maplibregl: {
+      mocks: {
+        zoomTo,
+        setCenter,
+        fitBounds,
       },
-      touchZoomRotate: {
-        disableRotation: jest.fn(),
-      },
-    })),
-    MapboxOptions: jest.fn(),
-    NavigationControl: jest.fn(),
-  },
-}));
+      setRTLTextPlugin: jest.fn(),
+      Map: jest.fn().mockImplementation(() => ({
+        getLayer: () => '',
+        removeLayer: jest.fn(),
+        once: (eventName: string, handler: Function) => handler(),
+        remove: () => jest.fn(),
+        getCanvas: () => ({ clientWidth: 512, clientHeight: 512 }),
+        getCenter: () => ({ lat: 20, lng: 20 }),
+        getZoom: () => 3,
+        zoomTo,
+        setCenter,
+        fitBounds,
+        addControl: jest.fn(),
+        addLayer: jest.fn(),
+        dragRotate: {
+          disable: jest.fn(),
+        },
+        touchZoomRotate: {
+          disableRotation: jest.fn(),
+        },
+      })),
+      MapboxOptions: jest.fn(),
+      NavigationControl: jest.fn(),
+    },
+  };
+});
 
 jest.mock('./layers', () => ({
   initVegaLayer: jest.fn(),
@@ -103,7 +116,6 @@ describe('vega_map_view/view', () => {
     let vegaParser: VegaParser;
 
     setInjectedVars({
-      emsTileLayerId: {},
       enableExternalUrls: true,
     });
     setData(dataPluginStart);
@@ -137,7 +149,6 @@ describe('vega_map_view/view', () => {
           search: dataPluginStart.search,
           indexPatterns: dataViewsStart,
           uiSettings: coreStart.uiSettings,
-          injectedMetadata: coreStart.injectedMetadata,
         }),
         new TimeCache(dataPluginStart.query.timefilter.timefilter, 0),
         {},
@@ -158,7 +169,7 @@ describe('vega_map_view/view', () => {
       await vegaMapView.init();
 
       const { longitude, latitude, scrollWheelZoom } = vegaMapView._parser.mapConfig;
-      expect(mapboxgl.Map).toHaveBeenCalledWith({
+      expect(maplibregl.Map).toHaveBeenCalledWith({
         style: {
           version: 8,
           sources: {},
@@ -182,7 +193,7 @@ describe('vega_map_view/view', () => {
       await vegaMapView.init();
 
       const { longitude, latitude, scrollWheelZoom } = vegaMapView._parser.mapConfig;
-      expect(mapboxgl.Map).toHaveBeenCalledWith({
+      expect(maplibregl.Map).toHaveBeenCalledWith({
         style: {
           version: 8,
           sources: {},
@@ -204,7 +215,59 @@ describe('vega_map_view/view', () => {
       const vegaMapView = await createVegaMapView();
       await vegaMapView.init();
 
-      expect(mapboxgl.NavigationControl).toHaveBeenCalled();
+      expect(maplibregl.NavigationControl).toHaveBeenCalled();
+    });
+
+    describe('setMapView', () => {
+      let vegaMapView: VegaMapView;
+      beforeEach(async () => {
+        vegaMapView = await createVegaMapView();
+        await vegaMapView.init();
+        maplibregl.mocks.setCenter.mockReset();
+        maplibregl.mocks.zoomTo.mockReset();
+        maplibregl.mocks.fitBounds.mockReset();
+      });
+
+      test('should set just lat lng', async () => {
+        vegaMapView.setMapViewHandler(1, 2);
+        expect(maplibregl.mocks.setCenter).toHaveBeenCalledWith({ lat: 1, lng: 2 });
+      });
+
+      test('should set just lng lat via array', async () => {
+        vegaMapView.setMapViewHandler([1, 2]);
+        expect(maplibregl.mocks.setCenter).toHaveBeenCalledWith({ lat: 2, lng: 1 });
+      });
+
+      test('should set lat lng and zoom', async () => {
+        vegaMapView.setMapViewHandler(1, 2, 6);
+        expect(maplibregl.mocks.setCenter).toHaveBeenCalledWith({ lat: 1, lng: 2 });
+        expect(maplibregl.mocks.zoomTo).toHaveBeenCalledWith(6);
+      });
+
+      test('should set bounds', async () => {
+        vegaMapView.setMapViewHandler([
+          [1, 2],
+          [6, 7],
+        ]);
+        expect(maplibregl.mocks.fitBounds).toHaveBeenCalledWith([
+          { lat: 2, lng: 1 },
+          { lat: 7, lng: 6 },
+        ]);
+      });
+
+      test('should throw on invalid input', async () => {
+        expect(() => {
+          vegaMapView.setMapViewHandler(undefined);
+        }).toThrow();
+
+        expect(() => {
+          vegaMapView.setMapViewHandler(['a', 'b'] as unknown as [number, number]);
+        }).toThrow();
+
+        expect(() => {
+          vegaMapView.setMapViewHandler([1, 2, 3, 4, 5] as unknown as [number, number]);
+        }).toThrow();
+      });
     });
   });
 });

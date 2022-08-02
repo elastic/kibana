@@ -26,12 +26,12 @@ interface SaveDashboardOptions {
 }
 
 export class DashboardPageObject extends FtrService {
+  private readonly config = this.ctx.getService('config');
   private readonly log = this.ctx.getService('log');
   private readonly find = this.ctx.getService('find');
   private readonly retry = this.ctx.getService('retry');
   private readonly browser = this.ctx.getService('browser');
   private readonly globalNav = this.ctx.getService('globalNav');
-  private readonly esArchiver = this.ctx.getService('esArchiver');
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly dashboardAddPanel = this.ctx.getService('dashboardAddPanel');
@@ -43,12 +43,17 @@ export class DashboardPageObject extends FtrService {
   private readonly visualize = this.ctx.getPageObject('visualize');
   private readonly discover = this.ctx.getPageObject('discover');
 
-  async initTests({
-    kibanaIndex = 'test/functional/fixtures/es_archiver/dashboard/legacy',
-    defaultIndex = 'logstash-*',
-  } = {}) {
+  private readonly logstashIndex = this.config.get('esTestCluster.ccs')
+    ? 'ftr-remote:logstash-*'
+    : 'logstash-*';
+  private readonly kibanaIndex = this.config.get('esTestCluster.ccs')
+    ? 'test/functional/fixtures/kbn_archiver/ccs/dashboard/legacy/legacy.json'
+    : 'test/functional/fixtures/kbn_archiver/dashboard/legacy/legacy.json';
+
+  async initTests({ kibanaIndex = this.kibanaIndex, defaultIndex = this.logstashIndex } = {}) {
     this.log.debug('load kibana index with visualizations and log data');
-    await this.esArchiver.load(kibanaIndex);
+    await this.kibanaServer.savedObjects.cleanStandardList();
+    await this.kibanaServer.importExport.load(kibanaIndex);
     await this.kibanaServer.uiSettings.replace({ defaultIndex });
     await this.common.navigateToApp('dashboard');
   }
@@ -143,10 +148,10 @@ export class DashboardPageObject extends FtrService {
     await this.testSubjects.click(`edit-unsaved-${title.split(' ').join('-')}`);
   }
 
-  public async clickUnsavedChangesDiscard(title: string, confirmDiscard = true) {
-    this.log.debug(`Click Unsaved Changes Discard for `, title);
-    await this.testSubjects.existOrFail(`discard-unsaved-${title.split(' ').join('-')}`);
-    await this.testSubjects.click(`discard-unsaved-${title.split(' ').join('-')}`);
+  public async clickUnsavedChangesDiscard(testSubject: string, confirmDiscard = true) {
+    this.log.debug(`Click Unsaved Changes Discard for `, testSubject);
+    await this.testSubjects.existOrFail(testSubject);
+    await this.testSubjects.click(testSubject);
     if (confirmDiscard) {
       await this.common.clickConfirmOnModal();
     } else {
@@ -561,7 +566,9 @@ export class DashboardPageObject extends FtrService {
     return await Promise.all(titleObjects.map(async (title) => await title.getVisibleText()));
   }
 
-  // returns an array of Boolean values - true if the panel title is visible in view mode, false if it is not
+  /**
+   * @return An array of boolean values - true if the panel title is visible in view mode, false if it is not
+   */
   public async getVisibilityOfPanelTitles() {
     this.log.debug('in getVisibilityOfPanels');
     // only works if the dashboard is in view mode
@@ -570,9 +577,12 @@ export class DashboardPageObject extends FtrService {
       await this.clickCancelOutOfEditMode();
     }
     const visibilities: boolean[] = [];
-    const titleObjects = await this.testSubjects.findAll('dashboardPanelTitle__wrapper');
-    for (const titleObject of titleObjects) {
-      const exists = !(await titleObject.elementHasClass('embPanel__header--floater'));
+    const panels = await this.getDashboardPanels();
+    for (const panel of panels) {
+      const exists = await this.find.descendantExistsByCssSelector(
+        'figcaption.embPanel__header',
+        panel
+      );
       visibilities.push(exists);
     }
     // return to edit mode if a switch to view mode above was necessary
@@ -666,6 +676,11 @@ export class DashboardPageObject extends FtrService {
     const count = await this.getSharedItemsCount();
     // eslint-disable-next-line radix
     await this.renderable.waitForRender(parseInt(count));
+  }
+
+  public async verifyNoRenderErrors() {
+    const errorEmbeddables = await this.testSubjects.findAll('embeddableStackError');
+    expect(errorEmbeddables.length).to.be(0);
   }
 
   public async getSharedContainerData() {

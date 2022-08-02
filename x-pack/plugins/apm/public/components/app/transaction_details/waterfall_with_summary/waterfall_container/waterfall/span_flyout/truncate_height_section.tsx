@@ -8,7 +8,7 @@
 import { EuiIcon, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment, ReactNode, useEffect, useRef, useState } from 'react';
-import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 const ToggleButtonContainer = euiStyled.div`
   margin-top: ${({ theme }) => theme.eui.euiSizeS}

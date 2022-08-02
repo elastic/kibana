@@ -8,6 +8,7 @@
 import React from 'react';
 
 import { createDnsRowRenderer } from '../../timeline/body/renderers/system/generic_row_renderer';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { mockEndgameDnsRequest } from '../../../../common/mock/mock_endgame_ecs_data';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
@@ -17,7 +18,6 @@ const SystemDnsExampleComponent: React.FC = () => {
   return (
     <>
       {systemDnsRowRenderer.renderRow({
-        browserFields: {},
         data: mockEndgameDnsRequest,
         isDraggable: false,
         timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,

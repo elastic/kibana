@@ -29,7 +29,7 @@ const Field = styled.div.attrs<WidthProp>(({ width }) => {
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
-  padding: ${({ theme }) => theme.eui.paddingSizes.xs};
+  padding: ${({ theme }) => theme.eui.euiSizeXS};
 `;
 Field.displayName = 'Field';
 

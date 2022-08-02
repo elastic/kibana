@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Dimensions } from '../../../../../xy/public';
+import type { Dimensions } from '@kbn/vis-type-xy-plugin/public';
 
 import { makeFakeXAspect } from './_fake_x_aspect';
 import { Aspects } from './point_series';

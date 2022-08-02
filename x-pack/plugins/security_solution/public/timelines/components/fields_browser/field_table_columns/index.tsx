@@ -18,11 +18,8 @@ import {
   EuiText,
   EuiHighlight,
 } from '@elastic/eui';
-import { Action } from '@elastic/eui/src/components/basic_table/action_types';
-import type {
-  BrowserFieldItem,
-  GetFieldTableColumns,
-} from '../../../../../../timelines/common/types';
+import type { Action } from '@elastic/eui/src/components/basic_table/action_types';
+import type { BrowserFieldItem, GetFieldTableColumns } from '@kbn/timelines-plugin/common/types';
 
 import * as i18n from './translations';
 import {
@@ -31,7 +28,7 @@ import {
 } from '../../../../common/components/event_details/helpers';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import { EllipsisText } from '../../../../common/components/truncatable_text';
-import { OpenFieldEditor, OpenDeleteFieldModal } from '..';
+import type { OpenFieldEditor, OpenDeleteFieldModal } from '..';
 
 export interface UseFieldTableColumnsProps {
   hasFieldEditPermission: boolean;

@@ -240,6 +240,7 @@ export const userActions: CaseUserActionsResponse = [
       },
       settings: { syncAlerts: true },
       status: 'open',
+      severity: 'low',
       owner: SECURITY_SOLUTION_OWNER,
     },
     action_id: 'fd830c60-6646-11eb-a291-51bf6b175a53',

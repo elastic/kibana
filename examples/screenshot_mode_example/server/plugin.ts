@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, PluginInitializerContext, CoreSetup, Logger } from 'kibana/server';
-import { ScreenshotModePluginSetup } from '../../../src/plugins/screenshot_mode/server';
+import { Plugin, PluginInitializerContext, CoreSetup, Logger } from '@kbn/core/server';
+import { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 import { RouteDependencies } from './types';
 import { registerRoutes } from './routes';
 

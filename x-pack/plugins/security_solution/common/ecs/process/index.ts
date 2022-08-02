@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { CodeSignature, Ext } from '../file';
+import type { CodeSignature, Ext } from '../file';
 
 export interface ProcessEcs {
   Ext?: Ext;
   command_line?: string[];
   entity_id?: string[];
+  entry_leader?: ProcessSessionData;
+  session_leader?: ProcessSessionData;
+  group_leader?: ProcessSessionData;
   exit_code?: number[];
   hash?: ProcessHashData;
   parent?: ProcessParentData;
@@ -23,6 +26,12 @@ export interface ProcessEcs {
   title?: string[];
   thread?: Thread;
   working_directory?: string[];
+}
+
+export interface ProcessSessionData {
+  entity_id?: string[];
+  pid?: string[];
+  name?: string[];
 }
 
 export interface ProcessHashData {

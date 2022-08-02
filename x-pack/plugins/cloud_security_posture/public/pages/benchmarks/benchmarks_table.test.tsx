@@ -10,7 +10,6 @@ import { render, screen } from '@testing-library/react';
 import moment from 'moment';
 import { createCspBenchmarkIntegrationFixture } from '../../test/fixtures/csp_benchmark_integration';
 import { BenchmarksTable } from './benchmarks_table';
-import { TABLE_COLUMN_HEADERS } from './translations';
 import { TestProvider } from '../../test/test_provider';
 
 describe('<BenchmarksTable />', () => {
@@ -23,22 +22,6 @@ describe('<BenchmarksTable />', () => {
     loading: false,
     setQuery: jest.fn(),
   };
-
-  it('renders all column headers', () => {
-    render(
-      <BenchmarksTable
-        {...{
-          ...tableProps,
-          benchmarks: [],
-          totalItemCount: 0,
-        }}
-      />
-    );
-
-    Object.values(TABLE_COLUMN_HEADERS).forEach((columnHeader) => {
-      expect(screen.getByText(columnHeader)).toBeInTheDocument();
-    });
-  });
 
   it('renders integration name', () => {
     const item = createCspBenchmarkIntegrationFixture();

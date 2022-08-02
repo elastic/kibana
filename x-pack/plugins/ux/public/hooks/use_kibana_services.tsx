@@ -10,8 +10,8 @@ import {
   DocLinksStart,
   IUiSettingsClient,
   ApplicationStart,
-} from 'kibana/public';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+} from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApmPluginStartDeps } from '../plugin';
 
 interface UxKibanaServices extends ApmPluginStartDeps {

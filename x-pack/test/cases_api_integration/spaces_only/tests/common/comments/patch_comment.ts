@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { AttributesTypeUser, CommentType } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { AttributesTypeUser, CommentType } from '../../../../../../plugins/cases/common/api';
 import { nullUser, postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
 import {
   deleteCasesByESQuery,
@@ -22,7 +22,7 @@ import {
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const authSpace1 = getAuthWithSuperUser();
 
@@ -34,9 +34,9 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should patch a comment in space1', async () => {
-      const postedCase = await createCase(supertest, postCaseReq, 200, authSpace1);
+      const postedCase = await createCase(supertestWithoutAuth, postCaseReq, 200, authSpace1);
       const patchedCase = await createComment({
-        supertest,
+        supertest: supertestWithoutAuth,
         caseId: postedCase.id,
         params: postCommentUserReq,
         auth: authSpace1,
@@ -44,7 +44,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const newComment = 'Well I decided to update my comment. So what? Deal with it.';
       const updatedCase = await updateComment({
-        supertest,
+        supertest: supertestWithoutAuth,
         caseId: postedCase.id,
         req: {
           id: patchedCase.comments![0].id,
@@ -63,9 +63,9 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should not patch a comment in a different space', async () => {
-      const postedCase = await createCase(supertest, postCaseReq, 200, authSpace1);
+      const postedCase = await createCase(supertestWithoutAuth, postCaseReq, 200, authSpace1);
       const patchedCase = await createComment({
-        supertest,
+        supertest: supertestWithoutAuth,
         caseId: postedCase.id,
         params: postCommentUserReq,
         auth: authSpace1,
@@ -73,7 +73,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const newComment = 'Well I decided to update my comment. So what? Deal with it.';
       await updateComment({
-        supertest,
+        supertest: supertestWithoutAuth,
         caseId: postedCase.id,
         req: {
           id: patchedCase.comments![0].id,

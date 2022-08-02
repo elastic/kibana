@@ -23,9 +23,10 @@ export const getUserActionsRoute = createCasesRoute({
     }),
   },
   options: { deprecated: true },
-  handler: async ({ context, request, response, logger, kibanaVersion }) => {
+  handler: async ({ context, request, response }) => {
     try {
-      const casesClient = await context.cases.getCasesClient();
+      const caseContext = await context.cases;
+      const casesClient = await caseContext.getCasesClient();
       const caseId = request.params.case_id;
 
       return response.ok({

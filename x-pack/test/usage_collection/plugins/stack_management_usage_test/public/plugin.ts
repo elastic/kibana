@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, CoreStart } from 'kibana/public';
+import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import './types';
 
 export class StackManagementUsageTest implements Plugin {

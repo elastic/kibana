@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { pie } from '../';
+import { pie } from '..';
 import { Render } from '../../__stories__/render';
 
 const pieOptions = {

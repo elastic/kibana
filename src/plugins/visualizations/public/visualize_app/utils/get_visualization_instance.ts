@@ -5,25 +5,24 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { cloneDeep } from 'lodash';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
+import type { ExpressionValueError } from '@kbn/expressions-plugin/public';
+import { SavedFieldNotFound, SavedFieldTypeInvalidForAgg } from '@kbn/kibana-utils-plugin/common';
+import {
+  getSavedSearch,
+  SavedSearch,
+  throwErrorOnSavedSearchUrlConflict,
+} from '@kbn/discover-plugin/public';
+import { createVisAsync } from '../../vis_async';
+import { convertToSerializedVis, getSavedVisualization } from '../../utils/saved_visualize_utils';
 import {
   SerializedVis,
   Vis,
   VisSavedObject,
   VisualizeEmbeddableContract,
   VisualizeInput,
-} from 'src/plugins/visualizations/public';
-import { cloneDeep } from 'lodash';
-import type { SerializedSearchSourceFields } from 'src/plugins/data/public';
-import type { ExpressionValueError } from 'src/plugins/expressions/public';
-import { createVisAsync } from '../../vis_async';
-import { convertToSerializedVis, getSavedVisualization } from '../../utils/saved_visualize_utils';
-import { SavedFieldNotFound, SavedFieldTypeInvalidForAgg } from '../../../../kibana_utils/common';
-import {
-  getSavedSearch,
-  SavedSearch,
-  throwErrorOnSavedSearchUrlConflict,
-} from '../../../../discover/public';
+} from '../..';
 import type { VisualizeServices } from '../types';
 
 function isErrorRelatedToRuntimeFields(error: ExpressionValueError['error']) {
@@ -39,6 +38,25 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
   visualizeServices: VisualizeServices
 ) => {
   const { data, createVisEmbeddableFromObject, savedObjects, spaces } = visualizeServices;
+
+  let savedSearch: SavedSearch | undefined;
+
+  if (vis.data.savedSearchId) {
+    try {
+      savedSearch = await getSavedSearch(vis.data.savedSearchId, {
+        search: data.search,
+        savedObjectsClient: savedObjects.client,
+        spaces,
+      });
+    } catch (e) {
+      // skip this catch block
+    }
+
+    if (savedSearch) {
+      await throwErrorOnSavedSearchUrlConflict(savedSearch);
+    }
+  }
+
   const embeddableHandler = (await createVisEmbeddableFromObject(vis, {
     id: '',
     timeRange: data.query.timefilter.timefilter.getTime(),
@@ -54,18 +72,6 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
       );
     }
   });
-
-  let savedSearch: SavedSearch | undefined;
-
-  if (vis.data.savedSearchId) {
-    savedSearch = await getSavedSearch(vis.data.savedSearchId, {
-      search: data.search,
-      savedObjectsClient: savedObjects.client,
-      spaces,
-    });
-
-    await throwErrorOnSavedSearchUrlConflict(savedSearch);
-  }
 
   return { savedSearch, embeddableHandler };
 };
@@ -101,6 +107,7 @@ export const getVisualizationInstanceFromInput = async (
       // skip this catch block
     }
   }
+
   const { embeddableHandler, savedSearch } = await createVisualizeEmbeddableAndLinkSavedSearch(
     vis,
     visualizeServices

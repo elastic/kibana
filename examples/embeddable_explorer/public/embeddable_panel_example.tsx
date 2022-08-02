@@ -18,14 +18,14 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
-import { EmbeddableStart, IEmbeddable } from '../../../src/plugins/embeddable/public';
+import { EmbeddableStart, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import {
   HELLO_WORLD_EMBEDDABLE,
   TODO_EMBEDDABLE,
   BOOK_EMBEDDABLE,
   MULTI_TASK_TODO_EMBEDDABLE,
   SearchableListContainerFactory,
-} from '../../embeddable_examples/public';
+} from '@kbn/embeddable-examples-plugin/public';
 
 interface Props {
   embeddableServices: EmbeddableStart;

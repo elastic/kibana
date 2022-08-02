@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectAttributes } from 'kibana/server';
+import type { SavedObjectAttributes } from '@kbn/core/server';
 import { IEmbeddable } from './i_embeddable';
 import { EmbeddableFactory } from './embeddable_factory';
 import { EmbeddableInput, EmbeddableOutput } from '..';

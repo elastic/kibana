@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
-import { NotificationsStart } from 'kibana/public';
+import { NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { getOptionLabel } from '../../../../../../common/agent_configuration/all_option';
 import {

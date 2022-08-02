@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { termQuery } from '@kbn/observability-plugin/server';
 import {
   FAAS_COLDSTART,
   SERVICE_NAME,
@@ -12,7 +14,6 @@ import {
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
-import { kqlQuery, rangeQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { Coordinate } from '../../../typings/timeseries';
 import {
@@ -26,7 +27,6 @@ import {
   getColdstartAggregation,
   getTransactionColdstartRateTimeSeries,
 } from '../helpers/transaction_coldstart_rate';
-import { termQuery } from '../../../../observability/server';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 
 export async function getColdstartRate({

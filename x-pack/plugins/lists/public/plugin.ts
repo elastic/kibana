@@ -10,7 +10,7 @@ import {
   CoreStart,
   Plugin as IPlugin,
   PluginInitializerContext,
-} from '../../../../src/core/public';
+} from '@kbn/core/public';
 
 import { PluginSetup, PluginStart, SetupPlugins, StartPlugins } from './types';
 

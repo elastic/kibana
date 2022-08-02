@@ -9,7 +9,7 @@ import moment from 'moment';
 import fs from 'fs';
 import Path from 'path';
 import dedent from 'dedent';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { PluginApi, PluginMetaInfo } from '../types';
 import { getPluginApiDocId } from '../utils';
 

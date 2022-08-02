@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { dataViewPluginMocks } from '../../../../data_views/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { extractIndexPatternsFromSpec } from './extract_index_pattern';
 import { setDataViews } from '../services';
 

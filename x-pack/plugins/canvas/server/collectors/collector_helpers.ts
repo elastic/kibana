@@ -11,7 +11,7 @@
  */
 
 import { isAst } from '@kbn/interpreter';
-import { ExpressionAstNode } from '../../../../../src/plugins/expressions/common';
+import { ExpressionAstNode } from '@kbn/expressions-plugin/common';
 
 export function collectFns(ast: ExpressionAstNode, cb: (functionName: string) => void) {
   if (!isAst(ast)) {

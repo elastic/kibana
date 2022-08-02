@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObjectMigrationContext, SavedObjectMigrationFn } from 'kibana/server';
+import type { SavedObjectMigrationContext, SavedObjectMigrationFn } from '@kbn/core/server';
 
 import { replaceIndexPatternReference } from './replace_index_pattern_reference';
 

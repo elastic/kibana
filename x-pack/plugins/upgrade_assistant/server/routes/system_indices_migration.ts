@@ -20,57 +20,43 @@ export function registerSystemIndicesMigrationRoutes({
   // GET status of the system indices migration
   router.get(
     { path: `${API_BASE_PATH}/system_indices_migration`, validate: false },
-    versionCheckHandlerWrapper(
-      async (
-        {
-          core: {
-            elasticsearch: { client },
-          },
-        },
-        request,
-        response
-      ) => {
-        try {
-          const status = await getESSystemIndicesMigrationStatus(client.asCurrentUser);
+    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+      try {
+        const {
+          elasticsearch: { client },
+        } = await core;
+        const status = await getESSystemIndicesMigrationStatus(client.asCurrentUser);
 
-          return response.ok({
-            body: {
-              ...status,
-              features: status.features.filter(
-                (feature) => feature.migration_status !== 'NO_MIGRATION_NEEDED'
-              ),
-            },
-          });
-        } catch (error) {
-          return handleEsError({ error, response });
-        }
+        return response.ok({
+          body: {
+            ...status,
+            features: status.features.filter(
+              (feature) => feature.migration_status !== 'NO_MIGRATION_NEEDED'
+            ),
+          },
+        });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
-    )
+    })
   );
 
   // POST starts the system indices migration
   router.post(
     { path: `${API_BASE_PATH}/system_indices_migration`, validate: false },
-    versionCheckHandlerWrapper(
-      async (
-        {
-          core: {
-            elasticsearch: { client },
-          },
-        },
-        request,
-        response
-      ) => {
-        try {
-          const status = await startESSystemIndicesMigration(client.asCurrentUser);
+    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+      try {
+        const {
+          elasticsearch: { client },
+        } = await core;
+        const status = await startESSystemIndicesMigration(client.asCurrentUser);
 
-          return response.ok({
-            body: status,
-          });
-        } catch (error) {
-          return handleEsError({ error, response });
-        }
+        return response.ok({
+          body: status,
+        });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
-    )
+    })
   );
 }

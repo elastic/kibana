@@ -1,0 +1,10 @@
+{
+  "reporterEnabled": "mochawesome, mocha-junit-reporter",
+  "reporterOptions": {
+    "html": false,
+    "json": true,
+    "mochaFile": "../../../target/kibana-fleet/cypress/results/TEST-fleet-cypress-[hash].xml",
+    "overwrite": false,
+    "reportDir": "../../../target/kibana-fleet/cypress/results"
+  }
+}

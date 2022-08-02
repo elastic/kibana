@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { getCaseCommentsUrl } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { postCaseReq, getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
@@ -28,7 +29,6 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
-import { getCaseCommentsUrl } from '../../../../../../plugins/cases/common/api';
 import { assertWarningHeader } from '../../../../common/lib/validation';
 
 // eslint-disable-next-line import/no-default-export

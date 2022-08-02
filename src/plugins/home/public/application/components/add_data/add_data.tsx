@@ -20,10 +20,10 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { ApplicationStart } from 'kibana/public';
+import { ApplicationStart } from '@kbn/core/public';
+import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 import { getServices } from '../../kibana_services';
-import { RedirectAppLinks } from '../../../../../kibana_react/public';
 
 interface Props {
   addBasePath: (path: string) => string;

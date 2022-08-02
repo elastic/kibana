@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Subject } from 'rxjs';
-import { first } from 'rxjs/operators';
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
+import { firstValueFrom, Subject } from 'rxjs';
+import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart } from './types';
 import { SavedObjectsManagement } from './services';
 import { registerRoutes } from './routes';
@@ -28,7 +27,7 @@ export class SavedObjectsManagementPlugin
     this.logger.debug('Setting up SavedObjectsManagement plugin');
     registerRoutes({
       http,
-      managementServicePromise: this.managementService$.pipe(first()).toPromise(),
+      managementServicePromise: firstValueFrom(this.managementService$),
     });
 
     capabilities.registerProvider(capabilitiesProvider);

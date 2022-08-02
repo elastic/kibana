@@ -7,15 +7,16 @@
 
 import uuid from 'uuid/v4';
 import { i18n } from '@kbn/i18n';
+import type { Query } from '@kbn/es-query';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { getUsageCollection } from '../kibana_services';
-import { APP_ID } from '../../common/constants';
-
 import {
   createAction,
   ACTION_VISUALIZE_GEO_FIELD,
   VisualizeFieldContext,
-} from '../../../../../src/plugins/ui_actions/public';
+} from '@kbn/ui-actions-plugin/public';
+import { getUsageCollection } from '../kibana_services';
+import { APP_ID } from '../../common/constants';
+
 import {
   getVisualizeCapabilities,
   getIndexPatternService,
@@ -85,7 +86,7 @@ const getMapsLink = async (context: VisualizeFieldContext) => {
   const locator = getShareService().url.locators.get(MAPS_APP_LOCATOR) as MapsAppLocator;
   const location = await locator.getLocation({
     filters: getData().query.filterManager.getFilters(),
-    query: getData().query.queryString.getQuery(),
+    query: getData().query.queryString.getQuery() as Query,
     initialLayers: initialLayers as unknown as LayerDescriptor[] & SerializableRecord,
     timeRange: getData().query.timefilter.timefilter.getTime(),
   });

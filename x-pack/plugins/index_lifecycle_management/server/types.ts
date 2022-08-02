@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { IRouter } from 'src/core/server';
+import { IRouter } from '@kbn/core/server';
 
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { IndexManagementPluginSetup } from '../../index_management/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { IndexManagementPluginSetup } from '@kbn/index-management-plugin/server';
 import { License } from './services';
 import { IndexLifecycleManagementConfig } from './config';
 import { handleEsError } from './shared_imports';

@@ -8,10 +8,9 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+
 import type { HomeProps } from './home';
 import { Home } from './home';
-
-import { FeatureCatalogueCategory } from '../../services';
 import { Welcome } from './welcome';
 
 let mockHasIntegrationsPermission = true;
@@ -33,7 +32,7 @@ jest.mock('../kibana_services', () => ({
   }),
 }));
 
-jest.mock('../../../../../../src/plugins/kibana_react/public', () => ({
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
   overviewPageActions: jest.fn().mockReturnValue([]),
   OverviewPageFooter: jest.fn().mockReturnValue(<></>),
   KibanaPageTemplate: jest.fn().mockReturnValue(<></>),
@@ -132,7 +131,7 @@ describe('home', () => {
         icon: 'indexPatternApp',
         path: 'index_management_landing_page',
         showOnHomePage: true,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin' as const,
       };
 
       const component = await renderHome({
@@ -150,7 +149,7 @@ describe('home', () => {
         icon: 'managementApp',
         path: 'management_landing_page',
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin' as const,
       };
 
       const component = await renderHome({
@@ -172,7 +171,7 @@ describe('home', () => {
             path: 'path-to-advanced_settings',
             showOnHomePage: false,
             title: 'Advanced settings',
-            category: FeatureCatalogueCategory.ADMIN,
+            category: 'admin',
           },
         ],
       });

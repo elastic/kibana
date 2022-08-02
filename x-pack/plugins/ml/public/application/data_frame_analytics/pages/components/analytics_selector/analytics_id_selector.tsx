@@ -107,17 +107,21 @@ const modelColumns = [
 ];
 
 interface Props {
-  setAnalyticsId: React.Dispatch<React.SetStateAction<AnalyticsSelectorIds | undefined>>;
+  setAnalyticsId: (update: AnalyticsSelectorIds) => void;
   jobsOnly?: boolean;
+  setIsIdSelectorFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: Props) {
+export function AnalyticsIdSelector({
+  setAnalyticsId,
+  jobsOnly = false,
+  setIsIdSelectorFlyoutVisible,
+}: Props) {
   const [selected, setSelected] = useState<
     { model_id?: string; job_id?: string; analysis_type?: string } | undefined
   >();
   const [analyticsJobs, setAnalyticsJobs] = useState<DataFrameAnalyticsConfig[]>([]);
   const [trainedModels, setTrainedModels] = useState<TrainedModelConfigResponse[]>([]);
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { displayErrorToast } = useToastNotificationService();
   const trainedModelsApiService = useTrainedModelsApiService();
@@ -136,7 +140,7 @@ export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: Props)
         await getDataFrameAnalytics();
       setAnalyticsJobs(dataFrameAnalytics);
     } catch (e) {
-      console.error('Error fetching analytics', e); // eslint-disable-line
+      console.error('Error fetching analytics', e); // eslint-disable-line no-console
       displayErrorToast(
         e,
         i18n.translate('xpack.ml.analyticsSelector.analyticsFetchErrorMessage', {
@@ -153,7 +157,7 @@ export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: Props)
       const response = await trainedModelsApiService.getTrainedModels();
       setTrainedModels(response);
     } catch (e) {
-      console.error('Error fetching trained models', e); // eslint-disable-line
+      console.error('Error fetching trained models', e); // eslint-disable-line no-console
       displayErrorToast(
         e,
         i18n.translate('xpack.ml.analyticsSelector.trainedModelsFetchErrorMessage', {
@@ -165,7 +169,7 @@ export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: Props)
   }
 
   function closeFlyout() {
-    setIsFlyoutVisible(false);
+    setIsIdSelectorFlyoutVisible(false);
   }
 
   // Fetch analytics jobs and models on flyout open
@@ -184,8 +188,8 @@ export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: Props)
   }, [selected?.model_id, selected?.job_id]);
 
   const pagination = {
-    initialPageSize: 5,
-    pageSizeOptions: [3, 5, 8],
+    initialPageSize: 20,
+    pageSizeOptions: [5, 10, 20, 50],
   };
 
   const selectionValue = {
@@ -258,7 +262,7 @@ export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: Props)
     });
   }
 
-  return isFlyoutVisible ? (
+  return (
     <EuiFlyout
       onClose={closeFlyout}
       data-test-subj="mlFlyoutJobSelector"
@@ -303,5 +307,5 @@ export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: Props)
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>
-  ) : null;
+  );
 }

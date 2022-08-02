@@ -8,7 +8,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n-react';
-import { LastUpdatedAt } from './';
+import { LastUpdatedAt } from '.';
 
 jest.mock('@kbn/i18n-react', () => {
   const originalModule = jest.requireActual('@kbn/i18n-react');

@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { CasesResponse, CaseStatuses, CommentType } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { postCaseReq } from '../../../../common/lib/mock';
@@ -15,11 +16,6 @@ import {
   deleteAllCaseItems,
   getSignalsWithES,
 } from '../../../../common/lib/utils';
-import {
-  CasesResponse,
-  CaseStatuses,
-  CommentType,
-} from '../../../../../../plugins/cases/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

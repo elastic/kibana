@@ -8,9 +8,9 @@
 import { omit } from 'lodash';
 import { Observable } from 'rxjs';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { IClusterClient, KibanaRequest } from 'src/core/server';
+import { IClusterClient, KibanaRequest } from '@kbn/core/server';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SpacesServiceStart } from '../../spaces/server';
+import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 
 import { EsContext } from './es';
 import { IEventLogClient } from './types';
@@ -32,6 +32,7 @@ const optionalDateFieldSchema = schema.maybe(
 const sortSchema = schema.object({
   sort_field: schema.oneOf([
     schema.literal('@timestamp'),
+    schema.literal('event.sequence'), // can be used as a tiebreaker for @timestamp
     schema.literal('event.start'),
     schema.literal('event.end'),
     schema.literal('event.provider'),

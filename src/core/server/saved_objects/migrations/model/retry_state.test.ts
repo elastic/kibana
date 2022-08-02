@@ -109,7 +109,7 @@ describe('delayRetryState', () => {
       hello: 'dolly',
       retryCount: 5,
       retryDelay: 64,
-      reason: `Unable to complete the TEST step after 5 attempts, terminating.`,
+      reason: `Unable to complete the TEST step after 5 attempts, terminating. The last failure message was: some-error`,
     });
   });
 });

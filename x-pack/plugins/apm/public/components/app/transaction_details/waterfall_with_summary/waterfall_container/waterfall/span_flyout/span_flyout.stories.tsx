@@ -9,7 +9,7 @@ import { Story } from '@storybook/react';
 import React, { ComponentProps, ComponentType } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { MockApmPluginContextWrapper } from '../../../../../../../context/apm_plugin/mock_apm_plugin_context';
-import { SpanFlyout } from './';
+import { SpanFlyout } from '.';
 
 type Args = ComponentProps<typeof SpanFlyout>;
 

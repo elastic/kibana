@@ -8,7 +8,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
+import { indexPatterns } from '@kbn/data-plugin/public';
 export function validateIndexPattern(indexPattern, rollupIndex) {
   if (!indexPattern || !indexPattern.trim()) {
     return [

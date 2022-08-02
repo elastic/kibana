@@ -13,7 +13,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { IBasePath } from '../../../../../../../src/core/public';
+import { IBasePath } from '@kbn/core/public';
 import { AlertType } from '../../../../common/alert_types';
 import { AlertingFlyout } from '../../alerting/alerting_flyout';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -69,6 +69,7 @@ export function AlertingPopoverAndFlyout({
       iconType="arrowDown"
       iconSide="right"
       onClick={() => setPopoverOpen((prevState) => !prevState)}
+      data-test-subj="apmAlertAndRulesHeaderLink"
     >
       {alertLabel}
     </EuiHeaderLink>
@@ -84,6 +85,7 @@ export function AlertingPopoverAndFlyout({
               {
                 name: createThresholdAlertLabel,
                 panel: CREATE_THRESHOLD_PANEL_ID,
+                'data-test-subj': 'apmAlertsMenuItemCreateThreshold',
               },
               ...(canReadAnomalies
                 ? [
@@ -93,6 +95,7 @@ export function AlertingPopoverAndFlyout({
                         setAlertType(AlertType.Anomaly);
                         setPopoverOpen(false);
                       },
+                      'data-test-subj': 'apmAlertsMenuItemCreateAnomaly',
                     },
                   ]
                 : []),
@@ -102,6 +105,7 @@ export function AlertingPopoverAndFlyout({
                   setAlertType(AlertType.ErrorCount);
                   setPopoverOpen(false);
                 },
+                'data-test-subj': 'apmAlertsMenuItemErrorCount',
               },
             ]
           : []),
@@ -114,6 +118,7 @@ export function AlertingPopoverAndFlyout({
                 ),
                 href: observability.useRulesLink().href,
                 icon: 'tableOfContents',
+                'data-test-subj': 'apmAlertsMenuItemManageRules',
               },
             ]
           : []),

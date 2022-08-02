@@ -1,0 +1,59 @@
+load("@npm//@bazel/typescript:index.bzl", "ts_config")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
+
+PKG_DIRNAME = "kbn-ambient-ui-types"
+PKG_REQUIRE_NAME = "@kbn/ambient-ui-types"
+
+SRCS = glob(
+  [
+    "*.d.ts",
+  ]
+)
+
+filegroup(
+  name = "srcs",
+  srcs = SRCS,
+)
+
+NPM_MODULE_EXTRA_FILES = [
+  "package.json",
+]
+
+# In this array place runtime dependencies, including other packages and NPM packages
+# which must be available for this code to run.
+#
+#  To reference other packages use:
+#    "//repo/relative/path/to/package"
+#    eg. "//packages/kbn-utils"
+#
+#  To reference a NPM package use:
+#    "@npm//name-of-package"
+#    eg. "@npm//lodash"
+RUNTIME_DEPS = [
+]
+
+js_library(
+  name = PKG_DIRNAME,
+  srcs = SRCS + NPM_MODULE_EXTRA_FILES,
+  deps = RUNTIME_DEPS,
+  package_name = PKG_REQUIRE_NAME,
+  visibility = ["//visibility:public"],
+)
+
+pkg_npm(
+  name = "npm_module",
+  deps = [":" + PKG_DIRNAME],
+)
+
+filegroup(
+  name = "build",
+  srcs = [":npm_module"],
+  visibility = ["//visibility:public"],
+)
+
+alias(
+  name = "npm_module_types",
+  actual = ":" + PKG_DIRNAME,
+  visibility = ["//visibility:public"],
+)

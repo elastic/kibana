@@ -6,16 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { PluginServiceFactory } from '../../../../presentation_util/public';
-
 import type { CustomIntegrationsPlatformService } from '../platform';
+import { PluginServiceFactory } from '../types';
+import { CustomIntegrationsStartDependencies } from '../../types';
 
 /**
  * A type definition for a factory to produce the `CustomIntegrationsPlatformService` with stubbed output.
- * @see /src/plugins/presentation_util/public/services/create/factory.ts
  */
-export type CustomIntegrationsPlatformServiceFactory =
-  PluginServiceFactory<CustomIntegrationsPlatformService>;
+export type CustomIntegrationsPlatformServiceFactory = PluginServiceFactory<
+  CustomIntegrationsPlatformService,
+  CustomIntegrationsStartDependencies
+>;
 
 /**
  * A factory to produce the `CustomIntegrationsPlatformService` with stubbed output.

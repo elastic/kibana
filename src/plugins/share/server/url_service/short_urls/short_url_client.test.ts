@@ -11,7 +11,8 @@ import { UrlService, LocatorDefinition } from '../../../common/url_service';
 import { LegacyShortUrlLocatorDefinition } from '../../../common/url_service/locators/legacy_short_url_locator';
 import { MemoryShortUrlStorage } from './storage/memory_short_url_storage';
 import { SerializableRecord } from '@kbn/utility-types';
-import { SavedObjectReference } from 'kibana/server';
+import { SavedObjectReference } from '@kbn/core/server';
+import { UrlServiceError } from '../error';
 
 const setup = () => {
   const currentVersion = '1.2.3';
@@ -125,20 +126,7 @@ describe('ServerShortUrlClient', () => {
             url: '/app/test#foo/bar/baz',
           },
         })
-      ).rejects.toThrowError(new Error(`Slug "lala" already exists.`));
-    });
-
-    test('can automatically generate human-readable slug', async () => {
-      const { client, locator } = setup();
-      const shortUrl = await client.create({
-        locator,
-        humanReadableSlug: true,
-        params: {
-          url: '/app/test#foo/bar/baz',
-        },
-      });
-
-      expect(shortUrl.data.slug.split('-').length).toBe(3);
+      ).rejects.toThrowError(new UrlServiceError(`Slug "lala" already exists.`, 'SLUG_EXISTS'));
     });
   });
 

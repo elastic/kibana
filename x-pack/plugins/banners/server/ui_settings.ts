@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { UiSettingsServiceSetup } from 'src/core/server';
+import { UiSettingsServiceSetup } from '@kbn/core/server';
 import { BannersConfigType } from './config';
 import { isHexColor } from './utils';
 

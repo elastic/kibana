@@ -31,9 +31,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { HttpStart, IBasePath } from 'src/core/public';
-import { ISearchStart } from '../../../../../data/public';
-import type { DataViewsContract, DataView } from '../../../../../data_views/public';
+import { HttpStart, IBasePath } from '@kbn/core/public';
+import { ISearchStart } from '@kbn/data-plugin/public';
+import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import {
   importFile,

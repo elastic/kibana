@@ -7,8 +7,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { toArray, map } from 'rxjs/operators';
-import { lastValueFrom } from '@kbn/std';
+import { fakeSchedulers } from 'rxjs-marbles/jest';
 
 import { pipeClosure, debounceTimeBuffer, maybeMap, maybe } from './rxjs_helpers';
 
@@ -21,26 +20,26 @@ describe('pipeClosure()', () => {
     const foo$ = Rx.of(1, 2, 3).pipe(
       pipeClosure((source$) => {
         const multiplier = ++counter;
-        return source$.pipe(map((i) => i * multiplier));
+        return source$.pipe(Rx.map((i) => i * multiplier));
       }),
-      toArray()
+      Rx.toArray()
     );
 
-    await expect(lastValueFrom(foo$)).resolves.toMatchInlineSnapshot(`
+    await expect(Rx.lastValueFrom(foo$)).resolves.toMatchInlineSnapshot(`
             Array [
               1,
               2,
               3,
             ]
           `);
-    await expect(lastValueFrom(foo$)).resolves.toMatchInlineSnapshot(`
+    await expect(Rx.lastValueFrom(foo$)).resolves.toMatchInlineSnapshot(`
             Array [
               2,
               4,
               6,
             ]
           `);
-    await expect(lastValueFrom(foo$)).resolves.toMatchInlineSnapshot(`
+    await expect(Rx.lastValueFrom(foo$)).resolves.toMatchInlineSnapshot(`
             Array [
               3,
               6,
@@ -52,9 +51,9 @@ describe('pipeClosure()', () => {
 
 describe('maybe()', () => {
   it('filters out undefined values from the stream', async () => {
-    const foo$ = Rx.of(1, undefined, 2, undefined, 3).pipe(maybe(), toArray());
+    const foo$ = Rx.of(1, undefined, 2, undefined, 3).pipe(maybe(), Rx.toArray());
 
-    await expect(lastValueFrom(foo$)).resolves.toEqual([1, 2, 3]);
+    await expect(Rx.lastValueFrom(foo$)).resolves.toEqual([1, 2, 3]);
   });
 });
 
@@ -62,10 +61,10 @@ describe('maybeMap()', () => {
   it('calls map fn and filters out undefined values returned', async () => {
     const foo$ = Rx.of(1, 2, 3, 4, 5).pipe(
       maybeMap((i) => (i % 2 ? i : undefined)),
-      toArray()
+      Rx.toArray()
     );
 
-    await expect(lastValueFrom(foo$)).resolves.toEqual([1, 3, 5]);
+    await expect(Rx.lastValueFrom(foo$)).resolves.toEqual([1, 3, 5]);
   });
 });
 
@@ -78,39 +77,42 @@ describe('debounceTimeBuffer()', () => {
     jest.useRealTimers();
   });
 
-  it('buffers items until there is n milliseconds of silence, then flushes buffer to stream', async () => {
-    const foo$ = new Rx.Subject<number>();
-    const dest = new Rx.BehaviorSubject<number | undefined>(undefined);
-    foo$
-      .pipe(
-        debounceTimeBuffer(100),
-        map((items) => items.reduce((sum, n) => sum + n))
-      )
-      .subscribe(dest);
+  it(
+    'buffers items until there is n milliseconds of silence, then flushes buffer to stream',
+    fakeSchedulers(async (advance) => {
+      const foo$ = new Rx.Subject<number>();
+      const dest = new Rx.BehaviorSubject<number | undefined>(undefined);
+      foo$
+        .pipe(
+          debounceTimeBuffer(100),
+          Rx.map((items) => items.reduce((sum, n) => sum + n))
+        )
+        .subscribe(dest);
 
-    foo$.next(1);
-    expect(dest.getValue()).toBe(undefined);
+      foo$.next(1);
+      expect(dest.getValue()).toBe(undefined);
 
-    // only wait 99 milliseconds before sending the next value
-    jest.advanceTimersByTime(99);
-    foo$.next(1);
-    expect(dest.getValue()).toBe(undefined);
+      // only wait 50 milliseconds before sending the next value
+      advance(50);
+      foo$.next(1);
+      expect(dest.getValue()).toBe(undefined);
 
-    // only wait 99 milliseconds before sending the next value
-    jest.advanceTimersByTime(99);
-    foo$.next(1);
-    expect(dest.getValue()).toBe(undefined);
+      // only wait 99 milliseconds before sending the next value
+      advance(99);
+      foo$.next(1);
+      expect(dest.getValue()).toBe(undefined);
 
-    // send the next value after 100 milliseconds and observe that it was forwarded
-    jest.advanceTimersByTime(100);
-    foo$.next(1);
-    expect(dest.getValue()).toBe(3);
+      // send the next value after 100 milliseconds and observe that it was forwarded
+      advance(500);
+      foo$.next(1);
+      expect(dest.getValue()).toBe(3);
 
-    foo$.complete();
-    if (!dest.isStopped) {
-      throw new Error('Expected destination to stop as soon as the source is completed');
-    }
-  });
+      foo$.complete();
+      if (!dest.isStopped) {
+        throw new Error('Expected destination to stop as soon as the source is completed');
+      }
+    })
+  );
 
   it('clears queue as soon as source completes if source completes before time is up', () => {
     const foo$ = new Rx.Subject<number>();
@@ -118,7 +120,7 @@ describe('debounceTimeBuffer()', () => {
     foo$
       .pipe(
         debounceTimeBuffer(100),
-        map((items) => items.reduce((sum, n) => sum + n))
+        Rx.map((items) => items.reduce((sum, n) => sum + n))
       )
       .subscribe(dest);
 

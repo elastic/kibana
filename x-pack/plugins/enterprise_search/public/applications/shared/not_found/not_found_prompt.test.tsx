@@ -15,7 +15,7 @@ import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 
 import { EuiButtonTo } from '../react_router_helpers';
 
-import { NotFoundPrompt } from './';
+import { NotFoundPrompt } from '.';
 
 describe('NotFoundPrompt', () => {
   const subject = (props?: object) =>

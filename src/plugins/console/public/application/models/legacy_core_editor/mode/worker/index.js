@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import src from '!!raw-loader!./worker.js';
+import src from '!!raw-loader!./worker';
 
 export const workerModule = {
   id: 'sense_editor/mode/worker',

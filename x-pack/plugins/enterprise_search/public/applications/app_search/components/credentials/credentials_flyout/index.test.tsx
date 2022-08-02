@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { EuiFlyout } from '@elastic/eui';
 
-import { CredentialsFlyout } from './';
+import { CredentialsFlyout } from '.';
 
 describe('CredentialsFlyout', () => {
   const actions = {

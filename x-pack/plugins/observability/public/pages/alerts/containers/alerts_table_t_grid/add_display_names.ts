@@ -6,8 +6,8 @@
  */
 import { ALERT_DURATION, ALERT_REASON, ALERT_STATUS, TIMESTAMP } from '@kbn/rule-data-utils';
 import { EuiDataGridColumn } from '@elastic/eui';
+import type { ColumnHeaderOptions } from '@kbn/timelines-plugin/common';
 import { translations } from '../../../../config';
-import type { ColumnHeaderOptions } from '../../../../../../timelines/common';
 
 export const addDisplayNames = (
   column: Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> &

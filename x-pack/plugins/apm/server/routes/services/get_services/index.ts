@@ -10,6 +10,7 @@ import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { getServicesItems } from './get_services_items';
 import { ServiceGroup } from '../../../../common/service_groups';
+import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 
 export async function getServices({
   environment,
@@ -20,6 +21,7 @@ export async function getServices({
   start,
   end,
   serviceGroup,
+  randomSampler,
 }: {
   environment: string;
   kuery: string;
@@ -29,6 +31,7 @@ export async function getServices({
   start: number;
   end: number;
   serviceGroup: ServiceGroup | null;
+  randomSampler: RandomSampler;
 }) {
   return withApmSpan('get_services', async () => {
     const items = await getServicesItems({
@@ -40,6 +43,7 @@ export async function getServices({
       start,
       end,
       serviceGroup,
+      randomSampler,
     });
 
     return {

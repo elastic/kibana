@@ -23,7 +23,7 @@ import {
 } from '../../domains/log_entries_domain';
 import { SortedSearchHit } from '../framework';
 import { KibanaFramework } from '../framework/kibana_framework_adapter';
-import { ResolvedLogSourceConfiguration } from '../../../../common/log_sources';
+import { ResolvedLogView } from '../../../../common/log_views';
 import { TIMESTAMP_FIELD, TIEBREAKER_FIELD } from '../../../../common/constants';
 
 const TIMESTAMP_FORMAT = 'epoch_millis';
@@ -33,7 +33,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
 
   public async getLogEntries(
     requestContext: InfraPluginRequestHandlerContext,
-    resolvedLogSourceConfiguration: ResolvedLogSourceConfiguration,
+    resolvedLogView: ResolvedLogView,
     fields: string[],
     params: LogEntriesParams
   ): Promise<{ documents: LogEntryDocument[]; hasMoreBefore?: boolean; hasMoreAfter?: boolean }> {
@@ -71,7 +71,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
 
     const esQuery = {
       allow_no_indices: true,
-      index: resolvedLogSourceConfiguration.indices,
+      index: resolvedLogView.indices,
       ignore_unavailable: true,
       body: {
         size: size + 1, // Extra one to test if it has more before or after
@@ -94,7 +94,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
             ],
           },
         },
-        runtime_mappings: resolvedLogSourceConfiguration.runtimeMappings,
+        runtime_mappings: resolvedLogView.runtimeMappings,
         sort,
         ...highlightClause,
         ...searchAfterClause,
@@ -127,7 +127,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
 
   public async getContainedLogSummaryBuckets(
     requestContext: InfraPluginRequestHandlerContext,
-    resolvedLogSourceConfiguration: ResolvedLogSourceConfiguration,
+    resolvedLogView: ResolvedLogView,
     startTimestamp: number,
     endTimestamp: number,
     bucketSize: number,
@@ -141,7 +141,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
 
     const query = {
       allow_no_indices: true,
-      index: resolvedLogSourceConfiguration.indices,
+      index: resolvedLogView.indices,
       ignore_unavailable: true,
       body: {
         aggregations: {
@@ -181,7 +181,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
             ],
           },
         },
-        runtime_mappings: resolvedLogSourceConfiguration.runtimeMappings,
+        runtime_mappings: resolvedLogView.runtimeMappings,
         size: 0,
         track_total_hits: false,
       },

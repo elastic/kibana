@@ -7,8 +7,8 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { KBN_FIELD_TYPES } from '../../../data/public';
-import { DataViewField } from '../../../data_views/public';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 
 export enum IgnoredReason {
   IGNORE_ABOVE = 'ignore_above',

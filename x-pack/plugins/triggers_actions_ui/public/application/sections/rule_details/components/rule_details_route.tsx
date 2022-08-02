@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { ToastsApi } from 'kibana/public';
+import { ToastsApi } from '@kbn/core/public';
 import { EuiSpacer } from '@elastic/eui';
 import { RuleType, ActionType, ResolvedRule } from '../../../../types';
 import { RuleDetailsWithApi as RuleDetails } from './rule_details';

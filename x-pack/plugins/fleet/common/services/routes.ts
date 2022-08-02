@@ -18,6 +18,9 @@ import {
   OUTPUT_API_ROUTES,
   SETTINGS_API_ROUTES,
   APP_API_ROUTES,
+  K8S_API_ROUTES,
+  PRECONFIGURATION_API_ROUTES,
+  DOWNLOAD_SOURCE_API_ROUTES,
 } from '../constants';
 
 export const epmRouteService = {
@@ -104,6 +107,10 @@ export const packagePolicyRouteService = {
   getDryRunPath: () => {
     return PACKAGE_POLICY_API_ROUTES.DRYRUN_PATTERN;
   },
+
+  getOrphanedIntegrationPoliciesPath: () => {
+    return PACKAGE_POLICY_API_ROUTES.ORPHANED_INTEGRATION_POLICIES;
+  },
 };
 
 export const agentPolicyRouteService = {
@@ -141,6 +148,22 @@ export const agentPolicyRouteService = {
       agentPolicyId
     );
   },
+
+  getK8sInfoPath: () => {
+    return K8S_API_ROUTES.K8S_INFO_PATTERN;
+  },
+
+  getK8sFullDownloadPath: () => {
+    return K8S_API_ROUTES.K8S_DOWNLOAD_PATTERN;
+  },
+
+  getResetOnePreconfiguredAgentPolicyPath: (agentPolicyId: string) => {
+    return PRECONFIGURATION_API_ROUTES.RESET_ONE_PATTERN.replace(`{agentPolicyId}`, agentPolicyId);
+  },
+
+  getResetAllPreconfiguredAgentPolicyPath: () => {
+    return PRECONFIGURATION_API_ROUTES.RESET_PATTERN;
+  },
 };
 
 export const dataStreamRouteService = {
@@ -157,6 +180,7 @@ export const fleetSetupRouteService = {
 export const agentRouteService = {
   getInfoPath: (agentId: string) => AGENT_API_ROUTES.INFO_PATTERN.replace('{agentId}', agentId),
   getUpdatePath: (agentId: string) => AGENT_API_ROUTES.UPDATE_PATTERN.replace('{agentId}', agentId),
+  getBulkUpdateTagsPath: () => AGENT_API_ROUTES.BULK_UPDATE_AGENT_TAGS_PATTERN,
   getUnenrollPath: (agentId: string) =>
     AGENT_API_ROUTES.UNENROLL_PATTERN.replace('{agentId}', agentId),
   getBulkUnenrollPath: () => AGENT_API_ROUTES.BULK_UNENROLL_PATTERN,
@@ -166,11 +190,15 @@ export const agentRouteService = {
   getUpgradePath: (agentId: string) =>
     AGENT_API_ROUTES.UPGRADE_PATTERN.replace('{agentId}', agentId),
   getBulkUpgradePath: () => AGENT_API_ROUTES.BULK_UPGRADE_PATTERN,
+  getCurrentUpgradesPath: () => AGENT_API_ROUTES.CURRENT_UPGRADES_PATTERN,
+  getCancelActionPath: (actionId: string) =>
+    AGENT_API_ROUTES.CANCEL_ACTIONS_PATTERN.replace('{actionId}', actionId),
   getListPath: () => AGENT_API_ROUTES.LIST_PATTERN,
   getStatusPath: () => AGENT_API_ROUTES.STATUS_PATTERN,
   getIncomingDataPath: () => AGENT_API_ROUTES.DATA_PATTERN,
   getCreateActionPath: (agentId: string) =>
     AGENT_API_ROUTES.ACTIONS_PATTERN.replace('{agentId}', agentId),
+  getListTagsPath: () => AGENT_API_ROUTES.LIST_TAGS_PATTERN,
 };
 
 export const outputRoutesService = {
@@ -204,4 +232,15 @@ export const enrollmentAPIKeyRouteService = {
 
 export const setupRouteService = {
   getSetupPath: () => SETUP_API_ROUTE,
+};
+
+export const downloadSourceRoutesService = {
+  getInfoPath: (downloadSourceId: string) =>
+    DOWNLOAD_SOURCE_API_ROUTES.INFO_PATTERN.replace('{sourceId}', downloadSourceId),
+  getUpdatePath: (downloadSourceId: string) =>
+    DOWNLOAD_SOURCE_API_ROUTES.UPDATE_PATTERN.replace('{sourceId}', downloadSourceId),
+  getListPath: () => DOWNLOAD_SOURCE_API_ROUTES.LIST_PATTERN,
+  getDeletePath: (downloadSourceId: string) =>
+    DOWNLOAD_SOURCE_API_ROUTES.DELETE_PATTERN.replace('{sourceId}', downloadSourceId),
+  getCreatePath: () => DOWNLOAD_SOURCE_API_ROUTES.CREATE_PATTERN,
 };

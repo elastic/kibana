@@ -31,7 +31,7 @@ export const readListRoute = (router: ListsPluginRouter): void => {
       const siemResponse = buildSiemResponse(response);
       try {
         const { id } = request.query;
-        const lists = getListClient(context);
+        const lists = await getListClient(context);
         const list = await lists.getList({ id });
         if (list == null) {
           return siemResponse.error({

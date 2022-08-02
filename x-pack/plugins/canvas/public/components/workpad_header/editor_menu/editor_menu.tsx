@@ -5,23 +5,20 @@
  * 2.0.
  */
 
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { trackCanvasUiMetric, METRIC_TYPE } from '../../../../public/lib/ui_metric';
+import { BaseVisType, VisGroups, VisTypeAlias } from '@kbn/visualizations-plugin/public';
+import {
+  EmbeddableFactory,
+  EmbeddableFactoryDefinition,
+  EmbeddableInput,
+} from '@kbn/embeddable-plugin/public';
+import { trackCanvasUiMetric, METRIC_TYPE } from '../../../lib/ui_metric';
 import {
   useEmbeddablesService,
   usePlatformService,
   useVisualizationsService,
 } from '../../../services';
-import {
-  BaseVisType,
-  VisGroups,
-  VisTypeAlias,
-} from '../../../../../../../src/plugins/visualizations/public';
-import {
-  EmbeddableFactoryDefinition,
-  EmbeddableInput,
-} from '../../../../../../../src/plugins/embeddable/public';
 import { CANVAS_APP } from '../../../../common/lib';
 import { encode } from '../../../../common/lib/embeddable_dataurl';
 import { ElementSpec } from '../../../../types';
@@ -34,13 +31,38 @@ interface Props {
   addElement: (element: Partial<ElementSpec>) => void;
 }
 
+interface UnwrappedEmbeddableFactory {
+  factory: EmbeddableFactory;
+  isEditable: boolean;
+}
+
 export const EditorMenu: FC<Props> = ({ addElement }) => {
   const embeddablesService = useEmbeddablesService();
-  const { pathname, search } = useLocation();
+  const { pathname, search, hash } = useLocation();
   const platformService = usePlatformService();
   const stateTransferService = embeddablesService.getStateTransfer();
   const visualizationsService = useVisualizationsService();
   const IS_DARK_THEME = platformService.getUISetting('theme:darkMode');
+
+  const embeddableFactories = useMemo(
+    () => (embeddablesService ? Array.from(embeddablesService.getEmbeddableFactories()) : []),
+    [embeddablesService]
+  );
+
+  const [unwrappedEmbeddableFactories, setUnwrappedEmbeddableFactories] = useState<
+    UnwrappedEmbeddableFactory[]
+  >([]);
+
+  useEffect(() => {
+    Promise.all(
+      embeddableFactories.map<Promise<UnwrappedEmbeddableFactory>>(async (factory) => ({
+        factory,
+        isEditable: await factory.isEditable(),
+      }))
+    ).then((factories) => {
+      setUnwrappedEmbeddableFactories(factories);
+    });
+  }, [embeddableFactories]);
 
   const createNewVisType = useCallback(
     (visType?: BaseVisType | VisTypeAlias) => () => {
@@ -68,11 +90,11 @@ export const EditorMenu: FC<Props> = ({ addElement }) => {
         path,
         state: {
           originatingApp: CANVAS_APP,
-          originatingPath: `#/${pathname}${search}`,
+          originatingPath: `${pathname}${search}${hash}`,
         },
       });
     },
-    [stateTransferService, pathname, search]
+    [stateTransferService, pathname, search, hash]
   );
 
   const createNewEmbeddable = useCallback(
@@ -120,18 +142,17 @@ export const EditorMenu: FC<Props> = ({ addElement }) => {
       a === b ? 0 : a ? -1 : 1
     );
 
-  const factories = embeddablesService
-    ? Array.from(embeddablesService.getEmbeddableFactories()).filter(
-        ({ type, isEditable, canCreateNew, isContainerType }) =>
-          // @ts-expect-error ts 4.5 upgrade
-          isEditable() &&
-          !isContainerType &&
-          canCreateNew() &&
-          !['visualization', 'ml'].some((factoryType) => {
-            return type.includes(factoryType);
-          })
-      )
-    : [];
+  const factories = unwrappedEmbeddableFactories
+    .filter(
+      ({ isEditable, factory: { type, canCreateNew, isContainerType } }) =>
+        isEditable &&
+        !isContainerType &&
+        canCreateNew() &&
+        !['visualization', 'ml'].some((factoryType) => {
+          return type.includes(factoryType);
+        })
+    )
+    .map(({ factory }) => factory);
 
   const promotedVisTypes = getVisTypesByGroup(VisGroups.PROMOTED);
 

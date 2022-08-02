@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
-import { UiSettingsParams } from 'kibana/server';
+import { UiSettingsParams } from '@kbn/core/server';
 import { HEATMAP_MAX_BUCKETS_SETTING } from '../common';
 
 export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({

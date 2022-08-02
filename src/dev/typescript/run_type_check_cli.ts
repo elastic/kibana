@@ -12,8 +12,8 @@ import Os from 'os';
 import * as Rx from 'rxjs';
 import { mergeMap, reduce } from 'rxjs/operators';
 import execa from 'execa';
-import { run, createFailError } from '@kbn/dev-utils';
-import { lastValueFrom } from '@kbn/std';
+import { run } from '@kbn/dev-cli-runner';
+import { createFailError } from '@kbn/dev-cli-errors';
 
 import { PROJECTS } from './projects';
 import { buildTsRefs } from './build_ts_refs';
@@ -35,14 +35,16 @@ export async function runTypeCheckCli() {
         return !p.disableTypeCheck && (!projectFilter || p.tsConfigPath === projectFilter);
       });
 
-      const { failed } = await buildTsRefs({
-        log,
-        procRunner,
-        verbose: !!flags.verbose,
-        project: projects.length === 1 ? projects[0] : undefined,
-      });
-      if (failed) {
-        throw createFailError('Unable to build TS project refs');
+      if (projects.length > 1 || projects[0].isCompositeProject()) {
+        const { failed } = await buildTsRefs({
+          log,
+          procRunner,
+          verbose: !!flags.verbose,
+          project: projects.length === 1 ? projects[0] : undefined,
+        });
+        if (failed) {
+          throw createFailError('Unable to build TS project refs');
+        }
       }
 
       if (!projects.length) {
@@ -65,7 +67,7 @@ export async function runTypeCheckCli() {
           : ['--skipLibCheck', 'false']),
       ];
 
-      const failureCount = await lastValueFrom(
+      const failureCount = await Rx.lastValueFrom(
         Rx.from(projects).pipe(
           mergeMap(async (p) => {
             const relativePath = Path.relative(process.cwd(), p.tsConfigPath);

@@ -6,9 +6,9 @@
  */
 
 import { RuleType } from '../../../types';
-import { httpServiceMock } from '../../../../../../../src/core/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { loadRuleTypes } from './rule_types';
-import { ALERTS_FEATURE_ID } from '../../../../../alerting/common';
+import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 
 const http = httpServiceMock.createStartContract();
 

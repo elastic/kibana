@@ -8,7 +8,7 @@
 import createContainer from 'constate';
 import { useState, useCallback, useEffect } from 'react';
 import moment from 'moment';
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';

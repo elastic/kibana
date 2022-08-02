@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 
 import { isErrorEmbeddable, IContainer, ErrorEmbeddable } from '../../services/embeddable';
-import { DashboardContainer } from '../../application/embeddable/dashboard_container';
-import { getSampleDashboardInput, getSampleDashboardPanel } from '../../application/test_helpers';
+import { DashboardContainer } from '../embeddable/dashboard_container';
+import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 import {
   ContactCardEmbeddable,
   ContactCardEmbeddableInput,
@@ -18,14 +18,14 @@ import {
   ContactCardExportableEmbeddableFactory,
   CONTACT_CARD_EXPORTABLE_EMBEDDABLE,
 } from '../../services/embeddable_test_samples';
-import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
+import { coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { ExportCSVAction } from './export_csv_action';
-import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
-import { DataPublicPluginStart } from '../../../../data/public/types';
-import { dataPluginMock } from '../../../../data/public/mocks';
-import { LINE_FEED_CHARACTER } from 'src/plugins/data/common/exports/export_csv';
-import { getStubPluginServices } from '../../../../presentation_util/public';
-import { screenshotModePluginMock } from '../../../../screenshot_mode/public/mocks';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public/types';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { LINE_FEED_CHARACTER } from '@kbn/data-plugin/common/exports/export_csv';
+import { getStubPluginServices } from '@kbn/presentation-util-plugin/public';
+import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 
 describe('Export CSV action', () => {
   const { setup, doStart } = embeddablePluginMock.createInstance();

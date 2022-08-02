@@ -6,7 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from 'kibana/server';
+import { PluginConfigDescriptor } from '@kbn/core/server';
 
 const configSchema = schema.object({
   cache_refresh_interval: schema.duration({ defaultValue: '15m' }),

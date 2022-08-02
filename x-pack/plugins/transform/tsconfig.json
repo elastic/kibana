@@ -20,5 +20,6 @@
     { "path": "../license_management/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },
     { "path": "../ml/tsconfig.json" },
+    { "path": "../../../src/plugins/unified_search/tsconfig.json" }
   ]
 }

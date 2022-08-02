@@ -62,8 +62,11 @@ export const AssetTitleMap: Record<DisplayedAssetType, string> = {
   security_rule: i18n.translate('xpack.fleet.epm.assetTitles.securityRules', {
     defaultMessage: 'Security rules',
   }),
-  osquery_pack_asset: i18n.translate('xpack.fleet.epm.assetTitles.osqueryPackAsset', {
+  osquery_pack_asset: i18n.translate('xpack.fleet.epm.assetTitles.osqueryPackAssets', {
     defaultMessage: 'Osquery packs',
+  }),
+  osquery_saved_query: i18n.translate('xpack.fleet.epm.assetTitles.osquerySavedQuery', {
+    defaultMessage: 'Osquery saved queries',
   }),
   ml_module: i18n.translate('xpack.fleet.epm.assetTitles.mlModules', {
     defaultMessage: 'ML modules',
@@ -102,6 +105,7 @@ export const AssetIcons: Record<KibanaAssetType, IconType> = {
   ml_module: 'mlApp',
   tag: 'tagApp',
   osquery_pack_asset: 'osqueryApp',
+  osquery_saved_query: 'osqueryApp',
 };
 
 export const ServiceIcons: Record<ServiceName, IconType> = {

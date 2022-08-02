@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DocLinksStart } from 'src/core/public';
+import { DocLinksStart } from '@kbn/core/public';
 
 export const getLinks = ({ links }: DocLinksStart) => {
   return {

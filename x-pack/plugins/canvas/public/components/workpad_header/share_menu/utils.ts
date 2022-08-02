@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RedirectOptions } from 'src/plugins/share/public';
-import { JobAppParamsPDFV2 } from '../../../../../reporting/common/types';
+import { JobAppParamsPDFV2 } from '@kbn/reporting-plugin/common/types';
+import type { RedirectOptions } from '@kbn/share-plugin/public';
 import { CanvasAppLocatorParams, CANVAS_APP_LOCATOR } from '../../../../common/locator';
 import { CanvasWorkpad } from '../../../../types';
 
@@ -45,10 +45,7 @@ export function getPdfJobParams(
   }
 
   return {
-    layout: {
-      dimensions: { width, height },
-      id: 'canvas',
-    },
+    layout: { dimensions: { width, height }, id: 'canvas' },
     objectType: 'canvas workpad',
     locatorParams,
     title,

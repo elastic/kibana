@@ -6,13 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
 import {
   BulkInstallPackageInfo,
   BulkInstallPackagesResponse,
   IBulkInstallPackageHTTPError,
-} from '../../../../plugins/fleet/common';
+} from '@kbn/fleet-plugin/common';
+import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 import { testUsers } from '../test_users';
 

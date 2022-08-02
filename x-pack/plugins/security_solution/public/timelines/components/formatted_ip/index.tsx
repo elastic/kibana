@@ -10,8 +10,9 @@ import React, { useCallback, useMemo, useContext } from 'react';
 import { useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
-import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
-import { FlowTarget } from '../../../../common/search_strategy/security_solution/network';
+import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import { StatefulEventContext } from '@kbn/timelines-plugin/public';
+import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import {
   DragEffects,
   DraggableWrapper,
@@ -19,21 +20,15 @@ import {
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
 import { Content } from '../../../common/components/draggables';
 import { getOrEmptyTagFromValue } from '../../../common/components/empty_value';
-import { parseQueryValue } from '../../../timelines/components/timeline/body/renderers/parse_query_value';
-import {
-  DataProvider,
-  IS_OPERATOR,
-} from '../../../timelines/components/timeline/data_providers/data_provider';
-import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
-import {
-  TimelineExpandedDetailType,
-  TimelineId,
-  TimelineTabs,
-} from '../../../../common/types/timeline';
+import { parseQueryValue } from '../timeline/body/renderers/parse_query_value';
+import type { DataProvider } from '../timeline/data_providers/data_provider';
+import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
+import { Provider } from '../timeline/data_providers/provider';
+import type { TimelineExpandedDetailType } from '../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { activeTimeline } from '../../containers/active_timeline_context';
 import { timelineActions } from '../../store/timeline';
 import { NetworkDetailsLink } from '../../../common/components/links';
-import { StatefulEventContext } from '../../../../../timelines/public';
 
 const getUniqueId = ({
   contextId,
@@ -83,10 +78,21 @@ const NonDecoratedIpComponent: React.FC<{
   contextId: string;
   eventId: string;
   fieldName: string;
+  fieldType: string;
+  isAggregatable: boolean;
   isDraggable: boolean;
   truncate?: boolean;
   value: string | object | null | undefined;
-}> = ({ contextId, eventId, fieldName, isDraggable, truncate, value }) => {
+}> = ({
+  contextId,
+  eventId,
+  fieldName,
+  fieldType,
+  isAggregatable,
+  isDraggable,
+  truncate,
+  value,
+}) => {
   const key = useMemo(
     () =>
       `non-decorated-ip-draggable-wrapper-${getUniqueId({
@@ -130,6 +136,8 @@ const NonDecoratedIpComponent: React.FC<{
   return (
     <DraggableWrapper
       dataProvider={dataProviderProp}
+      fieldType={fieldType}
+      isAggregatable={isAggregatable}
       isDraggable={isDraggable}
       key={key}
       render={render}
@@ -150,6 +158,8 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
   contextId,
   eventId,
   fieldName,
+  fieldType,
+  isAggregatable,
   isButton,
   isDraggable,
   onClick,
@@ -186,9 +196,9 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
           panelView: 'networkDetail',
           params: {
             ip: address,
-            flowTarget: fieldName.includes(FlowTarget.destination)
-              ? FlowTarget.destination
-              : FlowTarget.source,
+            flowTarget: fieldName.includes(FlowTargetSourceDest.destination)
+              ? FlowTargetSourceDest.destination
+              : FlowTargetSourceDest.source,
           },
         };
 
@@ -262,6 +272,8 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
     <DraggableWrapper
       dataProvider={dataProviderProp}
       isDraggable={isDraggable}
+      fieldType={fieldType}
+      isAggregatable={isAggregatable}
       key={key}
       render={render}
       truncate={truncate}
@@ -277,6 +289,8 @@ interface AddressLinksProps {
   contextId: string;
   eventId: string;
   fieldName: string;
+  fieldType: string;
+  isAggregatable: boolean;
   isButton?: boolean;
   isDraggable: boolean;
   onClick?: () => void;
@@ -290,6 +304,8 @@ const AddressLinksComponent: React.FC<AddressLinksProps> = ({
   contextId,
   eventId,
   fieldName,
+  fieldType,
+  isAggregatable,
   isButton,
   isDraggable,
   onClick,
@@ -308,6 +324,8 @@ const AddressLinksComponent: React.FC<AddressLinksProps> = ({
           contextId={contextId}
           eventId={eventId}
           fieldName={fieldName}
+          fieldType={fieldType}
+          isAggregatable={isAggregatable}
           isButton={isButton}
           isDraggable={isDraggable}
           onClick={onClick}
@@ -320,6 +338,8 @@ const AddressLinksComponent: React.FC<AddressLinksProps> = ({
       contextId,
       eventId,
       fieldName,
+      fieldType,
+      isAggregatable,
       isButton,
       isDraggable,
       onClick,
@@ -338,6 +358,8 @@ const AddressLinks = React.memo(
     prevProps.contextId === nextProps.contextId &&
     prevProps.eventId === nextProps.eventId &&
     prevProps.fieldName === nextProps.fieldName &&
+    prevProps.isAggregatable === nextProps.isAggregatable &&
+    prevProps.fieldType === nextProps.fieldType &&
     prevProps.isDraggable === nextProps.isDraggable &&
     prevProps.truncate === nextProps.truncate &&
     deepEqual(prevProps.addresses, nextProps.addresses)
@@ -348,6 +370,8 @@ const FormattedIpComponent: React.FC<{
   contextId: string;
   eventId: string;
   fieldName: string;
+  fieldType: string;
+  isAggregatable: boolean;
   isButton?: boolean;
   isDraggable: boolean;
   onClick?: () => void;
@@ -359,6 +383,8 @@ const FormattedIpComponent: React.FC<{
   contextId,
   eventId,
   fieldName,
+  fieldType,
+  isAggregatable,
   isDraggable,
   isButton,
   onClick,
@@ -377,6 +403,8 @@ const FormattedIpComponent: React.FC<{
             contextId={contextId}
             eventId={eventId}
             fieldName={fieldName}
+            fieldType={fieldType}
+            isAggregatable={isAggregatable}
             isButton={isButton}
             isDraggable={isDraggable}
             onClick={onClick}
@@ -400,6 +428,8 @@ const FormattedIpComponent: React.FC<{
         isDraggable={isDraggable}
         onClick={onClick}
         fieldName={fieldName}
+        fieldType={fieldType}
+        isAggregatable={isAggregatable}
         truncate={truncate}
         title={title}
       />
@@ -410,6 +440,8 @@ const FormattedIpComponent: React.FC<{
         contextId={contextId}
         eventId={eventId}
         fieldName={fieldName}
+        fieldType={fieldType}
+        isAggregatable={isAggregatable}
         isDraggable={isDraggable}
         truncate={truncate}
         value={value}
@@ -424,6 +456,8 @@ export const FormattedIp = React.memo(
     prevProps.contextId === nextProps.contextId &&
     prevProps.eventId === nextProps.eventId &&
     prevProps.fieldName === nextProps.fieldName &&
+    prevProps.isAggregatable === nextProps.isAggregatable &&
+    prevProps.fieldType === nextProps.fieldType &&
     prevProps.isDraggable === nextProps.isDraggable &&
     prevProps.truncate === nextProps.truncate &&
     deepEqual(prevProps.value, nextProps.value)

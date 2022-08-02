@@ -8,7 +8,7 @@
 
 import fn from './average';
 import moment from 'moment';
-const expect = require('chai').expect;
+import expect from '@kbn/expect';
 import _ from 'lodash';
 
 describe('average.js', function () {

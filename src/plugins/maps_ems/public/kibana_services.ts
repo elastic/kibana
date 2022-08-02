@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
 import type { MapConfig } from '../config';
-import { LicensingPluginStart } from '../../../../x-pack/plugins/licensing/public';
-import { ILicense } from '../../../../x-pack/plugins/licensing/common/types';
 import { LICENSE_CHECK_ID } from '../common';
 
 let kibanaVersion: string;

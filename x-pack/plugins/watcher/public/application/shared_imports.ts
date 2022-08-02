@@ -9,7 +9,7 @@ export type {
   SendRequestConfig,
   SendRequestResponse,
   UseRequestConfig,
-} from '../../../../../src/plugins/es_ui_shared/public';
+} from '@kbn/es-ui-shared-plugin/public';
 
 export {
   sendRequest,
@@ -17,6 +17,6 @@ export {
   XJson,
   PageError,
   EuiCodeEditor,
-} from '../../../../../src/plugins/es_ui_shared/public';
+} from '@kbn/es-ui-shared-plugin/public';
 
-export { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
+export { KibanaThemeProvider, useExecutionContext } from '@kbn/kibana-react-plugin/public';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { sin } = require('../../src/functions/sin.js');
+const { sin } = require('../../src/functions/sin');
 
 describe('Sine', () => {
   it('numbers', () => {

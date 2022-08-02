@@ -44,7 +44,7 @@ export class DynamicTextProperty extends DynamicStyleProperty<LabelDynamicOption
     return false;
   }
 
-  supportsMbFeatureState() {
+  supportsFeatureState() {
     return false;
   }
 

@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { BrowserFields, DocValueFields } from '@kbn/timelines-plugin/common';
 import {
-  BrowserFields,
-  DocValueFields,
   EMPTY_BROWSER_FIELDS,
   EMPTY_DOCVALUE_FIELD,
   EMPTY_INDEX_FIELDS,
-} from '../../../../../timelines/common';
-import { SecuritySolutionDataViewBase } from '../../types';
+} from '@kbn/timelines-plugin/common';
+import type { SecuritySolutionDataViewBase } from '../../types';
 /** Uniquely identifies a Sourcerer Scope */
 export enum SourcererScopeName {
   default = 'default',
@@ -60,9 +59,12 @@ export interface KibanaDataView {
  */
 export interface SourcererDataView extends KibanaDataView {
   id: string;
-  /** we need this for @timestamp data */
+  /** determines how we can use the field in the app
+   * aggregatable, searchable, type, example
+   * category, description, format
+   * indices the field is included in etc*/
   browserFields: BrowserFields;
-  /** we need this for @timestamp data */
+  /** query DSL field and format */
   docValueFields: DocValueFields[];
   /** comes from dataView.fields.toSpec() */
   indexFields: SecuritySolutionDataViewBase['fields'];

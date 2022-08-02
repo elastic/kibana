@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 import { registerNodesRoute } from './register_nodes_route';
 import { RouterMock, routeDependencies, RequestMock } from '../../../test/helpers';
 

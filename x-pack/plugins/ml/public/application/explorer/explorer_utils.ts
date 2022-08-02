@@ -12,16 +12,19 @@
 import { get, union, uniq } from 'lodash';
 import moment from 'moment-timezone';
 
+import { lastValueFrom } from 'rxjs';
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
 } from '../../../common/constants/search';
 import { EntityField, getEntityFieldList } from '../../../common/util/anomaly_utils';
 import { extractErrorMessage } from '../../../common/util/errors';
+import { ML_JOB_AGGREGATION } from '../../../common/constants/aggregation_types';
 import {
   isSourceDataChartableForDetector,
   isModelPlotChartableForDetector,
   isModelPlotEnabled,
+  isTimeSeriesViewJob,
 } from '../../../common/util/job_utils';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { ml } from '../services/ml_api_service';
@@ -47,6 +50,7 @@ export interface ExplorerJob {
   id: string;
   selected: boolean;
   bucketSpanSeconds: number;
+  isSingleMetricViewerJob?: boolean;
 }
 
 interface ClearedSelectedAnomaliesState {
@@ -107,11 +111,15 @@ export interface ViewBySwimLaneData extends OverallSwimlaneData {
 }
 
 // create new job objects based on standard job config objects
-// new job objects just contain job id, bucket span in seconds and a selected flag.
 export function createJobs(jobs: CombinedJob[]): ExplorerJob[] {
   return jobs.map((job) => {
     const bucketSpan = parseInterval(job.analysis_config.bucket_span);
-    return { id: job.job_id, selected: false, bucketSpanSeconds: bucketSpan!.asSeconds() };
+    return {
+      id: job.job_id,
+      selected: false,
+      bucketSpanSeconds: bucketSpan!.asSeconds(),
+      isSingleMetricViewerJob: isTimeSeriesViewJob(job),
+    };
   });
 }
 
@@ -323,14 +331,14 @@ export function loadOverallAnnotations(
   const timeRange = getSelectionTimeRange(undefined, bounds);
 
   return new Promise((resolve) => {
-    ml.annotations
-      .getAnnotations$({
+    lastValueFrom(
+      ml.annotations.getAnnotations$({
         jobIds,
         earliestMs: timeRange.earliestMs,
         latestMs: timeRange.latestMs,
         maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
       })
-      .toPromise()
+    )
       .then((resp) => {
         if (resp.error !== undefined || resp.annotations === undefined) {
           const errorMessage = extractErrorMessage(resp.error);
@@ -378,14 +386,14 @@ export function loadAnnotationsTableData(
   const timeRange = getSelectionTimeRange(selectedCells, bounds);
 
   return new Promise((resolve) => {
-    ml.annotations
-      .getAnnotations$({
+    lastValueFrom(
+      ml.annotations.getAnnotations$({
         jobIds,
         earliestMs: timeRange.earliestMs,
         latestMs: timeRange.latestMs,
         maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
       })
-      .toPromise()
+    )
       .then((resp) => {
         if (resp.error !== undefined || resp.annotations === undefined) {
           const errorMessage = extractErrorMessage(resp.error);
@@ -494,6 +502,8 @@ export async function loadAnomaliesTableData(
           }
 
           anomaly.isTimeSeriesViewRecord = isChartable;
+          anomaly.isGeoRecord =
+            detector !== undefined && detector.function === ML_JOB_AGGREGATION.LAT_LONG;
 
           if (mlJobService.customUrlsByJob[jobId] !== undefined) {
             anomaly.customUrls = mlJobService.customUrlsByJob[jobId];

@@ -9,7 +9,7 @@ import { NodesChangedRule } from './nodes_changed_rule';
 import { RULE_NODES_CHANGED } from '../../common/constants';
 import { fetchNodesFromClusterStats } from '../lib/alerts/fetch_nodes_from_cluster_stats';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 const RealDate = Date;
 
@@ -19,13 +19,6 @@ jest.mock('../lib/alerts/fetch_nodes_from_cluster_stats', () => ({
 jest.mock('../lib/alerts/fetch_clusters', () => ({
   fetchClusters: jest.fn(),
 }));
-jest.mock('moment', () => {
-  return function () {
-    return {
-      format: () => 'THE_DATE',
-    };
-  };
-});
 
 jest.mock('../static_globals', () => ({
   Globals: {
@@ -71,6 +64,7 @@ describe('NodesChangedAlert', () => {
 
   describe('execute', () => {
     function FakeDate() {}
+
     FakeDate.prototype.valueOf = () => 1;
 
     const nodeUuid = 'myNodeUuid';

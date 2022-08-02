@@ -10,11 +10,11 @@ import React from 'react';
 
 import { DecoratorFn } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { PluginServiceRegistry } from '@kbn/presentation-util-plugin/public';
+import { KibanaContextProvider as KibanaReactProvider } from '@kbn/kibana-react-plugin/public';
 import { pluginServices } from '../public/services';
 import { ControlsServices } from '../public/services';
 import { providers } from '../public/services/storybook';
-import { PluginServiceRegistry } from '../../presentation_util/public';
-import { KibanaContextProvider as KibanaReactProvider } from '../../kibana_react/public';
 
 const settings = new Map();
 settings.set('darkMode', true);

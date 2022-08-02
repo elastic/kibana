@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { KibanaRequest, KibanaResponseFactory } from 'kibana/server';
+import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { identity } from 'lodash';
 import type { MethodKeysOf } from '@kbn/utility-types';
-import { httpServerMock } from '../../../../../src/core/server/mocks';
+import { httpServerMock } from '@kbn/core/server/mocks';
 import { rulesClientMock, RulesClientMock } from '../rules_client.mock';
 import { AlertsHealth, RuleType } from '../../common';
 import type { AlertingRequestHandlerContext } from '../types';

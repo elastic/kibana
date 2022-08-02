@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EcsEventOutcome, EcsEventType, KibanaRequest, LogMeta } from 'src/core/server';
+import type { EcsEventOutcome, EcsEventType, KibanaRequest, LogMeta } from '@kbn/core/server';
 
 import type { AuthenticationProvider } from '../../common/model';
 import type { AuthenticationResult } from '../authentication/authentication_result';

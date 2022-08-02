@@ -7,8 +7,8 @@
 
 import { createSelector } from 'reselect';
 import type { Query } from '@kbn/es-query';
-import { InputsRange } from '../../store/inputs/model';
-import type { SavedQuery } from '../../../../../../../src/plugins/data/public';
+import type { SavedQuery } from '@kbn/data-plugin/public';
+import type { InputsRange } from '../../store/inputs/model';
 
 export {
   endSelector,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsFindResult } from 'kibana/server';
+import type { SavedObjectsFindResult } from '@kbn/core/server';
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyIRuleActionsAttributesSavedObjectAttributes } from '../../../../lib/detection_engine/rule_actions/legacy_types';
 

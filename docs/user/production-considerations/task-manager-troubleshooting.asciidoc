@@ -6,7 +6,7 @@
 <titleabbrev>Troubleshooting</titleabbrev>
 ++++
 
-Task Manager is used by a wide range of services in {kib}, such as <<alerting-production-considerations, Alerting>>, Reporting, and Telemetry.
+Task Manager is used by a wide range of services in {kib}, such as <<alerting-production-considerations, Alerting>>, Actions, Reporting, and Telemetry.
 Unexpected behavior in these services might be a downstream issue originating in Task Manager.
 
 This page describes how to resolve common problems you might encounter with Task Manager.

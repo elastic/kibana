@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServiceMock } from '../../../../../../../src/core/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { loadExecutionLogAggregations, SortField } from './load_execution_log_aggregations';
 
 const http = httpServiceMock.createStartContract();
@@ -47,7 +47,7 @@ describe('loadExecutionLogAggregations', () => {
       id: 'test-id',
       dateStart: '2022-03-23T16:17:53.482Z',
       dateEnd: '2022-03-23T16:17:53.482Z',
-      filter: ['success', 'unknown'],
+      outcomeFilter: ['success', 'unknown'],
       perPage: 10,
       page: 0,
       sort: [sortTimestamp],
@@ -84,7 +84,7 @@ describe('loadExecutionLogAggregations', () => {
           "query": Object {
             "date_end": "2022-03-23T16:17:53.482Z",
             "date_start": "2022-03-23T16:17:53.482Z",
-            "filter": "success OR unknown",
+            "filter": "event.provider: alerting AND event.outcome: success or unknown",
             "page": 1,
             "per_page": 10,
             "sort": "[{\\"timestamp\\":{\\"order\\":\\"asc\\"}}]",

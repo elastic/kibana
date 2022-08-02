@@ -8,8 +8,8 @@ import type {
   CoreStart,
   Logger,
   ISavedObjectsRepository,
-} from 'src/core/server';
-import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
+} from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   APM_INDEX_SETTINGS_SAVED_OBJECT_ID,
   APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,

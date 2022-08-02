@@ -21,7 +21,8 @@ export const pushCaseRoute: CaseRoute = createCasesRoute({
   path: CASE_PUSH_URL,
   handler: async ({ context, request, response }) => {
     try {
-      const casesClient = await context.cases.getCasesClient();
+      const caseContext = await context.cases;
+      const casesClient = await caseContext.getCasesClient();
 
       const params = pipe(
         CasePushRequestParamsRt.decode(request.params),

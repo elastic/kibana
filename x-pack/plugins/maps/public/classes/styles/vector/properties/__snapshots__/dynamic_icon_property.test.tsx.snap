@@ -47,6 +47,10 @@ exports[`renderLegendDetailRow Should render categorical legend with breaks 1`] 
         isPointsOnly={true}
         label="US_format"
         styleName="icon"
+        svg="<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>
+<svg version=\\"1.1\\" id=\\"circle-15\\" xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"15px\\" height=\\"15px\\" viewBox=\\"0 0 15 15\\">
+  <path d=\\"M13,14H2c-0.5523,0-1-0.4477-1-1V2c0-0.5523,0.4477-1,1-1h11c0.5523,0,1,0.4477,1,1v11C14,13.5523,13.5523,14,13,14z\\"/>
+</svg>"
         symbolId="circle"
       />
     </EuiFlexItem>
@@ -59,6 +63,10 @@ exports[`renderLegendDetailRow Should render categorical legend with breaks 1`] 
         isPointsOnly={true}
         label="CN_format"
         styleName="icon"
+        svg="<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>
+<svg version=\\"1.1\\" id=\\"marker-15\\" xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"15px\\" height=\\"15px\\" viewBox=\\"0 0 15 15\\">
+  <path d=\\"M13,14H2c-0.5523,0-1-0.4477-1-1V2c0-0.5523,0.4477-1,1-1h11c0.5523,0,1,0.4477,1,1v11C14,13.5523,13.5523,14,13,14z\\"/>
+</svg>"
         symbolId="marker"
       />
     </EuiFlexItem>
@@ -77,7 +85,91 @@ exports[`renderLegendDetailRow Should render categorical legend with breaks 1`] 
           </EuiTextColor>
         }
         styleName="icon"
+        svg="<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>
+<svg version=\\"1.1\\" id=\\"square-15\\" xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"15px\\" height=\\"15px\\" viewBox=\\"0 0 15 15\\">
+  <path d=\\"M13,14H2c-0.5523,0-1-0.4477-1-1V2c0-0.5523,0.4477-1,1-1h11c0.5523,0,1,0.4477,1,1v11C14,13.5523,13.5523,14,13,14z\\"/>
+</svg>"
         symbolId="square"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;
+
+exports[`renderLegendDetailRow Should render categorical legend with custom icons in breaks 1`] = `
+<div>
+  <EuiFlexGroup
+    gutterSize="xs"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiToolTip
+        content="foobar_label"
+        delay="regular"
+        display="inlineBlock"
+        position="top"
+        title="Icon"
+      >
+        <EuiText
+          className="eui-textTruncate"
+          size="xs"
+          style={
+            Object {
+              "maxWidth": "180px",
+            }
+          }
+        >
+          <small>
+            <strong>
+              foobar_label
+            </strong>
+          </small>
+        </EuiText>
+      </EuiToolTip>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    direction="column"
+    gutterSize="none"
+  >
+    <EuiFlexItem
+      key="0"
+    >
+      <Category
+        color="grey"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="MX_format"
+        styleName="icon"
+        svg="<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>
+<svg version=\\"1.1\\" id=\\"marker-15\\" xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"15px\\" height=\\"15px\\" viewBox=\\"0 0 15 15\\">
+  <path d=\\"M13,14H2c-0.5523,0-1-0.4477-1-1V2c0-0.5523,0.4477-1,1-1h11c0.5523,0,1,0.4477,1,1v11C14,13.5523,13.5523,14,13,14z\\"/>
+</svg>"
+        symbolId="marker"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="1"
+    >
+      <Category
+        color="grey"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label={
+          <EuiTextColor
+            color="success"
+          >
+            Other
+          </EuiTextColor>
+        }
+        styleName="icon"
+        svg="<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>
+<svg version=\\"1.1\\" id=\\"kbn__custom_icon_sdf__foobar-15\\" xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"15px\\" height=\\"15px\\" viewBox=\\"0 0 15 15\\">
+  <path d=\\"M13,14H2c-0.5523,0-1-0.4477-1-1V2c0-0.5523,0.4477-1,1-1h11c0.5523,0,1,0.4477,1,1v11C14,13.5523,13.5523,14,13,14z\\"/>
+</svg>"
+        symbolId="kbn__custom_icon_sdf__foobar"
       />
     </EuiFlexItem>
   </EuiFlexGroup>

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  savedObjectsRepositoryMock,
-  loggingSystemMock,
-} from '../../../../../../src/core/server/mocks';
+import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { getConnectorsTelemetryData } from './connectors';
 
 describe('getConnectorsTelemetryData', () => {
@@ -140,14 +137,12 @@ describe('getConnectorsTelemetryData', () => {
             {
               type: 'literal',
               value: 'cases-user-actions.attributes.type',
+              isQuoted: false,
             },
             {
               type: 'literal',
               value: 'connector',
-            },
-            {
-              type: 'literal',
-              value: false,
+              isQuoted: false,
             },
           ],
           function: 'is',
@@ -196,14 +191,12 @@ describe('getConnectorsTelemetryData', () => {
               {
                 type: 'literal',
                 value: 'cases-user-actions.attributes.payload.connector.type',
+                isQuoted: false,
               },
               {
                 type: 'literal',
                 value: connector,
-              },
-              {
-                type: 'literal',
-                value: false,
+                isQuoted: false,
               },
             ],
             function: 'is',

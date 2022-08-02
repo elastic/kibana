@@ -9,7 +9,7 @@
 /**
  * All exports from TS source files (where the implementation is actually done in TS).
  */
-import * as Public from 'src/core/public';
-import * as Server from 'src/core/server';
+import * as Public from '@kbn/core/public';
+import * as Server from '@kbn/core/server';
 
 export { Public, Server };

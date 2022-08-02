@@ -8,9 +8,9 @@
 import {
   DashboardEnhancedAbstractDashboardDrilldown as AbstractDashboardDrilldown,
   DashboardEnhancedAbstractDashboardDrilldownConfig as Config,
-} from '../../../../../plugins/dashboard_enhanced/public';
+} from '@kbn/dashboard-enhanced-plugin/public';
+import { KibanaLocation } from '@kbn/share-plugin/public';
 import { SAMPLE_APP1_CLICK_TRIGGER, SampleApp1ClickContext } from '../../triggers';
-import { KibanaLocation } from '../../../../../../src/plugins/share/public';
 
 export const APP1_TO_DASHBOARD_DRILLDOWN = 'APP1_TO_DASHBOARD_DRILLDOWN';
 

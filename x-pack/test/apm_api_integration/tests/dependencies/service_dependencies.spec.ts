@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { BackendNode } from '../../../../plugins/apm/common/connections';
+import { DependencyNode } from '@kbn/apm-plugin/common/connections';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { generateData } from './generate_data';
 
@@ -15,7 +15,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
-  const backendName = 'elasticsearch';
+  const dependencyName = 'elasticsearch';
   const serviceName = 'synth-go';
 
   async function callApi() {
@@ -62,8 +62,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expect(status).to.be(200);
           expect(
-            body.serviceDependencies.map(({ location }) => (location as BackendNode).backendName)
-          ).to.eql([backendName]);
+            body.serviceDependencies.map(
+              ({ location }) => (location as DependencyNode).dependencyName
+            )
+          ).to.eql([dependencyName]);
 
           const currentStatsLatencyValues =
             body.serviceDependencies[0].currentStats.latency.timeseries;
@@ -101,8 +103,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expect(status).to.be(200);
           expect(
-            body.serviceDependencies.map(({ location }) => (location as BackendNode).backendName)
-          ).to.eql([backendName]);
+            body.serviceDependencies.map(
+              ({ location }) => (location as DependencyNode).dependencyName
+            )
+          ).to.eql([dependencyName]);
 
           const currentStatsLatencyValues =
             body.serviceDependencies[0].currentStats.latency.timeseries;

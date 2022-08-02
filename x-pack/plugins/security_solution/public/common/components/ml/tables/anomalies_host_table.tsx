@@ -15,7 +15,7 @@ import * as i18n from './translations';
 import { getAnomaliesHostTableColumnsCurated } from './get_anomalies_host_table_columns';
 import { convertAnomaliesToHosts } from './convert_anomalies_to_hosts';
 import { Loader } from '../../loader';
-import { AnomaliesHostTableProps } from '../types';
+import type { AnomaliesHostTableProps } from '../types';
 import { useMlCapabilities } from '../hooks/use_ml_capabilities';
 import { BasicTable } from './basic_table';
 import { getCriteriaFromHostType } from '../criteria/get_criteria_from_host_type';
@@ -79,7 +79,6 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
     return (
       <Panel loading={loading}>
         <HeaderSection
-          height={!toggleStatus ? 40 : undefined}
           subtitle={`${i18n.SHOWING}: ${pagination.totalItemCount.toLocaleString()} ${i18n.UNIT(
             pagination.totalItemCount
           )}`}

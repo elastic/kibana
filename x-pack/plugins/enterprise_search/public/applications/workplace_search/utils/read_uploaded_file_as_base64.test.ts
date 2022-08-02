@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { readUploadedFileAsBase64 } from './';
+import { readUploadedFileAsBase64 } from '.';
 
 describe('readUploadedFileAsBase64', () => {
   it('reads a file and returns base64 string', async () => {

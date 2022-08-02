@@ -7,8 +7,8 @@
 
 import { get, getOr } from 'lodash/fp';
 
-import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
-import {
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type {
   NetworkHttpBuckets,
   NetworkHttpEdges,
 } from '../../../../../../common/search_strategy/security_solution/network';
@@ -23,8 +23,8 @@ const formatHttpEdges = (buckets: NetworkHttpBuckets[]): NetworkHttpEdges[] =>
       domains: bucket.domains.buckets.map(({ key }) => key),
       methods: bucket.methods.buckets.map(({ key }) => key),
       statuses: bucket.status.buckets.map(({ key }) => `${key}`),
-      lastHost: get('source.hits.hits[0]._source.host.name', bucket),
-      lastSourceIp: get('source.hits.hits[0]._source.source.ip', bucket),
+      lastHost: get('source.hits.hits[0].fields["host.name"]', bucket),
+      lastSourceIp: get('source.hits.hits[0].fields["source.ip"]', bucket),
       path: bucket.key,
       requestCount: bucket.doc_count,
     },

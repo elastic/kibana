@@ -7,13 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 
-import {
-  httpServerMock,
-  httpServiceMock,
-  loggingSystemMock,
-} from '../../../../../../src/core/server/mocks';
+import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { usageCollectionPluginMock } from '../../../../../../src/plugins/usage_collection/server/mocks';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 
 import { CasesRouter } from '../../types';
 import { createCasesRoute } from './create_cases_route';

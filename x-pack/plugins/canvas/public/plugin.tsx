@@ -6,10 +6,10 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { SharePluginSetup } from 'src/plugins/share/public';
-import { ChartsPluginSetup, ChartsPluginStart } from 'src/plugins/charts/public';
-import { VisualizationsStart } from 'src/plugins/visualizations/public';
-import { ReportingStart } from '../../reporting/public';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
+import { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
+import { ReportingStart } from '@kbn/reporting-plugin/public';
 import {
   CoreSetup,
   CoreStart,
@@ -18,22 +18,22 @@ import {
   AppUpdater,
   DEFAULT_APP_CATEGORIES,
   PluginInitializerContext,
-} from '../../../../src/core/public';
-import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import { SpacesPluginStart } from '../../spaces/public';
-import { initLoadingIndicator } from './lib/loading_indicator';
-import { getSessionStorage } from './lib/storage';
-import { SESSIONSTORAGE_LASTPATH, CANVAS_APP } from '../common/lib/constants';
-import { CanvasAppLocatorDefinition } from '../common/locator';
+} from '@kbn/core/public';
+import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
+import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
-import { ExpressionsSetup, ExpressionsStart } from '../../../../src/plugins/expressions/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
-import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-import { Start as InspectorStart } from '../../../../src/plugins/inspector/public';
-import { BfetchPublicSetup } from '../../../../src/plugins/bfetch/public';
-import { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
+import { CanvasAppLocatorDefinition } from '../common/locator';
+import { SESSIONSTORAGE_LASTPATH, CANVAS_APP } from '../common/lib/constants';
+import { getSessionStorage } from './lib/storage';
+import { initLoadingIndicator } from './lib/loading_indicator';
 import { getPluginApi, CanvasApi } from './plugin_api';
 import { setupExpressions } from './setup_expressions';
 

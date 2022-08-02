@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import semver from 'semver';
 import {
   CORRELATION_EVENT_TABLE_CELL,
   DATA_PROVIDERS,
@@ -37,7 +38,7 @@ import {
   TIMELINES_PINNED_EVENT_COUNT,
 } from '../../../screens/timelines';
 
-import { loginAndWaitForPageWithoutDateRange } from '../../../tasks/login';
+import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
   closeTimeline,
   deleteTimeline,
@@ -56,6 +57,7 @@ const timelineDetails = {
   dateStart: 'Oct 10, 2020 @ 22:00:00.000',
   dateEnd: 'Oct 11, 2030 @ 15:13:15.851',
   queryTab: 'Query4',
+  queryTabAlt: 'Query2',
   correlationTab: 'Correlation',
   analyzerTab: 'Analyzer',
   notesTab: 'Notes2',
@@ -85,7 +87,8 @@ const event = {
 
 describe('Import timeline after upgrade', () => {
   before(() => {
-    loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
+    login();
+    visitWithoutDateRange(TIMELINES_URL);
     importTimeline(timeline);
     setKibanaTimezoneToUTC();
   });
@@ -118,6 +121,11 @@ describe('Import timeline after upgrade', () => {
   });
 
   it('Displays the correct timeline details inside the query tab', () => {
+    let expectedQueryTab = timelineDetails.queryTab;
+    if (semver.lt(Cypress.env('ORIGINAL_VERSION'), '7.10.0')) {
+      expectedQueryTab = timelineDetails.queryTabAlt;
+    }
+
     openTimeline();
 
     cy.readFile(`cypress/fixtures/${timeline}`).then((file) => {
@@ -142,7 +150,7 @@ describe('Import timeline after upgrade', () => {
         'have.text',
         timelineJson.kqlQuery.filterQuery.kuery.expression
       );
-      cy.get(QUERY_TAB_BUTTON).should('have.text', timelineDetails.queryTab);
+      cy.get(QUERY_TAB_BUTTON).should('have.text', expectedQueryTab);
       cy.get(TIMELINE_CORRELATION_TAB).should('have.text', timelineDetails.correlationTab);
       cy.get(GRAPH_TAB_BUTTON).should('have.text', timelineDetails.analyzerTab).and('be.disabled');
       cy.get(NOTES_TAB_BUTTON).should('have.text', timelineDetails.notesTab);

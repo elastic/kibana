@@ -12,7 +12,8 @@
     "discover",
     "fileUpload",
     "uiActions",
-    "charts"
+    "charts",
+    "unifiedSearch"
   ],
   "optionalPlugins": [
     "security",
@@ -24,7 +25,6 @@
     "cloud"
   ],
   "requiredBundles": [
-    "home",
     "kibanaReact",
     "maps",
     "esUiShared",

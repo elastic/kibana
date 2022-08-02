@@ -29,7 +29,7 @@ export const exportExceptionsRoute = (router: ListsPluginRouter): void => {
 
       try {
         const { id, list_id: listId, namespace_type: namespaceType } = request.query;
-        const exceptionListsClient = getExceptionListClient(context);
+        const exceptionListsClient = await getExceptionListClient(context);
 
         const exportContent = await exceptionListsClient.exportExceptionListAndItems({
           id,

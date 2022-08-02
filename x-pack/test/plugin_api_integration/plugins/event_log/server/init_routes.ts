@@ -13,9 +13,9 @@ import {
   IRouter,
   Logger,
   RouteValidationResultFactory,
-} from 'kibana/server';
-import { IEventLogService, IEventLogger } from '../../../../../plugins/event_log/server';
-import { IValidatedEvent } from '../../../../../plugins/event_log/server/types';
+} from '@kbn/core/server';
+import { IEventLogService, IEventLogger } from '@kbn/event-log-plugin/server';
+import { IValidatedEvent } from '@kbn/event-log-plugin/server/types';
 
 export const logEventRoute = (router: IRouter, eventLogger: IEventLogger, logger: Logger) => {
   router.post(
@@ -35,13 +35,14 @@ export const logEventRoute = (router: IRouter, eventLogger: IEventLogger, logger
     ): Promise<IKibanaResponse<any>> {
       const { id } = req.params as { id: string };
       const event: IValidatedEvent = req.body;
+      const soClient = (await context.core).savedObjects.client;
       logger.info(`test fixture: log event: ${id} ${JSON.stringify(event)}`);
       try {
-        await context.core.savedObjects.client.get('event_log_test', id);
+        await soClient.get('event_log_test', id);
         logger.info(`found existing saved object`);
       } catch (ex) {
         logger.info(`log event error: ${ex}`);
-        await context.core.savedObjects.client.create('event_log_test', {}, { id });
+        await soClient.create('event_log_test', {}, { id });
         logger.info(`created saved object ${id}`);
       }
       // mark now as start and end

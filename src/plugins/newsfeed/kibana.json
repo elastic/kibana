@@ -7,5 +7,6 @@
   "version": "kibana",
   "server": true,
   "ui": true,
+  "requiredBundles": ["kibanaReact"],
   "requiredPlugins": ["screenshotMode"]
 }

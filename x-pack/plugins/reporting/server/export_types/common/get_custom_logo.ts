@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Headers, Logger } from 'kibana/server';
-import { ReportingCore } from '../../';
+import type { Headers, Logger } from '@kbn/core/server';
+import { ReportingCore } from '../..';
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '../../../common/constants';
 
 export const getCustomLogo = async (

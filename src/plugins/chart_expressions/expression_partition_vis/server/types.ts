@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { ExpressionsServerStart, ExpressionsServerSetup } from '../../../expressions/server';
+import { ExpressionsServerStart, ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 
 export type ExpressionPartitionVisPluginSetup = void;
 export type ExpressionPartitionVisPluginStart = void;

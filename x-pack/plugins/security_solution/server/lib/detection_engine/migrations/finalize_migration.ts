@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { getIndexCount } from '@kbn/securitysolution-es-utils';
 import { isMigrationPending } from './helpers';
 import { applyMigrationCleanupPolicy } from './migration_cleanup';
 import { replaceSignalsIndexAlias } from './replace_signals_index_alias';
-import { SignalsMigrationSO } from './saved_objects_schema';
+import type { SignalsMigrationSO } from './saved_objects_schema';
 import { updateMigrationSavedObject } from './update_migration_saved_object';
 
 /**

@@ -9,9 +9,9 @@ import { useEffect, useMemo, useState } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiDataGridColumn } from '@elastic/eui';
-import { CoreSetup } from 'src/core/public';
+import { CoreSetup } from '@kbn/core/public';
 
-import type { DataView } from '../../../../../../../../../src/plugins/data_views/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { isRuntimeMappings } from '../../../../../../common/util/runtime_field_utils';
 import { RuntimeMappings } from '../../../../../../common/types/fields';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../../../common/constants/field_histograms';

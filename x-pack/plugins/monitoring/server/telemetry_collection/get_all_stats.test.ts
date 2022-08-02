@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import sinon from 'sinon';
 import { getStackStats, getAllStats, handleAllStats } from './get_all_stats';
 import { ESClusterStats } from './get_es_stats';

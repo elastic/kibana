@@ -11,7 +11,7 @@ import {
   getDefaultAsyncGetParams,
   getIgnoreThrottled,
 } from './request_utils';
-import { IUiSettingsClient } from 'kibana/server';
+import { IUiSettingsClient } from '@kbn/core/server';
 import { UI_SETTINGS } from '../../../../common';
 import moment from 'moment';
 import { SearchSessionsConfigSchema } from '../../../../config';

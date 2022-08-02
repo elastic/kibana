@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { add } = require('../../src/functions/add.js');
+const { add } = require('../../src/functions/add');
 
 describe('Add', () => {
   it('numbers', () => {

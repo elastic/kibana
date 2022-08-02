@@ -7,13 +7,13 @@
 
 import { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { HttpSetup, MountPoint } from 'kibana/public';
+import { HttpSetup, MountPoint } from '@kbn/core/public';
+import { Case } from '@kbn/cases-plugin/common';
+import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { CasesDeepLinkId, DRAFT_COMMENT_STORAGE_ID } from '@kbn/cases-plugin/public';
 import { useKibana } from '../../../../utils/kibana_react';
-import { Case } from '../../../../../../cases/common';
-import { TypedLensByValueInput } from '../../../../../../lens/public';
 import { AddToCaseProps } from '../header/add_to_case_action';
 import { observabilityFeatureId } from '../../../../../common';
-import { CasesDeepLinkId, DRAFT_COMMENT_STORAGE_ID } from '../../../../../../cases/public';
 
 async function addToCase(
   http: HttpSetup,

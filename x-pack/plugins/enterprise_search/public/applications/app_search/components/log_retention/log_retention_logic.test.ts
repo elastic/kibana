@@ -15,7 +15,7 @@ import { nextTick } from '@kbn/test-jest-helpers';
 
 import { LogRetentionOptions } from './types';
 
-import { LogRetentionLogic } from './';
+import { LogRetentionLogic } from '.';
 
 describe('LogRetentionLogic', () => {
   const { mount } = new LogicMounter(LogRetentionLogic);

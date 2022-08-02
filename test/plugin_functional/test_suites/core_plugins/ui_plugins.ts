@@ -8,7 +8,7 @@
 
 import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
-import '../../../../test/plugin_functional/plugins/core_provider_plugin/types';
+import '@kbn/core-provider-plugin/types';
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);

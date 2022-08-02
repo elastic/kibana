@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { SynonymsLogic } from '..';
 import {
   CANCEL_BUTTON_LABEL,
   DELETE_BUTTON_LABEL,
@@ -31,7 +32,6 @@ import { FlashMessages } from '../../../../shared/flash_messages';
 import { MultiInputRows } from '../../multi_input_rows';
 
 import { SYNONYM_CREATE_TITLE, SYNONYM_UPDATE_TITLE, DELETE_CONFIRMATION } from '../constants';
-import { SynonymsLogic } from '../index';
 
 export const SynonymModal: React.FC = () => {
   const { isModalOpen, modalLoading, activeSynonymSet } = useValues(SynonymsLogic);

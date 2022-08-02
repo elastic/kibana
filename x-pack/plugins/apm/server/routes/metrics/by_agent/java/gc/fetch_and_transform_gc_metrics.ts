@@ -7,6 +7,7 @@
 
 import { sum, round } from 'lodash';
 import { euiLightVars as theme } from '@kbn/ui-theme';
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { isFiniteNumber } from '../../../../../../common/utils/is_finite_number';
 import { Setup } from '../../../../../lib/helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../../../../../lib/helpers/metrics';
@@ -26,10 +27,6 @@ import {
   environmentQuery,
   serviceNodeNameQuery,
 } from '../../../../../../common/utils/environment_query';
-import {
-  kqlQuery,
-  rangeQuery,
-} from '../../../../../../../observability/server';
 import { ProcessorEvent } from '../../../../../../common/processor_event';
 
 export async function fetchAndTransformGcMetrics({

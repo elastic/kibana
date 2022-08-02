@@ -7,14 +7,15 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { flashAPIErrors, clearFlashMessages } from '../../../../../../shared/flash_messages';
-import { HttpLogic } from '../../../../../../shared/http';
-import { AppLogic } from '../../../../../app_logic';
-import { CustomSource, SourceDataItem } from '../../../../../types';
+import { HttpError, Status } from '../../../../../../../../common/types/api';
+import { clearFlashMessages, flashAPIErrors } from '../../../../../../shared/flash_messages';
+import { CustomSource } from '../../../../../types';
+
+import { AddCustomSourceApiLogic } from './add_custom_source_api_logic';
 
 export interface AddCustomSourceProps {
-  sourceData: SourceDataItem;
-  initialValue: string;
+  baseServiceType?: string;
+  initialValue?: string;
 }
 
 export enum AddCustomSourceSteps {
@@ -23,8 +24,10 @@ export enum AddCustomSourceSteps {
 }
 
 export interface AddCustomSourceActions {
+  makeRequest: typeof AddCustomSourceApiLogic.actions.makeRequest;
+  apiSuccess({ source }: { source: CustomSource }): { source: CustomSource };
+  apiError(error: HttpError): HttpError;
   createContentSource(): void;
-  setButtonNotLoading(): void;
   setCustomSourceNameValue(customSourceNameValue: string): string;
   setNewCustomSource(data: CustomSource): CustomSource;
 }
@@ -34,7 +37,7 @@ interface AddCustomSourceValues {
   currentStep: AddCustomSourceSteps;
   customSourceNameValue: string;
   newCustomSource: CustomSource;
-  sourceData: SourceDataItem;
+  status: Status;
 }
 
 /**
@@ -45,10 +48,13 @@ interface AddCustomSourceValues {
 export const AddCustomSourceLogic = kea<
   MakeLogicType<AddCustomSourceValues, AddCustomSourceActions, AddCustomSourceProps>
 >({
+  connect: {
+    actions: [AddCustomSourceApiLogic, ['makeRequest', 'apiError', 'apiSuccess']],
+    values: [AddCustomSourceApiLogic, ['status']],
+  },
   path: ['enterprise_search', 'workplace_search', 'add_custom_source_logic'],
   actions: {
     createContentSource: true,
-    setButtonNotLoading: true,
     setCustomSourceNameValue: (customSourceNameValue) => customSourceNameValue,
     setNewCustomSource: (data) => data,
   },
@@ -56,8 +62,9 @@ export const AddCustomSourceLogic = kea<
     buttonLoading: [
       false,
       {
-        setButtonNotLoading: () => false,
         createContentSource: () => true,
+        apiSuccess: () => false,
+        apiError: () => false,
       },
     ],
     currentStep: [
@@ -67,7 +74,7 @@ export const AddCustomSourceLogic = kea<
       },
     ],
     customSourceNameValue: [
-      props.initialValue,
+      props.initialValue || '',
       {
         setCustomSourceNameValue: (_, customSourceNameValue) => customSourceNameValue,
       },
@@ -78,43 +85,20 @@ export const AddCustomSourceLogic = kea<
         setNewCustomSource: (_, newCustomSource) => newCustomSource,
       },
     ],
-    sourceData: [props.sourceData],
   }),
   listeners: ({ actions, values, props }) => ({
-    createContentSource: async () => {
-      clearFlashMessages();
-      const { isOrganization } = AppLogic.values;
-      const route = isOrganization
-        ? '/internal/workplace_search/org/create_source'
-        : '/internal/workplace_search/account/create_source';
-
+    createContentSource: () => {
       const { customSourceNameValue } = values;
-
-      const baseParams = {
-        service_type: 'custom',
-        name: customSourceNameValue,
-      };
-
-      // pre-configured custom sources have a serviceType reflecting their target service
-      // we submit this as `base_service_type` to keep track of
-      const params =
-        props.sourceData.serviceType === 'custom'
-          ? baseParams
-          : {
-              ...baseParams,
-              base_service_type: props.sourceData.serviceType,
-            };
-
-      try {
-        const response = await HttpLogic.values.http.post<CustomSource>(route, {
-          body: JSON.stringify(params),
-        });
-        actions.setNewCustomSource(response);
-      } catch (e) {
-        flashAPIErrors(e);
-      } finally {
-        actions.setButtonNotLoading();
-      }
+      const { baseServiceType } = props;
+      actions.makeRequest({ name: customSourceNameValue, baseServiceType });
+    },
+    makeRequest: () => clearFlashMessages(),
+    apiError: (error) => flashAPIErrors(error),
+    apiSuccess: ({ source }) => {
+      actions.setNewCustomSource(source);
     },
   }),
+  selectors: {
+    buttonLoading: [(selectors) => [selectors.status], (status) => status === Status.LOADING],
+  },
 });

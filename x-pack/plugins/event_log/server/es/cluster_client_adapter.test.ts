@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   ClusterClientAdapter,
   IClusterClientAdapter,
@@ -44,7 +44,7 @@ describe('indexDocument', () => {
     });
 
     expect(clusterClient.bulk).toHaveBeenCalledWith({
-      body: [{ create: { _index: 'event-log' } }, { message: 'foo' }],
+      body: [{ create: { _index: 'event-log', require_alias: true } }, { message: 'foo' }],
     });
   });
 
@@ -55,7 +55,7 @@ describe('indexDocument', () => {
       return logger.error.mock.calls.length !== 0;
     });
 
-    const expectedMessage = `error writing bulk events: "expected failure"; docs: [{"create":{"_index":"event-log"}},{"message":"foo"}]`;
+    const expectedMessage = `error writing bulk events: "expected failure"; docs: [{"create":{"_index":"event-log","require_alias":true}},{"message":"foo"}]`;
     expect(logger.error).toHaveBeenCalledWith(expectedMessage);
   });
 });
@@ -92,7 +92,10 @@ describe('buffering documents', () => {
 
     const expectedBody = [];
     for (let i = 0; i < EVENT_BUFFER_LENGTH - 1; i++) {
-      expectedBody.push({ create: { _index: 'event-log' } }, { message: `foo ${i}` });
+      expectedBody.push(
+        { create: { _index: 'event-log', require_alias: true } },
+        { message: `foo ${i}` }
+      );
     }
 
     expect(clusterClient.bulk).toHaveBeenCalledWith({
@@ -112,7 +115,10 @@ describe('buffering documents', () => {
 
     const expectedBody = [];
     for (let i = 0; i < EVENT_BUFFER_LENGTH; i++) {
-      expectedBody.push({ create: { _index: 'event-log' } }, { message: `foo ${i}` });
+      expectedBody.push(
+        { create: { _index: 'event-log', require_alias: true } },
+        { message: `foo ${i}` }
+      );
     }
 
     expect(clusterClient.bulk).toHaveBeenNthCalledWith(1, {
@@ -120,7 +126,7 @@ describe('buffering documents', () => {
     });
 
     expect(clusterClient.bulk).toHaveBeenNthCalledWith(2, {
-      body: [{ create: { _index: 'event-log' } }, { message: `foo 100` }],
+      body: [{ create: { _index: 'event-log', require_alias: true } }, { message: `foo 100` }],
     });
   });
 
@@ -146,7 +152,7 @@ describe('buffering documents', () => {
       const expectedBody = [];
       for (let j = 0; j < EVENT_BUFFER_LENGTH; j++) {
         expectedBody.push(
-          { create: { _index: 'event-log' } },
+          { create: { _index: 'event-log', require_alias: true } },
           { message: `foo ${i * EVENT_BUFFER_LENGTH + j}` }
         );
       }

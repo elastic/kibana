@@ -112,7 +112,7 @@ export const SourceRow: React.FC<SourceRowProps> = ({
         <EuiFlexGroup
           justifyContent="flexStart"
           alignItems="center"
-          gutterSize="xs"
+          gutterSize="m"
           responsive={false}
         >
           <EuiFlexItem grow={false}>

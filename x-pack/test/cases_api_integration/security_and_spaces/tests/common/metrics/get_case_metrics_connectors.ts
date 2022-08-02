@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { ConnectorTypes } from '@kbn/cases-plugin/common/api';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 
@@ -16,7 +17,6 @@ import {
   getCaseMetrics,
   updateCase,
 } from '../../../../common/lib/utils';
-import { ConnectorTypes } from '../../../../../../plugins/cases/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

@@ -6,11 +6,11 @@
  */
 
 import { Query } from '@elastic/eui';
-import { SavedObjectsFindOptionsReference } from 'src/core/public';
+import { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import {
   ParseSearchQueryOptions,
   SavedObjectsTaggingApiUi,
-} from '../../../../../src/plugins/saved_objects_tagging_oss/public';
+} from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { ITagsCache } from '../services';
 
 export interface BuildParseSearchQueryOptions {

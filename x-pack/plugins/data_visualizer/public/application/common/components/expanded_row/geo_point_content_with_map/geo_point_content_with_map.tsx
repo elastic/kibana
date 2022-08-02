@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { FC, useEffect, useState } from 'react';
-import { DataView } from '../../../../../../../../../src/plugins/data_views/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { ES_GEO_FIELD_TYPE, LayerDescriptor } from '@kbn/maps-plugin/common';
 import { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
 import { ExpandedRowContent } from '../../stats_table/components/field_data_expanded_row/expanded_row_content';
 import { DocumentStatsTable } from '../../stats_table/components/field_data_expanded_row/document_stats';
 import { ExamplesList } from '../../examples_list';
 import { FieldVisConfig } from '../../stats_table/types';
 import { useDataVisualizerKibana } from '../../../../kibana_context';
-import { JOB_FIELD_TYPES } from '../../../../../../common/constants';
-import { ES_GEO_FIELD_TYPE, LayerDescriptor } from '../../../../../../../maps/common';
+import { SUPPORTED_FIELD_TYPES } from '../../../../../../common/constants';
 import { EmbeddedMapComponent } from '../../embedded_map';
 import { ExpandedRowPanel } from '../../stats_table/components/field_data_expanded_row/expanded_row_panel';
 
@@ -36,7 +35,8 @@ export const GeoPointContentWithMap: FC<{
         dataView?.id !== undefined &&
         config !== undefined &&
         config.fieldName !== undefined &&
-        (config.type === JOB_FIELD_TYPES.GEO_POINT || config.type === JOB_FIELD_TYPES.GEO_SHAPE)
+        (config.type === SUPPORTED_FIELD_TYPES.GEO_POINT ||
+          config.type === SUPPORTED_FIELD_TYPES.GEO_SHAPE)
       ) {
         const params = {
           indexPatternId: dataView.id,
@@ -64,7 +64,7 @@ export const GeoPointContentWithMap: FC<{
   return (
     <ExpandedRowContent dataTestSubj={'dataVisualizerIndexBasedMapContent'}>
       <DocumentStatsTable config={config} />
-      <ExamplesList examples={stats.examples} />
+      <ExamplesList examples={stats?.examples} />
       <ExpandedRowPanel className={'dvPanel__wrapper dvMap__wrapper'} grow={true}>
         <EmbeddedMapComponent layerList={layerList} />
       </ExpandedRowPanel>

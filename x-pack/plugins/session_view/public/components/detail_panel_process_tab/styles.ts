@@ -13,15 +13,7 @@ export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const description: CSSObject = {
-      width: `calc(100% - ${euiTheme.size.xl})`,
-      whiteSpace: 'nowrap',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-    };
-
     const descriptionSemibold: CSSObject = {
-      ...description,
       fontWeight: euiTheme.font.weight.medium,
     };
 
@@ -30,10 +22,15 @@ export const useStyles = () => {
       paddingLeft: euiTheme.size.xs,
     };
 
+    const ellipsis: CSSObject = {
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+    };
+
     return {
-      description,
       descriptionSemibold,
       executableAction,
+      ellipsis,
     };
   }, [euiTheme]);
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 import { ExpressionsServerPlugin } from './plugin';
 
 export type { ExpressionsServerSetup, ExpressionsServerStart } from './plugin';

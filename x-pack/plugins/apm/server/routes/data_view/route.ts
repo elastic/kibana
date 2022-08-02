@@ -5,69 +5,59 @@
  * 2.0.
  */
 
+import { DataView } from '@kbn/data-views-plugin/common';
 import { createStaticDataView } from './create_static_data_view';
 import { setupRequest } from '../../lib/helpers/setup_request';
-import { getDynamicDataView } from './get_dynamic_data_view';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { ISavedObjectsRepository } from '../../../../../../src/core/server';
+import { getApmDataViewTitle } from './get_apm_data_view_title';
+import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 
 const staticDataViewRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/data_view/static',
   options: { tags: ['access:apm'] },
-  handler: async (resources): Promise<{ created: boolean }> => {
-    const {
+  handler: async (resources): Promise<{ dataView: DataView | undefined }> => {
+    const setup = await setupRequest(resources);
+    const { context, plugins, request, config } = resources;
+
+    const coreContext = await context.core;
+    const dataViewStart = await plugins.dataViews.start();
+    const dataViewService = await dataViewStart.dataViewsServiceFactory(
+      coreContext.savedObjects.client,
+      coreContext.elasticsearch.client.asCurrentUser,
       request,
-      core,
-      plugins: { spaces },
+      true
+    );
+
+    const dataView = await createStaticDataView({
+      dataViewService,
       config,
-    } = resources;
-
-    const setupPromise = setupRequest(resources);
-    const clientPromise = core
-      .start()
-      .then(
-        (coreStart): ISavedObjectsRepository =>
-          coreStart.savedObjects.createInternalRepository()
-      );
-
-    const setup = await setupPromise;
-    const savedObjectsClient = await clientPromise;
-
-    const spaceId = spaces?.setup.spacesService.getSpaceId(request);
-
-    const didCreateDataView = await createStaticDataView({
       setup,
-      config,
-      savedObjectsClient,
-      spaceId,
     });
 
-    return { created: didCreateDataView };
+    return { dataView };
   },
 });
 
-const dynamicDataViewRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/data_view/dynamic',
+const dataViewTitleRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/data_view/title',
   options: { tags: ['access:apm'] },
   handler: async ({
     context,
     config,
     logger,
-  }): Promise<{
-    dynamicDataView:
-      | import('./get_dynamic_data_view').DataViewTitleAndFields
-      | undefined;
-  }> => {
-    const dynamicDataView = await getDynamicDataView({
-      context,
+  }): Promise<{ apmDataViewTitle: string }> => {
+    const coreContext = await context.core;
+    const apmIndicies = await getApmIndices({
+      savedObjectsClient: coreContext.savedObjects.client,
       config,
-      logger,
     });
-    return { dynamicDataView };
+    const apmDataViewTitle = getApmDataViewTitle(apmIndicies);
+
+    return { apmDataViewTitle };
   },
 });
 
 export const dataViewRouteRepository = {
   ...staticDataViewRoute,
-  ...dynamicDataViewRoute,
+  ...dataViewTitleRoute,
 };

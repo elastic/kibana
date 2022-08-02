@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MapEmbeddableInput } from '../../../../../../plugins/maps/public';
+import { MapEmbeddableInput } from '@kbn/maps-plugin/public';
 
 export function toExpression(input: MapEmbeddableInput & { savedObjectId: string }): string {
   const expressionParts = [] as string[];

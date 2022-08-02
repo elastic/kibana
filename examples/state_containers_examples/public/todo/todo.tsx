@@ -32,13 +32,13 @@ import {
   StateContainer,
   syncState,
   useContainerSelector,
-} from '../../../../src/plugins/kibana_utils/public';
+} from '@kbn/kibana-utils-plugin/public';
 import {
   defaultState,
   pureTransitions,
   TodoActions,
   TodoState,
-} from '../../../../src/plugins/kibana_utils/demos/state_containers/todomvc';
+} from '@kbn/kibana-utils-plugin/demos/state_containers/todomvc';
 
 interface TodoAppProps {
   filter: 'completed' | 'not-completed' | null;

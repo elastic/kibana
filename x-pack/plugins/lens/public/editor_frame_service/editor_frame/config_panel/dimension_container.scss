@@ -46,3 +46,16 @@
 .lnsBody--overflowHidden {
   overflow: hidden;
 }
+
+.lnsLayerAddButton:hover {
+  text-decoration: none;
+
+  .lnsLayerAddButton__label {
+    text-decoration: underline;
+  }
+
+  .lnsLayerAddButton__techBadge,
+  .lnsLayerAddButton__techBadge * {
+    cursor: pointer;
+  }
+}

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObject } from 'src/core/types';
-import type { SavedObjectsNamespaceType } from 'src/core/public';
+import type { SavedObject } from '@kbn/core/types';
+import type { SavedObjectsNamespaceType } from '@kbn/core/public';
 
 /**
  * The metadata injected into a {@link SavedObject | saved object} when returning

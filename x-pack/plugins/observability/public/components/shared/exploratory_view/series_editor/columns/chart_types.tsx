@@ -8,11 +8,11 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIcon, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { SeriesType } from '@kbn/lens-plugin/public';
 import { ObservabilityPublicPluginsStart } from '../../../../../plugin';
 import { SeriesUrl, useFetcher } from '../../../../..';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
-import { SeriesType } from '../../../../../../../lens/public';
 
 const CHART_TYPE_LABEL = i18n.translate('xpack.observability.expView.chartTypes.label', {
   defaultMessage: 'Chart type',

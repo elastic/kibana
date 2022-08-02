@@ -6,7 +6,7 @@
  */
 
 import { buildUsersQuery } from './query.all_users.dsl';
-import { mockOptions } from './__mocks__/';
+import { mockOptions } from './__mocks__';
 
 describe('buildUsersQuery', () => {
   test('build query from options correctly', () => {

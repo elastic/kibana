@@ -9,7 +9,7 @@ import { Agent as HttpAgent } from 'http';
 import { Agent as HttpsAgent, AgentOptions } from 'https';
 import HttpProxyAgent from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
-import { Logger } from '../../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { getNodeSSLOptions, getSSLSettingsFromConfig } from './get_node_ssl_options';
 

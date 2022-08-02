@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { SavedObjectTaggingPlugin } from './plugin';
 
 export type { SavedObjectTaggingPluginStart } from './types';

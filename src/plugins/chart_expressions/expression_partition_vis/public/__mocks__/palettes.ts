@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PaletteDefinition, SeriesLayer } from '../../../../charts/public';
+import type { PaletteDefinition, SeriesLayer } from '@kbn/coloring';
 
 export const getPaletteRegistry = () => {
   const colors = [

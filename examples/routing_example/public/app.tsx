@@ -8,7 +8,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { AppMountParameters } from 'kibana/public';
+import { AppMountParameters } from '@kbn/core/public';
 import {
   EuiPage,
   EuiPageBody,

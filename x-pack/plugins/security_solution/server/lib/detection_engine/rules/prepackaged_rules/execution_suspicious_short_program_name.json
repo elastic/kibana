@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Suspicious Execution - Short Program Name",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and length(process.name) > 0 and\n length(process.name) == 5 and host.os.name == \"Windows\" and length(process.pe.original_file_name) > 5\n",
   "risk_score": 47,
   "rule_id": "17c7f6a5-5bc9-4e1f-92bf-13632d24384d",
@@ -25,5 +26,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 4
 }

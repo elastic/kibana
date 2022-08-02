@@ -13,6 +13,7 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { LogRetentionLogic, LogRetentionOptions, renderLogRetentionDate } from '..';
 import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 
 import { AppLogic } from '../../../app_logic';
@@ -20,8 +21,6 @@ import { SETTINGS_PATH } from '../../../routes';
 import { ANALYTICS_TITLE } from '../../analytics';
 import { API_LOGS_TITLE } from '../../api_logs';
 import { CRAWLER_TITLE } from '../../crawler';
-
-import { LogRetentionLogic, LogRetentionOptions, renderLogRetentionDate } from '../index';
 
 export const AUDIT_LOGS_TITLE = i18n.translate('xpack.enterpriseSearch.appSearch.audit.title', {
   defaultMessage: 'Audit',

@@ -10,7 +10,7 @@ import React, { useCallback, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { NumberInputOption, SwitchOption } from '../../../../../../../vis_default_editor/public';
+import { NumberInputOption, SwitchOption } from '@kbn/vis-default-editor-plugin/public';
 
 import { ValueAxis } from '../../../../types';
 import { YExtents } from './y_extents';

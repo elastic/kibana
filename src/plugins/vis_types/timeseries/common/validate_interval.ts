@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { parseInterval, TimeRangeBounds } from '@kbn/data-plugin/common';
 import { GTE_INTERVAL_RE } from './interval_regexp';
-import { parseInterval, TimeRangeBounds } from '../../../data/common';
 import { ValidateIntervalError } from './errors';
 
 export function validateInterval(bounds: TimeRangeBounds, interval: string, maxBuckets: number) {

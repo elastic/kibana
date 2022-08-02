@@ -7,8 +7,8 @@
 
 import { SavedObjectProviderRegistry } from './saved_object_provider_registry';
 import uuid from 'uuid';
-import { KibanaRequest } from 'src/core/server';
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { KibanaRequest } from '@kbn/core/server';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 describe('SavedObjectProviderRegistry', () => {
   beforeEach(() => jest.resetAllMocks());

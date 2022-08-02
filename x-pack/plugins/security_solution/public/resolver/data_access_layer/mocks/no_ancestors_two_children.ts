@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   ResolverRelatedEvents,
   SafeResolverEvent,
   ResolverEntityIndex,
@@ -13,7 +13,7 @@ import {
   ResolverSchema,
 } from '../../../../common/endpoint/types';
 import { mockTreeWithNoAncestorsAnd2Children } from '../../mocks/resolver_tree';
-import { DataAccessLayer, TimeRange } from '../../types';
+import type { DataAccessLayer, TimeRange } from '../../types';
 
 interface Metadata {
   /**

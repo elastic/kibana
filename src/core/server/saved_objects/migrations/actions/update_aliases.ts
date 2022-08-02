@@ -9,12 +9,12 @@
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { errors as EsErrors } from '@elastic/elasticsearch';
-import { ElasticsearchClient } from '../../../elasticsearch';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
-import { IndexNotFound } from './index';
+import { IndexNotFound } from '.';
 
 export interface AliasNotFound {
   type: 'alias_not_found_exception';
@@ -49,14 +49,11 @@ export const updateAliases =
   > =>
   () => {
     return client.indices
-      .updateAliases(
-        {
-          body: {
-            actions: aliasActions,
-          },
+      .updateAliases({
+        body: {
+          actions: aliasActions,
         },
-        { maxRetries: 0 }
-      )
+      })
       .then(() => {
         // Ignore `acknowledged: false`. When the coordinating node accepts
         // the new cluster state update but not all nodes have applied the

@@ -6,15 +6,18 @@
  */
 
 // import helpers first, this also sets up the mocks
-import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
+import { setupEnvironment, pageHelpers, getRandomString } from './helpers';
 
 import { ReactElement } from 'react';
 import { act } from 'react-dom/test-utils';
 
+import { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import * as fixtures from '../../test/fixtures';
+import { API_BASE_PATH } from '../../common';
 
 import { PolicyFormTestBed } from './helpers/policy_form.helpers';
 import { DEFAULT_POLICY_SCHEDULE } from '../../public/application/constants';
+import { FEATURE_STATES_NONE_OPTION } from '../../common/constants';
 
 const { setup } = pageHelpers.policyAdd;
 
@@ -36,12 +39,7 @@ const repository = fixtures.getRepository({ name: `a${getRandomString()}`, type:
 
 describe('<PolicyAdd />', () => {
   let testBed: PolicyFormTestBed;
-
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
-
-  afterAll(() => {
-    server.restore();
-  });
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   describe('on component mount', () => {
     beforeEach(async () => {
@@ -50,9 +48,11 @@ describe('<PolicyAdd />', () => {
         indices: ['my_index'],
         dataStreams: ['my_data_stream', 'my_other_data_stream'],
       });
+      httpRequestsMockHelpers.setLoadFeaturesResponse({
+        features: [{ name: 'kibana' }, { name: 'tasks' }],
+      });
 
-      testBed = await setup();
-      await nextTick();
+      testBed = await setup(httpSetup);
       testBed.component.update();
     });
 
@@ -141,9 +141,8 @@ describe('<PolicyAdd />', () => {
           await act(async () => {
             // Toggle "All indices" switch
             form.toggleEuiSwitch('allIndicesToggle');
-            await nextTick();
-            component.update();
           });
+          component.update();
 
           // Deselect all indices from list
           find('deselectIndicesLink').simulate('click');
@@ -159,7 +158,6 @@ describe('<PolicyAdd />', () => {
           await act(async () => {
             // Toggle "All indices" switch
             form.toggleEuiSwitch('allIndicesToggle');
-            await nextTick();
           });
           component.update();
 
@@ -214,6 +212,123 @@ describe('<PolicyAdd />', () => {
       });
     });
 
+    describe('feature states', () => {
+      beforeEach(async () => {
+        const { actions, form, component } = testBed;
+
+        // Complete step 1
+        form.setInputValue('nameInput', POLICY_NAME);
+        form.setInputValue('snapshotNameInput', SNAPSHOT_NAME);
+        actions.clickNextButton();
+
+        component.update();
+      });
+
+      test('Enabling include global state enables include feature state', async () => {
+        const { find, component, form } = testBed;
+
+        // By default includeGlobalState is enabled, so we need to toogle twice
+        await act(async () => {
+          form.toggleEuiSwitch('globalStateToggle');
+          form.toggleEuiSwitch('globalStateToggle');
+        });
+        component.update();
+
+        expect(find('featureStatesToggle').props().disabled).toBeUndefined();
+      });
+
+      test('feature states dropdown is only shown when include feature states is enabled', async () => {
+        const { exists, component, form } = testBed;
+
+        // By default the toggle is enabled
+        expect(exists('featureStatesDropdown')).toBe(true);
+
+        await act(async () => {
+          form.toggleEuiSwitch('featureStatesToggle');
+        });
+        component.update();
+
+        expect(exists('featureStatesDropdown')).toBe(false);
+      });
+
+      test('include all features by default', async () => {
+        const { actions } = testBed;
+
+        // Complete step 2
+        actions.clickNextButton();
+        // Complete step 3
+        actions.clickNextButton();
+
+        await act(async () => {
+          actions.clickSubmitButton();
+        });
+
+        const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
+        const [requestUrl, requestBody] = lastReq;
+        const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
+
+        expect(requestUrl).toBe(`${API_BASE_PATH}policies`);
+        expect(parsedReqBody.config).toEqual({
+          includeGlobalState: true,
+          featureStates: [],
+        });
+      });
+
+      test('include some features', async () => {
+        const { actions, form } = testBed;
+
+        form.setComboBoxValue('featureStatesDropdown', 'kibana');
+
+        // Complete step 2
+        actions.clickNextButton();
+        // Complete step 3
+        actions.clickNextButton();
+
+        await act(async () => {
+          actions.clickSubmitButton();
+        });
+
+        const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
+        const [requestUrl, requestBody] = lastReq;
+        const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
+
+        expect(requestUrl).toBe(`${API_BASE_PATH}policies`);
+        expect(parsedReqBody.config).toEqual({
+          includeGlobalState: true,
+          featureStates: ['kibana'],
+        });
+      });
+
+      test('include no features', async () => {
+        const { actions, form, component } = testBed;
+
+        // Disable all features
+        await act(async () => {
+          form.toggleEuiSwitch('featureStatesToggle');
+        });
+        component.update();
+
+        // Complete step 2
+        actions.clickNextButton();
+        // Complete step 3
+        actions.clickNextButton();
+
+        await act(async () => {
+          actions.clickSubmitButton();
+        });
+
+        const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
+        const [requestUrl, requestBody] = lastReq;
+        const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
+
+        expect(requestUrl).toBe(`${API_BASE_PATH}policies`);
+        expect(parsedReqBody.config).toEqual({
+          includeGlobalState: true,
+          featureStates: [FEATURE_STATES_NONE_OPTION],
+        });
+      });
+    });
+
     describe('form payload & api errors', () => {
       beforeEach(async () => {
         const { actions, form } = testBed;
@@ -238,45 +353,44 @@ describe('<PolicyAdd />', () => {
 
         await act(async () => {
           actions.clickSubmitButton();
-          await nextTick();
         });
 
-        const latestRequest = server.requests[server.requests.length - 1];
-
-        const expected = {
-          config: {},
-          isManagedPolicy: false,
-          name: POLICY_NAME,
-          repository: repository.name,
-          retention: {
-            expireAfterUnit: 'd', // default
-            expireAfterValue: Number(EXPIRE_AFTER_VALUE),
-            maxCount: Number(MAX_COUNT),
-            minCount: Number(MIN_COUNT),
-          },
-          schedule: DEFAULT_POLICY_SCHEDULE,
-          snapshotName: SNAPSHOT_NAME,
-        };
-
-        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
+        expect(httpSetup.post).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}policies`,
+          expect.objectContaining({
+            body: JSON.stringify({
+              name: POLICY_NAME,
+              snapshotName: SNAPSHOT_NAME,
+              schedule: DEFAULT_POLICY_SCHEDULE,
+              repository: repository.name,
+              config: { featureStates: [], includeGlobalState: true },
+              retention: {
+                expireAfterValue: Number(EXPIRE_AFTER_VALUE),
+                expireAfterUnit: 'd', // default
+                maxCount: Number(MAX_COUNT),
+                minCount: Number(MIN_COUNT),
+              },
+              isManagedPolicy: false,
+            }),
+          })
+        );
       });
 
       it('should surface the API errors from the put HTTP request', async () => {
         const { component, actions, find, exists } = testBed;
 
         const error = {
-          status: 409,
+          statusCode: 409,
           error: 'Conflict',
           message: `There is already a policy with name '${POLICY_NAME}'`,
         };
 
-        httpRequestsMockHelpers.setAddPolicyResponse(undefined, { body: error });
+        httpRequestsMockHelpers.setAddPolicyResponse(undefined, error);
 
         await act(async () => {
           actions.clickSubmitButton();
-          await nextTick();
-          component.update();
         });
+        component.update();
 
         expect(exists('savePolicyApiError')).toBe(true);
         expect(find('savePolicyApiError').text()).toContain(error.message);

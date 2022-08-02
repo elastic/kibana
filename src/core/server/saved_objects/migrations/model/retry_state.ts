@@ -18,12 +18,11 @@ export const delayRetryState = <S extends State>(
     return {
       ...state,
       controlState: 'FATAL',
-      reason: `Unable to complete the ${state.controlState} step after ${maxRetryAttempts} attempts, terminating.`,
+      reason: `Unable to complete the ${state.controlState} step after ${maxRetryAttempts} attempts, terminating. The last failure message was: ${errorMessage}`,
     };
   } else {
     const retryCount = state.retryCount + 1;
     const retryDelay = 1000 * Math.min(Math.pow(2, retryCount), 64); // 2s, 4s, 8s, 16s, 32s, 64s, 64s, 64s ...
-
     return {
       ...state,
       retryCount,

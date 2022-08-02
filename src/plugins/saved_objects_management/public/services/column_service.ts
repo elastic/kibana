@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SpacesApi } from '../../../../../x-pack/plugins/spaces/public';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import { ShareToSpaceSavedObjectsManagementColumn } from './columns';
 import { SavedObjectsManagementColumn } from './types';
 
@@ -14,18 +14,18 @@ export interface SavedObjectsManagementColumnServiceSetup {
   /**
    * register given column in the registry.
    */
-  register: (column: SavedObjectsManagementColumn<unknown>) => void;
+  register: (column: SavedObjectsManagementColumn) => void;
 }
 
 export interface SavedObjectsManagementColumnServiceStart {
   /**
    * return all {@link SavedObjectsManagementColumn | columns} currently registered.
    */
-  getAll: () => Array<SavedObjectsManagementColumn<unknown>>;
+  getAll: () => SavedObjectsManagementColumn[];
 }
 
 export class SavedObjectsManagementColumnService {
-  private readonly columns = new Map<string, SavedObjectsManagementColumn<unknown>>();
+  private readonly columns = new Map<string, SavedObjectsManagementColumn>();
 
   setup(): SavedObjectsManagementColumnServiceSetup {
     return {
@@ -52,6 +52,5 @@ function registerSpacesApiColumns(
   service: SavedObjectsManagementColumnService,
   spacesApi: SpacesApi
 ) {
-  // Note: this column is hidden for now because no saved objects are shareable. It should be uncommented when at least one saved object type is multi-namespace.
   service.setup().register(new ShareToSpaceSavedObjectsManagementColumn(spacesApi.ui));
 }

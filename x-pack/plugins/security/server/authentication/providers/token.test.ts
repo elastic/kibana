@@ -8,8 +8,8 @@
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
-import type { ScopeableRequest } from 'src/core/server';
-import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
+import type { ScopeableRequest } from '@kbn/core/server';
+import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../mocks';
@@ -61,7 +61,11 @@ describe('TokenAuthenticationProvider', () => {
       await expect(provider.login(request, credentials)).resolves.toEqual(
         AuthenticationResult.succeeded(
           { ...user, authentication_provider: { type: 'token', name: 'token' } },
-          { authHeaders: { authorization }, state: tokenPair }
+          {
+            authHeaders: { authorization },
+            userProfileGrant: { type: 'accessToken', accessToken: tokenPair.accessToken },
+            state: tokenPair,
+          }
         )
       );
 

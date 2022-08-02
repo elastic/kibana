@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { send, constructESUrl, getContentType, getVersion } from './es';
+export { send, constructUrl, getContentType, getVersion } from './es';

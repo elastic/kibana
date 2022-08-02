@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { DataView, DataViewsContract } from '../../../../../../../src/plugins/data_views/public';
+import { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { getDataViewAndSavedSearch } from '../../util/index_utils';
 import { JobType } from '../../../../common/types/saved_objects';
-import { newJobCapsServiceAnalytics } from '../new_job_capabilities/new_job_capabilities_service_analytics';
-import { newJobCapsService } from '../new_job_capabilities/new_job_capabilities_service';
+import { newJobCapsServiceAnalytics } from './new_job_capabilities_service_analytics';
+import { newJobCapsService } from './new_job_capabilities_service';
 
 export const ANOMALY_DETECTOR = 'anomaly-detector';
 export const DATA_FRAME_ANALYTICS = 'data-frame-analytics';

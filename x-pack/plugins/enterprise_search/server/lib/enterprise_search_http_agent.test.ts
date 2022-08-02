@@ -11,7 +11,7 @@ import { readFileSync } from 'fs';
 import http from 'http';
 import https from 'https';
 
-import { ConfigType } from '../';
+import { ConfigType } from '..';
 
 import { entSearchHttpAgent } from './enterprise_search_http_agent';
 

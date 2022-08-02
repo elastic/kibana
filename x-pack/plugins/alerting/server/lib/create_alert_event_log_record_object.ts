@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { IEvent } from '@kbn/event-log-plugin/server';
 import { AlertInstanceState } from '../types';
-import { IEvent } from '../../../event_log/server';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 
 export type Event = Exclude<IEvent, undefined>;
@@ -71,7 +71,7 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
       category: [ruleType.producer],
       ...(state?.start ? { start: state.start as string } : {}),
       ...(state?.end ? { end: state.end as string } : {}),
-      ...(state?.duration !== undefined ? { duration: state.duration as number } : {}),
+      ...(state?.duration !== undefined ? { duration: state.duration as string } : {}),
     },
     kibana: {
       alert: {

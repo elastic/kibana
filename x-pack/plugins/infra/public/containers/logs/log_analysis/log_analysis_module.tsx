@@ -6,12 +6,12 @@
  */
 
 import { useCallback, useMemo } from 'react';
+import { useUiTracker } from '@kbn/observability-plugin/public';
 import { DatasetFilter } from '../../../../common/log_analysis';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { useModuleStatus } from './log_analysis_module_status';
 import { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_module_types';
-import { useUiTracker } from '../../../../../observability/public';
 
 export const useLogAnalysisModule = <JobType extends string>({
   sourceConfiguration,

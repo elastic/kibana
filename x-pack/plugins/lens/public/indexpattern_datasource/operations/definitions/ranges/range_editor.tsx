@@ -20,8 +20,8 @@ import {
   EuiSwitch,
   EuiSpacer,
 } from '@elastic/eui';
-import type { IFieldFormat } from 'src/plugins/field_formats/common';
-import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/public';
+import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { RangeColumnParams, UpdateParamsFnType, MODES_TYPES } from './ranges';
 import { AdvancedRangeEditor } from './advanced_editor';
 import { TYPING_DEBOUNCE_TIME, MODES, MIN_HISTOGRAM_BARS } from './constants';

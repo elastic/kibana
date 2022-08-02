@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { coreMock, httpServerMock } from 'src/core/server/mocks';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { spacesClientServiceMock } from '../spaces_client/spaces_client_service.mock';

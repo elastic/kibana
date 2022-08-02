@@ -9,7 +9,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Observable, BehaviorSubject } from 'rxjs';
 
-import { CoreSetup } from 'kibana/public';
+import { CoreSetup } from '@kbn/core/public';
 import { DARK_THEME, LIGHT_THEME, PartialTheme, Theme } from '@elastic/charts';
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 

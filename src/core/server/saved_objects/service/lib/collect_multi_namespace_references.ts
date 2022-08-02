@@ -6,10 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
-import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
+import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type {
+  SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesOptions,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
+  SavedObjectReferenceWithContext,
+} from '@kbn/core-saved-objects-api-server';
+import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsSerializer } from '../../serialization';
-import type { SavedObject, SavedObjectsBaseOptions } from '../../types';
 import { SavedObjectsErrorHelpers } from './errors';
 import { findLegacyUrlAliases } from './legacy_url_aliases';
 import { getRootFields } from './included_fields';
@@ -21,6 +27,7 @@ import {
 } from './internal_utils';
 import type { CreatePointInTimeFinderFn } from './point_in_time_finder';
 import type { RepositoryEsClient } from './repository_es_client';
+import { findSharedOriginObjects } from './find_shared_origin_objects';
 
 /**
  * When we collect an object's outbound references, we will only go a maximum of this many levels deep before we throw an error.
@@ -28,77 +35,13 @@ import type { RepositoryEsClient } from './repository_es_client';
 const MAX_REFERENCE_GRAPH_DEPTH = 20;
 
 /**
- * How many aliases to search for per page. This is smaller than the PointInTimeFinder's default of 1000. We specify 100 for the page count
- * because this is a relatively unimportant operation, and we want to avoid blocking the Elasticsearch thread pool for longer than
- * necessary.
+ * How many aliases or objects with shared origins to search for per page. This is smaller than the PointInTimeFinder's default of 1000. We
+ * specify 100 for the page count because this is a relatively unimportant operation, and we want to avoid blocking the Elasticsearch thread
+ * pool for longer than necessary.
  *
  * @internal
  */
-export const ALIAS_SEARCH_PER_PAGE = 100;
-
-/**
- * An object to collect references for. It must be a multi-namespace type (in other words, the object type must be registered with the
- * `namespaceType: 'multiple'` or `namespaceType: 'multiple-isolated'` option).
- *
- * Note: if options.purpose is 'updateObjectsSpaces', it must be a shareable type (in other words, the object type must be registered with
- * the `namespaceType: 'multiple'`).
- *
- * @public
- */
-export interface SavedObjectsCollectMultiNamespaceReferencesObject {
-  id: string;
-  type: string;
-}
-
-/**
- * Options for collecting references.
- *
- * @public
- */
-export interface SavedObjectsCollectMultiNamespaceReferencesOptions
-  extends SavedObjectsBaseOptions {
-  /** Optional purpose used to determine filtering and authorization checks; default is 'collectMultiNamespaceReferences' */
-  purpose?: 'collectMultiNamespaceReferences' | 'updateObjectsSpaces';
-}
-
-/**
- * A returned input object or one of its references, with additional context.
- *
- * @public
- */
-export interface SavedObjectReferenceWithContext {
-  /** The type of the referenced object */
-  type: string;
-  /** The ID of the referenced object */
-  id: string;
-  /** The space(s) that the referenced object exists in */
-  spaces: string[];
-  /**
-   * References to this object; note that this does not contain _all inbound references everywhere for this object_, it only contains
-   * inbound references for the scope of this operation
-   */
-  inboundReferences: Array<{
-    /** The type of the object that has the inbound reference */
-    type: string;
-    /** The ID of the object that has the inbound reference */
-    id: string;
-    /** The name of the inbound reference */
-    name: string;
-  }>;
-  /** Whether or not this object or reference is missing */
-  isMissing?: boolean;
-  /** The space(s) that legacy URL aliases matching this type/id exist in */
-  spacesWithMatchingAliases?: string[];
-}
-
-/**
- * The response when object references are collected.
- *
- * @public
- */
-export interface SavedObjectsCollectMultiNamespaceReferencesResponse {
-  objects: SavedObjectReferenceWithContext[];
-}
+export const ALIAS_OR_SHARED_ORIGIN_SEARCH_PER_PAGE = 100;
 
 /**
  * Parameters for the collectMultiNamespaceReferences function.
@@ -140,8 +83,16 @@ export async function collectMultiNamespaceReferences(
     });
     const { type, id } = parseObjectKey(referenceKey);
     const object = objectMap.get(referenceKey);
+    const originId = object?.originId;
     const spaces = object?.namespaces ?? [];
-    return { type, id, spaces, inboundReferences, ...(object === null && { isMissing: true }) };
+    return {
+      type,
+      id,
+      originId,
+      spaces,
+      inboundReferences,
+      ...(object === null && { isMissing: true }),
+    };
   });
 
   const objectsToFindAliasesFor = objectsWithContext
@@ -150,13 +101,22 @@ export async function collectMultiNamespaceReferences(
   const aliasesMap = await findLegacyUrlAliases(
     createPointInTimeFinder,
     objectsToFindAliasesFor,
-    ALIAS_SEARCH_PER_PAGE
+    ALIAS_OR_SHARED_ORIGIN_SEARCH_PER_PAGE
+  );
+  const objectOriginsToSearchFor = objectsWithContext
+    .filter(({ spaces }) => spaces.length !== 0)
+    .map(({ type, id, originId }) => ({ type, origin: originId || id }));
+  const originsMap = await findSharedOriginObjects(
+    createPointInTimeFinder,
+    objectOriginsToSearchFor,
+    ALIAS_OR_SHARED_ORIGIN_SEARCH_PER_PAGE
   );
   const results = objectsWithContext.map((obj) => {
-    const key = getObjectKey(obj);
-    const val = aliasesMap.get(key);
-    const spacesWithMatchingAliases = val && Array.from(val);
-    return { ...obj, spacesWithMatchingAliases };
+    const aliasesVal = aliasesMap.get(getObjectKey(obj));
+    const spacesWithMatchingAliases = aliasesVal && Array.from(aliasesVal).sort();
+    const originsVal = originsMap.get(getObjectKey({ type: obj.type, id: obj.originId || obj.id }));
+    const spacesWithMatchingOrigins = originsVal && Array.from(originsVal).sort();
+    return { ...obj, spacesWithMatchingAliases, spacesWithMatchingOrigins };
   });
 
   return {

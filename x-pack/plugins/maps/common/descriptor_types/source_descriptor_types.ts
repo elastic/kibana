@@ -8,8 +8,8 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { FeatureCollection } from 'geojson';
-import { Query } from 'src/plugins/data/public';
-import { SortDirection } from 'src/plugins/data/common/search';
+import type { Query } from '@kbn/es-query';
+import { SortDirection } from '@kbn/data-plugin/common/search';
 import {
   AGG_TYPE,
   GRID_RESOLUTION,

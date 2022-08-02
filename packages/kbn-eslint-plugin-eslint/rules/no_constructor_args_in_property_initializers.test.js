@@ -63,7 +63,7 @@ ruleTester.run('@kbn/eslint/no_constructor_args_in_property_initializers', rule,
       errors: [
         {
           line: 2,
-          message: `The constructor argument "foo" can't be used in a class property intializer, define the property in the constructor instead`,
+          message: `The constructor argument "foo" can't be used in a class property initializer, define the property in the constructor instead`,
         },
       ],
     },
@@ -77,7 +77,7 @@ ruleTester.run('@kbn/eslint/no_constructor_args_in_property_initializers', rule,
       errors: [
         {
           line: 2,
-          message: `The constructor argument "foo" can't be used in a class property intializer, define the property in the constructor instead`,
+          message: `The constructor argument "foo" can't be used in a class property initializer, define the property in the constructor instead`,
         },
       ],
     },
@@ -91,7 +91,7 @@ ruleTester.run('@kbn/eslint/no_constructor_args_in_property_initializers', rule,
       errors: [
         {
           line: 2,
-          message: `The constructor argument "foo" can't be used in a class property intializer, define the property in the constructor instead`,
+          message: `The constructor argument "foo" can't be used in a class property initializer, define the property in the constructor instead`,
         },
       ],
     },
@@ -111,7 +111,7 @@ ruleTester.run('@kbn/eslint/no_constructor_args_in_property_initializers', rule,
       errors: [
         {
           line: 2,
-          message: `The constructor argument "deps" can't be used in a class property intializer, define the property in the constructor instead`,
+          message: `The constructor argument "deps" can't be used in a class property initializer, define the property in the constructor instead`,
         },
       ],
     },

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { login } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
@@ -15,13 +16,27 @@ import {
   typeInECSFieldInput,
   typeInOsqueryFieldInput,
 } from '../../tasks/live_query';
-import { RESULTS_TABLE_CELL_WRRAPER } from '../../screens/live_query';
+import {
+  LIVE_QUERY_EDITOR,
+  RESULTS_TABLE,
+  RESULTS_TABLE_BUTTON,
+  RESULTS_TABLE_CELL_WRRAPER,
+} from '../../screens/live_query';
 import { getAdvancedButton } from '../../screens/integrations';
+import { ROLES } from '../../test';
 
 describe('ALL - Live Query', () => {
+  before(() => {
+    runKbnArchiverScript(ArchiverMethod.LOAD, 'ecs_mapping_1');
+  });
+
   beforeEach(() => {
-    login();
+    login(ROLES.soc_manager);
     navigateTo('/app/osquery');
+  });
+
+  after(() => {
+    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'ecs_mapping_1');
   });
 
   it('should run query and enable ecs mapping', () => {
@@ -37,10 +52,10 @@ describe('ALL - Live Query', () => {
     cy.contains('View in Lens').should('exist');
     cy.react(RESULTS_TABLE_CELL_WRRAPER, {
       props: { id: 'osquery.days.number', index: 1 },
-    });
+    }).should('exist');
     cy.react(RESULTS_TABLE_CELL_WRRAPER, {
       props: { id: 'osquery.hours.number', index: 2 },
-    });
+    }).should('exist');
 
     getAdvancedButton().click();
     typeInECSFieldInput('message{downArrow}{enter}');
@@ -48,11 +63,53 @@ describe('ALL - Live Query', () => {
     submitQuery();
 
     checkResults();
-    cy.react(RESULTS_TABLE_CELL_WRRAPER, {
-      props: { id: 'message', index: 1 },
+    cy.getBySel(RESULTS_TABLE).within(() => {
+      cy.getBySel(RESULTS_TABLE_BUTTON).should('exist');
     });
     cy.react(RESULTS_TABLE_CELL_WRRAPER, {
+      props: { id: 'message', index: 1 },
+    }).should('exist');
+    cy.react(RESULTS_TABLE_CELL_WRRAPER, {
       props: { id: 'osquery.days.number', index: 2 },
-    }).react('EuiIconIndexMapping');
+    })
+      .react('EuiIconTip', { props: { type: 'indexMapping' } })
+      .should('exist');
+  });
+
+  it('should run customized saved query', () => {
+    cy.contains('New live query').click();
+    selectAllAgents();
+    cy.react('SavedQueriesDropdown').type('NOMAPPING{downArrow}{enter}');
+    cy.getReact('SavedQueriesDropdown').getCurrentState().should('have.length', 1);
+    inputQuery('{selectall}{backspace}{selectall}{backspace}select * from users');
+    cy.wait(1000);
+    submitQuery();
+    checkResults();
+    navigateTo('/app/osquery');
+    cy.react('EuiButtonIcon', { props: { iconType: 'play' } })
+      .eq(0)
+      .should('be.visible')
+      .click();
+
+    cy.react('ReactAce', { props: { value: 'select * from users' } }).should('exist');
+  });
+
+  it.skip('should run live pack', () => {
+    cy.contains('New live query').click();
+    cy.contains('Run a set of queries in a pack.').click();
+    cy.get(LIVE_QUERY_EDITOR).should('not.exist');
+    cy.getBySel('select-live-pack').click();
+    cy.contains('Integration').click();
+    cy.contains('This table contains 1 rows.');
+    cy.contains('Integration (');
+    cy.contains('system_memory_linux_elastic');
+    selectAllAgents();
+    submitQuery();
+    cy.getBySel('live-query-loading').should('exist');
+    cy.getBySel('live-query-loading', { timeout: 10000 }).should('not.exist');
+    cy.getBySel('toggleIcon-events').click();
+    checkResults();
+    navigateTo('/app/osquery');
+    cy.contains('Integration');
   });
 });

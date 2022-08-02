@@ -10,20 +10,18 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'settings', 'savedObjects']);
 
   describe('saved objects relationships flyout', () => {
     beforeEach(async () => {
-      await esArchiver.load(
-        'test/functional/fixtures/es_archiver/saved_objects_management/show_relationships'
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/saved_objects_management/show_relationships'
       );
     });
 
     afterEach(async () => {
-      await esArchiver.unload(
-        'test/functional/fixtures/es_archiver/saved_objects_management/show_relationships'
-      );
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('displays the invalid references', async () => {

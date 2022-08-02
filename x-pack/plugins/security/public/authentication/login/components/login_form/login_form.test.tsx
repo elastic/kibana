@@ -11,8 +11,8 @@ import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 
+import { coreMock } from '@kbn/core/public/mocks';
 import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test-jest-helpers';
-import { coreMock } from 'src/core/public/mocks';
 
 import { LoginForm, MessageType, PageMode } from './login_form';
 

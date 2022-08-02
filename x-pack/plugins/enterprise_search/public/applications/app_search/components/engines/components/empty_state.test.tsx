@@ -15,7 +15,7 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 
 import { SampleEngineCreationCta } from '../../sample_engine_creation_cta';
 
-import { EmptyState } from './';
+import { EmptyState } from '.';
 
 describe('EmptyState', () => {
   describe('when the user can manage/create engines', () => {

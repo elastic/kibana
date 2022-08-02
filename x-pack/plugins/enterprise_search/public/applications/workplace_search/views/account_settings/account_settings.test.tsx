@@ -12,7 +12,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { AccountSettings } from './';
+import { AccountSettings } from '.';
 
 describe('AccountSettings', () => {
   const {

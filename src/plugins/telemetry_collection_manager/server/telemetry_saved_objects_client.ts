@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsFindOptions, SavedObjectsFindResponse } from 'src/core/server';
-import { SavedObjectsClient } from '../../../core/server';
+import type { SavedObjectsFindOptions, SavedObjectsFindResponse } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
 
 /**
  * Extends the SavedObjectsClient to fit the telemetry fetching requirements (i.e.: find objects from all namespaces by default)

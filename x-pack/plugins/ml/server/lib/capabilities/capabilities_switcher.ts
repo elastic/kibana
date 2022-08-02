@@ -6,10 +6,9 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
-import { CapabilitiesSwitcher, CoreSetup, Logger } from 'src/core/server';
-import { ILicense } from '../../../../licensing/common/types';
+import { firstValueFrom, Observable } from 'rxjs';
+import { CapabilitiesSwitcher, CoreSetup, Logger } from '@kbn/core/server';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { isFullLicense, isMinimumLicense, isMlEnabled } from '../../../common/license';
 import { MlCapabilities, basicLicenseMlCapabilities } from '../../../common/types/capabilities';
 
@@ -30,7 +29,7 @@ function getSwitcher(license$: Observable<ILicense>, logger: Logger): Capabiliti
     }
 
     try {
-      const license = await license$.pipe(take(1)).toPromise();
+      const license = await firstValueFrom(license$);
       const mlEnabled = isMlEnabled(license);
 
       // full license, leave capabilities as they were

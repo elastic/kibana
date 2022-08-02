@@ -26,6 +26,7 @@ const fieldTypeToTokenMap = {
   [InternalSchemaType.Location]: 'tokenGeo',
   [SchemaType.Date]: 'tokenDate',
   [InternalSchemaType.Date]: 'tokenDate',
+  [InternalSchemaType.Nested]: 'tokenNested',
 };
 
 export const ResultToken: React.FC<Props> = ({ fieldType }) => {

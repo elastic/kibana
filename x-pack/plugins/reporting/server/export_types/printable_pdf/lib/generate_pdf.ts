@@ -7,7 +7,7 @@
 
 import * as Rx from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
-import { ReportingCore } from '../../../';
+import { ReportingCore } from '../../..';
 import { PdfScreenshotOptions } from '../../../types';
 import type { PdfMetrics } from '../../../../common/types';
 import { getTracker } from '../../common/pdf_tracker';
@@ -27,30 +27,29 @@ export function generatePdfObservable(
 
   return reporting.getScreenshots(options).pipe(
     tap(({ metrics }) => {
-      if (metrics) {
+      if (metrics.cpu) {
         tracker.setCpuUsage(metrics.cpu);
+      }
+      if (metrics.memory) {
         tracker.setMemoryUsage(metrics.memory);
       }
     }),
-    mergeMap(async ({ metrics, result }) => {
+    mergeMap(async ({ data: buffer, errors, metrics, renderErrors }) => {
       tracker.endScreenshots();
       const warnings: string[] = [];
-      if (result.errors) {
-        warnings.push(...result.errors.map((error) => error.message));
+      if (errors) {
+        warnings.push(...errors.map((error) => error.message));
       }
-      if (result.renderErrors) {
-        warnings.push(...result.renderErrors);
+      if (renderErrors) {
+        warnings.push(...renderErrors);
       }
 
       tracker.end();
 
       return {
-        buffer: result.data,
+        buffer,
+        metrics,
         warnings,
-        metrics: {
-          ...metrics,
-          pages: metrics.pageCount,
-        },
       };
     })
   );

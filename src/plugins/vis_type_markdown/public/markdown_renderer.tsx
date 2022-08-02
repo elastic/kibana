@@ -8,8 +8,8 @@
 
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { VisualizationContainer } from '../../visualizations/public';
-import { ExpressionRenderDefinition } from '../../expressions/common/expression_renderers';
+import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
+import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { MarkdownVisRenderValue } from './markdown_fn';
 
 // @ts-ignore

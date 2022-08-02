@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '@kbn/ml-plugin/common/constants/categorization_job';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../../plugins/ml/common/constants/categorization_job';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -75,7 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
   const calendarId = `wizard-test-calendar_${Date.now()}`;
 
   describe('categorization', function () {
-    this.tags(['mlqa']);
+    this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/categorization_small');
       await ml.testResources.createIndexPatternIfNeeded('ft_categorization_small', '@timestamp');

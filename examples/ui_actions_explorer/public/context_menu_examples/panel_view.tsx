@@ -9,7 +9,7 @@
 import * as React from 'react';
 import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import useAsync from 'react-use/lib/useAsync';
-import { buildContextMenuForActions } from '../../../../src/plugins/ui_actions/public';
+import { buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
 import { sampleAction } from './util';
 
 export const PanelView: React.FC = () => {

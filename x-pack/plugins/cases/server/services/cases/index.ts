@@ -16,12 +16,13 @@ import {
   SavedObjectsBulkUpdateResponse,
   SavedObjectsUpdateResponse,
   SavedObjectsResolveResponse,
-} from 'kibana/server';
+  SavedObjectsFindOptions,
+} from '@kbn/core/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { nodeBuilder, KueryNode } from '@kbn/es-query';
 
-import { SecurityPluginSetup } from '../../../../security/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
@@ -52,6 +53,9 @@ import {
 } from './transform';
 import { ESCaseAttributes } from './types';
 import { AttachmentService } from '../attachments';
+import { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
+import { createCaseError } from '../../common/error';
+import { IndexRefresh } from '../types';
 
 interface GetCaseIdsByAlertIdArgs {
   alertId: string;
@@ -67,6 +71,8 @@ interface GetCaseArgs {
   id: string;
 }
 
+interface DeleteCaseArgs extends GetCaseArgs, IndexRefresh {}
+
 interface GetCasesArgs {
   caseIds: string[];
 }
@@ -81,12 +87,12 @@ interface FindCaseCommentsArgs {
   options?: SavedObjectFindOptionsKueryNode;
 }
 
-interface PostCaseArgs {
+interface PostCaseArgs extends IndexRefresh {
   attributes: CaseAttributes;
   id: string;
 }
 
-interface PatchCase {
+interface PatchCase extends IndexRefresh {
   caseId: string;
   updatedAttributes: Partial<CaseAttributes & PushedArgs>;
   originalCase: SavedObject<CaseAttributes>;
@@ -94,8 +100,8 @@ interface PatchCase {
 }
 type PatchCaseArgs = PatchCase;
 
-interface PatchCasesArgs {
-  cases: PatchCase[];
+interface PatchCasesArgs extends IndexRefresh {
+  cases: Array<Omit<PatchCase, 'refresh'>>;
 }
 
 interface GetUserArgs {
@@ -294,10 +300,10 @@ export class CasesService {
     }, new Map<string, number>());
   }
 
-  public async deleteCase({ id: caseId }: GetCaseArgs) {
+  public async deleteCase({ id: caseId, refresh }: DeleteCaseArgs) {
     try {
       this.log.debug(`Attempting to DELETE case ${caseId}`);
-      return await this.unsecuredSavedObjectsClient.delete(CASE_SAVED_OBJECT, caseId);
+      return await this.unsecuredSavedObjectsClient.delete(CASE_SAVED_OBJECT, caseId, { refresh });
     } catch (error) {
       this.log.error(`Error on DELETE case ${caseId}: ${error}`);
       throw error;
@@ -386,19 +392,23 @@ export class CasesService {
     try {
       this.log.debug(`Attempting to GET all comments internal for id ${JSON.stringify(id)}`);
       if (options?.page !== undefined || options?.perPage !== undefined) {
-        return this.unsecuredSavedObjectsClient.find<CommentAttributes>({
-          type: CASE_COMMENT_SAVED_OBJECT,
-          sortField: defaultSortField,
-          ...options,
+        return this.attachmentService.find({
+          unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
+          options: {
+            sortField: defaultSortField,
+            ...options,
+          },
         });
       }
 
-      return this.unsecuredSavedObjectsClient.find<CommentAttributes>({
-        type: CASE_COMMENT_SAVED_OBJECT,
-        page: 1,
-        perPage: MAX_DOCS_PER_PAGE,
-        sortField: defaultSortField,
-        ...options,
+      return this.attachmentService.find({
+        unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
+        options: {
+          page: 1,
+          perPage: MAX_DOCS_PER_PAGE,
+          sortField: defaultSortField,
+          ...options,
+        },
       });
     } catch (error) {
       this.log.error(`Error on GET all comments internal for ${JSON.stringify(id)}: ${error}`);
@@ -557,14 +567,18 @@ export class CasesService {
     }
   }
 
-  public async postNewCase({ attributes, id }: PostCaseArgs): Promise<SavedObject<CaseAttributes>> {
+  public async postNewCase({
+    attributes,
+    id,
+    refresh,
+  }: PostCaseArgs): Promise<SavedObject<CaseAttributes>> {
     try {
       this.log.debug(`Attempting to POST a new case`);
       const transformedAttributes = transformAttributesToESModel(attributes);
       const createdCase = await this.unsecuredSavedObjectsClient.create<ESCaseAttributes>(
         CASE_SAVED_OBJECT,
         transformedAttributes.attributes,
-        { id, references: transformedAttributes.referenceHandler.build() }
+        { id, references: transformedAttributes.referenceHandler.build(), refresh }
       );
       return transformSavedObjectToExternalModel(createdCase);
     } catch (error) {
@@ -578,6 +592,7 @@ export class CasesService {
     updatedAttributes,
     originalCase,
     version,
+    refresh,
   }: PatchCaseArgs): Promise<SavedObjectsUpdateResponse<CaseAttributes>> {
     try {
       this.log.debug(`Attempting to UPDATE case ${caseId}`);
@@ -590,6 +605,7 @@ export class CasesService {
         {
           version,
           references: transformedAttributes.referenceHandler.build(originalCase.references),
+          refresh,
         }
       );
 
@@ -602,6 +618,7 @@ export class CasesService {
 
   public async patchCases({
     cases,
+    refresh,
   }: PatchCasesArgs): Promise<SavedObjectsBulkUpdateResponse<CaseAttributes>> {
     try {
       this.log.debug(`Attempting to UPDATE case ${cases.map((c) => c.caseId).join(', ')}`);
@@ -618,12 +635,47 @@ export class CasesService {
       });
 
       const updatedCases = await this.unsecuredSavedObjectsClient.bulkUpdate<ESCaseAttributes>(
-        bulkUpdate
+        bulkUpdate,
+        { refresh }
       );
       return transformUpdateResponsesToExternalModels(updatedCases);
     } catch (error) {
       this.log.error(`Error on UPDATE case ${cases.map((c) => c.caseId).join(', ')}: ${error}`);
       throw error;
+    }
+  }
+
+  public async executeAggregations({
+    aggregationBuilders,
+    options,
+  }: {
+    aggregationBuilders: Array<AggregationBuilder<unknown>>;
+    options?: Omit<SavedObjectsFindOptions, 'aggs' | 'type'>;
+  }): Promise<AggregationResponse> {
+    try {
+      const builtAggs = aggregationBuilders.reduce((acc, agg) => {
+        return { ...acc, ...agg.build() };
+      }, {});
+
+      const res = await this.unsecuredSavedObjectsClient.find<
+        ESCaseAttributes,
+        AggregationResponse
+      >({
+        sortField: defaultSortField,
+        ...options,
+        aggs: builtAggs,
+        type: CASE_SAVED_OBJECT,
+      });
+
+      return res.aggregations;
+    } catch (error) {
+      const aggregationNames = aggregationBuilders.map((agg) => agg.getName());
+
+      throw createCaseError({
+        message: `Failed to execute aggregations [${aggregationNames.join(',')}]: ${error}`,
+        error,
+        logger: this.log,
+      });
     }
   }
 }

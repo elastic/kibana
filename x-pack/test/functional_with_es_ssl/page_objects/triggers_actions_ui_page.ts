@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import {
   CustomCheerio,
   CustomCheerioStatic,
-} from 'test/functional/services/lib/web_element_wrapper/custom_cheerio_api';
+} from '../../../../test/functional/services/lib/web_element_wrapper/custom_cheerio_api';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const ENTER_KEY = '\uE007';
@@ -47,6 +47,10 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       if (createBtnIsVisible) {
         await createBtn.click();
       }
+    },
+    async getRulesListTitle() {
+      const noPermissionsTitle = await find.byCssSelector('[data-test-subj="rulesList"] .euiTitle');
+      return await noPermissionsTitle.getVisibleText();
     },
     async clickCreateConnectorButton() {
       const createBtn = await testSubjects.find('createActionButton');

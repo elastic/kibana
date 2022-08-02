@@ -5,29 +5,21 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import { Subject } from 'rxjs';
-import { none, some } from 'fp-ts/lib/Option';
+import moment from 'moment';
 
-import {
-  asTaskMarkRunningEvent,
-  asTaskRunEvent,
-  asTaskClaimEvent,
-  asTaskRunRequestEvent,
-  TaskClaimErrorType,
-  TaskPersistence,
-} from './task_events';
+import { asTaskRunEvent, TaskPersistence } from './task_events';
 import { TaskLifecycleEvent } from './polling_lifecycle';
-import { taskPollingLifecycleMock } from './polling_lifecycle.mock';
 import { TaskScheduling } from './task_scheduling';
 import { asErr, asOk } from './lib/result_type';
-import { ConcreteTaskInstance, TaskLifecycleResult, TaskStatus } from './task';
+import { ConcreteTaskInstance, TaskStatus } from './task';
 import { createInitialMiddleware } from './lib/middleware';
 import { taskStoreMock } from './task_store.mock';
 import { TaskRunResult } from './task_running';
 import { mockLogger } from './test_utils';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { ephemeralTaskLifecycleMock } from './ephemeral_task_lifecycle.mock';
+import { mustBeAllOf } from './queries/query_clauses';
 
 jest.mock('uuid', () => ({
   v4: () => 'v4uuid',
@@ -42,16 +34,14 @@ jest.mock('elastic-apm-node', () => ({
 
 describe('TaskScheduling', () => {
   const mockTaskStore = taskStoreMock.create({});
-  const mockTaskManager = taskPollingLifecycleMock.create({});
   const definitions = new TaskTypeDictionary(mockLogger());
   const taskSchedulingOpts = {
     taskStore: mockTaskStore,
-    taskPollingLifecycle: mockTaskManager,
     logger: mockLogger(),
     middleware: createInitialMiddleware(),
     definitions,
     ephemeralTaskLifecycle: ephemeralTaskLifecycleMock.create({}),
-    taskManagerId: '',
+    taskManagerId: '123',
   };
 
   definitions.registerTaskDefinitions({
@@ -135,308 +125,264 @@ describe('TaskScheduling', () => {
     });
   });
 
-  describe('runNow', () => {
-    test('resolves when the task run succeeds', () => {
-      const events$ = new Subject<TaskLifecycleEvent>();
-      const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
-
-      const taskScheduling = new TaskScheduling({
-        ...taskSchedulingOpts,
-        taskPollingLifecycle: taskPollingLifecycleMock.create({ events$ }),
-      });
-
-      const result = taskScheduling.runNow(id);
-
-      const task = mockTask({ id });
-      events$.next(
-        asTaskRunEvent(
-          id,
-          asOk({ task, result: TaskRunResult.Success, persistence: TaskPersistence.Recurring })
-        )
-      );
-
-      return expect(result).resolves.toEqual({ id });
-    });
-
-    test('rejects when the task run fails', () => {
-      const events$ = new Subject<TaskLifecycleEvent>();
-      const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
-
-      const taskScheduling = new TaskScheduling({
-        ...taskSchedulingOpts,
-        taskPollingLifecycle: taskPollingLifecycleMock.create({ events$ }),
-      });
-
-      const result = taskScheduling.runNow(id);
-
-      const task = mockTask({ id });
-      events$.next(asTaskClaimEvent(id, asOk(task)));
-      events$.next(asTaskMarkRunningEvent(id, asOk(task)));
-      events$.next(
-        asTaskRunEvent(
-          id,
-          asErr({
-            task,
-            error: new Error('some thing gone wrong'),
-            result: TaskRunResult.Failed,
-            persistence: TaskPersistence.Recurring,
-          })
-        )
-      );
-
-      return expect(result).rejects.toMatchInlineSnapshot(
-        `[Error: Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2": Error: some thing gone wrong]`
+  describe('bulkUpdateSchedules', () => {
+    const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+    beforeEach(() => {
+      mockTaskStore.bulkUpdate.mockImplementation(() =>
+        Promise.resolve([{ tag: 'ok', value: mockTask() }])
       );
     });
 
-    test('rejects when the task mark as running fails', () => {
-      const events$ = new Subject<TaskLifecycleEvent>();
-      const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+    test('should search for tasks by ids and idle status', async () => {
+      mockTaskStore.fetch.mockResolvedValue({ docs: [] });
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
 
-      const taskScheduling = new TaskScheduling({
-        ...taskSchedulingOpts,
-        taskPollingLifecycle: taskPollingLifecycleMock.create({ events$ }),
+      await taskScheduling.bulkUpdateSchedules([id], { interval: '1h' });
+
+      expect(mockTaskStore.fetch).toHaveBeenCalledTimes(1);
+      expect(mockTaskStore.fetch).toHaveBeenCalledWith({
+        query: mustBeAllOf(
+          {
+            terms: {
+              _id: [`task:${id}`],
+            },
+          },
+          {
+            term: {
+              'task.status': 'idle',
+            },
+          }
+        ),
+        size: 100,
+      });
+    });
+
+    test('should split search on chunks when input ids array too large', async () => {
+      mockTaskStore.fetch.mockResolvedValue({ docs: [] });
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      await taskScheduling.bulkUpdateSchedules(Array.from({ length: 1250 }), { interval: '1h' });
+
+      expect(mockTaskStore.fetch).toHaveBeenCalledTimes(13);
+    });
+
+    test('should transform response into correct format', async () => {
+      const successfulTask = mockTask({ id: 'task-1', schedule: { interval: '1h' } });
+      const failedTask = mockTask({ id: 'task-2', schedule: { interval: '1h' } });
+      mockTaskStore.bulkUpdate.mockImplementation(() =>
+        Promise.resolve([
+          { tag: 'ok', value: successfulTask },
+          { tag: 'err', error: { entity: failedTask, error: new Error('fail') } },
+        ])
+      );
+      mockTaskStore.fetch.mockResolvedValue({ docs: [successfulTask, failedTask] });
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const result = await taskScheduling.bulkUpdateSchedules([successfulTask.id, failedTask.id], {
+        interval: '1h',
       });
 
-      const result = taskScheduling.runNow(id);
+      expect(result).toEqual({
+        tasks: [successfulTask],
+        errors: [{ task: failedTask, error: new Error('fail') }],
+      });
+    });
 
-      const task = mockTask({ id });
-      events$.next(asTaskClaimEvent(id, asOk(task)));
-      events$.next(asTaskMarkRunningEvent(id, asErr(new Error('some thing gone wrong'))));
+    test('should not update task if new interval is equal to previous', async () => {
+      const task = mockTask({ id, schedule: { interval: '3h' } });
 
-      return expect(result).rejects.toMatchInlineSnapshot(
-        `[Error: Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2": Error: some thing gone wrong]`
+      mockTaskStore.fetch.mockResolvedValue({ docs: [task] });
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkUpdateSchedules([id], { interval: '3h' });
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
+
+      expect(bulkUpdatePayload).toHaveLength(0);
+    });
+
+    test('should postpone task run if new interval is greater than previous', async () => {
+      // task set to be run in 2 hrs from now
+      const runInTwoHrs = new Date(Date.now() + moment.duration(2, 'hours').asMilliseconds());
+      const task = mockTask({ id, schedule: { interval: '3h' }, runAt: runInTwoHrs });
+
+      mockTaskStore.fetch.mockResolvedValue({ docs: [task] });
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkUpdateSchedules([id], { interval: '5h' });
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
+
+      expect(bulkUpdatePayload).toHaveLength(1);
+      expect(bulkUpdatePayload[0]).toHaveProperty('schedule', { interval: '5h' });
+      // if tasks updated with schedule interval of '5h' and previous interval was 3h, task will be scheduled to run in 2 hours later
+      expect(bulkUpdatePayload[0].runAt.getTime() - runInTwoHrs.getTime()).toBe(
+        moment.duration(2, 'hours').asMilliseconds()
       );
     });
 
-    test('when a task claim fails we ensure the task exists', async () => {
-      const events$ = new Subject<TaskLifecycleEvent>();
-      const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+    test('should set task run sooner if new interval is lesser than previous', async () => {
+      // task set to be run in one 2hrs from now
+      const runInTwoHrs = new Date(Date.now() + moment.duration(2, 'hours').asMilliseconds());
+      const task = mockTask({ id, schedule: { interval: '3h' }, runAt: runInTwoHrs });
 
-      mockTaskStore.getLifecycle.mockResolvedValue(TaskLifecycleResult.NotFound);
+      mockTaskStore.fetch.mockResolvedValue({ docs: [task] });
 
-      const taskScheduling = new TaskScheduling({
-        ...taskSchedulingOpts,
-        taskPollingLifecycle: taskPollingLifecycleMock.create({ events$ }),
-      });
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkUpdateSchedules([id], { interval: '2h' });
 
-      const result = taskScheduling.runNow(id);
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
 
-      events$.next(
-        asTaskClaimEvent(
-          id,
-          asErr({ task: none, errorType: TaskClaimErrorType.CLAIMED_BY_ID_NOT_RETURNED })
-        )
+      expect(bulkUpdatePayload[0]).toHaveProperty('schedule', { interval: '2h' });
+      // if tasks updated with schedule interval of '2h' and previous interval was 3h, task will be scheduled to run in 1 hour sooner
+      expect(runInTwoHrs.getTime() - bulkUpdatePayload[0].runAt.getTime()).toBe(
+        moment.duration(1, 'hour').asMilliseconds()
       );
+    });
 
+    test('should set task run to now if time that passed from last run is greater than new interval', async () => {
+      // task set to be run in one 1hr from now. With interval of '2h', it means last run happened 1 hour ago
+      const runInOneHr = new Date(Date.now() + moment.duration(1, 'hour').asMilliseconds());
+      const task = mockTask({ id, schedule: { interval: '2h' }, runAt: runInOneHr });
+
+      mockTaskStore.fetch.mockResolvedValue({ docs: [task] });
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkUpdateSchedules([id], { interval: '30m' });
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
+
+      expect(bulkUpdatePayload[0]).toHaveProperty('schedule', { interval: '30m' });
+
+      // if time that passed from last task run is greater than new interval, task should be set to run at now time
+      expect(bulkUpdatePayload[0].runAt.getTime()).toBeLessThanOrEqual(Date.now());
+    });
+  });
+  describe('runSoon', () => {
+    test('resolves when the task update succeeds', async () => {
+      const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      mockTaskStore.get.mockResolvedValueOnce(mockTask({ id, status: TaskStatus.Idle }));
+      mockTaskStore.update.mockResolvedValueOnce(mockTask({ id }));
+
+      const result = await taskScheduling.runSoon(id);
+
+      expect(mockTaskStore.update).toHaveBeenCalledWith(
+        mockTask({
+          id,
+          status: TaskStatus.Idle,
+          runAt: expect.any(Date),
+          scheduledAt: expect.any(Date),
+        })
+      );
+      expect(mockTaskStore.get).toHaveBeenCalledWith(id);
+      expect(result).toEqual({ id });
+    });
+
+    test('runs failed tasks too', async () => {
+      const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      mockTaskStore.get.mockResolvedValueOnce(mockTask({ id, status: TaskStatus.Failed }));
+      mockTaskStore.update.mockResolvedValueOnce(mockTask({ id }));
+
+      const result = await taskScheduling.runSoon(id);
+      expect(mockTaskStore.update).toHaveBeenCalledWith(
+        mockTask({
+          id,
+          status: TaskStatus.Idle,
+          runAt: expect.any(Date),
+          scheduledAt: expect.any(Date),
+        })
+      );
+      expect(mockTaskStore.get).toHaveBeenCalledWith(id);
+      expect(result).toEqual({ id });
+    });
+
+    test('rejects when the task update fails', async () => {
+      const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      mockTaskStore.get.mockResolvedValueOnce(mockTask({ id, status: TaskStatus.Idle }));
+      mockTaskStore.update.mockRejectedValueOnce(500);
+
+      const result = taskScheduling.runSoon(id);
+      await expect(result).rejects.toEqual(500);
+      expect(taskSchedulingOpts.logger.error).toHaveBeenCalledWith(
+        'Failed to update the task (01ddff11-e88a-4d13-bc4e-256164e755e2) for runSoon'
+      );
+    });
+
+    test('ignores 409 conflict errors', async () => {
+      const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      mockTaskStore.get.mockResolvedValueOnce(mockTask({ id, status: TaskStatus.Idle }));
+      mockTaskStore.update.mockRejectedValueOnce({ statusCode: 409 });
+
+      const result = await taskScheduling.runSoon(id);
+      expect(result).toEqual({ id });
+      expect(taskSchedulingOpts.logger.debug).toHaveBeenCalledWith(
+        'Failed to update the task (01ddff11-e88a-4d13-bc4e-256164e755e2) for runSoon due to conflict (409)'
+      );
+    });
+
+    test('rejects when the task is being claimed', async () => {
+      const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      mockTaskStore.get.mockResolvedValueOnce(mockTask({ id, status: TaskStatus.Claiming }));
+      mockTaskStore.update.mockRejectedValueOnce(409);
+
+      const result = taskScheduling.runSoon(id);
       await expect(result).rejects.toEqual(
-        new Error(`Failed to run task "${id}" as it does not exist`)
-      );
-
-      expect(mockTaskStore.getLifecycle).toHaveBeenCalledWith(id);
-    });
-
-    test('when a task claim due to insufficient capacity we return an explciit message', async () => {
-      const events$ = new Subject<TaskLifecycleEvent>();
-      const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
-
-      mockTaskStore.getLifecycle.mockResolvedValue(TaskLifecycleResult.NotFound);
-
-      const taskScheduling = new TaskScheduling({
-        ...taskSchedulingOpts,
-        taskPollingLifecycle: taskPollingLifecycleMock.create({ events$ }),
-      });
-
-      const result = taskScheduling.runNow(id);
-
-      const task = mockTask({ id, taskType: 'foo' });
-      events$.next(
-        asTaskClaimEvent(
-          id,
-          asErr({ task: some(task), errorType: TaskClaimErrorType.CLAIMED_BY_ID_OUT_OF_CAPACITY })
+        Error(
+          'Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2" as it is currently running'
         )
       );
+    });
 
+    test('rejects when the task is already running', async () => {
+      const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      mockTaskStore.get.mockResolvedValueOnce(mockTask({ id, status: TaskStatus.Running }));
+      mockTaskStore.update.mockRejectedValueOnce(409);
+
+      const result = taskScheduling.runSoon(id);
       await expect(result).rejects.toEqual(
-        new Error(
-          `Failed to run task "${id}" as we would exceed the max concurrency of "${task.taskType}" which is 2. Rescheduled the task to ensure it is picked up as soon as possible.`
+        Error(
+          'Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2" as it is currently running'
         )
       );
     });
 
-    test('when a task claim fails we ensure the task isnt already claimed', async () => {
-      const events$ = new Subject<TaskLifecycleEvent>();
+    test('rejects when the task status is Unrecognized', async () => {
       const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
 
-      mockTaskStore.getLifecycle.mockResolvedValue(TaskStatus.Claiming);
+      mockTaskStore.get.mockResolvedValueOnce(mockTask({ id, status: TaskStatus.Unrecognized }));
+      mockTaskStore.update.mockRejectedValueOnce(409);
 
-      const taskScheduling = new TaskScheduling({
-        ...taskSchedulingOpts,
-        taskPollingLifecycle: taskPollingLifecycleMock.create({ events$ }),
-      });
-
-      const result = taskScheduling.runNow(id);
-
-      events$.next(
-        asTaskClaimEvent(
-          id,
-          asErr({ task: none, errorType: TaskClaimErrorType.CLAIMED_BY_ID_NOT_RETURNED })
-        )
-      );
-
+      const result = taskScheduling.runSoon(id);
       await expect(result).rejects.toEqual(
-        new Error(`Failed to run task "${id}" as it is currently running`)
+        Error('Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2" with status unrecognized')
       );
-
-      expect(mockTaskStore.getLifecycle).toHaveBeenCalledWith(id);
     });
 
-    test('when a task claim fails we ensure the task isnt already running', async () => {
-      const events$ = new Subject<TaskLifecycleEvent>();
+    test('rejects when the task does not exist', async () => {
       const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
 
-      mockTaskStore.getLifecycle.mockResolvedValue(TaskStatus.Running);
+      mockTaskStore.get.mockRejectedValueOnce(404);
 
-      const taskScheduling = new TaskScheduling({
-        ...taskSchedulingOpts,
-        taskPollingLifecycle: taskPollingLifecycleMock.create({ events$ }),
-      });
-
-      const result = taskScheduling.runNow(id);
-
-      events$.next(
-        asTaskClaimEvent(
-          id,
-          asErr({ task: none, errorType: TaskClaimErrorType.CLAIMED_BY_ID_NOT_RETURNED })
-        )
-      );
-
-      await expect(result).rejects.toEqual(
-        new Error(`Failed to run task "${id}" as it is currently running`)
-      );
-
-      expect(mockTaskStore.getLifecycle).toHaveBeenCalledWith(id);
+      const result = taskScheduling.runSoon(id);
+      await expect(result).rejects.toEqual(404);
     });
+  });
 
-    test('rejects when the task run fails due to capacity', async () => {
-      const events$ = new Subject<TaskLifecycleEvent>();
-      const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
-
-      mockTaskStore.getLifecycle.mockResolvedValue(TaskStatus.Idle);
-
-      const taskScheduling = new TaskScheduling({
-        ...taskSchedulingOpts,
-        taskPollingLifecycle: taskPollingLifecycleMock.create({ events$ }),
-      });
-
-      const result = taskScheduling.runNow(id);
-
-      events$.next(asTaskRunRequestEvent(id, asErr(new Error('failed to buffer request'))));
-
-      await expect(result).rejects.toEqual(
-        new Error(`Failed to run task "${id}": Task Manager is at capacity, please try again later`)
-      );
-      expect(mockTaskStore.getLifecycle).not.toHaveBeenCalled();
-    });
-
-    test('when a task claim fails we return the underlying error if the task is idle', async () => {
-      const events$ = new Subject<TaskLifecycleEvent>();
-      const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
-
-      mockTaskStore.getLifecycle.mockResolvedValue(TaskStatus.Idle);
-
-      const taskScheduling = new TaskScheduling({
-        ...taskSchedulingOpts,
-        taskPollingLifecycle: taskPollingLifecycleMock.create({ events$ }),
-      });
-
-      const result = taskScheduling.runNow(id);
-
-      events$.next(
-        asTaskClaimEvent(
-          id,
-          asErr({ task: none, errorType: TaskClaimErrorType.CLAIMED_BY_ID_NOT_RETURNED })
-        )
-      );
-
-      await expect(result).rejects.toMatchInlineSnapshot(
-        `[Error: Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2" for unknown reason (Current Task Lifecycle is "idle")]`
-      );
-
-      expect(mockTaskStore.getLifecycle).toHaveBeenCalledWith(id);
-    });
-
-    test('when a task claim fails we return the underlying error if the task is failed', async () => {
-      const events$ = new Subject<TaskLifecycleEvent>();
-      const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
-
-      mockTaskStore.getLifecycle.mockResolvedValue(TaskStatus.Failed);
-
-      const taskScheduling = new TaskScheduling({
-        ...taskSchedulingOpts,
-        taskPollingLifecycle: taskPollingLifecycleMock.create({ events$ }),
-      });
-
-      const result = taskScheduling.runNow(id);
-
-      events$.next(
-        asTaskClaimEvent(
-          id,
-          asErr({ task: none, errorType: TaskClaimErrorType.CLAIMED_BY_ID_NOT_RETURNED })
-        )
-      );
-
-      await expect(result).rejects.toMatchInlineSnapshot(
-        `[Error: Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2" for unknown reason (Current Task Lifecycle is "failed")]`
-      );
-
-      expect(mockTaskStore.getLifecycle).toHaveBeenCalledWith(id);
-    });
-
-    test('ignores task run success of other tasks', () => {
-      const events$ = new Subject<TaskLifecycleEvent>();
-      const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
-      const differentTask = '4bebf429-181b-4518-bb7d-b4246d8a35f0';
-
-      const taskScheduling = new TaskScheduling({
-        ...taskSchedulingOpts,
-        taskPollingLifecycle: taskPollingLifecycleMock.create({ events$ }),
-      });
-
-      const result = taskScheduling.runNow(id);
-
-      const task = mockTask({ id });
-      const otherTask = { id: differentTask } as ConcreteTaskInstance;
-      events$.next(asTaskClaimEvent(id, asOk(task)));
-      events$.next(asTaskClaimEvent(differentTask, asOk(otherTask)));
-      events$.next(
-        asTaskRunEvent(
-          differentTask,
-          asOk({
-            task: otherTask,
-            result: TaskRunResult.Success,
-            persistence: TaskPersistence.Recurring,
-          })
-        )
-      );
-
-      events$.next(
-        asTaskRunEvent(
-          id,
-          asErr({
-            task,
-            error: new Error('some thing gone wrong'),
-            result: TaskRunResult.Failed,
-            persistence: TaskPersistence.Recurring,
-          })
-        )
-      );
-
-      return expect(result).rejects.toMatchInlineSnapshot(
-        `[Error: Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2": Error: some thing gone wrong]`
-      );
-    });
-
+  describe('ephemeralRunNow', () => {
     test('runs a task ephemerally', async () => {
       const ephemeralEvents$ = new Subject<TaskLifecycleEvent>();
       const ephemeralTask = mockTask({
@@ -525,6 +471,28 @@ describe('TaskScheduling', () => {
 
       expect(result).rejects.toMatchInlineSnapshot(
         `[Error: Ephemeral Task of type foo was rejected]`
+      );
+    });
+
+    test('rejects ephemeral task if ephemeralTaskLifecycle is not defined', async () => {
+      const ephemeralTask = mockTask({
+        state: {
+          foo: 'bar',
+        },
+      });
+      const middleware = createInitialMiddleware();
+      middleware.beforeSave = jest.fn().mockImplementation(async () => {
+        return { taskInstance: ephemeralTask };
+      });
+      const taskScheduling = new TaskScheduling({
+        ...taskSchedulingOpts,
+        middleware,
+        ephemeralTaskLifecycle: undefined,
+      });
+
+      const result = taskScheduling.ephemeralRunNow(ephemeralTask);
+      expect(result).rejects.toMatchInlineSnapshot(
+        `[Error: Ephemeral Task of type foo was rejected because ephemeral tasks are not supported]`
       );
     });
   });

@@ -6,27 +6,26 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
+import type { EuiButtonGroupOptionProps, EuiSelectableProps } from '@elastic/eui';
 import {
   EuiButtonGroup,
-  EuiButtonGroupOptionProps,
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiSelectable,
-  EuiSelectableProps,
   EuiSpacer,
   EuiText,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
+import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
-import { PolicyData } from '../../../../common/endpoint/types';
+import type { PolicyData } from '../../../../common/endpoint/types';
 import { LinkToApp } from '../../../common/components/endpoint/link_to_app';
 import { getPolicyDetailPath } from '../../common/routing';
-import { useTestIdGenerator } from '../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { useAppUrl } from '../../../common/lib/kibana/hooks';
 import { Loader } from '../../../common/components/loader';
 
@@ -56,7 +55,7 @@ const StyledButtonGroup = styled(EuiButtonGroup)`
   display: flex;
   justify-content: right;
   .euiButtonGroupButton {
-    padding-right: ${(props) => props.theme.eui.paddingSizes.l};
+    padding-right: ${(props) => props.theme.eui.euiSizeL};
   }
 `;
 
@@ -88,6 +87,7 @@ export type EffectedPolicySelectProps = Omit<
   description?: string;
   onChange: (selection: EffectedPolicySelection) => void;
   selected?: PolicyData[];
+  disabled?: boolean;
 };
 export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
   ({
@@ -99,6 +99,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
     listProps,
     options,
     selected = [],
+    disabled = false,
     'data-test-subj': dataTestSubj,
     ...otherSelectableProps
   }) => {
@@ -140,7 +141,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
               id={htmlIdGenerator()()}
               onChange={NOOP}
               checked={isPolicySelected.has(policy.id)}
-              disabled={isGlobal || !isPlatinumPlus}
+              disabled={isGlobal || !isPlatinumPlus || disabled}
               data-test-subj={`policy-${policy.id}-checkbox`}
             />
           ),
@@ -158,11 +159,11 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           ),
           policy,
           checked: isPolicySelected.has(policy.id) ? 'on' : undefined,
-          disabled: isGlobal || !isPlatinumPlus,
+          disabled: isGlobal || !isPlatinumPlus || disabled,
           'data-test-subj': `policy-${policy.id}`,
         }))
         .sort(({ label: labelA }, { label: labelB }) => labelA.localeCompare(labelB));
-    }, [getAppUrl, isGlobal, isPlatinumPlus, options, selected]);
+    }, [disabled, getAppUrl, isGlobal, isPlatinumPlus, options, selected]);
 
     const handleOnPolicySelectChange = useCallback<
       Required<EuiSelectableProps<OptionPolicyData>>['onChange']
@@ -223,7 +224,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
             </EuiText>
           </EuiFlexItem>
           <StyledEuiFlexItemButtonGroup grow={1}>
-            <EuiFormRow fullWidth>
+            <EuiFormRow fullWidth isDisabled={disabled}>
               <StyledButtonGroup
                 legend="Global Policy Toggle"
                 options={toggleGlobal}
@@ -231,6 +232,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
                 onChange={handleGlobalButtonChange}
                 color="primary"
                 data-test-subj={getTestId('byPolicyGlobalButtonGroup')}
+                isDisabled={disabled}
               />
             </EuiFormRow>
           </StyledEuiFlexItemButtonGroup>

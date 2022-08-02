@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { APP_WRAPPER_CLASS } from '../../../../../src/core/server';
+import { APP_WRAPPER_CLASS } from '@kbn/core/server';
 export const DEFAULT_PAGELOAD_SELECTOR = `.${APP_WRAPPER_CLASS}`;
 
+// FIXME: cleanup: remove this file and use the EventLogger's Actions enum instead
 export const CONTEXT_GETNUMBEROFITEMS = 'GetNumberOfItems';
 export const CONTEXT_INJECTCSS = 'InjectCss';
 export const CONTEXT_WAITFORRENDER = 'WaitForRender';
@@ -17,3 +18,4 @@ export const CONTEXT_ELEMENTATTRIBUTES = 'ElementPositionAndAttributes';
 export const CONTEXT_WAITFORELEMENTSTOBEINDOM = 'WaitForElementsToBeInDOM';
 export const CONTEXT_SKIPTELEMETRY = 'SkipTelemetry';
 export const CONTEXT_READMETADATA = 'ReadVisualizationsMetadata';
+export const CONTEXT_DEBUG = 'Debug';

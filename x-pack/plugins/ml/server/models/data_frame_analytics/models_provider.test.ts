@@ -6,7 +6,7 @@
  */
 
 import { MemoryStatsResponse, ModelService, modelsProvider } from './models_provider';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { MlClient } from '../../lib/ml_client';
 import mockResponse from './__mocks__/mock_deployment_response.json';
 
@@ -24,12 +24,36 @@ describe('Model service', () => {
     getMemoryStats: jest.fn(() => {
       return Promise.resolve({
         _nodes: {
-          total: 3,
-          successful: 3,
+          total: 4,
+          successful: 4,
           failed: 0,
         },
         cluster_name: 'test_cluster',
         nodes: {
+          '3qIoLFnbSi-DwVr2333UCdw': {
+            name: 'node3',
+            transport_address: '10.10.10.2:9353',
+            // missing the ml role
+            roles: ['data', 'ingest', 'master', 'transform'],
+            attributes: {},
+            jvm: {
+              heap_max_in_bytes: 1073741824,
+              java_inference_in_bytes: 0,
+              java_inference_max_in_bytes: 0,
+            },
+            mem: {
+              adjusted_total_in_bytes: 15599742976,
+              total_in_bytes: 15599742976,
+              ml: {
+                data_frame_analytics_in_bytes: 0,
+                native_code_overhead_in_bytes: 0,
+                max_in_bytes: 1073741824,
+                anomaly_detectors_in_bytes: 0,
+                native_inference_in_bytes: 1555161790,
+              },
+            },
+            ephemeral_id: '3qIoLFnbSi-DwVrYioUCdw',
+          },
           '3qIoLFnbSi-DwVrYioUCdw': {
             name: 'node3',
             transport_address: '10.10.10.2:9353',

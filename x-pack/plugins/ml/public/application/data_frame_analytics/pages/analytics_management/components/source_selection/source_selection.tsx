@@ -10,9 +10,9 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiCallOut, EuiSpacer, EuiPageBody, EuiPageContent } from '@elastic/eui';
 
-import type { SimpleSavedObject } from 'src/core/public';
+import type { SimpleSavedObject } from '@kbn/core/public';
 
-import { SavedObjectFinderUi } from '../../../../../../../../../../src/plugins/saved_objects/public';
+import { SavedObjectFinderUi } from '@kbn/saved-objects-plugin/public';
 import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
 
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';

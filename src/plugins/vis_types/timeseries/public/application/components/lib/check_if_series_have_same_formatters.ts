@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import type { FieldFormatMap } from '@kbn/data-views-plugin/common';
 import { DATA_FORMATTERS } from '../../../../common/enums';
 import { aggs } from '../../../../common/agg_utils';
 import type { Series } from '../../../../common/types';
-import type { FieldFormatMap } from '../../../../../../data/common';
 
 export const checkIfSeriesHaveSameFormatters = (
   seriesModel: Series[],

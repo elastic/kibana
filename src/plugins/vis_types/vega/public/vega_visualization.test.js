@@ -19,9 +19,9 @@ import { VegaParser } from './data_model/vega_parser';
 import { SearchAPI } from './data_model/search_api';
 
 import { setInjectedVars, setData, setNotifications } from './services';
-import { coreMock } from '../../../../core/public/mocks';
-import { dataPluginMock } from '../../../data/public/mocks';
-import { dataViewPluginMocks } from '../../../data_views/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 jest.mock('./default_spec', () => ({
   getDefaultSpec: () => jest.requireActual('./test_utils/default.spec.json'),
@@ -56,7 +56,6 @@ describe('VegaVisualizations', () => {
 
   beforeEach(() => {
     setInjectedVars({
-      emsTileLayerId: {},
       enableExternalUrls: true,
     });
     setData(dataPluginStart);
@@ -97,7 +96,6 @@ describe('VegaVisualizations', () => {
             search: dataPluginStart.search,
             indexPatterns: dataViewsPluginStart,
             uiSettings: coreStart.uiSettings,
-            injectedMetadata: coreStart.injectedMetadata,
           }),
           0,
           0,
@@ -130,7 +128,6 @@ describe('VegaVisualizations', () => {
             search: dataPluginStart.search,
             indexPatterns: dataViewsPluginStart,
             uiSettings: coreStart.uiSettings,
-            injectedMetadata: coreStart.injectedMetadata,
           }),
           0,
           0,

@@ -15,7 +15,7 @@ import { DRAW_SHAPE, ES_SPATIAL_RELATIONS } from '../../../../../common/constant
 import { DrawState } from '../../../../../common/descriptor_types';
 import {
   createDistanceFilterWithMeta,
-  createSpatialFilterWithGeometry,
+  buildGeoShapeFilter,
   getBoundingBoxGeometry,
   roundCoordinates,
 } from '../../../../../common/elasticsearch_util';
@@ -68,7 +68,7 @@ export class DrawFilterControl extends Component<Props, {}> {
       // MapboxDraw returns coordinates with 12 decimals. Round to a more reasonable number
       roundCoordinates(geometry.coordinates);
 
-      filter = createSpatialFilterWithGeometry({
+      filter = buildGeoShapeFilter({
         geometry:
           this.props.drawState.drawShape === DRAW_SHAPE.BOUNDS
             ? getBoundingBoxGeometry(geometry)

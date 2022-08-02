@@ -12,11 +12,9 @@ import { merge } from 'lodash';
 
 import '../../common/mock/match_media';
 import { TestProviders } from '../../common/mock';
-import {
-  useMessagesStorage,
-  UseMessagesStorage,
-} from '../../common/containers/local_storage/use_messages_storage';
-import { Overview } from './index';
+import type { UseMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
+import { useMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
+import { Overview } from '.';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useFetchIndex } from '../../common/containers/source';
@@ -25,11 +23,10 @@ import { mockCtiLinksResponse, mockTiDataSources } from '../components/overview_
 import { useCtiDashboardLinks } from '../containers/overview_cti_links';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { initialUserPrivilegesState } from '../../common/components/user_privileges/user_privileges_context';
-import { EndpointPrivileges } from '../../../common/endpoint/types';
+import type { EndpointPrivileges } from '../../../common/endpoint/types';
 import { useHostRiskScore } from '../../risk_score/containers';
-import { APP_UI_ID, SecurityPageName } from '../../../common/constants';
-import { getAppLandingUrl } from '../../common/components/link_to/redirect_to_overview';
-import { mockCasesContract } from '../../../../cases/public/mocks';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+import { LandingPageComponent } from '../../common/components/landing_page';
 
 const mockNavigateToApp = jest.fn();
 jest.mock('../../common/lib/kibana', () => {
@@ -303,8 +300,8 @@ describe('Overview', () => {
         mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
       });
 
-      it('renders the Setup Instructions text', () => {
-        mount(
+      it('renders getting started page', () => {
+        const wrapper = mount(
           <TestProviders>
             <MemoryRouter>
               <Overview />
@@ -312,10 +309,7 @@ describe('Overview', () => {
           </TestProviders>
         );
 
-        expect(mockNavigateToApp).toHaveBeenCalledWith(APP_UI_ID, {
-          deepLinkId: SecurityPageName.landing,
-          path: getAppLandingUrl(),
-        });
+        expect(wrapper.find(LandingPageComponent).exists()).toBe(true);
       });
     });
   });

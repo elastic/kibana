@@ -8,10 +8,9 @@
 import actionCreatorFactory from 'typescript-fsa';
 
 import type { Filter } from '@kbn/es-query';
-import { InspectQuery, Refetch, RefetchKql } from './model';
-import { InputsModelId } from './constants';
-
-import type { SavedQuery } from '../../../../../../../src/plugins/data/public';
+import type { SavedQuery } from '@kbn/data-plugin/public';
+import type { InspectQuery, Refetch, RefetchKql } from './model';
+import type { InputsModelId } from './constants';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/inputs');
 
@@ -69,8 +68,9 @@ export const setInspectionParameter = actionCreator<{
 
 export const deleteAllQuery = actionCreator<{ id: InputsModelId }>('DELETE_ALL_QUERY');
 
-export const toggleTimelineLinkTo =
-  actionCreator<{ linkToId: InputsModelId }>('TOGGLE_TIMELINE_LINK_TO');
+export const toggleTimelineLinkTo = actionCreator<{ linkToId: InputsModelId }>(
+  'TOGGLE_TIMELINE_LINK_TO'
+);
 
 export const removeTimelineLinkTo = actionCreator('REMOVE_TIMELINE_LINK_TO');
 export const addTimelineLinkTo = actionCreator<{ linkToId: InputsModelId }>('ADD_TIMELINE_LINK_TO');

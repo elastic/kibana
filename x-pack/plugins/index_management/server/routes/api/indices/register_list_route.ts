@@ -7,7 +7,7 @@
 
 import { fetchIndices } from '../../../lib/fetch_indices';
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 export function registerListRoute({
   router,
@@ -17,7 +17,7 @@ export function registerListRoute({
   router.get(
     { path: addBasePath('/indices'), validate: false },
     async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
       try {
         const indices = await fetchIndices(client, indexDataEnricher);
         return response.ok({ body: indices });

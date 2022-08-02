@@ -7,8 +7,8 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { MigrateFunctionsObject } from 'src/plugins/kibana_utils/common';
-import { SavedObjectReference } from 'kibana/server';
+import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import type { SavedObjectReference } from '@kbn/core/server';
 import type { LocatorDependencies } from './locator';
 import type { LocatorDefinition, LocatorPublic, ILocatorClient, LocatorData } from './types';
 import { Locator } from './locator';

@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
 
 export default function ({
   getPageObjects,
@@ -16,6 +16,7 @@ export default function ({
   updateBaselines,
 }: FtrProviderContext & { updateBaselines: boolean }) {
   const PageObjects = getPageObjects(['common', 'maps', 'header', 'home', 'timePicker']);
+  const mapsHelper = getService('mapsHelper');
   const screenshot = getService('screenshots');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
@@ -81,7 +82,7 @@ export default function ({
   // Only update the baseline images from Jenkins session images after comparing them
   // These tests might fail locally because of scaling factors and resolution.
 
-  describe('maps smoke tests', function describeIndexTests() {
+  describe('upgrade maps smoke tests', function describeIndexTests() {
     const spaces = [
       { space: 'default', basePath: '' },
       { space: 'automation', basePath: 's/automation' },
@@ -100,18 +101,16 @@ export default function ({
     });
 
     spaces.forEach(({ space, basePath }) => {
-      describe('space ' + space + ' ecommerce', () => {
+      describe('space: ' + space + ', name: ecommerce', () => {
         before(async () => {
-          await PageObjects.common.navigateToActualUrl(
-            'maps',
-            'map/' + '2c9c1f60-1909-11e9-919b-ffe5949a18d2',
-            {
-              basePath,
-            }
-          );
+          await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
+            basePath,
+          });
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.home.launchSampleMap('ecommerce');
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.maps.waitForLayersToLoad();
-          await PageObjects.maps.toggleLayerVisibility('Road map - desaturated');
+          await PageObjects.maps.toggleEmsBasemapLayerVisibility();
           await PageObjects.maps.toggleLayerVisibility('United Kingdom');
           await PageObjects.maps.toggleLayerVisibility('France');
           await PageObjects.maps.toggleLayerVisibility('United States');
@@ -124,24 +123,22 @@ export default function ({
         });
         it('should load layers', async () => {
           const percentDifference = await screenshot.compareAgainstBaseline(
-            'ecommerce_map',
+            'upgrade_ecommerce_map',
             updateBaselines
           );
-          expect(percentDifference.toFixed(3)).to.be.lessThan(0.031);
+          expect(percentDifference.toFixed(3)).to.be.lessThan(0.05);
         });
       });
-      describe('space ' + space + ' flights', () => {
+      describe('space: ' + space + ', name: flights', () => {
         before(async () => {
-          await PageObjects.common.navigateToActualUrl(
-            'maps',
-            'map/' + '5dd88580-1906-11e9-919b-ffe5949a18d2',
-            {
-              basePath,
-            }
-          );
+          await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
+            basePath,
+          });
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.home.launchSampleMap('flights');
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.maps.waitForLayersToLoad();
-          await PageObjects.maps.toggleLayerVisibility('Road map - desaturated');
+          await PageObjects.maps.toggleEmsBasemapLayerVisibility();
           await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
           await PageObjects.maps.enterFullScreen();
           await PageObjects.maps.closeLegend();
@@ -150,25 +147,23 @@ export default function ({
         });
         it('should load saved object and display layers', async () => {
           const percentDifference = await screenshot.compareAgainstBaseline(
-            'flights_map',
+            'upgrade_flights_map',
             updateBaselines
           );
-          expect(percentDifference.toFixed(3)).to.be.lessThan(0.031);
+          expect(percentDifference.toFixed(3)).to.be.lessThan(0.05);
         });
       });
-      describe('space ' + space + ' web logs', () => {
+      describe('space: ' + space + ', name: web logs', () => {
         before(async () => {
-          await PageObjects.common.navigateToActualUrl(
-            'maps',
-            'map/' + 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
-            {
-              basePath,
-            }
-          );
+          await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
+            basePath,
+          });
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.home.launchSampleMap('logs');
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.maps.waitForLayersToLoad();
-          await PageObjects.maps.toggleLayerVisibility('Road map');
-          await PageObjects.maps.toggleLayerVisibility('Total Requests by Country');
+          await PageObjects.maps.toggleEmsBasemapLayerVisibility();
+          await mapsHelper.toggleLayerVisibilityTotalRequests();
           await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
           await PageObjects.maps.enterFullScreen();
           await PageObjects.maps.closeLegend();
@@ -177,10 +172,10 @@ export default function ({
         });
         it('should load saved object and display layers', async () => {
           const percentDifference = await screenshot.compareAgainstBaseline(
-            'web_logs_map',
+            'upgrade_web_logs_map',
             updateBaselines
           );
-          expect(percentDifference.toFixed(3)).to.be.lessThan(0.031);
+          expect(percentDifference.toFixed(3)).to.be.lessThan(0.05);
         });
       });
     });

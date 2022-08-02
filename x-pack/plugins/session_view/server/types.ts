@@ -7,7 +7,7 @@
 import {
   RuleRegistryPluginSetupContract as RuleRegistryPluginSetup,
   RuleRegistryPluginStartContract as RuleRegistryPluginStart,
-} from '../../rule_registry/server';
+} from '@kbn/rule-registry-plugin/server';
 
 export interface SessionViewSetupPlugins {
   ruleRegistry: RuleRegistryPluginSetup;

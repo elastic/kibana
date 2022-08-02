@@ -8,8 +8,8 @@
 
 import { schema, ValidationError } from '@kbn/config-schema';
 
-import { IRouter } from '../../http';
 import { SavedObjectsErrorHelpers } from '../../saved_objects';
+import type { InternalUiSettingsRouter } from '../internal_types';
 import { CannotOverrideError } from '../ui_settings_errors';
 
 const validate = {
@@ -18,10 +18,10 @@ const validate = {
   }),
 };
 
-export function registerSetManyRoute(router: IRouter) {
+export function registerSetManyRoute(router: InternalUiSettingsRouter) {
   router.post({ path: '/api/kibana/settings', validate }, async (context, request, response) => {
     try {
-      const uiSettingsClient = context.core.uiSettings.client;
+      const uiSettingsClient = (await context.core).uiSettings.client;
 
       const { changes } = request.body;
 

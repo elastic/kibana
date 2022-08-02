@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EcsEventOutcome } from 'kibana/server';
+import { EcsEventOutcome } from '@kbn/core/server';
+import { AuditEvent, AuditLogger } from '@kbn/security-plugin/server';
 import { DATABASE_CATEGORY, ECS_OUTCOMES, isWriteOperation, OperationDetails } from '.';
-import { AuditEvent, AuditLogger } from '../../../security/server';
 import { OwnerEntity } from './types';
 
 interface CreateAuditMsgParams {
@@ -31,11 +31,11 @@ export class AuthorizationAuditLogger {
    */
   private static createAuditMsg({ operation, error, entity }: CreateAuditMsgParams): AuditEvent {
     const doc =
-      entity !== undefined
+      entity?.id !== undefined
         ? `${operation.savedObjectType} [id=${entity.id}]`
         : `a ${operation.docType}`;
 
-    const ownerText = entity === undefined ? 'as any owners' : `as owner "${entity.owner}"`;
+    const ownerText = entity?.owner === undefined ? 'as any owners' : `as owner "${entity.owner}"`;
 
     let message: string;
     let outcome: EcsEventOutcome;
@@ -59,7 +59,7 @@ export class AuthorizationAuditLogger {
         type: [operation.ecsType],
         outcome,
       },
-      ...(entity !== undefined && {
+      ...(entity?.id !== undefined && {
         kibana: {
           saved_object: { type: operation.savedObjectType, id: entity.id },
         },

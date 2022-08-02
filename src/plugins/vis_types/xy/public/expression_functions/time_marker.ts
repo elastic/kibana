@@ -11,7 +11,7 @@ import type {
   ExpressionFunctionDefinition,
   Datatable,
   ExpressionValueBoxed,
-} from '../../../../expressions/public';
+} from '@kbn/expressions-plugin/public';
 import type { TimeMarker } from '../types';
 
 export type ExpressionValueTimeMarker = ExpressionValueBoxed<

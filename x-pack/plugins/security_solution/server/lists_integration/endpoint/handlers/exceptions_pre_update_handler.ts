@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import {
+import type {
   ExceptionsListPreUpdateItemServerExtension,
   UpdateExceptionListItemOptions,
-} from '../../../../../lists/server';
-import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { ExceptionItemLikeOptions } from '../types';
+} from '@kbn/lists-plugin/server';
+import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
+import type { ExceptionItemLikeOptions } from '../types';
 import {
   EventFilterValidator,
   TrustedAppValidator,

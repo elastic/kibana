@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
-import {
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type {
   NetworkKpiQueries,
   NetworkKpiDnsStrategyResponse,
   NetworkKpiDnsRequestOptions,
 } from '../../../../../../../common/search_strategy/security_solution/network';
 import { inspectStringifyObject } from '../../../../../../utils/build_query';
-import { SecuritySolutionFactory } from '../../../types';
-import { buildDnsQueryEntities } from './query.network_kip_dns_entities.dsl';
+import type { SecuritySolutionFactory } from '../../../types';
 import { buildDnsQuery } from './query.network_kpi_dns.dsl';
 
 export const networkKpiDns: SecuritySolutionFactory<NetworkKpiQueries.dns> = {
@@ -31,24 +30,6 @@ export const networkKpiDns: SecuritySolutionFactory<NetworkKpiQueries.dns> = {
       inspect,
       // @ts-expect-error code doesn't handle TotalHits
       dnsQueries: response.rawResponse.hits.total,
-    };
-  },
-};
-
-export const networkKpiDnsEntities: SecuritySolutionFactory<NetworkKpiQueries.dns> = {
-  buildDsl: (options: NetworkKpiDnsRequestOptions) => buildDnsQueryEntities(options),
-  parse: async (
-    options: NetworkKpiDnsRequestOptions,
-    response: IEsSearchResponse<unknown>
-  ): Promise<NetworkKpiDnsStrategyResponse> => {
-    const inspect = {
-      dsl: [inspectStringifyObject(buildDnsQueryEntities(options))],
-    };
-    return {
-      ...response,
-      inspect,
-      // @ts-expect-error code doesn't handle TotalHits
-      dnsQueries: response.rawResponse.aggregations?.dns?.value ?? null,
     };
   },
 };

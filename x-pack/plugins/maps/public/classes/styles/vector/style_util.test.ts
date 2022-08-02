@@ -5,121 +5,84 @@
  * 2.0.
  */
 
-import { isOnlySingleFeatureType, assignCategoriesToPalette, dynamicRound } from './style_util';
-import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
-
-describe('isOnlySingleFeatureType', () => {
-  describe('source supports single feature type', () => {
-    const supportedFeatures = [VECTOR_SHAPE_TYPE.POINT];
-    const hasFeatureType = {
-      [VECTOR_SHAPE_TYPE.POINT]: false,
-      [VECTOR_SHAPE_TYPE.LINE]: false,
-      [VECTOR_SHAPE_TYPE.POLYGON]: false,
-    };
-
-    test('Is only single feature type when only supported feature type is target feature type', () => {
-      expect(
-        isOnlySingleFeatureType(VECTOR_SHAPE_TYPE.POINT, supportedFeatures, hasFeatureType)
-      ).toBe(true);
-    });
-
-    test('Is not single feature type when only supported feature type is not target feature type', () => {
-      expect(
-        isOnlySingleFeatureType(VECTOR_SHAPE_TYPE.LINE, supportedFeatures, hasFeatureType)
-      ).toBe(false);
-    });
-  });
-
-  describe('source supports multiple feature types', () => {
-    const supportedFeatures = [
-      VECTOR_SHAPE_TYPE.POINT,
-      VECTOR_SHAPE_TYPE.LINE,
-      VECTOR_SHAPE_TYPE.POLYGON,
-    ];
-
-    test('Is only single feature type when data only has target feature type', () => {
-      const hasFeatureType = {
-        [VECTOR_SHAPE_TYPE.POINT]: true,
-        [VECTOR_SHAPE_TYPE.LINE]: false,
-        [VECTOR_SHAPE_TYPE.POLYGON]: false,
-      };
-      expect(
-        isOnlySingleFeatureType(VECTOR_SHAPE_TYPE.POINT, supportedFeatures, hasFeatureType)
-      ).toBe(true);
-    });
-
-    test('Is not single feature type when data has multiple feature types', () => {
-      const hasFeatureType = {
-        [VECTOR_SHAPE_TYPE.POINT]: true,
-        [VECTOR_SHAPE_TYPE.LINE]: true,
-        [VECTOR_SHAPE_TYPE.POLYGON]: true,
-      };
-      expect(
-        isOnlySingleFeatureType(VECTOR_SHAPE_TYPE.LINE, supportedFeatures, hasFeatureType)
-      ).toBe(false);
-    });
-
-    test('Is not single feature type when data does not have target feature types', () => {
-      const hasFeatureType = {
-        [VECTOR_SHAPE_TYPE.POINT]: false,
-        [VECTOR_SHAPE_TYPE.LINE]: true,
-        [VECTOR_SHAPE_TYPE.POLYGON]: false,
-      };
-      expect(
-        isOnlySingleFeatureType(VECTOR_SHAPE_TYPE.POINT, supportedFeatures, hasFeatureType)
-      ).toBe(false);
-    });
-  });
-});
+import { assignCategoriesToPalette, dynamicRound } from './style_util';
 
 describe('assignCategoriesToPalette', () => {
-  test('Categories and palette values have same length', () => {
+  test('Categories and icons have same length', () => {
     const categories = [
       { key: 'alpah', count: 1 },
       { key: 'bravo', count: 1 },
       { key: 'charlie', count: 1 },
       { key: 'delta', count: 1 },
     ];
-    const paletteValues = ['red', 'orange', 'yellow', 'green'];
+    const paletteValues = ['circle', 'marker', 'triangle', 'square'];
     expect(assignCategoriesToPalette({ categories, paletteValues })).toEqual({
       stops: [
-        { stop: 'alpah', style: 'red' },
-        { stop: 'bravo', style: 'orange' },
-        { stop: 'charlie', style: 'yellow' },
+        {
+          stop: 'alpah',
+          style: 'circle',
+          iconSource: 'MAKI',
+        },
+        {
+          stop: 'bravo',
+          style: 'marker',
+          iconSource: 'MAKI',
+        },
+        {
+          stop: 'charlie',
+          style: 'triangle',
+          iconSource: 'MAKI',
+        },
       ],
-      fallbackSymbolId: 'green',
+      fallbackSymbolId: 'square',
     });
   });
 
-  test('Should More categories than palette values', () => {
+  test('Should More categories than icon values', () => {
     const categories = [
       { key: 'alpah', count: 1 },
       { key: 'bravo', count: 1 },
       { key: 'charlie', count: 1 },
       { key: 'delta', count: 1 },
     ];
-    const paletteValues = ['red', 'orange', 'yellow'];
+    const paletteValues = ['circle', 'square', 'triangle'];
     expect(assignCategoriesToPalette({ categories, paletteValues })).toEqual({
       stops: [
-        { stop: 'alpah', style: 'red' },
-        { stop: 'bravo', style: 'orange' },
+        {
+          stop: 'alpah',
+          style: 'circle',
+          iconSource: 'MAKI',
+        },
+        {
+          stop: 'bravo',
+          style: 'square',
+          iconSource: 'MAKI',
+        },
       ],
-      fallbackSymbolId: 'yellow',
+      fallbackSymbolId: 'triangle',
     });
   });
 
-  test('Less categories than palette values', () => {
+  test('Less categories than icon values', () => {
     const categories = [
       { key: 'alpah', count: 1 },
       { key: 'bravo', count: 1 },
     ];
-    const paletteValues = ['red', 'orange', 'yellow', 'green', 'blue'];
+    const paletteValues = ['circle', 'triangle', 'marker', 'square', 'rectangle'];
     expect(assignCategoriesToPalette({ categories, paletteValues })).toEqual({
       stops: [
-        { stop: 'alpah', style: 'red' },
-        { stop: 'bravo', style: 'orange' },
+        {
+          stop: 'alpah',
+          style: 'circle',
+          iconSource: 'MAKI',
+        },
+        {
+          stop: 'bravo',
+          style: 'triangle',
+          iconSource: 'MAKI',
+        },
       ],
-      fallbackSymbolId: 'yellow',
+      fallbackSymbolId: 'marker',
     });
   });
 });

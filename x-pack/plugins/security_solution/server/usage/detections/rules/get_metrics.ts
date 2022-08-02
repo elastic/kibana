@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from 'kibana/server';
+import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import type { RuleAdoption } from './types';
 
 import { updateRuleUsage } from './update_usage';
 import { getDetectionRules } from '../../queries/get_detection_rules';
 import { getAlerts } from '../../queries/get_alerts';
 import { MAX_PER_PAGE, MAX_RESULTS_WINDOW } from '../../constants';
-import { getInitialRulesUsage } from './get_initial_usage';
+import { getInitialEventLogUsage, getInitialRulesUsage } from './get_initial_usage';
 import { getCaseComments } from '../../queries/get_case_comments';
 import { getRuleIdToCasesMap } from './transform_utils/get_rule_id_to_cases_map';
 import { getAlertIdToCountMap } from './transform_utils/get_alert_id_to_count_map';
 import { getRuleIdToEnabledMap } from './transform_utils/get_rule_id_to_enabled_map';
 import { getRuleObjectCorrelations } from './transform_utils/get_rule_object_correlations';
+import { getEventLogByTypeAndStatus } from '../../queries/get_event_log_by_type_and_status';
 
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetRuleActions } from '../../queries/legacy_get_rule_actions';
@@ -27,6 +28,7 @@ export interface GetRuleMetricsOptions {
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
+  eventLogIndex: string;
 }
 
 export const getRuleMetrics = async ({
@@ -34,6 +36,7 @@ export const getRuleMetrics = async ({
   esClient,
   savedObjectsClient,
   logger,
+  eventLogIndex,
 }: GetRuleMetricsOptions): Promise<RuleAdoption> => {
   try {
     // gets rule saved objects
@@ -49,6 +52,7 @@ export const getRuleMetrics = async ({
       return {
         detection_rule_detail: [],
         detection_rule_usage: getInitialRulesUsage(),
+        detection_rule_status: getInitialEventLogUsage(),
       };
     }
 
@@ -77,11 +81,21 @@ export const getRuleMetrics = async ({
       logger,
     });
 
-    const [detectionAlertsResp, caseComments, legacyRuleActions] = await Promise.all([
-      detectionAlertsRespPromise,
-      caseCommentsPromise,
-      legacyRuleActionsPromise,
-    ]);
+    // gets the event log information by type and status
+    const eventLogMetricsTypeStatusPromise = getEventLogByTypeAndStatus({
+      esClient,
+      logger,
+      eventLogIndex,
+      ruleResults,
+    });
+
+    const [detectionAlertsResp, caseComments, legacyRuleActions, eventLogMetricsTypeStatus] =
+      await Promise.all([
+        detectionAlertsRespPromise,
+        caseCommentsPromise,
+        legacyRuleActionsPromise,
+        eventLogMetricsTypeStatusPromise,
+      ]);
 
     // create in-memory maps for correlation
     const legacyNotificationRuleIds = getRuleIdToEnabledMap(legacyRuleActions);
@@ -108,6 +122,7 @@ export const getRuleMetrics = async ({
     return {
       detection_rule_detail: elasticRuleObjects,
       detection_rule_usage: rulesUsage,
+      detection_rule_status: eventLogMetricsTypeStatus,
     };
   } catch (e) {
     // ignore failure, usage will be zeroed. We use debug mode to not unnecessarily worry users as this will not effect them.
@@ -117,6 +132,7 @@ export const getRuleMetrics = async ({
     return {
       detection_rule_detail: [],
       detection_rule_usage: getInitialRulesUsage(),
+      detection_rule_status: getInitialEventLogUsage(),
     };
   }
 };

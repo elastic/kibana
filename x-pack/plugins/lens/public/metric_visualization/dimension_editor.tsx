@@ -13,19 +13,18 @@ import {
   EuiFormRow,
   htmlIdGenerator,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { useCallback, useState } from 'react';
-import { ColorMode } from '../../../../../src/plugins/charts/common';
-import type { PaletteRegistry } from '../../../../../src/plugins/charts/public';
-import type { MetricState } from '../../common/types';
-import { isNumericFieldForDatatable } from '../../common/expressions';
 import {
-  applyPaletteParams,
+  PaletteRegistry,
   CustomizablePalette,
   CUSTOM_PALETTE,
   FIXED_PROGRESSION,
-  PalettePanelContainer,
-} from '../shared_components';
+} from '@kbn/coloring';
+import { i18n } from '@kbn/i18n';
+import React, { useCallback, useState } from 'react';
+import { ColorMode } from '@kbn/charts-plugin/common';
+import type { MetricState } from '../../common/types';
+import { isNumericFieldForDatatable } from '../../common/expressions';
+import { applyPaletteParams, PalettePanelContainer } from '../shared_components';
 import type { VisualizationDimensionEditorProps } from '../types';
 import { defaultPaletteParams } from './palette_config';
 
@@ -80,13 +79,13 @@ export function MetricDimensionEditor(
       <EuiFormRow
         display="columnCompressed"
         fullWidth
-        label={i18n.translate('xpack.lens.metric.dynamicColoring.label', {
+        label={i18n.translate('xpack.lens.legacyMetric.dynamicColoring.label', {
           defaultMessage: 'Color by value',
         })}
       >
         <EuiButtonGroup
           isFullWidth
-          legend={i18n.translate('xpack.lens.metric.dynamicColoring.label', {
+          legend={i18n.translate('xpack.lens.legacyMetric.dynamicColoring.label', {
             defaultMessage: 'Color by value',
           })}
           data-test-subj="lnsMetric_dynamicColoring_groups"
@@ -95,21 +94,21 @@ export function MetricDimensionEditor(
           options={[
             {
               id: `${idPrefix}None`,
-              label: i18n.translate('xpack.lens.metric.dynamicColoring.none', {
+              label: i18n.translate('xpack.lens.legacyMetric.dynamicColoring.none', {
                 defaultMessage: 'None',
               }),
               'data-test-subj': 'lnsMetric_dynamicColoring_groups_none',
             },
             {
               id: `${idPrefix}Background`,
-              label: i18n.translate('xpack.lens.metric.dynamicColoring.background', {
+              label: i18n.translate('xpack.lens.legacyMetric.dynamicColoring.background', {
                 defaultMessage: 'Fill',
               }),
               'data-test-subj': 'lnsMetric_dynamicColoring_groups_background',
             },
             {
               id: `${idPrefix}Labels`,
-              label: i18n.translate('xpack.lens.metric.dynamicColoring.text', {
+              label: i18n.translate('xpack.lens.legacyMetric.dynamicColoring.text', {
                 defaultMessage: 'Text',
               }),
               'data-test-subj': 'lnsMetric_dynamicColoring_groups_labels',

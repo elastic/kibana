@@ -13,15 +13,15 @@ import type {
   Logger,
   Plugin,
   PluginInitializerContext,
-} from 'src/core/server';
-import type { HomeServerPluginSetup } from 'src/plugins/home/server';
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-
+} from '@kbn/core/server';
 import type {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
-} from '../../features/server';
-import type { LicensingPluginSetup } from '../../licensing/server';
+} from '@kbn/features-plugin/server';
+import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+
 import { SpacesLicenseService } from '../common/licensing';
 import { setupCapabilities } from './capabilities';
 import type { ConfigType } from './config';

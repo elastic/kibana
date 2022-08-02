@@ -7,8 +7,8 @@
 
 import React, { Component } from 'react';
 import { Provider } from 'react-redux';
-import type { AppMountParameters } from 'kibana/public';
-import type { EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
+import type { AppMountParameters } from '@kbn/core/public';
+import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { MapApp } from './map_app';
 import {
   SavedMap,

@@ -12,6 +12,7 @@
 export interface DocLinksMeta {
   version: string;
   elasticWebsiteUrl: string;
+  docsWebsiteUrl: string;
 }
 
 /**
@@ -33,6 +34,7 @@ export interface DocLinks {
     readonly metaData: string;
     readonly overview: string;
     readonly tailSamplingPolicies: string;
+    readonly elasticAgent: string;
   };
   readonly canvas: {
     readonly guide: string;
@@ -75,6 +77,7 @@ export interface DocLinks {
     readonly start: string;
   };
   readonly appSearch: {
+    readonly adaptiveRelevance: string;
     readonly apiRef: string;
     readonly apiClients: string;
     readonly apiKeys: string;
@@ -82,7 +85,9 @@ export interface DocLinks {
     readonly crawlRules: string;
     readonly curations: string;
     readonly duplicateDocuments: string;
+    readonly elasticsearchIndexedEngines: string;
     readonly entryPoints: string;
+    readonly gettingStarted: string;
     readonly guide: string;
     readonly indexingDocuments: string;
     readonly indexingDocumentsSchema: string;
@@ -96,11 +101,19 @@ export interface DocLinks {
     readonly synonyms: string;
     readonly webCrawler: string;
     readonly webCrawlerEventLogs: string;
+    readonly webCrawlerReference: string;
   };
   readonly enterpriseSearch: {
+    readonly apiKeys: string;
+    readonly bulkApi: string;
     readonly configuration: string;
+    readonly crawlerGettingStarted: string;
+    readonly crawlerManaging: string;
+    readonly crawlerOverview: string;
+    readonly languageAnalyzers: string;
     readonly licenseManagement: string;
     readonly mailService: string;
+    readonly start: string;
     readonly troubleshootSetup: string;
     readonly usersAccess: string;
   };
@@ -108,7 +121,10 @@ export interface DocLinks {
     readonly apiKeys: string;
     readonly box: string;
     readonly confluenceCloud: string;
+    readonly confluenceCloudConnectorPackage: string;
     readonly confluenceServer: string;
+    readonly contentSources: string;
+    readonly customConnectorPackage: string;
     readonly customSources: string;
     readonly customSourcePermissions: string;
     readonly documentPermissions: string;
@@ -122,8 +138,10 @@ export interface DocLinks {
     readonly indexingSchedule: string;
     readonly jiraCloud: string;
     readonly jiraServer: string;
+    readonly networkDrive: string;
     readonly oneDrive: string;
     readonly permissions: string;
+    readonly privateSourcePermissions: string;
     readonly salesforce: string;
     readonly security: string;
     readonly serviceNow: string;
@@ -141,6 +159,7 @@ export interface DocLinks {
   };
   readonly logstash: {
     readonly base: string;
+    readonly inputElasticAgent: string;
   };
   readonly functionbeat: {
     readonly base: string;
@@ -213,6 +232,7 @@ export interface DocLinks {
   readonly kibana: {
     readonly guide: string;
     readonly autocompleteSuggestions: string;
+    readonly secureSavedObject: string;
     readonly xpackSecurity: string;
   };
   readonly upgradeAssistant: {
@@ -231,10 +251,18 @@ export interface DocLinks {
     readonly detectionsReq: string;
     readonly networkMap: string;
     readonly troubleshootGaps: string;
+    readonly ruleApiOverview: string;
   };
   readonly securitySolution: {
     readonly trustedApps: string;
     readonly eventFilters: string;
+    readonly blocklist: string;
+    readonly policyResponseTroubleshooting: {
+      full_disk_access: string;
+      macos_system_ext: string;
+      linux_deadlock: string;
+    };
+    readonly threatIntelInt: string;
   };
   readonly query: {
     readonly eql: string;
@@ -303,8 +331,14 @@ export interface DocLinks {
     guide: string;
     importGeospatialPrivileges: string;
     gdalTutorial: string;
+    termJoinsExample: string;
   }>;
   readonly monitoring: Record<string, string>;
+  readonly reporting: Readonly<{
+    cloudMinimumRequirements: string;
+    browserSystemDependencies: string;
+    browserSandboxDependencies: string;
+  }>;
   readonly security: Readonly<{
     apiKeyServiceSettings: string;
     clusterPrivileges: string;
@@ -328,6 +362,7 @@ export interface DocLinks {
     azureRepo: string;
     gcsRepo: string;
     hdfsRepo: string;
+    ingestAttachment: string;
     s3Repo: string;
     snapshotRestoreRepos: string;
     mapperSize: string;
@@ -345,14 +380,17 @@ export interface DocLinks {
     troubleshooting: string;
     elasticAgent: string;
     datastreams: string;
+    datastreamsILM: string;
     datastreamsNamingScheme: string;
     installElasticAgent: string;
     installElasticAgentStandalone: string;
+    packageSignatures: string;
     upgradeElasticAgent: string;
-    upgradeElasticAgent712lower: string;
     learnMoreBlog: string;
     apiKeysLearnMore: string;
     onPremRegistry: string;
+    secureLogstash: string;
+    agentPolicy: string;
   }>;
   readonly ecs: {
     readonly guide: string;
@@ -390,5 +428,15 @@ export interface DocLinks {
   };
   readonly legal: {
     readonly privacyStatement: string;
+  };
+  readonly kibanaUpgradeSavedObjects: {
+    readonly resolveMigrationFailures: string;
+    readonly repeatedTimeoutRequests: string;
+    readonly routingAllocationDisabled: string;
+    readonly clusterShardLimitExceeded: string;
+  };
+  readonly searchUI: {
+    readonly appSearch: string;
+    readonly elasticsearch: string;
   };
 }

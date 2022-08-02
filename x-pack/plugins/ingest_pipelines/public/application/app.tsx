@@ -10,7 +10,7 @@ import { EuiPageContent, EuiEmptyPrompt } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
 import { Router, Switch, Route } from 'react-router-dom';
 
-import { useKibana } from '../shared_imports';
+import { useKibana, useExecutionContext } from '../shared_imports';
 
 import { APP_CLUSTER_REQUIRED_PRIVILEGES } from '../../common/constants';
 
@@ -44,7 +44,12 @@ export const AppWithoutRouter = () => (
 
 export const App: FunctionComponent = () => {
   const { apiError } = useAuthorizationContext();
-  const { history } = useKibana().services;
+  const { history, executionContext } = useKibana().services;
+
+  useExecutionContext(executionContext!, {
+    type: 'application',
+    page: 'ingestPipelines',
+  });
 
   if (apiError) {
     return (

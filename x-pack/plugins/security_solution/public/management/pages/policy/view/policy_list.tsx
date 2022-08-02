@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
+import type { CriteriaWithPagination } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiText,
@@ -14,29 +15,30 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
-  CriteriaWithPagination,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useLocation } from 'react-router-dom';
+import type { AgentPolicy } from '@kbn/fleet-plugin/common';
+import type { CreatePackagePolicyRouteState } from '@kbn/fleet-plugin/public';
+import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { EndpointPolicyLink } from '../../../components/endpoint_policy_link';
-import { PolicyData, PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
-import { useUrlPagination } from '../../../components/hooks/use_url_pagination';
+import type { PolicyData, PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
+import { useUrlPagination } from '../../../hooks/use_url_pagination';
 import {
   useGetAgentCountForPolicy,
   useGetEndpointSecurityPackage,
   useGetEndpointSpecificPolicies,
 } from '../../../services/policies/hooks';
-import { AgentPolicy } from '../../../../../../fleet/common';
 import { PolicyEmptyState } from '../../../components/management_empty_state';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
-import { CreatePackagePolicyRouteState } from '../../../../../../fleet/public';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { getPoliciesPath } from '../../../common/routing';
 import { useAppUrl, useToasts } from '../../../../common/lib/kibana';
 import { PolicyEndpointCount } from './components/policy_endpoint_count';
+import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
 
 export const PolicyList = memo(() => {
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
@@ -88,7 +90,11 @@ export const PolicyList = memo(() => {
   const policyIdToEndpointCount = useMemo(() => {
     const map = new Map<AgentPolicy['package_policies'][number], number>();
     for (const policy of endpointCount?.items) {
-      map.set(policy.package_policies[0], policy.agents ?? 0);
+      for (const packagePolicyId of policy.package_policies) {
+        if (policyIds.includes(packagePolicyId as string)) {
+          map.set(packagePolicyId, policy.agents ?? 0);
+        }
+      }
     }
 
     // error with the endpointCount api call, set default count to 0
@@ -122,9 +128,9 @@ export const PolicyList = memo(() => {
   const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackagePolicyRouteState>(
     'fleet',
     {
-      path: `/integrations/${
-        endpointPackageInfo ? `/endpoint-${endpointPackageInfo?.version}` : ''
-      }/add-integration`,
+      path: pagePathGetters.add_integration_to_policy({
+        pkgkey: endpointPackageInfo ? `/endpoint-${endpointPackageInfo?.version}` : '',
+      })[1],
       state: {
         onCancelNavigateTo: [
           APP_UI_ID,
@@ -184,7 +190,9 @@ export const PolicyList = memo(() => {
                 <EuiAvatar name={name} data-test-subj={'created-by-avatar'} size="s" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText size="s">{name}</EuiText>
+                <EuiText size="s" data-test-subj="created-by-name">
+                  {name}
+                </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           );
@@ -217,7 +225,9 @@ export const PolicyList = memo(() => {
                 <EuiAvatar name={name} data-test-subj={'updated-by-avatar'} size="s" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText size="s">{name}</EuiText>
+                <EuiText size="s" data-test-subj="updated-by-name">
+                  {name}
+                </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           );
@@ -286,12 +296,13 @@ export const PolicyList = memo(() => {
   return (
     <AdministrationListPage
       data-test-subj="policyListPage"
+      hideHeader={totalItemCount === 0}
       title={i18n.translate('xpack.securitySolution.policy.list.title', {
-        defaultMessage: 'Policy List',
+        defaultMessage: 'Policies',
       })}
       subtitle={i18n.translate('xpack.securitySolution.policy.list.subtitle', {
         defaultMessage:
-          'Use endpoint policies to customize endpoint security protections and other configurations',
+          'Use policies to customize endpoint and cloud workload protections and other configurations',
       })}
     >
       {totalItemCount > 0 ? (
@@ -315,11 +326,13 @@ export const PolicyList = memo(() => {
           />
         </>
       ) : (
-        <PolicyEmptyState
-          loading={packageIsFetching}
-          onActionClick={handleCreatePolicyClick}
-          policyEntryPoint
-        />
+        <ManagementEmptyStateWrapper>
+          <PolicyEmptyState
+            loading={packageIsFetching}
+            onActionClick={handleCreatePolicyClick}
+            policyEntryPoint
+          />
+        </ManagementEmptyStateWrapper>
       )}
     </AdministrationListPage>
   );

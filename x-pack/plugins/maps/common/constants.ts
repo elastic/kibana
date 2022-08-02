@@ -63,6 +63,7 @@ export enum SOURCE_TYPES {
   ES_SEARCH = 'ES_SEARCH',
   ES_PEW_PEW = 'ES_PEW_PEW',
   ES_TERM_SOURCE = 'ES_TERM_SOURCE',
+  ES_ML_ANOMALIES = 'ML_ANOMALIES',
   EMS_XYZ = 'EMS_XYZ', // identifies a custom TMS source. EMS-prefix in the name is a little unfortunate :(
   WMS = 'WMS',
   KIBANA_TILEMAP = 'KIBANA_TILEMAP',
@@ -195,6 +196,7 @@ export enum LAYER_STYLE_TYPE {
   VECTOR = 'VECTOR',
   HEATMAP = 'HEATMAP',
   TILE = 'TILE',
+  EMS_VECTOR_TILE = 'EMS_VECTOR_TILE',
 }
 
 export enum COLOR_MAP_TYPE {
@@ -218,6 +220,17 @@ export enum LABEL_BORDER_SIZES {
 }
 
 export const DEFAULT_ICON = 'marker';
+export const DEFAULT_CUSTOM_ICON_CUTOFF = 0.25;
+export const DEFAULT_CUSTOM_ICON_RADIUS = 0.25;
+export const CUSTOM_ICON_SIZE = 64;
+export const CUSTOM_ICON_PREFIX_SDF = '__kbn__custom_icon_sdf__';
+export const MAKI_ICON_SIZE = 16;
+export const HALF_MAKI_ICON_SIZE = MAKI_ICON_SIZE / 2;
+
+export enum ICON_SOURCE {
+  CUSTOM = 'CUSTOM',
+  MAKI = 'MAKI',
+}
 
 export enum VECTOR_STYLES {
   SYMBOLIZE_AS = 'symbolizeAs',
@@ -228,6 +241,7 @@ export enum VECTOR_STYLES {
   ICON_SIZE = 'iconSize',
   ICON_ORIENTATION = 'iconOrientation',
   LABEL_TEXT = 'labelText',
+  LABEL_ZOOM_RANGE = 'labelZoomRange',
   LABEL_COLOR = 'labelColor',
   LABEL_SIZE = 'labelSize',
   LABEL_BORDER_COLOR = 'labelBorderColor',
@@ -277,6 +291,7 @@ export enum DATA_MAPPING_FUNCTION {
   INTERPOLATE = 'INTERPOLATE',
   PERCENTILES = 'PERCENTILES',
 }
+
 export const DEFAULT_PERCENTILES = [50, 75, 90, 95, 99];
 
 export type RawValue = string | string[] | number | boolean | undefined | null;
@@ -287,6 +302,8 @@ export const MAPS_NEW_VECTOR_LAYER_META_CREATED_BY = 'maps-new-vector-layer';
 
 export const MAX_DRAWING_SIZE_BYTES = 10485760; // 10MB
 
+export const NO_EMS_LOCALE = 'none';
+export const AUTOSELECT_EMS_LOCALE = 'autoselect';
 export const emsWorldLayerId = 'world_countries';
 
 export enum WIZARD_ID {

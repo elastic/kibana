@@ -67,7 +67,7 @@ export function validateLogstashHosts(value: string[]) {
       if (val.match(/^http([s]){0,1}:\/\//)) {
         res.push({
           message: i18n.translate('xpack.fleet.settings.outputForm.logstashHostProtocolError', {
-            defaultMessage: 'Invalid logstash host should not start with http(s)',
+            defaultMessage: 'Host address must begin with a domain name or IP address',
           }),
           index: idx,
         });
@@ -80,12 +80,21 @@ export function validateLogstashHosts(value: string[]) {
         throw new Error('Invalid host');
       }
     } catch (error) {
-      res.push({
-        message: i18n.translate('xpack.fleet.settings.outputForm.logstashHostError', {
-          defaultMessage: 'Invalid Host',
-        }),
-        index: idx,
-      });
+      if (val.length === 0) {
+        res.push({
+          message: i18n.translate('xpack.fleet.settings.outputForm.logstashHostRequiredError', {
+            defaultMessage: 'Host is required',
+          }),
+          index: idx,
+        });
+      } else {
+        res.push({
+          message: i18n.translate('xpack.fleet.settings.outputForm.logstashHostError', {
+            defaultMessage: 'Invalid Host',
+          }),
+          index: idx,
+        });
+      }
     }
 
     const curIndexes = urlIndexes[val] || [];

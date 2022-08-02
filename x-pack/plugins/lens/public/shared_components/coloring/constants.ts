@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import type { RequiredPaletteParamTypes } from '../../../common';
-
-export const DEFAULT_PALETTE_NAME = 'positive';
-export const FIXED_PROGRESSION = 'fixed' as const;
-export const CUSTOM_PALETTE = 'custom';
-export const DEFAULT_CONTINUITY = 'above';
-export const DEFAULT_RANGE_TYPE = 'percent';
-export const DEFAULT_MIN_STOP = 0;
-export const DEFAULT_MAX_STOP = 100;
-export const DEFAULT_COLOR_STEPS = 5;
-export const DEFAULT_COLOR = '#6092C0'; // Same as EUI ColorStops default for new stops
+import {
+  DEFAULT_PALETTE_NAME,
+  FIXED_PROGRESSION,
+  DEFAULT_CONTINUITY,
+  DEFAULT_RANGE_TYPE,
+  DEFAULT_MIN_STOP,
+  DEFAULT_MAX_STOP,
+  DEFAULT_COLOR_STEPS,
+  RequiredPaletteParamTypes,
+} from '@kbn/coloring';
 
 export const defaultPaletteParams: RequiredPaletteParamTypes = {
-  maxSteps: undefined,
   name: DEFAULT_PALETTE_NAME,
   reverse: false,
   rangeType: DEFAULT_RANGE_TYPE,

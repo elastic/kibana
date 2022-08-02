@@ -12,7 +12,7 @@ import {
   SavedObjectMigrationMap,
   SavedObjectsUtils,
   SavedObjectUnsanitizedDoc,
-} from '../../../../../src/core/server';
+} from '@kbn/core/server';
 import { REMOVED_TYPES } from '../task_type_dictionary';
 import { ConcreteTaskInstance, TaskStatus } from '../task';
 

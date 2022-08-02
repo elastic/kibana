@@ -13,12 +13,8 @@ import del from 'del';
 import cpy from 'cpy';
 import globby from 'globby';
 import normalize from 'normalize-path';
-import {
-  ToolingLog,
-  createAbsolutePathSerializer,
-  createStripAnsiSerializer,
-  ToolingLogCollectingWriter,
-} from '@kbn/dev-utils';
+import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
+import { createAbsolutePathSerializer, createStripAnsiSerializer } from '@kbn/jest-serializers';
 
 import { RefOutputCache, OUTDIR_MERGE_BASE_FILENAME } from '../ref_output_cache';
 import { Archives } from '../archives';

@@ -8,8 +8,8 @@
 import React, { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { omit } from 'lodash';
+import { fromQuery, toQuery } from '@kbn/observability-plugin/public';
 import { URLSearch } from './url_search';
-import { fromQuery, toQuery } from '../../../../../../observability/public';
 import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
 
 export function URLFilter() {

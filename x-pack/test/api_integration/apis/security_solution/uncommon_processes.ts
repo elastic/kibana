@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import {
   HostsQueries,
   HostsUncommonProcessesStrategyResponse,
-} from '../../../../plugins/security_solution/common/search_strategy';
+} from '@kbn/security-solution-plugin/common/search_strategy';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const FROM = '2000-01-01T00:00:00.000Z';
@@ -128,7 +128,6 @@ export default function ({ getService }: FtrProviderContext) {
           _id: 'HCFxB2kBR346wHgnL4ik',
           instances: 1,
           process: {
-            args: [],
             name: ['kworker/u2:0'],
           },
           user: {
