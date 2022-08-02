@@ -246,7 +246,7 @@ const NetworkDetailsLinkComponent: React.FC<{
         </LinkAnchor>
       );
     },
-    [Component, children, isButton, onClick, title]
+    [children, Component, flowTarget, getSecuritySolutionLinkProps, onClick, isButton, title]
   );
   return isArray(ip) ? <>{ip.map(getLink)}</> : getLink(ip, 0);
 };
