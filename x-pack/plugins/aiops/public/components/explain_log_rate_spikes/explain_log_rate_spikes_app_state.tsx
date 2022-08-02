@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect } from 'react';
-import { Filter, Query } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
+import React, { FC, useCallback } from 'react';
 import { parse, stringify } from 'query-string';
 import { isEqual } from 'lodash';
 import { encode } from 'rison-node';
 import { useHistory, useLocation } from 'react-router-dom';
-import { SavedSearch } from '@kbn/discover-plugin/public';
 
+import { EuiCallOut } from '@elastic/eui';
+
+import type { Filter, Query } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+
+import type { SavedSearch } from '@kbn/discover-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 import {
@@ -21,7 +24,6 @@ import {
   SearchQueryLanguage,
   SavedSearchSavedObject,
 } from '../../application/utils/search_utils';
-import { useAiOpsKibana } from '../../kibana_context';
 import {
   Accessor,
   Dictionary,
@@ -68,29 +70,8 @@ export const ExplainLogRateSpikesAppState: FC<ExplainLogRateSpikesAppStateProps>
   dataView,
   savedSearch,
 }) => {
-  const { services } = useAiOpsKibana();
-  const { notifications } = services;
-  const { toasts } = notifications;
-
   const history = useHistory();
   const { search: urlSearchString } = useLocation();
-
-  useEffect(() => {
-    if (!dataView.isTimeBased()) {
-      toasts.addWarning({
-        title: i18n.translate('xpack.aiops.index.dataViewNotBasedOnTimeSeriesNotificationTitle', {
-          defaultMessage: 'The data view {dataViewTitle} is not based on a time series',
-          values: { dataViewTitle: dataView.title },
-        }),
-        text: i18n.translate(
-          'xpack.aiops.index.dataViewNotBasedOnTimeSeriesNotificationDescription',
-          {
-            defaultMessage: 'Log rate spike analysis only runs over time-based indices',
-          }
-        ),
-      });
-    }
-  }, [dataView, toasts]);
 
   const setUrlState: SetUrlState = useCallback(
     (
@@ -155,6 +136,25 @@ export const ExplainLogRateSpikesAppState: FC<ExplainLogRateSpikesAppStateProps>
   );
 
   if (!dataView) return null;
+
+  if (!dataView.isTimeBased()) {
+    return (
+      <EuiCallOut
+        title={i18n.translate('xpack.aiops.index.dataViewNotBasedOnTimeSeriesNotificationTitle', {
+          defaultMessage: 'The data view "{dataViewTitle}" is not based on a time series.',
+          values: { dataViewTitle: dataView.getName() },
+        })}
+        color="danger"
+        iconType="alert"
+      >
+        <p>
+          {i18n.translate('xpack.aiops.index.dataViewNotBasedOnTimeSeriesNotificationDescription', {
+            defaultMessage: 'Log rate spike analysis only runs over time-based indices.',
+          })}
+        </p>
+      </EuiCallOut>
+    );
+  }
 
   return (
     <UrlStateContextProvider value={{ searchString: urlSearchString, setUrlState }}>
