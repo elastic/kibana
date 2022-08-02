@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import { useParams } from 'react-router-dom';
 
-import { useActions, useValues } from 'kea';
+import { useValues } from 'kea';
 
 import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 
@@ -51,7 +51,6 @@ export enum SearchIndexTabId {
 }
 
 export const SearchIndex: React.FC = () => {
-  const { makeRequest, apiReset } = useActions(FetchIndexApiLogic);
   const { data: indexData, status: indexApiStatus } = useValues(FetchIndexApiLogic);
   const { isCalloutVisible } = useValues(IndexCreatedCalloutLogic);
   const { tabId = SearchIndexTabId.OVERVIEW } = useParams<{
@@ -59,11 +58,6 @@ export const SearchIndex: React.FC = () => {
   }>();
 
   const { indexName } = useValues(IndexNameLogic);
-
-  useEffect(() => {
-    makeRequest({ indexName });
-    return apiReset;
-  }, [indexName]);
 
   const ALL_INDICES_TABS: EuiTabbedContentTab[] = [
     {
@@ -146,7 +140,10 @@ export const SearchIndex: React.FC = () => {
     <EnterpriseSearchContentPageTemplate
       pageChrome={[...baseBreadcrumbs, indexName]}
       pageViewTelemetry={tabId}
-      isLoading={indexApiStatus === Status.LOADING || indexApiStatus === Status.IDLE}
+      isLoading={
+        indexApiStatus === Status.IDLE ||
+        (typeof indexData === 'undefined' && indexApiStatus === Status.LOADING)
+      }
       pageHeader={{
         pageTitle: indexName,
         rightSideItems: getHeaderActions(indexData),
@@ -154,7 +151,9 @@ export const SearchIndex: React.FC = () => {
     >
       <>
         {isCalloutVisible && <IndexCreatedCallout indexName={indexName} />}
-        <EuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
+        {indexName === indexData?.name && (
+          <EuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
+        )}
         {isCrawlerIndex(indexData) && <CrawlCustomSettingsFlyout />}
       </>
     </EnterpriseSearchContentPageTemplate>

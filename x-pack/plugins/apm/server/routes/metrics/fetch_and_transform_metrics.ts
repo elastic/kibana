@@ -10,6 +10,7 @@ import { euiLightVars as theme } from '@kbn/ui-theme';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { AggregationOptionsByType } from '@kbn/core/types/elasticsearch';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { getVizColorForIndex } from '../../../common/viz_colors';
 import { APMEventESSearchRequest } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getMetricsDateHistogramParams } from '../../lib/helpers/metrics';
@@ -19,7 +20,6 @@ import {
   environmentQuery,
   serviceNodeNameQuery,
 } from '../../../common/utils/environment_query';
-import { ProcessorEvent } from '../../../common/processor_event';
 import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
 
 type MetricsAggregationMap = Unionize<{

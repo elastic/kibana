@@ -5,34 +5,67 @@
  * 2.0.
  */
 
-import React from 'react';
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { IndicatorsPage } from './modules/indicators/indicators_page';
+import { CoreStart, Plugin } from '@kbn/core/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import React, { Suspense } from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from './hooks/use_kibana';
 import {
+  Services,
   ThreatIntelligencePluginSetup,
   ThreatIntelligencePluginStart,
   ThreatIntelligencePluginStartDeps,
+  ThreatIntelligenceSecuritySolutionContext,
 } from './types';
+import { SecuritySolutionContext } from './containers/security_solution_context';
 
-const createAppComponent = (services: CoreStart) => {
-  return () => (
-    <KibanaContextProvider services={services}>
-      <IndicatorsPage />
-    </KibanaContextProvider>
-  );
-};
+interface AppProps {
+  securitySolutionContext: ThreatIntelligenceSecuritySolutionContext;
+}
+
+const LazyIndicatorsPage = React.lazy(() => import('./modules/indicators/indicators_page'));
+
+/**
+ * This is used here:
+ * x-pack/plugins/security_solution/public/threat_intelligence/pages/threat_intelligence.tsx
+ */
+export const createApp =
+  (services: Services) =>
+  () =>
+  ({ securitySolutionContext }: AppProps) =>
+    (
+      <IntlProvider>
+        <KibanaContextProvider services={services}>
+          <SecuritySolutionContext.Provider value={securitySolutionContext}>
+            <Suspense fallback={<div />}>
+              <LazyIndicatorsPage />
+            </Suspense>
+          </SecuritySolutionContext.Provider>
+        </KibanaContextProvider>
+      </IntlProvider>
+    );
 
 export class ThreatIntelligencePlugin implements Plugin<void, void> {
-  public setup(core: CoreSetup): ThreatIntelligencePluginSetup {
+  public async setup(): Promise<ThreatIntelligencePluginSetup> {
     return {};
   }
+
   public start(
     core: CoreStart,
     plugins: ThreatIntelligencePluginStartDeps
   ): ThreatIntelligencePluginStart {
-    const App = createAppComponent({ ...core, ...plugins });
-    return { getComponent: () => App };
+    const localPluginServices = {
+      storage: new Storage(localStorage),
+    };
+
+    const services = {
+      ...localPluginServices,
+      ...core,
+      ...plugins,
+    } as Services;
+
+    return { getComponent: createApp(services) };
   }
+
   public stop() {}
 }
