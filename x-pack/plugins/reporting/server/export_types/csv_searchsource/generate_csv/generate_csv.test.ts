@@ -932,6 +932,7 @@ describe('error codes', () => {
     expect(warnings).toMatchInlineSnapshot(`
       Array [
         "This report contains partial CSV results because the authentication token expired. Export a smaller amount of data or increase the timeout of the authentication token.",
+        "Encountered an error with the number of CSV rows generated from the search: expected 10, received 5.",
       ]
     `);
   });
