@@ -46,7 +46,7 @@ const getUnknownArguments = (
   const response: string[] = [];
 
   Object.keys(inputArgs).forEach((argName) => {
-    if (!argDefinitions || !argDefinitions[argName]) {
+    if (argName !== 'help' && (!argDefinitions || !argDefinitions[argName])) {
       response.push(argName);
     }
   });
@@ -186,38 +186,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
 
   // If args were entered, then validate them
   if (parsedInput.hasArgs) {
-    // Show command help
-    if (parsedInput.hasArg('help')) {
-      return updateStateWithNewCommandHistoryItem(
-        state,
-        createCommandHistoryEntry(
-          cloneCommandDefinitionWithNewRenderComponent(command, HelpCommandArgument),
-          undefined,
-          false
-        )
-      );
-    }
-
-    // Command supports no arguments
-    if (!commandDefinition.args || Object.keys(commandDefinition.args).length === 0) {
-      return updateStateWithNewCommandHistoryItem(
-        state,
-        createCommandHistoryEntry(
-          cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
-          createCommandExecutionState({
-            errorMessage: i18n.translate(
-              'xpack.securitySolution.console.commandValidation.noArgumentsSupported',
-              {
-                defaultMessage: 'Command does not support any arguments',
-              }
-            ),
-          }),
-          false
-        )
-      );
-    }
-
-    // no unknown arguments allowed?
+    // no unknown arguments allowed
     const unknownInputArgs = getUnknownArguments(parsedInput.args, commandDefinition.args);
 
     if (unknownInputArgs.length) {
@@ -246,6 +215,37 @@ export const handleExecuteCommand: ConsoleStoreReducer<
                   }}
                 />
               </ConsoleCodeBlock>
+            ),
+          }),
+          false
+        )
+      );
+    }
+
+    // Show command help
+    if (parsedInput.hasArg('help')) {
+      return updateStateWithNewCommandHistoryItem(
+        state,
+        createCommandHistoryEntry(
+          cloneCommandDefinitionWithNewRenderComponent(command, HelpCommandArgument),
+          undefined,
+          false
+        )
+      );
+    }
+
+    // Command supports no arguments
+    if (!commandDefinition.args || Object.keys(commandDefinition.args).length === 0) {
+      return updateStateWithNewCommandHistoryItem(
+        state,
+        createCommandHistoryEntry(
+          cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+          createCommandExecutionState({
+            errorMessage: i18n.translate(
+              'xpack.securitySolution.console.commandValidation.noArgumentsSupported',
+              {
+                defaultMessage: 'Command does not support any arguments',
+              }
             ),
           }),
           false
