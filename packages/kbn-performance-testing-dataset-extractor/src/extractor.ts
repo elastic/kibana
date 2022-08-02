@@ -12,10 +12,11 @@ import { existsSync } from 'fs';
 import path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
 import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { initClient, Document, Headers } from './es_client';
+import { ESClient, TransactionDocument } from './es_client';
+import { getRequests } from './server_request';
+import { fetchQueries, queriesToStreams } from './es_query';
 
 const DATE_FORMAT = `YYYY-MM-DD'T'HH:mm:ss.SSS'Z'`;
-const STATIC_RESOURCES_PATTERN = /\.(css|ico|js|json|jpeg|jpg|gif|png|otf|ttf|woff|woff2)$/;
 
 interface CLIParams {
   param: {
@@ -45,64 +46,22 @@ export interface ScalabilitySetup {
   maxDuration: string;
 }
 
-const parsePayload = (payload: string, traceId: string, log: ToolingLog): string | undefined => {
-  let body;
-  try {
-    body = JSON.parse(payload);
-  } catch (error) {
-    log.error(`Failed to parse payload - trace_id: '${traceId}'`);
-  }
-  return body;
-};
-
-const combineHeaderFieldValues = (headers: Headers) => {
-  return Object.assign(
-    {},
-    ...Object.keys(headers).map((key) => ({ [key]: headers[key].join(', ') }))
-  );
-};
-
-const calculateTransactionTimeRage = (hit: SearchHit<Document>) => {
-  const trSource = hit._source as Document;
+const calculateTransactionTimeRage = (hit: SearchHit<TransactionDocument>) => {
+  const trSource = hit._source as TransactionDocument;
   const startTime = trSource['@timestamp'];
   const duration = trSource.transaction.duration.us / 1000; // convert microseconds to milliseconds
   const endTime = moment(startTime, DATE_FORMAT).add(duration, 'milliseconds').toISOString();
   return { startTime, endTime };
 };
 
-const getTraceItems = (
-  hits: Array<SearchHit<Document>>,
-  withoutStaticResources: boolean,
-  log: ToolingLog
-) => {
-  const data = hits
-    .map((hit) => hit!._source as Document)
-    .map((hit) => {
-      const payload = hit.http.request?.body?.original;
-      return {
-        traceId: hit.trace.id,
-        parentId: hit?.parent?.id,
-        processor: hit.processor,
-        environment: hit.environment,
-        request: {
-          timestamp: hit['@timestamp'],
-          method: hit.http.request.method,
-          path: hit.url.path,
-          headers: combineHeaderFieldValues(hit.http.request.headers),
-          body: payload ? JSON.stringify(parsePayload(payload, hit.trace.id, log)) : undefined,
-          statusCode: hit.http.response.status_code,
-        },
-        transaction: {
-          id: hit.transaction.id,
-          name: hit.transaction.name,
-          type: hit.transaction.type,
-        },
-      };
-    });
+const saveFile = async (output: any, outputDir: string, fileName: string, log: ToolingLog) => {
+  const filePath = path.resolve(outputDir, fileName);
 
-  return withoutStaticResources
-    ? data.filter((item) => !STATIC_RESOURCES_PATTERN.test(item.request.path))
-    : data;
+  if (!existsSync(outputDir)) {
+    await fs.mkdir(outputDir, { recursive: true });
+  }
+  await fs.writeFile(filePath, JSON.stringify(output, null, 2), 'utf8');
+  log.info(`Output file saved: ${filePath}`);
 };
 
 export const extractor = async ({ param, client, log }: CLIParams) => {
@@ -115,11 +74,11 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
   log.info(
     `Searching transactions with 'labels.testBuildId=${buildId}' and 'labels.journeyName=${journeyName}'`
   );
-  const esClient = initClient(authOptions, log);
-  const ftrTransactionHits = await esClient.getFtrTransactions(buildId, journeyName);
+  const esClient = new ESClient(authOptions, log);
+  const ftrTransactionHits = await esClient.getFtrServiceTransactions(buildId, journeyName);
   if (!ftrTransactionHits || ftrTransactionHits.length === 0) {
     log.warning(
-      `No transactions found. Can't calculate journey time range, output file won't be generated.`
+      `No 'functional test runner' transactions found. Can't calculate journey time range, output file won't be generated.`
     );
     return;
   }
@@ -134,27 +93,45 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
   // Filtering out setup/teardown related transactions by time range from 'functional test runner' transaction
   const hits = await esClient.getKibanaServerTransactions(buildId, journeyName, timeRange);
   if (!hits || hits.length === 0) {
-    log.warning(`No transactions found. Output file won't be generated.`);
+    log.warning(`No Kibana server transactions found. Output file won't be generated.`);
     return;
   }
 
-  const source = hits[0]!._source as Document;
+  const source = hits[0]!._source as TransactionDocument;
   const kibanaVersion = source.service.version;
 
-  const output = {
-    journeyName,
-    kibanaVersion,
-    scalabilitySetup,
-    requests: getTraceItems(hits, withoutStaticResources, log),
-  };
+  const requests = getRequests(hits, withoutStaticResources, log);
+  const esQueries = await fetchQueries(esClient, requests);
+  log.info(
+    `Found ${requests.length} Kibana server requests and ${esQueries.length} Elasticsearch queries`
+  );
+  const streams = queriesToStreams(esQueries);
 
   const outputDir = path.resolve('target/scalability_traces');
-  const fileName = `${output.journeyName.replace(/ /g, '')}-${buildId}.json`;
-  const filePath = path.resolve(outputDir, fileName);
+  const fileName = `${journeyName.replace(/ /g, '')}-${buildId}.json`;
 
-  log.info(`Found ${output.requests.length} transactions, output file: ${filePath}`);
-  if (!existsSync(outputDir)) {
-    await fs.mkdir(outputDir, { recursive: true });
+  if (scalabilitySetup) {
+    await saveFile(
+      {
+        journeyName,
+        kibanaVersion,
+        scalabilitySetup,
+        requests,
+      },
+      path.resolve(outputDir, 'server'),
+      fileName,
+      log
+    );
   }
-  await fs.writeFile(filePath, JSON.stringify(output, null, 2), 'utf8');
+
+  await saveFile(
+    {
+      journeyName,
+      kibanaVersion,
+      streams: Array.from(streams.values()),
+    },
+    path.resolve(outputDir, 'es'),
+    fileName,
+    log
+  );
 };
