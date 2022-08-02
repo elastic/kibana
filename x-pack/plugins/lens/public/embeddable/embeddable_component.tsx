@@ -121,13 +121,13 @@ interface EmbeddablePanelWrapperProps {
 }
 
 const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
-  actionPredicate,
-  extraActions,
   factory,
-  input,
-  inspector,
-  theme,
   uiActions,
+  actionPredicate,
+  inspector,
+  input,
+  theme,
+  extraActions,
   withDefaultActions,
 }) => {
   const [embeddable, loading] = useEmbeddableFactory({ factory, input });

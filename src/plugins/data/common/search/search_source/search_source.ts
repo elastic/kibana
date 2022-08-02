@@ -81,7 +81,6 @@ import {
   buildExpression,
   buildExpressionFunction,
 } from '@kbn/expressions-plugin/common';
-import _ from 'lodash';
 import { normalizeSortRequest } from './normalize_sort_request';
 
 import { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
@@ -205,7 +204,6 @@ export class SearchSource {
       return this.removeField(field);
     }
     this.fields[field] = value;
-    console.log('setfield', field, value);
     return this;
   }
 
@@ -252,58 +250,6 @@ export class SearchSource {
     }
     const parent = this.getParent();
     return parent && parent.getField(field);
-  }
-
-  getActiveIndexFilter() {
-    const { filter: originalFilters, query } = this.getFields();
-    // console.log('filters', originalFilters);
-    // console.log(`query`, query);
-
-    let filters: Filter[] = [];
-    if (originalFilters) {
-      filters = this.getFilters(originalFilters);
-    }
-
-    const indexFilters: string[] = filters?.reduce<string[]>((acc, f) => {
-      if (f.meta.key === '_index' && f.meta.disabled === false) {
-        if (f.meta.negate === false) {
-          return _.concat(acc, f.meta.params.query ?? f.meta.params);
-        } else {
-          if (Array.isArray(f.meta.params)) {
-            return _.difference(acc, f.meta.params);
-          } else {
-            return _.difference(acc, [f.meta.params.query]);
-          }
-        }
-      } else {
-        return acc;
-      }
-    }, []);
-    const regex = /\s?(_index)\s?:\s?(\w+\-?\*?)\s?(\w+)?/gi;
-    const str = query[0]?.query;
-    let m;
-
-    const activeIndexPattern = new Set(indexFilters);
-
-    while ((m = regex.exec(str)) !== null) {
-      // This is necessary to avoid infinite loops with zero-width matches
-      if (m.index === regex.lastIndex) {
-        regex.lastIndex++;
-      }
-
-      m.forEach((match, groupIndex) => {
-        // group 1 = field
-        // group 2 = value
-        // group 3 = operator
-        // console.log(`group ${groupIndex}: ${match}`);
-
-        if (groupIndex === 2) {
-          activeIndexPattern.add(match);
-        }
-      });
-    }
-
-    return [...activeIndexPattern];
   }
 
   /**
