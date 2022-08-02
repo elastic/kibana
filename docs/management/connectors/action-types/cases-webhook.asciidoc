@@ -185,6 +185,8 @@ Additional comments:: Additional information for the client, such as how to trou
 
 The following is an example of using the Webhook - Case Management Connector with a real third party case management system, Jira. We will reference their https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-issues/[API documentation] for creating an issue and use a demo instance of Jira with real working endpoints.
 
+[float]
+[[cases-webhook-example-step-1]]
 ===  Step 1 - Set up connector
 
 In the Webhook - Case Management connector create flyout, we begin by entering a *Name* for the connector - `Jira Test Connector`. We are going to use basic authentication in this example, so we keep the *Require authentication* checkbox checked and enter the *Username* and *Password* for the test instance, `test-user@elastic.co` and `notarealpassword`. We will not be setting any *Headers* for the requests.
@@ -192,6 +194,8 @@ In the Webhook - Case Management connector create flyout, we begin by entering a
 [role="screenshot"]
 image::management/connectors/images/cases-webhook-step1.png[Webhook - Case Management connector Step 1, Jira example]
 
+[float]
+[[cases-webhook-example-step-2]]
 ===  Step 2 - Create case
 
 Taking a look at the Jira https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-issues/#api-rest-api-2-issue-post[Create issue method documentation], we can find what values we will need to fill step 2.
@@ -234,6 +238,8 @@ In the screen capture below, on Step 2 we enter `POST` as the *Create Case Metho
 [role="screenshot"]
 image::management/connectors/images/cases-webhook-step2.gif[Webhook - Case Management connector Step 2, Jira example]
 
+[float]
+[[cases-webhook-example-step-3]]
 ===  Step 3 - Get case information
 
 Next we'll need to look at Jira's https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-issues/#api-rest-api-2-issue-issueidorkey-[Get issue method documentation] to find the values for step 3. In the GET response JSON below, we thinned out some null/unrelated data so that we can focus on the fields we need.
@@ -324,6 +330,8 @@ We also need the *External Case View URL*. https://support.atlassian.com/jira-so
 [role="screenshot"]
 image::management/connectors/images/cases-webhook-step3.gif[Webhook - Case Management connector Step 3, Jira example]
 
+[float]
+[[cases-webhook-example-step-4]]
 ===  Step 4 - Comments and updates
 
 In Step 4 we need to set the REST API data for updates and comments. Let's look at Jira's https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-issues/#api-rest-api-2-issue-issueidorkey-put[Edit issue documentation].
@@ -368,6 +376,9 @@ In the screen capture below, on Step 4 we enter `POST` as the *Create Comment Me
 [role="screenshot"]
 image::management/connectors/images/cases-webhook-step4b.gif[Webhook - Case Management connector Step 4 Comments, Jira example]
 
+[float]
+[[cases-webhook-example-implementation]]
+=== Implement connector in Kibana Cases
 Let's take a look at how our new Webhook - Case Management connector works within the Kibana Case Workflow.
 
 ====  Create a case
