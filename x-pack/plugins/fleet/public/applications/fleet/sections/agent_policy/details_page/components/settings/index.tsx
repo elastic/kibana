@@ -85,6 +85,8 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
           data_output_id,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           monitoring_output_id,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          download_source_id,
         } = agentPolicy;
         const { data, error } = await sendUpdateAgentPolicy(agentPolicy.id, {
           name,
@@ -94,6 +96,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
           unenroll_timeout,
           data_output_id,
           monitoring_output_id,
+          download_source_id,
         });
         if (data) {
           notifications.toasts.addSuccess(

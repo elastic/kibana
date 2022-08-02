@@ -227,7 +227,11 @@ const ToolsGroup = ({ visType, onVisTypeSelected, showExperimental }: VisCardPro
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiLink data-test-subj={`visType-${visType.name}`} onClick={onClick}>
+            <EuiLink
+              data-test-subj={`visType-${visType.name}`}
+              data-vis-stage={visType.stage}
+              onClick={onClick}
+            >
               {'titleInWizard' in visType && visType.titleInWizard
                 ? visType.titleInWizard
                 : visType.title}

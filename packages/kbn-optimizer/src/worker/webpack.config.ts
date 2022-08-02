@@ -144,6 +144,15 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                 sourceMap: !worker.dist,
               },
             },
+            {
+              loader: 'postcss-loader',
+              options: {
+                sourceMap: !worker.dist,
+                postcssOptions: {
+                  config: require.resolve('@kbn/optimizer/postcss.config.js'),
+                },
+              },
+            },
           ],
         },
         {
@@ -166,8 +175,8 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                   loader: 'postcss-loader',
                   options: {
                     sourceMap: !worker.dist,
-                    config: {
-                      path: require.resolve('@kbn/optimizer/postcss.config.js'),
+                    postcssOptions: {
+                      config: require.resolve('@kbn/optimizer/postcss.config.js'),
                     },
                   },
                 },

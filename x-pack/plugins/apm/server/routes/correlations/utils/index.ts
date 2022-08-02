@@ -8,3 +8,4 @@
 export { computeExpectationsAndRanges } from './compute_expectations_and_ranges';
 export { splitAllSettledPromises } from './split_all_settled_promises';
 export { getDurationField } from './get_duration_field';
+export { getEventType } from './get_event_type';

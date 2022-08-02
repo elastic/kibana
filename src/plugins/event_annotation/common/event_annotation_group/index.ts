@@ -8,15 +8,18 @@
 
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { IndexPatternExpressionType } from '@kbn/data-views-plugin/common';
 import type { EventAnnotationOutput } from '../manual_event_annotation/types';
 
 export interface EventAnnotationGroupOutput {
   type: 'event_annotation_group';
   annotations: EventAnnotationOutput[];
+  index?: IndexPatternExpressionType;
 }
 
 export interface EventAnnotationGroupArgs {
   annotations: EventAnnotationOutput[];
+  index?: IndexPatternExpressionType;
 }
 
 export function eventAnnotationGroup(): ExpressionFunctionDefinition<
@@ -34,6 +37,13 @@ export function eventAnnotationGroup(): ExpressionFunctionDefinition<
       defaultMessage: 'Event annotation group',
     }),
     args: {
+      index: {
+        types: ['index_pattern'],
+        required: false,
+        help: i18n.translate('eventAnnotation.group.args.annotationConfigs.index.help', {
+          defaultMessage: 'Data view retrieved with indexPatternLoad',
+        }),
+      },
       annotations: {
         types: ['manual_point_event_annotation', 'manual_range_event_annotation'],
         help: i18n.translate('eventAnnotation.group.args.annotationConfigs', {
@@ -46,6 +56,7 @@ export function eventAnnotationGroup(): ExpressionFunctionDefinition<
       return {
         type: 'event_annotation_group',
         annotations: args.annotations,
+        index: args.index,
       };
     },
   };

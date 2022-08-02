@@ -153,6 +153,9 @@
       "label": "Contributors Newsletters",
       "items": [
         {
+          "id": "kibJuly2022ContributorNewsletter"
+        },
+        {
           "id": "kibJune2022ContributorNewsletter"
         },
         {
@@ -228,9 +231,6 @@
         },
         {
           "id": "kibCoreChromePluginApi"
-        },
-        {
-          "id": "kibCoreHttpPluginApi"
         },
         {
           "id": "kibCoreSavedObjectsPluginApi"
@@ -451,6 +451,9 @@
           "label": "Build tooling",
           "items": [
             {
+              "id": "kibDevDocsOpsKbnPm"
+            },
+            {
               "id": "kibDevDocsOpsOptimizer"
             },
             {
@@ -487,6 +490,12 @@
             },
             {
               "id": "kibDevDocsOpsEslintPluginImports"
+            },
+            {
+              "id": "kibDevDocsOpsEslintPluginDisable"
+            },
+            {
+              "id": "kibDevDocsOpsKbnYarnLockValidator"
             }
           ]
         },
@@ -519,6 +528,18 @@
             },
             {
               "id": "kibDevDocsOpsEs"
+            },
+            {
+              "id": "kibDevDocsOpsSomeDevLog"
+            },
+            {
+              "id": "kibDevDocsOpsDevCliRunner"
+            },
+            {
+              "id": "kibDevDocsOpsGetRepoFiles"
+            },
+            {
+              "id": "kibDevDocsOpsRepoSourceClassifier"
             }
           ]
         }

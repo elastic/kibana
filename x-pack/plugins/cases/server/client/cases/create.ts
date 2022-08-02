@@ -41,8 +41,7 @@ export const create = async (
 ): Promise<CaseResponse> => {
   const {
     unsecuredSavedObjectsClient,
-    caseService,
-    userActionService,
+    services: { caseService, userActionService },
     user,
     logger,
     authorization: auth,
@@ -79,6 +78,7 @@ export const create = async (
         newCase: query,
       }),
       id: savedObjectID,
+      refresh: false,
     });
 
     await userActionService.createUserAction({

@@ -35,10 +35,8 @@ import { useFetcher } from '../../hooks/use_fetcher';
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useAlertIndexNames } from '../../hooks/use_alert_index_names';
-import { RouteParams } from '../../routes';
 import { getNewsFeed } from '../../services/get_news_feed';
 import { getBucketSize } from '../../utils/get_bucket_size';
-import { getNoDataConfig } from '../../utils/no_data_config';
 import { DataSections } from './data_sections';
 import { LoadingObservability } from './loading_observability';
 import { AlertsTableTGrid } from '../alerts/containers/alerts_table_t_grid/alerts_table_t_grid';
@@ -50,12 +48,9 @@ import { useDatePickerContext } from '../../hooks/use_date_picker_context';
 import { ObservabilityStatusProgress } from '../../components/app/observability_status/observability_status_progress';
 import { ObservabilityStatus } from '../../components/app/observability_status';
 import { useGuidedSetupProgress } from '../../hooks/use_guided_setup_progress';
+import { useObservabilityTourContext } from '../../components/shared/tour';
 
 export type BucketSize = ReturnType<typeof calculateBucketSize>;
-
-interface Props {
-  routeParams: RouteParams<'/overview'>;
-}
 
 const CAPABILITIES_KEYS = ['logs', 'infrastructure', 'apm', 'uptime'];
 
@@ -68,7 +63,7 @@ function calculateBucketSize({ start, end }: { start?: number; end?: number }) {
 const ALERT_TABLE_STATE_STORAGE_KEY = 'xpack.observability.overview.alert.tableState';
 const ALERTS_PER_PAGE = 10;
 
-export function OverviewPage({ routeParams }: Props) {
+export function OverviewPage() {
   const trackMetric = useUiTracker({ app: 'observability-overview' });
   useTrackPageview({ app: 'observability-overview', path: 'overview' });
   useTrackPageview({ app: 'observability-overview', path: 'overview', delay: 15000 });
@@ -84,7 +79,6 @@ export function OverviewPage({ routeParams }: Props) {
   const indexNames = useAlertIndexNames();
   const {
     cases,
-    docLinks,
     http,
     application: { capabilities },
   } = useKibana<ObservabilityAppServices>().services;
@@ -127,8 +121,7 @@ export function OverviewPage({ routeParams }: Props) {
   }, []);
 
   const CasesContext = cases.ui.getCasesContext();
-  const userPermissions = useGetUserCasesPermissions();
-  const casesPermissions = { all: userPermissions.crud, read: userPermissions.read };
+  const userCasesPermissions = useGetUserCasesPermissions();
 
   useEffect(() => {
     if (hasAnyData !== true) {
@@ -148,96 +141,82 @@ export function OverviewPage({ routeParams }: Props) {
     return <LoadingObservability />;
   }
 
-  const hasData = hasAnyData === true || (isAllRequestsComplete === false ? undefined : false);
-
-  const noDataConfig = getNoDataConfig({
-    hasData,
-    basePath: http.basePath,
-    docsLink: docLinks.links.observability.guide,
-  });
-
   const alertsLink = paths.observability.alerts;
 
   return (
     <ObservabilityPageTemplate
-      noDataConfig={noDataConfig}
-      isPageDataLoaded={Boolean(hasAnyData)}
-      pageHeader={
-        hasData
-          ? {
-              children: (
-                <PageHeader
-                  showTour={isGuidedSetupTourVisible}
-                  onTourDismiss={hideGuidedSetupTour}
-                  handleGuidedSetupClick={handleGuidedSetupClick}
-                  onTimeRangeRefresh={onTimeRangeRefresh}
-                />
-              ),
-            }
-          : undefined
-      }
-    >
-      {hasData && (
-        <>
-          <ObservabilityHeaderMenu />
-          <ObservabilityStatusProgress
-            onViewDetailsClick={() => setIsFlyoutVisible(true)}
-            onDismissClick={() => setGuidedSetupTourVisible(true)}
+      isPageDataLoaded={isAllRequestsComplete}
+      pageHeader={{
+        children: (
+          <PageHeader
+            showTour={isGuidedSetupTourVisible}
+            onTourDismiss={hideGuidedSetupTour}
+            handleGuidedSetupClick={handleGuidedSetupClick}
+            onTimeRangeRefresh={onTimeRangeRefresh}
           />
-          <EuiFlexGroup direction="column" gutterSize="s">
-            <EuiFlexItem>
-              <SectionContainer
-                title={i18n.translate('xpack.observability.overview.alerts.title', {
-                  defaultMessage: 'Alerts',
-                })}
-                hasError={false}
-                appLink={{
-                  href: alertsLink,
-                  label: i18n.translate('xpack.observability.overview.alerts.appLink', {
-                    defaultMessage: 'Show alerts',
-                  }),
-                }}
+        ),
+      }}
+    >
+      <>
+        <ObservabilityHeaderMenu />
+        <ObservabilityStatusProgress
+          onViewDetailsClick={() => setIsFlyoutVisible(true)}
+          onDismissClick={() => setGuidedSetupTourVisible(true)}
+        />
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexItem>
+            <SectionContainer
+              initialIsOpen={hasAnyData}
+              title={i18n.translate('xpack.observability.overview.alerts.title', {
+                defaultMessage: 'Alerts',
+              })}
+              hasError={false}
+              appLink={{
+                href: alertsLink,
+                label: i18n.translate('xpack.observability.overview.alerts.appLink', {
+                  defaultMessage: 'Show alerts',
+                }),
+              }}
+            >
+              <CasesContext
+                owner={[observabilityFeatureId]}
+                permissions={userCasesPermissions}
+                features={{ alerts: { sync: false } }}
               >
-                <CasesContext
-                  owner={[observabilityFeatureId]}
-                  permissions={casesPermissions}
-                  features={{ alerts: { sync: false } }}
-                >
-                  <AlertsTableTGrid
-                    setRefetch={setRefetch}
-                    rangeFrom={relativeStart}
-                    rangeTo={relativeEnd}
-                    indexNames={indexNames}
-                    itemsPerPage={ALERTS_PER_PAGE}
-                    stateStorageKey={ALERT_TABLE_STATE_STORAGE_KEY}
-                    storage={new Storage(window.localStorage)}
-                  />
-                </CasesContext>
-              </SectionContainer>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              {/* Data sections */}
-              {hasAnyData && <DataSections bucketSize={bucketSize} />}
-              <EmptySections />
-            </EuiFlexItem>
-            <EuiSpacer size="s" />
-          </EuiFlexGroup>
-          <EuiHorizontalRule />
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              {/* Resources / What's New sections */}
-              <EuiFlexGroup>
-                <EuiFlexItem grow={4}>
-                  {!!newsFeed?.items?.length && <NewsFeed items={newsFeed.items.slice(0, 3)} />}
-                </EuiFlexItem>
-                <EuiFlexItem grow={2}>
-                  <Resources />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      )}
+                <AlertsTableTGrid
+                  setRefetch={setRefetch}
+                  rangeFrom={relativeStart}
+                  rangeTo={relativeEnd}
+                  indexNames={indexNames}
+                  itemsPerPage={ALERTS_PER_PAGE}
+                  stateStorageKey={ALERT_TABLE_STATE_STORAGE_KEY}
+                  storage={new Storage(window.localStorage)}
+                />
+              </CasesContext>
+            </SectionContainer>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            {/* Data sections */}
+            {<DataSections bucketSize={bucketSize} />}
+            <EmptySections />
+          </EuiFlexItem>
+          <EuiSpacer size="s" />
+        </EuiFlexGroup>
+        <EuiHorizontalRule />
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            {/* Resources / What's New sections */}
+            <EuiFlexGroup>
+              <EuiFlexItem grow={4}>
+                {!!newsFeed?.items?.length && <NewsFeed items={newsFeed.items.slice(0, 3)} />}
+              </EuiFlexItem>
+              <EuiFlexItem grow={2}>
+                <Resources />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
       {isFlyoutVisible && (
         <EuiFlyout
           size="s"
@@ -287,6 +266,9 @@ function PageHeader({
   onTimeRangeRefresh,
 }: PageHeaderProps) {
   const { relativeStart, relativeEnd, refreshInterval, refreshPaused } = useDatePickerContext();
+  const { endTour: endObservabilityTour, isTourVisible: isObservabilityTourVisible } =
+    useObservabilityTourContext();
+
   const buttonRef = useRef();
 
   return (
@@ -309,10 +291,17 @@ function PageHeader({
         <EuiButton
           // @ts-expect-error the EUI verson that kibana uses right now doesn't have the correct types
           buttonRef={buttonRef}
+          data-test-subj="guidedSetupButton"
           id="guidedSetupButton"
           color="text"
           iconType="wrench"
-          onClick={handleGuidedSetupClick}
+          onClick={() => {
+            // End the Observability tour if it's visible and the user clicks the guided setup button
+            if (isObservabilityTourVisible) {
+              endObservabilityTour();
+            }
+            handleGuidedSetupClick();
+          }}
         >
           <FormattedMessage
             id="xpack.observability.overview.guidedSetupButton"

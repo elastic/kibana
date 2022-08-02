@@ -13,7 +13,12 @@ import { renderHook } from '@testing-library/react-hooks';
 import userEvent from '@testing-library/user-event';
 
 import '../../common/mock/match_media';
-import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
+import {
+  AppMockRenderer,
+  createAppMockRenderer,
+  noDeleteCasesPermissions,
+  TestProviders,
+} from '../../common/mock';
 import { casesStatus, useGetCasesMockState, mockCase, connectorsMock } from '../../containers/mock';
 
 import { StatusAll } from '../../../common/ui/types';
@@ -492,6 +497,20 @@ describe('AllCasesListGeneric', () => {
   it('should not render table utility bar when isSelectorView=true', async () => {
     const wrapper = mount(
       <TestProviders>
+        <AllCasesList isSelectorView={true} />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="case-table-selected-case-count"]').exists()).toBe(
+        false
+      );
+      expect(wrapper.find('[data-test-subj="case-table-bulk-actions"]').exists()).toBe(false);
+    });
+  });
+
+  it('should not render table utility bar when the user does not have permissions to delete', async () => {
+    const wrapper = mount(
+      <TestProviders permissions={noDeleteCasesPermissions()}>
         <AllCasesList isSelectorView={true} />
       </TestProviders>
     );

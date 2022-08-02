@@ -7,26 +7,39 @@
 
 import React from 'react';
 
-import { useParams } from 'react-router-dom';
-
-import { useValues } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import {
   EuiText,
   EuiFlexGroup,
-  EuiButton,
   EuiFlexItem,
   EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiSteps,
+  EuiCodeBlock,
+  EuiHorizontalRule,
+  EuiCallOut,
+  EuiButton,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import { FormattedMessage } from '@kbn/i18n-react';
+
+import { ConnectorStatus } from '../../../../../../common/types/connectors';
+import { generateEncodedPath } from '../../../../shared/encode_path_params';
+import { HttpLogic } from '../../../../shared/http';
+import { EuiButtonTo } from '../../../../shared/react_router_helpers';
+
 import { GenerateConnectorApiKeyApiLogic } from '../../../api/connector_package/generate_connector_api_key_api_logic';
 import { FetchIndexApiLogic } from '../../../api/index/fetch_index_api_logic';
-import { ApiKey } from '../../api_key/api_key';
+import { SEARCH_INDEX_TAB_PATH } from '../../../routes';
+import { isConnectorIndex } from '../../../utils/indices';
+
+import { IndexNameLogic } from '../index_name_logic';
+
+import { SearchIndexTabId } from '../search_index';
 
 import { ApiKeyConfig } from './api_key_configuration';
 import { ConnectorConfigurationConfig } from './connector_configuration_config';
@@ -34,30 +47,24 @@ import { ConnectorConfigurationConfig } from './connector_configuration_config';
 export const ConnectorConfiguration: React.FC = () => {
   const { data: apiKeyData } = useValues(GenerateConnectorApiKeyApiLogic);
   const { data: indexData } = useValues(FetchIndexApiLogic);
-  const { indexName } = useParams<{ indexName: string }>();
-  const indexId = indexData?.connector?.id ?? '';
+  const { indexName } = useValues(IndexNameLogic);
+  const { makeRequest: fetchIndex } = useActions(FetchIndexApiLogic);
+  const { http } = useValues(HttpLogic);
+  if (!isConnectorIndex(indexData)) {
+    return <></>;
+  }
 
-  const hasApiKey = !!(indexData?.connector?.api_key_id ?? apiKeyData);
+  const hasApiKey = !!(indexData.connector.api_key_id ?? apiKeyData);
 
-  const ConnectorConfig: React.FC = () =>
-    indexData?.connector ? (
-      <ConnectorConfigurationConfig
-        configuration={indexData.connector.configuration}
-        indexId={indexId}
-        indexName={indexName}
-      />
-    ) : (
-      <></>
-    );
-
-  const ConnectorPackage: React.FC = () => (
+  const ScheduleStep: React.FC = () => (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
         <EuiText size="s">
           {i18n.translate(
-            'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.description',
+            'xpack.enterpriseSearch.content.indices.configurationConnector.scheduleSync.description',
             {
-              defaultMessage: 'Used when configuring your connector package.',
+              defaultMessage:
+                'Once your connectors are configured to your liking, don’t forget to set a recurring sync schedule to make sure your documents are indexed and relevant. You can also trigger a one-time sync without enabling a sync schedule.',
             }
           )}
         </EuiText>
@@ -65,29 +72,150 @@ export const ConnectorConfiguration: React.FC = () => {
       <EuiFlexItem>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButton href="https://github.com/elastic/connectors" target="_blank">
+            <EuiButtonTo
+              to={`${generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
+                indexName,
+                tabId: SearchIndexTabId.SCHEDULING,
+              })}`}
+            >
               {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.button.label',
+                'xpack.enterpriseSearch.content.indices.configurationConnector.steps.schedule.button.label',
                 {
-                  defaultMessage: 'Clone and deploy connector package',
+                  defaultMessage: 'Set schedule and sync',
                 }
               )}
-            </EuiButton>
+            </EuiButtonTo>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem>
-        <ApiKey
-          apiKey={indexId}
-          label={i18n.translate(
-            'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.apiKey.label',
+    </EuiFlexGroup>
+  );
+
+  const ConnectorPackage: React.FC = () => (
+    <>
+      <EuiText size="s">
+        {i18n.translate(
+          'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.description.firstParagraph',
+          {
+            defaultMessage:
+              'The connectors repository contains several connector client examples to help you utilize our framework for accelerated development against custom data sources.',
+          }
+        )}
+      </EuiText>
+      <EuiLink href="https://github.com/elastic/connectors" target="_blank">
+        {i18n.translate(
+          'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.button.label',
+          {
+            defaultMessage: 'Explore the connectors repository',
+          }
+        )}
+      </EuiLink>
+      <EuiSpacer />
+      <EuiText size="s">
+        <FormattedMessage
+          id="xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.description.secondParagraph"
+          defaultMessage="The connectors repository contains several {link} to help you utilize our framework for accelerated development against custom data sources."
+          values={{
+            link: (
+              <EuiLink
+                href="https://github.com/elastic/connectors-ruby/tree/main/lib/connectors"
+                target="_blank"
+                external
+              >
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.clientExamplesLink',
+                  { defaultMessage: 'connector client examples' }
+                )}
+              </EuiLink>
+            ),
+          }}
+        />
+      </EuiText>
+      <EuiSpacer />
+      <EuiText size="s">
+        <FormattedMessage
+          id="xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.description.thirdParagraph"
+          defaultMessage="In this step, you will need to clone or fork the repository, and copy the generated API key and connector ID to the associated {link}. The connector ID will identify this connector to Enterprise Search."
+          values={{
+            link: (
+              <EuiLink
+                href="https://github.com/elastic/connectors-ruby/tree/main/config"
+                target="_blank"
+                external
+              >
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.configurationFileLink',
+                  { defaultMessage: 'configuration file' }
+                )}
+              </EuiLink>
+            ),
+          }}
+        />
+      </EuiText>
+      <EuiSpacer />
+      <EuiCodeBlock fontSize="m" paddingSize="m" color="dark" isCopyable>
+        {`${
+          apiKeyData?.encoded
+            ? `elasticsearch:
+  api_key: "${apiKeyData?.encoded}"
+`
+            : ''
+        }connector_id: "${indexData.connector.id}"
+`}
+      </EuiCodeBlock>
+      <EuiSpacer />
+      <EuiText size="s">
+        {i18n.translate(
+          'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.connectorDeployedText',
+          {
+            defaultMessage:
+              'Once you’ve configured the connector, deploy the connector to your self managed infrastructure.',
+          }
+        )}
+      </EuiText>
+      <EuiHorizontalRule />
+      {!indexData.connector.status || indexData.connector.status === ConnectorStatus.CREATED ? (
+        <EuiCallOut
+          title={i18n.translate(
+            'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.waitingForConnectorTitle',
             {
-              defaultMessage: 'Connector package ID',
+              defaultMessage: 'Waiting for your connector',
+            }
+          )}
+          iconType="iInCircle"
+        >
+          {i18n.translate(
+            'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.waitingForConnectorText',
+            {
+              defaultMessage:
+                'Your connector has not connected to Enterprise Search. Troubleshoot your configuration and refresh the page.',
+            }
+          )}
+          <EuiSpacer size="s" />
+          <EuiButton iconType="refresh" onClick={() => fetchIndex({ indexName })}>
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.waitingForConnector.button.label',
+              {
+                defaultMessage: 'Recheck now',
+              }
+            )}
+          </EuiButton>
+        </EuiCallOut>
+      ) : (
+        <EuiCallOut
+          iconType="check"
+          color="success"
+          title={i18n.translate(
+            'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.connectorConnected',
+            {
+              defaultMessage:
+                'Your connector {name} has connected to Enterprise Search successfully.',
+              values: { name: indexData.connector.name },
             }
           )}
         />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      )}
+    </>
   );
 
   return (
@@ -102,7 +230,7 @@ export const ConnectorConfiguration: React.FC = () => {
                   children: (
                     <ApiKeyConfig
                       indexName={indexName}
-                      hasApiKey={!!indexData?.connector?.api_key_id}
+                      hasApiKey={!!indexData.connector.api_key_id}
                     />
                   ),
                   status: hasApiKey ? 'complete' : 'incomplete',
@@ -116,22 +244,40 @@ export const ConnectorConfiguration: React.FC = () => {
                 },
                 {
                   children: <ConnectorPackage />,
-                  status: 'incomplete',
+                  status:
+                    !indexData.connector.status ||
+                    indexData.connector.status === ConnectorStatus.CREATED
+                      ? 'incomplete'
+                      : 'complete',
                   title: i18n.translate(
                     'xpack.enterpriseSearch.content.indices.configurationConnector.steps.deployConnector.title',
                     {
-                      defaultMessage: 'Clone and deploy the repo',
+                      defaultMessage: 'Deploy a connector',
                     }
                   ),
                   titleSize: 'xs',
                 },
                 {
-                  children: <ConnectorConfig />,
-                  status: 'incomplete',
+                  children: <ConnectorConfigurationConfig />,
+                  status:
+                    indexData.connector.status === ConnectorStatus.CONNECTED
+                      ? 'complete'
+                      : 'incomplete',
                   title: i18n.translate(
-                    'xpack.enterpriseSearch.content.indices.configurationConnector.steps.connect.title',
+                    'xpack.enterpriseSearch.content.indices.configurationConnector.steps.enhance.title',
                     {
-                      defaultMessage: 'Connect your data source',
+                      defaultMessage: 'Enhance your connector client',
+                    }
+                  ),
+                  titleSize: 'xs',
+                },
+                {
+                  children: <ScheduleStep />,
+                  status: indexData.connector.scheduling.enabled ? 'complete' : 'incomplete',
+                  title: i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.configurationConnector.steps.schedule.title',
+                    {
+                      defaultMessage: 'Set a recurring sync schedule',
                     }
                   ),
                   titleSize: 'xs',
@@ -169,24 +315,63 @@ export const ConnectorConfiguration: React.FC = () => {
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiLink
-                      href="https://github.com/elastic/connectors/blob/main/README.md"
-                      target="_blank"
-                    >
+                    <EuiLink href={http.basePath.prepend('/app/management/security/api_keys')}>
                       {i18n.translate(
-                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.readme.label',
+                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.manageKeys.label',
                         {
-                          defaultMessage: 'Repository readme',
+                          defaultMessage: 'Manage keys',
                         }
                       )}
                     </EuiLink>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiLink href="TODO TODO TODO DOCLINK" target="_blank">
+                    <EuiLink
+                      href="https://github.com/elastic/connectors-ruby#readme"
+                      target="_blank"
+                    >
                       {i18n.translate(
-                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.documentation.label',
+                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.readme.label',
                         {
-                          defaultMessage: 'Custom connector API documentation',
+                          defaultMessage: 'Connector readme',
+                        }
+                      )}
+                    </EuiLink>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiLink
+                      href="https://discuss.elastic.co/c/enterprise-search/84"
+                      target="_blank"
+                    >
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.getHelp.label',
+                        {
+                          defaultMessage: 'Get help',
+                        }
+                      )}
+                    </EuiLink>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiLink
+                      href="https://github.com/elastic/connectors-ruby/issues"
+                      target="_blank"
+                    >
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.issue.label',
+                        {
+                          defaultMessage: 'File an issue',
+                        }
+                      )}
+                    </EuiLink>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiLink
+                      href="https://docs.elastic.co/search-ui/tutorials/workplace-search"
+                      target="_blank"
+                    >
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.searchUI.label',
+                        {
+                          defaultMessage: 'Use Search UI for Workplace Search',
                         }
                       )}
                     </EuiLink>

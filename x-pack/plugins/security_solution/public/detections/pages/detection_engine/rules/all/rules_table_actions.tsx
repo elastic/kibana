@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  DefaultItemAction,
-  EuiBasicTableColumn,
-  EuiTableActionsColumnType,
-} from '@elastic/eui';
+import type { DefaultItemAction } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import type { NavigateToAppOptions } from '@kbn/core/public';
@@ -18,14 +14,12 @@ import type { UseAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { canEditRuleWithActions } from '../../../../../common/utils/privileges';
 import type { Rule } from '../../../../containers/detection_engine/rules';
 import * as i18n from '../translations';
-import { executeRulesBulkAction, goToRuleEditPage } from './actions';
+import { executeRulesBulkAction, goToRuleEditPage, bulkExportRules } from './actions';
 import type { RulesTableActions } from './rules_table/rules_table_context';
 import type { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
 import { SINGLE_RULE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
 
 type NavigateToApp = (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
-
-export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
 export const getRulesTableActions = ({
   toasts,
@@ -97,7 +91,7 @@ export const getRulesTableActions = ({
     name: i18n.EXPORT_RULE,
     onClick: async (rule: Rule) => {
       startTransaction({ name: SINGLE_RULE_ACTIONS.EXPORT });
-      await executeRulesBulkAction({
+      await bulkExportRules({
         action: BulkAction.export,
         setLoadingRules,
         visibleRuleIds: [rule.id],

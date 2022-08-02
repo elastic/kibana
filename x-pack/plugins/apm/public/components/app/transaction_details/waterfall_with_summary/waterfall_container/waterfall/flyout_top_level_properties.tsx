@@ -54,7 +54,17 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
       val: (
         <ServiceLink
           agentName={transaction.agent.name}
-          query={{ ...query, serviceGroup, environment: nextEnvironment }}
+          query={{
+            kuery: query.kuery,
+            latencyAggregationType,
+            offset: query.offset,
+            rangeFrom: query.rangeFrom,
+            rangeTo: query.rangeTo,
+            comparisonEnabled: query.comparisonEnabled,
+            transactionType: transaction.transaction.type,
+            serviceGroup,
+            environment: nextEnvironment,
+          }}
           serviceName={transaction.service.name}
         />
       ),

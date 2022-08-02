@@ -19,7 +19,7 @@ import type {
 import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '@kbn/lens-plugin/common/constants';
 import type { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
 import { FieldVisConfig } from '../../stats_table/types';
-import { JOB_FIELD_TYPES } from '../../../../../../common/constants';
+import { SUPPORTED_FIELD_TYPES } from '../../../../../../common/constants';
 
 interface ColumnsAndLayer {
   columns: Record<string, GenericIndexPatternColumn>;
@@ -200,19 +200,20 @@ export function getBooleanSettings(item: FieldVisConfig) {
 export function getCompatibleLensDataType(type: FieldVisConfig['type']): string | undefined {
   let lensType: string | undefined;
   switch (type) {
-    case JOB_FIELD_TYPES.KEYWORD:
+    case SUPPORTED_FIELD_TYPES.KEYWORD:
+    case SUPPORTED_FIELD_TYPES.VERSION:
       lensType = 'string';
       break;
-    case JOB_FIELD_TYPES.DATE:
+    case SUPPORTED_FIELD_TYPES.DATE:
       lensType = 'date';
       break;
-    case JOB_FIELD_TYPES.NUMBER:
+    case SUPPORTED_FIELD_TYPES.NUMBER:
       lensType = 'number';
       break;
-    case JOB_FIELD_TYPES.IP:
+    case SUPPORTED_FIELD_TYPES.IP:
       lensType = 'ip';
       break;
-    case JOB_FIELD_TYPES.BOOLEAN:
+    case SUPPORTED_FIELD_TYPES.BOOLEAN:
       lensType = 'string';
       break;
     default:
@@ -228,16 +229,20 @@ function getColumnsAndLayer(
 ): ColumnsAndLayer | undefined {
   if (item.fieldName === undefined) return;
 
-  if (fieldType === JOB_FIELD_TYPES.DATE) {
+  if (fieldType === SUPPORTED_FIELD_TYPES.DATE) {
     return getDateSettings(item);
   }
-  if (fieldType === JOB_FIELD_TYPES.NUMBER) {
+  if (fieldType === SUPPORTED_FIELD_TYPES.NUMBER) {
     return getNumberSettings(item, defaultDataView);
   }
-  if (fieldType === JOB_FIELD_TYPES.IP || fieldType === JOB_FIELD_TYPES.KEYWORD) {
+  if (
+    fieldType === SUPPORTED_FIELD_TYPES.IP ||
+    fieldType === SUPPORTED_FIELD_TYPES.KEYWORD ||
+    fieldType === SUPPORTED_FIELD_TYPES.VERSION
+  ) {
     return getKeywordSettings(item);
   }
-  if (fieldType === JOB_FIELD_TYPES.BOOLEAN) {
+  if (fieldType === SUPPORTED_FIELD_TYPES.BOOLEAN) {
     return getBooleanSettings(item);
   }
 }

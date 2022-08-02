@@ -6,6 +6,7 @@
  */
 
 import { combineReducers } from 'redux';
+import { agentPoliciesReducer } from '../private_locations';
 import { monitorReducer } from './monitor';
 import { uiReducer } from './ui';
 import { monitorStatusReducer } from './monitor_status';
@@ -44,4 +45,5 @@ export const rootReducer = combineReducers({
   networkEvents: networkEventsReducer,
   synthetics: syntheticsReducer,
   testNowRuns: testNowRunsReducer,
+  agentPolicies: agentPoliciesReducer,
 });

@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import React, { Component, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiTabbedContent, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiTabbedContent, EuiLoadingSpinner } from '@elastic/eui';
 
 import { extractJobDetails } from './extract_job_details';
 import { JsonPane } from './json_tab';
@@ -84,27 +84,20 @@ export class JobDetailsUI extends Component {
       } = extractJobDetails(job, basePath, refreshJobList);
 
       datafeed.titleAction = (
-        <EuiToolTip
-          content={
-            <FormattedMessage
-              id="xpack.ml.jobDetails.datafeedChartTooltipText"
-              defaultMessage="Datafeed chart"
-            />
+        <EuiButtonEmpty
+          onClick={() =>
+            this.setState({
+              datafeedChartFlyoutVisible: true,
+            })
           }
+          iconType="visAreaStacked"
+          size="s"
         >
-          <EuiButtonIcon
-            size="xs"
-            aria-label={i18n.translate('xpack.ml.jobDetails.datafeedChartAriaLabel', {
-              defaultMessage: 'Datafeed chart',
-            })}
-            iconType="visAreaStacked"
-            onClick={() =>
-              this.setState({
-                datafeedChartFlyoutVisible: true,
-              })
-            }
+          <FormattedMessage
+            id="xpack.ml.jobDetails.tabs.datafeed.viewCountsButtonText"
+            defaultMessage="View datafeed counts"
           />
-        </EuiToolTip>
+        </EuiButtonEmpty>
       );
 
       const tabs = [
@@ -248,7 +241,7 @@ export class JobDetailsUI extends Component {
         }),
         content: (
           <Fragment>
-            <AnnotationsTable jobs={[job]} drillDown={true} />
+            <AnnotationsTable jobs={[job]} refreshJobList={refreshJobList} />
             <AnnotationFlyout />
           </Fragment>
         ),

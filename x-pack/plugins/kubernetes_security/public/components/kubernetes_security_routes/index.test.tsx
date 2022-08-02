@@ -25,6 +25,10 @@ jest.mock('../count_widget', () => ({
   CountWidget: () => <div>{'Mock count widget'}</div>,
 }));
 
+jest.mock('../container_name_widget', () => ({
+  ContainerNameWidget: () => <div>{'Mock Container Name widget'}</div>,
+}));
+
 const renderWithRouter = (
   initialEntries: MemoryRouterProps['initialEntries'] = ['/kubernetes']
 ) => {

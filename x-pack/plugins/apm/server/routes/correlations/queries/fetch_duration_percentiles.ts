@@ -7,13 +7,13 @@
 
 import { SIGNIFICANT_VALUE_DIGITS } from '../../../../common/correlations/constants';
 import { Setup } from '../../../lib/helpers/setup_request';
-import { ProcessorEvent } from '../../../../common/processor_event';
+import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 import { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
-import { getDurationField } from '../utils';
+import { getDurationField, getEventType } from '../utils';
 
 export const fetchDurationPercentiles = async ({
-  eventType,
+  chartType,
   setup,
   start,
   end,
@@ -21,16 +21,25 @@ export const fetchDurationPercentiles = async ({
   kuery,
   query,
   percents,
+  searchMetrics,
 }: CommonCorrelationsQueryParams & {
-  eventType: ProcessorEvent;
+  chartType: LatencyDistributionChartType;
   setup: Setup;
   percents?: number[];
+  searchMetrics: boolean;
 }): Promise<{
   totalDocs: number;
   percentiles: Record<string, number>;
 }> => {
+  const durationField = getDurationField(chartType, searchMetrics);
+
+  // when using metrics data, ensure we filter by docs with the appropriate duration field
+  const filteredQuery = searchMetrics
+    ? { bool: { filter: [query, { exists: { field: durationField } }] } }
+    : query;
+
   const params = {
-    apm: { events: [eventType] },
+    apm: { events: [getEventType(chartType, searchMetrics)] },
     body: {
       track_total_hits: true,
       query: getCommonCorrelationsQuery({
@@ -38,7 +47,7 @@ export const fetchDurationPercentiles = async ({
         end,
         environment,
         kuery,
-        query,
+        query: filteredQuery,
       }),
       size: 0,
       aggs: {
@@ -47,7 +56,7 @@ export const fetchDurationPercentiles = async ({
             hdr: {
               number_of_significant_value_digits: SIGNIFICANT_VALUE_DIGITS,
             },
-            field: getDurationField(eventType),
+            field: getDurationField(chartType, searchMetrics),
             ...(Array.isArray(percents) ? { percents } : {}),
           },
         },

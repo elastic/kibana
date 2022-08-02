@@ -21,6 +21,7 @@ describe('DiscoverFieldSearch', () => {
     value: 'test',
     types: ['any', 'string', '_source'],
     presentFieldTypes: ['string', 'date', 'boolean', 'number'],
+    isPlainRecord: false,
   };
 
   function mountComponent(props?: Props) {

@@ -7,12 +7,16 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { Crawler } from '../../types/crawler';
+import { ElasticsearchIndexWithIngestion } from '../../../common/types/indices';
 import { fetchConnectorByIndexName } from '../connectors/fetch_connectors';
+import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
 
 import { mapIndexStats } from './fetch_indices';
 
-export const fetchIndex = async (client: IScopedClusterClient, index: string) => {
+export const fetchIndex = async (
+  client: IScopedClusterClient,
+  index: string
+): Promise<ElasticsearchIndexWithIngestion> => {
   const indexDataResult = await client.asCurrentUser.indices.get({ index });
   const indexData = indexDataResult[index];
   const { indices } = await client.asCurrentUser.indices.stats({ index });
@@ -25,23 +29,15 @@ export const fetchIndex = async (client: IScopedClusterClient, index: string) =>
   const connector = await fetchConnectorByIndexName(client, index);
   if (connector) {
     return {
+      ...indexResult,
       connector,
-      index: indexResult,
     };
   }
 
-  const crawlerResult = await client.asCurrentUser.search<Crawler>({
-    index: '.ent-search-actastic-crawler2_configurations',
-    query: { term: { index_name: index } },
-  });
-  const crawler = crawlerResult.hits.hits[0]?._source;
-
+  const crawler = await fetchCrawlerByIndexName(client, index);
   if (crawler) {
-    return {
-      crawler,
-      index: indexResult,
-    };
+    return { ...indexResult, crawler };
   }
 
-  return { index: indexResult };
+  return indexResult;
 };

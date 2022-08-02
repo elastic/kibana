@@ -20,8 +20,8 @@ export const AGGREGATE_MAX_BUCKETS = 2000;
 // react-query caching keys
 export const QUERY_KEY_PERCENT_WIDGET = 'kubernetesSecurityPercentWidget';
 export const QUERY_KEY_COUNT_WIDGET = 'kubernetesSecurityCountWidget';
-
-export const DEFAULT_QUERY = '{"bool":{"must":[],"filter":[],"should":[],"must_not":[]}}';
+export const QUERY_KEY_CONTAINER_NAME_WIDGET = 'kubernetesSecurityContainerNameWidget';
+export const QUERY_KEY_PROCESS_EVENTS = 'kubernetesSecurityProcessEvents';
 
 // ECS fields
 export const ENTRY_LEADER_INTERACTIVE = 'process.entry_leader.interactive';
@@ -39,3 +39,19 @@ export const COUNT_WIDGET_KEY_NAMESPACE = 'CountNamespaceWidgets';
 export const COUNT_WIDGET_KEY_NODES = 'CountNodesWidgets';
 export const COUNT_WIDGET_KEY_PODS = 'CountPodsWidgets';
 export const COUNT_WIDGET_KEY_CONTAINER_IMAGES = 'CountContainerImagesWidgets';
+
+export const DEFAULT_QUERY = '{"bool":{"must":[],"filter":[],"should":[],"must_not":[]}}';
+export const DEFAULT_FILTER_QUERY =
+  '{"bool":{"must":[],"filter":[{"bool": {"should": [{"exists": {"field": "process.entry_leader.entity_id"}}]}}],"should":[],"must_not":[]}}';
+export const DEFAULT_FILTER = {
+  bool: {
+    should: [
+      {
+        exists: {
+          field: ENTRY_LEADER_ENTITY_ID,
+        },
+      },
+    ],
+    minimum_should_match: 1,
+  },
+};

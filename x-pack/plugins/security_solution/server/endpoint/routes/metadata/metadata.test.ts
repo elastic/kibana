@@ -57,8 +57,7 @@ import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import type {
   ClusterClientMock,
   ScopedClusterClientMock,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '@kbn/core/server/elasticsearch/client/mocks';
+} from '@kbn/core-elasticsearch-client-server-mocks';
 import { EndpointHostNotFoundError } from '../../services/metadata';
 import { FleetAgentGenerator } from '../../../../common/endpoint/data_generators/fleet_agent_generator';
 import { createMockAgentClient, createMockPackageService } from '@kbn/fleet-plugin/server/mocks';

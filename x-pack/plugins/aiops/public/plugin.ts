@@ -7,6 +7,7 @@
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
@@ -17,12 +18,13 @@ export interface AiOpsStartDependencies {
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
   fieldFormats: FieldFormatsStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export class AiopsPlugin implements Plugin<AiopsPluginSetup, AiopsPluginStart> {
   public setup(core: CoreSetup) {}
-  public start(core: CoreStart) {
-    setStartServices(core);
+  public start(core: CoreStart, plugins: AiOpsStartDependencies) {
+    setStartServices(core, plugins);
   }
   public stop() {}
 }

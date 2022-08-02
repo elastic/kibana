@@ -21,18 +21,18 @@ export const useStyles = () => {
       borderRadius: border.radius.medium,
       overflow: 'auto',
       position: 'relative',
+      height: '100%',
     };
 
     const title: CSSObject = {
       marginBottom: size.m,
       fontSize: size.m,
       fontWeight: font.weight.bold,
+      whiteSpace: 'nowrap',
     };
 
     const dataInfo: CSSObject = {
       marginBottom: size.xs,
-      display: 'flex',
-      alignItems: 'center',
       height: '18px',
       fontSize: size.l,
       fontWeight: font.weight.bold,

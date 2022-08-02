@@ -8,7 +8,14 @@
 import React, { useCallback } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiBetaBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -36,14 +43,16 @@ import { AggregateResult } from '../../../common/types/aggregate';
 import { useLastUpdated } from '../../hooks';
 import { useStyles } from './styles';
 import { TreeViewContainer } from '../tree_view_container';
-import { WidgetsToggle } from '../widgets_toggle';
+import { ChartsToggle } from '../charts_toggle';
 import {
+  BETA,
   COUNT_WIDGET_CLUSTERS,
   COUNT_WIDGET_NAMESPACE,
   COUNT_WIDGET_NODES,
   COUNT_WIDGET_PODS,
   COUNT_WIDGET_CONTAINER_IMAGES,
 } from '../../../common/translations';
+import { ContainerNameWidget } from '../container_name_widget';
 
 const KubernetesSecurityRoutesComponent = ({
   filter,
@@ -51,7 +60,7 @@ const KubernetesSecurityRoutesComponent = ({
   globalFilter,
   renderSessionsView,
 }: KubernetesSecurityDeps) => {
-  const [shouldHideWidgets, setShouldHideWidgets] = useLocalStorage(
+  const [shouldHideCharts, setShouldHideCharts] = useLocalStorage(
     LOCAL_STORAGE_HIDE_WIDGETS_KEY,
     false
   );
@@ -59,8 +68,8 @@ const KubernetesSecurityRoutesComponent = ({
   const lastUpdated = useLastUpdated(globalFilter);
 
   const onReduceInteractiveAggs = useCallback(
-    (result: AggregateResult[]): Record<string, number> =>
-      result.reduce((groupedByKeyValue, aggregate) => {
+    (result: AggregateResult): Record<string, number> =>
+      result.buckets.reduce((groupedByKeyValue, aggregate) => {
         groupedByKeyValue[aggregate.key_as_string || (aggregate.key.toString() as string)] =
           aggregate.count_by_aggs.value;
         return groupedByKeyValue;
@@ -69,9 +78,9 @@ const KubernetesSecurityRoutesComponent = ({
   );
 
   const onReduceRootAggs = useCallback(
-    (result: AggregateResult[]): Record<string, number> =>
-      result.reduce((groupedByKeyValue, aggregate) => {
-        if (aggregate.key === '0') {
+    (result: AggregateResult): Record<string, number> =>
+      result.buckets.reduce((groupedByKeyValue, aggregate) => {
+        if (aggregate.key.toString() === '0') {
           groupedByKeyValue[aggregate.key] = aggregate.count_by_aggs.value;
         } else {
           groupedByKeyValue.nonRoot =
@@ -82,9 +91,9 @@ const KubernetesSecurityRoutesComponent = ({
     []
   );
 
-  const handleToggleHideWidgets = useCallback(() => {
-    setShouldHideWidgets(!shouldHideWidgets);
-  }, [setShouldHideWidgets, shouldHideWidgets]);
+  const handleToggleHideCharts = useCallback(() => {
+    setShouldHideCharts(!shouldHideCharts);
+  }, [setShouldHideCharts, shouldHideCharts]);
 
   return (
     <Switch>
@@ -93,190 +102,190 @@ const KubernetesSecurityRoutesComponent = ({
         <EuiFlexGroup gutterSize="none" css={styles.titleSection}>
           <EuiFlexItem>
             <EuiTitle size="l">
-              <h1>{KUBERNETES_TITLE}</h1>
+              <h1 css={styles.titleText}>
+                {KUBERNETES_TITLE}
+                <EuiBetaBadge label={BETA} size="s" css={styles.betaBadge} />
+              </h1>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false} css={styles.titleActions}>
             <div css={styles.updatedAt}>{lastUpdated}</div>
-            <WidgetsToggle
-              shouldHideWidgets={shouldHideWidgets}
-              handleToggleHideWidgets={handleToggleHideWidgets}
+            <ChartsToggle
+              shouldHideCharts={shouldHideCharts}
+              handleToggleHideCharts={handleToggleHideCharts}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-        {!shouldHideWidgets && (
+        {!shouldHideCharts && (
           <>
-            <EuiFlexGroup gutterSize="l">
-              <EuiFlexItem>
-                <EuiFlexGroup direction="column">
+            <EuiFlexGroup css={styles.widgetsGroup}>
+              <EuiFlexItem css={styles.leftWidgetsGroup}>
+                <EuiFlexGroup css={styles.countWidgetsGroup}>
                   <EuiFlexItem>
-                    <EuiFlexGroup gutterSize="l">
-                      <EuiFlexItem>
-                        <CountWidget
-                          title={COUNT_WIDGET_CLUSTERS}
-                          indexPattern={indexPattern}
-                          globalFilter={globalFilter}
-                          widgetKey={COUNT_WIDGET_KEY_CLUSTERS}
-                          groupedBy={ORCHESTRATOR_CLUSTER_ID}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <CountWidget
-                          title={COUNT_WIDGET_NAMESPACE}
-                          indexPattern={indexPattern}
-                          globalFilter={globalFilter}
-                          widgetKey={COUNT_WIDGET_KEY_NAMESPACE}
-                          groupedBy={ORCHESTRATOR_NAMESPACE}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <CountWidget
-                          title={COUNT_WIDGET_NODES}
-                          indexPattern={indexPattern}
-                          globalFilter={globalFilter}
-                          widgetKey={COUNT_WIDGET_KEY_NODES}
-                          groupedBy={CLOUD_INSTANCE_NAME}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <CountWidget
-                          title={COUNT_WIDGET_PODS}
-                          indexPattern={indexPattern}
-                          globalFilter={globalFilter}
-                          widgetKey={COUNT_WIDGET_KEY_NODES}
-                          groupedBy={ORCHESTRATOR_RESOURCE_ID}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <CountWidget
-                          title={COUNT_WIDGET_CONTAINER_IMAGES}
-                          indexPattern={indexPattern}
-                          globalFilter={globalFilter}
-                          widgetKey={COUNT_WIDGET_KEY_CONTAINER_IMAGES}
-                          groupedBy={CONTAINER_IMAGE_NAME}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
+                    <CountWidget
+                      title={COUNT_WIDGET_CLUSTERS}
+                      indexPattern={indexPattern}
+                      globalFilter={globalFilter}
+                      widgetKey={COUNT_WIDGET_KEY_CLUSTERS}
+                      groupedBy={ORCHESTRATOR_CLUSTER_ID}
+                    />
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiFlexGroup css={styles.percentageWidgets}>
-                      <EuiFlexItem>
-                        <PercentWidget
-                          title={
-                            <>
-                              <EuiText size="xs" css={styles.percentageChartTitle}>
-                                <FormattedMessage
-                                  id="xpack.kubernetesSecurity.sessionChart.title"
-                                  defaultMessage="Session Interactivity"
-                                />
-                              </EuiText>
-                              <EuiIconTip
-                                content={
-                                  <FormattedMessage
-                                    id="xpack.kubernetesSecurity.sessionChart.tooltip"
-                                    defaultMessage="Interactive sessions have a controlling terminal and often
-                        imply that a human is entering the commands."
-                                  />
-                                }
+                    <CountWidget
+                      title={COUNT_WIDGET_NAMESPACE}
+                      indexPattern={indexPattern}
+                      globalFilter={globalFilter}
+                      widgetKey={COUNT_WIDGET_KEY_NAMESPACE}
+                      groupedBy={ORCHESTRATOR_NAMESPACE}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <CountWidget
+                      title={COUNT_WIDGET_NODES}
+                      indexPattern={indexPattern}
+                      globalFilter={globalFilter}
+                      widgetKey={COUNT_WIDGET_KEY_NODES}
+                      groupedBy={CLOUD_INSTANCE_NAME}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <CountWidget
+                      title={COUNT_WIDGET_PODS}
+                      indexPattern={indexPattern}
+                      globalFilter={globalFilter}
+                      widgetKey={COUNT_WIDGET_KEY_NODES}
+                      groupedBy={ORCHESTRATOR_RESOURCE_ID}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <CountWidget
+                      title={COUNT_WIDGET_CONTAINER_IMAGES}
+                      indexPattern={indexPattern}
+                      globalFilter={globalFilter}
+                      widgetKey={COUNT_WIDGET_KEY_CONTAINER_IMAGES}
+                      groupedBy={CONTAINER_IMAGE_NAME}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiFlexGroup css={styles.widgetsBottomSpacing}>
+                  <EuiFlexItem>
+                    <PercentWidget
+                      title={
+                        <>
+                          <EuiText size="xs" css={styles.percentageChartTitle}>
+                            <FormattedMessage
+                              id="xpack.kubernetesSecurity.sessionChart.title"
+                              defaultMessage="Session Interactivity"
+                            />
+                          </EuiText>
+                          <EuiIconTip
+                            content={
+                              <FormattedMessage
+                                id="xpack.kubernetesSecurity.sessionChart.tooltip"
+                                defaultMessage="Interactive sessions have a controlling terminal and often
+                    imply that a human is entering the commands."
                               />
-                            </>
-                          }
-                          widgetKey="sessionsPercentage"
-                          indexPattern={indexPattern}
-                          globalFilter={globalFilter}
-                          dataValueMap={{
-                            true: {
-                              name: i18n.translate(
-                                'xpack.kubernetesSecurity.sessionChart.interactive',
-                                {
-                                  defaultMessage: 'Interactive',
-                                }
-                              ),
-                              fieldName: ENTRY_LEADER_INTERACTIVE,
-                              color: euiThemeVars.euiColorVis0,
-                            },
-                            false: {
-                              name: i18n.translate(
-                                'xpack.kubernetesSecurity.sessionChart.nonInteractive',
-                                {
-                                  defaultMessage: 'Non-interactive',
-                                }
-                              ),
-                              fieldName: ENTRY_LEADER_INTERACTIVE,
-                              color: euiThemeVars.euiColorVis1,
-                              shouldHideFilter: true,
-                            },
-                          }}
-                          groupedBy={ENTRY_LEADER_INTERACTIVE}
-                          countBy={ENTRY_LEADER_ENTITY_ID}
-                          onReduce={onReduceInteractiveAggs}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <PercentWidget
-                          title={
-                            <>
-                              <EuiText size="xs" css={styles.percentageChartTitle}>
-                                <FormattedMessage
-                                  id="xpack.kubernetesSecurity.entryUserChart.title"
-                                  defaultMessage="Session Entry Users"
-                                />
-                              </EuiText>
-                              <EuiIconTip
-                                content={
-                                  <FormattedMessage
-                                    id="xpack.kubernetesSecurity.entryUserChart.tooltip"
-                                    defaultMessage="The session user is the initial Linux user associated
-                        with the session. This user may be set from authentication of a remote
-                        login or automatically for service sessions started by init."
-                                  />
-                                }
+                            }
+                          />
+                        </>
+                      }
+                      widgetKey="sessionsPercentage"
+                      indexPattern={indexPattern}
+                      globalFilter={globalFilter}
+                      dataValueMap={{
+                        true: {
+                          name: i18n.translate(
+                            'xpack.kubernetesSecurity.sessionChart.interactive',
+                            {
+                              defaultMessage: 'Interactive',
+                            }
+                          ),
+                          fieldName: ENTRY_LEADER_INTERACTIVE,
+                          color: euiThemeVars.euiColorVis0,
+                        },
+                        false: {
+                          name: i18n.translate(
+                            'xpack.kubernetesSecurity.sessionChart.nonInteractive',
+                            {
+                              defaultMessage: 'Non-interactive',
+                            }
+                          ),
+                          fieldName: ENTRY_LEADER_INTERACTIVE,
+                          color: euiThemeVars.euiColorVis1,
+                          shouldHideFilter: true,
+                        },
+                      }}
+                      groupedBy={ENTRY_LEADER_INTERACTIVE}
+                      countBy={ENTRY_LEADER_ENTITY_ID}
+                      onReduce={onReduceInteractiveAggs}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <PercentWidget
+                      title={
+                        <>
+                          <EuiText size="xs" css={styles.percentageChartTitle}>
+                            <FormattedMessage
+                              id="xpack.kubernetesSecurity.entryUserChart.title"
+                              defaultMessage="Session Entry Users"
+                            />
+                          </EuiText>
+                          <EuiIconTip
+                            content={
+                              <FormattedMessage
+                                id="xpack.kubernetesSecurity.entryUserChart.tooltip"
+                                defaultMessage="The session user is the initial Linux user associated
+                    with the session. This user may be set from authentication of a remote
+                    login or automatically for service sessions started by init."
                               />
-                            </>
-                          }
-                          widgetKey="rootLoginPercentage"
-                          indexPattern={indexPattern}
-                          globalFilter={globalFilter}
-                          dataValueMap={{
-                            '0': {
-                              name: i18n.translate('xpack.kubernetesSecurity.entryUserChart.root', {
-                                defaultMessage: 'Root',
-                              }),
-                              fieldName: ENTRY_LEADER_USER_ID,
-                              color: euiThemeVars.euiColorVis2,
-                            },
-                            nonRoot: {
-                              name: i18n.translate(
-                                'xpack.kubernetesSecurity.entryUserChart.nonRoot',
-                                {
-                                  defaultMessage: 'Non-root',
-                                }
-                              ),
-                              fieldName: ENTRY_LEADER_USER_ID,
-                              color: euiThemeVars.euiColorVis3,
-                              shouldHideFilter: true,
-                            },
-                          }}
-                          groupedBy={ENTRY_LEADER_USER_ID}
-                          countBy={ENTRY_LEADER_ENTITY_ID}
-                          onReduce={onReduceRootAggs}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
+                            }
+                          />
+                        </>
+                      }
+                      widgetKey="rootLoginPercentage"
+                      indexPattern={indexPattern}
+                      globalFilter={globalFilter}
+                      dataValueMap={{
+                        '0': {
+                          name: i18n.translate('xpack.kubernetesSecurity.entryUserChart.root', {
+                            defaultMessage: 'Root',
+                          }),
+                          fieldName: ENTRY_LEADER_USER_ID,
+                          color: euiThemeVars.euiColorVis2,
+                        },
+                        nonRoot: {
+                          name: i18n.translate('xpack.kubernetesSecurity.entryUserChart.nonRoot', {
+                            defaultMessage: 'Non-root',
+                          }),
+                          fieldName: ENTRY_LEADER_USER_ID,
+                          color: euiThemeVars.euiColorVis3,
+                          shouldHideFilter: true,
+                        },
+                      }}
+                      groupedBy={ENTRY_LEADER_USER_ID}
+                      countBy={ENTRY_LEADER_ENTITY_ID}
+                      onReduce={onReduceRootAggs}
+                    />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup>
-                  <EuiFlexItem>
-                    <div css={styles.widgetHolder}>PlaceHolder for Container Name Widget</div>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+              <EuiFlexItem grow={false} css={styles.rightWidgetsGroup}>
+                <ContainerNameWidget
+                  widgetKey="containerNameSessions"
+                  indexPattern={indexPattern}
+                  globalFilter={globalFilter}
+                  groupedBy={CONTAINER_IMAGE_NAME}
+                  countBy={ENTRY_LEADER_ENTITY_ID}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </>
         )}
-        <TreeViewContainer globalFilter={globalFilter} renderSessionsView={renderSessionsView} />
+        <TreeViewContainer
+          globalFilter={globalFilter}
+          renderSessionsView={renderSessionsView}
+          indexPattern={indexPattern}
+        />
       </Route>
     </Switch>
   );

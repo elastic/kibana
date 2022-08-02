@@ -19,7 +19,10 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../common/processor_event';
+import {
+  latencyDistributionChartTypeRt,
+  LatencyDistributionChartType,
+} from '../../../common/latency_distribution_chart_types';
 
 const latencyOverallTransactionDistributionRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/latency/overall_distribution/transactions',
@@ -41,6 +44,7 @@ const latencyOverallTransactionDistributionRoute = createApmServerRoute({
       rangeRt,
       t.type({
         percentileThreshold: toNumberRt,
+        chartType: latencyDistributionChartTypeRt,
       }),
     ]),
   }),
@@ -60,20 +64,23 @@ const latencyOverallTransactionDistributionRoute = createApmServerRoute({
       end,
       percentileThreshold,
       termFilters,
+      chartType,
     } = resources.params.body;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      ...setup,
-      kuery,
-      start,
-      end,
-    });
+    // only the transaction latency distribution chart can use metrics data
+    const searchAggregatedTransactions =
+      chartType === LatencyDistributionChartType.transactionLatency
+        ? await getSearchAggregatedTransactions({
+            ...setup,
+            kuery,
+            start,
+            end,
+          })
+        : false;
 
     return getOverallLatencyDistribution({
       setup,
-      eventType: searchAggregatedTransactions
-        ? ProcessorEvent.metric
-        : ProcessorEvent.transaction,
+      chartType,
       environment,
       kuery,
       start,
@@ -92,6 +99,7 @@ const latencyOverallTransactionDistributionRoute = createApmServerRoute({
         },
       },
       percentileThreshold,
+      searchMetrics: searchAggregatedTransactions,
     });
   },
 });
