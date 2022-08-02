@@ -272,7 +272,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
   }
 
   useEffect(() => {
-    if (isPivotAggsConfigWithExtra<unknown>(aggConfigDef)) {
+    if (isFilterBooleanAgg(aggConfigDef) && isPivotAggsConfigWithExtra<unknown>(aggConfigDef)) {
       try {
         // @ts-ignore Partial type but we still need to check if parse-able or not
         JSON.parse(aggConfigDef.aggConfig?.aggTypeConfig?.filterAggConfig);
