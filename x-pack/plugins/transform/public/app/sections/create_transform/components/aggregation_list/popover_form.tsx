@@ -41,7 +41,11 @@ import {
   PivotAggsConfig,
   PivotAggsConfigWithUiSupportDict,
 } from '../../../../common';
-import { isFilterBooleanAgg, isPivotAggsWithExtendedForm } from '../../../../common/pivot_aggs';
+import {
+  isFilterBooleanAgg,
+  isPivotAggsConfigWithExtra,
+  isPivotAggsWithExtendedForm,
+} from '../../../../common/pivot_aggs';
 import { getAggFormConfig } from '../step_define/common/get_agg_form_config';
 
 interface Props {
@@ -110,6 +114,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
   const [field, setField] = useState<string | string[]>(
     isPivotAggsConfigWithUiSupport(defaultData) ? defaultData.field : ''
   );
+  const [isJSONValid, setIsJSONValid] = useState<boolean>(true);
 
   const [percents, setPercents] = useState(getDefaultPercents(defaultData));
   const [validPercents, setValidPercents] = useState(agg === PIVOT_SUPPORTED_AGGS.PERCENTILES);
@@ -266,6 +271,18 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
     formValid = validAggName && aggConfigDef.isValid();
   }
 
+  useEffect(() => {
+    if (isPivotAggsConfigWithExtra<unknown>(aggConfigDef)) {
+      try {
+        // @ts-ignore Partial type but we still need to check if parse-able or not
+        JSON.parse(aggConfigDef.aggConfig?.aggTypeConfig?.filterAggConfig);
+        setIsJSONValid(true);
+      } catch (e) {
+        setIsJSONValid(false);
+      }
+    }
+  }, [aggConfigDef]);
+
   return (
     <EuiForm style={{ width: '300px' }} data-test-subj={'transformAggPopoverForm_' + aggName}>
       <EuiFormRow
@@ -410,7 +427,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
       )}
       <EuiFormRow hasEmptyLabelSpace>
         <EuiButton
-          isDisabled={!formValid}
+          isDisabled={!formValid || !isJSONValid}
           onClick={() => onChange(getUpdatedItem())}
           data-test-subj="transformApplyAggChanges"
         >
