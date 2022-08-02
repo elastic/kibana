@@ -8,13 +8,22 @@
 import React from 'react';
 import { OverviewPageComponent } from './overview';
 import { render } from '../lib/helper/rtl_helpers';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { setAutocomplete } from '@kbn/unified-search-plugin/public/services';
 
 // FLAKY: https://github.com/elastic/kibana/issues/131346
-describe.skip('MonitorPage', () => {
+describe('MonitorPage', () => {
+  beforeEach(() => {
+    const autocompleteStart = unifiedSearchPluginMock.createStartContract();
+    setAutocomplete(autocompleteStart.autocomplete);
+  });
+
   it('renders expected elements for valid props', async () => {
     const { findByText, findByPlaceholderText } = render(<OverviewPageComponent />);
 
     expect(await findByText('No uptime monitors found')).toBeInTheDocument();
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     expect(
       await findByPlaceholderText('Search by monitor ID, name, or url (E.g. http:// )')
