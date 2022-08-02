@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { LogExplorerEntry } from '../../types';
+import { LogExplorerChunk, LogExplorerEntry } from '../../types';
 import { DataAccessService } from './state_machine';
 import { selectIsReloading } from './status_selectors';
 
@@ -29,15 +29,9 @@ export const selectLoadedEntries = (
 
   const { topChunk, bottomChunk } = state.context;
 
-  // TODO: the zero fallback should never happen, but the typestate is not strict enough
-  const startRowIndex = topChunk.status === 'uninitialized' ? 0 : topChunk.rowIndex;
-  const chunkBoundaryRowIndex = bottomChunk.status === 'uninitialized' ? 0 : bottomChunk.rowIndex;
-  const endRowIndex =
-    bottomChunk.status === 'uninitialized'
-      ? 0
-      : bottomChunk.status === 'loaded'
-      ? bottomChunk.rowIndex + bottomChunk.entries.length - 1
-      : bottomChunk.rowIndex;
+  const startRowIndex = getStartRowIndex(topChunk);
+  const chunkBoundaryRowIndex = getStartRowIndex(bottomChunk);
+  const endRowIndex = getEndRowIndex(bottomChunk);
 
   return {
     startRowIndex,
@@ -48,4 +42,32 @@ export const selectLoadedEntries = (
       ...(bottomChunk.status === 'loaded' ? bottomChunk.entries : []),
     ],
   };
+};
+
+const getStartRowIndex = (chunk: LogExplorerChunk): number => {
+  // TODO: the zero fallback should never happen, but the typestate is not strict enough
+  switch (chunk.status) {
+    case 'loaded':
+    case 'loading-bottom':
+    case 'loading-top':
+      return chunk.startRowIndex;
+    case 'empty':
+      return chunk.rowIndex;
+    case 'uninitialized':
+      return 0;
+  }
+};
+
+const getEndRowIndex = (chunk: LogExplorerChunk): number => {
+  // TODO: the zero fallback should never happen, but the typestate is not strict enough
+  switch (chunk.status) {
+    case 'loaded':
+    case 'loading-bottom':
+    case 'loading-top':
+      return chunk.endRowIndex;
+    case 'empty':
+      return chunk.rowIndex;
+    case 'uninitialized':
+      return 0;
+  }
 };

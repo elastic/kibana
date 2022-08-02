@@ -8,6 +8,7 @@
 
 import { assign, createMachine, InterpreterFrom } from 'xstate';
 import { updateChunksFromLoadAround } from './load_around_service';
+import { prependNewTopChunk, updateChunksFromLoadBefore } from './load_before_service';
 import { LogExplorerContext, LogExplorerEvent, LogExplorerState } from './types';
 import { areVisibleEntriesNearEnd, areVisibleEntriesNearStart } from './visible_entry_guards';
 
@@ -76,12 +77,10 @@ export const dataAccessStateMachine = createMachine<
               loaded: {
                 on: {
                   positionChanged: {
-                    actions: 'rotateChunksUpwards',
                     cond: 'isPositionNearStart',
                     target: '#logExplorerData.loadingTop',
                   },
                   visibleEntriesChanged: {
-                    actions: 'rotateChunksUpwards',
                     cond: 'areVisibleEntriesNearStart',
                     target: '#logExplorerData.loadingTop',
                   },
@@ -114,12 +113,10 @@ export const dataAccessStateMachine = createMachine<
               loaded: {
                 on: {
                   positionChanged: {
-                    actions: 'rotateChunkDownwards',
                     cond: 'isPositionNearEnd',
                     target: '#logExplorerData.loadingBottom',
                   },
                   visibleEntriesChanged: {
-                    actions: 'rotateChunkDownwards',
                     cond: 'areVisibleEntriesNearEnd',
                     target: '#logExplorerData.loadingBottom',
                   },
@@ -179,17 +176,18 @@ export const dataAccessStateMachine = createMachine<
         },
       },
       loadingTop: {
+        entry: 'prependNewTopChunk',
         invoke: {
           src: 'loadBefore',
           id: 'loadBefore',
         },
         on: {
-          loadTopSucceeded: {
-            actions: 'updateTopChunk',
+          loadBeforeSucceeded: {
+            actions: 'updateChunksFromLoadBefore',
             target: '#logExplorerData.loaded.top.loaded',
           },
-          loadTopFailed: {
-            actions: 'updateTopChunk',
+          loadBeforeFailed: {
+            actions: 'updateChunksFromLoadBefore',
             target: '#logExplorerData.loaded.top.failed',
           },
           columnsChanged: {
@@ -198,17 +196,18 @@ export const dataAccessStateMachine = createMachine<
         },
       },
       loadingBottom: {
+        entry: 'appendNewBottomChunk',
         invoke: {
           src: 'loadAfter',
           id: 'loadAfter',
         },
         on: {
-          loadBottomSucceeded: {
-            actions: 'updateBottomChunk',
+          loadAfterSucceeded: {
+            actions: 'updateChunksFromLoadAfter',
             target: '#logExplorerData.loaded.bottom.loaded',
           },
-          loadBottomFailed: {
-            actions: 'updateBottomChunk',
+          loadAfterFailed: {
+            actions: 'updateChunksFromLoadAfter',
             target: '#logExplorerData.loaded.bottom.failed',
           },
           columnsChanged: {
@@ -223,11 +222,11 @@ export const dataAccessStateMachine = createMachine<
         },
         on: {
           extendTopSucceeded: {
-            actions: 'prependToTopChunk',
+            actions: 'updateChunksFromExtendTop',
             target: '#logExplorerData.loaded.top.loaded',
           },
           extendTopFailed: {
-            actions: 'updateBottomChunk',
+            actions: 'updateChunksFromExtendTop',
             target: '#logExplorerData.loaded.top.failed',
           },
           columnsChanged: {
@@ -242,11 +241,11 @@ export const dataAccessStateMachine = createMachine<
         },
         on: {
           extendBottomSucceeded: {
-            actions: 'appendToBottomChunk',
+            actions: 'updateChunksFromExtendBottom',
             target: '#logExplorerData.loaded.bottom.loaded',
           },
           extendBottomFailed: {
-            actions: 'updateBottomChunk',
+            actions: 'updateChunksFromExtendBottom',
             target: '#logExplorerData.loaded.bottom.failed',
           },
           columnsChanged: {
@@ -264,7 +263,7 @@ export const dataAccessStateMachine = createMachine<
             target: 'failedNoData',
           },
           reloadSucceeded: {
-            actions: ['updateTopChunk', 'updateBottomChunk'],
+            actions: 'updateChunksFromReload',
             target: 'loaded',
           },
         },
@@ -304,6 +303,8 @@ export const dataAccessStateMachine = createMachine<
         },
       })),
       updateChunksFromLoadAround,
+      updateChunksFromLoadBefore,
+      prependNewTopChunk,
     },
     guards: {
       areVisibleEntriesNearStart,

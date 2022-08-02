@@ -9,7 +9,8 @@
 import { EuiDataGridProps, EuiDataGridRefProps } from '@elastic/eui';
 import { useSelector } from '@xstate/react';
 import { MutableRefObject, useCallback } from 'react';
-import { useStateMachineContext, useThrottled } from '../../hooks/query_data/use_state_machine';
+import { useStateMachineContext } from '../../hooks/query_data/use_state_machine';
+import { useThrottled } from '../../hooks/use_throttled';
 import { selectLoadedEntries } from '../../state_machines/data_access_state_machine';
 
 type GridOnItemsRenderedProps = Parameters<

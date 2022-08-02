@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { IEsSearchResponse, ISearchSource, QueryStart } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { catchError, last, map, Observable, of } from 'rxjs';
@@ -15,17 +14,20 @@ import {
   fetchEntriesAround,
   FetchEntriesAroundParameters,
 } from '../../queries/fetch_entries_around';
-import { LogExplorerChunk, LogExplorerCursorRT, LogExplorerEntry } from '../../types';
+import { LogExplorerChunk } from '../../types';
 import {
+  getCursorFromHitSort,
   getPositionFromCursor,
   getPositionFromTimestamp,
   getPredecessorPosition,
 } from '../../utils/cursor';
-import { decodeOrThrow } from '../../utils/runtime_types';
+import { getEntryFromHit } from '../../utils/entry';
+import { createTopChunkFromResponse } from './load_before_service';
 import { LogExplorerContext, LogExplorerEvent } from './types';
 
 export type LoadAroundParameters = FetchEntriesAroundParameters & {
-  centerRowIndex: number;
+  topEndRowIndex: number;
+  bottomStartRowIndex: number;
 };
 
 export type LoadAroundEvent =
@@ -74,7 +76,8 @@ export const loadAround = ({
 
     const eventRequestParameters: LoadAroundParameters = {
       ...fetchAroundRequestParamters,
-      centerRowIndex,
+      topEndRowIndex: centerRowIndex - 1,
+      bottomStartRowIndex: centerRowIndex,
     };
 
     return boundFetchEntriesAround(fetchAroundRequestParamters).pipe(
@@ -115,35 +118,6 @@ export const updateChunksFromLoadAround = assign(
   }
 );
 
-export const createTopChunkFromResponse = (
-  requestParameters: LoadAroundParameters,
-  response: IEsSearchResponse
-): LogExplorerChunk => {
-  const hits = response.rawResponse.hits.hits;
-  const endPosition = requestParameters.position;
-
-  if (hits.length <= 0) {
-    return {
-      status: 'empty',
-      startPosition: getPositionFromTimestamp(requestParameters.timeRange.from),
-      endPosition: requestParameters.position,
-      chunkSize: requestParameters.chunkSize,
-      rowIndex: requestParameters.centerRowIndex - 1,
-    };
-  }
-
-  const firstHit = hits[0];
-
-  return {
-    status: 'loaded',
-    startPosition: getPositionFromCursor(getCursorFromHitSort(firstHit.sort)),
-    endPosition,
-    entries: hits.map(getEntryFromHit).reverse(),
-    chunkSize: requestParameters.chunkSize,
-    rowIndex: requestParameters.centerRowIndex - hits.length,
-  };
-};
-
 export const createBottomChunkFromResponse = (
   requestParameters: LoadAroundParameters,
   response: IEsSearchResponse
@@ -157,7 +131,7 @@ export const createBottomChunkFromResponse = (
       startPosition,
       endPosition: getPositionFromTimestamp(requestParameters.timeRange.to),
       chunkSize: requestParameters.chunkSize,
-      rowIndex: requestParameters.centerRowIndex,
+      rowIndex: requestParameters.bottomStartRowIndex,
     };
   }
 
@@ -169,12 +143,7 @@ export const createBottomChunkFromResponse = (
     endPosition: getPositionFromCursor(getCursorFromHitSort(lastHit.sort)),
     entries: hits.map(getEntryFromHit),
     chunkSize: requestParameters.chunkSize,
-    rowIndex: requestParameters.centerRowIndex,
+    startRowIndex: requestParameters.bottomStartRowIndex,
+    endRowIndex: requestParameters.bottomStartRowIndex + (hits.length - 1),
   };
 };
-
-const getCursorFromHitSort = decodeOrThrow(LogExplorerCursorRT);
-const getEntryFromHit = (searchHit: SearchHit): LogExplorerEntry => ({
-  position: getPositionFromCursor(getCursorFromHitSort(searchHit.sort)),
-  fields: searchHit.fields ?? {},
-});

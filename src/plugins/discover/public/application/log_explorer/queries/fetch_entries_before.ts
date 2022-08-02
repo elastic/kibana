@@ -9,20 +9,20 @@
 import { IEsSearchResponse, ISearchSource, QueryStart } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { TimeRange } from '@kbn/es-query';
-import { forkJoin, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { LogExplorerPosition, SortCriteria } from '../types';
-import { getCursorFromPosition, getPredecessorPosition } from '../utils/cursor';
+import { getCursorFromPosition } from '../utils/cursor';
 import { invertSortCriteria, normalizeSortCriteriaForDataView } from '../utils/sort_criteria';
 import { copyWithCommonParameters } from './common';
 
-export interface FetchEntriesAroundParameters {
+export interface FetchEntriesBeforeParameters {
   chunkSize: number;
   position: LogExplorerPosition;
   sorting: SortCriteria;
   timeRange: TimeRange;
 }
 
-export const fetchEntriesAround =
+export const fetchEntriesBefore =
   ({
     dataView,
     query,
@@ -37,32 +37,15 @@ export const fetchEntriesAround =
     position,
     sorting,
     timeRange,
-  }: FetchEntriesAroundParameters): Observable<{
-    beforeResponse: IEsSearchResponse;
-    afterResponse: IEsSearchResponse;
-  }> => {
+  }: FetchEntriesBeforeParameters): Observable<IEsSearchResponse> => {
     const normalizeSortCriteria = normalizeSortCriteriaForDataView(dataView);
     const timeRangeFilter = query.timefilter.timefilter.createFilter(dataView, timeRange);
 
-    const commonSearchSource = copyWithCommonParameters(searchSource, {
-      chunkSize,
-      timeRangeFilter,
-    });
-
     // TODO: create and use point-in-time, not currently possible from client?
-    const beforeResponse$ = commonSearchSource
-      .createCopy()
+    const response$ = copyWithCommonParameters(searchSource, { chunkSize, timeRangeFilter })
       .setField('searchAfter', getCursorFromPosition(position))
       .setField('sort', normalizeSortCriteria(invertSortCriteria(sorting)))
       .fetch$();
-    const afterResponse$ = commonSearchSource
-      .createCopy()
-      .setField('searchAfter', getCursorFromPosition(getPredecessorPosition(position)))
-      .setField('sort', normalizeSortCriteria(sorting))
-      .fetch$();
 
-    return forkJoin({
-      beforeResponse: beforeResponse$,
-      afterResponse: afterResponse$,
-    });
+    return response$;
   };

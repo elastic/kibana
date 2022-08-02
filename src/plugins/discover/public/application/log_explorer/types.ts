@@ -36,7 +36,8 @@ export type LogExplorerChunk =
       endPosition: LogExplorerPosition;
       entries: LogExplorerEntry[];
       chunkSize: number;
-      rowIndex: number;
+      startRowIndex: number;
+      endRowIndex: number;
     }
   | {
       status: 'empty';
@@ -49,13 +50,15 @@ export type LogExplorerChunk =
       status: 'loading-top';
       endPosition: LogExplorerPosition;
       chunkSize: number;
-      rowIndex: number;
+      startRowIndex: number;
+      endRowIndex: number;
     }
   | {
       status: 'loading-bottom';
       startPosition: LogExplorerPosition;
       chunkSize: number;
-      rowIndex: number;
+      startRowIndex: number;
+      endRowIndex: number;
     }
   | {
       status: 'uninitialized';

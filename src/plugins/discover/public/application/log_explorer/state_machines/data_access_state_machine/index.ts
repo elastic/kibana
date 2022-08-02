@@ -8,6 +8,7 @@
 
 export * from './entry_selectors';
 export * from './load_around_service';
+export * from './load_before_service';
 export * from './state_machine';
 export * from './status_selectors';
 export * from './types';

@@ -10,6 +10,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { LogExplorerChunk, LogExplorerPosition } from '../../types';
 import { LoadAroundEvent } from './load_around_service';
+import { LoadBeforeEvent } from './load_before_service';
 
 export interface LogExplorerContext {
   configuration: {
@@ -74,19 +75,14 @@ export type LogExplorerInternalEvent =
       type: 'retryTop';
     }
   | LoadAroundEvent
+  | LoadBeforeEvent
   | {
       // the following event types will be moved to their respective services
       // once these exist
-      type: 'loadTopSucceeded';
+      type: 'loadAfterSucceeded';
     }
   | {
-      type: 'loadTopFailed';
-    }
-  | {
-      type: 'loadBottomSucceeded';
-    }
-  | {
-      type: 'loadBottomFailed';
+      type: 'loadAfterFailed';
     }
   | {
       type: 'extendTopSucceeded';

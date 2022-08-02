@@ -11,10 +11,13 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { useInterpret } from '@xstate/react';
 import createContainer from 'constate';
-import { throttle } from 'lodash';
 import moment from 'moment';
-import { useEffect, useMemo } from 'react';
-import { dataAccessStateMachine, loadAround } from '../../state_machines/data_access_state_machine';
+import { useMemo } from 'react';
+import {
+  dataAccessStateMachine,
+  loadAround,
+  loadBefore,
+} from '../../state_machines/data_access_state_machine';
 import { useSubscription } from '../use_observable';
 
 export const useStateMachineService = ({
@@ -61,6 +64,11 @@ export const useStateMachineService = ({
           query,
           searchSource,
         }),
+        loadBefore: loadBefore({
+          dataView,
+          query,
+          searchSource,
+        }),
       },
       devTools: true,
     }
@@ -81,17 +89,6 @@ export const useStateMachineService = ({
 
 export const [StateMachineProvider, useStateMachineContext] =
   createContainer(useStateMachineService);
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const useThrottled = <Fn extends (...args: any[]) => any>(fn: Fn, delay: number) => {
-  const throttledFn = useMemo(() => throttle(fn, delay), [fn, delay]);
-
-  useEffect(() => {
-    return () => throttledFn.cancel();
-  }, [throttledFn]);
-
-  return throttledFn;
-};
 
 // export const useStateMachineContextSelector = <T, TEmitted = DataAccessService['state']>(
 //   selector: (emitted: TEmitted) => T,
