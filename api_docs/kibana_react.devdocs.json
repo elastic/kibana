@@ -2162,13 +2162,7 @@
             "text": "ToMountPointOptions"
           },
           ") => ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.MountPoint",
-            "text": "MountPoint"
-          },
+          "MountPoint",
           "<HTMLElement>"
         ],
         "path": "src/plugins/kibana_react/public/util/to_mount_point.tsx",
@@ -2979,21 +2973,9 @@
             "description": [],
             "signature": [
               "(node: React.ReactNode, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.OverlayFlyoutOpenOptions",
-                "text": "OverlayFlyoutOpenOptions"
-              },
+              "OverlayFlyoutOpenOptions",
               " | undefined) => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.OverlayRef",
-                "text": "OverlayRef"
-              }
+              "OverlayRef"
             ],
             "path": "src/plugins/kibana_react/public/overlays/types.ts",
             "deprecated": false,
@@ -3020,13 +3002,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.OverlayFlyoutOpenOptions",
-                    "text": "OverlayFlyoutOpenOptions"
-                  },
+                  "OverlayFlyoutOpenOptions",
                   " | undefined"
                 ],
                 "path": "src/plugins/kibana_react/public/overlays/types.ts",
@@ -3045,21 +3021,9 @@
             "description": [],
             "signature": [
               "(node: React.ReactNode, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.OverlayModalOpenOptions",
-                "text": "OverlayModalOpenOptions"
-              },
+              "OverlayModalOpenOptions",
               " | undefined) => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.OverlayRef",
-                "text": "OverlayRef"
-              }
+              "OverlayRef"
             ],
             "path": "src/plugins/kibana_react/public/overlays/types.ts",
             "deprecated": false,
@@ -3086,13 +3050,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.OverlayModalOpenOptions",
-                    "text": "OverlayModalOpenOptions"
-                  },
+                  "OverlayModalOpenOptions",
                   " | undefined"
                 ],
                 "path": "src/plugins/kibana_react/public/overlays/types.ts",
@@ -3428,153 +3386,7 @@
             "label": "toastNotifications",
             "description": [],
             "signature": [
-              "{ add: (toastOrTitle: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ToastInput",
-                "text": "ToastInput"
-              },
-              ") => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              },
-              "; get$: () => ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              },
-              "[]>; remove: (toastOrId: string | ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              },
-              ") => void; addSuccess: (toastOrTitle: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ToastInput",
-                "text": "ToastInput"
-              },
-              ", options?: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ToastOptions",
-                "text": "ToastOptions"
-              },
-              " | undefined) => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              },
-              "; addWarning: (toastOrTitle: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ToastInput",
-                "text": "ToastInput"
-              },
-              ", options?: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ToastOptions",
-                "text": "ToastOptions"
-              },
-              " | undefined) => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              },
-              "; addDanger: (toastOrTitle: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ToastInput",
-                "text": "ToastInput"
-              },
-              ", options?: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ToastOptions",
-                "text": "ToastOptions"
-              },
-              " | undefined) => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              },
-              "; addError: (error: Error, options: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ErrorToastOptions",
-                "text": "ErrorToastOptions"
-              },
-              ") => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              },
-              "; addInfo: (toastOrTitle: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ToastInput",
-                "text": "ToastInput"
-              },
-              ", options?: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ToastOptions",
-                "text": "ToastOptions"
-              },
-              " | undefined) => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              },
-              "; }"
+              "IToasts"
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false
@@ -4313,21 +4125,9 @@
           " | undefined; i18n?: ",
           "I18nStart",
           " | undefined; notifications?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.NotificationsStart",
-            "text": "NotificationsStart"
-          },
+          "NotificationsStart",
           " | undefined; overlays?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.OverlayStart",
-            "text": "OverlayStart"
-          },
+          "OverlayStart",
           " | undefined; uiSettings?: ",
           "IUiSettingsClient",
           " | undefined; fatalErrors?: ",
