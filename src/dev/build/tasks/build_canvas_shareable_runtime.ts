@@ -15,14 +15,9 @@ export const BuildCanvasShareableRuntime: Task = {
   async run(config, log, build) {
     await del(config.resolveFromRepo('x-pack/plugins/canvas/shareable_runtime/build'));
 
-    await exec(
-      log,
-      process.execPath,
-      ['--preserve-symlinks', 'plugins/canvas/scripts/shareable_runtime'],
-      {
-        cwd: config.resolveFromRepo('x-pack'),
-        level: 'info',
-      }
-    );
+    await exec(log, process.execPath, ['plugins/canvas/scripts/shareable_runtime'], {
+      cwd: config.resolveFromRepo('x-pack'),
+      level: 'info',
+    });
   },
 };
