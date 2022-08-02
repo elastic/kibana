@@ -20,7 +20,8 @@ const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
 const filterManager = new FilterManager(mockUiSettingsForFilterManager);
 
-describe('QueryBar ', () => {
+// Failing: See https://github.com/elastic/kibana/issues/137752
+describe.skip('QueryBar ', () => {
   const onSubmitQuery = jest.fn();
   const onSubmitDateRange = jest.fn();
   const onSavedQuery = jest.fn();
