@@ -2684,8 +2684,7 @@ export class RulesClient {
         throw new Error(`Action reference "${action.actionRef}" not found in alert id: ${alertId}`);
       }
       return {
-        ...omit(action, 'actionRef'),
-        ref: action.actionRef,
+        ...action,
         id: reference.id,
       };
     }) as Rule['actions'];

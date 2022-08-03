@@ -662,7 +662,7 @@ export class TaskRunner<
       await this.markRuleAsSnoozed(rule.id, rulesClient);
     }
 
-    let actionsToReturn: Array<Omit<RuleAction, 'id' | 'ref'>> = [];
+    let actionsToReturn: Array<Omit<RuleAction, 'id'>> = [];
 
     if (!ruleIsSnoozed && this.shouldLogAndScheduleActionsForAlerts()) {
       const actionsStore: ActionsStore = {};
@@ -696,10 +696,10 @@ export class TaskRunner<
         return omit(
           {
             ...action,
-            lastTriggerDate: actionsStore[action.ref!]?.lastTriggerDate || action.lastTriggerDate,
-            actionRef: action.ref,
+            lastTriggerDate:
+              actionsStore[action.actionRef]?.lastTriggerDate || action.lastTriggerDate,
           },
-          ['id', 'ref']
+          ['id']
         );
       });
     } else {
@@ -913,9 +913,9 @@ export class TaskRunner<
       // Selected action group or summary
       if (action.group === actionGroup || action.isSummary) {
         // Don't add the same action that is a summary
-        if (action.isSummary && actionsStore[action.ref!] !== undefined) {
+        if (action.isSummary && actionsStore[action.actionRef] !== undefined) {
           this.logger.info(
-            `skipping action "${action.ref}" of "${ruleType.id}" as it is a summary and already in the list to trigger`
+            `skipping action "${action.actionRef}" of "${ruleType.id}" as it is a summary and already in the list to trigger`
           );
           continue;
         }
@@ -934,7 +934,7 @@ export class TaskRunner<
         // Summary actions should not run on every rule run
         if (action.notifyWhen === NotifyWhen.ON_EVERY_RUN && action.isSummary) {
           this.logger.debug(
-            `skipping action "${action.ref}" of "${ruleType.id}" as it is a summary and supposed to run every rule run`
+            `skipping action "${action.actionRef}" of "${ruleType.id}" as it is a summary and supposed to run every rule run`
           );
           continue;
         }
@@ -948,7 +948,9 @@ export class TaskRunner<
             .add(parseInt(String(action.actionThrottle), 10), action.actionThrottleUnit)
             .isAfter(moment())
         ) {
-          this.logger.info(`Action "${action.ref}" of "${ruleType.id}/${rule.name}" is throttled`);
+          this.logger.info(
+            `Action "${action.actionRef}" of "${ruleType.id}/${rule.name}" is throttled`
+          );
           continue;
         }
 
@@ -982,7 +984,7 @@ export class TaskRunner<
         ruleRunMetricsStore.incrementNumberOfTriggeredActions();
         ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(action.actionTypeId);
 
-        actionsStore[action.ref!] = {
+        actionsStore[action.actionRef!] = {
           isSummary: Boolean(action.isSummary),
           lastTriggerDate: new Date().toISOString(),
         };
