@@ -8,8 +8,19 @@
 
 import { type AggregateQuery, type Filter, type Query } from '@kbn/es-query';
 
+/**
+ * All embeddables that implement this interface should support being filtered
+ * and/or queried via the top navigation bar
+ * @public
+ */
 export interface FilterableEmbeddable {
+  /**
+   * Gets the embeddable's local filters
+   **/
   getFilters: () => Promise<Filter[]>;
+  /**
+   * Gets the embeddable's local query
+   **/
   getQuery: () => Promise<Query | AggregateQuery | undefined>;
 }
 
