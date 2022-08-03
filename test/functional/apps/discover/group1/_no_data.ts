@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitForWithTimeout(
         'data view selector to include a newly created dataview',
-        5000,
+        10000,
         async () => {
           const dataViewTitle = await PageObjects.discover.getCurrentlySelectedDataView();
           // data view editor will add wildcard symbol by default
