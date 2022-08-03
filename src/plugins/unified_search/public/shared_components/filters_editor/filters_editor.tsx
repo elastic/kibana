@@ -68,7 +68,6 @@ export function FiltersEditor({
             conditionalType: ConditionTypes.OR,
           },
         });
-
       }
 
       setDropTarget('');
@@ -92,7 +91,7 @@ export function FiltersEditor({
         globalParams: { disableOr, disableAnd, maxDepth },
         dataView,
         dispatch,
-        dropTarget
+        dropTarget,
       }}
     >
       <EuiDragDropContext onDragEnd={onDragEnd} onDragUpdate={onDragActive}>
