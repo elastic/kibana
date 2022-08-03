@@ -56,7 +56,13 @@ export const KibanaPageTemplateInner: FC<Props> = ({
   let sideBar;
   if (pageSideBar) {
     sideBar = (
-      <EuiPageTemplate.Sidebar {...pageSideBarProps}>{pageSideBar}</EuiPageTemplate.Sidebar>
+      <EuiPageTemplate.Sidebar
+        // TODO: Get `offset` from Kibana Chrome Header and pass directly to:
+        // sticky={{ offset }}
+        {...pageSideBarProps}
+      >
+        {pageSideBar}
+      </EuiPageTemplate.Sidebar>
     );
   }
 
