@@ -8,7 +8,16 @@ import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { FileKind } from '../common';
 import { FileServiceFactory } from './file_service';
 
+/**
+ * Files plugin setup contract
+ */
 export interface FilesSetup {
+  /**
+   * Register a {@link FileKind} which allows for specifying details about the files
+   * that will be uploaded.
+   *
+   * @param {FileKind} fileKind - the file kind to register
+   */
   registerFileKind(fileKind: FileKind): void;
 }
 
@@ -16,6 +25,12 @@ export interface FilesPluginSetupDependencies {
   security?: SecurityPluginSetup;
 }
 
+/**
+ * Files plugin start contract
+ */
 export interface FilesStart {
+  /**
+   * Create an instance of {@link FileServiceStart}.
+   */
   fileServiceFactory: FileServiceFactory;
 }

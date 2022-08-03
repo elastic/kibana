@@ -8,13 +8,18 @@
 export { FILE_SO_TYPE, PLUGIN_ID, PLUGIN_NAME, ES_FIXED_SIZE_INDEX_BLOB_STORE } from './constants';
 
 export type {
-  FileSavedObjectAttributes,
-  FileStatus,
   File,
-  FileSavedObject,
-  UpdatableFileAttributes,
   FileKind,
-  BlobStorageSettings,
   FileJSON,
+  FileStatus,
+  FileMetadata,
   FilesMetrics,
+  FileShareJSON,
+  FileCompression,
+  FileSavedObject,
+  BlobStorageSettings,
+  FileShareJSONWithToken,
+  UpdatableFileAttributes,
+  FileSavedObjectAttributes,
+  FileShareSavedObjectAttributes,
 } from './types';

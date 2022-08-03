@@ -10,6 +10,15 @@ import { FilesPlugin } from './plugin';
 
 export type { FilesSetup, FilesStart } from './types';
 export type { FileShareServiceStart } from './file_share_service';
+export type {
+  FileServiceFactory,
+  CreateFileArgs,
+  DeleteFileArgs,
+  FindFileArgs,
+  GetByIdArgs,
+  ListFilesArgs,
+  UpdateFileArgs,
+} from './file_service';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new FilesPlugin(initializerContext);

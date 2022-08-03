@@ -15,21 +15,29 @@ import type { GetArgs, UpdateArgs, DeleteArgs, ListArgs } from './internal_file_
 export interface FileShareServiceStart {
   /**
    * Get a share instance
+   *
+   * @param {GetArgs} arg - the arguments to get the share instance
    */
   get(arg: GetArgs): Promise<FileShareJSON>;
 
   /**
    * List share objects
+   *
+   * @param {ListArgs} arg - the arguments to list share objects
    */
   list(arg: ListArgs): Promise<{ shares: FileShareJSON[] }>;
 
   /**
    * Update a share instance.
+   *
+   * @param {UpdateArgs} args - the arguments to update a share instance
    */
   update(args: UpdateArgs): Promise<FileShareSavedObjectAttributes & { id: string }>;
 
   /**
    * Delete a share instance.
+   *
+   * @param {DeleteArgs} args - the arguments to delete a share instance
    */
   delete(args: DeleteArgs): Promise<void>;
 }

@@ -5,7 +5,13 @@
  * 2.0.
  */
 
+/**
+ * The files plugin ID
+ */
 export const PLUGIN_ID = 'files' as const;
+/**
+ * The files plugin name
+ */
 export const PLUGIN_NAME = 'files' as const;
 
 /**
@@ -17,4 +23,7 @@ export const FILE_SO_TYPE = 'file';
  */
 export const FILE_SHARE_SO_TYPE = 'fileShare';
 
+/**
+ * The name of the fixed size ES-backed blob store
+ */
 export const ES_FIXED_SIZE_INDEX_BLOB_STORE = 'esFixedSizeIndex' as const;
