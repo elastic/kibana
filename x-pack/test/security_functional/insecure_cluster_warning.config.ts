@@ -20,16 +20,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('../../../test/functional/config.base.js')
   );
 
-  const kbnTestServerArgOverrides = [
-    ...kibanaCommonConfig
-      .get('kbnTestServer.serverArgs')
-      .filter((arg: string) => !arg.startsWith('--security.showInsecureClusterWarning')),
-  ];
-
-  kbnTestServerArgOverrides.push('--security.showInsecureClusterWarning=true');
+  const kbnTestServerArgOverrides = kibanaCommonConfig
+    .get('kbnTestServer.serverArgs')
+    .filter((arg: string) => !arg.startsWith('--security.showInsecureClusterWarning'));
 
   return {
-    testFiles: [resolve(__dirname, './tests/security_check')],
+    testFiles: [resolve(__dirname, './tests/insecure_cluster_warning')],
 
     services,
     pageObjects,
@@ -46,17 +42,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...kibanaCommonConfig.get('kbnTestServer'),
       serverArgs: kbnTestServerArgOverrides,
     },
-    uiSettings: {
-      defaults: {
-        // 'accessibility:disableAnimations': true,
-        'dateFormat:tz': 'UTC',
-      },
-    },
     apps: kibanaFunctionalConfig.get('apps'),
-    screenshots: { directory: resolve(__dirname, 'screenshots') },
-
     junit: {
-      reportName: 'Unsecure Cluster Alert Functional Tests',
+      reportName: 'Insecure Cluster Warning Functional Tests',
     },
   };
 }
