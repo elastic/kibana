@@ -15,9 +15,9 @@ export const DropOperationSwitcher = ({
   isVisible = false,
 }: {
   isVisible: boolean;
-  portalRef?: HTMLElement | null;
+  portalRef: HTMLElement | null;
 }) =>
-  portalRef ? (
+  portalRef && isVisible ? (
     <EuiPortal insert={{ sibling: portalRef, position: 'before' }}>
       <div
         className={css`
@@ -27,18 +27,13 @@ export const DropOperationSwitcher = ({
         `}
       >
         <EuiFlexGroup>
-          <EuiFlexItem>Content grid item</EuiFlexItem>
           <EuiFlexItem>
-            <p>Another content grid item</p>
+            <p>OR</p>
           </EuiFlexItem>
           <EuiFlexItem>
-            <p>
-              Note how both of these are the same width and height despite having different content?
-            </p>
+            <p>AND</p>
           </EuiFlexItem>
         </EuiFlexGroup>
       </div>
     </EuiPortal>
-  ) : (
-    <div>'Hello'</div>
-  );
+  ) : null;

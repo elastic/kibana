@@ -16,7 +16,6 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiPanel,
-  EuiPortal,
 } from '@elastic/eui';
 import { buildEmptyFilter, FieldFilter, Filter, getFilterParams } from '@kbn/es-query';
 import { DataViewField } from '@kbn/data-views-plugin/common';
@@ -68,7 +67,7 @@ export function FilterItem({
 }: FilterItemProps) {
   const { dispatch, dataView } = useContext(FiltersEditorContextType);
   const conditionalOperationType = getConditionalOperationType(filter);
-  let panelRef = useRef<HTMLElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
 
   let field: DataViewField | undefined;
   let operator: Operator | undefined;
@@ -154,7 +153,7 @@ export function FilterItem({
     <div ref={panelRef}>
       <DropOperationSwitcher
         isVisible={Boolean(destination === path && panelRef?.current)}
-        panelRef={panelRef?.current}
+        portalRef={panelRef?.current}
       />
       {conditionalOperationType ? (
         <FilterGroup
