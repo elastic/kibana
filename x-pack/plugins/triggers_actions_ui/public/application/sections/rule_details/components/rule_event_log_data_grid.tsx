@@ -89,7 +89,7 @@ const numGeneratedActionsDisplay = i18n.translate(
 const numGeneratedActionsToolTip = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.scheduledActionsToolTip',
   {
-    defaultMessage: 'The total number of actions generated (when the rule ran)',
+    defaultMessage: 'The total number of actions generated when the rule ran.',
   }
 );
 
