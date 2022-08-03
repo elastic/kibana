@@ -12,4 +12,4 @@ export { setupServer } from './saved_objects/routes/test_utils';
 export {
   getDeprecationsFor,
   getDeprecationsForGlobalSettings,
-} from '@kbn/core-config-server-internal';
+} from '@kbn/core-test-helpers-deprecations-getters';

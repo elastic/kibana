@@ -19,6 +19,7 @@ export type UseTreeViewProps = {
 export const useTreeView = ({ globalFilter, indexPattern }: UseTreeViewProps) => {
   const [noResults, setNoResults] = useState(false);
   const [treeNavSelection, setTreeNavSelection] = useState<TreeNavSelection>({});
+  const [hasSelection, setHasSelection] = useState(false);
 
   const filterQueryWithTimeRange = useMemo(() => {
     return JSON.parse(
@@ -31,13 +32,9 @@ export const useTreeView = ({ globalFilter, indexPattern }: UseTreeViewProps) =>
   }, [globalFilter.filterQuery, globalFilter.startDate, globalFilter.endDate]);
 
   const onTreeNavSelect = useCallback((selection: TreeNavSelection) => {
+    setHasSelection(false);
     setTreeNavSelection(selection);
   }, []);
-
-  const hasSelection = useMemo(
-    () => !!treeNavSelection[KubernetesCollection.cluster],
-    [treeNavSelection]
-  );
 
   const sessionViewFilter = useMemo(
     () => addTreeNavSelectionToFilterQuery(globalFilter.filterQuery, treeNavSelection),
@@ -49,6 +46,13 @@ export const useTreeView = ({ globalFilter, indexPattern }: UseTreeViewProps) =>
     setNoResults(false);
     setTreeNavSelection({});
   }, [filterQueryWithTimeRange]);
+
+  useEffect(() => {
+    if (!!treeNavSelection[KubernetesCollection.cluster]) {
+      setHasSelection(true);
+      setTreeNavSelection(treeNavSelection);
+    }
+  }, [treeNavSelection]);
 
   return {
     noResults,
