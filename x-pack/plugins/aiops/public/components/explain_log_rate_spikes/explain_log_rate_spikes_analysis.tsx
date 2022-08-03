@@ -59,7 +59,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     start,
     data,
     isRunning,
-    error: streamError,
+    errors: streamErrors,
   } = useFetchStream<ApiExplainLogRateSpikes, typeof basePath>(
     `${basePath}/internal/aiops/explain_log_rate_spikes`,
     {
@@ -74,10 +74,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     { reducer: streamReducer, initialState }
   );
 
-  const errors = useMemo(
-    () => [...(streamError ? [streamError] : []), ...data.errors],
-    [streamError, data.errors]
-  );
+  const errors = useMemo(() => [...streamErrors, ...data.errors], [streamErrors, data.errors]);
 
   // Start handler clears possibly hovered or pinned
   // change points on analysis refresh.
@@ -107,27 +104,31 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
       />
       <EuiSpacer size="xs" />
       {errors.length > 0 && (
-        <EuiCallOut
-          title={i18n.translate('xpack.aiops.analysis.errorCallOutTitle', {
-            defaultMessage:
-              'The following {errorCount, plural, one {error} other {errors}} occurred running the analysis.',
-            values: { errorCount: errors.length },
-          })}
-          color="warning"
-          iconType="alert"
-          size="s"
-        >
-          <EuiText size="s">
-            {errors.length === 1 && <p>{errors[0]}</p>}
-            {errors.length > 1 && (
-              <ul>
-                {errors.map((e, i) => (
-                  <li key={i}>{e}</li>
-                ))}
-              </ul>
-            )}
-          </EuiText>
-        </EuiCallOut>
+        <>
+          <EuiCallOut
+            title={i18n.translate('xpack.aiops.analysis.errorCallOutTitle', {
+              defaultMessage:
+                'The following {errorCount, plural, one {error} other {errors}} occurred running the analysis.',
+              values: { errorCount: errors.length },
+            })}
+            color="warning"
+            iconType="alert"
+            size="s"
+          >
+            <EuiText size="s">
+              {errors.length === 1 ? (
+                <p>{errors[0]}</p>
+              ) : (
+                <ul>
+                  {errors.map((e, i) => (
+                    <li key={i}>{e}</li>
+                  ))}
+                </ul>
+              )}
+            </EuiText>
+          </EuiCallOut>
+          <EuiSpacer size="xs" />
+        </>
       )}
       {data?.changePoints ? (
         <SpikeAnalysisTable

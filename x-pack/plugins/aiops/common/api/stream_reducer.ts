@@ -47,7 +47,7 @@ export function streamReducer(
         return cp;
       });
       return { ...state, changePoints };
-    case API_ACTION_NAME.ERROR:
+    case API_ACTION_NAME.ADD_ERROR:
       return { ...state, errors: [...state.errors, action.payload] };
     case API_ACTION_NAME.RESET:
       return initialState;
