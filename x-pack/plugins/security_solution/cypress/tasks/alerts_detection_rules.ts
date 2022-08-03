@@ -14,6 +14,7 @@ import {
   DELETE_RULE_ACTION_BTN,
   DELETE_RULE_BULK_BTN,
   LOAD_PREBUILT_RULES_BTN,
+  LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN,
   RULES_TABLE_INITIAL_LOADING_INDICATOR,
   RULES_TABLE_REFRESH_INDICATOR,
   RULES_TABLE_AUTOREFRESH_INDICATOR,
@@ -50,6 +51,8 @@ import {
   SELECTED_RULES_NUMBER_LABEL,
   REFRESH_SETTINGS_POPOVER,
   REFRESH_SETTINGS_SWITCH,
+  ELASTIC_RULES_BTN,
+  BULK_EXPORT_ACTION_BTN,
 } from '../screens/alerts_detection_rules';
 import { ALL_ACTIONS } from '../screens/rule_details';
 import { LOADING_INDICATOR } from '../screens/security_header';
@@ -168,6 +171,12 @@ export const loadPrebuiltDetectionRules = () => {
     .should('be.disabled');
 };
 
+export const loadPrebuiltDetectionRulesFromHeaderBtn = () => {
+  cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN)
+    .pipe(($el) => $el.trigger('click'))
+    .should('not.exist');
+};
+
 export const openIntegrationsPopover = () => {
   cy.get(INTEGRATIONS_POPOVER).click();
 };
@@ -246,10 +255,6 @@ export const changeRowsPerPageTo = (rowsCount: number) => {
   cy.get(rowsPerPageSelector(rowsCount))
     .pipe(($el) => $el.trigger('click'))
     .should('not.exist');
-};
-
-export const changeRowsPerPageTo100 = () => {
-  changeRowsPerPageTo(100);
 };
 
 export const goToPage = (pageNumber: number) => {
@@ -331,4 +336,14 @@ export const mockGlobalClock = () => {
    */
 
   cy.clock(Date.now(), ['setInterval', 'clearInterval', 'Date']);
+};
+
+export const switchToElasticRules = () => {
+  cy.get(ELASTIC_RULES_BTN).click();
+  waitForRulesTableToBeRefreshed();
+};
+
+export const bulkExportRules = () => {
+  cy.get(BULK_ACTIONS_BTN).click();
+  cy.get(BULK_EXPORT_ACTION_BTN).click();
 };

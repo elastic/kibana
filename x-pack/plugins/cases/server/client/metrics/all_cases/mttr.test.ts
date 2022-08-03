@@ -21,7 +21,9 @@ const getAuthorizationFilter = jest.fn().mockResolvedValue({});
 
 const clientArgs = {
   logger,
-  caseService,
+  services: {
+    caseService,
+  },
   authorization: { getAuthorizationFilter },
 } as unknown as CasesClientArgs;
 
@@ -100,11 +102,13 @@ describe('MTTR', () => {
                   Object {
                     "arguments": Array [
                       Object {
+                        "isQuoted": false,
                         "type": "literal",
                         "value": "cases.attributes.created_at",
                       },
                       "gte",
                       Object {
+                        "isQuoted": false,
                         "type": "literal",
                         "value": "2022-04-28T15:18:00.000Z",
                       },
@@ -115,11 +119,13 @@ describe('MTTR', () => {
                   Object {
                     "arguments": Array [
                       Object {
+                        "isQuoted": false,
                         "type": "literal",
                         "value": "cases.attributes.created_at",
                       },
                       "lte",
                       Object {
+                        "isQuoted": false,
                         "type": "literal",
                         "value": "2022-04-28T15:22:00.000Z",
                       },
@@ -134,16 +140,14 @@ describe('MTTR', () => {
               Object {
                 "arguments": Array [
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "cases.attributes.owner",
                   },
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "cases",
-                  },
-                  Object {
-                    "type": "literal",
-                    "value": false,
                   },
                 ],
                 "function": "is",

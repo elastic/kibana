@@ -5,13 +5,14 @@
  * 2.0.
  */
 import { Chance } from 'chance';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import {
+  elasticsearchClientMock,
+  ElasticsearchClientMock,
+} from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { DEFAULT_PIT_KEEP_ALIVE, defineEsPitRoute, esPitInputSchema } from './es_pit';
-import { CspAppService } from '../../lib/csp_app_services';
-import { CspAppContext } from '../../plugin';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { createCspRequestHandlerContextMock } from '../../mocks';
 
 describe('ES Point in time API endpoint', () => {
   const chance = new Chance();
@@ -23,13 +24,8 @@ describe('ES Point in time API endpoint', () => {
 
   it('validate the API route path', () => {
     const router = httpServiceMock.createRouter();
-    const cspContext: CspAppContext = {
-      logger: loggingSystemMock.createLogger(),
-      service: new CspAppService(),
-      security: securityMock.createSetup(),
-    };
 
-    defineEsPitRoute(router, cspContext);
+    defineEsPitRoute(router);
 
     const [config] = router.post.mock.calls[0];
     expect(config.path).toEqual('/internal/cloud_security_posture/es_pit');
@@ -37,18 +33,10 @@ describe('ES Point in time API endpoint', () => {
 
   it('should accept to a user with fleet.all privilege', async () => {
     const router = httpServiceMock.createRouter();
-    const cspContext: CspAppContext = {
-      logger: loggingSystemMock.createLogger(),
-      service: new CspAppService(),
-      security: securityMock.createSetup(),
-    };
 
-    defineEsPitRoute(router, cspContext);
+    defineEsPitRoute(router);
 
-    const mockContext = {
-      fleet: { authz: { fleet: { all: true } } },
-    };
-
+    const mockContext = createCspRequestHandlerContextMock();
     const mockResponse = httpServerMock.createResponseFactory();
     const mockRequest = httpServerMock.createKibanaRequest();
     const [context, req, res] = [mockContext, mockRequest, mockResponse];
@@ -61,17 +49,11 @@ describe('ES Point in time API endpoint', () => {
 
   it('should reject to a user without fleet.all privilege', async () => {
     const router = httpServiceMock.createRouter();
-    const cspContext: CspAppContext = {
-      logger: loggingSystemMock.createLogger(),
-      service: new CspAppService(),
-      security: securityMock.createSetup(),
-    };
 
-    defineEsPitRoute(router, cspContext);
+    defineEsPitRoute(router);
 
-    const mockContext = {
-      fleet: { authz: { fleet: { all: false } } },
-    };
+    const mockContext = createCspRequestHandlerContextMock();
+    mockContext.fleet.authz.fleet.all = false;
 
     const mockResponse = httpServerMock.createResponseFactory();
     const mockRequest = httpServerMock.createKibanaRequest();
@@ -85,22 +67,15 @@ describe('ES Point in time API endpoint', () => {
 
   it('should return the newly created PIT ID from ES', async () => {
     const router = httpServiceMock.createRouter();
-    const cspContext: CspAppContext = {
-      logger: loggingSystemMock.createLogger(),
-      service: new CspAppService(),
-      security: securityMock.createSetup(),
-    };
 
-    defineEsPitRoute(router, cspContext);
+    defineEsPitRoute(router);
 
     const pitId = chance.string();
     mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
     mockEsClient.openPointInTime.mockImplementation(() => Promise.resolve({ id: pitId }));
 
-    const mockContext = {
-      fleet: { authz: { fleet: { all: true } } },
-      core: { elasticsearch: { client: { asCurrentUser: mockEsClient } } },
-    };
+    const mockContext = createCspRequestHandlerContextMock();
+    mockContext.core.elasticsearch.client.asCurrentUser = mockEsClient as ElasticsearchClientMock;
 
     const indexName = chance.string();
     const keepAlive = chance.string();

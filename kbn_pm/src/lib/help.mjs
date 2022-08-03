@@ -44,13 +44,11 @@ export async function getHelp(cmdName = undefined) {
     return ['', ...cmdLines(0, cmd)].join('\n');
   }
 
-  const lines = [
+  return [
     'Usage:',
     '  yarn kbn <command> [...flags]',
     '',
     'Commands:',
     ...COMMANDS.map((cmd) => cmdLines(2, cmd)).flat(),
-  ];
-
-  return lines.join('\n');
+  ].join('\n');
 }

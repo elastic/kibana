@@ -7,14 +7,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { KBN_LOAD_MARKS } from '@kbn/core-mount-utils-browser-internal';
 import { CoreSystem } from './core_system';
 import { ApmSystem } from './apm_system';
-import { KBN_LOAD_MARKS } from './utils';
+
+import { LOAD_BOOTSTRAP_START } from './events';
 
 /** @internal */
 export async function __kbnBootstrap__() {
   performance.mark(KBN_LOAD_MARKS, {
-    detail: 'bootstrap_started',
+    detail: LOAD_BOOTSTRAP_START,
   });
 
   const injectedMetadata = JSON.parse(

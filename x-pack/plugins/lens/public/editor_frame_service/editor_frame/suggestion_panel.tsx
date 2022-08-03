@@ -40,7 +40,6 @@ import {
 } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import { getDatasourceExpressionsByLayers } from './expression_helpers';
-import { trackUiEvent, trackSuggestionEvent } from '../../lens_ui_telemetry';
 import {
   getMissingIndexPattern,
   validateDatasourceAndVisualization,
@@ -345,7 +344,6 @@ export function SuggestionPanel({
 
   function rollbackToCurrentVisualization() {
     if (lastSelectedSuggestion !== -1) {
-      trackSuggestionEvent('back_to_current');
       setLastSelectedSuggestion(-1);
       dispatchLens(rollbackSuggestion());
       dispatchLens(applyChanges());
@@ -411,7 +409,6 @@ export function SuggestionPanel({
               ExpressionRenderer={AutoRefreshExpressionRenderer}
               key={index}
               onSelect={() => {
-                trackUiEvent('suggestion_clicked');
                 if (lastSelectedSuggestion === index) {
                   rollbackToCurrentVisualization();
                 } else {
@@ -455,7 +452,6 @@ export function SuggestionPanel({
                 size="xs"
                 iconType="refresh"
                 onClick={() => {
-                  trackUiEvent('suggestion_confirmed');
                   dispatchLens(submitSuggestion());
                 }}
               >

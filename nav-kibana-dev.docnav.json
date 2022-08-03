@@ -153,6 +153,9 @@
       "label": "Contributors Newsletters",
       "items": [
         {
+          "id": "kibJuly2022ContributorNewsletter"
+        },
+        {
           "id": "kibJune2022ContributorNewsletter"
         },
         {
@@ -531,6 +534,12 @@
             },
             {
               "id": "kibDevDocsOpsDevCliRunner"
+            },
+            {
+              "id": "kibDevDocsOpsGetRepoFiles"
+            },
+            {
+              "id": "kibDevDocsOpsRepoSourceClassifier"
             }
           ]
         }
