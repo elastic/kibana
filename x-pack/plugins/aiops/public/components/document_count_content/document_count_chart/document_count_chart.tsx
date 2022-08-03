@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { DualBrush, DualBrushAnnotation } from '@kbn/aiops-components';
-import { getWindowParameters } from '@kbn/aiops-utils';
+import { getSnappedWindowParameters, getWindowParameters } from '@kbn/aiops-utils';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
@@ -148,6 +148,14 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chartPointsSplit, timeRangeEarliest, timeRangeLatest, interval]);
 
+  const snapTimestamps = useMemo(() => {
+    return adjustedChartPoints
+      .map((d) => d.time)
+      .filter(function (arg: unknown): arg is number {
+        return typeof arg === 'number';
+      });
+  }, [adjustedChartPoints]);
+
   const timefilterUpdateHandler = useCallback(
     (ranges: { from: number; to: number }) => {
       data.query.timefilter.timefilter.setTime({
@@ -189,9 +197,10 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
           xDomain.min,
           xDomain.max + interval
         );
-        setOriginalWindowParameters(wp);
-        setWindowParameters(wp);
-        brushSelectionUpdateHandler(wp, true);
+        const wpSnap = getSnappedWindowParameters(wp, snapTimestamps);
+        setOriginalWindowParameters(wpSnap);
+        setWindowParameters(wpSnap);
+        brushSelectionUpdateHandler(wpSnap, true);
       }
     }
   };
@@ -280,6 +289,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
               max={timeRangeLatest + interval}
               onChange={onWindowParametersChange}
               marginLeft={mlBrushMarginLeft}
+              snapTimestamps={snapTimestamps}
               width={mlBrushWidth}
             />
           </div>
