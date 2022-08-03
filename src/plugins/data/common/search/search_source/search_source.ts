@@ -331,9 +331,8 @@ export class SearchSource {
    * Set a searchSource that this source should inherit from
    * @param  {SearchSource} parent - the parent searchSource
    * @param  {SearchSourceOptions} options - the inherit options
-   * @return {this} - chainable
    */
-  setParent(parent?: ISearchSource, options: SearchSourceOptions = {}) {
+  setParent(parent?: ISearchSource, options: SearchSourceOptions = {}): this {
     this.parent = parent as SearchSource;
     this.inheritOptions = options;
     return this;
@@ -341,9 +340,8 @@ export class SearchSource {
 
   /**
    * Get the parent of this SearchSource
-   * @return {undefined|searchSource}
    */
-  getParent() {
+  getParent(): SearchSource | undefined {
     return this.parent;
   }
 
@@ -408,9 +406,8 @@ export class SearchSource {
 
   /**
    * Completely destroy the SearchSource.
-   * @return {undefined}
    */
-  destroy() {
+  destroy(): void {
     this.requestStartHandlers.length = 0;
   }
 
@@ -604,13 +601,12 @@ export class SearchSource {
    * @param  {object} data - the current merged data
    * @param  {*} val - the value at `key`
    * @param  {*} key - The key of `val`
-   * @return {undefined}
    */
   private mergeProp<K extends keyof SearchSourceFields>(
     data: SearchRequest,
     val: SearchSourceFields[K],
     key: K
-  ) {
+  ): false | void {
     val = typeof val === 'function' ? val(this) : val;
     if (val == null || !key) return;
 
@@ -994,7 +990,6 @@ export class SearchSource {
    * The produced expression from the returned AST will return the `datatable` structure.
    * If the `asDatatable` option is truthy or omitted, the generator will use the `esdsl` function to perform the search.
    * When the `aggs` field is present, it will use the `esaggs` function instead.
-   * @returns The expression AST.
    */
   toExpressionAst({ asDatatable = true }: ExpressionAstOptions = {}): ExpressionAstExpression {
     const searchRequest = this.mergeProps();
