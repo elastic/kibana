@@ -193,6 +193,7 @@ describe('getSavedSearch', () => {
     const savedSearch = await getSavedSearch('ccf1af80-2297-11ec-86e0-1155ffb9c7a7', {
       savedObjectsClient,
       search,
+      savedObjectsTagging: undefined,
     });
 
     expect(savedObjectsClient.resolve).toHaveBeenCalled();
