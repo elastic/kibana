@@ -50,7 +50,6 @@ export interface FilterItemProps {
   disableRemove: boolean;
   color: 'plain' | 'subdued';
   index: number;
-  destination?: string;
 }
 
 export function FilterItem({
@@ -63,9 +62,8 @@ export function FilterItem({
   disableRemove,
   color,
   index,
-  destination,
 }: FilterItemProps) {
-  const { dispatch, dataView } = useContext(FiltersEditorContextType);
+  const { dispatch, dataView, dropTarget } = useContext(FiltersEditorContextType);
   const conditionalOperationType = getConditionalOperationType(filter);
   const panelRef = useRef<HTMLDivElement | null>(null);
 
@@ -152,7 +150,7 @@ export function FilterItem({
   return (
     <div ref={panelRef}>
       <DropOperationSwitcher
-        isVisible={Boolean(destination === path && panelRef?.current)}
+        isVisible={Boolean(dropTarget === path && panelRef?.current)}
         portalRef={panelRef?.current}
       />
       {conditionalOperationType ? (
@@ -162,7 +160,6 @@ export function FilterItem({
           filters={Array.isArray(filter) ? filter : filter.meta?.params}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           reverseBackground={!reverseBackground}
-          destination={destination}
         />
       ) : (
         <EuiDroppable droppableId={path} spacing="s" isCombineEnabled>

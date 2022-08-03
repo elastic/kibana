@@ -38,7 +38,7 @@ export function FiltersEditor({
   disableAnd = false,
 }: FiltersEditorProps) {
   const [state, dispatch] = useReducer(filtersEditorReducer, { filters });
-  const [destination, setDestination] = useState('');
+  const [dropTarget, setDropTarget] = useState('');
 
   useEffect(() => {
     if (state.filters !== filters) {
@@ -57,8 +57,6 @@ export function FiltersEditor({
             conditionalType: ConditionTypes.AND,
           },
         });
-
-        setDestination('');
       }
 
       if (source && combine) {
@@ -70,20 +68,21 @@ export function FiltersEditor({
             conditionalType: ConditionTypes.OR,
           },
         });
-        setDestination('');
+
       }
+
+      setDropTarget('');
     },
     []
   );
 
   const onDragActive: DragDropContextProps['onDragUpdate'] = (initial) => {
-    // console.log('initial', initial);
     if (initial.destination) {
-      setDestination(initial.destination.droppableId);
+      setDropTarget(initial.destination.droppableId);
     }
 
     if (initial.combine) {
-      setDestination(initial.combine.droppableId);
+      setDropTarget(initial.combine.droppableId);
     }
   };
 
@@ -93,6 +92,7 @@ export function FiltersEditor({
         globalParams: { disableOr, disableAnd, maxDepth },
         dataView,
         dispatch,
+        dropTarget
       }}
     >
       <EuiDragDropContext onDragEnd={onDragEnd} onDragUpdate={onDragActive}>
@@ -101,7 +101,6 @@ export function FiltersEditor({
           conditionType={rootLevelConditionType}
           path={''}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-          destination={destination}
         />
       </EuiDragDropContext>
     </FiltersEditorContextType.Provider>

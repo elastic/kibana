@@ -18,6 +18,7 @@ interface FiltersEditorContextType {
     disableOr: boolean;
     disableAnd: boolean;
   };
+  dropTarget: string;
 }
 
 export const FiltersEditorContextType = React.createContext<FiltersEditorContextType>(
