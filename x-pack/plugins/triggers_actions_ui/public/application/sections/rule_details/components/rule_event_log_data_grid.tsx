@@ -115,7 +115,7 @@ const numErroredActionsDisplay = i18n.translate(
 const numErroredActionsToolTip = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.erroredActionsToolTip',
   {
-    defaultMessage: 'The number of actions that failed',
+    defaultMessage: 'The number of failed actions.',
   }
 );
 
