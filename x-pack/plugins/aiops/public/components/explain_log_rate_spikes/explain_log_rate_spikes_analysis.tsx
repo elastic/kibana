@@ -7,10 +7,13 @@
 
 import React, { useEffect, FC } from 'react';
 
+import { EuiEmptyPrompt } from '@elastic/eui';
+
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ProgressControls } from '@kbn/aiops-components';
 import { useFetchStream } from '@kbn/aiops-utils';
 import type { WindowParameters } from '@kbn/aiops-utils';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
 import type { Query } from '@kbn/es-query';
 
@@ -85,6 +88,8 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     start();
   }
 
+  const showSpikeAnalysisTable = data?.changePoints.length > 0;
+
   return (
     <>
       <ProgressControls
@@ -94,7 +99,28 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
         onRefresh={startHandler}
         onCancel={cancel}
       />
-      {data?.changePoints ? (
+      {!isRunning && !showSpikeAnalysisTable && (
+        <EuiEmptyPrompt
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.aiops.explainLogRateSpikesPage.noResultsPromptTitle"
+                defaultMessage="The analysis did not return any results."
+              />
+            </h2>
+          }
+          titleSize="xs"
+          body={
+            <p>
+              <FormattedMessage
+                id="xpack.aiops.explainLogRateSpikesPage.noResultsPromptBody"
+                defaultMessage="Try to adjust the baseline and deviation time ranges and rerun the analysis. If you still get no results, there might be no statistically significant entities contributing to this spike in log rates."
+              />
+            </p>
+          }
+        />
+      )}
+      {showSpikeAnalysisTable && (
         <SpikeAnalysisTable
           changePoints={data.changePoints}
           loading={isRunning}
@@ -103,7 +129,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
           onSelectedChangePoint={onSelectedChangePoint}
           selectedChangePoint={selectedChangePoint}
         />
-      ) : null}
+      )}
     </>
   );
 };

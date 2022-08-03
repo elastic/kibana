@@ -27,6 +27,7 @@ import {
   getValueFromAccessor,
   getSubtypeByGaugeType,
   getGoalConfig,
+  computeMinMax,
 } from './utils';
 import './index.scss';
 import { GaugeCentralMajorMode } from '../../common/types';
@@ -119,27 +120,6 @@ function getTitle(
   return major || fallbackTitle || '';
 }
 
-const calculateRealRangeValueMin = (
-  relativeRangeValue: number,
-  { min, max }: { min: number; max: number }
-) => {
-  if (isFinite(relativeRangeValue)) {
-    return relativeRangeValue * ((max - min) / 100);
-  }
-  return min;
-};
-
-const calculateRealRangeValueMax = (
-  relativeRangeValue: number,
-  { min, max }: { min: number; max: number }
-) => {
-  if (isFinite(relativeRangeValue)) {
-    return relativeRangeValue * ((max - min) / 100);
-  }
-
-  return max;
-};
-
 const getPreviousSectionValue = (value: number, bands: number[]) => {
   // bands value is equal to the stop. The purpose of this value is coloring the previous section, which is smaller, then the band.
   // So, the smaller value should be taken. For the first element -1, for the next - middle value of the previous section.
@@ -176,24 +156,13 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
         bands: number[],
         percentageMode?: boolean
       ) => {
-        const { rangeMin, rangeMax, range }: CustomPaletteState = paletteConfig.params!;
-        const minRealValue = bands[0];
-        const maxRealValue = bands[bands.length - 1];
-        let min = rangeMin;
-        let max = rangeMax;
-
         let stops = paletteConfig.params?.stops ?? [];
 
         if (percentageMode) {
           stops = bands.map((v) => v * 100);
         }
 
-        if (range === 'percent') {
-          const minMax = { min: minRealValue, max: maxRealValue };
-
-          min = calculateRealRangeValueMin(min, minMax);
-          max = calculateRealRangeValueMax(max, minMax);
-        }
+        const { min, max } = computeMinMax(paletteConfig, bands);
 
         return paletteService
           .get(paletteConfig?.name ?? 'custom')

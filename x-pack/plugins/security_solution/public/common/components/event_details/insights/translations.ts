@@ -34,6 +34,13 @@ export const PROCESS_ANCESTRY_ERROR = i18n.translate(
   }
 );
 
+export const PROCESS_ANCESTRY_EMPTY = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.insights.related_alerts_by_process_ancestry_empty',
+  {
+    defaultMessage: 'There are no related alerts by process ancestry.',
+  }
+);
+
 export const SESSION_LOADING = i18n.translate(
   'xpack.securitySolution.alertDetails.overview.insights.related_alerts_by_source_event_loading',
   { defaultMessage: 'Loading related alerts by source event' }
@@ -43,6 +50,13 @@ export const SESSION_ERROR = i18n.translate(
   'xpack.securitySolution.alertDetails.overview.insights.related_alerts_by_session_error',
   {
     defaultMessage: 'Failed to load related alerts by session',
+  }
+);
+
+export const SESSION_EMPTY = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.insights.related_alerts_by_session_empty',
+  {
+    defaultMessage: 'There are no related alerts by session',
   }
 );
 
@@ -63,6 +77,13 @@ export const SOURCE_EVENT_ERROR = i18n.translate(
   'xpack.securitySolution.alertDetails.overview.insights.related_alerts_by_source_event_error',
   {
     defaultMessage: 'Failed to load related alerts by source event',
+  }
+);
+
+export const SOURCE_EVENT_EMPTY = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.insights.related_alerts_by_source_event_empty',
+  {
+    defaultMessage: 'There are no related alerts by source event',
   }
 );
 
