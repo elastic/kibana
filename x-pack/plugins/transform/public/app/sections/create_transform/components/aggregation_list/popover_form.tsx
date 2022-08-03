@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -114,7 +114,6 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
   const [field, setField] = useState<string | string[]>(
     isPivotAggsConfigWithUiSupport(defaultData) ? defaultData.field : ''
   );
-  const [isJSONValid, setIsJSONValid] = useState<boolean>(true);
 
   const [percents, setPercents] = useState(getDefaultPercents(defaultData));
   const [validPercents, setValidPercents] = useState(agg === PIVOT_SUPPORTED_AGGS.PERCENTILES);
@@ -271,14 +270,14 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
     formValid = validAggName && aggConfigDef.isValid();
   }
 
-  useEffect(() => {
+  const isJSONValid = useMemo(() => {
     if (isFilterBooleanAgg(aggConfigDef) && isPivotAggsConfigWithExtra<unknown>(aggConfigDef)) {
       try {
         // @ts-ignore Partial type but we still need to check if parse-able or not
-        JSON.parse(aggConfigDef.aggConfig?.aggTypeConfig?.filterAggConfig);
-        setIsJSONValid(true);
+        return !!JSON.parse(aggConfigDef.aggConfig?.aggTypeConfig?.filterAggConfig);
       } catch (e) {
-        setIsJSONValid(false);
+        // eslint-disable-next-line no-console
+        console.error(`Invalid JSON for aggregation definition\n${e}`);
       }
     }
   }, [aggConfigDef]);
