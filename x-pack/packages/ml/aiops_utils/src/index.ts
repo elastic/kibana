@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { getWindowParameters } from './get_window_parameters';
+export { getSnappedWindowParameters, getWindowParameters } from './get_window_parameters';
 export type { WindowParameters } from './get_window_parameters';
 export { streamFactory } from './stream_factory';
 export { useFetchStream } from './use_fetch_stream';
