@@ -16,7 +16,7 @@ jest.mock('./parse', () => ({
   insertOrReplaceFormulaColumn: jest.fn().mockReturnValue({}),
 }));
 
-jest.mock('../../../loader', () => ({
+jest.mock('../../../../indexpattern_service/loader', () => ({
   convertDataViewIntoLensIndexPattern: jest.fn((v) => v),
 }));
 
