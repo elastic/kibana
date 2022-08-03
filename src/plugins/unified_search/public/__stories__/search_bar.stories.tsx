@@ -439,6 +439,15 @@ storiesOf('SearchBar', module)
       showSubmitButton: false,
     } as SearchBarProps)
   )
+  .add('show only query bar and timepicker without submit', () =>
+    wrapSearchBarInContext({
+      showDatePicker: true,
+      showFilterBar: false,
+      showAutoRefreshOnly: false,
+      showQueryInput: true,
+      showSubmitButton: false,
+    } as SearchBarProps)
+  )
   .add('with filter bar on but pinning option is hidden from menus', () =>
     wrapSearchBarInContext({
       showDatePicker: false,
