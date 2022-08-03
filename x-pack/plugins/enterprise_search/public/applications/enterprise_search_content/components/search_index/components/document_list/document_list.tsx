@@ -171,6 +171,10 @@ export const DocumentList: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPopover
+            aria-label={i18n.translate(
+              'xpack.enterpriseSearch.content.searchIndex.documents.documentList.docsPerPage',
+              { defaultMessage: 'Document count per page dropdown' }
+            )}
             button={docsPerPageButton}
             isOpen={isPopoverOpen}
             closePopover={() => {
