@@ -9,6 +9,7 @@
 export { ScopedClusterClient } from './scoped_cluster_client';
 export { ClusterClient } from './cluster_client';
 export { configureClient } from './configure_client';
+export { AgentManager } from './agent_manager';
 export { getRequestDebugMeta, getErrorMessage } from './log_query_and_deprecation';
 export {
   PRODUCT_RESPONSE_HEADER,
