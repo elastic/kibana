@@ -61,7 +61,7 @@ describe('fetchClusterHealth', () => {
     ]);
     expect(esClient.search).toHaveBeenCalledWith({
       index:
-        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.cluster_stats-*,metrics-elasticsearch.cluster_stats-*',
+        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.stack_monitoring.cluster_stats-*,metrics-elasticsearch.stack_monitoring.cluster_stats-*',
       filter_path: [
         'hits.hits._source.cluster_state.status',
         'hits.hits._source.elasticsearch.cluster.stats.status',
@@ -108,6 +108,8 @@ describe('fetchClusterHealth', () => {
     await fetchClusterHealth(esClient, [{ clusterUuid: '1', clusterName: 'foo1' }]);
 
     // @ts-ignore
-    expect(params.index).toBe('.monitoring-es-*,metrics-elasticsearch.cluster_stats-*');
+    expect(params.index).toBe(
+      '.monitoring-es-*,metrics-elasticsearch.stack_monitoring.cluster_stats-*'
+    );
   });
 });

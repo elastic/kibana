@@ -95,7 +95,7 @@ describe('fetchLogstashVersions', () => {
     await fetchLogstashVersions(esClient, clusters, size);
     expect(params).toStrictEqual({
       index:
-        '*:.monitoring-logstash-*,.monitoring-logstash-*,*:metrics-logstash.node_stats-*,metrics-logstash.node_stats-*',
+        '*:.monitoring-logstash-*,.monitoring-logstash-*,*:metrics-logstash.stack_monitoring.node_stats-*,metrics-logstash.stack_monitoring.node_stats-*',
       filter_path: ['aggregations'],
       body: {
         size: 0,
@@ -151,6 +151,8 @@ describe('fetchLogstashVersions', () => {
     });
     await fetchLogstashVersions(esClient, clusters, size);
     // @ts-ignore
-    expect(params.index).toBe('.monitoring-logstash-*,metrics-logstash.node_stats-*');
+    expect(params.index).toBe(
+      '.monitoring-logstash-*,metrics-logstash.stack_monitoring.node_stats-*'
+    );
   });
 });

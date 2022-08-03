@@ -89,7 +89,7 @@ describe('fetchDiskUsageNodeStats', () => {
     await fetchDiskUsageNodeStats(esClient, clusters, duration, size);
     expect(esClient.search).toHaveBeenCalledWith({
       index:
-        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.node_stats-*,metrics-elasticsearch.node_stats-*',
+        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.stack_monitoring.node_stats-*,metrics-elasticsearch.stack_monitoring.node_stats-*',
       filter_path: ['aggregations'],
       body: {
         size: 0,
@@ -150,6 +150,8 @@ describe('fetchDiskUsageNodeStats', () => {
     });
     await fetchDiskUsageNodeStats(esClient, clusters, duration, size);
     // @ts-ignore
-    expect(params.index).toBe('.monitoring-es-*,metrics-elasticsearch.node_stats-*');
+    expect(params.index).toBe(
+      '.monitoring-es-*,metrics-elasticsearch.stack_monitoring.node_stats-*'
+    );
   });
 });

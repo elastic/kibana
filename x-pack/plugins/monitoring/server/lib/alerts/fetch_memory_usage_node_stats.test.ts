@@ -117,7 +117,7 @@ describe('fetchMemoryUsageNodeStats', () => {
     await fetchMemoryUsageNodeStats(esClient, clusters, startMs, endMs, size);
     expect(params).toStrictEqual({
       index:
-        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.node_stats-*,metrics-elasticsearch.node_stats-*',
+        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.stack_monitoring.node_stats-*,metrics-elasticsearch.stack_monitoring.node_stats-*',
       filter_path: ['aggregations'],
       body: {
         size: 0,
@@ -168,6 +168,8 @@ describe('fetchMemoryUsageNodeStats', () => {
     });
     await fetchMemoryUsageNodeStats(esClient, clusters, startMs, endMs, size);
     // @ts-ignore
-    expect(params.index).toBe('.monitoring-es-*,metrics-elasticsearch.node_stats-*');
+    expect(params.index).toBe(
+      '.monitoring-es-*,metrics-elasticsearch.stack_monitoring.node_stats-*'
+    );
   });
 });

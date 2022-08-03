@@ -150,7 +150,7 @@ describe('fetchIndexShardSize', () => {
     await fetchIndexShardSize(esClient, clusters, threshold, shardIndexPatterns, size);
     expect(esClient.search).toHaveBeenCalledWith({
       index:
-        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.index-*,metrics-elasticsearch.index-*',
+        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.stack_monitoring.index-*,metrics-elasticsearch.stack_monitoring.index-*',
       filter_path: ['aggregations.clusters.buckets'],
       body: {
         size: 0,
@@ -211,6 +211,6 @@ describe('fetchIndexShardSize', () => {
     });
     await fetchIndexShardSize(esClient, clusters, threshold, shardIndexPatterns, size);
     // @ts-ignore
-    expect(params.index).toBe('.monitoring-es-*,metrics-elasticsearch.index-*');
+    expect(params.index).toBe('.monitoring-es-*,metrics-elasticsearch.stack_monitoring.index-*');
   });
 });

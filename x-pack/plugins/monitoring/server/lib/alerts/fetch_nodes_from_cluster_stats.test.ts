@@ -159,7 +159,7 @@ describe('fetchNodesFromClusterStats', () => {
     await fetchNodesFromClusterStats(esClient, clusters);
     expect(params).toStrictEqual({
       index:
-        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.cluster_stats-*,metrics-elasticsearch.cluster_stats-*',
+        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.stack_monitoring.cluster_stats-*,metrics-elasticsearch.stack_monitoring.cluster_stats-*',
       filter_path: ['aggregations.clusters.buckets'],
       body: {
         size: 0,
@@ -210,6 +210,8 @@ describe('fetchNodesFromClusterStats', () => {
     });
     await fetchNodesFromClusterStats(esClient, clusters);
     // @ts-ignore
-    expect(params.index).toBe('.monitoring-es-*,metrics-elasticsearch.cluster_stats-*');
+    expect(params.index).toBe(
+      '.monitoring-es-*,metrics-elasticsearch.stack_monitoring.cluster_stats-*'
+    );
   });
 });

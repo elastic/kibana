@@ -83,7 +83,7 @@ describe('fetchClusters', () => {
     await fetchClusters(esClient);
     expect(esClient.search).toHaveBeenCalledWith({
       index:
-        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.cluster_stats-*,metrics-elasticsearch.cluster_stats-*',
+        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.stack_monitoring.cluster_stats-*,metrics-elasticsearch.stack_monitoring.cluster_stats-*',
       filter_path: [
         'hits.hits._source.cluster_settings.cluster.metadata.display_name',
         'hits.hits._source.cluster_uuid',
@@ -125,6 +125,8 @@ describe('fetchClusters', () => {
     });
     await fetchClusters(esClient);
     // @ts-ignore
-    expect(params.index).toBe('.monitoring-es-*,metrics-elasticsearch.cluster_stats-*');
+    expect(params.index).toBe(
+      '.monitoring-es-*,metrics-elasticsearch.stack_monitoring.cluster_stats-*'
+    );
   });
 });

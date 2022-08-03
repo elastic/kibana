@@ -67,7 +67,7 @@ describe('fetchElasticsearchVersions', () => {
     await fetchElasticsearchVersions(esClient, clusters, size);
     expect(esClient.search).toHaveBeenCalledWith({
       index:
-        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.cluster_stats-*,metrics-elasticsearch.cluster_stats-*',
+        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.stack_monitoring.cluster_stats-*,metrics-elasticsearch.stack_monitoring.cluster_stats-*',
       filter_path: [
         'hits.hits._source.cluster_stats.nodes.versions',
         'hits.hits._source.elasticsearch.cluster.stats.nodes.versions',
@@ -110,6 +110,8 @@ describe('fetchElasticsearchVersions', () => {
     });
     await fetchElasticsearchVersions(esClient, clusters, size);
     // @ts-ignore
-    expect(params.index).toBe('.monitoring-es-*,metrics-elasticsearch.cluster_stats-*');
+    expect(params.index).toBe(
+      '.monitoring-es-*,metrics-elasticsearch.stack_monitoring.cluster_stats-*'
+    );
   });
 });
