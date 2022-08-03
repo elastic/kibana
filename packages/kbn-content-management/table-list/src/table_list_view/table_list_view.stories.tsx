@@ -33,17 +33,22 @@ export default {
 const argTypes = getStoryArgTypes();
 
 let mockItems: UserContentCommonSchema[];
-
+const itemTypes = ['foo', 'bar', 'baz', 'elastic'];
 const createMockItems = (total: number) => {
-  mockItems = [...Array(total)].map((_, i) => ({
-    id: i.toString(),
-    references: [],
-    updatedAt: moment().subtract(i, 'day').format('YYYY-MM-DDTHH:mm:ss'),
-    attributes: {
-      title: chance.sentence({ words: 5 }),
-      description: `Description of item ${i}`,
-    },
-  }));
+  mockItems = [...Array(total)].map((_, i) => {
+    const type = itemTypes[Math.floor(Math.random() * 4)];
+
+    return {
+      id: i.toString(),
+      references: [],
+      updatedAt: moment().subtract(i, 'day').format('YYYY-MM-DDTHH:mm:ss'),
+      attributes: {
+        title: chance.sentence({ words: 5 }),
+        description: `Description of item ${i}`,
+        type,
+      },
+    };
+  });
 };
 
 createMockItems(500);
@@ -52,6 +57,7 @@ export const TableListView = (params: Params) => {
   return (
     <TableListViewProvider {...getStoryServices(params, action)}>
       <Component
+        // Added key to force a refresh of the component state
         key={`${params.initialFilter}-${params.initialPageSize}`}
         findItems={(searchQuery) => {
           const hits = mockItems
@@ -77,6 +83,14 @@ export const TableListView = (params: Params) => {
                 action('Delete item(s)')(
                   items.map(({ attributes: { title } }) => title).join(', ')
                 );
+              }
+            : undefined
+        }
+        customTableColumn={
+          params.showCustomColumn
+            ? {
+                field: 'attributes.type',
+                name: 'Type',
               }
             : undefined
         }

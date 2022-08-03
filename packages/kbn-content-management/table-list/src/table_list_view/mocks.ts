@@ -73,6 +73,10 @@ export const getStoryArgTypes = () => ({
     control: 'boolean',
     defaultValue: true,
   },
+  showCustomColumn: {
+    control: 'boolean',
+    defaultValue: false,
+  },
   numberOfItemsToRender: {
     control: {
       type: 'number',
