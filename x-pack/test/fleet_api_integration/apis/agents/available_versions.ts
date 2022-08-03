@@ -14,6 +14,7 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
+  const log = getService('log');
 
   const VERSIONS_FILE_PATH = 'x-pack/plugins/fleet/target/';
   const FILENAME = 'agent_versions_list.json';
@@ -23,9 +24,23 @@ export default function (providerContext: FtrProviderContext) {
     await fs.writeFile(path.resolve(VERSIONS_FILE_PATH, FILENAME), json);
   };
 
+  const removeVersionsFile = async () => {
+    try {
+      const existingFile = fs.readFile(path.join(VERSIONS_FILE_PATH, FILENAME));
+
+      if (!!existingFile) {
+        await fs.unlink(path.join(VERSIONS_FILE_PATH, FILENAME));
+      }
+    } catch (error) {
+      log.error('Error removing versions file');
+      log.error(error);
+    }
+  };
+
   describe('Agent available_versions API', () => {
     describe('GET /api/fleet/agents/available_versions', () => {
       it('should fail if no file was generated at build time', async () => {
+        await removeVersionsFile();
         await supertest.get(`/api/fleet/agents/available_versions`).expect(500);
       });
     });
