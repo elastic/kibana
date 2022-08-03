@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Filter } from '@kbn/es-query';
+import { AggregateQuery, Filter, Query } from '@kbn/es-query';
 
 export interface FilterableEmbeddable {
   getFilters: () => Filter[];
+  getQuery: () => Query | AggregateQuery | undefined;
 }
 
 export function isFilterableEmbeddable(incoming: unknown): incoming is FilterableEmbeddable {

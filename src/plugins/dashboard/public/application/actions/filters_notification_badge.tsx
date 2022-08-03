@@ -16,6 +16,7 @@ import { Action, IncompatibleActionError } from '../../services/ui_actions';
 import { toMountPoint } from '../../services/kibana_react';
 import { IEmbeddable, isErrorEmbeddable } from '../../services/embeddable';
 import { dashboardFilterNotificationBadge } from '../../dashboard_strings';
+import { AggregateQuery, isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
 
 export const BADGE_FILTERS_NOTIFICATION = 'ACTION_FILTERS_NOTIFICATION';
 
@@ -53,11 +54,19 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
   }
 
   public isCompatible = async ({ embeddable }: FiltersNotificationActionContext) => {
+    if (
+      isErrorEmbeddable(embeddable) ||
+      !embeddable.getRoot().isContainer ||
+      !isFilterableEmbeddable(embeddable)
+    ) {
+      return false;
+    }
+
+    const query = embeddable.getQuery();
     return (
-      !isErrorEmbeddable(embeddable) &&
-      embeddable.getRoot().isContainer &&
-      isFilterableEmbeddable(embeddable) &&
-      embeddable.getFilters().length > 0
+      embeddable.getFilters().length > 0 ||
+      (isOfQueryType(query) && query.query !== '') ||
+      isOfAggregateQueryType(query as AggregateQuery)
     );
   };
 

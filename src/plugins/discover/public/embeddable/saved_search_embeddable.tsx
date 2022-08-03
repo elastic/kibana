@@ -557,6 +557,10 @@ export class SavedSearchEmbeddable
     );
   }
 
+  public getQuery() {
+    return this.savedSearch.searchSource.getFields().query;
+  }
+
   public destroy() {
     super.destroy();
     if (this.searchProps) {

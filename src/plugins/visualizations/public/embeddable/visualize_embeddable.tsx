@@ -199,6 +199,10 @@ export class VisualizeEmbeddable
     return mapAndFlattenFilters(_.cloneDeep(filters));
   }
 
+  public getQuery() {
+    return this.getInput().savedVis?.data.searchSource?.query;
+  }
+
   public getInspectorAdapters = () => {
     if (!this.handler || (this.inspectorAdapters && !Object.keys(this.inspectorAdapters).length)) {
       return undefined;

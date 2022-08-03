@@ -874,12 +874,16 @@ export class Embeddable
   }
 
   public getFilters() {
-    if (!this.savedVis) {
-      throw new Error('savedVis is required for getFilters');
-    }
     return mapAndFlattenFilters(
-      this.deps.injectFilterReferences(this.savedVis.state.filters, this.savedVis.references)
+      this.deps.injectFilterReferences(
+        this.savedVis?.state.filters ?? [],
+        this.savedVis?.references ?? []
+      )
     );
+  }
+
+  public getQuery() {
+    return this.savedVis?.state.query;
   }
 
   public getSavedVis(): Readonly<Document | undefined> {

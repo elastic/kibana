@@ -423,14 +423,14 @@ export class DashboardPlugin
         application,
         embeddable.getStateTransfer()
       );
-      const panelLevelFiltersAction = new FiltersNotificationBadge(
+      const panelLevelFiltersNotification = new FiltersNotificationBadge(
         theme,
         overlays,
         uiSettings,
         editPanelAction
       );
-      uiActions.registerAction(panelLevelFiltersAction);
-      uiActions.attachAction(PANEL_BADGE_TRIGGER, panelLevelFiltersAction.id);
+      uiActions.registerAction(panelLevelFiltersNotification);
+      uiActions.attachAction(PANEL_BADGE_TRIGGER, panelLevelFiltersNotification.id);
 
       const copyToDashboardAction = new CopyToDashboardAction(
         theme,
