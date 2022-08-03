@@ -224,9 +224,7 @@ export function DiscoverMainRoute(props: Props) {
 
   return (
     <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
-      <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated}>
-        <Discover />
-      </AnalyticsNoDataPage>
+      <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated}>{Discover()}</AnalyticsNoDataPage>
     </AnalyticsNoDataPageKibanaProvider>
   );
 }
