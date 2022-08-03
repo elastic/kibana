@@ -451,6 +451,13 @@ export const getReferenceConfiguration = ({
     groups: groupsToShow.map(({ config = [], id, label, dataTestSubj, valid }) => ({
       groupId: id,
       groupLabel: getAxisName(label, { isHorizontal }),
+      dimensionEditorGroupLabel: i18n.translate(
+        'xpack.lens.indexPattern.referenceLineDimensionEditorLabel',
+        {
+          defaultMessage: '{groupLabel} reference line',
+          values: { groupLabel: getAxisName(label, { isHorizontal }) },
+        }
+      ),
       accessors: config.map(({ forAccessor, color }) => getSingleColorConfig(forAccessor, color)),
       filterOperations: isNumericMetric,
       supportsMoreColumns: true,
@@ -463,6 +470,9 @@ export const getReferenceConfiguration = ({
             defaultMessage: 'Reference line value',
           }),
         ],
+        headingLabel: i18n.translate('xpack.lens.staticValue.headingLabel', {
+          defaultMessage: 'Placement',
+        }),
       },
       supportFieldFormat: false,
       dataTestSubj,

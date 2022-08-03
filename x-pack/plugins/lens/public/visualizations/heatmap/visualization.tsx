@@ -200,6 +200,11 @@ export const getHeatmapVisualization = ({
           groupLabel: i18n.translate('xpack.lens.heatmap.cellValueLabel', {
             defaultMessage: 'Cell value',
           }),
+          paramEditorCustomProps: {
+            headingLabel: i18n.translate('xpack.lens.heatmap.headingLabel', {
+              defaultMessage: 'Value',
+            }),
+          },
           accessors: state.valueAccessor
             ? [
                 // When data is not available and the range type is numeric, return a placeholder while refreshing

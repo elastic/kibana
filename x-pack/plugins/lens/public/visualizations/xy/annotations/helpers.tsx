@@ -402,6 +402,13 @@ export const getAnnotationsConfiguration = ({
       {
         groupId: 'xAnnotations',
         groupLabel,
+        dimensionEditorGroupLabel: i18n.translate(
+          'xpack.lens.indexPattern.annotationsDimensionEditorLabel',
+          {
+            defaultMessage: '{groupLabel} annotation',
+            values: { groupLabel },
+          }
+        ),
         accessors: getAnnotationsAccessorColorConfig(layer),
         dataTestSubj: 'lnsXY_xAnnotationsPanel',
         invalid: !hasDateHistogram,

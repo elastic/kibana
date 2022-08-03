@@ -279,7 +279,7 @@ export const getXyVisualization = ({
         {
           groupId: 'breakdown',
           groupLabel: i18n.translate('xpack.lens.xyChart.splitSeries', {
-            defaultMessage: 'Break down by',
+            defaultMessage: 'Breakdown',
           }),
           accessors: dataLayer.splitAccessor
             ? [
