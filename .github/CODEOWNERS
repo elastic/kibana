@@ -264,7 +264,6 @@ x-pack/plugins/files @elastic/kibana-app-services
 
 # Performance testing
 /packages/kbn-performance-testing-dataset-extractor/  @elastic/kibana-performance-testing
-/packages/kbn-scalability-simulation-generator/  @elastic/kibana-performance-testing
 
 # Quality Assurance
 /src/dev/code_coverage @elastic/kibana-qa
