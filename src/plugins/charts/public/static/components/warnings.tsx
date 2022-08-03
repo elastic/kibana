@@ -6,26 +6,33 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonIcon, EuiPopover } from '@elastic/eui';
+import { EuiButtonEmpty, EuiIcon, EuiNotificationBadge, EuiPopover } from '@elastic/eui';
 import React, { useState } from 'react';
 
 export function Warnings({ warnings }: { warnings: React.ReactNode[] }) {
   const [open, setOpen] = useState(false);
   if (warnings.length === 0) return null;
   return (
-    <EuiPopover
-      isOpen={open}
-      closePopover={() => setOpen(false)}
-      button={<EuiButtonIcon onClick={() => setOpen(!open)} color="warning" iconType="alert" />}
-    >
-      <div style={{ maxWidth: 512 }}>
-        {warnings.map((w, i) => (
-          <React.Fragment key={i}>
-            {w}
-            <br />
-          </React.Fragment>
-        ))}
-      </div>
-    </EuiPopover>
+    <>
+      <EuiPopover
+        isOpen={open}
+        closePopover={() => setOpen(false)}
+        button={
+          <EuiButtonEmpty onClick={() => setOpen(!open)}>
+            <EuiNotificationBadge>{warnings.length}</EuiNotificationBadge>{' '}
+            <EuiIcon color="warning" type="alert" />
+          </EuiButtonEmpty>
+        }
+      >
+        <div style={{ maxWidth: 512 }}>
+          {warnings.map((w, i) => (
+            <React.Fragment key={i}>
+              {w}
+              <br />
+            </React.Fragment>
+          ))}
+        </div>
+      </EuiPopover>
+    </>
   );
 }
