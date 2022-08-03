@@ -5,18 +5,6 @@
  * 2.0.
  */
 
-import { IEsSearchRequest, IEsSearchResponse } from '@kbn/data-plugin/common';
-
-export interface IMyStrategyRequest extends IEsSearchRequest {
-  get_project_id: number;
-  time_from: number;
-  time_to: number;
-  granularity: number;
-}
-export interface IMyStrategyResponse extends IEsSearchResponse {
-  executed_at: number;
-}
-
 export interface TimeRange {
   start: string;
   end: string;
