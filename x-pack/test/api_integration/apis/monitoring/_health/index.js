@@ -13,6 +13,8 @@ import { getLifecycleMethods } from '../data_stream';
 import emptyResponse from './fixtures/response_empty.json';
 import { esBeatsResponse } from './fixtures/response_es_beats';
 
+const METRICBEAT_ARCHIVE =
+  'x-pack/test/api_integration/apis/monitoring/es_archives/_health/metricbeat_8';
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
@@ -38,15 +40,16 @@ export default function ({ getService }) {
       const archives = [
         'x-pack/test/api_integration/apis/monitoring/es_archives/_health/monitoring_es_8',
         'x-pack/test/api_integration/apis/monitoring/es_archives/_health/monitoring_beats_8',
+        METRICBEAT_ARCHIVE,
       ];
       const { setup, tearDown } = getLifecycleMethods(getService);
 
       before('load archive', () => {
-        return Promise.all(archives.map(setup));
+        return setup(archives);
       });
 
       after('unload archive', () => {
-        return tearDown();
+        return tearDown([METRICBEAT_ARCHIVE]);
       });
 
       it('returns the state of the monitoring documents', async () => {
