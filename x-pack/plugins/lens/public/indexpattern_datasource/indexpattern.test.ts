@@ -38,6 +38,7 @@ import {
 import { createMockedFullReference } from './operations/mocks';
 import { cloneDeep } from 'lodash';
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { createMockFramePublicAPI } from '../mocks';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
@@ -166,18 +167,10 @@ const expectedIndexPatterns = {
   },
 };
 
-type DataViewBaseState = Omit<
-  IndexPatternPrivateState,
-  'indexPatternRefs' | 'indexPatterns' | 'existingFields' | 'isFirstExistenceFetch'
->;
-
 const indexPatterns = expectedIndexPatterns;
 
 describe('IndexPattern Data Source', () => {
-  let baseState: Omit<
-    IndexPatternPrivateState,
-    'indexPatternRefs' | 'indexPatterns' | 'existingFields' | 'isFirstExistenceFetch'
-  >;
+  let baseState: IndexPatternPrivateState;
   let indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState>;
 
   beforeEach(() => {
@@ -304,7 +297,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should create a table when there is a formula without aggs', async () => {
-      const queryBaseState: DataViewBaseState = {
+      const queryBaseState: IndexPatternPrivateState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -341,7 +334,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should generate an expression for an aggregated query', async () => {
-      const queryBaseState: DataViewBaseState = {
+      const queryBaseState: IndexPatternPrivateState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -495,7 +488,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should put all time fields used in date_histograms to the esaggs timeFields parameter if not ignoring global time range', async () => {
-      const queryBaseState: DataViewBaseState = {
+      const queryBaseState: IndexPatternPrivateState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -554,7 +547,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should pass time shift parameter to metric agg functions', async () => {
-      const queryBaseState: DataViewBaseState = {
+      const queryBaseState: IndexPatternPrivateState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -593,7 +586,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should wrap filtered metrics in filtered metric aggregation', async () => {
-      const queryBaseState: DataViewBaseState = {
+      const queryBaseState: IndexPatternPrivateState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -725,7 +718,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should add time_scale and format function if time scale is set and supported', async () => {
-      const queryBaseState: DataViewBaseState = {
+      const queryBaseState: IndexPatternPrivateState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -810,7 +803,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should put column formatters after calculated columns', async () => {
-      const queryBaseState: DataViewBaseState = {
+      const queryBaseState: IndexPatternPrivateState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -861,7 +854,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should rename the output from esaggs when using flat query', () => {
-      const queryBaseState: DataViewBaseState = {
+      const queryBaseState: IndexPatternPrivateState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -916,7 +909,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should not put date fields used outside date_histograms to the esaggs timeFields parameter', async () => {
-      const queryBaseState: DataViewBaseState = {
+      const queryBaseState: IndexPatternPrivateState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -955,7 +948,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should call optimizeEsAggs once per operation for which it is available', () => {
-      const queryBaseState: DataViewBaseState = {
+      const queryBaseState: IndexPatternPrivateState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -1013,7 +1006,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should update anticipated esAggs column IDs based on the order of the optimized agg expression builders', () => {
-      const queryBaseState: DataViewBaseState = {
+      const queryBaseState: IndexPatternPrivateState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -1102,7 +1095,7 @@ describe('IndexPattern Data Source', () => {
       });
 
       it('should collect expression references and append them', async () => {
-        const queryBaseState: DataViewBaseState = {
+        const queryBaseState: IndexPatternPrivateState = {
           currentIndexPatternId: '1',
           layers: {
             first: {
@@ -1139,7 +1132,7 @@ describe('IndexPattern Data Source', () => {
       });
 
       it('should keep correct column mapping keys with reference columns present', async () => {
-        const queryBaseState: DataViewBaseState = {
+        const queryBaseState: IndexPatternPrivateState = {
           currentIndexPatternId: '1',
           layers: {
             first: {
@@ -1182,7 +1175,7 @@ describe('IndexPattern Data Source', () => {
 
       it('should topologically sort references', () => {
         // This is a real example of count() + count()
-        const queryBaseState: DataViewBaseState = {
+        const queryBaseState: IndexPatternPrivateState = {
           currentIndexPatternId: '1',
           layers: {
             first: {
@@ -1271,9 +1264,6 @@ describe('IndexPattern Data Source', () => {
   describe('#insertLayer', () => {
     it('should insert an empty layer into the previous state', () => {
       const state = {
-        indexPatternRefs: [],
-        existingFields: {},
-        indexPatterns: expectedIndexPatterns,
         layers: {
           first: {
             indexPatternId: '1',
@@ -1287,7 +1277,6 @@ describe('IndexPattern Data Source', () => {
           },
         },
         currentIndexPatternId: '1',
-        isFirstExistenceFetch: false,
       };
       expect(indexPatternDatasource.insertLayer(state, 'newLayer')).toEqual({
         ...state,
@@ -1306,10 +1295,6 @@ describe('IndexPattern Data Source', () => {
   describe('#removeLayer', () => {
     it('should remove a layer', () => {
       const state = {
-        indexPatternRefs: [],
-        existingFields: {},
-        isFirstExistenceFetch: false,
-        indexPatterns: expectedIndexPatterns,
         layers: {
           first: {
             indexPatternId: '1',
@@ -2538,6 +2523,14 @@ describe('IndexPattern Data Source', () => {
               } as DatatableColumn,
             ],
           },
+        },
+        dataViews: {
+          ...createMockFramePublicAPI().dataViews,
+          indexPatterns: expectedIndexPatterns,
+          indexPatternRefs: Object.values(expectedIndexPatterns).map(({ id, title }) => ({
+            id,
+            title,
+          })),
         },
       } as unknown as FramePublicAPI;
     });
