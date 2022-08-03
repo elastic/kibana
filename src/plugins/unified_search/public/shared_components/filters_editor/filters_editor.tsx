@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useReducer, useCallback } from 'react';
+import React, { useEffect, useReducer, useCallback, useState } from 'react';
 import { EuiDragDropContext, DragDropContextProps } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
@@ -38,6 +38,7 @@ export function FiltersEditor({
   disableAnd = false,
 }: FiltersEditorProps) {
   const [state, dispatch] = useReducer(filtersEditorReducer, { filters });
+  const [destination, setDestination] = useState('');
 
   useEffect(() => {
     if (state.filters !== filters) {
@@ -56,6 +57,8 @@ export function FiltersEditor({
             conditionalType: ConditionTypes.AND,
           },
         });
+
+        setDestination('');
       }
 
       if (source && combine) {
@@ -67,10 +70,22 @@ export function FiltersEditor({
             conditionalType: ConditionTypes.OR,
           },
         });
+        setDestination('');
       }
     },
     []
   );
+
+  const onDragActive: DragDropContextProps['onDragUpdate'] = (initial) => {
+    // console.log('initial', initial);
+    if (initial.destination) {
+      setDestination(initial.destination.droppableId);
+    }
+
+    if (initial.combine) {
+      setDestination(initial.combine.droppableId);
+    }
+  };
 
   return (
     <FiltersEditorContextType.Provider
@@ -80,12 +95,13 @@ export function FiltersEditor({
         dispatch,
       }}
     >
-      <EuiDragDropContext onDragEnd={onDragEnd}>
+      <EuiDragDropContext onDragEnd={onDragEnd} onDragUpdate={onDragActive}>
         <FilterGroup
           filters={state.filters}
           conditionType={rootLevelConditionType}
           path={''}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+          destination={destination}
         />
       </EuiDragDropContext>
     </FiltersEditorContextType.Provider>

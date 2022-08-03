@@ -17,7 +17,7 @@ export const DropOperationSwitcher = ({
   isVisible: boolean;
   portalRef?: HTMLElement | null;
 }) =>
-  portalRef && isVisible ? (
+  portalRef ? (
     <EuiPortal insert={{ sibling: portalRef, position: 'before' }}>
       <div
         className={css`
@@ -39,4 +39,6 @@ export const DropOperationSwitcher = ({
         </EuiFlexGroup>
       </div>
     </EuiPortal>
-  ) : null;
+  ) : (
+    <div>'Hello'</div>
+  );

@@ -22,6 +22,7 @@ export interface FilterGroupProps {
   path: Path;
   timeRangeForSuggestionsOverride?: boolean;
   reverseBackground?: boolean;
+  destination?: string;
 }
 
 const Delimiter = ({ conditionType }: { conditionType: ConditionTypes }) =>
@@ -49,6 +50,7 @@ export const FilterGroup = ({
   path,
   timeRangeForSuggestionsOverride,
   reverseBackground = false,
+  destination,
 }: FilterGroupProps) => {
   const {
     globalParams: { maxDepth, disableOr, disableAnd },
@@ -78,6 +80,7 @@ export const FilterGroup = ({
                 disableRemove={removeDisabled}
                 color={color}
                 index={index}
+                destination={destination}
               />
             </EuiFlexItem>
 

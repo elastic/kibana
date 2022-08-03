@@ -16,6 +16,7 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiPanel,
+  EuiPortal,
 } from '@elastic/eui';
 import { buildEmptyFilter, FieldFilter, Filter, getFilterParams } from '@kbn/es-query';
 import { DataViewField } from '@kbn/data-views-plugin/common';
@@ -50,6 +51,7 @@ export interface FilterItemProps {
   disableRemove: boolean;
   color: 'plain' | 'subdued';
   index: number;
+  destination?: string;
 }
 
 export function FilterItem({
@@ -62,10 +64,11 @@ export function FilterItem({
   disableRemove,
   color,
   index,
+  destination,
 }: FilterItemProps) {
   const { dispatch, dataView } = useContext(FiltersEditorContextType);
   const conditionalOperationType = getConditionalOperationType(filter);
-  const panelRef = useRef<HTMLDivElement | null>(null);
+  let panelRef = useRef<HTMLElement | null>(null);
 
   let field: DataViewField | undefined;
   let operator: Operator | undefined;
@@ -149,7 +152,10 @@ export function FilterItem({
 
   return (
     <div ref={panelRef}>
-      <DropOperationSwitcher isVisible={false} portalRef={panelRef?.current} />
+      <DropOperationSwitcher
+        isVisible={Boolean(destination === path && panelRef?.current)}
+        panelRef={panelRef?.current}
+      />
       {conditionalOperationType ? (
         <FilterGroup
           path={path}
@@ -157,6 +163,7 @@ export function FilterItem({
           filters={Array.isArray(filter) ? filter : filter.meta?.params}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           reverseBackground={!reverseBackground}
+          destination={destination}
         />
       ) : (
         <EuiDroppable droppableId={path} spacing="s" isCombineEnabled>
