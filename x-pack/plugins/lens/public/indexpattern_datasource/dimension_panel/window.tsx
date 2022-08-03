@@ -106,7 +106,7 @@ export function Window({
         })}
         helpText={i18n.translate('xpack.lens.indexPattern.window.help', {
           defaultMessage:
-            'Additional time range filter aligned with the end of the global time range',
+            'Reduces the time range specified in the global time filter from the end of the global time filter.',
         })}
         error={
           shouldNotUseWindow
