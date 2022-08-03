@@ -62,6 +62,7 @@ describe('ALL - Add Integration', () => {
     cy.get('.euiTableCellContent').get('.euiPopover__anchor').get(`[aria-label="Open"]`).click();
     cy.contains(/^Delete integration$/).click();
     closeModalIfVisible();
+    cy.contains(/^Deleted integration 'osquery_manager-1'$/);
     cy.contains(/^Settings$/).click();
     cy.contains(/^Uninstall Osquery Manager$/).click();
     closeModalIfVisible();
@@ -100,7 +101,10 @@ describe('ALL - Add Integration', () => {
     navigateTo('app/osquery/packs');
     findAndClickButton('Add pack');
     findFormFieldByRowsLabelAndType('Name', 'Integration');
-    findFormFieldByRowsLabelAndType('Scheduled agent policies (optional)', '{downArrow} {enter}');
+    findFormFieldByRowsLabelAndType(
+      'Scheduled agent policies (optional)',
+      'Agent policy 1 {downArrow} {enter}'
+    );
     findAndClickButton('Add query');
     cy.react('EuiComboBox', {
       props: { placeholder: 'Search for a query to run, or write a new query below' },

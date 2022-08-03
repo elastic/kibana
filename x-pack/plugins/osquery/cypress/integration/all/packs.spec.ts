@@ -85,6 +85,7 @@ describe('ALL - Packs', () => {
       findAndClickButton('Update pack');
       cy.contains('Save and deploy changes');
       findAndClickButton('Save and deploy changes');
+      cy.contains(`Successfully updated "${PACK_NAME}" pack`);
     });
 
     it('should trigger validation when saved query is being chosen', () => {
@@ -283,6 +284,7 @@ describe('ALL - Packs', () => {
         .click();
       cy.contains(/^Delete integration$/).click();
       closeModalIfVisible();
+      cy.contains(/^Deleted integration 'osquery_manager-3'$/);
       navigateTo('app/osquery/packs');
       cy.contains(REMOVING_PACK).click();
       cy.contains(`${REMOVING_PACK} details`).should('exist');
