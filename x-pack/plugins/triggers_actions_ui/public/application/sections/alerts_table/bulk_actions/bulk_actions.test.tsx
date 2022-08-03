@@ -66,6 +66,7 @@ describe('AlertsTable.BulkActions', () => {
 
   const alertsTableConfiguration = {
     id: '',
+    casesFeatureId: 'test',
     columns,
     sort: [],
     useInternalFlyout: jest.fn().mockImplementation(() => ({

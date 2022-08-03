@@ -22,6 +22,7 @@ const props = {
   } as unknown as EcsFieldsResponse,
   alertsTableConfiguration: {
     id: 'test',
+    casesFeatureId: 'testCases',
     columns: [
       {
         id: AlertsField.name,
