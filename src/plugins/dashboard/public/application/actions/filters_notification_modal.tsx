@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -93,7 +93,7 @@ export function FiltersNotificationModal({
           <EuiForm component="div">
             {queryString !== '' && (
               <EuiFormRow
-                label="Query"
+                label={dashboardFilterNotificationBadge.getQueryTitle()}
                 display="rowCompressed"
                 css={css`
                   max-width: 100%;
@@ -112,9 +112,7 @@ export function FiltersNotificationModal({
             )}
             {filters && filters.length > 0 && (
               <EuiFormRow
-                label="Filters"
-                // the following makes it so that the filter pills respect the inner padding of the modal body
-                // regardless of what the gutter size is
+                label={dashboardFilterNotificationBadge.getFiltersTitle()}
                 css={css`
                   max-width: 100%;
                 `}

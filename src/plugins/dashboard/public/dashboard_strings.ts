@@ -204,6 +204,14 @@ export const dashboardFilterNotificationBadge = {
     i18n.translate('dashboard.panel.filters.modal.closeButton', {
       defaultMessage: 'Close',
     }),
+  getQueryTitle: () =>
+    i18n.translate('dashboard.panel.filters.modal.queryTitle', {
+      defaultMessage: 'Query',
+    }),
+  getFiltersTitle: () =>
+    i18n.translate('dashboard.panel.filters.modal.filtersTitle', {
+      defaultMessage: 'Filters',
+    }),
 };
 
 /*
