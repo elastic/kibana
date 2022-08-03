@@ -272,7 +272,6 @@ export class MapEmbeddable
   }
 
   public async getQuery() {
-    console.log(this.input);
     let mapState: { query?: Query | AggregateQuery } = {};
     try {
       mapState = JSON.parse(this._savedMap.getAttributes().mapStateJSON ?? '');

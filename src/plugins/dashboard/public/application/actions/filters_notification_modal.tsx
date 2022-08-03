@@ -60,20 +60,20 @@ export function FiltersNotificationModal({
     Promise.all([
       (embeddable as IEmbeddable & FilterableEmbeddable).getFilters(),
       (embeddable as IEmbeddable & FilterableEmbeddable).getQuery(),
-    ]).then(([filters, query]) => {
-      setFilters(filters);
-      if (query) {
-        if (isOfQueryType(query)) {
-          setQueryString(query.query as string);
+    ]).then(([embeddableFilters, embeddableQuery]) => {
+      setFilters(embeddableFilters);
+      if (embeddableQuery) {
+        if (isOfQueryType(embeddableQuery)) {
+          setQueryString(embeddableQuery.query as string);
         } else {
-          const language = getAggregateQueryMode(query);
+          const language = getAggregateQueryMode(embeddableQuery);
           setQueryLanguage(language);
-          setQueryString(query[language as keyof AggregateQuery]);
+          setQueryString(embeddableQuery[language as keyof AggregateQuery]);
         }
       }
       setIsLoading(false);
     });
-  }, []);
+  }, [embeddable]);
 
   const dataViewList: DataView[] = (embeddable.getRoot() as DashboardContainer)?.getAllDataViews();
   const viewMode = embeddable.getInput().viewMode;
