@@ -59,7 +59,7 @@ const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?:
         search: getSearch(),
         savedObjectsClient: getSavedObjects().client,
         spaces: getSpaces(),
-        savedObjectsTagging: getSavedObjectTagging()?.getTaggingApi?.(),
+        savedObjectsTagging: getSavedObjectTagging()?.getTaggingApi(),
       });
     } catch (e) {
       return inputSearchSource;

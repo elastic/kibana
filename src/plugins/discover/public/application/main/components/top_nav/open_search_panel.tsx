@@ -20,7 +20,6 @@ import {
   EuiFlyoutBody,
   EuiTitle,
 } from '@elastic/eui';
-import { SavedObjectFinderUi } from '@kbn/saved-objects-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
 const SEARCH_OBJECT_TYPE = 'search';
@@ -31,12 +30,7 @@ interface OpenSearchPanelProps {
 }
 
 export function OpenSearchPanel(props: OpenSearchPanelProps) {
-  const {
-    core: { uiSettings, savedObjects },
-    addBasePath,
-    capabilities,
-  } = useDiscoverServices();
-
+  const { addBasePath, capabilities, savedObjectsFinder } = useDiscoverServices();
   const hasSavedObjectPermission =
     capabilities.savedObjectsManagement?.edit || capabilities.savedObjectsManagement?.delete;
 
@@ -53,7 +47,7 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <SavedObjectFinderUi
+        <savedObjectsFinder.SavedObjectFinder
           noItemsMessage={
             <FormattedMessage
               id="discover.topNav.openSearchPanel.noSearchesFoundDescription"
@@ -73,8 +67,6 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
             props.onOpenSavedSearch(id);
             props.onClose();
           }}
-          uiSettings={uiSettings}
-          savedObjects={savedObjects}
         />
       </EuiFlyoutBody>
       {hasSavedObjectPermission && (

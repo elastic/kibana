@@ -44,6 +44,7 @@ import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SavedObjectsFinderStart } from '@kbn/saved-objects-finder-plugin/public';
 import { DiscoverAppLocator } from './locator';
 import { getHistory } from './kibana_services';
 import { DiscoverStartPlugins } from './plugin';
@@ -85,6 +86,7 @@ export interface DiscoverServices {
   locator: DiscoverAppLocator;
   expressions: ExpressionsStart;
   savedObjectsTagging?: SavedObjectsTaggingApi;
+  savedObjectsFinder: SavedObjectsFinderStart;
 }
 
 export const buildServices = memoize(function (
@@ -131,5 +133,6 @@ export const buildServices = memoize(function (
     locator,
     expressions: plugins.expressions,
     savedObjectsTagging: plugins.savedObjectsTaggingOss?.getTaggingApi(),
+    savedObjectsFinder: plugins.savedObjectsFinder,
   };
 });

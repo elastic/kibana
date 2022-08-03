@@ -17,6 +17,7 @@
     { "path": "../inspector/tsconfig.json" },
     { "path": "../url_forwarding/tsconfig.json" },
     { "path": "../saved_objects/tsconfig.json" },
+    { "path": "../saved_objects_finder/tsconfig.json" },
     { "path": "../navigation/tsconfig.json" },
     { "path": "../ui_actions/tsconfig.json" },
     { "path": "../home/tsconfig.json" },
