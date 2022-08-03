@@ -20,7 +20,15 @@ export const buildLabelFunction =
   (ofName: (name?: string) => string) =>
   (name?: string, timeScale?: TimeScaleUnit, timeShift?: string) => {
     const rawLabel = ofName(name);
-    return adjustTimeScaleLabelSuffix(rawLabel, undefined, timeScale, undefined, timeShift);
+    return adjustTimeScaleLabelSuffix(
+      rawLabel,
+      undefined,
+      timeScale,
+      undefined,
+      timeShift,
+      undefined,
+      undefined
+    );
   };
 
 export function checkForDataLayerType(layerType: LayerType, name: string) {

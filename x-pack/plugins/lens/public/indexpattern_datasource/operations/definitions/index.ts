@@ -344,6 +344,10 @@ interface BaseOperationDefinitionProps<
    * autocomplete.
    */
   filterable?: boolean | { helpMessage: string };
+  /**
+   * Windowable operations can have a time window defined at the dimension level - under the hood this will be translated into a filter on the defined time field
+   */
+  windowable?: boolean;
   shiftable?: boolean;
 
   getHelpMessage?: (props: HelpProps<C>) => React.ReactNode;
@@ -492,6 +496,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
       kql?: string;
       lucene?: string;
       shift?: string;
+      window?: string;
       usedInMath?: boolean;
     }
   ) => C;

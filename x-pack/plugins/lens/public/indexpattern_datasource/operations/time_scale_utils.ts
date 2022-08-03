@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { unitSuffixesLong } from '../../../common/suffix_formatter';
 import type { TimeScaleUnit } from '../../../common/expressions';
 import type { IndexPatternLayer } from '../types';
@@ -12,12 +13,23 @@ import type { GenericIndexPatternColumn } from './definitions';
 
 export const DEFAULT_TIME_SCALE = 's' as TimeScaleUnit;
 
-function getSuffix(scale: TimeScaleUnit | undefined, shift: string | undefined) {
+function getSuffix(
+  scale: TimeScaleUnit | undefined,
+  shift: string | undefined,
+  window: string | undefined
+) {
   return (
     (shift || scale ? ' ' : '') +
     (scale ? unitSuffixesLong[scale] : '') +
     (shift && scale ? ' ' : '') +
-    (shift ? `-${shift}` : '')
+    (shift ? `-${shift}` : '') +
+    (window ? ' ' : '') +
+    (window
+      ? i18n.translate('xpack.lens.windowSuffix', {
+          defaultMessage: 'last {window}',
+          values: { window },
+        })
+      : '')
   );
 }
 
@@ -26,22 +38,24 @@ export function adjustTimeScaleLabelSuffix(
   previousTimeScale: TimeScaleUnit | undefined,
   newTimeScale: TimeScaleUnit | undefined,
   previousShift: string | undefined,
-  newShift: string | undefined
+  newShift: string | undefined,
+  previousWindow: string | undefined,
+  newWindow: string | undefined
 ) {
   let cleanedLabel = oldLabel;
   // remove added suffix if column had a time scale previously
-  if (previousTimeScale || previousShift) {
-    const suffix = getSuffix(previousTimeScale, previousShift);
+  if (previousTimeScale || previousShift || previousWindow) {
+    const suffix = getSuffix(previousTimeScale, previousShift, previousWindow);
     const suffixPosition = oldLabel.lastIndexOf(suffix);
     if (suffixPosition !== -1) {
       cleanedLabel = oldLabel.substring(0, suffixPosition);
     }
   }
-  if (!newTimeScale && !newShift) {
+  if (!newTimeScale && !newShift && !newWindow) {
     return cleanedLabel;
   }
   // add new suffix if column has a time scale now
-  return `${cleanedLabel}${getSuffix(newTimeScale, newShift)}`;
+  return `${cleanedLabel}${getSuffix(newTimeScale, newShift, newWindow)}`;
 }
 
 export function adjustTimeScaleOnOtherColumnChange<T extends GenericIndexPatternColumn>(
@@ -70,7 +84,9 @@ export function adjustTimeScaleOnOtherColumnChange<T extends GenericIndexPattern
       column.timeScale,
       undefined,
       column.timeShift,
-      column.timeShift
+      column.timeShift,
+      column.window,
+      column.window
     ),
   };
 }
