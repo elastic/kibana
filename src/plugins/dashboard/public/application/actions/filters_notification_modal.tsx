@@ -95,15 +95,12 @@ export function FiltersNotificationModal({
               <EuiFormRow
                 label={dashboardFilterNotificationBadge.getQueryTitle()}
                 display="rowCompressed"
-                css={css`
-                  max-width: 100%;
-                `}
               >
                 <EuiCodeBlock
                   language={queryLanguage}
                   paddingSize="none"
                   transparentBackground
-                  aria-labelledby={`Query: ${queryString}`}
+                  aria-labelledby={`${dashboardFilterNotificationBadge.getQueryTitle()}: ${queryString}`}
                   tabIndex={0} // focus so that keyboard controls will not skip over the code block
                 >
                   {queryString}
@@ -114,7 +111,7 @@ export function FiltersNotificationModal({
               <EuiFormRow
                 label={dashboardFilterNotificationBadge.getFiltersTitle()}
                 css={css`
-                  max-width: 100%;
+                  max-width: fit-content;
                 `}
               >
                 <EuiFlexGroup wrap={true} gutterSize="xs">
