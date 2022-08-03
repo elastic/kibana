@@ -1403,8 +1403,7 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
                 [`saved_object:${savedObjectTypes[0]}/get`]: false,
                 [`saved_object:${savedObjectTypes[1]}/get`]: true,
               },
-              // @ts-expect-error this is wrong on purpose
-              'space:space_1': {
+              'space:space_2': {
                 [mockActions.login]: true,
                 [mockActions.version]: true,
                 [`saved_object:${savedObjectTypes[0]}/get`]: false,
@@ -1414,7 +1413,7 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected resources]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected actions]`
       );
     });
 
@@ -1431,8 +1430,7 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
                 [mockActions.login]: true,
                 [mockActions.version]: true,
               },
-              // @ts-expect-error this is wrong on purpose
-              'space:space_1': {
+              'space:space_2': {
                 [mockActions.login]: true,
                 [mockActions.version]: true,
                 [`saved_object:${savedObjectTypes[0]}/get`]: false,
@@ -1442,7 +1440,7 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected resources]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected actions]`
       );
     });
 
