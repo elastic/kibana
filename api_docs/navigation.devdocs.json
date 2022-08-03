@@ -681,13 +681,7 @@
             "text": "UnifiedSearchPublicPluginStart"
           },
           " | undefined; className?: string | undefined; visible?: boolean | undefined; setMenuMountPoint?: ((menuMount: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.MountPoint",
-            "text": "MountPoint"
-          },
+          "MountPoint",
           "<HTMLElement> | undefined) => void) | undefined; }"
         ],
         "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx",
