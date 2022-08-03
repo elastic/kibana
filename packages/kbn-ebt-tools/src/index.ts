@@ -6,8 +6,4 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test/jest_node',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-scalability-simulation-generator'],
-};
+export * from './performance_metric_events';
