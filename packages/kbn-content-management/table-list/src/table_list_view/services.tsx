@@ -18,6 +18,11 @@ interface SavedObjectsReference {
   id: string;
 }
 
+export type DateFormatter = (props: {
+  value: number;
+  children: (formattedDate: string) => React.ReactElement;
+}) => React.ReactElement;
+
 /**
  * Abstract external services for this component.
  */
@@ -31,6 +36,7 @@ export interface Services {
     references?: SavedObjectsReference[];
   };
   getSearchBarFilters?: () => SearchFilterConfig[];
+  DateFormatterComp?: DateFormatter;
 }
 
 const TableListViewContext = React.createContext<Services | null>(null);

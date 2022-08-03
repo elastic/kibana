@@ -8,6 +8,7 @@
 
 import React from 'react';
 import Chance from 'chance';
+import moment from 'moment';
 import { action } from '@storybook/addon-actions';
 
 import { Params, getStoryArgTypes, getStoryServices } from './mocks';
@@ -37,7 +38,7 @@ const createMockItems = (total: number) => {
   mockItems = [...Array(total)].map((_, i) => ({
     id: i.toString(),
     references: [],
-    updatedAt: '2022-12-07T10:00:00',
+    updatedAt: moment().subtract(i, 'day').format('YYYY-MM-DDTHH:mm:ss'),
     attributes: {
       title: chance.sentence({ words: 5 }),
       description: `Description of item ${i}`,

@@ -11,46 +11,39 @@ import { i18n } from '@kbn/i18n';
 
 import { UpdatedAtField } from './components';
 import type { State, UserContentCommonSchema } from './table_list_view';
-import type { Action, OnFetchItemsSuccessAction } from './actions';
+import type { Action } from './actions';
 
-function getTableState<T extends UserContentCommonSchema>(
-  state: State<T>,
-  action: OnFetchItemsSuccessAction<T>
-) {
-  let tableColumns: State<T>['tableColumns'] = [];
-  let tableSort = state.tableSort;
-  const items = action.data.response.hits;
+let isInitialFetchItems = true;
 
+function onInitialItemsFetch<T extends UserContentCommonSchema>(items: T[]) {
   // We check if the saved object have the "updatedAt" metadata
   // to render or not that column in the table
   const hasUpdatedAtMetadata = Boolean(items.find((item) => Boolean(item.updatedAt)));
 
   if (hasUpdatedAtMetadata) {
     // Add "Last update" column and sort by that column initially
-    tableSort = {
-      field: 'updatedAt' as keyof T,
-      direction: 'desc' as const,
-    };
-
-    tableColumns = [
-      {
-        field: 'updatedAt',
-        name: i18n.translate('contentManagementTableList.lastUpdatedColumnTitle', {
-          defaultMessage: 'Last updated',
-        }),
-        render: (field: string, record: { updatedAt?: string }) => (
-          <UpdatedAtField dateTime={record.updatedAt} />
-        ),
-        sortable: true,
-        width: '150px',
+    return {
+      tableSort: {
+        field: 'updatedAt' as keyof T,
+        direction: 'desc' as const,
       },
-    ];
+      tableColumns: [
+        {
+          field: 'updatedAt',
+          name: i18n.translate('contentManagementTableList.lastUpdatedColumnTitle', {
+            defaultMessage: 'Last updated',
+          }),
+          render: (field: string, record: { updatedAt?: string }) => (
+            <UpdatedAtField dateTime={record.updatedAt} />
+          ),
+          sortable: true,
+          width: '150px',
+        },
+      ],
+    };
   }
 
-  return {
-    tableColumns,
-    tableSort,
-  };
+  return {};
 }
 
 export function reducer<T extends UserContentCommonSchema>(
@@ -66,13 +59,13 @@ export function reducer<T extends UserContentCommonSchema>(
     }
     case 'onFetchItemsSuccess': {
       const items = action.data.response.hits;
-      const isFirstFetch = state.tableColumns === null && state.items.length === 0;
+      // We only get the state on the initial fetch of items
+      // After that we don't want to reset the columns or change the sort after fetching
+      const { tableColumns, tableSort } = isInitialFetchItems
+        ? onInitialItemsFetch(items)
+        : { tableColumns: undefined, tableSort: undefined };
 
-      const tableColumnState =
-        // We only get the state on the initial fetch of items
-        // and tableColumns is still null. After that we don't want to reset
-        // the columns or change the sort after fetching
-        isFirstFetch ? getTableState(state, action) : {};
+      isInitialFetchItems = false;
 
       return {
         ...state,
@@ -80,7 +73,8 @@ export function reducer<T extends UserContentCommonSchema>(
         isFetchingItems: false,
         items: !state.searchQuery ? sortBy<T>(items, 'title') : items,
         totalItems: action.data.response.total,
-        ...tableColumnState,
+        tableColumns: tableColumns ? [...state.tableColumns, ...tableColumns] : state.tableColumns,
+        tableSort: tableSort ?? state.tableSort,
         pagination: {
           ...state.pagination,
           totalItemCount: items.length,

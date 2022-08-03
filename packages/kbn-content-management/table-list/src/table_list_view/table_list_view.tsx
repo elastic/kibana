@@ -129,7 +129,7 @@ function TableListView<T extends UserContentCommonSchema>({
     selectedIds: [],
     tableColumns: [
       {
-        field: 'title',
+        field: 'attributes.title',
         name: i18n.translate('contentManagementTableList.titleColumnName', {
           defaultMessage: 'Title',
         }),
@@ -146,12 +146,10 @@ function TableListView<T extends UserContentCommonSchema>({
         ),
       },
       {
-        field: 'description',
+        field: 'attributes.description',
         name: i18n.translate('contentManagementTableList.descriptionColumnName', {
           defaultMessage: 'Description',
         }),
-        render: (field: keyof T, record: T) => <span>{record.attributes.description}</span>,
-        sortable: true,
       },
     ],
     searchQuery: initialQuery,

@@ -9,10 +9,17 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
-import { FormattedRelative } from '@kbn/i18n-react';
 import moment from 'moment';
 
-export const UpdatedAtField: FC<{ dateTime?: string }> = ({ dateTime }) => {
+import { DateFormatter } from '../services';
+
+const DefaultDateFormatter: DateFormatter = ({ value, children }) =>
+  children(new Date(value).toDateString());
+
+export const UpdatedAtField: FC<{ dateTime?: string; DateFormatterComp?: DateFormatter }> = ({
+  dateTime,
+  DateFormatterComp = DefaultDateFormatter,
+}) => {
   if (!dateTime) {
     return (
       <EuiToolTip
@@ -28,13 +35,13 @@ export const UpdatedAtField: FC<{ dateTime?: string }> = ({ dateTime }) => {
 
   if (updatedAt.diff(moment(), 'days') > -7) {
     return (
-      <FormattedRelative value={new Date(dateTime).getTime()}>
+      <DateFormatterComp value={new Date(dateTime).getTime()}>
         {(formattedDate: string) => (
           <EuiToolTip content={updatedAt.format('LL LT')}>
             <span>{formattedDate}</span>
           </EuiToolTip>
         )}
-      </FormattedRelative>
+      </DateFormatterComp>
     );
   }
   return (
