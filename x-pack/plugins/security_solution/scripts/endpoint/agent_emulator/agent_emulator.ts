@@ -6,19 +6,14 @@
  */
 
 import type { RunFn } from '@kbn/dev-cli-runner';
+import { MainScreen } from './screens/main';
 import { loadEndpointsIfNoneExist } from './services/endpoint_loader';
-import { HORIZONTAL_LINE } from '../common/constants';
 import { EmulatorRunContext } from './services/emulator_run_context';
 
 export const DEFAULT_CHECKIN_INTERVAL = 60_000; // 1m
 export const DEFAULT_ACTION_DELAY = 5_000; // 5s
 
 export const agentEmulatorRunner: RunFn = async (cliContext) => {
-  cliContext.log.write(`
-${HORIZONTAL_LINE}
- Endpoint Agent Emulator
-${HORIZONTAL_LINE}
-`);
   const actionResponseDelay = Number(cliContext.flags.actionDelay) || DEFAULT_ACTION_DELAY;
   const checkinInterval = Number(cliContext.flags.checkinInterval) || DEFAULT_CHECKIN_INTERVAL;
 
@@ -40,11 +35,7 @@ ${HORIZONTAL_LINE}
     emulatorContext.getLogger()
   );
 
-  // TODO:PT Show Main menu
+  new MainScreen().show();
 
   await emulatorContext.whileRunning;
-
-  cliContext.log.write(`
-${HORIZONTAL_LINE}
-`);
 };

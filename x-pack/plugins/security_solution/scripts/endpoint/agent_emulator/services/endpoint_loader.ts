@@ -27,6 +27,10 @@ export const loadEndpointsIfNoneExist = async (
   count: number = 2
 ): Promise<void> => {
   if (!count || (await fetchEndpointMetadataList(kbnClient, { pageSize: 1 })).total > 0) {
+    if (log) {
+      log.verbose('loadEndpointsIfNoneExist(): Endpoints exist. Exiting (nothing was done)');
+    }
+
     return;
   }
 
