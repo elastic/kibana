@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { FileMetadataClient, SavedObjectsFileMetadataClient } from './file_metadata_client';
+export { EsIndexFilesMetadataClient, SavedObjectsFileMetadataClient } from './file_metadata_client';
+export type { FileMetadataClient } from './file_metadata_client';
+export { FileClient } from './file_client';
+export { createEsFileClient, CreateEsFileClientArgs } from './create_es_file_client';
 export type { FileDescriptor } from './file_metadata_client';

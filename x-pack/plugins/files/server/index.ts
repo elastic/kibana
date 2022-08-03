@@ -8,6 +8,9 @@
 import type { PluginInitializerContext } from '@kbn/core/server';
 import { FilesPlugin } from './plugin';
 
+export type { FileMetadataClient } from './file_client';
+export { FileClient, createEsFileClient } from './file_client';
+
 export type { FilesSetup, FilesStart } from './types';
 export type {
   FileShareServiceStart,
