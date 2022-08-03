@@ -1165,7 +1165,7 @@ describe('xy_visualization', () => {
       expect(options.map((o) => o.groupLabel)).toEqual([
         'Horizontal axis',
         'Vertical axis',
-        'Break down by',
+        'Breakdown',
       ]);
     });
 
@@ -1183,7 +1183,7 @@ describe('xy_visualization', () => {
       expect(options.map((o) => o.groupLabel)).toEqual([
         'Vertical axis',
         'Horizontal axis',
-        'Break down by',
+        'Breakdown',
       ]);
     });
 
@@ -1982,7 +1982,7 @@ describe('xy_visualization', () => {
         expect(accessorConfig.triggerIcon).toEqual('disabled');
       });
 
-      it('should show current palette for break down by dimension', () => {
+      it('should show current palette for breakdown dimension', () => {
         const palette = paletteServiceMock.get('mock');
         const customColors = ['yellow', 'green'];
         (palette.getCategoricalColors as jest.Mock).mockReturnValue(customColors);

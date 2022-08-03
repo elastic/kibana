@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiDraggable,
@@ -13,6 +13,8 @@ import {
   EuiFlexItem,
   EuiIcon,
   htmlIdGenerator,
+  EuiPanel,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DragDropBuckets, NewBucketButton } from '../shared_components/buckets';
@@ -55,6 +57,9 @@ export function FieldInputs({
   operationSupportMatrix,
   invalidFields,
 }: FieldInputsProps) {
+  const { euiTheme } = useEuiTheme();
+  const [isDragging, setIsDragging] = useState(false);
+
   const onChangeWrapped = useCallback(
     (values: WrappedValue[]) =>
       onChange(values.filter(removeNewEmptyField).map(({ value }) => value)),
@@ -87,152 +92,155 @@ export function FieldInputs({
     [localValues, indexPattern, handleInputChange]
   );
 
-  // diminish attention to adding fields alternative
-  if (localValues.length === 1) {
-    const [{ value }] = localValues;
-    return (
-      <>
-        <FieldSelect
-          fieldIsInvalid={Boolean(invalidFields?.[0])}
-          currentIndexPattern={indexPattern}
-          existingFields={existingFields}
-          operationByField={operationSupportMatrix.operationByField}
-          selectedOperationType={column?.operationType}
-          selectedField={value}
-          onChoose={onFieldSelectChange}
-        />
-        <NewBucketButton
-          data-test-subj={`indexPattern-terms-add-field`}
-          onClick={() => {
-            handleInputChange([
-              ...localValues,
-              { id: generateId(), value: undefined, isNew: true },
-            ]);
-          }}
-          label={i18n.translate('xpack.lens.indexPattern.terms.addField', {
-            defaultMessage: 'Add field',
-          })}
-          isDisabled={column.params.orderBy.type === 'rare'}
-        />
-      </>
-    );
-  }
-  const disableActions = localValues.length === 2 && localValues.some(({ isNew }) => isNew);
+  const disableActions =
+    (localValues.length === 2 && localValues.some(({ isNew }) => isNew)) ||
+    localValues.length === 1;
   const localValuesFilled = localValues.filter(({ isNew }) => !isNew);
   return (
     <>
-      <DragDropBuckets
-        onDragEnd={(updatedValues: WrappedValue[]) => {
-          handleInputChange(updatedValues);
+      <div
+        style={{
+          backgroundColor: isDragging ? 'transparent' : euiTheme.colors.lightestShade,
+          borderRadius: euiTheme.size.xs,
+          marginBottom: euiTheme.size.xs,
         }}
-        onDragStart={() => {}}
-        droppableId="TOP_TERMS_DROPPABLE_AREA"
-        items={localValues}
       >
-        {localValues.map(({ id, value, isNew }, index) => {
-          // need to filter the available fields for multiple terms
-          // * a scripted field should be removed
-          // * a field of unsupported type should be removed
-          // * a field that has been used
-          // * a scripted field was used in a singular term, should be marked as invalid for multi-terms
-          const filteredOperationByField = Object.keys(operationSupportMatrix.operationByField)
-            .filter((key) => {
-              if (key === value) {
-                return true;
-              }
-              const field = indexPattern.getFieldByName(key);
-              return (
-                !rawValuesLookup.has(key) &&
-                field &&
-                !field.scripted &&
-                supportedTypes.has(field.type)
-              );
-            })
-            .reduce<OperationSupportMatrix['operationByField']>((memo, key) => {
-              memo[key] = operationSupportMatrix.operationByField[key];
-              return memo;
-            }, {});
+        <DragDropBuckets
+          onDragEnd={(updatedValues: WrappedValue[]) => {
+            handleInputChange(updatedValues);
+            setIsDragging(false);
+          }}
+          className="lnsIndexPatternDimensionEditor__droppable"
+          onDragStart={() => {
+            setIsDragging(true);
+          }}
+          droppableId="TOP_TERMS_DROPPABLE_AREA"
+          items={localValues}
+        >
+          {localValues.map(({ id, value, isNew }, index) => {
+            // need to filter the available fields for multiple terms
+            // * a scripted field should be removed
+            // * a field of unsupported type should be removed
+            // * a field that has been used
+            // * a scripted field was used in a singular term, should be marked as invalid for multi-terms
+            const filteredOperationByField = Object.keys(operationSupportMatrix.operationByField)
+              .filter((key) => {
+                if (key === value) {
+                  return true;
+                }
+                const field = indexPattern.getFieldByName(key);
+                if (index === 0) {
+                  return !rawValuesLookup.has(key) && field && supportedTypes.has(field.type);
+                } else {
+                  return (
+                    !rawValuesLookup.has(key) &&
+                    field &&
+                    !field.scripted &&
+                    supportedTypes.has(field.type)
+                  );
+                }
+              })
+              .reduce<OperationSupportMatrix['operationByField']>((memo, key) => {
+                memo[key] = operationSupportMatrix.operationByField[key];
+                return memo;
+              }, {});
 
-          const shouldShowError = Boolean(
-            value &&
-              ((indexPattern.getFieldByName(value)?.scripted && localValuesFilled.length > 1) ||
-                invalidFields?.includes(value))
-          );
-          return (
-            <EuiDraggable
-              style={{ marginBottom: 4 }}
-              spacing="none"
-              index={index}
-              draggableId={value || 'newField'}
-              key={id}
-              disableInteractiveElementBlocking
-            >
-              {(provided) => (
-                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                  <EuiFlexItem grow={false}>{/* Empty for spacing */}</EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon
-                      size="s"
-                      color="subdued"
-                      type="grab"
-                      title={i18n.translate('xpack.lens.indexPattern.terms.dragToReorder', {
-                        defaultMessage: 'Drag to reorder',
-                      })}
-                      data-test-subj={`indexPattern-terms-dragToReorder-${index}`}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
-                    <FieldSelect
-                      fieldIsInvalid={shouldShowError}
-                      currentIndexPattern={indexPattern}
-                      existingFields={existingFields}
-                      operationByField={filteredOperationByField}
-                      selectedOperationType={column.operationType}
-                      selectedField={value}
-                      autoFocus={isNew}
-                      onChoose={(choice) => {
-                        onFieldSelectChange(choice, index);
-                      }}
-                      isInvalid={shouldShowError}
-                      data-test-subj={`indexPattern-dimension-field-${index}`}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <TooltipWrapper
-                      tooltipContent={i18n.translate(
-                        'xpack.lens.indexPattern.terms.deleteButtonDisabled',
-                        {
-                          defaultMessage: 'This function requires a minimum of one field defined',
-                        }
-                      )}
-                      condition={disableActions}
-                    >
-                      <EuiButtonIcon
-                        iconType="trash"
-                        color="danger"
-                        aria-label={i18n.translate(
-                          'xpack.lens.indexPattern.terms.deleteButtonAriaLabel',
-                          {
-                            defaultMessage: 'Delete',
+            const shouldShowError = Boolean(
+              value &&
+                ((indexPattern.getFieldByName(value)?.scripted && localValuesFilled.length > 1) ||
+                  invalidFields?.includes(value))
+            );
+            return (
+              <EuiDraggable
+                spacing="none"
+                index={index}
+                draggableId={value || 'newField'}
+                key={id}
+                disableInteractiveElementBlocking
+              >
+                {(provided) => (
+                  <EuiPanel paddingSize="xs" hasShadow={false} color="transparent">
+                    <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+                      <EuiFlexItem
+                        grow={false}
+                        className="lnsIndexPatternDimensionEditor__droppableItem"
+                      >
+                        <EuiIcon
+                          size="s"
+                          color="text"
+                          type="grab"
+                          title={i18n.translate('xpack.lens.indexPattern.terms.dragToReorder', {
+                            defaultMessage: 'Drag to reorder',
+                          })}
+                          data-test-subj={`indexPattern-terms-dragToReorder-${index}`}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem
+                        grow={true}
+                        style={{ minWidth: 0 }}
+                        className="lnsIndexPatternDimensionEditor__droppableItem"
+                      >
+                        <FieldSelect
+                          fieldIsInvalid={shouldShowError}
+                          currentIndexPattern={indexPattern}
+                          existingFields={existingFields}
+                          operationByField={filteredOperationByField}
+                          selectedOperationType={column.operationType}
+                          selectedField={value}
+                          autoFocus={isNew}
+                          onChoose={(choice) => {
+                            onFieldSelectChange(choice, index);
+                          }}
+                          isInvalid={shouldShowError}
+                          data-test-subj={
+                            localValues.length !== 1
+                              ? `indexPattern-dimension-field-${index}`
+                              : undefined
                           }
-                        )}
-                        title={i18n.translate('xpack.lens.indexPattern.terms.deleteButtonLabel', {
-                          defaultMessage: 'Delete',
-                        })}
-                        onClick={() => {
-                          handleInputChange(localValues.filter((_, i) => i !== index));
-                        }}
-                        data-test-subj={`indexPattern-terms-removeField-${index}`}
-                        isDisabled={disableActions && !isNew}
-                      />
-                    </TooltipWrapper>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              )}
-            </EuiDraggable>
-          );
-        })}
-      </DragDropBuckets>
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <TooltipWrapper
+                          tooltipContent={i18n.translate(
+                            'xpack.lens.indexPattern.terms.deleteButtonDisabled',
+                            {
+                              defaultMessage:
+                                'This function requires a minimum of one field defined',
+                            }
+                          )}
+                          condition={disableActions}
+                        >
+                          <EuiButtonIcon
+                            iconType="trash"
+                            color="danger"
+                            aria-label={i18n.translate(
+                              'xpack.lens.indexPattern.terms.deleteButtonAriaLabel',
+                              {
+                                defaultMessage: 'Delete',
+                              }
+                            )}
+                            title={i18n.translate(
+                              'xpack.lens.indexPattern.terms.deleteButtonLabel',
+                              {
+                                defaultMessage: 'Delete',
+                              }
+                            )}
+                            onClick={() => {
+                              handleInputChange(localValues.filter((_, i) => i !== index));
+                            }}
+                            data-test-subj={`indexPattern-terms-removeField-${index}`}
+                            isDisabled={disableActions && !isNew}
+                          />
+                        </TooltipWrapper>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiPanel>
+                )}
+              </EuiDraggable>
+            );
+          })}
+        </DragDropBuckets>
+      </div>
       <NewBucketButton
         onClick={() => {
           handleInputChange([...localValues, { id: generateId(), value: undefined, isNew: true }]);
@@ -241,7 +249,9 @@ export function FieldInputs({
         label={i18n.translate('xpack.lens.indexPattern.terms.addaFilter', {
           defaultMessage: 'Add field',
         })}
-        isDisabled={localValues.length > MAX_MULTI_FIELDS_SIZE}
+        isDisabled={
+          column.params.orderBy.type === 'rare' || localValues.length > MAX_MULTI_FIELDS_SIZE
+        }
       />
     </>
   );

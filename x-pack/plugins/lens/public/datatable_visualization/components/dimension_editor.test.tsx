@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButtonGroup, EuiComboBox, EuiFieldText } from '@elastic/eui';
+import { EuiButtonGroup } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
 import {
   FramePublicAPI,
@@ -241,57 +241,5 @@ describe('data table dimension editor', () => {
       false
     );
     expect(instance.find('[data-test-subj="lnsDatatable_summaryrow_label"]').exists()).toBe(false);
-  });
-
-  it('should set the summary row function default to "none"', () => {
-    frame.activeData!.first.columns[0].meta.type = 'number';
-    const instance = mountWithIntl(<TableDimensionEditor {...props} />);
-    expect(
-      instance
-        .find('[data-test-subj="lnsDatatable_summaryrow_function"]')
-        .find(EuiComboBox)
-        .prop('selectedOptions')
-    ).toEqual([{ value: 'none', label: 'None' }]);
-
-    expect(instance.find('[data-test-subj="lnsDatatable_summaryrow_label"]').exists()).toBe(false);
-  });
-
-  it('should show the summary row label input ony when summary row is different from "none"', () => {
-    frame.activeData!.first.columns[0].meta.type = 'number';
-    state.columns[0].summaryRow = 'sum';
-    const instance = mountWithIntl(<TableDimensionEditor {...props} />);
-    expect(
-      instance
-        .find('[data-test-subj="lnsDatatable_summaryrow_function"]')
-        .find(EuiComboBox)
-        .prop('selectedOptions')
-    ).toEqual([{ value: 'sum', label: 'Sum' }]);
-
-    expect(
-      instance
-        .find('[data-test-subj="lnsDatatable_summaryrow_label"]')
-        .find(EuiFieldText)
-        .prop('value')
-    ).toBe('Sum');
-  });
-
-  it("should show the correct summary row name when user's changes summary label", () => {
-    frame.activeData!.first.columns[0].meta.type = 'number';
-    state.columns[0].summaryRow = 'sum';
-    state.columns[0].summaryLabel = 'MySum';
-    const instance = mountWithIntl(<TableDimensionEditor {...props} />);
-    expect(
-      instance
-        .find('[data-test-subj="lnsDatatable_summaryrow_function"]')
-        .find(EuiComboBox)
-        .prop('selectedOptions')
-    ).toEqual([{ value: 'sum', label: 'Sum' }]);
-
-    expect(
-      instance
-        .find('[data-test-subj="lnsDatatable_summaryrow_label"]')
-        .find(EuiFieldText)
-        .prop('value')
-    ).toBe('MySum');
   });
 });

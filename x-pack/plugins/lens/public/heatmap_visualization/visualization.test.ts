@@ -151,6 +151,9 @@ describe('heatmap', () => {
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+            },
             groupId: GROUP_ID.CELL,
             groupLabel: 'Cell value',
             accessors: [
@@ -206,6 +209,9 @@ describe('heatmap', () => {
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+            },
             groupId: GROUP_ID.CELL,
             groupLabel: 'Cell value',
             accessors: [],
@@ -259,6 +265,9 @@ describe('heatmap', () => {
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+            },
             groupId: GROUP_ID.CELL,
             groupLabel: 'Cell value',
             accessors: [

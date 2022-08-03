@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiAccordion, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiSpacer, EuiAccordion, EuiTextColor, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { css } from '@emotion/react';
 import { AdvancedOption } from '../operations/definitions';
 
 export function AdvancedOptions(props: { options: AdvancedOption[] }) {
@@ -17,13 +18,21 @@ export function AdvancedOptions(props: { options: AdvancedOption[] }) {
       id="advancedOptionsAccordion"
       arrowProps={{ color: 'primary' }}
       data-test-subj="indexPattern-advanced-accordion"
+      className="lnsIndexPatternDimensionEditor-advancedOptions"
       buttonContent={
-        <EuiText size="s" color={euiTheme.colors.primary}>
-          {i18n.translate('xpack.lens.indexPattern.advancedSettings', {
-            defaultMessage: 'Advanced',
-          })}
-        </EuiText>
+        <EuiTitle size="xxs">
+          <h5>
+            <EuiTextColor color={euiTheme.colors.primary}>
+              {i18n.translate('xpack.lens.indexPattern.advancedSettings', {
+                defaultMessage: 'Advanced',
+              })}
+            </EuiTextColor>
+          </h5>
+        </EuiTitle>
       }
+      css={css`
+        padding: 0 ${euiTheme.size.base} ${euiTheme.size.base};
+      `}
     >
       {props.options.map(({ dataTestSubj, inlineElement }) => (
         <div key={dataTestSubj} data-test-subj={dataTestSubj}>
