@@ -440,6 +440,14 @@
           "label": "Overview"
         },
         {
+          "label": "Initiatives",
+          "items": [
+            {
+              "id": "kibDevDocsOpsPackages"
+            }
+          ]
+        },
+        {
           "label": "CI",
           "items": [
             {
