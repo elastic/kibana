@@ -3421,6 +3421,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-test-helpers-deprecations-getters@link:bazel-bin/packages/core/test-helpers/core-test-helpers-deprecations-getters":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-test-helpers-http-setup-browser@link:bazel-bin/packages/core/test-helpers/core-test-helpers-http-setup-browser":
   version "0.0.0"
   uid ""
@@ -3726,6 +3730,10 @@
   uid ""
 
 "@kbn/server-route-repository@link:bazel-bin/packages/kbn-server-route-repository":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-svg@link:bazel-bin/packages/kbn-shared-svg":
   version "0.0.0"
   uid ""
 
@@ -7301,6 +7309,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-test-helpers-deprecations-getters@link:bazel-bin/packages/core/test-helpers/core-test-helpers-deprecations-getters/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-test-helpers-http-setup-browser@link:bazel-bin/packages/core/test-helpers/core-test-helpers-http-setup-browser/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7590,6 +7602,10 @@
   uid ""
 
 "@types/kbn__server-route-repository@link:bazel-bin/packages/kbn-server-route-repository/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-svg@link:bazel-bin/packages/kbn-shared-svg/npm_module_types":
   version "0.0.0"
   uid ""
 
