@@ -162,7 +162,7 @@ const PRIVATE_LOCATIONS_NOT_ALLOWED_MESSAGE = i18n.translate(
   'xpack.synthetics.monitorManagement.privateLocationsNotAllowedMessage',
   {
     defaultMessage:
-      'You do not have permission to edit private locations. Contact your administrator to request access.',
+      'You do not have permission to add monitors to private locations. Contact your administrator to request access.',
   }
 );
 
