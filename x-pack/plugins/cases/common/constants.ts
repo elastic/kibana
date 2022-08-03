@@ -78,6 +78,8 @@ export const CASE_METRICS_DETAILS_URL = `${CASES_URL}/metrics/{case_id}` as cons
 export const CASES_INTERNAL_URL = '/internal/cases' as const;
 export const INTERNAL_BULK_CREATE_ATTACHMENTS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/attachments/_bulk_create` as const;
+export const INTERNAL_SUGGEST_USER_PROFILES_URL =
+  `${CASES_INTERNAL_URL}/_suggest_user_profiles` as const;
 
 /**
  * Action routes
@@ -131,7 +133,7 @@ export const MAX_TITLE_LENGTH = 64 as const;
  */
 
 export const DEFAULT_FEATURES: CasesFeaturesAllRequired = Object.freeze({
-  alerts: { sync: true, enabled: true },
+  alerts: { sync: true, enabled: true, isExperimental: false },
   metrics: [],
 });
 

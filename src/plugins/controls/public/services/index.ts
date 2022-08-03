@@ -9,6 +9,7 @@
 import { PluginServices } from '@kbn/presentation-util-plugin/public';
 import { ControlsDataViewsService } from './data_views';
 import { ControlsOverlaysService } from './overlays';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { registry as stubRegistry } from './stub';
 import { ControlsPluginStart } from '../types';
 import { ControlsDataService } from './data';

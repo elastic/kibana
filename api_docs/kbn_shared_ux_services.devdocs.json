@@ -488,7 +488,7 @@
             "label": "navigateToUrl",
             "description": [],
             "signature": [
-              "(url: string) => Promise<void>"
+              "(url: string) => void | Promise<void>"
             ],
             "path": "packages/kbn-shared-ux-services/src/services/application.ts",
             "deprecated": false,
