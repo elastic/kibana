@@ -6,12 +6,7 @@
  */
 
 import { ES_FIXED_SIZE_INDEX_BLOB_STORE } from '../../../common/constants';
-import type {
-  FileJSON,
-  FileMetadata,
-  FilesMetrics,
-  UpdatableFileMetadata,
-} from '../../../common/types';
+import type { FileMetadata, FilesMetrics, UpdatableFileMetadata } from '../../../common/types';
 import type { FindFileArgs } from '../../file_service/file_action_types';
 
 export interface GetUsageMetricsArgs {
@@ -134,7 +129,7 @@ export interface FileMetadataClient {
    *
    * @param arg - Filters and other settings to match against
    */
-  findJSON(arg: FindFileArgs & Pagination): Promise<FileJSON[]>;
+  find(arg: FindFileArgs): Promise<FileDescriptor[]>;
   /**
    * Prepare a set of metrics based on the file metadata.
    */

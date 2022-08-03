@@ -6,7 +6,11 @@
  */
 
 import { Logger } from '@kbn/core/server';
+import { pipe, flatMap } from 'lodash/fp';
+import { getFlattenedObject } from '@kbn/std';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { FilesMetrics, FileMetadata } from '../../../../common';
+import type { FindFileArgs } from '../../../file_service';
 import type {
   DeleteArg,
   FileDescriptor,
@@ -14,11 +18,9 @@ import type {
   GetArg,
   GetUsageMetricsArgs,
   ListArg,
-  Pagination,
   UpdateArgs,
+  Pagination,
 } from '../file_metadata_service';
-import { FileJSON, FilesMetrics } from '@kbn/files-plugin/common';
-import { FindFileArgs } from '@kbn/files-plugin/server/file_service';
 
 export class EsIndexFilesMetadataClient<M = unknown> implements FileMetadataClient {
   constructor(
@@ -61,21 +63,78 @@ export class EsIndexFilesMetadataClient<M = unknown> implements FileMetadataClie
     return this.get({ id });
   }
 
-  async list({ page, perPage }: ListArg): Promise<FileDescriptor<M>[]> {
-    const result = await this.esClient.search({
+  private paginationToES({ page = 1, perPage = 50 }: Pagination) {
+    return {
+      size: perPage,
+      from: page === 1 ? 0 : page * perPage,
+    };
+  }
+
+  async list({ page, perPage }: ListArg): Promise<Array<FileDescriptor<M>>> {
+    const result = await this.esClient.search<FileDescriptor<M>['metadata']>({
       index: this.index,
       query: {
         match_all: {},
-      }
+      },
+      ...this.paginationToES({ page, perPage }),
       sort: 'created',
+    });
+
+    return result.hits.hits.map((hit) => {
+      return {
+        id: hit._id,
+        metadata: hit._source!,
+      };
     });
   }
 
-  async getUsageMetrics(arg: GetUsageMetricsArgs): Promise<FilesMetrics> {
-    throw new Error('Not implemented');
+  async find({
+    extension,
+    kind,
+    meta,
+    mimeType,
+    name,
+    page,
+    perPage,
+    status,
+  }: FindFileArgs): Promise<Array<FileDescriptor<M>>> {
+    const toTerms = (field: keyof FileMetadata, value: string[]) =>
+      value.map((v) => ({
+        term: { [field]: v },
+      }));
+
+    const must = [
+      ...(extension ? toTerms('extension', extension) : []),
+      ...(kind ? toTerms('FileKind', kind) : []),
+      ...(mimeType ? toTerms('mime_type', mimeType) : []),
+      ...(name ? toTerms('name', name) : []),
+      ...(status ? toTerms('Status', status) : []),
+      ...(meta
+        ? pipe(
+            getFlattenedObject,
+            Object.entries,
+            flatMap(([key, value]) => toTerms(key as keyof FileMetadata, [value]))
+          )(meta)
+        : []),
+    ].filter(Boolean);
+
+    if (!must.length) {
+      return this.list({ page, perPage });
+    }
+
+    const result = await this.esClient.search<FileMetadata<M>>({
+      query: {
+        bool: {
+          must,
+        },
+      },
+      ...this.paginationToES({ page, perPage }),
+    });
+
+    return result.hits.hits.map((r) => ({ id: r._id, metadata: r._source! }));
   }
 
-  async findJSON(arg: FindFileArgs & Pagination): Promise<Array<FileJSON<M>>> {
+  async getUsageMetrics(arg: GetUsageMetricsArgs): Promise<FilesMetrics> {
     throw new Error('Not implemented');
   }
 }

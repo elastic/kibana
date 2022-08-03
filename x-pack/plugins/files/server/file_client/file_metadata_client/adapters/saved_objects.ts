@@ -18,8 +18,7 @@ import { escapeKuery, KueryNode, nodeBuilder } from '@kbn/es-query';
 
 import { FindFileArgs } from '../../../file_service/file_action_types';
 import { ES_FIXED_SIZE_INDEX_BLOB_STORE } from '../../../../common/constants';
-import type { FileJSON, FileMetadata, FilesMetrics, FileStatus } from '../../../../common/types';
-import { toJSON } from '../../../file/to_json';
+import type { FileMetadata, FilesMetrics, FileStatus } from '../../../../common/types';
 import type {
   FileMetadataClient,
   UpdateArgs,
@@ -83,7 +82,7 @@ export class SavedObjectsFileMetadataClient implements FileMetadataClient {
     }));
   }
 
-  async findJSON({
+  async find({
     kind,
     meta,
     name,
@@ -92,7 +91,7 @@ export class SavedObjectsFileMetadataClient implements FileMetadataClient {
     perPage,
     mimeType,
     extension,
-  }: FindFileArgs & Pagination): Promise<FileJSON[]> {
+  }: FindFileArgs & Pagination): Promise<FileDescriptor[]> {
     const kueryExpressions: KueryNode[] = [];
 
     const addFilters = (fieldName: string, values: string[] = []): void => {
@@ -124,9 +123,10 @@ export class SavedObjectsFileMetadataClient implements FileMetadataClient {
       sortOrder: 'desc',
       sortField: 'created',
     });
-    return result.saved_objects.map((so) =>
-      toJSON(so.id, so.attributes as FileDescriptor['metadata'])
-    );
+    return result.saved_objects.map((so) => ({
+      id: so.id,
+      metadata: so.attributes as FileMetadata,
+    }));
   }
 
   async delete({ id }: { id: string }): Promise<void> {
