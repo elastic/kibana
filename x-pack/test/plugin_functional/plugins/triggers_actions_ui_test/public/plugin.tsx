@@ -57,11 +57,7 @@ const FlyoutBody = ({ alert }: AlertsTableFlyoutBaseProps) => (
 
 const FlyoutHeader: React.FunctionComponent<AlertsTableFlyoutBaseProps> = ({ alert }) => {
   const { 'kibana.alert.rule.name': name } = alert;
-  return (
-    <>
-      <div data-test-subj="alertsFlyoutName">{name}</div>
-    </>
-  );
+  return <div data-test-subj="alertsFlyoutName">{name}</div>;
 };
 
 const useInternalFlyout = () => ({
