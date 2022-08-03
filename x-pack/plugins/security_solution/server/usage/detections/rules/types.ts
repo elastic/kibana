@@ -22,6 +22,7 @@ export interface RulesTypeUsage {
   eql: FeatureTypeUsage;
   machine_learning: FeatureTypeUsage;
   threat_match: FeatureTypeUsage;
+  new_terms: FeatureTypeUsage;
   elastic_total: FeatureTypeUsage;
   custom_total: FeatureTypeUsage;
 }
