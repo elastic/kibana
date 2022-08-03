@@ -108,7 +108,7 @@ export const fetchIndices = async (
     ],
   });
 
-  const indexCounts = await fetchIndexCounts(client, indicesNames);
+  const indexCounts = await fetchIndexCounts(client, indexAndAliasNames);
 
   return indicesNames
     .map((indexName: string) => {
