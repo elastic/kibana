@@ -375,10 +375,6 @@ export const QueryBarTopRow = React.memo(
     }
 
     function renderUpdateButton() {
-      if (!shouldRenderUpdatebutton()) {
-        return null;
-      }
-
       const buttonLabelUpdate = i18n.translate('unifiedSearch.queryBarTopRow.submitButton.update', {
         defaultMessage: 'Needs updating',
       });
@@ -421,16 +417,12 @@ export const QueryBarTopRow = React.memo(
         </EuiFlexItem>
       );
 
-      if (!shouldRenderDatePicker()) {
-        return button;
-      }
-
       return (
         <EuiFlexItem grow={false}>
           <NoDataPopover storage={storage} showNoDataPopover={props.indicateNoData}>
             <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
-              {renderDatePicker()}
-              {button}
+              {shouldRenderDatePicker() ? renderDatePicker() : null}
+              {shouldRenderUpdatebutton() ? button : null}
             </EuiFlexGroup>
           </NoDataPopover>
         </EuiFlexItem>
