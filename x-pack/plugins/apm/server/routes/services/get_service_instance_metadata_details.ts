@@ -6,7 +6,7 @@
  */
 import { merge } from 'lodash';
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '../../../common/processor_event';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   METRICSET_NAME,
   SERVICE_NAME,
