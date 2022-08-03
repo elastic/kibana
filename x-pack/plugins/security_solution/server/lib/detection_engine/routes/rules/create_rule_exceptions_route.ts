@@ -17,9 +17,8 @@ import type {
   ExceptionListItemSchema,
   ExceptionListSchema,
   createExceptionListSchema,
-  ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { exceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { exceptionListItemSchema, ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { exactCheck, formatErrors, validate } from '@kbn/securitysolution-io-ts-utils';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
@@ -163,7 +162,7 @@ export const createExceptionListItems = async ({
   defaultList,
   listsClient,
 }: {
-  items: CreateRuleExceptionListItemSchema[];
+  items: CreateRuleExceptionListItemSchemaDecoded[];
   defaultList: ExceptionListSchema;
   listsClient: ExceptionListClient | null;
 }): Promise<ExceptionListItemSchema[]> => {

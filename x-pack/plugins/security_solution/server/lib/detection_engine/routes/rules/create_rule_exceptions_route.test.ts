@@ -116,7 +116,7 @@ describe('createRuleExceptionsRoute', () => {
 
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
-        message: 'Unable to add exception list to rule - rule with id:"1234" not found',
+        message: 'Unable to add exception to rule - rule with id:"1234" not found',
         status_code: 500,
       });
     });

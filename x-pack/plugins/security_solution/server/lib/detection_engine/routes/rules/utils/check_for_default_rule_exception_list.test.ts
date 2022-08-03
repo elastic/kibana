@@ -6,6 +6,7 @@
  */
 
 import { checkDefaultRuleExceptionListReferences } from './check_for_default_rule_exception_list';
+import { ExceptionListTypeEnum, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 
 describe('checkDefaultRuleExceptionListReferences', () => {
   it('returns undefined if "exceptionLists" is undefined', () => {
@@ -17,7 +18,7 @@ describe('checkDefaultRuleExceptionListReferences', () => {
   });
 
   it('returns "exceptionLists" if it does not contain more than one default rule exception list', () => {
-    const lists = [
+    const lists: ListArray = [
       {
         id: '2',
         list_id: '123',
@@ -39,7 +40,7 @@ describe('checkDefaultRuleExceptionListReferences', () => {
   });
 
   it('throws error if "exceptionLists" contains more than one default rule exception list', () => {
-    const lists = [
+    const lists: ListArray = [
       {
         id: '2',
         list_id: '123',
@@ -53,14 +54,11 @@ describe('checkDefaultRuleExceptionListReferences', () => {
         type: ExceptionListTypeEnum.RULE_DEFAULT,
       },
     ];
-    const result = checkDefaultRuleExceptionListReferences({
-      exceptionLists: lists,
-    });
 
-    expect(
+    expect(() =>
       checkDefaultRuleExceptionListReferences({
         exceptionLists: lists,
       })
-    ).toThrowErrorMatchingInlineSnapshot();
+    ).toThrowErrorMatchingInlineSnapshot(`"More than one default exception list found on rule"`);
   });
 });

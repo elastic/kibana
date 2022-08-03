@@ -67,7 +67,7 @@ export default ({ getService }: FtrProviderContext) => {
       const udpatedRule = await getRule(supertest, log, rule.rule_id);
       const defaultList = udpatedRule.exceptions_list.find((list) => list.type === 'rule_default');
 
-      const itemsWithoutServerGeneratedValues = items.map(({ item_id, ...restOfItem }) => removeExceptionListItemServerGeneratedProperties(restOfItem));
+      const itemsWithoutServerGeneratedValues = items.map(({ item_id: itemId, ...restOfItem }) => removeExceptionListItemServerGeneratedProperties(restOfItem));
       expect(itemsWithoutServerGeneratedValues).to.eql([
         {
           comments: [],
@@ -118,7 +118,7 @@ export default ({ getService }: FtrProviderContext) => {
       const udpatedRule = await getRule(supertest, log, rule.rule_id);
       const defaultList = udpatedRule.exceptions_list.find((list) => list.type === 'rule_default');
 
-      const itemsWithoutServerGeneratedValues = items.map(({ item_id, ...restOfItem }) => removeExceptionListItemServerGeneratedProperties(restOfItem));
+      const itemsWithoutServerGeneratedValues = items.map(({ item_id: itemId, ...restOfItem }) => removeExceptionListItemServerGeneratedProperties(restOfItem));
       expect(udpatedRule.exceptions_list).to.eql([{
         id: defaultList?.id,
         list_id: defaultList?.list_id,
@@ -182,7 +182,7 @@ export default ({ getService }: FtrProviderContext) => {
         })
         .expect(200);
 
-      const itemsWithoutServerGeneratedValues = items.map(({ item_id, ...restOfItem }) => removeExceptionListItemServerGeneratedProperties(restOfItem));
+      const itemsWithoutServerGeneratedValues = items.map(({ item_id: itemId, ...restOfItem }) => removeExceptionListItemServerGeneratedProperties(restOfItem));
       expect(itemsWithoutServerGeneratedValues[0]).to.eql({
         comments: [],
         created_by: "elastic",
