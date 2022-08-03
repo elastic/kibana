@@ -109,13 +109,7 @@ describe('SearchSource', () => {
   describe('#getFields()', () => {
     test('gets the value for the property', () => {
       searchSource.setField('aggs', { i: 5 });
-      expect(searchSource.getFields()).toMatchInlineSnapshot(`
-        Object {
-          "aggs": Object {
-            "i": 5,
-          },
-        }
-      `);
+      expect(searchSource.getFields()).toMatchObject({ aggs: { i: 5 } });
     });
   });
 
@@ -125,14 +119,7 @@ describe('SearchSource', () => {
         language: 'kuery',
         query: `_INDEX : fakebeat and _index : "mybeat-*"`,
       });
-      expect(searchSource.getActiveIndexFilter()).toMatchInlineSnapshot(
-        ['mybeat-*'],
-        `
-        Array [
-          "mybeat-*",
-        ]
-      `
-      );
+      expect(searchSource.getActiveIndexFilter()).toMatchObject(['mybeat-*']);
     });
 
     test('pase _index from filter', () => {
@@ -173,14 +160,7 @@ describe('SearchSource', () => {
         },
       ];
       searchSource.setField('filter', filter);
-      expect(searchSource.getActiveIndexFilter()).toMatchInlineSnapshot(
-        ['auditbeat-*'],
-        `
-        Array [
-          "auditbeat-*",
-        ]
-      `
-      );
+      expect(searchSource.getActiveIndexFilter()).toMatchObject(['auditbeat-*']);
     });
 
     test('pase _index from query and filter with negate equals to true', () => {
@@ -206,7 +186,7 @@ describe('SearchSource', () => {
         language: 'kuery',
         query: '_index : auditbeat-*',
       });
-      expect(searchSource.getActiveIndexFilter()).toMatchInlineSnapshot([], `Array []`);
+      expect(searchSource.getActiveIndexFilter()).toMatchObject([]);
     });
 
     test('pase _index from query and filter with negate equals to true and disabled equals to true', () => {
@@ -232,14 +212,7 @@ describe('SearchSource', () => {
         language: 'kuery',
         query: '_index : auditbeat-*',
       });
-      expect(searchSource.getActiveIndexFilter()).toMatchInlineSnapshot(
-        ['auditbeat-*'],
-        `
-        Array [
-          "auditbeat-*",
-        ]
-      `
-      );
+      expect(searchSource.getActiveIndexFilter()).toMatchObject(['auditbeat-*']);
     });
   });
 
@@ -505,29 +478,7 @@ describe('SearchSource', () => {
           language: 'kuery',
         });
         const request = searchSource.getSearchRequestBody();
-        expect(request.query).toMatchInlineSnapshot(`
-          Object {
-            "bool": Object {
-              "filter": Array [
-                Object {
-                  "bool": Object {
-                    "minimum_should_match": 1,
-                    "should": Array [
-                      Object {
-                        "match_phrase": Object {
-                          "agent.keyword": "Mozilla",
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-              "must": Array [],
-              "must_not": Array [],
-              "should": Array [],
-            },
-          }
-        `);
+        expect(request.query).toMatchSnapshot();
       });
 
       test('includes queries in the "must" clause if sorting by _score', async () => {
@@ -537,29 +488,7 @@ describe('SearchSource', () => {
         });
         searchSource.setField('sort', [{ _score: SortDirection.asc }]);
         const request = searchSource.getSearchRequestBody();
-        expect(request.query).toMatchInlineSnapshot(`
-          Object {
-            "bool": Object {
-              "filter": Array [],
-              "must": Array [
-                Object {
-                  "bool": Object {
-                    "minimum_should_match": 1,
-                    "should": Array [
-                      Object {
-                        "match_phrase": Object {
-                          "agent.keyword": "Mozilla",
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-              "must_not": Array [],
-              "should": Array [],
-            },
-          }
-        `);
+        expect(request.query).toMatchSnapshot();
       });
     });
 
@@ -952,11 +881,9 @@ describe('SearchSource', () => {
       searchSource.setField('index', localDataView);
       const { searchSourceJSON, references } = searchSource.serialize();
       expect(references.length).toEqual(0);
-      expect(JSON.parse(searchSourceJSON).index).toMatchInlineSnapshot(`
-        Object {
-          "id": "local-123",
-        }
-      `);
+      expect(JSON.parse(searchSourceJSON).index).toMatchObject({
+        id: 'local-123',
+      });
     });
 
     test('should add other fields', () => {
@@ -1057,29 +984,7 @@ describe('SearchSource', () => {
         return filter;
       });
       const serializedFields = searchSource.getSerializedFields();
-      expect(serializedFields).toMatchInlineSnapshot(
-        { index: '123', filter },
-        `
-        Object {
-          "filter": Array [
-            Object {
-              "meta": Object {
-                "alias": "alias",
-                "disabled": false,
-                "index": "456",
-                "negate": false,
-              },
-              "query": Object {
-                "query_string": Object {
-                  "query": "query",
-                },
-              },
-            },
-          ],
-          "index": "123",
-        }
-      `
-      );
+      expect(serializedFields).toMatchSnapshot();
     });
 
     test('should support nested search sources', () => {
@@ -1088,24 +993,10 @@ describe('SearchSource', () => {
       const childSearchSource = searchSource.createChild();
       childSearchSource.setField('timeout', '100');
       const serializedFields = childSearchSource.getSerializedFields(true);
-      expect(serializedFields).toMatchInlineSnapshot(
-        {
-          timeout: '100',
-          parent: {
-            index: '123',
-            from: 123,
-          },
-        },
-        `
-        Object {
-          "parent": Object {
-            "from": 123,
-            "index": "123",
-          },
-          "timeout": "100",
-        }
-      `
-      );
+      expect(serializedFields).toMatchObject({
+        timeout: '100',
+        parent: { index: '123', from: 123 },
+      });
     });
   });
 
@@ -1123,28 +1014,12 @@ describe('SearchSource', () => {
 
         expect(next).toBeCalledTimes(2);
         expect(complete).toBeCalledTimes(1);
-        expect(next.mock.calls[0]).toMatchInlineSnapshot(`
-                  Array [
-                    Object {
-                      "isPartial": true,
-                      "isRunning": true,
-                      "rawResponse": Object {
-                        "test": 1,
-                      },
-                    },
-                  ]
-                `);
-        expect(next.mock.calls[1]).toMatchInlineSnapshot(`
-                  Array [
-                    Object {
-                      "isPartial": false,
-                      "isRunning": false,
-                      "rawResponse": Object {
-                        "test": 2,
-                      },
-                    },
-                  ]
-                `);
+        expect(next.mock.calls[0]).toMatchObject([
+          { isPartial: true, isRunning: true, rawResponse: { test: 1 } },
+        ]);
+        expect(next.mock.calls[1]).toMatchObject([
+          { isPartial: false, isRunning: false, rawResponse: { test: 2 } },
+        ]);
       });
 
       test('shareReplays result', async () => {
@@ -1592,9 +1467,7 @@ describe('SearchSource', () => {
     });
 
     test('should not include the `esdsl` function to the chain if the `asDatatable` option is false', () => {
-      expect(toString(searchSource.toExpressionAst({ asDatatable: false }))).toMatchInlineSnapshot(
-        `"kibana_context"`
-      );
+      expect(toString(searchSource.toExpressionAst({ asDatatable: false }))).toBe('kibana_context');
     });
 
     test('should not include the `esaggs` function to the chain if the `asDatatable` option is false', () => {
@@ -1602,8 +1475,8 @@ describe('SearchSource', () => {
         { enabled: true, type: 'avg', schema: 'metric', params: { field: 'bytes' } },
       ]);
 
-      expect(toString(searchSource.toExpressionAst({ asDatatable: false }))).toMatchInlineSnapshot(
-        `"kibana_context"`
+      expect(toString(searchSource.toExpressionAst({ asDatatable: false }))).toMatch(
+        'kibana_context'
       );
     });
   });

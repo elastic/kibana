@@ -333,7 +333,7 @@ export class SearchSource {
    * @param  {SearchSourceOptions} options - the inherit options
    * @return {this} - chainable
    */
-  setParent(parent?: ISearchSource, options: SearchSourceOptions = {}): this {
+  setParent(parent?: ISearchSource, options: SearchSourceOptions = {}) {
     this.parent = parent as SearchSource;
     this.inheritOptions = options;
     return this;
@@ -341,8 +341,9 @@ export class SearchSource {
 
   /**
    * Get the parent of this SearchSource
+   * @return {undefined|searchSource}
    */
-  getParent(): SearchSource | undefined {
+  getParent() {
     return this.parent;
   }
 
@@ -407,8 +408,9 @@ export class SearchSource {
 
   /**
    * Completely destroy the SearchSource.
+   * @return {undefined}
    */
-  destroy(): void {
+  destroy() {
     this.requestStartHandlers.length = 0;
   }
 
@@ -602,12 +604,13 @@ export class SearchSource {
    * @param  {object} data - the current merged data
    * @param  {*} val - the value at `key`
    * @param  {*} key - The key of `val`
+   * @return {undefined}
    */
   private mergeProp<K extends keyof SearchSourceFields>(
     data: SearchRequest,
     val: SearchSourceFields[K],
     key: K
-  ): false | void {
+  ) {
     val = typeof val === 'function' ? val(this) : val;
     if (val == null || !key) return;
 
@@ -675,7 +678,6 @@ export class SearchSource {
   /**
    * Walk the inheritance chain of a source and return its
    * flat representation (taking into account merging rules)
-   * @returns {SearchRequest}
    * @resolved {Object|null} - the flat data of the SearchSource
    */
   private mergeProps(root = this, searchRequest: SearchRequest = { body: {} }): SearchRequest {
