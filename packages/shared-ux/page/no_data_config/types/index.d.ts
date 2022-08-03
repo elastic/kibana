@@ -20,4 +20,4 @@ export type NoDataConfigPageServices = NoDataPageServices;
 export type NoDataConfig = NoDataPageProps;
 
 export type NoDataConfigPageProps = EuiPageTemplateProps &
-  Pick<KibanaPageTemplateProps, 'solutionNav' | 'noDataConfig'>;
+  Pick<KibanaPageTemplateProps, 'pageSideBar' | 'pageSideBarProps' | 'noDataConfig'>;

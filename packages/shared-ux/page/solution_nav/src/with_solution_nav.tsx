@@ -8,7 +8,12 @@
 
 import React, { ComponentType, useState } from 'react';
 import classNames from 'classnames';
-import { useIsWithinBreakpoints, EuiPageTemplateProps_Deprecated } from '@elastic/eui';
+import {
+  useIsWithinBreakpoints,
+  EuiPageTemplateProps_Deprecated,
+  EuiPageSidebarProps,
+  useEuiTheme,
+} from '@elastic/eui';
 import { SolutionNav, SolutionNavProps } from './solution_nav';
 
 import './with_solution_nav.scss';
@@ -18,13 +23,11 @@ function getDisplayName(Component: ComponentType<any>) {
   return Component.displayName || Component.name || 'UnnamedComponent';
 }
 
-type TemplateProps = Pick<
-  EuiPageTemplateProps_Deprecated,
-  'pageSideBar' | 'pageSideBarProps' | 'template' | 'children'
->;
+type TemplateProps = Pick<EuiPageTemplateProps_Deprecated, 'pageSideBar' | 'template' | 'children'>;
 
 type ComponentProps = TemplateProps & {
   isEmptyState?: boolean;
+  pageSideBarProps?: EuiPageSidebarProps;
 };
 
 type Props<P> = P &
@@ -41,8 +44,9 @@ export const withSolutionNav = <P extends ComponentProps>(WrappedComponent: Comp
     const [isSideNavOpenOnDesktop, setisSideNavOpenOnDesktop] = useState(
       !JSON.parse(String(localStorage.getItem(SOLUTION_NAV_COLLAPSED_KEY)))
     );
-    const { solutionNav, ...propagatedProps } = props;
-    const { children, isEmptyState, template } = propagatedProps;
+
+    const { solutionNav, children, ...propagatedProps } = props;
+    const { euiTheme } = useEuiTheme();
 
     const toggleOpenOnDesktop = () => {
       setisSideNavOpenOnDesktop(!isSideNavOpenOnDesktop);
@@ -61,7 +65,7 @@ export const withSolutionNav = <P extends ComponentProps>(WrappedComponent: Comp
       props.pageSideBarProps?.className
     );
 
-    const templateToUse = isEmptyState && !template ? 'centeredContent' : template;
+    // const templateToUse = isEmptyState && !template ? 'centeredContent' : template;
 
     const pageSideBar = (
       <SolutionNav
@@ -71,9 +75,14 @@ export const withSolutionNav = <P extends ComponentProps>(WrappedComponent: Comp
       />
     );
 
-    const pageSideBarProps = {
+    const pageSideBarProps: EuiPageSidebarProps = {
       paddingSize: 'none' as 'none',
       ...props.pageSideBarProps,
+      // TODO: `minWidth` isn't re-populating down on state change
+      minWidth:
+        isMediumBreakpoint || (canBeCollapsed && isLargerBreakpoint && !isSideNavOpenOnDesktop)
+          ? euiTheme.size.xxl
+          : undefined,
       className: sideBarClasses,
     };
 
@@ -83,7 +92,6 @@ export const withSolutionNav = <P extends ComponentProps>(WrappedComponent: Comp
           ...(propagatedProps as P),
           pageSideBar,
           pageSideBarProps,
-          template: templateToUse,
         }}
       >
         {children}
