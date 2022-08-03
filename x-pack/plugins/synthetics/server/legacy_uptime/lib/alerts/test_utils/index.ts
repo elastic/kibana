@@ -12,7 +12,7 @@ import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { UMServerLibs } from '../../lib';
 import { UptimeCorePluginsSetup, UptimeServerSetup } from '../../adapters';
 import type { UptimeRouter } from '../../../../types';
-import { getUptimeESMockClient } from '../../requests/helper';
+import { getUptimeESMockClient } from '../../requests/test_helpers';
 
 /**
  * The alert takes some dependencies as parameters; these are things like

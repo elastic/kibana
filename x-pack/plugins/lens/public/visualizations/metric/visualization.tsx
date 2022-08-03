@@ -234,6 +234,11 @@ export const getMetricVisualization = ({
           groupLabel: i18n.translate('xpack.lens.primaryMetric.label', {
             defaultMessage: 'Primary metric',
           }),
+          paramEditorCustomProps: {
+            headingLabel: i18n.translate('xpack.lens.primaryMetric.headingLabel', {
+              defaultMessage: 'Value',
+            }),
+          },
           layerId: props.state.layerId,
           accessors: props.state.metricAccessor
             ? [
@@ -256,6 +261,11 @@ export const getMetricVisualization = ({
           groupLabel: i18n.translate('xpack.lens.metric.secondaryMetric', {
             defaultMessage: 'Secondary metric',
           }),
+          paramEditorCustomProps: {
+            headingLabel: i18n.translate('xpack.lens.primaryMetric.headingLabel', {
+              defaultMessage: 'Value',
+            }),
+          },
           layerId: props.state.layerId,
           accessors: props.state.secondaryMetricAccessor
             ? [
@@ -274,6 +284,11 @@ export const getMetricVisualization = ({
           groupId: GROUP_ID.MAX,
           dataTestSubj: 'lnsMetric_maxDimensionPanel',
           groupLabel: i18n.translate('xpack.lens.metric.max', { defaultMessage: 'Maximum value' }),
+          paramEditorCustomProps: {
+            headingLabel: i18n.translate('xpack.lens.primaryMetric.headingLabel', {
+              defaultMessage: 'Value',
+            }),
+          },
           layerId: props.state.layerId,
           accessors: props.state.maxAccessor
             ? [
