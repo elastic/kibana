@@ -6,7 +6,13 @@
  */
 
 import moment from 'moment-timezone';
-import { dateFormatter } from './dates';
+import { TimeRangeBounds } from '@kbn/data-plugin/common';
+import {
+  dateFormatter,
+  getDateDifferenceInDays,
+  barChartTimeAxisLabelFormatter,
+  calculateBarchartColumnTimeInterval,
+} from './dates';
 import { EMPTY_VALUE } from '../../../common/constants';
 
 const mockValidStringDate = '1 Jan 2022 00:00:00 GMT';
@@ -32,13 +38,82 @@ describe('dates', () => {
       expect(dateFormatter(date, mockTimeZone, mockDateFormat)).toEqual('Jan 1st 22');
     });
 
-    it('should return EMPTY_VALUE for invalid string date', () => {
+    it(`should return ${EMPTY_VALUE} for invalid string date`, () => {
       expect(dateFormatter(mockInvalidStringDate, mockTimeZone)).toEqual(EMPTY_VALUE);
     });
 
-    it('should return EMPTY_VALUE for invalid moment date', () => {
+    it(`should return ${EMPTY_VALUE} for invalid moment date`, () => {
       const date = moment(mockInvalidStringDate);
       expect(dateFormatter(date, mockTimeZone)).toEqual(EMPTY_VALUE);
+    });
+  });
+
+  describe('getDaysDiff', () => {
+    it('should return correct number of days between two dates', () => {
+      const minDate: moment.Moment = moment(mockValidStringDate);
+      const maxDate: moment.Moment = moment(mockValidStringDate).add(4, 'days');
+
+      expect(getDateDifferenceInDays(minDate, maxDate)).toEqual(4);
+    });
+
+    it('should return 2 if dates are close to each other (less than one day apart)', () => {
+      const minDate: moment.Moment = moment(mockValidStringDate);
+      const maxDate: moment.Moment = moment(mockValidStringDate).add(12, 'hours');
+
+      expect(getDateDifferenceInDays(minDate, maxDate)).toEqual(2);
+    });
+
+    it('should handle maxDate older than minDate', () => {
+      const minDate: moment.Moment = moment(mockValidStringDate).add(4, 'days');
+      const maxDate: moment.Moment = moment(mockValidStringDate);
+
+      expect(getDateDifferenceInDays(minDate, maxDate)).toEqual(2);
+    });
+
+    it('should return 0 if dates are identical', () => {
+      const minDate: moment.Moment = moment(mockValidStringDate);
+      const maxDate: moment.Moment = moment(mockValidStringDate);
+
+      expect(getDateDifferenceInDays(minDate, maxDate)).toEqual(0);
+    });
+  });
+
+  describe('dateTimeFormatter', () => {
+    it('should return a string', () => {
+      const dateRange: TimeRangeBounds = {
+        min: moment(mockValidStringDate),
+        max: moment(mockValidStringDate).add(4, 'days'),
+      };
+
+      expect(typeof barChartTimeAxisLabelFormatter(dateRange)).toBe('function');
+    });
+  });
+
+  describe('calculateBarchartTimeInterval', () => {
+    it('should handle number dates', () => {
+      const from = moment(mockValidStringDate).valueOf();
+      const to = moment(mockValidStringDate).add(1, 'days').valueOf();
+
+      const interval = calculateBarchartColumnTimeInterval(from, to);
+      expect(interval).toContain('ms');
+      expect(parseInt(interval, 10) > 0).toBeTruthy();
+    });
+
+    it('should handle moment dates', () => {
+      const from = moment(mockValidStringDate);
+      const to = moment(mockValidStringDate).add(1, 'days');
+
+      const interval = calculateBarchartColumnTimeInterval(from, to);
+      expect(interval).toContain('ms');
+      expect(parseInt(interval, 10) > 0).toBeTruthy();
+    });
+
+    it('should handle dateTo older than dateFrom', () => {
+      const from = moment(mockValidStringDate).add(1, 'days');
+      const to = moment(mockValidStringDate);
+
+      const interval = calculateBarchartColumnTimeInterval(from, to);
+      expect(parseInt(interval, 10) > 0).toBeFalsy();
     });
   });
 });
