@@ -13,19 +13,23 @@ import userEvent from '@testing-library/user-event';
 import { FilterManager } from '@kbn/data-plugin/public';
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
+import { TestProvidersComponent, unifiedSearch } from '../../../../common/mocks/test_providers';
 import { getByTestSubj } from '../../../../../common/test/utils';
+import { setAutocomplete } from '@kbn/unified-search-plugin/public/services';
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
 const filterManager = new FilterManager(mockUiSettingsForFilterManager);
 
-// Failing: See https://github.com/elastic/kibana/issues/137752
-describe.skip('QueryBar ', () => {
+describe('QueryBar ', () => {
   const onSubmitQuery = jest.fn();
   const onSubmitDateRange = jest.fn();
   const onSavedQuery = jest.fn();
   const onChangedQuery = jest.fn();
+
+  beforeEach(() => {
+    setAutocomplete(unifiedSearch.autocomplete);
+  });
 
   beforeEach(async () => {
     await act(async () => {
