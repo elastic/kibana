@@ -17,22 +17,14 @@ import {
   errors,
   validateAxes,
 } from './validate';
-import { appendLayerIds, getDataLayers, getLayersWithTable } from '../helpers';
+import { appendLayerIds, getDataLayers } from '../helpers';
 
 export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers) => {
   const layers = appendLayerIds(args.layers ?? [], 'layers');
   const dataLayers = getDataLayers(layers);
-  const layersWithTable = getLayersWithTable(layers);
 
-  // if layers have the same table should log only one
-  if (layersWithTable.every((l) => l.table === layersWithTable[0].table)) {
-    logDatatable(
-      layersWithTable[0].table,
-      layers,
-      handlers,
-      args.splitColumnAccessor,
-      args.splitRowAccessor
-    );
+  if (args.singleTable) {
+    logDatatable(data, layers, handlers, args.splitColumnAccessor, args.splitRowAccessor);
   } else {
     logDatatables(layers, handlers, args.splitColumnAccessor, args.splitRowAccessor);
   }

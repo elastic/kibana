@@ -54,6 +54,7 @@ interface Props {
   defaultXScaleType: XScaleType;
   fieldFormats: LayersFieldFormats;
   uiState?: PersistedState;
+  singleTable?: boolean;
 }
 
 export const DataLayers: FC<Props> = ({
@@ -75,8 +76,38 @@ export const DataLayers: FC<Props> = ({
   defaultXScaleType,
   fieldFormats,
   uiState,
+  singleTable,
 }) => {
-  const colorAssignments = getColorAssignments(layers, titles, fieldFormats, formattedDatatables);
+  // for singleTable mode we should use y accessors from all layers for creating correct series name and getting color
+  const allYAccessors = layers.flatMap((layer) => layer.accessors);
+  const allColumnsToLabel = layers.reduce((acc, layer) => {
+    if (layer.columnToLabel) {
+      return { ...acc, ...JSON.parse(layer.columnToLabel) };
+    }
+
+    return acc;
+  }, {});
+  const allYTitles = Object.keys(titles).reduce((acc, key) => {
+    if (titles[key].yTitles) {
+      return { ...acc, ...titles[key].yTitles };
+    }
+    return acc;
+  }, {});
+  const colorAssignments = singleTable
+    ? getColorAssignments(
+        [
+          {
+            ...layers[0],
+            layerId: 'commonLayerId',
+            accessors: allYAccessors,
+            columnToLabel: JSON.stringify(allColumnsToLabel),
+          },
+        ],
+        { commonLayerId: { ...titles, yTitles: allYTitles } },
+        { commonLayerId: fieldFormats[layers[0].layerId] },
+        { commonLayerId: formattedDatatables[layers[0].layerId] }
+      )
+    : getColorAssignments(layers, titles, fieldFormats, formattedDatatables);
   return (
     <>
       {layers.flatMap((layer) =>
@@ -118,6 +149,8 @@ export const DataLayers: FC<Props> = ({
             defaultXScaleType,
             fieldFormats,
             uiState,
+            allYAccessors,
+            singleTable,
           });
 
           const index = `${layer.layerId}-${accessorIndex}`;

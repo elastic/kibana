@@ -20,6 +20,9 @@ Object {
     "showTooltip": Array [
       true,
     ],
+    "singleTable": Array [
+      true,
+    ],
     "valueLabels": Array [
       "hide",
     ],

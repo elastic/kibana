@@ -13,9 +13,8 @@ import {
   XYExtendedLayerConfigResult,
   ExtendedDataLayerArgs,
   DataLayerArgs,
-  XYExtendedLayerConfigResultWithTable,
 } from '../types';
-import { LayerTypes, SeriesTypes, REFERENCE_LINE_LAYER } from '../constants';
+import { LayerTypes, SeriesTypes } from '../constants';
 
 function isWithLayerId<T>(layer: T): layer is T & WithLayerId {
   return (layer as T & WithLayerId).layerId ? true : false;
@@ -42,13 +41,6 @@ export function getDataLayers(layers: XYExtendedLayerConfigResult[]) {
   return layers.filter<ExtendedDataLayerConfig>(
     (layer): layer is ExtendedDataLayerConfig =>
       layer.layerType === LayerTypes.DATA || !layer.layerType
-  );
-}
-
-export function getLayersWithTable(layers: XYExtendedLayerConfigResult[]) {
-  return layers.filter<XYExtendedLayerConfigResultWithTable>(
-    (layer): layer is XYExtendedLayerConfigResultWithTable =>
-      layer.layerType === LayerTypes.DATA || layer.type === REFERENCE_LINE_LAYER || !layer.layerType
   );
 }
 

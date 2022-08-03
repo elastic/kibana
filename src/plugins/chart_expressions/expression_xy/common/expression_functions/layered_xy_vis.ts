@@ -40,6 +40,13 @@ export const layeredXyVisFunction: LayeredXyVisFn = {
       types: ['vis_dimension', 'string'],
       help: strings.getSplitRowAccessorHelp(),
     },
+    singleTable: {
+      types: ['boolean'],
+      help: i18n.translate('expressionXY.layeredXyVis.singleTable.help', {
+        defaultMessage: 'All layers use the one datatable',
+      }),
+      default: false,
+    },
   },
   async fn(data, args, handlers) {
     const { layeredXyVisFn } = await import('./layered_xy_vis_fn');

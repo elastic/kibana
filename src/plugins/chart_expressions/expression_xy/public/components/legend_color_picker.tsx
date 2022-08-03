@@ -126,10 +126,10 @@ export const LegendColorPickerWrapper: LegendColorPicker = ({
         panelPaddingSize="s"
       >
         <ColorPicker
-          color={color}
+          color={layer?.palette.name === 'kibana_palette' ? color : color.toLowerCase()}
           onChange={handleChange}
           label={seriesName}
-          useLegacyColors={false}
+          useLegacyColors={layer?.palette.name === 'kibana_palette'}
           colorIsOverwritten={colorIsOverwritten}
           onKeyDown={onKeyDown}
         />

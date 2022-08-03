@@ -254,6 +254,7 @@ export interface LayeredXYArgs {
   showTooltip: boolean;
   splitRowAccessor?: ExpressionValueVisDimension | string;
   splitColumnAccessor?: ExpressionValueVisDimension | string;
+  singleTable?: boolean;
 }
 
 export interface XYProps {
@@ -277,6 +278,7 @@ export interface XYProps {
   detailedTooltip?: boolean;
   orderBucketsBySum?: boolean;
   showTooltip: boolean;
+  singleTable?: boolean;
 }
 
 export interface AnnotationLayerArgs {
@@ -326,10 +328,6 @@ export type XYExtendedLayerConfigResult =
   | ReferenceLineLayerConfigResult
   | ExtendedAnnotationLayerConfigResult
   | ReferenceLineConfigResult;
-
-export type XYExtendedLayerConfigResultWithTable =
-  | ExtendedDataLayerConfigResult
-  | ReferenceLineLayerConfigResult;
 
 export interface ExtendedReferenceLineDecorationConfig extends ReferenceLineArgs {
   type: typeof EXTENDED_REFERENCE_LINE_DECORATION_CONFIG;

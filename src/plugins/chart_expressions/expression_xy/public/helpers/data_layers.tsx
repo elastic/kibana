@@ -53,6 +53,8 @@ type GetSeriesPropsFn = (config: {
   defaultXScaleType: XScaleType;
   fieldFormats: LayersFieldFormats;
   uiState?: PersistedState;
+  allYAccessors: Array<string | ExpressionValueVisDimension>;
+  singleTable?: boolean;
 }) => SeriesSpec;
 
 type GetSeriesNameFn = (
@@ -78,7 +80,8 @@ type GetColorFn = (
     getSeriesNameFn: (d: XYChartSeriesIdentifier) => SeriesName;
     syncColors?: boolean;
   },
-  uiState?: PersistedState
+  uiState?: PersistedState,
+  singleTable?: boolean
 ) => string | null;
 
 type GetPointConfigFn = (config: {
@@ -307,7 +310,8 @@ const getLineConfig: GetLineConfigFn = ({ showLines, lineWidth }) => ({
 const getColor: GetColorFn = (
   series,
   { layer, accessor, colorAssignments, paletteService, syncColors, getSeriesNameFn },
-  uiState
+  uiState,
+  singleTable
 ) => {
   const overwriteColor = getSeriesColor(layer, accessor);
   if (overwriteColor !== null) {
@@ -327,7 +331,7 @@ const getColor: GetColorFn = (
     {
       name,
       totalSeriesAtDepth: colorAssignment.totalSeriesCount,
-      rankAtDepth: colorAssignment.getRank(layer, name),
+      rankAtDepth: colorAssignment.getRank(singleTable ? 'commonLayerId' : layer.layerId, name),
     },
   ];
   return paletteService.get(layer.palette.name).getCategoricalColor(
@@ -343,7 +347,7 @@ const getColor: GetColorFn = (
 };
 
 const EMPTY_ACCESSOR = '-';
-const SPLIT_CHAR = '.';
+const SPLIT_CHAR = ':';
 
 export const generateSeriesId = (
   { layerId }: Pick<CommonXYDataLayerConfig, 'layerId'>,
@@ -383,6 +387,8 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   defaultXScaleType,
   fieldFormats,
   uiState,
+  allYAccessors,
+  singleTable,
 }): SeriesSpec => {
   const { table, isStacked, markSizeAccessor } = layer;
   const isPercentage = layer.isPercentage;
@@ -449,7 +455,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
       d,
       {
         splitAccessors: layer.splitAccessors || [],
-        accessorsCount: layer.accessors.length,
+        accessorsCount: singleTable ? allYAccessors.length : layer.accessors.length,
         alreadyFormattedColumns: formattedColumns,
         columns: formattedTable.columns,
         splitAccessorsFormats: fieldFormats[layer.layerId].splitSeriesAccessors,
@@ -489,7 +495,8 @@ export const getSeriesProps: GetSeriesPropsFn = ({
           getSeriesNameFn,
           syncColors,
         },
-        uiState
+        uiState,
+        singleTable
       ),
     groupId: yAxis?.groupId,
     enableHistogramMode,

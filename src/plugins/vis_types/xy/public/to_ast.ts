@@ -42,6 +42,8 @@ interface Bounds {
   max?: string | number;
 }
 
+type YDimension = Omit<Dimension, 'accessor'> & { accessor: string };
+
 const getCurveType = (type?: InterpolationMode) => {
   switch (type) {
     case 'cardinal':
@@ -67,13 +69,13 @@ const prepareLengend = (params: VisParams, legendSize?: LegendSize) => {
   return buildExpression([legend]);
 };
 
-const getCorrectAccessor = (yAccessor: Dimension, aggId: string) => {
+const getCorrectAccessor = (yAccessor: Dimension | YDimension, aggId: string) => {
   return typeof yAccessor.accessor === 'number'
     ? `col-${yAccessor.accessor}-${aggId}`
     : yAccessor.accessor;
 };
 
-const prepareDecoration = (axisId: string, yAccessor: Dimension, aggId: string) => {
+const prepareDecoration = (axisId: string, yAccessor: YDimension, aggId: string) => {
   const dataDecorationConfig = buildExpressionFunction('dataDecorationConfig', {
     forAccessor: getCorrectAccessor(yAccessor, aggId),
     axisId,
@@ -99,7 +101,7 @@ const prepareLayers = (
   seriesParam: SeriesParam,
   isHistogram: boolean,
   valueAxes: ValueAxis[],
-  yAccessors: Dimension[],
+  yAccessors: YDimension[],
   xAccessor: Dimension | null,
   splitAccessors?: Dimension[],
   markSizeAccessor?: Dimension,
@@ -294,7 +296,7 @@ const prepareReferenceLine = (thresholdLine: ThresholdLine, axisId: string) => {
   return buildExpression([referenceLine]);
 };
 
-const prepareVisDimension = (data: Dimension) => {
+const prepareVisDimension = (data: Dimension | YDimension) => {
   const visDimension = buildExpressionFunction('visdimension', { accessor: data.accessor });
 
   if (data.format) {
@@ -389,16 +391,23 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     legendSize = LegendSize.AUTO;
   }
 
-  const yAccessors = (dimensions.y || []).reduce<Record<string, Dimension[]>>((acc, yDimension) => {
-    const yAgg = responseAggs[yDimension.accessor];
-    const aggId = getSafeId(yAgg.id);
-    if (acc[aggId]) {
-      acc[aggId].push(yDimension);
-    } else {
-      acc[aggId] = [yDimension];
-    }
-    return acc;
-  }, {});
+  const yAccessors = (dimensions.y || []).reduce<Record<string, YDimension[]>>(
+    (acc, yDimension) => {
+      const yAgg = responseAggs[yDimension.accessor];
+      const aggId = getSafeId(yAgg.id);
+      const dimension: YDimension = {
+        ...yDimension,
+        accessor: getCorrectAccessor(yDimension, yAgg.id),
+      };
+      if (acc[aggId]) {
+        acc[aggId].push(dimension);
+      } else {
+        acc[aggId] = [dimension];
+      }
+      return acc;
+    },
+    {}
+  );
 
   const xScale = vis.params.categoryAxes[0].scale;
 
@@ -417,7 +426,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
   const visTypeXy = buildExpressionFunction('layeredXyVis', {
     layers: [
       ...finalSeriesParams
-        .filter((seriesParam) => seriesParam.show)
+        .filter((seriesParam) => seriesParam.show && yAccessors[seriesParam.data.id])
         .map((seriesParam) =>
           prepareLayers(
             seriesParam,
@@ -474,6 +483,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     splitColumnAccessor: dimensions.splitColumn?.map(prepareVisDimension),
     splitRowAccessor: dimensions.splitRow?.map(prepareVisDimension),
     valueLabels: vis.params.labels.show ? 'show' : 'hide',
+    singleTable: true,
   });
 
   const ast = buildExpression(mapColumn ? [mapColumn, visTypeXy] : [visTypeXy]);

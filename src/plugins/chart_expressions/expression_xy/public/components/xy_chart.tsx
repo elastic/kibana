@@ -214,6 +214,7 @@ export function XYChart({
     xAxisConfig,
     splitColumnAccessor,
     splitRowAccessor,
+    singleTable,
   } = args;
   const chartRef = useRef<Chart>(null);
   const chartTheme = chartsThemeService.useChartsTheme();
@@ -234,7 +235,7 @@ export function XYChart({
   const getShowLegendDefault = useCallback(() => {
     const legendStateDefault =
       legend.isVisible && !legend.showSingleSeries ? chartHasMoreThanOneSeries : legend.isVisible;
-    return uiState?.get('vis.legendOpen', legendStateDefault) || legendStateDefault;
+    return uiState?.get('vis.legendOpen', legendStateDefault) ?? legendStateDefault;
   }, [chartHasMoreThanOneSeries, legend.isVisible, legend.showSingleSeries, uiState]);
 
   const [showLegend, setShowLegend] = useState<boolean>(() => getShowLegendDefault());
@@ -476,7 +477,9 @@ export function XYChart({
       })
     );
 
-    const fit = !hasBarOrArea && extent.mode === AxisExtentModes.DATA_BOUNDS;
+    const fit = Boolean(
+      (!hasBarOrArea || axis.extent?.enforce) && extent.mode === AxisExtentModes.DATA_BOUNDS
+    );
     const padding = axis.boundsMargin || undefined;
 
     let min: number = NaN;
@@ -805,6 +808,7 @@ export function XYChart({
                         splitColumnAccessor: splitColumnId,
                         splitRowAccessor: splitRowId,
                       }}
+                      layers={dataLayers}
                       xDomain={isTimeViz ? rawXDomain : undefined}
                     />
                   )
@@ -880,7 +884,7 @@ export function XYChart({
                 id={axis.groupId}
                 groupId={axis.groupId}
                 position={axis.position}
-                title={getYAxesTitles(axis.series)}
+                title={axis.title || getYAxesTitles(axis.series)}
                 gridLine={{
                   visible: axis.showGridLines,
                 }}
@@ -936,6 +940,7 @@ export function XYChart({
               defaultXScaleType={defaultXScaleType}
               fieldFormats={fieldFormats}
               uiState={uiState}
+              singleTable={singleTable}
             />
           )}
           {referenceLineLayers.length ? (

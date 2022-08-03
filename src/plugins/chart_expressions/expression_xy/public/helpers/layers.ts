@@ -61,6 +61,7 @@ export interface LayerAccessorsTitles {
   splitSeriesTitles?: AccessorsTitles;
   splitColumnTitles?: AccessorsTitles;
   splitRowTitles?: AccessorsTitles;
+  markSizeTitles?: AccessorsTitles;
 }
 
 export type LayersAccessorsTitles = Record<string, LayerAccessorsTitles>;
@@ -192,11 +193,18 @@ const getTitleForYAccessor = (
     group.series.some(({ accessor, layer }) => accessor === yAccessor && layer === layerId)
   );
 
-  return axisGroup?.title || column!.name;
+  return column?.name ?? axisGroup?.title;
 };
 
 export const getLayerTitles = (
-  { xAccessor, accessors, splitAccessors = [], table, layerId }: CommonXYDataLayerConfig,
+  {
+    xAccessor,
+    accessors,
+    splitAccessors = [],
+    table,
+    layerId,
+    markSizeAccessor,
+  }: CommonXYDataLayerConfig,
   { splitColumnAccessor, splitRowAccessor }: SplitAccessors,
   { xTitle }: CustomTitles,
   groups: GroupsConfiguration
@@ -231,6 +239,7 @@ export const getLayerTitles = (
       }),
       {}
     ),
+    markSizeTitles: mapTitle(markSizeAccessor),
     splitColumnTitles: mapTitle(splitColumnAccessor),
     splitRowTitles: mapTitle(splitRowAccessor),
   };
