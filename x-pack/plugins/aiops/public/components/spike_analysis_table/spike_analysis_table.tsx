@@ -37,7 +37,6 @@ const DEFAULT_SORT_DIRECTION = 'asc';
 
 interface SpikeAnalysisTableProps {
   changePoints: ChangePoint[];
-  error?: string;
   loading: boolean;
   onPinnedChangePoint?: (changePoint: ChangePoint | null) => void;
   onSelectedChangePoint?: (changePoint: ChangePoint | null) => void;
@@ -46,7 +45,6 @@ interface SpikeAnalysisTableProps {
 
 export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
   changePoints,
-  error,
   loading,
   onPinnedChangePoint,
   onSelectedChangePoint,
@@ -215,7 +213,6 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       onChange={onChange}
       pagination={pagination}
       loading={loading}
-      error={error}
       sorting={sorting as EuiTableSortingType<ChangePoint>}
       rowProps={(changePoint) => {
         return {
