@@ -94,8 +94,10 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   }
 
   const shouldRerunAnalysis = useMemo(() => {
-    return currentAnalysisWindowParameters !== undefined &&
-      !isEqual(currentAnalysisWindowParameters, windowParameters);
+    return (
+      currentAnalysisWindowParameters !== undefined &&
+      !isEqual(currentAnalysisWindowParameters, windowParameters)
+    );
   }, [currentAnalysisWindowParameters, windowParameters]);
 
   return (
