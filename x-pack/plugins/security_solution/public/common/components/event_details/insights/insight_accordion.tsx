@@ -18,12 +18,7 @@ const StyledAccordion = euiStyled(EuiAccordion)`
   border-radius: 6px;
 `;
 
-const EmptyAccordion = euiStyled(StyledAccordion)`
-  color: ${({ theme }) => theme.eui.euiColorDisabledText};
-  pointer-events: none;
-`;
-
-export type InsightAccordionState = 'loading' | 'error' | 'success' | 'empty';
+export type InsightAccordionState = 'loading' | 'error' | 'success';
 
 interface Props {
   prefix: string;
@@ -59,24 +54,6 @@ export const InsightAccordion = React.memo<Props>(
               </span>
             }
             onToggle={onToggle}
-          />
-        );
-      case 'empty':
-        // Since EuiAccordions don't have an empty state and they don't allow to style the arrow
-        // we're using a custom styled Accordion here and we're adding the faded-out button manually.
-        return (
-          <EmptyAccordion
-            id={accordionId}
-            buttonContent={
-              <span>
-                <EuiIcon type="arrowRight" style={{ margin: '0px 8px 0 4px' }} />
-                {text}
-              </span>
-            }
-            buttonProps={{
-              'aria-disabled': true,
-            }}
-            arrowDisplay="none"
           />
         );
       case 'success':
