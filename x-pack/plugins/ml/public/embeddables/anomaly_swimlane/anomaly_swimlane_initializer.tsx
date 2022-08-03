@@ -22,7 +22,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { pickBy } from 'lodash';
 import { SWIMLANE_TYPE, SwimlaneType } from '../../application/explorer/explorer_constants';
 import { AnomalySwimlaneEmbeddableInput } from '..';
 
@@ -84,11 +83,11 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
     (swimlaneType === SWIMLANE_TYPE.OVERALL ||
       (swimlaneType === SWIMLANE_TYPE.VIEW_BY && !!viewBySwimlaneFieldName));
 
-  const resultInput = pickBy({
+  const resultInput = {
     panelTitle,
     swimlaneType,
-    viewBy: viewBySwimlaneFieldName,
-  } as ExplicitInput) as ExplicitInput;
+    ...(viewBySwimlaneFieldName ? { viewBy: viewBySwimlaneFieldName } : {}),
+  };
 
   return (
     <EuiModal initialFocus="[name=panelTitle]" onClose={onCancel}>
