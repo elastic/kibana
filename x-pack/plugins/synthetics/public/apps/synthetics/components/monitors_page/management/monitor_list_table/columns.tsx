@@ -33,6 +33,7 @@ export function getMonitorListColumns({
   errorSummariesById,
   canEditSynthetics,
   reloadPage,
+  loading,
   syntheticsMonitors,
 }: {
   basePath: string;
@@ -41,6 +42,7 @@ export function getMonitorListColumns({
   errorSummariesById: Map<string, Ping>;
   canEditSynthetics: boolean;
   syntheticsMonitors: EncryptedSyntheticsSavedMonitor[];
+  loading: boolean;
   reloadPage: () => void;
 }) {
   const getIsMonitorUnHealthy = (monitor: EncryptedSyntheticsSavedMonitor) => {
@@ -132,7 +134,12 @@ export function getMonitorListColumns({
         defaultMessage: 'Enabled',
       }),
       render: (_enabled: boolean, monitor: EncryptedSyntheticsSavedMonitor) => (
-        <MonitorEnabled id={monitor.id} monitor={monitor} reloadPage={reloadPage} />
+        <MonitorEnabled
+          id={monitor.id}
+          monitor={monitor}
+          reloadPage={reloadPage}
+          isSwitchable={!loading}
+        />
       ),
     },
     {

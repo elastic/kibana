@@ -7,7 +7,7 @@
 
 import { IHttpFetchError } from '@kbn/core-http-browser';
 import { PayloadAction } from '@reduxjs/toolkit';
-import { call, put, takeLeading } from 'redux-saga/effects';
+import { call, put, takeEvery, takeLeading } from 'redux-saga/effects';
 import { fetchEffectFactory } from '../utils/fetch_effect';
 import {
   fetchMonitorListAction,
@@ -30,7 +30,7 @@ export function* fetchMonitorListEffect() {
 }
 
 export function* upsertMonitorEffect() {
-  yield takeLeading(
+  yield takeEvery(
     fetchUpsertMonitorAction,
     function* (action: PayloadAction<UpsertMonitorRequest>): Generator {
       try {

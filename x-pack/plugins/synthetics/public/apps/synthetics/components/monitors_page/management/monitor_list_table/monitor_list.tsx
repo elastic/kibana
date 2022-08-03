@@ -111,6 +111,7 @@ export const MonitorList = ({
     errorSummariesById,
     canEditSynthetics,
     syntheticsMonitors,
+    loading,
     reloadPage,
   });
 
