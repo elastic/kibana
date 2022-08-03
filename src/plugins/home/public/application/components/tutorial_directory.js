@@ -213,7 +213,6 @@ class TutorialDirectoryUi extends React.Component {
 
     return (
       <KibanaPageTemplate
-        restrictWidth={1200}
         template="empty"
         pageHeader={{
           pageTitle: (

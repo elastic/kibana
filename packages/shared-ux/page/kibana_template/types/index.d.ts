@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { EuiPageTemplateProps_Deprecated } from '@elastic/eui';
+import { EuiPageTemplateProps, EuiPageSidebarProps, EuiPageHeaderProps } from '@elastic/eui';
 import { SolutionNavProps } from '@kbn/shared-ux-page-solution-nav';
+import { ReactNode } from 'react';
 
 import {
   NoDataConfig,
@@ -19,7 +20,7 @@ export type KibanaPageTemplateKibanaDependencies = NoDataConfigPageKibanaDepende
 export type KibanaPageTemplateServices = NoDataConfigPageServices;
 export type { NoDataConfig } from '@kbn/shared-ux-page-no-data-config-types';
 
-export type KibanaPageTemplateProps = EuiPageTemplateProps_Deprecated & {
+export type KibanaPageTemplateProps = EuiPageTemplateProps & {
   /**
    * Converts the `pageHeader` contents into an EuiEmptyPrompt when no `children` are present
    */
@@ -33,4 +34,10 @@ export type KibanaPageTemplateProps = EuiPageTemplateProps_Deprecated & {
    * displays Agent, Beats, and custom cards to direct users to the right ingest location
    */
   noDataConfig?: NoDataConfig;
+  /**
+   * BWC Props from old EUI template
+   */
+  pageHeader?: EuiPageHeaderProps;
+  pageSideBar?: ReactNode;
+  pageSideBarProps?: EuiPageSidebarProps;
 };

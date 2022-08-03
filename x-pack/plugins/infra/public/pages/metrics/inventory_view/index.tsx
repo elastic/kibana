@@ -75,9 +75,6 @@ export const SnapshotPage = () => {
                   pageTitle: inventoryTitle,
                   rightSideItems: [<SavedViews />],
                 }}
-                pageBodyProps={{
-                  paddingSize: 'none',
-                }}
               >
                 <SnapshotContainer
                   render={({ loading, nodes, reload, interval }) => (
