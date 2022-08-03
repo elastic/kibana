@@ -165,6 +165,7 @@ export class SavedSearchEmbeddable
 
     const { searchSource } = this.savedSearch;
 
+    const prevAbortController = this.abortController;
     // Abort any in-progress requests
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
@@ -266,7 +267,8 @@ export class SavedSearchEmbeddable
       this.searchProps!.totalHitCount = resp.hits.total as number;
       this.searchProps!.isLoading = false;
     } catch (error) {
-      if (!this.destroyed) {
+      const cancelled = !!prevAbortController?.signal.aborted;
+      if (!this.destroyed && !cancelled) {
         this.updateOutput({
           ...this.getOutput(),
           loading: false,

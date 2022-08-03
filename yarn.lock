@@ -3463,6 +3463,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ebt-tools@link:bazel-bin/packages/kbn-ebt-tools":
+  version "0.0.0"
+  uid ""
+
 "@kbn/es-archiver@link:bazel-bin/packages/kbn-es-archiver":
   version "0.0.0"
   uid ""
@@ -3632,10 +3636,6 @@
   uid ""
 
 "@kbn/rule-data-utils@link:bazel-bin/packages/kbn-rule-data-utils":
-  version "0.0.0"
-  uid ""
-
-"@kbn/scalability-simulation-generator@link:bazel-bin/packages/kbn-scalability-simulation-generator":
   version "0.0.0"
   uid ""
 
@@ -7351,6 +7351,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__ebt-tools@link:bazel-bin/packages/kbn-ebt-tools/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__es-archiver@link:bazel-bin/packages/kbn-es-archiver/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7504,10 +7508,6 @@
   uid ""
 
 "@types/kbn__rule-data-utils@link:bazel-bin/packages/kbn-rule-data-utils/npm_module_types":
-  version "0.0.0"
-  uid ""
-
-"@types/kbn__scalability-simulation-generator@link:bazel-bin/packages/kbn-scalability-simulation-generator/npm_module_types":
   version "0.0.0"
   uid ""
 

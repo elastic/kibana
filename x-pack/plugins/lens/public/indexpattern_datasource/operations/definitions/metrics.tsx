@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiSwitch } from '@elastic/eui';
+import { EuiSwitch, EuiText } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { OperationDefinition, ParamEditorProps } from '.';
@@ -164,9 +164,13 @@ function buildMetricOperation<T extends MetricColumn<string>>({
           dataTestSubj: 'hide-zero-values',
           inlineElement: (
             <EuiSwitch
-              label={i18n.translate('xpack.lens.indexPattern.hideZero', {
-                defaultMessage: 'Hide zero values',
-              })}
+              label={
+                <EuiText size="xs">
+                  {i18n.translate('xpack.lens.indexPattern.hideZero', {
+                    defaultMessage: 'Hide zero values',
+                  })}
+                </EuiText>
+              }
               labelProps={{
                 style: {
                   fontWeight: euiThemeVars.euiFontWeightMedium,

@@ -14,6 +14,7 @@ import {
   EuiComboBoxOptionOption,
   EuiSwitch,
   EuiToolTip,
+  EuiText,
 } from '@elastic/eui';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
@@ -302,6 +303,46 @@ export const lastValueOperation: OperationDefinition<
 
     return (
       <>
+        {!isReferenced && (
+          <EuiFormRow
+            error={i18n.translate(
+              'xpack.lens.indexPattern.lastValue.showArrayValuesWithTopValuesWarning',
+              {
+                defaultMessage:
+                  'When you show array values, you are unable to use this field to rank top values.',
+              }
+            )}
+            isInvalid={currentColumn.params.showArrayValues && usingTopValues}
+            display="rowCompressed"
+            fullWidth
+            data-test-subj="lns-indexPattern-lastValue-showArrayValues"
+          >
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.lens.indexPattern.lastValue.showArrayValuesExplanation',
+                {
+                  defaultMessage:
+                    'Displays all values associated with this field in each last document.',
+                }
+              )}
+              position="left"
+            >
+              <EuiSwitch
+                label={
+                  <EuiText size="xs">
+                    {i18n.translate('xpack.lens.indexPattern.lastValue.showArrayValues', {
+                      defaultMessage: 'Show array values',
+                    })}
+                  </EuiText>
+                }
+                compressed={true}
+                checked={Boolean(currentColumn.params.showArrayValues)}
+                disabled={isScriptedField(currentColumn.sourceField, indexPattern)}
+                onChange={() => setShowArrayValues(!currentColumn.params.showArrayValues)}
+              />
+            </EuiToolTip>
+          </EuiFormRow>
+        )}
         <FormRow
           isInline={isInline}
           label={sortByFieldLabel}
@@ -355,42 +396,6 @@ export const lastValueOperation: OperationDefinition<
             }
           />
         </FormRow>
-        {!isReferenced && (
-          <EuiFormRow
-            error={i18n.translate(
-              'xpack.lens.indexPattern.lastValue.showArrayValuesWithTopValuesWarning',
-              {
-                defaultMessage:
-                  'When you show array values, you are unable to use this field to rank top values.',
-              }
-            )}
-            isInvalid={currentColumn.params.showArrayValues && usingTopValues}
-            display="rowCompressed"
-            fullWidth
-            data-test-subj="lns-indexPattern-lastValue-showArrayValues"
-          >
-            <EuiToolTip
-              content={i18n.translate(
-                'xpack.lens.indexPattern.lastValue.showArrayValuesExplanation',
-                {
-                  defaultMessage:
-                    'Displays all values associated with this field in each last document.',
-                }
-              )}
-              position="left"
-            >
-              <EuiSwitch
-                label={i18n.translate('xpack.lens.indexPattern.lastValue.showArrayValues', {
-                  defaultMessage: 'Show array values',
-                })}
-                compressed={true}
-                checked={Boolean(currentColumn.params.showArrayValues)}
-                disabled={isScriptedField(currentColumn.sourceField, indexPattern)}
-                onChange={() => setShowArrayValues(!currentColumn.params.showArrayValues)}
-              />
-            </EuiToolTip>
-          </EuiFormRow>
-        )}
       </>
     );
   },
