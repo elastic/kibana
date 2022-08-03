@@ -55,7 +55,7 @@ export const createExternalService = (
     getIncidentUrl,
     hasAuth,
     headers,
-    incidentViewUrl,
+    viewIncidentUrl,
     updateIncidentJson,
     updateIncidentMethod,
     updateIncidentUrl,
@@ -64,7 +64,7 @@ export const createExternalService = (
   if (
     !getIncidentUrl ||
     !createIncidentUrlConfig ||
-    !incidentViewUrl ||
+    !viewIncidentUrl ||
     !updateIncidentUrl ||
     (hasAuth && (!password || !user))
   ) {
@@ -163,7 +163,7 @@ export const createExternalService = (
 
       logger.debug(`response from webhook action "${actionId}": [HTTP ${status}] ${statusText}`);
 
-      const viewUrl = renderMustacheStringNoEscape(incidentViewUrl, {
+      const viewUrl = renderMustacheStringNoEscape(viewIncidentUrl, {
         external: {
           system: {
             id: encodeURIComponent(externalId),
@@ -233,7 +233,7 @@ export const createExternalService = (
         res,
       });
       const updatedIncident = await getIncident(incidentId as string);
-      const viewUrl = renderMustacheStringNoEscape(incidentViewUrl, {
+      const viewUrl = renderMustacheStringNoEscape(viewIncidentUrl, {
         external: {
           system: {
             id: encodeURIComponent(incidentId),

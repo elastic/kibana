@@ -8,60 +8,46 @@
 
 import { EuiFilterButton, EuiFilterGroup, EuiPopover, useResizeObserver } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import classNames from 'classnames';
 import { debounce, isEmpty } from 'lodash';
 
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
-import { DataViewField } from '@kbn/data-views-plugin/public';
 import { OptionsListStrings } from './options_list_strings';
 import { optionsListReducers } from './options_list_reducers';
 import { OptionsListPopover } from './options_list_popover_component';
 
 import './options_list.scss';
-import { useStateObservable } from '../../hooks/use_state_observable';
-import { OptionsListEmbeddableInput } from './types';
-
-// OptionsListComponentState is controlled by the embeddable, but is not considered embeddable input.
-export interface OptionsListComponentState {
-  loading: boolean;
-  field?: DataViewField;
-  totalCardinality?: number;
-  availableOptions?: string[];
-  invalidSelections?: string[];
-  validSelections?: string[];
-}
+import { OptionsListReduxState } from './types';
 
 export const OptionsListComponent = ({
   typeaheadSubject,
-  componentStateSubject,
 }: {
   typeaheadSubject: Subject<string>;
-  componentStateSubject: BehaviorSubject<OptionsListComponentState>;
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [searchString, setSearchString] = useState('');
 
   const resizeRef = useRef(null);
   const dimensions = useResizeObserver(resizeRef.current);
 
-  // Redux embeddable Context to get state from Embeddable input
+  // Redux embeddable Context
   const {
     useEmbeddableDispatch,
-    useEmbeddableSelector,
-    actions: { replaceSelection },
-  } = useReduxEmbeddableContext<OptionsListEmbeddableInput, typeof optionsListReducers>();
+    actions: { replaceSelection, setSearchString },
+    useEmbeddableSelector: select,
+  } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
   const dispatch = useEmbeddableDispatch();
-  const { controlStyle, selectedOptions, singleSelect, id } = useEmbeddableSelector(
-    (state) => state
-  );
 
-  // useStateObservable to get component state from Embeddable
-  const { availableOptions, loading, invalidSelections, validSelections, totalCardinality, field } =
-    useStateObservable<OptionsListComponentState>(
-      componentStateSubject,
-      componentStateSubject.getValue()
-    );
+  // Select current state from Redux using multiple selectors to avoid rerenders.
+  const invalidSelections = select((state) => state.componentState.invalidSelections);
+  const validSelections = select((state) => state.componentState.validSelections);
+
+  const selectedOptions = select((state) => state.explicitInput.selectedOptions);
+  const controlStyle = select((state) => state.explicitInput.controlStyle);
+  const singleSelect = select((state) => state.explicitInput.singleSelect);
+  const id = select((state) => state.explicitInput.id);
+
+  const loading = select((state) => state.output.loading);
 
   // debounce loading state so loading doesn't flash when user types
   const [buttonLoading, setButtonLoading] = useState(true);
@@ -69,7 +55,7 @@ export const OptionsListComponent = ({
     () => debounce((latestLoading: boolean) => setButtonLoading(latestLoading), 100),
     []
   );
-  useEffect(() => debounceSetButtonLoading(loading), [loading, debounceSetButtonLoading]);
+  useEffect(() => debounceSetButtonLoading(loading ?? false), [loading, debounceSetButtonLoading]);
 
   // remove all other selections if this control is single select
   useEffect(() => {
@@ -81,14 +67,10 @@ export const OptionsListComponent = ({
   const updateSearchString = useCallback(
     (newSearchString: string) => {
       typeaheadSubject.next(newSearchString);
-      setSearchString(newSearchString);
+      dispatch(setSearchString(newSearchString));
     },
-    [typeaheadSubject]
+    [typeaheadSubject, dispatch, setSearchString]
   );
-
-  useEffect(() => {
-    updateSearchString('');
-  }, [field?.spec?.name, updateSearchString]);
 
   const { hasSelections, selectionDisplayNode, validSelectionsCount } = useMemo(() => {
     return {
@@ -136,26 +118,17 @@ export const OptionsListComponent = ({
       })}
     >
       <EuiPopover
+        ownFocus
         button={button}
+        repositionOnScroll
         isOpen={isPopoverOpen}
-        className="optionsList__popoverOverride"
-        anchorClassName="optionsList__anchorOverride"
-        closePopover={() => setIsPopoverOpen(false)}
         panelPaddingSize="none"
         anchorPosition="downCenter"
-        ownFocus
-        repositionOnScroll
+        className="optionsList__popoverOverride"
+        closePopover={() => setIsPopoverOpen(false)}
+        anchorClassName="optionsList__anchorOverride"
       >
-        <OptionsListPopover
-          field={field}
-          width={dimensions.width}
-          loading={loading}
-          searchString={searchString}
-          totalCardinality={totalCardinality}
-          availableOptions={availableOptions}
-          invalidSelections={invalidSelections}
-          updateSearchString={updateSearchString}
-        />
+        <OptionsListPopover width={dimensions.width} updateSearchString={updateSearchString} />
       </EuiPopover>
     </EuiFilterGroup>
   );
