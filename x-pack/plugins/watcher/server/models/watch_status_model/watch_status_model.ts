@@ -25,6 +25,7 @@ export const buildServerWatchStatusModel = (
 ): ServerWatchStatusModel => {
   const { id, watchStatusJson, state, watchErrors } = watchStatusUpstreamJson;
 
+  // TODO: Remove once all consumers and upstream dependencies are converted to TS.
   if (!id) {
     throw badRequest(
       i18n.translate('xpack.watcher.models.watchStatus.idPropertyMissingBadRequestMessage', {
@@ -33,6 +34,7 @@ export const buildServerWatchStatusModel = (
     );
   }
 
+  // TODO: Remove once all consumers and upstream dependencies are converted to TS.
   if (!watchStatusJson) {
     throw badRequest(
       i18n.translate(
@@ -75,14 +77,14 @@ export const buildClientWatchStatusModel = (serverWatchStatusModel: ServerWatchS
     isActive,
     lastChecked,
     lastMetCondition,
-    state: buildState(serverWatchStatusModel),
-    comment: buildComment(serverWatchStatusModel),
-    lastFired: buildLastFired(actionStatuses),
+    state: deriveState(serverWatchStatusModel),
+    comment: deriveComment(serverWatchStatusModel),
+    lastFired: deriveLastFired(actionStatuses),
     actionStatuses: map(actionStatuses, (actionStatus) => actionStatus.downstreamJson),
   };
 };
 
-const getActionStatusTotals = (actionStatuses?: ServerWatchStatusModel['actionStatuses']) => {
+const deriveActionStatusTotals = (actionStatuses?: ServerWatchStatusModel['actionStatuses']) => {
   const result: { [key: string]: number } = {};
 
   forEach(ACTION_STATES, (state: keyof typeof ACTION_STATES) => {
@@ -98,7 +100,7 @@ const getActionStatusTotals = (actionStatuses?: ServerWatchStatusModel['actionSt
   return result;
 };
 
-const buildState = (serverWatchStatusModel: ServerWatchStatusModel) => {
+const deriveState = (serverWatchStatusModel: ServerWatchStatusModel) => {
   const { isActive, watchState, actionStatuses } = serverWatchStatusModel;
 
   if (!isActive) {
@@ -109,7 +111,7 @@ const buildState = (serverWatchStatusModel: ServerWatchStatusModel) => {
     return WATCH_STATES.ERROR;
   }
 
-  const totals = getActionStatusTotals(actionStatuses);
+  const totals = deriveActionStatusTotals(actionStatuses);
 
   if (totals[ACTION_STATES.ERROR] > 0) {
     return WATCH_STATES.ERROR;
@@ -131,10 +133,10 @@ const buildState = (serverWatchStatusModel: ServerWatchStatusModel) => {
   return WATCH_STATES.OK;
 };
 
-const buildComment = (serverWatchStatusModel: ServerWatchStatusModel) => {
+const deriveComment = (serverWatchStatusModel: ServerWatchStatusModel) => {
   const { isActive, actionStatuses } = serverWatchStatusModel;
 
-  const totals = getActionStatusTotals(actionStatuses);
+  const totals = deriveActionStatusTotals(actionStatuses);
   const totalActions = actionStatuses ? actionStatuses.length : 0;
   let result = WATCH_STATE_COMMENTS.OK;
 
@@ -168,7 +170,7 @@ const buildComment = (serverWatchStatusModel: ServerWatchStatusModel) => {
   return result;
 };
 
-const buildLastFired = (actionStatuses: ServerWatchStatusModel['actionStatuses']) => {
+const deriveLastFired = (actionStatuses: ServerWatchStatusModel['actionStatuses']) => {
   const actionStatus = maxBy(actionStatuses, 'lastExecution');
   if (actionStatus) {
     return actionStatus.lastExecution;
