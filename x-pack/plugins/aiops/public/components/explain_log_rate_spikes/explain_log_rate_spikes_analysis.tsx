@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, FC } from 'react';
+import React, { useEffect, useMemo, useState, FC } from 'react';
 import { isEqual } from 'lodash';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -55,17 +55,6 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   const [currentAnalysisWindowParameters, setCurrentAnalysisWindowParameters] = useState<
     WindowParameters | undefined
   >();
-  const [shouldRerunAnalysis, setShouldRerunAnalysis] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (
-      currentAnalysisWindowParameters !== undefined &&
-      !isEqual(currentAnalysisWindowParameters, windowParameters)
-    ) {
-      setShouldRerunAnalysis(true);
-      setCurrentAnalysisWindowParameters(windowParameters);
-    }
-  }, [currentAnalysisWindowParameters, windowParameters]);
 
   const { cancel, start, data, isRunning, error } = useFetchStream<
     ApiExplainLogRateSpikes,
@@ -99,9 +88,15 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     if (onSelectedChangePoint) {
       onSelectedChangePoint(null);
     }
-    setShouldRerunAnalysis(false);
+
+    setCurrentAnalysisWindowParameters(windowParameters);
     start();
   }
+
+  const shouldRerunAnalysis = useMemo(() => {
+    return currentAnalysisWindowParameters !== undefined &&
+      !isEqual(currentAnalysisWindowParameters, windowParameters);
+  }, [currentAnalysisWindowParameters, windowParameters]);
 
   return (
     <>
