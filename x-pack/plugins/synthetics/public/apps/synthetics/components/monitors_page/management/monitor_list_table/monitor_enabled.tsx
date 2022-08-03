@@ -6,7 +6,7 @@
  */
 
 import { EuiSwitch, EuiSwitchEvent, EuiLoadingSpinner } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FETCH_STATUS } from '@kbn/observability-plugin/public';
 import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
 import { ConfigKey, EncryptedSyntheticsMonitor } from '../../../../../../../common/runtime_types';
@@ -23,15 +23,19 @@ interface Props {
 export const MonitorEnabled = ({ id, monitor, reloadPage, initialLoading }: Props) => {
   const isDisabled = !useCanEditSynthetics();
 
-  const { isEnabled, setIsEnabled, status } = useMonitorEnableHandler({
+  const monitorName = monitor[ConfigKey.NAME];
+  const statusLabels = useMemo(() => {
+    return {
+      failureLabel: labels.getMonitorEnabledUpdateFailureMessage(monitorName),
+      enabledSuccessLabel: labels.getMonitorEnabledSuccessLabel(monitorName),
+      disabledSuccessLabel: labels.getMonitorDisabledSuccessLabel(monitorName),
+    };
+  }, [monitorName]);
+
+  const { isEnabled, updateMonitorEnabledState, status } = useMonitorEnableHandler({
     id,
-    monitor,
     reloadPage,
-    labels: {
-      failureLabel: labels.getMonitorEnabledUpdateFailureMessage(monitor[ConfigKey.NAME]),
-      enabledSuccessLabel: labels.getMonitorEnabledSuccessLabel(monitor[ConfigKey.NAME]),
-      disabledSuccessLabel: labels.getMonitorDisabledSuccessLabel(monitor[ConfigKey.NAME]),
-    },
+    labels: statusLabels,
   });
 
   const enabled = isEnabled ?? monitor[ConfigKey.ENABLED];
@@ -39,7 +43,7 @@ export const MonitorEnabled = ({ id, monitor, reloadPage, initialLoading }: Prop
 
   const handleEnabledChange = (event: EuiSwitchEvent) => {
     const checked = event.target.checked;
-    setIsEnabled(checked);
+    updateMonitorEnabledState(monitor, checked);
   };
 
   return (

@@ -7,6 +7,7 @@
 import uuid from 'uuid';
 import { FtrConfigProviderContext } from '@kbn/test';
 
+import { TelemetryConfigLabels } from '@kbn/telemetry-plugin/server/config';
 import { services } from '../services';
 import { pageObjects } from '../page_objects';
 
@@ -23,6 +24,26 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
 
   log.info(` 👷‍♀️ BUILD ID ${testBuildId}\n 👷 JOB ID ${testJobId}\n 👷‍♂️ EXECUTION ID:${executionId}`);
 
+  const prId = process.env.GITHUB_PR_NUMBER
+    ? Number.parseInt(process.env.GITHUB_PR_NUMBER, 10)
+    : undefined;
+
+  if (Number.isNaN(prId)) {
+    throw new Error('invalid GITHUB_PR_NUMBER environment variable');
+  }
+
+  const telemetryLabels: TelemetryConfigLabels = {
+    branch: process.env.BUILDKITE_BRANCH,
+    ciBuildId: process.env.BUILDKITE_BUILD_ID,
+    ciBuildJobId: process.env.BUILDKITE_JOB_ID,
+    ciBuildNumber: Number(process.env.BUILDKITE_BUILD_NUMBER) || 0,
+    gitRev: process.env.BUILDKITE_COMMIT,
+    isPr: prId !== undefined,
+    ...(prId !== undefined ? { prId } : {}),
+    testJobId,
+    testBuildId,
+  };
+
   return {
     services,
     pageObjects,
@@ -36,7 +57,10 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
     },
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
-      serverArgs: [...functionalConfig.get('kbnTestServer.serverArgs')],
+      serverArgs: [
+        ...functionalConfig.get('kbnTestServer.serverArgs'),
+        `--telemetry.labels=${JSON.stringify(telemetryLabels)}`,
+      ],
       env: {
         ELASTIC_APM_ACTIVE: process.env.TEST_PERFORMANCE_PHASE ? 'true' : 'false',
         ELASTIC_APM_CONTEXT_PROPAGATION_ONLY: 'false',

@@ -37,6 +37,14 @@ export const Insights = React.memo<Props>(
       'insightsRelatedAlertsByProcessAncestry'
     );
     const processEntityField = find({ category: 'process', field: 'process.entity_id' }, data);
+    const originalDocumentId = find(
+      { category: 'kibana', field: 'kibana.alert.ancestors.id' },
+      data
+    );
+    const originalDocumentIndex = find(
+      { category: 'kibana', field: 'kibana.alert.rule.parameters.index' },
+      data
+    );
     const hasProcessEntityInfo =
       isRelatedAlertsByProcessAncestryEnabled && processEntityField && processEntityField.values;
 
@@ -63,6 +71,13 @@ export const Insights = React.memo<Props>(
       hasProcessEntityInfo ||
       hasSourceEventInfo ||
       hasProcessSessionInfo;
+
+    const canShowAncestryInsight =
+      isRelatedAlertsByProcessAncestryEnabled &&
+      processEntityField &&
+      processEntityField.values &&
+      originalDocumentId &&
+      originalDocumentIndex;
 
     // If we're in read-only mode or don't have any insight-related data,
     // don't render anything.
@@ -107,17 +122,17 @@ export const Insights = React.memo<Props>(
             </EuiFlexItem>
           )}
 
-          {isRelatedAlertsByProcessAncestryEnabled &&
-            processEntityField &&
-            processEntityField.values && (
-              <EuiFlexItem>
-                <RelatedAlertsByProcessAncestry
-                  data={processEntityField}
-                  eventId={eventId}
-                  timelineId={timelineId}
-                />
-              </EuiFlexItem>
-            )}
+          {canShowAncestryInsight && (
+            <EuiFlexItem data-test-subj="related-alerts-by-ancestry">
+              <RelatedAlertsByProcessAncestry
+                data={processEntityField}
+                originalDocumentId={originalDocumentId}
+                index={originalDocumentIndex}
+                eventId={eventId}
+                timelineId={timelineId}
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </div>
     );

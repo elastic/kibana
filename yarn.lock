@@ -3391,6 +3391,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-test-helpers-deprecations-getters@link:bazel-bin/packages/core/test-helpers/core-test-helpers-deprecations-getters":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-test-helpers-http-setup-browser@link:bazel-bin/packages/core/test-helpers/core-test-helpers-http-setup-browser":
   version "0.0.0"
   uid ""
@@ -3456,6 +3460,10 @@
   uid ""
 
 "@kbn/docs-utils@link:bazel-bin/packages/kbn-docs-utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ebt-tools@link:bazel-bin/packages/kbn-ebt-tools":
   version "0.0.0"
   uid ""
 
@@ -3631,10 +3639,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/scalability-simulation-generator@link:bazel-bin/packages/kbn-scalability-simulation-generator":
-  version "0.0.0"
-  uid ""
-
 "@kbn/securitysolution-autocomplete@link:bazel-bin/packages/kbn-securitysolution-autocomplete":
   version "0.0.0"
   uid ""
@@ -3696,6 +3700,10 @@
   uid ""
 
 "@kbn/server-route-repository@link:bazel-bin/packages/kbn-server-route-repository":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-svg@link:bazel-bin/packages/kbn-shared-svg":
   version "0.0.0"
   uid ""
 
@@ -7275,6 +7283,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-test-helpers-deprecations-getters@link:bazel-bin/packages/core/test-helpers/core-test-helpers-deprecations-getters/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-test-helpers-http-setup-browser@link:bazel-bin/packages/core/test-helpers/core-test-helpers-http-setup-browser/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7340,6 +7352,10 @@
   uid ""
 
 "@types/kbn__docs-utils@link:bazel-bin/packages/kbn-docs-utils/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__ebt-tools@link:bazel-bin/packages/kbn-ebt-tools/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -7499,10 +7515,6 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__scalability-simulation-generator@link:bazel-bin/packages/kbn-scalability-simulation-generator/npm_module_types":
-  version "0.0.0"
-  uid ""
-
 "@types/kbn__securitysolution-autocomplete@link:bazel-bin/packages/kbn-securitysolution-autocomplete/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7564,6 +7576,10 @@
   uid ""
 
 "@types/kbn__server-route-repository@link:bazel-bin/packages/kbn-server-route-repository/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-svg@link:bazel-bin/packages/kbn-shared-svg/npm_module_types":
   version "0.0.0"
   uid ""
 
