@@ -194,9 +194,14 @@ export function getTSDBRollupWarningMessages(
       uniq(
         Object.values(layer.columns)
           .filter((col) =>
-            ['median', 'percentile', 'percentile_rank', 'last_value', 'cardinality'].includes(
-              col.operationType
-            )
+            [
+              'median',
+              'percentile',
+              'percentile_rank',
+              'last_value',
+              'unique_count',
+              'standard_deviation',
+            ].includes(col.operationType)
           )
           .map((col) => col.label)
       ).map((label) => (

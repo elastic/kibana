@@ -285,6 +285,18 @@ export function DimensionEditor(props: DimensionEditorProps) {
     hasField(selectedColumn) &&
     currentIndexPattern.getFieldByName(selectedColumn.sourceField);
 
+  const referencedField =
+    currentField ||
+    (selectedColumn &&
+      'references' in selectedColumn &&
+      currentIndexPattern.getFieldByName(
+        (
+          state.layers[layerId].columns[
+            selectedColumn.references[0]
+          ] as FieldBasedIndexPatternColumn
+        ).sourceField
+      ));
+
   // Operations are compatible if they match inputs. They are always compatible in
   // the empty state. Field-based operations are not compatible with field-less operations.
   const operationsWithCompatibility = possibleOperations.map((operationType) => {
@@ -495,14 +507,16 @@ export function DimensionEditor(props: DimensionEditorProps) {
   );
   const softRestrictedSideNavItems = sideNavItems.filter(
     (navItem) =>
-      currentField && currentField.softRestrictions && currentField.softRestrictions[navItem.id!]
+      referencedField &&
+      referencedField.softRestrictions &&
+      referencedField.softRestrictions[navItem.id!]
   );
   if (softRestrictedSideNavItems.length > 0) {
     sideNavItems = sideNavItems.filter(
       (navItem) =>
-        !currentField ||
-        !currentField.softRestrictions ||
-        !currentField.softRestrictions[navItem.id!]
+        !referencedField ||
+        !referencedField.softRestrictions ||
+        !referencedField.softRestrictions[navItem.id!]
     );
   }
   const hasSoftRestrictedSideNavItems = softRestrictedSideNavItems.length > 0;

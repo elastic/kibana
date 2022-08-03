@@ -68,6 +68,8 @@ export function convertDataViewIntoLensIndexPattern(dataView: DataView): IndexPa
               percentile_rank: true,
               median: true,
               last_value: true,
+              unique_count: true,
+              standard_deviation: true,
             }
           : undefined,
       };
