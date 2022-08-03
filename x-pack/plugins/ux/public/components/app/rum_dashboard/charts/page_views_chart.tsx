@@ -16,6 +16,8 @@ import {
 } from '@kbn/observability-plugin/public';
 import { useHistory } from 'react-router-dom';
 
+import { getExploratoryViewFilter } from '../../../../services/data/get_exp_view_filter';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import { useDataView } from '../local_uifilters/use_data_view';
@@ -31,6 +33,8 @@ export function PageViewsChart({ breakdown }: Props) {
   const kibana = useKibanaServices();
   const { ExploratoryViewEmbeddable } = kibana.observability;
 
+  const { uxUiFilters, urlParams } = useLegacyUrlParams();
+
   const theme = useTheme();
 
   const { reportDefinitions, time } = useExpViewAttributes();
@@ -44,6 +48,7 @@ export function PageViewsChart({ breakdown }: Props) {
       selectedMetricField: RECORDS_FIELD,
       breakdown: breakdown?.fieldName,
       color: theme.eui.euiColorVis1,
+      filters: getExploratoryViewFilter(uxUiFilters, urlParams),
     },
   ];
   const onBrushEnd = ({ range }: { range: number[] }) => {
