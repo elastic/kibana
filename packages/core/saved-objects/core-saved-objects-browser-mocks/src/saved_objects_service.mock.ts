@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsService, SavedObjectsStart } from './saved_objects_service';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { SavedObjectsService } from '@kbn/core-saved-objects-browser-internal';
+import type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
+
+type SavedObjectsServiceContract = PublicMethodsOf<SavedObjectsService>;
 
 const createStartContractMock = () => {
   const mock: jest.Mocked<SavedObjectsStart> = {
@@ -27,7 +31,7 @@ const createStartContractMock = () => {
 };
 
 const createMock = () => {
-  const mocked: jest.Mocked<SavedObjectsService> = {
+  const mocked: jest.Mocked<SavedObjectsServiceContract> = {
     setup: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
