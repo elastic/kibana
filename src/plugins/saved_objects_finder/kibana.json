@@ -1,0 +1,11 @@
+{
+  "id": "savedObjectsFinder",
+  "owner": {
+    "name": "Kibana Core",
+    "githubTeam": "kibana-core"
+  },
+  "version": "kibana",
+  "ui": true,
+  "requiredPlugins": ["data", "dataViews"],
+  "requiredBundles": ["kibanaUtils", "kibanaReact", "savedObjectsManagement"]
+}
