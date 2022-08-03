@@ -6,11 +6,10 @@
  */
 
 import { run } from '@kbn/dev-cli-runner';
-import {
-  agentEmulatorRunner,
-  DEFAULT_ACTION_DELAY,
-  DEFAULT_CHECKIN_INTERVAL,
-} from './agent_emulator';
+import { agentEmulatorRunner } from './agent_emulator';
+
+const DEFAULT_CHECKIN_INTERVAL = 60_000; // 1m
+const DEFAULT_ACTION_DELAY = 5_000; // 5s
 
 export const cli = () => {
   run(
