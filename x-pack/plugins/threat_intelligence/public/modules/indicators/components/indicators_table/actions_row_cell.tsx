@@ -5,10 +5,25 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
+import React, { useContext, VFC } from 'react';
 import { Indicator } from '../../../../../common/types/indicator';
 import { OpenIndicatorFlyoutButton } from '../open_indicator_flyout_button/open_indicator_flyout_button';
+import { IndicatorsTableContext } from './context';
 
-export const ActionsRowCell: VFC<{ indicator: Indicator }> = ({ indicator }) => (
-  <OpenIndicatorFlyoutButton indicator={indicator} />
-);
+export const ActionsRowCell: VFC<{ indicator: Indicator }> = ({ indicator }) => {
+  const indicatorTableContext = useContext(IndicatorsTableContext);
+
+  if (!indicatorTableContext) {
+    throw new Error(`indicatorTableContext has to be defined`);
+  }
+
+  const { setExpanded, expanded } = indicatorTableContext;
+
+  return (
+    <OpenIndicatorFlyoutButton
+      indicator={indicator}
+      onOpen={setExpanded}
+      isOpen={Boolean(expanded && expanded._id === indicator._id)}
+    />
+  );
+};
