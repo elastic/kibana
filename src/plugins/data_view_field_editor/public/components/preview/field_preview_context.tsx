@@ -34,6 +34,7 @@ import type {
   EsDocument,
   ScriptErrorCodes,
   FetchDocError,
+  FieldPreview,
 } from './types';
 
 const fieldPreviewContext = createContext<Context | undefined>(undefined);
@@ -45,6 +46,7 @@ const defaultParams: Params = {
   document: null,
   type: null,
   format: null,
+  parentName: null,
 };
 
 export const defaultValueFormatter = (value: unknown) => {
@@ -138,7 +140,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     isPreviewAvailable = false;
   }
 
-  const { name, document, script, format, type } = params;
+  const { name, document, script, format, type, parentName } = params;
 
   const updateParams: Context['params']['update'] = useCallback((updated) => {
     setParams((prev) => ({ ...prev, ...updated }));
@@ -342,9 +344,11 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   const updateCompositeFieldPreview = useCallback(
     (compositeName: string | null, compositeValues: Record<string, unknown[]>) => {
       const updatedFieldsInScript: string[] = [];
+      // if we're displaying a composite subfield, filter results
+      const filter = parentName ? (field: FieldPreview) => field.key === name : () => true;
 
       const fields = Object.entries(compositeValues)
-        .map(([key, values]) => {
+        .map<FieldPreview>(([key, values]) => {
           // The Painless _execute API returns the composite field values under a map.
           // Each of the key is prefixed with "composite_field." (e.g. "composite_field.field1: ['value']")
           const { 1: fieldName } = key.split('composite_field.');
@@ -354,12 +358,15 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
           const formattedValue = valueFormatter(value);
 
           return {
-            key: `${compositeName ?? ''}.${fieldName}`,
+            key: parentName
+              ? `${parentName ?? ''}.${fieldName}`
+              : `${compositeName ?? ''}.${fieldName}`,
             value,
             formattedValue,
             type: valueTypeToSelectedType(value),
           };
         })
+        .filter(filter)
         // ...and sort alphabetically
         .sort((a, b) => a.key.localeCompare(b.key));
 
@@ -368,15 +375,19 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         error: null,
       });
     },
-    [valueFormatter]
+    [valueFormatter, parentName, name]
   );
 
   const updatePreview = useCallback(async () => {
-    if (scriptEditorValidation.isValidating) {
+    // don't prevent rendering if we're working with a composite subfield (has parentName)
+    if (!parentName && scriptEditorValidation.isValidating) {
       return;
     }
 
-    if (!allParamsDefined || !hasSomeParamsChanged || scriptEditorValidation.isValid === false) {
+    if (
+      !parentName &&
+      (!allParamsDefined || !hasSomeParamsChanged || scriptEditorValidation.isValid === false)
+    ) {
       setIsLoadingPreview(false);
       return;
     }
@@ -388,11 +399,14 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     };
 
     const currentApiCall = ++previewCount.current;
+
+    const previewScript = (parentName && dataView.getRuntimeField(parentName)?.script) || script!;
+
     const response = await getFieldPreview({
       index: currentDocIndex,
       document: document!,
-      context: `${type!}_field` as PainlessExecuteContext,
-      script: script!,
+      context: (parentName ? 'composite_field' : `${type!}_field`) as PainlessExecuteContext,
+      script: previewScript,
     });
 
     if (currentApiCall !== previewCount.current) {
@@ -443,6 +457,8 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     name,
     type,
     script,
+    parentName,
+    dataView,
     document,
     currentDocId,
     getFieldPreview,
@@ -633,7 +649,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         fields: updatedFields,
       };
     });
-  }, [name, type]);
+  }, [name, type, parentName]);
 
   /**
    * Whenever the format changes we immediately update the preview

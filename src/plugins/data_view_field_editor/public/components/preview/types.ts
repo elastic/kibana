@@ -56,6 +56,8 @@ export interface Params {
   script: Required<RuntimeField>['script'] | null;
   format: SerializedFieldFormat | null;
   document: { [key: string]: unknown } | null;
+  // used for composite subfields
+  parentName: string | null;
 }
 
 export interface FieldPreview {

@@ -229,8 +229,17 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
           ? null
           : { source: updatedScript!.source },
       format: updatedFormat?.id !== undefined ? updatedFormat : null,
+      parentName: field?.parentName,
     });
-  }, [updatedName, updatedType, updatedScript, isValueVisible, updatedFormat, updatePreviewParams]);
+  }, [
+    updatedName,
+    updatedType,
+    updatedScript,
+    isValueVisible,
+    updatedFormat,
+    updatePreviewParams,
+    field,
+  ]);
 
   useEffect(() => {
     if (onFormModifiedChange) {
