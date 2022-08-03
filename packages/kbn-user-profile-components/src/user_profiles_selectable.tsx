@@ -230,11 +230,15 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
 
         onChange(values);
       }}
-      height={height}
+      style={{ maxHeight: height }}
       singleSelection={singleSelection}
       searchable
       searchProps={{
-        placeholder: searchPlaceholder,
+        placeholder:
+          searchPlaceholder ??
+          i18n.translate('userProfileComponents.userProfilesSelectable.searchPlaceholder', {
+            defaultMessage: 'Search',
+          }),
         onChange: onSearchChange,
         isLoading,
         isClearable: !isLoading,
@@ -259,7 +263,7 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
                   ) : (
                     <FormattedMessage
                       id="userProfileComponents.userProfilesSelectable.selectedStatusMessage"
-                      defaultMessage="{count, plural, one {# user} other {# users}}"
+                      defaultMessage="{count, plural, one {# user selected} other {# users selected}}"
                       values={{ count: selectedCount }}
                     />
                   )}
