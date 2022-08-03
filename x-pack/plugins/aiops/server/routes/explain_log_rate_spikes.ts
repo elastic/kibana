@@ -75,6 +75,23 @@ export const defineExplainLogRateSpikesRoute = (
         logger
       );
 
+      function endWithUpdatedLoadingState() {
+        push(
+          updateLoadingStateAction({
+            ccsWarning: false,
+            loaded: 1,
+            loadingState: i18n.translate(
+              'xpack.aiops.explainLogRateSpikes.loadingState.doneMessage',
+              {
+                defaultMessage: 'Done.',
+              }
+            ),
+          })
+        );
+
+        end();
+      }
+
       // Async IIFE to run the analysis while not blocking returning `responseWithHeaders`.
       (async () => {
         push(resetAction());
@@ -100,11 +117,7 @@ export const defineExplainLogRateSpikesRoute = (
           return;
         }
 
-        if (fieldCandidates.length > 0) {
-          loaded += LOADED_FIELD_CANDIDATES;
-        } else {
-          loaded = 1;
-        }
+        loaded += LOADED_FIELD_CANDIDATES;
 
         push(
           updateLoadingStateAction({
@@ -123,7 +136,9 @@ export const defineExplainLogRateSpikesRoute = (
           })
         );
 
-        if (shouldStop || fieldCandidates.length === 0) {
+        if (fieldCandidates.length === 0) {
+          endWithUpdatedLoadingState();
+        } else if (shouldStop) {
           end();
           return;
         }
@@ -179,7 +194,7 @@ export const defineExplainLogRateSpikesRoute = (
         }
 
         if (changePoints?.length === 0) {
-          end();
+          endWithUpdatedLoadingState();
           return;
         }
 
@@ -274,20 +289,7 @@ export const defineExplainLogRateSpikesRoute = (
           });
         }
 
-        push(
-          updateLoadingStateAction({
-            ccsWarning: false,
-            loaded: 1,
-            loadingState: i18n.translate(
-              'xpack.aiops.explainLogRateSpikes.loadingState.doneMessage',
-              {
-                defaultMessage: 'Done.',
-              }
-            ),
-          })
-        );
-
-        end();
+        endWithUpdatedLoadingState();
       })();
 
       return response.ok(responseWithHeaders);
