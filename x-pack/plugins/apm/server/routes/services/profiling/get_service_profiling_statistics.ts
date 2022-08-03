@@ -9,6 +9,7 @@ import { Logger } from '@kbn/core/server';
 import util from 'util';
 import { ESFilter } from '@kbn/core/types/elasticsearch';
 import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { maybe } from '../../../../common/utils/maybe';
 import { ProfileStackFrame } from '../../../../typings/es_schemas/ui/profile';
 import {
@@ -16,7 +17,6 @@ import {
   ProfileNode,
   getValueTypeConfig,
 } from '../../../../common/profiling';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   PROFILE_STACK,
   PROFILE_TOP_ID,

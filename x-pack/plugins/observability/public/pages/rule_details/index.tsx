@@ -49,10 +49,9 @@ import { paths } from '../../config/paths';
 import { observabilityFeatureId } from '../../../common';
 import { ALERT_STATUS_LICENSE_ERROR, rulesStatusesTranslationsMapping } from './translations';
 import { ObservabilityAppServices } from '../../application/types';
-import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
+
 export function RuleDetailsPage() {
   const {
-    cases,
     http,
     triggersActionsUi: {
       alertsTableConfigurationRegistry,
@@ -153,12 +152,7 @@ export function RuleDetailsPage() {
       ? !ruleTypeRegistry.get(rule.ruleTypeId).requiresAppContext
       : false);
 
-  const userPermissions = useGetUserCasesPermissions();
   const alertStateProps = {
-    cases: {
-      ui: cases.ui,
-      permissions: userPermissions,
-    },
     alertsTableConfigurationRegistry,
     configurationId: observabilityFeatureId,
     id: `case-details-alerts-o11y`,
