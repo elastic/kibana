@@ -67,6 +67,7 @@ describe('saved_searches_utils', () => {
           },
           "sharingSavedObjectProps": Object {},
           "sort": Array [],
+          "tags": Array [],
           "timeRange": undefined,
           "timeRestore": undefined,
           "title": "saved search",
