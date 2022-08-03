@@ -8,6 +8,7 @@ PKG_REQUIRE_NAME = "@kbn/core-saved-objects-browser-mocks"
 SOURCE_FILES = glob(
   [
     "src/**/*.ts",
+    "src/**/*.tsx",
   ],
   exclude = [
     "**/*.test.*",
@@ -44,6 +45,13 @@ jsts_transpiler(
   build_pkg_name = package_name(),
 )
 
+jsts_transpiler(
+  name = "target_web",
+  srcs = SRCS,
+  build_pkg_name = package_name(),
+  web = True,
+)
+
 ts_config(
   name = "tsconfig",
   src = "tsconfig.json",
@@ -69,7 +77,7 @@ ts_project(
 js_library(
   name = PKG_DIRNAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node"],
+  deps = RUNTIME_DEPS + [":target_node", ":target_web"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
