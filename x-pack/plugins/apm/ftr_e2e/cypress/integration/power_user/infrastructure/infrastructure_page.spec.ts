@@ -12,10 +12,6 @@ import { generateData } from './generate_data';
 const start = '2021-10-10T00:00:00.000Z';
 const end = '2021-10-10T00:15:00.000Z';
 
-const settingsPageHref = '/app/management/kibana/settings';
-const infraToggle =
-  '[data-test-subj="advancedSetting-editField-observability:enableInfrastructureView"]';
-
 const goServiceInfraPageHref = url.format({
   pathname: '/app/apm/services/synth-go/infrastructure',
   query: { rangeFrom: start, rangeTo: end },
@@ -51,9 +47,6 @@ describe('Infrastructure page', () => {
 
   describe('when data is loaded', () => {
     it('has no detectable a11y violations on load', () => {
-      cy.visit(settingsPageHref);
-      cy.get(infraToggle).click();
-      cy.contains('Save changes').click();
       cy.visit(goServiceInfraPageHref);
       cy.contains('Infrastructure');
       // set skipFailures to true to not fail the test when there are accessibility failures
@@ -79,7 +72,7 @@ describe('Infrastructure page', () => {
     describe('when none infrastructure attributes are returned by the api call', () => {
       it('shows no data message', () => {
         cy.visit(nodeServiceInfraPageHref);
-        cy.contains('No infrastructure data found');
+        cy.contains('No results match your search criteria.');
       });
     });
   });
