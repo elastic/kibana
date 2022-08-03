@@ -42,6 +42,7 @@ import type {
   WrappedFieldsLatest,
 } from '../../../../common/detection_engine/schemas/alerts';
 import type { IRuleExecutionLogForExecutors } from '../rule_monitoring';
+import { buildGroupByFieldAggregation } from './group_and_bulk_create';
 
 export interface ThresholdResult {
   terms?: Array<{
@@ -315,3 +316,12 @@ export interface ThresholdAlertState extends RuleTypeState {
   initialized: boolean;
   signalHistory: ThresholdSignalHistory;
 }
+
+export type EventGroupingMultiBucketAggregationResult = ESSearchResponse<
+  SignalSource,
+  {
+    body: {
+      aggregations: ReturnType<typeof buildGroupByFieldAggregation>;
+    };
+  }
+>;

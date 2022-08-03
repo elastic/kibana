@@ -14,56 +14,58 @@ import type { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { withSecuritySpan } from '../../../utils/with_security_span';
 import { buildTimeRangeFilter } from './build_events_query';
 import type {
+  EventGroupingMultiBucketAggregationResult,
   SearchAfterAndBulkCreateParams,
   SearchAfterAndBulkCreateReturnType,
   SignalSource,
 } from './types';
 import { createSearchAfterReturnType } from './utils';
-import type {
-  CompleteRule,
-  QueryRuleParams,
-  SavedQueryRuleParams,
-  ThreatRuleParams,
-} from '../schemas/rule_schemas';
+import type { CompleteRule, QueryRuleParams } from '../schemas/rule_schemas';
 
 interface BaseArgs {
   baseQuery: estypes.SearchRequest;
-  completeRule:
-    | CompleteRule<QueryRuleParams>
-    | CompleteRule<SavedQueryRuleParams>
-    | CompleteRule<ThreatRuleParams>;
+  completeRule: CompleteRule<QueryRuleParams>;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
 }
-type GetCardinalityArgs = BaseArgs;
 
 interface GetEventsByGroupArgs extends BaseArgs {
-  topHitsSize: number;
+  maxSignals: number;
   sort: estypes.Sort;
 }
 
-const getCardinality = async ({ baseQuery, completeRule, services }: GetCardinalityArgs) => {
-  return services.scopedClusterClient.asCurrentUser.search({
-    ...baseQuery,
-    size: 0,
-    body: {
-      ...baseQuery.body,
-      aggregations: {
-        fieldCardinality: {
-          cardinality: {
-            // TODO: typing
-            field: (completeRule.ruleParams as unknown as { groupBy: string[] }).groupBy[0],
-          },
+interface GetGroupByFieldAggregationArgs {
+  completeRule: CompleteRule<QueryRuleParams>;
+  maxSignals: number;
+  sort: estypes.Sort;
+}
+
+export const buildGroupByFieldAggregation = ({
+  completeRule,
+  maxSignals,
+  sort,
+}: GetGroupByFieldAggregationArgs) => ({
+  eventGroups: {
+    terms: {
+      field: completeRule.ruleParams.alertGrouping?.groupBy[0],
+      size: maxSignals,
+      min_doc_count: 1,
+    },
+    aggs: {
+      topHits: {
+        top_hits: {
+          sort,
+          size: maxSignals,
         },
       },
     },
-  });
-};
+  },
+});
 
 const getEventsByGroup = async ({
   baseQuery,
   completeRule,
   services,
-  topHitsSize,
+  maxSignals,
   sort,
 }: GetEventsByGroupArgs) => {
   return services.scopedClusterClient.asCurrentUser.search({
@@ -71,23 +73,7 @@ const getEventsByGroup = async ({
     body: {
       ...baseQuery.body,
       track_total_hits: true,
-      aggs: {
-        eventGroups: {
-          terms: {
-            // TODO: typing
-            field: (completeRule.ruleParams as unknown as { groupBy: string[] }).groupBy[0],
-            size: 10000,
-          },
-          aggs: {
-            topHits: {
-              top_hits: {
-                sort: [],
-                size: topHitsSize,
-              },
-            },
-          },
-        },
-      },
+      aggs: buildGroupByFieldAggregation({ completeRule, maxSignals, sort }),
     },
   });
 };
@@ -115,7 +101,7 @@ export const groupAndBulkCreate = async ({
   secondaryTimestamp,
 }: SearchAfterAndBulkCreateParams): Promise<SearchAfterAndBulkCreateReturnType> => {
   return withSecuritySpan('groupAndBulkCreate', async () => {
-    const toReturn = createSearchAfterReturnType();
+    let toReturn = createSearchAfterReturnType();
 
     const to = tuple.to.toISOString();
     const from = tuple.from.toISOString();
@@ -146,35 +132,17 @@ export const groupAndBulkCreate = async ({
       },
     };
 
-    // Get cardinality of "groupBy" field
-    const cardinality = await getCardinality({
-      baseQuery,
-      completeRule,
-      services,
-    });
-    // TODO: typing
-    const cardinalityValue = cardinality.aggregations?.fieldCardinality?.value ?? 0;
-
-    // Calculate top_hits size
-    // e.g. when maxSignals is 100 and the field has cardinality 5, we
-    // have 5 buckets. Thus we need at least 100 / 5 = 20 hits per bucket.
-    // TODO: We may need to go back and get more if not evenly distributed.
-    const topHitsSize = Math.max(tuple.maxSignals / cardinalityValue, 1);
-
-    // reverse the sort order so we can pop() instead of shift() (more efficient)
-    const reverseSortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
-
     const sort: estypes.Sort = [];
     sort.push({
       [primaryTimestamp]: {
-        order: reverseSortOrder,
+        order: sortOrder,
         unmapped_type: 'date',
       },
     });
     if (secondaryTimestamp) {
       sort.push({
         [secondaryTimestamp]: {
-          order: reverseSortOrder,
+          order: sortOrder,
           unmapped_type: 'date',
         },
       });
@@ -183,22 +151,26 @@ export const groupAndBulkCreate = async ({
     // Get aggregated results
     const eventsByGroupResponse = await getEventsByGroup({
       baseQuery,
-      completeRule,
+      completeRule: completeRule as CompleteRule<QueryRuleParams>,
       services,
-      topHitsSize,
+      maxSignals: tuple.maxSignals,
       sort,
     });
 
-    const buckets = eventsByGroupResponse.aggregations?.eventGroups.buckets;
-    const numBuckets = buckets.length;
+    const eventsByGroupResponseWithAggs =
+      eventsByGroupResponse as EventGroupingMultiBucketAggregationResult;
+    if (!eventsByGroupResponseWithAggs.aggregations) {
+      throw new Error('expected to find aggregations on search result');
+    }
+
+    const buckets = eventsByGroupResponseWithAggs.aggregations.eventGroups.buckets;
 
     // Index
-    const numToIndex = Math.min(tuple.maxSignals, eventsByGroupResponse.hits.total?.value);
     const toIndex: Array<estypes.SearchHit<SignalSource>> = [];
 
     let indexedThisPass = [];
     let indexedLastPass = [];
-    for (let i = 0; ; i = (i + 1) % numBuckets) {
+    for (let i = 0; ; i = (i + 1) % buckets.length) {
       if (i === 0) {
         if (!indexedThisPass.length && indexedLastPass.length) {
           break;
@@ -212,15 +184,30 @@ export const groupAndBulkCreate = async ({
         toIndex.push(event);
         indexedThisPass.push(buckets[i].key);
       }
+
+      if (toIndex.length >= tuple.maxSignals) {
+        break;
+      }
     }
 
-    if (toIndex.length < numToIndex) {
-      // TODO: we need to go back and get more results
-      // Query for terms using search_after (we need to get the sort keys above)
-    }
+    const enrichedEvents = await enrichment(toIndex);
+    const wrappedDocs = wrapHits(enrichedEvents, buildReasonMessage);
 
-    // TODO: bulk create
-    // Implement this next
+    const {
+      bulkCreateDuration: bulkDuration,
+      createdItemsCount: createdCount,
+      createdItems,
+      success: bulkSuccess,
+      errors: bulkErrors,
+    } = await bulkCreate(wrappedDocs);
+
+    toReturn = createSearchAfterReturnType({
+      success: bulkSuccess,
+      createdSignalsCount: createdCount,
+      createdSignals: createdItems,
+      bulkCreateTimes: [bulkDuration],
+      errors: bulkErrors,
+    });
 
     return toReturn;
   });
