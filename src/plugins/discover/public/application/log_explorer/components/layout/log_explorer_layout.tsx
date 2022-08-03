@@ -89,8 +89,7 @@ export function LogExplorerLayout({
 
   const stateMachine = useStateMachineContext();
   const [dataAccessState] = useActor(stateMachine);
-  const fieldCounts = useFieldCounts(dataAccessState.context);
-  console.log(dataAccessState);
+  const fieldCounts = useFieldCounts(stateMachine);
   const dataState: DataMainMsg = useDataState(main$);
 
   // We treat rollup v1 data views as non time based in Discover, since we query them
@@ -181,9 +180,9 @@ export function LogExplorerLayout({
   const contentCentered =
     dataAccessState.matches('uninitialized') || dataAccessState.matches('failedNoData');
   const onDataViewCreated = useCallback(
-    (dataView: DataView) => {
-      if (dataView.id) {
-        onChangeDataView(dataView.id);
+    (newDataView: DataView) => {
+      if (newDataView.id) {
+        onChangeDataView(newDataView.id);
       }
     },
     [onChangeDataView]

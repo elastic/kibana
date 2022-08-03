@@ -8,9 +8,8 @@
 
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { useSelector } from '@xstate/react';
-import memoizeOne from 'memoize-one';
 import { useStateMachineContext } from '../../hooks/query_data/use_state_machine';
-import { selectRows } from '../../state_machines/data_access_state_machine';
+import { memoizedSelectRows } from '../../state_machines/data_access_state_machine';
 
 export function LogExplorerCell({ rowIndex, columnId }: EuiDataGridCellValueElementProps) {
   const { rows } = useSelector(useStateMachineContext(), memoizedSelectRows);
@@ -25,5 +24,3 @@ export function LogExplorerCell({ rowIndex, columnId }: EuiDataGridCellValueElem
 
   return JSON.stringify(row);
 }
-
-const memoizedSelectRows = memoizeOne(selectRows);

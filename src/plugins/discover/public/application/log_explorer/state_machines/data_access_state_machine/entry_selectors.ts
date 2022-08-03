@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import memoizeOne from 'memoize-one';
 import { LogExplorerChunk, LogExplorerRow } from '../../types';
 import { DataAccessService } from './state_machine';
 import { selectIsReloading } from './status_selectors';
@@ -33,7 +34,7 @@ export const selectRows = (
   const chunkBoundaryRowIndex = getStartRowIndex(bottomChunk);
   const endRowIndex = getEndRowIndex(bottomChunk);
 
-  const rows = new Map([...getRowsFromChunk(topChunk), ...getRowsFromChunk(bottomChunk)]);
+  const rows = memoizedGetRowMapFromChunksForSelector(topChunk, bottomChunk);
 
   return {
     startRowIndex,
@@ -42,6 +43,8 @@ export const selectRows = (
     rows,
   };
 };
+
+export const memoizedSelectRows = memoizeOne(selectRows);
 
 const getStartRowIndex = (chunk: LogExplorerChunk): number => {
   // TODO: the zero fallback should never happen, but the typestate is not strict enough
@@ -56,6 +59,11 @@ const getStartRowIndex = (chunk: LogExplorerChunk): number => {
       return 0;
   }
 };
+
+const getRowMapFromChunks = (topChunk: LogExplorerChunk, bottomChunk: LogExplorerChunk) =>
+  new Map([...getRowsFromChunk(topChunk), ...getRowsFromChunk(bottomChunk)]);
+
+const memoizedGetRowMapFromChunksForSelector = memoizeOne(getRowMapFromChunks);
 
 const getEndRowIndex = (chunk: LogExplorerChunk): number => {
   // TODO: the zero fallback should never happen, but the typestate is not strict enough

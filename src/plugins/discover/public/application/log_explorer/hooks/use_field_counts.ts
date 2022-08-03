@@ -6,30 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { useMemo } from 'react';
-import { LogExplorerContext } from '../state_machines/data_access_state_machine';
+import { useSelector } from '@xstate/react';
+import isDeepEqual from 'fast-deep-equal';
+import {
+  DataAccessService,
+  memoizedSelectFieldCounts,
+} from '../state_machines/data_access_state_machine';
 
-type FieldCounts = Record<string, number>;
-
-export const useFieldCounts = (logExplorerContext: LogExplorerContext) => {
-  const { topChunk, bottomChunk } = logExplorerContext;
-
-  const fieldCounts: FieldCounts = useMemo(() => {
-    if (topChunk.status !== 'loaded' || bottomChunk.status !== 'loaded') {
-      return {};
-    }
-
-    const entries = [...topChunk.entries, ...bottomChunk.entries];
-
-    return entries.reduce<FieldCounts>((fieldCountsAcc, entry) => {
-      return Object.keys(entry.fields).reduce((countsAcc, field) => {
-        return {
-          ...countsAcc,
-          [field]: (countsAcc[field] || 0) + 1,
-        };
-      }, fieldCountsAcc);
-    }, {});
-  }, [topChunk, bottomChunk]);
-
-  return fieldCounts;
-};
+export const useFieldCounts = (stateMachine: DataAccessService) =>
+  useSelector(stateMachine, memoizedSelectFieldCounts, isDeepEqual);
