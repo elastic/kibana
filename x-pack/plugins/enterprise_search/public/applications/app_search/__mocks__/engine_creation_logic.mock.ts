@@ -156,6 +156,7 @@ export const mockElasticsearchIndices = [
 
 export const mockSearchIndexOptions: SearchIndexSelectableOption[] = [
   {
+    count: 0,
     label: 'search-my-index-1',
     health: 'yellow',
     status: 'open',
@@ -181,6 +182,7 @@ export const mockSearchIndexOptions: SearchIndexSelectableOption[] = [
     },
   },
   {
+    count: 100,
     label: 'my-index-2',
     health: 'green',
     status: 'open',
@@ -207,6 +209,7 @@ export const mockSearchIndexOptions: SearchIndexSelectableOption[] = [
     },
   },
   {
+    count: 100,
     label: 'search-my-index-2',
     health: 'green',
     status: 'open',
@@ -229,6 +232,7 @@ export const mockSearchIndexOptions: SearchIndexSelectableOption[] = [
     },
   },
   {
+    count: 100,
     label: 'alias-my-index-2',
     health: 'green',
     status: 'open',
