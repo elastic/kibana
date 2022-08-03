@@ -14,7 +14,7 @@ exports[`EditableTitle renders 1`] = `
                 "retry": false,
               },
             },
-            "logger": CustomConsole {
+            "logger": BufferedConsole {
               "Console": [Function],
               "_buffer": Array [],
               "_counters": Object {},
