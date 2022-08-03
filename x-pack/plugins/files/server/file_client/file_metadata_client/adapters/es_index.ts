@@ -6,8 +6,7 @@
  */
 
 import { Logger } from '@kbn/core/server';
-import { pipe, flatMap } from 'lodash/fp';
-import { getFlattenedObject } from '@kbn/std';
+import { toElasticsearchQuery } from '@kbn/es-query';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { FilesMetrics, FileMetadata } from '../../../../common';
 import type { FindFileArgs } from '../../../file_service';
@@ -21,6 +20,7 @@ import type {
   UpdateArgs,
   Pagination,
 } from '../file_metadata_service';
+import { filterArgsToEsQuery } from './filter_args_to_es_query';
 
 export class EsIndexFilesMetadataClient<M = unknown> implements FileMetadataClient {
   constructor(
@@ -88,46 +88,16 @@ export class EsIndexFilesMetadataClient<M = unknown> implements FileMetadataClie
     });
   }
 
-  async find({
-    extension,
-    kind,
-    meta,
-    mimeType,
-    name,
-    page,
-    perPage,
-    status,
-  }: FindFileArgs): Promise<Array<FileDescriptor<M>>> {
-    const toTerms = (field: keyof FileMetadata, value: string[]) =>
-      value.map((v) => ({
-        term: { [field]: v },
-      }));
+  async find({ page, perPage, ...filterArgs }: FindFileArgs): Promise<Array<FileDescriptor<M>>> {
+    const kuery = filterArgsToEsQuery(filterArgs);
 
-    const must = [
-      ...(extension ? toTerms('extension', extension) : []),
-      ...(kind ? toTerms('FileKind', kind) : []),
-      ...(mimeType ? toTerms('mime_type', mimeType) : []),
-      ...(name ? toTerms('name', name) : []),
-      ...(status ? toTerms('Status', status) : []),
-      ...(meta
-        ? pipe(
-            getFlattenedObject,
-            Object.entries,
-            flatMap(([key, value]) => toTerms(key as keyof FileMetadata, [value]))
-          )(meta)
-        : []),
-    ].filter(Boolean);
-
-    if (!must.length) {
+    if (!kuery) {
       return this.list({ page, perPage });
     }
 
     const result = await this.esClient.search<FileMetadata<M>>({
-      query: {
-        bool: {
-          must,
-        },
-      },
+      index: this.index,
+      query: toElasticsearchQuery(kuery),
       ...this.paginationToES({ page, perPage }),
     });
 

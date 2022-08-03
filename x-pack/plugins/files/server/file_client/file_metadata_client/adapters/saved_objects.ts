@@ -13,8 +13,7 @@ import type {
   SavedObjectsOpenPointInTimeResponse,
 } from '@kbn/core-saved-objects-api-server';
 import { AggregationsSumAggregate } from '@elastic/elasticsearch/lib/api/types';
-import { getFlattenedObject } from '@kbn/std';
-import { escapeKuery, KueryNode, nodeBuilder } from '@kbn/es-query';
+import { escapeKuery } from '@kbn/es-query';
 
 import { FindFileArgs } from '../../../file_service/file_action_types';
 import { ES_FIXED_SIZE_INDEX_BLOB_STORE } from '../../../../common/constants';
@@ -26,6 +25,8 @@ import type {
   Pagination,
   GetUsageMetricsArgs,
 } from '../file_metadata_service';
+
+import { filterArgsToEsQuery } from './filter_args_to_es_query';
 
 interface TermsAgg {
   buckets: Array<{ key: string; doc_count: number }>;
@@ -82,42 +83,10 @@ export class SavedObjectsFileMetadataClient implements FileMetadataClient {
     }));
   }
 
-  async find({
-    kind,
-    meta,
-    name,
-    page,
-    status,
-    perPage,
-    mimeType,
-    extension,
-  }: FindFileArgs & Pagination): Promise<FileDescriptor[]> {
-    const kueryExpressions: KueryNode[] = [];
-
-    const addFilters = (fieldName: string, values: string[] = []): void => {
-      if (values.length) {
-        const orExpressions = values
-          .filter(Boolean)
-          .map((value) =>
-            nodeBuilder.is(`${this.soType}.attributes.${fieldName}`, escapeKuery(value))
-          );
-        kueryExpressions.push(nodeBuilder.or(orExpressions));
-      }
-    };
-
-    addFilters('name', name);
-    addFilters('FileKind', kind);
-    addFilters('Status', status);
-    addFilters('mime_type', mimeType);
-    addFilters('extension', extension);
-
-    Object.entries(meta ? getFlattenedObject(meta) : {}).forEach(([fieldName, value]) => {
-      addFilters(`Meta.${fieldName}`, Array.isArray(value) ? value : [value]);
-    });
-
+  async find({ page, perPage, ...filterArgs }: FindFileArgs): Promise<FileDescriptor[]> {
     const result = await this.soClient.find({
       type: this.soType,
-      filter: kueryExpressions ? nodeBuilder.and(kueryExpressions) : undefined,
+      filter: filterArgsToEsQuery({ ...filterArgs, attrPrefix: `${this.soType}.attributes.` }),
       page,
       perPage,
       sortOrder: 'desc',
