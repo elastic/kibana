@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from '../../../common/types';
-
-export type DashboardLoadedEventStatus = 'done' | 'error';
-
-export interface DashboardLoadedEventMeta {
-  status: DashboardLoadedEventStatus;
-}
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-ebt-tools'],
+};

@@ -14,15 +14,15 @@ export interface BrowserPerformanceMemoryInfo {
   /**
    * The maximum size of the heap, in bytes, that is available to the context.
    */
-  memory_js_heap_size_limit: number;
+  jsHeapSizeLimit: number;
   /**
    * The total allocated heap size, in bytes.
    */
-  memory_js_heap_size_total: number;
+  totalJSHeapSize: number;
   /**
    * The currently active segment of JS heap, in bytes.
    */
-  memory_js_heap_size_used: number;
+  usedJSHeapSize: number;
 }
 
 /**
@@ -34,9 +34,9 @@ export function fetchOptionalMemoryInfo(): BrowserPerformanceMemoryInfo | undefi
   const memory = window.performance.memory;
   if (memory) {
     return {
-      memory_js_heap_size_limit: memory.jsHeapSizeLimit,
-      memory_js_heap_size_total: memory.totalJSHeapSize,
-      memory_js_heap_size_used: memory.usedJSHeapSize,
+      jsHeapSizeLimit: memory.jsHeapSizeLimit,
+      totalJSHeapSize: memory.totalJSHeapSize,
+      usedJSHeapSize: memory.usedJSHeapSize,
     };
   }
 }

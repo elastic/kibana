@@ -27,9 +27,9 @@ describe('fetchOptionalMemoryInfo', () => {
       },
     };
     expect(fetchOptionalMemoryInfo()).toEqual({
-      memory_js_heap_size_limit: 3,
-      memory_js_heap_size_total: 2,
-      memory_js_heap_size_used: 1,
+      jsHeapSizeLimit: 3,
+      totalJSHeapSize: 2,
+      usedJSHeapSize: 1,
     });
   });
 });

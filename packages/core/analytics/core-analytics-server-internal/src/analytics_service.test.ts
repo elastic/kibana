@@ -7,8 +7,7 @@
  */
 
 import { firstValueFrom, Observable } from 'rxjs';
-import { coreContextMock } from '@kbn/core-base-browser-mocks';
-import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { analyticsClientMock } from './analytics_service.test.mocks';
 import { AnalyticsService } from './analytics_service';
 
@@ -16,36 +15,27 @@ describe('AnalyticsService', () => {
   let analyticsService: AnalyticsService;
   beforeEach(() => {
     jest.clearAllMocks();
-    analyticsService = new AnalyticsService(coreContextMock.create());
+    analyticsService = new AnalyticsService(mockCoreContext.create());
   });
-  test('should register some context providers on creation', async () => {
-    expect(analyticsClientMock.registerContextProvider).toHaveBeenCalledTimes(3);
-    expect(
+
+  test('should register the context provider `build info` on creation', async () => {
+    expect(analyticsClientMock.registerContextProvider).toHaveBeenCalledTimes(1);
+    await expect(
       await firstValueFrom(analyticsClientMock.registerContextProvider.mock.calls[0][0].context$)
     ).toMatchInlineSnapshot(`
             Object {
-              "branch": "branch",
-              "buildNum": 100,
-              "buildSha": "buildSha",
+              "branch": "main",
+              "buildNum": 9007199254740991,
+              "buildSha": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
               "isDev": true,
               "isDistributable": false,
-              "version": "version",
+              "version": "8.5.0",
             }
           `);
-    expect(
-      await firstValueFrom(analyticsClientMock.registerContextProvider.mock.calls[1][0].context$)
-    ).toEqual({ session_id: expect.any(String) });
-    expect(
-      await firstValueFrom(analyticsClientMock.registerContextProvider.mock.calls[2][0].context$)
-    ).toEqual({
-      preferred_language: 'en-US',
-      preferred_languages: ['en-US', 'en'],
-      user_agent: expect.any(String),
-    });
   });
 
-  test('should register the `performance_metric` and `click` event types on creation', () => {
-    expect(analyticsClientMock.registerEventType).toHaveBeenCalledTimes(2);
+  test('should register the `performance_metric` event type on creation', () => {
+    expect(analyticsClientMock.registerEventType).toHaveBeenCalledTimes(1);
     expect(analyticsClientMock.registerEventType.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -144,29 +134,10 @@ describe('AnalyticsService', () => {
         },
       ]
     `);
-    expect(analyticsClientMock.registerEventType.mock.calls[1]).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "eventType": "click",
-          "schema": Object {
-            "target": Object {
-              "items": Object {
-                "_meta": Object {
-                  "description": "The attributes of the clicked element and all its parents in the form \`{attr.name}={attr.value}\`. It allows finding the clicked elements by looking up its attributes like \\"data-test-subj=my-button\\".",
-                },
-                "type": "keyword",
-              },
-              "type": "array",
-            },
-          },
-        },
-      ]
-    `);
   });
 
   test('setup should expose all the register APIs, reportEvent and opt-in', () => {
-    const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
-    expect(analyticsService.setup({ injectedMetadata })).toStrictEqual({
+    expect(analyticsService.setup()).toStrictEqual({
       registerShipper: expect.any(Function),
       registerContextProvider: expect.any(Function),
       removeContextProvider: expect.any(Function),
@@ -175,33 +146,6 @@ describe('AnalyticsService', () => {
       optIn: expect.any(Function),
       telemetryCounter$: expect.any(Observable),
     });
-  });
-
-  test('setup should register the elasticsearch info context provider (undefined)', async () => {
-    const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
-    analyticsService.setup({ injectedMetadata });
-    expect(
-      await firstValueFrom(analyticsClientMock.registerContextProvider.mock.calls[3][0].context$)
-    ).toMatchInlineSnapshot(`undefined`);
-  });
-
-  test('setup should register the elasticsearch info context provider (with info)', async () => {
-    const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
-    injectedMetadata.getElasticsearchInfo.mockReturnValue({
-      cluster_name: 'cluster_name',
-      cluster_uuid: 'cluster_uuid',
-      cluster_version: 'version',
-    });
-    analyticsService.setup({ injectedMetadata });
-    expect(
-      await firstValueFrom(analyticsClientMock.registerContextProvider.mock.calls[3][0].context$)
-    ).toMatchInlineSnapshot(`
-                  Object {
-                    "cluster_name": "cluster_name",
-                    "cluster_uuid": "cluster_uuid",
-                    "cluster_version": "version",
-                  }
-              `);
   });
 
   test('setup should expose only the APIs report and opt-in', () => {

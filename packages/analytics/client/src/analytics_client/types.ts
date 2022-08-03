@@ -170,7 +170,7 @@ export interface IAnalyticsClient {
    * @param eventType The event type registered via the `registerEventType` API.
    * @param eventData The properties matching the schema declared in the `registerEventType` API.
    */
-  reportEvent: <EventTypeData extends Record<string, unknown>>(
+  reportEvent: <EventTypeData extends object>(
     eventType: EventType,
     eventData: EventTypeData
   ) => void;

@@ -6,10 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from '../../../common/types';
-
-export type DashboardLoadedEventStatus = 'done' | 'error';
-
-export interface DashboardLoadedEventMeta {
-  status: DashboardLoadedEventStatus;
-}
+export const DASHBOARD_LOADED_EVENT = 'dashboard_loaded';
