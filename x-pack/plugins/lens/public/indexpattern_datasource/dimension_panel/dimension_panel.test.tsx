@@ -1309,7 +1309,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         columnId: 'col2',
       };
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
-      wrapper.find('[data-test-subj="indexPattern-advanced-accordion"]').first().simulate('click');
+      findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
       expect(wrapper.find('[data-test-subj="indexPattern-dimension-window-row"]')).toHaveLength(0);
     });
 
@@ -1321,7 +1321,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
     it('should allow to set window initially', () => {
       const props = getProps({});
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
-      wrapper.find('[data-test-subj="indexPattern-advanced-accordion"]').first().simulate('click');
+      findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
       wrapper.find(Window).find(EuiComboBox).prop('onChange')!([{ value: '1h', label: '' }]);
       expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
         ...props.state,
