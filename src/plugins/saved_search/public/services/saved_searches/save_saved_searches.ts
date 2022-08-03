@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObjectsStart } from '@kbn/core/public';
+import type { SavedObjectsClientContract, SavedObjectsStart } from '@kbn/core/public';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedSearch, SavedSearchAttributes } from './types';
 
@@ -43,7 +43,7 @@ const hasDuplicatedTitle = async (
 export const saveSavedSearch = async (
   savedSearch: SavedSearch,
   options: SaveSavedSearchOptions,
-  savedObjectsClient: SavedObjectsStart['client'],
+  savedObjectsClient: SavedObjectsClientContract,
   savedObjectsTagging: SavedObjectsTaggingApi | undefined
 ): Promise<string | undefined> => {
   const isNew = options.copyOnSave || !savedSearch.id;

@@ -26,9 +26,7 @@ type SOClient = Pick<
   'find' | 'resolve' | 'update' | 'create' | 'delete'
 >;
 
-export const simpleSavedObjectToSavedObject = <T>(
-  simpleSavedObject: SimpleSavedObject
-): SavedObject<T> =>
+const simpleSavedObjectToSavedObject = <T>(simpleSavedObject: SimpleSavedObject): SavedObject<T> =>
   ({
     version: simpleSavedObject._version,
     ...omit(simpleSavedObject, '_version'),

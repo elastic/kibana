@@ -6,8 +6,5 @@
  * Side Public License, v 1.
  */
 
-import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
-import { SavedObjectsStart } from './plugin';
-
-export const [getSavedObjects, setSavedObjects] =
-  createGetterSetter<SavedObjectsStart>('SavedObjects');
+export type { SavedObjectMetaData, SavedObjectFinderUiProps } from './saved_object_finder';
+export { SavedObjectFinderProps, getSavedObjectFinder } from './saved_object_finder';
