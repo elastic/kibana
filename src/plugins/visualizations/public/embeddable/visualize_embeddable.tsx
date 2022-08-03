@@ -192,15 +192,22 @@ export class VisualizeEmbeddable
     return this.vis.description;
   }
 
-  public getFilters() {
-    // because injection happens as part of the factory, we can reference filters directly here
-    const filters = this.getInput().savedVis?.data.searchSource?.filter ?? [];
+  public async getFilters() {
+    let input = this.getInput();
+    if (this.inputIsRefType(input)) {
+      input = await this.getInputAsValueType();
+    }
+    const filters = input.savedVis?.data.searchSource?.filter ?? [];
     // must clone the filters so that it's not read only, because mapAndFlattenFilters modifies the array
     return mapAndFlattenFilters(_.cloneDeep(filters));
   }
 
-  public getQuery() {
-    return this.getInput().savedVis?.data.searchSource?.query;
+  public async getQuery() {
+    let input = this.getInput();
+    if (this.inputIsRefType(input)) {
+      input = await this.getInputAsValueType();
+    }
+    return input.savedVis?.data.searchSource?.query;
   }
 
   public getInspectorAdapters = () => {

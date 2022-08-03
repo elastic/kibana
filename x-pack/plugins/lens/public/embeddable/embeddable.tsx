@@ -873,7 +873,7 @@ export class Embeddable
     return this.savedVis && this.savedVis.description;
   }
 
-  public getFilters() {
+  public async getFilters() {
     return mapAndFlattenFilters(
       this.deps.injectFilterReferences(
         this.savedVis?.state.filters ?? [],
@@ -882,7 +882,7 @@ export class Embeddable
     );
   }
 
-  public getQuery() {
+  public async getQuery() {
     return this.savedVis?.state.query;
   }
 

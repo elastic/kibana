@@ -551,13 +551,13 @@ export class SavedSearchEmbeddable
     return this.savedSearch.description;
   }
 
-  public getFilters() {
+  public async getFilters() {
     return mapAndFlattenFilters(
       (this.savedSearch.searchSource.getFields().filter as Filter[]) ?? []
     );
   }
 
-  public getQuery() {
+  public async getQuery() {
     return this.savedSearch.searchSource.getFields().query;
   }
 

@@ -15,6 +15,7 @@ import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import {
+  FilterStateStore,
   type Filter,
   compareFilters,
   type TimeRange,
@@ -33,7 +34,6 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { APPLY_FILTER_TRIGGER, mapAndFlattenFilters } from '@kbn/data-plugin/public';
-import { FilterStateStore } from '@kbn/es-query';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { createExtentFilter } from '../../common/elasticsearch_util';
 import {
@@ -256,7 +256,7 @@ export class MapEmbeddable
     return this._isInitialized ? this._savedMap.getAttributes().description : '';
   }
 
-  public getFilters() {
+  public async getFilters() {
     let mapState: { filters?: Filter[] } = {};
     try {
       mapState = JSON.parse(this._savedMap.getAttributes().mapStateJSON ?? '');
@@ -271,7 +271,7 @@ export class MapEmbeddable
     return mapAndFlattenFilters(filters);
   }
 
-  public getQuery() {
+  public async getQuery() {
     console.log(this.input);
     let mapState: { query?: Query | AggregateQuery } = {};
     try {

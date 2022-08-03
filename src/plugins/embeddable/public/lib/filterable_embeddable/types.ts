@@ -9,8 +9,8 @@
 import { AggregateQuery, Filter, Query } from '@kbn/es-query';
 
 export interface FilterableEmbeddable {
-  getFilters: () => Filter[];
-  getQuery: () => Query | AggregateQuery | undefined;
+  getFilters: () => Promise<Filter[]>;
+  getQuery: () => Promise<Query | AggregateQuery | undefined>;
 }
 
 export function isFilterableEmbeddable(incoming: unknown): incoming is FilterableEmbeddable {

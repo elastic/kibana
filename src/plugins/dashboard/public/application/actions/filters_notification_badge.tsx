@@ -62,9 +62,9 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
       return false;
     }
 
-    const query = embeddable.getQuery();
+    const query = await embeddable.getQuery();
     return (
-      embeddable.getFilters().length > 0 ||
+      (await embeddable.getFilters()).length > 0 ||
       (isOfQueryType(query) && query.query !== '') ||
       isOfAggregateQueryType(query as AggregateQuery)
     );
