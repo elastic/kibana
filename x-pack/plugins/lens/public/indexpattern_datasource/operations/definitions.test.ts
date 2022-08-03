@@ -211,7 +211,7 @@ describe('time scale transition', () => {
     ).toEqual(
       expect.objectContaining({
         timeScale: undefined,
-        label: 'Value count of bytesLabel',
+        label: 'Count of bytesLabel',
       })
     );
   });
