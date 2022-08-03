@@ -3339,6 +3339,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-notifications-browser-internal@link:bazel-bin/packages/core/notifications/core-notifications-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-notifications-browser-mocks@link:bazel-bin/packages/core/notifications/core-notifications-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-notifications-browser@link:bazel-bin/packages/core/notifications/core-notifications-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-overlays-browser-internal@link:bazel-bin/packages/core/overlays/core-overlays-browser-internal":
   version "0.0.0"
   uid ""
@@ -3376,6 +3388,10 @@
   uid ""
 
 "@kbn/core-saved-objects-server@link:bazel-bin/packages/core/saved-objects/core-saved-objects-server":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-test-helpers-deprecations-getters@link:bazel-bin/packages/core/test-helpers/core-test-helpers-deprecations-getters":
   version "0.0.0"
   uid ""
 
@@ -3444,6 +3460,10 @@
   uid ""
 
 "@kbn/docs-utils@link:bazel-bin/packages/kbn-docs-utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ebt-tools@link:bazel-bin/packages/kbn-ebt-tools":
   version "0.0.0"
   uid ""
 
@@ -3619,10 +3639,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/scalability-simulation-generator@link:bazel-bin/packages/kbn-scalability-simulation-generator":
-  version "0.0.0"
-  uid ""
-
 "@kbn/securitysolution-autocomplete@link:bazel-bin/packages/kbn-securitysolution-autocomplete":
   version "0.0.0"
   uid ""
@@ -3684,6 +3700,10 @@
   uid ""
 
 "@kbn/server-route-repository@link:bazel-bin/packages/kbn-server-route-repository":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-svg@link:bazel-bin/packages/kbn-shared-svg":
   version "0.0.0"
   uid ""
 
@@ -7199,6 +7219,18 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-notifications-browser-internal@link:bazel-bin/packages/core/notifications/core-notifications-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-notifications-browser-mocks@link:bazel-bin/packages/core/notifications/core-notifications-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-notifications-browser@link:bazel-bin/packages/core/notifications/core-notifications-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-overlays-browser-internal@link:bazel-bin/packages/core/overlays/core-overlays-browser-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7244,6 +7276,10 @@
   uid ""
 
 "@types/kbn__core-server-internal-base@link:bazel-bin/packages/core/server/internal-base/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-test-helpers-deprecations-getters@link:bazel-bin/packages/core/test-helpers/core-test-helpers-deprecations-getters/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -7312,6 +7348,10 @@
   uid ""
 
 "@types/kbn__docs-utils@link:bazel-bin/packages/kbn-docs-utils/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__ebt-tools@link:bazel-bin/packages/kbn-ebt-tools/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -7471,10 +7511,6 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__scalability-simulation-generator@link:bazel-bin/packages/kbn-scalability-simulation-generator/npm_module_types":
-  version "0.0.0"
-  uid ""
-
 "@types/kbn__securitysolution-autocomplete@link:bazel-bin/packages/kbn-securitysolution-autocomplete/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7536,6 +7572,10 @@
   uid ""
 
 "@types/kbn__server-route-repository@link:bazel-bin/packages/kbn-server-route-repository/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-svg@link:bazel-bin/packages/kbn-shared-svg/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -8329,10 +8369,10 @@
   resolved "https://registry.yarnpkg.com/@types/seedrandom/-/seedrandom-2.4.28.tgz#9ce8fa048c1e8c85cb71d7fe4d704e000226036f"
   integrity sha512-SMA+fUwULwK7sd/ZJicUztiPs8F1yCPwF3O23Z9uQ32ME5Ha0NmDK9+QTsYE4O2tHXChzXomSWWeIhCnoN1LqA==
 
-"@types/selenium-webdriver@^4.1.1":
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.1.1.tgz#aefb038f0462fd880f9c9581b8b3b71ce385719c"
-  integrity sha512-NxxZZek50ylIACiXebKQYHD3D4One3WXOasEXWazL6aTfYbZob7ClNKxUpg8I4/oWArX87oPWvj1cHKqfel3Hg==
+"@types/selenium-webdriver@^4.1.2":
+  version "4.1.2"
+  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.1.2.tgz#9c6d8d6bea08b312e890aaa5915fb2228fa62486"
+  integrity sha512-NCn1vqHC2hDgZmOuiDa4xgyo3FBZuqB+wXg5t8YcwnjIi2ufGTowqcnbUAKGHxY7z/OFfv4MnaVfuJ7gJ/xBsw==
   dependencies:
     "@types/ws" "*"
 
