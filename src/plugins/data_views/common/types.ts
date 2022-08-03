@@ -319,7 +319,7 @@ export interface GetFieldsOptions {
 
 export interface IDataViewsApiClient {
   getFieldsForWildcard: (options: GetFieldsOptions) => Promise<FieldSpec[]>;
-  hasUserIndexPattern: () => Promise<boolean>;
+  hasUserDataView: () => Promise<boolean>;
 }
 
 export type AggregationRestrictions = Record<
