@@ -26,6 +26,9 @@ import React from 'react';
 import * as sinon from 'sinon';
 import { SavedObjectFinderUi as SavedObjectFinder } from './saved_object_finder';
 import { coreMock } from '@kbn/core/public/mocks';
+import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/public/mocks';
+import { savedObjectsPluginMock } from '@kbn/saved-objects-plugin/public/mocks';
+import { savedObjectTaggingOssPluginMock } from '@kbn/saved-objects-tagging-oss-plugin/public/mocks';
 
 describe('SavedObjectsFinder', () => {
   const doc = {
@@ -52,6 +55,10 @@ describe('SavedObjectsFinder', () => {
     },
   ];
 
+  const savedObjectsManagement = savedObjectsManagementPluginMock.createStartContract();
+  const savedObjectsPlugin = savedObjectsPluginMock.createStartContract();
+  const savedObjectsTagging = savedObjectTaggingOssPluginMock.createStart().getTaggingApi();
+
   it('should call saved object client on startup', async () => {
     const core = coreMock.createStart();
     (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
@@ -63,6 +70,9 @@ describe('SavedObjectsFinder', () => {
       <SavedObjectFinder
         savedObjects={core.savedObjects}
         uiSettings={core.uiSettings}
+        savedObjectsManagement={savedObjectsManagement}
+        savedObjectsPlugin={savedObjectsPlugin}
+        savedObjectsTagging={savedObjectsTagging}
         savedObjectMetaData={searchMetaData}
       />
     );
@@ -90,6 +100,9 @@ describe('SavedObjectsFinder', () => {
       <SavedObjectFinder
         savedObjects={core.savedObjects}
         uiSettings={core.uiSettings}
+        savedObjectsManagement={savedObjectsManagement}
+        savedObjectsPlugin={savedObjectsPlugin}
+        savedObjectsTagging={savedObjectsTagging}
         savedObjectMetaData={searchMetaData}
       />
     );
@@ -113,6 +126,9 @@ describe('SavedObjectsFinder', () => {
       <SavedObjectFinder
         savedObjects={core.savedObjects}
         uiSettings={core.uiSettings}
+        savedObjectsManagement={savedObjectsManagement}
+        savedObjectsPlugin={savedObjectsPlugin}
+        savedObjectsTagging={savedObjectsTagging}
         onChoose={chooseStub}
         savedObjectMetaData={searchMetaData}
       />
@@ -138,6 +154,9 @@ describe('SavedObjectsFinder', () => {
         <SavedObjectFinder
           savedObjects={core.savedObjects}
           uiSettings={core.uiSettings}
+          savedObjectsManagement={savedObjectsManagement}
+          savedObjectsPlugin={savedObjectsPlugin}
+          savedObjectsTagging={savedObjectsTagging}
           savedObjectMetaData={searchMetaData}
         />
       );
@@ -159,6 +178,9 @@ describe('SavedObjectsFinder', () => {
         <SavedObjectFinder
           savedObjects={core.savedObjects}
           uiSettings={core.uiSettings}
+          savedObjectsManagement={savedObjectsManagement}
+          savedObjectsPlugin={savedObjectsPlugin}
+          savedObjectsTagging={savedObjectsTagging}
           savedObjectMetaData={searchMetaData}
         />
       );
@@ -183,6 +205,9 @@ describe('SavedObjectsFinder', () => {
       <SavedObjectFinder
         savedObjects={core.savedObjects}
         uiSettings={core.uiSettings}
+        savedObjectsManagement={savedObjectsManagement}
+        savedObjectsPlugin={savedObjectsPlugin}
+        savedObjectsTagging={savedObjectsTagging}
         savedObjectMetaData={[
           {
             type: 'search',
@@ -213,6 +238,9 @@ describe('SavedObjectsFinder', () => {
         <SavedObjectFinder
           savedObjects={core.savedObjects}
           uiSettings={core.uiSettings}
+          savedObjectsManagement={savedObjectsManagement}
+          savedObjectsPlugin={savedObjectsPlugin}
+          savedObjectsTagging={savedObjectsTagging}
           savedObjectMetaData={searchMetaData}
         />
       );
@@ -243,6 +271,9 @@ describe('SavedObjectsFinder', () => {
         <SavedObjectFinder
           savedObjects={core.savedObjects}
           uiSettings={core.uiSettings}
+          savedObjectsManagement={savedObjectsManagement}
+          savedObjectsPlugin={savedObjectsPlugin}
+          savedObjectsTagging={savedObjectsTagging}
           savedObjectMetaData={[
             {
               type: 'type1',
@@ -288,6 +319,9 @@ describe('SavedObjectsFinder', () => {
         <SavedObjectFinder
           savedObjects={core.savedObjects}
           uiSettings={core.uiSettings}
+          savedObjectsManagement={savedObjectsManagement}
+          savedObjectsPlugin={savedObjectsPlugin}
+          savedObjectsTagging={savedObjectsTagging}
           savedObjectMetaData={searchMetaData}
         />
       );
@@ -316,6 +350,9 @@ describe('SavedObjectsFinder', () => {
       <SavedObjectFinder
         savedObjects={core.savedObjects}
         uiSettings={core.uiSettings}
+        savedObjectsManagement={savedObjectsManagement}
+        savedObjectsPlugin={savedObjectsPlugin}
+        savedObjectsTagging={savedObjectsTagging}
         savedObjectMetaData={[
           {
             type: 'search',
@@ -370,6 +407,9 @@ describe('SavedObjectsFinder', () => {
         <SavedObjectFinder
           savedObjects={core.savedObjects}
           uiSettings={core.uiSettings}
+          savedObjectsManagement={savedObjectsManagement}
+          savedObjectsPlugin={savedObjectsPlugin}
+          savedObjectsTagging={savedObjectsTagging}
           showFilter={false}
           savedObjectMetaData={metaDataConfig}
         />
@@ -395,6 +435,9 @@ describe('SavedObjectsFinder', () => {
         <SavedObjectFinder
           savedObjects={core.savedObjects}
           uiSettings={core.uiSettings}
+          savedObjectsManagement={savedObjectsManagement}
+          savedObjectsPlugin={savedObjectsPlugin}
+          savedObjectsTagging={savedObjectsTagging}
           showFilter={true}
           savedObjectMetaData={metaDataConfig}
         />
@@ -420,6 +463,9 @@ describe('SavedObjectsFinder', () => {
         <SavedObjectFinder
           savedObjects={core.savedObjects}
           uiSettings={core.uiSettings}
+          savedObjectsManagement={savedObjectsManagement}
+          savedObjectsPlugin={savedObjectsPlugin}
+          savedObjectsTagging={savedObjectsTagging}
           showFilter={true}
           savedObjectMetaData={metaDataConfig}
         />
@@ -449,6 +495,9 @@ describe('SavedObjectsFinder', () => {
       <SavedObjectFinder
         savedObjects={core.savedObjects}
         uiSettings={core.uiSettings}
+        savedObjectsManagement={savedObjectsManagement}
+        savedObjectsPlugin={savedObjectsPlugin}
+        savedObjectsTagging={savedObjectsTagging}
         noItemsMessage={noItemsMessage}
         savedObjectMetaData={searchMetaData}
       />
@@ -479,6 +528,9 @@ describe('SavedObjectsFinder', () => {
         <SavedObjectFinder
           savedObjects={core.savedObjects}
           uiSettings={core.uiSettings}
+          savedObjectsManagement={savedObjectsManagement}
+          savedObjectsPlugin={savedObjectsPlugin}
+          savedObjectsTagging={savedObjectsTagging}
           initialPageSize={15}
           savedObjectMetaData={searchMetaData}
         />
@@ -501,6 +553,9 @@ describe('SavedObjectsFinder', () => {
         <SavedObjectFinder
           savedObjects={core.savedObjects}
           uiSettings={core.uiSettings}
+          savedObjectsManagement={savedObjectsManagement}
+          savedObjectsPlugin={savedObjectsPlugin}
+          savedObjectsTagging={savedObjectsTagging}
           initialPageSize={15}
           savedObjectMetaData={searchMetaData}
         />
@@ -523,6 +578,9 @@ describe('SavedObjectsFinder', () => {
         <SavedObjectFinder
           savedObjects={core.savedObjects}
           uiSettings={core.uiSettings}
+          savedObjectsManagement={savedObjectsManagement}
+          savedObjectsPlugin={savedObjectsPlugin}
+          savedObjectsTagging={savedObjectsTagging}
           initialPageSize={15}
           savedObjectMetaData={searchMetaData}
         />
@@ -545,6 +603,9 @@ describe('SavedObjectsFinder', () => {
         <SavedObjectFinder
           savedObjects={core.savedObjects}
           uiSettings={core.uiSettings}
+          savedObjectsManagement={savedObjectsManagement}
+          savedObjectsPlugin={savedObjectsPlugin}
+          savedObjectsTagging={savedObjectsTagging}
           fixedPageSize={33}
           savedObjectMetaData={searchMetaData}
         />
@@ -567,6 +628,9 @@ describe('SavedObjectsFinder', () => {
         <SavedObjectFinder
           savedObjects={core.savedObjects}
           uiSettings={core.uiSettings}
+          savedObjectsManagement={savedObjectsManagement}
+          savedObjectsPlugin={savedObjectsPlugin}
+          savedObjectsTagging={savedObjectsTagging}
           fixedPageSize={33}
           savedObjectMetaData={searchMetaData}
         />
@@ -588,6 +652,9 @@ describe('SavedObjectsFinder', () => {
         <SavedObjectFinder
           savedObjects={core.savedObjects}
           uiSettings={core.uiSettings}
+          savedObjectsManagement={savedObjectsManagement}
+          savedObjectsPlugin={savedObjectsPlugin}
+          savedObjectsTagging={savedObjectsTagging}
           savedObjectMetaData={searchMetaData}
         />
       );
@@ -605,6 +672,9 @@ describe('SavedObjectsFinder', () => {
         <SavedObjectFinder
           savedObjects={core.savedObjects}
           uiSettings={core.uiSettings}
+          savedObjectsManagement={savedObjectsManagement}
+          savedObjectsPlugin={savedObjectsPlugin}
+          savedObjectsTagging={savedObjectsTagging}
           savedObjectMetaData={[
             {
               type: 'search',
@@ -630,6 +700,9 @@ describe('SavedObjectsFinder', () => {
         <SavedObjectFinder
           savedObjects={core.savedObjects}
           uiSettings={core.uiSettings}
+          savedObjectsManagement={savedObjectsManagement}
+          savedObjectsPlugin={savedObjectsPlugin}
+          savedObjectsTagging={savedObjectsTagging}
           savedObjectMetaData={searchMetaData}
         />
       );
@@ -658,6 +731,9 @@ describe('SavedObjectsFinder', () => {
       <SavedObjectFinder
         savedObjects={core.savedObjects}
         uiSettings={core.uiSettings}
+        savedObjectsManagement={savedObjectsManagement}
+        savedObjectsPlugin={savedObjectsPlugin}
+        savedObjectsTagging={savedObjectsTagging}
         savedObjectMetaData={[
           {
             type: 'search',
