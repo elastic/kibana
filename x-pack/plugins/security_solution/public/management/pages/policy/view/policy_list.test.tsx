@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, waitFor } from '@testing-library/react';
+import { act, waitFor, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
@@ -39,6 +39,7 @@ describe('When on the policy list page', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    cleanup();
   });
 
   describe('and there are no policies', () => {
@@ -50,7 +51,9 @@ describe('When on the policy list page', () => {
           count: 0,
         })
       );
-      render();
+      act(() => {
+        render();
+      });
       await waitFor(() => {
         expect(getPackagePolicies).toHaveBeenCalled();
       });
@@ -165,7 +168,7 @@ describe('When on the policy list page', () => {
         });
         return response;
       });
-      render();
+      await render();
       await waitFor(() => {
         expect(getPackagePolicies).toHaveBeenCalled();
       });

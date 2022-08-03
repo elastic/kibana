@@ -327,8 +327,10 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
   });
 
   describe('and in Edit mode', () => {
-    beforeEach(async () => {
-      history.push('somepage?show=edit&itemId=123');
+    beforeEach(() => {
+      act(() => {
+        history.push('somepage?show=edit&itemId=123');
+      });
     });
 
     it('should show loader while initializing in edit mode', async () => {
@@ -379,26 +381,25 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
         expectedProps.entries
       ) as ExceptionListItemSchema['entries'];
 
-      expect(getLastFormComponentProps().item).toEqual(expectedProps);
+      await waitFor(() => {
+        expect(getLastFormComponentProps().item).toEqual(expectedProps);
+      });
     });
 
     it('should show error toast and close flyout if item for edit does not exist', async () => {
-      mockedApi.responseProvider.trustedApp.mockRejectedValueOnce(
-        new Error('does not exist') as never
-      );
-      mockedApi.responseProvider.trustedApp.mockRejectedValueOnce(
-        new Error('does not exist') as never
-      );
+      mockedApi.responseProvider.trustedApp.mockRejectedValue(new Error('does not exist') as never);
 
-      await render();
+      await act(async () => {
+        await render();
+      });
 
       await waitFor(() => {
         expect(mockedApi.responseProvider.trustedApp).toHaveBeenCalled();
-      });
 
-      expect(coreStart.notifications.toasts.addWarning).toHaveBeenCalledWith(
-        'Failed to retrieve item for edit. Reason: does not exist'
-      );
+        expect(coreStart.notifications.toasts.addWarning).toHaveBeenCalledWith(
+          'Failed to retrieve item for edit. Reason: does not exist'
+        );
+      });
     });
 
     it('should not show the expired license callout', async () => {
@@ -406,9 +407,8 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
 
       await waitFor(() => {
         expect(getByTestId('formMock')).toBeTruthy();
+        expect(queryByTestId('testPage-flyout-expiredLicenseCallout')).not.toBeTruthy();
       });
-
-      expect(queryByTestId('testPage-flyout-expiredLicenseCallout')).not.toBeTruthy();
     });
 
     it('should show expired license warning when unsupported features are being used (downgrade scenario)', async () => {
@@ -432,9 +432,8 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
 
       await waitFor(() => {
         expect(getByTestId('formMock')).toBeTruthy();
+        expect(getByTestId('testPage-flyout-expiredLicenseCallout')).toBeTruthy();
       });
-
-      expect(getByTestId('testPage-flyout-expiredLicenseCallout')).toBeTruthy();
     });
   });
 });
