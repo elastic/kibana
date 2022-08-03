@@ -64,7 +64,11 @@ export class CsvGenerator {
   private async scan(index: DataView, searchSource: ISearchSource, settings: CsvExportSettings) {
     const { scroll: scrollSettings, includeFrozen } = settings;
     const searchBody: SearchRequest | undefined = searchSource.getSearchRequestBody();
-    this.logger.debug(`Tracking total hits with: track_total_hits=${searchBody?.track_total_hits}`);
+    if (searchBody == null) {
+      throw new Error('Could not retrieve the search body!');
+    }
+
+    this.logger.debug(`Tracking total hits with: track_total_hits=${searchBody.track_total_hits}`);
     this.logger.info(`Executing search request...`);
     const searchParams = {
       params: {

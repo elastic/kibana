@@ -45,7 +45,10 @@ let uiSettingsClient: IUiSettingsClient;
 let stream: jest.Mocked<Writable>;
 let content: string;
 
-const searchSourceMock = { ...searchSourceInstanceMock };
+const searchSourceMock = {
+  ...searchSourceInstanceMock,
+  getSearchRequestBody: jest.fn(() => ({})),
+};
 const mockSearchSourceService: jest.Mocked<ISearchStartSearchSource> = {
   create: jest.fn().mockReturnValue(searchSourceMock),
   createEmpty: jest.fn().mockReturnValue(searchSourceMock),
@@ -331,7 +334,7 @@ it('uses the scrollId to page all the data', async () => {
 
   expect(mockDataClient.search).toHaveBeenCalledTimes(1);
   expect(mockDataClient.search).toBeCalledWith(
-    { params: { ignore_throttled: undefined, scroll: '30s', size: 500 } },
+    { params: { body: {}, ignore_throttled: undefined, scroll: '30s', size: 500 } },
     { strategy: 'es' }
   );
 
@@ -801,7 +804,7 @@ it('can override ignoring frozen indices', async () => {
   await generateCsv.generateData();
 
   expect(mockDataClient.search).toBeCalledWith(
-    { params: { ignore_throttled: false, scroll: '30s', size: 500 } },
+    { params: { body: {}, ignore_throttled: false, scroll: '30s', size: 500 } },
     { strategy: 'es' }
   );
 });
