@@ -62,7 +62,6 @@ export class SavedObjectsPublicPlugin
       registerDecorator: (config) => this.decoratorRegistry.register(config),
     };
   }
-
   public start(core: CoreStart, { data, dataViews }: SavedObjectsStartDeps) {
     return {
       SavedObjectClass: createSavedObjectClass(

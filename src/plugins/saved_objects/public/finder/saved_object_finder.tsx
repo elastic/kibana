@@ -9,25 +9,26 @@
 import { debounce } from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
-import {
-  getTagFindReferences,
-  parseQuery,
-  SavedObjectManagementTypeInfo,
-} from '@kbn/saved-objects-management-plugin/public';
 
 import {
-  EuiInMemoryTable,
-  EuiLink,
-  EuiTableFieldDataColumnType,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiEmptyPrompt,
+  EuiFieldSearch,
+  EuiFilterButton,
+  EuiFilterGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiListGroup,
+  EuiListGroupItem,
+  EuiLoadingSpinner,
+  EuiPagination,
+  EuiPopover,
+  EuiSpacer,
+  EuiTablePagination,
   IconType,
-  EuiIcon,
-  EuiToolTip,
-  CriteriaWithPagination,
-  EuiSearchBarProps,
-  SearchFilterConfig,
-  Query,
-  PropertySort,
 } from '@elastic/eui';
+import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -35,13 +36,9 @@ import {
   CoreStart,
   IUiSettingsClient,
   SavedObjectsStart,
-  SavedObject,
-  SimpleSavedObjectImpl,
 } from '@kbn/core/public';
 
-import { simpleSavedObjectToSavedObject } from '@kbn/data-views-plugin/public';
 import { LISTING_LIMIT_SETTING } from '../../common';
-import { getSavedObjects } from '../services';
 
 export interface SavedObjectMetaData<T = unknown> {
   type: string;
@@ -51,6 +48,7 @@ export interface SavedObjectMetaData<T = unknown> {
   showSavedObject?(savedObject: SimpleSavedObject<T>): boolean;
   getSavedObjectSubType?(savedObject: SimpleSavedObject<T>): string;
   includeFields?: string[];
+  defaultSearchField?: string;
 }
 
 interface FinderAttributes {
@@ -59,20 +57,22 @@ interface FinderAttributes {
   type: string;
 }
 
-interface SavedObjectFinderItem extends SavedObject {
-  title: string | null;
-  name: string | null;
-  simple: SimpleSavedObject<FinderAttributes>;
-}
-
 interface SavedObjectFinderState {
-  items: SavedObjectFinderItem[];
-  query: Query;
+  items: Array<{
+    title: string | null;
+    name: string | null;
+    id: SimpleSavedObject['id'];
+    type: SimpleSavedObject['type'];
+    savedObject: SimpleSavedObject<FinderAttributes>;
+  }>;
+  query: string;
   isFetchingItems: boolean;
   page: number;
   perPage: number;
-  sort?: PropertySort;
-  allowedTypes: SavedObjectManagementTypeInfo[];
+  sortDirection?: Direction;
+  sortOpen: boolean;
+  filterOpen: boolean;
+  filteredTypes: string[];
 }
 
 interface BaseSavedObjectFinder {
@@ -119,55 +119,39 @@ class SavedObjectFinderUi extends React.Component<
 
   private isComponentMounted: boolean = false;
 
-  private debouncedFetch = debounce(async (query: Query) => {
+  private debouncedFetch = debounce(async (query: string) => {
     const metaDataMap = this.getSavedObjectMetaDataMap();
-    const { queryText, visibleTypes, selectedTags } = parseQuery(query, this.state.allowedTypes);
 
     const fields = Object.values(metaDataMap)
       .map((metaData) => metaData.includeFields || [])
       .reduce((allFields, currentFields) => allFields.concat(currentFields), ['title', 'name']);
 
-    const searchTypes = Object.keys(metaDataMap).filter(
-      (type) => !visibleTypes || visibleTypes.includes(type)
-    );
+    const additionalSearchFields = Object.values(metaDataMap).reduce<string[]>((col, item) => {
+      if (item.defaultSearchField) {
+        col.push(item.defaultSearchField);
+      }
+      return col;
+    }, []);
 
     const perPage = this.props.uiSettings.get(LISTING_LIMIT_SETTING);
-    const response = await this.props.savedObjects.client.find<FinderAttributes>({
-      type: searchTypes,
+    const resp = await this.props.savedObjects.client.find<FinderAttributes>({
+      type: Object.keys(metaDataMap),
       fields: [...new Set(fields)],
-      search: queryText ? `${queryText}*` : undefined,
+      search: query ? `${query}*` : undefined,
       page: 1,
       perPage,
-      searchFields: ['title^3', 'description'],
+      searchFields: ['title^3', 'description', ...additionalSearchFields],
       defaultSearchOperator: 'AND',
-      hasReference: getTagFindReferences({
-        selectedTags,
-        taggingApi: getSavedObjects().getSavedObjectsTagging(),
-      }),
     });
 
-    const savedObjects = response.savedObjects
-      .map((savedObject) => {
-        const {
-          attributes: { name, title },
-        } = savedObject;
-        const titleToUse = typeof title === 'string' ? title : '';
-        const nameToUse = name && typeof name === 'string' ? name : titleToUse;
-        return {
-          ...simpleSavedObjectToSavedObject(savedObject),
-          title: titleToUse,
-          name: nameToUse,
-          simple: new SimpleSavedObjectImpl(this.props.savedObjects.client, savedObject),
-        };
-      })
-      .filter((savedObject) => {
-        const metaData = metaDataMap[savedObject.type];
-        if (metaData.showSavedObject) {
-          return metaData.showSavedObject(savedObject.simple);
-        } else {
-          return true;
-        }
-      });
+    resp.savedObjects = resp.savedObjects.filter((savedObject) => {
+      const metaData = metaDataMap[savedObject.type];
+      if (metaData.showSavedObject) {
+        return metaData.showSavedObject(savedObject);
+      } else {
+        return true;
+      }
+    });
 
     if (!this.isComponentMounted) {
       return;
@@ -175,11 +159,26 @@ class SavedObjectFinderUi extends React.Component<
 
     // We need this check to handle the case where search results come back in a different
     // order than they were sent out. Only load results for the most recent search.
-    if (query.text === this.state.query.text) {
+    if (query === this.state.query) {
       this.setState({
         isFetchingItems: false,
         page: 0,
-        items: savedObjects,
+        items: resp.savedObjects.map((savedObject) => {
+          const {
+            attributes: { name, title },
+            id,
+            type,
+          } = savedObject;
+          const titleToUse = typeof title === 'string' ? title : '';
+          const nameToUse = name && typeof name === 'string' ? name : titleToUse;
+          return {
+            title: titleToUse,
+            name: nameToUse,
+            id,
+            type,
+            savedObject,
+          };
+        }),
       });
     }
   }, 300);
@@ -192,8 +191,10 @@ class SavedObjectFinderUi extends React.Component<
       isFetchingItems: false,
       page: 0,
       perPage: props.initialPageSize || props.fixedPageSize || 10,
-      query: Query.parse(''),
-      allowedTypes: [],
+      query: '',
+      filterOpen: false,
+      filteredTypes: [],
+      sortOpen: false,
     };
   }
 
@@ -205,7 +206,15 @@ class SavedObjectFinderUi extends React.Component<
   public componentDidMount() {
     this.isComponentMounted = true;
     this.fetchItems();
-    this.fetchAllowedTypes();
+  }
+
+  public render() {
+    return (
+      <React.Fragment>
+        {this.renderSearchBar()}
+        {this.renderListing()}
+      </React.Fragment>
+    );
   }
 
   private getSavedObjectMetaDataMap(): Record<string, SavedObjectMetaData> {
@@ -214,6 +223,49 @@ class SavedObjectFinderUi extends React.Component<
       {}
     );
   }
+
+  private getPageCount() {
+    return Math.ceil(
+      (this.state.filteredTypes.length === 0
+        ? this.state.items.length
+        : this.state.items.filter(
+            (item) =>
+              this.state.filteredTypes.length === 0 || this.state.filteredTypes.includes(item.type)
+          ).length) / this.state.perPage
+    );
+  }
+
+  // server-side paging not supported
+  // 1) saved object client does not support sorting by title because title is only mapped as analyzed
+  // 2) can not search on anything other than title because all other fields are stored in opaque JSON strings,
+  //    for example, visualizations need to be search by isLab but this is not possible in Elasticsearch side
+  //    with the current mappings
+  private getPageOfItems = () => {
+    // do not sort original list to preserve elasticsearch ranking order
+    const items = this.state.items.slice();
+    const { sortDirection } = this.state;
+
+    if (sortDirection || !this.state.query) {
+      items.sort(({ title: titleA }, { title: titleB }) => {
+        let order = 1;
+        if (sortDirection === 'desc') {
+          order = -1;
+        }
+        return order * (titleA || '').toLowerCase().localeCompare((titleB || '').toLowerCase());
+      });
+    }
+
+    // If begin is greater than the length of the sequence, an empty array is returned.
+    const startIndex = this.state.page * this.state.perPage;
+    // If end is greater than the length of the sequence, slice extracts through to the end of the sequence (arr.length).
+    const lastIndex = startIndex + this.state.perPage;
+    return items
+      .filter(
+        (item) =>
+          this.state.filteredTypes.length === 0 || this.state.filteredTypes.includes(item.type)
+      )
+      .slice(startIndex, lastIndex);
+  };
 
   private fetchItems = () => {
     this.setState(
@@ -224,159 +276,259 @@ class SavedObjectFinderUi extends React.Component<
     );
   };
 
-  private fetchAllowedTypes = async () => {
-    const allowedTypes = await getSavedObjects().getAllowedTypes();
-    this.setState({ allowedTypes });
-  };
+  private getAvailableSavedObjectMetaData() {
+    const typesInItems = new Set<string>();
+    this.state.items.forEach((item) => {
+      typesInItems.add(item.type);
+    });
+    return this.props.savedObjectMetaData.filter((metaData) => typesInItems.has(metaData.type));
+  }
 
-  // server-side paging not supported
-  // 1) saved object client does not support sorting by title because title is only mapped as analyzed
-  // 2) can not search on anything other than title because all other fields are stored in opaque JSON strings,
-  //    for example, visualizations need to be search by isLab but this is not possible in Elasticsearch side
-  //    with the current mappings
-  public render() {
-    const { onChoose, savedObjectMetaData } = this.props;
-    const taggingApi = getSavedObjects().getSavedObjectsTagging();
-    const originalTagColumn = taggingApi?.ui.getTableColumnDefinition();
-    const tagColumn: EuiTableFieldDataColumnType<SavedObject> | undefined = originalTagColumn
-      ? {
-          ...originalTagColumn,
-          sortable: (item) =>
-            typeof originalTagColumn.sortable === 'function'
-              ? originalTagColumn.sortable(item) ?? ''
-              : '',
+  private getSortOptions() {
+    const sortOptions = [
+      <EuiContextMenuItem
+        key="asc"
+        icon={
+          this.state.sortDirection === 'asc' ||
+          (this.state.query === '' && this.state.sortDirection !== 'desc')
+            ? 'check'
+            : 'empty'
         }
-      : undefined;
-    const columns: Array<EuiTableFieldDataColumnType<SavedObjectFinderItem>> = [
-      {
-        field: 'type',
-        name: i18n.translate('savedObjects.finder.typeName', {
-          defaultMessage: 'Type',
-        }),
-        width: '50px',
-        align: 'center',
-        description: i18n.translate('savedObjects.finder.typeDescription', {
-          defaultMessage: 'Type of the saved object',
-        }),
-        sortable: ({ type }) => {
-          return getSavedObjects().getSavedObjectLabel(type, this.state.allowedTypes);
-        },
-        'data-test-subj': 'savedObjectFinderType',
-        render: (type, item) => {
-          const typeLabel = getSavedObjects().getSavedObjectLabel(type, this.state.allowedTypes);
-          const currentSavedObjectMetaData = savedObjectMetaData.find(
-            (metaData) => metaData.type === item.type
-          )!;
-          const iconType = (
-            currentSavedObjectMetaData ||
-            ({
-              getIconForSavedObject: () => 'document',
-            } as Pick<SavedObjectMetaData<{ title: string }>, 'getIconForSavedObject'>)
-          ).getIconForSavedObject(item.simple);
-
-          return (
-            <EuiToolTip position="top" content={typeLabel}>
-              <EuiIcon
-                aria-label={typeLabel}
-                type={iconType}
-                size="s"
-                data-test-subj="objectType"
-              />
-            </EuiToolTip>
-          );
-        },
-      },
-      {
-        field: 'title',
-        name: i18n.translate('savedObjects.finder.titleName', {
-          defaultMessage: 'Title',
-        }),
-        description: i18n.translate('savedObjects.finder.titleDescription', {
-          defaultMessage: 'Title of the saved object',
-        }),
-        dataType: 'string',
-        sortable: ({ name }) => name?.toLowerCase(),
-        'data-test-subj': 'savedObjectFinderTitle',
-        render: (_, item) => {
-          const currentSavedObjectMetaData = savedObjectMetaData.find(
-            (metaData) => metaData.type === item.type
-          )!;
-          const fullName = currentSavedObjectMetaData.getTooltipForSavedObject
-            ? currentSavedObjectMetaData.getTooltipForSavedObject(item.simple)
-            : `${item.name} (${currentSavedObjectMetaData!.name})`;
-
-          return (
-            <EuiLink
-              onClick={
-                onChoose
-                  ? () => {
-                      onChoose(item.id, item.type, fullName, item.simple);
-                    }
-                  : undefined
-              }
-              title={fullName}
-              data-test-subj={`savedObjectTitle${(item.title || '').split(' ').join('-')}`}
-            >
-              {item.name}
-            </EuiLink>
-          );
-        },
-      },
-      ...(tagColumn ? [tagColumn] : []),
-    ];
-    const pagination = {
-      pageIndex: this.state.page,
-      pageSize: this.state.perPage,
-      totalItemCount: this.state.items.length,
-      pageSizeOptions: [5, 10, 20, 50],
-      showPerPageOptions: !this.props.fixedPageSize,
-    };
-    const typeFilter: SearchFilterConfig = {
-      type: 'field_value_selection',
-      field: 'type',
-      name: i18n.translate('savedObjects.finder.filterButtonLabel', {
-        defaultMessage: 'Types',
-      }),
-      multiSelect: 'or',
-      options: this.props.savedObjectMetaData.map((metaData) => ({
-        value: metaData.type,
-        name: metaData.name,
-      })),
-    };
-    const search: EuiSearchBarProps = {
-      onChange: ({ query }) => {
-        this.setState({ query: query ?? Query.parse('') }, this.fetchItems);
-      },
-      box: {
-        incremental: true,
-      },
-      filters: [
-        ...(this.props.showFilter ? [typeFilter] : []),
-        ...(taggingApi ? [taggingApi.ui.getSearchBarFilter({ useName: true })] : []),
-      ],
-      toolsRight: this.props.children ? <>{this.props.children}</> : undefined,
-    };
-
-    return (
-      <EuiInMemoryTable
-        loading={this.state.isFetchingItems || !this.state.allowedTypes.length}
-        itemId="id"
-        items={this.state.allowedTypes.length ? this.state.items : []}
-        columns={columns}
-        message={this.props.noItemsMessage}
-        search={search}
-        pagination={pagination}
-        sorting={this.state.sort ? { sort: this.state.sort } : true}
-        onChange={(table: CriteriaWithPagination<SavedObjectFinderItem>) => {
-          const { index: page, size: perPage } = table.page || {};
-
+        onClick={() => {
           this.setState({
-            page,
-            perPage,
-            sort: table.sort,
+            sortDirection: 'asc',
           });
         }}
-      />
+      >
+        {i18n.translate('savedObjects.finder.sortAsc', {
+          defaultMessage: 'Ascending',
+        })}
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        key="desc"
+        icon={this.state.sortDirection === 'desc' ? 'check' : 'empty'}
+        onClick={() => {
+          this.setState({
+            sortDirection: 'desc',
+          });
+        }}
+      >
+        {i18n.translate('savedObjects.finder.sortDesc', {
+          defaultMessage: 'Descending',
+        })}
+      </EuiContextMenuItem>,
+    ];
+    if (this.state.query) {
+      sortOptions.push(
+        <EuiContextMenuItem
+          key="auto"
+          icon={!this.state.sortDirection ? 'check' : 'empty'}
+          onClick={() => {
+            this.setState({
+              sortDirection: undefined,
+            });
+          }}
+        >
+          {i18n.translate('savedObjects.finder.sortAuto', {
+            defaultMessage: 'Best match',
+          })}
+        </EuiContextMenuItem>
+      );
+    }
+    return sortOptions;
+  }
+
+  private renderSearchBar() {
+    const availableSavedObjectMetaData = this.getAvailableSavedObjectMetaData();
+
+    return (
+      <EuiFlexGroup gutterSize="m">
+        <EuiFlexItem grow={true}>
+          <EuiFieldSearch
+            placeholder={i18n.translate('savedObjects.finder.searchPlaceholder', {
+              defaultMessage: 'Search…',
+            })}
+            aria-label={i18n.translate('savedObjects.finder.searchPlaceholder', {
+              defaultMessage: 'Search…',
+            })}
+            fullWidth
+            value={this.state.query}
+            onChange={(e) => {
+              this.setState(
+                {
+                  query: e.target.value,
+                },
+                this.fetchItems
+              );
+            }}
+            data-test-subj="savedObjectFinderSearchInput"
+            isLoading={this.state.isFetchingItems}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFilterGroup>
+            <EuiPopover
+              id="addPanelSortPopover"
+              panelClassName="euiFilterGroup__popoverPanel"
+              panelPaddingSize="none"
+              isOpen={this.state.sortOpen}
+              closePopover={() => this.setState({ sortOpen: false })}
+              button={
+                <EuiFilterButton
+                  onClick={() =>
+                    this.setState(({ sortOpen }) => ({
+                      sortOpen: !sortOpen,
+                    }))
+                  }
+                  iconType="arrowDown"
+                  isSelected={this.state.sortOpen}
+                  data-test-subj="savedObjectFinderSortButton"
+                >
+                  {i18n.translate('savedObjects.finder.sortButtonLabel', {
+                    defaultMessage: 'Sort',
+                  })}
+                </EuiFilterButton>
+              }
+            >
+              <EuiContextMenuPanel items={this.getSortOptions()} />
+            </EuiPopover>
+            {this.props.showFilter && (
+              <EuiPopover
+                id="addPanelFilterPopover"
+                panelClassName="euiFilterGroup__popoverPanel"
+                panelPaddingSize="none"
+                isOpen={this.state.filterOpen}
+                closePopover={() => this.setState({ filterOpen: false })}
+                button={
+                  <EuiFilterButton
+                    onClick={() =>
+                      this.setState(({ filterOpen }) => ({
+                        filterOpen: !filterOpen,
+                      }))
+                    }
+                    iconType="arrowDown"
+                    data-test-subj="savedObjectFinderFilterButton"
+                    isSelected={this.state.filterOpen}
+                    numFilters={this.props.savedObjectMetaData.length}
+                    hasActiveFilters={this.state.filteredTypes.length > 0}
+                    numActiveFilters={this.state.filteredTypes.length}
+                  >
+                    {i18n.translate('savedObjects.finder.filterButtonLabel', {
+                      defaultMessage: 'Types',
+                    })}
+                  </EuiFilterButton>
+                }
+              >
+                <EuiContextMenuPanel
+                  items={this.props.savedObjectMetaData.map((metaData) => (
+                    <EuiContextMenuItem
+                      key={metaData.type}
+                      disabled={!availableSavedObjectMetaData.includes(metaData)}
+                      icon={this.state.filteredTypes.includes(metaData.type) ? 'check' : 'empty'}
+                      data-test-subj={`savedObjectFinderFilter-${metaData.type}`}
+                      onClick={() => {
+                        this.setState(({ filteredTypes }) => ({
+                          filteredTypes: filteredTypes.includes(metaData.type)
+                            ? filteredTypes.filter((t) => t !== metaData.type)
+                            : [...filteredTypes, metaData.type],
+                          page: 0,
+                        }));
+                      }}
+                    >
+                      {metaData.name}
+                    </EuiContextMenuItem>
+                  ))}
+                />
+              </EuiPopover>
+            )}
+          </EuiFilterGroup>
+        </EuiFlexItem>
+        {this.props.children ? <EuiFlexItem grow={false}>{this.props.children}</EuiFlexItem> : null}
+      </EuiFlexGroup>
+    );
+  }
+
+  private renderListing() {
+    const items = this.state.items.length === 0 ? [] : this.getPageOfItems();
+    const { onChoose, savedObjectMetaData } = this.props;
+
+    return (
+      <>
+        {this.state.isFetchingItems && this.state.items.length === 0 && (
+          <EuiFlexGroup justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiSpacer />
+              <EuiLoadingSpinner data-test-subj="savedObjectFinderLoadingIndicator" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+        {items.length > 0 ? (
+          <EuiListGroup data-test-subj="savedObjectFinderItemList" maxWidth={false}>
+            {items.map((item) => {
+              const currentSavedObjectMetaData = savedObjectMetaData.find(
+                (metaData) => metaData.type === item.type
+              )!;
+              const fullName = currentSavedObjectMetaData.getTooltipForSavedObject
+                ? currentSavedObjectMetaData.getTooltipForSavedObject(item.savedObject)
+                : `${item.name} (${currentSavedObjectMetaData!.name})`;
+              const iconType = (
+                currentSavedObjectMetaData ||
+                ({
+                  getIconForSavedObject: () => 'document',
+                } as Pick<SavedObjectMetaData<{ title: string }>, 'getIconForSavedObject'>)
+              ).getIconForSavedObject(item.savedObject);
+              return (
+                <EuiListGroupItem
+                  key={item.id}
+                  iconType={iconType}
+                  label={item.name}
+                  onClick={
+                    onChoose
+                      ? () => {
+                          onChoose(item.id, item.type, fullName, item.savedObject);
+                        }
+                      : undefined
+                  }
+                  title={fullName}
+                  data-test-subj={`savedObjectTitle${(item.title || '').split(' ').join('-')}`}
+                />
+              );
+            })}
+          </EuiListGroup>
+        ) : (
+          !this.state.isFetchingItems && <EuiEmptyPrompt body={this.props.noItemsMessage} />
+        )}
+        {this.getPageCount() > 1 &&
+          (this.props.fixedPageSize ? (
+            <EuiPagination
+              activePage={this.state.page}
+              pageCount={this.getPageCount()}
+              onPageClick={(page) => {
+                this.setState({
+                  page,
+                });
+              }}
+            />
+          ) : (
+            <EuiTablePagination
+              activePage={this.state.page}
+              pageCount={this.getPageCount()}
+              onChangePage={(page) => {
+                this.setState({
+                  page,
+                });
+              }}
+              onChangeItemsPerPage={(perPage) => {
+                this.setState({
+                  page: 0,
+                  perPage,
+                });
+              }}
+              itemsPerPage={this.state.perPage}
+              itemsPerPageOptions={[5, 10, 15, 25]}
+            />
+          ))}
+      </>
     );
   }
 }
