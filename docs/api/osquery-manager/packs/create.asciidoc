@@ -19,17 +19,17 @@ experimental[] Create packs.
 ==== Path parameters
 
 `space_id`::
-  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+  (Optional, string) The space identifier. When `space_id` is not provided in the URL, the default space is used.
 
 
 [[osquery-manager-packs-api-create-body-params]]
 ==== Request body
 
-`name`:: (Required, string) The name of the pack.
+`name`:: (Required, string) The pack name.
 
-`description`:: (Optional, string) A description of the pack.
+`description`:: (Optional, string) The pack description.
 
-`enabled`:: (Optional, boolean) Whether the pack is enabled.
+`enabled`:: (Optional, boolean) Enables the pack.
 
 `policy_ids`:: (Optional, array) A list of agents policy IDs.
 

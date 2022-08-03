@@ -19,25 +19,25 @@ experimental[] Create saved queries.
 ==== Path parameters
 
 `space_id`::
-  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+  (Optional, string) The space identifier. When `space_id` is not provided in the URL, the default space is used.
 
 
 [[osquery-manager-saved-queries-api-create-body-params]]
 ==== Request body
 
-`id`:: (Required, string) The name of the saved query.
+`id`:: (Required, string) The saved query name.
 
-`description`:: (Optional, string) A description of the saved query.
+`description`:: (Optional, string) The saved query description.
 
-`platform`:: (Optional, string) Restrict this query to a given platform, default is 'all' platforms; you may use commas to set multiple platforms (e.g. 'linux,darwin').
+`platform`:: (Optional, string) Restricts the query to a specified platform. The default is 'all' platforms. To specify multiple platforms, use commas. For example, 'linux,darwin'.
 
-`query`:: (Required, string) The SQL query to run.
+`query`:: (Required, string) The SQL query you want to run.
 
-`version`:: (Optional, string) Only run on osquery versions greater than or equal-to this version string
+`version`:: (Optional, string) Uses the Osquery versions greater than or equal to the specified version string.
 
-`internal`:: (Optional, string) An interval in seconds to run the query.
+`internal`:: (Optional, string) An interval, in seconds, to run the query.
 
-`ecs_mapping`:: (Optional, object) Map osquery results columns or static values to ECS fields.
+`ecs_mapping`:: (Optional, object) Maps Osquery results columns or static values to ECS fields.
 
 
 [[osquery-manager-saved-queries-api-create-request-codes]]

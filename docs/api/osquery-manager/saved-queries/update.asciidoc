@@ -6,7 +6,7 @@
 
 experimental[] Update saved queries.
 
-WARNING: You cannot update a prebuilt saved query (`prebuilt = true`).
+WARNING: You are unable to update a prebuilt saved query (`prebuilt = true`).
 
 
 [[osquery-manager-saved-queries-api-update-request]]
@@ -21,7 +21,7 @@ WARNING: You cannot update a prebuilt saved query (`prebuilt = true`).
 ==== Path parameters
 
 `space_id`::
-  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+  (Optional, string) The space identifier. When `space_id` is not provided in the URL, the default space is used.
 
 `id`::
   (Required, string) The ID of the saved query you want to update.
@@ -30,19 +30,19 @@ WARNING: You cannot update a prebuilt saved query (`prebuilt = true`).
 [[osquery-manager-saved-queries-api-update-body-params]]
 ==== Request body
 
-`id`:: (Required, string) The name of the saved query.
+`id`:: (Required, string) The saved query name.
 
-`description`:: (Optional, string) A description of the saved query.
+`description`:: (Optional, string) The saved query description.
 
-`platform`:: (Optional, string) Restrict this query to a given platform, default is 'all' platforms; you may use commas to set multiple platforms (e.g. 'linux,darwin').
+`platform`:: (Optional, string) Restricts the query to a specified platform. The default is 'all' platforms. To specify multiple platforms, use commas. For example, 'linux,darwin'.
 
-`query`:: (Required, string) The SQL query to run.
+`query`:: (Required, string) The SQL query you want to run.
 
-`version`:: (Optional, string) Only run on osquery versions greater than or equal-to this version string
+`version`:: (Optional, string) Runs on Osquery versions greater than or equal to the specified version string.
 
-`internal`:: (Optional, string) An interval in seconds to run the query.
+`internal`:: (Optional, string) The interval, in seconds, to run the query.
 
-`ecs_mapping`:: (Optional, object) Config allows to map osquery results columns or static values to ECS fields.
+`ecs_mapping`:: (Optional, object) Maps Osquery result columns or static values to ECS fields.
 
 
 [[osquery-manager-saved-queries-api-update-request-codes]]

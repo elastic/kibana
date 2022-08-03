@@ -19,7 +19,7 @@ experimental[] Create live queries.
 ==== Path parameters
 
 `space_id`::
-  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+  (Optional, string) An identifier for the space. When `space_id` is not provided in the URL, the default space is used.
 
 
 [[osquery-manager-live-queries-api-create-body-params]]
@@ -27,19 +27,19 @@ experimental[] Create live queries.
 
 `agent_ids`:: (Optional, array) A list of agent IDs to run the query on.
 
-`agent_all`:: (Optional, boolean) If `true`, the query will be run on all agents.
+`agent_all`:: (Optional, boolean) When `true`, the query runs on all agents.
 
 `agent_platforms`:: (Optional, array) A list of agent platforms to run the query on.
 
 `agent_policy_ids`:: (Optional, array) A list of agent policy IDs to run the query on.
 
-`query`:: (Optional, string) The SQL query to run.
+`query`:: (Optional, string) The SQL query you want to run.
 
-`saved_query_id`:: (Optional, string) The ID of a saved query to run.
+`saved_query_id`:: (Optional, string) The ID of a saved query.
 
-`ecs_mapping`:: (Optional, object) Map osquery results columns or static values to ECS fields.
+`ecs_mapping`:: (Optional, object) Map osquery results columns or static values to Elastic Common Schema (ECS) fields.
 
-`pack_id`:: (Optional, string) The ID of a pack to run.
+`pack_id`:: (Optional, string) The ID of the pack you want to run.
 
 `alert_ids`:: (Optional, array) A list of alert IDs associated to the live query.
 
@@ -60,7 +60,9 @@ experimental[] Create live queries.
 [[osquery-manager-live-queries-api-create-example]]
 ==== Examples
 
-Run live query on all supported agents (`osquery_manager` integration has to be added to the agent policy):
+Run a live query on all supported agents:
+
+ TIP: `osquery_manager` integration has to be added to the agent policy.
 
 [source,sh]
 --------------------------------------------------
@@ -123,7 +125,7 @@ The API returns the live query object:
 --------------------------------------------------
 
 
-Run pack on darwin supported agents: 
+Run a pack on Darwin-supported agents: 
 
 [source,sh]
 --------------------------------------------------

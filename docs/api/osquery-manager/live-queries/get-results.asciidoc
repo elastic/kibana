@@ -4,7 +4,7 @@
 <titleabbrev>Get live query results</titleabbrev>
 ++++
 
-experimental[] Retrieve a single live query results by ID.
+experimental[] Retrieve a single live query result by ID.
 
 
 [[osquery-manager-live-queries-api-get-results-request]]
@@ -19,10 +19,10 @@ experimental[] Retrieve a single live query results by ID.
 ==== Path parameters
 
 `space_id`::
-(Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+(Optional, string) The space identifier. When `space_id` is not provided in the URL, the default space is used.
 
 `id`::
-(Required, string) The ID of the live query results you want to retrieve.
+(Required, string) The ID of the live query result you want to retrieve.
 
 `query_action_id`::
 (Required, string) The ID of the query action that generated the live query results.
@@ -51,7 +51,7 @@ $ curl -X GET api/osquery/live_queries/3c42c847-eb30-4452-80e0-728584042334/resu
 --------------------------------------------------
 // KIBANA
 
-The API returns a live query action single query results:
+The API returns a live query action single query result:
 
 [source,sh]
 --------------------------------------------------
