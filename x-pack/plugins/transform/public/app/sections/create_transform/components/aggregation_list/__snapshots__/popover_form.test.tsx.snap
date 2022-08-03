@@ -34,6 +34,7 @@ exports[`Transform: Aggregation <PopoverForm /> Minimal initialization 1`] = `
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={true}
+    isInvalid={false}
     labelType="label"
   >
     <EuiButton
