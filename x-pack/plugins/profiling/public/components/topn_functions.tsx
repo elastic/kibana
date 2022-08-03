@@ -38,7 +38,8 @@ interface Row {
 
 function CPUStat({ cpu, diffCPU }: { cpu: number; diffCPU: number | undefined }) {
   const cpuLabel = `${cpu.toFixed(2)}%`;
-  if (diffCPU === undefined) {
+
+  if (diffCPU === undefined || diffCPU === 0) {
     return <>{cpuLabel}</>;
   }
   const color = diffCPU < 0 ? 'success' : 'danger';
