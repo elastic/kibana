@@ -33,8 +33,8 @@ export class TriggersActionsUiTestPlugin
       title: 'Triggers Actions Ui Test',
       mount: async (params: AppMountParameters<unknown>) => {
         const startServices = await core.getStartServices();
-        const [coreStart, { data }] = startServices;
-        return renderApp({ ...coreStart, data }, params);
+        const [coreStart, { data, triggersActionsUi }] = startServices;
+        return renderApp({ ...coreStart, data, triggersActionsUi }, params);
       },
     });
   }

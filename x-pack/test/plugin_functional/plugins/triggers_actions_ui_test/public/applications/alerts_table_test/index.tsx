@@ -10,14 +10,17 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider, useKibana } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
 
-type CoreStartTriggersActionsUI = CoreStart & { data: DataPublicPluginStart };
+type CoreStartTriggersActionsUI = CoreStart & {
+  data: DataPublicPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+};
 
 /**
  * Render the TriggersActionsUI Test app. Returns a cleanup function.
@@ -38,9 +41,8 @@ const AppRoot = React.memo(
     coreStart: CoreStartTriggersActionsUI;
     parameters: AppMountParameters;
   }) => {
-    const {
-      triggersActionsUi: { alertsTableConfigurationRegistry, getAlertsStateTable },
-    } = useKibana<{ triggersActionsUi: TriggersAndActionsUIPublicPluginStart }>().services;
+    const { triggersActionsUi } = coreStart;
+    const { alertsTableConfigurationRegistry, getAlertsStateTable } = triggersActionsUi;
 
     const alertStateProps: AlertsTableStateProps = {
       configurationId: 'testConfigId',
