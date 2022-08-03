@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const findService = getService('find');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
+  const retry = getService('retry');
 
   const getMetricTiles = () =>
     findService.allByCssSelector('[data-test-subj="mtrVis"] .echChart li');
@@ -157,9 +158,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const title = '93.28.27.24';
       await clickMetric(title);
 
-      const labels = await filterBar.getFiltersLabel();
-      expect(labels.length).to.be(1);
-      expect(labels[0]).to.be(`ip: ${title}`);
+      await PageObjects.common.sleep(1000);
+
+      retry.try(async () => {
+        const labels = await filterBar.getFiltersLabel();
+        expect(labels.length).to.be(1);
+        expect(labels[0]).to.be(`ip: ${title}`);
+      });
 
       await filterBar.removeAllFilters();
       await PageObjects.lens.waitForVisualization('mtrVis');
