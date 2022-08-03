@@ -22,7 +22,7 @@ Object {
             <span
               class="euiButtonEmpty__text"
             >
-              selected cluster
+              selected cluster name
             </span>
           </span>
         </button>
@@ -113,7 +113,7 @@ Object {
           <span
             class="euiButtonEmpty__text"
           >
-            selected cluster
+            selected cluster name
           </span>
         </span>
       </button>
@@ -261,7 +261,7 @@ Object {
             <span
               class="euiButtonEmpty__text"
             >
-              selected cluster
+              selected cluster name
             </span>
           </span>
         </button>
@@ -330,7 +330,7 @@ Object {
           <span
             class="euiButtonEmpty__text"
           >
-            selected cluster
+            selected cluster name
           </span>
         </span>
       </button>

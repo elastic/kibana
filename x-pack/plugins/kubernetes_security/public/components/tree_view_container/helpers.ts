@@ -10,13 +10,15 @@ import {
   CONTAINER_IMAGE_NAME,
   DEFAULT_QUERY,
   ORCHESTRATOR_CLUSTER_ID,
+  ORCHESTRATOR_CLUSTER_NAME,
   ORCHESTRATOR_NAMESPACE,
   ORCHESTRATOR_RESOURCE_ID,
 } from '../../../common/constants';
 import { KubernetesCollection, QueryDslQueryContainerBool, TreeNavSelection } from '../../types';
 
 export const KUBERNETES_COLLECTION_FIELDS = {
-  [KubernetesCollection.cluster]: ORCHESTRATOR_CLUSTER_ID,
+  [KubernetesCollection.clusterId]: ORCHESTRATOR_CLUSTER_ID,
+  [KubernetesCollection.clusterName]: ORCHESTRATOR_CLUSTER_NAME,
   [KubernetesCollection.namespace]: ORCHESTRATOR_NAMESPACE,
   [KubernetesCollection.node]: CLOUD_INSTANCE_NAME,
   [KubernetesCollection.pod]: ORCHESTRATOR_RESOURCE_ID,
@@ -35,20 +37,22 @@ export const addTreeNavSelectionToFilterQuery = (
       throw new Error('Invalid filter query');
     }
     parsedFilterQuery.bool.filter.push(
-      ...Object.keys(treeNavSelection).map((collectionKey) => {
-        const collection = collectionKey as KubernetesCollection;
-        return {
-          bool: {
-            should: [
-              {
-                match: {
-                  [KUBERNETES_COLLECTION_FIELDS[collection]]: treeNavSelection[collection],
+      ...Object.keys(treeNavSelection)
+        .filter((key) => key !== KubernetesCollection.clusterName)
+        .map((collectionKey) => {
+          const collection = collectionKey as KubernetesCollection;
+          return {
+            bool: {
+              should: [
+                {
+                  match: {
+                    [KUBERNETES_COLLECTION_FIELDS[collection]]: treeNavSelection[collection],
+                  },
                 },
-              },
-            ],
-          },
-        };
-      })
+              ],
+            },
+          };
+        })
     );
     validFilterQuery = JSON.stringify(parsedFilterQuery);
   } catch {

@@ -30,7 +30,7 @@ export const useFetchDynamicTreeView = (
   return useInfiniteQuery<AggregateBucketPaginationResult>(
     cachingKeys,
     async ({ pageParam = 0 }) => {
-      if (groupBy === KUBERNETES_COLLECTION_FIELDS.cluster) {
+      if (groupBy === KUBERNETES_COLLECTION_FIELDS.clusterId) {
         const { buckets } = await http.get<any>(MULTI_TERMS_AGGREGATE_ROUTE, {
           query: {
             query: JSON.stringify(query),

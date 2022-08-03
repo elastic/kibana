@@ -11,7 +11,8 @@ import { KubernetesCollection, TreeNavSelection } from '../../../types';
 import { Breadcrumb } from '.';
 
 const MOCK_TREE_SELECTION: TreeNavSelection = {
-  [KubernetesCollection.cluster]: 'selected cluster',
+  [KubernetesCollection.clusterId]: 'selected cluster id',
+  [KubernetesCollection.clusterName]: 'selected cluster name',
   [KubernetesCollection.namespace]: 'selected namespace',
   [KubernetesCollection.node]: 'selected node',
   [KubernetesCollection.pod]: 'selected pod',
@@ -39,7 +40,7 @@ describe('Tree view Breadcrumb component', () => {
       );
 
       expect(
-        renderResult.queryByText(MOCK_TREE_SELECTION[KubernetesCollection.cluster]!)
+        renderResult.queryByText(MOCK_TREE_SELECTION[KubernetesCollection.clusterName]!)
       ).toBeVisible();
       expect(
         renderResult.queryByText(MOCK_TREE_SELECTION[KubernetesCollection.namespace]!)
@@ -63,7 +64,7 @@ describe('Tree view Breadcrumb component', () => {
     it('returns null when no cluster in selection', async () => {
       renderResult = mockedContext.render(
         <Breadcrumb
-          treeNavSelection={{ ...MOCK_TREE_SELECTION, [KubernetesCollection.cluster]: undefined }}
+          treeNavSelection={{ ...MOCK_TREE_SELECTION, [KubernetesCollection.clusterId]: undefined }}
           onSelect={onSelect}
         />
       );
@@ -75,7 +76,9 @@ describe('Tree view Breadcrumb component', () => {
       renderResult = mockedContext.render(
         <Breadcrumb
           treeNavSelection={{
-            [KubernetesCollection.cluster]: MOCK_TREE_SELECTION[KubernetesCollection.cluster],
+            [KubernetesCollection.clusterId]: MOCK_TREE_SELECTION[KubernetesCollection.clusterId],
+            [KubernetesCollection.clusterName]:
+              MOCK_TREE_SELECTION[KubernetesCollection.clusterName],
             [KubernetesCollection.node]: MOCK_TREE_SELECTION[KubernetesCollection.node],
             [KubernetesCollection.containerImage]:
               MOCK_TREE_SELECTION[KubernetesCollection.containerImage],
@@ -85,7 +88,7 @@ describe('Tree view Breadcrumb component', () => {
       );
 
       expect(
-        renderResult.queryByText(MOCK_TREE_SELECTION[KubernetesCollection.cluster]!)
+        renderResult.queryByText(MOCK_TREE_SELECTION[KubernetesCollection.clusterName]!)
       ).toBeVisible();
       expect(
         renderResult.queryByText(MOCK_TREE_SELECTION[KubernetesCollection.namespace]!)

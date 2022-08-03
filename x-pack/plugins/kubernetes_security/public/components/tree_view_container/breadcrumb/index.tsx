@@ -21,9 +21,10 @@ export const Breadcrumb = ({ treeNavSelection, onSelect }: BreadcrumbDeps) => {
     (collectionType: string) => {
       const selectionCopy = { ...treeNavSelection };
       switch (collectionType) {
-        case KubernetesCollection.cluster: {
+        case KubernetesCollection.clusterId: {
           onSelect({
-            [KubernetesCollection.cluster]: treeNavSelection[KubernetesCollection.cluster],
+            [KubernetesCollection.clusterId]: treeNavSelection[KubernetesCollection.clusterId],
+            [KubernetesCollection.clusterName]: treeNavSelection[KubernetesCollection.clusterName],
           });
           break;
         }
@@ -59,7 +60,10 @@ export const Breadcrumb = ({ treeNavSelection, onSelect }: BreadcrumbDeps) => {
           color="text"
           onClick={() => onBreadCrumbClick(collectionType)}
         >
-          {treeNavSelection[collectionType]}
+          {collectionType === KubernetesCollection.clusterId
+            ? treeNavSelection[KubernetesCollection.clusterName] ||
+              treeNavSelection[KubernetesCollection.clusterId]
+            : treeNavSelection[collectionType]}
         </EuiButtonEmpty>
       </>
     ),
@@ -72,14 +76,14 @@ export const Breadcrumb = ({ treeNavSelection, onSelect }: BreadcrumbDeps) => {
     ]
   );
 
-  if (!treeNavSelection[KubernetesCollection.cluster]) {
+  if (!treeNavSelection[KubernetesCollection.clusterId]) {
     return null;
   }
 
   return (
     <div css={styles.breadcrumb}>
       {renderBreadcrumbLink(
-        KubernetesCollection.cluster,
+        KubernetesCollection.clusterId,
         <EuiIcon type="heatmap" color="success" />,
         !(
           treeNavSelection[KubernetesCollection.namespace] ||
