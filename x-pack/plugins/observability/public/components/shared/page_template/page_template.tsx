@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSideNavItemType } from '@elastic/eui';
+import { EuiPageTemplate, EuiSideNavItemType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { matchPath, useLocation } from 'react-router-dom';
@@ -159,7 +159,7 @@ export function ObservabilityPageTemplate({
                   : undefined
               }
             >
-              {children}
+              <EuiPageTemplate.Section>{children}</EuiPageTemplate.Section>
             </KibanaPageTemplate>
           );
         }}
