@@ -7,7 +7,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { useKibana } from '../../../../../../common/lib/kibana';
-import { ConsoleDataState } from '../types';
+import type { ConsoleDataState } from '../types';
 
 interface InputHistoryOfflineStorage {
   version: number;
