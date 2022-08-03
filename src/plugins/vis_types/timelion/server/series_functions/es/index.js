@@ -107,6 +107,7 @@ export default new Datasource('es', {
     const indexPatternSpec = (await indexPatternsService.find(config.index, 1)).find(
       (index) => index.title === config.index
     );
+    // TODO check time field for tsdb rollup and switch to UTC
 
     const { scriptFields = {}, runtimeFields = {} } = indexPatternSpec?.getComputedFields() ?? {};
     const esShardTimeout = tlConfig.esShardTimeout;
