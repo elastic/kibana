@@ -55,7 +55,7 @@ describe('useSuggestUserProfiles', () => {
 
     expect(spyOnSuggestUserProfiles).toBeCalledWith({
       ...props,
-      size: 100,
+      size: 10,
       http: expect.anything(),
       signal: expect.anything(),
     });

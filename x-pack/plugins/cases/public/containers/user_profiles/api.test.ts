@@ -40,7 +40,7 @@ describe('User profiles API', () => {
       });
 
       expect(http.post).toHaveBeenCalledWith('/internal/cases/_suggest_user_profiles', {
-        body: '{"name":"elastic","size":100,"owner":["cases"]}',
+        body: '{"name":"elastic","size":10,"owner":["cases"]}',
         signal: abortCtrl.signal,
       });
     });
