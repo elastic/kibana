@@ -409,7 +409,7 @@ function DiscoverFieldComponent({
 
   const renderPopover = () => {
     const details = getDetails(field);
-    const dateRange = data.query.timefilter.timefilter.getTime();
+    const dateRange = data?.query?.timefilter.timefilter.getTime();
 
     return (
       <>
@@ -419,26 +419,28 @@ function DiscoverFieldComponent({
               {'Stats as in Lens:'}
             </EuiText>
             <EuiSpacer size="s" />
-            <FieldStats
-              query={state.query!}
-              filters={state.filters!}
-              fromDate={dateRange.from}
-              toDate={dateRange.to}
-              dataViewOrDataViewId={indexPattern}
-              field={multiFields ? multiFields[0].field : field} // TODO: how to handle multifields?
-              testSubject="dscFieldListPanel"
-              overrideContent={(currentField, params) => {
-                if (params?.noDataFound) {
-                  return (
-                    <EuiText size="s">{`TODO: add a custom "no data available" message for ${currentField.type} field`}</EuiText>
-                  );
-                }
+            {Boolean(dateRange) && (
+              <FieldStats
+                query={state.query!}
+                filters={state.filters!}
+                fromDate={dateRange.from}
+                toDate={dateRange.to}
+                dataViewOrDataViewId={dataView}
+                field={multiFields ? multiFields[0].field : field} // TODO: how to handle multifields?
+                testSubject="dscFieldListPanel"
+                overrideContent={(currentField, params) => {
+                  if (params?.noDataFound) {
+                    return (
+                      <EuiText size="s">{`TODO: add a custom "no data available" message for ${currentField.type} field`}</EuiText>
+                    );
+                  }
 
-                return (
-                  <EuiText size="s">{`TODO: add a custom "stats are not available" message for ${currentField.type} field`}</EuiText>
-                );
-              }}
-            />
+                  return (
+                    <EuiText size="s">{`TODO: add a custom "stats are not available" message for ${currentField.type} field`}</EuiText>
+                  );
+                }}
+              />
+            )}
             {/* TODO: remove previous field stats view when we finish FieldStats component and add addFilter buttons to it */}
             <EuiSpacer size="l" />
             <EuiText color="subdued" size="s">
