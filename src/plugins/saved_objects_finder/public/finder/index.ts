@@ -6,5 +6,9 @@
  * Side Public License, v 1.
  */
 
-export type { SavedObjectMetaData, SavedObjectFinderUiProps } from './saved_object_finder';
-export { SavedObjectFinderProps, getSavedObjectFinder } from './saved_object_finder';
+export type {
+  SavedObjectMetaData,
+  SavedObjectFinderUiProps,
+  SavedObjectFinderProps,
+} from './saved_object_finder';
+export { getSavedObjectFinder } from './saved_object_finder';
