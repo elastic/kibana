@@ -64,6 +64,7 @@
     "newsfeed": "src/plugins/newsfeed",
     "presentationUtil": "src/plugins/presentation_util",
     "savedObjects": "src/plugins/saved_objects",
+    "savedObjectsFinder": "src/plugins/saved_objects_finder",
     "savedObjectsManagement": "src/plugins/saved_objects_management",
     "server": "src/legacy/server",
     "share": "src/plugins/share",

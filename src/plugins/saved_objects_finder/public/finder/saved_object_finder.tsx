@@ -261,12 +261,12 @@ class SavedObjectFinderUi extends React.Component<
     const columns: Array<EuiTableFieldDataColumnType<SavedObjectFinderItem>> = [
       {
         field: 'type',
-        name: i18n.translate('savedObjects.finder.typeName', {
+        name: i18n.translate('savedObjectsFinder.typeName', {
           defaultMessage: 'Type',
         }),
         width: '50px',
         align: 'center',
-        description: i18n.translate('savedObjects.finder.typeDescription', {
+        description: i18n.translate('savedObjectsFinder.typeDescription', {
           defaultMessage: 'Type of the saved object',
         }),
         sortable: ({ type }) => {
@@ -305,10 +305,10 @@ class SavedObjectFinderUi extends React.Component<
       },
       {
         field: 'title',
-        name: i18n.translate('savedObjects.finder.titleName', {
+        name: i18n.translate('savedObjectsFinder.titleName', {
           defaultMessage: 'Title',
         }),
-        description: i18n.translate('savedObjects.finder.titleDescription', {
+        description: i18n.translate('savedObjectsFinder.titleDescription', {
           defaultMessage: 'Title of the saved object',
         }),
         dataType: 'string',
@@ -351,7 +351,7 @@ class SavedObjectFinderUi extends React.Component<
     const typeFilter: SearchFilterConfig = {
       type: 'field_value_selection',
       field: 'type',
-      name: i18n.translate('savedObjects.finder.filterButtonLabel', {
+      name: i18n.translate('savedObjectsFinder.filterButtonLabel', {
         defaultMessage: 'Types',
       }),
       multiSelect: 'or',
