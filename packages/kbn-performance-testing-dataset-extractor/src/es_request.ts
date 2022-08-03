@@ -58,12 +58,12 @@ const parseQueryStatement = (statement: string): { params?: string; body?: JSON 
   }
 };
 
-export const fetchRequests = async (esClient: ESClient, transactions: KibanaRequest[]) => {
-  const esQueries = new Array<Request>();
-  for (let i = 0; i < transactions.length; i++) {
-    const transactionId = transactions[i].transaction.id;
-    const esHits = await esClient.getSpans(transactionId);
-    const spans = esHits
+export const fetchRequests = async (esClient: ESClient, requests: KibanaRequest[]) => {
+  const esRequests = new Array<Request>();
+  for (const request of requests) {
+    const transactionId = request.transaction.id;
+    const hits = await esClient.getSpans(transactionId);
+    const spans = hits
       .map((hit) => hit!._source as SpanDocument)
       .map((hit) => {
         const query = hit?.span.db?.statement ? parseQueryStatement(hit?.span.db?.statement) : {};
@@ -82,7 +82,7 @@ export const fetchRequests = async (esClient: ESClient, transactions: KibanaRequ
           duration: hit.span?.duration?.us,
         };
       })
-      // filter out queries without method, path and POST/PUT/DELETE without body
+      // filter out requests without method, path and POST/PUT/DELETE without body
       .filter(
         (hit) =>
           hit &&
@@ -90,9 +90,10 @@ export const fetchRequests = async (esClient: ESClient, transactions: KibanaRequ
           hit.request?.path &&
           (hit.request?.method === 'GET' || hit.request?.body)
       );
-    esQueries.push(...spans);
+    esRequests.push(...spans);
   }
-  return esQueries;
+
+  return esRequests;
 };
 
 export const requestsToStreams = (requests: Request[]) => {
