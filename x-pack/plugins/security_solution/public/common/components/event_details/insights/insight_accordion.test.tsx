@@ -42,19 +42,6 @@ describe('InsightAccordion', () => {
     expect(screen.getByText(errorText)).toBeInTheDocument();
   });
 
-  it("shows the text and a disabled button when it's in the empty state", () => {
-    const text = 'the text';
-    render(
-      <TestProviders>
-        <InsightAccordion state="empty" text={text} prefix="" renderContent={noopRenderer} />
-      </TestProviders>
-    );
-
-    const button = screen.getByRole('button', { name: text });
-    expect(button).toBeInTheDocument();
-    expect(button).toHaveAttribute('aria-disabled');
-  });
-
   it('shows the text and renders the correct content', () => {
     const text = 'the text';
     const contentText = 'content text';
