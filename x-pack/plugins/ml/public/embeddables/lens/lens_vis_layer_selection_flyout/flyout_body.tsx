@@ -255,7 +255,7 @@ export const FlyoutBody: FC<Props> = ({
                         <EuiAccordion
                           id="additional-section"
                           buttonContent={i18n.translate(
-                            'xpack.ml.newJob.wizard.validateJob.jobNameAlreadyExists',
+                            'xpack.ml.embeddables.lensLayerFlyout.createJobCallout.additionalSettings.title',
                             {
                               defaultMessage: 'Additional settings',
                             }
@@ -282,7 +282,7 @@ export const FlyoutBody: FC<Props> = ({
                               checked={startJob}
                               onChange={(e) => setStartJobWrapper(e.target.checked)}
                               label={i18n.translate(
-                                'xpack.ml.newJob.wizard.validateJob.jobNameAlreadyExists',
+                                'xpack.ml.embeddables.lensLayerFlyout.createJobCallout.additionalSettings.start',
                                 {
                                   defaultMessage: 'Start the job after saving',
                                 }
@@ -298,7 +298,7 @@ export const FlyoutBody: FC<Props> = ({
                               checked={runInRealTime}
                               onChange={(e) => setRunInRealTime(e.target.checked)}
                               label={i18n.translate(
-                                'xpack.ml.newJob.wizard.validateJob.jobNameAlreadyExists',
+                                'xpack.ml.embeddables.lensLayerFlyout.createJobCallout.additionalSettings.realTime',
                                 {
                                   defaultMessage: 'Leave the job running for new data',
                                 }
