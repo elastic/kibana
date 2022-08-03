@@ -2,16 +2,14 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "kbn-scalability-simulation-generator"
-PKG_REQUIRE_NAME = "@kbn/scalability-simulation-generator"
+PKG_BASE_NAME = "kbn-ebt-tools"
+PKG_REQUIRE_NAME = "@kbn/ebt-tools"
 
 SOURCE_FILES = glob(
   [
     "src/**/*.ts",
   ],
-  exclude = [
-    "**/*.test.*",
-  ],
+  exclude = ["**/*.test.*"],
 )
 
 SRCS = SOURCE_FILES
@@ -23,39 +21,15 @@ filegroup(
 
 NPM_MODULE_EXTRA_FILES = [
   "package.json",
+  "README.md"
 ]
 
-# In this array place runtime dependencies, including other packages and NPM packages
-# which must be available for this code to run.
-#
-#  To reference other packages use:
-#    "//repo/relative/path/to/package"
-#    eg. "//packages/kbn-utils"
-#
-#  To reference a NPM package use:
-#    "@npm//name-of-package"
-#    eg. "@npm//lodash"
-RUNTIME_DEPS = [
-  "//packages/kbn-dev-cli-errors",
-  "//packages/kbn-dev-cli-runner",
-  "//packages/kbn-tooling-log",
-]
+RUNTIME_DEPS = []
 
-# In this array place dependencies necessary to build the types, which will include the
-# :npm_module_types target of other packages and packages from NPM, including @types/*
-# packages.
-#
-#  To reference the types for another package use:
-#    "//repo/relative/path/to/package:npm_module_types"
-#    eg. "//packages/kbn-utils:npm_module_types"
-#
-#  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
-  "//packages/kbn-dev-cli-errors:npm_module_types",
-  "//packages/kbn-dev-cli-runner:npm_module_types",
-  "//packages/kbn-tooling-log:npm_module_types",
-  "@npm//@types/node",
+  "//packages/analytics/client:npm_module_types",
   "@npm//@types/jest",
+  "@npm//@types/node",
 ]
 
 jsts_transpiler(
@@ -87,21 +61,25 @@ ts_project(
 )
 
 js_library(
-  name = PKG_DIRNAME,
+  name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node"],
+  deps = RUNTIME_DEPS + [":target_node", ":tsc_types"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
 
 pkg_npm(
   name = "npm_module",
-  deps = [":" + PKG_DIRNAME],
+  deps = [
+    ":%s" % PKG_BASE_NAME,
+  ]
 )
 
 filegroup(
   name = "build",
-  srcs = [":npm_module"],
+  srcs = [
+    ":npm_module",
+  ],
   visibility = ["//visibility:public"],
 )
 
@@ -116,6 +94,8 @@ pkg_npm_types(
 
 filegroup(
   name = "build_types",
-  srcs = [":npm_module_types"],
+  srcs = [
+    ":npm_module_types",
+  ],
   visibility = ["//visibility:public"],
 )
