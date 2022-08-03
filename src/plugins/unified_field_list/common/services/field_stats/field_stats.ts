@@ -6,145 +6,111 @@
  * Side Public License, v 1.
  */
 
-import { errors } from '@elastic/elasticsearch';
+import { lastValueFrom } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import DateMath from '@kbn/datemath';
-import { schema } from '@kbn/config-schema';
-import { CoreSetup } from '@kbn/core/server';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
+import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
-import { FIELD_STATS_API_PATH } from '../../common/constants';
-import type { FieldStatsResponse } from '../../common/types';
-import type { PluginStart } from '../types';
+import type { BoolQuery } from '@kbn/es-query';
+import type { FieldStatsResponse } from '../../types';
 
 const SHARD_SIZE = 5000;
+const DEFAULT_TOP_VALUES_SIZE = 10;
 
-export async function initFieldStatsRoute(setup: CoreSetup<PluginStart>) {
-  const router = setup.http.createRouter();
-  router.post(
-    {
-      path: FIELD_STATS_API_PATH,
-      validate: {
-        body: schema.object(
+interface FetchFieldStatsParams {
+  data: DataPublicPluginStart;
+  dataView: DataView;
+  field: DataViewField;
+  fromDate: string;
+  toDate: string;
+  dslQuery: { bool: BoolQuery } | {};
+  size?: number;
+}
+
+export const fetchFieldStats = async ({
+  data,
+  dataView,
+  field,
+  fromDate,
+  toDate,
+  dslQuery,
+  size,
+}: FetchFieldStatsParams): Promise<FieldStatsResponse<string | number>> => {
+  try {
+    const timeFieldName = dataView.timeFieldName;
+    const filter = timeFieldName
+      ? [
           {
-            dslQuery: schema.object({}, { unknowns: 'allow' }),
-            fromDate: schema.string(),
-            toDate: schema.string(),
-            dataViewId: schema.string(),
-            fieldName: schema.string(),
-            size: schema.maybe(schema.number()),
-          },
-          { unknowns: 'allow' }
-        ),
-      },
-    },
-    async (context, req, res) => {
-      const requestClient = (await context.core).elasticsearch.client.asCurrentUser;
-      const { fromDate, toDate, fieldName, dslQuery, size, dataViewId } = req.body;
-
-      const [{ savedObjects, elasticsearch }, { dataViews }] = await setup.getStartServices();
-      const savedObjectsClient = savedObjects.getScopedClient(req);
-      const esClient = elasticsearch.client.asScoped(req).asCurrentUser;
-      const indexPatternsService = await dataViews.dataViewsServiceFactory(
-        savedObjectsClient,
-        esClient
-      );
-
-      try {
-        const indexPattern = await indexPatternsService.get(dataViewId);
-
-        const timeFieldName = indexPattern.timeFieldName;
-        const field = indexPattern.fields.find((f) => f.name === fieldName);
-
-        if (!field) {
-          throw new Error(`Field {fieldName} not found in data view ${indexPattern.title}`);
-        }
-
-        const filter = timeFieldName
-          ? [
-              {
-                range: {
-                  [timeFieldName]: {
-                    gte: fromDate,
-                    lte: toDate,
-                  },
-                },
+            range: {
+              [timeFieldName]: {
+                gte: fromDate,
+                lte: toDate,
               },
-              dslQuery,
-            ]
-          : [dslQuery];
-
-        const query = {
-          bool: {
-            filter,
+            },
           },
-        };
+          dslQuery,
+        ]
+      : [dslQuery];
 
-        const runtimeMappings = indexPattern.getRuntimeMappings();
+    const query = {
+      bool: {
+        filter,
+      },
+    };
 
-        const search = async (aggs: Record<string, estypes.AggregationsAggregationContainer>) => {
-          const result = await requestClient.search({
-            index: indexPattern.title,
-            track_total_hits: true,
+    const runtimeMappings = dataView.getRuntimeMappings();
+
+    const search = async (
+      aggs: Record<string, estypes.AggregationsAggregationContainer>
+    ): Promise<estypes.SearchResponse<any>> => {
+      const result = await lastValueFrom(
+        data.search.search({
+          params: {
+            index: dataView.title,
             body: {
               query,
               aggs,
               runtime_mappings: runtimeMappings,
             },
+            track_total_hits: true,
             size: 0,
-          });
-          return result;
-        };
+          },
+        })
+      );
+      return result.rawResponse;
+    };
 
-        if (field.type.includes('range')) {
-          return res.ok({ body: {} });
-        }
-
-        if (field.type === 'histogram') {
-          return res.ok({
-            body: await getNumberHistogram(search, field, false),
-          });
-        } else if (field.type === 'number') {
-          return res.ok({
-            body: await getNumberHistogram(search, field),
-          });
-        } else if (field.type === 'date') {
-          return res.ok({
-            body: await getDateHistogram(search, field, { fromDate, toDate }),
-          });
-        }
-
-        return res.ok({
-          body: await getStringSamples(search, field, size),
-        });
-      } catch (e) {
-        if (e instanceof SavedObjectNotFound) {
-          return res.notFound();
-        }
-        if (e instanceof errors.ResponseError && e.statusCode === 404) {
-          return res.notFound();
-        }
-        if (e.isBoom) {
-          if (e.output.statusCode === 404) {
-            return res.notFound();
-          }
-          throw new Error(e.output.message);
-        } else {
-          throw e;
-        }
-      }
+    if (field.type.includes('range')) {
+      return {};
     }
-  );
-}
+
+    if (field.type === 'histogram') {
+      return await getNumberHistogram(search, field, false);
+    }
+
+    if (field.type === 'number') {
+      return await getNumberHistogram(search, field);
+    }
+
+    if (field.type === 'date') {
+      return await getDateHistogram(search, field, { fromDate, toDate });
+    }
+
+    return await getStringSamples(search, field, size);
+  } catch (error) {
+    // console.error(error);
+    throw new Error('Could not aggregate data');
+  }
+};
 
 export async function getNumberHistogram(
   aggSearchWithBody: (
     aggs: Record<string, estypes.AggregationsAggregationContainer>
-  ) => Promise<unknown>,
+  ) => Promise<estypes.SearchResponse<any>>,
   field: DataViewField,
   useTopHits = true
-): Promise<FieldStatsResponse> {
+): Promise<FieldStatsResponse<string | number>> {
   const fieldRef = getFieldRef(field);
 
   const baseAggs = {
@@ -168,7 +134,7 @@ export async function getNumberHistogram(
       aggs: {
         ...baseAggs,
         top_values: {
-          terms: { ...fieldRef, size: 10 },
+          terms: { ...fieldRef, size: DEFAULT_TOP_VALUES_SIZE },
         },
       },
     },
@@ -177,8 +143,8 @@ export async function getNumberHistogram(
   const minMaxResult = (await aggSearchWithBody(
     useTopHits ? searchWithHits : searchWithoutHits
   )) as
-    | ESSearchResponse<unknown, { body: { aggs: typeof searchWithHits } }>
-    | ESSearchResponse<unknown, { body: { aggs: typeof searchWithoutHits } }>;
+    | ESSearchResponse<any, { body: { aggs: typeof searchWithHits } }>
+    | ESSearchResponse<any, { body: { aggs: typeof searchWithoutHits } }>;
 
   const minValue = minMaxResult.aggregations!.sample.min_value.value;
   const maxValue = minMaxResult.aggregations!.sample.max_value.value;
@@ -204,7 +170,7 @@ export async function getNumberHistogram(
 
   if (histogramInterval === 0) {
     return {
-      totalDocuments: minMaxResult.hits.total.value,
+      totalDocuments: getHitsTotal(minMaxResult),
       sampledValues: minMaxResult.aggregations!.sample.sample_count.value!,
       sampledDocuments: minMaxResult.aggregations!.sample.doc_count,
       topValues: topValuesBuckets,
@@ -212,7 +178,7 @@ export async function getNumberHistogram(
         ? { buckets: [] }
         : {
             // Insert a fake bucket for a single-value histogram
-            buckets: [{ count: minMaxResult.aggregations!.sample.doc_count, key: minValue }],
+            buckets: [{ count: minMaxResult.aggregations!.sample.doc_count, key: minValue! }],
           },
     };
   }
@@ -236,7 +202,7 @@ export async function getNumberHistogram(
   >;
 
   return {
-    totalDocuments: minMaxResult.hits.total.value,
+    totalDocuments: getHitsTotal(minMaxResult),
     sampledDocuments: minMaxResult.aggregations!.sample.doc_count,
     sampledValues: minMaxResult.aggregations!.sample.sample_count.value!,
     histogram: {
@@ -252,8 +218,8 @@ export async function getNumberHistogram(
 export async function getStringSamples(
   aggSearchWithBody: (aggs: Record<string, estypes.AggregationsAggregationContainer>) => unknown,
   field: DataViewField,
-  size = 10
-): Promise<FieldStatsResponse> {
+  size = DEFAULT_TOP_VALUES_SIZE
+): Promise<FieldStatsResponse<string | number>> {
   const fieldRef = getFieldRef(field);
 
   const topValuesBody = {
@@ -276,7 +242,7 @@ export async function getStringSamples(
   >;
 
   return {
-    totalDocuments: topValuesResult.hits.total.value,
+    totalDocuments: getHitsTotal(topValuesResult),
     sampledDocuments: topValuesResult.aggregations!.sample.doc_count,
     sampledValues: topValuesResult.aggregations!.sample.sample_count.value!,
     topValues: {
@@ -293,7 +259,7 @@ export async function getDateHistogram(
   aggSearchWithBody: (aggs: Record<string, estypes.AggregationsAggregationContainer>) => unknown,
   field: DataViewField,
   range: { fromDate: string; toDate: string }
-): Promise<FieldStatsResponse> {
+): Promise<FieldStatsResponse<string | number>> {
   const fromDate = DateMath.parse(range.fromDate);
   const toDate = DateMath.parse(range.toDate);
   if (!fromDate) {
@@ -323,7 +289,7 @@ export async function getDateHistogram(
   >;
 
   return {
-    totalDocuments: results.hits.total.value,
+    totalDocuments: getHitsTotal(results),
     histogram: {
       buckets: results.aggregations!.histo.buckets.map((bucket) => ({
         count: bucket.doc_count,
@@ -343,3 +309,7 @@ function getFieldRef(field: DataViewField) {
       }
     : { field: field.name };
 }
+
+const getHitsTotal = (body: estypes.SearchResponse): number => {
+  return (body.hits.total as estypes.SearchTotalHits).value ?? body.hits.total ?? 0;
+};

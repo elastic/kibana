@@ -6,10 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup } from '@kbn/core/server';
-import { PluginStart } from '../types';
-import { initFieldStatsRoute } from './field_stats';
-
-export function defineRoutes(setup: CoreSetup<PluginStart>) {
-  initFieldStatsRoute(setup);
-}
+export { fetchFieldStats } from './field_stats';

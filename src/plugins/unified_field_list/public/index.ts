@@ -24,3 +24,5 @@ export function plugin() {
   return new UnifiedFieldListPlugin();
 }
 export type { UnifiedFieldListPluginSetup, UnifiedFieldListPluginStart } from './types';
+
+export { fetchFieldStats } from '../common/services/field_stats';

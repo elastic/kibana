@@ -38,8 +38,8 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { buildEsQuery, Query, Filter } from '@kbn/es-query';
-import type { BucketedAggregation, FieldStatsResponse } from '../../../common/types';
-import { FIELD_STATS_API_PATH } from '../../../common/constants';
+import type { BucketedAggregation } from '../../../common/types';
+import { fetchFieldStats } from '../../../common/services/field_stats';
 import { useUnifiedFieldListServices } from '../../hooks/use_unified_field_list_services';
 import './field_stats.scss';
 
@@ -79,7 +79,7 @@ export const FieldStats: React.FC<FieldStatsProps> = ({
   overrideContent,
 }) => {
   const services = useUnifiedFieldListServices();
-  const { http, fieldFormats, uiSettings, charts, dataViews } = services;
+  const { fieldFormats, uiSettings, charts, dataViews, data } = services;
   const [state, setState] = useState<State>({
     isLoading: false,
   });
@@ -104,33 +104,31 @@ export const FieldStats: React.FC<FieldStatsProps> = ({
       return;
     }
 
-    setState((s) => ({ ...s, isLoading: true }));
+    try {
+      setState((s) => ({ ...s, isLoading: true }));
 
-    http
-      .post<FieldStatsResponse<string | number>>(FIELD_STATS_API_PATH, {
-        body: JSON.stringify({
-          dslQuery: buildEsQuery(loadedDataView, query, filters, getEsQueryConfig(uiSettings)),
-          fromDate,
-          toDate,
-          fieldName: field.name,
-          dataViewId: loadedDataView.id,
-        }),
-      })
-      .then((results) => {
-        setState((s) => ({
-          ...s,
-          isLoading: false,
-          totalDocuments: results.totalDocuments,
-          sampledDocuments: results.sampledDocuments,
-          sampledValues: results.sampledValues,
-          histogram: results.histogram,
-          topValues: results.topValues,
-          dataView: loadedDataView,
-        }));
-      })
-      .catch(() => {
-        setState((s) => ({ ...s, isLoading: false }));
+      const results = await fetchFieldStats({
+        data,
+        dataView: loadedDataView,
+        field,
+        fromDate,
+        toDate,
+        dslQuery: buildEsQuery(loadedDataView, query, filters, getEsQueryConfig(uiSettings)),
+        // TODO: pass abortSignal on unmount
       });
+
+      setState((s) => ({
+        ...s,
+        isLoading: false,
+        totalDocuments: results.totalDocuments,
+        sampledDocuments: results.sampledDocuments,
+        sampledValues: results.sampledValues,
+        histogram: results.histogram,
+        topValues: results.topValues,
+      }));
+    } catch (e) {
+      setState((s) => ({ ...s, isLoading: false }));
+    }
   }
 
   useEffect(() => {
