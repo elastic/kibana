@@ -74,7 +74,7 @@ Every package is of one of the following types. Using package types allows us to
 
 We're planning to implement the full package system described in phases. Currently, those phases look like this:
 
-### Ground preparation
+### Phase 1: Ground preparation
 
 **status:** ✅ complete
 
@@ -88,7 +88,7 @@ This phase is about identifying issues that would prevent a migration for teams 
  - Rewrite @kbn/pm using native Node.js to remove its build step. Anything outside of bootstrap like clean and reset commands will move to different packages.
  - Document how to break up packages into smaller pieces
 
-### Legacy packages migration
+### Phase 2: Legacy packages migration
 
 **status:** in progress
 
@@ -98,7 +98,7 @@ This phase is about migrating the existing legacy packages to one of the [packag
   - Auto generating configuration files based on the `kibana.jsonc` manifest
   - Discover dependencies used in packages automatically
 
-### Double down on DX
+### Phase 3: Double down on DX
 
 This phase is all about making it easier for teams to start breaking their plugin up into packages.
 
@@ -109,7 +109,7 @@ This phase is all about making it easier for teams to start breaking their plugi
   - Start with a package rule to validate dependencies are all used and included
   - Document how to create, build and watch packages.
 
-### Plugins everywhere
+### Phase 4: Plugins everywhere
 
 This phase is all about supporting the creation of plugin-browser and plugin-server packages anywhere in the repository.
 
@@ -120,7 +120,7 @@ This phase is all about supporting the creation of plugin-browser and plugin-ser
   - Documentation, documentation, documentation
   - How do 3rd party plugins migrate to the new system?
 
-### Legacy plugins migration 
+### Phase 5: Legacy plugins migration
 
 This phase is all about having the solution teams migrating their legacy plugins into packages.
 
@@ -129,7 +129,7 @@ This phase is all about having the solution teams migrating their legacy plugins
   - Provide migration consultations
   - Deprecate legacy 3rd party plugin styles and communicate 18 month migration period
 
-### Cleanup
+### Phase 6: Cleanup
 
 This phase is about finalizing the rough edges and making sure every piece of code is on Bazel.
 
