@@ -246,8 +246,21 @@ export const getField = (fields: Fields, pathNames: string[]): Field | undefined
   return undefined;
 };
 
+export function processFieldsWithWildcard(fields: Fields): Fields {
+  const newFields: Fields = [];
+  for (const field of fields) {
+    if (field.name.includes('*') && (field.type !== 'object' || !field.object_type)) {
+      newFields.push({ ...field, type: 'object', object_type: field.type });
+    } else {
+      newFields.push({ ...field });
+    }
+  }
+  return newFields;
+}
+
 export function processFields(fields: Fields): Fields {
-  const expandedFields = expandFields(fields);
+  const processedFields = processFieldsWithWildcard(fields);
+  const expandedFields = expandFields(processedFields);
   const dedupedFields = dedupFields(expandedFields);
   return validateFields(dedupedFields, dedupedFields);
 }
