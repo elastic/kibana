@@ -104,7 +104,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   );
 
   const showSpikeAnalysisTable = data?.changePoints.length > 0;
-  
+
   return (
     <>
       <ProgressControls
