@@ -17,7 +17,7 @@ import type {
   FileShareJSON,
   FileShareJSONWithToken,
   FileShare,
-  UpdatableFileShareAttributes,
+  UpdatableFileShareMetadata,
 } from '../../common/types';
 import { FILE_SO_TYPE } from '../../common/constants';
 import type { File } from '../../common/types';
@@ -101,7 +101,7 @@ export interface UpdateArgs {
   /**
    * The updated attributes to store.
    */
-  attributes: UpdatableFileShareAttributes;
+  attributes: UpdatableFileShareMetadata;
 }
 
 function toFileShareJSON(so: SavedObject<FileShare>): FileShareJSON {

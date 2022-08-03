@@ -303,7 +303,7 @@ export type FileShareJSONWithToken = FileShareJSON & {
 /**
  * Set of attributes that can be updated in a file share.
  */
-export type UpdatableFileShareAttributes = Pick<FileShare, 'name'>;
+export type UpdatableFileShareMetadata = Pick<FileShare, 'name'>;
 
 /**
  * Arguments to pass to share a file

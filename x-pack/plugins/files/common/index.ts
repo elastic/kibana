@@ -25,5 +25,5 @@ export type {
   BaseFileMetadata,
   UpdatableFileMetadata,
   FileShareJSONWithToken,
-  UpdatableFileShareAttributes,
+  UpdatableFileShareMetadata,
 } from './types';
