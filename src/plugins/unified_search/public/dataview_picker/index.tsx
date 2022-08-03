@@ -59,10 +59,6 @@ export interface DataViewPickerProps {
    */
   onDataViewCreated?: () => void;
   /**
-   * Flag to show the tour component for the first time.
-   */
-  showNewMenuTour?: boolean;
-  /**
    * List of the supported text based languages (SQL, ESQL) etc.
    * Defined per application, if not provided, no text based languages
    * will be available.
@@ -93,7 +89,6 @@ export const DataViewPicker = ({
   onDataViewCreated,
   trigger,
   selectableProps,
-  showNewMenuTour,
   textBasedLanguages,
   onSaveTextLanguageQuery,
   onTextLangQuerySubmit,
@@ -108,7 +103,6 @@ export const DataViewPicker = ({
       onDataViewCreated={onDataViewCreated}
       trigger={trigger}
       selectableProps={selectableProps}
-      showNewMenuTour={showNewMenuTour}
       textBasedLanguages={textBasedLanguages}
       onSaveTextLanguageQuery={onSaveTextLanguageQuery}
       onTextLangQuerySubmit={onTextLangQuerySubmit}

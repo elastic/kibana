@@ -99,7 +99,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return retry.try(async () => {
         await testSubjects.click(`visListingTitleLink-${title}`);
         await this.isLensPageOrFail();
-        await PageObjects.unifiedSearch.closeTourPopoverByLocalStorage();
       });
     },
 
@@ -1132,7 +1131,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await PageObjects.dashboard.switchToEditMode();
       }
       await dashboardAddPanel.clickCreateNewLink();
-      await PageObjects.unifiedSearch.closeTourPopoverByLocalStorage();
       await this.goToTimeRange();
       await this.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',

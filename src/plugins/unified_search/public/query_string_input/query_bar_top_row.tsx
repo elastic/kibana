@@ -447,7 +447,6 @@ export const QueryBarTopRow = React.memo(
       return (
         <EuiFlexItem style={{ maxWidth: '100%' }} grow={isMobile}>
           <DataViewPicker
-            showNewMenuTour
             {...props.dataViewPickerComponentProps}
             trigger={{ fullWidth: isMobile, ...props.dataViewPickerComponentProps.trigger }}
             onTextLangQuerySubmit={props.onTextLangQuerySubmit}
