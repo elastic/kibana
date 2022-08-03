@@ -14,7 +14,7 @@ import { PaletteOutput, PaletteRegistry, CUSTOM_PALETTE, CustomPaletteParams } f
 import { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { LayoutDirection } from '@elastic/charts';
-import { euiLightVars } from '@kbn/ui-theme';
+import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { LayerType } from '../../../common';
 import { getSuggestions } from './suggestions';
@@ -27,6 +27,9 @@ import { Toolbar } from './toolbar';
 import { generateId } from '../../id_generator';
 
 export const DEFAULT_MAX_COLUMNS = 3;
+
+export const getDefaultColor = (hasMax: boolean) =>
+  hasMax ? euiLightVars.euiColorPrimary : euiThemeVars.euiColorLightestShade;
 
 export interface MetricVisualizationState {
   layerId: string;
@@ -128,11 +131,7 @@ const toExpression = (
             state.breakdownByAccessor && !state.collapseFn ? [state.breakdownByAccessor] : [],
           subtitle: state.subtitle ? [state.subtitle] : [],
           progressDirection: state.progressDirection ? [state.progressDirection] : [],
-          color: state.color
-            ? [state.color]
-            : state.maxAccessor
-            ? [euiLightVars.euiColorPrimary]
-            : [],
+          color: [state.color || getDefaultColor(!!state.maxAccessor)],
           palette: state.palette?.params
             ? [
                 paletteService
@@ -237,7 +236,10 @@ export const getMetricVisualization = ({
             triggerIcon: 'color',
             color: props.state.color,
           }
-        : {};
+        : {
+            triggerIcon: 'color',
+            color: getDefaultColor(!!props.state.maxAccessor),
+          };
     };
 
     const isBucketed = (op: OperationMetadata) => op.isBucketed;

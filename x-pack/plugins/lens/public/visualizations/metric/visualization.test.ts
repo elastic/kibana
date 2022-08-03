@@ -8,7 +8,7 @@
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { ExpressionAstExpression, ExpressionAstFunction } from '@kbn/expressions-plugin/common';
-import { euiLightVars } from '@kbn/ui-theme';
+import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { layerTypes } from '../..';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import {
@@ -107,7 +107,9 @@ describe('metric visualization', () => {
       ).toMatchInlineSnapshot(`
         Array [
           Object {
+            "color": "#0077cc",
             "columnId": "metric-col-id",
+            "triggerIcon": "color",
           },
         ]
       `);
@@ -506,8 +508,8 @@ describe('metric visualization', () => {
               },
               datasourceLayers
             ) as ExpressionAstExpression
-          ).chain[1].arguments.color
-        ).toEqual([]);
+          ).chain[1].arguments.color[0]
+        ).toEqual(euiThemeVars.euiColorLightestShade);
       });
     });
   });
