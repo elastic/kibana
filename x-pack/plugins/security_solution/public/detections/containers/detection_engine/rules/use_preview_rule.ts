@@ -78,13 +78,15 @@ export const usePreviewRule = ({
       1000;
 
     const { unit: intervalUnit, value: intervalValue } = getTimeTypeValue(advancedOptions.interval);
-    const { unit: lookbackUnit, value: lookbackValue } = getTimeTypeValue(advancedOptions.lookback);
-    const duration = moment.duration(intervalValue, intervalUnit as 's' | 'm' | 'h');
-    duration.add(lookbackValue, lookbackUnit as 's' | 'm' | 'h');
+    const duration = moment.duration(intervalValue, intervalUnit);
     const ruleIntervalDuration = duration.asMilliseconds();
 
     invocationCount = Math.max(Math.ceil(timeframeDuration / ruleIntervalDuration), 1);
     interval = advancedOptions.interval;
+
+    const { unit: lookbackUnit, value: lookbackValue } = getTimeTypeValue(advancedOptions.lookback);
+    duration.add(lookbackValue, lookbackUnit);
+
     from = `now-${duration.asSeconds()}s`;
   }
   const showInvocationCountWarning = invocationCount > REASONABLE_INVOCATION_COUNT;
