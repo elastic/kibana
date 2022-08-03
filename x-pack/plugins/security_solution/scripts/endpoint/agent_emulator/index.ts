@@ -5,63 +5,16 @@
  * 2.0.
  */
 
-import { run, RunContext } from '@kbn/dev-cli-runner';
-import { ActionResponderService } from './services/action_responder';
-import { AgentKeepAliveService } from './services/keep_alive';
-import { EmulatorRunContext } from './services/emulator_run_context';
-import { HORIZONTAL_LINE } from '../common/constants';
-
-const DEFAULT_CHECKIN_INTERVAL = 60_000; // 1m
-const DEFAULT_ACTION_DELAY = 5_000; // 5s
+import { run } from '@kbn/dev-cli-runner';
+import {
+  agentEmulatorRunner,
+  DEFAULT_ACTION_DELAY,
+  DEFAULT_CHECKIN_INTERVAL,
+} from './agent_emulator';
 
 export const cli = () => {
   run(
-    async (cliContext: RunContext) => {
-      cliContext.log.write(`
-${HORIZONTAL_LINE}
- Endpoint Agent Emulator
-${HORIZONTAL_LINE}
-`);
-
-      const emulatorContext = new EmulatorRunContext(
-        cliContext.flags.username as string,
-        cliContext.flags.password as string,
-        cliContext.flags.kibana as string,
-        cliContext.flags.elastic as string,
-        cliContext.flags.asSuperuser as boolean,
-        cliContext.log
-      );
-      await emulatorContext.start();
-
-      const actionDelay = Number(cliContext.flags.actionDelay) || DEFAULT_ACTION_DELAY;
-      const checkinInterval = Number(cliContext.flags.checkinInterval) || DEFAULT_CHECKIN_INTERVAL;
-
-      const esClient = emulatorContext.getEsClient();
-      const kbnClient = emulatorContext.getKbnClient();
-      const log = emulatorContext.getLogger();
-
-      const keepAliveService = new AgentKeepAliveService(esClient, kbnClient, log, checkinInterval);
-      keepAliveService.start();
-
-      const actionResponderService = new ActionResponderService(
-        esClient,
-        kbnClient,
-        log,
-        5_000, // Check for actions every 5s
-        actionDelay
-      );
-      actionResponderService.start();
-
-      // TODO:PT check if any endpoints are loaded - if not, then load 5 now
-
-      // TODO:PT Show Main menu
-
-      await Promise.all([keepAliveService.whileRunning, actionResponderService.whileRunning]);
-
-      cliContext.log.write(`
-${HORIZONTAL_LINE}
-`);
-    },
+    agentEmulatorRunner,
 
     // Options
     {
