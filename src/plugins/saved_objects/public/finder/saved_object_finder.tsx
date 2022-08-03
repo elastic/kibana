@@ -48,7 +48,6 @@ export interface SavedObjectMetaData<T = unknown> {
   showSavedObject?(savedObject: SimpleSavedObject<T>): boolean;
   getSavedObjectSubType?(savedObject: SimpleSavedObject<T>): string;
   includeFields?: string[];
-  defaultSearchField?: string;
 }
 
 interface FinderAttributes {
@@ -126,13 +125,6 @@ class SavedObjectFinderUi extends React.Component<
       .map((metaData) => metaData.includeFields || [])
       .reduce((allFields, currentFields) => allFields.concat(currentFields), ['title', 'name']);
 
-    const additionalSearchFields = Object.values(metaDataMap).reduce<string[]>((col, item) => {
-      if (item.defaultSearchField) {
-        col.push(item.defaultSearchField);
-      }
-      return col;
-    }, []);
-
     const perPage = this.props.uiSettings.get(LISTING_LIMIT_SETTING);
     const resp = await this.props.savedObjects.client.find<FinderAttributes>({
       type: Object.keys(metaDataMap),
@@ -140,7 +132,7 @@ class SavedObjectFinderUi extends React.Component<
       search: query ? `${query}*` : undefined,
       page: 1,
       perPage,
-      searchFields: ['title^3', 'description', ...additionalSearchFields],
+      searchFields: ['title^3', 'description'],
       defaultSearchOperator: 'AND',
     });
 
