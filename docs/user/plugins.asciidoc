@@ -70,6 +70,7 @@ We are unable to evaluate or maintain the known plugins, so care should be taken
 * https://github.com/PhaedrusTheGreek/transform_vis[Transform Visualization] (PhaedrusTheGreek)
 * https://github.com/nyurik/kibana-vega-vis[Vega-based visualizations] (nyurik) - Support for user-defined graphs, external data sources, maps, images, and user-defined interactivity.
 * https://github.com/Camichan/kbn_aframe[VR Graph Visualizations] (Camichan)
+* https://github.com/uniberg/kbn_sankey_vis[Sankey-Visualization] (uniberg)
 
 [float]
 === Other
