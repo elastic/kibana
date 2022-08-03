@@ -257,28 +257,13 @@ export class MapEmbeddable
   }
 
   public async getFilters() {
-    let mapState: { filters?: Filter[] } = {};
-    try {
-      mapState = JSON.parse(this._savedMap.getAttributes().mapStateJSON ?? '');
-    } catch (e) {
-      throw new Error('Unable to parse attribute mapStateJSON');
-    }
-    const filters = mapState.filters
-      ? mapState.filters.filter((filter) => {
-          return filter.$state?.store === FilterStateStore.APP_STATE;
-        })
-      : [];
-    return mapAndFlattenFilters(filters);
+    // TODO: Implement this function once https://github.com/elastic/kibana/issues/91282 is resolved
+    return [];
   }
 
   public async getQuery() {
-    let mapState: { query?: Query | AggregateQuery } = {};
-    try {
-      mapState = JSON.parse(this._savedMap.getAttributes().mapStateJSON ?? '');
-    } catch (e) {
-      throw new Error('Unable to parse attribute mapStateJSON');
-    }
-    return mapState.query;
+    // TODO: Implement this function once https://github.com/elastic/kibana/issues/91282 is resolved
+    return undefined;
   }
 
   public supportedTriggers(): string[] {
