@@ -444,6 +444,7 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
 export type ParamEditorCustomProps = Record<string, unknown> & {
   labels?: string[];
   isInline?: boolean;
+  headingLabel?: string;
 };
 // The only way a visualization has to restrict the query building
 export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionProps<T> & {
@@ -586,6 +587,7 @@ export interface AccessorConfig {
 
 export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   groupLabel: string;
+  dimensionEditorGroupLabel?: string;
   groupTooltip?: string;
 
   /** ID is passed back to visualization. For example, `x` */
@@ -904,6 +906,14 @@ export interface Visualization<T = unknown> {
    * This can be used to configure dimension-specific options
    */
   renderDimensionEditor?: (
+    domElement: Element,
+    props: VisualizationDimensionEditorProps<T>
+  ) => ((cleanupElement: Element) => void) | void;
+  /**
+   * Additional editor that gets rendered inside the dimension popover.
+   * This can be used to configure dimension-specific options
+   */
+  renderDimensionEditorAdditionalSection?: (
     domElement: Element,
     props: VisualizationDimensionEditorProps<T>
   ) => ((cleanupElement: Element) => void) | void;
