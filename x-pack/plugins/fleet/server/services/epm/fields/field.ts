@@ -249,7 +249,9 @@ export const getField = (fields: Fields, pathNames: string[]): Field | undefined
 export function processFieldsWithWildcard(fields: Fields): Fields {
   const newFields: Fields = [];
   for (const field of fields) {
-    if (field.name.includes('*') && (field.type !== 'object' || !field.object_type)) {
+    const hasWildcard = field.name.includes('*');
+    const hasNotObjectType = !field.object_type;
+    if (hasWildcard && hasNotObjectType) {
       newFields.push({ ...field, type: 'object', object_type: field.type });
     } else {
       newFields.push({ ...field });
