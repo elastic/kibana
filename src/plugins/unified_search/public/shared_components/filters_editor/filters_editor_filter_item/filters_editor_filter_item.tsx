@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback, useContext, useRef } from 'react';
 import {
   EuiButtonIcon,
   EuiDraggable,
@@ -21,6 +21,8 @@ import { buildEmptyFilter, FieldFilter, Filter, getFilterParams } from '@kbn/es-
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid';
+
+import { DropOperationSwitcher } from './drop_operation_swither';
 import { FieldInput } from './filters_editor_filter_item_field_input';
 import { OperatorInput } from './filters_editor_filter_item_operator_input';
 import { ParamsEditor } from './filters_editor_filter_item_params_editor';
@@ -63,6 +65,7 @@ export function FilterItem({
 }: FilterItemProps) {
   const { dispatch, dataView } = useContext(FiltersEditorContextType);
   const conditionalOperationType = getConditionalOperationType(filter);
+  const panelRef = useRef<HTMLDivElement | null>(null);
 
   let field: DataViewField | undefined;
   let operator: Operator | undefined;
@@ -145,7 +148,8 @@ export function FilterItem({
   }
 
   return (
-    <>
+    <div ref={panelRef}>
+      <DropOperationSwitcher isVisible={false} portalRef={panelRef?.current} />
       {conditionalOperationType ? (
         <FilterGroup
           path={path}
@@ -264,6 +268,6 @@ export function FilterItem({
           </EuiDraggable>
         </EuiDroppable>
       )}
-    </>
+    </div>
   );
 }
