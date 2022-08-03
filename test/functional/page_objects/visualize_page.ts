@@ -255,7 +255,7 @@ export class VisualizePageObject extends FtrService {
       await this.listingTable.checkListingSelectAllCheckbox();
       await this.listingTable.clickDeleteSelected();
       await this.common.clickConfirmOnModal();
-      await this.testSubjects.find('createVisualizationPromptButton');
+      await this.testSubjects.find('newItemButton');
     });
   }
 
