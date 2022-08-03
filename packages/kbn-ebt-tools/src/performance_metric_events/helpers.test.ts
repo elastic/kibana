@@ -11,7 +11,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { registerPerformanceMetricEventType, reportPerformanceMetricEvent } from './helpers';
 import { METRIC_EVENT_SCHEMA } from './schema';
 
-describe('metric event helpers', () => {
+describe('performance metric event helpers', () => {
   let analyticsClient: AnalyticsClient;
 
   describe('registerPerformanceMetricEventType', () => {
@@ -67,7 +67,7 @@ describe('metric event helpers', () => {
       });
     });
 
-    test('should fail if eventName is missing', () => {
+    test('should fail if eventName and duration is missing', () => {
       expect(() =>
         reportPerformanceMetricEvent(
           analyticsClient,

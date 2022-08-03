@@ -20,7 +20,7 @@ describe('AnalyticsService', () => {
   });
   test('should register some context providers on creation', async () => {
     expect(analyticsClientMock.registerContextProvider).toHaveBeenCalledTimes(3);
-    await expect(
+    expect(
       await firstValueFrom(analyticsClientMock.registerContextProvider.mock.calls[0][0].context$)
     ).toMatchInlineSnapshot(`
             Object {
@@ -32,10 +32,10 @@ describe('AnalyticsService', () => {
               "version": "version",
             }
           `);
-    await expect(
+    expect(
       await firstValueFrom(analyticsClientMock.registerContextProvider.mock.calls[1][0].context$)
     ).toEqual({ session_id: expect.any(String) });
-    await expect(
+    expect(
       await firstValueFrom(analyticsClientMock.registerContextProvider.mock.calls[2][0].context$)
     ).toEqual({
       preferred_language: 'en-US',
@@ -180,7 +180,7 @@ describe('AnalyticsService', () => {
   test('setup should register the elasticsearch info context provider (undefined)', async () => {
     const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
     analyticsService.setup({ injectedMetadata });
-    await expect(
+    expect(
       await firstValueFrom(analyticsClientMock.registerContextProvider.mock.calls[3][0].context$)
     ).toMatchInlineSnapshot(`undefined`);
   });
@@ -193,7 +193,7 @@ describe('AnalyticsService', () => {
       cluster_version: 'version',
     });
     analyticsService.setup({ injectedMetadata });
-    await expect(
+    expect(
       await firstValueFrom(analyticsClientMock.registerContextProvider.mock.calls[3][0].context$)
     ).toMatchInlineSnapshot(`
                   Object {

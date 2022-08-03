@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './metric_events';
+export * from './performance_metric_events';

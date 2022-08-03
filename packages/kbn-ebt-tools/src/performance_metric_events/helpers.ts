@@ -7,7 +7,7 @@
  */
 
 import type { AnalyticsClient } from '@kbn/analytics-client';
-import { type MetricEvent, METRIC_EVENT_SCHEMA } from './schema';
+import { type PerformanceMetricEvent, METRIC_EVENT_SCHEMA } from './schema';
 
 const PERFORMANCE_METRIC_EVENT_TYPE = 'performance_metric';
 
@@ -19,7 +19,7 @@ const PERFORMANCE_METRIC_EVENT_TYPE = 'performance_metric';
 export function registerPerformanceMetricEventType(
   analytics: Pick<AnalyticsClient, 'registerEventType'>
 ) {
-  analytics.registerEventType<MetricEvent>({
+  analytics.registerEventType<PerformanceMetricEvent>({
     eventType: PERFORMANCE_METRIC_EVENT_TYPE,
     schema: METRIC_EVENT_SCHEMA,
   });
@@ -32,7 +32,7 @@ export function registerPerformanceMetricEventType(
  */
 export function reportPerformanceMetricEvent(
   analytics: Pick<AnalyticsClient, 'reportEvent'>,
-  eventData: MetricEvent
+  eventData: PerformanceMetricEvent
 ) {
   analytics.reportEvent(PERFORMANCE_METRIC_EVENT_TYPE, eventData);
 }
