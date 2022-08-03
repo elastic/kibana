@@ -16,7 +16,7 @@ import {
   getCursorFromHitSort,
   getPositionFromCursor,
   getPositionFromTimestamp,
-  getPredecessorPosition,
+  getSuccessorPosition,
 } from '../../utils/cursor';
 import { getEntryFromHit } from '../../utils/entry';
 import { LogExplorerContext, LogExplorerEvent } from './types';
@@ -66,7 +66,7 @@ export const loadAfter = ({
 
     const fetchAfterRequestParamters: FetchEntriesAfterParameters = {
       chunkSize,
-      position: bottomChunk.startPosition,
+      afterStartPosition: bottomChunk.startPosition,
       sortCriteria: [
         // TODO: don't hard-code this
         [dataView.timeFieldName!, 'asc'],
@@ -119,16 +119,21 @@ export const createBottomChunkFromResponse = (
   requestParameters: LoadAfterParameters,
   response: IEsSearchResponse
 ): LogExplorerChunk => {
+  const {
+    bottomStartRowIndex,
+    chunkSize,
+    afterStartPosition: startPosition,
+    timeRange,
+  } = requestParameters;
   const hits = response.rawResponse.hits.hits;
-  const startPosition = getPredecessorPosition(requestParameters.position);
 
   if (hits.length <= 0) {
     return {
       status: 'empty',
       startPosition,
-      endPosition: getPositionFromTimestamp(requestParameters.timeRange.to),
-      chunkSize: requestParameters.chunkSize,
-      rowIndex: requestParameters.bottomStartRowIndex,
+      endPosition: getPositionFromTimestamp(timeRange.to),
+      chunkSize,
+      rowIndex: bottomStartRowIndex,
     };
   }
 
@@ -139,9 +144,9 @@ export const createBottomChunkFromResponse = (
     startPosition,
     endPosition: getPositionFromCursor(getCursorFromHitSort(lastHit.sort)),
     entries: hits.map(getEntryFromHit),
-    chunkSize: requestParameters.chunkSize,
-    startRowIndex: requestParameters.bottomStartRowIndex,
-    endRowIndex: requestParameters.bottomStartRowIndex + (hits.length - 1),
+    chunkSize,
+    startRowIndex: bottomStartRowIndex,
+    endRowIndex: bottomStartRowIndex + (hits.length - 1),
   };
 };
 
@@ -158,9 +163,9 @@ export const appendNewBottomChunk = assign(
     const newBottomChunk: LogExplorerChunk = {
       status: 'loading-bottom',
       chunkSize: context.configuration.chunkSize,
-      startPosition: bottomChunk.endPosition,
-      startRowIndex: bottomChunk.startRowIndex - 1,
-      endRowIndex: bottomChunk.startRowIndex - 1,
+      startPosition: getSuccessorPosition(bottomChunk.endPosition),
+      startRowIndex: bottomChunk.startRowIndex + 1,
+      endRowIndex: bottomChunk.startRowIndex + 1,
     };
 
     return {

@@ -32,7 +32,7 @@ export const getPredecessorPosition = (position: LogExplorerPosition): LogExplor
   tiebreaker: position.tiebreaker - 1,
 });
 
-export const getSucceessorPosition = (position: LogExplorerPosition): LogExplorerPosition => ({
+export const getSuccessorPosition = (position: LogExplorerPosition): LogExplorerPosition => ({
   ...position,
   tiebreaker: position.tiebreaker + 1,
 });

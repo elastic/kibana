@@ -17,7 +17,10 @@ import { applyBeforeParameters } from './fetch_entries_before';
 
 export interface FetchEntriesAroundParameters {
   chunkSize: number;
-  position: LogExplorerPosition;
+  // inclusive start of the "future" interval
+  afterStartPosition: LogExplorerPosition;
+  // inclusive end of the "past" interval
+  beforeEndPosition: LogExplorerPosition;
   sortCriteria: SortCriteria;
   timeRange: TimeRange;
 }
@@ -34,7 +37,8 @@ export const fetchEntriesAround =
   }) =>
   ({
     chunkSize,
-    position,
+    afterStartPosition,
+    beforeEndPosition,
     sortCriteria,
     timeRange,
   }: FetchEntriesAroundParameters): Observable<{
@@ -51,12 +55,12 @@ export const fetchEntriesAround =
     // TODO: create and use point-in-time, not currently possible from client?
     const beforeResponse$ = applyBeforeParameters({
       dataView,
-      position,
+      beforeEndPosition,
       sortCriteria,
     })(commonSearchSource.createCopy()).fetch$();
     const afterResponse$ = applyAfterParameters({
       dataView,
-      position,
+      afterStartPosition,
       sortCriteria,
     })(commonSearchSource.createCopy()).fetch$();
 

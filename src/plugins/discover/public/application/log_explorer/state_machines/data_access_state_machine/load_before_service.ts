@@ -69,7 +69,7 @@ export const loadBefore = ({
 
     const fetchBeforeRequestParamters: FetchEntriesBeforeParameters = {
       chunkSize,
-      position: topChunk.endPosition,
+      beforeEndPosition: topChunk.endPosition,
       sortCriteria: [
         // TODO: don't hard-code this
         [dataView.timeFieldName!, 'asc'],
@@ -122,36 +122,34 @@ export const createTopChunkFromResponse = (
   requestParameters: LoadBeforeParameters,
   response: IEsSearchResponse
 ): LogExplorerChunk => {
-  const hits = response.rawResponse.hits.hits;
-  const endPosition = requestParameters.position;
+  const {
+    chunkSize,
+    beforeEndPosition: endPosition,
+    timeRange,
+    topEndRowIndex,
+  } = requestParameters;
+  const hits = [...response.rawResponse.hits.hits].reverse();
 
   if (hits.length <= 0) {
-    const startPosition = getPredecessorPosition(
-      getPositionFromTimestamp(requestParameters.timeRange.from)
-    );
-
     return {
       status: 'empty',
-      startPosition,
+      startPosition: getPositionFromTimestamp(timeRange.from),
       endPosition,
-      chunkSize: requestParameters.chunkSize,
-      rowIndex: requestParameters.topEndRowIndex,
+      chunkSize,
+      rowIndex: topEndRowIndex,
     };
   }
 
   const firstHit = hits[0];
-  const startPosition = getPredecessorPosition(
-    getPositionFromCursor(getCursorFromHitSort(firstHit.sort))
-  );
 
   return {
     status: 'loaded',
-    startPosition,
+    startPosition: getPositionFromCursor(getCursorFromHitSort(firstHit.sort)),
     endPosition,
-    entries: hits.map(getEntryFromHit).reverse(),
-    chunkSize: requestParameters.chunkSize,
-    startRowIndex: requestParameters.topEndRowIndex - (hits.length - 1),
-    endRowIndex: requestParameters.topEndRowIndex,
+    entries: hits.map(getEntryFromHit),
+    chunkSize,
+    startRowIndex: topEndRowIndex - (hits.length - 1),
+    endRowIndex: topEndRowIndex,
   };
 };
 
@@ -168,7 +166,7 @@ export const prependNewTopChunk = assign(
     const newTopChunk: LogExplorerChunk = {
       status: 'loading-top',
       chunkSize: context.configuration.chunkSize,
-      endPosition: topChunk.startPosition,
+      endPosition: getPredecessorPosition(topChunk.startPosition),
       startRowIndex: topChunk.startRowIndex - 1,
       endRowIndex: topChunk.startRowIndex - 1,
     };

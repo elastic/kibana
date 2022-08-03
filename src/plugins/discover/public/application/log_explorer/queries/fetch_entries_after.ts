@@ -17,7 +17,8 @@ import { copyWithCommonParameters } from './common';
 
 export interface FetchEntriesAfterParameters {
   chunkSize: number;
-  position: LogExplorerPosition;
+  // inclusive start of the "future" interval
+  afterStartPosition: LogExplorerPosition;
   sortCriteria: SortCriteria;
   timeRange: TimeRange;
 }
@@ -34,7 +35,7 @@ export const fetchEntriesAfter =
   }) =>
   ({
     chunkSize,
-    position,
+    afterStartPosition,
     sortCriteria,
     timeRange,
   }: FetchEntriesAfterParameters): Observable<IEsSearchResponse> => {
@@ -45,7 +46,7 @@ export const fetchEntriesAfter =
       copyWithCommonParameters({ chunkSize, timeRangeFilter }),
       applyAfterParameters({
         dataView,
-        position,
+        afterStartPosition,
         sortCriteria,
       })
     )(searchSource).fetch$();
@@ -56,14 +57,14 @@ export const fetchEntriesAfter =
 export const applyAfterParameters =
   ({
     dataView,
-    position,
+    afterStartPosition,
     sortCriteria,
   }: {
     dataView: DataView;
-    position: LogExplorerPosition;
+    afterStartPosition: LogExplorerPosition;
     sortCriteria: SortCriteria;
   }) =>
   (searchSource: ISearchSource) =>
     searchSource
-      .setField('searchAfter', getCursorFromPosition(getPredecessorPosition(position)))
+      .setField('searchAfter', getCursorFromPosition(getPredecessorPosition(afterStartPosition)))
       .setField('sort', normalizeSortCriteriaForDataView(dataView)(sortCriteria));

@@ -14,6 +14,7 @@ import {
   fetchEntriesAround,
   FetchEntriesAroundParameters,
 } from '../../queries/fetch_entries_around';
+import { getPredecessorPosition } from '../../utils/cursor';
 import { createBottomChunkFromResponse } from './load_after_service';
 import { createTopChunkFromResponse } from './load_before_service';
 import { LogExplorerContext, LogExplorerEvent } from './types';
@@ -59,7 +60,8 @@ export const loadAround = ({
 
     const fetchAroundRequestParamters: FetchEntriesAroundParameters = {
       chunkSize,
-      position,
+      afterStartPosition: position,
+      beforeEndPosition: getPredecessorPosition(position),
       sortCriteria: [
         // TODO: don't hard-code this
         [dataView.timeFieldName!, 'asc'],
