@@ -122,7 +122,7 @@ export class UptimePlugin
       hasData: async () => {
         const dataHelper = await getUptimeDataHelper();
         const status = await dataHelper.indexStatus();
-        return { hasData: status.docCount > 0, indices: status.indices };
+        return { hasData: status.indexExists, indices: status.indices };
       },
       fetchData: async (params: FetchDataParams) => {
         const dataHelper = await getUptimeDataHelper();
