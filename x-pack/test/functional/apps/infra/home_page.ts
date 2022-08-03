@@ -50,13 +50,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.goToTime(DATE_WITHOUT_DATA);
         await pageObjects.infraHome.getNoMetricsDataPrompt();
       });
-      /*
       it('renders the waffle map and tooltips for dates with data', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraHome.getWaffleMap();
-        await pageObjects.infraHome.getWaffleMapTooltips();
+        // await pageObjects.infraHome.getWaffleMapTooltips(); see https://github.com/elastic/kibana/issues/137903
       });
-*/
       it('shows query suggestions', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraHome.clickQueryBar();
