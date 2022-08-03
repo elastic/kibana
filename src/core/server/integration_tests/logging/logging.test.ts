@@ -40,7 +40,9 @@ function createRoot() {
   });
 }
 
-describe('logging service', () => {
+// Skipping due to cc ingestion failure:
+// https://buildkite.com/elastic/kibana-code-coverage-main/builds/641#018263fe-75d5-4d34-85c1-f14c74836ff0/5455-5538
+describe.skip('logging service', () => {
   describe('logs according to context name hierarchy', () => {
     let root: ReturnType<typeof createRoot>;
     let mockConsoleLog: jest.SpyInstance;
