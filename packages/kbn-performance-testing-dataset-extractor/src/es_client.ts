@@ -17,11 +17,6 @@ interface ClientOptions {
   password: string;
 }
 
-interface Labels {
-  journeyName: string;
-  maxUsersCount: string;
-}
-
 export interface Headers {
   readonly [key: string]: string[];
 }
@@ -44,21 +39,33 @@ interface Transaction {
 }
 
 export interface Document {
-  labels: Labels;
-  character: string;
-  quote: string;
-  service: { version: string };
-  parent?: { id: string };
-  processor: string;
-  trace: { id: string };
   '@timestamp': string;
-  environment: string;
+  labels?: { journeyName: string; maxUsersCount: string };
+  parent?: { id: string };
+  service: { name: string; environment: string };
+  trace: { id: string };
+  transaction: Transaction;
+}
+
+export interface SpanDocument extends Omit<Document, 'transaction'> {
+  transaction: { id: string };
+  span: {
+    id: string;
+    name: string;
+    action: string;
+    duration: { us: number };
+    db?: { statement?: string };
+  };
+}
+
+export interface TransactionDocument extends Omit<Document, 'service'> {
+  service: { name: string; environment: string; version: string };
+  processor: string;
   url: { path: string };
   http: {
     request: Request;
     response: Response;
   };
-  transaction: Transaction;
 }
 
 const addBooleanFilter = (filter: { field: string; value: string }): QueryDslQueryContainer => {
@@ -88,81 +95,86 @@ const addRangeFilter = (range: { startTime: string; endTime: string }): QueryDsl
   };
 };
 
-export function initClient(options: ClientOptions, log: ToolingLog) {
-  const client = new Client({
-    node: options.node,
-    auth: {
-      username: options.username,
-      password: options.password,
-    },
-  });
+export class ESClient {
+  client: Client;
+  log: ToolingLog;
 
-  return {
-    async getKibanaServerTransactions(
-      buildId: string,
-      journeyName: string,
-      range?: { startTime: string; endTime: string }
-    ) {
-      const filters = [
-        { field: 'transaction.type', value: 'request' },
-        { field: 'processor.event', value: 'transaction' },
-        { field: 'labels.testBuildId', value: buildId },
-        { field: 'labels.journeyName', value: journeyName },
-      ];
-      const queryFilters = filters.map((filter) => addBooleanFilter(filter));
-      if (range) {
-        queryFilters.push(addRangeFilter(range));
-      }
-      return await this.getTransactions(queryFilters);
-    },
-    async getFtrTransactions(buildId: string, journeyName: string) {
-      const filters = [
-        { field: 'service.name', value: 'functional test runner' },
-        { field: 'processor.event', value: 'transaction' },
-        { field: 'labels.testBuildId', value: buildId },
-        { field: 'labels.journeyName', value: journeyName },
-        { field: 'labels.performancePhase', value: 'TEST' },
-      ];
-      const queryFilters = filters.map((filter) => addBooleanFilter(filter));
-      return await this.getTransactions(queryFilters);
-    },
+  constructor(options: ClientOptions, log: ToolingLog) {
+    this.client = new Client({
+      node: options.node,
+      auth: {
+        username: options.username,
+        password: options.password,
+      },
+    });
+    this.log = log;
+  }
 
-    async getTransactions(queryFilters: QueryDslQueryContainer[]) {
-      const searchRequest: SearchRequest = {
-        body: {
-          track_total_hits: true,
-          sort: [
-            {
-              '@timestamp': {
-                order: 'asc',
-                unmapped_type: 'boolean',
-              },
-            },
-          ],
-          size: 10000,
-          stored_fields: ['*'],
-          _source: true,
-          query: {
-            bool: {
-              must: [],
-              filter: [
-                {
-                  bool: {
-                    filter: queryFilters,
-                  },
-                },
-              ],
-              should: [],
-              must_not: [],
+  async getTransactions<T>(queryFilters: QueryDslQueryContainer[]) {
+    const searchRequest: SearchRequest = {
+      body: {
+        sort: [
+          {
+            '@timestamp': {
+              order: 'asc',
+              unmapped_type: 'boolean',
             },
           },
+        ],
+        size: 10000,
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  filter: queryFilters,
+                },
+              },
+            ],
+          },
         },
-      };
+      },
+    };
 
-      log.debug(`Search request: ${JSON.stringify(searchRequest)}`);
-      const result = await client.search<Document>(searchRequest);
-      log.debug(`Search result: ${JSON.stringify(result)}`);
-      return result?.hits?.hits;
-    },
-  };
+    this.log.debug(`Search request: ${JSON.stringify(searchRequest)}`);
+    const result = await this.client.search<T>(searchRequest);
+    this.log.debug(`Search result: ${JSON.stringify(result)}`);
+    return result?.hits?.hits;
+  }
+
+  async getFtrServiceTransactions(buildId: string, journeyName: string) {
+    const filters = [
+      { field: 'service.name', value: 'functional test runner' },
+      { field: 'processor.event', value: 'transaction' },
+      { field: 'labels.testBuildId', value: buildId },
+      { field: 'labels.journeyName', value: journeyName },
+      { field: 'labels.performancePhase', value: 'TEST' },
+    ];
+    const queryFilters = filters.map((filter) => addBooleanFilter(filter));
+    return await this.getTransactions<Document>(queryFilters);
+  }
+
+  async getKibanaServerTransactions(
+    buildId: string,
+    journeyName: string,
+    range?: { startTime: string; endTime: string }
+  ) {
+    const filters = [
+      { field: 'transaction.type', value: 'request' },
+      { field: 'processor.event', value: 'transaction' },
+      { field: 'labels.testBuildId', value: buildId },
+      { field: 'labels.journeyName', value: journeyName },
+    ];
+    const queryFilters = filters.map((filter) => addBooleanFilter(filter));
+    if (range) {
+      queryFilters.push(addRangeFilter(range));
+    }
+    return await this.getTransactions<TransactionDocument>(queryFilters);
+  }
+
+  async getSpans(transactionId: string) {
+    const filters = [{ field: 'parent.id', value: transactionId }];
+    const queryFilters = filters.map((filter) => addBooleanFilter(filter));
+    return await this.getTransactions<SpanDocument>(queryFilters);
+  }
 }
