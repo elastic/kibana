@@ -24,7 +24,7 @@ export interface OnFetchItemsSuccessAction<T> {
 
 export interface OnFetchItemsErrorAction {
   type: 'onFetchItemsError';
-  data: IHttpFetchError;
+  data: IHttpFetchError<Error>;
 }
 
 export interface DeleteItemsActions {
