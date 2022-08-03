@@ -1261,7 +1261,7 @@ tr:hover .c5:focus::before {
                                                             <a
                                                               class="euiLink emotion-euiLink-primary"
                                                               data-test-subj="network-details"
-                                                              href="/ip/192.168.1.2/source"
+                                                              href="/ip/192.168.1.2/source/flows"
                                                               rel="noreferrer"
                                                             >
                                                               192.168.1.2
@@ -2305,7 +2305,7 @@ tr:hover .c5:focus::before {
                                                             <a
                                                               class="euiLink emotion-euiLink-primary"
                                                               data-test-subj="network-details"
-                                                              href="/ip/10.1.2.3/source"
+                                                              href="/ip/10.1.2.3/source/flows"
                                                               rel="noreferrer"
                                                             >
                                                               10.1.2.3
