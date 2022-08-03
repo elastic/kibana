@@ -40,7 +40,9 @@ export default function ({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       // We use a really small window to minimize differences across os's and browsers.
-      await browser.setScreenshotSize(1000, 500);
+      // Size of 1000 x 500 seemed to be truncating some data in the screenshots when running with CI...
+      // the following line is just a test to see what happens.
+      await browser.setScreenshotSize(2000, 1000);
       // adding this navigate adds the timestamp hash to the url which invalidates previous
       // session.  If we don't do this, the colors on the visualizations are different and the screenshots won't match.
       await PageObjects.common.navigateToApp('dashboard');
