@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { EntityArrayIterable } from '@elastic/apm-synthtrace';
-import { ProcessorEvent } from '@kbn/apm-plugin/common/processor_event';
 import expect from '@kbn/expect';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { generateSpanLinksData } from './data_generator';
 
