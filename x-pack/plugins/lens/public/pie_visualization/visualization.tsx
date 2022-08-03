@@ -149,6 +149,9 @@ export const getPieVisualization = ({
             groupLabel: i18n.translate('xpack.lens.pie.sliceGroupLabel', {
               defaultMessage: 'Slice by',
             }),
+            dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.sliceDimensionGroupLabel', {
+              defaultMessage: 'Slice',
+            }),
             supportsMoreColumns: sortedColumns.length < PartitionChartsMeta.pie.maxBuckets,
             dataTestSubj: 'lnsPie_sliceByDimensionPanel',
           };
@@ -157,6 +160,9 @@ export const getPieVisualization = ({
             ...baseProps,
             groupLabel: i18n.translate('xpack.lens.pie.treemapGroupLabel', {
               defaultMessage: 'Group by',
+            }),
+            dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.treemapDimensionGroupLabel', {
+              defaultMessage: 'Group',
             }),
             supportsMoreColumns: sortedColumns.length < PartitionChartsMeta[state.shape].maxBuckets,
             dataTestSubj: 'lnsPie_groupByDimensionPanel',
@@ -170,6 +176,14 @@ export const getPieVisualization = ({
       groupLabel: i18n.translate('xpack.lens.pie.groupsizeLabel', {
         defaultMessage: 'Size by',
       }),
+      dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.groupSizeLabel', {
+        defaultMessage: 'Size',
+      }),
+      paramEditorCustomProps: {
+        headingLabel: i18n.translate('xpack.lens.pie.headingLabel', {
+          defaultMessage: 'Value',
+        }),
+      },
       accessors: layer.metric ? [{ columnId: layer.metric }] : [],
       supportsMoreColumns: !layer.metric,
       filterOperations: numberMetricOperations,

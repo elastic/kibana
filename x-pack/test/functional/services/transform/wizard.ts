@@ -26,7 +26,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
   const retry = getService('retry');
   const find = getService('find');
   const ml = getService('ml');
-  const PageObjects = getPageObjects(['discover', 'timePicker', 'unifiedSearch']);
+  const PageObjects = getPageObjects(['discover', 'timePicker']);
 
   return {
     async clickNextButton() {
@@ -994,7 +994,6 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
         await testSubjects.click('transformWizardCardDiscover');
         await PageObjects.discover.isDiscoverAppOnScreen();
       });
-      await PageObjects.unifiedSearch.closeTourPopoverByLocalStorage();
     },
 
     async setDiscoverTimeRange(fromTime: string, toTime: string) {
