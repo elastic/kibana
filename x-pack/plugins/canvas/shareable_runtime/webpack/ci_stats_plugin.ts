@@ -41,7 +41,7 @@ export class CiStatsPlugin {
       return;
     }
 
-    compiler.hooks.emit.tapAsync('CiStatsPlugin', async (compilation) => {
+    compiler.hooks.emit.tapPromise('CiStatsPlugin', async (compilation) => {
       const { entryName } = this.options;
 
       const assets = Object.entries(compilation.assets)
