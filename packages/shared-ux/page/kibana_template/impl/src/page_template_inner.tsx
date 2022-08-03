@@ -8,7 +8,7 @@
 
 import React, { FC } from 'react';
 import classNames from 'classnames';
-import { EuiEmptyPrompt, EuiPageTemplate_Deprecated as EuiPageTemplate } from '@elastic/eui';
+import { EuiPageTemplate } from '@elastic/eui';
 
 import { withSolutionNav } from '@kbn/shared-ux-page-solution-nav';
 import { KibanaPageTemplateProps as Props } from '@kbn/shared-ux-page-kibana-template-types';
@@ -32,38 +32,29 @@ export const KibanaPageTemplateInner: FC<Props> = ({
   isEmptyState,
   ...rest
 }) => {
-  /**
-   * An easy way to create the right content for empty pages
-   */
-  const emptyStateDefaultTemplate = 'centeredBody';
-  let header = pageHeader;
+  let header;
 
-  if (isEmptyState) {
-    if (pageHeader && !children) {
-      template = template ?? emptyStateDefaultTemplate;
-      const { iconType, pageTitle, description, rightSideItems } = pageHeader;
-      const title = pageTitle ? <h1>{pageTitle}</h1> : undefined;
-      const body = description ? <p>{description}</p> : undefined;
-      header = undefined;
-      children = (
-        <EuiEmptyPrompt
-          iconType={iconType}
-          iconColor="" // This is likely a solution or app logo, so keep it multi-color
-          title={title}
-          body={body}
-          actions={rightSideItems}
-        />
-      );
-    } else if (pageHeader && children) {
-      template = template ?? 'centeredContent';
-    } else if (!pageHeader) {
-      template = template ?? emptyStateDefaultTemplate;
-    }
+  if (isEmptyState && pageHeader && !children) {
+    const { iconType, pageTitle, description, rightSideItems } = pageHeader;
+    const title = pageTitle ? <h1>{pageTitle}</h1> : undefined;
+    const body = description ? <p>{description}</p> : undefined;
+    children = (
+      <EuiPageTemplate.EmptyPrompt
+        iconType={iconType}
+        iconColor="" // This is likely a solution or app logo, so keep it multi-color
+        title={title}
+        body={body}
+        actions={rightSideItems}
+      />
+    );
+  } else if (pageHeader) {
+    header = <EuiPageTemplate.Header {...pageHeader} />;
   }
 
   const classes = getClasses(template, className);
   return (
-    <EuiPageTemplate template={template} className={classes} pageHeader={header} {...rest}>
+    <EuiPageTemplate className={classes} {...rest}>
+      {header}
       {children}
     </EuiPageTemplate>
   );
