@@ -10,3 +10,5 @@ export * from './accessors';
 export * from './icons';
 export * from './gauge_types';
 export * from './goal_config';
+
+export { computeMinMax } from './helpers';
