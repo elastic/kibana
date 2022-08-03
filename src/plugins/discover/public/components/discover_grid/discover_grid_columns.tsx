@@ -63,7 +63,7 @@ export function getLeadControlColumns(setExpandedDoc?: (doc?: DataTableRecord) =
 function buildEuiGridColumn({
   columnName,
   columnWidth = 0,
-  indexPattern,
+  dataView,
   defaultColumns,
   isSortEnabled,
   services,
@@ -74,7 +74,7 @@ function buildEuiGridColumn({
 }: {
   columnName: string;
   columnWidth: number | undefined;
-  indexPattern: DataView;
+  dataView: DataView;
   defaultColumns: boolean;
   isSortEnabled: boolean;
   services: DiscoverServices;
@@ -83,24 +83,24 @@ function buildEuiGridColumn({
   onFilter?: DocViewFilterFn;
   editField?: (fieldName: string) => void;
 }) {
-  const indexPatternField = indexPattern.getFieldByName(columnName);
+  const dataViewField = dataView.getFieldByName(columnName);
   const editFieldButton =
     editField &&
-    indexPatternField &&
-    buildEditFieldButton({ services, dataView: indexPattern, field: indexPatternField, editField });
+    dataViewField &&
+    buildEditFieldButton({ services, dataView, field: dataViewField, editField });
   const column: EuiDataGridColumn = {
     id: columnName,
-    schema: getSchemaByKbnType(indexPatternField?.type),
-    isSortable: isSortEnabled && indexPatternField?.sortable === true,
+    schema: getSchemaByKbnType(dataViewField?.type),
+    isSortable: isSortEnabled && dataViewField?.sortable === true,
     display:
       columnName === '_source'
         ? i18n.translate('discover.grid.documentHeader', {
             defaultMessage: 'Document',
           })
-        : indexPatternField?.displayName,
+        : dataViewField?.displayName,
     actions: {
       showHide:
-        defaultColumns || columnName === indexPattern.timeFieldName
+        defaultColumns || columnName === dataView.timeFieldName
           ? false
           : {
               label: i18n.translate('discover.removeColumnLabel', {
@@ -123,11 +123,11 @@ function buildEuiGridColumn({
         ...(editFieldButton ? [editFieldButton] : []),
       ],
     },
-    cellActions: indexPatternField ? buildCellActions(indexPatternField, onFilter) : [],
+    cellActions: dataViewField ? buildCellActions(dataViewField, onFilter) : [],
   };
 
-  if (column.id === indexPattern.timeFieldName) {
-    const timeFieldName = indexPatternField?.customLabel ?? indexPattern.timeFieldName;
+  if (column.id === dataView.timeFieldName) {
+    const timeFieldName = dataViewField?.customLabel ?? dataView.timeFieldName;
     const primaryTimeAriaLabel = i18n.translate(
       'discover.docTable.tableHeader.timeFieldIconTooltipAriaLabel',
       {
@@ -163,7 +163,7 @@ export function getEuiGridColumns({
   columns,
   rowsCount,
   settings,
-  indexPattern,
+  dataView,
   showTimeCol,
   defaultColumns,
   isSortEnabled,
@@ -175,7 +175,7 @@ export function getEuiGridColumns({
   columns: string[];
   rowsCount: number;
   settings: DiscoverGridSettings | undefined;
-  indexPattern: DataView;
+  dataView: DataView;
   showTimeCol: boolean;
   defaultColumns: boolean;
   isSortEnabled: boolean;
@@ -184,19 +184,19 @@ export function getEuiGridColumns({
   onFilter: DocViewFilterFn;
   editField?: (fieldName: string) => void;
 }) {
-  const timeFieldName = indexPattern.timeFieldName;
+  const timeFieldName = dataView.timeFieldName;
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
 
   let visibleColumns = columns;
-  if (showTimeCol && indexPattern.timeFieldName && !columns.find((col) => col === timeFieldName)) {
-    visibleColumns = [indexPattern.timeFieldName, ...columns];
+  if (showTimeCol && dataView.timeFieldName && !columns.find((col) => col === timeFieldName)) {
+    visibleColumns = [dataView.timeFieldName, ...columns];
   }
 
   return visibleColumns.map((column) =>
     buildEuiGridColumn({
       columnName: column,
       columnWidth: getColWidth(column),
-      indexPattern,
+      dataView,
       defaultColumns,
       isSortEnabled,
       services,
@@ -208,8 +208,8 @@ export function getEuiGridColumns({
   );
 }
 
-export function getVisibleColumns(columns: string[], indexPattern: DataView, showTimeCol: boolean) {
-  const timeFieldName = indexPattern.timeFieldName;
+export function getVisibleColumns(columns: string[], dataView: DataView, showTimeCol: boolean) {
+  const timeFieldName = dataView.timeFieldName;
 
   if (showTimeCol && !columns.find((col) => col === timeFieldName)) {
     return [timeFieldName, ...columns];

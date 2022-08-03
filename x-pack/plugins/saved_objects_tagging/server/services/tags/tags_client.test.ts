@@ -58,7 +58,20 @@ describe('TagsClient', () => {
       await tagsClient.create(attributes);
 
       expect(soClient.create).toHaveBeenCalledTimes(1);
-      expect(soClient.create).toHaveBeenCalledWith('tag', attributes);
+      expect(soClient.create).toHaveBeenCalledWith('tag', attributes, undefined);
+    });
+
+    it('calls `soClient.create` with options', async () => {
+      const attributes = createAttributes();
+
+      await tagsClient.create(attributes, { id: '1', overwrite: true, refresh: false });
+
+      expect(soClient.create).toHaveBeenCalledTimes(1);
+      expect(soClient.create).toHaveBeenCalledWith('tag', attributes, {
+        id: '1',
+        overwrite: true,
+        refresh: false,
+      });
     });
 
     it('converts the object returned from the soClient to a `Tag`', async () => {

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import uuid from 'uuid';
 import expect from '@kbn/expect';
 import { HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
@@ -12,15 +13,15 @@ import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_mana
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
-import { comparePolicies, testSyntheticsPolicy } from './sample_data/test_policy';
+import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
 import { PrivateLocationTestService } from './services/private_location_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
-  // FAILING ON 8.4: https://github.com/elastic/kibana/issues/137328
-  describe.skip('PrivateLocationMonitor', function () {
+  describe('PrivateLocationMonitor', function () {
     this.tags('skipCloud');
-
+    const kibanaServer = getService('kibanaServer');
     const supertestAPI = getService('supertest');
+    const supertestWithoutAuth = getService('supertestWithoutAuth');
 
     let testFleetPolicyID: string;
 
@@ -28,11 +29,12 @@ export default function ({ getService }: FtrProviderContext) {
     let httpMonitorJson: HTTPFields;
 
     const testPrivateLocations = new PrivateLocationTestService(getService);
+    const security = getService('security');
 
     before(async () => {
       await supertestAPI.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
       await supertestAPI
-        .post('/api/fleet/epm/packages/synthetics/0.9.5')
+        .post('/api/fleet/epm/packages/synthetics/0.9.4')
         .set('kbn-xsrf', 'true')
         .send({ force: true })
         .expect(200);
@@ -113,7 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(packagePolicy.policy_id).eql(testFleetPolicyID);
 
-      comparePolicies(packagePolicy, testSyntheticsPolicy);
+      comparePolicies(packagePolicy, getTestSyntheticsPolicy(httpMonitorJson.name));
     });
 
     let testFleetPolicyID2: string;
@@ -152,7 +154,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(packagePolicy.policy_id).eql(testFleetPolicyID);
 
-      comparePolicies(packagePolicy, testSyntheticsPolicy);
+      comparePolicies(packagePolicy, getTestSyntheticsPolicy(httpMonitorJson.name));
 
       packagePolicy = apiResponsePolicy.body.items.find(
         (pkgPolicy: PackagePolicy) =>
@@ -160,7 +162,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       expect(packagePolicy.policy_id).eql(testFleetPolicyID2);
-      comparePolicies(packagePolicy, testSyntheticsPolicy);
+      comparePolicies(packagePolicy, getTestSyntheticsPolicy(httpMonitorJson.name));
     });
 
     it('deletes integration for a removed location from monitor', async () => {
@@ -185,7 +187,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(packagePolicy.policy_id).eql(testFleetPolicyID);
 
-      comparePolicies(packagePolicy, testSyntheticsPolicy);
+      comparePolicies(packagePolicy, getTestSyntheticsPolicy(httpMonitorJson.name));
 
       packagePolicy = apiResponsePolicy.body.items.find(
         (pkgPolicy: PackagePolicy) =>
@@ -211,6 +213,72 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       expect(packagePolicy).eql(undefined);
+    });
+
+    it('handles spaces', async () => {
+      const username = 'admin';
+      const password = `${username}-password`;
+      const roleName = 'uptime-role';
+      const SPACE_ID = `test-space-${uuid.v4()}`;
+      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      let monitorId = '';
+      const monitor = {
+        ...httpMonitorJson,
+        name: `Test monitor ${uuid.v4()}`,
+        locations: [
+          {
+            id: testFleetPolicyID,
+            label: 'Test private location 0',
+            isServiceManaged: false,
+          },
+        ],
+      };
+
+      try {
+        await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
+        await security.role.create(roleName, {
+          kibana: [
+            {
+              feature: {
+                uptime: ['all'],
+                fleet: ['all'],
+                fleetv2: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+        await security.user.create(username, {
+          password,
+          roles: [roleName],
+          full_name: 'a kibana user',
+        });
+        const apiResponse = await supertestWithoutAuth
+          .post(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}`)
+          .auth(username, password)
+          .set('kbn-xsrf', 'true')
+          .send(monitor)
+          .expect(200);
+
+        expect(apiResponse.body.attributes).eql(omit(monitor, secretKeys));
+        monitorId = apiResponse.body.id;
+
+        const policyResponse = await supertestAPI.get(
+          '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+        );
+
+        const packagePolicy = policyResponse.body.items.find(
+          (pkgPolicy: PackagePolicy) =>
+            pkgPolicy.id === monitorId + '-' + testFleetPolicyID + `-${SPACE_ID}`
+        );
+
+        expect(packagePolicy.policy_id).eql(testFleetPolicyID);
+        expect(packagePolicy.name).eql(`${monitor.name}-Test private location 0-${SPACE_ID}`);
+        comparePolicies(packagePolicy, getTestSyntheticsPolicy(monitor.name));
+      } finally {
+        await security.user.delete(username);
+        await security.role.delete(roleName);
+      }
     });
   });
 }
