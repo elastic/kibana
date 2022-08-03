@@ -63,7 +63,8 @@ describe('Risky Hosts Link Panel', () => {
       cy.get(`${OVERVIEW_RISKY_HOSTS_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 0 hosts');
     });
 
-    it('renders space aware dashboard module as expected when there are hosts in the selected time period', () => {
+    // TO DO https://github.com/elastic/kibana/issues/137942
+    it.skip('renders space aware dashboard module as expected when there are hosts in the selected time period', () => {
       visit(OVERVIEW_URL);
       cy.get(
         `${OVERVIEW_RISKY_HOSTS_LINKS} ${OVERVIEW_RISKY_HOSTS_LINKS_WARNING_INNER_PANEL}`
