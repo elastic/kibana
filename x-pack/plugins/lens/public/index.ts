@@ -21,7 +21,7 @@ export type {
   YAxisMode,
   SeriesType,
   YConfig,
-} from './xy_visualization/types';
+} from './visualizations/xy/types';
 export type {
   DatasourcePublicAPI,
   DataType,
@@ -40,7 +40,7 @@ export type {
 } from '../common/types';
 
 export type { DatatableVisualizationState } from './datatable_visualization/visualization';
-export type { HeatmapVisualizationState } from './heatmap_visualization/types';
+export type { HeatmapVisualizationState } from './visualizations/heatmap/types';
 export type { GaugeVisualizationState } from './visualizations/gauge/constants';
 export type {
   IndexPatternPersistedState,
