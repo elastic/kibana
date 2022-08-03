@@ -20,7 +20,7 @@ import { HttpError, Status } from '../../../../../common/types/api';
 
 import { DEFAULT_META } from '../../../shared/constants';
 import { flashAPIErrors, clearFlashMessages } from '../../../shared/flash_messages';
-import { updateMetaPageIndex } from '../../../shared/table_pagination';
+import { updateMetaPageIndex, convertMetaToPagination } from '../../../shared/table_pagination';
 
 import { MappingsApiLogic } from '../../api/mappings/mappings_logic';
 import { SearchDocumentsApiLogic } from '../../api/search_documents/search_documents_logic';
@@ -47,6 +47,7 @@ interface DocumentsLogicActions {
 
 export interface DocumentsLogicValues {
   data: typeof SearchDocumentsApiLogic.values.data;
+  docsPerPage: number;
   indexName: typeof IndexNameLogic.values.indexName;
   isLoading: boolean;
   mappingData: IndicesGetMappingIndexMappingRecord;
@@ -85,18 +86,39 @@ export const DocumentsLogic = kea<MakeLogicType<DocumentsLogicValues, DocumentsL
     makeRequest: () => clearFlashMessages(),
     mappingsApiError: (e) => flashAPIErrors(e),
     onPaginate: () => {
-      actions.makeRequest({ indexName: values.indexName, meta: values.meta, query: values.query });
+      actions.makeRequest({
+        docsPerPage: values.docsPerPage,
+        indexName: values.indexName,
+        pagination: convertMetaToPagination(values.meta),
+        query: values.query,
+      });
     },
     setDocsPerPage: () => {
-      actions.makeRequest({ indexName: values.indexName, meta: values.meta, query: values.query });
+      actions.makeRequest({
+        docsPerPage: values.docsPerPage,
+        indexName: values.indexName,
+        pagination: convertMetaToPagination(values.meta),
+        query: values.query,
+      });
     },
     setSearchQuery: async (_, breakpoint) => {
       await breakpoint(250);
-      actions.makeRequest({ indexName: values.indexName, meta: values.meta, query: values.query });
+      actions.makeRequest({
+        docsPerPage: values.docsPerPage,
+        indexName: values.indexName,
+        pagination: convertMetaToPagination(values.meta),
+        query: values.query,
+      });
     },
   }),
   path: ['enterprise_search', 'search_index', 'documents'],
   reducers: () => ({
+    docsPerPage: [
+      ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT,
+      {
+        setDocsPerPage: (_, { docsPerPage }) => docsPerPage,
+      },
+    ],
     meta: [
       INDEX_DOCUMENTS_META_DEFAULT,
       {

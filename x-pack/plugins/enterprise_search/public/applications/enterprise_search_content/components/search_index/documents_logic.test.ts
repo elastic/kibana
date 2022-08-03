@@ -10,7 +10,7 @@ import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__/kea_lo
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { HttpError, Status } from '../../../../../common/types/api';
-
+import { convertMetaToPagination } from '../../../shared/table_pagination';
 import { MappingsApiLogic } from '../../api/mappings/mappings_logic';
 import { SearchDocumentsApiLogic } from '../../api/search_documents/search_documents_logic';
 
@@ -19,6 +19,7 @@ import { IndexNameLogic } from './index_name_logic';
 
 export const DEFAULT_VALUES = {
   data: undefined,
+  docsPerPage: 25,
   indexName: 'indexName',
   isLoading: true,
   mappingData: undefined,
@@ -65,6 +66,7 @@ describe('DocumentsLogic', () => {
         DocumentsLogic.actions.setDocsPerPage(docsToShow);
         expect(DocumentsLogic.values).toEqual({
           ...DEFAULT_VALUES,
+          docsPerPage: docsToShow,
           meta: {
             page: {
               ...INDEX_DOCUMENTS_META_DEFAULT.page,
@@ -88,8 +90,9 @@ describe('DocumentsLogic', () => {
         jest.advanceTimersByTime(250);
         await nextTick();
         expect(DocumentsLogic.actions.makeRequest).toHaveBeenCalledWith({
+          docsPerPage: 25,
           indexName: 'indexName',
-          meta: INDEX_DOCUMENTS_META_DEFAULT,
+          pagination: convertMetaToPagination(INDEX_DOCUMENTS_META_DEFAULT),
           query: 'test',
         });
         jest.useRealTimers();
@@ -106,7 +109,7 @@ describe('DocumentsLogic', () => {
     it('clears flash messages on new makeRequest', () => {
       DocumentsLogic.actions.makeRequest({
         indexName: 'index',
-        meta: INDEX_DOCUMENTS_META_DEFAULT,
+        pagination: convertMetaToPagination(INDEX_DOCUMENTS_META_DEFAULT),
         query: '',
       });
       expect(mockFlashMessageHelpers.clearFlashMessages).toHaveBeenCalledTimes(1);

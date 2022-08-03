@@ -20,6 +20,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { convertMetaToPagination } from '../../../shared/table_pagination';
+
 import { DocumentList } from './components/document_list/document_list';
 import { DocumentsLogic, INDEX_DOCUMENTS_META_DEFAULT } from './documents_logic';
 import { IndexNameLogic } from './index_name_logic';
@@ -32,7 +34,11 @@ export const SearchIndexDocuments: React.FC = () => {
   const { makeRequest, makeMappingRequest, setSearchQuery } = useActions(DocumentsLogic);
 
   useEffect(() => {
-    makeRequest({ indexName, meta: INDEX_DOCUMENTS_META_DEFAULT, query: '' });
+    makeRequest({
+      indexName,
+      pagination: convertMetaToPagination(INDEX_DOCUMENTS_META_DEFAULT),
+      query: '',
+    });
     makeMappingRequest({ indexName });
   }, [indexName]);
 

@@ -13,18 +13,20 @@ import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export const searchDocuments = async ({
+  docsPerPage,
   indexName,
-  meta,
+  pagination,
   query: q,
 }: {
+  docsPerPage?: number;
   indexName: string;
-  meta: Meta;
+  pagination: { pageIndex: number; pageSize: number; totalItemCount: number };
   query: string;
 }) => {
   const route = `/internal/enterprise_search/indices/${indexName}/search/${q}`;
   const query = {
-    page: meta.page.current,
-    size: meta.page.size,
+    page: pagination.pageIndex,
+    size: docsPerPage || pagination.pageSize,
   };
 
   return await HttpLogic.values.http.get<{ meta: Meta; results: SearchResponseBody }>(route, {
