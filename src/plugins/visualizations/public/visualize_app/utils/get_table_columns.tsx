@@ -156,12 +156,7 @@ export const getNoItemsMessage = (createItem: () => void) => (
       </p>
     }
     actions={
-      <EuiButton
-        onClick={createItem}
-        fill
-        iconType="plusInCircle"
-        data-test-subj="newItemButton"
-      >
+      <EuiButton onClick={createItem} fill iconType="plusInCircle" data-test-subj="newItemButton">
         <FormattedMessage
           id="visualizations.listing.createNew.createButtonLabel"
           defaultMessage="Create new visualization"
