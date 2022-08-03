@@ -47,6 +47,7 @@ export const useData = (
 
   /** Prepare required params to pass to search strategy **/
   const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
+    const filterManager = data.query.filterManager;
     const searchData = getEsQueryFromSavedSearch({
       dataView: currentDataView,
       uiSettings,
@@ -56,7 +57,10 @@ export const useData = (
 
     if (searchData === undefined || aiopsListState.searchString !== '') {
       if (aiopsListState.filters) {
-        services.data.query.filterManager.setFilters(aiopsListState.filters);
+        const globalFilters = filterManager?.getGlobalFilters();
+
+        if (filterManager) filterManager.setFilters(aiopsListState.filters);
+        if (globalFilters) filterManager?.addFilters(globalFilters);
       }
       return {
         searchQuery: aiopsListState.searchQuery,
@@ -104,13 +108,13 @@ export const useData = (
   }, [fieldStatsRequest, selectedChangePoint]);
 
   const selectedChangePointStatsRequest = useMemo(() => {
-    return fieldStatsRequest
+    return fieldStatsRequest && selectedChangePoint
       ? { ...fieldStatsRequest, selectedChangePoint, includeSelectedChangePoint: true }
       : undefined;
   }, [fieldStatsRequest, selectedChangePoint]);
 
-  const { docStats: overallDocStats } = useDocumentCountStats(overallStatsRequest, lastRefresh);
-  const { docStats: selectedDocStats } = useDocumentCountStats(
+  const documentStats = useDocumentCountStats(
+    overallStatsRequest,
     selectedChangePointStatsRequest,
     lastRefresh
   );
@@ -173,8 +177,7 @@ export const useData = (
   }, [searchString, JSON.stringify(searchQuery)]);
 
   return {
-    overallDocStats,
-    selectedDocStats,
+    documentStats,
     timefilter,
     /** Start timestamp filter */
     earliest: fieldStatsRequest?.earliest,
