@@ -375,6 +375,9 @@ export const QueryBarTopRow = React.memo(
     }
 
     function renderUpdateButton() {
+      if (!shouldRenderUpdatebutton() && !shouldRenderDatePicker()) {
+        return null;
+      }
       const buttonLabelUpdate = i18n.translate('unifiedSearch.queryBarTopRow.submitButton.update', {
         defaultMessage: 'Needs updating',
       });
@@ -416,6 +419,11 @@ export const QueryBarTopRow = React.memo(
           />
         </EuiFlexItem>
       );
+
+      // allows to render the button without the datepicker
+      if (!shouldRenderDatePicker() && shouldRenderUpdatebutton()) {
+        return button;
+      }
 
       return (
         <EuiFlexItem grow={false}>
