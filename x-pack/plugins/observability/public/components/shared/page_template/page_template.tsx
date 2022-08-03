@@ -30,12 +30,8 @@ export type WrappedPageTemplateProps = Pick<
   | 'children'
   | 'data-test-subj'
   | 'paddingSize'
-  | 'pageBodyProps'
-  | 'pageContentBodyProps'
-  | 'pageContentProps'
   | 'pageHeader'
   | 'restrictWidth'
-  | 'template'
   | 'isEmptyState'
   | 'noDataConfig'
 > & {

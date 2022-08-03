@@ -22,16 +22,8 @@ import {
   SecuritySolutionBottomBarProps,
 } from './bottom_bar';
 import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
-import { useShowPagesWithEmptyView } from '../../../common/utils/empty_view/use_show_pages_with_empty_view';
 import { useIsPolicySettingsBarVisible } from '../../../management/pages/policy/view/policy_hooks';
 import { useIsGroupedNavigationEnabled } from '../../../common/components/navigation/helpers';
-
-const NO_DATA_PAGE_MAX_WIDTH = 950;
-
-const NO_DATA_PAGE_TEMPLATE_PROPS = {
-  restrictWidth: NO_DATA_PAGE_MAX_WIDTH,
-  template: 'centeredBody',
-};
 
 /**
  * Need to apply the styles via a className to effect the containing bottom bar
@@ -71,16 +63,6 @@ export const SecuritySolutionTemplateWrapper: React.FC<{
   const addBottomPadding =
     isTimelineBottomBarVisible || isPolicySettingsVisible || isGroupedNavEnabled;
 
-  const showEmptyState = useShowPagesWithEmptyView();
-
-  const emptyStateProps =
-    showEmptyState || template === 'noData'
-      ? {
-          ...NO_DATA_PAGE_TEMPLATE_PROPS,
-          template: 'centeredContent' as const,
-        }
-      : { template };
-
   // The bottomBar by default has a set 'dark' colorMode that doesn't match the global colorMode from the Advanced Settings
   // To keep the mode in sync, we pass in the globalColorMode to the bottom bar here
   const { colorMode: globalColorMode } = useEuiTheme();
@@ -97,7 +79,6 @@ export const SecuritySolutionTemplateWrapper: React.FC<{
       paddingSize="none"
       solutionNav={solutionNav}
       restrictWidth={false}
-      {...emptyStateProps}
     >
       <GlobalKQLHeader />
 
@@ -112,7 +93,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<{
       {isTimelineBottomBarVisible && (
         <EuiPageTemplate.BottomBar {...SecuritySolutionBottomBarProps}>
           <EuiThemeProvider colorMode={globalColorMode}>
-            <SecuritySolutionBottomBar onAppLeave={onAppLeave} />
+            <SecuritySolutionBottomBar />
           </EuiThemeProvider>
         </EuiPageTemplate.BottomBar>
       )}

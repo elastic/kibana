@@ -215,7 +215,6 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
           showManagementLink: !!manageDataFeatures,
         }),
       }}
-      template="empty"
     >
       <>
         <section aria-labelledby="kbnOverviewApps__title" className="kbnOverviewApps">

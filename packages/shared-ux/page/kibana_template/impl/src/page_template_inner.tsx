@@ -25,7 +25,6 @@ const getClasses = (template?: string, className?: string) => {
  * A thin wrapper around EuiPageTemplate with a few Kibana specific additions
  */
 export const KibanaPageTemplateInner: FC<Props> = ({
-  template,
   className,
   pageHeader,
   children,
