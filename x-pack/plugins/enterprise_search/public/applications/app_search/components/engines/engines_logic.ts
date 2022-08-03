@@ -150,7 +150,9 @@ export const EnginesLogic = kea<MakeLogicType<EnginesValues, EnginesActions>>({
     },
     onDeleteEngineSuccess: async ({ engine }) => {
       flashSuccessToast(DELETE_ENGINE_MESSAGE(engine.name));
-      if ([EngineTypes.default, EngineTypes.indexed].includes(engine.type)) {
+      if (
+        [EngineTypes.default, EngineTypes.indexed, EngineTypes.elasticsearch].includes(engine.type)
+      ) {
         actions.loadEngines();
       } else if (engine.type === EngineTypes.meta) {
         actions.loadMetaEngines();
