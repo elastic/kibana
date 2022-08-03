@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { Client, estypes } from '@elastic/elasticsearch';
-import { AGENTS_INDEX, AgentStatus } from '@kbn/fleet-plugin/common';
+import type { Client, estypes } from '@elastic/elasticsearch';
+import { AGENTS_INDEX, EPM_API_ROUTES } from '@kbn/fleet-plugin/common';
+import type { AgentStatus, GetPackagesResponse } from '@kbn/fleet-plugin/common';
 import { pick } from 'lodash';
 import { ToolingLog } from '@kbn/tooling-log';
+import type { AxiosResponse } from 'axios';
+import type { KbnClient } from '@kbn/test';
 import { FleetAgentGenerator } from '../../../common/endpoint/data_generators/fleet_agent_generator';
 
 const fleetGenerator = new FleetAgentGenerator();
@@ -64,4 +67,21 @@ export const checkInFleetAgent = async (
       doc: update,
     },
   });
+};
+
+export const fetchEndpointPackageInfo = async (
+  kbnClient: KbnClient
+): Promise<GetPackagesResponse['items'][number]> => {
+  const endpointPackage = (
+    (await kbnClient.request({
+      path: `${EPM_API_ROUTES.LIST_PATTERN}?category=security`,
+      method: 'GET',
+    })) as AxiosResponse<GetPackagesResponse>
+  ).data.items.find((epmPackage) => epmPackage.name === 'endpoint');
+
+  if (!endpointPackage) {
+    throw new Error('EPM Endpoint package was not found!');
+  }
+
+  return endpointPackage;
 };

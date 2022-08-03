@@ -6,6 +6,7 @@
  */
 
 import type { RunFn } from '@kbn/dev-cli-runner';
+import { loadEndpointsIfNoneExist } from './services/endpoint_loader';
 import { HORIZONTAL_LINE } from '../common/constants';
 import { EmulatorRunContext } from './services/emulator_run_context';
 
@@ -33,7 +34,11 @@ ${HORIZONTAL_LINE}
   });
   await emulatorContext.start();
 
-  // TODO:PT check if any endpoints are loaded - if not, then load 5 now
+  loadEndpointsIfNoneExist(
+    emulatorContext.getEsClient(),
+    emulatorContext.getKbnClient(),
+    emulatorContext.getLogger()
+  );
 
   // TODO:PT Show Main menu
 
