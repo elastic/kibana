@@ -171,7 +171,7 @@ export function MetricDimensionEditor(
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="lnsMetric_dynamicColoring_trigger"
+                data-test-subj="lnsLegacyMetric_dynamicColoring_trigger"
                 iconType="controlsHorizontal"
                 onClick={togglePalette}
                 size="xs"

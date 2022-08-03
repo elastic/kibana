@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import testSubjSelector from '@kbn/test-subj-selector';
 import expect from '@kbn/expect';
 import { WebElementWrapper } from '../../../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -15,7 +14,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const findService = getService('find');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
-  const retry = getService('retry');
 
   const getMetricTiles = () =>
     findService.allByCssSelector('[data-test-subj="mtrVis"] .echChart li');
@@ -26,12 +24,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       : undefined;
 
   const getMetricDatum = async (tile: WebElementWrapper) => {
-    // const progressBar = await getIfExists('.echSingleMetricProgressBar', tile);
-    // const color = await (progressBar
-    //   ? progressBar
-    //   : await getIfExists('.echMetric', tile)
-    // )?.getComputedStyle('background-color');
-
     return {
       title: await (await getIfExists('h2', tile))?.getVisibleText(),
       subtitle: await (await getIfExists('.echMetricText__subtitle', tile))?.getVisibleText(),
@@ -60,7 +52,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     for (const tile of tiles) {
       const datum = await getMetricDatum(tile);
       if (datum.title === title) {
-        tile.click();
+        await tile.click();
+        return;
       }
     }
   };
@@ -147,7 +140,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         },
       ]);
 
-      await testSubjects.click('lnsMetric_maxDimensionPanel > lns-empty-dimension');
+      await PageObjects.lens.openDimensionEditor(
+        'lnsMetric_maxDimensionPanel > lns-empty-dimension'
+      );
 
       await PageObjects.lens.waitForVisualization('mtrVis');
 
@@ -155,36 +150,74 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.closeDimensionEditor();
       await PageObjects.lens.removeDimension('lnsMetric_maxDimensionPanel');
-      await PageObjects.lens.waitForVisualization('mtrVis');
     });
 
     it('should filter by click', async () => {
       expect((await filterBar.getFiltersLabel()).length).to.be(0);
       const title = '93.28.27.24';
       await clickMetric(title);
-      await retry.try(async () => {
-        const labels = await filterBar.getFiltersLabel();
-        expect(labels.length).to.be(1);
-        expect(labels[0]).to.be(`ip: ${title}`);
-      });
+
+      const labels = await filterBar.getFiltersLabel();
+      expect(labels.length).to.be(1);
+      expect(labels[0]).to.be(`ip: ${title}`);
+
       await filterBar.removeAllFilters();
       await PageObjects.lens.waitForVisualization('mtrVis');
     });
 
     it('applies static color', async () => {
-      await findService.clickByCssSelector(
-        `${testSubjSelector('lnsMetric_primaryMetricDimensionPanel')} ${testSubjSelector(
-          'lnsLayerPanel-dimensionLink'
-        )}`
+      await PageObjects.lens.openDimensionEditor(
+        'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger'
       );
+
       const colorPicker = await testSubjects.find('euiColorPickerAnchor');
       await colorPicker.type('#000000');
 
+      await PageObjects.common.sleep(1000); // allow new tiles to render
+
       const data = await getMetricData();
-      expect(data).to.be.eql(new Array(6).fill('rgba(0, 0, 0, 1)'));
+
+      expect(data.map(({ color }) => color)).to.be.eql(new Array(6).fill('rgba(0, 0, 0, 1)'));
     });
-    it('applies dynamic color', async () => {});
-    it('converts color stops to number', async () => {});
-    it("doesn't error with empty formula", async () => {});
+
+    const expectedDynamicColors = [
+      'rgba(204, 86, 66, 1)',
+      'rgba(204, 86, 66, 1)',
+      'rgba(204, 86, 66, 1)',
+      'rgba(204, 86, 66, 1)',
+      'rgba(204, 86, 66, 1)',
+      'rgba(32, 146, 128, 1)',
+    ];
+
+    it('applies dynamic color', async () => {
+      await testSubjects.click('lnsMetric_color_mode_dynamic');
+
+      await PageObjects.common.sleep(1000); // allow new tiles to render
+
+      const data = await getMetricData();
+      expect(data.map(({ color }) => color)).to.eql(expectedDynamicColors);
+    });
+
+    it('converts color stops to number', async () => {
+      await PageObjects.lens.openPalettePanel('lnsMetric');
+      await testSubjects.click('lnsPalettePanel_dynamicColoring_rangeType_groups_number');
+      expect([
+        await testSubjects.getAttribute('lnsPalettePanel_dynamicColoring_range_value_1', 'value'),
+        await testSubjects.getAttribute('lnsPalettePanel_dynamicColoring_range_value_2', 'value'),
+      ]).to.be.eql(['10400.18', '15077.59']);
+
+      await PageObjects.common.sleep(1000); // allow new tiles to render
+
+      expect((await getMetricData()).map(({ color }) => color)).to.eql(expectedDynamicColors); // colors shouldn't change
+    });
+
+    it("doesn't error with empty formula", async () => {
+      await PageObjects.lens.closePaletteEditor();
+
+      await PageObjects.lens.switchToFormula();
+      await PageObjects.lens.typeFormula('');
+
+      await PageObjects.lens.waitForVisualization('mtrVis');
+    });
   });
 }
