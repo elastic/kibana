@@ -756,19 +756,7 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [
-      {
-        "parentPluginId": "apm",
-        "id": "def-server.ProcessorEvent",
-        "type": "Enum",
-        "tags": [],
-        "label": "ProcessorEvent",
-        "description": [],
-        "path": "x-pack/plugins/apm/common/processor_event.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "apm",
@@ -987,23 +975,53 @@
           "<[",
           "LiteralC",
           "<",
-          "ProcessorEvent",
+          {
+            "pluginId": "observability",
+            "scope": "common",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-common.ProcessorEvent",
+            "text": "ProcessorEvent"
+          },
           ".transaction>, ",
           "LiteralC",
           "<",
-          "ProcessorEvent",
+          {
+            "pluginId": "observability",
+            "scope": "common",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-common.ProcessorEvent",
+            "text": "ProcessorEvent"
+          },
           ".error>, ",
           "LiteralC",
           "<",
-          "ProcessorEvent",
+          {
+            "pluginId": "observability",
+            "scope": "common",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-common.ProcessorEvent",
+            "text": "ProcessorEvent"
+          },
           ".metric>, ",
           "LiteralC",
           "<",
-          "ProcessorEvent",
+          {
+            "pluginId": "observability",
+            "scope": "common",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-common.ProcessorEvent",
+            "text": "ProcessorEvent"
+          },
           ".span>, ",
           "LiteralC",
           "<",
-          "ProcessorEvent",
+          {
+            "pluginId": "observability",
+            "scope": "common",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-common.ProcessorEvent",
+            "text": "ProcessorEvent"
+          },
           ".profile>]>; }>]>; }>, ",
           {
             "pluginId": "apm",
@@ -1113,23 +1131,53 @@
           "<[",
           "LiteralC",
           "<",
-          "ProcessorEvent",
+          {
+            "pluginId": "observability",
+            "scope": "common",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-common.ProcessorEvent",
+            "text": "ProcessorEvent"
+          },
           ".transaction>, ",
           "LiteralC",
           "<",
-          "ProcessorEvent",
+          {
+            "pluginId": "observability",
+            "scope": "common",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-common.ProcessorEvent",
+            "text": "ProcessorEvent"
+          },
           ".error>, ",
           "LiteralC",
           "<",
-          "ProcessorEvent",
+          {
+            "pluginId": "observability",
+            "scope": "common",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-common.ProcessorEvent",
+            "text": "ProcessorEvent"
+          },
           ".metric>, ",
           "LiteralC",
           "<",
-          "ProcessorEvent",
+          {
+            "pluginId": "observability",
+            "scope": "common",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-common.ProcessorEvent",
+            "text": "ProcessorEvent"
+          },
           ".span>, ",
           "LiteralC",
           "<",
-          "ProcessorEvent",
+          {
+            "pluginId": "observability",
+            "scope": "common",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-common.ProcessorEvent",
+            "text": "ProcessorEvent"
+          },
           ".profile>]>; id: ",
           "StringC",
           "; }>; }>, ",

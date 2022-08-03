@@ -7451,6 +7451,17 @@
     "enums": [
       {
         "parentPluginId": "observability",
+        "id": "def-common.ProcessorEvent",
+        "type": "Enum",
+        "tags": [],
+        "label": "ProcessorEvent",
+        "description": [],
+        "path": "x-pack/plugins/observability/common/processor_event.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-common.ProgressiveLoadingQuality",
         "type": "Enum",
         "tags": [],
