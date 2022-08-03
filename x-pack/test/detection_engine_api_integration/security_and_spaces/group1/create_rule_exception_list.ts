@@ -25,12 +25,14 @@ import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/commo
 
 const getRuleExceptionItemMock = (): CreateRuleExceptionListItemSchema => ({
   description: 'Exception item for rule default exception list',
-  entries: [{
-    field: 'some.not.nested.field',
-    operator: 'included',
-    type: 'match',
-    value: 'some value',
-  }],
+  entries: [
+    {
+      field: 'some.not.nested.field',
+      operator: 'included',
+      type: 'match',
+      value: 'some value',
+    },
+  ],
   name: 'Sample exception item',
   type: 'simple',
 });
@@ -58,7 +60,7 @@ export default ({ getService }: FtrProviderContext) => {
         .post(`${DETECTION_ENGINE_RULES_URL}/${rule.id}/exceptions`)
         .set('kbn-xsrf', 'true')
         .send({
-          items: [getRuleExceptionItemMock()]
+          items: [getRuleExceptionItemMock()],
         })
         .expect(200);
 
@@ -176,7 +178,7 @@ export default ({ getService }: FtrProviderContext) => {
         .post(`${DETECTION_ENGINE_RULES_URL}/${rule.id}/exceptions`)
         .set('kbn-xsrf', 'true')
         .send({
-          items: [getRuleExceptionItemMock()]
+          items: [getRuleExceptionItemMock()],
         })
         .expect(200);
 
@@ -204,13 +206,13 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('returns 500 if no rule is found to add exception list to', async () => {
-      const { body } =  await supertest
-      .post(`${DETECTION_ENGINE_RULES_URL}/123456/exceptions`)
-      .set('kbn-xsrf', 'true')
-      .send({
-        items: [getRuleExceptionItemMock()]
-      })
-      .expect(500);
+      const { body } = await supertest
+        .post(`${DETECTION_ENGINE_RULES_URL}/123456/exceptions`)
+        .set('kbn-xsrf', 'true')
+        .send({
+          items: [getRuleExceptionItemMock()],
+        })
+        .expect(500);
 
       expect(body).to.eql({
         message: "Unable to add exception to rule - rule with id:\"123456\" not found",

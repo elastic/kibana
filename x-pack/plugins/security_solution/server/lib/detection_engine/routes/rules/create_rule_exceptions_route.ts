@@ -24,7 +24,6 @@ import { exactCheck, formatErrors, validate } from '@kbn/securitysolution-io-ts-
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-
 import type {
   CreateRuleExceptionListItemSchema,
   CreateRuleExceptionSchemaDecoded,
