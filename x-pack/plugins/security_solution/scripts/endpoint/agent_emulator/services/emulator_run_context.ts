@@ -7,32 +7,57 @@
 
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import { KbnClient } from '@kbn/test';
-import { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { KbnClient } from '@kbn/test';
+import type { Client } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
+import { AgentKeepAliveService } from './keep_alive';
+import { ActionResponderService } from './action_responder';
 import { createRuntimeServices } from '../../common/stack_services';
+
+export interface EmulatorRunContextConstructorOptions {
+  username: string;
+  password: string;
+  kibanaUrl: string;
+  elasticUrl: string;
+  actionResponseDelay: number;
+  checkinInterval: number;
+  asSuperuser?: boolean;
+  log?: ToolingLog;
+}
 
 export class EmulatorRunContext {
   private esClient: Client | undefined = undefined;
   private kbnClient: KbnClient | undefined = undefined;
   private wasStarted: boolean = false;
+  private agentKeepAliveService: AgentKeepAliveService | undefined = undefined;
+  private actionResponderService: ActionResponderService | undefined = undefined;
 
-  constructor(
-    private readonly username: string,
-    private readonly password: string,
-    private readonly kibanaUrl: string,
-    private readonly elasticUrl: string,
+  private readonly username: string;
+  private readonly password: string;
+  private readonly kibanaUrl: string;
+  private readonly elasticUrl: string;
+  private readonly actionResponseDelay: number;
+  private readonly checkinInterval: number;
+  private readonly asSuperuser: boolean = false;
+  private log: ToolingLog | undefined = undefined;
 
-    private readonly asSuperuser: boolean = false,
-    private log: ToolingLog | undefined = undefined
-  ) {}
+  constructor(options: EmulatorRunContextConstructorOptions) {
+    this.username = options.username;
+    this.password = options.password;
+    this.kibanaUrl = options.kibanaUrl;
+    this.elasticUrl = options.elasticUrl;
+    this.actionResponseDelay = options.actionResponseDelay;
+    this.checkinInterval = options.checkinInterval;
+    this.asSuperuser = options.asSuperuser ?? false;
+    this.log = options.log;
+  }
 
   async start() {
     if (this.wasStarted) {
       return;
     }
 
-    const stackServices = await createRuntimeServices({
+    const { esClient, kbnClient, log } = await createRuntimeServices({
       kibanaUrl: this.kibanaUrl,
       elasticsearchUrl: this.elasticUrl,
       username: this.username,
@@ -41,9 +66,26 @@ export class EmulatorRunContext {
       log: this.log,
     });
 
-    this.esClient = stackServices.esClient;
-    this.kbnClient = stackServices.kbnClient;
-    this.log = stackServices.log;
+    this.esClient = esClient;
+    this.kbnClient = kbnClient;
+    this.log = log;
+
+    this.agentKeepAliveService = new AgentKeepAliveService(
+      esClient,
+      kbnClient,
+      log,
+      this.checkinInterval
+    );
+    this.agentKeepAliveService.start();
+
+    this.actionResponderService = new ActionResponderService(
+      esClient,
+      kbnClient,
+      log,
+      5_000, // Check for actions every 5s
+      this.actionResponseDelay
+    );
+    this.actionResponderService.start();
 
     this.wasStarted = true;
   }
@@ -52,6 +94,25 @@ export class EmulatorRunContext {
     if (!this.wasStarted) {
       throw new Error('RunContext instance has not been `.start()`ed!');
     }
+  }
+
+  public get whileRunning(): Promise<void> {
+    this.ensureStarted();
+
+    return Promise.all([
+      this.getActionResponderService().whileRunning,
+      this.getAgentKeepAliveService().whileRunning,
+    ]).then(() => {});
+  }
+
+  getActionResponderService(): ActionResponderService {
+    this.ensureStarted();
+    return this.actionResponderService!;
+  }
+
+  getAgentKeepAliveService(): AgentKeepAliveService {
+    this.ensureStarted();
+    return this.agentKeepAliveService!;
   }
 
   getEsClient(): Client {
