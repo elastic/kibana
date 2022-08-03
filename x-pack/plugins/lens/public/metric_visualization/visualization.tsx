@@ -235,6 +235,11 @@ export const getLegacyMetricVisualization = ({
       groups: [
         {
           groupId: 'metric',
+          paramEditorCustomProps: {
+            headingLabel: i18n.translate('xpack.lens.metric.headingLabel', {
+              defaultMessage: 'Value',
+            }),
+          },
           groupLabel: i18n.translate('xpack.lens.legacyMetric.label', {
             defaultMessage: 'Legacy Metric',
           }),
