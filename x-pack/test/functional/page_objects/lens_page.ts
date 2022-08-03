@@ -1089,7 +1089,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async setLegacyMetricDynamicColoring(coloringType: 'none' | 'labels' | 'background') {
-      await testSubjects.click('lnsMetric_dynamicColoring_groups_' + coloringType);
+      await testSubjects.click('lnsLegacyMetric_dynamicColoring_groups_' + coloringType);
     },
 
     async getLegacyMetricStyle() {
