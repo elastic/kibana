@@ -7,7 +7,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { SavedObjectsService } from '@kbn/core-saved-objects-browser-internal';
+import type { SavedObjectsService } from '@kbn/core-saved-objects-browser-internal';
 import type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
 
 type SavedObjectsServiceContract = PublicMethodsOf<SavedObjectsService>;
