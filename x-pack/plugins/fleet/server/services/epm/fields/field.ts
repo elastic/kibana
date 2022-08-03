@@ -250,8 +250,8 @@ export function processFieldsWithWildcard(fields: Fields): Fields {
   const newFields: Fields = [];
   for (const field of fields) {
     const hasWildcard = field.name.includes('*');
-    const hasNotObjectType = !field.object_type;
-    if (hasWildcard && hasNotObjectType) {
+    const hasObjectType = field.object_type;
+    if (hasWildcard && !hasObjectType) {
       newFields.push({ ...field, type: 'object', object_type: field.type });
     } else {
       newFields.push({ ...field });
