@@ -6,7 +6,6 @@
  */
 
 import { useState } from 'react';
-import { isEmpty } from 'lodash';
 import { useQuery, UseQueryResult } from 'react-query';
 import useDebounce from 'react-use/lib/useDebounce';
 import { UserProfile } from '@kbn/security-plugin/common';
@@ -48,7 +47,6 @@ export const useSuggestUserProfiles = ({
       });
     },
     {
-      enabled: !isEmpty(debouncedName),
       onError: (error: ServerError) => {
         if (error.name !== 'AbortError') {
           toasts.addError(

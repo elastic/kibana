@@ -43,7 +43,7 @@ export const bulkGetUserProfiles = async ({
   uids,
 }: BulkGetUserProfilesArgs): Promise<UserProfile[]> => {
   if (security == null) {
-    return Promise.resolve([]);
+    return [];
   }
 
   return security.userProfiles.bulkGet({ uids: new Set(uids), dataPath: 'avatar' });
