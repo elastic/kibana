@@ -15,20 +15,15 @@ describe('UserAvatar', () => {
   it('should render `EuiAvatar` correctly with image avatar', () => {
     const wrapper = shallow(
       <UserAvatar
-        userProfile={{
-          uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
-          user: {
-            username: 'delighted_nightingale',
-            email: 'delighted_nightingale@elastic.co',
-            full_name: 'Delighted Nightingale',
-          },
-          data: {
-            avatar: {
-              color: '#09e8ca',
-              initials: 'DN',
-              imageUrl: 'https://source.unsplash.com/64x64/?cat',
-            },
-          },
+        user={{
+          username: 'delighted_nightingale',
+          email: 'delighted_nightingale@elastic.co',
+          full_name: 'Delighted Nightingale',
+        }}
+        avatar={{
+          color: '#09e8ca',
+          initials: 'DN',
+          imageUrl: 'https://source.unsplash.com/64x64/?cat',
         }}
       />
     );
@@ -44,20 +39,15 @@ describe('UserAvatar', () => {
   it('should render `EuiAvatar` correctly with initials avatar', () => {
     const wrapper = shallow(
       <UserAvatar
-        userProfile={{
-          uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
-          user: {
-            username: 'delighted_nightingale',
-            email: 'delighted_nightingale@elastic.co',
-            full_name: 'Delighted Nightingale',
-          },
-          data: {
-            avatar: {
-              color: '#09e8ca',
-              initials: 'DN',
-              imageUrl: undefined,
-            },
-          },
+        user={{
+          username: 'delighted_nightingale',
+          email: 'delighted_nightingale@elastic.co',
+          full_name: 'Delighted Nightingale',
+        }}
+        avatar={{
+          color: '#09e8ca',
+          initials: 'DN',
+          imageUrl: undefined,
         }}
       />
     );
@@ -74,14 +64,10 @@ describe('UserAvatar', () => {
   it('should render `EuiAvatar` correctly without avatar data', () => {
     const wrapper = shallow(
       <UserAvatar
-        userProfile={{
-          uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
-          user: {
-            username: 'delighted_nightingale',
-            email: 'delighted_nightingale@elastic.co',
-            full_name: 'Delighted Nightingale',
-          },
-          data: {},
+        user={{
+          username: 'delighted_nightingale',
+          email: 'delighted_nightingale@elastic.co',
+          full_name: 'Delighted Nightingale',
         }}
       />
     );
@@ -91,6 +77,17 @@ describe('UserAvatar', () => {
         initials="DN"
         initialsLength={2}
         name="Delighted Nightingale"
+      />
+    `);
+  });
+
+  it('should render `EuiAvatar` correctly without user data', () => {
+    const wrapper = shallow(<UserAvatar />);
+    expect(wrapper).toMatchInlineSnapshot(`
+      <EuiAvatar
+        color="#F1F4FA"
+        initials="?"
+        name=""
       />
     `);
   });

@@ -38,40 +38,38 @@ export interface UserAvatarProps
     | 'type'
   > {
   /**
-   * User profile for avatar to be rendered
+   * User to be rendered
    */
-  userProfile?: UserProfileWithAvatar;
+  user?: UserProfile['user'];
+
+  /**
+   * Avatar data of user to be rendered
+   */
+  avatar?: UserProfileAvatarData;
 }
 
 /**
  * Renders an avatar given a user profile
  */
-export const UserAvatar: FunctionComponent<UserAvatarProps> = ({ userProfile, ...rest }) => {
+export const UserAvatar: FunctionComponent<UserAvatarProps> = ({ user, avatar, ...rest }) => {
   const { euiTheme } = useEuiTheme();
 
-  if (!userProfile) {
+  if (!user) {
     return <EuiAvatar name="" color={euiTheme.colors.lightestShade} initials="?" {...rest} />;
   }
 
-  const displayName = getUserDisplayName(userProfile.user);
+  const displayName = getUserDisplayName(user);
 
-  if (userProfile.data.avatar?.imageUrl) {
-    return (
-      <EuiAvatar
-        name={displayName}
-        imageUrl={userProfile.data.avatar.imageUrl}
-        color="plain"
-        {...rest}
-      />
-    );
+  if (avatar?.imageUrl) {
+    return <EuiAvatar name={displayName} imageUrl={avatar.imageUrl} color="plain" {...rest} />;
   }
 
   return (
     <EuiAvatar
       name={displayName}
-      initials={getUserAvatarInitials(userProfile.user, userProfile.data.avatar)}
+      initials={getUserAvatarInitials(user, avatar)}
       initialsLength={USER_AVATAR_MAX_INITIALS}
-      color={getUserAvatarColor(userProfile.user, userProfile.data.avatar)}
+      color={getUserAvatarColor(user, avatar)}
       {...rest}
     />
   );
