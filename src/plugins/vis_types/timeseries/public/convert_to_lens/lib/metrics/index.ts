@@ -8,6 +8,7 @@
 
 export * from './supported_metrics';
 export * from './metrics_helpers';
+export * from './metrics_converter';
 export * from './parent_pipeline_formula';
 export * from './sibling_pipeline_formula';
 export * from './filter_ratio_formula';

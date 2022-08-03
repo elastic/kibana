@@ -9,7 +9,8 @@
 import { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
 import { PaletteOutput } from '@kbn/coloring';
 import { SUPPORTED_FORMATTERS } from '../formatters';
-import { convertChartType, convertFilter, convertMetrics, convertSplitFilters } from '../xy';
+import { convertFilter, convertSplitFilters } from '../filters';
+import { convertMetrics } from '../metrics';
 import type { Panel, Series } from '../../../../common/types';
 import { VisSeries } from '../series';
 
@@ -36,6 +37,7 @@ function getPalette(palette: PaletteOutput): PaletteOutput {
 export const getLayerConfiguration = (
   indexPatternId: string,
   layerIdx: number,
+  chartType: string,
   model: Panel,
   series: VisSeries,
   splitFields: string[],
@@ -51,7 +53,7 @@ export const getLayerConfiguration = (
   return {
     indexPatternId,
     timeFieldName: timeField,
-    chartType: convertChartType(layer),
+    chartType,
     axisPosition: layer.separate_axis ? layer.axis_position : model.axis_position,
     ...(layer.terms_field && { splitFields }),
     splitWithDateHistogram,

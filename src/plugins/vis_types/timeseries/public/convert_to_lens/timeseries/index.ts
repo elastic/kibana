@@ -12,8 +12,9 @@ import { getDataSourceInfo } from '../lib/datasource';
 import { getSeries } from '../lib/series';
 import { getFieldsForTerms } from '../../../common/fields_utils';
 import { ConvertTsvbToLensVisualization } from '../types';
-import { getYExtents, isSplitWithDateHistogram } from '../lib/xy';
+import { convertChartType, getYExtents } from '../lib/xy';
 import { getLayerConfiguration } from '../lib/layers';
+import { isSplitWithDateHistogram } from '../lib/split_chart';
 
 export const convertToLens: ConvertTsvbToLensVisualization = async (model) => {
   const layersConfiguration: { [key: string]: VisualizeEditorLayersContext } = {};
@@ -57,9 +58,12 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model) => {
       return null;
     }
 
+    const chartType = convertChartType(layer);
+
     layersConfiguration[layerIdx] = getLayerConfiguration(
       indexPatternId,
       layerIdx,
+      chartType,
       model,
       series,
       splitFields,
