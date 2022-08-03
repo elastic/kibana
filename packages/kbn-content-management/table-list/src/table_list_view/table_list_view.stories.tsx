@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import Chance from 'chance';
 import { action } from '@storybook/addon-actions';
 
 import { Params, getStoryArgTypes, getStoryServices } from './mocks';
@@ -15,6 +16,8 @@ import { TableListView as Component, UserContentCommonSchema } from './table_lis
 import { TableListViewProvider } from './services';
 
 import mdx from '../../README.mdx';
+
+const chance = new Chance();
 
 export default {
   title: 'Table list view',
@@ -28,54 +31,31 @@ export default {
 
 const argTypes = getStoryArgTypes();
 
-const mockItems: UserContentCommonSchema[] = [
-  {
-    id: '123',
-    references: [],
-    updatedAt: '2022-28-07T10:00:00',
-    attributes: {
-      title: 'Dashboard title 1',
-      description: 'Description of dashboard 1',
-    },
-  },
-  {
-    id: '456',
-    references: [],
-    updatedAt: '2022-20-07T10:00:00',
-    attributes: {
-      title: 'Dashboard title 2',
-      description: 'Description of dashboard 2',
-    },
-  },
-  {
-    id: '789',
-    references: [],
-    updatedAt: '2022-12-07T10:00:00',
-    attributes: {
-      title: 'Dashboard title 3',
-      description: 'Description of dashboard 3',
-    },
-  },
-];
+let mockItems: UserContentCommonSchema[];
 
-const getMockItems = (total: number) =>
-  new Array(total).fill(' ').map((_, i) => ({
-    id: i,
+const createMockItems = (total: number) => {
+  mockItems = [...Array(total)].map((_, i) => ({
+    id: i.toString(),
     references: [],
     updatedAt: '2022-12-07T10:00:00',
     attributes: {
-      title: `Item title ${i}`,
+      title: chance.sentence({ words: 5 }),
       description: `Description of item ${i}`,
     },
   }));
+};
+
+createMockItems(500);
 
 export const TableListView = (params: Params) => {
   return (
     <TableListViewProvider {...getStoryServices(params, action)}>
       <Component
         key={`${params.initialFilter}-${params.initialPageSize}`}
-        findItems={() => {
-          const hits = getMockItems(params.numberOfItemsToRender);
+        findItems={(searchQuery) => {
+          const hits = mockItems
+            .filter((_, i) => i < params.numberOfItemsToRender)
+            .filter((item) => item.attributes.title.includes(searchQuery));
 
           return Promise.resolve({
             total: hits.length,
