@@ -76,7 +76,7 @@ const numTriggeredActionsDisplay = i18n.translate(
 const numTriggeredActionsToolTip = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.triggeredActionsToolTip',
   {
-    defaultMessage: 'The subset of generated actions that will run',
+    defaultMessage: 'The subset of generated actions that will run.',
   }
 );
 
