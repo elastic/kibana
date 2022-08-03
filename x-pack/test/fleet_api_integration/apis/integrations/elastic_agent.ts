@@ -34,7 +34,6 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
       pkgVersion = getPkRes.body.item.version;
-      // pkgVersion
       // Install latest version of the package
       await supertest
         .post(`/api/fleet/epm/packages/${FLEET_ELASTIC_AGENT_PACKAGE}/${pkgVersion}`)
