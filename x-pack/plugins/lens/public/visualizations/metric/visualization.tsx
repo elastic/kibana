@@ -19,7 +19,7 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { LayerType } from '../../../common';
 import { getSuggestions } from './suggestions';
 import { LensIconChartMetric } from '../../assets/chart_metric';
-import { Visualization, OperationMetadata, DatasourceLayers } from '../../types';
+import { Visualization, OperationMetadata, DatasourceLayers, AccessorConfig } from '../../types';
 import { layerTypes } from '../../../common';
 import { GROUP_ID, LENS_METRIC_ID } from './constants';
 import { DimensionEditor } from './dimension_editor';
@@ -217,15 +217,31 @@ export const getMetricVisualization = ({
   triggers: [VIS_EVENT_TO_TRIGGER.filter],
 
   getConfiguration(props) {
-    const hasColoring = props.state.palette != null;
-    const stops = props.state.palette?.params?.stops || [];
     const isSupportedMetric = (op: OperationMetadata) =>
       !op.isBucketed && supportedDataTypes.has(op.dataType);
 
     const isSupportedDynamicMetric = (op: OperationMetadata) =>
       !op.isBucketed && supportedDataTypes.has(op.dataType) && !op.isStaticValue;
 
+    const getPrimaryAccessorDisplayConfig = (): Partial<AccessorConfig> => {
+      const stops = props.state.palette?.params?.stops || [];
+      const hasStaticColoring = !!props.state.color;
+      const hasDynamicColoring = !!props.state.palette;
+      return hasDynamicColoring
+        ? {
+            triggerIcon: 'colorBy',
+            palette: stops.map(({ color }) => color),
+          }
+        : hasStaticColoring
+        ? {
+            triggerIcon: 'color',
+            color: props.state.color,
+          }
+        : {};
+    };
+
     const isBucketed = (op: OperationMetadata) => op.isBucketed;
+
     return {
       groups: [
         {
@@ -243,8 +259,7 @@ export const getMetricVisualization = ({
             ? [
                 {
                   columnId: props.state.metricAccessor,
-                  triggerIcon: hasColoring ? 'colorBy' : undefined,
-                  palette: hasColoring ? stops.map(({ color }) => color) : undefined,
+                  ...getPrimaryAccessorDisplayConfig(),
                 },
               ]
             : [],

@@ -100,7 +100,7 @@ describe('metric visualization', () => {
 
       expect(
         visualization.getConfiguration({
-          state: { ...fullState, palette: undefined },
+          state: { ...fullState, palette: undefined, color: undefined },
           layerId: fullState.layerId,
           frame: mockFrameApi,
         }).groups[0].accessors
@@ -108,8 +108,40 @@ describe('metric visualization', () => {
         Array [
           Object {
             "columnId": "metric-col-id",
-            "palette": undefined,
-            "triggerIcon": undefined,
+          },
+        ]
+      `);
+    });
+
+    test('static coloring', () => {
+      expect(
+        visualization.getConfiguration({
+          state: { ...fullState, palette: undefined },
+          layerId: fullState.layerId,
+          frame: mockFrameApi,
+        }).groups[0].accessors
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "color": "static-color",
+            "columnId": "metric-col-id",
+            "triggerIcon": "color",
+          },
+        ]
+      `);
+
+      expect(
+        visualization.getConfiguration({
+          state: { ...fullState, color: undefined },
+          layerId: fullState.layerId,
+          frame: mockFrameApi,
+        }).groups[0].accessors
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "columnId": "metric-col-id",
+            "palette": Array [],
+            "triggerIcon": "colorBy",
           },
         ]
       `);
