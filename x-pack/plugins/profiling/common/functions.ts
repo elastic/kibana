@@ -28,7 +28,10 @@ interface TopNFunctionAndFrameGroup {
   CountInclusive: number;
 }
 
-type TopNFunction = Pick<TopNFunctionAndFrameGroup, 'Frame' | 'CountExclusive' | 'CountInclusive'>;
+type TopNFunction = Pick<
+  TopNFunctionAndFrameGroup,
+  'Frame' | 'CountExclusive' | 'CountInclusive'
+> & { Id: string; Rank: number };
 
 export interface TopNFunctions {
   TotalCount: number;
@@ -111,15 +114,17 @@ export function createTopNFunctions(
     endIndex = topN.length;
   }
 
-  const framesAndCounts = topN.slice(startIndex, endIndex).map((frameAndCount) => ({
+  const framesAndCountsAndIds = topN.slice(startIndex, endIndex).map((frameAndCount, i) => ({
+    Rank: i + 1,
     Frame: frameAndCount.Frame,
     CountExclusive: frameAndCount.CountExclusive,
     CountInclusive: frameAndCount.CountInclusive,
+    Id: hashFrameGroup(frameAndCount.FrameGroup),
   }));
 
   return {
     TotalCount: totalCount,
-    TopN: framesAndCounts,
+    TopN: framesAndCountsAndIds,
   };
 }
 
@@ -129,6 +134,7 @@ export enum TopNFunctionSortField {
   Samples = 'samples',
   ExclusiveCPU = 'exclusiveCPU',
   InclusiveCPU = 'inclusiveCPU',
+  Diff = 'diff',
 }
 
 export const topNFunctionSortFieldRt = t.union([
@@ -137,4 +143,5 @@ export const topNFunctionSortFieldRt = t.union([
   t.literal(TopNFunctionSortField.Samples),
   t.literal(TopNFunctionSortField.ExclusiveCPU),
   t.literal(TopNFunctionSortField.InclusiveCPU),
+  t.literal(TopNFunctionSortField.Diff),
 ]);

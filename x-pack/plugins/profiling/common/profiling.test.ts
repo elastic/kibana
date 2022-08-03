@@ -107,7 +107,7 @@ describe('Frame group operations', () => {
       AddressOrLine: 102938,
     });
     expect(hashFrameGroup(defaultGroupBy(metadata))).toEqual(
-      '{"FileID":"0x0123456789ABCDEF","ExeFileName":"","FunctionName":"","AddressOrLine":102938,"SourceFilename":""}'
+      '{"AddressOrLine":102938,"ExeFileName":"","FileID":"0x0123456789ABCDEF","FunctionName":"","SourceFilename":""}'
     );
   });
 
@@ -117,7 +117,7 @@ describe('Frame group operations', () => {
       FileID: '0x0123456789ABCDEF',
     });
     expect(hashFrameGroup(defaultGroupBy(metadata))).toEqual(
-      '{"FileID":"0x0123456789ABCDEF","ExeFileName":"","FunctionName":"strlen()","AddressOrLine":0,"SourceFilename":""}'
+      '{"AddressOrLine":0,"ExeFileName":"","FileID":"0x0123456789ABCDEF","FunctionName":"strlen()","SourceFilename":""}'
     );
   });
 
@@ -128,7 +128,7 @@ describe('Frame group operations', () => {
       FunctionName: 'strlen()',
     });
     expect(hashFrameGroup(defaultGroupBy(metadata))).toEqual(
-      '{"FileID":"","ExeFileName":"chrome","FunctionName":"strlen()","AddressOrLine":0,"SourceFilename":"strlen()"}'
+      '{"AddressOrLine":0,"ExeFileName":"chrome","FileID":"","FunctionName":"strlen()","SourceFilename":"strlen()"}'
     );
   });
 });
