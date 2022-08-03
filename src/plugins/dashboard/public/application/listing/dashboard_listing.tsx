@@ -151,7 +151,11 @@ export const DashboardListing = ({
       return (
         <EuiEmptyPrompt
           iconType="glasses"
-          title={<h1 id="dashboardListingHeading">{noItemsStrings.getReadonlyTitle()}</h1>}
+          title={
+            <h1 id="dashboardListingHeading" data-test-subj="emptyListPrompt">
+              {noItemsStrings.getReadonlyTitle()}
+            </h1>
+          }
           body={<p>{noItemsStrings.getReadonlyBody()}</p>}
         />
       );
@@ -200,7 +204,7 @@ export const DashboardListing = ({
       <EuiEmptyPrompt
         iconType="dashboardApp"
         title={
-          <h1 id="dashboardListingHeading">
+          <h1 id="dashboardListingHeading" data-test-subj="emptyListPrompt">
             {isEditingFirstDashboard
               ? noItemsStrings.getReadEditInProgressTitle()
               : noItemsStrings.getReadEditTitle()}

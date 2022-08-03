@@ -371,10 +371,7 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async getCreateDashboardPromptExists() {
-    const heading = await (
-      await this.find.byCssSelector('#dashboardListingHeading')
-    ).getVisibleText();
-    return heading.includes('Create your first dashboard');
+    return this.testSubjects.exists('emptyListPrompt');
   }
 
   public async isOptionsOpen() {
