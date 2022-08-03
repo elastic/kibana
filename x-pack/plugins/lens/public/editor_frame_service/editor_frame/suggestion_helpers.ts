@@ -211,26 +211,30 @@ function getVisualizationSuggestions(
   isFromContext?: boolean,
   activeData?: Record<string, Datatable>
 ) {
-  return visualization
-    .getSuggestions({
-      table,
-      state: currentVisualizationState,
-      keptLayerIds: datasourceSuggestion.keptLayerIds,
-      subVisualizationId,
-      mainPalette,
-      isFromContext,
-      activeData,
-    })
-    .map(({ state, ...visualizationSuggestion }) => ({
-      ...visualizationSuggestion,
-      visualizationId,
-      visualizationState: state,
-      keptLayerIds: datasourceSuggestion.keptLayerIds,
-      datasourceState: datasourceSuggestion.state,
-      datasourceId: datasourceSuggestion.datasourceId,
-      columns: table.columns.length,
-      changeType: table.changeType,
-    }));
+  try {
+    return visualization
+      .getSuggestions({
+        table,
+        state: currentVisualizationState,
+        keptLayerIds: datasourceSuggestion.keptLayerIds,
+        subVisualizationId,
+        mainPalette,
+        isFromContext,
+        activeData,
+      })
+      .map(({ state, ...visualizationSuggestion }) => ({
+        ...visualizationSuggestion,
+        visualizationId,
+        visualizationState: state,
+        keptLayerIds: datasourceSuggestion.keptLayerIds,
+        datasourceState: datasourceSuggestion.state,
+        datasourceId: datasourceSuggestion.datasourceId,
+        columns: table.columns.length,
+        changeType: table.changeType,
+      }));
+  } catch (e) {
+    return [];
+  }
 }
 
 export function switchToSuggestion(

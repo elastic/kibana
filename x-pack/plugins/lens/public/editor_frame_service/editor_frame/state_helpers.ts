@@ -196,16 +196,28 @@ export const validateDatasourceAndVisualization = (
   currentVisualizationState: unknown | undefined,
   frameAPI: Pick<FramePublicAPI, 'datasourceLayers'>
 ): ErrorMessage[] | undefined => {
-  const datasourceValidationErrors = currentDatasourceState
-    ? currentDataSource?.getErrorMessages(currentDatasourceState)
-    : undefined;
+  try {
+    const datasourceValidationErrors = currentDatasourceState
+      ? currentDataSource?.getErrorMessages(currentDatasourceState)
+      : undefined;
 
-  const visualizationValidationErrors = currentVisualizationState
-    ? currentVisualization?.getErrorMessages(currentVisualizationState, frameAPI.datasourceLayers)
-    : undefined;
+    const visualizationValidationErrors = currentVisualizationState
+      ? currentVisualization?.getErrorMessages(currentVisualizationState, frameAPI.datasourceLayers)
+      : undefined;
 
-  if (datasourceValidationErrors?.length || visualizationValidationErrors?.length) {
-    return [...(datasourceValidationErrors || []), ...(visualizationValidationErrors || [])];
+    if (datasourceValidationErrors?.length || visualizationValidationErrors?.length) {
+      return [...(datasourceValidationErrors || []), ...(visualizationValidationErrors || [])];
+    }
+  } catch (e) {
+    if (e.message) {
+      return [
+        {
+          shortMessage: e.message,
+          longMessage: e.message,
+          type: 'critical',
+        },
+      ];
+    }
   }
   return undefined;
 };
