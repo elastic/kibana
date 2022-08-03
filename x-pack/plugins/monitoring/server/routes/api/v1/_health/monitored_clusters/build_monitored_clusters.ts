@@ -45,10 +45,11 @@ export interface MonitoredClusters {
   [clusterUuid: string]: MonitoredProducts;
 }
 
-const internalMonitoringPattern = /^\.monitoring-(es|kibana|beats|logstash)-7-[0-9]{4}\..*/;
-const metricbeatMonitoring7Pattern = /^\.monitoring-(es|kibana|beats|logstash|ent-search)-7.*-mb.*/;
+const internalMonitoringPattern = /(.*:)?\.monitoring-(es|kibana|beats|logstash)-7-[0-9]{4}\..*/;
+const metricbeatMonitoring7Pattern =
+  /(.*:)?\.monitoring-(es|kibana|beats|logstash|ent-search)-7.*-mb.*/;
 const metricbeatMonitoring8Pattern =
-  /^\.ds-\.monitoring-(es|kibana|beats|logstash|ent-search)-8-mb.*/;
+  /(.*:)?\.ds-\.monitoring-(es|kibana|beats|logstash|ent-search)-8-mb.*/;
 
 const getCollectionMode = (index: string): CollectionMode => {
   if (internalMonitoringPattern.test(index)) return CollectionMode.Internal;
