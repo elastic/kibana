@@ -6,22 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { EuiPageTemplateProps_Deprecated } from '@elastic/eui';
+import { EuiPageTemplateProps } from '@elastic/eui';
 
 import type {
   NoDataPageProps,
   NoDataPageServices,
   NoDataPageKibanaDependencies,
 } from '@kbn/shared-ux-page-no-data-types';
+import { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template-types';
 
 export type NoDataConfigPageKibanaDependencies = NoDataPageKibanaDependencies;
 export type NoDataConfigPageServices = NoDataPageServices;
 export type NoDataConfig = NoDataPageProps;
 
-export type NoDataConfigPageProps = EuiPageTemplateProps_Deprecated & {
-  /**
-   * Accepts a configuration object, that when provided, ignores pageHeader and children and instead
-   * displays Agent, Beats, and custom cards to direct users to the right ingest location
-   */
-  noDataConfig?: NoDataConfig;
-};
+export type NoDataConfigPageProps = EuiPageTemplateProps &
+  Pick<KibanaPageTemplateProps, 'solutionNav' | 'noDataConfig'>;

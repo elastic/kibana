@@ -8,13 +8,13 @@
 
 import React from 'react';
 import classNames from 'classnames';
-import { EuiPageTemplate_Deprecated as EuiPageTemplate } from '@elastic/eui';
+import { EuiPageTemplate } from '@elastic/eui';
 
 import { withSolutionNav } from '@kbn/shared-ux-page-solution-nav';
 import { NoDataPage } from '@kbn/shared-ux-page-no-data';
 import type { NoDataConfigPageProps } from '@kbn/shared-ux-page-no-data-config-types';
 
-import { NO_DATA_PAGE_TEMPLATE_PROPS } from './constants';
+import { NO_DATA_PAGE_MAX_WIDTH } from './constants';
 
 const getClasses = (template?: string, className?: string) => {
   return classNames(
@@ -25,19 +25,25 @@ const getClasses = (template?: string, className?: string) => {
 };
 
 export const NoDataConfigPage = (props: NoDataConfigPageProps) => {
-  const { className: classNameProp, noDataConfig, ...rest } = props;
+  const { className, noDataConfig, ...rest } = props;
 
   if (!noDataConfig) {
     return null;
   }
 
-  const className = getClasses(NO_DATA_PAGE_TEMPLATE_PROPS.template, classNameProp);
+  const classes = getClasses(undefined, className);
 
   return (
     <EuiPageTemplate
-      data-test-subj={props['data-test-subj']}
-      {...{ className, ...rest }}
-      {...NO_DATA_PAGE_TEMPLATE_PROPS}
+      className={classes}
+      restrictWidth={NO_DATA_PAGE_MAX_WIDTH}
+      panelled={false}
+      // Note: Once all pages have been converted to this new component,
+      // the following props can be removed to allow the template to auto-handle
+      // the fixed header and banner heights.
+      offset={0}
+      minHeight={0}
+      {...rest}
     >
       <NoDataPage {...noDataConfig} />
     </EuiPageTemplate>
