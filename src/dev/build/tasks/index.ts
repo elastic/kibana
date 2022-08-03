@@ -35,4 +35,6 @@ export * from './verify_env_task';
 export * from './write_sha_sums_task';
 
 // @ts-expect-error this module can't be TS because it ends up pulling x-pack into Kibana
+export { DownloadChromium } from './download_chromium';
+// @ts-expect-error
 export { InstallChromium } from './install_chromium';

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { install, paths } from '@kbn/screenshotting-plugin/server/utils';
+import { download, paths } from '@kbn/screenshotting-plugin/server/utils';
 
-export const InstallChromium = {
-  description: 'Install Chromium',
+export const DownloadChromium = {
+  description: 'Download Chromium',
 
-  async run(config, log, build) {
+  async run(config, log) {
     const preInstalledPackages = paths.packages.filter((p) => p.isPreInstalled);
 
     for (const platform of config.getNodePlatforms()) {
@@ -19,14 +19,14 @@ export const InstallChromium = {
       const target = `${platform.getName()}-${platform.getArchitecture()}`;
 
       if (!pkg) {
-        log.info(`Skipping Chromium install for ${target}`);
+        log.info(`Skipping Chromium download for ${target}`);
 
         // Unbundled chromium packages (for Darwin): Chromium is downloaded at
         // server startup, rather than being pre-installed
         continue;
       }
 
-      log.info(`Installing Chromium for ${target}`);
+      log.info(`Downloading Chromium for ${target}`);
 
       const logger = {
         get: log.withType.bind(log),
@@ -39,8 +39,7 @@ export const InstallChromium = {
         log: log.write.bind(log),
       };
 
-      const path = build.resolvePathForPlatform(platform, 'x-pack/plugins/screenshotting/chromium');
-      await install(logger, pkg, path);
+      await download(pkg, logger);
     }
   },
 };

@@ -33,6 +33,7 @@ export interface BuildOptions {
   targetAllPlatforms: boolean;
   createExamplePlugins: boolean;
   eprRegistry: 'production' | 'snapshot';
+  downloadOnly: boolean;
 }
 
 export async function buildDistributables(log: ToolingLog, options: BuildOptions): Promise<void> {
@@ -50,6 +51,12 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
    */
   if (options.initialize) {
     await run(Tasks.VerifyEnv);
+    await run(Tasks.DownloadChromium);
+
+    if (options.downloadOnly) {
+      return;
+    }
+
     await run(Tasks.Clean);
     await run(
       options.downloadFreshNode ? Tasks.DownloadNodeBuilds : Tasks.VerifyExistingNodeBuilds

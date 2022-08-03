@@ -37,6 +37,7 @@ export function readCliArgs(argv: string[]) {
       'debug',
       'all-platforms',
       'example-plugins',
+      'download-only',
       'verbose',
       'quiet',
       'silent',
@@ -136,6 +137,7 @@ export function readCliArgs(argv: string[]) {
     createDockerContexts: !Boolean(flags['skip-docker-contexts']),
     targetAllPlatforms: Boolean(flags['all-platforms']),
     eprRegistry: flags['epr-registry'],
+    downloadOnly: flags['download-only'],
   };
 
   return {
