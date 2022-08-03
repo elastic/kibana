@@ -1,12 +1,12 @@
 title: Upgrade agent
 type: object
-  properties:
-    version:
-      type: string
-    source_uri:
-      type: string
-    force:
-      type: boolean
-      description: Force upgrade, skipping validation
-  required:
-    - version
+properties:
+  version:
+    type: string
+  source_uri:
+    type: string
+  force:
+    type: boolean
+    description: Force upgrade, skipping validation (should be used with caution)
+required:
+  - version
