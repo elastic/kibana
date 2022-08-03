@@ -160,7 +160,7 @@ export const getNoItemsMessage = (createItem: () => void) => (
         onClick={createItem}
         fill
         iconType="plusInCircle"
-        data-test-subj="createVisualizationPromptButton"
+        data-test-subj="newItemButton"
       >
         <FormattedMessage
           id="visualizations.listing.createNew.createButtonLabel"
