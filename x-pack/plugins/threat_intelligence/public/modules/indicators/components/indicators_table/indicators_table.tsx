@@ -19,6 +19,7 @@ import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indi
 import { UseIndicatorsValue } from '../../hooks/use_indicators';
 import { cellRendererFactory, ComputedIndicatorFieldId } from './cell_renderer';
 import { ActionsRowCell } from './actions_row_cell';
+import { EmptyState } from '../../../../components/empty_state';
 
 interface Column {
   id: RawIndicatorFieldId | ComputedIndicatorFieldId;
@@ -70,7 +71,7 @@ const columns: Column[] = [
   },
 ];
 
-export type IndicatorsTableProps = UseIndicatorsValue;
+export type IndicatorsTableProps = Omit<UseIndicatorsValue, 'handleRefresh'>;
 
 export const TABLE_TEST_ID = 'tiIndicatorsTable';
 
@@ -81,6 +82,7 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
   onChangeItemsPerPage,
   pagination,
   firstLoad,
+  loading,
 }) => {
   const [visibleColumns, setVisibleColumns] = useState<Array<Column['id']>>(
     columns.map((column) => column.id)
@@ -113,6 +115,10 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
       },
     },
   ];
+
+  if (!loading && !indicatorCount) {
+    return <EmptyState />;
+  }
 
   return (
     <div>
