@@ -626,7 +626,7 @@ describe('UserActionBuilder', () => {
   it('builds a create case user action correctly', () => {
     const builder = builderFactory.getBuilder(ActionTypes.create_case)!;
     const userAction = builder.build({
-      payload: { ...casePayload, assignees: [{ uid: '1' }] },
+      payload: casePayload,
       ...commonArgs,
     });
 

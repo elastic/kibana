@@ -7,14 +7,12 @@
 
 import type SuperTest from 'supertest';
 
-import { UserProfileServiceStart } from '@kbn/security-plugin/server';
-import {
-  INTERNAL_USER_PROFILES_BULK_GET,
-  UserProfilesBulkGetParams,
-} from '../fixtures/plugins/security_solution/server';
+import { UserProfileBulkGetParams, UserProfileServiceStart } from '@kbn/security-plugin/server';
 import { superUser } from './authentication/users';
 import { User } from './authentication/types';
 import { getSpaceUrlPrefix } from './utils';
+
+type BulkGetUserProfilesParams = Omit<UserProfileBulkGetParams, 'uids'> & { uids: string[] };
 
 export const bulkGetUserProfiles = async ({
   supertest,
@@ -23,15 +21,18 @@ export const bulkGetUserProfiles = async ({
   auth = { user: superUser, space: null },
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
-  req: UserProfilesBulkGetParams;
+  req: BulkGetUserProfilesParams;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
 }): ReturnType<UserProfileServiceStart['bulkGet']> => {
+  const { uids, ...restParams } = req;
+  const uniqueIDs = [...new Set(uids)];
+
   const { body: profiles } = await supertest
-    .post(`${getSpaceUrlPrefix(auth.space)}${INTERNAL_USER_PROFILES_BULK_GET}`)
+    .post(`${getSpaceUrlPrefix(auth.space)}/internal/security/user_profile/_bulk_get`)
     .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'true')
-    .send(req)
+    .send({ uids: uniqueIDs, ...restParams })
     .expect(expectedHttpCode);
 
   return profiles;

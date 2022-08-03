@@ -343,10 +343,9 @@ export const constructQueryOptions = ({
   const statusFilter = status != null ? addStatusFilter({ status }) : undefined;
   const severityFilter = severity != null ? addSeverityFilter({ severity }) : undefined;
   const rangeFilter = buildRangeFilter({ from, to });
-  const assigneesFilter = buildNestedFilter({
+  const assigneesFilter = buildFilter({
     filters: assignees,
-    field: 'uid',
-    nestedField: 'assignees',
+    field: 'assignees.uid',
     operator: 'or',
   });
 

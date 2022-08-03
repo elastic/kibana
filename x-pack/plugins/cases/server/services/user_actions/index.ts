@@ -18,7 +18,6 @@ import {
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { KueryNode } from '@kbn/es-query';
-import { CaseAssignees, CaseUserProfile } from '../../../common/api/cases/assignee';
 import { isCommentRequestTypePersistableState } from '../../../common/utils/attachments';
 import {
   isConnectorUserAction,
@@ -36,6 +35,8 @@ import {
   CaseUserActionAttributes,
   CaseUserActionAttributesWithoutConnectorId,
   CaseUserActionResponse,
+  CaseUserProfile,
+  CaseAssignees,
   CommentRequest,
   NONE_CONNECTOR_ID,
   User,

@@ -38,7 +38,7 @@ export const casePayload: CasePostRequest = {
   settings: { syncAlerts: true },
   severity: CaseSeverity.LOW,
   owner: SECURITY_SOLUTION_OWNER,
-  assignees: [],
+  assignees: [{ uid: '1' }],
 };
 
 export const externalService = {

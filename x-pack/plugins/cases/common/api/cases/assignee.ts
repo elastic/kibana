@@ -6,12 +6,8 @@
  */
 
 import * as rt from 'io-ts';
-
-export const CaseUserProfileRt = rt.type({
-  uid: rt.string,
-});
+import { CaseUserProfileRt } from './user_profiles';
 
 export const CaseAssigneesRt = rt.array(CaseUserProfileRt);
 
-export type CaseUserProfile = rt.TypeOf<typeof CaseUserProfileRt>;
 export type CaseAssignees = rt.TypeOf<typeof CaseAssigneesRt>;

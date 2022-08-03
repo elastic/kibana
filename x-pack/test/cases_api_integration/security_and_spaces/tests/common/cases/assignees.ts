@@ -9,12 +9,12 @@ import expect from '@kbn/expect';
 
 import { findCasesResp, getPostCaseRequest, postCaseReq } from '../../../../common/lib/mock';
 import {
-  deleteCasesByESQuery,
   createCase,
   suggestUserProfiles,
   getCase,
   findCases,
   updateCase,
+  deleteAllCaseItems,
 } from '../../../../common/lib/utils';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -29,11 +29,20 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('assignees', () => {
     afterEach(async () => {
-      await deleteCasesByESQuery(es);
+      await deleteAllCaseItems(es);
     });
 
     it('allows the assignees field to be an empty array', async () => {
       const postedCase = await createCase(supertest, getPostCaseRequest());
+
+      expect(postedCase.assignees).to.eql([]);
+    });
+
+    it('allows creating a case without the assignees field in the request', async () => {
+      const postReq = getPostCaseRequest();
+      const { assignees, ...restRequest } = postReq;
+
+      const postedCase = await createCase(supertest, restRequest);
 
       expect(postedCase.assignees).to.eql([]);
     });

@@ -39,6 +39,10 @@ describe('type_guards', () => {
       expect(isAssigneesArray([{ a: '1' }])).toBeFalsy();
     });
 
+    it('returns false when the value is an array of assignees and non assignee objects', () => {
+      expect(isAssigneesArray([{ uid: '1' }, { hi: '2' }])).toBeFalsy();
+    });
+
     it('returns true when the value is an array of a single assignee', () => {
       expect(isAssigneesArray([{ uid: '1' }])).toBeTruthy();
     });

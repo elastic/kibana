@@ -673,7 +673,7 @@ describe('CaseUserActionService', () => {
               type: 'create_case',
               owner: 'securitySolution',
               payload: {
-                assignees: [],
+                assignees: [{ uid: '1' }],
                 connector: {
                   fields: {
                     category: 'Denial of Service',

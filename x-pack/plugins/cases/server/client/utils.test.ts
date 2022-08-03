@@ -513,21 +513,21 @@ describe('utils', () => {
           buildNestedFilter({
             filters: ['hello'],
             field: 'uid',
-            nestedField: 'assignees',
+            nestedField: 'nestedField',
             operator: 'or',
           })!
         )
       ).toMatchInlineSnapshot(`
         Object {
           "nested": Object {
-            "path": "cases.attributes.assignees",
+            "path": "cases.attributes.nestedField",
             "query": Object {
               "bool": Object {
                 "minimum_should_match": 1,
                 "should": Array [
                   Object {
                     "match": Object {
-                      "cases.attributes.assignees.uid": "hello",
+                      "cases.attributes.nestedField.uid": "hello",
                     },
                   },
                 ],
@@ -545,7 +545,7 @@ describe('utils', () => {
           buildNestedFilter({
             filters: ['uid1', 'uid2'],
             field: 'uid',
-            nestedField: 'assignees',
+            nestedField: 'nestedField',
             operator: 'or',
           })!
         )
@@ -556,14 +556,14 @@ describe('utils', () => {
             "should": Array [
               Object {
                 "nested": Object {
-                  "path": "cases.attributes.assignees",
+                  "path": "cases.attributes.nestedField",
                   "query": Object {
                     "bool": Object {
                       "minimum_should_match": 1,
                       "should": Array [
                         Object {
                           "match": Object {
-                            "cases.attributes.assignees.uid": "uid1",
+                            "cases.attributes.nestedField.uid": "uid1",
                           },
                         },
                       ],
@@ -574,14 +574,14 @@ describe('utils', () => {
               },
               Object {
                 "nested": Object {
-                  "path": "cases.attributes.assignees",
+                  "path": "cases.attributes.nestedField",
                   "query": Object {
                     "bool": Object {
                       "minimum_should_match": 1,
                       "should": Array [
                         Object {
                           "match": Object {
-                            "cases.attributes.assignees.uid": "uid2",
+                            "cases.attributes.nestedField.uid": "uid2",
                           },
                         },
                       ],
@@ -596,13 +596,13 @@ describe('utils', () => {
       `);
     });
 
-    it("returns a KueryNode for multiple filters and'ded together", () => {
+    it("returns a KueryNode for multiple filters and'ed together", () => {
       expect(
         toElasticsearchQuery(
           buildNestedFilter({
             filters: ['uid1', 'uid2'],
             field: 'uid',
-            nestedField: 'assignees',
+            nestedField: 'nestedField',
             operator: 'and',
           })!
         )
@@ -612,14 +612,14 @@ describe('utils', () => {
             "filter": Array [
               Object {
                 "nested": Object {
-                  "path": "cases.attributes.assignees",
+                  "path": "cases.attributes.nestedField",
                   "query": Object {
                     "bool": Object {
                       "minimum_should_match": 1,
                       "should": Array [
                         Object {
                           "match": Object {
-                            "cases.attributes.assignees.uid": "uid1",
+                            "cases.attributes.nestedField.uid": "uid1",
                           },
                         },
                       ],
@@ -630,14 +630,14 @@ describe('utils', () => {
               },
               Object {
                 "nested": Object {
-                  "path": "cases.attributes.assignees",
+                  "path": "cases.attributes.nestedField",
                   "query": Object {
                     "bool": Object {
                       "minimum_should_match": 1,
                       "should": Array [
                         Object {
                           "match": Object {
-                            "cases.attributes.assignees.uid": "uid2",
+                            "cases.attributes.nestedField.uid": "uid2",
                           },
                         },
                       ],

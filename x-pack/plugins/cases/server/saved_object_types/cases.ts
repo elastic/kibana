@@ -28,7 +28,6 @@ export const createCaseSavedObjectType = (
   mappings: {
     properties: {
       assignees: {
-        type: 'nested',
         properties: {
           uid: {
             type: 'keyword',

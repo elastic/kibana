@@ -156,12 +156,12 @@ export const CasePostRequestRt = rt.intersection([
      * creating this case must also be granted access to that plugin's feature.
      */
     owner: rt.string,
+  }),
+  rt.partial({
     /**
      * The users assigned to the case
      */
     assignees: CaseAssigneesRt,
-  }),
-  rt.partial({
     /**
      * The severity of the case. The severity is
      * default it to "low" if not provided.
