@@ -30,6 +30,7 @@ export interface Field {
   search_analyzer?: string;
   ignore_above?: number;
   object_type?: string;
+  object_type_mapping_type?: string;
   scaling_factor?: number;
   dynamic?: 'strict' | boolean;
   include_in_parent?: boolean;
