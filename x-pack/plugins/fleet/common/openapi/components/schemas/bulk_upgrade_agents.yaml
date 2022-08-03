@@ -21,6 +21,9 @@ properties:
         items:
           type: string
         description: list of agent IDs
+  force:
+    type: boolean
+    description: Force upgrade, skipping validation (should be used with caution)
 required:
   - agents
   - version
