@@ -67,7 +67,7 @@ describe('Policy details artifacts list', () => {
             getArtifactPath={getEventFiltersListPath}
           />
         );
-        await waitFor(mockedApi.responseProvider.eventFiltersList);
+        await waitFor(() => expect(mockedApi.responseProvider.eventFiltersList).toHaveBeenCalled());
       });
       return renderResult;
     };

@@ -166,19 +166,23 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
         }
       });
 
-      it('should disable all buttons while an update is in flight', () => {
-        expect(getByTestId('testPage-flyout-cancelButton')).not.toBeEnabled();
-        expect(getByTestId('testPage-flyout-submitButton')).not.toBeEnabled();
+      it('should disable all buttons while an update is in flight', async () => {
+        await waitFor(() => {
+          expect(getByTestId('testPage-flyout-cancelButton')).not.toBeEnabled();
+          expect(getByTestId('testPage-flyout-submitButton')).not.toBeEnabled();
+        });
       });
 
-      it('should display loading indicator on Submit while an update is in flight', () => {
-        expect(
-          getByTestId('testPage-flyout-submitButton').querySelector('.euiLoadingSpinner')
-        ).toBeTruthy();
+      it('should display loading indicator on Submit while an update is in flight', async () => {
+        await waitFor(() =>
+          expect(
+            getByTestId('testPage-flyout-submitButton').querySelector('.euiLoadingSpinner')
+          ).toBeTruthy()
+        );
       });
 
-      it('should pass `disabled=true` to the Form component while an update is in flight', () => {
-        expect(getLastFormComponentProps().disabled).toBe(true);
+      it('should pass `disabled=true` to the Form component while an update is in flight', async () => {
+        await waitFor(() => expect(getLastFormComponentProps().disabled).toBe(true));
       });
     });
 
@@ -223,34 +227,33 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
             userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
           });
 
-          await act(async () => {
-            await waitFor(() =>
-              expect(mockedApi.responseProvider.trustedAppCreate).toHaveBeenCalled()
-            );
-          });
+          await waitFor(() =>
+            expect(mockedApi.responseProvider.trustedAppCreate).toHaveBeenCalled()
+          );
 
           return renderResult;
         };
       });
 
-      // FIXME:PT investigate test failure
-      // (I don't understand why its failing... All assertions are successful -- HELP!)
-      it.skip('should re-enable `Cancel` and `Submit` buttons', async () => {
-        await render();
+      it('should re-enable `Cancel` and `Submit` buttons', async () => {
+        await act(async () => {
+          await render();
+        });
 
-        expect(renderResult.getByTestId('testPage-flyout-cancelButton')).not.toBeEnabled();
+        await waitFor(() => {
+          expect(renderResult.getByTestId('testPage-flyout-cancelButton')).toBeEnabled();
 
-        expect(renderResult.getByTestId('testPage-flyout-submitButton')).not.toBeEnabled();
+          expect(renderResult.getByTestId('testPage-flyout-submitButton')).toBeEnabled();
+        });
       });
 
-      // FIXME:PT investigate test failure
-      // (I don't understand why its failing... All assertions are successful -- HELP!)
-      it.skip('should pass error along to the Form component and reset disabled back to `false`', async () => {
-        await render();
-        const lastFormProps = getLastFormComponentProps();
+      it('should pass error along to the Form component and reset disabled back to `false`', async () => {
+        await waitFor(() => {
+          const lastFormProps = getLastFormComponentProps();
 
-        expect(lastFormProps.error).toBeInstanceOf(Error);
-        expect(lastFormProps.disabled).toBe(false);
+          expect(lastFormProps.error).toBeInstanceOf(Error);
+          expect(lastFormProps.disabled).toBe(false);
+        });
       });
     });
 
@@ -355,10 +358,8 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
     it('should provide Form component with the item for edit', async () => {
       const { getByTestId } = await render();
 
-      await act(async () => {
-        await waitFor(() => {
-          expect(getByTestId('formMock')).toBeTruthy();
-        });
+      await waitFor(() => {
+        expect(getByTestId('formMock')).toBeTruthy();
       });
 
       const expectedProps = {
@@ -383,10 +384,8 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
 
       await render();
 
-      await act(async () => {
-        await waitFor(() => {
-          expect(mockedApi.responseProvider.trustedApp).toHaveBeenCalled();
-        });
+      await waitFor(() => {
+        expect(mockedApi.responseProvider.trustedApp).toHaveBeenCalled();
       });
 
       expect(coreStart.notifications.toasts.addWarning).toHaveBeenCalledWith(
@@ -397,10 +396,8 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
     it('should not show the expired license callout', async () => {
       const { queryByTestId, getByTestId } = await render();
 
-      await act(async () => {
-        await waitFor(() => {
-          expect(getByTestId('formMock')).toBeTruthy();
-        });
+      await waitFor(() => {
+        expect(getByTestId('formMock')).toBeTruthy();
       });
 
       expect(queryByTestId('testPage-flyout-expiredLicenseCallout')).not.toBeTruthy();
@@ -425,10 +422,8 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
 
       const { getByTestId } = await render();
 
-      await act(async () => {
-        await waitFor(() => {
-          expect(getByTestId('formMock')).toBeTruthy();
-        });
+      await waitFor(() => {
+        expect(getByTestId('formMock')).toBeTruthy();
       });
 
       expect(getByTestId('testPage-flyout-expiredLicenseCallout')).toBeTruthy();

@@ -63,24 +63,12 @@ describe('When on the host isolation exceptions entry form', () => {
         ).resolves.toHaveLength(10);
       });
 
-      await act(async () => {
-        await waitFor(() => {
-          userEvent.click(
-            renderResult.getByTestId('hostIsolationExceptionsListPage-pageAddButton')
-          );
-        });
+      userEvent.click(renderResult.getByTestId('hostIsolationExceptionsListPage-pageAddButton'));
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('hostIsolationExceptions-form')).toBeTruthy();
+        expect(fleetApiMock.responseProvider.endpointPackagePolicyList).toHaveBeenCalled();
       });
-
-      await act(async () => {
-        await waitFor(() => {
-          expect(renderResult.getByTestId('hostIsolationExceptions-form')).toBeTruthy();
-        });
-
-        await waitFor(() => {
-          expect(fleetApiMock.responseProvider.endpointPackagePolicyList).toHaveBeenCalled();
-        });
-      });
-
       return renderResult;
     };
 
@@ -92,9 +80,7 @@ describe('When on the host isolation exceptions entry form', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/136165
-  // FLAKY: https://github.com/elastic/kibana/issues/136166
-  describe.skip('and creating a new exception', () => {
+  describe('and creating a new exception', () => {
     beforeEach(async () => {
       await render();
     });
