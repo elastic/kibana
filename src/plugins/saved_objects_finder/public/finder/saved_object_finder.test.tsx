@@ -56,6 +56,12 @@ describe('SavedObjectsFinder', () => {
   ];
 
   const savedObjectsManagement = savedObjectsManagementPluginMock.createStartContract();
+  savedObjectsManagement.parseQuery.mockImplementation(() => ({
+    queryText: '',
+    visibleTypes: [],
+    selectedTags: [],
+  }));
+  savedObjectsManagement.getAllowedTypes.mockImplementation(() => Promise.resolve([]));
   const savedObjectsPlugin = savedObjectsPluginMock.createStartContract();
   const savedObjectsTagging = savedObjectTaggingOssPluginMock.createStart().getTaggingApi();
 

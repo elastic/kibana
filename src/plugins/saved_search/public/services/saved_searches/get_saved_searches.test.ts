@@ -151,6 +151,7 @@ describe('getSavedSearch', () => {
             "desc",
           ],
         ],
+        "tags": Array [],
         "title": "test1",
         "viewMode": undefined,
       }
@@ -245,6 +246,7 @@ describe('getSavedSearch', () => {
             "desc",
           ],
         ],
+        "tags": Array [],
         "title": "test2",
         "viewMode": undefined,
       }
