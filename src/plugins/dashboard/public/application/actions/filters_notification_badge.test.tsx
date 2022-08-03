@@ -13,7 +13,7 @@ import { coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { CoreStart } from '@kbn/core/public';
 import { FiltersNotificationBadge } from '.';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
-import { Filter } from '@kbn/es-query';
+import { Query, AggregateQuery, Filter } from '@kbn/es-query';
 
 import {
   EditPanelAction,
@@ -42,7 +42,8 @@ const start = doStart();
 let action: FiltersNotificationBadge;
 let container: DashboardContainer;
 let embeddable: ContactCardEmbeddable & FilterableEmbeddable;
-const mockGetFilters = jest.fn(() => [] as Filter[]);
+const mockGetFilters = jest.fn(async () => [] as Filter[]);
+const mockGetQuery = jest.fn(async () => undefined as Query | AggregateQuery | undefined);
 let coreStart: CoreStart;
 let editAction: EditPanelAction;
 
@@ -110,6 +111,7 @@ beforeEach(async () => {
   );
   embeddable = embeddablePluginMock.mockFilterableEmbeddable(contactCardEmbeddable, {
     getFilters: () => mockGetFilters(),
+    getQuery: () => mockGetQuery(),
   });
 });
 
@@ -122,13 +124,16 @@ test('Badge is incompatible with Error Embeddables', async () => {
   expect(await action.isCompatible({ embeddable: errorEmbeddable })).toBe(false);
 });
 
-test('Badge is not shown when panel has no app-level filters', async () => {
+test('Badge is not shown when panel has no app-level filters or queries', async () => {
   expect(await action.isCompatible({ embeddable })).toBe(false);
 });
 
 test('Badge is shown when panel has at least one app-level filter', async () => {
-  mockGetFilters.mockImplementation(
-    () => [getMockPhraseFilter('fieldName', 'someValue')] as Filter[]
-  );
+  mockGetFilters.mockResolvedValue([getMockPhraseFilter('fieldName', 'someValue')] as Filter[]);
+  expect(await action.isCompatible({ embeddable })).toBe(true);
+});
+
+test('Badge is shown when panel has at least one app-level query', async () => {
+  mockGetQuery.mockResolvedValue({ sql: 'SELECT * FROM test_dataview' } as AggregateQuery);
   expect(await action.isCompatible({ embeddable })).toBe(true);
 });
