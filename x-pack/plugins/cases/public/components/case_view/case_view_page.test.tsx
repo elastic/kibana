@@ -371,6 +371,38 @@ describe('CaseViewPage', () => {
   });
 
   describe('Tabs', () => {
+    jest.mock('@kbn/kibana-react-plugin/public', () => ({
+      useKibana: () => ({
+        services: {
+          application: {
+            capabilities: {
+              fakeCases: {
+                create_cases: true,
+                read_cases: true,
+                update_cases: true,
+                delete_cases: true,
+                push_cases: true,
+              },
+            },
+          },
+          cases: {
+            ui: {
+              getCasesContext: () => null,
+            },
+            helpers: {
+              getUICapabilities: () => ({
+                all: true,
+                read: true,
+                create: true,
+                update: true,
+                delete: true,
+                push: true,
+              }),
+            },
+          },
+        },
+      }),
+    }));
     it('renders tabs correctly', async () => {
       const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
       await act(async () => {
