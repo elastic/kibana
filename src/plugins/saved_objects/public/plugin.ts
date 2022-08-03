@@ -10,16 +10,7 @@ import { CoreStart, Plugin } from '@kbn/core/public';
 
 import './index.scss';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import {
-  DataViewsPublicPluginStart,
-  SavedObjectsClientPublicToCommon,
-} from '@kbn/data-views-plugin/public';
-import {
-  getAllowedTypes,
-  getSavedObjectLabel,
-  SavedObjectManagementTypeInfo,
-} from '@kbn/saved-objects-management-plugin/public';
-import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import {
   createSavedObjectClass,
   SavedObjectDecoratorRegistry,
@@ -27,11 +18,9 @@ import {
 } from './saved_object';
 import { PER_PAGE_SETTING, LISTING_LIMIT_SETTING } from '../common';
 import { SavedObject } from './types';
-import { setSavedObjects } from './services';
 
 export interface SavedObjectSetup {
   registerDecorator: (config: SavedObjectDecoratorConfig<any>) => void;
-  registerSavedObjectsTagging: (savedObjectsTagging: SavedObjectsTaggingApi) => void;
 }
 
 export interface SavedObjectsStart {
@@ -56,10 +45,6 @@ export interface SavedObjectsStart {
      */
     getListingLimit: () => number;
   };
-  getSavedObjectLabel: typeof getSavedObjectLabel;
-  getAllowedTypes: () => Promise<SavedObjectManagementTypeInfo[]>;
-  getSavedObjectsTagging: () => SavedObjectsTaggingApi | undefined;
-  savedObjectsClient: SavedObjectsClientPublicToCommon;
 }
 
 export interface SavedObjectsStartDeps {
@@ -71,19 +56,15 @@ export class SavedObjectsPublicPlugin
   implements Plugin<SavedObjectSetup, SavedObjectsStart, object, SavedObjectsStartDeps>
 {
   private decoratorRegistry = new SavedObjectDecoratorRegistry();
-  private savedObjectsTagging?: SavedObjectsTaggingApi;
 
   public setup(): SavedObjectSetup {
     return {
       registerDecorator: (config) => this.decoratorRegistry.register(config),
-      registerSavedObjectsTagging: (savedObjectsTagging) => {
-        this.savedObjectsTagging = savedObjectsTagging;
-      },
     };
   }
 
   public start(core: CoreStart, { data, dataViews }: SavedObjectsStartDeps) {
-    const start = {
+    return {
       SavedObjectClass: createSavedObjectClass(
         {
           dataViews,
@@ -98,14 +79,6 @@ export class SavedObjectsPublicPlugin
         getPerPage: () => core.uiSettings.get(PER_PAGE_SETTING),
         getListingLimit: () => core.uiSettings.get(LISTING_LIMIT_SETTING),
       },
-      getSavedObjectLabel,
-      getAllowedTypes: getAllowedTypes.bind(undefined, core.http),
-      getSavedObjectsTagging: () => this.savedObjectsTagging,
-      savedObjectsClient: new SavedObjectsClientPublicToCommon(core.savedObjects.client),
     };
-
-    setSavedObjects(start);
-
-    return start;
   }
 }

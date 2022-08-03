@@ -10,8 +10,9 @@ import { debounce } from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
 import {
+  getTagFindReferences,
+  parseQuery,
   SavedObjectManagementTypeInfo,
-  SavedObjectsManagementPluginStart,
 } from '@kbn/saved-objects-management-plugin/public';
 
 import {
@@ -35,9 +36,12 @@ import {
   IUiSettingsClient,
   SavedObjectsStart,
   SavedObject,
+  SimpleSavedObjectImpl,
 } from '@kbn/core/public';
-import { SavedObjectsStart as SavedObjectsPlugin } from '@kbn/saved-objects-plugin/public/plugin';
-import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+
+import { simpleSavedObjectToSavedObject } from '@kbn/data-views-plugin/public';
+import { LISTING_LIMIT_SETTING } from '../../common';
+import { getSavedObjects } from '../services';
 
 export interface SavedObjectMetaData<T = unknown> {
   type: string;
@@ -47,7 +51,6 @@ export interface SavedObjectMetaData<T = unknown> {
   showSavedObject?(savedObject: SimpleSavedObject<T>): boolean;
   getSavedObjectSubType?(savedObject: SimpleSavedObject<T>): string;
   includeFields?: string[];
-  defaultSearchField?: string;
 }
 
 interface FinderAttributes {
@@ -99,9 +102,6 @@ export type SavedObjectFinderProps = SavedObjectFinderFixedPage | SavedObjectFin
 export type SavedObjectFinderUiProps = {
   savedObjects: CoreStart['savedObjects'];
   uiSettings: CoreStart['uiSettings'];
-  savedObjectsManagement: SavedObjectsManagementPluginStart;
-  savedObjectsPlugin: SavedObjectsPlugin;
-  savedObjectsTagging: SavedObjectsTaggingApi | undefined;
 } & SavedObjectFinderProps;
 
 class SavedObjectFinderUi extends React.Component<
@@ -121,10 +121,7 @@ class SavedObjectFinderUi extends React.Component<
 
   private debouncedFetch = debounce(async (query: Query) => {
     const metaDataMap = this.getSavedObjectMetaDataMap();
-    const { queryText, visibleTypes, selectedTags } = this.props.savedObjectsManagement.parseQuery(
-      query,
-      this.state.allowedTypes
-    );
+    const { queryText, visibleTypes, selectedTags } = parseQuery(query, this.state.allowedTypes);
 
     const fields = Object.values(metaDataMap)
       .map((metaData) => metaData.includeFields || [])
@@ -134,25 +131,18 @@ class SavedObjectFinderUi extends React.Component<
       (type) => !visibleTypes || visibleTypes.includes(type)
     );
 
-    const perPage = this.props.savedObjectsPlugin.settings.getListingLimit();
-    const additionalSearchFields = Object.values(metaDataMap).reduce<string[]>((col, item) => {
-      if (item.defaultSearchField) {
-        col.push(item.defaultSearchField);
-      }
-      return col;
-    }, []);
-
+    const perPage = this.props.uiSettings.get(LISTING_LIMIT_SETTING);
     const response = await this.props.savedObjects.client.find<FinderAttributes>({
       type: searchTypes,
       fields: [...new Set(fields)],
       search: queryText ? `${queryText}*` : undefined,
       page: 1,
       perPage,
-      searchFields: ['title^3', 'description', ...additionalSearchFields],
+      searchFields: ['title^3', 'description'],
       defaultSearchOperator: 'AND',
-      hasReference: this.props.savedObjectsManagement.getTagFindReferences({
+      hasReference: getTagFindReferences({
         selectedTags,
-        taggingApi: this.props.savedObjectsTagging,
+        taggingApi: getSavedObjects().getSavedObjectsTagging(),
       }),
     });
 
@@ -164,11 +154,10 @@ class SavedObjectFinderUi extends React.Component<
         const titleToUse = typeof title === 'string' ? title : '';
         const nameToUse = name && typeof name === 'string' ? name : titleToUse;
         return {
-          ...savedObject,
-          version: savedObject._version,
+          ...simpleSavedObjectToSavedObject(savedObject),
           title: titleToUse,
           name: nameToUse,
-          simple: savedObject,
+          simple: new SimpleSavedObjectImpl(this.props.savedObjects.client, savedObject),
         };
       })
       .filter((savedObject) => {
@@ -236,7 +225,7 @@ class SavedObjectFinderUi extends React.Component<
   };
 
   private fetchAllowedTypes = async () => {
-    const allowedTypes = await this.props.savedObjectsManagement.getAllowedTypes();
+    const allowedTypes = await getSavedObjects().getAllowedTypes();
     this.setState({ allowedTypes });
   };
 
@@ -247,7 +236,7 @@ class SavedObjectFinderUi extends React.Component<
   //    with the current mappings
   public render() {
     const { onChoose, savedObjectMetaData } = this.props;
-    const taggingApi = this.props.savedObjectsTagging;
+    const taggingApi = getSavedObjects().getSavedObjectsTagging();
     const originalTagColumn = taggingApi?.ui.getTableColumnDefinition();
     const tagColumn: EuiTableFieldDataColumnType<SavedObject> | undefined = originalTagColumn
       ? {
@@ -270,17 +259,11 @@ class SavedObjectFinderUi extends React.Component<
           defaultMessage: 'Type of the saved object',
         }),
         sortable: ({ type }) => {
-          return this.props.savedObjectsManagement.getSavedObjectLabel(
-            type,
-            this.state.allowedTypes
-          );
+          return getSavedObjects().getSavedObjectLabel(type, this.state.allowedTypes);
         },
         'data-test-subj': 'savedObjectFinderType',
         render: (type, item) => {
-          const typeLabel = this.props.savedObjectsManagement.getSavedObjectLabel(
-            type,
-            this.state.allowedTypes
-          );
+          const typeLabel = getSavedObjects().getSavedObjectLabel(type, this.state.allowedTypes);
           const currentSavedObjectMetaData = savedObjectMetaData.find(
             (metaData) => metaData.type === item.type
           )!;
@@ -398,22 +381,9 @@ class SavedObjectFinderUi extends React.Component<
   }
 }
 
-const getSavedObjectFinder = (
-  savedObject: SavedObjectsStart,
-  uiSettings: IUiSettingsClient,
-  savedObjectsManagement: SavedObjectsManagementPluginStart,
-  savedObjectsPlugin: SavedObjectsPlugin,
-  savedObjectsTagging: SavedObjectsTaggingApi | undefined
-) => {
+const getSavedObjectFinder = (savedObject: SavedObjectsStart, uiSettings: IUiSettingsClient) => {
   return (props: SavedObjectFinderProps) => (
-    <SavedObjectFinderUi
-      {...props}
-      savedObjects={savedObject}
-      uiSettings={uiSettings}
-      savedObjectsManagement={savedObjectsManagement}
-      savedObjectsPlugin={savedObjectsPlugin}
-      savedObjectsTagging={savedObjectsTagging}
-    />
+    <SavedObjectFinderUi {...props} savedObjects={savedObject} uiSettings={uiSettings} />
   );
 };
 

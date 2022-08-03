@@ -40,10 +40,6 @@ export class SavedObjectTaggingOssPlugin
         provider.then(
           (api) => {
             this.api = api;
-
-            if (savedObjects) {
-              savedObjects.registerSavedObjectsTagging(this.api);
-            }
           },
           (error) => {
             // eslint-disable-next-line no-console
