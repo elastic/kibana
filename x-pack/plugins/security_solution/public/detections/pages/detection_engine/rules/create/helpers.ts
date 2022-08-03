@@ -50,9 +50,9 @@ import { stepActionsDefaultValue } from '../../../../components/rules/step_rule_
 import type { FieldValueThreshold } from '../../../../components/rules/threshold_input';
 import type { EqlOptionsSelected } from '../../../../../../common/search_strategy';
 
-export const getTimeTypeValue = (time: string): { unit: string; value: number } => {
-  const timeObj = {
-    unit: '',
+export const getTimeTypeValue = (time: string): { unit: Unit; value: number } => {
+  const timeObj: { unit: Unit; value: number } = {
+    unit: 'ms',
     value: 0,
   };
   const filterTimeVal = time.match(/\d+/g);
@@ -65,7 +65,7 @@ export const getTimeTypeValue = (time: string): { unit: string; value: number } 
     filterTimeType != null &&
     ['s', 'm', 'h'].includes(filterTimeType[0])
   ) {
-    timeObj.unit = filterTimeType[0];
+    timeObj.unit = filterTimeType[0] as Unit;
   }
   return timeObj;
 };
@@ -461,8 +461,8 @@ export const formatScheduleStepData = (scheduleData: ScheduleStepRule): Schedule
       formatScheduleData.interval
     );
     const { unit: fromUnit, value: fromValue } = getTimeTypeValue(formatScheduleData.from);
-    const duration = moment.duration(intervalValue, intervalUnit as 's' | 'm' | 'h');
-    duration.add(fromValue, fromUnit as 's' | 'm' | 'h');
+    const duration = moment.duration(intervalValue, intervalUnit);
+    duration.add(fromValue, fromUnit);
     formatScheduleData.from = `now-${duration.asSeconds()}s`;
     formatScheduleData.to = 'now';
   }
