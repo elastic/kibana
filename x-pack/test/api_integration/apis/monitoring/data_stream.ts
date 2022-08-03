@@ -34,7 +34,9 @@ export const getLifecycleMethods = (getService: FtrProviderContext['getService']
       const archivesArray = Array.isArray(archives) ? archives : [archives];
       await Promise.all(archivesArray.map((archive) => esArchiver.unload(archive)));
 
-      await deleteDataStream('metricbeat-*');
+      // Monitoring mappings are already installed by elasticsearch
+      // the archiver doesn't have any reference to the template and can't automatically delete it.
+      // that's why we manually delete the data stream here to clean up the environment
       await deleteDataStream('.monitoring-*');
     },
   };
