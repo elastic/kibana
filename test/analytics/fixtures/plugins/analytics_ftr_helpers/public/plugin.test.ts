@@ -127,5 +127,32 @@ describe('AnalyticsFTRHelpers', () => {
         })
       ).resolves.toEqual([{ ...event, timestamp: '2022-06-10T00:00:00.000Z' }]);
     });
+
+    test('should filter by `filters` when provided', async () => {
+      // 3 enqueued events
+      const events = [
+        { ...event, timestamp: '2022-01-10T00:00:00.000Z' },
+        { ...event, timestamp: '2022-03-10T00:00:00.000Z', properties: { my_property: 20 } },
+        { ...event, timestamp: '2022-06-10T00:00:00.000Z' },
+      ];
+      events.forEach((ev) => events$.next(ev));
+
+      await expect(
+        window.__analytics_ftr_helpers__.getEvents(1, {
+          eventTypes: [event.event_type],
+          filters: {
+            'properties.my_property': {
+              eq: 20,
+              gte: 20,
+              lte: 20,
+              gt: 10,
+              lt: 30,
+            },
+          },
+        })
+      ).resolves.toEqual([
+        { ...event, timestamp: '2022-03-10T00:00:00.000Z', properties: { my_property: 20 } },
+      ]);
+    });
   });
 });
