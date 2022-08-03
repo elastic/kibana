@@ -45,7 +45,7 @@ const AppRoot = React.memo(
     const { alertsTableConfigurationRegistry, getAlertsStateTable } = triggersActionsUi;
 
     const alertStateProps: AlertsTableStateProps = {
-      configurationId: 'testConfigId',
+      configurationId: 'triggersActionsUiTestId',
       id: `alerts-table-test`,
       alertsTableConfigurationRegistry,
       featureIds: [AlertConsumers.LOGS],

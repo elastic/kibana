@@ -48,7 +48,7 @@ export class TriggersActionsUiTestPlugin
     }: { alertsTableConfigurationRegistry: TypeRegistry<AlertsTableConfigurationRegistry> } =
       triggersActionsUi;
     const config = {
-      id: 'triggersActions',
+      id: 'triggersActionsUiTestId',
       columns: [
         {
           id: 'event.action',
