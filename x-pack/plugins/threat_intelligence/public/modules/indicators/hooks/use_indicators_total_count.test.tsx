@@ -7,9 +7,7 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { BehaviorSubject } from 'rxjs';
-
-import { mockSearchService } from '../../../common/mocks/mock_kibana_search_service';
-
+import { mockKibanaDataService } from '../../../common/mocks/mock_kibana_data_service';
 import { useIndicatorsTotalCount } from './use_indicators_total_count';
 import { DEFAULT_THREAT_INDEX_KEY } from '../../../../common/constants';
 
@@ -18,11 +16,11 @@ jest.mock('../../../hooks/use_kibana');
 const indicatorsResponse = { rawResponse: { hits: { hits: [], total: 0 } } };
 
 describe('useIndicatorsTotalCount()', () => {
-  let mockSearch: ReturnType<typeof mockSearchService>;
+  let mockData: ReturnType<typeof mockKibanaDataService>;
 
   describe('when mounted', () => {
     beforeEach(() => {
-      mockSearch = mockSearchService(new BehaviorSubject(indicatorsResponse));
+      mockData = mockKibanaDataService({ searchSubject: new BehaviorSubject(indicatorsResponse) });
     });
 
     beforeEach(async () => {
@@ -30,17 +28,17 @@ describe('useIndicatorsTotalCount()', () => {
     });
 
     it('should query the database for threat indicators', async () => {
-      expect(mockSearch.search).toHaveBeenCalledTimes(1);
+      expect(mockData.search).toHaveBeenCalledTimes(1);
     });
 
     it('should retrieve index patterns from settings', () => {
-      expect(mockSearch.getUiSetting).toHaveBeenCalledWith(DEFAULT_THREAT_INDEX_KEY);
+      expect(mockData.getUiSetting).toHaveBeenCalledWith(DEFAULT_THREAT_INDEX_KEY);
     });
   });
 
   describe('when rerendered', () => {
     beforeEach(async () => {
-      mockSearch = mockSearchService(new BehaviorSubject(indicatorsResponse));
+      mockData = mockKibanaDataService({ searchSubject: new BehaviorSubject(indicatorsResponse) });
     });
 
     it('should not call the database when rerendered', async () => {
@@ -48,13 +46,13 @@ describe('useIndicatorsTotalCount()', () => {
 
       rerender();
 
-      expect(mockSearch.search).toHaveBeenCalledTimes(1);
+      expect(mockData.search).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('when query succeeds', () => {
     beforeEach(async () => {
-      mockSearch = mockSearchService(new BehaviorSubject(indicatorsResponse));
+      mockData = mockKibanaDataService({ searchSubject: new BehaviorSubject(indicatorsResponse) });
     });
 
     it('should return the total count', async () => {

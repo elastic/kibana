@@ -14,3 +14,5 @@ export const DEFAULT_THREAT_INDEX_KEY = 'securitySolution:defaultThreatIndex' as
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
 
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
+
+export const THREAT_QUERY_BASE = 'event.type: indicator and event.category : threat';

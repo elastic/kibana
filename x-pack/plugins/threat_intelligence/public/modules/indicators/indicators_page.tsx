@@ -6,6 +6,7 @@
  */
 
 import React, { VFC } from 'react';
+import { IndicatorsBarChartWrapper } from './components/indicators_barchart_wrapper/indicators_barchart_wrapper';
 import { IndicatorsTable } from './components/indicators_table/indicators_table';
 import { useIndicators } from './hooks/use_indicators';
 import { EmptyPage } from '../../components/empty_page';
@@ -67,7 +68,7 @@ export const IndicatorsPage: VFC = () => {
           onSubmitDateRange={handleSubmitTimeRange}
         />
       </FiltersGlobal>
-
+      <IndicatorsBarChartWrapper timeRange={timeRange} indexPatterns={indexPatterns} />
       <IndicatorsTable {...indicators} />
     </DefaultPageLayout>
   );
