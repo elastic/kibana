@@ -12,11 +12,11 @@ import { CoreStart, OverlayStart } from '@kbn/core/public';
 import { EditPanelAction, isFilterableEmbeddable } from '@kbn/embeddable-plugin/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 
+import { AggregateQuery, isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
 import { Action, IncompatibleActionError } from '../../services/ui_actions';
 import { toMountPoint } from '../../services/kibana_react';
 import { IEmbeddable, isErrorEmbeddable } from '../../services/embeddable';
 import { dashboardFilterNotificationBadge } from '../../dashboard_strings';
-import { AggregateQuery, isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
 
 export const BADGE_FILTERS_NOTIFICATION = 'ACTION_FILTERS_NOTIFICATION';
 
