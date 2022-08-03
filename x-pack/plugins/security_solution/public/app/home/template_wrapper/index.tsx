@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { EuiPanel, EuiThemeProvider, useEuiTheme } from '@elastic/eui';
+import { EuiPageTemplate, EuiThemeProvider, useEuiTheme } from '@elastic/eui';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -22,7 +22,6 @@ import {
   SecuritySolutionBottomBarProps,
 } from './bottom_bar';
 import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
-import { gutterTimeline } from '../../../common/lib/helpers';
 import { useShowPagesWithEmptyView } from '../../../common/utils/empty_view/use_show_pages_with_empty_view';
 import { useIsPolicySettingsBarVisible } from '../../../management/pages/policy/view/policy_hooks';
 import { useIsGroupedNavigationEnabled } from '../../../common/components/navigation/helpers';
@@ -56,17 +55,6 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<{
       transform: none;
     }
   }
-
-  // If the bottom bar is visible add padding to the navigation
-  ${({ $addBottomPadding }) =>
-    $addBottomPadding &&
-    `
-    @media (min-width: 768px) {
-      .kbnSolutionNav {
-        padding-bottom: ${gutterTimeline};
-      }
-    }
-  `}
 `;
 
 export const SecuritySolutionTemplateWrapper: React.FC<{
@@ -106,30 +94,28 @@ export const SecuritySolutionTemplateWrapper: React.FC<{
     <StyledKibanaPageTemplate
       $addBottomPadding={addBottomPadding}
       $isShowingTimelineOverlay={isShowingTimelineOverlay}
-      bottomBarProps={SecuritySolutionBottomBarProps}
-      bottomBar={
-        isTimelineBottomBarVisible && (
-          <EuiThemeProvider colorMode={globalColorMode}>
-            <SecuritySolutionBottomBar />
-          </EuiThemeProvider>
-        )
-      }
       paddingSize="none"
       solutionNav={solutionNav}
       restrictWidth={false}
       {...emptyStateProps}
     >
-      <>
-        <GlobalKQLHeader />
-        <EuiPanel
-          className="securityPageWrapper"
-          data-test-subj="pageContainer"
-          hasShadow={false}
-          paddingSize="l"
-        >
-          {children}
-        </EuiPanel>
-      </>
+      <GlobalKQLHeader />
+
+      <EuiPageTemplate.Section
+        className="securityPageWrapper"
+        data-test-subj="pageContainer"
+        paddingSize="l"
+      >
+        {children}
+      </EuiPageTemplate.Section>
+
+      {isTimelineBottomBarVisible && (
+        <EuiPageTemplate.BottomBar {...SecuritySolutionBottomBarProps}>
+          <EuiThemeProvider colorMode={globalColorMode}>
+            <SecuritySolutionBottomBar onAppLeave={onAppLeave} />
+          </EuiThemeProvider>
+        </EuiPageTemplate.BottomBar>
+      )}
     </StyledKibanaPageTemplate>
   );
 });
