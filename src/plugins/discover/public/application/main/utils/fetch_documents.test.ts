@@ -43,9 +43,9 @@ describe('test fetchDocuments', () => {
   test('rejects on query failure', () => {
     savedSearchMock.searchSource.fetch$ = () => throwErrorRx(() => new Error('Oh noes!'));
 
-    expect(fetchDocuments(savedSearchMock.searchSource, getDeps())).rejects.toEqual({
-      msg: 'Oh noes!',
-    });
+    expect(fetchDocuments(savedSearchMock.searchSource, getDeps())).rejects.toEqual(
+      new Error('Oh noes!')
+    );
   });
 
   test('fetch$ is called with execution context containing savedSearch id', async () => {
