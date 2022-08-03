@@ -181,7 +181,7 @@ export default function ({
           log
         );
 
-        expect(percentDiff).to.be.lessThan(0.09);
+        expect(percentDiff).to.be.lessThan(0.01);
       });
 
       it('PNG file matches the baseline: large dashboard', async function () {
@@ -211,7 +211,7 @@ export default function ({
           log
         );
 
-        expect(percentDiff).to.be.lessThan(0.09);
+        expect(percentDiff).to.be.lessThan(0.01);
       });
     });
 
@@ -317,7 +317,7 @@ export default function ({
           log
         );
 
-        expect(percentDiff).to.be.lessThan(0.09);
+        expect(percentDiff).to.be.lessThan(0.01);
       });
     });
   });
