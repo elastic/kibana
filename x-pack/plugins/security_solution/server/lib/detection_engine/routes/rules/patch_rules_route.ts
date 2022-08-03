@@ -16,6 +16,7 @@ import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwAuthzError } from '../../../machine_learning/validation';
 import { patchRules } from '../../rules/patch_rules';
 import { buildSiemResponse } from '../utils';
+import { checkDefaultRuleExceptionListReferences } from './utils/check_for_default_rule_exception_list';
 
 import { getIdError } from './utils';
 import { transformValidate } from './validate';
@@ -64,6 +65,9 @@ export const patchRulesRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
           ruleId: params.rule_id,
           id: params.id,
         });
+
+        checkDefaultRuleExceptionListReferences({ exceptionLists: params.exceptions_list });
+
         if (existingRule?.params.type) {
           // reject an unauthorized modification of an ML rule
           throwAuthzError(await mlAuthz.validateRuleType(existingRule?.params.type));

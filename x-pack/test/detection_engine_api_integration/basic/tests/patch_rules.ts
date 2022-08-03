@@ -26,7 +26,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  describe('patch_rules', () => {
+  describe.only('patch_rules', () => {
     describe('patch rules', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest, log);

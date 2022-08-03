@@ -5,27 +5,30 @@
  * 2.0.
  */
 
-import type * as t from 'io-ts';
+import * as t from 'io-ts';
+
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import { schema } from '@kbn/config-schema';
 import { BadRequestError, transformError } from '@kbn/securitysolution-es-utils';
 import type {
-  CreateExceptionListItemSchema,
   CreateExceptionListSchema,
+  ExceptionListItemSchema,
   ExceptionListSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
-import {
   createExceptionListSchema,
   ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
-
+import { exceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { exactCheck, formatErrors, validate } from '@kbn/securitysolution-io-ts-utils';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { CreateRuleExceptionListItemSchema, CreateRuleExceptionSchemaDecoded } from '../../../../../common/detection_engine/schemas/request';
+
+import type {
+  CreateRuleExceptionListItemSchema,
+  CreateRuleExceptionSchemaDecoded,
+} from '../../../../../common/detection_engine/schemas/request';
 import { createRuleExceptionsSchema } from '../../../../../common/detection_engine/schemas/request';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
@@ -33,6 +36,7 @@ import { buildSiemResponse } from '../utils';
 import { patchRules } from '../../rules/patch_rules';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { readRules } from '../../rules/read_rules';
+import type { RuleParams } from '../../schemas/rule_schemas';
 
 export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) => {
   router.post(
@@ -78,13 +82,26 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
         if (rule == null) {
           return siemResponse.error({
             statusCode: 500,
-            body: `Unable to add exception list to rule - rule with id:"${ruleId}" not found`,
+            body: `Unable to add exception to rule - rule with id:"${ruleId}" not found`,
           });
         }
 
-        const [ruleDefaultList] = rule.params.exceptionsList.filter(
+        let createdItems: ExceptionListItemSchema[];
+
+        const ruleDefaultLists = rule.params.exceptionsList.filter(
           (list) => list.type === ExceptionListTypeEnum.RULE_DEFAULT
         );
+
+        // This should hopefully never happen, but could if we forget to add such a check to one
+        // of our routes allowing the user to update the rule to have more than one default list added
+        if (ruleDefaultLists.length > 1) {
+          return siemResponse.error({
+            statusCode: 500,
+            body: `Unable to add exception to rule - rule with id:"${ruleId}" has more than one default exception list assigned.`,
+          });
+        }
+
+        const [ruleDefaultList] = ruleDefaultLists;
 
         if (ruleDefaultList != null) {
           // check that list does indeed exist
@@ -96,7 +113,11 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
 
           // if list does exist, just need to create the items
           if (exceptionListAssociatedToRule != null) {
-            await createExceptionListItems({ items, defaultList: exceptionListAssociatedToRule, listsClient });
+            createdItems = await createExceptionListItems({
+              items,
+              defaultList: exceptionListAssociatedToRule,
+              listsClient,
+            });
           } else {
             // This means that there was missed cleanup when this rule exception list was
             // deleted and it remained referenced on the rule. Let's remove it from the rule,
@@ -108,7 +129,7 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
               removeOldAssociation: true,
             });
 
-            await createExceptionListItems({ items, defaultList, listsClient });
+            createdItems = await createExceptionListItems({ items, defaultList, listsClient });
           }
         } else {
           const defaultList = await createAndAssociateDefaultExceptionList({
@@ -118,10 +139,15 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
             removeOldAssociation: false,
           });
 
-          await createExceptionListItems({ items, defaultList, listsClient });
+          createdItems = await createExceptionListItems({ items, defaultList, listsClient });
         }
 
-        return response.ok({});
+        const [validated, errors] = validate(createdItems, t.array(exceptionListItemSchema));
+        if (errors != null) {
+          return siemResponse.error({ body: errors, statusCode: 500 });
+        } else {
+          return response.ok({ body: validated ?? {} });
+        }
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({
@@ -141,7 +167,7 @@ export const createExceptionListItems = async ({
   items: CreateRuleExceptionListItemSchema[];
   defaultList: ExceptionListSchema;
   listsClient: ExceptionListClient | null;
-}) => {
+}): Promise<ExceptionListItemSchema[]> => {
   return Promise.all(
     items.map((item) =>
       listsClient?.createExceptionListItem({
@@ -187,7 +213,7 @@ export const createAndAssociateDefaultExceptionList = async ({
   const onLeft = (errors: t.Errors): BadRequestError | CreateExceptionListSchema => {
     return new BadRequestError(formatErrors(errors).join());
   };
-  const onRight = (schema: CreateExceptionListSchema): CreateExceptionListSchema => schema;
+  const onRight = (listSchema: CreateExceptionListSchema): CreateExceptionListSchema => listSchema;
 
   const {
     description,
@@ -221,7 +247,9 @@ export const createAndAssociateDefaultExceptionList = async ({
   // we need to go ahead and "attach" it to the rule.
   const existingRuleExceptionLists = rule.params.exceptionsList ?? [];
 
-  const ruleExceptionLists = removeOldAssociation ? existingRuleExceptionLists.filter((list) => list.type === ExceptionListTypeEnum.RULE_DEFAULT) : existingRuleExceptionLists;
+  const ruleExceptionLists = removeOldAssociation
+    ? existingRuleExceptionLists.filter((list) => list.type !== ExceptionListTypeEnum.RULE_DEFAULT)
+    : existingRuleExceptionLists;
 
   await patchRules({
     rulesClient,

@@ -79,7 +79,6 @@ export * from './get_web_hook_action';
 export * from './index_event_log_execution_events';
 export * from './install_prepackaged_rules';
 export * from './refresh_index';
-export * from './remove_exceptions_server_generated_properties';
 export * from './remove_server_generated_properties';
 export * from './remove_server_generated_properties_including_rule_id';
 export * from './resolve_simple_rule_output';

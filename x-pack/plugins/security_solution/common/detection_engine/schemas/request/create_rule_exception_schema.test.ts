@@ -9,10 +9,7 @@ import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 import { createRuleExceptionsSchema } from './create_rule_exception_schema';
-import type {
-  CreateRuleExceptionSchema,
-  CreateRuleExceptionListItemSchemaDecoded,
-} from './create_rule_exception_schema';
+import type { CreateRuleExceptionSchema } from './create_rule_exception_schema';
 
 import { getCreateExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
 
@@ -51,36 +48,26 @@ describe('createRuleExceptionsSchema', () => {
     const decoded = createRuleExceptionsSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    message.schema = {
-      items: message.schema.items.map<CreateRuleExceptionListItemSchemaDecoded>(
-        (item: CreateRuleExceptionListItemSchemaDecoded) => {
-          delete item.item_id;
-          return item;
-        }
-      ),
-    };
 
     expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual({
-      items: [
-        {
-          comments: [],
-          description: 'Exception item for rule default exception list',
-          entries: [
-            {
-              field: 'some.not.nested.field',
-              operator: 'included',
-              type: 'match',
-              value: 'some value',
-            },
-          ],
-          name: 'Sample exception item',
-          os_types: [],
-          tags: [],
-          type: 'simple',
-        },
-      ],
-    });
+    expect((message.schema as CreateRuleExceptionSchema).items[0]).toEqual(
+      expect.objectContaining({
+        comments: [],
+        description: 'Exception item for rule default exception list',
+        entries: [
+          {
+            field: 'some.not.nested.field',
+            operator: 'included',
+            type: 'match',
+            value: 'some value',
+          },
+        ],
+        name: 'Sample exception item',
+        os_types: [],
+        tags: [],
+        type: 'simple',
+      })
+    );
   });
 
   test('items with list_id do not validate', () => {
