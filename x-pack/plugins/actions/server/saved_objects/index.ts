@@ -19,6 +19,7 @@ import { getActionTaskParamsMigrations } from './action_task_params_migrations';
 import { PreConfiguredAction, RawAction } from '../types';
 import { getImportWarnings } from './get_import_warnings';
 import { transformConnectorsForExport } from './transform_connectors_for_export';
+import { transformConnectorsForImport } from './transform_connectors_for_import';
 import { ActionTypeRegistry } from '../action_type_registry';
 import {
   ACTION_SAVED_OBJECT_TYPE,
@@ -54,6 +55,7 @@ export function setupSavedObjects(
         return transformConnectorsForExport(objects, actionTypeRegistry);
       },
       onImport(connectors) {
+        transformConnectorsForImport(connectors);
         return {
           warnings: getImportWarnings(connectors as Array<SavedObject<RawAction>>),
         };
