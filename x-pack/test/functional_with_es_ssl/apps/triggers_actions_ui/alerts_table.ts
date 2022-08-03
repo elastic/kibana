@@ -16,7 +16,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const find = getService('find');
 
-  describe('Alerts table', function () {
+  describe.skip('Alerts table', function () {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
     });
