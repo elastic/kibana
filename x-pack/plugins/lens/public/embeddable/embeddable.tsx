@@ -875,8 +875,9 @@ export class Embeddable
   }
 
   destroy() {
-    super.destroy();
     this.isDestroyed = true;
+    super.destroy();
+
     if (this.inputReloadSubscriptions.length > 0) {
       this.inputReloadSubscriptions.forEach((reloadSub) => {
         reloadSub.unsubscribe();
