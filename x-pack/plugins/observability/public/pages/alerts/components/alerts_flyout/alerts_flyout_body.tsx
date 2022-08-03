@@ -33,14 +33,14 @@ import { AlertStatusIndicator } from '../../../../components/shared/alert_status
 import { FlyoutProps } from './types';
 
 // eslint-disable-next-line import/no-default-export
-export default function AlertsFlyoutBody({ alert, id }: FlyoutProps) {
+export default function AlertsFlyoutBody({ alert, id: pageId }: FlyoutProps) {
   const { services } = useKibana();
   const { http } = services;
   const dateFormat = useUiSetting<string>('dateFormat');
   const prepend = http?.basePath.prepend;
   const ruleId = get(alert.fields, ALERT_RULE_UUID) ?? null;
   const linkToRule =
-    id !== RULE_DETAILS_PAGE_ID && ruleId && prepend
+    pageId !== RULE_DETAILS_PAGE_ID && ruleId && prepend
       ? prepend(paths.observability.ruleDetails(ruleId))
       : null;
   const overviewListItems = [
