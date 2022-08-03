@@ -51,6 +51,7 @@ const secrets = {
   password: 'pass',
 };
 const actionId = '1234';
+const mockTime = new Date('2021-10-20T19:41:02.754+0300');
 describe('Cases webhook service', () => {
   let service: ExternalService;
 
@@ -64,8 +65,13 @@ describe('Cases webhook service', () => {
       logger,
       configurationUtilities
     );
+    jest.useFakeTimers('modern');
+    jest.setSystemTime(mockTime);
   });
 
+  afterAll(() => {
+    jest.useRealTimers();
+  });
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -128,8 +134,6 @@ describe('Cases webhook service', () => {
         fields: {
           title: 'title',
           description: 'description',
-          created: '2021-10-20T19:41:02.754+0300',
-          updated: '2021-10-20T19:41:02.754+0300',
         },
       },
     };
@@ -140,8 +144,7 @@ describe('Cases webhook service', () => {
       expect(res).toEqual({
         id: '1',
         title: 'CK-1',
-        createdAt: '2021-10-20T19:41:02.754+0300',
-        updatedAt: '2021-10-20T19:41:02.754+0300',
+        pushedDate: mockTime.toISOString(),
       });
     });
 
@@ -184,7 +187,7 @@ describe('Cases webhook service', () => {
       );
 
       await expect(service.getIncident('1')).rejects.toThrow(
-        '[Action][Webhook - Case Management]: Unable to get case with id 1. Error: Response is missing the expected fields: fields.created, key, fields.updated'
+        '[Action][Webhook - Case Management]: Unable to get case with id 1. Error: Response is missing the expected field: key'
       );
     });
   });
@@ -213,7 +216,6 @@ describe('Cases webhook service', () => {
           data: {
             id: '1',
             key: 'CK-1',
-            fields: { created: '2020-04-27T10:59:46.202Z', updated: '2020-04-27T10:59:46.202Z' },
           },
         })
       );
@@ -227,7 +229,7 @@ describe('Cases webhook service', () => {
       expect(res).toEqual({
         title: 'CK-1',
         id: '1',
-        pushedDate: '2020-04-27T10:59:46.202Z',
+        pushedDate: mockTime.toISOString(),
         url: 'https://coolsite.net/browse/CK-1',
       });
     });
@@ -238,7 +240,6 @@ describe('Cases webhook service', () => {
           data: {
             id: '1',
             key: 'CK-1',
-            fields: { created: '2020-04-27T10:59:46.202Z' },
           },
         })
       );
@@ -248,7 +249,6 @@ describe('Cases webhook service', () => {
           data: {
             id: '1',
             key: 'CK-1',
-            fields: { created: '2020-04-27T10:59:46.202Z', updated: '2020-04-27T10:59:46.202Z' },
           },
         })
       );
@@ -312,7 +312,6 @@ describe('Cases webhook service', () => {
           data: {
             id: '1',
             key: 'CK-1',
-            fields: { created: '2020-04-27T10:59:46.202Z', updated: '2020-04-27T10:59:46.202Z' },
           },
         })
       );
@@ -322,7 +321,7 @@ describe('Cases webhook service', () => {
       expect(res).toEqual({
         title: 'CK-1',
         id: '1',
-        pushedDate: '2020-04-27T10:59:46.202Z',
+        pushedDate: mockTime.toISOString(),
         url: 'https://coolsite.net/browse/CK-1',
       });
     });
@@ -333,7 +332,6 @@ describe('Cases webhook service', () => {
           data: {
             id: '1',
             key: 'CK-1',
-            fields: { created: '2020-04-27T10:59:46.202Z', updated: '2020-04-27T10:59:46.202Z' },
           },
         })
       );
@@ -395,7 +393,6 @@ describe('Cases webhook service', () => {
           data: {
             id: '1',
             key: 'CK-1',
-            created: '2020-04-27T10:59:46.202Z',
           },
         })
       );
@@ -411,7 +408,6 @@ describe('Cases webhook service', () => {
           data: {
             id: '1',
             key: 'CK-1',
-            created: '2020-04-27T10:59:46.202Z',
           },
         })
       );
@@ -646,10 +642,6 @@ describe('Cases webhook service', () => {
           data: {
             id: '../../malicious-app/malicious-endpoint/',
             key: '../../malicious-app/malicious-endpoint/',
-            fields: {
-              updated: '2020-04-27T10:59:46.202Z',
-              created: '2020-04-27T10:59:46.202Z',
-            },
           },
         })
       );

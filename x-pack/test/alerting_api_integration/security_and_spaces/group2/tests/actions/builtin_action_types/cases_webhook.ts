@@ -382,13 +382,21 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
             .expect(200);
 
           expect(proxyHaveBeenCalled).to.equal(true);
+          const { pushedDate, ...dataWithoutTime } = body.data;
+          body.data = dataWithoutTime;
+
+          // check timestamp
+          const timestampTime = new Date(pushedDate).getTime();
+          const timeNow = Date.now();
+          const timeMinuteAgo = timeNow - 1000 * 60;
+          expect(timestampTime).to.be.within(timeMinuteAgo, timeNow);
+
           expect(body).to.eql({
             status: 'ok',
             connector_id: simulatedActionId,
             data: {
               id: '123',
               title: 'CK-1',
-              pushedDate: '2020-04-27T14:17:45.490Z',
               url: `${casesWebhookSimulatorURL}/browse/CK-1`,
             },
           });
