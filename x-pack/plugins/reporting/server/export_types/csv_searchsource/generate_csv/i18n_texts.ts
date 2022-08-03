@@ -33,7 +33,7 @@ export const i18nTexts = {
       defaultMessage: 'Encountered an unknown error: {message}',
       values: { message },
     }),
-  csvRowCountError: ({ expected, received }: { expected: number; received: number }) =>
+  csvRowCountError: ({ expected, received }: { expected?: number; received: number }) =>
     i18n.translate('xpack.reporting.exportTypes.csv.generateCsv.incorrectRowCount', {
       defaultMessage:
         'Encountered an error with the number of CSV rows generated from the search: expected {expected}, received {received}.',

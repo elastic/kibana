@@ -59,6 +59,7 @@ export class CsvGenerator {
   private async scan(index: DataView, searchSource: ISearchSource, settings: CsvExportSettings) {
     const { scroll: scrollSettings, includeFrozen } = settings;
     const searchBody = searchSource.getSearchRequestBody();
+    this.logger.debug(`Tracking total hits with: track_total_hits=${searchBody.track_total_hits}`);
     this.logger.info(`Executing search request...`);
     const searchParams = {
       params: {
@@ -277,7 +278,8 @@ export class CsvGenerator {
     const warnings: string[] = [];
     let first = true;
     let currentRecord = -1;
-    let totalRecords = 0;
+    let totalRecords: number | undefined;
+    let totalRelation = 'eq';
     let scrollId: string | undefined;
 
     // apply timezone from the job to all date field formatters
@@ -309,8 +311,14 @@ export class CsvGenerator {
           results = await this.scan(index, searchSource, settings);
           scrollId = results?._scroll_id;
           if (results?.hits?.total != null) {
-            totalRecords = results.hits.total as number;
-            this.logger.debug(`Total search results: ${totalRecords}`);
+            const { hits } = results;
+            if (typeof hits.total === 'number') {
+              totalRecords = hits.total;
+            } else {
+              totalRecords = hits.total?.value;
+              totalRelation = hits.total?.relation ?? 'unknown';
+            }
+            this.logger.info(`Total hits: [${totalRecords}].` + `Accuracy: ${totalRelation}`);
           }
         } else {
           // use the scroll cursor in Elasticsearch
@@ -364,7 +372,7 @@ export class CsvGenerator {
 
         // update iterator
         currentRecord += table.rows.length;
-      } while (currentRecord < totalRecords - 1);
+      } while (totalRecords != null && currentRecord < totalRecords - 1);
 
       // Add warnings to be logged
       if (this.csvContainsFormulas && escapeFormulaValues) {
@@ -396,7 +404,7 @@ export class CsvGenerator {
       }
     }
 
-    this.logger.debug(`Finished generating. Row count: ${this.csvRowCount}.`);
+    this.logger.info(`Finished generating. Row count: ${this.csvRowCount}.`);
 
     if (!this.maxSizeReached && this.csvRowCount !== totalRecords) {
       this.logger.warn(
