@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, FC } from 'react';
+import React, { useEffect, useMemo, useState, FC } from 'react';
+import { isEqual } from 'lodash';
 
-import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
-
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiCallOut, EuiEmptyPrompt, EuiSpacer, EuiText } from '@elastic/eui';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ProgressControls } from '@kbn/aiops-components';
@@ -57,6 +56,10 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   const { services } = useAiOpsKibana();
   const basePath = services.http?.basePath.get() ?? '';
 
+  const [currentAnalysisWindowParameters, setCurrentAnalysisWindowParameters] = useState<
+    WindowParameters | undefined
+  >();
+
   const {
     cancel,
     start,
@@ -88,13 +91,23 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     if (onSelectedChangePoint) {
       onSelectedChangePoint(null);
     }
+
+    setCurrentAnalysisWindowParameters(windowParameters);
     start();
   }
 
   useEffect(() => {
-    startHandler();
+    setCurrentAnalysisWindowParameters(windowParameters);
+    start();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const shouldRerunAnalysis = useMemo(
+    () =>
+      currentAnalysisWindowParameters !== undefined &&
+      !isEqual(currentAnalysisWindowParameters, windowParameters),
+    [currentAnalysisWindowParameters, windowParameters]
+  );
 
   const showSpikeAnalysisTable = data?.changePoints.length > 0;
 
@@ -106,6 +119,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
         isRunning={isRunning}
         onRefresh={startHandler}
         onCancel={cancel}
+        shouldRerunAnalysis={shouldRerunAnalysis}
       />
       <EuiSpacer size="xs" />
       {!isRunning && !showSpikeAnalysisTable && (
