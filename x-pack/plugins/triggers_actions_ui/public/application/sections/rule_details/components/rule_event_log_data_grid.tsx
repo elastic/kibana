@@ -102,7 +102,7 @@ const numSucceededActionsDisplay = i18n.translate(
 const numSucceededActionsToolTip = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.succeededActionsToolTip',
   {
-    defaultMessage: 'The number of actions that completed successfully',
+    defaultMessage: 'The number of actions that were completed successfully.',
   }
 );
 
