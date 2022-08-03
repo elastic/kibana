@@ -163,7 +163,7 @@ describe('ALL - Packs', () => {
       cy.contains(`Successfully activated "${PACK_NAME}" pack`).should('exist');
     });
 
-    it('should verify that packs are triggered', () => {
+    it.skip('should verify that packs are triggered', () => {
       cy.waitForReact();
       preparePack(PACK_NAME);
       cy.contains(`${PACK_NAME} details`).should('exist');
