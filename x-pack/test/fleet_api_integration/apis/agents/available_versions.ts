@@ -15,26 +15,22 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
 
-  describe('Agent available_versions API', () => {
-    const VERSIONS_FILE_PATH = 'x-pack/plugins/fleet/target/';
-    const FILENAME = 'agent_versions_list.json';
-    before(async () => {
-      try {
-        await fs.access(VERSIONS_FILE_PATH);
-      } catch (error) {
-        await fs.mkdir(VERSIONS_FILE_PATH);
-      }
-    });
-    const writeJson = async (versions: string[]) => {
-      const json = JSON.stringify({ versions });
-      await fs.writeFile(path.resolve(VERSIONS_FILE_PATH, FILENAME), json);
-    };
+  const VERSIONS_FILE_PATH = 'x-pack/plugins/fleet/target/';
+  const FILENAME = 'agent_versions_list.json';
 
+  const writeJson = async (versions: string[]) => {
+    const json = JSON.stringify(versions);
+    await fs.writeFile(path.resolve(VERSIONS_FILE_PATH, FILENAME), json);
+  };
+
+  describe('Agent available_versions API', () => {
     describe('GET /api/fleet/agents/available_versions', () => {
       it('should fail if no file was generated at build time', async () => {
         await supertest.get(`/api/fleet/agents/available_versions`).expect(500);
       });
+    });
 
+    describe('GET /api/fleet/agents/available_versions', () => {
       it('should return a list of versions > 7.17.0', async () => {
         const kibanaVersion = await kibanaServer.version.get();
         const kibanaVersionCoerced = semverCoerce(kibanaVersion)?.version;
