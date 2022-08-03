@@ -74,13 +74,13 @@ export const DetailsPanel = React.memo(
 
     let visiblePanel = null; // store in variable to make return statement more readable
     let panelSize: EuiFlyoutProps['size'] = 's';
-    let uniqueKey: string = timelineId;
+    let flyoutUniqueKey: string = timelineId;
     const contextID = `${timelineId}-${activeTab}`;
     const isDraggable = timelineId === TimelineId.active && activeTab === TimelineTabs.query;
 
     if (currentTabDetail?.panelView === 'eventDetail' && currentTabDetail?.params?.eventId) {
       panelSize = 'm';
-      uniqueKey = currentTabDetail.params.eventId;
+      flyoutUniqueKey = currentTabDetail.params.eventId;
       visiblePanel = (
         <EventDetailsPanel
           browserFields={browserFields}
@@ -98,7 +98,7 @@ export const DetailsPanel = React.memo(
     }
 
     if (currentTabDetail?.panelView === 'hostDetail' && currentTabDetail?.params?.hostName) {
-      uniqueKey = currentTabDetail.params.hostName;
+      flyoutUniqueKey = currentTabDetail.params.hostName;
       visiblePanel = (
         <HostDetailsPanel
           contextID={contextID}
@@ -111,7 +111,7 @@ export const DetailsPanel = React.memo(
     }
 
     if (currentTabDetail?.panelView === 'userDetail' && currentTabDetail?.params?.userName) {
-      uniqueKey = currentTabDetail.params.userName;
+      flyoutUniqueKey = currentTabDetail.params.userName;
       visiblePanel = (
         <UserDetailsPanel
           contextID={contextID}
@@ -124,7 +124,7 @@ export const DetailsPanel = React.memo(
     }
 
     if (currentTabDetail?.panelView === 'networkDetail' && currentTabDetail?.params?.ip) {
-      uniqueKey = currentTabDetail.params.ip;
+      flyoutUniqueKey = currentTabDetail.params.ip;
       visiblePanel = (
         <NetworkDetailsPanel
           contextID={contextID}
@@ -142,7 +142,7 @@ export const DetailsPanel = React.memo(
         size={panelSize}
         onClose={closePanel}
         ownFocus={false}
-        key={uniqueKey}
+        key={flyoutUniqueKey}
       >
         {visiblePanel}
       </EuiFlyout>
