@@ -844,6 +844,7 @@ it('will return partial data if the scroll or search fails', async () => {
             },
             "warnings": Array [
               "Received a 500 response from Elasticsearch: my error",
+              "Encountered an error with the number of CSV rows generated from the search: expected NaN, received 0.",
             ],
           }
         `);
@@ -892,6 +893,7 @@ it('handles unknown errors', async () => {
             },
             "warnings": Array [
               "Encountered an unknown error: An unknown error",
+              "Encountered an error with the number of CSV rows generated from the search: expected NaN, received 0.",
             ],
           }
         `);
