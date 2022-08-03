@@ -48,9 +48,14 @@ const AppRoot = React.memo(
       configurationId: 'triggersActionsUiTestId',
       id: `alerts-table-test`,
       alertsTableConfigurationRegistry,
-      featureIds: [AlertConsumers.LOGS],
-      query: {},
+      featureIds: [AlertConsumers.INFRASTRUCTURE],
+      query: {
+        bool: {
+          filter: [],
+        },
+      },
       showExpandToDetails: false,
+      pageSize: 10,
     };
 
     return (
