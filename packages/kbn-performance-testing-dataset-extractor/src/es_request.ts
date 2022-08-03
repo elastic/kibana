@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { ESClient, ESQueryDocument } from './es_client';
+import { ESClient, SpanDocument } from './es_client';
 import { KibanaRequest } from './server_request';
 
 const httpMethodRegExp = /(GET|POST|DELETE|HEAD|PUT|OPTIONS)/;
 const httpPathRegExp = /(?<=GET|POST|DELETE|HEAD|PUT|OPTIONS).*/;
 
-interface ESQuery {
+interface Request {
   id: string;
   transactionId: string;
   name: string;
@@ -30,7 +30,7 @@ interface ESQuery {
 interface Stream {
   startTime: number;
   endTime: number;
-  queries: ESQuery[];
+  requests: Request[];
 }
 
 const strToJSON = (str: string): JSON | undefined => {
@@ -58,13 +58,13 @@ const parseQueryStatement = (statement: string): { params?: string; body?: JSON 
   }
 };
 
-export const fetchQueries = async (esClient: ESClient, transactions: KibanaRequest[]) => {
-  const esQueries = new Array<ESQuery>();
+export const fetchRequests = async (esClient: ESClient, transactions: KibanaRequest[]) => {
+  const esQueries = new Array<Request>();
   for (let i = 0; i < transactions.length; i++) {
     const transactionId = transactions[i].transaction.id;
     const esHits = await esClient.getSpans(transactionId);
     const spans = esHits
-      .map((hit) => hit!._source as ESQueryDocument)
+      .map((hit) => hit!._source as SpanDocument)
       .map((hit) => {
         const query = hit?.span.db?.statement ? parseQueryStatement(hit?.span.db?.statement) : {};
         return {
@@ -95,13 +95,13 @@ export const fetchQueries = async (esClient: ESClient, transactions: KibanaReque
   return esQueries;
 };
 
-export const queriesToStreams = (esQueries: ESQuery[]) => {
-  const sorted = esQueries.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+export const requestsToStreams = (requests: Request[]) => {
+  const sorted = requests.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   const streams = new Map<string, Stream>();
 
-  for (const query of sorted) {
-    const startTime = new Date(query.date).getTime();
-    const endTime = new Date(query.date).getTime() + query.duration / 1000;
+  for (const request of sorted) {
+    const startTime = new Date(request.date).getTime();
+    const endTime = new Date(request.date).getTime() + request.duration / 1000;
     // searching if query starts before any existing stream ended
     const match = Array.from(streams.keys()).filter((key) => {
       const streamEndTime = streams.get(key)?.endTime;
@@ -110,7 +110,7 @@ export const queriesToStreams = (esQueries: ESQuery[]) => {
     const stream = streams.get(match[0]);
     if (stream) {
       // adding query to the existing stream
-      stream.queries.push(query);
+      stream.requests.push(request);
       // updating the stream endTime if needed
       if (endTime > stream.endTime) {
         stream.endTime = endTime;
@@ -119,10 +119,10 @@ export const queriesToStreams = (esQueries: ESQuery[]) => {
       streams.set(match[0], stream);
     } else {
       // add a new stream
-      streams.set(query.date, {
+      streams.set(request.date, {
         startTime,
         endTime,
-        queries: [query],
+        requests: [request],
       });
     }
   }
@@ -132,7 +132,7 @@ export const queriesToStreams = (esQueries: ESQuery[]) => {
     return {
       startTime: new Date(stream.startTime).toISOString(),
       endTime: new Date(stream.endTime).toISOString(),
-      queries: stream.queries,
+      requests: stream.requests,
     };
   });
 };

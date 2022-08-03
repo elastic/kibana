@@ -12,9 +12,9 @@ import { existsSync } from 'fs';
 import path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
 import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { ESClient, TransactionDocument } from './es_client';
+import { ESClient, Document, TransactionDocument } from './es_client';
 import { getRequests } from './server_request';
-import { fetchQueries, queriesToStreams } from './es_query';
+import { fetchRequests, requestsToStreams } from './es_request';
 
 const DATE_FORMAT = `YYYY-MM-DD'T'HH:mm:ss.SSS'Z'`;
 
@@ -46,8 +46,8 @@ export interface ScalabilitySetup {
   maxDuration: string;
 }
 
-const calculateTransactionTimeRage = (hit: SearchHit<TransactionDocument>) => {
-  const trSource = hit._source as TransactionDocument;
+const calculateTransactionTimeRage = (hit: SearchHit<Document>) => {
+  const trSource = hit._source as Document;
   const startTime = trSource['@timestamp'];
   const duration = trSource.transaction.duration.us / 1000; // convert microseconds to milliseconds
   const endTime = moment(startTime, DATE_FORMAT).add(duration, 'milliseconds').toISOString();
@@ -100,12 +100,12 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
   const source = hits[0]!._source as TransactionDocument;
   const kibanaVersion = source.service.version;
 
-  const requests = getRequests(hits, withoutStaticResources, log);
-  const esQueries = await fetchQueries(esClient, requests);
+  const kibanaRequests = getRequests(hits, withoutStaticResources, log);
+  const esRequests = await fetchRequests(esClient, kibanaRequests);
   log.info(
-    `Found ${requests.length} Kibana server requests and ${esQueries.length} Elasticsearch queries`
+    `Found ${kibanaRequests.length} Kibana server and ${esRequests.length} Elasticsearch requests`
   );
-  const streams = queriesToStreams(esQueries);
+  const streams = requestsToStreams(esRequests);
 
   const outputDir = path.resolve('target/scalability_traces');
   const fileName = `${journeyName.replace(/ /g, '')}-${buildId}.json`;
@@ -116,7 +116,7 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
         journeyName,
         kibanaVersion,
         scalabilitySetup,
-        requests,
+        requests: kibanaRequests,
       },
       path.resolve(outputDir, 'server'),
       fileName,

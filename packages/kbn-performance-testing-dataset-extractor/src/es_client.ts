@@ -17,11 +17,6 @@ interface ClientOptions {
   password: string;
 }
 
-interface Labels {
-  journeyName: string;
-  maxUsersCount: string;
-}
-
 export interface Headers {
   readonly [key: string]: string[];
 }
@@ -43,16 +38,16 @@ interface Transaction {
   duration: { us: number };
 }
 
-interface Document {
+export interface Document {
   '@timestamp': string;
-  labels?: Labels;
+  labels?: { journeyName: string; maxUsersCount: string };
   parent?: { id: string };
   service: { name: string; environment: string };
   trace: { id: string };
   transaction: Transaction;
 }
 
-export interface ESQueryDocument extends Omit<Document, 'transaction'> {
+export interface SpanDocument extends Omit<Document, 'transaction'> {
   transaction: { id: string };
   span: {
     id: string;
@@ -118,7 +113,6 @@ export class ESClient {
   async getTransactions<T>(queryFilters: QueryDslQueryContainer[]) {
     const searchRequest: SearchRequest = {
       body: {
-        track_total_hits: true,
         sort: [
           {
             '@timestamp': {
@@ -128,11 +122,8 @@ export class ESClient {
           },
         ],
         size: 10000,
-        stored_fields: ['*'],
-        _source: true,
         query: {
           bool: {
-            must: [],
             filter: [
               {
                 bool: {
@@ -140,8 +131,6 @@ export class ESClient {
                 },
               },
             ],
-            should: [],
-            must_not: [],
           },
         },
       },
@@ -162,7 +151,7 @@ export class ESClient {
       { field: 'labels.performancePhase', value: 'TEST' },
     ];
     const queryFilters = filters.map((filter) => addBooleanFilter(filter));
-    return await this.getTransactions<TransactionDocument>(queryFilters);
+    return await this.getTransactions<Document>(queryFilters);
   }
 
   async getKibanaServerTransactions(
@@ -186,6 +175,6 @@ export class ESClient {
   async getSpans(transactionId: string) {
     const filters = [{ field: 'parent.id', value: transactionId }];
     const queryFilters = filters.map((filter) => addBooleanFilter(filter));
-    return await this.getTransactions<ESQueryDocument>(queryFilters);
+    return await this.getTransactions<SpanDocument>(queryFilters);
   }
 }
