@@ -64,7 +64,7 @@ export async function getExecutablesAndStackTraces({
       events: stackTraceEvents,
     });
 
-    return withProfilingSpan('mget_stack_frames_and_executables', () =>
+    return withProfilingSpan('get_stackframes_and_executables', () =>
       Promise.all([
         mgetStackFrames({ logger, client, stackFrameIDs: stackFrameDocIDs }),
         mgetExecutables({ logger, client, executableIDs: executableDocIDs }),

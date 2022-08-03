@@ -46,22 +46,23 @@ export function registerTopNFunctionsSearchRoute({ router, logger }: RouteRegist
           kuery,
         });
 
-        const topNFunctions = withProfilingSpan('query_topn_functions', async () => {
-          return getExecutablesAndStackTraces({
+        const { stackFrames, stackTraceEvents, stackTraces, executables } =
+          await getExecutablesAndStackTraces({
             client: createProfilingEsClient({ request, esClient }),
             filter,
             logger,
             sampleSize: targetSampleSize,
-          }).then(({ stackFrames, stackTraceEvents, stackTraces, executables }) => {
-            return createTopNFunctions(
-              stackTraceEvents,
-              stackTraces,
-              stackFrames,
-              executables,
-              startIndex,
-              endIndex
-            );
           });
+
+        const topNFunctions = await withProfilingSpan('collect_topn_functions', async () => {
+          return createTopNFunctions(
+            stackTraceEvents,
+            stackTraces,
+            stackFrames,
+            executables,
+            startIndex,
+            endIndex
+          );
         });
 
         logger.info('returning payload response to client');
