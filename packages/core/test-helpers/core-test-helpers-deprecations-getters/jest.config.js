@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { createHttpServer } from '@kbn/core-http-server-mocks';
-export { ServiceStatusLevelSnapshotSerializer } from './status/test_utils';
-export { setupServer } from './saved_objects/routes/test_utils';
-export {
-  getDeprecationsFor,
-  getDeprecationsForGlobalSettings,
-} from '@kbn/core-test-helpers-deprecations-getters';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/test-helpers/core-test-helpers-deprecations-getters'],
+};

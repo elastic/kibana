@@ -8,5 +8,3 @@
 
 export { coreDeprecationProvider } from './deprecation';
 export { ensureValidConfiguration } from './ensure_valid_configuration';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-export { getDeprecationsFor, getDeprecationsForGlobalSettings } from './test_utils';
