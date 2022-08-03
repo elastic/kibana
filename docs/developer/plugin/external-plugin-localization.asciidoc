@@ -132,9 +132,9 @@ Full details are {kib-repo}tree/main/packages/kbn-i18n#react[here].
 [discrete]
 === Resources
 
-To learn more about i18n tooling, see {kib-repo}blob/{branch}src/dev/i18n/README.md[i18n dev tooling].
+To learn more about i18n tooling, see {kib-repo}blob/{branch}/src/dev/i18n/README.md[i18n dev tooling].
 
 To learn more about implementing i18n in the UI, use the following links:
 
-* {kib-repo}blob/{branch}packages/kbn-i18n/README.md[i18n plugin]
-* {kib-repo}blob/{branch}packages/kbn-i18n/GUIDELINE.md[i18n guidelines]
+* {kib-repo}blob/{branch}/packages/kbn-i18n/README.md[i18n plugin]
+* {kib-repo}blob/{branch}/packages/kbn-i18n/GUIDELINE.md[i18n guidelines]
