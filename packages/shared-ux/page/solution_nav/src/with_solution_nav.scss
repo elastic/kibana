@@ -1,7 +1,6 @@
 // TODO: Can now be converted to Emotion
 .kbnSolutionNav__sidebar {
   overflow: hidden;
-  position: relative;
 
   @include euiCanAnimate {
     transition: min-width $euiAnimSpeedFast $euiAnimSlightResistance;

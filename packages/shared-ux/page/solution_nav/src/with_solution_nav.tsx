@@ -58,6 +58,7 @@ export const withSolutionNav = <P extends ComponentProps>(WrappedComponent: Comp
     const { canBeCollapsed = true } = solutionNav;
     const sideBarClasses = classNames(
       'kbnSolutionNav__sidebar',
+      'kbnStickyMenu',
       {
         'kbnSolutionNav__sidebar--shrink':
           isMediumBreakpoint || (canBeCollapsed && isLargerBreakpoint && !isSideNavOpenOnDesktop),
