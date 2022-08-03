@@ -3703,6 +3703,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-svg@link:bazel-bin/packages/kbn-shared-svg":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-avatar-solution@link:bazel-bin/packages/shared-ux/avatar/solution":
   version "0.0.0"
   uid ""
@@ -7568,6 +7572,10 @@
   uid ""
 
 "@types/kbn__server-route-repository@link:bazel-bin/packages/kbn-server-route-repository/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-svg@link:bazel-bin/packages/kbn-shared-svg/npm_module_types":
   version "0.0.0"
   uid ""
 
