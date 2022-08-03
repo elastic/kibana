@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import { type AggregateQuery, type Filter, type Query } from '@kbn/es-query';
 
 export interface FilterableEmbeddable {
   getFilters: () => Promise<Filter[]>;

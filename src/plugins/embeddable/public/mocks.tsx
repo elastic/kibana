@@ -10,7 +10,7 @@ import React from 'react';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { CoreStart } from '@kbn/core/public';
 import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
-import { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import { type AggregateQuery, type Filter, type Query } from '@kbn/es-query';
 
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';

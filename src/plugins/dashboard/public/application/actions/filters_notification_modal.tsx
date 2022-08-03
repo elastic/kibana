@@ -30,7 +30,12 @@ import {
   IEmbeddable,
   ViewMode,
 } from '@kbn/embeddable-plugin/public';
-import { AggregateQuery, Filter, getAggregateQueryMode, isOfQueryType } from '@kbn/es-query';
+import {
+  type AggregateQuery,
+  type Filter,
+  getAggregateQueryMode,
+  isOfQueryType,
+} from '@kbn/es-query';
 import { FiltersNotificationActionContext } from './filters_notification_badge';
 import { dashboardFilterNotificationBadge } from '../../dashboard_strings';
 import { DashboardContainer } from '../embeddable';

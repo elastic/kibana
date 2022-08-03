@@ -13,7 +13,7 @@ import { coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { CoreStart } from '@kbn/core/public';
 import { FiltersNotificationBadge } from '.';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
-import { Query, AggregateQuery, Filter } from '@kbn/es-query';
+import { type Query, type AggregateQuery, Filter } from '@kbn/es-query';
 
 import {
   EditPanelAction,

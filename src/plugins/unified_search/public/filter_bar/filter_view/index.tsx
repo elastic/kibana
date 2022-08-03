@@ -38,18 +38,15 @@ export const FilterView: FC<Props> = ({
 }: Props) => {
   const [ref, innerText] = useInnerText();
 
-  let filterString = i18n.translate('unifiedSearch.filter.filterBar.filterString', {
-    defaultMessage: 'Filter: {innerText}.',
-    values: { innerText },
-  });
-  if (!readOnly) {
-    filterString = `${filterString} ${i18n.translate(
-      'unifiedSearch.filter.filterBar.filterActionsMessage',
-      {
-        defaultMessage: 'Select for more filter actions.',
-      }
-    )}`;
-  }
+  const filterString = readOnly
+    ? i18n.translate('unifiedSearch.filter.filterBar.filterString', {
+        defaultMessage: 'Filter: {innerText}.',
+        values: { innerText },
+      })
+    : i18n.translate('unifiedSearch.filter.filterBar.filterActionsMessage', {
+        defaultMessage: 'Filter: {innerText}. Select for more filter actions.',
+        values: { innerText },
+      });
 
   let title: string = errorMessage || filterString;
   if (isFilterPinned(filter)) {
