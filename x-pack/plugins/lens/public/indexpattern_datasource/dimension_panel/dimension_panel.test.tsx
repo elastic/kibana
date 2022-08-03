@@ -333,13 +333,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
   it('should hide fields that have no data', () => {
     const props = {
       ...defaultProps,
-      state: {
-        ...defaultProps.state,
-        existingFields: {
-          'my-fake-index-pattern': {
-            timestamp: true,
-            source: true,
-          },
+      existingFields: {
+        'my-fake-index-pattern': {
+          timestamp: true,
+          source: true,
         },
       },
     };

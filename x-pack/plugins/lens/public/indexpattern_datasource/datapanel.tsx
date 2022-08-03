@@ -56,7 +56,6 @@ export type Props = Omit<
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
-  changeIndexPattern: (id: string) => void;
   charts: ChartsPluginSetup;
   core: CoreStart;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
@@ -129,7 +128,6 @@ export function IndexPatternDataPanel({
   query,
   filters,
   dateRange,
-  changeIndexPattern,
   charts,
   indexPatternFieldEditor,
   showNoDataPopover,
@@ -221,7 +219,6 @@ export function IndexPatternDataPanel({
           fieldFormats={fieldFormats}
           charts={charts}
           indexPatternFieldEditor={indexPatternFieldEditor}
-          onChangeIndexPattern={changeIndexPattern}
           dropOntoWorkspace={dropOntoWorkspace}
           hasSuggestionForField={hasSuggestionForField}
           uiActions={uiActions}
@@ -268,7 +265,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   dateRange,
   filters,
   dragDropContext,
-  onChangeIndexPattern,
   core,
   data,
   dataViews,
@@ -281,14 +277,16 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   indexPatternService,
   frame,
   onIndexPatternRefresh,
-}: Omit<DatasourceDataPanelProps, 'state' | 'setState' | 'showNoDataPopover' | 'core'> & {
+}: Omit<
+  DatasourceDataPanelProps,
+  'state' | 'setState' | 'showNoDataPopover' | 'core' | 'onChangeIndexPattern'
+> & {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   core: CoreStart;
   currentIndexPatternId: string;
   dragDropContext: DragContextState;
-  onChangeIndexPattern: (newId: string) => void;
   charts: ChartsPluginSetup;
   frame: FramePublicAPI;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;

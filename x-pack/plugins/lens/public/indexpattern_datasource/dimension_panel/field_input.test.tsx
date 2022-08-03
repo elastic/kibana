@@ -130,13 +130,13 @@ function getDefaultOperationSupportMatrix(
   });
 }
 
-function getExistingFields(layer: IndexPatternLayer) {
+function getExistingFields() {
   const fields: Record<string, boolean> = {};
   for (const field of defaultProps.indexPattern.fields) {
     fields[field.name] = true;
   }
   return {
-    [layer.indexPatternId]: fields,
+    [defaultProps.indexPattern.title]: fields,
   };
 }
 
@@ -144,7 +144,7 @@ describe('FieldInput', () => {
   it('should render a field select box', () => {
     const updateLayerSpy = jest.fn();
     const layer = getLayer();
-    const existingFields = getExistingFields(layer);
+    const existingFields = getExistingFields();
     const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1', existingFields);
     const instance = mount(
       <FieldInput
@@ -163,7 +163,7 @@ describe('FieldInput', () => {
   it('should render an error message when incomplete operation is on', () => {
     const updateLayerSpy = jest.fn();
     const layer = getLayer();
-    const existingFields = getExistingFields(layer);
+    const existingFields = getExistingFields();
     const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1', existingFields);
     const instance = mount(
       <FieldInput
@@ -195,7 +195,7 @@ describe('FieldInput', () => {
     (_, col: ReferenceBasedIndexPatternColumn) => {
       const updateLayerSpy = jest.fn();
       const layer = getLayer(col);
-      const existingFields = getExistingFields(layer);
+      const existingFields = getExistingFields();
       const operationSupportMatrix = getDefaultOperationSupportMatrix(
         layer,
         'col1',
@@ -234,7 +234,7 @@ describe('FieldInput', () => {
     (_, col: ReferenceBasedIndexPatternColumn) => {
       const updateLayerSpy = jest.fn();
       const layer = getLayer(col);
-      const existingFields = getExistingFields(layer);
+      const existingFields = getExistingFields();
       const operationSupportMatrix = getDefaultOperationSupportMatrix(
         layer,
         'col1',
@@ -269,7 +269,7 @@ describe('FieldInput', () => {
   it('should render an error message for invalid fields', () => {
     const updateLayerSpy = jest.fn();
     const layer = getLayer();
-    const existingFields = getExistingFields(layer);
+    const existingFields = getExistingFields();
     const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1', existingFields);
     const instance = mount(
       <FieldInput
@@ -295,7 +295,7 @@ describe('FieldInput', () => {
   it('should render a help message when passed and no errors are found', () => {
     const updateLayerSpy = jest.fn();
     const layer = getLayer();
-    const existingFields = getExistingFields(layer);
+    const existingFields = getExistingFields();
     const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1', existingFields);
     const instance = mount(
       <FieldInput
@@ -320,7 +320,7 @@ describe('FieldInput', () => {
   it('should prioritize errors over help messages', () => {
     const updateLayerSpy = jest.fn();
     const layer = getLayer();
-    const existingFields = getExistingFields(layer);
+    const existingFields = getExistingFields();
     const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1', existingFields);
     const instance = mount(
       <FieldInput
@@ -346,7 +346,7 @@ describe('FieldInput', () => {
   it('should update the layer on field selection', () => {
     const updateLayerSpy = jest.fn();
     const layer = getLayer();
-    const existingFields = getExistingFields(layer);
+    const existingFields = getExistingFields();
     const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1', existingFields);
     const instance = mount(
       <FieldInput
@@ -372,7 +372,7 @@ describe('FieldInput', () => {
   it('should not trigger when the same selected field is selected again', () => {
     const updateLayerSpy = jest.fn();
     const layer = getLayer();
-    const existingFields = getExistingFields(layer);
+    const existingFields = getExistingFields();
     const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1', existingFields);
     const instance = mount(
       <FieldInput
@@ -398,7 +398,7 @@ describe('FieldInput', () => {
   it('should prioritize incomplete fields over selected column field to display', () => {
     const updateLayerSpy = jest.fn();
     const layer = getLayer();
-    const existingFields = getExistingFields(layer);
+    const existingFields = getExistingFields();
     const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1', existingFields);
     const instance = mount(
       <FieldInput
@@ -425,7 +425,7 @@ describe('FieldInput', () => {
     const updateLayerSpy = jest.fn();
     const onDeleteColumn = jest.fn();
     const layer = getLayer();
-    const existingFields = getExistingFields(layer);
+    const existingFields = getExistingFields();
     const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1', existingFields);
     const instance = mount(
       <FieldInput

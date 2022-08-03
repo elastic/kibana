@@ -10,7 +10,7 @@ import ReactDOM from 'react-dom';
 import { createMockedDragDropContext } from './mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { InnerIndexPatternDataPanel, IndexPatternDataPanel, MemoizedDataPanel } from './datapanel';
+import { InnerIndexPatternDataPanel, IndexPatternDataPanel } from './datapanel';
 import { FieldList } from './field_list';
 import { FieldItem } from './field_item';
 import { NoFieldsCallout } from './no_fields_callout';
@@ -30,6 +30,7 @@ import { DOCUMENT_FIELD_NAME } from '../../common';
 import { createIndexPatternServiceMock } from '../mocks/data_views_service_mock';
 import { createMockFramePublicAPI } from '../mocks';
 import { DataViewsState } from '../state_management';
+import { ExistingFieldsMap, FramePublicAPI, IndexPattern } from '../types';
 
 const fieldsOne = [
   {
@@ -155,6 +156,18 @@ const fieldsThree = [
   documentField,
 ];
 
+function getExistingFields(indexPatterns: Record<string, IndexPattern>) {
+  const existingFields: ExistingFieldsMap = {};
+  for (const { title, fields } of Object.values(indexPatterns)) {
+    const fieldsMap: Record<string, boolean> = {};
+    for (const { displayName, name } of fields) {
+      fieldsMap[displayName ?? name] = true;
+    }
+    existingFields[title] = fieldsMap;
+  }
+  return existingFields;
+}
+
 const initialState: IndexPatternPrivateState = {
   currentIndexPatternId: '1',
   layers: {
@@ -248,7 +261,7 @@ function getFrameAPIMock({ indexPatterns, existingFields, ...rest }: Partial<Dat
     dataViews: {
       ...frameAPI.dataViews,
       indexPatterns: indexPatterns ?? defaultIndexPatterns,
-      existingFields: existingFields ?? {},
+      existingFields: existingFields ?? getExistingFields(indexPatterns ?? defaultIndexPatterns),
       isFirstExistenceFetch: false,
       ...rest,
     },
@@ -273,7 +286,6 @@ describe('IndexPattern Data Panel', () => {
       dataViews: dataViewPluginMocks.createStartContract(),
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
       indexPatternFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
-      onChangeIndexPattern: jest.fn(),
       onIndexPatternRefresh: jest.fn(),
       dragDropContext: createMockedDragDropContext(),
       currentIndexPatternId: '1',
@@ -294,31 +306,6 @@ describe('IndexPattern Data Panel', () => {
     };
   });
 
-  it('should call change index pattern callback', async () => {
-    const setStateSpy = jest.fn();
-    const state = {
-      ...initialState,
-      layers: { first: { indexPatternId: '1', columnOrder: [], columns: {} } },
-    };
-    const changeIndexPattern = jest.fn();
-    const wrapper = shallowWithIntl(
-      <IndexPatternDataPanel
-        changeIndexPattern={changeIndexPattern}
-        {...defaultProps}
-        state={state}
-        setState={setStateSpy}
-        dragDropContext={{
-          ...createMockedDragDropContext(),
-          dragging: { id: '1', humanData: { label: 'Label' } },
-        }}
-      />
-    );
-
-    wrapper.find(MemoizedDataPanel).prop('onChangeIndexPattern')!('2');
-
-    expect(changeIndexPattern).toHaveBeenCalledWith('2', state, setStateSpy);
-  });
-
   it('should render a warning if there are no index patterns', () => {
     const wrapper = shallowWithIntl(
       <IndexPatternDataPanel
@@ -332,7 +319,6 @@ describe('IndexPattern Data Panel', () => {
           ...createMockedDragDropContext(),
           dragging: { id: '1', humanData: { label: 'Label' } },
         }}
-        changeIndexPattern={jest.fn()}
         frame={createMockFramePublicAPI()}
       />
     );
@@ -341,7 +327,6 @@ describe('IndexPattern Data Panel', () => {
 
   describe('loading existence data', () => {
     function testProps() {
-      const setState = jest.fn();
       core.http.post.mockImplementation(async (path) => {
         const parts = (path as unknown as string).split('/');
         const indexPatternTitle = parts[parts.length - 1];
@@ -354,36 +339,39 @@ describe('IndexPattern Data Panel', () => {
       });
       return {
         ...defaultProps,
-        changeIndexPattern: jest.fn(),
-        setState,
+        setState: jest.fn(),
         dragDropContext: {
           ...createMockedDragDropContext(),
           dragging: { id: '1', humanData: { label: 'Label' } },
         },
         dateRange: { fromDate: '2019-01-01', toDate: '2020-01-01' },
-        state: {
-          indexPatternRefs: [],
-          existingFields: {},
-          isFirstExistenceFetch: false,
-          currentIndexPatternId: 'a',
-          indexPatterns: {
-            a: {
-              id: 'a',
-              title: 'aaa',
-              timeFieldName: 'atime',
-              fields: [],
-              getFieldByName: getFieldByNameFactory([]),
-              hasRestrictions: false,
-            },
-            b: {
-              id: 'b',
-              title: 'bbb',
-              timeFieldName: 'btime',
-              fields: [],
-              getFieldByName: getFieldByNameFactory([]),
-              hasRestrictions: false,
+        frame: {
+          dataViews: {
+            indexPatternRefs: [],
+            existingFields: {},
+            isFirstExistenceFetch: false,
+            indexPatterns: {
+              a: {
+                id: 'a',
+                title: 'aaa',
+                timeFieldName: 'atime',
+                fields: [],
+                getFieldByName: getFieldByNameFactory([]),
+                hasRestrictions: false,
+              },
+              b: {
+                id: 'b',
+                title: 'bbb',
+                timeFieldName: 'btime',
+                fields: [],
+                getFieldByName: getFieldByNameFactory([]),
+                hasRestrictions: false,
+              },
             },
           },
+        } as unknown as FramePublicAPI,
+        state: {
+          currentIndexPatternId: 'a',
           layers: {
             1: {
               indexPatternId: 'a',

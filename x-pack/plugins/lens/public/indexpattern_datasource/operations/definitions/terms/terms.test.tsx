@@ -1163,7 +1163,7 @@ describe('terms', () => {
         fields[field.name] = true;
       }
       return {
-        [layer.indexPatternId]: fields,
+        [defaultProps.indexPattern.title]: fields,
       };
     }
 
