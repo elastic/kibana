@@ -257,7 +257,7 @@ export class File<M = unknown> implements IFile {
       },
     });
 
-    const file = internalFileService.toFile(fileMeta.id, fileMeta.metadata, fileKind);
+    const file = internalFileService.toFile(fileMeta.id, fileMeta.metadata, fileKind, fileClient);
 
     internalFileService.createAuditLog(
       createAuditEvent({

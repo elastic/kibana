@@ -12,11 +12,16 @@ import {
   savedObjectsServiceMock,
 } from '@kbn/core/server/mocks';
 import { Readable } from 'stream';
+import { promisify } from 'util';
+
+const setImmediate = promisify(global.setImmediate);
 
 import { BlobStorageService } from '../blob_storage_service';
 import { InternalFileService } from '../file_service/internal_file_service';
 import { fileKindsRegistry } from '../file_kinds_registry';
 import { InternalFileShareService } from '../file_share_service';
+import { FileMetadataClient } from '../file_client';
+import { SavedObjectsFileMetadataClient } from '../file_client/file_metadata_client/adapters/saved_objects';
 
 describe('File', () => {
   let esClient: ElasticsearchClient;
@@ -24,6 +29,7 @@ describe('File', () => {
   let blobStorageService: BlobStorageService;
   let fileShareService: InternalFileShareService;
   let soClient: ISavedObjectsRepository;
+  let fileMetadaClient: FileMetadataClient;
 
   const sandbox = createSandbox();
   const fileKind = 'fileKind';
@@ -33,14 +39,14 @@ describe('File', () => {
   });
 
   beforeEach(() => {
+    const logger = loggingSystemMock.createLogger();
     esClient = elasticsearchServiceMock.createInternalClient();
     soClient = savedObjectsServiceMock.createStartContract().createInternalRepository();
-    const logger = loggingSystemMock.createLogger();
+    fileMetadaClient = new SavedObjectsFileMetadataClient('test', soClient, logger);
     blobStorageService = new BlobStorageService(esClient, logger);
     fileShareService = new InternalFileShareService(soClient);
     fileService = new InternalFileService(
-      'test',
-      soClient,
+      fileMetadaClient,
       blobStorageService,
       fileShareService,
       undefined,
@@ -50,11 +56,12 @@ describe('File', () => {
   });
 
   afterEach(() => {
+    jest.clearAllMocks();
     sandbox.restore();
   });
 
   it('deletes file content when an upload fails', async () => {
-    const createBlobSpy = sandbox.spy(blobStorageService, 'createBlobStorage');
+    const createBlobSpy = sandbox.spy(blobStorageService, 'createBlobStorageClient');
 
     (esClient.index as jest.Mock).mockRejectedValue(new Error('test'));
     const fileSO = { attributes: { Status: 'AWAITING_UPLOAD' } };
@@ -66,6 +73,7 @@ describe('File', () => {
     const blobStoreSpy = sandbox.spy(blobStore, 'delete');
     expect(blobStoreSpy.calledOnce).toBe(false);
     await expect(file.uploadContent(Readable.from(['test']))).rejects.toThrow(new Error('test'));
+    await setImmediate();
     expect(blobStoreSpy.calledOnce).toBe(true);
   });
 });

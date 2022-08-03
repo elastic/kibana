@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { SavedObjectsFileMetadataService } from './saved_objects';
+export { SavedObjectsFileMetadataClient } from './saved_objects';

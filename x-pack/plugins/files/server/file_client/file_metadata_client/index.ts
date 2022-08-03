@@ -6,4 +6,4 @@
  */
 
 export type { FileMetadataClient, FileDescriptor } from './file_metadata_service';
-export { SavedObjectsFileMetadataService } from './adapters';
+export { SavedObjectsFileMetadataClient } from './adapters';

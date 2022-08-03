@@ -22,6 +22,7 @@ import type { FileJSON, FileMetadata, FilesMetrics, FileStatus } from '../../../
 import { toJSON } from '../../../file/to_json';
 import type {
   FileMetadataClient,
+  UpdateArgs,
   FileDescriptor,
   Pagination,
   GetUsageMetricsArgs,
@@ -47,7 +48,7 @@ export class SavedObjectsFileMetadataClient implements FileMetadataClient {
     const result = await this.soClient.create(this.soType, metadata, { id });
     return { id: result.id, metadata: result.attributes };
   }
-  async update({ id, metadata }: FileDescriptor): Promise<FileDescriptor> {
+  async update({ id, metadata }: UpdateArgs): Promise<FileDescriptor> {
     const result = await this.soClient.update(this.soType, id, metadata);
     return {
       id: result.id,

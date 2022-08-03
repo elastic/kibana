@@ -111,15 +111,21 @@ export class InternalFileService {
     return result.map((file) => this.toFile(file.id, file.metadata, fileKind));
   }
 
-  public toFile(id: string, fileMetadata: FileMetadata, fileKind: FileKind): IFile {
+  public toFile(
+    id: string,
+    fileMetadata: FileMetadata,
+    fileKind: FileKind,
+    fileClient?: FileClient
+  ): IFile {
     return new File(
       id,
       fileMetadata,
-      new FileClient(
-        fileKind,
-        this.metadataClient,
-        this.blobStorageService.createBlobStorageClient(fileKind.blobStoreSettings)
-      ),
+      fileClient ??
+        new FileClient(
+          fileKind,
+          this.metadataClient,
+          this.blobStorageService.createBlobStorageClient(fileKind.blobStoreSettings)
+        ),
       this,
       this.fileShareService,
       this.logger.get(`file-${id}`)
