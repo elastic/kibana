@@ -12,7 +12,7 @@ import { CoreStart, OverlayStart } from '@kbn/core/public';
 import { EditPanelAction, isFilterableEmbeddable } from '@kbn/embeddable-plugin/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 
-import { AggregateQuery, isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
+import { AggregateQuery } from '@kbn/es-query';
 import { Action, IncompatibleActionError } from '../../services/ui_actions';
 import { toMountPoint } from '../../services/kibana_react';
 import { IEmbeddable, isErrorEmbeddable } from '../../services/embeddable';
@@ -61,7 +61,7 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
     ) {
       return false;
     }
-
+    const { isOfQueryType, isOfAggregateQueryType } = await import('@kbn/es-query');
     const query = await embeddable.getQuery();
     return (
       (await embeddable.getFilters()).length > 0 ||
