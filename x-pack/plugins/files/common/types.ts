@@ -219,8 +219,14 @@ export type FileSavedObject<Meta = unknown> = SavedObject<FileSavedObjectAttribu
  */
 export type UpdatableFileAttributes<Meta = unknown> = Pick<FileJSON<Meta>, 'meta' | 'alt' | 'name'>;
 
+/**
+ * The set of file metadata that can be updated on a file share instance.
+ */
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type FileShareSavedObjectAttributes = {
+  /**
+   * ISO timestamp of when the file share was created.
+   */
   created: string;
 
   /**

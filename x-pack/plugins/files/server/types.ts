@@ -6,7 +6,7 @@
  */
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { FileKind } from '../common';
-import { FileServiceFactory } from './file_service';
+import { FileServiceFactory } from './file_service/file_service_factory';
 
 /**
  * Files plugin setup contract

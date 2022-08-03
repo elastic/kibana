@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { FileServiceFactory } from './file_service_factory';
+export { FileServiceFactoryImpl as FileServiceFactory } from './file_service_factory';
 export type {
   FileServiceStart,
   CreateFileArgs,

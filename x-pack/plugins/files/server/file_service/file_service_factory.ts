@@ -28,7 +28,31 @@ import {
 import { FileServiceStart } from './file_service';
 import { FileKindsRegistry } from '../file_kinds_registry';
 
-export class FileServiceFactory {
+/**
+ * A simple interface for getting an instance of {@link FileServiceStart}
+ */
+export interface FileServiceFactory {
+  /**
+   * Get a file service instance that is scoped to the current user request.
+   *
+   * @param req - the Kibana request to scope the service to
+   */
+  asScoped(req: KibanaRequest): FileServiceStart;
+
+  /**
+   * Get a file service instance that is scoped to the internal user.
+   *
+   * @note
+   * Do not use this to drive interactions with files that are initiated by a
+   * user.
+   */
+  asInternal(): FileServiceStart;
+}
+
+/**
+ * Factory for creating {@link FileServiceStart} instances.
+ */
+export class FileServiceFactoryImpl implements FileServiceFactory {
   constructor(
     private readonly savedObjectsService: SavedObjectsServiceStart,
     private readonly blobStorageService: BlobStorageService,
@@ -93,20 +117,10 @@ export class FileServiceFactory {
     };
   }
 
-  /**
-   * Get a file service instance that is scoped to the current user request.
-   */
   public asScoped(req: KibanaRequest): FileServiceStart {
     return this.createFileService(req);
   }
 
-  /**
-   * Get a file service instance that is scoped to the internal user.
-   *
-   * @note
-   * Do not use this to drive interactions with files that are initiated by a
-   * user.
-   */
   public asInternal(): FileServiceStart {
     return this.createFileService();
   }
