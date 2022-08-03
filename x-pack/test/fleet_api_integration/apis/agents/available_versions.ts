@@ -14,7 +14,6 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
-  const log = getService('log');
 
   const VERSIONS_FILE_PATH = 'x-pack/plugins/fleet/target/';
   const FILENAME = 'agent_versions_list.json';
@@ -24,72 +23,51 @@ export default function (providerContext: FtrProviderContext) {
     await fs.writeFile(path.resolve(VERSIONS_FILE_PATH, FILENAME), json);
   };
 
-  const removeVersionsFile = async () => {
-    try {
-      const existingFile = fs.readFile(path.join(VERSIONS_FILE_PATH, FILENAME));
-
-      if (!!existingFile) {
-        await fs.unlink(path.join(VERSIONS_FILE_PATH, FILENAME));
-      }
-    } catch (error) {
-      log.error('Error removing versions file');
-      log.error(error);
-    }
-  };
-
   describe('Agent available_versions API', () => {
-    describe('GET /api/fleet/agents/available_versions', () => {
-      it('should fail if no file was generated at build time', async () => {
-        await removeVersionsFile();
-        await supertest.get(`/api/fleet/agents/available_versions`).expect(500);
-      });
+    it('should return a list of versions > 7.17.0', async () => {
+      const kibanaVersion = await kibanaServer.version.get();
+      const kibanaVersionCoerced = semverCoerce(kibanaVersion)?.version;
+      const versions = ['8.4.0', '8.3.2', '8.3.1', '8.3.0', '8.2.0', '7.17.3', '7.16.0', '7.15.0'];
+      await writeJson(versions);
+      const res = await supertest.get(`/api/fleet/agents/available_versions`).expect(200);
+      const expectedVersions = res.body.items;
+
+      expect(expectedVersions).to.eql([
+        kibanaVersionCoerced,
+        '8.4.0',
+        '8.3.2',
+        '8.3.1',
+        '8.3.0',
+        '8.2.0',
+        '7.17.3',
+      ]);
     });
 
-    describe('GET /api/fleet/agents/available_versions', () => {
-      it('should return a list of versions > 7.17.0', async () => {
-        const kibanaVersion = await kibanaServer.version.get();
-        const kibanaVersionCoerced = semverCoerce(kibanaVersion)?.version;
-        const versions = [
-          '8.3.1',
-          '8.4.0',
-          '8.3.2',
-          '8.3.0',
-          '8.2.0-SNAPSHOT',
-          '8.2.0',
-          '8.4.0-SNAPSHOT',
-          '7.16.0',
-          '7.17.3',
-        ];
-        await writeJson(versions);
-        const res = await supertest.get(`/api/fleet/agents/available_versions`).expect(200);
-        const expectedVersions = res.body.items;
-
-        expect(expectedVersions).to.eql([
-          kibanaVersionCoerced,
-          '8.4.0',
-          '8.3.2',
-          '8.3.1',
-          '8.3.0',
-          '8.2.0',
-          '7.17.3',
-        ]);
-      });
-
-      it('should cache the file', async () => {
-        const kibanaVersion = await kibanaServer.version.get();
-        const kibanaVersionCoerced = semverCoerce(kibanaVersion)?.version;
-        const res = await supertest.get(`/api/fleet/agents/available_versions`).expect(200);
-        const expectedVersions = res.body.items;
-        expect(expectedVersions).to.eql([
-          kibanaVersionCoerced,
-          '8.4.0',
-          '8.3.2',
-          '8.3.1',
-          '8.3.0',
-          '8.2.0',
-          '7.17.3',
-        ]);
-      });
+    it('should return an ordered list with no prerelease versions or duplicates', async () => {
+      const kibanaVersion = await kibanaServer.version.get();
+      const kibanaVersionCoerced = semverCoerce(kibanaVersion)?.version;
+      const versions = [
+        '8.3.1',
+        '8.4.0',
+        '8.3.2',
+        '8.3.0',
+        '8.2.0-SNAPSHOT',
+        '8.2.0',
+        '8.4.0-SNAPSHOT',
+        '7.17.3',
+      ];
+      await writeJson(versions);
+      const res = await supertest.get(`/api/fleet/agents/available_versions`).expect(200);
+      const expectedVersions = res.body.items;
+      expect(expectedVersions).to.eql([
+        kibanaVersionCoerced,
+        '8.4.0',
+        '8.3.2',
+        '8.3.1',
+        '8.3.0',
+        '8.2.0',
+        '7.17.3',
+      ]);
     });
   });
 }

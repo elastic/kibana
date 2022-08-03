@@ -120,7 +120,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
     }
     return options;
   }, [availableVersions, minVersion]);
-  const noVersions = versionOptions[0]?.value === '';
+  const noVersions = !availableVersions || versionOptions[0]?.value === '';
 
   const maintenanceOptions: Array<EuiComboBoxOptionOption<number>> = MAINTENANCE_VALUES.map(
     (option) => ({

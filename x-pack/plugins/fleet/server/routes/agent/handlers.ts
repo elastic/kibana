@@ -43,8 +43,6 @@ import type {
 import { defaultIngestErrorHandler } from '../../errors';
 import * as AgentService from '../../services/agents';
 
-import { setCachedFile, getCachedVersionFile } from './versions_utils';
-
 export const getAgentHandler: RequestHandler<
   TypeOf<typeof GetOneAgentRequestSchema.params>
 > = async (context, request, response) => {
@@ -330,7 +328,7 @@ function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
 }
 
-// Read a static file generated at build time and cache it for subsequent calls
+// Read a static file generated at build time
 export const getAvailableVersionsHandler: RequestHandler = async (context, request, response) => {
   const AGENT_VERSION_BUILD_FILE = 'x-pack/plugins/fleet/target/agent_versions_list.json';
   let versionsToDisplay: string[] = [];
@@ -338,23 +336,12 @@ export const getAvailableVersionsHandler: RequestHandler = async (context, reque
   const kibanaVersion = appContextService.getKibanaVersion();
   const kibanaVersionCoerced = semverCoerce(kibanaVersion)?.version ?? kibanaVersion;
 
-  if (!getCachedVersionFile('versions')) {
-    try {
-      const file = await fs.readFile(AGENT_VERSION_BUILD_FILE, 'utf-8');
-      if (file) {
-        setCachedFile('versions', file);
-      }
-    } catch (error) {
-      return defaultIngestErrorHandler({ error, response });
-    }
-  }
+  try {
+    const file = await fs.readFile(AGENT_VERSION_BUILD_FILE, 'utf-8');
 
-  // Exclude versions older than MINIMUM_SUPPORTED_VERSION and pre-release versions (SNAPSHOT, rc..)
-  // De-dup and sort in descending order
-  const cachedFile = getCachedVersionFile('versions');
-  if (cachedFile) {
-    const data: string[] = JSON.parse(cachedFile);
-
+    // Exclude versions older than MINIMUM_SUPPORTED_VERSION and pre-release versions (SNAPSHOT, rc..)
+    // De-dup and sort in descending order
+    const data: string[] = JSON.parse(file);
     const versions = data
       .map((item: any) => semverCoerce(item)?.version || '')
       .filter((v: any) => semverGte(v, MINIMUM_SUPPORTED_VERSION))
@@ -368,7 +355,7 @@ export const getAvailableVersionsHandler: RequestHandler = async (context, reque
       : parsedVersions;
     const body: GetAvailableVersionsResponse = { items: versionsToDisplay };
     return response.ok({ body });
-  } else {
-    return response.ok({ body: {} });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
