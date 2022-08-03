@@ -359,8 +359,8 @@ describe('GET /api/reporting/jobs/download', () => {
         .expect(403)
         .then(({ body }) =>
           expect(body.message).toMatchInlineSnapshot(`
-            "Sorry, you don't have access to Reporting. <a href=mock-link style=\\"font-weight: 600;\\"
-                                target=\\"_blank\\" rel=\\"noopener\\">See details</a> to grant user access."
+            "Contact your administrator for access to reporting features. <a href=https://www.elastic.co/guide/en/kibana/test-branch/secure-reporting.html#grant-user-access style=\\"font-weight: 600;\\"
+                                target=\\"_blank\\" rel=\\"noopener\\">See details</a> how to grant user access."
           `)
         );
     });
