@@ -29,6 +29,7 @@ import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/publi
 import { EuiLoadingContent } from '@elastic/eui';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
+import type { SavedObjectsFinderStart } from '@kbn/saved-objects-finder-plugin/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
@@ -172,6 +173,7 @@ export interface DiscoverStartPlugins {
   urlForwarding: UrlForwardingStart;
   inspector: InspectorPublicPluginStart;
   savedObjects: SavedObjectsStart;
+  savedObjectsFinder: SavedObjectsFinderStart;
   usageCollection?: UsageCollectionSetup;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   spaces?: SpacesPluginStart;

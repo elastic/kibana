@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart, IUiSettingsClient, Plugin } from '@kbn/core/public';
+import { CoreStart, Plugin } from '@kbn/core/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
-import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { getSavedObjectFinder, SavedObjectFinderProps } from './finder';
 
 export interface SavedObjectsFinderStart {
@@ -17,10 +17,9 @@ export interface SavedObjectsFinderStart {
 }
 
 interface SavedObjectsFinderStartDeps {
-  uiSettings: IUiSettingsClient;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
-  savedObjectsPlugin: SavedObjectsStart;
-  savedObjectsTagging: SavedObjectsTaggingApi | undefined;
+  savedObjects: SavedObjectsStart;
+  savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
 }
 
 export class SavedObjectsFinderPublicPlugin
@@ -34,10 +33,10 @@ export class SavedObjectsFinderPublicPlugin
     return {
       SavedObjectFinder: getSavedObjectFinder(
         core.savedObjects,
-        deps.uiSettings,
+        core.uiSettings,
         deps.savedObjectsManagement,
-        deps.savedObjectsPlugin,
-        deps.savedObjectsTagging
+        deps.savedObjects,
+        deps.savedObjectsTaggingOss
       ),
     };
   }

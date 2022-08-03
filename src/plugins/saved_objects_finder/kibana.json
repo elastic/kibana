@@ -7,6 +7,5 @@
   "version": "kibana",
   "ui": true,
   "requiredPlugins": ["savedObjects", "savedObjectsManagement"],
-  "optionalPlugins": ["savedObjectsTaggingOss"],
-  "requiredBundles": ["kibanaUtils", "kibanaReact"]
+  "optionalPlugins": ["savedObjectsTaggingOss"]
 }

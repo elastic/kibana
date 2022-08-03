@@ -37,7 +37,10 @@ import {
   SavedObject,
 } from '@kbn/core/public';
 import { SavedObjectsStart as SavedObjectsPlugin } from '@kbn/saved-objects-plugin/public/plugin';
-import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import {
+  SavedObjectsTaggingApi,
+  SavedObjectTaggingOssPluginStart,
+} from '@kbn/saved-objects-tagging-oss-plugin/public';
 
 export interface SavedObjectMetaData<T = unknown> {
   type: string;
@@ -403,7 +406,7 @@ const getSavedObjectFinder = (
   uiSettings: IUiSettingsClient,
   savedObjectsManagement: SavedObjectsManagementPluginStart,
   savedObjectsPlugin: SavedObjectsPlugin,
-  savedObjectsTagging: SavedObjectsTaggingApi | undefined
+  savedObjectsTagging: SavedObjectTaggingOssPluginStart | undefined
 ) => {
   return (props: SavedObjectFinderProps) => (
     <SavedObjectFinderUi
@@ -412,7 +415,7 @@ const getSavedObjectFinder = (
       uiSettings={uiSettings}
       savedObjectsManagement={savedObjectsManagement}
       savedObjectsPlugin={savedObjectsPlugin}
-      savedObjectsTagging={savedObjectsTagging}
+      savedObjectsTagging={savedObjectsTagging?.getTaggingApi()}
     />
   );
 };
