@@ -1401,13 +1401,6 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
                 [mockActions.login]: true,
                 [mockActions.version]: true,
                 [`saved_object:${savedObjectTypes[0]}/get`]: false,
-                [`saved_object:${savedObjectTypes[1]}/get`]: true,
-              },
-              // @ts-expect-error this is wrong on purpose
-              'space:space_1': {
-                [mockActions.login]: true,
-                [mockActions.version]: true,
-                [`saved_object:${savedObjectTypes[0]}/get`]: false,
               },
             },
           },
@@ -1427,11 +1420,6 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
           username: 'foo-username',
           application: {
             [application]: {
-              'space:space_1': {
-                [mockActions.login]: true,
-                [mockActions.version]: true,
-              },
-              // @ts-expect-error this is wrong on purpose
               'space:space_1': {
                 [mockActions.login]: true,
                 [mockActions.version]: true,
