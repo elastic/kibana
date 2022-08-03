@@ -225,6 +225,7 @@ export default function (providerContext: FtrProviderContext) {
             title: 'Endpoint',
             version: '1.4.1',
           },
+          force: true,
         })
         .expect(200);
       await supertest
