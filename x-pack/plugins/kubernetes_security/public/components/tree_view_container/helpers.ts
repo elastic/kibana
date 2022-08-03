@@ -6,7 +6,12 @@
  */
 
 import { DEFAULT_QUERY } from '../../../common/constants';
-import { KubernetesCollection, QueryDslQueryContainerBool, TreeNavSelection } from '../../types';
+import {
+  KubernetesCollection,
+  QueryDslQueryContainerBool,
+  TreeNavSelection,
+  TreeViewIconProps,
+} from '../../types';
 
 export const KUBERNETES_COLLECTION_FIELDS = {
   [KubernetesCollection.cluster]: 'orchestrator.cluster.name',
@@ -14,6 +19,14 @@ export const KUBERNETES_COLLECTION_FIELDS = {
   [KubernetesCollection.node]: 'cloud.instance.name',
   [KubernetesCollection.pod]: 'orchestrator.resource.name',
   [KubernetesCollection.containerImage]: 'container.image.name',
+};
+
+export const KUBERNETES_COLLECTION_ICONS_PROPS: { [key: string]: TreeViewIconProps } = {
+  [KubernetesCollection.cluster]: { type: 'cluster', euiVarColor: 'euiColorVis0' },
+  [KubernetesCollection.namespace]: { type: 'namespace', euiVarColor: 'euiColorVis1' },
+  [KubernetesCollection.node]: { type: 'kubernetesNode', euiVarColor: 'euiColorVis3' },
+  [KubernetesCollection.pod]: { type: 'kubernetesPod', euiVarColor: 'euiColorVis9' },
+  [KubernetesCollection.containerImage]: { type: 'container', euiVarColor: 'euiColorVis8' },
 };
 
 export const addTreeNavSelectionToFilterQuery = (
