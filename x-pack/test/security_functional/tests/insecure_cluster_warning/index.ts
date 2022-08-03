@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('security app - unsecured cluster alert', function () {
-    loadTestFile(require.resolve('./unsecure_cluster_alert'));
+  describe('security app - insecure cluster warning', function () {
+    loadTestFile(require.resolve('./insecure_cluster_warning'));
   });
 }
