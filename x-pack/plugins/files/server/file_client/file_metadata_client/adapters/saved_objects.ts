@@ -26,7 +26,7 @@ import type {
   GetUsageMetricsArgs,
 } from '../file_metadata_service';
 
-import { filterArgsToEsQuery } from './filter_args_to_es_query';
+import { filterArgsToKuery } from './filter_args_to_kuery';
 
 interface TermsAgg {
   buckets: Array<{ key: string; doc_count: number }>;
@@ -86,7 +86,7 @@ export class SavedObjectsFileMetadataClient implements FileMetadataClient {
   async find({ page, perPage, ...filterArgs }: FindFileArgs): Promise<FileDescriptor[]> {
     const result = await this.soClient.find({
       type: this.soType,
-      filter: filterArgsToEsQuery({ ...filterArgs, attrPrefix: `${this.soType}.attributes.` }),
+      filter: filterArgsToKuery({ ...filterArgs, attrPrefix: `${this.soType}.attributes.` }),
       page,
       perPage,
       sortOrder: 'desc',
