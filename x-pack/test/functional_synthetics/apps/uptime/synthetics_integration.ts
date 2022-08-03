@@ -73,7 +73,6 @@ export default function (providerContext: FtrProviderContext) {
             },
           },
         ],
-        origin: 'ui',
         ...config,
       },
       ...(monitorType === 'browser'
