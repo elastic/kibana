@@ -298,7 +298,7 @@ function toSelectableOption(userProfile: UserProfileWithAvatar): SelectableOptio
   // @ts-ignore: `isGroupLabel` is not required here but TS complains
   return {
     key: userProfile.uid,
-    prepend: <UserAvatar userProfile={userProfile} size="s" />,
+    prepend: <UserAvatar user={userProfile.user} avatar={userProfile.data.avatar} size="s" />,
     label: getUserDisplayName(userProfile.user),
     append: <EuiTextColor color="subdued">{userProfile.user.email}</EuiTextColor>,
     data: userProfile,

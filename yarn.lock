@@ -7735,6 +7735,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__user-profile-components@link:bazel-bin/packages/kbn-user-profile-components/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__utility-types-jest@link:bazel-bin/packages/kbn-utility-types-jest/npm_module_types":
   version "0.0.0"
   uid ""

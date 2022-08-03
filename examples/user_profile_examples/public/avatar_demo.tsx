@@ -30,13 +30,11 @@ export const AvatarDemo: FunctionComponent = () => {
   return (
     <PanelWithCodeBlock title="Avatar" code={code}>
       <UserAvatar
-        userProfile={{
-          ...userProfile,
-          data: { avatar: { ...userProfile.data.avatar, imageUrl: undefined } },
-        }}
+        user={userProfile.user}
+        avatar={{ ...userProfile.data.avatar, imageUrl: undefined }}
       />
       &ensp;
-      <UserAvatar userProfile={userProfile} />
+      <UserAvatar user={userProfile.user} avatar={userProfile.data.avatar} />
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
         <h3>Unknown</h3>
@@ -65,4 +63,4 @@ const userProfile = {
   },
 };
 
-<UserAvatar userProfile={userProfile} />`;
+<UserAvatar user={userProfile.user} avatar={userProfile.data.avatar} />`;
