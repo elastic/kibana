@@ -17,8 +17,7 @@
     "lens",
     "licensing",
     "spaces",
-    "usageCollection",
-    "security"
+    "usageCollection"
   ],
   "requiredPlugins": [
     "alerting",
@@ -32,7 +31,8 @@
     "triggersActionsUi",
     "inspector",
     "unifiedSearch",
-    "sharedUX"
+    "sharedUX",
+    "security"
   ],
   "ui": true,
   "server": true,

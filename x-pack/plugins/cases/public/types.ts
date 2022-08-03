@@ -44,7 +44,7 @@ import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_fra
 import { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 
 export interface CasesPluginSetup {
-  security?: SecurityPluginSetup;
+  security: SecurityPluginSetup;
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
 }
@@ -56,8 +56,8 @@ export interface CasesPluginStart {
   storage: Storage;
   triggersActionsUi: TriggersActionsStart;
   features: FeaturesPluginStart;
+  security: SecurityPluginStart;
   spaces?: SpacesPluginStart;
-  security?: SecurityPluginStart;
 }
 
 /**
@@ -66,10 +66,7 @@ export interface CasesPluginStart {
  * Leaving it out currently in lieu of RBAC changes
  */
 
-export type StartServices = CoreStart &
-  CasesPluginStart & {
-    security?: SecurityPluginStart;
-  };
+export type StartServices = CoreStart & CasesPluginStart;
 
 export interface RenderAppProps {
   mountParams: ManagementAppMountParams;

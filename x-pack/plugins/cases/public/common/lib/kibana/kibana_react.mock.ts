@@ -22,7 +22,7 @@ import { BehaviorSubject } from 'rxjs';
 import { registerConnectorsToMockActionRegistry } from '../../mock/register_connectors';
 import { connectorsMock } from '../../mock/connectors';
 
-export const createStartServicesMock = (): Required<StartServices> => {
+export const createStartServicesMock = (): StartServices => {
   const services = {
     ...coreMock.createStart(),
     storage: { ...coreMock.createStorage(), get: jest.fn(), set: jest.fn(), remove: jest.fn() },
@@ -33,7 +33,7 @@ export const createStartServicesMock = (): Required<StartServices> => {
     security: securityMock.createStart(),
     triggersActionsUi: triggersActionsUiMock.createStart(),
     spaces: spacesPluginMock.createStartContract(),
-  } as unknown as Required<StartServices>;
+  } as unknown as StartServices;
 
   services.application.currentAppId$ = new BehaviorSubject<string>('testAppId');
   services.application.applications$ = new BehaviorSubject<Map<string, PublicAppInfo>>(

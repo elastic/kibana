@@ -24,8 +24,6 @@ export const useBulkGetUserProfiles = ({ uids }: { uids: string[] }) => {
       return bulkGetUserProfiles({ security, uids });
     },
     {
-      // Do not run the query if the security plugin is disabled
-      enabled: Boolean(security),
       onError: (error: ServerError) => {
         if (error.name !== 'AbortError') {
           toasts.addError(

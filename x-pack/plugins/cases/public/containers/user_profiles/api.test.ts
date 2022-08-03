@@ -63,15 +63,6 @@ describe('User profiles API', () => {
       expect(res).toEqual(userProfiles);
     });
 
-    it('returns an empty array if the security plugin is undefined', async () => {
-      const res = await bulkGetUserProfiles({
-        security: undefined,
-        uids: userProfilesIds,
-      });
-
-      expect(res).toEqual([]);
-    });
-
     it('calls http.post correctly', async () => {
       await bulkGetUserProfiles({
         security,
