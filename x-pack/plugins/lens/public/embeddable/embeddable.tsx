@@ -7,6 +7,7 @@
 
 import { isEqual, uniqBy } from 'lodash';
 import React from 'react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
 import type { DataViewBase, EsQueryConfig, Filter, Query, TimeRange } from '@kbn/es-query';
@@ -75,7 +76,6 @@ import { getLensInspectorService, LensInspector } from '../lens_inspector_servic
 import { SharingSavedObjectProps, VisualizationDisplayOptions } from '../types';
 import { getActiveDatasourceIdFromDoc, getIndexPatternsObjects, inferTimeField } from '../utils';
 import { getLayerMetaInfo, combineQueryAndFilters } from '../app_plugin/show_underlying_data';
-import { css } from '@emotion/react';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -486,22 +486,24 @@ export class Embeddable
     }
 
     // TODO this should be calling into the datasource
-    const warnings = this.getInspectorAdapters()
-      .requests?.getRequests()
-      .flatMap((r) =>
-        r.response?.json?.rawResponse?._shards?.failures
-          .filter((failure) => failure.reason?.type === 'illegal_argument_exception')
-          .map((failure) => failure.reason.reason)
-      )
-      .filter(Boolean);
 
     const { type, error } = data as { type: string; error: ErrorLike };
     this.updateOutput({
       ...this.getOutput(),
       loading: false,
       error: type === 'error' ? error : undefined,
-      warnings,
     });
+
+    const activeDatasourceId = getActiveDatasourceIdFromDoc(this.savedVis);
+    if (!activeDatasourceId) return;
+    const activeDatasource = this.deps.datasourceMap[activeDatasourceId];
+    const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
+    const warnings =
+      activeDatasource.getEmbeddedWarningMessages?.(
+        docDatasourceState,
+        this.activeDataInfo.activeData!,
+        this.getInspectorAdapters()
+      ) || [];
     if (warnings && this.warningDomNode) {
       render(<Warnings warnings={warnings} />, this.warningDomNode);
     }

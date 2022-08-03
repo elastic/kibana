@@ -46,6 +46,7 @@ import { fieldExists } from './pure_helpers';
 import { Loader } from '../loader';
 import { LensFieldIcon } from '../shared_components/field_picker/lens_field_icon';
 import { FieldGroups, FieldList } from './field_list';
+import { getFieldType } from './utils';
 
 export type Props = Omit<DatasourceDataPanelProps<IndexPatternPrivateState>, 'core'> & {
   data: DataPublicPluginStart;
@@ -284,13 +285,6 @@ const defaultFieldGroups: {
 const htmlId = htmlIdGenerator('datapanel');
 const fieldSearchDescriptionId = htmlId();
 
-function getFilterType(field: IndexPatternField) {
-  if (field.timeSeriesMetricType) {
-    return field.timeSeriesMetricType;
-  }
-  return field.type;
-}
-
 export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   currentIndexPatternId,
   indexPatternRefs,
@@ -346,7 +340,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const clearLocalState = () => setLocalState((s) => ({ ...s, nameFilter: '', typeFilter: [] }));
   const hasSyncedExistingFields = existingFields[currentIndexPattern.title];
   const availableFieldTypes = uniq([
-    ...uniq(allFields.map(getFilterType)).filter((type) => type in fieldTypeNames),
+    ...uniq(allFields.map(getFieldType)).filter((type) => type in fieldTypeNames),
     // always include current selection - there might be no match for an existing type filter on data view switch
     ...localState.typeFilter,
   ]);
@@ -487,7 +481,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
           return false;
         }
         if (localState.typeFilter.length > 0) {
-          return localState.typeFilter.includes(getFilterType(field) as DataType);
+          return localState.typeFilter.includes(getFieldType(field) as DataType);
         }
         return true;
       });

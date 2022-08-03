@@ -55,7 +55,12 @@ import {
   getDatasourceSuggestionsForVisualizeCharts,
 } from './indexpattern_suggestions';
 
-import { getFiltersInLayer, getTSDBRollupWarningMessages, getVisualDefaultsForLayer, isColumnInvalid } from './utils';
+import {
+  getFiltersInLayer,
+  getTSDBRollupWarningMessages,
+  getVisualDefaultsForLayer,
+  isColumnInvalid,
+} from './utils';
 import { normalizeOperationDataType, isDraggedField } from './pure_utils';
 import { LayerPanel } from './layerpanel';
 import {
@@ -667,15 +672,11 @@ export function getIndexPatternDatasource({
           core.docLinks,
           setState
         ),
-        ...getTSDBRollupWarningMessages(
-          data.datatableUtilities,
-          state,
-          frame,
-          core.docLinks,
-          adapters,
-          setState
-        ),
+        ...getTSDBRollupWarningMessages(state, adapters),
       ];
+    },
+    getEmbeddedWarningMessages: (state, activeData, adapters) => {
+      return [...getTSDBRollupWarningMessages(state, adapters)];
     },
     checkIntegrity: (state) => {
       const ids = Object.values(state.layers || {}).map(({ indexPatternId }) => indexPatternId);

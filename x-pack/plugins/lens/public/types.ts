@@ -18,6 +18,7 @@ import type {
   Datatable,
 } from '@kbn/expressions-plugin/public';
 import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
+import { Adapters } from '@kbn/inspector-plugin/public';
 import type { Query } from '@kbn/es-query';
 import type {
   UiActionsStart,
@@ -41,7 +42,6 @@ import {
   LENS_EDIT_PAGESIZE_ACTION,
 } from './datatable_visualization/components/constants';
 import type { LensInspector } from './lens_inspector_service';
-import { Adapters } from '@kbn/inspector-plugin/public';
 
 export type ErrorCallback = (e: { message: string }) => void;
 
@@ -333,6 +333,14 @@ export interface Datasource<T = unknown, P = unknown> {
     frame: FramePublicAPI,
     adapters: Adapters,
     setState: StateSetter<T>
+  ) => React.ReactNode[] | undefined;
+  /**
+   * The embeddable calls this function to display warnings about visualization on the dashboard
+   */
+  getEmbeddedWarningMessages?: (
+    state: P,
+    activeData: Record<string, Datatable>,
+    adapters: Adapters
   ) => React.ReactNode[] | undefined;
   /**
    * Checks if the visualization created is time based, for example date histogram

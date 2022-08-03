@@ -16,8 +16,9 @@ import { Filter, onlyDisabledFiltersChanged, Query, TimeRange } from '@kbn/es-qu
 import type { KibanaExecutionContext, SavedObjectAttributes } from '@kbn/core/public';
 import type { ErrorLike } from '@kbn/expressions-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { TimefilterContract } from '@kbn/data-plugin/public';
+import { IEsSearchResponse, TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { Warnings } from '@kbn/charts-plugin/public';
 import {
   Adapters,
   AttributeService,
@@ -54,7 +55,6 @@ import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import { VisSavedObject } from '../types';
 import { toExpressionAst } from './to_ast';
-import { Warnings } from '@kbn/charts-plugin/public';
 
 export interface VisualizeEmbeddableConfiguration {
   vis: Vis;
@@ -306,25 +306,21 @@ export class VisualizeEmbeddable
   };
 
   onContainerData = () => {
-    const warnings = this.getInspectorAdapters()?.requests
-      ?.getRequests()
+    const warnings = this.getInspectorAdapters()
+      ?.requests?.getRequests()
       .flatMap((r) =>
-        r.response?.json?.rawResponse?._shards?.failures
-          .filter((failure) => failure.reason?.type === 'illegal_argument_exception')
+        (r.response?.json as IEsSearchResponse | undefined)?.rawResponse?._shards?.failures
+          ?.filter((failure) => failure.reason?.type === 'illegal_argument_exception')
           .map((failure) => failure.reason.reason)
       )
       .filter(Boolean);
     this.updateOutput({
       ...this.getOutput(),
-      warnings,
       loading: false,
     });
 
-    if (warnings?.length && this.warningDomNode) {
-      render(
-        <Warnings warnings={warnings} />,
-        this.warningDomNode
-      );
+    if (this.warningDomNode) {
+      render(<Warnings warnings={warnings || []} />, this.warningDomNode);
     }
   };
 

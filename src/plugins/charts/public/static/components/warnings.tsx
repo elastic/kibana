@@ -9,8 +9,9 @@
 import { EuiButtonIcon, EuiPopover } from '@elastic/eui';
 import React, { useState } from 'react';
 
-export function Warnings({ warnings }: { warnings: string[] }) {
+export function Warnings({ warnings }: { warnings: React.ReactNode[] }) {
   const [open, setOpen] = useState(false);
+  if (warnings.length === 0) return null;
   return (
     <EuiPopover
       isOpen={open}

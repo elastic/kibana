@@ -29,7 +29,6 @@ export interface EmbeddableOutput {
   title?: string;
   editable?: boolean;
   savedObjectId?: string;
-  warnings?: string[];
 }
 
 export interface IEmbeddable<

@@ -9,15 +9,22 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinksStart } from '@kbn/core/public';
-import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
+import type { DatatableUtilitiesService, IEsSearchResponse } from '@kbn/data-plugin/common';
 import { TimeRange } from '@kbn/es-query';
 import { EuiLink, EuiTextColor, EuiButton, EuiSpacer } from '@elastic/eui';
 
+import { Adapters } from '@kbn/inspector-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { groupBy, escape } from 'lodash';
+import { groupBy, escape, uniq } from 'lodash';
 import type { Query } from '@kbn/data-plugin/common';
 import type { FramePublicAPI, StateSetter } from '../types';
-import type { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from './types';
+import type {
+  IndexPattern,
+  IndexPatternField,
+  IndexPatternLayer,
+  IndexPatternPersistedState,
+  IndexPatternPrivateState,
+} from './types';
 import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';
 
 import {
@@ -39,7 +46,6 @@ import { mergeLayer } from './state_helpers';
 import { supportsRarityRanking } from './operations/definitions/terms';
 import { DEFAULT_MAX_DOC_COUNT } from './operations/definitions/terms/constants';
 import { getOriginalId } from '../../common/expressions';
-import { Adapters } from '@kbn/inspector-plugin/public';
 
 export function isColumnInvalid(
   layer: IndexPatternLayer,
@@ -160,43 +166,48 @@ const accuracyModeEnabledWarning = (columnName: string, docLink: string) => (
   />
 );
 
+export function getFieldType(field: IndexPatternField) {
+  if (field.timeSeriesMetricType) {
+    return field.timeSeriesMetricType;
+  }
+  return field.type;
+}
+
 export function getTSDBRollupWarningMessages(
-  datatableUtilities: DatatableUtilitiesService,
-  state: IndexPatternPrivateState,
-  { activeData }: FramePublicAPI,
-  docLinks: DocLinksStart,
-  adapters: Adapters,
-  setState: StateSetter<IndexPatternPrivateState>
+  state: IndexPatternPersistedState,
+  adapters: Adapters
 ) {
   if (state && adapters.requests) {
-    const hasTSDBRollupWarnings = adapters.requests
-      .getRequests()
-      .flatMap((r) =>
-        r.response?.json?.rawResponse?._shards?.failures
-          .filter((failure) => failure.reason?.type === 'illegal_argument_exception')
-          .map((failure) => failure.reason.reason)
-      )
-      .filter(Boolean);
+    const hasTSDBRollupWarnings =
+      adapters.requests
+        .getRequests()
+        .flatMap((r) =>
+          (r.response?.json as IEsSearchResponse | undefined)?.rawResponse?._shards?.failures
+            ?.filter((failure) => failure.reason?.type === 'illegal_argument_exception')
+            .map((failure) => failure.reason.reason)
+        )
+        .filter(Boolean).length > 0;
     if (!hasTSDBRollupWarnings) {
       return [];
     }
     return Object.values(state.layers).flatMap((layer) =>
-      Object.values(layer.columns)
-        .filter(
-          (col) =>
-            'sourceField' in col &&
-            state.indexPatterns[layer.indexPatternId].getFieldByName(col.sourceField)
-              ?.softRestrictions?.[col.operationType]
-        )
-        .map((col) => (
-          <FormattedMessage
-            id="xpack.lens.indexPattern.tsdbRollupWarning"
-            defaultMessage="{name} does not work for all indices in the selected data view because it's using a function which is not supported on rolled up data. Please edit the visualization to use another function or change the time range."
-            values={{
-              name: <EuiTextColor color="accent">{col.label}</EuiTextColor>,
-            }}
-          />
-        ))
+      uniq(
+        Object.values(layer.columns)
+          .filter((col) =>
+            ['median', 'percentile', 'percentile_rank', 'last_value', 'cardinality'].includes(
+              col.operationType
+            )
+          )
+          .map((col) => col.label)
+      ).map((label) => (
+        <FormattedMessage
+          id="xpack.lens.indexPattern.tsdbRollupWarning"
+          defaultMessage="{name} does not work for all indices in the selected data view because it's using a function which is not supported on rolled up data. Please edit the visualization to use another function or change the time range."
+          values={{
+            name: <EuiTextColor color="accent">{label}</EuiTextColor>,
+          }}
+        />
+      ))
     );
   }
 
