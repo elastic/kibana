@@ -26,6 +26,7 @@ export default function ({
   const kibanaServer = getService('kibanaServer');
   const reporting = getService('reporting');
   const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
+  const config = getService('config');
 
   const loadEcommerce = async () => {
     await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
@@ -163,6 +164,7 @@ export default function ({
         await PageObjects.reporting.clickGenerateReportButton();
         await PageObjects.reporting.removeForceSharedItemsContainerSize();
 
+        const screenshotDir = config.get('screenshots.directory');
         const url = await PageObjects.reporting.getReportURL(60000);
         const reportData = await PageObjects.reporting.getRawPdfReportData(url);
         const reportFileName = 'small_dashboard_preserve_layout';
@@ -170,13 +172,13 @@ export default function ({
           reportFileName,
           'png',
           reportData,
-          REPORTS_FOLDER
+          screenshotDir
         );
 
         const percentDiff = await reporting.comparePngAgainstBaseline(
           sessionReportPath,
           PageObjects.reporting.getBaselineReportPath(reportFileName, 'png', REPORTS_FOLDER),
-          REPORTS_FOLDER,
+          screenshotDir,
           updateBaselines,
           log
         );
@@ -194,6 +196,7 @@ export default function ({
         await PageObjects.reporting.clickGenerateReportButton();
         await PageObjects.reporting.removeForceSharedItemsContainerSize();
 
+        const screenshotDir = config.get('screenshots.directory');
         const url = await PageObjects.reporting.getReportURL(200000);
         const reportData = await PageObjects.reporting.getRawPdfReportData(url);
         const reportFileName = 'large_dashboard_preserve_layout';
@@ -201,12 +204,12 @@ export default function ({
           reportFileName,
           'png',
           reportData,
-          REPORTS_FOLDER
+          screenshotDir
         );
         const percentDiff = await reporting.comparePngAgainstBaseline(
           sessionReportPath,
           PageObjects.reporting.getBaselineReportPath(reportFileName, 'png', REPORTS_FOLDER),
-          REPORTS_FOLDER,
+          screenshotDir,
           updateBaselines,
           log
         );
@@ -271,6 +274,7 @@ export default function ({
     describe('Sample data from Kibana 7.6', () => {
       const reportFileName = 'sample_data_ecommerce_76';
       let sessionReportPath: string;
+      const screenshotDir = config.get('screenshots.directory');
 
       before(async () => {
         await kibanaServer.uiSettings.replace({
@@ -296,7 +300,7 @@ export default function ({
           reportFileName,
           'png',
           reportData,
-          REPORTS_FOLDER
+          screenshotDir
         );
       });
 
@@ -312,7 +316,7 @@ export default function ({
         const percentDiff = await reporting.comparePngAgainstBaseline(
           sessionReportPath,
           PageObjects.reporting.getBaselineReportPath(reportFileName, 'png', REPORTS_FOLDER),
-          REPORTS_FOLDER,
+          screenshotDir,
           updateBaselines,
           log
         );
