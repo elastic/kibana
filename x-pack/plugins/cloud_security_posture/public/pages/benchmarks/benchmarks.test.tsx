@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import Chance from 'chance';
 import { render, screen } from '@testing-library/react';
 import type { UseQueryResult } from 'react-query/types/react/types';
 import { createCspBenchmarkIntegrationFixture } from '../../test/fixtures/csp_benchmark_integration';
@@ -13,19 +14,24 @@ import { TestProvider } from '../../test/test_provider';
 import { Benchmarks } from './benchmarks';
 import * as TEST_SUBJ from './test_subjects';
 import { useCspBenchmarkIntegrations } from './use_csp_benchmark_integrations';
-import { useCisKubernetesIntegration } from '../../common/api/use_cis_kubernetes_integration';
+import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
 
 jest.mock('./use_csp_benchmark_integrations');
-jest.mock('../../common/api/use_cis_kubernetes_integration');
+jest.mock('../../common/api/use_setup_status_api');
+jest.mock('../../common/navigation/use_navigate_to_cis_integration');
+const chance = new Chance();
 
 describe('<Benchmarks />', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-
-    // if package installation status is 'not_installed', CspPageTemplate will render a noDataConfig prompt
-    (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({
-      data: { item: { status: 'installed' } },
-    }));
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: { status: 'indexed' },
+      })
+    );
+    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
   });
 
   const renderBenchmarks = (

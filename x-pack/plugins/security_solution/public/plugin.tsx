@@ -331,6 +331,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         management: new subPluginClasses.Management(),
         landingPages: new subPluginClasses.LandingPages(),
         cloudSecurityPosture: new subPluginClasses.CloudSecurityPosture(),
+        threatIntelligence: new subPluginClasses.ThreatIntelligence(),
       };
     }
     return this._subPlugins;
@@ -359,6 +360,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       management: subPlugins.management.start(core, plugins),
       landingPages: subPlugins.landingPages.start(),
       cloudSecurityPosture: subPlugins.cloudSecurityPosture.start(),
+      threatIntelligence: subPlugins.threatIntelligence.start(),
     };
   }
   /**
@@ -475,7 +477,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const { links, getFilteredLinks } = await this.lazyApplicationLinks();
 
     const { license$ } = plugins.licensing;
-    const newNavEnabled$ = core.uiSettings.get$<boolean>(ENABLE_GROUPED_NAVIGATION, false);
+    const newNavEnabled$ = core.uiSettings.get$<boolean>(ENABLE_GROUPED_NAVIGATION, true);
 
     let appLinksSubscription: Subscription | null = null;
     license$.pipe(combineLatestWith(newNavEnabled$)).subscribe(async ([license, newNavEnabled]) => {

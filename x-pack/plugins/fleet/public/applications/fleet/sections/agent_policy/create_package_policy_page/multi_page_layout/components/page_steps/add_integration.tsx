@@ -12,6 +12,10 @@ import { safeLoad } from 'js-yaml';
 
 import { i18n } from '@kbn/i18n';
 
+import { useConfirmForceInstall } from '../../../../../../../integrations/hooks';
+
+import { isVerificationError } from '../../../../../../../../services';
+
 import type { MultiPageStepLayoutProps } from '../../types';
 import type { PackagePolicyFormState } from '../../../types';
 import type { NewPackagePolicy } from '../../../../../../types';
@@ -83,7 +87,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
   const { notifications } = useStartServices();
   const [formState, setFormState] = useState<PackagePolicyFormState>('VALID');
   const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
-
+  const confirmForceInstall = useConfirmForceInstall();
   const [packagePolicy, setPackagePolicy] = useState<NewPackagePolicy>({
     name: '',
     description: '',
@@ -136,32 +140,59 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
   );
 
   // Save package policy
-  const savePackagePolicy = async (pkgPolicy: NewPackagePolicy) => {
+  const savePackagePolicy = async ({
+    newPackagePolicy,
+    force,
+  }: {
+    newPackagePolicy: NewPackagePolicy;
+    force?: boolean;
+  }) => {
     setFormState('LOADING');
-    const result = await sendCreatePackagePolicy(pkgPolicy);
+    const result = await sendCreatePackagePolicy({ ...newPackagePolicy, force });
     setFormState('SUBMITTED');
     return result;
   };
 
-  const onSubmit = useCallback(async () => {
-    const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
+  const onSubmit = useCallback(
+    async ({ force = false }: { force?: boolean } = {}) => {
+      const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
-    if (formState === 'VALID' && hasErrors) {
-      setFormState('INVALID');
-      return;
-    }
-    setFormState('LOADING');
+      if (formState === 'VALID' && hasErrors) {
+        setFormState('INVALID');
+        return;
+      }
+      setFormState('LOADING');
 
-    const { error } = await savePackagePolicy(packagePolicy);
-    if (error) {
-      notifications.toasts.addError(error, {
-        title: 'Error',
-      });
-      setFormState('VALID');
-    } else {
-      onNext();
-    }
-  }, [validationResults, formState, packagePolicy, notifications.toasts, onNext]);
+      const { error } = await savePackagePolicy({ newPackagePolicy: packagePolicy, force });
+      if (error) {
+        if (isVerificationError(error)) {
+          const forceInstall = await confirmForceInstall(packageInfo);
+
+          if (forceInstall) {
+            onSubmit({ force: true });
+          } else {
+            setFormState('VALID');
+          }
+          return;
+        }
+        notifications.toasts.addError(error, {
+          title: 'Error',
+        });
+        setFormState('VALID');
+      } else {
+        onNext();
+      }
+    },
+    [
+      validationResults,
+      formState,
+      packagePolicy,
+      notifications.toasts,
+      confirmForceInstall,
+      packageInfo,
+      onNext,
+    ]
+  );
 
   useEffect(() => {
     const getBasePolicy = async () => {

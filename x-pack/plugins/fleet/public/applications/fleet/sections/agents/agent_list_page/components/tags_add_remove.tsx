@@ -41,6 +41,7 @@ interface Props {
   selectedTags: string[];
   button: HTMLElement;
   onTagsUpdated: () => void;
+  onClosePopover: () => void;
 }
 
 export const TagsAddRemove: React.FC<Props> = ({
@@ -50,6 +51,7 @@ export const TagsAddRemove: React.FC<Props> = ({
   selectedTags,
   button,
   onTagsUpdated,
+  onClosePopover,
 }: Props) => {
   const labelsFromTags = useCallback(
     (tags: string[]) =>
@@ -65,7 +67,10 @@ export const TagsAddRemove: React.FC<Props> = ({
   const [searchValue, setSearchValue] = useState<string | undefined>(undefined);
   const [isPopoverOpen, setIsPopoverOpen] = useState(true);
   const [isTagHovered, setIsTagHovered] = useState<{ [tagName: string]: boolean }>({});
-  const closePopover = () => setIsPopoverOpen(false);
+  const closePopover = () => {
+    setIsPopoverOpen(false);
+    onClosePopover();
+  };
 
   const updateTagsHook = useUpdateTags();
 
@@ -139,6 +144,8 @@ export const TagsAddRemove: React.FC<Props> = ({
         anchorPosition="leftUp"
       >
         <EuiSelectable
+          // workaround for auto-scroll to first element after clearing search
+          onFocus={() => {}}
           aria-label={i18n.translate('xpack.fleet.tagsAddRemove.selectableTagsLabel', {
             defaultMessage: 'Add / remove tags',
           })}
@@ -146,7 +153,7 @@ export const TagsAddRemove: React.FC<Props> = ({
           searchProps={{
             'data-test-subj': 'addRemoveTags',
             placeholder: i18n.translate('xpack.fleet.tagsAddRemove.findOrCreatePlaceholder', {
-              defaultMessage: 'Find or create label...',
+              defaultMessage: 'Find or create tag...',
             }),
             onChange: (value: string) => {
               setSearchValue(sanitizeTag(value));

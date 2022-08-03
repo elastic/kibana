@@ -37,7 +37,6 @@ import { hasField } from '../pure_utils';
 import { fieldIsInvalid } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
 import type { IndexPattern, IndexPatternField, IndexPatternLayer } from '../types';
-import { trackUiEvent } from '../../lens_ui_telemetry';
 import { FormatSelector } from './format_selector';
 import { ReferenceEditor } from './reference_editor';
 import { TimeScaling } from './time_scaling';
@@ -45,6 +44,7 @@ import { Filtering } from './filtering';
 import { AdvancedOptions } from './advanced_options';
 import { TimeShift } from './time_shift';
 import type { LayerType } from '../../../common';
+import { DOCUMENT_FIELD_NAME } from '../../../common';
 import {
   quickFunctionsName,
   staticValueOperationName,
@@ -62,6 +62,7 @@ import { ParamEditorProps } from '../operations/definitions';
 import { WrappingHelpPopover } from '../help_popover';
 import { isColumn } from '../operations/definitions/helpers';
 import { FieldChoiceWithOperationType } from './field_select';
+import { documentField } from '../document_field';
 
 export interface DimensionEditorProps extends IndexPatternDimensionEditorProps {
   selectedColumn?: GenericIndexPatternColumn;
@@ -191,7 +192,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const addStaticValueColumn = (prevLayer = props.state.layers[props.layerId]) => {
     if (selectedColumn?.operationType !== staticValueOperationName) {
-      trackUiEvent(`indexpattern_dimension_operation_static_value`);
       const layer = insertOrReplaceColumn({
         layer: prevLayer,
         indexPattern: currentIndexPattern,
@@ -427,7 +427,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
               setTemporaryState('none');
             }
             setStateWrapper(newLayer);
-            trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
             return;
           } else if (!selectedColumn || !compatibleWithCurrentField) {
             const possibleFields = fieldByOperation[operationType] || new Set();
@@ -449,7 +448,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 indexPattern: currentIndexPattern,
                 columnId,
                 op: operationType,
-                field: undefined,
+                // if document field can be used, default to it
+                field: possibleFields.has(DOCUMENT_FIELD_NAME) ? documentField : undefined,
                 visualizationGroups: dimensionGroups,
                 targetGroup: props.groupId,
               });
@@ -462,7 +462,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
               setTemporaryState('none');
             }
             setStateWrapper(newLayer);
-            trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
             return;
           }
 
@@ -604,7 +603,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
                     );
                   }}
                   onChooseField={(choice: FieldChoiceWithOperationType) => {
-                    trackUiEvent('indexpattern_dimension_field_changed');
                     updateLayer(
                       insertOrReplaceColumn({
                         layer,
@@ -788,7 +786,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
             visualizationGroups: dimensionGroups,
           });
           setStateWrapper(newLayer);
-          trackUiEvent(`indexpattern_dimension_operation_formula`);
         }
       },
       label: i18n.translate('xpack.lens.indexPattern.formulaLabel', {

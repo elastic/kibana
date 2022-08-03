@@ -69,8 +69,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     const containerElement = useRef<HTMLDivElement | null>(null);
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
     const graphEventId = useShallowEqualSelector(
-      (state) =>
-        (getTimeline(state, TimelineId.networkPageExternalAlerts) ?? timelineDefaults).graphEventId
+      (state) => (getTimeline(state, TimelineId.networkPageEvents) ?? timelineDefaults).graphEventId
     );
     const getGlobalFiltersQuerySelector = useMemo(
       () => inputsSelectors.globalFiltersQuerySelector(),
@@ -88,7 +87,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     const canUseMaps = kibana.services.application.capabilities.maps.show;
 
     const tabsFilters = useMemo(() => {
-      if (tabName === NetworkRouteType.alerts) {
+      if (tabName === NetworkRouteType.events) {
         return filters.length > 0
           ? [...filters, ...filterNetworkExternalAlertData]
           : filterNetworkExternalAlertData;

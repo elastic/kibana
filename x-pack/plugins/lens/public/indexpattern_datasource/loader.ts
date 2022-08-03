@@ -111,7 +111,7 @@ export function convertDataViewIntoLensIndexPattern(dataView: DataView): IndexPa
         ])
       ),
     fields: newFields,
-    getFieldByName: getFieldByNameFactory(newFields),
+    getFieldByName: getFieldByNameFactory(newFields, false),
     hasRestrictions: !!typeMeta?.aggs,
   };
 }
