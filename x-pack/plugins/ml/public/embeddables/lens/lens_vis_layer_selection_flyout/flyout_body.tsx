@@ -215,34 +215,34 @@ export const FlyoutBody: FC<Props> = ({
             <EuiSplitPanel.Inner grow={false} color="subdued">
               {layer.isCompatible ? (
                 <>
-                  <EuiFlexGroup gutterSize="s" data-test-subj="mlLensLayerCompatible">
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="s">
-                        <EuiIcon type="checkInCircleFilled" color="success" />
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiText size="s">
-                        <FormattedMessage
-                          id="xpack.ml.embeddables.lensLayerFlyout.createJobCalloutTitle"
-                          defaultMessage="This layer can be used to create a {type} job"
-                          values={{
-                            type:
-                              layer.jobWizardType === CREATED_BY_LABEL.MULTI_METRIC
-                                ? 'multi-metric'
-                                : 'single metric',
-                          }}
-                        />
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                  <EuiSpacer size="m" />
-                  {state !== STATE.SAVE_SUCCESS ? (
+                  {state !== STATE.SAVE_SUCCESS && state !== STATE.SAVING ? (
                     <>
+                      <EuiFlexGroup gutterSize="s" data-test-subj="mlLensLayerCompatible">
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="s">
+                            <EuiIcon type="checkInCircleFilled" color="success" />
+                          </EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiText size="s">
+                            {layer.jobWizardType === CREATED_BY_LABEL.MULTI_METRIC ? (
+                              <FormattedMessage
+                                id="xpack.ml.embeddables.lensLayerFlyout.createJobCalloutTitle.multiMetric"
+                                defaultMessage="This layer can be used to create a multi-metric job"
+                              />
+                            ) : (
+                              <FormattedMessage
+                                id="xpack.ml.embeddables.lensLayerFlyout.createJobCalloutTitle.singleMetric"
+                                defaultMessage="This layer can be used to create a single metric job"
+                              />
+                            )}
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                      <EuiSpacer size="m" />
                       <EuiForm>
                         <EuiFormRow label="Job ID" error={jobIdValid} isInvalid={jobIdValid !== ''}>
                           <EuiFieldText
-                            disabled={state === STATE.SAVING}
                             value={jobId}
                             onChange={(e) => {
                               setJobId(e.target.value);
@@ -268,7 +268,6 @@ export const FlyoutBody: FC<Props> = ({
                             isInvalid={bucketSpanValid !== ''}
                           >
                             <EuiFieldText
-                              disabled={state === STATE.SAVING}
                               value={bucketSpan}
                               onChange={(e) => {
                                 setBucketSpan(e.target.value);
@@ -279,7 +278,6 @@ export const FlyoutBody: FC<Props> = ({
                           <EuiSpacer size="l" />
                           <EuiFormRow>
                             <EuiCheckbox
-                              disabled={state === STATE.SAVING}
                               id="startJob"
                               checked={startJob}
                               onChange={(e) => setStartJobWrapper(e.target.checked)}
@@ -295,7 +293,7 @@ export const FlyoutBody: FC<Props> = ({
                           <EuiSpacer size="s" />
                           <EuiFormRow>
                             <EuiCheckbox
-                              disabled={startJob === false || state === STATE.SAVING}
+                              disabled={startJob === false}
                               id="startJob"
                               checked={runInRealTime}
                               onChange={(e) => setRunInRealTime(e.target.checked)}
@@ -315,7 +313,6 @@ export const FlyoutBody: FC<Props> = ({
                         <EuiFlexItem>
                           <EuiButton
                             disabled={
-                              state === STATE.SAVING ||
                               state === STATE.VALIDATING ||
                               jobId === '' ||
                               jobIdValid !== '' ||
@@ -323,26 +320,17 @@ export const FlyoutBody: FC<Props> = ({
                             }
                             onClick={createADJob.bind(null, i)}
                             size="s"
-                            color="success"
                             data-test-subj={`mlLensLayerCompatibleButton_${i}`}
                           >
-                            {state === STATE.SAVING ? (
-                              <FormattedMessage
-                                id="xpack.ml.embeddables.lensLayerFlyout.createJobButton"
-                                defaultMessage="Saving job"
-                              />
-                            ) : (
-                              <FormattedMessage
-                                id="xpack.ml.embeddables.lensLayerFlyout.createJobButton.saving"
-                                defaultMessage="Quick create job"
-                              />
-                            )}
+                            <FormattedMessage
+                              id="xpack.ml.embeddables.lensLayerFlyout.createJobButton.saving"
+                              defaultMessage="Create job"
+                            />
                           </EuiButton>
                         </EuiFlexItem>
 
                         <EuiFlexItem grow={false}>
                           <EuiButtonEmpty
-                            disabled={state === STATE.SAVING}
                             onClick={createADJobInWizard.bind(null, i)}
                             size="s"
                             iconType="popout"
@@ -361,10 +349,22 @@ export const FlyoutBody: FC<Props> = ({
 
                   {state === STATE.SAVE_SUCCESS ? (
                     <>
-                      <FormattedMessage
-                        id="xpack.ml.embeddables.lensLayerFlyout.saveSuccess"
-                        defaultMessage="Job created"
-                      />
+                      <EuiFlexGroup gutterSize="s" data-test-subj="mlLensLayerCompatible">
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="s">
+                            <EuiIcon type="checkInCircleFilled" color="success" />
+                          </EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiText size="s">
+                            <FormattedMessage
+                              id="xpack.ml.embeddables.lensLayerFlyout.saveSuccess"
+                              defaultMessage="Job created"
+                            />
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+
                       {resultsLink === null ? null : (
                         <>
                           <EuiSpacer size="s" />
@@ -375,10 +375,17 @@ export const FlyoutBody: FC<Props> = ({
                             target="_blank"
                             flush="left"
                           >
-                            <FormattedMessage
-                              id="xpack.ml.embeddables.lensLayerFlyout.saveSuccess.resultsLink"
-                              defaultMessage="View results"
-                            />
+                            {layer.jobWizardType === CREATED_BY_LABEL.MULTI_METRIC ? (
+                              <FormattedMessage
+                                id="xpack.ml.embeddables.lensLayerFlyout.saveSuccess.resultsLink.multiMetric"
+                                defaultMessage="View results in Anomaly Explorer"
+                              />
+                            ) : (
+                              <FormattedMessage
+                                id="xpack.ml.embeddables.lensLayerFlyout.saveSuccess.resultsLink.singleMetric"
+                                defaultMessage="View results in Single Metric Viewer"
+                              />
+                            )}
                           </EuiButtonEmpty>
                         </>
                       )}
@@ -390,7 +397,7 @@ export const FlyoutBody: FC<Props> = ({
                       <EuiFlexItem grow={false}>
                         <FormattedMessage
                           id="xpack.ml.embeddables.lensLayerFlyout.saveSuccess"
-                          defaultMessage="Saving job"
+                          defaultMessage="Creating job"
                         />
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
