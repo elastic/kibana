@@ -441,7 +441,6 @@ export async function syncExistingFields({
   dslQuery: object;
   showNoDataPopover: () => void;
 }) {
-  console.log('test');
   const existenceRequests = indexPatterns.map((pattern) => {
     const hasRestrictions = !!pattern.typeMeta?.aggs;
     if (hasRestrictions) {
@@ -450,7 +449,6 @@ export async function syncExistingFields({
         existingFieldNames: pattern.fields.map((field) => field.name),
       };
     }
-    console.log('test2');
 
     return fetchFieldExistence({
       dslQuery,
@@ -465,7 +463,6 @@ export async function syncExistingFields({
       useSampling: core.uiSettings.get(FIELD_EXISTENCE_SETTING),
     }) as Promise<ExistingFields>;
   });
-
   try {
     const emptinessInfo = await Promise.all(existenceRequests);
     if (isFirstExistenceFetch) {
@@ -476,7 +473,6 @@ export async function syncExistingFields({
         showNoDataPopover();
       }
     }
-
     setState(
       (state) => ({
         ...state,

@@ -115,7 +115,7 @@ async function legacyFetchFieldExistenceSampling({
 
   return {
     indexPatternTitle: dataView.title,
-    existingFieldNames: legacyExistingFields(docs, fields),
+    existingFieldNames: legacyExistingFields(docs as estypes.SearchHit[], fields),
   };
 }
 
@@ -200,7 +200,7 @@ async function fetchIndexPatternStats({
     )
     .toPromise();
   // @ts-ignore
-  return result?.hits?.hits;
+  return result?.rawResponse.hits?.hits as estypes.SearchHit[];
 }
 
 function toQuery(

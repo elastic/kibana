@@ -337,6 +337,9 @@ describe('IndexPattern Data Panel', () => {
     const getFieldsForIndexPattern = jest.fn(async () => {
       return Promise.resolve(['field_1', 'field_2'].map((name) => ({ name } as FieldSpec)));
     });
+    afterEach(() => {
+      getFieldsForIndexPattern.mockClear();
+    });
     function testProps() {
       const setState = jest.fn();
       const fields = [{ name: 'field_1' } as DataViewField, { name: 'field_2' } as DataViewField];
@@ -467,41 +470,60 @@ describe('IndexPattern Data Panel', () => {
     });
 
     it('loads existence data if date range changes', async () => {
-      getFieldsForIndexPattern.mockReset();
       const setState = await testExistenceLoading(undefined, {
         dateRange: { fromDate: '2019-01-01', toDate: '2020-01-02' },
       });
 
       expect(setState).toHaveBeenCalledTimes(1);
+      expect(getFieldsForIndexPattern).toHaveBeenCalledTimes(2);
 
-      expect(getFieldsForIndexPattern).toHaveBeenCalledWith('/api/lens/existing_fields/a', {
-        filter: {
-          bool: {
-            filter: [
-              {
-                range: {
-                  atime: {
-                    format: 'strict_date_optional_time',
-                    gte: '2019-01-01',
-                    lte: '2020-01-02',
-                  },
-                },
+      expect(getFieldsForIndexPattern.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "fields": Array [
+              Object {
+                "name": "field_1",
               },
-              {
-                bool: {
-                  filter: [],
-                  must: [],
-                  must_not: [],
-                  should: [],
-                },
+              Object {
+                "name": "field_2",
               },
             ],
+            "getFieldByName": [Function],
+            "hasRestrictions": false,
+            "id": "a",
+            "timeFieldName": "atime",
+            "title": "aaa",
           },
-        },
-        pattern: '',
-      });
+          Object {
+            "filter": Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "range": Object {
+                      "atime": Object {
+                        "format": "strict_date_optional_time",
+                        "gte": "2019-01-01",
+                        "lte": "2020-01-02",
+                      },
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "filter": Array [],
+                      "must": Array [],
+                      "must_not": Array [],
+                      "should": Array [],
+                    },
+                  },
+                ],
+              },
+            },
+            "pattern": "",
+          },
+        ]
+      `);
 
-      const nextState = setState.mock.calls[1][0]({
+      const nextState = setState.mock.calls[0][0]({
         existingFields: {},
       });
 
@@ -523,6 +545,7 @@ describe('IndexPattern Data Panel', () => {
       });
 
       expect(setState).toHaveBeenCalledTimes(2);
+      expect(getFieldsForIndexPattern).toHaveBeenCalledTimes(2);
 
       expect(core.http.post).toHaveBeenCalledWith('/api/lens/existing_fields/a', {
         body: JSON.stringify({
