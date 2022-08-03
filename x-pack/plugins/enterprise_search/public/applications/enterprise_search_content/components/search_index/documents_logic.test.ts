@@ -10,11 +10,14 @@ import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__/kea_lo
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { HttpError, Status } from '../../../../../common/types/api';
-import { convertMetaToPagination } from '../../../shared/table_pagination';
 import { MappingsApiLogic } from '../../api/mappings/mappings_logic';
 import { SearchDocumentsApiLogic } from '../../api/search_documents/search_documents_logic';
 
-import { DocumentsLogic, INDEX_DOCUMENTS_META_DEFAULT } from './documents_logic';
+import {
+  DocumentsLogic,
+  INDEX_DOCUMENTS_META_DEFAULT,
+  convertMetaToPagination,
+} from './documents_logic';
 import { IndexNameLogic } from './index_name_logic';
 
 export const DEFAULT_VALUES = {

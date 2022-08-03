@@ -18,9 +18,8 @@ import { ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT } from '../../../../../co
 import { Meta } from '../../../../../common/types';
 import { HttpError, Status } from '../../../../../common/types/api';
 
-import { DEFAULT_META } from '../../../shared/constants';
 import { flashAPIErrors, clearFlashMessages } from '../../../shared/flash_messages';
-import { updateMetaPageIndex, convertMetaToPagination } from '../../../shared/table_pagination';
+import { updateMetaPageIndex } from '../../../shared/table_pagination';
 
 import { MappingsApiLogic } from '../../api/mappings/mappings_logic';
 import { SearchDocumentsApiLogic } from '../../api/search_documents/search_documents_logic';
@@ -29,9 +28,17 @@ import { IndexNameLogic } from './index_name_logic';
 
 export const INDEX_DOCUMENTS_META_DEFAULT = {
   page: {
-    ...DEFAULT_META.page,
+    current: 0,
     size: ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT,
+    total_pages: 0,
+    total_results: 0,
   },
+};
+
+export const DEFAULT_PAGINATION = {
+  pageIndex: INDEX_DOCUMENTS_META_DEFAULT.page.current,
+  pageSize: INDEX_DOCUMENTS_META_DEFAULT.page.size,
+  totalItemCount: INDEX_DOCUMENTS_META_DEFAULT.page.total_results,
 };
 
 interface DocumentsLogicActions {
@@ -58,6 +65,12 @@ export interface DocumentsLogicValues {
   simplifiedMapping: Record<string, MappingProperty> | undefined;
   status: Status;
 }
+
+export const convertMetaToPagination = (meta: Meta) => ({
+  pageIndex: meta.page.current,
+  pageSize: meta.page.size,
+  totalItemCount: meta.page.total_results,
+});
 
 export const DocumentsLogic = kea<MakeLogicType<DocumentsLogicValues, DocumentsLogicActions>>({
   actions: {

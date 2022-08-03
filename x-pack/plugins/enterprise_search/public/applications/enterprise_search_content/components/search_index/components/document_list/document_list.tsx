@@ -28,6 +28,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { Result } from '../../../../../shared/result/result';
+
 import { DocumentsLogic } from '../../documents_logic';
 
 export const DocumentList: React.FC = () => {
@@ -39,6 +40,7 @@ export const DocumentList: React.FC = () => {
     simplifiedMapping: mappings,
   } = useValues(DocumentsLogic);
   const { onPaginate, setDocsPerPage } = useActions(DocumentsLogic);
+
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const resultToField = (result: SearchHit) => {
     if (mappings && result._source && !Array.isArray(result._source)) {
@@ -68,7 +70,7 @@ export const DocumentList: React.FC = () => {
         'xpack.enterpriseSearch.content.searchIndex.documents.documentList.pagination.itemsPerPage',
         {
           defaultMessage: 'Documents per page: {docPerPage}',
-          values: { docPerPage: meta.page.size },
+          values: { docPerPage: docsPerPage },
         }
       )}
     </EuiButtonEmpty>
@@ -164,6 +166,7 @@ export const DocumentList: React.FC = () => {
             )}
             pageCount={meta.page.total_pages}
             activePage={meta.page.current}
+            onPageClick={onPaginate}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
