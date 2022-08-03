@@ -22,6 +22,7 @@ export enum RawIndicatorFieldId {
 }
 
 export interface Indicator {
+  _id?: unknown;
   fields: Partial<Record<RawIndicatorFieldId, unknown[]>>;
 }
 
@@ -33,6 +34,7 @@ export const generateMockIndicator = (): Indicator => ({
     'threat.indicator.first_seen': ['2022-01-01T01:01:01.000Z'],
     'threat.feed.name': ['[Filebeat] AbuseCH Malware'],
   },
+  _id: Math.random(),
 });
 
 export const generateMockUrlIndicator = (): Indicator => {
