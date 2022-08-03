@@ -25,10 +25,17 @@ const getClasses = (template?: string, className?: string) => {
 };
 
 export const NoDataConfigPage = (props: NoDataConfigPageProps) => {
-  const { className, noDataConfig, ...rest } = props;
+  const { className, noDataConfig, pageSideBar, pageSideBarProps, ...rest } = props;
 
   if (!noDataConfig) {
     return null;
+  }
+
+  let sideBar;
+  if (pageSideBar) {
+    sideBar = (
+      <EuiPageTemplate.Sidebar {...pageSideBarProps}>{pageSideBar}</EuiPageTemplate.Sidebar>
+    );
   }
 
   const classes = getClasses(undefined, className);
@@ -45,6 +52,7 @@ export const NoDataConfigPage = (props: NoDataConfigPageProps) => {
       minHeight={0}
       {...rest}
     >
+      {sideBar}
       <NoDataPage {...noDataConfig} />
     </EuiPageTemplate>
   );

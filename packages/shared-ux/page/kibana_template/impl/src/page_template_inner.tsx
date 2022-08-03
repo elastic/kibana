@@ -30,6 +30,8 @@ export const KibanaPageTemplateInner: FC<Props> = ({
   pageHeader,
   children,
   isEmptyState,
+  pageSideBar,
+  pageSideBarProps,
   ...rest
 }) => {
   let header;
@@ -51,9 +53,26 @@ export const KibanaPageTemplateInner: FC<Props> = ({
     header = <EuiPageTemplate.Header {...pageHeader} />;
   }
 
-  const classes = getClasses(template, className);
+  let sideBar;
+  if (pageSideBar) {
+    sideBar = (
+      <EuiPageTemplate.Sidebar {...pageSideBarProps}>{pageSideBar}</EuiPageTemplate.Sidebar>
+    );
+  }
+
+  const classes = getClasses(undefined, className);
+
   return (
-    <EuiPageTemplate className={classes} {...rest}>
+    <EuiPageTemplate
+      className={classes}
+      // Note: Once all pages have been converted to this new component,
+      // the following props can be removed to allow the template to auto-handle
+      // the fixed header and banner heights.
+      offset={0}
+      minHeight={0}
+      {...rest}
+    >
+      {sideBar}
       {header}
       {children}
     </EuiPageTemplate>
