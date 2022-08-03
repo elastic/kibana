@@ -15,7 +15,6 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiButtonIcon,
-  EuiLoadingSpinner,
   EuiTitle,
   EuiStat,
 } from '@elastic/eui';
@@ -25,23 +24,10 @@ import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 import { useQueryToggle } from '../../containers/query_toggle';
 
-import type {
-  HostsKpiStrategyResponse,
-  NetworkKpiStrategyResponse,
-} from '../../../../common/search_strategy';
-
-import type {
-  ChartSeriesData,
-  ChartData,
-  ChartSeriesConfigs,
-  UpdateDateRange,
-} from '../charts/common';
-
-import { InspectButton } from '../inspect';
+import type { ChartSeriesConfigs } from '../charts/common';
 
 import type { LensAttributes } from '../visualization_actions/types';
 import * as i18n from '../../containers/query_toggle/translations';
-import type { UserskKpiStrategyResponse } from '../../../../common/search_strategy/security_solution/users';
 import { LensEmbeddable } from '../visualization_actions/lens_embeddable';
 
 const FlexGroup = styled(EuiFlexGroup)`
@@ -93,15 +79,9 @@ export interface StatItems {
 }
 
 export interface StatItemsProps extends StatItems {
-  areaChart?: ChartSeriesData[];
-  barChart?: ChartSeriesData[];
   from: string;
   id: string;
-  narrowDateRange: UpdateDateRange;
   to: string;
-  showInspectButton?: boolean;
-  loading: boolean;
-  setQuerySkip: (skip: boolean) => void;
 }
 
 export const numberFormatter = (value: string | number): string => value.toLocaleString();
@@ -142,84 +122,26 @@ export const barchartConfigs = (config?: { onElementClick?: ElementClickListener
   customHeight: statItemChartCustomHeight,
 });
 
-export const addValueToFields = (
-  fields: StatItem[],
-  data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse | UserskKpiStrategyResponse
-): StatItem[] => fields.map((field) => ({ ...field, value: get(field.key, data) }));
-
-export const addValueToAreaChart = (
-  fields: StatItem[],
-  data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse | UserskKpiStrategyResponse
-): ChartSeriesData[] =>
-  fields
-    .filter((field) => get(`${field.key}Histogram`, data) != null)
-    .map(({ lensAttributes, ...field }) => ({
-      ...field,
-      value: get(`${field.key}Histogram`, data),
-      key: `${field.key}Histogram`,
-    }));
-
-export const addValueToBarChart = (
-  fields: StatItem[],
-  data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse | UserskKpiStrategyResponse
-): ChartSeriesData[] => {
-  if (fields.length === 0) return [];
-  return fields.reduce((acc: ChartSeriesData[], field: StatItem, idx: number) => {
-    const { key, color } = field;
-    const y: number | null = getOr(null, key, data);
-    const x: string = get(`${idx}.name`, fields) || getOr('', `${idx}.description`, fields);
-    const value: [ChartData] = [
-      {
-        x,
-        y,
-        g: key,
-        y0: 0,
-      },
-    ];
-
-    return [
-      ...acc,
-      {
-        key,
-        color,
-        value,
-      },
-    ];
-  }, []);
-};
-
 export const useKpiMatrixStatus = (
   mappings: Readonly<StatItems[]>,
-  data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse | UserskKpiStrategyResponse,
   id: string,
   from: string,
-  to: string,
-  narrowDateRange: UpdateDateRange,
-  setQuerySkip: (skip: boolean) => void,
-  loading: boolean
+  to: string
 ): StatItemsProps[] =>
   mappings.map((stat) => ({
     ...stat,
-    areaChart: stat.enableAreaChart ? addValueToAreaChart(stat.fields, data) : undefined,
-    barChart: stat.enableBarChart ? addValueToBarChart(stat.fields, data) : undefined,
-    fields: addValueToFields(stat.fields, data),
     id,
     key: `kpi-summary-${stat.key}`,
     statKey: `${stat.key}`,
     from,
     to,
-    narrowDateRange,
-    setQuerySkip,
-    loading,
   }));
+
 const StyledTitle = styled.h6`
   line-height: 200%;
 `;
 export const StatItemsComponent = React.memo<StatItemsProps>(
-  // eslint-disable-next-line complexity
   ({
-    areaChart,
-    barChart,
     description,
     enableAreaChart,
     enableBarChart,
@@ -227,25 +149,11 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
     from,
     grow,
     id,
-    loading = false,
-    showInspectButton = true,
-    index,
-    narrowDateRange,
     statKey = 'item',
     to,
     barChartLensAttributes,
     areaChartLensAttributes,
-    setQuerySkip,
   }) => {
-    const isBarChartDataAvailable =
-      barChart &&
-      barChart.length &&
-      barChart.every((item) => item.value != null && item.value.length > 0);
-    const isAreaChartDataAvailable =
-      areaChart &&
-      areaChart.length &&
-      areaChart.every((item) => item.value != null && item.value.length > 0);
-
     const timerange = useMemo(
       () => ({
         from,
@@ -259,10 +167,8 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
     const toggleQuery = useCallback(
       (status: boolean) => {
         setToggleStatus(status);
-        // toggle on = skipQuery false
-        setQuerySkip(!status);
       },
-      [setQuerySkip, setToggleStatus]
+      [setToggleStatus]
     );
     const toggle = useCallback(() => toggleQuery(!toggleStatus), [toggleQuery, toggleStatus]);
 
@@ -291,26 +197,15 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-            {showInspectButton && toggleStatus && !loading && (
-              <EuiFlexItem grow={false}>
-                <InspectButton queryId={id} title={description} inspectIndex={index} />
-              </EuiFlexItem>
-            )}
           </FlexGroup>
-          {loading && (
-            <EuiFlexGroup justifyContent="center" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiLoadingSpinner size="l" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
-          {toggleStatus && !loading && (
+
+          {toggleStatus && (
             <>
               <EuiFlexGroup>
                 {fields.map((field) => (
                   <FlexItem key={`stat-items-field-${field.key}`}>
                     <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                      {(isAreaChartDataAvailable || isBarChartDataAvailable) && field.icon && (
+                      {field.icon && (
                         <FlexItem grow={false}>
                           <EuiIcon
                             type={field.icon}
@@ -355,18 +250,16 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                 )}
 
                 {enableAreaChart && from != null && to != null && (
-                  <>
-                    <FlexItem>
-                      {areaChartLensAttributes && (
-                        <LensEmbeddable
-                          lensAttributes={areaChartLensAttributes}
-                          timerange={timerange}
-                          id={id}
-                          height={ChartHeight}
-                        />
-                      )}
-                    </FlexItem>
-                  </>
+                  <FlexItem>
+                    {areaChartLensAttributes && (
+                      <LensEmbeddable
+                        lensAttributes={areaChartLensAttributes}
+                        timerange={timerange}
+                        id={id}
+                        height={ChartHeight}
+                      />
+                    )}
+                  </FlexItem>
                 )}
               </EuiFlexGroup>
             </>
@@ -381,15 +274,10 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
     prevProps.enableBarChart === nextProps.enableBarChart &&
     prevProps.from === nextProps.from &&
     prevProps.grow === nextProps.grow &&
-    prevProps.loading === nextProps.loading &&
-    prevProps.setQuerySkip === nextProps.setQuerySkip &&
     prevProps.id === nextProps.id &&
     prevProps.index === nextProps.index &&
-    prevProps.narrowDateRange === nextProps.narrowDateRange &&
     prevProps.statKey === nextProps.statKey &&
     prevProps.to === nextProps.to &&
-    deepEqual(prevProps.areaChart, nextProps.areaChart) &&
-    deepEqual(prevProps.barChart, nextProps.barChart) &&
     deepEqual(prevProps.fields, nextProps.fields)
 );
 

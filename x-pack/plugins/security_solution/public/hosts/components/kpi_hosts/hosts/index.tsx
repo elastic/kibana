@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import type { StatItems } from '../../../../common/components/stat_items';
 import { kpiHostAreaLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_host_area';
 import { kpiHostMetricLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_host_metric';
-import { useHostsKpiHosts, ID } from '../../../containers/kpi_hosts/hosts';
-import { KpiBaseComponentManage } from '../common';
+import { ID } from '../../../containers/kpi_hosts/hosts';
+import { KpiBaseComponent } from '../common';
 import type { HostsKpiProps } from '../types';
 import { HostsKpiChartColors } from '../types';
 import * as i18n from './translations';
-import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
 export const fieldsMapping: Readonly<StatItems[]> = [
   {
@@ -35,43 +34,8 @@ export const fieldsMapping: Readonly<StatItems[]> = [
   },
 ];
 
-const HostsKpiHostsComponent: React.FC<HostsKpiProps> = ({
-  filterQuery,
-  from,
-  indexNames,
-  to,
-  narrowDateRange,
-  setQuery,
-  skip,
-}) => {
-  const { toggleStatus } = useQueryToggle(ID);
-  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
-  useEffect(() => {
-    setQuerySkip(skip || !toggleStatus);
-  }, [skip, toggleStatus]);
-  const [loading, { refetch, id, inspect, ...data }] = useHostsKpiHosts({
-    filterQuery,
-    endDate: to,
-    indexNames,
-    startDate: from,
-    skip: querySkip,
-  });
-
-  return (
-    <KpiBaseComponentManage
-      data={data}
-      id={id}
-      inspect={inspect}
-      loading={loading}
-      fieldsMapping={fieldsMapping}
-      from={from}
-      to={to}
-      narrowDateRange={narrowDateRange}
-      refetch={refetch}
-      setQuery={setQuery}
-      setQuerySkip={setQuerySkip}
-    />
-  );
+const HostsKpiHostsComponent: React.FC<HostsKpiProps> = ({ from, to }) => {
+  return <KpiBaseComponent id={ID} fieldsMapping={fieldsMapping} from={from} to={to} />;
 };
 
 export const HostsKpiHosts = React.memo(HostsKpiHostsComponent);

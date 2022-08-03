@@ -8,17 +8,11 @@
 import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import styled from 'styled-components';
-import deepEqual from 'fast-deep-equal';
 
 import { manageQuery } from '../../../../common/components/page/manage_query';
-import type {
-  HostsKpiStrategyResponse,
-  NetworkKpiStrategyResponse,
-} from '../../../../../common/search_strategy';
+
 import type { StatItemsProps, StatItems } from '../../../../common/components/stat_items';
 import { StatItemsComponent, useKpiMatrixStatus } from '../../../../common/components/stat_items';
-import type { UpdateDateRange } from '../../../../common/components/charts/common';
-import type { UserskKpiStrategyResponse } from '../../../../../common/search_strategy/security_solution/users';
 
 const kpiWidgetHeight = 247;
 
@@ -30,32 +24,19 @@ FlexGroup.displayName = 'FlexGroup';
 
 interface KpiBaseComponentProps {
   fieldsMapping: Readonly<StatItems[]>;
-  data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse | UserskKpiStrategyResponse;
-  loading?: boolean;
   id: string;
   from: string;
   to: string;
-  narrowDateRange: UpdateDateRange;
-  setQuerySkip: (skip: boolean) => void;
 }
 
 export const KpiBaseComponent = React.memo<KpiBaseComponentProps>(
-  ({ fieldsMapping, data, id, loading = false, from, to, narrowDateRange, setQuerySkip }) => {
-    const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(
-      fieldsMapping,
-      data,
-      id,
-      from,
-      to,
-      narrowDateRange,
-      setQuerySkip,
-      loading
-    );
+  ({ fieldsMapping, id, from, to }) => {
+    const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(fieldsMapping, id, from, to);
 
     return (
       <EuiFlexGroup wrap>
         {statItemsProps.map((mappedStatItemProps) => (
-          <StatItemsComponent {...mappedStatItemProps} showInspectButton={false} />
+          <StatItemsComponent {...mappedStatItemProps} />
         ))}
       </EuiFlexGroup>
     );
@@ -63,11 +44,8 @@ export const KpiBaseComponent = React.memo<KpiBaseComponentProps>(
   (prevProps, nextProps) =>
     prevProps.fieldsMapping === nextProps.fieldsMapping &&
     prevProps.id === nextProps.id &&
-    prevProps.loading === nextProps.loading &&
     prevProps.from === nextProps.from &&
-    prevProps.to === nextProps.to &&
-    prevProps.narrowDateRange === nextProps.narrowDateRange &&
-    deepEqual(prevProps.data, nextProps.data)
+    prevProps.to === nextProps.to
 );
 
 KpiBaseComponent.displayName = 'KpiBaseComponent';

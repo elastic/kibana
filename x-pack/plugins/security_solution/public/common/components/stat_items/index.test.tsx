@@ -11,19 +11,12 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import type { StatItemsProps, StatItems } from '.';
-import {
-  StatItemsComponent,
-  addValueToFields,
-  addValueToAreaChart,
-  addValueToBarChart,
-  useKpiMatrixStatus,
-} from '.';
+import { StatItemsComponent, useKpiMatrixStatus } from '.';
 import { BarChart } from '../charts/barchart';
 import { AreaChart } from '../charts/areachart';
 import { EuiHorizontalRule } from '@elastic/eui';
 import { fieldsMapping as fieldTitleChartMapping } from '../../../network/components/kpi_network/unique_private_ips';
 import {
-  mockData,
   mockEnableChartsData,
   mockNoChartMappings,
   mockNarrowDateRange,
@@ -37,10 +30,7 @@ import {
 import type { State } from '../../store';
 import { createStore } from '../../store';
 import { Provider as ReduxStoreProvider } from 'react-redux';
-import type {
-  HostsKpiStrategyResponse,
-  NetworkKpiStrategyResponse,
-} from '../../../../common/search_strategy';
+
 import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
 import * as module from '../../containers/query_toggle';
 
@@ -94,7 +84,7 @@ describe('Stat Items Component', () => {
       mount(
         <ThemeProvider theme={mockTheme}>
           <ReduxStoreProvider store={store}>
-            <StatItemsComponent areaChart={[]} barChart={[]} {...testProps} />
+            <StatItemsComponent {...testProps} />
           </ReduxStoreProvider>
         </ThemeProvider>
       ),
@@ -123,34 +113,6 @@ describe('Stat Items Component', () => {
 
   const mockStatItemsData: StatItemsProps = {
     ...testProps,
-    areaChart: [
-      {
-        key: 'uniqueSourceIpsHistogram',
-        value: [
-          { x: new Date('2019-05-03T13:00:00.000Z').toISOString(), y: 565975 },
-          { x: new Date('2019-05-04T01:00:00.000Z').toISOString(), y: 1084366 },
-          { x: new Date('2019-05-04T13:00:00.000Z').toISOString(), y: 12280 },
-        ],
-        color: '#D36086',
-      },
-      {
-        key: 'uniqueDestinationIpsHistogram',
-        value: [
-          { x: new Date('2019-05-03T13:00:00.000Z').toISOString(), y: 565975 },
-          { x: new Date('2019-05-04T01:00:00.000Z').toISOString(), y: 1084366 },
-          { x: new Date('2019-05-04T13:00:00.000Z').toISOString(), y: 12280 },
-        ],
-        color: '#9170B8',
-      },
-    ],
-    barChart: [
-      { key: 'uniqueSourceIps', value: [{ x: 'uniqueSourceIps', y: '1714' }], color: '#D36086' },
-      {
-        key: 'uniqueDestinationIps',
-        value: [{ x: 'uniqueDestinationIps', y: 2354 }],
-        color: '#9170B8',
-      },
-    ],
     description: 'UNIQUE_PRIVATE_IPS',
     enableAreaChart: true,
     enableBarChart: true,
@@ -241,49 +203,19 @@ describe('Stat Items Component', () => {
   });
 });
 
-describe('addValueToFields', () => {
-  const mockNetworkMappings = fieldTitleChartMapping[0];
-  test('should update value from data', () => {
-    const result = addValueToFields(mockNetworkMappings.fields, mockData);
-    expect(result).toEqual(mockEnableChartsData.fields);
-  });
-});
-
-describe('addValueToAreaChart', () => {
-  const mockNetworkMappings = fieldTitleChartMapping[0];
-  test('should add areaChart from data', () => {
-    const result = addValueToAreaChart(mockNetworkMappings.fields, mockData);
-    expect(result).toEqual(mockEnableChartsData.areaChart);
-  });
-});
-
-describe('addValueToBarChart', () => {
-  const mockNetworkMappings = fieldTitleChartMapping[0];
-  test('should add areaChart from data', () => {
-    const result = addValueToBarChart(mockNetworkMappings.fields, mockData);
-    expect(result).toEqual(mockEnableChartsData.barChart);
-  });
-});
-
 describe('useKpiMatrixStatus', () => {
   const mockNetworkMappings = fieldTitleChartMapping;
-  const MockChildComponent = (mappedStatItemProps: StatItemsProps) => <span />;
+  const MockChildComponent = () => <span />;
   const MockHookWrapperComponent = ({
     fieldsMapping,
-    data,
   }: {
     fieldsMapping: Readonly<StatItems[]>;
-    data: NetworkKpiStrategyResponse | HostsKpiStrategyResponse;
   }) => {
     const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(
       fieldsMapping,
-      data,
       'statItem',
       from,
-      to,
-      mockNarrowDateRange,
-      mockSetQuerySkip,
-      false
+      to
     );
 
     return (
@@ -298,7 +230,7 @@ describe('useKpiMatrixStatus', () => {
   test('it updates status correctly', () => {
     const wrapper = mount(
       <>
-        <MockHookWrapperComponent fieldsMapping={mockNetworkMappings} data={mockData} />
+        <MockHookWrapperComponent fieldsMapping={mockNetworkMappings} />
       </>
     );
     const result = { ...wrapper.find('MockChildComponent').get(0).props };
@@ -310,7 +242,7 @@ describe('useKpiMatrixStatus', () => {
   test('it should not append areaChart if enableAreaChart is off', () => {
     const wrapper = mount(
       <>
-        <MockHookWrapperComponent fieldsMapping={mockNoChartMappings} data={mockData} />
+        <MockHookWrapperComponent fieldsMapping={mockNoChartMappings} />
       </>
     );
 
@@ -320,7 +252,7 @@ describe('useKpiMatrixStatus', () => {
   test('it should not append barChart if enableBarChart is off', () => {
     const wrapper = mount(
       <>
-        <MockHookWrapperComponent fieldsMapping={mockNoChartMappings} data={mockData} />
+        <MockHookWrapperComponent fieldsMapping={mockNoChartMappings} />
       </>
     );
 

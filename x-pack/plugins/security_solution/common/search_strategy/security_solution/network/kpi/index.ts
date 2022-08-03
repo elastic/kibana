@@ -11,12 +11,6 @@ export * from './tls_handshakes';
 export * from './unique_flows';
 export * from './unique_private_ips';
 
-import type { NetworkKpiDnsStrategyResponse } from './dns';
-import type { NetworkKpiNetworkEventsStrategyResponse } from './network_events';
-import type { NetworkKpiTlsHandshakesStrategyResponse } from './tls_handshakes';
-import type { NetworkKpiUniqueFlowsStrategyResponse } from './unique_flows';
-import type { NetworkKpiUniquePrivateIpsStrategyResponse } from './unique_private_ips';
-
 export enum NetworkKpiQueries {
   dns = 'networkKpiDns',
   networkEvents = 'networkKpiNetworkEvents',
@@ -24,10 +18,3 @@ export enum NetworkKpiQueries {
   uniqueFlows = 'networkKpiUniqueFlows',
   uniquePrivateIps = 'networkKpiUniquePrivateIps',
 }
-
-export type NetworkKpiStrategyResponse =
-  | Omit<NetworkKpiDnsStrategyResponse, 'rawResponse'>
-  | Omit<NetworkKpiNetworkEventsStrategyResponse, 'rawResponse'>
-  | Omit<NetworkKpiTlsHandshakesStrategyResponse, 'rawResponse'>
-  | Omit<NetworkKpiUniqueFlowsStrategyResponse, 'rawResponse'>
-  | Omit<NetworkKpiUniquePrivateIpsStrategyResponse, 'rawResponse'>;

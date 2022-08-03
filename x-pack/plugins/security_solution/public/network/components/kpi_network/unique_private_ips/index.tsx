@@ -5,22 +5,18 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { euiPaletteColorBlind } from '@elastic/eui';
 
 import type { StatItems } from '../../../../common/components/stat_items';
-import {
-  useNetworkKpiUniquePrivateIps,
-  ID,
-} from '../../../containers/kpi_network/unique_private_ips';
+import { ID } from '../../../containers/kpi_network/unique_private_ips';
 import type { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
 import { kpiUniquePrivateIpsSourceMetricLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_source_metric';
 import { kpiUniquePrivateIpsDestinationMetricLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_destination_metric';
 import { kpiUniquePrivateIpsAreaLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_area';
 import { kpiUniquePrivateIpsBarLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_bar';
-import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common';
-import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import { KpiBaseComponent } from '../../../../hosts/components/kpi_hosts/common';
 
 const euiVisColorPalette = euiPaletteColorBlind();
 const euiColorVis2 = euiVisColorPalette[2];
@@ -57,43 +53,8 @@ export const fieldsMapping: Readonly<StatItems[]> = [
   },
 ];
 
-const NetworkKpiUniquePrivateIpsComponent: React.FC<NetworkKpiProps> = ({
-  filterQuery,
-  from,
-  indexNames,
-  to,
-  narrowDateRange,
-  setQuery,
-  skip,
-}) => {
-  const { toggleStatus } = useQueryToggle(ID);
-  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
-  useEffect(() => {
-    setQuerySkip(skip || !toggleStatus);
-  }, [skip, toggleStatus]);
-  const [loading, { refetch, id, inspect, ...data }] = useNetworkKpiUniquePrivateIps({
-    filterQuery,
-    endDate: to,
-    indexNames,
-    startDate: from,
-    skip: querySkip,
-  });
-
-  return (
-    <KpiBaseComponentManage
-      data={data}
-      id={id}
-      inspect={inspect}
-      loading={loading}
-      fieldsMapping={fieldsMapping}
-      from={from}
-      to={to}
-      narrowDateRange={narrowDateRange}
-      refetch={refetch}
-      setQuery={setQuery}
-      setQuerySkip={setQuerySkip}
-    />
-  );
+const NetworkKpiUniquePrivateIpsComponent: React.FC<NetworkKpiProps> = ({ from, to }) => {
+  return <KpiBaseComponent fieldsMapping={fieldsMapping} from={from} to={to} id={ID} />;
 };
 
 export const NetworkKpiUniquePrivateIps = React.memo(NetworkKpiUniquePrivateIpsComponent);
