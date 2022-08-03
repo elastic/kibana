@@ -394,12 +394,13 @@ export const getMetricVisualization = ({
     return updated;
   },
 
-  removeDimension({ prevState, layerId, columnId }) {
+  removeDimension({ prevState, columnId }) {
     const updated = { ...prevState };
 
     if (prevState.metricAccessor === columnId) {
       delete updated.metricAccessor;
       delete updated.palette;
+      delete updated.color;
     }
     if (prevState.secondaryMetricAccessor === columnId) {
       delete updated.secondaryMetricAccessor;
