@@ -58,6 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
+      /*
       it('should modify runtime field', async function () {
         await PageObjects.settings.filterField(fieldName);
         await testSubjects.click('editFieldFormat');
@@ -67,6 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.clickSaveField();
         await PageObjects.settings.confirmSave();
       });
+      */
 
       it('should delete runtime field', async function () {
         await testSubjects.click('deleteField');
