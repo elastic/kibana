@@ -20,10 +20,7 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { deprecationsServiceMock } from '@kbn/core-deprecations-browser-mocks';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
-import {
-  savedObjectsServiceMock,
-  simpleSavedObjectMock,
-} from '@kbn/core-saved-objects-browser-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import type { PluginInitializerContext, AppMountParameters } from '.';
 // Import values from their individual modules instead.

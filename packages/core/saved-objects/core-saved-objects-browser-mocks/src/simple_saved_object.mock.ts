@@ -6,36 +6,15 @@
  * Side Public License, v 1.
  */
 
-// import type { MockedKeys } from '@kbn/utility-types-jest';
-import type {
-  SavedObjectsClientContract,
-  SimpleSavedObject,
-} from '@kbn/core-saved-objects-api-browser';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-browser';
 import { SimpleSavedObjectImpl } from '@kbn/core-saved-objects-browser-internal';
-
-// const simpleSavedObjectInstanceMock: MockedKeys<SimpleSavedObject> = {
-//   attributes: {},
-//   id: '',
-//   type: '',
-//   migrationVersion: {},
-//   coreMigrationVersion: '',
-//   error: undefined,
-//   references: [],
-//   updatedAt: '',
-//   namespaces: undefined,
-//   get: jest.fn().mockReturnThis(),
-//   set: jest.fn().mockReturnThis(),
-//   has: jest.fn().mockReturnValue(true),
-//   save: jest.fn().mockResolvedValue({}),
-//   delete: jest.fn().mockResolvedValue({}),
-// };
+import type { SavedObject } from '@kbn/core-saved-objects-common';
 
 const createSimpleSavedObjectMock = (
   client: SavedObjectsClientContract,
-  savedObject: SimpleSavedObject
+  savedObject: SavedObject<unknown>
 ) => new SimpleSavedObjectImpl(client, savedObject);
 
 export const simpleSavedObjectMock = {
   create: createSimpleSavedObjectMock,
-  // createBlank: jest.fn().mockReturnValue(simpleSavedObjectInstanceMock),
 };
