@@ -10,7 +10,7 @@ import React from 'react';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { CoreStart } from '@kbn/core/public';
 import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
-import { Filter } from '@kbn/es-query';
+import { AggregateQuery, Filter, Query } from '@kbn/es-query';
 
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
@@ -116,10 +116,14 @@ export function mockSelfStyledEmbeddable<OriginalEmbeddableType>(
 
 export function mockFilterableEmbeddable<OriginalEmbeddableType>(
   embeddable: OriginalEmbeddableType,
-  options: { getFilters: () => Filter[] }
+  options: {
+    getFilters: () => Promise<Filter[]>;
+    getQuery: () => Promise<Query | AggregateQuery | undefined>;
+  }
 ): OriginalEmbeddableType & FilterableEmbeddable {
   const newEmbeddable: FilterableEmbeddable = embeddable as unknown as FilterableEmbeddable;
   newEmbeddable.getFilters = () => options.getFilters();
+  newEmbeddable.getQuery = () => options.getQuery();
   return newEmbeddable as OriginalEmbeddableType & FilterableEmbeddable;
 }
 

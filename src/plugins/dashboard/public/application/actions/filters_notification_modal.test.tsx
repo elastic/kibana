@@ -26,6 +26,7 @@ import {
   ContactCardEmbeddableOutput,
   ContactCardEmbeddable,
 } from '../../services/embeddable_test_samples';
+import { act } from 'react-dom/test-utils';
 
 describe('LibraryNotificationPopover', () => {
   const { setup, doStart } = embeddablePluginMock.createInstance();
@@ -73,6 +74,7 @@ describe('LibraryNotificationPopover', () => {
     }
     embeddable = embeddablePluginMock.mockFilterableEmbeddable(contactCardEmbeddable, {
       getFilters: jest.fn(),
+      getQuery: jest.fn(),
     });
 
     defaultProps = {
@@ -90,33 +92,41 @@ describe('LibraryNotificationPopover', () => {
     return mountWithIntl(<FiltersNotificationModal {...{ ...defaultProps, ...props }} />);
   }
 
-  test('show modal footer in edit mode', () => {
+  test('show modal footer in edit mode', async () => {
     embeddable.updateInput({ viewMode: ViewMode.EDIT });
-    const component = mountComponent();
-    const footer = component.find(EuiModalFooter);
-    expect(footer.exists()).toBe(true);
+    await act(async () => {
+      const component = mountComponent();
+      const footer = component.find(EuiModalFooter);
+      expect(footer.exists()).toBe(true);
+    });
   });
 
-  test('hide modal footer in view mode', () => {
+  test('hide modal footer in view mode', async () => {
     embeddable.updateInput({ viewMode: ViewMode.VIEW });
-    const component = mountComponent();
-    const footer = component.find(EuiModalFooter);
-    expect(footer.exists()).toBe(false);
+    await act(async () => {
+      const component = mountComponent();
+      const footer = component.find(EuiModalFooter);
+      expect(footer.exists()).toBe(false);
+    });
   });
 
-  test('clicking edit button executes edit panel action', () => {
+  test('clicking edit button executes edit panel action', async () => {
     embeddable.updateInput({ viewMode: ViewMode.EDIT });
-    const component = mountComponent();
-    const editButton = findTestSubject(component, 'filtersNotificationModal__editButton');
-    editButton.simulate('click');
-    expect(defaultProps.editPanelAction.execute).toHaveBeenCalled();
+    await act(async () => {
+      const component = mountComponent();
+      const editButton = findTestSubject(component, 'filtersNotificationModal__editButton');
+      editButton.simulate('click');
+      expect(defaultProps.editPanelAction.execute).toHaveBeenCalled();
+    });
   });
 
-  test('clicking close button calls onClose', () => {
+  test('clicking close button calls onClose', async () => {
     embeddable.updateInput({ viewMode: ViewMode.EDIT });
-    const component = mountComponent();
-    const editButton = findTestSubject(component, 'filtersNotificationModal__closeButton');
-    editButton.simulate('click');
-    expect(defaultProps.onClose).toHaveBeenCalled();
+    await act(async () => {
+      const component = mountComponent();
+      const editButton = findTestSubject(component, 'filtersNotificationModal__closeButton');
+      editButton.simulate('click');
+      expect(defaultProps.onClose).toHaveBeenCalled();
+    });
   });
 });

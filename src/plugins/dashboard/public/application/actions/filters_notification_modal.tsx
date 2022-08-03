@@ -110,7 +110,7 @@ export function FiltersNotificationModal({
                 </EuiCodeBlock>
               </EuiFormRow>
             )}
-            {filters.length > 0 && (
+            {filters && filters.length > 0 && (
               <EuiFormRow
                 label="Filters"
                 // the following makes it so that the filter pills respect the inner padding of the modal body
