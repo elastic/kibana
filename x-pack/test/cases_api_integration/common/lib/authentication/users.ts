@@ -12,6 +12,7 @@ import {
   observabilityOnlyRead,
   globalRead as globalReadRole,
   noKibanaPrivileges as noKibanaPrivilegesRole,
+  noCasesPrivilegesSpace1 as noCasesPrivilegesSpace1Role,
   securitySolutionOnlyAllSpacesAll,
   securitySolutionOnlyReadSpacesAll,
   observabilityOnlyAllSpacesAll,
@@ -94,6 +95,12 @@ export const noKibanaPrivileges: User = {
   roles: [noKibanaPrivilegesRole.name],
 };
 
+export const noCasesPrivilegesSpace1: User = {
+  username: 'no_kibana_privileges_space1',
+  password: 'no_kibana_privileges_space1',
+  roles: [noCasesPrivilegesSpace1Role.name],
+};
+
 export const users = [
   superUser,
   secOnly,
@@ -106,6 +113,7 @@ export const users = [
   obsSecRead,
   globalRead,
   noKibanaPrivileges,
+  noCasesPrivilegesSpace1,
   testDisabled,
 ];
 
