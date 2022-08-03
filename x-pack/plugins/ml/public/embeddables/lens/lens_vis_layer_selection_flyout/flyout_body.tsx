@@ -396,7 +396,7 @@ export const FlyoutBody: FC<Props> = ({
                     <EuiFlexGroup>
                       <EuiFlexItem grow={false}>
                         <FormattedMessage
-                          id="xpack.ml.embeddables.lensLayerFlyout.saveSuccess"
+                          id="xpack.ml.embeddables.lensLayerFlyout.creatingJob"
                           defaultMessage="Creating job"
                         />
                       </EuiFlexItem>
