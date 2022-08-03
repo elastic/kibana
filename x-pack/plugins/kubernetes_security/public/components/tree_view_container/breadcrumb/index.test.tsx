@@ -61,6 +61,34 @@ describe('Tree view Breadcrumb component', () => {
       expect(renderResult.container).toBeEmptyDOMElement();
     });
 
+    it('returns cluster id when no cluster name is provided', async () => {
+      renderResult = mockedContext.render(
+        <Breadcrumb
+          treeNavSelection={{
+            ...MOCK_TREE_SELECTION,
+            [KubernetesCollection.clusterName]: undefined,
+            [KubernetesCollection.node]: undefined,
+          }}
+          onSelect={onSelect}
+        />
+      );
+
+      expect(
+        renderResult.queryByText(MOCK_TREE_SELECTION[KubernetesCollection.clusterId]!)
+      ).toBeVisible();
+      expect(
+        renderResult.queryByText(MOCK_TREE_SELECTION[KubernetesCollection.namespace]!)
+      ).toBeVisible();
+      expect(renderResult.queryByText(MOCK_TREE_SELECTION[KubernetesCollection.node]!)).toBeFalsy();
+      expect(
+        renderResult.queryByText(MOCK_TREE_SELECTION[KubernetesCollection.pod]!)
+      ).toBeVisible();
+      expect(
+        renderResult.queryByText(MOCK_TREE_SELECTION[KubernetesCollection.containerImage]!)
+      ).toBeVisible();
+      expect(renderResult).toMatchSnapshot();
+    });
+
     it('returns null when no cluster in selection', async () => {
       renderResult = mockedContext.render(
         <Breadcrumb
@@ -70,6 +98,18 @@ describe('Tree view Breadcrumb component', () => {
       );
 
       expect(renderResult.container).toBeEmptyDOMElement();
+    });
+
+    it('clicking on breadcrumb item triggers onSelect', async () => {
+      renderResult = mockedContext.render(
+        <Breadcrumb
+          treeNavSelection={{ ...MOCK_TREE_SELECTION, [KubernetesCollection.node]: undefined }}
+          onSelect={onSelect}
+        />
+      );
+
+      renderResult.getByText(MOCK_TREE_SELECTION[KubernetesCollection.clusterName]!).click();
+      expect(onSelect).toHaveBeenCalledTimes(1);
     });
 
     it('renders provided collections only', async () => {
