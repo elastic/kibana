@@ -662,19 +662,17 @@ export class ActionsClient {
   }
 
   public async bulkEnqueueExecution(options: EnqueueExecutionOptions[]): Promise<void> {
-    await Promise.all(
-      options.map(async (option) => {
-        const { source } = option;
-        if (
-          (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
-          AuthorizationMode.RBAC
-        ) {
-          return this.authorization.ensureAuthorized('execute');
-        } else {
-          return trackLegacyRBACExemption('bulkEnqueueExecution', this.usageCounter);
-        }
-      })
-    );
+    for (const option of options) {
+      const { source } = option;
+      if (
+        (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
+        AuthorizationMode.RBAC
+      ) {
+        await this.authorization.ensureAuthorized('execute');
+      } else {
+        trackLegacyRBACExemption('bulkEnqueueExecution', this.usageCounter);
+      }
+    }
     return this.bulkExecutionEnqueuer(this.unsecuredSavedObjectsClient, options);
   }
 

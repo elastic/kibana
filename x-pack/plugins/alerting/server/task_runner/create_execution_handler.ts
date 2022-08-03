@@ -61,6 +61,7 @@ export function createExecutionHandler<
   const ruleTypeActionGroups = new Map(
     ruleType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
   );
+  const CHUNK_SIZE = 1000;
 
   return async ({
     actionGroup,
@@ -206,7 +207,7 @@ export function createExecutionHandler<
       });
     }
 
-    for (const c of chunk(bulkActions, 1000)) {
+    for (const c of chunk(bulkActions, CHUNK_SIZE)) {
       await actionsClient.bulkEnqueueExecution(c);
     }
   };
