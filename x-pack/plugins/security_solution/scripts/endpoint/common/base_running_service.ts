@@ -6,16 +6,20 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { KbnClient } from '@kbn/test';
-import { Client } from '@elastic/elasticsearch';
+import type { KbnClient } from '@kbn/test';
+import type { Client } from '@elastic/elasticsearch';
 import moment from 'moment';
 
+/**
+ * A base class for creating a service that runs on a interval
+ */
 export class BaseRunningService {
   private nextRunId: ReturnType<typeof setTimeout> | undefined;
   private markRunComplete: (() => void) | undefined;
 
   protected isRunning = false;
 
+  /** Promise that remains pending while the service is running */
   public whileRunning: Promise<void> = Promise.resolve();
 
   protected readonly logPrefix: string;
