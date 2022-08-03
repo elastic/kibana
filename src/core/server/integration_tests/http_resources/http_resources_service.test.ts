@@ -9,7 +9,9 @@
 import { schema } from '@kbn/config-schema';
 import * as kbnTestServer from '../../../test_helpers/kbn_server';
 
-describe('http resources service', () => {
+// Skipping due to cc ingestion failure:
+// https://buildkite.com/elastic/kibana-code-coverage-main/builds/627#01822075-adfb-41c8-a753-b92b56ea4515/5713-5718
+describe.skip('http resources service', () => {
   describe('register', () => {
     applyTestsWithDisableUnsafeEvalSetTo(true);
     applyTestsWithDisableUnsafeEvalSetTo(false);
