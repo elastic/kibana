@@ -14,15 +14,16 @@ import { HttpError, Status } from '../../../../../common/types/api';
 import { MappingsApiLogic } from '../../api/mappings/mappings_logic';
 import { SearchDocumentsApiLogic } from '../../api/search_documents/search_documents_logic';
 
-import { DocumentsLogic } from './documents_logic';
+import { DocumentsLogic, INDEX_DOCUMENTS_META_DEFAULT } from './documents_logic';
 import { IndexNameLogic } from './index_name_logic';
 
-const DEFAULT_VALUES = {
+export const DEFAULT_VALUES = {
   data: undefined,
   indexName: 'indexName',
   isLoading: true,
   mappingData: undefined,
   mappingStatus: 0,
+  meta: INDEX_DOCUMENTS_META_DEFAULT,
   query: '',
   results: [],
   status: Status.IDLE,
@@ -57,6 +58,24 @@ describe('DocumentsLogic', () => {
         expect(DocumentsLogic.values).toEqual({ ...DEFAULT_VALUES, query: newQueryString });
       });
     });
+    describe('setDocsPerPage', () => {
+      it('sets documents to show per page', () => {
+        const docsToShow = 50;
+        expect(DocumentsLogic.values).toEqual({ ...DEFAULT_VALUES });
+        DocumentsLogic.actions.setDocsPerPage(docsToShow);
+        expect(DocumentsLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          meta: {
+            page: {
+              ...INDEX_DOCUMENTS_META_DEFAULT.page,
+              size: docsToShow,
+            },
+          },
+          simplifiedMapping: undefined,
+          status: Status.LOADING,
+        });
+      });
+    });
   });
   describe('listeners', () => {
     describe('setSearchQuery', () => {
@@ -70,6 +89,7 @@ describe('DocumentsLogic', () => {
         await nextTick();
         expect(DocumentsLogic.actions.makeRequest).toHaveBeenCalledWith({
           indexName: 'indexName',
+          meta: INDEX_DOCUMENTS_META_DEFAULT,
           query: 'test',
         });
         jest.useRealTimers();
@@ -84,7 +104,11 @@ describe('DocumentsLogic', () => {
       expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledTimes(1);
     });
     it('clears flash messages on new makeRequest', () => {
-      DocumentsLogic.actions.makeRequest({ indexName: 'index', query: '' });
+      DocumentsLogic.actions.makeRequest({
+        indexName: 'index',
+        meta: INDEX_DOCUMENTS_META_DEFAULT,
+        query: '',
+      });
       expect(mockFlashMessageHelpers.clearFlashMessages).toHaveBeenCalledTimes(1);
     });
   });
@@ -99,11 +123,17 @@ describe('DocumentsLogic', () => {
         };
         expect(DocumentsLogic.values).toEqual({ ...DEFAULT_VALUES });
         MappingsApiLogic.actions.apiSuccess({ mappings: {} });
-        SearchDocumentsApiLogic.actions.apiSuccess(mockSuccessData);
+        SearchDocumentsApiLogic.actions.apiSuccess({
+          meta: INDEX_DOCUMENTS_META_DEFAULT,
+          results: mockSuccessData,
+        });
 
         expect(DocumentsLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          data: mockSuccessData,
+          data: {
+            meta: INDEX_DOCUMENTS_META_DEFAULT,
+            results: mockSuccessData,
+          },
           isLoading: false,
           mappingData: {
             mappings: {},
@@ -135,17 +165,43 @@ describe('DocumentsLogic', () => {
         };
 
         MappingsApiLogic.actions.apiSuccess({ mappings: {} });
-        SearchDocumentsApiLogic.actions.apiSuccess(mockSuccessData);
+        SearchDocumentsApiLogic.actions.apiSuccess({
+          meta: {
+            page: {
+              ...INDEX_DOCUMENTS_META_DEFAULT.page,
+              total_pages: 1,
+              total_results: 1,
+            },
+          },
+          results: mockSuccessData,
+        });
 
         expect(DocumentsLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          data: mockSuccessData,
+          data: {
+            meta: {
+              page: {
+                ...INDEX_DOCUMENTS_META_DEFAULT.page,
+                total_pages: 1,
+                total_results: 1,
+              },
+            },
+            results: mockSuccessData,
+          },
           isLoading: false,
           mappingData: {
             mappings: {},
           },
           mappingStatus: Status.SUCCESS,
+          meta: {
+            page: {
+              ...INDEX_DOCUMENTS_META_DEFAULT.page,
+              total_pages: 1,
+              total_results: 1,
+            },
+          },
           results: [{ _id: '123', _index: 'indexName', searchHit: true }],
+          simplifiedMapping: undefined,
           status: Status.SUCCESS,
         });
       });
@@ -158,11 +214,14 @@ describe('DocumentsLogic', () => {
         };
 
         MappingsApiLogic.actions.apiSuccess({ mappings: {} });
-        SearchDocumentsApiLogic.actions.apiSuccess(mockSuccessData);
+        SearchDocumentsApiLogic.actions.apiSuccess({
+          meta: INDEX_DOCUMENTS_META_DEFAULT,
+          results: mockSuccessData,
+        });
 
         expect(DocumentsLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          data: mockSuccessData,
+          data: { meta: INDEX_DOCUMENTS_META_DEFAULT, results: mockSuccessData },
           isLoading: false,
           mappingData: {
             mappings: {},
@@ -182,7 +241,7 @@ describe('DocumentsLogic', () => {
 
         expect(DocumentsLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          isLoading: false,
+          isLoading: true,
           mappingData: {
             mappings: { properties: { some: { type: 'text' } } },
           },

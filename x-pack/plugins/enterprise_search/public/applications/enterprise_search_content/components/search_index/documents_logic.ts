@@ -14,6 +14,7 @@ import {
   SearchHit,
 } from '@elastic/elasticsearch/lib/api/types';
 
+import { ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT } from '../../../../../common/constants';
 import { Meta } from '../../../../../common/types';
 import { HttpError, Status } from '../../../../../common/types/api';
 
@@ -29,7 +30,7 @@ import { IndexNameLogic } from './index_name_logic';
 export const INDEX_DOCUMENTS_META_DEFAULT = {
   page: {
     ...DEFAULT_META.page,
-    size: 25,
+    size: ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT,
   },
 };
 
@@ -101,7 +102,7 @@ export const DocumentsLogic = kea<MakeLogicType<DocumentsLogicValues, DocumentsL
       {
         apiSuccess: (_, { meta }) => meta,
         onPaginate: (state, { newPageIndex }) => updateMetaPageIndex(state, newPageIndex),
-        setDocsPerPage: (state, { docsPerPage }) => ({
+        setDocsPerPage: (_, { docsPerPage }) => ({
           page: { ...INDEX_DOCUMENTS_META_DEFAULT.page, size: docsPerPage },
         }),
       },

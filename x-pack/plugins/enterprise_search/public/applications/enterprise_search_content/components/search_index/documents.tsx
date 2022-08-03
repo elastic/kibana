@@ -28,7 +28,7 @@ import './documents.scss';
 
 export const SearchIndexDocuments: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);
-  const { simplifiedMapping, results, meta } = useValues(DocumentsLogic);
+  const { simplifiedMapping } = useValues(DocumentsLogic);
   const { makeRequest, makeMappingRequest, setSearchQuery } = useActions(DocumentsLogic);
 
   useEffect(() => {
@@ -73,9 +73,7 @@ export const SearchIndexDocuments: React.FC = () => {
             i18n.translate('xpack.enterpriseSearch.content.searchIndex.documents.noMappings', {
               defaultMessage: 'No mappings found for index',
             })}
-          {simplifiedMapping && (
-            <DocumentList results={results} mappings={simplifiedMapping} meta={meta} />
-          )}
+          {simplifiedMapping && <DocumentList />}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

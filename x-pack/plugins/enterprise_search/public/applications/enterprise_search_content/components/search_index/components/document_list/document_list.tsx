@@ -27,20 +27,11 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { Meta } from '../../../../../../../common/types';
 import { Result } from '../../../../../shared/result/result';
 import { DocumentsLogic } from '../../documents_logic';
 
-import type { DocumentsLogicValues } from '../../documents_logic';
-
-interface DocumentListProps {
-  mappings: DocumentsLogicValues['simplifiedMapping'];
-  meta: Meta;
-  results: DocumentsLogicValues['results'];
-}
-
-export const DocumentList: React.FC<DocumentListProps> = ({ mappings, results, meta }) => {
-  const { isLoading } = useValues(DocumentsLogic);
+export const DocumentList: React.FC = () => {
+  const { isLoading, meta, results, simplifiedMapping: mappings } = useValues(DocumentsLogic);
   const { onPaginate, setDocsPerPage } = useActions(DocumentsLogic);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const resultToField = (result: SearchHit) => {
@@ -146,7 +137,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({ mappings, results, m
       <EuiSpacer size="m" />
       {results.map((result) => {
         return (
-          <>
+          <React.Fragment key={result._id}>
             <Result
               fields={resultToField(result)}
               metaData={{
@@ -154,7 +145,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({ mappings, results, m
               }}
             />
             <EuiSpacer size="s" />
-          </>
+          </React.Fragment>
         );
       })}
 
