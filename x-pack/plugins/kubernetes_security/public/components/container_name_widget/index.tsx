@@ -171,7 +171,7 @@ export const ContainerNameWidget = ({
             return aggsData?.buckets.map((aggData) => {
               return {
                 name: aggData.key as string,
-                count: addCommasToNumber(aggData.count_by_aggs.value),
+                count: addCommasToNumber(aggData.count_by_aggs?.value ?? 0),
               };
             });
           })
