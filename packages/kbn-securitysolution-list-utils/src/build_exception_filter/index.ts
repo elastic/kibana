@@ -22,9 +22,6 @@ import {
   OsTypeArray,
   entriesMatchWildcard,
   EntryMatchWildcard,
-  EntryList,
-  entriesList,
-  Entry,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -309,9 +306,6 @@ export const createInnerAndClauses = (
     return buildMatchAnyClause({ ...entry, field });
   } else if (entriesMatchWildcard.is(entry)) {
     return buildMatchWildcardClause({ ...entry, field });
-  } else if (entriesList.is(entry)) {
-    const field = parent != null ? `${parent}.${entry.field}` : entry.field;
-    return buildListClause({ ...entry, field });
   } else if (entriesNested.is(entry)) {
     return buildNestedClause(entry);
   } else {
