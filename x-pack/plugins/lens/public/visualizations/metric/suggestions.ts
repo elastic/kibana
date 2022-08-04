@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { TableSuggestion, Visualization } from '../../types';
 import { LensIconChartMetric } from '@kbn/lens-icons';
+import type { TableSuggestion, Visualization } from '../../types';
 import { layerTypes } from '../../../common';
 import { metricLabel, MetricVisualizationState, supportedDataTypes } from './visualization';
 
