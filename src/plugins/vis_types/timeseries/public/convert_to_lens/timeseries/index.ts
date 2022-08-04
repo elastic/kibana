@@ -40,7 +40,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model) => {
 
     // handle multiple metrics
     const series = getSeries(layer.metrics, seriesNum);
-    if (!series) {
+    if (!series || !series.metrics) {
       return null;
     }
 
