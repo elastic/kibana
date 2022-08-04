@@ -161,9 +161,7 @@ describe('When on the policy list page', () => {
           count: 100,
         });
       });
-      act(() => {
-        render();
-      });
+      render();
       await waitFor(() => {
         expect(getPackagePolicies).toHaveBeenCalled();
         expect(sendGetEndpointSpecificPackagePolicies).toHaveBeenCalled();
