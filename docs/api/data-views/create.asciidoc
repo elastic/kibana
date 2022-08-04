@@ -251,4 +251,4 @@ data view API endpoints.
 (Optional, boolean) Allows the data view saved object to exist before data is present.
 
 `namespaces`::
-(Optional, string[]) Array of {kibana-ref}/xpack-spaces[space] IDs, for sharing the data view between multiple spaces.
+(Optional, string[]) Array of {kibana-ref}/xpack-spaces.html[space] IDs, for sharing the data view between multiple spaces.
