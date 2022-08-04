@@ -77,6 +77,22 @@ export default ({ getService }: FtrProviderContext) => {
       expect(rule?.execution_summary?.last_execution.status).to.eql('succeeded');
     });
 
+    it('should not be able to create a new terms rule with too small history window', async () => {
+      const rule = {
+        ...getCreateNewTermsRulesSchemaMock('rule-1'),
+        history_window_start: 'now-5m',
+      };
+      const response = await supertest
+        .post(DETECTION_ENGINE_RULES_URL)
+        .set('kbn-xsrf', 'true')
+        .send(rule);
+
+      expect(response.status).to.equal(400);
+      expect(response.body.message).to.equal(
+        "params invalid: History window size too small, 'historyWindowStart' must be earlier than 'from'"
+      );
+    });
+
     const removeRandomValuedProperties = (alert: DetectionAlert | undefined) => {
       if (!alert) {
         return undefined;
