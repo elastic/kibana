@@ -9,7 +9,15 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 import { FilesPlugin } from './plugin';
 
 export type { FilesSetup, FilesStart } from './types';
-export type { FileShareServiceStart } from './file_share_service';
+export type {
+  FileShareServiceStart,
+  CreateShareArgs,
+  DeleteShareArgs,
+  DeleteSharesForFileArgs,
+  GetShareArgs,
+  ListSharesArgs,
+  UpdateShareArgs,
+} from './file_share_service';
 export type {
   GetByIdArgs,
   FindFileArgs,

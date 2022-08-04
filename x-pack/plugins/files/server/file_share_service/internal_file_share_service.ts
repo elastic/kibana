@@ -30,6 +30,9 @@ import {
   FileShareTokenInvalidError,
 } from './errors';
 
+/**
+ * Arguments for a creating a file share
+ */
 export interface CreateShareArgs {
   /**
    * Optionally provide a name for this file share instance
@@ -45,23 +48,56 @@ export interface CreateShareArgs {
   file: File;
 }
 
+/**
+ * Arguments for listing file shares.
+ */
 export interface ListArgs extends Pagination {
+  /**
+   * The file ID for scope the list to.
+   */
   fileId?: string;
 }
 
+/**
+ * ID argument
+ */
 interface IdArg {
+  /**
+   * File share ID.
+   */
   id: string;
 }
 
+/**
+ * Delete file share arguments.
+ */
 export type DeleteArgs = IdArg;
+/**
+ * Get file share arguments.
+ */
 export type GetArgs = IdArg;
 
+/**
+ * Delete file shares for file arguments.
+ */
 export interface DeleteForFileArgs {
+  /**
+   * The file object to delete the shares for.
+   */
   file: File;
 }
 
+/**
+ * Update file share arguments.
+ */
 export interface UpdateArgs {
+  /**
+   * The file share ID.
+   */
   id: string;
+  /**
+   * The updated attributes to store.
+   */
   attributes: UpdatableFileShareAttributes;
 }
 
