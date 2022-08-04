@@ -232,7 +232,8 @@ export default ({ getService }: FtrProviderContext) => {
         .expect(500);
 
       expect(body).to.eql({
-        message: 'Unable to add exception to rule - rule with id:"4656dc92-5832-11ea-8e2d-0242ac130003" not found',
+        message:
+          'Unable to add exception to rule - rule with id:"4656dc92-5832-11ea-8e2d-0242ac130003" not found',
         status_code: 500,
       });
     });

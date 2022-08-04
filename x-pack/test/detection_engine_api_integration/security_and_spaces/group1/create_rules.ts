@@ -294,9 +294,9 @@ export default ({ getService }: FtrProviderContext) => {
                 namespace_type: 'single',
                 type: ExceptionListTypeEnum.RULE_DEFAULT,
               },
-            ]
+            ],
           };
-          
+
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
@@ -305,7 +305,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(body).to.eql({
             message: 'More than one default exception list found on rule',
-            status_code: 500
+            status_code: 500,
           });
         });
       });

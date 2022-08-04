@@ -361,22 +361,26 @@ export default ({ getService }: FtrProviderContext) => {
       it('should overwrite exception list value on update - non additive', async () => {
         await createRule(supertest, log, {
           ...getSimpleRule('rule-1'),
-          exceptions_list: [{
-            id: '1',
-            list_id: '123',
-            namespace_type: 'single',
-            type: ExceptionListTypeEnum.RULE_DEFAULT,
-          }]
+          exceptions_list: [
+            {
+              id: '1',
+              list_id: '123',
+              namespace_type: 'single',
+              type: ExceptionListTypeEnum.RULE_DEFAULT,
+            },
+          ],
         });
 
         const ruleUpdate = {
           ...getSimpleRuleUpdate('rule-1'),
-          exceptions_list: [{
-            id: '2',
-            list_id: '456',
-            namespace_type: 'single',
-            type: ExceptionListTypeEnum.RULE_DEFAULT,
-          }]
+          exceptions_list: [
+            {
+              id: '2',
+              list_id: '456',
+              namespace_type: 'single',
+              type: ExceptionListTypeEnum.RULE_DEFAULT,
+            },
+          ],
         };
 
         const { body } = await supertest
@@ -385,10 +389,9 @@ export default ({ getService }: FtrProviderContext) => {
           .send(ruleUpdate)
           .expect(200);
 
-        expect(body.exceptions_list).to.eql([ { id: '2',
-        list_id: '456',
-        namespace_type: 'single',
-        type: 'rule_default' } ]);
+        expect(body.exceptions_list).to.eql([
+          { id: '2', list_id: '456', namespace_type: 'single', type: 'rule_default' },
+        ]);
       });
 
       it('should throw error if trying to add more than one default exception list', async () => {
@@ -408,8 +411,8 @@ export default ({ getService }: FtrProviderContext) => {
               list_id: '456',
               namespace_type: 'single',
               type: ExceptionListTypeEnum.RULE_DEFAULT,
-            }
-          ]
+            },
+          ],
         };
 
         const { body } = await supertest
@@ -420,7 +423,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body).to.eql({
           message: 'More than one default exception list found on rule',
-          status_code: 500
+          status_code: 500,
         });
       });
 

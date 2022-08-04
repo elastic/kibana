@@ -6,7 +6,8 @@
  */
 
 import { checkDefaultRuleExceptionListReferences } from './check_for_default_rule_exception_list';
-import { ExceptionListTypeEnum, ListArray } from '@kbn/securitysolution-io-ts-list-types';
+import type { ListArray } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 describe('checkDefaultRuleExceptionListReferences', () => {
   it('returns undefined if "exceptionLists" is undefined', () => {
