@@ -32,14 +32,14 @@ import type {
   LensResizeActionData,
   LensToggleActionData,
   LensPagesizeActionData,
-} from './datatable_visualization/components/types';
+} from './visualizations/datatable/components/types';
 
 import {
   LENS_EDIT_SORT_ACTION,
   LENS_EDIT_RESIZE_ACTION,
   LENS_TOGGLE_ACTION,
   LENS_EDIT_PAGESIZE_ACTION,
-} from './datatable_visualization/components/constants';
+} from './visualizations/datatable/components/constants';
 import type { LensInspector } from './lens_inspector_service';
 
 export type ErrorCallback = (e: { message: string }) => void;
