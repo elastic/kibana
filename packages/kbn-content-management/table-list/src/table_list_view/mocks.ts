@@ -14,19 +14,6 @@ export type Params = Record<keyof ReturnType<typeof getStoryArgTypes>, any>;
 type ActionFn = (name: string) => any;
 
 /**
- * Returns the Jest-compatible service abstractions for the `NoDataCard` Provider.
- */
-export const getMockServices = (overrides?: Partial<Services>) => {
-  const services: Services = {
-    canEditAdvancedSettings: true,
-    getUrlForListingLimitSettings: () => 'http://elastic.co',
-    notifyError: () => undefined,
-    ...overrides,
-  };
-
-  return services;
-};
-/**
  * Returns Storybook-compatible service abstractions for the `NoDataCard` Provider.
  */
 export const getStoryServices = (params: Params, action: ActionFn = () => {}) => {

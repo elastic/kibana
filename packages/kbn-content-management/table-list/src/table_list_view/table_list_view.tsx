@@ -37,7 +37,7 @@ interface SavedObjectsReference {
   id: string;
 }
 
-export interface Props<T> {
+export interface Props<T extends UserContentCommonSchema = UserContentCommonSchema> {
   entityName: string;
   entityNamePlural: string;
   tableListTitle: string;
@@ -91,7 +91,7 @@ export interface UserContentCommonSchema {
   };
 }
 
-function TableListView<T extends UserContentCommonSchema>({
+function TableListViewComp<T extends UserContentCommonSchema>({
   tableListTitle,
   entityName,
   entityNamePlural,
@@ -407,7 +407,7 @@ function TableListView<T extends UserContentCommonSchema>({
       data-test-subj={pageDataTestSubject}
       pageHeader={{
         pageTitle: <span id={headingId}>{tableListTitle}</span>,
-        rightSideItems: [renderCreateButton()],
+        rightSideItems: [renderCreateButton() ?? <span />],
         'data-test-subj': 'top-nav',
       }}
       pageBodyProps={{
@@ -461,6 +461,8 @@ function TableListView<T extends UserContentCommonSchema>({
     </KibanaPageTemplate>
   );
 }
+
+const TableListView = React.memo(TableListViewComp);
 
 export { TableListView };
 

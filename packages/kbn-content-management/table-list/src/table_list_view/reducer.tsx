@@ -13,8 +13,6 @@ import { UpdatedAtField } from './components';
 import type { State, UserContentCommonSchema } from './table_list_view';
 import type { Action } from './actions';
 
-let isInitialFetchItems = true;
-
 function onInitialItemsFetch<T extends UserContentCommonSchema>(items: T[]) {
   // We check if the saved object have the "updatedAt" metadata
   // to render or not that column in the table
@@ -61,11 +59,9 @@ export function reducer<T extends UserContentCommonSchema>(
       const items = action.data.response.hits;
       // We only get the state on the initial fetch of items
       // After that we don't want to reset the columns or change the sort after fetching
-      const { tableColumns, tableSort } = isInitialFetchItems
-        ? onInitialItemsFetch(items)
-        : { tableColumns: undefined, tableSort: undefined };
-
-      isInitialFetchItems = false;
+      const { tableColumns, tableSort } = state.hasInitialFetchReturned
+        ? { tableColumns: undefined, tableSort: undefined }
+        : onInitialItemsFetch(items);
 
       return {
         ...state,
