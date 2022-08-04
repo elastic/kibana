@@ -99,7 +99,7 @@ interface SavedObjectFinderInitialPageSize extends BaseSavedObjectFinder {
 
 export type SavedObjectFinderProps = SavedObjectFinderFixedPage | SavedObjectFinderInitialPageSize;
 
-export type SavedObjectFinderUiProps = {
+type SavedObjectFinderUiProps = {
   savedObjects: CoreStart['savedObjects'];
   uiSettings: CoreStart['uiSettings'];
   savedObjectsManagement: SavedObjectsManagementPluginStart;

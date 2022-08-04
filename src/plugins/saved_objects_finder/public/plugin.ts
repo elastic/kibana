@@ -13,7 +13,10 @@ import { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss
 import { getSavedObjectFinder, SavedObjectFinderProps } from './finder';
 
 export interface SavedObjectsFinderStart {
-  SavedObjectFinder: (props: SavedObjectFinderProps) => JSX.Element;
+  /**
+   * The saved objects finder component
+   */
+  Finder: (props: SavedObjectFinderProps) => JSX.Element;
 }
 
 interface SavedObjectsFinderStartDeps {
@@ -31,7 +34,7 @@ export class SavedObjectsFinderPublicPlugin
 
   public start(core: CoreStart, deps: SavedObjectsFinderStartDeps) {
     return {
-      SavedObjectFinder: getSavedObjectFinder(
+      Finder: getSavedObjectFinder(
         core.savedObjects,
         core.uiSettings,
         deps.savedObjectsManagement,

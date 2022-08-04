@@ -7,7 +7,7 @@
  */
 
 import { SavedObjectsFinderPublicPlugin } from './plugin';
-export type { SavedObjectFinderUiProps, SavedObjectMetaData } from './finder';
+export type { SavedObjectMetaData, SavedObjectFinderProps } from './finder';
 export type { SavedObjectsFinderStart } from './plugin';
 
 export const plugin = () => new SavedObjectsFinderPublicPlugin();
