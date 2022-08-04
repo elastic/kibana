@@ -140,7 +140,13 @@ export const MANIFEST_V2: JSONSchema = {
       type: 'object',
       properties: {
         type: {
-          enum: ['shared-server', 'shared-common', 'functional-tests', 'test-helper'],
+          enum: [
+            'shared-server',
+            'shared-common',
+            'functional-tests',
+            'test-helper',
+            'shared-scss',
+          ],
         },
       },
     },
