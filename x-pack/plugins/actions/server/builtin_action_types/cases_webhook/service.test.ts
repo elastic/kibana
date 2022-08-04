@@ -144,7 +144,6 @@ describe('Cases webhook service', () => {
       expect(res).toEqual({
         id: '1',
         title: 'CK-1',
-        pushedDate: mockTime.toISOString(),
       });
     });
 
