@@ -48,7 +48,7 @@ export type FileCompression = 'br' | 'gzip' | 'deflate' | 'none';
  * TODO: Consider moving this to a commonly shareable package
  */
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type FileMetadata = {
+export type BaseFileMetadata = {
   /**
    * Name of the file
    *
@@ -141,10 +141,10 @@ export type FileMetadata = {
 /**
  * Metadata of a file object
  */
-export type FileSavedObjectAttributes<Meta = unknown> = Required<
-  Pick<FileMetadata, 'created' | 'name' | 'Status' | 'Updated'>
+export type FileMetadata<Meta = unknown> = Required<
+  Pick<BaseFileMetadata, 'created' | 'name' | 'Status' | 'Updated'>
 > &
-  FileMetadata & {
+  BaseFileMetadata & {
     /**
      * Unique identifier of the kind of file. Kibana applications can register
      * these at runtime.
@@ -168,32 +168,32 @@ export interface FileJSON<Meta = unknown> {
   /**
    * ISO string of when this file was created
    */
-  created: FileSavedObjectAttributes['created'];
+  created: FileMetadata['created'];
   /**
    * ISO string of when the file was updated
    */
-  updated: FileSavedObjectAttributes['Updated'];
+  updated: FileMetadata['Updated'];
   /**
    * File name.
    *
    * @note Does not have to be unique.
    */
-  name: FileSavedObjectAttributes['name'];
+  name: FileMetadata['name'];
   /**
    * MIME type of the file's contents.
    */
-  mimeType: FileSavedObjectAttributes['mime_type'];
+  mimeType: FileMetadata['mime_type'];
   /**
    * The size, in bytes, of the file content.
    */
-  size: FileSavedObjectAttributes['size'];
+  size: FileMetadata['size'];
   /**
    * The file extension (dot suffix).
    *
    * @note this value can be derived from MIME type but is stored for search
    * convenience.
    */
-  extension: FileSavedObjectAttributes['extension'];
+  extension: FileMetadata['extension'];
 
   /**
    * A consumer defined set of attributes.
@@ -201,11 +201,11 @@ export interface FileJSON<Meta = unknown> {
    * Consumers of the file service can add their own tags and identifiers to
    * a file using the "meta" object.
    */
-  meta: FileSavedObjectAttributes<Meta>['Meta'];
+  meta: FileMetadata<Meta>['Meta'];
   /**
    * Use this text to describe the file contents for display and accessibility.
    */
-  alt: FileSavedObjectAttributes['Alt'];
+  alt: FileMetadata['Alt'];
   /**
    * A unique kind that governs various aspects of the file. A consumer of the
    * files service must register a file kind and link their files to a specific
@@ -214,30 +214,30 @@ export interface FileJSON<Meta = unknown> {
    * @note This enables stricter access controls to CRUD and other functionality
    * exposed by the files service.
    */
-  fileKind: FileSavedObjectAttributes['FileKind'];
+  fileKind: FileMetadata['FileKind'];
   /**
    * The current status of the file.
    *
    * See {@link FileStatus} for more details.
    */
-  status: FileSavedObjectAttributes['Status'];
+  status: FileMetadata['Status'];
 }
 
 /**
  * An {@link SavedObject} containing a file object (i.e., metadata only).
  */
-export type FileSavedObject<Meta = unknown> = SavedObject<FileSavedObjectAttributes<Meta>>;
+export type FileSavedObject<Meta = unknown> = SavedObject<FileMetadata<Meta>>;
 
 /**
  * The set of file metadata that can be updated.
  */
-export type UpdatableFileAttributes<Meta = unknown> = Pick<FileJSON<Meta>, 'meta' | 'alt' | 'name'>;
+export type UpdatableFileMetadata<Meta = unknown> = Pick<FileJSON<Meta>, 'meta' | 'alt' | 'name'>;
 
 /**
  * The set of file metadata that can be updated on a file share instance.
  */
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type FileShareSavedObjectAttributes = {
+export type FileShare = {
   /**
    * ISO timestamp of when the file share was created.
    */
@@ -273,15 +273,15 @@ export interface FileShareJSON {
   /**
    * ISO timestamp the share was created
    */
-  created: FileShareSavedObjectAttributes['created'];
+  created: FileShare['created'];
   /**
    * Unix timestamp (in milliseconds) of when this share expires
    */
-  validUntil: FileShareSavedObjectAttributes['valid_until'];
+  validUntil: FileShare['valid_until'];
   /**
    * A user-friendly name for the file share
    */
-  name?: FileShareSavedObjectAttributes['name'];
+  name?: FileShare['name'];
   /**
    * The ID of the file this share is linked to
    */
@@ -303,7 +303,7 @@ export type FileShareJSONWithToken = FileShareJSON & {
 /**
  * Set of attributes that can be updated in a file share.
  */
-export type UpdatableFileShareAttributes = Pick<FileSavedObjectAttributes, 'name'>;
+export type UpdatableFileShareMetadata = Pick<FileShare, 'name'>;
 
 /**
  * Arguments to pass to share a file
@@ -340,7 +340,7 @@ export interface File<Meta = unknown> extends FileJSON<Meta> {
    *
    * @param attr - The of attributes to update.
    */
-  update(attr: Partial<UpdatableFileAttributes<Meta>>): Promise<File<Meta>>;
+  update(attr: Partial<UpdatableFileMetadata<Meta>>): Promise<File<Meta>>;
 
   /**
    * Stream file content to storage.

@@ -13,7 +13,7 @@ import {
 } from '@kbn/core/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
-import type { File, FileJSON, FileSavedObjectAttributes } from '../../common';
+import type { File, FileJSON, FileMetadata } from '../../common';
 import { fileObjectType, fileShareObjectType } from '../saved_objects';
 import { BlobStorageService } from '../blob_storage_service';
 import { InternalFileShareService } from '../file_share_service';
@@ -21,12 +21,13 @@ import {
   CreateFileArgs,
   FindFileArgs,
   GetByIdArgs,
-  InternalFileService,
   ListFilesArgs,
   UpdateFileArgs,
-} from './internal_file_service';
+} from './file_action_types';
+import { InternalFileService } from './internal_file_service';
 import { FileServiceStart } from './file_service';
 import { FileKindsRegistry } from '../file_kinds_registry';
+import { SavedObjectsFileMetadataClient } from '../file_client';
 
 /**
  * A simple interface for getting an instance of {@link FileServiceStart}
@@ -74,10 +75,14 @@ export class FileServiceFactoryImpl implements FileServiceFactory {
       : this.security?.audit.withoutRequest;
 
     const internalFileShareService = new InternalFileShareService(soClient);
-
-    const internalFileService = new InternalFileService(
+    const soMetadataClient = new SavedObjectsFileMetadataClient(
       fileObjectType.name,
       soClient,
+      this.logger.get('so-metadata-client')
+    );
+
+    const internalFileService = new InternalFileService(
+      soMetadataClient,
       this.blobStorageService,
       internalFileShareService,
       auditLogger,
@@ -129,7 +134,7 @@ export class FileServiceFactoryImpl implements FileServiceFactory {
    * This function can only called during Kibana's setup phase
    */
   public static setup(savedObjectsSetup: SavedObjectsServiceSetup): void {
-    savedObjectsSetup.registerType<FileSavedObjectAttributes<{}>>(fileObjectType);
+    savedObjectsSetup.registerType<FileMetadata<{}>>(fileObjectType);
     savedObjectsSetup.registerType(fileShareObjectType);
   }
 }

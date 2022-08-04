@@ -42,7 +42,7 @@ interface UploadOptions {
  *
  * @internal
  */
-export interface BlobStorage {
+export interface BlobStorageClient {
   /**
    * Upload a new file.
    *

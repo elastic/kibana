@@ -7,9 +7,9 @@
 
 import { SavedObjectsType, SavedObjectsFieldMapping } from '@kbn/core/server';
 import { FILE_SO_TYPE } from '../../common';
-import type { FileSavedObjectAttributes } from '../../common';
+import type { FileMetadata } from '../../common';
 
-type Properties = Record<keyof FileSavedObjectAttributes, SavedObjectsFieldMapping>;
+type Properties = Record<keyof FileMetadata, SavedObjectsFieldMapping>;
 
 const properties: Properties = {
   created: {
@@ -53,7 +53,7 @@ const properties: Properties = {
   },
 };
 
-export const fileObjectType: SavedObjectsType<FileSavedObjectAttributes> = {
+export const fileObjectType: SavedObjectsType<FileMetadata> = {
   name: FILE_SO_TYPE,
   hidden: true,
   namespaceType: 'multiple-isolated',

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { FileSavedObjectAttributes, FileJSON } from '../../common/types';
+import type { FileMetadata, FileJSON } from '../../common/types';
 
-export function toJSON<M = unknown>(id: string, attrs: FileSavedObjectAttributes): FileJSON<M> {
+export function toJSON<M = unknown>(id: string, attrs: FileMetadata): FileJSON<M> {
   const {
     name,
     mime_type: mimeType,
