@@ -16,7 +16,7 @@ import { kpiUniquePrivateIpsSourceMetricLensAttributes } from '../../../../commo
 import { kpiUniquePrivateIpsDestinationMetricLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_destination_metric';
 import { kpiUniquePrivateIpsAreaLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_area';
 import { kpiUniquePrivateIpsBarLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_bar';
-import { KpiBaseComponent } from '../../../../hosts/components/kpi_hosts/common';
+import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common';
 
 const euiVisColorPalette = euiPaletteColorBlind();
 const euiColorVis2 = euiVisColorPalette[2];
@@ -53,8 +53,17 @@ export const fieldsMapping: Readonly<StatItems[]> = [
   },
 ];
 
-const NetworkKpiUniquePrivateIpsComponent: React.FC<NetworkKpiProps> = ({ from, to }) => {
-  return <KpiBaseComponent fieldsMapping={fieldsMapping} from={from} to={to} id={ID} />;
+const NetworkKpiUniquePrivateIpsComponent: React.FC<NetworkKpiProps> = ({ from, to, setQuery }) => {
+  return (
+    <KpiBaseComponentManage
+      fieldsMapping={fieldsMapping}
+      from={from}
+      to={to}
+      id={ID}
+      loading={false} // TODO: remove unused props
+      setQuery={setQuery}
+    />
+  );
 };
 
 export const NetworkKpiUniquePrivateIps = React.memo(NetworkKpiUniquePrivateIpsComponent);

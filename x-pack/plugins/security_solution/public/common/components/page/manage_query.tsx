@@ -7,17 +7,19 @@
 
 import type { Position } from '@elastic/charts';
 import { omit } from 'lodash/fp';
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 
+import { useDispatch } from 'react-redux';
 import type { inputsModel } from '../../store';
 import type { GlobalTimeArgs } from '../../containers/use_global_time';
+import { inputsActions } from '../../store/actions';
 
 export interface OwnProps extends Pick<GlobalTimeArgs, 'deleteQuery' | 'setQuery'> {
   headerChildren?: React.ReactNode;
   id: string;
   legendPosition?: Position;
   loading: boolean;
-  refetch: inputsModel.Refetch;
+  refetch?: inputsModel.Refetch;
   inspect?: inputsModel.InspectQuery;
 }
 
@@ -26,10 +28,36 @@ export function manageQuery<T>(
 ): React.FC<OwnProps & T> {
   const ManageQuery = (props: OwnProps & T) => {
     const { loading, id, refetch, setQuery, deleteQuery, inspect = null } = props;
+    const dispatch = useDispatch();
+
+    const refetchByToggleComponent = useCallback(() => {
+      dispatch(
+        inputsActions.setInspectionParameter({
+          id,
+          selectedInspectIndex: 0,
+          isRefreshing: true,
+          isInspected: false,
+          inputId: 'global',
+        })
+      );
+
+      setTimeout(() => {
+        dispatch(
+          inputsActions.setInspectionParameter({
+            id,
+            selectedInspectIndex: 0,
+            isRefreshing: false,
+            isInspected: false,
+            inputId: 'global',
+          })
+        );
+      }, 100);
+    }, [dispatch, id]);
+
     useQueryInspector({
       queryId: id,
       loading,
-      refetch,
+      refetch: refetch ?? refetchByToggleComponent,
       setQuery,
       deleteQuery,
       inspect,

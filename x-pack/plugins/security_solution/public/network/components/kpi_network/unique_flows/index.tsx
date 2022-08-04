@@ -10,7 +10,7 @@ import React from 'react';
 import type { StatItems } from '../../../../common/components/stat_items';
 import { kpiUniqueFlowIdsLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_flow_ids';
 import { ID } from '../../../containers/kpi_network/unique_flows';
-import { KpiBaseComponent } from '../../../../hosts/components/kpi_hosts/common';
+import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common';
 import type { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
 
@@ -28,8 +28,17 @@ export const fieldsMapping: Readonly<StatItems[]> = [
   },
 ];
 
-const NetworkKpiUniqueFlowsComponent: React.FC<NetworkKpiProps> = ({ from, to }) => {
-  return <KpiBaseComponent fieldsMapping={fieldsMapping} from={from} to={to} id={ID} />;
+const NetworkKpiUniqueFlowsComponent: React.FC<NetworkKpiProps> = ({ from, to, setQuery }) => {
+  return (
+    <KpiBaseComponentManage
+      fieldsMapping={fieldsMapping}
+      from={from}
+      id={ID}
+      loading={false} // TODO: remove unused props
+      setQuery={setQuery}
+      to={to}
+    />
+  );
 };
 
 export const NetworkKpiUniqueFlows = React.memo(NetworkKpiUniqueFlowsComponent);

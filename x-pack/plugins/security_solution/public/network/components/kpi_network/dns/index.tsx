@@ -10,7 +10,7 @@ import React from 'react';
 import type { StatItems } from '../../../../common/components/stat_items';
 import { kpiDnsQueriesLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_dns_queries';
 import { ID } from '../../../containers/kpi_network/dns';
-import { KpiBaseComponent } from '../../../../hosts/components/kpi_hosts/common';
+import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common';
 
 import type { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
@@ -29,8 +29,17 @@ export const fieldsMapping: Readonly<StatItems[]> = [
   },
 ];
 
-const NetworkKpiDnsComponent: React.FC<NetworkKpiProps> = ({ from, to }) => {
-  return <KpiBaseComponent fieldsMapping={fieldsMapping} id={ID} from={from} to={to} />;
+const NetworkKpiDnsComponent: React.FC<NetworkKpiProps> = ({ from, to, setQuery }) => {
+  return (
+    <KpiBaseComponentManage
+      fieldsMapping={fieldsMapping}
+      from={from}
+      id={ID}
+      loading={false}
+      setQuery={setQuery}
+      to={to}
+    />
+  );
 };
 
 export const NetworkKpiDns = React.memo(NetworkKpiDnsComponent);

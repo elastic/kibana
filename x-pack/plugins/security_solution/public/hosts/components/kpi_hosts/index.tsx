@@ -16,7 +16,7 @@ import { RISKY_HOSTS_DOC_LINK } from '../../../overview/components/overview_risk
 import * as i18n from './translations';
 import { useHostRiskScore } from '../../../risk_score/containers';
 
-export const HostsKpiComponent = React.memo<HostsKpiProps>(({ from, to }) => {
+export const HostsKpiComponent = React.memo<HostsKpiProps>(({ setQuery, from, to }) => {
   const [_, { isModuleEnabled }] = useHostRiskScore({});
 
   return (
@@ -47,10 +47,10 @@ export const HostsKpiComponent = React.memo<HostsKpiProps>(({ from, to }) => {
 
       <EuiFlexGroup wrap>
         <EuiFlexItem grow={1}>
-          <HostsKpiHosts from={from} to={to} />
+          <HostsKpiHosts from={from} to={to} setQuery={setQuery} />
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
-          <HostsKpiUniqueIps from={from} to={to} />
+          <HostsKpiUniqueIps from={from} to={to} setQuery={setQuery} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
@@ -59,11 +59,11 @@ export const HostsKpiComponent = React.memo<HostsKpiProps>(({ from, to }) => {
 
 HostsKpiComponent.displayName = 'HostsKpiComponent';
 
-export const HostsDetailsKpiComponent = React.memo<HostsKpiProps>(({ from, to }) => {
+export const HostsDetailsKpiComponent = React.memo<HostsKpiProps>(({ from, to, setQuery }) => {
   return (
     <EuiFlexGroup wrap>
       <EuiFlexItem grow={1}>
-        <HostsKpiUniqueIps from={from} to={to} />
+        <HostsKpiUniqueIps from={from} to={to} setQuery={setQuery} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

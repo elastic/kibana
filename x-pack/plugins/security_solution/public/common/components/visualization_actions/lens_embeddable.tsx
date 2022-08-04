@@ -15,6 +15,8 @@ import { useKibana } from '../../lib/kibana';
 import { useLensAttributes } from './use_lens_attributes';
 import type { LensEmbeddableComponentProps } from './types';
 import { useActions } from './use_actions';
+import { inputsSelectors } from '../../store';
+import { useDeepEqualSelector } from '../../hooks/use_selector';
 
 const LensComponentWrapper = styled.div<{ height?: string }>`
   height: ${({ height }) => height ?? 'auto'};
@@ -31,6 +33,10 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
 }) => {
   const { lens } = useKibana().services;
   const dispatch = useDispatch();
+
+  const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
+  const { isRefreshing } = useDeepEqualSelector((state) => getGlobalQuery(state, id));
+
   const { attributes } = useLensAttributes({
     lensAttributes,
     getLensAttributes,
@@ -59,28 +65,30 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   );
   return attributes ? (
     <LensComponentWrapper height={height}>
-      <LensComponent
-        id={id}
-        style={{ height: '100%' }}
-        timeRange={timerange}
-        attributes={attributes}
-        // onLoad={(val) => {
-        // }}
-        onBrushEnd={onBrushEnd}
-        viewMode={ViewMode.VIEW}
-        // onFilter={
-        //   (/* _data*/) => {
-        //     // call back event for on filter event
-        //   }
-        // }
-        // onTableRowClick={
-        //   (/* _data*/) => {
-        //     // call back event for on table row click event
-        //   }
-        // }
-        withDefaultActions={true}
-        extraActions={actions}
-      />
+      {!isRefreshing && (
+        <LensComponent
+          id={id}
+          style={{ height: '100%' }}
+          timeRange={timerange}
+          attributes={attributes}
+          // onLoad={(val) => {
+          // }}
+          onBrushEnd={onBrushEnd}
+          viewMode={ViewMode.VIEW}
+          // onFilter={
+          //   (/* _data*/) => {
+          //     // call back event for on filter event
+          //   }
+          // }
+          // onTableRowClick={
+          //   (/* _data*/) => {
+          //     // call back event for on table row click event
+          //   }
+          // }
+          withDefaultActions={false}
+          extraActions={actions}
+        />
+      )}
     </LensComponentWrapper>
   ) : null;
 };

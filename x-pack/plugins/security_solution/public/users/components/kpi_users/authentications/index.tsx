@@ -13,7 +13,7 @@ import { kpiUserAuthenticationsBarLensAttributes } from '../../../../common/comp
 import { kpiUserAuthenticationsMetricSuccessLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/users/kpi_user_authentications_metric_success';
 import { kpiUserAuthenticationsMetricFailureLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/users/kpi_user_authentication_metric_failure';
 import { ID } from '../../../containers/users/authentications';
-import { KpiBaseComponent } from '../../../../hosts/components/kpi_hosts/common';
+import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common';
 import * as i18n from './translations';
 import type { UsersKpiProps } from '../types';
 
@@ -53,8 +53,17 @@ export const fieldsMapping: Readonly<StatItems[]> = [
   },
 ];
 
-const UsersKpiAuthenticationsComponent: React.FC<UsersKpiProps> = ({ from, to }) => {
-  return <KpiBaseComponent id={ID} fieldsMapping={fieldsMapping} from={from} to={to} />;
+const UsersKpiAuthenticationsComponent: React.FC<UsersKpiProps> = ({ from, to, setQuery }) => {
+  return (
+    <KpiBaseComponentManage
+      fieldsMapping={fieldsMapping}
+      from={from}
+      id={ID}
+      loading={false} // TODO: remove unused props
+      setQuery={setQuery}
+      to={to}
+    />
+  );
 };
 
 UsersKpiAuthenticationsComponent.displayName = 'UsersKpiAuthenticationsComponent';

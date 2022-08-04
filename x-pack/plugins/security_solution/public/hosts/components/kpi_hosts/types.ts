@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+
 export interface HostsKpiProps {
   from: string;
   to: string;
+  setQuery: GlobalTimeArgs['setQuery'];
 }
 
 export enum HostsKpiChartColors {

@@ -62,6 +62,7 @@ export interface GlobalGenericQuery {
   loading: boolean;
   selectedInspectIndex: number;
   invalidKqlQuery?: Error;
+  isRefreshing?: boolean;
 }
 
 export interface GlobalGraphqlQuery extends GlobalGenericQuery {

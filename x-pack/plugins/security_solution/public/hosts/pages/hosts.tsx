@@ -179,7 +179,7 @@ const HostsComponent = () => {
                 border
               />
 
-              <HostsKpiComponent from={from} to={to} />
+              <HostsKpiComponent from={from} to={to} setQuery={setQuery} />
 
               <EuiSpacer />
 
