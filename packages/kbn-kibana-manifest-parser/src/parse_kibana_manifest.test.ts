@@ -18,7 +18,7 @@ const BASE_FIELDS = {
 describe('validateKibanaManifest', () => {
   it('requires valid type', () => {
     expect(() => validateKibanaManifest({})).toThrowErrorMatchingInlineSnapshot(
-      `"invalid package \\"type\\", options are [functional-tests, plugin-browser, plugin-server, shared-browser, shared-common, shared-server, test-helper]"`
+      `"invalid package \\"type\\", options are [functional-tests, plugin-browser, plugin-server, shared-browser, shared-common, shared-server, test-helper, shared-scss]"`
     );
   });
 
