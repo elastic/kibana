@@ -35,6 +35,7 @@ import {
   setReadOnly,
   updateLayerById,
   setGotoWithCenter,
+  setEmbeddableSearchContext,
 } from '../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
@@ -192,6 +193,20 @@ export class MapEmbeddable
     this._dispatchSetQuery({
       forceRefresh: false,
     });
+
+    const mapStateJSON = this._savedMap.getAttributes().mapStateJSON;
+    if (mapStateJSON) {
+      try {
+        const mapState = JSON.parse(mapStateJSON);
+        store.dispatch(setEmbeddableSearchContext({
+          filters: mapState.filters ? mapState.filters : [],
+          query: mapState.query,
+        }));
+      } catch (e) {
+        console.log(e);
+        // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
+      }
+    }
 
     this._unsubscribeFromStore = store.subscribe(() => {
       this._handleStoreChanges();

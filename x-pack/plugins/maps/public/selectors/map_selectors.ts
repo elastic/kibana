@@ -198,8 +198,11 @@ export const getQuery = ({ map }: MapStoreState): Query | undefined => map.mapSt
 
 export const getFilters = ({ map }: MapStoreState): Filter[] => map.mapState.filters;
 
+export const getEmbeddableSearchContext = ({ map }: MapStoreState) =>
+  map.mapState.embeddableSearchContext;
+
 export const getSearchSessionId = ({ map }: MapStoreState): string | undefined =>
-  map.mapState.searchSessionId;
+-  map.mapState.searchSessionId;
 
 export const getSearchSessionMapBuffer = ({ map }: MapStoreState): MapExtent | undefined =>
   map.mapState.searchSessionMapBuffer;
@@ -239,6 +242,7 @@ export const getDataFilters = createSelector(
   getTimeslice,
   getQuery,
   getFilters,
+  getEmbeddableSearchContext,
   getSearchSessionId,
   getSearchSessionMapBuffer,
   getIsReadOnly,
@@ -250,6 +254,7 @@ export const getDataFilters = createSelector(
     timeslice,
     query,
     filters,
+    embeddableSearchContext,
     searchSessionId,
     searchSessionMapBuffer,
     isReadOnly
@@ -262,6 +267,7 @@ export const getDataFilters = createSelector(
       timeslice,
       query,
       filters,
+      embeddableSearchContext,
       searchSessionId,
       isReadOnly,
     };
