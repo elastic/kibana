@@ -55,41 +55,118 @@ $ curl -X POST api/data_views/data_view
 --------------------------------------------------
 // KIBANA
 
-Customize the creation behavior:
+Use the `data_view.fieldFormats` property to create custom field formats:
 
 [source,sh]
 --------------------------------------------------
 $ curl -X POST api/data_views/data_view
 {
-  "override": false,
-  "refresh_fields": true,
   "data_view": {
-     "title": "logstash-*",
-     "name": "My Logstash Data View"
+    "title": "logstash-*",
+    "name": "My Logstash data view 2",
+    "fieldFormats": {
+      "event_time": {
+        "id": "date_nanos"
+      },
+      "machine.ram": {
+        "id": "number",
+        "params": {
+          "pattern": "0,0.[000] b"
+        }
+      }
+    }
   }
 }
 --------------------------------------------------
 // KIBANA
 
-At creation, all data view fields are optional:
+Use the `data_view.fieldAttrs` property to create custom labels:
 
 [source,sh]
 --------------------------------------------------
 $ curl -X POST api/data_views/data_view
 {
   "data_view": {
-      "id": "...",
-      "version": "...",
-      "title": "...",
-      "name": "...",
-      "type": "...",
-      "timeFieldName": "...",
-      "sourceFilters": [],
-      "typeMeta": {},
-      "fieldAttrs": {},
-      "runtimeFieldMap": {}
-      "allowNoIndex": "..."
+    "title": "logstash-*",
+    "name": "My Logstash data view 3",
+    "fieldAttrs": {
+      "utc_time": {
+        "customLabel": "Time (UTC)"
+      }
     }
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+Use the `data_view.type` and `data_view.typeMeta` properties to create data views based on {ref}/xpack-rollup.html[rollup indices]:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/data_views/data_view
+{
+  "data_view": {
+    "title": "logstash-*",
+    "name": "My Logstash rollup data view",
+    "type": "rollup",
+    "typeMeta": {
+      "params": {
+        "rollup_index": "rollup_logstash"
+      },
+      "aggs": {
+        "terms": {
+          "geo.dest": { "agg": "terms" },
+          "extension.keyword": { "agg": "terms" },
+          "geo.src": { "agg": "terms" },
+          "machine.os.keyword": { "agg": "terms" }
+        },
+        "date_histogram": {
+          "@timestamp": {
+            "agg": "date_histogram",
+            "fixed_interval": "20m",
+            "delay": "10m",
+            "time_zone": "UTC"
+          }
+        },
+        "avg": {
+          "memory": { "agg": "avg" },
+          "bytes": { "agg": "avg" }
+        },
+        "max": { "memory": { "agg": "max" } },
+        "min": { "memory": { "agg": "min" } },
+        "sum": { "memory": { "agg": "sum" } },
+        "value_count": { "memory": { "agg": "value_count" } },
+        "histogram": {
+          "machine.ram": {
+            "agg": "histogram",
+            "interval": 5
+          }
+        }
+      }
+    }
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+Use the `data_view.runtimeFieldMap` property to create a data view with {ref}/runtime-search-request.html[runtime fields]:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/data_views/data_view
+{
+  "data_view": {
+    "title": "logstash-*",
+    "name": "My Logstash data view 3",
+    "runtimeFieldMap": {
+      "runtime_shape_name": {
+        "type": "keyword",
+        "script": {
+          "source": "emit(doc['shape_name'].value)"
+        }
+      }
+    }
+  }
 }
 --------------------------------------------------
 // KIBANA
@@ -104,9 +181,9 @@ The API returns the data view object:
 --------------------------------------------------
 
 
-[[data-views-api-path-parameters]]
+[[data-views-api-properties]]
 
-==== Path Parameters
+==== Properties of the `data_view` object:
 
 `title`::
 (Optional, string) Comma-separated list of data streams, indices, and aliases to search. Supports wildcards
@@ -132,10 +209,10 @@ data view API endpoints.
 [%collapsible%open]
 =====
 `aggs`:::
-(Required, object) A map of rollup field names and the aggregation restrictions
+(Required, object) A map of rollup of the aggregation restrictions by aggregation type and field name.
 
 `params`:::
-(Optional, object) Parameters for retrieving rollup fields
+(Optional, object) Properties for retrieving rollup fields
 =====
 
 `timeFieldName`::
@@ -156,8 +233,6 @@ data view API endpoints.
 `count`:::
 (Optional, number) Popularity count for the field.
 =====
-+
-For more on field attributes, see {kibana-ref}/data-views-fields-api-update.html[Update data view fields API].
 
 `runtimeFieldMap`::
 (Optional, object) Map of runtime field definitions by field name.
@@ -168,16 +243,11 @@ For more on field attributes, see {kibana-ref}/data-views-fields-api-update.html
 `type`:::
 (Required, string) Mapping type of the runtime field. See {ref}/mapping-types.html[Field data types].
 
-`script`:::
-(Required, string) Script block of the runtime field.
+`script.source`:::
+(Required, string) Script of the runtime field.
 =====
-+
-For more on runtime field definitions, see {kibana-ref}/data-views-runtime-field-api-create.html[Create runtime field API].
-+
-For more on how runtime fields can be used in search, see {ref}//runtime-search-request.html[Define runtime
-fields in a search request].
 
-`fieldFormatMap`::
+`fieldFormats`::
 (Optional, object) Map field formats by field name.
 
 `allowNoIndex`::
