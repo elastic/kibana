@@ -539,7 +539,8 @@ export function FormulaEditor({
             tokenInfo.ast.type !== 'namedArgument' ||
             (tokenInfo.ast.name !== 'kql' &&
               tokenInfo.ast.name !== 'lucene' &&
-              tokenInfo.ast.name !== 'shift') ||
+              tokenInfo.ast.name !== 'shift' &&
+              tokenInfo.ast.name !== 'timeRange') ||
             (tokenInfo.ast.value !== 'LENS_MATH_MARKER' &&
               !isSingleQuoteCase.test(tokenInfo.ast.value))
           ) {
@@ -559,7 +560,11 @@ export function FormulaEditor({
               text: `''`,
             };
           }
-          if (char === "'" && tokenInfo.ast.name !== 'shift') {
+          if (
+            char === "'" &&
+            tokenInfo.ast.name !== 'shift' &&
+            tokenInfo.ast.name !== 'timeRange'
+          ) {
             editOperation = {
               range: {
                 ...currentPosition,
