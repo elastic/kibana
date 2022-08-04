@@ -48,7 +48,8 @@ export type QueryDslQueryContainerBool = {
 };
 
 export enum KubernetesCollection {
-  cluster = 'cluster',
+  clusterId = 'clusterId',
+  clusterName = 'clusterName',
   namespace = 'namespace',
   node = 'node',
   pod = 'pod',
@@ -56,7 +57,8 @@ export enum KubernetesCollection {
 }
 
 export interface TreeNavSelection {
-  [KubernetesCollection.cluster]?: string;
+  [KubernetesCollection.clusterId]?: string;
+  [KubernetesCollection.clusterName]?: string;
   [KubernetesCollection.namespace]?: string;
   [KubernetesCollection.node]?: string;
   [KubernetesCollection.pod]?: string;
