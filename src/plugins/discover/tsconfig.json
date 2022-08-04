@@ -11,6 +11,7 @@
     { "path": "../../core/tsconfig.json" },
     { "path": "../charts/tsconfig.json" },
     { "path": "../data/tsconfig.json" },
+    { "path": "../expressions/tsconfig.json" },
     { "path": "../embeddable/tsconfig.json" },
     { "path": "../inspector/tsconfig.json" },
     { "path": "../url_forwarding/tsconfig.json" },

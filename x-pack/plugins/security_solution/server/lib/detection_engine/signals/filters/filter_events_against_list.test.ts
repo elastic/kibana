@@ -6,18 +6,20 @@
  */
 
 import uuid from 'uuid';
-import { filterEventsAgainstList } from './filter_events_against_list';
-import { buildRuleMessageMock as buildRuleMessage } from '../rule_messages.mock';
-import { mockLogger, repeatedHitsWithSortId } from '../__mocks__/es_results';
 
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
-import { listMock } from '@kbn/lists-plugin/server/mocks';
 import { getSearchListItemResponseMock } from '@kbn/lists-plugin/common/schemas/response/search_list_item_schema.mock';
+import { listMock } from '@kbn/lists-plugin/server/mocks';
+
+import { filterEventsAgainstList } from './filter_events_against_list';
+import { repeatedHitsWithSortId } from '../__mocks__/es_results';
+import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 
 const someGuids = Array.from({ length: 13 }).map((x) => uuid.v4());
 
 describe('filterEventsAgainstList', () => {
   let listClient = listMock.getListClient();
+  const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -31,7 +33,7 @@ describe('filterEventsAgainstList', () => {
 
   it('should respond with eventSearchResult if exceptionList is empty array', async () => {
     const [included, excluded] = await filterEventsAgainstList({
-      logger: mockLogger,
+      ruleExecutionLogger,
       listClient,
       exceptionsList: [],
       events: repeatedHitsWithSortId(4, someGuids.slice(0, 3), [
@@ -40,7 +42,6 @@ describe('filterEventsAgainstList', () => {
         '3.3.3.3',
         '7.7.7.7',
       ]),
-      buildRuleMessage,
     });
     expect(included.length).toEqual(4);
     expect(excluded.length).toEqual(0);
@@ -48,7 +49,7 @@ describe('filterEventsAgainstList', () => {
 
   it('should respond with eventSearchResult if exceptionList does not contain value list exceptions', async () => {
     const [included, excluded] = await filterEventsAgainstList({
-      logger: mockLogger,
+      ruleExecutionLogger,
       listClient,
       exceptionsList: [getExceptionListItemSchemaMock()],
       events: repeatedHitsWithSortId(4, someGuids.slice(0, 3), [
@@ -57,11 +58,10 @@ describe('filterEventsAgainstList', () => {
         '3.3.3.3',
         '7.7.7.7',
       ]),
-      buildRuleMessage,
     });
     expect(included.length).toEqual(4);
     expect(excluded.length).toEqual(0);
-    expect((mockLogger.debug as unknown as jest.Mock).mock.calls[0][0]).toContain(
+    expect(ruleExecutionLogger.debug.mock.calls[0][0]).toContain(
       'no exception items of type list found - returning original search result'
     );
   });
@@ -82,11 +82,10 @@ describe('filterEventsAgainstList', () => {
       ];
 
       const [included, excluded] = await filterEventsAgainstList({
-        logger: mockLogger,
+        ruleExecutionLogger,
         listClient,
         exceptionsList: [exceptionItem],
         events: repeatedHitsWithSortId(4, someGuids.slice(0, 3)),
-        buildRuleMessage,
       });
       expect(included.length).toEqual(4);
       expect(excluded.length).toEqual(0);
@@ -114,7 +113,7 @@ describe('filterEventsAgainstList', () => {
         )
       );
       const [included, excluded] = await filterEventsAgainstList({
-        logger: mockLogger,
+        ruleExecutionLogger,
         listClient,
         exceptionsList: [exceptionItem],
         events: repeatedHitsWithSortId(4, someGuids.slice(0, 3), [
@@ -123,7 +122,6 @@ describe('filterEventsAgainstList', () => {
           '3.3.3.3',
           '7.7.7.7',
         ]),
-        buildRuleMessage,
       });
       expect((listClient.searchListItemByValues as jest.Mock).mock.calls[0][0].type).toEqual('ip');
       expect((listClient.searchListItemByValues as jest.Mock).mock.calls[0][0].listId).toEqual(
@@ -175,7 +173,7 @@ describe('filterEventsAgainstList', () => {
       ]);
 
       const [included, excluded] = await filterEventsAgainstList({
-        logger: mockLogger,
+        ruleExecutionLogger,
         listClient,
         exceptionsList: [exceptionItem, exceptionItemAgain],
         events: repeatedHitsWithSortId(9, someGuids.slice(0, 9), [
@@ -189,7 +187,6 @@ describe('filterEventsAgainstList', () => {
           '8.8.8.8',
           '9.9.9.9',
         ]),
-        buildRuleMessage,
       });
       expect(listClient.searchListItemByValues as jest.Mock).toHaveBeenCalledTimes(2);
       expect(included.length).toEqual(6);
@@ -237,7 +234,7 @@ describe('filterEventsAgainstList', () => {
       ]);
 
       const [included, excluded] = await filterEventsAgainstList({
-        logger: mockLogger,
+        ruleExecutionLogger,
         listClient,
         exceptionsList: [exceptionItem, exceptionItemAgain],
         events: repeatedHitsWithSortId(9, someGuids.slice(0, 9), [
@@ -251,7 +248,6 @@ describe('filterEventsAgainstList', () => {
           '8.8.8.8',
           '9.9.9.9',
         ]),
-        buildRuleMessage,
       });
       expect(listClient.searchListItemByValues as jest.Mock).toHaveBeenCalledTimes(2);
       // @ts-expect-error
@@ -297,7 +293,7 @@ describe('filterEventsAgainstList', () => {
       ]);
 
       const [included, excluded] = await filterEventsAgainstList({
-        logger: mockLogger,
+        ruleExecutionLogger,
         listClient,
         exceptionsList: [exceptionItem],
         events: repeatedHitsWithSortId(
@@ -326,7 +322,6 @@ describe('filterEventsAgainstList', () => {
             '2.2.2.2',
           ]
         ),
-        buildRuleMessage,
       });
       expect(listClient.searchListItemByValues as jest.Mock).toHaveBeenCalledTimes(2);
       expect(included.length).toEqual(8);
@@ -375,7 +370,7 @@ describe('filterEventsAgainstList', () => {
       ]);
 
       const [included, excluded] = await filterEventsAgainstList({
-        logger: mockLogger,
+        ruleExecutionLogger,
         listClient,
         exceptionsList: [exceptionItem],
         events: repeatedHitsWithSortId(9, someGuids.slice(0, 9), [
@@ -389,7 +384,6 @@ describe('filterEventsAgainstList', () => {
           '8.8.8.8',
           '9.9.9.9',
         ]),
-        buildRuleMessage,
       });
       expect(listClient.searchListItemByValues as jest.Mock).toHaveBeenCalledTimes(2);
       expect(included.length).toEqual(9);
@@ -443,7 +437,7 @@ describe('filterEventsAgainstList', () => {
       ]);
 
       const [included, excluded] = await filterEventsAgainstList({
-        logger: mockLogger,
+        ruleExecutionLogger,
         listClient,
         exceptionsList: [exceptionItem],
         events: repeatedHitsWithSortId(
@@ -460,7 +454,6 @@ describe('filterEventsAgainstList', () => {
             ['3.3.3.3', '4.4.4.4'],
           ]
         ),
-        buildRuleMessage,
       });
       expect(listClient.searchListItemByValues as jest.Mock).toHaveBeenCalledTimes(2);
       expect((listClient.searchListItemByValues as jest.Mock).mock.calls[0][0].value).toEqual([
@@ -505,11 +498,10 @@ describe('filterEventsAgainstList', () => {
         },
       ];
       const [included, excluded] = await filterEventsAgainstList({
-        logger: mockLogger,
+        ruleExecutionLogger,
         listClient,
         exceptionsList: [exceptionItem],
         events: repeatedHitsWithSortId(4, someGuids.slice(0, 3)),
-        buildRuleMessage,
       });
       expect(included.length).toEqual(0);
       expect(excluded.length).toEqual(4);
@@ -537,7 +529,7 @@ describe('filterEventsAgainstList', () => {
         )
       );
       const [included, excluded] = await filterEventsAgainstList({
-        logger: mockLogger,
+        ruleExecutionLogger,
         listClient,
         exceptionsList: [exceptionItem],
         events: repeatedHitsWithSortId(4, someGuids.slice(0, 3), [
@@ -546,7 +538,6 @@ describe('filterEventsAgainstList', () => {
           '3.3.3.3',
           '7.7.7.7',
         ]),
-        buildRuleMessage,
       });
       expect((listClient.searchListItemByValues as jest.Mock).mock.calls[0][0].type).toEqual('ip');
       expect((listClient.searchListItemByValues as jest.Mock).mock.calls[0][0].listId).toEqual(
@@ -592,7 +583,7 @@ describe('filterEventsAgainstList', () => {
       ]);
 
       const [included, excluded] = await filterEventsAgainstList({
-        logger: mockLogger,
+        ruleExecutionLogger,
         listClient,
         exceptionsList: [exceptionItem],
         events: repeatedHitsWithSortId(
@@ -609,7 +600,6 @@ describe('filterEventsAgainstList', () => {
             ['3.3.3.3', '4.4.4.4'],
           ]
         ),
-        buildRuleMessage,
       });
       expect(listClient.searchListItemByValues as jest.Mock).toHaveBeenCalledTimes(2);
       expect((listClient.searchListItemByValues as jest.Mock).mock.calls[0][0].value).toEqual([

@@ -116,6 +116,13 @@ export const ALERTS_HEADERS_THRESHOLD_CARDINALITY = i18n.translate(
   }
 );
 
+export const ALERTS_HEADERS_NEW_TERMS = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.newTerms',
+  {
+    defaultMessage: 'New Terms',
+  }
+);
+
 export const ACTION_INVESTIGATE_IN_TIMELINE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.investigateInTimelineTitle',
   {

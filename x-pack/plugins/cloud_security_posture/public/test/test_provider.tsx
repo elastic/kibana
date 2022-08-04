@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import React, { useMemo } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router, Switch, Route } from 'react-router-dom';
@@ -15,7 +16,13 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
-import type { CspAppDeps } from '../application/app';
+import type { CspClientPluginStartDeps } from '../types';
+
+interface CspAppDeps {
+  core: CoreStart;
+  deps: CspClientPluginStartDeps;
+  params: AppMountParameters;
+}
 
 export const TestProvider: React.FC<Partial<CspAppDeps>> = ({
   core = coreMock.createStart(),

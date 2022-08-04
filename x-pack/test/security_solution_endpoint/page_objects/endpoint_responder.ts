@@ -21,7 +21,7 @@ export function EndpointResponderPageObjects({ getService }: FtrProviderContext)
 
   const closeResponder = async () => {
     await ensureOnResponder();
-    (await testSubjects.find('consolePageOverlay-doneButton')).click();
+    (await testSubjects.find('consolePageOverlay-header-back-link')).click();
     await testSubjects.missingOrFail(TEST_SUBJ.responderPage);
   };
 

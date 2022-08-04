@@ -27,3 +27,10 @@ export const HOURS = i18n.translate(
     defaultMessage: 'Hours',
   }
 );
+
+export const DAYS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepScheduleRuleForm.daysOptionDescription',
+  {
+    defaultMessage: 'Days',
+  }
+);

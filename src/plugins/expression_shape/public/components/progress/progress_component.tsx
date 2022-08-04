@@ -8,7 +8,7 @@
 
 import React, { CSSProperties, RefCallback, useCallback, useEffect, useRef, useState } from 'react';
 import { useResizeObserver } from '@elastic/eui';
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { NodeDimensions, ProgressRendererConfig } from '../../../common/types';
 import { ShapeRef, SvgConfig, SvgTextAttributes } from '../reusable/types';

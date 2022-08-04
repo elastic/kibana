@@ -22,6 +22,7 @@ import type {
 } from '../types';
 import { LensIconChartDatatable } from '../assets/chart_datatable';
 import { TableDimensionEditor } from './components/dimension_editor';
+import { TableDimensionEditorAdditionalSection } from './components/dimension_editor_addtional_section';
 import { LayerType, layerTypes } from '../../common';
 import { getDefaultSummaryLabel, PagingState } from '../../common/expressions';
 import type { ColumnState, SortingState } from '../../common/expressions';
@@ -190,6 +191,9 @@ export const getDatatableVisualization = ({
           groupLabel: i18n.translate('xpack.lens.datatable.breakdownRows', {
             defaultMessage: 'Rows',
           }),
+          dimensionEditorGroupLabel: i18n.translate('xpack.lens.datatable.breakdownRow', {
+            defaultMessage: 'Row',
+          }),
           groupTooltip: i18n.translate('xpack.lens.datatable.breakdownRows.description', {
             defaultMessage:
               'Split table rows by field. This is recommended for high cardinality breakdowns.',
@@ -221,6 +225,9 @@ export const getDatatableVisualization = ({
           groupLabel: i18n.translate('xpack.lens.datatable.breakdownColumns', {
             defaultMessage: 'Columns',
           }),
+          dimensionEditorGroupLabel: i18n.translate('xpack.lens.datatable.breakdownColumn', {
+            defaultMessage: 'Column',
+          }),
           groupTooltip: i18n.translate('xpack.lens.datatable.breakdownColumns.description', {
             defaultMessage:
               "Split metric columns by field. It's recommended to keep the number of columns low to avoid horizontal scrolling.",
@@ -245,6 +252,14 @@ export const getDatatableVisualization = ({
           groupLabel: i18n.translate('xpack.lens.datatable.metrics', {
             defaultMessage: 'Metrics',
           }),
+          dimensionEditorGroupLabel: i18n.translate('xpack.lens.datatable.metric', {
+            defaultMessage: 'Metric',
+          }),
+          paramEditorCustomProps: {
+            headingLabel: i18n.translate('xpack.lens.datatable.headingLabel', {
+              defaultMessage: 'Value',
+            }),
+          },
           layerId: state.layerId,
           accessors: sortedColumns
             .filter((c) => !datasource!.getOperationForColumnId(c)?.isBucketed)
@@ -307,6 +322,17 @@ export const getDatatableVisualization = ({
       <KibanaThemeProvider theme$={theme.theme$}>
         <I18nProvider>
           <TableDimensionEditor {...props} paletteService={paletteService} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
+      domElement
+    );
+  },
+
+  renderDimensionEditorAdditionalSection(domElement, props) {
+    render(
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <I18nProvider>
+          <TableDimensionEditorAdditionalSection {...props} paletteService={paletteService} />
         </I18nProvider>
       </KibanaThemeProvider>,
       domElement
@@ -464,6 +490,29 @@ export const getDatatableVisualization = ({
 
   getErrorMessages(state) {
     return undefined;
+  },
+
+  getRenderEventCounters(state) {
+    const events = {
+      color_by_value: false,
+      summary_row: false,
+    };
+
+    state.columns.forEach((column) => {
+      if (column.summaryRow && column.summaryRow !== 'none') {
+        events.summary_row = true;
+      }
+      if (column.colorMode && column.colorMode !== 'none') {
+        events.color_by_value = true;
+      }
+    });
+
+    return Object.entries(events).reduce<string[]>((acc, [key, isActive]) => {
+      if (isActive) {
+        acc.push(`dimension_${key}`);
+      }
+      return acc;
+    }, []);
   },
 
   renderToolbar(domElement, props) {

@@ -9,6 +9,7 @@ import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/
 import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/experimental_rule_field_map';
 import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
 import { isEmpty } from 'lodash/fp';
+import { ENRICHMENT_DESTINATION_PATH } from '../constants';
 
 import type { EventHit, TimelineEventsDetailsItem } from '../search_strategy';
 import { toObjectArrayOfStrings, toStringArray } from './to_array';
@@ -40,6 +41,9 @@ export const formatGeoLocation = (item: unknown[]) => {
 
 export const isGeoField = (field: string) =>
   field.includes('geo.location') || field.includes('geoip.location');
+
+export const isThreatEnrichmentFieldOrSubfield = (field: string, prependField?: string) =>
+  prependField?.includes(ENRICHMENT_DESTINATION_PATH) || field === ENRICHMENT_DESTINATION_PATH;
 
 export const getDataFromFieldsHits = (
   fields: EventHit['fields'],
@@ -88,6 +92,18 @@ export const getDataFromFieldsHits = (
       ];
     }
 
+    const threatEnrichmentObject = isThreatEnrichmentFieldOrSubfield(field, prependField)
+      ? [
+          {
+            category: fieldCategory,
+            field: dotField,
+            values: strArr,
+            originalValue: strArr,
+            isObjectArray,
+          },
+        ]
+      : [];
+
     // format nested fields
     const nestedFields = Array.isArray(item)
       ? item
@@ -99,6 +115,7 @@ export const getDataFromFieldsHits = (
     const flat: Record<string, TimelineEventsDetailsItem> = [
       ...accumulator,
       ...nestedFields,
+      ...threatEnrichmentObject,
     ].reduce(
       (acc, f) => ({
         ...acc,

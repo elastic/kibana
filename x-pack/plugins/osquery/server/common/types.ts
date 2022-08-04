@@ -20,8 +20,9 @@ export interface PackSavedObjectAttributes {
   queries: Array<{
     id: string;
     name: string;
+    query: string;
     interval: number;
-    ecs_mapping: Record<string, unknown>;
+    ecs_mapping?: Record<string, unknown>;
   }>;
   version?: number;
   enabled: boolean | undefined;
@@ -29,6 +30,7 @@ export interface PackSavedObjectAttributes {
   created_by: string | undefined;
   updated_at: string;
   updated_by: string | undefined;
+  policy_ids?: string[];
 }
 
 export type PackSavedObject = SavedObject<PackSavedObjectAttributes>;

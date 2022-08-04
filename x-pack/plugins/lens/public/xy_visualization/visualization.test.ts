@@ -24,7 +24,7 @@ import { LensIconChartBar } from '../assets/chart_bar';
 import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { Datatable } from '@kbn/expressions-plugin';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
@@ -1165,7 +1165,7 @@ describe('xy_visualization', () => {
       expect(options.map((o) => o.groupLabel)).toEqual([
         'Horizontal axis',
         'Vertical axis',
-        'Break down by',
+        'Breakdown',
       ]);
     });
 
@@ -1183,7 +1183,7 @@ describe('xy_visualization', () => {
       expect(options.map((o) => o.groupLabel)).toEqual([
         'Vertical axis',
         'Horizontal axis',
-        'Break down by',
+        'Breakdown',
       ]);
     });
 
@@ -1982,7 +1982,7 @@ describe('xy_visualization', () => {
         expect(accessorConfig.triggerIcon).toEqual('disabled');
       });
 
-      it('should show current palette for break down by dimension', () => {
+      it('should show current palette for breakdown dimension', () => {
         const palette = paletteServiceMock.get('mock');
         const customColors = ['yellow', 'green'];
         (palette.getCategoricalColors as jest.Mock).mockReturnValue(customColors);

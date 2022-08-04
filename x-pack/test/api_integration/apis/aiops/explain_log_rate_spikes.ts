@@ -28,14 +28,14 @@ export default ({ getService }: FtrProviderContext) => {
     deviationMin: 1561986810992,
     end: 2147483647000,
     index: 'ft_ecommerce',
-    kuery: '',
+    searchQuery: '{"bool":{"filter":[],"must":[{"match_all":{}}],"must_not":[]}}',
     start: 0,
     timeFieldName: 'order_date',
   };
 
   const expected = {
-    chunksLength: 12,
-    actionsLength: 11,
+    chunksLength: 13,
+    actionsLength: 12,
     noIndexChunksLength: 4,
     noIndexActionsLength: 3,
     changePointFilter: 'add_change_points',

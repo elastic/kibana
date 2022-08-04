@@ -19,6 +19,7 @@ import { DataCharts$, DataChartsMessage, DataTotalHits$ } from '../../hooks/use_
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
 import { GetStateReturn } from '../../services/discover_state';
+import { DataView } from '@kbn/data-views-plugin/common';
 
 export interface DiscoverHistogramProps {
   savedSearchData$: DataCharts$;

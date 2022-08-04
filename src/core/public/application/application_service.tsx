@@ -14,10 +14,11 @@ import { createBrowserHistory, History } from 'history';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { HttpSetup, HttpStart } from '@kbn/core-http-browser';
-import type { MountPoint } from '../types';
-import type { OverlayStart } from '../overlays';
+import type { Capabilities } from '@kbn/core-capabilities-common';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
+import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { AppRouter } from './ui';
-import { type Capabilities, CapabilitiesService } from './capabilities';
+import { CapabilitiesService } from './capabilities';
 import type {
   App,
   AppDeepLink,

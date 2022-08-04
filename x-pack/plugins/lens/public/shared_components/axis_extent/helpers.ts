@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Datatable } from '@kbn/expressions-plugin';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import type { DatasourcePublicAPI } from '../../types';
 
 /**
