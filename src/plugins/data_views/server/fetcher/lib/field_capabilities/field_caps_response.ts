@@ -142,10 +142,8 @@ export function readFieldCapsResponse(
         aggregatable: isAggregatable,
         readFromDocValues: shouldReadFieldFromDocValues(isAggregatable, esType),
         metadata_field: capsByType[types[0]].metadata_field,
-        meta: {
-          fixedInterval: capsByType[types[0]].meta?.fixed_interval,
-          timeZone: capsByType[types[0]].meta?.time_zone,
-        },
+        fixedInterval: capsByType[types[0]].meta?.fixed_interval,
+        timeZone: capsByType[types[0]].meta?.time_zone,
         timeSeriesMetric: timeSeriesMetricType,
         timeSeriesDimension: capsByType[types[0]].time_series_dimension,
       };

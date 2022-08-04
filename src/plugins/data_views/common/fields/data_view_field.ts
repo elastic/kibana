@@ -222,10 +222,17 @@ export class DataViewField implements DataViewFieldBase {
   }
 
   /**
-   * returns field meta information
+   * returns list of alloeed fixed intervals
    */
-  public get meta() {
-    return this.spec.meta;
+  public get fixedInterval() {
+    return this.spec.fixedInterval;
+  }
+
+  /**
+   * return list of allowed time zones
+   */
+  public get timeZone() {
+    return this.spec.timeZone;
   }
   /**
    * Returns true if field is available via doc values
@@ -379,7 +386,8 @@ export class DataViewField implements DataViewFieldBase {
       isMapped: this.isMapped,
       timeSeriesDimension: this.spec.timeSeriesDimension,
       timeSeriesMetric: this.spec.timeSeriesMetric,
-      meta: this.spec.meta,
+      timeZone: this.spec.timeZone,
+      fixedInterval: this.spec.fixedInterval,
     };
 
     // Filter undefined values from the spec

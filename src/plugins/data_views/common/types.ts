@@ -411,12 +411,14 @@ export type FieldSpec = DataViewFieldBase & {
   runtimeField?: RuntimeFieldSpec;
 
   /**
-   * Field meta information
+   * list of allowed field intervals for the field
    */
-  meta?: {
-    fixedInterval: string[];
-    timeZone: string[];
-  };
+  fixedInterval?: string[];
+
+  /**
+   * List of allowed timezones for the field
+   */
+  timeZone?: string[];
 
   /**
    * set to true if field is a TSDB dimension field
