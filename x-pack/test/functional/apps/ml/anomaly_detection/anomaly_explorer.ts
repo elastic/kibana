@@ -64,9 +64,6 @@ export default function ({ getService }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
 
   describe('anomaly explorer', function () {
-    // FAILING ES FORWARDS COMPATIBILITY TESTS: https://github.com/elastic/kibana/issues/137602
-    this.onlyEsVersion('<8');
-
     this.tags(['mlqa']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
