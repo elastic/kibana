@@ -695,13 +695,23 @@ export class SettingsPageObject extends FtrService {
     await this.clickSaveScriptedField();
   }
 
-  async addRuntimeField(name: string, type: string, script: string, doSaveField = true) {
+  async addRuntimeField(
+    name: string,
+    type: string,
+    script: string,
+    doSaveField = true,
+    compositeCount = 0
+  ) {
     await this.clickAddField();
     await this.setFieldName(name);
     await this.setFieldType(type);
     if (script) {
-      await this.setFieldScript(script);
+      await this.setFieldScript(script, type === 'Composite');
     }
+    if (compositeCount > 0) {
+      await this.testSubjects.find(`typeField_${compositeCount - 1}`);
+    }
+
     if (doSaveField) {
       await this.clickSaveField();
     }
@@ -765,12 +775,15 @@ export class SettingsPageObject extends FtrService {
   async setFieldType(type: string) {
     this.log.debug('set type = ' + type);
     await this.testSubjects.setValue('typeField', type);
+    await this.browser.pressKeys(this.browser.keys.RETURN);
   }
 
-  async setFieldScript(script: string) {
+  async setFieldScript(script: string, skipToggleRow = false) {
     this.log.debug('set script = ' + script);
-    await this.toggleRow('valueRow');
-    await this.monacoEditor.waitCodeEditorReady('valueRow');
+    if (!skipToggleRow) {
+      await this.toggleRow('valueRow');
+    }
+    await this.monacoEditor.waitCodeEditorReady('scriptFieldRow');
     await this.monacoEditor.setCodeEditorValue(script);
   }
 

@@ -48,7 +48,7 @@ export const CompositeEditor = ({ value, setValue }: CompositeEditorProps) => {
             <EuiNotificationBadge color="subdued">{fields.length}</EuiNotificationBadge>
           </EuiText>
         </div>
-        {Object.entries(value).map(([key, itemValue]) => {
+        {Object.entries(value).map(([key, itemValue], idx) => {
           return (
             <div>
               <EuiFlexGroup gutterSize="s">
@@ -78,7 +78,7 @@ export const CompositeEditor = ({ value, setValue }: CompositeEditorProps) => {
                         setValue({ ...value });
                       }}
                       isClearable={false}
-                      data-test-subj="typeField"
+                      data-test-subj={`typeField_${idx}`}
                       aria-label={i18n.translate(
                         'indexPatternFieldEditor.editor.form.typeSelectAriaLabel',
                         {

@@ -31,7 +31,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('create composite runtime field', function describeIndexTests() {
-      const fieldName = 'composite_test';
+      // Starting with '@' to sort toward start of field list
+      const fieldName = '@composite_test';
 
       it('should create runtime field', async function () {
         await PageObjects.settings.navigateTo();
@@ -43,7 +44,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           fieldName,
           'Composite',
           "emit('a','hello world')",
-          false
+          false,
+          1
         );
 
         await log.debug('check that field preview is rendered');
@@ -58,17 +60,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      /*
       it('should modify runtime field', async function () {
+        const startingCount = parseInt(await PageObjects.settings.getFieldsTabCount(), 10);
         await PageObjects.settings.filterField(fieldName);
         await testSubjects.click('editFieldFormat');
-        await PageObjects.settings.setFieldType('Long');
-        await PageObjects.settings.setFieldScript('emit(6);');
-        await testSubjects.find('changeWarning');
+        // wait for subfields to render
+        await testSubjects.find(`typeField_0`);
+        await new Promise((e) => setTimeout(e, 2000));
+        await PageObjects.settings.setFieldScript("emit('a',6);emit('b',10);", true);
+
+        // wait for subfields to render
+        await testSubjects.find(`typeField_1`);
+        await new Promise((e) => setTimeout(e, 500));
+
         await PageObjects.settings.clickSaveField();
-        await PageObjects.settings.confirmSave();
+        await testSubjects.click('clearSearchButton');
+        await retry.try(async function () {
+          expect(parseInt(await PageObjects.settings.getFieldsTabCount(), 10)).to.be(
+            startingCount + 1
+          );
+        });
       });
-      */
 
       it('should delete runtime field', async function () {
         await testSubjects.click('deleteField');

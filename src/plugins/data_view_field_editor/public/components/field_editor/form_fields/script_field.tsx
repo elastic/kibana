@@ -221,6 +221,7 @@ const ScriptFieldComponent = ({ existingConcreteFields, links }: Props) => {
               id="runtimeFieldScript"
               error={errorMessage}
               isInvalid={!isValid}
+              data-test-subj="scriptFieldRow"
               helpText={
                 <FormattedMessage
                   id="indexPatternFieldEditor.editor.form.source.scriptFieldHelpText"
