@@ -14,7 +14,12 @@ import {
   ORCHESTRATOR_NAMESPACE,
   ORCHESTRATOR_RESOURCE_ID,
 } from '../../../common/constants';
-import { KubernetesCollection, QueryDslQueryContainerBool, TreeNavSelection, TreeViewIconProps } from '../../types';
+import {
+  KubernetesCollection,
+  QueryDslQueryContainerBool,
+  TreeNavSelection,
+  TreeViewIconProps,
+} from '../../types';
 
 export const KUBERNETES_COLLECTION_FIELDS = {
   [KubernetesCollection.clusterId]: ORCHESTRATOR_CLUSTER_ID,
@@ -26,7 +31,7 @@ export const KUBERNETES_COLLECTION_FIELDS = {
 };
 
 export const KUBERNETES_COLLECTION_ICONS_PROPS: { [key: string]: TreeViewIconProps } = {
-  [KubernetesCollection.cluster]: { type: 'cluster', euiVarColor: 'euiColorVis0' },
+  [KubernetesCollection.clusterId]: { type: 'cluster', euiVarColor: 'euiColorVis0' },
   [KubernetesCollection.namespace]: { type: 'namespace', euiVarColor: 'euiColorVis1' },
   [KubernetesCollection.node]: { type: 'kubernetesNode', euiVarColor: 'euiColorVis3' },
   [KubernetesCollection.pod]: { type: 'kubernetesPod', euiVarColor: 'euiColorVis9' },

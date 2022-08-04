@@ -326,7 +326,7 @@ const DynamicTreeViewItem = ({
         )}
         <TreeViewIcon {...tree[depth].iconProps} css={styles.labelIcon} />
         <EuiToolTip content={aggData.key}>
-        <span className="euiTreeView__nodeLabel">{aggData.key_as_string || aggData.key}</span>
+          <span className="euiTreeView__nodeLabel">{aggData.key_as_string || aggData.key}</span>
         </EuiToolTip>
       </button>
       <div

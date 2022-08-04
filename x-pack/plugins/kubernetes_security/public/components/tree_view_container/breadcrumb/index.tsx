@@ -58,16 +58,16 @@ export const Breadcrumb = ({ treeNavSelection, onSelect }: BreadcrumbDeps) => {
         {hasRightArrow && <EuiIcon css={styles.breadcrumbRightIcon} type="arrowRight" size="s" />}
         {icon}
         <EuiToolTip content={treeNavSelection[collectionType]}>
-        <EuiButtonEmpty
-          css={isBolded ? styles.breadcrumbButtonBold : styles.breadcrumbButton}
-          color="text"
-          onClick={() => onBreadCrumbClick(collectionType)}
-        >
-          {collectionType === KubernetesCollection.clusterId
-            ? treeNavSelection[KubernetesCollection.clusterName] ||
-              treeNavSelection[KubernetesCollection.clusterId]
-            : treeNavSelection[collectionType]}
-        </EuiButtonEmpty>
+          <EuiButtonEmpty
+            css={isBolded ? styles.breadcrumbButtonBold : styles.breadcrumbButton}
+            color="text"
+            onClick={() => onBreadCrumbClick(collectionType)}
+          >
+            {collectionType === KubernetesCollection.clusterId
+              ? treeNavSelection[KubernetesCollection.clusterName] ||
+                treeNavSelection[KubernetesCollection.clusterId]
+              : treeNavSelection[collectionType]}
+          </EuiButtonEmpty>
         </EuiToolTip>
       </>
     ),
@@ -88,7 +88,7 @@ export const Breadcrumb = ({ treeNavSelection, onSelect }: BreadcrumbDeps) => {
     <div css={styles.breadcrumb}>
       {renderBreadcrumbLink(
         KubernetesCollection.clusterId,
-        <TreeViewIcon {...KUBERNETES_COLLECTION_ICONS_PROPS.cluster} />,
+        <TreeViewIcon {...KUBERNETES_COLLECTION_ICONS_PROPS.clusterId} />,
         !(
           treeNavSelection[KubernetesCollection.namespace] ||
           treeNavSelection[KubernetesCollection.node]

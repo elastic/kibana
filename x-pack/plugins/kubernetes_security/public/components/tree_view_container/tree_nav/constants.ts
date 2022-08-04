@@ -12,7 +12,7 @@ import { translations } from './translations';
 const LOGICAL_TREE_VIEW: DynamicTree[] = [
   {
     key: KUBERNETES_COLLECTION_FIELDS.clusterId,
-    iconProps: KUBERNETES_COLLECTION_ICONS_PROPS.cluster,
+    iconProps: KUBERNETES_COLLECTION_ICONS_PROPS.clusterId,
     type: KubernetesCollection.clusterId,
     name: translations.cluster(),
     namePlural: translations.cluster(true),
