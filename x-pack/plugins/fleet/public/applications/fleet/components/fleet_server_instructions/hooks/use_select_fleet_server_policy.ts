@@ -14,7 +14,11 @@ export const useSelectFleetServerPolicy = (defaultAgentPolicyId?: string) => {
   const [fleetServerPolicyId, setFleetServerPolicyId] = useState<string | undefined>(
     defaultAgentPolicyId
   );
-  const { data: agentPoliciesData, resendRequest } = useGetAgentPolicies({
+  const {
+    isLoading,
+    data: agentPoliciesData,
+    resendRequest,
+  } = useGetAgentPolicies({
     full: true,
   });
 
@@ -34,6 +38,7 @@ export const useSelectFleetServerPolicy = (defaultAgentPolicyId?: string) => {
   }, [eligibleFleetServerPolicies, fleetServerPolicyId]);
 
   return {
+    isSelectFleetServerPolicyLoading: isLoading,
     fleetServerPolicyId,
     setFleetServerPolicyId,
     eligibleFleetServerPolicies,
