@@ -14,7 +14,7 @@ import * as i18n from '../translations';
 import { Case } from '../../../../common/ui/types';
 import { CreateCaseForm } from '../form';
 import { UseCreateAttachments } from '../../../containers/use_create_attachments';
-import { CaseAttachments } from '../../../types';
+import { CaseAttachmentsWithoutOwner } from '../../../types';
 import { casesQueryClient } from '../../cases_context/query_client';
 
 export interface CreateCaseFlyoutProps {
@@ -24,7 +24,7 @@ export interface CreateCaseFlyoutProps {
   ) => Promise<void>;
   onClose?: () => void;
   onSuccess?: (theCase: Case) => Promise<void>;
-  attachments?: CaseAttachments;
+  attachments?: CaseAttachmentsWithoutOwner;
 }
 
 const StyledFlyout = styled(EuiFlyout)`
