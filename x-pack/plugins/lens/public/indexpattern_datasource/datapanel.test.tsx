@@ -16,7 +16,7 @@ import { FieldItem } from './field_item';
 import { NoFieldsCallout } from './no_fields_callout';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from '@kbn/core/public/mocks';
-import { IndexPatternPrivateState } from './types';
+import { IndexPattern, IndexPatternPrivateState } from './types';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { EuiProgress, EuiLoadingSpinner } from '@elastic/eui';
 import { documentField } from './document_field';
@@ -243,7 +243,7 @@ const initialState: IndexPatternPrivateState = {
   isFirstExistenceFetch: false,
 };
 
-const dslQuery = { bool: { must: [], filter: [], should: [], must_not: [] } };
+// const dslQuery = { bool: { must: [], filter: [], should: [], must_not: [] } };
 
 // @ts-expect-error Portal mocks are notoriously difficult to type
 ReactDOM.createPortal = jest.fn((element) => element);
@@ -340,26 +340,29 @@ describe('IndexPattern Data Panel', () => {
     afterEach(() => {
       getFieldsForIndexPattern.mockClear();
     });
+
     function testProps() {
       const setState = jest.fn();
       const fields = [{ name: 'field_1' } as DataViewField, { name: 'field_2' } as DataViewField];
+      const dataViewA = {
+        id: 'a',
+        title: 'aaa',
+        timeFieldName: 'atime',
+        fields,
+        getFieldByName: getFieldByNameFactory([]),
+        hasRestrictions: false,
+      } as unknown as IndexPattern;
+      const dataViewB = {
+        id: 'b',
+        title: 'bbb',
+        timeFieldName: 'btime',
+        fields,
+        getFieldByName: getFieldByNameFactory([]),
+        hasRestrictions: false,
+      } as unknown as IndexPattern;
       const indexPatterns = {
-        a: {
-          id: 'a',
-          title: 'aaa',
-          timeFieldName: 'atime',
-          fields,
-          getFieldByName: getFieldByNameFactory([]),
-          hasRestrictions: false,
-        },
-        b: {
-          id: 'b',
-          title: 'bbb',
-          timeFieldName: 'btime',
-          fields,
-          getFieldByName: getFieldByNameFactory([]),
-          hasRestrictions: false,
-        },
+        a: dataViewA,
+        b: dataViewB,
       };
       return {
         ...defaultProps,
@@ -367,7 +370,11 @@ describe('IndexPattern Data Panel', () => {
           ...defaultProps.dataViews,
           getFieldsForIndexPattern,
           get: (id: string) => {
-            return Promise.resolve(indexPatterns[id]);
+            if (id === 'a') {
+              return Promise.resolve(dataViewA);
+            } else {
+              return Promise.resolve(dataViewB);
+            }
           },
         },
         changeIndexPattern: jest.fn(),
@@ -390,7 +397,7 @@ describe('IndexPattern Data Panel', () => {
               columns: {},
             },
           },
-        } as IndexPatternPrivateState,
+        } as unknown as IndexPatternPrivateState,
       };
     }
 
@@ -474,7 +481,7 @@ describe('IndexPattern Data Panel', () => {
         dateRange: { fromDate: '2019-02-01', toDate: '2020-01-02' },
       });
 
-      expect(setState).toHaveBeenCalledTimes(1);
+      expect(setState).toHaveBeenCalledTimes(2);
       expect(getFieldsForIndexPattern).toHaveBeenCalledTimes(2);
 
       expect(getFieldsForIndexPattern.mock.calls[0]).toMatchInlineSnapshot(`
