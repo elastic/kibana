@@ -1509,65 +1509,84 @@ describe('The metric threshold alert type', () => {
   describe('querying the entire infrastructure with warning threshold', () => {
     afterAll(() => clearInstances());
     const instanceID = '*';
-    const alertThreshold = [9999];
-    const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
+
+    const execute = () =>
       executor({
         ...mockOptions,
         services,
         params: {
-          sourceId,
+          sourceId: 'default',
           criteria: [
             {
               ...baseNonCountCriterion,
               comparator: Comparator.GT,
-              threshold: alertThreshold,
-              warningComparator: comparator,
-              warningThreshold: threshold,
+              threshold: [9999],
             },
           ],
         },
       });
-    const setWarningResults = (
-      comparator: Comparator,
-      threshold: number[],
-      shouldWarn: boolean = false
-    ) =>
+
+    const setResults = ({
+      comparator = Comparator.GT,
+      threshold = [9999],
+      warningComparator = Comparator.GT,
+      warningThreshold = [2.49],
+      metric = 'test.metric.1',
+      currentValue = 7.59,
+      shouldWarn = false,
+    }) =>
       setEvaluationResults([
         {
           '*': {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
-            threshold: alertThreshold,
-            warningComparator: comparator,
-            warningThreshold: threshold,
-            metric: 'test.metric.1',
-            currentValue: 7.59,
+            comparator,
+            threshold,
+            warningComparator,
+            warningThreshold,
+            metric,
+            currentValue,
             timestamp: new Date().toISOString(),
             shouldFire: false,
-            shouldWarn: shouldWarn,
+            shouldWarn,
             isNoData: false,
           },
         },
       ]);
 
     test('warns as expected with the > comparator', async () => {
-      setWarningResults(Comparator.GT, [2.49], true);
-      await execute(Comparator.GT, [2.49]);
+      setResults({ warningThreshold: [2.49], currentValue: 2.5, shouldWarn: true });
+      await execute();
       expect(mostRecentAction(instanceID)).toBeWarnAction();
 
-      setWarningResults(Comparator.GT, [1.5], false);
-      await execute(Comparator.GT, [1.5]);
+      setResults({ warningThreshold: [2.49], currentValue: 1.23, shouldWarn: false });
+      await execute();
       expect(mostRecentAction(instanceID)).toBe(undefined);
     });
 
     test('reports expected warning values to the action context', async () => {
-      setWarningResults(Comparator.GT, [2.56], true);
-      await execute(Comparator.GT, [2.56]);
+      setResults({ warningThreshold: [2.49], currentValue: 2.5, shouldWarn: true });
+      await execute();
 
       const { action } = mostRecentAction(instanceID);
       expect(action.group).toBe('*');
       expect(action.reason).toBe(
-        'test.metric.1 is 7.59 in the last 1 min for all hosts. Alert when > 2.56.'
+        'test.metric.1 is 2.5 in the last 1 min for all hosts. Alert when > 2.49.'
+      );
+    });
+
+    test('reports expected warning values to the action context for percentage metric', async () => {
+      setResults({
+        warningThreshold: [0.81],
+        currentValue: 0.82,
+        shouldWarn: true,
+        metric: 'system.cpu.user.pct',
+      });
+      await execute();
+
+      const { action } = mostRecentAction(instanceID);
+      expect(action.group).toBe('*');
+      expect(action.reason).toBe(
+        'system.cpu.user.pct is 82% in the last 1 min for all hosts. Alert when > 81%.'
       );
     });
   });
