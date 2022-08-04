@@ -153,9 +153,9 @@ describe('When on the policy list page', () => {
   });
   describe('pagination', () => {
     beforeEach(async () => {
-      getPackagePolicies.mockImplementation(async ({ page, perPage }) => {
+      getPackagePolicies.mockImplementation(({ page, perPage }) => {
         // # policies = 100 to trigger UI to show pagination
-        const response = await sendGetEndpointSpecificPackagePoliciesMock({
+        const response = sendGetEndpointSpecificPackagePoliciesMock({
           page,
           perPage,
           count: 100,
@@ -166,9 +166,6 @@ describe('When on the policy list page', () => {
       await waitFor(() => {
         expect(getPackagePolicies).toHaveBeenCalled();
       });
-    });
-    afterEach(() => {
-      getPackagePolicies.mockReset();
     });
     it('should pass the correct page value to the api', async () => {
       await waitFor(() => {
