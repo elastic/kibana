@@ -15,10 +15,10 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 
-import { CaseAssignees } from '../../../common/api/cases/assignee';
-import * as i18n from './translations';
-import { SuggestUsers } from '../user_profiles/suggest_users';
-import { SidebarTitle } from '../case_view/components/sidebar_title';
+import { CaseAssignees } from '../../../../common/api/cases/assignee';
+import * as i18n from '../translations';
+import { SuggestUsers } from '../../user_profiles/suggest_users';
+import { SidebarTitle } from './sidebar_title';
 
 interface AssignUsersProps {
   assignees: CaseAssignees;

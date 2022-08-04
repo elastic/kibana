@@ -176,3 +176,18 @@ export const SEND_EMAIL_ARIA = (user: string) =>
     values: { user },
     defaultMessage: 'click to send an email to {user}',
   });
+
+export const ASSIGNEES = i18n.translate('xpack.cases.caseView.editAssigneesTitle', {
+  defaultMessage: 'Assignees',
+});
+
+export const EDIT_ASSIGNEES_ARIA_LABEL = i18n.translate(
+  'xpack.cases.caseView.editAssigneesAriaLabel',
+  {
+    defaultMessage: 'click to edit assignees',
+  }
+);
+
+export const NO_ASSIGNEES = i18n.translate('xpack.cases.caseView.noAssignees', {
+  defaultMessage: 'No users have been assigned.',
+});
