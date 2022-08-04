@@ -14,13 +14,11 @@ import { IconExceptionLists } from '../management/icons/exception_lists';
 const commonLinkProperties: Partial<LinkItem> = {
   hideTimeline: true,
   capabilities: [`${SERVER_APP_ID}.show`],
-  isBeta: true,
 };
 
 export const rootLinks: LinkItem = {
   ...getSecuritySolutionLink<SecurityPageName>('findings'),
   globalNavPosition: 3,
-  isBeta: true,
   ...commonLinkProperties,
 };
 

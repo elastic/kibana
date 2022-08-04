@@ -53,14 +53,6 @@ const TitleText = styled.h2`
   display: inline;
 `;
 
-// TODO: remove
-// Remove explicit typing after eui update https://github.com/elastic/eui/pull/6086
-// const BetaBadge: typeof EuiBetaBadge = styled(EuiBetaBadge)`
-//   vertical-align: text-top;
-//   margin-left: ${({ theme }) => theme.eui.euiSizeS};
-//   color: ${(props) => props.theme.eui.euiTextColor};
-// `;
-
 const SecuritySolutionLink = withSecuritySolutionLink(Link);
 
 export const LandingLinksImages: React.FC<LandingImagesProps> = ({ items }) => (
