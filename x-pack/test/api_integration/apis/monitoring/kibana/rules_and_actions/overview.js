@@ -13,7 +13,8 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
   const { setup, tearDown } = getLifecycleMethods(getService);
 
-  describe('overview', () => {
+  describe('overview', function () {
+    this.tags(['skipCloud']);
     const archive = 'x-pack/test/functional/es_archives/monitoring/kibana/rules_and_actions';
     const timeRange = {
       min: '2022-05-31T18:44:19.267Z',
