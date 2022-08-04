@@ -6,7 +6,7 @@
  */
 
 import type { CreateFileKindHttpEndpoint } from '../../../common/api_routes';
-import { setupIntegrationEnvironment, TestEnvironmentUtils } from '../test_utils';
+import { setupIntegrationEnvironment, TestEnvironmentUtils } from '../../test_utils';
 
 describe('File HTTP API', () => {
   let testHarness: TestEnvironmentUtils;
@@ -122,7 +122,7 @@ describe('File HTTP API', () => {
   });
 
   describe('metrics', () => {
-    const esMaxCapacity = 50 * 1024 * 1024;
+    const esMaxCapacity = 50 * 1024 * 1024 * 1024;
     afterEach(async () => {
       await testHarness.cleanupAfterEach();
     });
