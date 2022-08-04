@@ -24,6 +24,7 @@ describe('streamReducer', () => {
       loaded: 50,
       loadingState: 'Loaded 50%',
       changePoints: [],
+      errors: [],
     });
   });
 

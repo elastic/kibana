@@ -40,7 +40,7 @@ export default ({ getService }: FtrProviderContext) => {
     noIndexActionsLength: 3,
     changePointFilter: 'add_change_points',
     histogramFilter: 'add_change_points_histogram',
-    errorFilter: 'error',
+    errorFilter: 'add_error',
     changePoints: [
       {
         fieldName: 'day_of_week',
