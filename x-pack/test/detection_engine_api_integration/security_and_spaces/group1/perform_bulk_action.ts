@@ -634,8 +634,18 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should correctly remove timeline', async () => {
+        const timelineId = 'test-id';
+        const timelineTitle = 'Test timeline template';
         const ruleId = 'ruleId';
-        await createRule(supertest, log, getSimpleRule(ruleId));
+        const createdRule = await createRule(supertest, log, {
+          ...getSimpleRule(ruleId),
+          timeline_id: 'test-id',
+          timeline_title: 'Test timeline template',
+        });
+
+        // ensure rule has been created with timeline properties
+        expect(createdRule.timeline_id).to.be(timelineId);
+        expect(createdRule.timeline_title).to.be(timelineTitle);
 
         const { body } = await postBulkAction()
           .send({
