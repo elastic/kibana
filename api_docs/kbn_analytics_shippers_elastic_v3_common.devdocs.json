@@ -227,7 +227,7 @@
           "TelemetryCounter",
           ">, source: string) => (events: ",
           "Event",
-          "[], { type, code, error, }?: { type?: ",
+          "<Record<string, unknown>>[], { type, code, error, }?: { type?: ",
           "TelemetryCounterType",
           " | undefined; code?: string | undefined; error?: Error | undefined; }) => void"
         ],
@@ -285,7 +285,7 @@
         "signature": [
           "(events: ",
           "Event",
-          "[]) => string"
+          "<Record<string, unknown>>[]) => string"
         ],
         "path": "packages/analytics/shippers/elastic_v3/common/src/events_to_ndjson.ts",
         "deprecated": false,
@@ -301,7 +301,7 @@
             ],
             "signature": [
               "Event",
-              "[]"
+              "<Record<string, unknown>>[]"
             ],
             "path": "packages/analytics/shippers/elastic_v3/common/src/events_to_ndjson.ts",
             "deprecated": false,
