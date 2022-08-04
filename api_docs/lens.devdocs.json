@@ -4837,6 +4837,55 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.Visualization.renderDimensionEditorAdditionalSection",
+            "type": "Function",
+            "tags": [],
+            "label": "renderDimensionEditorAdditionalSection",
+            "description": [
+              "\nAdditional editor that gets rendered inside the dimension popover.\nThis can be used to configure dimension-specific options"
+            ],
+            "signature": [
+              "((domElement: Element, props: ",
+              "VisualizationDimensionEditorProps",
+              "<T>) => void | ((cleanupElement: Element) => void)) | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.renderDimensionEditorAdditionalSection.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "domElement",
+                "description": [],
+                "signature": [
+                  "Element"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.renderDimensionEditorAdditionalSection.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "VisualizationDimensionEditorProps",
+                  "<T>"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.Visualization.renderDimensionTrigger",
             "type": "Function",
             "tags": [],

@@ -2318,10 +2318,10 @@
           },
           {
             "parentPluginId": "dataViews",
-            "id": "def-public.DataViewsApiClient.hasUserIndexPattern",
+            "id": "def-public.DataViewsApiClient.hasUserDataView",
             "type": "Function",
             "tags": [],
-            "label": "hasUserIndexPattern",
+            "label": "hasUserDataView",
             "description": [
               "\nDoes a user created data view exist?"
             ],
@@ -17886,10 +17886,10 @@
           },
           {
             "parentPluginId": "dataViews",
-            "id": "def-common.IDataViewsApiClient.hasUserIndexPattern",
+            "id": "def-common.IDataViewsApiClient.hasUserDataView",
             "type": "Function",
             "tags": [],
-            "label": "hasUserIndexPattern",
+            "label": "hasUserDataView",
             "description": [],
             "signature": [
               "() => Promise<boolean>"
@@ -20443,38 +20443,21 @@
         "tags": [],
         "label": "DEFAULT_ASSETS_TO_IGNORE",
         "description": [
-          "\nUsed to determine if the instance has some user created index patterns by filtering index patterns\nthat are created and backed only by Fleet server data\nShould be revised after https://github.com/elastic/kibana/issues/82851 is fixed\nFor more background see: https://github.com/elastic/kibana/issues/107020"
+          "\nUsed to optimize on-boarding experience to determine if the instance has some user created data views or data indices/streams by filtering data sources\nthat are created by default by elastic in ese.\nWe should somehow prevent creating initial data for the users without their explicit action\ninstead of relying on these hardcoded assets"
         ],
         "path": "src/plugins/data_views/common/constants.ts",
         "deprecated": false,
         "children": [
           {
             "parentPluginId": "dataViews",
-            "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.LOGS_INDEX_PATTERN",
-            "type": "string",
+            "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.DATA_STREAMS_TO_IGNORE",
+            "type": "Array",
             "tags": [],
-            "label": "LOGS_INDEX_PATTERN",
+            "label": "DATA_STREAMS_TO_IGNORE",
             "description": [],
-            "path": "src/plugins/data_views/common/constants.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.LOGS_DATA_STREAM_TO_IGNORE",
-            "type": "string",
-            "tags": [],
-            "label": "LOGS_DATA_STREAM_TO_IGNORE",
-            "description": [],
-            "path": "src/plugins/data_views/common/constants.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE",
-            "type": "string",
-            "tags": [],
-            "label": "ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE",
-            "description": [],
+            "signature": [
+              "string[]"
+            ],
             "path": "src/plugins/data_views/common/constants.ts",
             "deprecated": false
           }

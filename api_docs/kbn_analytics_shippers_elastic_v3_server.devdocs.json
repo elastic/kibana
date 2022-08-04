@@ -195,7 +195,7 @@
             "signature": [
               "(events: ",
               "Event",
-              "[]) => void"
+              "<Record<string, unknown>>[]) => void"
             ],
             "path": "packages/analytics/shippers/elastic_v3/server/src/server_shipper.ts",
             "deprecated": false,
@@ -211,7 +211,7 @@
                 ],
                 "signature": [
                   "Event",
-                  "[]"
+                  "<Record<string, unknown>>[]"
                 ],
                 "path": "packages/analytics/shippers/elastic_v3/server/src/server_shipper.ts",
                 "deprecated": false,

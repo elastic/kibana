@@ -3,36 +3,7 @@
   "client": {
     "classes": [],
     "functions": [],
-    "interfaces": [
-      {
-        "parentPluginId": "core",
-        "id": "def-public.SavedObjectsStart",
-        "type": "Interface",
-        "tags": [],
-        "label": "SavedObjectsStart",
-        "description": [],
-        "path": "src/core/public/saved_objects/saved_objects_service.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-public.SavedObjectsStart.client",
-            "type": "Object",
-            "tags": [],
-            "label": "client",
-            "description": [
-              "{@link SavedObjectsClientContract}"
-            ],
-            "signature": [
-              "SavedObjectsClientContract"
-            ],
-            "path": "src/core/public/saved_objects/saved_objects_service.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []
