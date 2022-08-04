@@ -45,7 +45,9 @@ export function setTimeShift(
         currentColumn.timeScale,
         currentColumn.timeScale,
         currentColumn.timeShift,
-        trimmedTimeShift
+        trimmedTimeShift,
+        currentColumn.window,
+        currentColumn.window
       );
   return {
     ...layer,
