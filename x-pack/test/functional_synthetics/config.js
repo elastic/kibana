@@ -8,6 +8,7 @@
 import path, { resolve } from 'path';
 
 import { defineDockerServersConfig } from '@kbn/test';
+import { dockerImage as fleetDockerImage } from '../fleet_api_integration/config';
 
 import { services } from './services';
 import { pageObjects } from './page_objects';
@@ -99,7 +100,7 @@ export default async function ({ readConfigFile }) {
     dockerServers: defineDockerServersConfig({
       registry: {
         enabled: !!registryPort,
-        image: dockerImage,
+        image: fleetDockerImage,
         portInContainer: 8080,
         port: registryPort,
         args: dockerArgs,
