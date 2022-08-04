@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
@@ -31,12 +31,13 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   stackByField,
   timerange,
 }) => {
-  const { lens } = useKibana().services;
+  const { lens, data } = useKibana().services;
   const dispatch = useDispatch();
+  const session = useRef(data.search.session);
 
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
   const { isRefreshing } = useDeepEqualSelector((state) => getGlobalQuery(state, id));
-
+  const [searchSessionId, setSearchSessionId] = useState<string>();
   const { attributes } = useLensAttributes({
     lensAttributes,
     getLensAttributes,
@@ -44,6 +45,16 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     title: '',
   });
   const LensComponent = lens.EmbeddableComponent;
+
+  useEffect(() => {
+    setSearchSessionId(session.current.start());
+  }, []);
+
+  useEffect(() => {
+    if (isRefreshing) {
+      setSearchSessionId(session.current.start());
+    }
+  }, [isRefreshing]);
 
   const actions = useActions({
     withActions: true,
@@ -63,32 +74,31 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     },
     [dispatch, inputsModelId]
   );
-  return attributes ? (
+  return attributes && searchSessionId ? (
     <LensComponentWrapper height={height}>
-      {!isRefreshing && (
-        <LensComponent
-          id={id}
-          style={{ height: '100%' }}
-          timeRange={timerange}
-          attributes={attributes}
-          // onLoad={(val) => {
-          // }}
-          onBrushEnd={onBrushEnd}
-          viewMode={ViewMode.VIEW}
-          // onFilter={
-          //   (/* _data*/) => {
-          //     // call back event for on filter event
-          //   }
-          // }
-          // onTableRowClick={
-          //   (/* _data*/) => {
-          //     // call back event for on table row click event
-          //   }
-          // }
-          withDefaultActions={false}
-          extraActions={actions}
-        />
-      )}
+      <LensComponent
+        id={id}
+        style={{ height: '100%' }}
+        timeRange={timerange}
+        attributes={attributes}
+        // onLoad={(val) => {
+        // }}
+        onBrushEnd={onBrushEnd}
+        viewMode={ViewMode.VIEW}
+        // onFilter={
+        //   (/* _data*/) => {
+        //     // call back event for on filter event
+        //   }
+        // }
+        // onTableRowClick={
+        //   (/* _data*/) => {
+        //     // call back event for on table row click event
+        //   }
+        // }
+        withDefaultActions={false}
+        extraActions={actions}
+        searchSessionId={searchSessionId}
+      />
     </LensComponentWrapper>
   ) : null;
 };
