@@ -26,7 +26,7 @@ export const suggestUserProfiles = async ({
   signal,
 }: SuggestUserProfilesArgs): Promise<UserProfile[]> => {
   const response = await http.post<UserProfile[]>(INTERNAL_SUGGEST_USER_PROFILES_URL, {
-    body: JSON.stringify({ name, size, owner }),
+    body: JSON.stringify({ name, size, owners: owner }),
     signal,
   });
 

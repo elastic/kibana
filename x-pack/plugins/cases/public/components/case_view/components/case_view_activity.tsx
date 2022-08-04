@@ -25,6 +25,7 @@ import { getNoneConnector, normalizeActionConnector } from '../../configure_case
 import { getConnectorById } from '../../utils';
 import { SeveritySidebarSelector } from '../../severity/sidebar_selector';
 import { useGetCaseUserActions } from '../../../containers/use_get_case_user_actions';
+import { AssignUsers } from '../../assignees/assign_users';
 
 export const CaseViewActivity = ({
   ruleDetailsNavigation,
@@ -148,6 +149,7 @@ export const CaseViewActivity = ({
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
+        <AssignUsers />
         <SeveritySidebarSelector
           isDisabled={!permissions.update}
           isLoading={isLoading}
