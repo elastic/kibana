@@ -1796,7 +1796,7 @@ export class RulesClient {
 
     let result;
     try {
-      result = await this.unsecuredSavedObjectsClient.bulkUpdate(rules);
+      result = await this.unsecuredSavedObjectsClient.bulkCreate(rules, { overwrite: true });
     } catch (e) {
       // avoid unused newly generated API keys
       if (apiKeysMap.size > 0) {
