@@ -128,6 +128,7 @@ export class FilterBarService extends FtrService {
    */
   public async addFilter(field: string, operator: string, ...values: any): Promise<void> {
     await this.testSubjects.click('addFilter');
+    await this.testSubjects.existOrFail('addFilterPopover');
     await this.comboBox.set('filterFieldSuggestionList', field);
     await this.comboBox.set('filterOperatorList', operator);
     const params = await this.testSubjects.find('filterParams');
@@ -152,7 +153,9 @@ export class FilterBarService extends FtrService {
         }
       }
     }
-    await this.testSubjects.click('saveFilter');
+    await this.testSubjects.existOrFail('addFilterPopover');
+    await this.common.sleep(500); // Stale element errors occur without this wait
+    await this.testSubjects.clickWhenNotDisabled('saveFilter');
     await this.header.awaitGlobalLoadingIndicatorHidden();
   }
 
