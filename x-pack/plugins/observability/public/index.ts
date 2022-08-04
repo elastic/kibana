@@ -87,7 +87,7 @@ export { NavigationWarningPromptProvider, Prompt } from './utils/navigation_warn
 export { getApmTraceUrl } from './utils/get_apm_trace_url';
 export { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';
 export type { AllSeries } from './components/shared/exploratory_view/hooks/use_series_storage';
-export type { SeriesUrl } from './components/shared/exploratory_view/types';
+export type { SeriesUrl, UrlFilter } from './components/shared/exploratory_view/types';
 
 export type {
   ObservabilityRuleTypeFormatter,
