@@ -14,7 +14,13 @@ interface UserAvatarProps {
 }
 
 const CaseUserAvatarComponent: React.FC<UserAvatarProps> = ({ profile }) => {
-  return <UserAvatar user={profile.user} avatar={profile.data.avatar} />;
+  return (
+    <UserAvatar
+      user={profile.user}
+      avatar={profile.data.avatar}
+      data-test-subj="case-user-profile-avatar"
+    />
+  );
 };
 
 CaseUserAvatarComponent.displayName = 'CaseUserAvatar';

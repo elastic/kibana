@@ -21,20 +21,29 @@ const UserFullInformation: React.FC<{ profile: UserProfileWithAvatar }> = React.
     if (profile.user.display_name && profile.user.full_name) {
       return (
         <>
-          <EuiText size="s" className="eui-textBreakWord">
+          <EuiText
+            size="s"
+            className="eui-textBreakWord"
+            data-test-subj="user-profile-tooltip-display-name"
+          >
             <strong>{profile.user.display_name}</strong>
           </EuiText>
           <EuiText
             size="s"
             className="eui-textBreakWord"
             color="subdued"
+            data-test-subj="user-profile-tooltip-full-name"
           >{`(${profile.user.full_name})`}</EuiText>
         </>
       );
     }
 
     return (
-      <EuiText size="s" className="eui-textBreakWord">
+      <EuiText
+        size="s"
+        className="eui-textBreakWord"
+        data-test-subj="user-profile-tooltip-single-name"
+      >
         <strong>
           {profile.user.display_name ??
             profile.user.full_name ??
@@ -52,7 +61,7 @@ UserFullInformation.displayName = 'UserFullInformation';
 const UserFullRepresentationComponent: React.FC<UserFullRepresentationProps> = ({ profile }) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} data-test-subj="user-profile-tooltip-avatar">
         <CaseUserAvatar profile={profile} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -62,7 +71,11 @@ const UserFullRepresentationComponent: React.FC<UserFullRepresentationProps> = (
           </EuiFlexItem>
           {displayEmail(profile) && (
             <EuiFlexItem grow={false}>
-              <EuiText size="s" className="eui-textBreakWord">
+              <EuiText
+                size="s"
+                className="eui-textBreakWord"
+                data-test-subj="user-profile-tooltip-email"
+              >
                 {profile.user.email ?? i18n.UNKNOWN}
               </EuiText>
             </EuiFlexItem>
@@ -79,22 +92,23 @@ const displayEmail = (profile: UserProfileWithAvatar) => {
   return (profile.user.display_name || profile.user.full_name) && profile.user.email;
 };
 
-interface UserTooltipProps {
+export interface UserToolTipProps {
   children: React.ReactElement;
   profile: UserProfileWithAvatar;
 }
 
-const UserToolTipComponent: React.FC<UserTooltipProps> = ({ children, profile }) => {
+const UserToolTipComponent: React.FC<UserToolTipProps> = ({ children, profile }) => {
   return (
     <EuiToolTip
       display="block"
       position="top"
       content={<UserFullRepresentationComponent profile={profile} />}
+      data-test-subj="user-profile-tooltip"
     >
       {children}
     </EuiToolTip>
   );
 };
 
-UserToolTipComponent.displayName = 'UserTooltip';
+UserToolTipComponent.displayName = 'UserToolTip';
 export const UserToolTip = React.memo(UserToolTipComponent);
