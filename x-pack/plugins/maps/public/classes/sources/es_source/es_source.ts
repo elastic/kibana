@@ -267,7 +267,6 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       const layerSearchSource = searchService.searchSource.createEmpty();
       layerSearchSource.setField('index', indexPattern);
       layerSearchSource.setField('query', searchFilters.sourceQuery);
-      searchSource.setParent(layerSearchSource);
       parents.push(layerSearchSource);
     }
 
