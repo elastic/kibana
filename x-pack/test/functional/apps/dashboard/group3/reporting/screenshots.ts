@@ -192,7 +192,7 @@ export default function ({
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.loadSavedDashboard('Large Dashboard');
         await PageObjects.reporting.openPngReportingPanel();
-        await PageObjects.reporting.forceSharedItemsContainerSize({ width: 1405 });
+        await PageObjects.reporting.forceSharedItemsContainerSize({ width: 2810 });
         await PageObjects.reporting.clickGenerateReportButton();
         await PageObjects.reporting.removeForceSharedItemsContainerSize();
 
