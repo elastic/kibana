@@ -195,9 +195,6 @@ The API returns the data view object:
 `id`::
 (Optional, string) Saved object ID.
 
-`version`::
-(Optional, string) Saved object version.
-
 `type`::
 (Optional, string) When set to `rollup`, this is used to identify rollup data views.
 
@@ -212,14 +209,14 @@ data view API endpoints.
 (Required, object) A map of rollup of the aggregation restrictions by aggregation type and field name.
 
 `params`:::
-(Optional, object) Properties for retrieving rollup fields
+(Required, object) Properties for retrieving rollup fields
 =====
 
 `timeFieldName`::
 (Optional, string) Timestamp field name, for time-based data views.
 
 `sourceFilters`::
-(Optional, string[]) Array of filters to hide fields in Kibana.
+(Optional, string[]) Array of field names to filter out in Kibana.
 
 `fieldAttrs`::
 (Optional, object) Map of field attributes by field name.
@@ -254,4 +251,4 @@ data view API endpoints.
 (Optional, boolean) Allows the data view to exist before data is present.
 
 `namespaces`::
-(Optional, string[]) Array of namespace IDs
+(Optional, string[]) Array of {kibana-ref}/spaces-api[space] IDs.
