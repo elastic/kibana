@@ -25,6 +25,7 @@ import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import {
   HOST_ENDPOINT_UNENROLLED_TOOLTIP,
+  METADATA_API_ERROR_TOOLTIP,
   NOT_FROM_ENDPOINT_HOST_TOOLTIP,
 } from '../endpoint_responder/responder_context_menu_item';
 import { endpointMetadataHttpMocks } from '../../../management/pages/endpoint_hosts/mocks';
@@ -482,6 +483,26 @@ describe('take action dropdown', () => {
         expect(findLaunchResponderButton().first().prop('toolTipContent')).toEqual(
           HOST_ENDPOINT_UNENROLLED_TOOLTIP
         );
+      });
+      it('should disable the button if the metadata api call returns any error', async () => {
+        setAlertDetailsDataMockToEndpointAgent();
+        apiMocks.responseProvider.metadataDetails.mockImplementationOnce(() => {
+          throw new Error('general error');
+        });
+        render();
+
+        await waitFor(() => {
+          expect(apiMocks.responseProvider.metadataDetails).toHaveBeenCalled();
+        });
+
+        wrapper.update();
+
+        expect(findLaunchResponderButton().first().prop('disabled')).toBe(true);
+        await waitFor(() => {
+          expect(findLaunchResponderButton().first().prop('toolTipContent')).toEqual(
+            METADATA_API_ERROR_TOOLTIP
+          );
+        });
       });
     });
   });

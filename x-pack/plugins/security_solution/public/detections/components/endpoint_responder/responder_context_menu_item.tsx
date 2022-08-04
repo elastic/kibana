@@ -30,7 +30,7 @@ export const LOADING_ENDPOINT_DATA_TOOLTIP = i18n.translate(
   'xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.loadingTooltip',
   { defaultMessage: 'Loading' }
 );
-const METADATA_API_ERROR_TOOLTIP = i18n.translate(
+export const METADATA_API_ERROR_TOOLTIP = i18n.translate(
   'xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.generalMetadataErrorTooltip',
   { defaultMessage: 'Failed to retrieve Endpoint metadata' }
 );
@@ -73,12 +73,12 @@ export const ResponderContextMenuItem = memo<ResponderContextMenuItemProps>(
         (error && error.body?.statusCode === 400 && error.body?.message.includes('unenrolled')) ||
         endpointHostInfo?.host_status === HostStatus.UNENROLLED
       ) {
-        return [true, METADATA_API_ERROR_TOOLTIP];
+        return [true, HOST_ENDPOINT_UNENROLLED_TOOLTIP];
       }
 
       // return general error tooltip
       if (error) {
-        return [true, HOST_ENDPOINT_UNENROLLED_TOOLTIP];
+        return [true, METADATA_API_ERROR_TOOLTIP];
       }
 
       return [false, undefined];
