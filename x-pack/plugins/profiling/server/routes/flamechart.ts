@@ -6,54 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { Logger } from '@kbn/core/server';
 import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
 import { FlameGraph } from '../../common/flamegraph';
-import { createProfilingEsClient, ProfilingESClient } from '../utils/create_profiling_es_client';
+import { createProfilingEsClient } from '../utils/create_profiling_es_client';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
 import { getExecutablesAndStackTraces } from './get_executables_and_stacktraces';
-import { createCommonFilter, ProjectTimeQuery } from './query';
-
-async function queryFlameGraph({
-  logger,
-  client,
-  filter,
-  sampleSize,
-}: {
-  logger: Logger;
-  client: ProfilingESClient;
-  filter: ProjectTimeQuery;
-  sampleSize: number;
-}): Promise<FlameGraph> {
-  return withProfilingSpan('get_flamegraph', async () => {
-    return getExecutablesAndStackTraces({
-      logger,
-      client,
-      filter,
-      sampleSize,
-    }).then(
-      ({
-        stackTraces,
-        executables,
-        stackFrames,
-        eventsIndex,
-        downsampledTotalCount,
-        stackTraceEvents,
-      }) => {
-        return new FlameGraph(
-          eventsIndex.sampleRate,
-          downsampledTotalCount,
-          stackTraceEvents,
-          stackTraces,
-          stackFrames,
-          executables
-        );
-      }
-    );
-  });
-}
+import { createCommonFilter } from './query';
 
 export function registerFlameChartElasticSearchRoute({ router, logger }: RouteRegisterParameters) {
   const paths = getRoutePaths();
@@ -80,16 +40,35 @@ export function registerFlameChartElasticSearchRoute({ router, logger }: RouteRe
           kuery,
         });
 
-        const flamegraph = await queryFlameGraph({
+        const {
+          stackTraces,
+          executables,
+          stackFrames,
+          eventsIndex,
+          downsampledTotalCount,
+          stackTraceEvents,
+        } = await getExecutablesAndStackTraces({
           logger,
           client: createProfilingEsClient({ request, esClient }),
           filter,
           sampleSize: targetSampleSize,
         });
+
+        const flamegraph = await withProfilingSpan('collect_flamegraph', async () => {
+          return new FlameGraph(
+            eventsIndex.sampleRate,
+            downsampledTotalCount,
+            stackTraceEvents,
+            stackTraces,
+            stackFrames,
+            executables
+          ).toElastic();
+        });
+
         logger.info('returning payload response to client');
 
         return response.ok({
-          body: flamegraph.toElastic(),
+          body: flamegraph,
         });
       } catch (e) {
         logger.error(e);

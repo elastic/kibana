@@ -6,49 +6,14 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import type { Logger } from '@kbn/core/server';
 import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
 import { createTopNFunctions } from '../../common/functions';
-import { createProfilingEsClient, ProfilingESClient } from '../utils/create_profiling_es_client';
+import { createProfilingEsClient } from '../utils/create_profiling_es_client';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
 import { getExecutablesAndStackTraces } from './get_executables_and_stacktraces';
-import { createCommonFilter, ProjectTimeQuery } from './query';
-
-async function queryTopNFunctions({
-  logger,
-  client,
-  filter,
-  startIndex,
-  endIndex,
-  sampleSize,
-}: {
-  logger: Logger;
-  client: ProfilingESClient;
-  filter: ProjectTimeQuery;
-  startIndex: number;
-  endIndex: number;
-  sampleSize: number;
-}) {
-  return withProfilingSpan('query_topn_functions', async () => {
-    return getExecutablesAndStackTraces({
-      client,
-      filter,
-      logger,
-      sampleSize,
-    }).then(({ stackFrames, stackTraceEvents, stackTraces, executables }) => {
-      return createTopNFunctions(
-        stackTraceEvents,
-        stackTraces,
-        stackFrames,
-        executables,
-        startIndex,
-        endIndex
-      );
-    });
-  });
-}
+import { createCommonFilter } from './query';
 
 const querySchema = schema.object({
   timeFrom: schema.number(),
@@ -81,14 +46,25 @@ export function registerTopNFunctionsSearchRoute({ router, logger }: RouteRegist
           kuery,
         });
 
-        const topNFunctions = await queryTopNFunctions({
-          logger,
-          client: createProfilingEsClient({ request, esClient }),
-          filter,
-          startIndex,
-          endIndex,
-          sampleSize: targetSampleSize,
+        const { stackFrames, stackTraceEvents, stackTraces, executables } =
+          await getExecutablesAndStackTraces({
+            client: createProfilingEsClient({ request, esClient }),
+            filter,
+            logger,
+            sampleSize: targetSampleSize,
+          });
+
+        const topNFunctions = await withProfilingSpan('collect_topn_functions', async () => {
+          return createTopNFunctions(
+            stackTraceEvents,
+            stackTraces,
+            stackFrames,
+            executables,
+            startIndex,
+            endIndex
+          );
         });
+
         logger.info('returning payload response to client');
 
         return response.ok({

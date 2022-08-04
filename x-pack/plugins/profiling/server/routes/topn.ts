@@ -14,6 +14,7 @@ import { getFieldNameForTopNType, TopNType } from '../../common/stack_traces';
 import { createTopNSamples } from '../../common/topn';
 import { ProfilingRequestHandlerContext } from '../types';
 import { createProfilingEsClient, ProfilingESClient } from '../utils/create_profiling_es_client';
+import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
 import { findDownsampledIndex } from './downsampling';
 import {
@@ -54,7 +55,7 @@ export async function topNElasticSearchQuery({
     sampleSize: targetSampleSize,
   });
 
-  const resEvents = await client.search('get_top_n_histogram', {
+  const resEvents = await client.search('get_topn_histogram', {
     index: eventsIndex.name,
     size: 0,
     query: filter,
@@ -115,20 +116,30 @@ export async function topNElasticSearchQuery({
     events: stackTraceEvents,
   });
 
-  return Promise.all([
-    mgetStackFrames({ logger, client, stackFrameIDs: stackFrameDocIDs }),
-    mgetExecutables({ logger, client, executableIDs: executableDocIDs }),
-  ]).then(([stackFrames, executables]) => {
-    const metadata = fromMapToRecord(
+  const [stackFrames, executables] = await withProfilingSpan(
+    'get_stackframes_and_executables',
+    () => {
+      return Promise.all([
+        mgetStackFrames({ logger, client, stackFrameIDs: stackFrameDocIDs }),
+        mgetExecutables({ logger, client, executableIDs: executableDocIDs }),
+      ]);
+    }
+  );
+
+  const metadata = await withProfilingSpan('collect_stackframe_metadata', async () => {
+    return fromMapToRecord(
       groupStackFrameMetadataByStackTrace(stackTraces, stackFrames, executables)
     );
-    return response.ok({
-      body: {
-        TotalCount: totalSampledStackTraces,
-        TopN: topN,
-        Metadata: metadata,
-      },
-    });
+  });
+
+  logger.info('returning payload response to client');
+
+  return response.ok({
+    body: {
+      TotalCount: totalSampledStackTraces,
+      TopN: topN,
+      Metadata: metadata,
+    },
   });
 }
 
