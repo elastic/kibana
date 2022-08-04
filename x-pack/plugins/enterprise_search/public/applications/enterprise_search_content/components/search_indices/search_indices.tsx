@@ -121,7 +121,7 @@ export const SearchIndices: React.FC = () => {
       <EnterpriseSearchContentPageTemplate
         pageChrome={baseBreadcrumbs}
         pageViewTelemetry="Search indices"
-        isLoading={false}
+        isLoading={isLoading}
         pageHeader={{
           pageTitle,
           rightSideItems: [createNewIndexButton],
@@ -208,12 +208,7 @@ export const SearchIndices: React.FC = () => {
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem>
-              <IndicesTable
-                indices={indices}
-                meta={meta}
-                onChange={handlePageChange(onPaginate)}
-                isLoading={isLoading}
-              />
+              <IndicesTable indices={indices} meta={meta} onChange={handlePageChange(onPaginate)} />
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (
