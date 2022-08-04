@@ -367,6 +367,20 @@ export class DashboardPlugin
     uiActions.registerAction(clonePanelAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction.id);
 
+    const editPanelAction = new EditPanelAction(
+      embeddable.getEmbeddableFactory,
+      application,
+      embeddable.getStateTransfer()
+    );
+    const panelLevelFiltersNotification = new FiltersNotificationBadge(
+      theme,
+      overlays,
+      uiSettings,
+      editPanelAction
+    );
+    uiActions.registerAction(panelLevelFiltersNotification);
+    uiActions.attachAction(PANEL_BADGE_TRIGGER, panelLevelFiltersNotification.id);
+
     if (share) {
       const ExportCSVPlugin = new ExportCSVAction({ core, data });
       uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, ExportCSVPlugin);
@@ -404,20 +418,6 @@ export class DashboardPlugin
       uiActions.registerAction(copyToDashboardAction);
       uiActions.attachAction(CONTEXT_MENU_TRIGGER, copyToDashboardAction.id);
     }
-
-    const editPanelAction = new EditPanelAction(
-      embeddable.getEmbeddableFactory,
-      application,
-      embeddable.getStateTransfer()
-    );
-    const panelLevelFiltersNotification = new FiltersNotificationBadge(
-      theme,
-      overlays,
-      uiSettings,
-      editPanelAction
-    );
-    uiActions.registerAction(panelLevelFiltersNotification);
-    uiActions.attachAction(PANEL_BADGE_TRIGGER, panelLevelFiltersNotification.id);
 
     const savedDashboardLoader = createSavedDashboardLoader({
       savedObjectsClient: core.savedObjects.client,
