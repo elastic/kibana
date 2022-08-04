@@ -70,6 +70,13 @@ export const ConnectedComponent = (params: Params) => {
           });
         }}
         getDetailViewLink={() => 'http://elastic.co'}
+        createItem={
+          params.canCreateItem
+            ? () => {
+                action('Create item')();
+              }
+            : undefined
+        }
         editItem={
           params.canEditItem
             ? ({ attributes: { title } }) => {

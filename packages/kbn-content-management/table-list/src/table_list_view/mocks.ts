@@ -52,6 +52,10 @@ export const getStoryArgTypes = () => ({
     },
     defaultValue: 'Dashboards',
   },
+  canCreateItem: {
+    control: 'boolean',
+    defaultValue: true,
+  },
   canEditItem: {
     control: 'boolean',
     defaultValue: true,
