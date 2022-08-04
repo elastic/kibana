@@ -5,18 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { IKibanaSearchResponse } from '@kbn/data-plugin/public';
+import { fetchDocuments } from './fetch_documents';
+import { throwError as throwErrorRx, of } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { of, throwError as throwErrorRx } from 'rxjs';
+import { savedSearchMock, savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
+import { discoverServiceMock } from '../../../__mocks__/services';
+import { IKibanaSearchResponse } from '@kbn/data-plugin/public';
+import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { FetchDeps } from './fetch_all';
+import { fetchTotalHits } from './fetch_total_hits';
 import type { EsHitRecord } from '../../../types';
 import { buildDataTableRecord } from '../../../utils/build_data_record';
 import { dataViewMock } from '../../../__mocks__/data_view';
-import { savedSearchMock, savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
-import { discoverServiceMock } from '../../../__mocks__/services';
-import { FetchDeps } from './fetch_all';
-import { fetchDocuments } from './fetch_documents';
-import { fetchTotalHits } from './fetch_total_hits';
 
 const getDeps = () =>
   ({

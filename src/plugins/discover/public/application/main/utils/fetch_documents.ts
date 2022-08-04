@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { isCompleteResponse, ISearchSource } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { lastValueFrom } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { SAMPLE_SIZE_SETTING } from '../../../../common';
+import { lastValueFrom } from 'rxjs';
+import { isCompleteResponse, ISearchSource } from '@kbn/data-plugin/public';
 import { EsHitRecord } from '../../../types';
 import { buildDataTableRecordList } from '../../../utils/build_data_record';
+import { SAMPLE_SIZE_SETTING } from '../../../../common';
 import { FetchDeps } from './fetch_all';
 
 /**
