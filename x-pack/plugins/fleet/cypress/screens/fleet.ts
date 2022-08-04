@@ -23,6 +23,7 @@ export const FLEET_SERVER_MISSING_PRIVILEGES_TITLE = 'fleetServerMissingPrivileg
 export const AGENT_POLICY_SAVE_INTEGRATION = 'saveIntegration';
 export const PACKAGE_POLICY_TABLE_LINK = 'PackagePoliciesTableLink';
 export const ADD_PACKAGE_POLICY_BTN = 'addPackagePolicyButton';
+export const GENERATE_FLEET_SERVER_POLICY_BUTTON = 'generateFleetServerPolicyButton';
 
 export const AGENT_BINARY_SOURCES_TABLE = 'AgentDownloadSourcesTable';
 export const AGENT_BINARY_SOURCES_TABLE_ACTIONS = {

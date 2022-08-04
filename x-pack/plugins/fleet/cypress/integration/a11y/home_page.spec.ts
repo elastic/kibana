@@ -6,20 +6,23 @@
  */
 import { checkA11y } from '../../support/commands';
 import { FLEET, navigateTo } from '../../tasks/navigation';
-describe('Home page', function () {
-    before(async () => {
-        navigateTo(FLEET);
+import { GENERATE_FLEET_SERVER_POLICY_BUTTON } from '../../screens/fleet';
+describe('Home page', async () => {
+  before(() => {
+    navigateTo(FLEET);
+  });
+  describe('Agents', async () => {
+    const fleetServerHost = 'https://localhost:8220';
+    describe('Quick Start', async () => {
+      it('Get started with fleet', async () => {
+        checkA11y({ skipFailures: false });
+        // cy.getBySel('comboBoxSearchInput').clear().type(fleetServerHost);
+        cy.getBySel(GENERATE_FLEET_SERVER_POLICY_BUTTON).click();
+      });
+      // it('Install Fleet Server', async () => {
+      //   checkA11y({ skipFailures: false });
+      // });
     });
-    describe('Agents', async () => {
-        describe('Quick Start', async () => {
-            it('Get started with fleet', async () => {
-                checkA11y({skipFailures: false});
-                //await pageObjects.fleet.createNewFleetServer('https://localhost:8220');
-            });
-            it('Install Fleet Server', async () => {
-                checkA11y({skipFailures: false});
-            });
-        });
     //     describe('Advanced', async () => {
     //         before(async () => {
     //             await pageObjects.fleet.clickAdvanceOption();
@@ -36,21 +39,19 @@ describe('Home page', function () {
     //             await a11y.testAppSnapshot();
     //         });
     //     });
-    });
+  });
 
-    it('should edit package policy', () => {
-        // cy.getBySel('toastCloseButton').click();
-        // cy.getBySel('packagePolicyDescriptionInput').clear().type('desc');
-
-        // cy.intercept('PUT', '/api/fleet/package_policies/policy-1', {
-        //     name: 'fleet_server-1',
-        //     description: 'desc',
-        //     namespace: 'default',
-        // }).as('updatePackagePolicy');
-        // cy.get('.euiButton').contains('Save integration').click();
-
-        // cy.wait('@updatePackagePolicy').then((interception) => {
-        //     expect(interception.request.body.description).to.equal('desc');
-        // });
-    });
+  // it('should edit package policy', () => {
+  // cy.getBySel('toastCloseButton').click();
+  // cy.getBySel('packagePolicyDescriptionInput').clear().type('desc');
+  // cy.intercept('PUT', '/api/fleet/package_policies/policy-1', {
+  //     name: 'fleet_server-1',
+  //     description: 'desc',
+  //     namespace: 'default',
+  // }).as('updatePackagePolicy');
+  // cy.get('.euiButton').contains('Save integration').click();
+  // cy.wait('@updatePackagePolicy').then((interception) => {
+  //     expect(interception.request.body.description).to.equal('desc');
+  // });
+  // });
 });
