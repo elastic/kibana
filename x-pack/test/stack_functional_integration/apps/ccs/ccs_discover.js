@@ -130,7 +130,8 @@ export default ({ getService, getPageObjects }) => {
     });
 
     it('create index pattern for data from both clusters', async () => {
-      await PageObjects.settings.createIndexPattern('*:makelogs工程-*', '@timestamp', true, false);
+      await PageObjects.settings.createIndexPattern('*:makelogs工程-*', '@timestamp', true, false, "*:makelogs工程-*");
+      // line about is workaround for https://github.com/elastic/kibana/issues/136757  
       const patternName = await PageObjects.settings.getIndexPageHeading();
       expect(patternName).to.be('*:makelogs工程-*');
     });
