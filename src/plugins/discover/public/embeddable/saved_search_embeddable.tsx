@@ -290,12 +290,13 @@ export class SavedSearchEmbeddable
     if (!dataView) {
       return;
     }
+    const sort = this.getSort(this.savedSearch.sort, dataView);
 
     const props: SearchProps = {
       columns: this.savedSearch.columns,
       dataView,
       isLoading: false,
-      sort: this.getSort(this.savedSearch.sort, dataView),
+      sort,
       rows: [],
       searchDescription: this.savedSearch.description,
       description: this.savedSearch.description,
@@ -326,9 +327,9 @@ export class SavedSearchEmbeddable
       onSetColumns: (columns: string[]) => {
         this.updateInput({ columns });
       },
-      onSort: (sort: string[][]) => {
+      onSort: (nextSort: string[][]) => {
         const sortOrderArr: SortPairArr[] = [];
-        sort.forEach((arr) => {
+        nextSort.forEach((arr) => {
           sortOrderArr.push(arr as SortPairArr);
         });
         this.updateInput({ sort: sortOrderArr });
@@ -421,7 +422,7 @@ export class SavedSearchEmbeddable
     ).columns;
     searchProps.sort = this.getSort(
       this.input.sort || this.savedSearch.sort,
-      this.searchProps?.dataView
+      searchProps?.dataView
     );
 
     searchProps.sharedItemTitle = this.panelTitle;
