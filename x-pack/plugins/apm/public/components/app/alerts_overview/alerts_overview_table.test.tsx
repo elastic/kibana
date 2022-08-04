@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, waitFor, fireEvent, act } from '@testing-library/react';
+import { render, waitFor, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import React, { ReactNode } from 'react';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
