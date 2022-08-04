@@ -41,7 +41,7 @@ data view with the provided title already exists. The default is `false`.
 [[data-views-api-create-example]]
 ==== Examples
 
-Create a data view to view data in the `logstash-*` indices:
+To explore the data in the `logstash-*` indices, create a {data-source}:
 
 [source,sh]
 --------------------------------------------------
@@ -55,7 +55,7 @@ $ curl -X POST api/data_views/data_view
 --------------------------------------------------
 // KIBANA
 
-Use the `data_view.fieldFormats` property to create custom field formats:
+To create custom field formats, use the `data_view.fieldFormats` property:
 
 [source,sh]
 --------------------------------------------------
@@ -80,7 +80,7 @@ $ curl -X POST api/data_views/data_view
 --------------------------------------------------
 // KIBANA
 
-Use the `data_view.fieldAttrs` property to create custom labels:
+To create custom labels, use the `data_view.fieldAttrs` property:
 
 [source,sh]
 --------------------------------------------------
@@ -99,7 +99,7 @@ $ curl -X POST api/data_views/data_view
 --------------------------------------------------
 // KIBANA
 
-Use the `data_view.runtimeFieldMap` property to create a data view with {ref}/runtime-search-request.html[runtime fields]:
+To create a {data-source} with {ref}/runtime-search-request.html[runtime fields], use the `data_view.runtimeFieldMap` property:
 
 [source,sh]
 --------------------------------------------------
@@ -121,7 +121,7 @@ $ curl -X POST api/data_views/data_view
 --------------------------------------------------
 // KIBANA
 
-Use the `data_view.type` and `data_view.typeMeta` properties to create data views based on {ref}/xpack-rollup.html[rollup indices]:
+To create {data-sources} based on {ref}/xpack-rollup.html[rollup indices], use the `data_view.type` and `data_view.typeMeta` properties :
 
 [source,sh]
 --------------------------------------------------
@@ -171,7 +171,7 @@ $ curl -X POST api/data_views/data_view
 --------------------------------------------------
 // KIBANA
 
-The API returns the data view object:
+The API returns the {data-source} object:
 
 [source,sh]
 --------------------------------------------------
@@ -186,37 +186,37 @@ The API returns the data view object:
 ==== Properties of the `data_view` object:
 
 `title`::
-(Optional, string) Comma-separated list of data streams, indices, and aliases to search. Supports wildcards
+(Optional, string) Comma-separated list of data streams, indices, and aliases that you want to search. Supports wildcards
 (`*`).
 
 `name`::
-(Optional, string) Human readable name to differentiate the data view.
+(Optional, string) The {data-source} name.
 
 `id`::
 (Optional, string) Saved object ID.
 
 `type`::
-(Optional, string) When set to `rollup`, this is used to identify rollup data views.
+(Optional, string) When set to `rollup`, identifies the rollup {data-sources}.
 
 `typeMeta`::
-(Optional, object) When using rollup indices, this contains the field list for the rollup-specific
-data view API endpoints.
+(Optional, object) When you use rollup indices, contains the field list for the rollup
+{data-source} API endpoints.
 +
 .Properties of the typeMeta objects:
 [%collapsible%open]
 =====
 `aggs`:::
-(Required, object) A map of rollup of the aggregation restrictions by aggregation type and field name.
+(Required, object) A map of rollup restrictions by aggregation type and field name.
 
 `params`:::
-(Required, object) Properties for retrieving rollup fields
+(Required, object) Properties for retrieving rollup fields.
 =====
 
 `timeFieldName`::
-(Optional, string) Timestamp field name, for time-based data views.
+(Optional, string) Timestamp field name, which you use for time-based {data-sources}.
 
 `sourceFilters`::
-(Optional, string[]) Array of field names to filter out in Kibana.
+(Optional, string[]) Array of field names you want to filter out in {kib}.
 
 `fieldAttrs`::
 (Optional, object) Map of field attributes by field name.
@@ -238,7 +238,7 @@ data view API endpoints.
 [%collapsible%open]
 =====
 `type`:::
-(Required, string) Mapping type of the runtime field. See {ref}/mapping-types.html[Field data types].
+(Required, string) Mapping type of the runtime field. For more information, check {ref}/mapping-types.html[Field data types].
 
 `script.source`:::
 (Required, string) Script of the runtime field.
@@ -251,4 +251,4 @@ data view API endpoints.
 (Optional, boolean) Allows the data view saved object to exist before data is present.
 
 `namespaces`::
-(Optional, string[]) Array of {kibana-ref}/xpack-spaces.html[space] IDs, for sharing the data view between multiple spaces.
+(Optional, string[]) Array of {kibana-ref}/xpack-spaces.html[space] IDs for sharing the {data-source} between multiple spaces.
