@@ -49,6 +49,7 @@ import { KpiPanel, StackByComboBox } from '../common/components';
 import { useInspectButton } from '../common/hooks';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { GROUP_BY_TOP_LABEL } from '../common/translations';
+import { FETCH_ALERTS } from '../../../../common/lib/apm/http_requests';
 
 const defaultTotalAlertsObj: AlertsTotal = {
   value: 0,
@@ -187,6 +188,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       ),
       indexName: signalIndexName,
       skip: querySkip,
+      monitoringKey: FETCH_ALERTS.HISTOGRAM,
     });
 
     const kibana = useKibana();

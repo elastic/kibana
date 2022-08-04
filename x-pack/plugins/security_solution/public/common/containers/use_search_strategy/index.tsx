@@ -8,19 +8,14 @@ import { filter } from 'rxjs/operators';
 import { noop, omit } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useMemo } from 'react';
 import type { Observable } from 'rxjs';
-
-import type { OptionalSignalArgs } from '@kbn/securitysolution-hook-utils';
 import { useObservable } from '@kbn/securitysolution-hook-utils';
-
-import type { IKibanaSearchResponse } from '@kbn/data-plugin/common';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/public';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
+import type { Transaction } from '@elastic/apm-rum';
 import * as i18n from './translations';
 
 import type {
   FactoryQueryTypes,
-  RequestBasicOptions,
   StrategyRequestType,
   StrategyResponseType,
 } from '../../../../common/search_strategy/security_solution';
@@ -28,56 +23,81 @@ import { getInspectResponse } from '../../../helpers';
 import type { inputsModel } from '../../store';
 import { useKibana } from '../../lib/kibana';
 import { useAppToasts } from '../../hooks/use_app_toasts';
+import { useStartTransaction } from '../../lib/apm/use_start_transaction';
+import type { SearchStrategyMonitoringKey } from '../../lib/apm/http_requests';
 
-type UseSearchStrategyRequestArgs = RequestBasicOptions & {
-  data: DataPublicPluginStart;
+interface UseSearchFunctionParams<QueryType extends FactoryQueryTypes> {
+  request: StrategyRequestType<QueryType>;
   signal: AbortSignal;
-  factoryQueryType: FactoryQueryTypes;
-};
+}
 
-const search = <ResponseType extends IKibanaSearchResponse>({
-  data,
-  signal,
-  factoryQueryType,
-  defaultIndex,
-  filterQuery,
-  timerange,
-  ...requestProps
-}: UseSearchStrategyRequestArgs): Observable<ResponseType> => {
-  return data.search.search<RequestBasicOptions, ResponseType>(
-    {
-      ...requestProps,
-      factoryQueryType,
-      defaultIndex,
-      timerange,
-      filterQuery,
-    },
-    {
-      strategy: 'securitySolutionSearchStrategy',
-      abortSignal: signal,
-    }
-  );
-};
+type UseSearchFunction<QueryType extends FactoryQueryTypes> = (
+  params: UseSearchFunctionParams<QueryType>
+) => Observable<StrategyResponseType<QueryType>>;
 
-const searchComplete = <ResponseType extends IKibanaSearchResponse>(
-  props: UseSearchStrategyRequestArgs
-): Observable<ResponseType> => {
-  return search<ResponseType>(props).pipe(
-    filter((response) => {
-      return isErrorResponse(response) || isCompleteResponse(response);
-    })
-  );
-};
+type SearchFunction<QueryType extends FactoryQueryTypes> = (
+  params: StrategyRequestType<QueryType>
+) => void;
 
 const EMPTY_INSPECT = {
   dsl: [],
   response: [],
 };
 
+const useSearch = <QueryType extends FactoryQueryTypes>(
+  factoryQueryType: QueryType,
+  monitoringKey?: SearchStrategyMonitoringKey
+): UseSearchFunction<QueryType> => {
+  const { data } = useKibana().services;
+  const { startTransaction } = useStartTransaction();
+
+  const search = useCallback<UseSearchFunction<QueryType>>(
+    ({ signal, request }) => {
+      let transaction: Transaction | undefined;
+      if (monitoringKey) {
+        transaction = startTransaction({ name: monitoringKey, type: 'http-request' });
+      }
+
+      const observable = data.search
+        .search<StrategyRequestType<QueryType>, StrategyResponseType<QueryType>>(
+          { ...request, factoryQueryType },
+          {
+            strategy: 'securitySolutionSearchStrategy',
+            abortSignal: signal,
+          }
+        )
+        .pipe(filter((response) => isErrorResponse(response) || isCompleteResponse(response)));
+
+      if (monitoringKey) {
+        observable.subscribe({
+          next: () => {
+            if (transaction) {
+              transaction.addLabels({ result: 'success' });
+              transaction.end();
+            }
+          },
+          error: () => {
+            if (transaction) {
+              transaction.addLabels({ result: signal.aborted ? 'aborted' : 'error' });
+              transaction.end();
+            }
+          },
+        });
+      }
+
+      return observable;
+    },
+    [data.search, factoryQueryType, monitoringKey, startTransaction]
+  );
+
+  return search;
+};
+
 export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
   factoryQueryType,
   initialResult,
   errorMessage,
+  monitoringKey,
   abort = false,
 }: {
   factoryQueryType: QueryType;
@@ -86,24 +106,28 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
    */
   initialResult: Omit<StrategyResponseType<QueryType>, 'rawResponse'>;
   /**
-   * Message displayed to the user on a Toast when an erro happens.
+   * Message displayed to the user on a Toast when an error happens.
    */
   errorMessage?: string;
+  /**
+   * Monitoring Key to track the request performance using APM
+   */
+  monitoringKey?: SearchStrategyMonitoringKey;
   /**
    * When the flag switches from `false` to `true`, it will abort any ongoing request.
    */
   abort?: boolean;
 }) => {
   const abortCtrl = useRef(new AbortController());
-
   const refetch = useRef<inputsModel.Refetch>(noop);
-  const { data } = useKibana().services;
   const { addError } = useAppToasts();
 
+  const search = useSearch(factoryQueryType, monitoringKey);
+
   const { start, error, result, loading } = useObservable<
-    [UseSearchStrategyRequestArgs],
+    [UseSearchFunctionParams<QueryType>],
     StrategyResponseType<QueryType>
-  >(searchComplete);
+  >(search);
 
   useEffect(() => {
     if (error != null && !(error instanceof AbortError)) {
@@ -113,24 +137,22 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
     }
   }, [addError, error, errorMessage, factoryQueryType]);
 
-  const searchCb = useCallback(
-    (props: OptionalSignalArgs<StrategyRequestType<QueryType>>) => {
-      const asyncSearch = () => {
+  const searchCb = useCallback<SearchFunction<QueryType>>(
+    (request) => {
+      const startSearch = () => {
         abortCtrl.current = new AbortController();
         start({
-          ...props,
-          data,
-          factoryQueryType,
+          request,
           signal: abortCtrl.current.signal,
-        } as never); // This typescast is required because every StrategyRequestType instance has different fields.
+        });
       };
 
       abortCtrl.current.abort();
-      asyncSearch();
+      startSearch();
 
-      refetch.current = asyncSearch;
+      refetch.current = startSearch;
     },
-    [data, start, factoryQueryType]
+    [start]
   );
 
   useEffect(() => {

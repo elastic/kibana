@@ -25,6 +25,7 @@ import { NetworkQueries } from '../../../../common/search_strategy';
 import type { InspectResponse } from '../../../types';
 import * as i18n from './translations';
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
+import { SEARCH_STRATEGY } from '../../../common/lib/apm/http_requests';
 
 export const ID = 'networkTopNFlowQuery';
 
@@ -92,7 +93,7 @@ export const useNetworkTopNFlow = ({
     search,
     refetch,
     inspect,
-  } = useSearchStrategy<NetworkQueries.topNFlow>({
+  } = useSearchStrategy({
     factoryQueryType: NetworkQueries.topNFlow,
     initialResult: {
       edges: [],
@@ -105,6 +106,7 @@ export const useNetworkTopNFlow = ({
     },
     errorMessage: i18n.FAIL_NETWORK_TOP_N_FLOW,
     abort: skip,
+    monitoringKey: ip ? SEARCH_STRATEGY.NETWORK_IP_FLOW : SEARCH_STRATEGY.NETWORK_FLOW,
   });
 
   const networkTopNFlowResponse = useMemo(

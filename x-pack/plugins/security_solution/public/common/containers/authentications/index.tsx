@@ -22,6 +22,7 @@ import { createFilter } from '../helpers';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 
 import type { InspectResponse } from '../../../types';
+import type { SearchStrategyMonitoringKey } from '../../lib/apm/http_requests';
 
 import * as i18n from './translations';
 import { useSearchStrategy } from '../use_search_strategy';
@@ -45,6 +46,7 @@ interface UseAuthentications {
   skip: boolean;
   stackByField: AuthStackByField;
   startDate: string;
+  monitoringKey?: SearchStrategyMonitoringKey;
 }
 
 export const useAuthentications = ({
@@ -56,6 +58,7 @@ export const useAuthentications = ({
   skip,
   stackByField,
   startDate,
+  monitoringKey,
 }: UseAuthentications): [boolean, AuthenticationArgs] => {
   const [authenticationsRequest, setAuthenticationsRequest] =
     useState<UserAuthenticationsRequestOptions | null>(null);
@@ -82,7 +85,7 @@ export const useAuthentications = ({
     search,
     refetch,
     inspect,
-  } = useSearchStrategy<UsersQueries.authentications>({
+  } = useSearchStrategy({
     factoryQueryType: UsersQueries.authentications,
     initialResult: {
       edges: [],
@@ -95,6 +98,7 @@ export const useAuthentications = ({
     },
     errorMessage: i18n.FAIL_AUTHENTICATIONS,
     abort: skip,
+    monitoringKey,
   });
 
   const authenticationsResponse = useMemo(

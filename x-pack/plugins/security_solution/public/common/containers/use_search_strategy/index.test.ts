@@ -9,7 +9,7 @@ import { useSearchStrategy } from '.';
 import { act, renderHook } from '@testing-library/react-hooks';
 
 import { useObservable } from '@kbn/securitysolution-hook-utils';
-import type { FactoryQueryTypes } from '../../../../common/search_strategy';
+import type { FactoryQueryTypes, StrategyRequestType } from '../../../../common/search_strategy';
 
 const mockAddToastError = jest.fn();
 
@@ -33,6 +33,8 @@ const userSearchStrategyProps = {
   initialResult: {},
   errorMessage: 'testErrorMessage',
 };
+
+const searchParams = {} as unknown as StrategyRequestType<FactoryQueryTypes>;
 
 describe('useSearchStrategy', () => {
   it("returns the provided initial result while the query hasn't returned data", () => {
@@ -59,7 +61,7 @@ describe('useSearchStrategy', () => {
       })
     );
 
-    result.current.search({});
+    result.current.search(searchParams);
 
     expect(start).toBeCalledWith(expect.objectContaining({ factoryQueryType }));
   });
@@ -104,7 +106,6 @@ describe('useSearchStrategy', () => {
 
   it('start should be called when search is called ', () => {
     const start = jest.fn();
-    const searchParams = {};
 
     (useObservable as jest.Mock).mockReturnValue({ ...useObservableHookResult, start });
 
@@ -119,7 +120,6 @@ describe('useSearchStrategy', () => {
 
   it('refetch should execute the previous search again with the same params', async () => {
     const start = jest.fn();
-    const searchParams = {};
 
     (useObservable as jest.Mock).mockReturnValue({ ...useObservableHookResult, start });
 
@@ -138,7 +138,6 @@ describe('useSearchStrategy', () => {
   });
 
   it('aborts previous search when a subsequent search is triggered', async () => {
-    const searchParams = {};
     const abortFunction = jest.fn();
     jest
       .spyOn(window, 'AbortController')
@@ -157,7 +156,6 @@ describe('useSearchStrategy', () => {
   });
 
   it('aborts search when component unmounts', async () => {
-    const searchParams = {};
     const abortFunction = jest.fn();
     jest
       .spyOn(window, 'AbortController')
@@ -190,7 +188,7 @@ describe('useSearchStrategy', () => {
       })
     );
 
-    result.current.search({});
+    result.current.search(searchParams);
 
     expect(start).toBeCalledWith(expect.objectContaining({ signal }));
   });
