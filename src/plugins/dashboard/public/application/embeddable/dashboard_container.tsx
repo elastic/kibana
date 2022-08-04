@@ -109,10 +109,17 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   private allDataViews: DataView[] = [];
 
+  /**
+   * @returns All the dataviews that are actively being used in the dashboard
+   */
   public getAllDataViews = () => {
     return this.allDataViews;
   };
 
+  /**
+   * Use this to set the dataviews that are used in the dashboard when they change/update
+   * @param newDataViews The new list of dataviews that will overwrite the old dataviews
+   */
   public setAllDataViews = (newDataViews: DataView[]) => {
     this.allDataViews = newDataViews;
   };
