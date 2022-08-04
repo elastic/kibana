@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Subject } from 'rxjs';
 import { KibanaResponse } from '@kbn/core-http-router-server-internal';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
 import { createUptimeESClient, inspectableEsQueriesMap } from './legacy_uptime/lib/lib';
 import { syntheticsServiceApiKey } from './legacy_uptime/lib/saved_objects/service_api_key';
-import { SyntheticsRouteWrapper } from './legacy_uptime/routes';
+import { SyntheticsRouteWrapper, SyntheticsStreamingRouteHandler } from './legacy_uptime/routes';
 import { API_URLS } from '../common/constants';
 
 export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
@@ -51,7 +50,7 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
       inspectableEsQueriesMap.set(request, []);
     }
 
-    const res = await uptimeRoute.handler({
+    const res = await (uptimeRoute.handler as SyntheticsStreamingRouteHandler)({
       uptimeEsClient,
       savedObjectsClient,
       context,

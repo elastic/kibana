@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { Subject } from 'rxjs';
-import { from } from 'rxjs';
 import { UptimeRequestHandlerContext } from './types';
 import { createSyntheticsRouteWithAuth } from './routes/create_route_with_auth';
 import { SyntheticsMonitorClient } from './synthetics_service/synthetics_monitor/synthetics_monitor_client';
@@ -64,12 +63,12 @@ export const initSyntheticsServer = (
       syntheticsMonitorClient
     );
 
-    plugins.bfetch.addStreamingResponseRoute<string, string>(
+    plugins.bfetch.addStreamingResponseRoute<string, unknown>(
       path,
       (request, context) => {
         return {
           getResponseStream: ({ data }: any) => {
-            const subject = new Subject<string>();
+            const subject = new Subject<unknown>();
 
             if (streamHandler) {
               streamHandler(

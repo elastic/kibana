@@ -91,7 +91,7 @@ export class ProjectMonitorFormatter {
     server: UptimeServerSetup;
     syntheticsMonitorClient: SyntheticsMonitorClient;
     request: KibanaRequest;
-    subject?: Subject<unknown>;
+    subject: Subject<unknown>;
   }) {
     this.projectId = projectId;
     this.spaceId = spaceId;

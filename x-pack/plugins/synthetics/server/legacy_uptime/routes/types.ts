@@ -31,7 +31,7 @@ export type SyntheticsRequest = KibanaRequest<
  * Defines the basic properties employed by Uptime routes.
  */
 export interface UMServerRoute<T> {
-  method: string;
+  method: 'GET' | 'PUT' | 'POST' | 'DELETE';
   writeAccess?: boolean;
   handler: T;
   streamHandler?: (
@@ -68,6 +68,7 @@ export type UptimeRoute = UMRouteDefinition<UMRouteHandler>;
  */
 export type UMRestApiRouteFactory = (libs: UMServerLibs) => UptimeRoute;
 export type SyntheticsRestApiRouteFactory = (libs: UMServerLibs) => SyntheticsRoute;
+export type SyntheticsStreamingRouteFactory = (libs: UMServerLibs) => SyntheticsStreamingRoute;
 
 /**
  * Functions of this type accept our internal route format and output a route
@@ -79,9 +80,10 @@ export type UMKibanaRouteWrapper = (
 ) => UMKibanaRoute;
 
 export type SyntheticsRoute = UMRouteDefinition<SyntheticsRouteHandler>;
+export type SyntheticsStreamingRoute = UMRouteDefinition<SyntheticsStreamingRouteHandler>;
 
 export type SyntheticsRouteWrapper = (
-  uptimeRoute: SyntheticsRoute,
+  uptimeRoute: SyntheticsRoute | SyntheticsStreamingRoute,
   server: UptimeServerSetup,
   syntheticsMonitorClient: SyntheticsMonitorClient
 ) => UMKibanaRoute;
@@ -119,7 +121,24 @@ export type SyntheticsRouteHandler = ({
   uptimeEsClient: UptimeESClient;
   context: UptimeRequestHandlerContext;
   request: SyntheticsRequest;
-  response?: KibanaResponseFactory;
+  response: KibanaResponseFactory;
+  savedObjectsClient: SavedObjectsClientContract;
+  server: UptimeServerSetup;
+  syntheticsMonitorClient: SyntheticsMonitorClient;
+  subject?: Subject<unknown>;
+}) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
+
+export type SyntheticsStreamingRouteHandler = ({
+  uptimeEsClient,
+  context,
+  request,
+  server,
+  savedObjectsClient,
+  subject: Subject,
+}: {
+  uptimeEsClient: UptimeESClient;
+  context: UptimeRequestHandlerContext;
+  request: SyntheticsRequest;
   savedObjectsClient: SavedObjectsClientContract;
   server: UptimeServerSetup;
   syntheticsMonitorClient: SyntheticsMonitorClient;
