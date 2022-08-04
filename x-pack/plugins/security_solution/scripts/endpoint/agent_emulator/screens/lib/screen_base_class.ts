@@ -11,6 +11,7 @@ import type { WriteStream as TtyWriteStream } from 'tty';
 import { stdout, stdin } from 'node:process';
 import * as readline from 'node:readline';
 import { red, blue, green } from 'chalk';
+import { ChoiceListFormatter } from './choice_list_formatter';
 import { DataFormatter } from './data_formatter';
 import { HORIZONTAL_LINE } from '../../../common/constants';
 
@@ -18,6 +19,15 @@ export interface Choice {
   key: string;
   title: string;
 }
+
+export const QuitChoice: Choice = {
+  key: 'Q',
+  title: 'Quit',
+} as const;
+
+export const isChoice = (item: string | object): item is Choice => {
+  return 'string' !== typeof item && 'key' in item && 'title' in item;
+};
 
 const CONTENT_MAX_WIDTH = HORIZONTAL_LINE.length - 1;
 const CONTENT_60_PERCENT = Math.floor(CONTENT_MAX_WIDTH * 0.6);
@@ -42,6 +52,7 @@ class RenderedScreen {
 export class ScreenBaseClass {
   private readonly ttyOut: TtyWriteStream = stdout;
   private readlineInstance: readline.Interface | undefined = undefined;
+  private showPromise: Promise<void> | undefined = undefined;
   private endSession: (() => void) | undefined = undefined;
   private screenRenderInfo: RenderedScreen | undefined;
 
@@ -56,10 +67,15 @@ export class ScreenBaseClass {
       : HORIZONTAL_LINE;
   }
 
-  protected footer(): string | DataFormatter {
+  protected footer(choices: Choice[] = [QuitChoice]): string | DataFormatter {
+    const displayChoices =
+      choices && choices.length
+        ? new ChoiceListFormatter(choices, { layout: 'horizontal' }).output
+        : '';
+
     return `
 
-  [Q] Quit\n${HORIZONTAL_LINE}`;
+  ${displayChoices}${HORIZONTAL_LINE}`;
   }
 
   protected body(): string | DataFormatter {
@@ -156,9 +172,9 @@ export class ScreenBaseClass {
     const footerContent = this.footer();
 
     const screenRenderInfo = new RenderedScreen(
-      (headerContent instanceof DataFormatter ? headerContent.output : headerContent) +
-        (bodyContent instanceof DataFormatter ? bodyContent.output : bodyContent) +
-        (footerContent instanceof DataFormatter ? footerContent.output : footerContent)
+      this.getOutputContent(headerContent) +
+        this.getOutputContent(bodyContent) +
+        this.getOutputContent(footerContent)
     );
     this.screenRenderInfo = screenRenderInfo;
 
@@ -169,9 +185,14 @@ export class ScreenBaseClass {
 
     this.askForChoice();
 
-    return new Promise((resolve) => {
-      this.endSession = () => resolve();
-    });
+    // `show()` can be called multiple times, so only create the `showPromise` if one is not already present
+    if (!this.showPromise) {
+      this.showPromise = new Promise((resolve) => {
+        this.endSession = () => resolve();
+      });
+    }
+
+    return this.showPromise;
   }
 
   hide() {
@@ -189,5 +210,9 @@ export class ScreenBaseClass {
 
   protected throwUnknownChoiceError(choice: string): never {
     throw new Error(`Unknown choice: ${choice}`);
+  }
+
+  protected getOutputContent(item: string | DataFormatter): string {
+    return item instanceof DataFormatter ? item.output : item;
   }
 }

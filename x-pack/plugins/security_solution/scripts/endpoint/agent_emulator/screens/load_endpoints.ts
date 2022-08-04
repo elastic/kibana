@@ -10,10 +10,6 @@ import type { DataFormatter } from './lib/data_formatter';
 import { TOOL_TITLE } from '../constants';
 
 export class LoadEndpointsScreen extends ScreenBaseClass {
-  constructor(private readonly onBack?: () => void) {
-    super();
-  }
-
   protected header() {
     return super.header(TOOL_TITLE, 'Endpoint loader');
   }
