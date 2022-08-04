@@ -18,6 +18,7 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { DistributiveOmit } from '@elastic/eui';
 import type {
   CasesByAlertId,
   CasesByAlertIDRequest,
@@ -145,5 +146,7 @@ export interface CasesUiStart {
 
 export type SupportedCaseAttachment = CommentRequestAlertType | CommentRequestUserType;
 export type CaseAttachments = SupportedCaseAttachment[];
+export type CaseAttachmentWithoutOwner = DistributiveOmit<SupportedCaseAttachment, 'owner'>;
+export type CaseAttachmentsWithoutOwner = CaseAttachmentWithoutOwner[];
 
 export type ServerError = IHttpFetchError<ResponseErrorBody>;
