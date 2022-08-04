@@ -31,30 +31,44 @@ export interface FilesClient {
    * Create a new file object with the provided metadata.
    *
    * @note The file object that is created will be not have
+   *
+   * @param args
    */
   create: ClientMethodFrom<CreateFileKindHttpEndpoint>;
   /**
    * Delete a file object and all associated share and content objects.
+   *
+   * @param args
    */
   delete: ClientMethodFrom<DeleteFileKindHttpEndpoint>;
   /**
    * Get a file object by ID.
+   *
+   * @param args
    */
   getById: ClientMethodFrom<GetByIdFileKindHttpEndpoint>;
   /**
    * List all file objects, of a given {@link FileKind}.
+   *
+   * @param args
    */
   list: ClientMethodFrom<ListFileKindHttpEndpoint>;
   /**
    * Update a set of of metadata values of the file object.
+   *
+   * @param args
    */
   update: ClientMethodFrom<UpdateFileKindHttpEndpoint>;
   /**
    * Stream the contents of the file to Kibana server for storage.
+   *
+   * @param args
    */
   upload: ClientMethodFrom<UploadFileKindHttpEndpoint>;
   /**
    * Stream a download of the file object's content.
+   *
+   * @param args
    */
   download: ClientMethodFrom<DownloadFileKindHttpEndpoint>;
 }

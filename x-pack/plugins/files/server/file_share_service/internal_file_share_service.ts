@@ -20,7 +20,7 @@ import type {
   UpdatableFileShareAttributes,
 } from '../../common/types';
 import { FILE_SO_TYPE } from '../../common/constants';
-import type { File } from '../file';
+import type { File } from '../../common/types';
 import { fileShareObjectType } from '../saved_objects';
 import { generateShareToken } from './generate_share_token';
 import { FileShareServiceStart } from './types';
@@ -45,6 +45,9 @@ export interface CreateShareArgs {
    */
   validUntil?: number;
 
+  /**
+   * The file object to create the share for
+   */
   file: File;
 }
 
