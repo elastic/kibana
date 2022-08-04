@@ -13,7 +13,7 @@ export const sendGetEndpointSpecificPackagePoliciesMock = (
     perPage: number;
     count: number;
   } = { page: 1, perPage: 20, count: 5 }
-): Promise<GetPolicyListResponse> => {
+): GetPolicyListResponse => {
   const { page, perPage, count } = params;
   const generator = new FleetPackagePolicyGenerator();
   const items = Array.from({ length: count }, (_, index) => {

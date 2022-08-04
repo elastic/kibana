@@ -42,7 +42,7 @@ describe('When on the policy list page', () => {
 
   describe('and there are no policies', () => {
     beforeEach(async () => {
-      getPackagePolicies.mockImplementation(() =>
+      getPackagePolicies.mockResolvedValue(
         sendGetEndpointSpecificPackagePoliciesMock({
           page: 1,
           perPage: 20,
@@ -73,13 +73,11 @@ describe('When on the policy list page', () => {
   });
 
   describe('and data exists', () => {
-    let policies: GetPolicyListResponse;
+    const policies: GetPolicyListResponse = sendGetEndpointSpecificPackagePoliciesMock();
+
     beforeEach(async () => {
-      policies = await sendGetEndpointSpecificPackagePoliciesMock();
-      getPackagePolicies.mockImplementation(async () => {
-        return policies;
-      });
-      getAgentPolicies.mockResolvedValue({
+      getPackagePolicies.mockReturnValue(policies);
+      getAgentPolicies.mockReturnValue({
         items: [
           { package_policies: [policies.items[0].id], agents: 4 },
           { package_policies: [policies.items[1].id], agents: 2 },
@@ -120,11 +118,11 @@ describe('When on the policy list page', () => {
       expect(updatedByCells[0].textContent).toEqual(expectedAvatarName.charAt(0));
       expect(firstUpdatedByName.textContent).toEqual(expectedAvatarName);
     });
-    it('should show the correct endpoint count', () => {
+    it('should show the correct endpoint count', async () => {
       const endpointCount = renderResult.getAllByTestId('policyEndpointCountLink');
       expect(endpointCount[0].textContent).toBe('4');
     });
-    it('endpoint count link should navigate to the endpoint list filtered by policy', () => {
+    it.skip('endpoint count link should navigate to the endpoint list filtered by policy', async () => {
       const policyId = policies.items[0].id;
       const filterByPolicyQuery = `?admin_query=(language:kuery,query:'united.endpoint.Endpoint.policy.applied.id : "${policyId}"')`;
       const backLink = {
@@ -140,7 +138,9 @@ describe('When on the policy list page', () => {
         },
       };
       const endpointCount = renderResult.getAllByTestId('policyEndpointCountLink')[0];
-      fireEvent.click(endpointCount);
+      act(() => {
+        fireEvent.click(endpointCount);
+      });
 
       expect(history.location.pathname).toEqual(getEndpointListPath({ name: 'endpointList' }));
       expect(history.location.search).toEqual(filterByPolicyQuery);
@@ -155,17 +155,23 @@ describe('When on the policy list page', () => {
     beforeEach(async () => {
       getPackagePolicies.mockImplementation(({ page, perPage }) => {
         // # policies = 100 to trigger UI to show pagination
-        const response = sendGetEndpointSpecificPackagePoliciesMock({
+        return sendGetEndpointSpecificPackagePoliciesMock({
           page,
           perPage,
           count: 100,
         });
-        return response;
       });
-      render();
+      act(() => {
+        render();
+      });
       await waitFor(() => {
         expect(getPackagePolicies).toHaveBeenCalled();
+        expect(sendGetEndpointSpecificPackagePolicies).toHaveBeenCalled();
+        expect(sendGetAgentPolicyList).toHaveBeenCalled();
       });
+    });
+    afterEach(() => {
+      getPackagePolicies.mockReset();
     });
     it('should pass the correct page value to the api', async () => {
       await waitFor(() => {
