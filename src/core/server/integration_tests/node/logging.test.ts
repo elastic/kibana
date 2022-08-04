@@ -29,7 +29,8 @@ function createRootWithRoles(roles: string[]) {
     },
   });
 }
-
+// Skipping due to cc ingestion failure:
+// https://buildkite.com/elastic/kibana-code-coverage-main/builds/643#018265eb-0721-4fd6-b36c-6b3e66ef0e4c/5790-5910
 describe('node service global context', () => {
   const validRoles = [['ui', 'background_tasks'], ['ui'], ['background_tasks']];
 
