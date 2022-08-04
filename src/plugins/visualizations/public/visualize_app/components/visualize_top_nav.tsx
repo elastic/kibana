@@ -328,7 +328,6 @@ const TopNav = ({
               },
               isMissingCurrent: isMissingCurrentDataView,
               onChangeDataView,
-              showNewMenuTour: false,
             }
           : undefined
       }
