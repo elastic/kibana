@@ -25,13 +25,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { getUserDisplayName } from './user_profile';
-import type { UserProfile, UserProfileAvatarData } from './user_profile';
+import type { UserProfileWithAvatar } from './user_avatar';
 import { UserAvatar } from './user_avatar';
 
-export type UserProfileWithAvatar = UserProfile<{ avatar?: UserProfileAvatarData }>;
-
 /**
- * Props of `UserProfilesSelectable` component
+ * Props of {@link UserProfilesSelectable} component
  */
 export interface UserProfilesSelectableProps
   extends Pick<
@@ -60,11 +58,13 @@ export interface UserProfilesSelectableProps
 
   /**
    * Passes back the list of selected users.
+   * @param options List of selected users
    */
   onChange?(options: UserProfileWithAvatar[]): void;
 
   /**
    * Passes back the search term.
+   * @param searchTerm Search term
    */
   onSearchChange?(searchTerm: string): void;
 
@@ -79,12 +79,13 @@ export interface UserProfilesSelectableProps
   searchPlaceholder?: string;
 
   /**
-   * Placeholder text for search box.
+   * Returns text for selected status.
+   * @param selectedCount Number of selected users
    */
   selectedStatusMessage?(selectedCount: number): ReactNode;
 
   /**
-   * Placeholder text for search box.
+   * Text for label of clear button.
    */
   clearButtonLabel?: ReactNode;
 }
@@ -230,11 +231,15 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
 
         onChange(values);
       }}
-      height={height}
+      style={{ maxHeight: height }}
       singleSelection={singleSelection}
       searchable
       searchProps={{
-        placeholder: searchPlaceholder,
+        placeholder:
+          searchPlaceholder ??
+          i18n.translate('userProfileComponents.userProfilesSelectable.searchPlaceholder', {
+            defaultMessage: 'Search',
+          }),
         onChange: onSearchChange,
         isLoading,
         isClearable: !isLoading,
@@ -259,7 +264,7 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
                   ) : (
                     <FormattedMessage
                       id="userProfileComponents.userProfilesSelectable.selectedStatusMessage"
-                      defaultMessage="{count, plural, one {# user} other {# users}}"
+                      defaultMessage="{count, plural, one {# user selected} other {# users selected}}"
                       values={{ count: selectedCount }}
                     />
                   )}

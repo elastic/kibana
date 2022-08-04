@@ -11,7 +11,7 @@ import { EuiAvatar, useEuiTheme } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 
-import type { UserProfile, UserProfileAvatarData } from './user_profile';
+import type { UserProfile, UserProfileUserInfo, UserProfileAvatarData } from './user_profile';
 import {
   getUserAvatarColor,
   getUserAvatarInitials,
@@ -19,10 +19,13 @@ import {
   USER_AVATAR_MAX_INITIALS,
 } from './user_profile';
 
+/**
+ * Convenience type for a {@link UserProfile} with avatar data
+ */
 export type UserProfileWithAvatar = UserProfile<{ avatar?: UserProfileAvatarData }>;
 
 /**
- * Props of `UserAvatar` component
+ * Props of {@link UserAvatar} component
  */
 export interface UserAvatarProps
   extends Omit<
@@ -40,7 +43,7 @@ export interface UserAvatarProps
   /**
    * User to be rendered
    */
-  user?: UserProfile['user'];
+  user?: UserProfileUserInfo;
 
   /**
    * Avatar data of user to be rendered
