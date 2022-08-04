@@ -64,8 +64,6 @@ export interface StackFrameMetadata {
   FileID: FileID;
   // StackTrace.Type
   FrameType: FrameType;
-  // stringified FrameType -- FrameType.String()
-  FrameTypeString: string;
 
   // StackFrame.LineNumber?
   AddressOrLine: number;
@@ -93,8 +91,6 @@ export interface StackFrameMetadata {
   SourcePackageURL: string;
   // unused atm due to lack of symbolization metadata
   SourceType: number;
-
-  Index: number;
 }
 
 export function createStackFrameMetadata(
@@ -104,7 +100,6 @@ export function createStackFrameMetadata(
 
   metadata.FileID = options.FileID ?? '';
   metadata.FrameType = options.FrameType ?? 0;
-  metadata.FrameTypeString = options.FrameTypeString ?? '';
   metadata.AddressOrLine = options.AddressOrLine ?? 0;
   metadata.FunctionName = options.FunctionName ?? '';
   metadata.FunctionOffset = options.FunctionOffset ?? 0;
@@ -117,7 +112,6 @@ export function createStackFrameMetadata(
   metadata.SourcePackageHash = options.SourcePackageHash ?? '';
   metadata.SourcePackageURL = options.SourcePackageURL ?? '';
   metadata.SourceType = options.SourceType ?? 0;
-  metadata.Index = options.Index ?? 0;
 
   return metadata;
 }
@@ -167,14 +161,13 @@ export function groupStackFrameMetadataByStackTrace(
       const executable = executables.get(trace.FileID[i])!;
 
       const metadata = createStackFrameMetadata({
-        FileID: Buffer.from(trace.FileID[i], 'base64url').toString('hex'),
+        FileID: trace.FileID[i],
         FrameType: trace.Type[i],
         AddressOrLine: frame.LineNumber,
         FunctionName: frame.FunctionName,
         FunctionOffset: frame.FunctionOffset,
         SourceLine: frame.LineNumber,
         ExeFileName: executable.FileName,
-        Index: i,
       });
 
       frameMetadata.push(metadata);
