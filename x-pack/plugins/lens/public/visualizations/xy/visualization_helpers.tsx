@@ -7,6 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
+import { LensIconChartBarHorizontal } from '@kbn/lens-icons';
+import { LensIconChartMixedXy } from '@kbn/lens-icons';
+import { LensIconChartBarStacked } from '@kbn/lens-icons';
 import { DatasourceLayers, OperationMetadata, VisualizationType } from '../../types';
 import {
   State,
@@ -20,9 +23,6 @@ import {
 } from './types';
 import { isHorizontalChart } from './state_helpers';
 import { layerTypes } from '../..';
-import { LensIconChartBarHorizontal } from '../../assets/chart_bar_horizontal';
-import { LensIconChartMixedXy } from '../../assets/chart_mixed_xy';
-import { LensIconChartBarStacked } from '../../assets/chart_bar_stacked';
 import { LayerType } from '../../../common';
 
 export function getAxisName(
