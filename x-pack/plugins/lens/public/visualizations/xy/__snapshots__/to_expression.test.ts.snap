@@ -64,6 +64,9 @@ Object {
                   "seriesType": Array [
                     "area",
                   ],
+                  "showLines": Array [
+                    true,
+                  ],
                   "simpleView": Array [
                     false,
                   ],
