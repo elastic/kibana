@@ -192,6 +192,9 @@ export class VisualizeEmbeddable
     return this.vis.description;
   }
 
+  /**
+   * @returns Local/panel-level array of filters for Visualize embeddable
+   */
   public async getFilters() {
     let input = this.getInput();
     if (this.inputIsRefType(input)) {
@@ -202,6 +205,9 @@ export class VisualizeEmbeddable
     return mapAndFlattenFilters(_.cloneDeep(filters));
   }
 
+  /**
+   * @returns Local/panel-level query for Visualize embeddable
+   */
   public async getQuery() {
     let input = this.getInput();
     if (this.inputIsRefType(input)) {

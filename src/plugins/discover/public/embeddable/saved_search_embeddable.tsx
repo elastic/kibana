@@ -553,12 +553,18 @@ export class SavedSearchEmbeddable
     return this.savedSearch.description;
   }
 
+  /**
+   * @returns Local/panel-level array of filters for Saved Search embeddable
+   */
   public async getFilters() {
     return mapAndFlattenFilters(
       (this.savedSearch.searchSource.getFields().filter as Filter[]) ?? []
     );
   }
 
+  /**
+   * @returns Local/panel-level query for Saved Search embeddable
+   */
   public async getQuery() {
     return this.savedSearch.searchSource.getFields().query;
   }

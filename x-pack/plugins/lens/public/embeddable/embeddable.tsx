@@ -873,6 +873,9 @@ export class Embeddable
     return this.savedVis && this.savedVis.description;
   }
 
+  /**
+   * @returns Local/panel-level array of filters for Lens embeddable
+   */
   public async getFilters() {
     return mapAndFlattenFilters(
       this.deps.injectFilterReferences(
@@ -882,6 +885,9 @@ export class Embeddable
     );
   }
 
+  /**
+   * @returns Local/panel-level query for Lens embeddable
+   */
   public async getQuery() {
     return this.savedVis?.state.query;
   }

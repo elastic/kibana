@@ -249,13 +249,19 @@ export class MapEmbeddable
     return this._isInitialized ? this._savedMap.getAttributes().description : '';
   }
 
+  /**
+   * TODO: Implement this function once https://github.com/elastic/kibana/issues/91282 is resolved
+   * @returns []
+   */
   public async getFilters() {
-    // TODO: Implement this function once https://github.com/elastic/kibana/issues/91282 is resolved
     return [];
   }
 
+  /**
+   * TODO: Implement this function once https://github.com/elastic/kibana/issues/91282 is resolved
+   * @returns undefined
+   */
   public async getQuery() {
-    // TODO: Implement this function once https://github.com/elastic/kibana/issues/91282 is resolved
     return undefined;
   }
 
