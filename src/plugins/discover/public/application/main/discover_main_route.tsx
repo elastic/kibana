@@ -82,7 +82,14 @@ export function DiscoverMainRoute(props: Props) {
         setHasUserDataView(hasUserDataViewValue);
         setHasESData(hasESDataValue);
 
-        if (!hasUserDataViewValue || !hasESDataValue) {
+        if (!hasUserDataViewValue) {
+          setShowNoDataPage(true);
+          return;
+        }
+
+        const defaultDataView = await data.dataViews.getDefaultDataView();
+
+        if (!defaultDataView) {
           setShowNoDataPage(true);
           return;
         }

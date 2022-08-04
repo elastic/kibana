@@ -52,7 +52,9 @@ describe('DiscoverMainRoute', () => {
       expect(findTestSubject(component, 'noDataViewsPrompt').length).toBe(1);
     });
   });
-  test('renders no data page when hasESData=false & hasUserDataView=true', async () => {
+  // skipped because this is the case that never ever should happen, it happened once and was fixed in
+  // https://github.com/elastic/kibana/pull/137824
+  test.skip('renders no data page when hasESData=false & hasUserDataView=true', async () => {
     const component = mountComponent(false, true);
 
     await waitFor(() => {
