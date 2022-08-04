@@ -14,7 +14,9 @@ const createAgentDocs = (kibanaVersion: string) => [
 ];
 
 let docs: any[] = [];
-describe('View agents', () => {
+// TODO: create fleet server, fix version of agent to upgrade to an allowed version (>= fleet server's, < kibana)
+// https://github.com/elastic/kibana/issues/138121
+describe.skip('View agents', () => {
   before(() => {
     cy.task('deleteDocsByQuery', {
       index: '.fleet-agents',
