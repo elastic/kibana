@@ -28,7 +28,7 @@ export const getRuleList = (rule: CspFinding['rule']) => [
     title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.frameworkSourcesTitle', {
       defaultMessage: 'Framework Sources',
     }),
-    description: <CisKubernetesIcons />,
+    description: <CisKubernetesIcons benchmarkId={rule.benchmark.id} />,
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.cisSectionTitle', {

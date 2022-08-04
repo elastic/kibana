@@ -34,6 +34,7 @@ export interface Cluster {
   meta: {
     clusterId: string;
     benchmarkName: string;
+    benchmarkId: BenchmarkId;
     lastUpdate: number; // unix epoch time
   };
   stats: Stats;
