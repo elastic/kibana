@@ -20,6 +20,7 @@ import moment from 'moment';
 import { PartitionElementEvent } from '@elastic/charts';
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import { i18n } from '@kbn/i18n';
+import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
 import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
 import { ChartPanel } from '../../../components/chart_panel';
 import type { ComplianceDashboardData, Evaluation } from '../../../../common/types';
@@ -61,7 +62,6 @@ export const BenchmarksSection = ({
     <>
       {complianceData.clusters.map((cluster) => {
         const shortId = cluster.meta.clusterId.slice(0, 6);
-
         return (
           <React.Fragment key={cluster.meta.clusterId}>
             <EuiPanel hasBorder hasShadow={false} paddingSize="none">
@@ -82,8 +82,7 @@ export const BenchmarksSection = ({
                       </EuiText>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      {/* TODO: change default k8s logo to use a getBenchmarkLogo function */}
-                      <EuiIcon type="logoKubernetes" size="xxl" />
+                      <CISBenchmarkIcon type={cluster.meta.benchmarkId} />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       {INTERNAL_FEATURE_FLAGS.showManageRulesMock && (
