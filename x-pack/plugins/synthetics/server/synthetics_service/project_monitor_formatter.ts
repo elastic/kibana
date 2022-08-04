@@ -64,7 +64,7 @@ export class ProjectMonitorFormatter {
   private projectFilter: string;
   private syntheticsMonitorClient: SyntheticsMonitorClient;
   private request: KibanaRequest;
-  private subject: Subject<unknown>;
+  private subject?: Subject<unknown>;
 
   constructor({
     locations,
@@ -91,7 +91,7 @@ export class ProjectMonitorFormatter {
     server: UptimeServerSetup;
     syntheticsMonitorClient: SyntheticsMonitorClient;
     request: KibanaRequest;
-    subject: Subject<unknown>;
+    subject?: Subject<unknown>;
   }) {
     this.projectId = projectId;
     this.spaceId = spaceId;
@@ -350,7 +350,7 @@ export class ProjectMonitorFormatter {
 
   private handleStreamingMessage = async ({ message }: { message: string }) => {
     if (this.subject) {
-      this.subject.next(message);
+      this.subject?.next(message);
     }
   };
 }
