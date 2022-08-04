@@ -60,6 +60,7 @@ describe('AlertsTable', () => {
 
   const alertsTableConfiguration = {
     id: '',
+    casesFeatureId: '',
     columns,
     sort: [],
     useInternalFlyout: jest.fn().mockImplementation(() => ({

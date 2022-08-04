@@ -20,6 +20,7 @@ export interface BuildOptions {
   downloadFreshNode: boolean;
   downloadCloudDependencies: boolean;
   initialize: boolean;
+  buildCanvasShareableRuntime: boolean;
   createGenericFolders: boolean;
   createPlatformFolders: boolean;
   createArchives: boolean;
@@ -74,6 +75,10 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await run(Tasks.CreateEmptyDirsAndFiles);
     await run(Tasks.CreateReadme);
     await run(Tasks.BuildBazelPackages);
+    if (options.buildCanvasShareableRuntime) {
+      await run(Tasks.BuildCanvasShareableRuntime);
+    }
+
     await run(Tasks.BuildXpack);
     await run(Tasks.BuildKibanaPlatformPlugins);
     await run(Tasks.TranspileBabel);
@@ -82,6 +87,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await run(Tasks.GeneratePackagesOptimizedAssets);
     await run(Tasks.DeleteBazelPackagesFromBuildRoot);
     await run(Tasks.CreateNoticeFile);
+    await run(Tasks.CreateXPackNoticeFile);
     await run(Tasks.UpdateLicenseFile);
     await run(Tasks.RemovePackageJsonDeps);
     await run(Tasks.CleanPackageManagerRelatedFiles);

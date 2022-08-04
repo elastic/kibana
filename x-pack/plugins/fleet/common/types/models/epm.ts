@@ -483,6 +483,7 @@ export type PackageAssetReference = Pick<SavedObjectReference, 'id'> & {
 
 export interface IndexTemplateMappings {
   properties: any;
+  dynamic_templates?: any;
 }
 
 // This is an index template v2, see https://github.com/elastic/elasticsearch/issues/53101
