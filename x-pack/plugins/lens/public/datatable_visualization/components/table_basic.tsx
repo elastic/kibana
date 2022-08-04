@@ -29,12 +29,12 @@ import {
 } from '@elastic/eui';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
+import { LensIconChartDatatable } from '@kbn/lens-icons';
 import type { LensTableRowContextMenuEvent } from '../../types';
 import type { FormatFactory } from '../../../common';
 import type { LensGridDirection } from '../../../common/expressions';
 import { VisualizationContainer } from '../../visualization_container';
 import { findMinMaxByColumnId } from '../../shared_components';
-import { LensIconChartDatatable } from '../../assets/chart_datatable';
 import type {
   DataContextType,
   DatatableRenderProps,

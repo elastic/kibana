@@ -22,16 +22,16 @@ import type {
   YAxisConfig,
 } from '@kbn/expression-xy-plugin/common';
 import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
-import { LensIconChartArea } from '../assets/chart_area';
-import { LensIconChartAreaStacked } from '../assets/chart_area_stacked';
-import { LensIconChartAreaPercentage } from '../assets/chart_area_percentage';
-import { LensIconChartBar } from '../assets/chart_bar';
-import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
-import { LensIconChartBarPercentage } from '../assets/chart_bar_percentage';
-import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
-import { LensIconChartBarHorizontalStacked } from '../assets/chart_bar_horizontal_stacked';
-import { LensIconChartBarHorizontalPercentage } from '../assets/chart_bar_horizontal_percentage';
-import { LensIconChartLine } from '../assets/chart_line';
+import { LensIconChartArea } from '@kbn/lens-icons';
+import { LensIconChartAreaStacked } from '@kbn/lens-icons';
+import { LensIconChartAreaPercentage } from '@kbn/lens-icons';
+import { LensIconChartBar } from '@kbn/lens-icons';
+import { LensIconChartBarStacked } from '@kbn/lens-icons';
+import { LensIconChartBarPercentage } from '@kbn/lens-icons';
+import { LensIconChartBarHorizontal } from '@kbn/lens-icons';
+import { LensIconChartBarHorizontalStacked } from '@kbn/lens-icons';
+import { LensIconChartBarHorizontalPercentage } from '@kbn/lens-icons';
+import { LensIconChartLine } from '@kbn/lens-icons';
 
 import type { VisualizationType, Suggestion } from '../types';
 import type { ValueLabelConfig } from '../../common/types';

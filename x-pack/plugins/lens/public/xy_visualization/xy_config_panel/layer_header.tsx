@@ -13,8 +13,8 @@ import type { VisualizationLayerWidgetProps, VisualizationType } from '../../typ
 import { State, visualizationTypes, SeriesType } from '../types';
 import { isHorizontalChart, isHorizontalSeries } from '../state_helpers';
 import { StaticHeader } from '../../shared_components';
-import { LensIconChartBarReferenceLine } from '../../assets/chart_bar_reference_line';
-import { LensIconChartBarAnnotations } from '../../assets/chart_bar_annotations';
+import { LensIconChartBarReferenceLine } from '@kbn/lens-icons';
+import { LensIconChartBarAnnotations } from '@kbn/lens-icons';
 import { updateLayer } from '.';
 import { isAnnotationsLayer, isDataLayer, isReferenceLayer } from '../visualization_helpers';
 

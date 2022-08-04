@@ -24,7 +24,7 @@ import {
   getDataLayers,
   isAnnotationsLayer,
 } from '../visualization_helpers';
-import { LensIconChartBarAnnotations } from '../../assets/chart_bar_annotations';
+import { LensIconChartBarAnnotations } from '@kbn/lens-icons';
 import { generateId } from '../../id_generator';
 
 const MAX_DATE = 8640000000000000;

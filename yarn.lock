@@ -3583,6 +3583,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/lens-icons@link:bazel-bin/packages/kbn-lens-icons":
+  version "0.0.0"
+  uid ""
+
 "@kbn/logging-mocks@link:bazel-bin/packages/kbn-logging-mocks":
   version "0.0.0"
   uid ""
@@ -7464,6 +7468,10 @@
   uid ""
 
 "@types/kbn__kibana-json-schema@link:bazel-bin/packages/kbn-kibana-json-schema/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__lens-icons@link:bazel-bin/packages/kbn-lens-icons/npm_module_types":
   version "0.0.0"
   uid ""
 

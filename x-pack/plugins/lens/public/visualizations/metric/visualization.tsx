@@ -18,7 +18,7 @@ import { euiLightVars } from '@kbn/ui-theme';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { LayerType } from '../../../common';
 import { getSuggestions } from './suggestions';
-import { LensIconChartMetric } from '../../assets/chart_metric';
+import { LensIconChartMetric } from '@kbn/lens-icons';
 import { Visualization, OperationMetadata, DatasourceLayers } from '../../types';
 import { layerTypes } from '../../../common';
 import { GROUP_ID, LENS_METRIC_ID } from './constants';

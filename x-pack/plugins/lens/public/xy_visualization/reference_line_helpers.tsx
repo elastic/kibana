@@ -28,7 +28,7 @@ import {
   isReferenceLayer,
 } from './visualization_helpers';
 import { generateId } from '../id_generator';
-import { LensIconChartBarReferenceLine } from '../assets/chart_bar_reference_line';
+import { LensIconChartBarReferenceLine } from '@kbn/lens-icons';
 import { defaultReferenceLineColor } from './color_assignment';
 
 export interface ReferenceLineBase {

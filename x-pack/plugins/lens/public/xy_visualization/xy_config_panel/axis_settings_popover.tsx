@@ -27,10 +27,10 @@ import {
   BucketAxisBoundsControl,
 } from '../../shared_components';
 import { isHorizontalChart } from '../state_helpers';
-import { EuiIconAxisBottom } from '../../assets/axis_bottom';
-import { EuiIconAxisLeft } from '../../assets/axis_left';
-import { EuiIconAxisRight } from '../../assets/axis_right';
-import { EuiIconAxisTop } from '../../assets/axis_top';
+import { EuiIconAxisBottom } from'@kbn/lens-icons';
+import { EuiIconAxisLeft } from '@kbn/lens-icons';
+import { EuiIconAxisRight } from '@kbn/lens-icons';
+import { EuiIconAxisTop } from '@kbn/lens-icons';
 import { validateExtent } from '../axes_configuration';
 
 import './axis_settings_popover.scss';
