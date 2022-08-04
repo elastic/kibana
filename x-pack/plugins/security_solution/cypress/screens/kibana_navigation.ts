@@ -29,4 +29,4 @@ export const KIBANA_NAVIGATION_TOGGLE = '[data-test-subj="toggleNavButton"]';
 
 export const SPACES_BUTTON = '[data-test-subj="spacesNavSelector"]';
 
-export const getGoToSpaceMenuItem = (space: string) => `[data-test-subj="${space}-gotoSpace"]`;
+export const getGoToSpaceMenuItem = (space: string) => `[data-test-subj="space-avatar-${space}"]`;
