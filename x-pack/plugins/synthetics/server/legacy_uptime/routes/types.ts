@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Subject } from 'rxjs';
 import { ObjectType } from '@kbn/config-schema';
 import {
   RequestHandler,
@@ -20,6 +21,12 @@ import { UMServerLibs, UptimeESClient } from '../lib/lib';
 import type { UptimeRequestHandlerContext } from '../../types';
 import { UptimeServerSetup } from '../lib/adapters';
 
+export type SyntheticsRequest = KibanaRequest<
+  Record<string, any>,
+  Record<string, any>,
+  Record<string, any>
+>;
+
 /**
  * Defines the basic properties employed by Uptime routes.
  */
@@ -27,6 +34,11 @@ export interface UMServerRoute<T> {
   method: string;
   writeAccess?: boolean;
   handler: T;
+  streamHandler?: (
+    context: UptimeRequestHandlerContext,
+    request: SyntheticsRequest,
+    subject: Subject<unknown>
+  ) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
 }
 
 /**
@@ -84,13 +96,15 @@ export type UMRouteHandler = ({
   response,
   server,
   savedObjectsClient,
+  subject,
 }: {
   uptimeEsClient: UptimeESClient;
   context: UptimeRequestHandlerContext;
-  request: KibanaRequest<Record<string, any>, Record<string, any>, Record<string, any>>;
+  request: SyntheticsRequest;
   response: KibanaResponseFactory;
   savedObjectsClient: SavedObjectsClientContract;
   server: UptimeServerSetup;
+  subject?: Subject<unknown>;
 }) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
 
 export type SyntheticsRouteHandler = ({
@@ -100,12 +114,14 @@ export type SyntheticsRouteHandler = ({
   response,
   server,
   savedObjectsClient,
+  subject: Subject,
 }: {
   uptimeEsClient: UptimeESClient;
   context: UptimeRequestHandlerContext;
-  request: KibanaRequest<Record<string, any>, Record<string, any>, Record<string, any>>;
-  response: KibanaResponseFactory;
+  request: SyntheticsRequest;
+  response?: KibanaResponseFactory;
   savedObjectsClient: SavedObjectsClientContract;
   server: UptimeServerSetup;
   syntheticsMonitorClient: SyntheticsMonitorClient;
+  subject?: Subject<unknown>;
 }) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;

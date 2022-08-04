@@ -14,6 +14,8 @@ import type {
   Logger,
   KibanaRequest,
   StartServicesAccessor,
+  RequestHandlerContext,
+  RequestHandler,
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { map$ } from '@kbn/std';
@@ -46,7 +48,12 @@ export interface BfetchServerSetup {
   ) => void;
   addStreamingResponseRoute: <Payload, Response>(
     path: string,
-    params: (request: KibanaRequest) => StreamingResponseHandler<Payload, Response>
+    params: (
+      request: KibanaRequest,
+      context: RequestHandlerContext
+    ) => StreamingResponseHandler<Payload, Response>,
+    method?: 'GET' | 'POST' | 'PUT' | 'DELETE',
+    pluginRouter?: ReturnType<CoreSetup['http']['createRouter']>
   ) => void;
 }
 
@@ -105,25 +112,41 @@ export class BfetchServerPlugin
       router: ReturnType<CoreSetup['http']['createRouter']>;
       logger: Logger;
     }): BfetchServerSetup['addStreamingResponseRoute'] =>
-    (path, handler) => {
-      router.post(
-        {
-          path: `/${removeLeadingSlash(path)}`,
-          validate: {
-            body: schema.any(),
-            query: schema.object({ compress: schema.boolean({ defaultValue: false }) }),
-          },
+    (path, handler, method = 'POST', pluginRouter) => {
+      const httpRouter = pluginRouter || router;
+      const routeDefinition = {
+        path: `/${removeLeadingSlash(path)}`,
+        validate: {
+          body: schema.any(),
+          query: schema.object({ compress: schema.boolean({ defaultValue: false }) }),
         },
-        async (context, request, response) => {
-          const handlerInstance = handler(request);
-          const data = request.body;
-          const compress = request.query.compress;
-          return response.ok({
-            headers: streamingHeaders,
-            body: createStream(handlerInstance.getResponseStream(data), logger, compress),
-          });
-        }
-      );
+      };
+      const routeHandler: RequestHandler<any, any, any> = async (context, request, response) => {
+        const handlerInstance = handler(request, context);
+        const data = request.body;
+        const compress = request.query.compress;
+        return response.ok({
+          headers: streamingHeaders,
+          body: createStream(handlerInstance.getResponseStream(data), logger, compress),
+        });
+      };
+
+      switch (method) {
+        case 'GET':
+          httpRouter.get(routeDefinition, routeHandler);
+          break;
+        case 'POST':
+          httpRouter.post(routeDefinition, routeHandler);
+          break;
+        case 'PUT':
+          httpRouter.put(routeDefinition, routeHandler);
+          break;
+        case 'DELETE':
+          httpRouter.delete(routeDefinition, routeHandler);
+          break;
+        default:
+          throw new Error(`Handler for method ${method} is not defined`);
+      }
     };
 
   private addBatchProcessingRoute =
