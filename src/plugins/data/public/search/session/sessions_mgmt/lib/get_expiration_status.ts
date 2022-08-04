@@ -35,11 +35,11 @@ export const getExpirationStatus = (config: SearchSessionsConfigSchema, expires:
 
     toolTipContent = i18n.translate('data.mgmt.searchSessions.status.expiresSoonInHours', {
       defaultMessage: 'This session expires in {numHours} {count, plural, one {hour} other {hours}}',
-      values: { numHours: expiresInHours, count: expiresInHours },
+      values: { numHours: expiresInHours, count: expiresInHours === 1 },
     });
     statusContent = i18n.translate('data.mgmt.searchSessions.status.expiresSoonInHoursTooltip', {
       defaultMessage: '{numHours} {count, plural, one {hour} other {hours}}',
-      values: { numHours: expiresInHours, count: expiresInHours },
+      values: { numHours: expiresInHours, count: expiresInHours === 1 },
     });
   }
 
