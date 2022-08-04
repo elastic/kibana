@@ -15,14 +15,16 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 
+import { CaseAssignees } from '../../../common/api/cases/assignee';
 import * as i18n from './translations';
 import { SuggestUsers } from '../user_profiles/suggest_users';
+import { SidebarTitle } from '../case_view/components/sidebar_title';
 
 interface AssignUsersProps {
-  assignees: Array<{ uid: string }>;
+  assignees: CaseAssignees;
 }
 
-const AssignUsersComponent: React.FC = () => {
+const AssignUsersComponent: React.FC<AssignUsersProps> = ({ assignees }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const togglePopOver = useCallback(() => {
@@ -51,9 +53,7 @@ const AssignUsersComponent: React.FC = () => {
         responsive={false}
       >
         <EuiFlexItem grow={false}>
-          <EuiText>
-            <h4>{i18n.ASSIGNEES}</h4>
-          </EuiText>
+          <SidebarTitle title={i18n.ASSIGNEES} />
         </EuiFlexItem>
         <EuiFlexItem data-test-subj="assignees-edit" grow={false}>
           <EuiPopover
@@ -69,7 +69,7 @@ const AssignUsersComponent: React.FC = () => {
           </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem grow={false}>
           <EuiText size="s">
             <p>{i18n.NO_ASSIGNEES}</p>
@@ -78,8 +78,8 @@ const AssignUsersComponent: React.FC = () => {
         <EuiFlexItem grow={false}>
           <EuiText size="s">
             <EuiLink>{'Assign a user'}</EuiLink>
-            <span>{'or'}</span>
-            <EuiLink>{'Assign yourself'}</EuiLink>
+            <span>{' or '}</span>
+            <EuiLink>{'assign yourself'}</EuiLink>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -15,9 +15,9 @@ import { Case, CaseStatuses } from '../../../../common';
 import { EditConnector } from '../../edit_connector';
 import { CasesNavigation } from '../../links';
 import { StatusActionButton } from '../../status/button';
-import { TagList } from '../../tag_list';
+import { EditTags } from './edit_tags';
 import { UserActions } from '../../user_actions';
-import { UserList } from '../../user_list';
+import { UserList } from './user_list';
 import { useOnUpdateField } from '../use_on_update_field';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import * as i18n from '../translations';
@@ -26,6 +26,7 @@ import { getConnectorById } from '../../utils';
 import { SeveritySidebarSelector } from '../../severity/sidebar_selector';
 import { useGetCaseUserActions } from '../../../containers/use_get_case_user_actions';
 import { AssignUsers } from '../../assignees/assign_users';
+import { SidebarSection } from './sidebar_section';
 
 export const CaseViewActivity = ({
   ruleDetailsNavigation,
@@ -149,7 +150,9 @@ export const CaseViewActivity = ({
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
-        <AssignUsers />
+        <SidebarSection>
+          <AssignUsers assignees={caseData.assignees} />
+        </SidebarSection>
         <SeveritySidebarSelector
           isDisabled={!permissions.update}
           isLoading={isLoading}
@@ -171,7 +174,7 @@ export const CaseViewActivity = ({
             users={userActionsData.participants}
           />
         ) : null}
-        <TagList
+        <EditTags
           tags={caseData.tags}
           onSubmit={onSubmitTags}
           isLoading={isLoading && loadingKey === 'tags'}

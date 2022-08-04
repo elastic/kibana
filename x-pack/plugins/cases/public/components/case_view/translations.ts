@@ -170,3 +170,9 @@ export const ALERTS_EMPTY_DESCRIPTION = i18n.translate(
     defaultMessage: 'No alerts have been added to this case.',
   }
 );
+
+export const SEND_EMAIL_ARIA = (user: string) =>
+  i18n.translate('xpack.cases.caseView.sendEmalLinkAria', {
+    values: { user },
+    defaultMessage: 'click to send an email to {user}',
+  });
