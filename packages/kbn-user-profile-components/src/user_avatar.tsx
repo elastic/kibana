@@ -11,7 +11,7 @@ import { EuiAvatar, useEuiTheme } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 
-import type { UserProfile, UserProfileAvatarData } from './user_profile';
+import type { UserProfile, UserProfileUserInfo, UserProfileAvatarData } from './user_profile';
 import {
   getUserAvatarColor,
   getUserAvatarInitials,
@@ -43,7 +43,7 @@ export interface UserAvatarProps
   /**
    * User to be rendered
    */
-  user?: UserProfile['user'];
+  user?: UserProfileUserInfo;
 
   /**
    * Avatar data of user to be rendered
