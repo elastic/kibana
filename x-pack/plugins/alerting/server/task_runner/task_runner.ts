@@ -48,7 +48,6 @@ import {
   RuleTaskState,
   RuleTypeRegistry,
   SanitizedRule,
-  SummaryOf,
 } from '../types';
 import { asErr, asOk, map, promiseResult, resolveErr, Resultable } from '../lib/result_type';
 import { getExecutionDurationPercentiles, getExecutionSuccessRatio } from '../lib/monitoring';
@@ -672,20 +671,165 @@ export class TaskRunner<
         alerts: [...Object.values(activeAlerts), ...Object.values(recoveredAlerts)],
       });
 
-      const allActions = this.getActions({
-        rule,
-        ruleLabel,
-        alerts: allAlerts as unknown as Array<
-          Alert<State, Context, ActionGroupIds> | Alert<State, Context, RecoveryActionGroupId>
-        >,
-        ruleRunMetricsStore,
-        spaceId,
-        actionsStore,
-      });
+      /////////////////////////////////////////////////////////////////////////
+      /////////////////////////////////////////////////////////////////////////
+      /////////////////////////////////////////////////////////////////////////
 
-      ruleRunMetricsStore.incrementNumberOfGeneratedActions(allActions.length);
+      const actionsToTrigger: RuleAction[] = [];
+      const ruleTypeActionGroups = new Map(
+        ruleType.actionGroups.map((group) => [group.id, group.name])
+      );
+
+      for (const action of rule.actions) {
+        if (this.shouldActionBeThrottled(action)) {
+          this.logger.info(
+            `Action "${action.actionRef}" of "${ruleType.id}/${rule.name}" is throttled`
+          );
+          continue;
+        }
+
+        if (this.isActionDisabled(action)) {
+          this.logger.warn(
+            `Rule "${rule.id}" skipped scheduling action "${action.id}" because it is disabled`
+          );
+          continue;
+        }
+
+        if (action.isSummary) {
+          if (action.notifyWhen === NotifyWhen.ON_EVERY_RUN) {
+            this.logger.debug(
+              `skipping action "${action.actionRef}" of "${ruleType.id}" as it is a summary and not supposed to run on every rule run`
+            );
+            continue;
+          }
+          if (action.notifyWhen === NotifyWhen.ONCE) {
+            this.logger.debug(
+              `skipping action "${action.actionRef}" of "${ruleType.id}" as it is a summary and not supposed to run on status change`
+            );
+            continue;
+          }
+        }
+
+        for (const alert of allAlerts) {
+          const actionGroup = (
+            alert.getState().end
+              ? ruleType.recoveryActionGroup.id
+              : alert.getScheduledActionOptions()!.actionGroup
+          ) as RecoveryActionGroupId & ActionGroupIds;
+
+          const actionSubgroup = alert.getScheduledActionOptions()?.subgroup;
+
+          alert.updateLastScheduledActions(actionGroup, actionSubgroup);
+          alert.unscheduleActions();
+
+          if (action.group !== actionGroup) {
+            continue;
+          }
+
+          if (!ruleTypeActionGroups.has(actionGroup)) {
+            this.logger.error(`Invalid action group "${actionGroup}" for rule "${ruleType.id}".`);
+            continue;
+          }
+
+          if (
+            action.notifyWhen === NotifyWhen.ONCE &&
+            !alert.scheduledActionGroupOrSubgroupHasChanged()
+          ) {
+            this.logger.debug(
+              `skipping scheduling of actions for '${alert.getId()}' in rule ${ruleLabel}: alert is active but action group has not changed`
+            );
+            continue;
+          }
+
+          ruleRunMetricsStore.incrementNumberOfGeneratedActions(1);
+          ruleRunMetricsStore.incrementNumberOfGeneratedActionsByConnectorType(action.actionTypeId);
+
+          if (
+            ruleRunMetricsStore.hasReachedTheExecutableActionsLimit(this.context.actionsConfigMap)
+          ) {
+            ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
+              actionTypeId: action.actionTypeId,
+              status: ActionsCompletion.PARTIAL,
+            });
+            this.logger.debug(
+              `Rule "${rule.id}" skipped scheduling action "${action.id}" because the maximum number of allowed actions has been reached.`
+            );
+            break;
+          }
+
+          if (
+            ruleRunMetricsStore.hasReachedTheExecutableActionsLimitByConnectorType({
+              actionTypeId: action.actionTypeId,
+              actionsConfigMap: this.context.actionsConfigMap,
+            })
+          ) {
+            if (!ruleRunMetricsStore.hasConnectorTypeReachedTheLimit(action.actionTypeId)) {
+              this.logger.debug(
+                `Rule "${ruleId}" skipped scheduling action "${action.id}" because the maximum number of allowed actions for connector type ${action.actionTypeId} has been reached.`
+              );
+            }
+            ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
+              actionTypeId: action.actionTypeId,
+              status: ActionsCompletion.PARTIAL,
+            });
+            continue;
+          }
+
+          ruleRunMetricsStore.incrementNumberOfTriggeredActions();
+          ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(action.actionTypeId);
+
+          const actionParams = transformActionParams({
+            actionsPlugin: this.context.actionsPlugin,
+            alertId: rule.id,
+            alertType: ruleType.id,
+            actionTypeId: action.actionTypeId,
+            alertName: rule.name,
+            spaceId,
+            tags: rule.tags,
+            alertInstanceId: alert.getId(),
+            alertActionGroup: actionGroup,
+            alertActionGroupName: ruleTypeActionGroups.get(actionGroup)!,
+            alertActionSubgroup: actionSubgroup,
+            context: alert.getContext(),
+            actionParams: action.params,
+            actionId: action.id,
+            state: alert.getState(),
+            kibanaBaseUrl: this.context.kibanaBaseUrl,
+            alertParams: rule.params,
+          });
+
+          actionsToTrigger.push({
+            ...action,
+            params: {
+              ...injectActionParams({
+                ruleId: rule.id,
+                spaceId,
+                actionParams,
+                actionTypeId: action.actionTypeId,
+              }),
+            },
+          });
+
+          if (alert.getState().end) {
+            alert.scheduleActions(actionGroup);
+          }
+
+          this.alertingEventLogger.logAction({
+            id: action.id,
+            typeId: action.actionTypeId,
+            alertId: alert.getId(),
+            alertGroup: actionGroup,
+            alertSubgroup: actionSubgroup,
+          });
+        }
+      }
+
+      /////////////////////////////////////////////////////////////////////////
+      /////////////////////////////////////////////////////////////////////////
+      /////////////////////////////////////////////////////////////////////////
+
       await this.triggerActions({
-        actions: allActions,
+        actions: actionsToTrigger,
         spaceId,
         apiKey,
         ruleId,
@@ -761,69 +905,6 @@ export class TaskRunner<
     });
   }
 
-  private getActions({
-    alerts,
-    rule,
-    ruleLabel,
-    ruleRunMetricsStore,
-    spaceId,
-    actionsStore,
-  }: {
-    alerts: Array<Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>;
-    rule: SanitizedRule<RuleTypeParams>;
-    ruleLabel: string;
-    ruleRunMetricsStore: RuleRunMetricsStore;
-    spaceId: string;
-    actionsStore: ActionsStore;
-  }) {
-    let actionsToTrigger: RuleAction[] = [];
-
-    const ruleType = this.ruleTypeRegistry.get(rule.alertTypeId);
-
-    const ruleTypeActionGroups = new Map(
-      ruleType.actionGroups.map((group) => [group.id, group.name])
-    );
-
-    for (const alert of alerts) {
-      const actionGroup = alert.getState().end
-        ? (ruleType.recoveryActionGroup.id as RecoveryActionGroupId & ActionGroupIds)
-        : (alert.getScheduledActionOptions()!.actionGroup as RecoveryActionGroupId &
-            ActionGroupIds);
-
-      const actionSubgroup = alert.getScheduledActionOptions()?.subgroup;
-      alert.updateLastScheduledActions(actionGroup, actionSubgroup);
-      alert.unscheduleActions();
-
-      if (!ruleTypeActionGroups.has(actionGroup)) {
-        this.logger.error(`Invalid action group "${actionGroup}" for rule "${ruleType.id}".`);
-        continue;
-      }
-
-      actionsToTrigger = actionsToTrigger.concat(
-        this.generateActions({
-          alert,
-          rule,
-          ruleLabel,
-          ruleRunMetricsStore,
-          actionGroup,
-          actionSubgroup,
-          spaceId,
-          alertActionGroupName: ruleTypeActionGroups.get(actionGroup)!,
-          alerts: alerts as unknown as Alert[],
-          alertContext: alert.getContext(),
-          state: alert.getState(),
-          actionsStore,
-        })
-      );
-
-      if (alert.getState().end) {
-        alert.scheduleActions(actionGroup);
-      }
-    }
-
-    return actionsToTrigger;
-  }
-
   private async triggerActions({
     actions,
     spaceId,
@@ -879,165 +960,35 @@ export class TaskRunner<
     );
   }
 
-  private generateActions({
-    alert,
-    rule,
-    ruleLabel,
-    ruleRunMetricsStore,
-    actionGroup,
-    actionSubgroup,
-    spaceId,
-    alertActionGroupName,
-    alerts,
-    alertContext,
-    state,
-    actionsStore,
-  }: {
-    alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>;
-    rule: SanitizedRule<RuleTypeParams>;
-    ruleLabel: string;
-    ruleRunMetricsStore: RuleRunMetricsStore;
-    actionGroup: string;
-    actionSubgroup?: string;
-    spaceId: string;
-    alertActionGroupName: string;
-    alerts: Alert[];
-    alertContext: AlertInstanceContext;
-    state: AlertInstanceState;
-    actionsStore: ActionsStore;
-  }) {
-    const ruleType = this.ruleTypeRegistry.get(rule.alertTypeId);
-    const actionsToTrigger: RuleAction[] = [];
+  shouldActionBeThrottled(action: RuleAction) {
+    return (
+      action.notifyWhen === NotifyWhen.ON_INTERVAL &&
+      action.lastTriggerDate &&
+      // @ts-ignore
+      moment(String(action.lastTriggerDate))
+        .add(parseInt(String(action.actionThrottle), 10), action.actionThrottleUnit)
+        .isAfter(moment())
+    );
+  }
 
-    for (const action of rule.actions) {
-      // Selected action group or summary
-      if (action.group === actionGroup || action.isSummary) {
-        // Don't add the same action that is a summary
-        if (action.isSummary && actionsStore[action.actionRef] !== undefined) {
-          this.logger.info(
-            `skipping action "${action.actionRef}" of "${ruleType.id}" as it is a summary and already in the list to trigger`
-          );
-          continue;
-        }
-
-        // Action should run on status change
-        if (
-          action.notifyWhen === NotifyWhen.ONCE &&
-          !alert.scheduledActionGroupOrSubgroupHasChanged()
-        ) {
-          this.logger.debug(
-            `skipping scheduling of actions for '${alert.getId()}' in rule ${ruleLabel}: alert is active but action group has not changed`
-          );
-          continue;
-        }
-
-        // Summary actions should not run on every rule run
-        if (action.notifyWhen === NotifyWhen.ON_EVERY_RUN && action.isSummary) {
-          this.logger.debug(
-            `skipping action "${action.actionRef}" of "${ruleType.id}" as it is a summary and supposed to run every rule run`
-          );
-          continue;
-        }
-
-        // Throttle
-        if (
-          action.notifyWhen === NotifyWhen.ON_INTERVAL &&
-          action.lastTriggerDate &&
-          // @ts-ignore
-          moment(String(action.lastTriggerDate))
-            .add(parseInt(String(action.actionThrottle), 10), action.actionThrottleUnit)
-            .isAfter(moment())
-        ) {
-          this.logger.info(
-            `Action "${action.actionRef}" of "${ruleType.id}/${rule.name}" is throttled`
-          );
-          continue;
-        }
-
-        // Should we count skipped actions above?
-        ruleRunMetricsStore.incrementNumberOfGeneratedActionsByConnectorType(action.actionTypeId);
-
-        if (
-          ruleRunMetricsStore.hasReachedTheExecutableActionsLimit(this.context.actionsConfigMap)
-        ) {
-          ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
-            actionTypeId: action.actionTypeId,
-            status: ActionsCompletion.PARTIAL,
-          });
-          this.logger.debug(
-            `Rule "${rule.id}" skipped scheduling action "${action.id}" because the maximum number of allowed actions has been reached.`
-          );
-          break;
-        }
-
-        if (
-          !this.context.actionsPlugin.isActionExecutable(action.id, action.actionTypeId, {
-            notifyUsage: true,
-          })
-        ) {
-          this.logger.warn(
-            `Rule "${rule.id}" skipped scheduling action "${action.id}" because it is disabled`
-          );
-          continue;
-        }
-
-        ruleRunMetricsStore.incrementNumberOfTriggeredActions();
-        ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(action.actionTypeId);
-
-        actionsStore[action.actionRef!] = {
-          isSummary: Boolean(action.isSummary),
-          lastTriggerDate: new Date().toISOString(),
-        };
-
-        if (action.isSummary && action.summaryOf === SummaryOf.TIME_SPAN) {
-          // fetch alert as data
-          // alerts = alerts.concat(fetchAlertAsData(rule.id));
-        }
-
-        actionsToTrigger.push({
-          ...action,
-          params: {
-            ...injectActionParams({
-              ruleId: rule.id,
-              spaceId,
-              actionParams: transformActionParams({
-                actionsPlugin: this.context.actionsPlugin,
-                alertId: rule.id,
-                alertType: ruleType.id,
-                actionTypeId: action.actionTypeId,
-                alertName: rule.name,
-                spaceId,
-                tags: rule.tags,
-                alertInstanceId: alert.getId(),
-                alertActionGroup: actionGroup,
-                alertActionGroupName,
-                alertActionSubgroup: actionSubgroup,
-                context: alertContext,
-                actionParams: action.params,
-                actionId: action.id,
-                state,
-                kibanaBaseUrl: this.context.kibanaBaseUrl,
-                alertParams: rule.params,
-                ...(action.isSummary && { alerts }),
-              }),
-              actionTypeId: action.actionTypeId,
-            }),
-          },
-        });
-
-        this.alertingEventLogger.logAction({
-          id: action.id,
-          typeId: action.actionTypeId,
-          alertId: alert.getId(),
-          alertGroup: actionGroup,
-          alertSubgroup: actionSubgroup,
-        });
-      }
-    }
-
-    return actionsToTrigger;
+  isActionDisabled(action: RuleAction) {
+    return !this.context.actionsPlugin.isActionExecutable(action.id, action.actionTypeId, {
+      notifyUsage: true,
+    });
   }
 }
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
 
 function generateNewAndRecoveredAlertEvents<
   State extends AlertInstanceState,
