@@ -356,5 +356,30 @@ export function MachineLearningCommonUIProvider({
         );
       });
     },
+
+    async selectButtonGroupValue(inputTestSubj: string, label: string) {
+      await retry.tryForTime(5000, async () => {
+        // The input element can not be clicked directly.
+        // Instead, we need to click the corresponding label
+        const inputId: string = await testSubjects.getAttribute(inputTestSubj, 'id', 1000);
+        const labelElement = await find.byCssSelector(
+          `[for="${inputId}"] [label="${label}"]`,
+          1000
+        );
+        await labelElement.click();
+
+        // sometimes the checked attribute of the input is set but it's not actually
+        // selected, so we're also checking the class of the corresponding label
+        const updatedLabelElement = await find.byCssSelector(
+          `[for="${inputId}"] [label="${label}"]`,
+          1000
+        );
+        const labelClasses = await updatedLabelElement.getAttribute('class');
+        expect(labelClasses).to.contain(
+          'euiButtonGroupButton-isSelected',
+          `Label for '${inputTestSubj}' should be selected`
+        );
+      });
+    },
   };
 }

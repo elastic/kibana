@@ -101,6 +101,19 @@ export default function ({ getService }: FtrProviderContext) {
         });
       }
 
+      it('starts deployment of the imported model', async () => {
+        await ml.testExecution.logTestStep('should show the start deployment modal');
+        await ml.trainedModelsTable.startDeploymentWithParams(
+          SUPPORTED_TRAINED_MODELS.TINY_NER.name,
+          {
+            numOfAllocations: 2,
+            threadsPerAllocation: 2,
+          }
+        );
+      });
+
+      it('stops deployment of the imported model', async () => {});
+
       it('displays the built-in model and no actions are enabled', async () => {
         await ml.testExecution.logTestStep('should display the model in the table');
         await ml.trainedModelsTable.filterWithSearchString(builtInModelData.modelId, 1);
