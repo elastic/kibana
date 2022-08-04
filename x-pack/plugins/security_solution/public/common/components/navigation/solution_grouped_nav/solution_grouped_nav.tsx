@@ -202,37 +202,35 @@ const SolutionNavItemComponent: React.FC<SolutionNavItemProps> = ({
   };
 
   return (
-    <>
-      {/* eslint-disable-next-line @elastic/eui/href-or-on-click*/}
-      <EuiLink
-        key={id}
-        href={href}
-        onClick={onClick}
+    // eslint-disable-next-line @elastic/eui/href-or-on-click
+    <EuiLink
+      key={id}
+      href={href}
+      onClick={onClick}
+      color={isSelected ? 'primary' : 'text'}
+      data-test-subj={`groupedNavItemLink-${id}`}
+    >
+      <EuiListGroupItemStyled
+        className={itemClassNames}
         color={isSelected ? 'primary' : 'text'}
-        data-test-subj={`groupedNavItemLink-${id}`}
-      >
-        <EuiListGroupItemStyled
-          className={itemClassNames}
-          color={isSelected ? 'primary' : 'text'}
-          label={label}
-          size="s"
-          {...(hasPanelNav
-            ? {
-                extraAction: {
-                  className: buttonClassNames,
-                  color: isActive ? 'primary' : 'text',
-                  onClick: onButtonClick,
-                  iconType: EuiIconSpaces,
-                  iconSize: 'm',
-                  'aria-label': 'Toggle group nav',
-                  'data-test-subj': `groupedNavItemButton-${id}`,
-                  alwaysShow: true,
-                },
-              }
-            : {})}
-        />
-      </EuiLink>
-    </>
+        label={label}
+        size="s"
+        {...(hasPanelNav
+          ? {
+              extraAction: {
+                className: buttonClassNames,
+                color: isActive ? 'primary' : 'text',
+                onClick: onButtonClick,
+                iconType: EuiIconSpaces,
+                iconSize: 'm',
+                'aria-label': 'Toggle group nav',
+                'data-test-subj': `groupedNavItemButton-${id}`,
+                alwaysShow: true,
+              },
+            }
+          : {})}
+      />
+    </EuiLink>
   );
 };
 const SolutionNavItem = React.memo(SolutionNavItemComponent);
