@@ -9,6 +9,7 @@ import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { useContext, useEffect } from 'react';
 import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
 import React from 'react';
+import { DateFormatter } from '../../../../components/date_formatter';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { EMPTY_VALUE } from '../../../../../common/constants';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
@@ -35,7 +36,7 @@ export const cellRendererFactory = (from: number) => {
 
     const darkMode = uiSettings.get('theme:darkMode');
 
-    const { indicators, expanded } = indicatorsTableContext;
+    const { indicators, expanded, fieldTypesMap } = indicatorsTableContext;
 
     const indicator: Indicator | undefined = indicators[rowIndex - from];
 
@@ -63,6 +64,9 @@ export const cellRendererFactory = (from: number) => {
       return displayValue(indicator) || EMPTY_VALUE;
     }
 
-    return unwrapValue(indicator, columnId as RawIndicatorFieldId) || EMPTY_VALUE;
+    const fieldType: string = fieldTypesMap[columnId];
+    const value = unwrapValue(indicator, columnId as RawIndicatorFieldId);
+
+    return fieldType === 'date' ? <DateFormatter date={value as string} /> : value || EMPTY_VALUE;
   };
 };

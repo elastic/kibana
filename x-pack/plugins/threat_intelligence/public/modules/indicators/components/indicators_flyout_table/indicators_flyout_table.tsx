@@ -8,6 +8,8 @@
 import { EuiEmptyPrompt, EuiInMemoryTable } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { VFC } from 'react';
+import { dateFormatter } from '../../../../common/utils/dates';
+import { useDateFormat, useTimeZone } from '../../../../hooks/use_kibana_ui_settings';
 import { EMPTY_VALUE } from '../../../../../common/constants';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { unwrapValue } from '../../lib/unwrap_value';
@@ -46,16 +48,29 @@ const search = {
 
 export interface IndicatorsFlyoutTableProps {
   indicator: Indicator;
+  fieldTypesMap: { [id: string]: string };
 }
 
-export const IndicatorsFlyoutTable: VFC<IndicatorsFlyoutTableProps> = ({ indicator }) => {
-  const items: Array<{ field: string; value: string }> = [];
+export const IndicatorsFlyoutTable: VFC<IndicatorsFlyoutTableProps> = ({
+  indicator,
+  fieldTypesMap,
+}) => {
+  const userTimeZone = useTimeZone();
+  const userFormat = useDateFormat();
 
+  const items: Array<{ field: string; value: string }> = [];
   for (const key in indicator.fields) {
     if (!indicator.fields.hasOwnProperty(key)) continue;
+
+    const fieldType: string = fieldTypesMap[key];
+    const value = unwrapValue(indicator, key as RawIndicatorFieldId);
+
     items.push({
       field: key,
-      value: unwrapValue(indicator, key as RawIndicatorFieldId) || EMPTY_VALUE,
+      value:
+        fieldType === 'date'
+          ? dateFormatter(value as string, userTimeZone, userFormat)
+          : value || EMPTY_VALUE,
     });
   }
 
