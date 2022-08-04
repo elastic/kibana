@@ -22,16 +22,18 @@ import type {
   YAxisConfig,
 } from '@kbn/expression-xy-plugin/common';
 import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
-import { LensIconChartArea } from '@kbn/lens-icons';
-import { LensIconChartAreaStacked } from '@kbn/lens-icons';
-import { LensIconChartAreaPercentage } from '@kbn/lens-icons';
-import { LensIconChartBar } from '@kbn/lens-icons';
-import { LensIconChartBarStacked } from '@kbn/lens-icons';
-import { LensIconChartBarPercentage } from '@kbn/lens-icons';
-import { LensIconChartBarHorizontal } from '@kbn/lens-icons';
-import { LensIconChartBarHorizontalStacked } from '@kbn/lens-icons';
-import { LensIconChartBarHorizontalPercentage } from '@kbn/lens-icons';
-import { LensIconChartLine } from '@kbn/lens-icons';
+import {
+  LensIconChartArea,
+  LensIconChartLine,
+  LensIconChartAreaStacked,
+  LensIconChartBarHorizontalStacked,
+  LensIconChartBarHorizontalPercentage,
+  LensIconChartAreaPercentage,
+  LensIconChartBar,
+  LensIconChartBarStacked,
+  LensIconChartBarPercentage,
+  LensIconChartBarHorizontal,
+} from '@kbn/lens-icons';
 
 import type { VisualizationType, Suggestion } from '../../types';
 import type { ValueLabelConfig } from '../../../common/types';

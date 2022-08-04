@@ -7,9 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
-import { LensIconChartBarHorizontal } from '@kbn/lens-icons';
-import { LensIconChartMixedXy } from '@kbn/lens-icons';
-import { LensIconChartBarStacked } from '@kbn/lens-icons';
+import {
+  LensIconChartBarHorizontal,
+  LensIconChartMixedXy,
+  LensIconChartBarStacked,
+} from '@kbn/lens-icons';
 import { DatasourceLayers, OperationMetadata, VisualizationType } from '../../types';
 import {
   State,

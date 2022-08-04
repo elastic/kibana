@@ -18,10 +18,12 @@ import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
 import { ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
-import { EuiIconAxisBottom } from '@kbn/lens-icons';
-import { EuiIconAxisLeft } from '@kbn/lens-icons';
-import { EuiIconAxisRight } from '@kbn/lens-icons';
-import { EuiIconAxisTop } from '@kbn/lens-icons';
+import {
+  EuiIconAxisBottom,
+  EuiIconAxisLeft,
+  EuiIconAxisRight,
+  EuiIconAxisTop,
+} from '@kbn/lens-icons';
 import { isHorizontalChart } from '../state_helpers';
 import {
   ToolbarPopover,

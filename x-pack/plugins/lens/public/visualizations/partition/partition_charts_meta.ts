@@ -9,11 +9,13 @@ import { i18n } from '@kbn/i18n';
 import type { EuiIconProps } from '@elastic/eui';
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { LensIconChartDonut } from '@kbn/lens-icons';
-import { LensIconChartPie } from '@kbn/lens-icons';
-import { LensIconChartTreemap } from '@kbn/lens-icons';
-import { LensIconChartMosaic } from '@kbn/lens-icons';
-import { LensIconChartWaffle } from '@kbn/lens-icons';
+import {
+  LensIconChartDonut,
+  LensIconChartPie,
+  LensIconChartTreemap,
+  LensIconChartMosaic,
+  LensIconChartWaffle,
+} from '@kbn/lens-icons';
 import {
   CategoryDisplay,
   NumberDisplay,
