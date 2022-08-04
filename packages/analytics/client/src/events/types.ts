@@ -108,7 +108,7 @@ export interface TelemetryCounter {
 /**
  * Definition of the full event structure
  */
-export interface Event {
+export interface Event<Properties = Record<string, unknown>> {
   /**
    * The time the event was generated in ISO format.
    */
@@ -120,7 +120,7 @@ export interface Event {
   /**
    * The specific properties of the event type.
    */
-  properties: Record<string, unknown>;
+  properties: Properties;
   /**
    * The {@link EventContext} enriched during the processing pipeline.
    */

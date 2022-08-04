@@ -12,6 +12,7 @@ import * as d3Scale from 'd3-scale';
 import * as d3Selection from 'd3-selection';
 import * as d3Transition from 'd3-transition';
 
+import { getSnappedWindowParameters } from '@kbn/aiops-utils';
 import type { WindowParameters } from '@kbn/aiops-utils';
 
 import './dual_brush.scss';
@@ -56,8 +57,9 @@ interface DualBrushProps {
   windowParameters: WindowParameters;
   min: number;
   max: number;
-  onChange?: (windowParameters: WindowParameters) => void;
+  onChange?: (windowParameters: WindowParameters, windowPxParameters: WindowParameters) => void;
   marginLeft: number;
+  snapTimestamps?: number[];
   width: number;
 }
 
@@ -67,6 +69,7 @@ export function DualBrush({
   max,
   onChange,
   marginLeft,
+  snapTimestamps,
   width,
 }: DualBrushProps) {
   const d3BrushContainer = useRef(null);
@@ -141,12 +144,6 @@ export function DualBrush({
 
             newWindowParameters.deviationMin = px2ts(newDeviationMin);
             newWindowParameters.deviationMax = px2ts(newDeviationMax);
-
-            d3.select(this)
-              .transition()
-              .duration(200)
-              // @ts-expect-error call doesn't allow the brush move function
-              .call(brushes.current[1].brush.move, [newDeviationMin, newDeviationMax]);
           } else if (
             id === 'baseline' &&
             deviationSelection &&
@@ -158,21 +155,56 @@ export function DualBrush({
 
             newWindowParameters.baselineMin = px2ts(newBaselineMin);
             newWindowParameters.baselineMax = px2ts(newBaselineMax);
+          }
 
+          const snappedWindowParameters = snapTimestamps
+            ? getSnappedWindowParameters(newWindowParameters, snapTimestamps)
+            : newWindowParameters;
+
+          const newBrushPx = {
+            baselineMin: x(snappedWindowParameters.baselineMin) ?? 0,
+            baselineMax: x(snappedWindowParameters.baselineMax) ?? 0,
+            deviationMin: x(snappedWindowParameters.deviationMin) ?? 0,
+            deviationMax: x(snappedWindowParameters.deviationMax) ?? 0,
+          };
+
+          if (
+            id === 'baseline' &&
+            (baselineSelection[0] !== newBrushPx.baselineMin ||
+              baselineSelection[1] !== newBrushPx.baselineMax)
+          ) {
             d3.select(this)
               .transition()
               .duration(200)
               // @ts-expect-error call doesn't allow the brush move function
-              .call(brushes.current[0].brush.move, [newBaselineMin, newBaselineMax]);
+              .call(brushes.current[0].brush.move, [
+                newBrushPx.baselineMin,
+                newBrushPx.baselineMax,
+              ]);
           }
 
-          brushes.current[0].start = newWindowParameters.baselineMin;
-          brushes.current[0].end = newWindowParameters.baselineMax;
-          brushes.current[1].start = newWindowParameters.deviationMin;
-          brushes.current[1].end = newWindowParameters.deviationMax;
+          if (
+            id === 'deviation' &&
+            (deviationSelection[0] !== newBrushPx.deviationMin ||
+              deviationSelection[1] !== newBrushPx.deviationMax)
+          ) {
+            d3.select(this)
+              .transition()
+              .duration(200)
+              // @ts-expect-error call doesn't allow the brush move function
+              .call(brushes.current[1].brush.move, [
+                newBrushPx.deviationMin,
+                newBrushPx.deviationMax,
+              ]);
+          }
+
+          brushes.current[0].start = snappedWindowParameters.baselineMin;
+          brushes.current[0].end = snappedWindowParameters.baselineMax;
+          brushes.current[1].start = snappedWindowParameters.deviationMin;
+          brushes.current[1].end = snappedWindowParameters.deviationMax;
 
           if (onChange) {
-            onChange(newWindowParameters);
+            onChange(snappedWindowParameters, newBrushPx);
           }
           drawBrushes();
         }
@@ -245,7 +277,17 @@ export function DualBrush({
 
       drawBrushes();
     }
-  }, [min, max, width, baselineMin, baselineMax, deviationMin, deviationMax, onChange]);
+  }, [
+    min,
+    max,
+    width,
+    baselineMin,
+    baselineMax,
+    deviationMin,
+    deviationMax,
+    snapTimestamps,
+    onChange,
+  ]);
 
   return (
     <>

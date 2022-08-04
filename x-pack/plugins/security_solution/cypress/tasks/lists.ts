@@ -123,43 +123,6 @@ export const uploadListItemData = (
 };
 
 /**
- * Checks a single value list file against a data set to ensure it has been uploaded.
- *
- * You can optionally pass in an array of test suggestions which will be useful for if you are
- * using a range such as a CIDR range and need to ensure that test range has been added to the
- * list but you cannot run an explicit test against that range.
- *
- * This also will remove any upload data such as empty strings that can happen from the fixture
- * due to extra lines being added from formatters.
- * @param file The file that was imported
- * @param data The contents to check unless testSuggestions is given.
- * @param type The type of the file import such as ip/keyword/text etc...
- * @param testSuggestions The type of test to use rather than the fixture file which is useful for ranges
- * Ref: https://www.elastic.co/guide/en/security/current/lists-api-import-list-items.html
- */
-export const checkListItemData = (
-  file: string,
-  data: string,
-  testSuggestions: string[] | undefined
-): Cypress.Chainable<JQuery<HTMLElement>> => {
-  const importCheckLines =
-    testSuggestions == null
-      ? data.split('\n').filter((line) => line.trim() !== '')
-      : testSuggestions;
-  return cy.wrap(importCheckLines).each((line) => {
-    return cy
-      .request({
-        retryOnStatusCodeFailure: true,
-        method: 'GET',
-        url: `api/lists/items?list_id=${file}&value=${line}`,
-      })
-      .then((resp) => {
-        expect(resp.status).to.eq(200);
-      });
-  });
-};
-
-/**
  * Imports a single value list file this using Cypress Request and lists REST API. After it
  * imports the data, it will re-check and ensure that the data is there before continuing to
  * get us more deterministic.

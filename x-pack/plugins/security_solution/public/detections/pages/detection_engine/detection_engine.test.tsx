@@ -56,10 +56,6 @@ jest.mock('react-router-dom', () => {
     useHistory: jest.fn(),
   };
 });
-jest.mock('../../components/alerts_info', () => ({
-  useAlertInfo: jest.fn().mockReturnValue([]),
-}));
-
 jest.mock('../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../common/lib/kibana');
 

@@ -3,9 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
- */
-
-import React from 'react';
+ */ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -36,7 +34,7 @@ interface MetricConfig extends Omit<MetricState, 'palette' | 'colorMode'> {
   palette: PaletteOutput<CustomPaletteState>;
 }
 
-export const supportedTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
+export const legacyMetricSupportedTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
 
 const getFontSizeAndUnit = (fontSize: string) => {
   const [size, sizeUnit] = fontSize.split(/(\d+)/).filter(Boolean);
@@ -171,7 +169,7 @@ const toExpression = (
   };
 };
 
-export const getMetricVisualization = ({
+export const getLegacyMetricVisualization = ({
   paletteService,
   theme,
 }: {
@@ -184,13 +182,12 @@ export const getMetricVisualization = ({
     {
       id: 'lnsMetric',
       icon: LensIconChartMetric,
-      label: i18n.translate('xpack.lens.metric.label', {
-        defaultMessage: 'Metric',
+      label: i18n.translate('xpack.lens.legacyMetric.label', {
+        defaultMessage: 'Legacy Metric',
       }),
-      groupLabel: i18n.translate('xpack.lens.metric.groupLabel', {
+      groupLabel: i18n.translate('xpack.lens.legacyMetric.groupLabel', {
         defaultMessage: 'Goal and single value',
       }),
-      sortPriority: 3,
     },
   ],
 
@@ -212,8 +209,8 @@ export const getMetricVisualization = ({
   getDescription() {
     return {
       icon: LensIconChartMetric,
-      label: i18n.translate('xpack.lens.metric.label', {
-        defaultMessage: 'Metric',
+      label: i18n.translate('xpack.lens.legacyMetric.label', {
+        defaultMessage: 'Legacy Metric',
       }),
     };
   },
@@ -238,7 +235,14 @@ export const getMetricVisualization = ({
       groups: [
         {
           groupId: 'metric',
-          groupLabel: i18n.translate('xpack.lens.metric.label', { defaultMessage: 'Metric' }),
+          paramEditorCustomProps: {
+            headingLabel: i18n.translate('xpack.lens.metric.headingLabel', {
+              defaultMessage: 'Value',
+            }),
+          },
+          groupLabel: i18n.translate('xpack.lens.legacyMetric.label', {
+            defaultMessage: 'Legacy Metric',
+          }),
           layerId: props.state.layerId,
           accessors: props.state.accessor
             ? [
@@ -251,7 +255,7 @@ export const getMetricVisualization = ({
             : [],
           supportsMoreColumns: !props.state.accessor,
           filterOperations: (op: OperationMetadata) =>
-            !op.isBucketed && supportedTypes.has(op.dataType),
+            !op.isBucketed && legacyMetricSupportedTypes.has(op.dataType),
           enableDimensionEditor: true,
           required: true,
         },
@@ -263,7 +267,7 @@ export const getMetricVisualization = ({
     return [
       {
         type: layerTypes.DATA,
-        label: i18n.translate('xpack.lens.metric.addLayer', {
+        label: i18n.translate('xpack.lens.legacyMetric.addLayer', {
           defaultMessage: 'Visualization',
         }),
       },

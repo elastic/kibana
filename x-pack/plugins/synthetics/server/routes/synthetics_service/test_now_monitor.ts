@@ -12,7 +12,7 @@ import {
   SyntheticsMonitor,
   SyntheticsMonitorWithSecrets,
 } from '../../../common/runtime_types';
-import { UMRestApiRouteFactory } from '../../legacy_uptime/routes/types';
+import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
 import {
   syntheticsMonitor,
@@ -21,7 +21,7 @@ import {
 import { formatHeartbeatRequest } from '../../synthetics_service/formatters/format_configs';
 import { normalizeSecrets } from '../../synthetics_service/utils/secrets';
 
-export const testNowMonitorRoute: UMRestApiRouteFactory = () => ({
+export const testNowMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: API_URLS.TRIGGER_MONITOR + '/{monitorId}',
   validate: {
@@ -29,7 +29,12 @@ export const testNowMonitorRoute: UMRestApiRouteFactory = () => ({
       monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
     }),
   },
-  handler: async ({ request, savedObjectsClient, server }): Promise<any> => {
+  handler: async ({
+    request,
+    savedObjectsClient,
+    server,
+    syntheticsMonitorClient,
+  }): Promise<any> => {
     const { monitorId } = request.params;
     const monitor = await savedObjectsClient.get<SyntheticsMonitor>(
       syntheticsMonitorType,
@@ -47,7 +52,7 @@ export const testNowMonitorRoute: UMRestApiRouteFactory = () => ({
 
     const { [ConfigKey.SCHEDULE]: schedule, [ConfigKey.LOCATIONS]: locations } = monitor.attributes;
 
-    const { syntheticsService } = server;
+    const { syntheticsService } = syntheticsMonitorClient;
 
     const testRunId = uuidv4();
 

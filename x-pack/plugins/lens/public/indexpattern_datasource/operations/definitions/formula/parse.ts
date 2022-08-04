@@ -103,9 +103,10 @@ function extractColumns(
     if (nodeOperation.input === 'field') {
       const [fieldName] = variables.filter((v): v is TinymathVariable => isObject(v));
       // a validation task passed before executing this and checked already there's a field
-      const field = shouldHaveFieldArgument(node)
-        ? indexPattern.getFieldByName(fieldName.value)!
-        : documentField;
+      let field = fieldName ? indexPattern.getFieldByName(fieldName.value) : undefined;
+      if (!shouldHaveFieldArgument(node) && !field) {
+        field = documentField;
+      }
 
       const mappedParams = {
         ...mergeWithGlobalFilter(
@@ -122,7 +123,8 @@ function extractColumns(
         {
           layer,
           indexPattern,
-          field,
+          // checked in the validation phase
+          field: field!,
         },
         mappedParams
       );

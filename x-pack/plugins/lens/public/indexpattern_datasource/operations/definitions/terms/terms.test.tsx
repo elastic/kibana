@@ -34,6 +34,7 @@ import { DateHistogramIndexPatternColumn } from '../date_histogram';
 import { getOperationSupportMatrix } from '../../../dimension_panel/operation_support';
 import { FieldSelect } from '../../../dimension_panel/field_select';
 import { ReferenceEditor } from '../../../dimension_panel/reference_editor';
+import { cloneDeep } from 'lodash';
 import { IncludeExcludeRow } from './include_exclude_options';
 
 // mocking random id generator function
@@ -1345,7 +1346,7 @@ describe('terms', () => {
       ).toBe('Invalid field: "timestamp". Check your data view or pick another field.');
     });
 
-    it('should render the an add button for single layer, but no other hints', () => {
+    it('should render the an add button for single layer and disabled the remove button', () => {
       const updateLayerSpy = jest.fn();
       const existingFields = getExistingFields();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
@@ -1365,7 +1366,15 @@ describe('terms', () => {
         instance.find('[data-test-subj="indexPattern-terms-add-field"]').exists()
       ).toBeTruthy();
 
-      expect(instance.find('[data-test-subj^="indexPattern-terms-removeField-"]').length).toBe(0);
+      expect(instance.find('[data-test-subj^="indexPattern-terms-removeField-"]').length).not.toBe(
+        0
+      );
+      expect(
+        instance
+          .find('[data-test-subj^="indexPattern-terms-removeField-"]')
+          .first()
+          .prop('isDisabled')
+      ).toBeTruthy();
     });
 
     it('should switch to the first supported operation when in single term mode and the picked field is not supported', () => {
@@ -1582,7 +1591,7 @@ describe('terms', () => {
       );
 
       expect(
-        instance.find('[data-test-subj="indexPattern-dimension-field"]').first().prop('options')
+        instance.find('[data-test-subj="indexPattern-dimension-field"]').at(1).prop('options')
       ).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
@@ -2555,13 +2564,19 @@ describe('terms', () => {
       const functionComboBox = comboBoxes.filter(
         '[data-test-subj="indexPattern-reference-function"]'
       );
-      const fieldComboBox = comboBoxes.filter('[data-test-subj="indexPattern-dimension-field"]');
       const option = functionComboBox.prop('options')!.find(({ label }) => label === 'Average')!;
       act(() => {
         functionComboBox.prop('onChange')!([option]);
       });
+      instance.update();
 
-      expect(fieldComboBox.prop('isInvalid')).toBeTruthy();
+      expect(
+        instance
+          .find('ReferenceEditor')
+          .find(EuiComboBox)
+          .filter('[data-test-subj="indexPattern-dimension-field"]')
+          .prop('isInvalid')
+      ).toBeTruthy();
       expect(updateLayerSpy).not.toHaveBeenCalled();
     });
 
@@ -3066,6 +3081,22 @@ describe('terms', () => {
           defaultProps.indexPattern
         )
       ).toEqual(['unsupported']);
+    });
+  });
+
+  describe('getMaxPossibleNumValues', () => {
+    it('reports correct number of values', () => {
+      const termsSize = 5;
+
+      const withoutOther = cloneDeep(layer.columns.col1 as TermsIndexPatternColumn);
+      withoutOther.params.size = termsSize;
+      withoutOther.params.otherBucket = false;
+
+      const withOther = cloneDeep(withoutOther);
+      withOther.params.otherBucket = true;
+
+      expect(termsOperation.getMaxPossibleNumValues!(withoutOther)).toBe(termsSize);
+      expect(termsOperation.getMaxPossibleNumValues!(withOther)).toBe(termsSize + 1);
     });
   });
 });

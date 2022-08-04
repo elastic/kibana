@@ -330,7 +330,9 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async waitForTourStep(tourStep: string) {
-      await retry.waitForWithTimeout('tour step', 5000, () => testSubjects.exists(tourStep));
+      await retry.waitForWithTimeout(`tour step ${tourStep}`, 10000, () =>
+        testSubjects.exists(tourStep)
+      );
     },
 
     async ensureTourStepIsClosed(tourStep: string) {
@@ -347,6 +349,23 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
     async clickTourSkipButton() {
       await testSubjects.click('onboarding--observTourSkipButton');
+    },
+
+    async clickGuidedSetupButton() {
+      await testSubjects.click('guidedSetupButton');
+    },
+
+    async clickQueryBar() {
+      await testSubjects.click('infraSearchField');
+    },
+
+    async inputQueryData() {
+      const queryBar = await testSubjects.find('infraSearchField');
+      await queryBar.type('h');
+    },
+
+    async ensureSuggestionsPanelVisible() {
+      await testSubjects.find('infraSuggestionsPanel');
     },
   };
 }

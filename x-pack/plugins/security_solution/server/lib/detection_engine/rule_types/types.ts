@@ -24,11 +24,10 @@ import type {
   IRuleDataClient,
   IRuleDataReader,
 } from '@kbn/rule-registry-plugin/server';
-import type { IEventLogService } from '@kbn/event-log-plugin/server';
+
 import type { ConfigType } from '../../../config';
 import type { SetupPlugins } from '../../../plugin';
 import type { CompleteRule, RuleParams } from '../schemas/rule_schemas';
-import type { BuildRuleMessage } from '../signals/rule_messages';
 import type {
   BulkCreate,
   SearchAfterAndBulkCreateReturnType,
@@ -37,7 +36,7 @@ import type {
 } from '../signals/types';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import type { ITelemetryEventsSender } from '../../telemetry/sender';
-import type { RuleExecutionLogForExecutorsFactory } from '../rule_execution_log';
+import type { IRuleExecutionLogForExecutors, IRuleExecutionLogService } from '../rule_monitoring';
 
 export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   bulkCreateTimes: string[];
@@ -53,22 +52,23 @@ export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
 }
 
 export interface RunOpts<TParams extends RuleParams> {
-  buildRuleMessage: BuildRuleMessage;
-  bulkCreate: BulkCreate;
-  exceptionItems: ExceptionListItemSchema[];
-  listClient: ListClient;
   completeRule: CompleteRule<TParams>;
-  searchAfterSize: number;
   tuple: {
     to: Moment;
     from: Moment;
     maxSignals: number;
   };
+  exceptionItems: ExceptionListItemSchema[];
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  listClient: ListClient;
+  searchAfterSize: number;
+  bulkCreate: BulkCreate;
   wrapHits: WrapHits;
   wrapSequences: WrapSequences;
   ruleDataReader: IRuleDataReader;
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  mergeStrategy: ConfigType['alertMergeStrategy'];
   primaryTimestamp: string;
   secondaryTimestamp?: string;
 }
@@ -101,8 +101,7 @@ export interface CreateSecurityRuleTypeWrapperProps {
   logger: Logger;
   config: ConfigType;
   ruleDataClient: IRuleDataClient;
-  eventLogService: IEventLogService;
-  ruleExecutionLoggerFactory: RuleExecutionLogForExecutorsFactory;
+  ruleExecutionLoggerFactory: IRuleExecutionLogService['createClientForExecutors'];
   version: string;
 }
 

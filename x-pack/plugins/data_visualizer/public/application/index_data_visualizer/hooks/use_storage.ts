@@ -9,9 +9,13 @@ import { useCallback, useState } from 'react';
 import { useDataVisualizerKibana } from '../../kibana_context';
 
 export const DV_FROZEN_TIER_PREFERENCE = 'dataVisualizer.frozenDataTierPreference';
+export const DV_RANDOM_SAMPLER_PREFERENCE = 'dataVisualizer.randomSamplerPreference';
+export const DV_RANDOM_SAMPLER_P_VALUE = 'dataVisualizer.randomSamplerPValue';
 
 export type DV = Partial<{
   [DV_FROZEN_TIER_PREFERENCE]: 'exclude_frozen' | 'include_frozen';
+  [DV_RANDOM_SAMPLER_PREFERENCE]: 'true' | 'false';
+  [DV_RANDOM_SAMPLER_P_VALUE]: number;
 }> | null;
 
 export type DVKey = keyof Exclude<DV, null>;

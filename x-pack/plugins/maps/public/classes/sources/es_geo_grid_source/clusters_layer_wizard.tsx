@@ -32,6 +32,9 @@ import {
 } from '../../../../common/constants';
 import { NUMERICAL_COLOR_PALETTES } from '../../styles/color_palettes';
 import { ClustersLayerIcon } from '../../layers/wizards/icons/clusters_layer_icon';
+import { getIconSize } from './get_icon_size';
+
+const DEFAULT_RESOLUTION = GRID_RESOLUTION.FINE;
 
 export const clustersLayerWizardConfig: LayerWizard = {
   id: WIZARD_ID.CLUSTERS,
@@ -51,7 +54,7 @@ export const clustersLayerWizardConfig: LayerWizard = {
 
       const sourceDescriptor = ESGeoGridSource.createDescriptor({
         ...sourceConfig,
-        resolution: GRID_RESOLUTION.FINE,
+        resolution: DEFAULT_RESOLUTION,
       });
 
       const defaultDynamicProperties = getDefaultDynamicProperties();
@@ -85,7 +88,7 @@ export const clustersLayerWizardConfig: LayerWizard = {
           type: STYLE_TYPE.DYNAMIC,
           options: {
             ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options as SizeDynamicOptions),
-            maxSize: 24,
+            ...getIconSize(DEFAULT_RESOLUTION),
             field: {
               name: COUNT_PROP_NAME,
               origin: FIELD_ORIGIN.SOURCE,
