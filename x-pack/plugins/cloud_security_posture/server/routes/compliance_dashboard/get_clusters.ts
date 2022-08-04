@@ -56,7 +56,7 @@ export const getClustersQuery = (query: QueryDslQueryContainer, pitId: string): 
         },
         benchmarkId: {
           terms: {
-            field: 'rule.benchmark.id.keyword',
+            field: 'rule.benchmark.id',
           },
         },
         timestamps: {
@@ -83,8 +83,12 @@ export const getClustersFromAggs = (clusters: ClusterBucket[]): ClusterWithoutTr
     // get cluster's meta data
     const benchmarkNames = cluster.benchmarkName.buckets;
     const benchmarkIds = cluster.benchmarkId.buckets;
-    if (!Array.isArray(benchmarkNames) || !Array.isArray(benchmarkIds))
-      throw new Error('missing aggs by benchmarks per cluster');
+
+    if (!Array.isArray(benchmarkIds) || benchmarkIds.length === 0)
+      throw new Error('missing aggs by benchmarkIds per cluster');
+
+    if (!Array.isArray(benchmarkNames)) throw new Error('missing aggs by benchmarks per cluster');
+
     const timestamps = cluster.timestamps.buckets;
     if (!Array.isArray(timestamps)) throw new Error('missing aggs by timestamps per cluster');
 

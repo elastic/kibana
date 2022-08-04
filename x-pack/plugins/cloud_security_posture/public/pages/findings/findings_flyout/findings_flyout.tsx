@@ -30,9 +30,8 @@ import { ResourceTab } from './resource_tab';
 import { JsonTab } from './json_tab';
 import { OverviewTab } from './overview_tab';
 import { RuleTab } from './rule_tab';
-import cisK8sVanillaIcon from '../../../assets/icons/k8s_logo.svg';
-import cisEksIcon from '../../../assets/icons/cis_eks_logo.svg';
-import { BenchmarkId } from '../../../../common/types';
+import type { BenchmarkId } from '../../../../common/types';
+import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
 
 const tabs = [
   {
@@ -82,8 +81,7 @@ export const CisKubernetesIcons = ({ benchmarkId }: { benchmarkId: BenchmarkId }
       <EuiIcon type={cisLogoIcon} size="xxl" />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      {benchmarkId === 'cis_eks' && <EuiIcon type={cisEksIcon} size="xxl" />}
-      {benchmarkId === 'cis_k8s' && <EuiIcon type={cisK8sVanillaIcon} size="xxl" />}
+      <CISBenchmarkIcon type={benchmarkId} />
     </EuiFlexItem>
   </EuiFlexGroup>
 );
