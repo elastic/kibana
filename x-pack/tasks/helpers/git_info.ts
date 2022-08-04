@@ -21,18 +21,17 @@ export async function gitInfo() {
       sha: process.env.GIT_COMMIT || process.env.BUILDKITE_COMMIT || 'none',
     };
   }
-  const git = simpleGit(gitDir);
+
+  const log = await simpleGit(gitDir).log();
 
   return new Promise<{ number: number; sha: string }>((resolve, reject) => {
-    git.log((err: undefined | Error, log: { total: number; latest: { hash: string } }) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve({
-          number: log.total,
-          sha: log.latest.hash,
-        });
-      }
-    });
+    if (!log.latest) {
+      reject();
+    } else {
+      resolve({
+        number: log.total,
+        sha: log.latest.hash,
+      });
+    }
   });
 }

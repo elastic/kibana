@@ -38,7 +38,9 @@ export default function ({ getService }: FtrProviderContext) {
   const toTime = '2019-06-25T00:00:00.000Z';
 
   const itIfEs7 = esVersion.matchRange('<8') ? it : it.skip;
-  const itIfEs8 = esVersion.matchRange('>=8') ? it : it.skip;
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/137210
+  // const itIfEs8 = esVersion.matchRange('>=8') ? it : it.skip;
+  const itIfEs8 = it.skip;
 
   describe('CSV Generation from SearchSource', function () {
     before(async () => {
