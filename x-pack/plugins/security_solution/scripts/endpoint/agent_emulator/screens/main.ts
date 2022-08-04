@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ChoiceListFormatter } from './lib/choice_list_formatter';
+import type { DataFormatter } from './lib/data_formatter';
 import { HORIZONTAL_LINE } from '../../common/constants';
 import { ScreenBaseClass } from './lib/screen_base_class';
 
@@ -15,14 +17,21 @@ export class MainScreen extends ScreenBaseClass {
 ${HORIZONTAL_LINE}`;
   }
 
-  protected screen(): string {
-    return `
-  [1] load endpoints
-`;
+  protected body(): string | DataFormatter {
+    return new ChoiceListFormatter(['Load endpoints']);
   }
 
   protected onEnterChoice(choice: string) {
-    global.console.log(`entered: ${choice}`);
-    throw new Error(`unknown choice: ${choice}`);
+    switch (choice.toUpperCase().trim()) {
+      // Load endpoints
+      case '1':
+        return;
+
+      case 'Q':
+        this.hide();
+        return;
+    }
+
+    throw new Error(`Unknown choice: ${choice}`);
   }
 }

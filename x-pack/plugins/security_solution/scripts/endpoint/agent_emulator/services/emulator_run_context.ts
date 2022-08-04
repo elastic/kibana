@@ -90,6 +90,12 @@ export class EmulatorRunContext {
     this.wasStarted = true;
   }
 
+  async stop(): Promise<void> {
+    this.getAgentKeepAliveService().stop();
+    this.getActionResponderService().stop();
+    this.wasStarted = false;
+  }
+
   protected ensureStarted() {
     if (!this.wasStarted) {
       throw new Error('RunContext instance has not been `.start()`ed!');

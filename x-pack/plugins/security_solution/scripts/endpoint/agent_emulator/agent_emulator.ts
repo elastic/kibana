@@ -35,7 +35,7 @@ export const agentEmulatorRunner: RunFn = async (cliContext) => {
     emulatorContext.getLogger()
   );
 
-  new MainScreen().show();
+  await new MainScreen().show();
 
-  await emulatorContext.whileRunning;
+  await emulatorContext.stop();
 };
