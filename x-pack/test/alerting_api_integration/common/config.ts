@@ -43,6 +43,7 @@ const enabledActionTypes = [
   '.resilient',
   '.slack',
   '.webhook',
+  '.d3security',
   '.xmatters',
   '.test-sub-action-connector',
   '.test-sub-action-connector-without-sub-actions',

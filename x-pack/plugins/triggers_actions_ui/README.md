@@ -1,4 +1,4 @@
-# Kibana Alerts and Actions UI
+# Kibana Alerts an3 Actions UI
 
 The Kibana alerts and actions UI plugin provides a user interface for managing alerts and actions. 
 As a developer you can reuse and extend built-in alerts and actions UI functionality:
@@ -1115,7 +1115,7 @@ export function getActionType(): ActionTypeModel {
 ```
 ![D3Security connector card](https://i.imgur.com/pbmXBVy.png)
 
-![D3Security connector form](https://i.imgur.com/bjluUsl.png)
+![D3Security connector form](https://i.imgur.com/HEUF6qC.png)
 
 and action params form available in Create Alert form:
 ![D3Security action form](https://i.imgur.com/TwioSA0.png)
