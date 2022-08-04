@@ -49,7 +49,7 @@ describe('<IndicatorsFlyoutTable />', () => {
   it('should render error message on invalid indicator', () => {
     const { getByTestId, getByText } = render(
       <TestProvidersComponent>
-        <IndicatorsFlyoutTable indicator={{} as unknown as Indicator} fieldTypesMap={{}} />
+        <IndicatorsFlyoutTable indicator={{ fields: {} }} fieldTypesMap={{}} />
       </TestProvidersComponent>
     );
 

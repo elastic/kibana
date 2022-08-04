@@ -9,12 +9,11 @@ import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { useContext, useEffect } from 'react';
 import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
 import React from 'react';
-import { DateFormatter } from '../../../../components/date_formatter';
+import { IndicatorField } from '../../../../components/indicator_field/indicator_field';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { EMPTY_VALUE } from '../../../../../common/constants';
-import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
+import { Indicator } from '../../../../../common/types/indicator';
 import { displayValue } from '../../lib/display_value';
-import { unwrapValue } from '../../lib/unwrap_value';
 import { IndicatorsTableContext } from './context';
 import { ActionsRowCell } from './actions_row_cell';
 
@@ -64,9 +63,6 @@ export const cellRendererFactory = (from: number) => {
       return displayValue(indicator) || EMPTY_VALUE;
     }
 
-    const fieldType: string = fieldTypesMap[columnId];
-    const value = unwrapValue(indicator, columnId as RawIndicatorFieldId);
-
-    return fieldType === 'date' ? <DateFormatter date={value as string} /> : value || EMPTY_VALUE;
+    return IndicatorField({ indicator, field: columnId, fieldTypesMap });
   };
 };

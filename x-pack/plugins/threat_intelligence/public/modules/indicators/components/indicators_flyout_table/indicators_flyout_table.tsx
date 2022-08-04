@@ -8,37 +8,12 @@
 import { EuiEmptyPrompt, EuiInMemoryTable } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { VFC } from 'react';
-import { dateFormatter } from '../../../../common/utils/dates';
-import { useDateFormat, useTimeZone } from '../../../../hooks/use_kibana_ui_settings';
-import { EMPTY_VALUE } from '../../../../../common/constants';
-import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
-import { unwrapValue } from '../../lib/unwrap_value';
+import { IndicatorField } from '../../../../components/indicator_field/indicator_field';
+import { Indicator } from '../../../../../common/types/indicator';
 
 export const EMPTY_PROMPT_TEST_ID = 'tiFlyoutTableEmptyPrompt';
 export const TABLE_TEST_ID = 'tiFlyoutTableMemoryTable';
 
-const columns = [
-  {
-    field: 'field',
-    name: (
-      <FormattedMessage
-        id="xpack.threatIntelligence.indicator.flyoutTable.fieldColumnLabel"
-        defaultMessage="Field"
-      />
-    ),
-    sortable: true,
-  },
-  {
-    field: 'value',
-    name: (
-      <FormattedMessage
-        id="xpack.threatIntelligence.indicator.flyoutTable.valueColumnLabel"
-        defaultMessage="Value"
-      />
-    ),
-    truncateText: true,
-  },
-];
 const search = {
   box: {
     incremental: true,
@@ -55,24 +30,32 @@ export const IndicatorsFlyoutTable: VFC<IndicatorsFlyoutTableProps> = ({
   indicator,
   fieldTypesMap,
 }) => {
-  const userTimeZone = useTimeZone();
-  const userFormat = useDateFormat();
-
-  const items: Array<{ field: string; value: string }> = [];
-  for (const key in indicator.fields) {
-    if (!indicator.fields.hasOwnProperty(key)) continue;
-
-    const fieldType: string = fieldTypesMap[key];
-    const value = unwrapValue(indicator, key as RawIndicatorFieldId);
-
-    items.push({
-      field: key,
-      value:
-        fieldType === 'date'
-          ? dateFormatter(value as string, userTimeZone, userFormat)
-          : value || EMPTY_VALUE,
-    });
-  }
+  const items: string[] = Object.keys(indicator.fields);
+  const columns = [
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.threatIntelligence.indicator.flyoutTable.fieldColumnLabel"
+          defaultMessage="Field"
+        />
+      ),
+      render: (field: string) => field,
+    },
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.threatIntelligence.indicator.flyoutTable.valueColumnLabel"
+          defaultMessage="Value"
+        />
+      ),
+      render: (field: string) =>
+        IndicatorField({
+          indicator,
+          field,
+          fieldTypesMap,
+        }),
+    },
+  ];
 
   return items.length === 0 ? (
     <EuiEmptyPrompt
