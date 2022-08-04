@@ -18848,7 +18848,6 @@
     "xpack.ml.editModelSnapshotFlyout.useDefaultButton": "删除",
     "xpack.ml.embeddables.lensLayerFlyout.closeButton": "关闭",
     "xpack.ml.embeddables.lensLayerFlyout.createJobButton": "从此图层创建作业",
-    "xpack.ml.embeddables.lensLayerFlyout.createJobCalloutTitle": "此图层可用于创建 {type} 作业",
     "xpack.ml.embeddables.lensLayerFlyout.defaultLayerError": "此图层无法用于创建异常检测作业",
     "xpack.ml.embeddables.lensLayerFlyout.secondTitle": "从可视化中选择兼容的图层以创建异常检测作业。",
     "xpack.ml.embeddables.lensLayerFlyout.title": "创建异常检测作业",
