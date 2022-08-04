@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import fs from 'fs/promises';
+import { readFile } from 'fs/promises';
 
 import { uniq } from 'lodash';
 import semverGte from 'semver/functions/gte';
@@ -337,11 +337,12 @@ export const getAvailableVersionsHandler: RequestHandler = async (context, reque
   const kibanaVersionCoerced = semverCoerce(kibanaVersion)?.version ?? kibanaVersion;
 
   try {
-    const file = await fs.readFile(AGENT_VERSION_BUILD_FILE, 'utf-8');
+    const file = await readFile(AGENT_VERSION_BUILD_FILE, 'utf-8');
 
     // Exclude versions older than MINIMUM_SUPPORTED_VERSION and pre-release versions (SNAPSHOT, rc..)
     // De-dup and sort in descending order
     const data: string[] = JSON.parse(file);
+
     const versions = data
       .map((item: any) => semverCoerce(item)?.version || '')
       .filter((v: any) => semverGte(v, MINIMUM_SUPPORTED_VERSION))
