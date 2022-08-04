@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 
 import classNames from 'classnames';
+import { NavItemBetaBadge } from '../nav_item_beta_badge';
 import { SolutionNavPanel } from './solution_grouped_nav_panel';
 import { EuiListGroupItemStyled } from './solution_grouped_nav.styles';
 import type { DefaultSideNavItem, SideNavItem } from './types';
@@ -77,7 +78,7 @@ export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
       // This event is triggered on outside click.
       // Closing the side nav at the end of event loop to make sure it
       // closes also if the active panel button has been clicked (toggle),
-      // but it does not close if any any other panel open button has been clicked.
+      // but it does not close if any other panel open button has been clicked.
       if (activePanelNavIdRef.current === currentPanelNavId) {
         onClosePanelNav();
       }
@@ -187,7 +188,7 @@ const SolutionNavItemComponent: React.FC<SolutionNavItemProps> = ({
   if (isCustomItem(item)) {
     return <Fragment key={item.id}>{item.render(isSelected)}</Fragment>;
   }
-  const { id, href, label, onClick } = item;
+  const { id, href, label, onClick, isBeta } = item;
 
   const itemClassNames = classNames('solutionGroupedNavItem', {
     'solutionGroupedNavItem--isActive': isActive,
@@ -202,35 +203,44 @@ const SolutionNavItemComponent: React.FC<SolutionNavItemProps> = ({
   };
 
   return (
-    // eslint-disable-next-line @elastic/eui/href-or-on-click
-    <EuiLink
-      key={id}
-      href={href}
-      onClick={onClick}
-      color={isSelected ? 'primary' : 'text'}
-      data-test-subj={`groupedNavItemLink-${id}`}
-    >
-      <EuiListGroupItemStyled
-        className={itemClassNames}
-        color={isSelected ? 'primary' : 'text'}
-        label={label}
-        size="s"
-        {...(hasPanelNav
-          ? {
-              extraAction: {
-                className: buttonClassNames,
-                color: isActive ? 'primary' : 'text',
-                onClick: onButtonClick,
-                iconType: EuiIconSpaces,
-                iconSize: 'm',
-                'aria-label': 'Toggle group nav',
-                'data-test-subj': `groupedNavItemButton-${id}`,
-                alwaysShow: true,
-              },
-            }
-          : {})}
-      />
-    </EuiLink>
+    <EuiFlexGroup gutterSize="none">
+      <EuiFlexItem grow={false}>
+        {/* eslint-disable-next-line @elastic/eui/href-or-on-click*/}
+        <EuiLink
+          key={id}
+          href={href}
+          onClick={onClick}
+          color={isSelected ? 'primary' : 'text'}
+          data-test-subj={`groupedNavItemLink-${id}`}
+        >
+          <EuiListGroupItemStyled
+            className={itemClassNames}
+            color={isSelected ? 'primary' : 'text'}
+            label={label}
+            size="s"
+            {...(hasPanelNav
+              ? {
+                  extraAction: {
+                    className: buttonClassNames,
+                    color: isActive ? 'primary' : 'text',
+                    onClick: onButtonClick,
+                    iconType: EuiIconSpaces,
+                    iconSize: 'm',
+                    'aria-label': 'Toggle group nav',
+                    'data-test-subj': `groupedNavItemButton-${id}`,
+                    alwaysShow: true,
+                  },
+                }
+              : {})}
+          />
+        </EuiLink>
+      </EuiFlexItem>
+      {isBeta && (
+        <EuiFlexItem grow={false}>
+          <NavItemBetaBadge />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   );
 };
 const SolutionNavItem = React.memo(SolutionNavItemComponent);
