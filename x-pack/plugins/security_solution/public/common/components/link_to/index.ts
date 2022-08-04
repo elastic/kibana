@@ -11,7 +11,8 @@ import { useGetUrlSearch, useGetUrlStateQueryString } from '../navigation/use_ge
 import { navTabs } from '../../../app/home/home_navigations';
 import { useAppUrl } from '../../lib/kibana/hooks';
 import type { SecurityNavKey } from '../navigation/types';
-import { SecurityPageName } from '../../../app/types';
+import type { SecurityPageName } from '../../../app/types';
+import { needsUrlState } from '../../links';
 
 export { getDetectionEngineUrl, getRuleDetailsUrl } from './redirect_to_detection_engine';
 export { getHostDetailsUrl, getTabsOnHostDetailsUrl, getHostsUrl } from './redirect_to_hosts';
@@ -33,6 +34,14 @@ interface FormatUrlOptions {
 
 export type FormatUrl = (path: string, options?: Partial<FormatUrlOptions>) => string;
 
+/**
+ * @deprecated `useFormatUrl` is deprecated. Alternatives:
+ * - `SecuritySolutionLinkAnchor` -> Component with built-in Security link anchor
+ * - `SecuritySolutionLinkButton` -> Component with built-in Security link button
+ * - `withSecuritySolutionLink` -> HOC to create a custom Security link component.
+ * - `useGetSecuritySolutionLinkProps` -> Hook to get `href` and `onClick` Security link props.
+ * - `useGetSecuritySolutionUrl` -> Hook to get a Security formatted url.
+ */
 export const useFormatUrl = (page: SecurityPageName) => {
   const { getAppUrl } = useAppUrl();
   const tab = page in navTabs ? navTabs[page as SecurityNavKey] : undefined;
@@ -85,21 +94,4 @@ function formatPath(path: string, search: string, skipSearch?: boolean) {
       : `?${parameterPath}`
   }`;
   return formattedPath;
-}
-
-// TODO: migrate to links.needsUrlState
-function needsUrlState(pageId: SecurityPageName) {
-  return (
-    pageId !== SecurityPageName.dashboardsLanding &&
-    pageId !== SecurityPageName.exploreLanding &&
-    pageId !== SecurityPageName.administration &&
-    pageId !== SecurityPageName.rules &&
-    pageId !== SecurityPageName.exceptions &&
-    pageId !== SecurityPageName.endpoints &&
-    pageId !== SecurityPageName.policies &&
-    pageId !== SecurityPageName.trustedApps &&
-    pageId !== SecurityPageName.eventFilters &&
-    pageId !== SecurityPageName.blocklist &&
-    pageId !== SecurityPageName.hostIsolationExceptions
-  );
 }

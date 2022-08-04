@@ -14,6 +14,7 @@ import { ErrorCode } from '../../../common/types/error_codes';
 import { setupConnectorsIndices } from '../../index_management/setup_indices';
 
 import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
+import { textAnalysisSettings } from '../indices/text_analysis';
 
 import { addConnector } from './add_connector';
 import { fetchConnectorByIndexName } from './fetch_connectors';
@@ -52,7 +53,7 @@ describe('addConnector lib function', () => {
     await expect(
       addConnector(mockClient as unknown as IScopedClusterClient, {
         index_name: 'index_name',
-        language: 'en',
+        language: 'fr',
       })
     ).resolves.toEqual({ id: 'fakeId', index_name: 'index_name' });
     expect(mockClient.asCurrentUser.index).toHaveBeenCalledWith({
@@ -60,7 +61,7 @@ describe('addConnector lib function', () => {
         api_key_id: null,
         configuration: {},
         index_name: 'index_name',
-        language: 'en',
+        language: 'fr',
         last_seen: null,
         last_sync_error: null,
         last_sync_status: null,
@@ -73,7 +74,10 @@ describe('addConnector lib function', () => {
       },
       index: CONNECTORS_INDEX,
     });
-    expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({ index: 'index_name' });
+    expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
+      index: 'index_name',
+      settings: textAnalysisSettings('fr'),
+    });
   });
 
   it('should reject if index already exists', async () => {
@@ -156,7 +160,10 @@ describe('addConnector lib function', () => {
       },
       index: CONNECTORS_INDEX,
     });
-    expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({ index: 'index_name' });
+    expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
+      index: 'index_name',
+      settings: textAnalysisSettings(undefined),
+    });
   });
 
   it('should create index if no connectors index exists', async () => {
@@ -196,6 +203,7 @@ describe('addConnector lib function', () => {
     });
     expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
       index: 'search-index_name',
+      settings: textAnalysisSettings('en'),
     });
   });
   it('should not create index if status code is not 404', async () => {

@@ -20,14 +20,15 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
 
+import { useEuiTheme } from '../../hooks/use_eui_theme';
+
 import { MiniHistogram } from '../mini_histogram';
 
 import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
 
+const NARROW_COLUMN_WIDTH = '120px';
+
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
-const noDataText = i18n.translate('xpack.aiops.correlations.correlationsTable.noDataText', {
-  defaultMessage: 'No data',
-});
 const DEFAULT_SORT_FIELD = 'pValue';
 const DEFAULT_SORT_DIRECTION = 'asc';
 
@@ -48,6 +49,8 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
   onSelectedChangePoint,
   selectedChangePoint,
 }) => {
+  const euiTheme = useEuiTheme();
+
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [sortField, setSortField] = useState<keyof ChangePoint>(DEFAULT_SORT_FIELD);
@@ -72,6 +75,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       sortable: true,
     },
     {
+      width: NARROW_COLUMN_WIDTH,
       field: 'pValue',
       name: (
         <EuiToolTip
@@ -93,14 +97,17 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
           </>
         </EuiToolTip>
       ),
-      render: (_, { histogram, fieldName, fieldValue }) => {
-        return histogram ? (
-          <MiniHistogram chartData={histogram} label={`${fieldName}:${fieldValue}`} />
-        ) : null;
-      },
+      render: (_, { histogram, fieldName, fieldValue }) => (
+        <MiniHistogram
+          chartData={histogram}
+          isLoading={loading && histogram === undefined}
+          label={`${fieldName}:${fieldValue}`}
+        />
+      ),
       sortable: false,
     },
     {
+      width: NARROW_COLUMN_WIDTH,
       field: 'pValue',
       name: (
         <EuiToolTip
@@ -126,6 +133,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       sortable: true,
     },
     {
+      width: NARROW_COLUMN_WIDTH,
       field: 'pValue',
       name: (
         <EuiToolTip
@@ -195,15 +203,21 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
     };
   }, [pageIndex, pageSize, sortField, sortDirection, changePoints]);
 
+  // Don't pass on the `loading` state to the table itself because
+  // it disables hovering events. Because the mini histograms take a while
+  // to load, hovering would not update the main chart. Instead,
+  // the loading state is shown by the progress bar on the outer component level.
+  // The outer component also will display a prompt when no data was returned
+  // running the analysis and will hide this table.
+
   return (
     <EuiBasicTable
       compressed
       columns={columns}
       items={pageOfItems}
-      noItemsMessage={noDataText}
       onChange={onChange}
       pagination={pagination}
-      loading={loading}
+      loading={false}
       error={error}
       sorting={sorting as EuiTableSortingType<ChangePoint>}
       rowProps={(changePoint) => {
@@ -228,9 +242,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
             selectedChangePoint.fieldValue === changePoint.fieldValue &&
             selectedChangePoint.fieldName === changePoint.fieldName
               ? {
-                  // TODO use euiTheme
-                  // backgroundColor: euiTheme.eui.euiColorLightestShade,
-                  backgroundColor: '#ddd',
+                  backgroundColor: euiTheme.euiColorLightestShade,
                 }
               : null,
         };
