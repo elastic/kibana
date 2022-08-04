@@ -8,21 +8,6 @@
 
 import { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
 import { Series } from '../../../../common/types';
-import { Filter } from '../../types';
-
-export const convertFilter = (series: Series): Filter | void => {
-  if (!series.filter) {
-    return;
-  }
-
-  if (series.filter.language === 'kuery') {
-    return { kql: series.filter.query };
-  }
-
-  if (series.filter.language === 'lucene') {
-    return { lucene: series.filter.query };
-  }
-};
 
 export const convertSplitFilters = (
   series: Series

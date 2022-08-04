@@ -9,8 +9,8 @@
 import { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
 import { PaletteOutput } from '@kbn/coloring';
 import { SUPPORTED_FORMATTERS } from '../formatters';
-import { convertFilter, convertSplitFilters } from '../filters';
-import { convertMetrics } from '../metrics';
+import { convertSplitFilters } from '../split_chart';
+import { convertMetrics, convertFilter } from '../metrics';
 import type { Panel, Series } from '../../../../common/types';
 import { VisSeries } from '../series';
 

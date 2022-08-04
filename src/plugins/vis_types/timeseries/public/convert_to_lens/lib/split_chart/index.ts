@@ -7,3 +7,4 @@
  */
 
 export * from './date_histogram';
+export * from './filters';
