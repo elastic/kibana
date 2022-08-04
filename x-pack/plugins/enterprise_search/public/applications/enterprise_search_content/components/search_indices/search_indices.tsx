@@ -108,7 +108,7 @@ export const SearchIndices: React.FC = () => {
     ? ''
     : indices.length !== 0
     ? i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.pageTitle', {
-        defaultMessage: 'Elasticsearch Indices',
+        defaultMessage: 'Elasticsearch indices',
       })
     : i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.emptyPageTitle', {
         defaultMessage: 'Welcome to Enterprise Search',
