@@ -359,7 +359,7 @@ export class DataViewField implements DataViewFieldBase {
   public toSpec(config: ToSpecConfig = {}): FieldSpec {
     const { getFormatterForField } = config;
 
-    return {
+    const spec = {
       count: this.count,
       script: this.script,
       lang: this.lang,
@@ -381,6 +381,11 @@ export class DataViewField implements DataViewFieldBase {
       timeSeriesMetric: this.spec.timeSeriesMetric,
       meta: this.spec.meta,
     };
+
+    // Filter undefined values from the spec
+    return Object.fromEntries(
+      Object.entries(spec).filter(([, v]) => typeof v !== 'undefined')
+    ) as FieldSpec;
   }
 
   /**
