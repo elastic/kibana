@@ -350,6 +350,14 @@ paths:
                           - install_failed
                           - not_installed
                       savedObject:
+                        type: object
+                      latestVersion:
+                        type: string
+                      keepPoliciesUpToDate:
+                        type: boolean
+                      notice:
+                        type: string
+                      licensePath:
                         type: string
                     required:
                       - status
@@ -2442,6 +2450,20 @@ components:
           type: string
         version:
           type: string
+        release:
+          type: string
+          enum:
+            - experimental
+            - beta
+            - ga
+        source:
+          type: object
+          properties:
+            license:
+              type: string
+              enum:
+                - Apache-2.0
+                - Elastic-2.0
         readme:
           type: string
         description:
@@ -2452,21 +2474,24 @@ components:
           type: array
           items:
             type: string
-        requirement:
-          oneOf:
-            - properties:
-                kibana:
-                  type: object
-                  properties:
-                    versions:
-                      type: string
-            - properties:
-                elasticsearch:
-                  type: object
-                  properties:
-                    versions:
-                      type: string
+        conditions:
           type: object
+          properties:
+            kibana:
+              type: object
+              properties:
+                versions:
+                  type: string
+            elasticsearch:
+              type: object
+              properties:
+                subscription:
+                  type: string
+                  enum:
+                    - basic
+                    - gold
+                    - platinum
+                    - enterprise
         screenshots:
           type: array
           items:
@@ -2537,6 +2562,16 @@ components:
           type: string
         path:
           type: string
+        elasticsearch:
+          type: object
+          properties:
+            privileges:
+              type: object
+              properties:
+                cluster:
+                  type: array
+                  items:
+                    type: string
       required:
         - name
         - title
@@ -2544,7 +2579,7 @@ components:
         - description
         - type
         - categories
-        - requirement
+        - conditions
         - assets
         - format_version
         - download
@@ -2716,26 +2751,25 @@ components:
               items:
                 type: string
               description: list of agent IDs
+        force:
+          type: boolean
+          description: Force upgrade, skipping validation (should be used with caution)
       required:
         - agents
         - version
     upgrade_agent:
       title: Upgrade agent
-      oneOf:
-        - type: object
-          properties:
-            version:
-              type: string
-          required:
-            - version
-        - type: object
-          properties:
-            version:
-              type: string
-            source_uri:
-              type: string
-          required:
-            - version
+      type: object
+      properties:
+        version:
+          type: string
+        source_uri:
+          type: string
+        force:
+          type: boolean
+          description: Force upgrade, skipping validation (should be used with caution)
+      required:
+        - version
     agent_action:
       title: Agent action
       oneOf:
