@@ -5,20 +5,53 @@
  * 2.0.
  */
 
+import { isChoice } from './screen_base_class';
+import type { Choice } from './screen_base_class';
 import { DataFormatter } from './data_formatter';
+
+type ChoiceListFormatterItems = string[] | Choice[];
+
+interface ChoiceListFormatterOptions {
+  layout: 'vertical' | 'horizontal';
+}
+
+const getDefaultOptions = (): ChoiceListFormatterOptions => {
+  return {
+    layout: 'vertical',
+  };
+};
 
 export class ChoiceListFormatter extends DataFormatter {
   private readonly outputContent: string;
 
-  constructor(private readonly choiceList: string[]) {
+  constructor(
+    private readonly choiceList: ChoiceListFormatterItems,
+    private readonly options: ChoiceListFormatterOptions = getDefaultOptions()
+  ) {
     super();
 
-    this.outputContent = `\n${this.choiceList
-      .map((choice, index) => `  [${index + 1}] ${choice}`)
-      .join('\n')}\n`;
+    const list = this.buildList();
+
+    this.outputContent = `\n${list.join(this.options.layout === 'horizontal' ? '   ' : '\n')}\n`;
   }
 
   protected getOutput(): string {
     return this.outputContent;
+  }
+
+  private buildList(): string[] {
+    return this.choiceList.map((choice, index) => {
+      let key: string = `${index + 1}`;
+      let title: string = '';
+
+      if (isChoice(choice)) {
+        key = choice.key;
+        title = choice.title;
+      } else {
+        title = choice;
+      }
+
+      return `  [${key}] ${title}`;
+    });
   }
 }

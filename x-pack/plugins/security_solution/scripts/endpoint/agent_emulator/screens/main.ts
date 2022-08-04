@@ -20,21 +20,25 @@ export class MainScreen extends ScreenBaseClass {
     return new ChoiceListFormatter(['Load endpoints']);
   }
 
+  protected footer(): string | DataFormatter {
+    return super.footer([
+      {
+        key: 'E',
+        title: 'Exit',
+      },
+    ]);
+  }
+
   protected onEnterChoice(choice: string) {
     switch (choice.toUpperCase().trim()) {
       // Load endpoints
       case '1':
-        const endpointLoadScreen = new LoadEndpointsScreen(() => {
-          endpointLoadScreen.hide();
-          this.show();
-        });
-
-        endpointLoadScreen.show().then(() => {
+        new LoadEndpointsScreen().show().then(() => {
           this.show();
         });
         return;
 
-      case 'Q':
+      case 'E':
         this.hide();
         return;
     }
