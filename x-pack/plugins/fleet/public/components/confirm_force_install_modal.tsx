@@ -57,6 +57,7 @@ export const ConfirmForceInstallModal: React.FC<{
         />
       }
       buttonColor="danger"
+      data-test-subj="confirmForceInstallModal"
     >
       <EuiCallOut
         title={title}

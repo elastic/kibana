@@ -31,14 +31,9 @@ jest.mock('@elastic/charts', () => {
   };
 });
 
-jest.mock('uuid', () => {
-  const actual = jest.requireActual('uuid');
-
-  return {
-    ...actual,
-    v4: jest.fn().mockReturnValue('test-uuid'),
-  };
-});
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('test-uuid'),
+}));
 
 jest.mock('../../../overview/components/detection_response/alerts_by_status/chart_label', () => {
   return {
@@ -183,5 +178,11 @@ describe('DonutChart', () => {
     };
     const { container } = render(<DonutChart {...testProps} />);
     expect(container.querySelector(`[data-test-subj="legend"]`)).not.toBeInTheDocument();
+  });
+
+  test('should render label within a tooltip', () => {
+    const { container } = render(<DonutChart {...props} />);
+    const tooltip = container.getElementsByClassName('euiToolTipAnchor')[0];
+    expect(tooltip.textContent).toBe(props.label);
   });
 });
