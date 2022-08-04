@@ -27,7 +27,7 @@ export interface FilterItemsProps {
   hiddenPanelOptions?: FilterItemProps['hiddenPanelOptions'];
 }
 
-const FilterItemsUI = React.memo(function FilterItemsUI(props: Props) {
+const FilterItemsUI = React.memo(function FilterItemsUI(props: FilterItemsProps) {
   const groupRef = useRef<HTMLDivElement>(null);
   const kibana = useKibana<IDataPluginServices>();
   const { appName, usageCollection, uiSettings } = kibana.services;

@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-export { FilterItemsProps } from './filter_item/filter_items';
+export type { FilterItemsProps } from './filter_item/filter_items';
 
 const Fallback = () => <div />;
 

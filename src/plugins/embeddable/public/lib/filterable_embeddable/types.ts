@@ -24,6 +24,13 @@ export interface FilterableEmbeddable {
   getQuery: () => Promise<Query | AggregateQuery | undefined>;
 }
 
+/**
+ * Ensure that embeddable supports filtering/querying
+ * @param incoming Embeddable that is being tested to check if it is a FilterableEmbeddable
+ * @returns true if the incoming embeddable is a FilterableEmbeddable, false if it is not
+ */
 export function isFilterableEmbeddable(incoming: unknown): incoming is FilterableEmbeddable {
-  return !!(incoming as FilterableEmbeddable).getFilters;
+  return (
+    !!(incoming as FilterableEmbeddable).getFilters && !!(incoming as FilterableEmbeddable).getQuery
+  );
 }
