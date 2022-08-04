@@ -188,6 +188,18 @@ export function getFilterAggTypeConfig(
           null,
           2
         ),
+        isValid() {
+          if (typeof this.filterAggConfig === 'string') {
+            try {
+              return !!JSON.parse(this.filterAggConfig);
+            } catch (e) {
+              // eslint-disable-next-line no-console
+              console.error(`Invalid JSON for aggregation definition.\n${e}`);
+              return false;
+            }
+          }
+          return true;
+        },
         getEsAggConfig(fieldName) {
           return JSON.parse(this.filterAggConfig!);
         },
@@ -198,6 +210,18 @@ export function getFilterAggTypeConfig(
         filterAggConfig: '',
         getEsAggConfig() {
           return this.filterAggConfig !== undefined ? JSON.parse(this.filterAggConfig!) : {};
+        },
+        isValid() {
+          if (typeof this.filterAggConfig === 'string') {
+            try {
+              return !!JSON.parse(this.filterAggConfig);
+            } catch (e) {
+              // eslint-disable-next-line no-console
+              console.error(`Invalid JSON for aggregation definition.\n${e}`);
+              return false;
+            }
+          }
+          return true;
         },
       };
   }

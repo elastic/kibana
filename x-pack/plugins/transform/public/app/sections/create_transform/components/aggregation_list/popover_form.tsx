@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -20,7 +20,6 @@ import {
   EuiSelect,
   EuiSelectOption,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { cloneDeep } from 'lodash';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
@@ -42,7 +41,7 @@ import {
   PivotAggsConfig,
   PivotAggsConfigWithUiSupportDict,
 } from '../../../../common';
-import { isFilterBooleanAgg, isPivotAggsWithExtendedForm } from '../../../../common/pivot_aggs';
+import { isPivotAggsWithExtendedForm } from '../../../../common/pivot_aggs';
 import { getAggFormConfig } from '../step_define/common/get_agg_form_config';
 
 interface Props {
@@ -206,7 +205,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
     return updatedItem;
   }
 
-  if (!isUnsupportedAgg || isFilterBooleanAgg(defaultData)) {
+  if (!isUnsupportedAgg) {
     const optionsArr = dictionaryToArray(options);
 
     optionsArr
@@ -265,24 +264,6 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
   if (isPivotAggsWithExtendedForm(aggConfigDef)) {
     formValid = validAggName && aggConfigDef.isValid();
   }
-
-  const isJSONValid = useMemo(() => {
-    if (
-      isFilterBooleanAgg(aggConfigDef) &&
-      // @ts-ignore Partial type but we still need to check if parse-able or not
-      typeof aggConfigDef.aggConfig?.aggTypeConfig?.filterAggConfig === 'string'
-    ) {
-      try {
-        // @ts-ignore Partial type but we still need to check if parse-able or not
-        return !!JSON.parse(aggConfigDef.aggConfig?.aggTypeConfig?.filterAggConfig);
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.error(`Invalid JSON for aggregation definition:\n${e}`);
-        return false;
-      }
-    }
-    return true;
-  }, [aggConfigDef]);
 
   return (
     <EuiForm style={{ width: '300px' }} data-test-subj={'transformAggPopoverForm_' + aggName}>
@@ -426,20 +407,9 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
           {JSON.stringify(getEsAggFromAggConfig(defaultData), null, 2)}
         </EuiCodeBlock>
       )}
-      <EuiFormRow
-        hasEmptyLabelSpace
-        error={
-          !isJSONValid ? (
-            <FormattedMessage
-              id="xpack.transform.agg.popoverForm.jsonInvalidErrorMessage"
-              defaultMessage="JSON is invalid"
-            />
-          ) : undefined
-        }
-        isInvalid={!formValid || !isJSONValid}
-      >
+      <EuiFormRow hasEmptyLabelSpace>
         <EuiButton
-          isDisabled={!formValid || !isJSONValid}
+          isDisabled={!formValid}
           onClick={() => onChange(getUpdatedItem())}
           data-test-subj="transformApplyAggChanges"
         >

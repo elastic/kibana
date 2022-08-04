@@ -39,11 +39,10 @@ export function getSupportedFilterAggs(
     ];
   }
 
-  // Filter boolean fields might not exist in the data view
+  // Some aggs like filter boolean might have fields that don't exist
   // but we still support it as JSON
   // eslint-disable-next-line no-console
   console.error(`The field ${fieldName} does not exist in the index or runtime fields`);
-  return undefined;
 }
 
 /**
@@ -71,7 +70,7 @@ export const FilterAggForm: PivotAggsConfigFilter['AggFormComponent'] = ({
 
   const filterAggTypeConfig = aggConfig?.aggTypeConfig;
   const filterAgg = aggConfig?.filterAgg ?? '';
-
+  const isValid = filterAggTypeConfig?.isValid ? filterAggTypeConfig?.isValid() : undefined;
   return (
     <>
       {filterAggsOptions !== undefined ? (
@@ -130,6 +129,7 @@ export const FilterAggForm: PivotAggsConfigFilter['AggFormComponent'] = ({
             });
           }}
           selectedField={selectedField}
+          isValid={isValid}
         />
       )}
     </>
