@@ -232,8 +232,8 @@ export type FileSavedObject<Meta = unknown> = SavedObject<FileMetadata<Meta>>;
  * The set of file metadata that can be updated.
  */
 export type UpdatableFileMetadata<Meta = unknown> = Pick<
-  FileMetadata<Meta>,
-  'Meta' | 'Alt' | 'name'
+  FileJSON<Meta>,
+  'meta' | 'alt' | 'name'
 >;
 
 /**

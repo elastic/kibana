@@ -6,7 +6,7 @@
  */
 
 import { ES_FIXED_SIZE_INDEX_BLOB_STORE } from '../../../common/constants';
-import type { FileMetadata, FilesMetrics, UpdatableFileMetadata } from '../../../common/types';
+import type { FileMetadata, FilesMetrics } from '../../../common/types';
 import type { FindFileArgs } from '../../file_service/file_action_types';
 
 export interface GetUsageMetricsArgs {
@@ -43,7 +43,7 @@ export interface UpdateArgs<M = unknown> {
   /**
    * The file's metadata.
    */
-  metadata: UpdatableFileMetadata<M>;
+  metadata: Pick<FileMetadata<M>, 'name' | 'Alt' | 'Meta'>;
 }
 
 export interface Pagination {

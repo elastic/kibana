@@ -50,8 +50,8 @@ export function fileAttributesReducer(
       return {
         ...state,
         name: payload.name ?? state.name,
-        Alt: payload.Alt ?? state.Alt,
-        Meta: payload.Meta ?? state.Meta,
+        Alt: payload.alt ?? state.Alt,
+        Meta: payload.meta ?? state.Meta,
         Updated: d.toISOString(),
       };
     default:
