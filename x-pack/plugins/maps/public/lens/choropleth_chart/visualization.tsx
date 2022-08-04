@@ -15,7 +15,7 @@ import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { layerTypes } from '@kbn/lens-plugin/public';
 import type { OperationMetadata, SuggestionRequest, Visualization } from '@kbn/lens-plugin/public';
-import { RegionMap } from '@kbn/lens-icons';
+import { LensIconRegionMap } from '@kbn/lens-icons';
 import { getSuggestions } from './suggestions';
 import type { ChoroplethChartState } from './types';
 import { RegionKeyEditor } from './region_key_editor';
@@ -41,7 +41,7 @@ export const getVisualization = ({
   visualizationTypes: [
     {
       id: 'lnsChoropleth',
-      icon: RegionMap,
+      icon: LensIconRegionMap,
       label: CHART_LABEL,
       groupLabel: i18n.translate('xpack.maps.lens.groupLabel', {
         defaultMessage: 'Map',
@@ -70,7 +70,7 @@ export const getVisualization = ({
 
   getDescription() {
     return {
-      icon: RegionMap,
+      icon: LensIconRegionMap,
       label: CHART_LABEL,
     };
   },

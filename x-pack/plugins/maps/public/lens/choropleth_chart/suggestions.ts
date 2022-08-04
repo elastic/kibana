@@ -9,7 +9,7 @@ import { partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { FileLayer } from '@elastic/ems-client';
 import type { SuggestionRequest, VisualizationSuggestion } from '@kbn/lens-plugin/public';
-import { RegionMap } from '@kbn/lens-icons';
+import { LensIconRegionMap } from '@kbn/lens-icons';
 import type { ChoroplethChartState } from './types';
 import { getEmsSuggestion } from './get_ems_suggestion';
 
@@ -72,7 +72,7 @@ export function getSuggestions(
                 valueAccessor: metric.columnId,
                 regionAccessor: bucket.columnId,
               },
-              previewIcon: RegionMap,
+              previewIcon: LensIconRegionMap,
             });
           }
         }

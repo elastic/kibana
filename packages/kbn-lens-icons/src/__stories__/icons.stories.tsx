@@ -40,7 +40,7 @@ import {
   DropIllustration,
   GlobeIllustration,
   EuiIconLegend,
-  RegionMap,
+  LensIconRegionMap,
 } from '..';
 
 export default {
@@ -169,8 +169,8 @@ const IconsArray: Array<{
     Component: IconTriangle,
   },
   {
-    title: 'RegionMap',
-    Component: RegionMap,
+    title: 'LensIconRegionMap',
+    Component: LensIconRegionMap,
   },
 ];
 

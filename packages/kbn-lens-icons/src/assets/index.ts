@@ -37,4 +37,4 @@ export { LensIconChartWaffle } from './chart_waffle';
 export { DropIllustration } from './drop_illustration';
 export { GlobeIllustration } from './globe_illustration';
 export { EuiIconLegend } from './legend';
-export { RegionMap } from './region_map';
+export { LensIconRegionMap } from './region_map';

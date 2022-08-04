@@ -9,7 +9,7 @@
 import React, { FunctionComponent } from 'react';
 import type { EuiIconProps } from '@elastic/eui';
 
-export const RegionMap: FunctionComponent = ({
+export const LensIconRegionMap: FunctionComponent = ({
   title,
   titleId,
   ...props
