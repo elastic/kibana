@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IndexPattern, IndexPatternLayer } from './types';
+import type { IndexPatternLayer } from './types';
+import type { IndexPattern } from '../types';
 
 export const windowOptions = [
   {
