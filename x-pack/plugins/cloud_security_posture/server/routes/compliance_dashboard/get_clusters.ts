@@ -11,7 +11,7 @@ import type {
   QueryDslQueryContainer,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { Cluster } from '../../../common/types';
+import type { BenchmarkId, Cluster } from '../../../common/types';
 import {
   getFailedFindingsFromAggs,
   failedFindingsAggQuery,
@@ -30,7 +30,7 @@ export interface ClusterBucket extends FailedFindingsQueryResult, KeyDocCount {
     doc_count: number;
   };
   benchmarkName: Aggregation<KeyDocCount>;
-  benchmarkId: Aggregation<KeyDocCount>;
+  benchmarkId: Aggregation<KeyDocCount<BenchmarkId>>;
   timestamps: Aggregation<KeyDocCount<UnixEpochTime>>;
 }
 
