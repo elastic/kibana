@@ -12,6 +12,7 @@ export type {
   FileKind,
   FileJSON,
   FileStatus,
+  Pagination,
   FileMetadata,
   FilesMetrics,
   FileShareJSON,

@@ -9,6 +9,20 @@ import type { Readable } from 'stream';
 import type { ES_FIXED_SIZE_INDEX_BLOB_STORE } from './constants';
 
 /**
+ * Values for paginating through results.
+ */
+export interface Pagination {
+  /**
+   * Page of results.
+   */
+  page?: number;
+  /**
+   * Number of results per page.
+   */
+  perPage?: number;
+}
+
+/**
  * Status of a file.
  *
  * AWAITING_UPLOAD  - A file object has been created but does not have any contents.

@@ -13,6 +13,7 @@ import {
 } from '@kbn/core/server';
 import { nodeBuilder, escapeKuery } from '@kbn/es-query';
 import type {
+  Pagination,
   FileShareJSON,
   FileShareJSONWithToken,
   FileShareSavedObjectAttributes,
@@ -44,10 +45,8 @@ export interface CreateShareArgs {
   file: File;
 }
 
-export interface ListArgs {
+export interface ListArgs extends Pagination {
   fileId?: string;
-  page?: number;
-  perPage?: number;
 }
 
 interface IdArg {

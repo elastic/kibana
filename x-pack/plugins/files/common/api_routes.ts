@@ -6,7 +6,13 @@
  */
 
 import { PLUGIN_ID } from './constants';
-import type { FileJSON, FileShareJSON, FileShareJSONWithToken, FilesMetrics } from './types';
+import type {
+  FileJSON,
+  Pagination,
+  FilesMetrics,
+  FileShareJSON,
+  FileShareJSONWithToken,
+} from './types';
 
 export const API_BASE_PATH = `/api/${PLUGIN_ID}`;
 
@@ -15,11 +21,6 @@ export const FILES_API_BASE_PATH = `${API_BASE_PATH}/files`;
 export const FILES_SHARE_API_BASE_PATH = `${API_BASE_PATH}/shares`;
 
 export const FILES_PUBLIC_API_BASE_PATH = `${API_BASE_PATH}/public`;
-
-interface Pagination {
-  page?: number;
-  perPage?: number;
-}
 
 /**
  * Abstract type definition for API route inputs and outputs.
