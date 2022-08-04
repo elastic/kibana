@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { arraysDifference, buildRangeFilter, constructQueryOptions, sortToSnake } from './utils';
+import {
+  arraysDifference,
+  buildNestedFilter,
+  buildRangeFilter,
+  constructQueryOptions,
+  sortToSnake,
+} from './utils';
 import { toElasticsearchQuery } from '@kbn/es-query';
 import { CaseStatuses } from '../../common';
 import { CaseSeverity } from '../../common/api';
@@ -485,6 +491,163 @@ describe('utils', () => {
           ],
           "function": "and",
           "type": "function",
+        }
+      `);
+    });
+  });
+
+  describe('buildNestedFilter', () => {
+    it('returns undefined if filters is undefined', () => {
+      expect(buildNestedFilter({ field: '', nestedField: '', operator: 'or' })).toBeUndefined();
+    });
+
+    it('returns undefined when the filters array is empty', () => {
+      expect(
+        buildNestedFilter({ filters: [], field: '', nestedField: '', operator: 'or' })
+      ).toBeUndefined();
+    });
+
+    it('returns a KueryNode for a single filter', () => {
+      expect(
+        toElasticsearchQuery(
+          buildNestedFilter({
+            filters: ['hello'],
+            field: 'uid',
+            nestedField: 'nestedField',
+            operator: 'or',
+          })!
+        )
+      ).toMatchInlineSnapshot(`
+        Object {
+          "nested": Object {
+            "path": "cases.attributes.nestedField",
+            "query": Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match": Object {
+                      "cases.attributes.nestedField.uid": "hello",
+                    },
+                  },
+                ],
+              },
+            },
+            "score_mode": "none",
+          },
+        }
+      `);
+    });
+
+    it("returns a KueryNode for multiple filters or'd together", () => {
+      expect(
+        toElasticsearchQuery(
+          buildNestedFilter({
+            filters: ['uid1', 'uid2'],
+            field: 'uid',
+            nestedField: 'nestedField',
+            operator: 'or',
+          })!
+        )
+      ).toMatchInlineSnapshot(`
+        Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "nested": Object {
+                  "path": "cases.attributes.nestedField",
+                  "query": Object {
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "should": Array [
+                        Object {
+                          "match": Object {
+                            "cases.attributes.nestedField.uid": "uid1",
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  "score_mode": "none",
+                },
+              },
+              Object {
+                "nested": Object {
+                  "path": "cases.attributes.nestedField",
+                  "query": Object {
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "should": Array [
+                        Object {
+                          "match": Object {
+                            "cases.attributes.nestedField.uid": "uid2",
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  "score_mode": "none",
+                },
+              },
+            ],
+          },
+        }
+      `);
+    });
+
+    it("returns a KueryNode for multiple filters and'ed together", () => {
+      expect(
+        toElasticsearchQuery(
+          buildNestedFilter({
+            filters: ['uid1', 'uid2'],
+            field: 'uid',
+            nestedField: 'nestedField',
+            operator: 'and',
+          })!
+        )
+      ).toMatchInlineSnapshot(`
+        Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "nested": Object {
+                  "path": "cases.attributes.nestedField",
+                  "query": Object {
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "should": Array [
+                        Object {
+                          "match": Object {
+                            "cases.attributes.nestedField.uid": "uid1",
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  "score_mode": "none",
+                },
+              },
+              Object {
+                "nested": Object {
+                  "path": "cases.attributes.nestedField",
+                  "query": Object {
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "should": Array [
+                        Object {
+                          "match": Object {
+                            "cases.attributes.nestedField.uid": "uid2",
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  "score_mode": "none",
+                },
+              },
+            ],
+          },
         }
       `);
     });

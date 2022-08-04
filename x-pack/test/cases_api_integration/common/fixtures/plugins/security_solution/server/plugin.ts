@@ -23,7 +23,14 @@ export interface FixtureStartDeps {
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
   public setup(core: CoreSetup<FixtureStartDeps>, deps: FixtureSetupDeps) {
     const { features } = deps;
+    this.registerFeatures(features);
+  }
 
+  public start() {}
+
+  public stop() {}
+
+  private registerFeatures(features: FeaturesPluginSetup) {
     features.registerKibanaFeature({
       id: 'securitySolutionFixture',
       name: 'SecuritySolutionFixture',
@@ -118,6 +125,4 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       },
     });
   }
-  public start() {}
-  public stop() {}
 }

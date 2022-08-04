@@ -86,7 +86,11 @@ export const create = async (
       unsecuredSavedObjectsClient,
       caseId: newCase.id,
       user,
-      payload: { ...query, severity: query.severity ?? CaseSeverity.LOW },
+      payload: {
+        ...query,
+        severity: query.severity ?? CaseSeverity.LOW,
+        assignees: query.assignees ?? [],
+      },
       owner: newCase.attributes.owner,
     });
 

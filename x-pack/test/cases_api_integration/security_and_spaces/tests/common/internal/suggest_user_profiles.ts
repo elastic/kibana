@@ -9,10 +9,7 @@ import expect from '@kbn/expect';
 import { loginUsers, suggestUserProfiles } from '../../../../common/lib/utils';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
-  secOnly,
   superUser,
-  secOnlyNoDelete,
-  secOnlyRead,
   obsOnly,
   noCasesPrivilegesSpace1,
 } from '../../../../common/lib/authentication/users';
@@ -24,13 +21,6 @@ export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('suggest_user_profiles', () => {
-    before(async () => {
-      await loginUsers({
-        supertest: supertestWithoutAuth,
-        users: [secOnly, secOnlyNoDelete, secOnlyRead, obsOnly],
-      });
-    });
-
     it('finds the profile for the user without deletion privileges', async () => {
       const profiles = await suggestUserProfiles({
         supertest: supertestWithoutAuth,

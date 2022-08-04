@@ -62,6 +62,7 @@ export const find = async (
       owner: queryParams.owner,
       from: queryParams.from,
       to: queryParams.to,
+      assignees: queryParams.assignees,
     };
 
     const statusStatsOptions = constructQueryOptions({

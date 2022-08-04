@@ -13,11 +13,13 @@ import {
   SavedObjectReference,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
+  SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import {
   Actions,
   ActionTypes,
+  CaseAttributes,
   CaseSeverity,
   CaseStatuses,
   CaseUserActionAttributes,
@@ -39,6 +41,7 @@ import {
 } from '../../common/constants';
 
 import {
+  createCaseSavedObjectResponse,
   createConnectorObject,
   createExternalService,
   createJiraConnector,
@@ -51,6 +54,9 @@ import {
   updatedCases,
   comment,
   attachments,
+  updatedAssigneesCases,
+  originalCasesWithAssignee,
+  updatedTagsCases,
 } from './mocks';
 import { CaseUserActionService, transformFindResponseToExternalModel } from '.';
 import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
@@ -667,6 +673,7 @@ describe('CaseUserActionService', () => {
               type: 'create_case',
               owner: 'securitySolution',
               payload: {
+                assignees: [{ uid: '1' }],
                 connector: {
                   fields: {
                     category: 'Denial of Service',
@@ -1067,6 +1074,267 @@ describe('CaseUserActionService', () => {
           ],
           { refresh: undefined }
         );
+      });
+
+      it('creates the correct user actions when an assignee is added', async () => {
+        await service.bulkCreateUpdateCase({
+          ...commonArgs,
+          originalCases,
+          updatedCases: updatedAssigneesCases,
+          user: commonArgs.user,
+        });
+
+        expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Object {
+                "attributes": Object {
+                  "action": "add",
+                  "created_at": "2022-01-09T22:00:00.000Z",
+                  "created_by": Object {
+                    "email": "elastic@elastic.co",
+                    "full_name": "Elastic User",
+                    "username": "elastic",
+                  },
+                  "owner": "securitySolution",
+                  "payload": Object {
+                    "assignees": Array [
+                      Object {
+                        "uid": "1",
+                      },
+                    ],
+                  },
+                  "type": "assignees",
+                },
+                "references": Array [
+                  Object {
+                    "id": "1",
+                    "name": "associated-cases",
+                    "type": "cases",
+                  },
+                ],
+                "type": "cases-user-actions",
+              },
+            ],
+            Object {
+              "refresh": undefined,
+            },
+          ]
+        `);
+      });
+
+      it('creates the correct user actions when an assignee is removed', async () => {
+        const casesWithAssigneeRemoved: Array<SavedObjectsUpdateResponse<CaseAttributes>> = [
+          {
+            ...createCaseSavedObjectResponse(),
+            id: '1',
+            attributes: {
+              assignees: [],
+            },
+          },
+        ];
+
+        await service.bulkCreateUpdateCase({
+          ...commonArgs,
+          originalCases: originalCasesWithAssignee,
+          updatedCases: casesWithAssigneeRemoved,
+          user: commonArgs.user,
+        });
+
+        expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Object {
+                "attributes": Object {
+                  "action": "delete",
+                  "created_at": "2022-01-09T22:00:00.000Z",
+                  "created_by": Object {
+                    "email": "elastic@elastic.co",
+                    "full_name": "Elastic User",
+                    "username": "elastic",
+                  },
+                  "owner": "securitySolution",
+                  "payload": Object {
+                    "assignees": Array [
+                      Object {
+                        "uid": "1",
+                      },
+                    ],
+                  },
+                  "type": "assignees",
+                },
+                "references": Array [
+                  Object {
+                    "id": "1",
+                    "name": "associated-cases",
+                    "type": "cases",
+                  },
+                ],
+                "type": "cases-user-actions",
+              },
+            ],
+            Object {
+              "refresh": undefined,
+            },
+          ]
+        `);
+      });
+
+      it('creates the correct user actions when assignees are added and removed', async () => {
+        const caseAssignees: Array<SavedObjectsUpdateResponse<CaseAttributes>> = [
+          {
+            ...createCaseSavedObjectResponse(),
+            id: '1',
+            attributes: {
+              assignees: [{ uid: '2' }],
+            },
+          },
+        ];
+
+        await service.bulkCreateUpdateCase({
+          ...commonArgs,
+          originalCases: originalCasesWithAssignee,
+          updatedCases: caseAssignees,
+          user: commonArgs.user,
+        });
+
+        expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Object {
+                "attributes": Object {
+                  "action": "add",
+                  "created_at": "2022-01-09T22:00:00.000Z",
+                  "created_by": Object {
+                    "email": "elastic@elastic.co",
+                    "full_name": "Elastic User",
+                    "username": "elastic",
+                  },
+                  "owner": "securitySolution",
+                  "payload": Object {
+                    "assignees": Array [
+                      Object {
+                        "uid": "2",
+                      },
+                    ],
+                  },
+                  "type": "assignees",
+                },
+                "references": Array [
+                  Object {
+                    "id": "1",
+                    "name": "associated-cases",
+                    "type": "cases",
+                  },
+                ],
+                "type": "cases-user-actions",
+              },
+              Object {
+                "attributes": Object {
+                  "action": "delete",
+                  "created_at": "2022-01-09T22:00:00.000Z",
+                  "created_by": Object {
+                    "email": "elastic@elastic.co",
+                    "full_name": "Elastic User",
+                    "username": "elastic",
+                  },
+                  "owner": "securitySolution",
+                  "payload": Object {
+                    "assignees": Array [
+                      Object {
+                        "uid": "1",
+                      },
+                    ],
+                  },
+                  "type": "assignees",
+                },
+                "references": Array [
+                  Object {
+                    "id": "1",
+                    "name": "associated-cases",
+                    "type": "cases",
+                  },
+                ],
+                "type": "cases-user-actions",
+              },
+            ],
+            Object {
+              "refresh": undefined,
+            },
+          ]
+        `);
+      });
+
+      it('creates the correct user actions when tags are added and removed', async () => {
+        await service.bulkCreateUpdateCase({
+          ...commonArgs,
+          originalCases,
+          updatedCases: updatedTagsCases,
+          user: commonArgs.user,
+        });
+
+        expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Object {
+                "attributes": Object {
+                  "action": "add",
+                  "created_at": "2022-01-09T22:00:00.000Z",
+                  "created_by": Object {
+                    "email": "elastic@elastic.co",
+                    "full_name": "Elastic User",
+                    "username": "elastic",
+                  },
+                  "owner": "securitySolution",
+                  "payload": Object {
+                    "tags": Array [
+                      "a",
+                      "b",
+                    ],
+                  },
+                  "type": "tags",
+                },
+                "references": Array [
+                  Object {
+                    "id": "1",
+                    "name": "associated-cases",
+                    "type": "cases",
+                  },
+                ],
+                "type": "cases-user-actions",
+              },
+              Object {
+                "attributes": Object {
+                  "action": "delete",
+                  "created_at": "2022-01-09T22:00:00.000Z",
+                  "created_by": Object {
+                    "email": "elastic@elastic.co",
+                    "full_name": "Elastic User",
+                    "username": "elastic",
+                  },
+                  "owner": "securitySolution",
+                  "payload": Object {
+                    "tags": Array [
+                      "defacement",
+                    ],
+                  },
+                  "type": "tags",
+                },
+                "references": Array [
+                  Object {
+                    "id": "1",
+                    "name": "associated-cases",
+                    "type": "cases",
+                  },
+                ],
+                "type": "cases-user-actions",
+              },
+            ],
+            Object {
+              "refresh": undefined,
+            },
+          ]
+        `);
       });
     });
 
