@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { CaseAttachments } from '../../../types';
+import { CaseAttachmentsWithoutOwner } from '../../../types';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import { Case } from '../../../containers/types';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
@@ -29,7 +29,7 @@ export const useCasesAddToNewCaseFlyout = (props: AddToNewCaseFlyoutProps = {}) 
   }, [dispatch]);
 
   const openFlyout = useCallback(
-    ({ attachments }: { attachments?: CaseAttachments } = {}) => {
+    ({ attachments }: { attachments?: CaseAttachmentsWithoutOwner } = {}) => {
       dispatch({
         type: CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT,
         payload: {

@@ -112,7 +112,7 @@ const CasesTableFiltersComponent = ({
 
   const handleSelectedSolution = useCallback(
     (newOwner) => {
-      if (!isEqual(newOwner, selectedOwner) && newOwner.length) {
+      if (!isEqual(newOwner, selectedOwner)) {
         setSelectedOwner(newOwner);
         onFilterChanged({ owner: newOwner });
       }

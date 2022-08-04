@@ -190,7 +190,7 @@ describe('CasesTableFilters ', () => {
     );
   });
 
-  describe('dynamic Solution filter', () => {
+  describe('Solution filter', () => {
     it('shows Solution filter when provided more than 1 availableSolutions', () => {
       const wrapper = mount(
         <TestProviders>
@@ -215,28 +215,58 @@ describe('CasesTableFilters ', () => {
         wrapper.find(`[data-test-subj="options-filter-popover-button-Solution"]`).exists()
       ).toBeFalsy();
     });
-  });
 
-  it('should call onFilterChange when selected solution changes', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <CasesTableFilters
-          {...props}
-          availableSolutions={[SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER]}
-        />
-      </TestProviders>
-    );
-    wrapper
-      .find(`[data-test-subj="options-filter-popover-button-Solution"]`)
-      .last()
-      .simulate('click');
+    it('should call onFilterChange when selected solution changes', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <CasesTableFilters
+            {...props}
+            availableSolutions={[SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER]}
+          />
+        </TestProviders>
+      );
+      wrapper
+        .find(`[data-test-subj="options-filter-popover-button-Solution"]`)
+        .last()
+        .simulate('click');
 
-    wrapper
-      .find(`[data-test-subj="options-filter-popover-item-${SECURITY_SOLUTION_OWNER}"]`)
-      .last()
-      .simulate('click');
+      wrapper
+        .find(`[data-test-subj="options-filter-popover-item-${SECURITY_SOLUTION_OWNER}"]`)
+        .last()
+        .simulate('click');
 
-    expect(onFilterChanged).toBeCalledWith({ owner: [SECURITY_SOLUTION_OWNER] });
+      expect(onFilterChanged).toBeCalledWith({ owner: [SECURITY_SOLUTION_OWNER] });
+    });
+
+    it('should deselect all solutions', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <CasesTableFilters
+            {...props}
+            availableSolutions={[SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER]}
+          />
+        </TestProviders>
+      );
+
+      wrapper
+        .find(`[data-test-subj="options-filter-popover-button-Solution"]`)
+        .last()
+        .simulate('click');
+
+      wrapper
+        .find(`[data-test-subj="options-filter-popover-item-${SECURITY_SOLUTION_OWNER}"]`)
+        .last()
+        .simulate('click');
+
+      expect(onFilterChanged).toBeCalledWith({ owner: [SECURITY_SOLUTION_OWNER] });
+
+      wrapper
+        .find(`[data-test-subj="options-filter-popover-item-${SECURITY_SOLUTION_OWNER}"]`)
+        .last()
+        .simulate('click');
+
+      expect(onFilterChanged).toBeCalledWith({ owner: [] });
+    });
   });
 
   describe('create case button', () => {

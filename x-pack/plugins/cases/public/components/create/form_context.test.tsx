@@ -822,7 +822,11 @@ describe('Create case', () => {
     });
 
     expect(createAttachments).toHaveBeenCalledTimes(1);
-    expect(createAttachments).toHaveBeenCalledWith({ caseId: 'case-id', data: attachments });
+    expect(createAttachments).toHaveBeenCalledWith({
+      caseId: 'case-id',
+      data: attachments,
+      caseOwner: 'securitySolution',
+    });
   });
 
   it('should NOT call createAttachments if the attachments are an empty array', async () => {

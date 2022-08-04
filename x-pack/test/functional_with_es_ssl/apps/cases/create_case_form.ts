@@ -15,6 +15,7 @@ export default ({ getService }: FtrProviderContext) => {
     const find = getService('find');
     const cases = getService('cases');
     const testSubjects = getService('testSubjects');
+    const config = getService('config');
 
     before(async () => {
       await cases.navigation.navigateToApp();
@@ -27,11 +28,15 @@ export default ({ getService }: FtrProviderContext) => {
     it('creates a case from the stack management page', async () => {
       const caseTitle = 'test-' + uuid.v4();
       await cases.create.openCreateCasePage();
-      await cases.create.createCaseFromCreateCasePage({
+      await cases.create.createCase({
         title: caseTitle,
         description: 'test description',
         tag: 'tagme',
         severity: CaseSeverity.HIGH,
+      });
+
+      await testSubjects.existOrFail('case-view-title', {
+        timeout: config.get('timeouts.waitFor'),
       });
 
       // validate title
