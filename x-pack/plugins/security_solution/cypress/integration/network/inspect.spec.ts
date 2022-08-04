@@ -6,7 +6,6 @@
  */
 
 import { INSPECT_MODAL, INSPECT_NETWORK_BUTTONS_IN_SECURITY } from '../../screens/inspect';
-import { waitForPageToBeLoaded } from '../../tasks/common';
 
 import { closesModal, openStatsAndTables } from '../../tasks/inspect';
 import { login, visit } from '../../tasks/login';
@@ -18,7 +17,6 @@ describe('Inspect', () => {
     before(() => {
       login();
       visit(NETWORK_URL);
-      waitForPageToBeLoaded();
     });
     afterEach(() => {
       closesModal();
