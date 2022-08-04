@@ -31,12 +31,34 @@ function transformConnectorForExport(
   try {
     // If connector requires secrets, this will throw an error
     validateSecrets(actionType, {});
+  } catch (err) {
+    isMissingSecrets = true;
+    return {
+      ...connector,
+      attributes: {
+        ...connector.attributes,
+        secrets: {},
+        isMissingSecrets,
+      },
+    };
+  }
 
+  try {
     // If connector has optional (or no) secrets, set isMissingSecrets value to value of hasAuth
     // If connector doesn't have hasAuth value, default to isMissingSecrets: false
     isMissingSecrets = (connector?.attributes?.config?.hasAuth as boolean) ?? false;
+
+    // If connector requires secrets to be defined, this will throw an error
+    validateSecrets(actionType, null);
   } catch (err) {
-    isMissingSecrets = true;
+    return {
+      ...connector,
+      attributes: {
+        ...connector.attributes,
+        secrets: {},
+        isMissingSecrets,
+      },
+    };
   }
 
   // Skip connectors

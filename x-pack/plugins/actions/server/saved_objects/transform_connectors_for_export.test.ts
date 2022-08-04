@@ -240,7 +240,21 @@ describe('transform connector for export', () => {
 
   it('should not change connectors without secrets', () => {
     expect(transformConnectorsForExport(connectorsWithNoSecrets, actionTypeRegistry)).toEqual(
-      connectorsWithNoSecrets
+      connectorsWithNoSecrets.map((connector) => {
+        if (
+          connector.attributes.actionTypeId === '.email' ||
+          connector.attributes.actionTypeId === '.webhook'
+        ) {
+          return {
+            ...connector,
+            attributes: {
+              ...connector.attributes,
+              secrets: {},
+            },
+          };
+        }
+        return connector;
+      })
     );
   });
 
@@ -250,6 +264,7 @@ describe('transform connector for export', () => {
         ...connector,
         attributes: {
           ...connector.attributes,
+          secrets: {},
           isMissingSecrets: true,
         },
       }))
