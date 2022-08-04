@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import "cypress-real-events/support";
 import { checkA11y } from '../../support/commands';
 import { FLEET, navigateTo } from '../../tasks/navigation';
 import { GENERATE_FLEET_SERVER_POLICY_BUTTON } from '../../screens/fleet';
@@ -16,12 +17,12 @@ describe('Home page', async () => {
     describe('Quick Start', async () => {
       it('Get started with fleet', async () => {
         checkA11y({ skipFailures: false });
-        // cy.getBySel('comboBoxSearchInput').clear().type(fleetServerHost);
-        cy.getBySel(GENERATE_FLEET_SERVER_POLICY_BUTTON).click();
       });
-      // it('Install Fleet Server', async () => {
-      //   checkA11y({ skipFailures: false });
-      // });
+      it('Install Fleet Server', async () => {
+          cy.getBySel('comboBoxSearchInput').clear().realClick().realType(fleetServerHost);
+          cy.getBySel(GENERATE_FLEET_SERVER_POLICY_BUTTON).click();
+        checkA11y({ skipFailures: false });
+      });
     });
     //     describe('Advanced', async () => {
     //         before(async () => {
