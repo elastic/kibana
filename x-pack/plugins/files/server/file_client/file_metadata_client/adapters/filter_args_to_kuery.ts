@@ -26,7 +26,7 @@ export function filterArgsToKuery({
     if (values.length) {
       const orExpressions = values
         .filter(Boolean)
-        .map((value) => nodeBuilder.is(`${attrPrefix}${fieldName}`, escapeKuery(value)));
+        .map((value) => nodeBuilder.is(`${attrPrefix}.${fieldName}`, escapeKuery(value)));
       kueryExpressions.push(nodeBuilder.or(orExpressions));
     }
   };

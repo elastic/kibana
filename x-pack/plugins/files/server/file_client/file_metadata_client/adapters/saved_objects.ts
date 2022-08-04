@@ -62,11 +62,9 @@ export class SavedObjectsFileMetadataClient implements FileMetadataClient {
       metadata: result.attributes as FileDescriptor['metadata'],
     };
   }
-  async list({
-    fileKind,
-    page,
-    perPage,
-  }: { fileKind: string } & Pagination): Promise<FileDescriptor[]> {
+  async list({ fileKind, page, perPage }: { fileKind?: string } & Pagination = {}): Promise<
+    FileDescriptor[]
+  > {
     let filter = `NOT ${this.soType}.attributes.Status: DELETED`;
     if (fileKind) {
       filter = `${this.soType}.attributes.FileKind: ${escapeKuery(fileKind)} AND ${filter}`;
@@ -86,7 +84,7 @@ export class SavedObjectsFileMetadataClient implements FileMetadataClient {
   async find({ page, perPage, ...filterArgs }: FindFileArgs): Promise<FileDescriptor[]> {
     const result = await this.soClient.find({
       type: this.soType,
-      filter: filterArgsToKuery({ ...filterArgs, attrPrefix: `${this.soType}.attributes.` }),
+      filter: filterArgsToKuery({ ...filterArgs, attrPrefix: `${this.soType}.attributes` }),
       page,
       perPage,
       sortOrder: 'desc',

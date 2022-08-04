@@ -4,10 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { Readable } from 'stream';
 import cuid from 'cuid';
 import { FileKind, FileMetadata } from '../../common/types';
 import type { FileMetadataClient } from './file_metadata_client';
-import type { BlobStorageClient } from '../blob_storage_service';
+import type {
+  BlobStorageClient,
+  UploadOptions as BlobUploadOptions,
+} from '../blob_storage_service';
 import { enforceMaxByteSizeTransform } from './stream_transforms';
 
 export interface DeleteArgs {
@@ -24,7 +28,7 @@ export interface DeleteArgs {
 /**
  * Args to create a file
  */
-interface CreateArgs {
+export interface CreateArgs {
   /**
    * Unique file ID
    */
@@ -34,6 +38,8 @@ interface CreateArgs {
    */
   metadata: Omit<FileMetadata, 'FileKind'> & { FileKind?: string };
 }
+
+export type UploadOptions = Omit<BlobUploadOptions, 'id'>;
 
 /**
  * Wraps the {@link FileMetadataClient} and {@link BlobStorageClient} client
@@ -112,7 +118,10 @@ export class FileClientImpl implements FileClient {
     return this.fileKindDescriptor.id;
   }
 
-  public create = async ({ id, metadata }: CreateArgs) => {
+  public create = async ({
+    id,
+    metadata,
+  }: CreateArgs): ReturnType<FileMetadataClient['create']> => {
     return this.metadataClient.create({
       id: id || cuid(),
       metadata: {
@@ -147,10 +156,24 @@ export class FileClientImpl implements FileClient {
     return this.metadataClient.list(arg);
   };
 
-  public upload: BlobStorageClient['upload'] = (rs, options) => {
+  /**
+   * Upload a blob
+   * @param id - The ID of the file content is associated with
+   * @param rs - The readable stream of the file content
+   * @param options - Options for the upload
+   */
+  public upload = async (
+    id: string,
+    rs: Readable,
+    options?: UploadOptions
+  ): ReturnType<BlobStorageClient['upload']> => {
     return this.blobStorageClient.upload(rs, {
       ...options,
-      transforms: [enforceMaxByteSizeTransform(this.fileKindDescriptor.maxSizeBytes ?? Infinity)],
+      transforms: [
+        ...(options?.transforms || []),
+        enforceMaxByteSizeTransform(this.fileKindDescriptor.maxSizeBytes ?? Infinity),
+      ],
+      id,
     });
   };
 

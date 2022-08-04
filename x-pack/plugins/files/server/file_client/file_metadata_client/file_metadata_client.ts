@@ -135,7 +135,7 @@ export interface FileMetadataClient {
    *
    * @param arg - Arguments to list file metadata
    */
-  list(arg: ListArg): Promise<FileDescriptor[]>;
+  list(arg?: ListArg): Promise<FileDescriptor[]>;
   /**
    * Search for a set of file kind instances that match the filters.
    *

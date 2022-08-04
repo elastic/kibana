@@ -95,9 +95,7 @@ export class File<M = unknown> implements IFile {
     });
 
     try {
-      const { size } = await this.fileClient.upload(content, {
-        id: this.id, // By sharing this ID with the blob content we can retrieve the content later
-      });
+      const { size } = await this.fileClient.upload(this.id, content);
       await this.updateFileState({
         action: 'uploaded',
         payload: { size },

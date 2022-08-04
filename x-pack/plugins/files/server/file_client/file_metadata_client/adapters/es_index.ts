@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { once } from 'lodash';
 import { Logger } from '@kbn/core/server';
 import { toElasticsearchQuery } from '@kbn/es-query';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import type { FilesMetrics, FileMetadata } from '../../../../common';
 import type { FindFileArgs } from '../../../file_service';
 import type {
@@ -21,6 +23,15 @@ import type {
   Pagination,
 } from '../file_metadata_client';
 import { filterArgsToKuery } from './filter_args_to_kuery';
+import { fileObjectType } from '../../../saved_objects/file';
+
+const fileMappings: MappingProperty = {
+  dynamic: false,
+  type: 'object',
+  properties: {
+    ...fileObjectType.mappings.properties,
+  },
+};
 
 interface FileDocument<M = unknown> {
   file: FileMetadata<M>;
@@ -33,11 +44,32 @@ export class EsIndexFilesMetadataClient<M = unknown> implements FileMetadataClie
     private readonly logger: Logger
   ) {}
 
+  private createIfNotExists = once(async () => {
+    try {
+      if (await this.esClient.indices.exists({ index: this.index })) {
+        return;
+      }
+      await this.esClient.indices.create({
+        index: this.index,
+        mappings: {
+          dynamic: false,
+          properties: {
+            file: fileMappings,
+          },
+        },
+      });
+    } catch (e) {
+      // best effort
+    }
+  });
+
   async create({ id, metadata }: FileDescriptor<M>): Promise<FileDescriptor<M>> {
-    const result = await this.esClient.index({
+    await this.createIfNotExists();
+    const result = await this.esClient.index<FileDocument>({
       index: this.index,
       id,
-      document: { files: metadata },
+      document: { file: metadata },
+      refresh: true,
     });
     return {
       id: result._id,
@@ -67,25 +99,26 @@ export class EsIndexFilesMetadataClient<M = unknown> implements FileMetadataClie
   }
 
   async update({ id, metadata }: UpdateArgs<M>): Promise<FileDescriptor<M>> {
-    await this.esClient.update({ index: this.index, id, doc: { file: metadata } });
+    await this.esClient.update({ index: this.index, id, doc: { file: metadata }, refresh: true });
     return this.get({ id });
   }
 
   private paginationToES({ page = 1, perPage = 50 }: Pagination) {
     return {
       size: perPage,
-      from: page === 1 ? 0 : page * perPage,
+      from: (page - 1) * perPage,
     };
   }
 
-  async list({ page, perPage }: ListArg): Promise<Array<FileDescriptor<M>>> {
+  async list({ page, perPage }: ListArg = {}): Promise<Array<FileDescriptor<M>>> {
     const result = await this.esClient.search<FileDocument<M>>({
       index: this.index,
+      expand_wildcards: 'hidden',
       query: {
         match_all: {},
       },
       ...this.paginationToES({ page, perPage }),
-      sort: 'created',
+      sort: 'file.created',
     });
 
     return result.hits.hits.map((hit) => {
@@ -106,8 +139,10 @@ export class EsIndexFilesMetadataClient<M = unknown> implements FileMetadataClie
 
     const result = await this.esClient.search<FileDocument<M>>({
       index: this.index,
+      expand_wildcards: 'hidden',
       query: toElasticsearchQuery(kuery),
       ...this.paginationToES({ page, perPage }),
+      sort: 'file.created',
     });
 
     return result.hits.hits.map((r) => ({ id: r._id, metadata: r._source?.file! }));

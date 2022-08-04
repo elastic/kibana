@@ -10,7 +10,7 @@ import { ElasticsearchBlobStorageClient } from '../blob_storage_service';
 import { FileClientImpl, FileClient } from './file_client';
 import { EsIndexFilesMetadataClient } from './file_metadata_client';
 
-const NO_FILE_KIND = 'no-file-kind';
+const NO_FILE_KIND = 'none';
 
 /**
  * Arguments to create an ES file client.

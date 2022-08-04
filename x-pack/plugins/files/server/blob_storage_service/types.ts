@@ -10,7 +10,7 @@ import type { Readable, Transform } from 'stream';
 
 export type BlobAttribute = [key: string, value: JsonValue];
 
-interface UploadOptions {
+export interface UploadOptions {
   /**
    * Optionally provide any transforms to run on the readable source stream
    * as it is being uploaded.
