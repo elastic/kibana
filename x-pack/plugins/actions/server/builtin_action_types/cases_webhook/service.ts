@@ -108,8 +108,7 @@ export const createExternalService = (
       });
 
       const title = getObjectValueByKeyAsString(res.data, getIncidentResponseExternalTitleKey)!;
-      const pushedDate = new Date().toISOString();
-      return { id, title, pushedDate };
+      return { id, title };
     } catch (error) {
       throw createServiceError(error, `Unable to get case with id ${id}`);
     }
@@ -172,7 +171,7 @@ export const createExternalService = (
         id: externalId,
         title: insertedIncident.title,
         url: normalizedViewUrl,
-        pushedDate: insertedIncident.pushedDate,
+        pushedDate: new Date().toISOString(),
       };
     } catch (error) {
       throw createServiceError(error, 'Unable to create case');
@@ -242,7 +241,7 @@ export const createExternalService = (
         id: incidentId,
         title: updatedIncident.title,
         url: normalizedViewUrl,
-        pushedDate: updatedIncident.pushedDate,
+        pushedDate: new Date().toISOString(),
       };
     } catch (error) {
       throw createServiceError(error, `Unable to update case with id ${incidentId}`);

@@ -385,12 +385,6 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
           const { pushedDate, ...dataWithoutTime } = body.data;
           body.data = dataWithoutTime;
 
-          // check timestamp
-          const timestampTime = new Date(pushedDate).getTime();
-          const timeNow = Date.now();
-          const timeMinuteAgo = timeNow - 1000 * 60;
-          expect(timestampTime).to.be.within(timeMinuteAgo, timeNow);
-
           expect(body).to.eql({
             status: 'ok',
             connector_id: simulatedActionId,
