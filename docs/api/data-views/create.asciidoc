@@ -99,6 +99,28 @@ $ curl -X POST api/data_views/data_view
 --------------------------------------------------
 // KIBANA
 
+Use the `data_view.runtimeFieldMap` property to create a data view with {ref}/runtime-search-request.html[runtime fields]:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/data_views/data_view
+{
+  "data_view": {
+    "title": "logstash-*",
+    "name": "My Logstash data view 3",
+    "runtimeFieldMap": {
+      "runtime_shape_name": {
+        "type": "keyword",
+        "script": {
+          "source": "emit(doc['shape_name'].value)"
+        }
+      }
+    }
+  }
+}
+--------------------------------------------------
+// KIBANA
+
 Use the `data_view.type` and `data_view.typeMeta` properties to create data views based on {ref}/xpack-rollup.html[rollup indices]:
 
 [source,sh]
@@ -141,28 +163,6 @@ $ curl -X POST api/data_views/data_view
             "agg": "histogram",
             "interval": 5
           }
-        }
-      }
-    }
-  }
-}
---------------------------------------------------
-// KIBANA
-
-Use the `data_view.runtimeFieldMap` property to create a data view with {ref}/runtime-search-request.html[runtime fields]:
-
-[source,sh]
---------------------------------------------------
-$ curl -X POST api/data_views/data_view
-{
-  "data_view": {
-    "title": "logstash-*",
-    "name": "My Logstash data view 3",
-    "runtimeFieldMap": {
-      "runtime_shape_name": {
-        "type": "keyword",
-        "script": {
-          "source": "emit(doc['shape_name'].value)"
         }
       }
     }
