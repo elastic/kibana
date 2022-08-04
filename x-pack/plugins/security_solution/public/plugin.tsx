@@ -137,7 +137,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         apm,
         savedObjectsTagging: savedObjectsTaggingOss.getTaggingApi(),
         storage: this.storage,
-        security: plugins.security,
+        security: startPluginsDeps.security,
       };
       return services;
     })();

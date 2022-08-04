@@ -23,7 +23,7 @@ import type {
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { CasesUiStart } from '@kbn/cases-plugin/public';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { SessionViewStart } from '@kbn/session-view-plugin/public';
 import type { KubernetesSecurityStart } from '@kbn/kubernetes-security-plugin/public';
@@ -87,7 +87,7 @@ export interface StartPlugins {
   spaces?: SpacesPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   osquery?: OsqueryPluginStart;
-  security: SecurityPluginSetup;
+  security: SecurityPluginStart;
   cloudSecurityPosture: CspClientPluginStart;
   threatIntelligence: ThreatIntelligencePluginStart;
 }
