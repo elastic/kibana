@@ -38,6 +38,9 @@ import {
 } from './definitions';
 import { TinymathAST } from '@kbn/tinymath';
 import { CoreStart } from '@kbn/core/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+
+const dataMock = dataPluginMock.createStartContract();
 
 jest.mock('.');
 jest.mock('../../id_generator');
@@ -3006,7 +3009,8 @@ describe('state_helpers', () => {
         indexPattern,
         {},
         '1',
-        {}
+        {},
+        dataMock
       );
       expect(mock).toHaveBeenCalled();
       expect(errors).toHaveLength(1);
@@ -3032,7 +3036,8 @@ describe('state_helpers', () => {
         indexPattern,
         {} as IndexPatternPrivateState,
         '1',
-        {} as CoreStart
+        {} as CoreStart,
+        dataMock
       );
       expect(mock).toHaveBeenCalled();
       expect(errors).toHaveLength(1);
@@ -3067,7 +3072,8 @@ describe('state_helpers', () => {
         indexPattern,
         {} as IndexPatternPrivateState,
         '1',
-        {} as CoreStart
+        {} as CoreStart,
+        dataMock
       );
       expect(notCalledMock).not.toHaveBeenCalled();
       expect(mock).toHaveBeenCalledTimes(1);
@@ -3103,7 +3109,8 @@ describe('state_helpers', () => {
         indexPattern,
         {} as IndexPatternPrivateState,
         '1',
-        {} as CoreStart
+        {} as CoreStart,
+        dataMock
       );
       expect(savedRef).toHaveBeenCalled();
       expect(incompleteRef).not.toHaveBeenCalled();
@@ -3132,7 +3139,8 @@ describe('state_helpers', () => {
         indexPattern,
         {} as IndexPatternPrivateState,
         '1',
-        {} as CoreStart
+        {} as CoreStart,
+        dataMock
       );
       expect(mock).toHaveBeenCalledWith(
         {

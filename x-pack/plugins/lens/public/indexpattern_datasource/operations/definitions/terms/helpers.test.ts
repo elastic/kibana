@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { coreMock as corePluginMock } from '@kbn/core/public/mocks';
 import type { FrameDatasourceAPI } from '../../../../types';
 import type { CountIndexPatternColumn } from '..';
 import type { TermsIndexPatternColumn } from './types';
@@ -20,29 +21,24 @@ import { ReferenceBasedIndexPatternColumn } from '../column_types';
 import type { PercentileRanksIndexPatternColumn } from '../percentile_ranks';
 import { MULTI_KEY_VISUAL_SEPARATOR } from './constants';
 
-const indexPattern = createMockedIndexPattern();
-
-const coreMock = {
-  uiSettings: {
-    get: () => undefined,
-  },
-  http: {
-    post: jest.fn(() =>
-      Promise.resolve({
-        topValues: {
-          buckets: [
-            {
-              key: 'A',
-            },
-            {
-              key: 'B',
-            },
-          ],
+jest.mock('@kbn/unified-field-list-plugin/common/services/field_stats', () => ({
+  fetchFieldStats: jest.fn().mockResolvedValue({
+    topValues: {
+      buckets: [
+        {
+          key: 'A',
         },
-      })
-    ),
-  },
-} as unknown as CoreStart;
+        {
+          key: 'B',
+        },
+      ],
+    },
+  }),
+}));
+
+const indexPattern = createMockedIndexPattern();
+const dataMock = dataPluginMock.createStartContract();
+const coreMock = corePluginMock.createStart();
 
 function getStringBasedOperationColumn(
   field = 'source',
@@ -212,6 +208,7 @@ describe('getDisallowedTermsMessage()', () => {
       indexPattern
     )!.fixAction.newState;
     const newLayer = await fixAction(
+      dataMock,
       coreMock,
       {
         query: { language: 'kuery', query: 'a: b' },
@@ -259,6 +256,7 @@ describe('getDisallowedTermsMessage()', () => {
       indexPattern
     )!.fixAction.newState;
     const newLayer = await fixAction(
+      dataMock,
       coreMock,
       {
         query: { language: 'kuery', query: 'a: b' },
@@ -300,6 +298,7 @@ describe('getDisallowedTermsMessage()', () => {
       indexPattern
     )!.fixAction.newState;
     const newLayer = await fixAction(
+      dataMock,
       coreMock,
       {
         query: { language: 'kuery', query: 'a: b' },
@@ -340,6 +339,7 @@ describe('getDisallowedTermsMessage()', () => {
       indexPattern
     )!.fixAction.newState;
     const newLayer = await fixAction(
+      dataMock,
       coreMock,
       {
         query: { language: 'kuery', query: 'a: b' },

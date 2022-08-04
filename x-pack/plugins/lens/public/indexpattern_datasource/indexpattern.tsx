@@ -625,7 +625,8 @@ export function getIndexPatternDatasource({
               state.indexPatterns[layer.indexPatternId],
               state,
               layerId,
-              core
+              core,
+              data
             ) ?? []
           ).map((message) => ({
             shortMessage: '', // Not displayed currently

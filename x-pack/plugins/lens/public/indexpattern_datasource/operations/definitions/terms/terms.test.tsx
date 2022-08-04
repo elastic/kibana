@@ -9,12 +9,8 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { shallow, mount } from 'enzyme';
 import { EuiButtonGroup, EuiComboBox, EuiFieldNumber, EuiSelect, EuiSwitch } from '@elastic/eui';
-import type {
-  IUiSettingsClient,
-  SavedObjectsClientContract,
-  HttpSetup,
-  CoreStart,
-} from '@kbn/core/public';
+import { coreMock as corePluginMock } from '@kbn/core/public/mocks';
+import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -36,6 +32,21 @@ import { FieldSelect } from '../../../dimension_panel/field_select';
 import { ReferenceEditor } from '../../../dimension_panel/reference_editor';
 import { cloneDeep } from 'lodash';
 import { IncludeExcludeRow } from './include_exclude_options';
+
+jest.mock('@kbn/unified-field-list-plugin/common/services/field_stats', () => ({
+  fetchFieldStats: jest.fn().mockResolvedValue({
+    topValues: {
+      buckets: [
+        {
+          key: 'A',
+        },
+        {
+          key: 'B',
+        },
+      ],
+    },
+  }),
+}));
 
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {
@@ -2719,29 +2730,10 @@ describe('terms', () => {
         const fixAction = (
           typeof errorMessage === 'object' ? errorMessage.fixAction!.newState : undefined
         )!;
-        const coreMock = {
-          uiSettings: {
-            get: () => undefined,
-          },
-          http: {
-            post: jest.fn(() =>
-              Promise.resolve({
-                topValues: {
-                  buckets: [
-                    {
-                      key: 'A',
-                    },
-                    {
-                      key: 'B',
-                    },
-                  ],
-                },
-              })
-            ),
-          },
-        } as unknown as CoreStart;
+        const dataMock = dataPluginMock.createStartContract();
         const newLayer = await fixAction(
-          coreMock,
+          dataMock,
+          corePluginMock.createStart(),
           {
             query: { language: 'kuery', query: 'a: b' },
             filters: [],

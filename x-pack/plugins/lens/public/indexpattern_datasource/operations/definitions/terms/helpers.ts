@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
 import { buildEsQuery } from '@kbn/es-query';
-import { getEsQueryConfig } from '@kbn/data-plugin/public';
-import { FieldStatsResponse, FIELD_STATS_API_PATH } from '@kbn/unified-field-list-plugin/public';
+import { getEsQueryConfig, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { FieldStatsResponse, fetchFieldStats } from '@kbn/unified-field-list-plugin/public';
 import { GenericIndexPatternColumn, operationDefinitionMap } from '..';
 import { defaultLabel } from '../filters';
 import { isReferenced } from '../../layer_helpers';
@@ -108,7 +108,12 @@ export function getDisallowedTermsMessage(
       label: i18n.translate('xpack.lens.indexPattern.termsWithMultipleShiftsFixActionLabel', {
         defaultMessage: 'Use filters',
       }),
-      newState: async (core: CoreStart, frame: FrameDatasourceAPI, layerId: string) => {
+      newState: async (
+        data: DataPublicPluginStart,
+        core: CoreStart,
+        frame: FrameDatasourceAPI,
+        layerId: string
+      ) => {
         const currentColumn = layer.columns[columnId] as TermsIndexPatternColumn;
         const fieldNames = [
           currentColumn.sourceField,
@@ -132,24 +137,21 @@ export function getDisallowedTermsMessage(
         );
         if (!activeDataFieldNameMatch || currentTerms.length === 0) {
           if (fieldNames.length === 1) {
-            const response: FieldStatsResponse<string | number> = await core.http.post(
-              FIELD_STATS_API_PATH,
-              {
-                body: JSON.stringify({
-                  dataViewId: indexPattern.id,
-                  fieldName: fieldNames[0],
-                  dslQuery: buildEsQuery(
-                    indexPattern,
-                    frame.query,
-                    frame.filters,
-                    getEsQueryConfig(core.uiSettings)
-                  ),
-                  fromDate: frame.dateRange.fromDate,
-                  toDate: frame.dateRange.toDate,
-                  size: currentColumn.params.size,
-                }),
-              }
-            );
+            const currentDataView = await data.dataViews.get(indexPattern.id);
+            const response: FieldStatsResponse<string | number> = await fetchFieldStats({
+              data,
+              dataView: currentDataView,
+              field: indexPattern.getFieldByName(fieldNames[0])!,
+              dslQuery: buildEsQuery(
+                indexPattern,
+                frame.query,
+                frame.filters,
+                getEsQueryConfig(core.uiSettings)
+              ),
+              fromDate: frame.dateRange.fromDate,
+              toDate: frame.dateRange.toDate,
+              size: currentColumn.params.size,
+            });
             currentTerms = response.topValues?.buckets.map(({ key }) => String(key)) || [];
           }
         }

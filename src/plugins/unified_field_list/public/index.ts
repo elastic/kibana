@@ -16,7 +16,6 @@ export type {
 } from '../common/types';
 export type { FieldStatsProps, FieldStatsFromSampleProps } from './components/field_stats';
 export { FieldStats, FieldStatsFromSample } from './components/field_stats';
-export { BASE_API_PATH, FIELD_STATS_API_PATH } from '../common/constants';
 
 // This exports static code and TypeScript types,
 // as well as, Kibana Platform `plugin()` initializer.

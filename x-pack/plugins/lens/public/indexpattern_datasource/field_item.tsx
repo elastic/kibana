@@ -208,12 +208,14 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
         panelClassName="lnsFieldItem__fieldPanel"
         initialFocus=".lnsFieldItem__fieldPanel"
       >
-        <FieldItemPopoverContents
-          {...props}
-          editField={closeAndEdit}
-          removeField={closeAndRemove}
-          dropOntoWorkspace={dropOntoWorkspaceAndClose}
-        />
+        {infoIsOpen && (
+          <FieldItemPopoverContents
+            {...props}
+            editField={closeAndEdit}
+            removeField={closeAndRemove}
+            dropOntoWorkspace={dropOntoWorkspaceAndClose}
+          />
+        )}
       </EuiPopover>
     </li>
   );

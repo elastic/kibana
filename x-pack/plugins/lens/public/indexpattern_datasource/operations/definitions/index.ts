@@ -322,6 +322,7 @@ interface BaseOperationDefinitionProps<
             fixAction?: {
               label: string;
               newState: (
+                data: DataPublicPluginStart,
                 core: CoreStart,
                 frame: FrameDatasourceAPI,
                 layerId: string

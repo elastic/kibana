@@ -9,10 +9,10 @@
 import { lastValueFrom } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import DateMath from '@kbn/datemath';
-import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
-import type { BoolQuery } from '@kbn/es-query';
+import type { BoolQuery, DataViewFieldBase } from '@kbn/es-query';
 import type { FieldStatsResponse } from '../../types';
 
 const SHARD_SIZE = 5000;
@@ -21,7 +21,7 @@ const DEFAULT_TOP_VALUES_SIZE = 10;
 interface FetchFieldStatsParams {
   data: DataPublicPluginStart;
   dataView: DataView;
-  field: DataViewField;
+  field: DataViewFieldBase;
   fromDate: string;
   toDate: string;
   dslQuery: { bool: BoolQuery } | {};
@@ -38,6 +38,9 @@ export const fetchFieldStats = async ({
   size,
 }: FetchFieldStatsParams): Promise<FieldStatsResponse<string | number>> => {
   try {
+    if (!dataView?.id || !field?.type) {
+      return {};
+    }
     const timeFieldName = dataView.timeFieldName;
     const filter = timeFieldName
       ? [
@@ -108,7 +111,7 @@ export async function getNumberHistogram(
   aggSearchWithBody: (
     aggs: Record<string, estypes.AggregationsAggregationContainer>
   ) => Promise<estypes.SearchResponse<any>>,
-  field: DataViewField,
+  field: DataViewFieldBase,
   useTopHits = true
 ): Promise<FieldStatsResponse<string | number>> {
   const fieldRef = getFieldRef(field);
@@ -217,7 +220,7 @@ export async function getNumberHistogram(
 
 export async function getStringSamples(
   aggSearchWithBody: (aggs: Record<string, estypes.AggregationsAggregationContainer>) => unknown,
-  field: DataViewField,
+  field: DataViewFieldBase,
   size = DEFAULT_TOP_VALUES_SIZE
 ): Promise<FieldStatsResponse<string | number>> {
   const fieldRef = getFieldRef(field);
@@ -257,7 +260,7 @@ export async function getStringSamples(
 // This one is not sampled so that it returns the full date range
 export async function getDateHistogram(
   aggSearchWithBody: (aggs: Record<string, estypes.AggregationsAggregationContainer>) => unknown,
-  field: DataViewField,
+  field: DataViewFieldBase,
   range: { fromDate: string; toDate: string }
 ): Promise<FieldStatsResponse<string | number>> {
   const fromDate = DateMath.parse(range.fromDate);
@@ -299,7 +302,7 @@ export async function getDateHistogram(
   };
 }
 
-function getFieldRef(field: DataViewField) {
+function getFieldRef(field: DataViewFieldBase) {
   return field.scripted
     ? {
         script: {

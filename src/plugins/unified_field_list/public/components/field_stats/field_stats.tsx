@@ -66,9 +66,7 @@ export interface FieldStatsProps {
   ) => JSX.Element | null;
 }
 
-// TODO: catch errors during rendering
-
-export const FieldStats: React.FC<FieldStatsProps> = ({
+const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   query,
   filters,
   fromDate,
@@ -127,6 +125,7 @@ export const FieldStats: React.FC<FieldStatsProps> = ({
         topValues: results.topValues,
       }));
     } catch (e) {
+      // console.error(e);
       setState((s) => ({ ...s, isLoading: false }));
     }
   }
@@ -467,4 +466,35 @@ export const FieldStats: React.FC<FieldStatsProps> = ({
   }
 
   return null;
+};
+
+class ErrorBoundary extends React.Component<{}, { hasError: boolean }> {
+  constructor(props: FieldStatsProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  // componentDidCatch(error, errorInfo) {
+  //   console.log(error, errorInfo);
+  // }
+
+  render() {
+    if (this.state.hasError) {
+      return null;
+    }
+
+    return this.props.children;
+  }
+}
+
+export const FieldStats: React.FC<FieldStatsProps> = (props) => {
+  return (
+    <ErrorBoundary>
+      <FieldStatsComponent {...props} />
+    </ErrorBoundary>
+  );
 };
