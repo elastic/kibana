@@ -81,6 +81,7 @@ export const useFieldValueAutocomplete = ({
               indexPattern: patterns,
               query: searchQuery,
               signal: abortCtrl.signal,
+              useTimeRange: false,
             });
 
             if (newSuggestions.length === 0) {
