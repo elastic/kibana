@@ -94,7 +94,7 @@ export const ConnectorSchedulingComponent: React.FC = () => {
           <EuiSpacer size="s" />
           <EuiButtonTo
             to={generatePath(SEARCH_INDEX_TAB_PATH, {
-              indexName: index.connector.name,
+              indexName: index.name,
               tabId: SearchIndexTabId.CONFIGURATION,
             })}
             fill
