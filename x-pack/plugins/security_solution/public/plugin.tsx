@@ -525,7 +525,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       updateAppLinks(links, linksPermissions);
 
       // set filtered links asynchronously
-      const filteredLinks = await getFilteredLinks(core, plugins, this.experimentalFeatures);
+      const filteredLinks = await getFilteredLinks(core, plugins);
       updateAppLinks(filteredLinks, linksPermissions);
     });
   }

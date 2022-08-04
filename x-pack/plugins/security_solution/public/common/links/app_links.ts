@@ -5,9 +5,7 @@
  * 2.0.
  */
 import type { CoreStart } from '@kbn/core/public';
-import { links as threatIntelligenceLinks } from '../../threat_intelligence/links';
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
-import type { AppLinkItems, LinkItem } from './types';
+import type { AppLinkItems } from './types';
 import { links as detectionLinks } from '../../detections/links';
 import { links as timelinesLinks } from '../../timelines/links';
 import { getCasesLinkItems } from '../../cases/links';
@@ -32,19 +30,9 @@ export const links = Object.freeze([
 
 export const getFilteredLinks = async (
   core: CoreStart,
-  plugins: StartPlugins,
-  experimentalFeatures: Readonly<ExperimentalFeatures>
+  plugins: StartPlugins
 ): Promise<AppLinkItems> => {
   const managementFilteredLinks = await getManagementFilteredLinks(core, plugins);
-
-  const threatHuntingFilteredLinks = {
-    ...threatHuntingLandingLinks,
-    links: !experimentalFeatures.threatIntelligenceEnabled
-      ? threatHuntingLandingLinks.links?.filter(
-          (p: LinkItem) => p.id !== threatIntelligenceLinks.id
-        )
-      : threatHuntingLandingLinks.links,
-  };
 
   return Object.freeze([
     dashboardsLandingLinks,
@@ -52,7 +40,7 @@ export const getFilteredLinks = async (
     cloudSecurityPostureRootLinks,
     timelinesLinks,
     casesLinks,
-    threatHuntingFilteredLinks,
+    threatHuntingLandingLinks,
     gettingStartedLinks,
     managementFilteredLinks,
   ]);
