@@ -14,12 +14,12 @@ import { XYBrushEvent } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TableInspectorAdapter } from '@kbn/lens-plugin/public/editor_frame_service/types';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DataCharts$, DataChartsMessage, DataTotalHits$ } from '../../hooks/use_saved_search';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
 import { GetStateReturn } from '../../services/discover_state';
-import { DataView } from '@kbn/data-views-plugin/common';
 
 export interface DiscoverHistogramProps {
   savedSearchData$: DataCharts$;
