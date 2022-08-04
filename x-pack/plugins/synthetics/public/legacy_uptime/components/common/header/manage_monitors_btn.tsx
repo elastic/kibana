@@ -12,29 +12,18 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MONITOR_MANAGEMENT_ROUTE } from '../../../../../common/constants';
 import { PUBLIC_BETA_DESCRIPTION } from '../../../pages/monitor_management/service_allowed_wrapper';
-import { ClientPluginsSetup } from '../../../../plugin';
-import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
 
 export const ManageMonitorsBtn = () => {
   const [isOpen, setIsOpen] = useLocalStorage('xpack.synthetics.monitorManagement.openTour', true);
 
   const history = useHistory();
 
-  const { cloud } = useKibana<ClientPluginsSetup>().services;
-
-  const { isDev } = useUptimeSettingsContext();
-
   const handleOnClick = () => {
     setIsOpen(false);
     history.push(MONITOR_MANAGEMENT_ROUTE + '/all');
   };
-
-  if (!cloud?.isCloudEnabled && !isDev) {
-    return null;
-  }
 
   return (
     <EuiTourStep

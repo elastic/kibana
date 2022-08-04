@@ -6,7 +6,7 @@
  */
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFieldNumber, EuiFormLabel, EuiSpacer } from '@elastic/eui';
+import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { OperationDefinition } from '.';
 import {
   ReferenceBasedIndexPatternColumn,
@@ -215,9 +215,7 @@ export const staticValueOperation: OperationDefinition<
     );
 
     return (
-      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded lnsIndexPatternDimensionEditor__section--shaded">
-        <EuiFormLabel>{paramEditorCustomProps?.labels?.[0] || defaultLabel}</EuiFormLabel>
-        <EuiSpacer size="s" />
+      <EuiFormRow label={paramEditorCustomProps?.labels?.[0] || defaultLabel} fullWidth>
         <EuiFieldNumber
           fullWidth
           data-test-subj="lns-indexPattern-static_value-input"
@@ -226,7 +224,7 @@ export const staticValueOperation: OperationDefinition<
           onChange={onChangeHandler}
           step="any"
         />
-      </div>
+      </EuiFormRow>
     );
   },
 };

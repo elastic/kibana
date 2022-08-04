@@ -35,14 +35,14 @@ import type {
   LensResizeActionData,
   LensToggleActionData,
   LensPagesizeActionData,
-} from './datatable_visualization/components/types';
+} from './visualizations/datatable/components/types';
 
 import {
   LENS_EDIT_SORT_ACTION,
   LENS_EDIT_RESIZE_ACTION,
   LENS_TOGGLE_ACTION,
   LENS_EDIT_PAGESIZE_ACTION,
-} from './datatable_visualization/components/constants';
+} from './visualizations/datatable/components/constants';
 import type { LensInspector } from './lens_inspector_service';
 import { DataViewsState } from './state_management/types';
 import { IndexPatternServiceAPI } from './indexpattern_service/service';
@@ -518,6 +518,7 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
 export type ParamEditorCustomProps = Record<string, unknown> & {
   labels?: string[];
   isInline?: boolean;
+  headingLabel?: string;
 };
 // The only way a visualization has to restrict the query building
 export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionProps<T> & {
@@ -667,6 +668,7 @@ export interface AccessorConfig {
 
 export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   groupLabel: string;
+  dimensionEditorGroupLabel?: string;
   groupTooltip?: string;
 
   /** ID is passed back to visualization. For example, `x` */
@@ -995,6 +997,14 @@ export interface Visualization<T = unknown> {
    * This can be used to configure dimension-specific options
    */
   renderDimensionEditor?: (
+    domElement: Element,
+    props: VisualizationDimensionEditorProps<T>
+  ) => ((cleanupElement: Element) => void) | void;
+  /**
+   * Additional editor that gets rendered inside the dimension popover.
+   * This can be used to configure dimension-specific options
+   */
+  renderDimensionEditorAdditionalSection?: (
     domElement: Element,
     props: VisualizationDimensionEditorProps<T>
   ) => ((cleanupElement: Element) => void) | void;

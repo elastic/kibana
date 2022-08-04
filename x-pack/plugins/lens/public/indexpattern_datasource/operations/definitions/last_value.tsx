@@ -14,6 +14,7 @@ import {
   EuiComboBoxOptionOption,
   EuiSwitch,
   EuiToolTip,
+  EuiText,
 } from '@elastic/eui';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
@@ -31,8 +32,9 @@ import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { isScriptedField } from './terms/helpers';
 import { FormRow } from './shared_components/form_row';
+import { getColumnWindowError } from '../../window_utils';
 
-function ofName(name: string, timeShift: string | undefined) {
+function ofName(name: string, timeShift: string | undefined, window: string | undefined) {
   return adjustTimeScaleLabelSuffix(
     i18n.translate('xpack.lens.indexPattern.lastValueOf', {
       defaultMessage: 'Last value of {name}',
@@ -43,7 +45,9 @@ function ofName(name: string, timeShift: string | undefined) {
     undefined,
     undefined,
     undefined,
-    timeShift
+    timeShift,
+    undefined,
+    window
   );
 }
 
@@ -130,7 +134,7 @@ export const lastValueOperation: OperationDefinition<
     defaultMessage: 'Last value',
   }),
   getDefaultLabel: (column, indexPattern) =>
-    ofName(getSafeName(column.sourceField, indexPattern), column.timeShift),
+    ofName(getSafeName(column.sourceField, indexPattern), column.timeShift, column.window),
   input: 'field',
   onFieldChange: (oldColumn, field) => {
     const newParams = { ...oldColumn.params };
@@ -143,7 +147,7 @@ export const lastValueOperation: OperationDefinition<
     return {
       ...oldColumn,
       dataType: field.type as DataType,
-      label: ofName(field.displayName, oldColumn.timeShift),
+      label: ofName(field.displayName, oldColumn.timeShift, oldColumn.window),
       sourceField: field.name,
       params: newParams,
       scale: field.type === 'string' ? 'ordinal' : 'ratio',
@@ -185,6 +189,7 @@ export const lastValueOperation: OperationDefinition<
       errorMessages = [invalidSortFieldMessage];
     }
     errorMessages.push(...(getDisallowedPreviousShiftMessage(layer, columnId) || []));
+    errorMessages.push(...(getColumnWindowError(layer, columnId, indexPattern) || []));
     return errorMessages.length ? errorMessages : undefined;
   },
   buildColumn({ field, previousColumn, indexPattern }, columnParams) {
@@ -204,7 +209,7 @@ export const lastValueOperation: OperationDefinition<
     const showArrayValues = isScriptedField(field) || lastValueParams?.showArrayValues;
 
     return {
-      label: ofName(field.displayName, previousColumn?.timeShift),
+      label: ofName(field.displayName, previousColumn?.timeShift, previousColumn?.window),
       dataType: field.type as DataType,
       operationType: 'last_value',
       isBucketed: false,
@@ -212,6 +217,7 @@ export const lastValueOperation: OperationDefinition<
       sourceField: field.name,
       filter: getFilter(previousColumn, columnParams) || getExistsFilter(field.name),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
+      window: columnParams?.window || previousColumn?.window,
       params: {
         showArrayValues,
         sortField: lastValueParams?.sortField || sortField,
@@ -220,6 +226,7 @@ export const lastValueOperation: OperationDefinition<
     };
   },
   filterable: true,
+  windowable: true,
   shiftable: true,
   toEsAggsFn: (column, columnId, indexPattern) => {
     const initialArgs = {
@@ -296,6 +303,46 @@ export const lastValueOperation: OperationDefinition<
 
     return (
       <>
+        {!isReferenced && (
+          <EuiFormRow
+            error={i18n.translate(
+              'xpack.lens.indexPattern.lastValue.showArrayValuesWithTopValuesWarning',
+              {
+                defaultMessage:
+                  'When you show array values, you are unable to use this field to rank top values.',
+              }
+            )}
+            isInvalid={currentColumn.params.showArrayValues && usingTopValues}
+            display="rowCompressed"
+            fullWidth
+            data-test-subj="lns-indexPattern-lastValue-showArrayValues"
+          >
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.lens.indexPattern.lastValue.showArrayValuesExplanation',
+                {
+                  defaultMessage:
+                    'Displays all values associated with this field in each last document.',
+                }
+              )}
+              position="left"
+            >
+              <EuiSwitch
+                label={
+                  <EuiText size="xs">
+                    {i18n.translate('xpack.lens.indexPattern.lastValue.showArrayValues', {
+                      defaultMessage: 'Show array values',
+                    })}
+                  </EuiText>
+                }
+                compressed={true}
+                checked={Boolean(currentColumn.params.showArrayValues)}
+                disabled={isScriptedField(currentColumn.sourceField, indexPattern)}
+                onChange={() => setShowArrayValues(!currentColumn.params.showArrayValues)}
+              />
+            </EuiToolTip>
+          </EuiFormRow>
+        )}
         <FormRow
           isInline={isInline}
           label={sortByFieldLabel}
@@ -349,42 +396,6 @@ export const lastValueOperation: OperationDefinition<
             }
           />
         </FormRow>
-        {!isReferenced && (
-          <EuiFormRow
-            error={i18n.translate(
-              'xpack.lens.indexPattern.lastValue.showArrayValuesWithTopValuesWarning',
-              {
-                defaultMessage:
-                  'When you show array values, you are unable to use this field to rank top values.',
-              }
-            )}
-            isInvalid={currentColumn.params.showArrayValues && usingTopValues}
-            display="rowCompressed"
-            fullWidth
-            data-test-subj="lns-indexPattern-lastValue-showArrayValues"
-          >
-            <EuiToolTip
-              content={i18n.translate(
-                'xpack.lens.indexPattern.lastValue.showArrayValuesExplanation',
-                {
-                  defaultMessage:
-                    'Displays all values associated with this field in each last document.',
-                }
-              )}
-              position="left"
-            >
-              <EuiSwitch
-                label={i18n.translate('xpack.lens.indexPattern.lastValue.showArrayValues', {
-                  defaultMessage: 'Show array values',
-                })}
-                compressed={true}
-                checked={Boolean(currentColumn.params.showArrayValues)}
-                disabled={isScriptedField(currentColumn.sourceField, indexPattern)}
-                onChange={() => setShowArrayValues(!currentColumn.params.showArrayValues)}
-              />
-            </EuiToolTip>
-          </EuiFormRow>
-        )}
       </>
     );
   },

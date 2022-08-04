@@ -1346,7 +1346,7 @@ describe('terms', () => {
       ).toBe('Invalid field: "timestamp". Check your data view or pick another field.');
     });
 
-    it('should render the an add button for single layer, but no other hints', () => {
+    it('should render the an add button for single layer and disabled the remove button', () => {
       const updateLayerSpy = jest.fn();
       const existingFields = getExistingFields();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
@@ -1366,7 +1366,15 @@ describe('terms', () => {
         instance.find('[data-test-subj="indexPattern-terms-add-field"]').exists()
       ).toBeTruthy();
 
-      expect(instance.find('[data-test-subj^="indexPattern-terms-removeField-"]').length).toBe(0);
+      expect(instance.find('[data-test-subj^="indexPattern-terms-removeField-"]').length).not.toBe(
+        0
+      );
+      expect(
+        instance
+          .find('[data-test-subj^="indexPattern-terms-removeField-"]')
+          .first()
+          .prop('isDisabled')
+      ).toBeTruthy();
     });
 
     it('should switch to the first supported operation when in single term mode and the picked field is not supported', () => {
@@ -1583,7 +1591,7 @@ describe('terms', () => {
       );
 
       expect(
-        instance.find('[data-test-subj="indexPattern-dimension-field"]').first().prop('options')
+        instance.find('[data-test-subj="indexPattern-dimension-field"]').at(1).prop('options')
       ).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
