@@ -50,13 +50,13 @@ export function fileAttributesReducer(
         ...state,
         ...payload,
         Status: 'READY',
-        Updated: moment().toISOString()
+        Updated: moment().toISOString(),
       };
     case 'uploadError':
       return {
         ...state,
         Status: 'UPLOAD_ERROR',
-        Updated: moment().toISOString()
+        Updated: moment().toISOString(),
       };
     case 'updateFile':
       return {
