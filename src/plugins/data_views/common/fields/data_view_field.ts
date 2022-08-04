@@ -229,6 +229,13 @@ export class DataViewField implements DataViewFieldBase {
   }
 
   /**
+   * returns true if the field is of rolled up type
+   */
+  public get isRolledUpField() {
+    return this.esTypes?.includes('aggregate_metric_double');
+  }
+
+  /**
    * return list of allowed time zones
    */
   public get timeZone() {
