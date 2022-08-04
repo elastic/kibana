@@ -37,7 +37,7 @@ import {
   TooltipType,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { buildEsQuery, Query, Filter } from '@kbn/es-query';
+import { buildEsQuery, Query, Filter, AggregateQuery } from '@kbn/es-query';
 import type { BucketedAggregation } from '../../../common/types';
 import { fetchFieldStats } from '../../../common/services/field_stats';
 import { useUnifiedFieldListServices } from '../../hooks/use_unified_field_list_services';
@@ -53,7 +53,7 @@ interface State {
 }
 
 export interface FieldStatsProps {
-  query: Query;
+  query: Query | AggregateQuery;
   filters: Filter[];
   fromDate: string;
   toDate: string;
