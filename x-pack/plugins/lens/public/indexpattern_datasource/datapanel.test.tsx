@@ -471,7 +471,7 @@ describe('IndexPattern Data Panel', () => {
 
     it('loads existence data if date range changes', async () => {
       const setState = await testExistenceLoading(undefined, {
-        dateRange: { fromDate: '2019-01-01', toDate: '2020-01-02' },
+        dateRange: { fromDate: '2019-02-01', toDate: '2020-01-02' },
       });
 
       expect(setState).toHaveBeenCalledTimes(1);
@@ -545,40 +545,160 @@ describe('IndexPattern Data Panel', () => {
       });
 
       expect(setState).toHaveBeenCalledTimes(2);
-      expect(getFieldsForIndexPattern).toHaveBeenCalledTimes(2);
+      expect(getFieldsForIndexPattern).toHaveBeenCalledTimes(3);
 
-      expect(core.http.post).toHaveBeenCalledWith('/api/lens/existing_fields/a', {
-        body: JSON.stringify({
-          dslQuery,
-          fromDate: '2019-01-01',
-          toDate: '2020-01-01',
-          timeFieldName: 'atime',
-        }),
-      });
-
-      expect(core.http.post).toHaveBeenCalledWith('/api/lens/existing_fields/b', {
-        body: JSON.stringify({
-          dslQuery,
-          fromDate: '2019-01-01',
-          toDate: '2020-01-01',
-          timeFieldName: 'btime',
-        }),
-      });
+      expect(getFieldsForIndexPattern.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "fields": Array [
+              Object {
+                "name": "field_1",
+              },
+              Object {
+                "name": "field_2",
+              },
+            ],
+            "getFieldByName": [Function],
+            "hasRestrictions": false,
+            "id": "a",
+            "timeFieldName": "atime",
+            "title": "aaa",
+          },
+          Object {
+            "filter": Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "range": Object {
+                      "atime": Object {
+                        "format": "strict_date_optional_time",
+                        "gte": "2019-01-01",
+                        "lte": "2020-01-02",
+                      },
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "filter": Array [],
+                      "must": Array [],
+                      "must_not": Array [],
+                      "should": Array [],
+                    },
+                  },
+                ],
+              },
+            },
+            "pattern": "",
+          },
+        ]
+      `);
+      expect(getFieldsForIndexPattern.mock.calls[1]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "fields": Array [
+              Object {
+                "name": "field_1",
+              },
+              Object {
+                "name": "field_2",
+              },
+            ],
+            "getFieldByName": [Function],
+            "hasRestrictions": false,
+            "id": "a",
+            "timeFieldName": "atime",
+            "title": "aaa",
+          },
+          Object {
+            "filter": Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "range": Object {
+                      "atime": Object {
+                        "format": "strict_date_optional_time",
+                        "gte": "2019-01-01",
+                        "lte": "2020-01-02",
+                      },
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "filter": Array [],
+                      "must": Array [],
+                      "must_not": Array [],
+                      "should": Array [],
+                    },
+                  },
+                ],
+              },
+            },
+            "pattern": "",
+          },
+        ]
+      `);
+      expect(getFieldsForIndexPattern.mock.calls[2]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "fields": Array [
+              Object {
+                "name": "field_1",
+              },
+              Object {
+                "name": "field_2",
+              },
+            ],
+            "getFieldByName": [Function],
+            "hasRestrictions": false,
+            "id": "b",
+            "timeFieldName": "btime",
+            "title": "bbb",
+          },
+          Object {
+            "filter": Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "range": Object {
+                      "btime": Object {
+                        "format": "strict_date_optional_time",
+                        "gte": "2019-01-01",
+                        "lte": "2020-01-02",
+                      },
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "filter": Array [],
+                      "must": Array [],
+                      "must_not": Array [],
+                      "should": Array [],
+                    },
+                  },
+                ],
+              },
+            },
+            "pattern": "",
+          },
+        ]
+      `);
 
       const nextState = setState.mock.calls[1][0]({
         existingFields: {},
       });
 
-      expect(nextState.existingFields).toEqual({
-        a_testtitle: {
-          a_field_1: true,
-          a_field_2: true,
-        },
-        b_testtitle: {
-          b_field_1: true,
-          b_field_2: true,
-        },
-      });
+      expect(nextState.existingFields).toMatchInlineSnapshot(`
+        Object {
+          "aaa": Object {
+            "field_1": true,
+            "field_2": true,
+          },
+          "bbb": Object {
+            "field_1": true,
+            "field_2": true,
+          },
+        }
+      `);
     });
 
     it('shows a loading indicator when loading', async () => {
@@ -591,30 +711,7 @@ describe('IndexPattern Data Panel', () => {
     });
 
     it('does not perform multiple queries at once', async () => {
-      let queryCount = 0;
-      let overlapCount = 0;
       const props = testProps();
-
-      core.http.post.mockImplementation((path) => {
-        if (queryCount) {
-          ++overlapCount;
-        }
-        ++queryCount;
-
-        const parts = (path as unknown as string).split('/');
-        const indexPatternTitle = parts[parts.length - 1];
-        const result = Promise.resolve({
-          indexPatternTitle,
-          existingFieldNames: ['field_1', 'field_2'].map(
-            (fieldName) => `${indexPatternTitle}_${fieldName}`
-          ),
-        });
-
-        result.then(() => --queryCount);
-
-        return result;
-      });
-
       const inst = mountWithIntl(<IndexPatternDataPanel {...props} />);
 
       inst.update();
@@ -635,8 +732,7 @@ describe('IndexPattern Data Panel', () => {
         inst.update();
       });
 
-      expect(core.http.post).toHaveBeenCalledTimes(2);
-      expect(overlapCount).toEqual(0);
+      expect(getFieldsForIndexPattern).toHaveBeenCalledTimes(2);
     });
 
     it("should default to empty dsl if query can't be parsed", async () => {
@@ -648,8 +744,9 @@ describe('IndexPattern Data Panel', () => {
         },
       };
       await testExistenceLoading(undefined, undefined, props);
+      const optionsArg = JSON.stringify(getFieldsForIndexPattern.mock.calls[0]);
 
-      expect((props.core.http.post as jest.Mock).mock.calls[0][1].body).toContain(
+      expect(optionsArg).toContain(
         JSON.stringify({
           must_not: {
             match_all: {},
