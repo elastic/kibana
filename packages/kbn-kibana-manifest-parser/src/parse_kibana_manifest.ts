@@ -94,17 +94,7 @@ export function validateKibanaManifest(parsed: unknown): KibanaPackageManifest {
     throw err('expected root value to be an object');
   }
 
-  const {
-    type,
-    id,
-    owner,
-    typeDeps,
-    runtimeDeps,
-    tsconfigType,
-    plugin,
-    sharedBrowserBundle,
-    ...extra
-  } = parsed;
+  const { type, id, owner, typeDeps, runtimeDeps, plugin, sharedBrowserBundle, ...extra } = parsed;
 
   const extraKeys = Object.keys(extra);
   if (extraKeys.length) {
@@ -131,16 +121,11 @@ export function validateKibanaManifest(parsed: unknown): KibanaPackageManifest {
     throw err(`invalid "runtimeDeps", must be an array of strings`);
   }
 
-  if (tsconfigType !== undefined && typeof tsconfigType !== 'string') {
-    throw err(`invalid "tsconfigType", must be a string`);
-  }
-
   const base = {
     id,
     owner,
     typeDeps,
     runtimeDeps,
-    tsconfigType,
   };
 
   // return if this is one of the more basic types of package types

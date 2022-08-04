@@ -22,7 +22,6 @@ interface PackageManifestBaseFields {
   owner: string;
   typeDeps: string[];
   runtimeDeps: string[];
-  tsconfigType?: string;
 }
 
 export interface PluginPackageManifest extends PackageManifestBaseFields {

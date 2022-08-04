@@ -119,7 +119,6 @@ describe('validateKibanaManifest', () => {
         "id": "@kbn/foo",
         "owner": "@elastic/kibana-operations",
         "runtimeDeps": Array [],
-        "tsconfigType": undefined,
         "type": "shared-server",
         "typeDeps": Array [],
       }
@@ -134,7 +133,6 @@ describe('validateKibanaManifest', () => {
         "id": "@kbn/foo",
         "owner": "@elastic/kibana-operations",
         "runtimeDeps": Array [],
-        "tsconfigType": undefined,
         "type": "functional-tests",
         "typeDeps": Array [],
       }
@@ -149,7 +147,6 @@ describe('validateKibanaManifest', () => {
         "id": "@kbn/foo",
         "owner": "@elastic/kibana-operations",
         "runtimeDeps": Array [],
-        "tsconfigType": undefined,
         "type": "test-helper",
         "typeDeps": Array [],
       }
@@ -223,7 +220,6 @@ describe('validateKibanaManifest', () => {
             "serviceFolders": undefined,
           },
           "runtimeDeps": Array [],
-          "tsconfigType": undefined,
           "type": "plugin-browser",
           "typeDeps": Array [],
         }

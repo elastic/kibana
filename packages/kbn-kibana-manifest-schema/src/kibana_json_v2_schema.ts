@@ -30,13 +30,6 @@ export const MANIFEST_V2: JSONSchema = {
       `,
       pattern: '^@',
     },
-    tsconfigType: {
-      type: 'string',
-      description: desc`
-        tsconfig package that will be extended for this package. Defaults are smart
-        based on the type of package.
-      `,
-    },
     typeDependencies: {
       type: 'array',
       description: desc`
