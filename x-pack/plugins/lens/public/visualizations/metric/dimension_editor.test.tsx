@@ -13,7 +13,7 @@ import { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/colori
 
 import { MetricVisualizationState } from './visualization';
 import { DimensionEditor } from './dimension_editor';
-import { HTMLAttributes, ReactWrapper, shallow } from 'enzyme';
+import { HTMLAttributes, mount, ReactWrapper, shallow } from 'enzyme';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
 import { EuiButtonGroup, EuiColorPicker, EuiFieldText } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -216,14 +216,16 @@ describe('dimension editor', () => {
     it('sets metric prefix', () => {
       const setState = jest.fn();
       const localState = { ...fullState, secondaryMetricAccessor: accessor };
-      const component = shallow(
+      const component = mount(
         <DimensionEditor {...props} state={localState} setState={setState} accessor={accessor} />
       );
 
       const newVal = 'Metric explanation';
-      component.find(EuiFieldText).props().onChange!({
-        target: { value: newVal },
-      } as ChangeEvent<HTMLInputElement>);
+      act(() => {
+        component.find(EuiFieldText).props().onChange!({
+          target: { value: newVal },
+        } as ChangeEvent<HTMLInputElement>);
+      });
       expect(setState).toHaveBeenCalledWith({ ...localState, secondaryPrefix: newVal });
     });
   });
