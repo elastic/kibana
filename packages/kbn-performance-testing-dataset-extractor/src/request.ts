@@ -1,0 +1,112 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import { ESClient, SpanDocument, TransactionDocument, Headers } from './es_client';
+import { KibanaRequest, Request } from './types';
+
+const httpMethodRegExp = /(GET|POST|DELETE|HEAD|PUT|OPTIONS)/;
+const httpPathRegExp = /(?<=GET|POST|DELETE|HEAD|PUT|OPTIONS).*/;
+const staticResourcesRegExp = /\.(css|ico|js|json|jpeg|jpg|gif|png|otf|ttf|woff|woff2)$/;
+
+const strToJSON = (str: string): JSON | undefined => {
+  try {
+    return JSON.parse(str);
+  } catch (e) {
+    return;
+  }
+};
+
+const findFirstMatch = (regExp: RegExp, testString: string) => {
+  const found = regExp.exec(testString);
+  return found ? found[0] : undefined;
+};
+
+const parseQueryStatement = (statement: string): { params?: string; body?: JSON } => {
+  // github.com/elastic/apm-agent-nodejs/blob/5ba1b2609d18b12a64e1e559236717dd38d64a51/lib/instrumentation/elasticsearch-shared.js#L27-L29
+  // Some ES endpoints support both query params and a body, statement string might contain both of it
+  const split = statement.split('\n\n');
+  if (split.length === 2) {
+    return { params: split[0], body: strToJSON(split[1]) };
+  } else {
+    const body = strToJSON(split[0]);
+    return body ? { body } : { params: split[0] };
+  }
+};
+
+const combineHeaderFieldValues = (headers: Headers): { [key: string]: string } => {
+  return Object.assign(
+    {},
+    ...Object.keys(headers).map((key) => ({ [key]: headers[key].join(', ') }))
+  );
+};
+
+export const getKibanaRequests = (
+  hits: Array<SearchHit<TransactionDocument>>,
+  withoutStaticResources: boolean
+): KibanaRequest[] => {
+  const data = hits
+    .map((hit) => hit!._source as TransactionDocument)
+    .map((hit) => {
+      const payload = hit.http.request?.body?.original;
+      return {
+        transactionId: hit.transaction.id,
+        name: hit.transaction.name,
+        date: hit['@timestamp'],
+        duration: hit.transaction.duration.us,
+        http: {
+          method: hit.http.request.method,
+          path: hit.url.path,
+          headers: combineHeaderFieldValues(hit.http.request.headers),
+          body: payload ? JSON.stringify(strToJSON(payload)) : undefined,
+          statusCode: hit.http.response.status_code,
+        },
+      };
+    });
+
+  return withoutStaticResources
+    ? data.filter((item) => !staticResourcesRegExp.test(item.http.path))
+    : data;
+};
+
+export const getESRequests = async (esClient: ESClient, requests: KibanaRequest[]) => {
+  const esRequests = new Array<Request>();
+  for (const request of requests) {
+    const transactionId = request.transactionId;
+    const hits = await esClient.getSpans(transactionId);
+    const spans = hits
+      .map((hit) => hit!._source as SpanDocument)
+      .map((hit) => {
+        const query = hit?.span.db?.statement ? parseQueryStatement(hit?.span.db?.statement) : {};
+        return {
+          transactionId: hit.transaction.id,
+          spanId: hit.span.id,
+          name: hit.span.name,
+          date: hit['@timestamp'],
+          duration: hit.span?.duration?.us,
+          http: {
+            method: findFirstMatch(httpMethodRegExp, hit.span.name),
+            path: findFirstMatch(httpPathRegExp, hit.span.name.replace(/\s+/g, '')),
+            params: query?.params,
+            body: query?.body,
+          },
+        };
+      })
+      // filter out requests without method, path and POST/PUT/DELETE without body
+      .filter(
+        (hit) =>
+          hit &&
+          hit.http?.method &&
+          hit.http?.path &&
+          (hit.http?.method === 'GET' || hit.http?.body)
+      );
+    esRequests.push(...spans);
+  }
+
+  return esRequests;
+};
