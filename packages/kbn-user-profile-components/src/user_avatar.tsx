@@ -19,10 +19,13 @@ import {
   USER_AVATAR_MAX_INITIALS,
 } from './user_profile';
 
+/**
+ * Convenience type for a {@link UserProfile} with avatar data
+ */
 export type UserProfileWithAvatar = UserProfile<{ avatar?: UserProfileAvatarData }>;
 
 /**
- * Props of `UserAvatar` component
+ * Props of {@link UserAvatar} component
  */
 export interface UserAvatarProps
   extends Omit<
