@@ -440,7 +440,7 @@ describe('computeOrderForMultiplePercentiles()', () => {
     ).toBeNull();
   });
 
-  it('should return correct orderBy for multiple percentile', () => {
+  it('should return correct orderBy for multiple percentile on the same field', () => {
     expect(
       computeOrderForMultiplePercentiles(
         {
@@ -475,6 +475,43 @@ describe('computeOrderForMultiplePercentiles()', () => {
         ['col1', 'col2', 'col3']
       )
     ).toBe('1.95');
+  });
+
+  it('should return null for multiple percentile on different field', () => {
+    expect(
+      computeOrderForMultiplePercentiles(
+        {
+          label: 'Percentile 95 of bytes',
+          dataType: 'number',
+          operationType: 'percentile',
+          sourceField: 'bytes',
+          isBucketed: false,
+          scale: 'ratio',
+          params: { percentile: 95 },
+        } as PercentileIndexPatternColumn,
+        getLayer(getStringBasedOperationColumn(), [
+          {
+            label: 'Percentile 95 of bytes',
+            dataType: 'number',
+            operationType: 'percentile',
+            sourceField: 'bytes',
+            isBucketed: false,
+            scale: 'ratio',
+            params: { percentile: 95 },
+          } as PercentileIndexPatternColumn,
+          {
+            label: 'Percentile 65 of geo',
+            dataType: 'number',
+            operationType: 'percentile',
+            sourceField: 'geo',
+            isBucketed: false,
+            scale: 'ratio',
+            params: { percentile: 65 },
+          } as PercentileIndexPatternColumn,
+        ]),
+        ['col1', 'col2', 'col3']
+      )
+    ).toBeNull();
   });
 });
 

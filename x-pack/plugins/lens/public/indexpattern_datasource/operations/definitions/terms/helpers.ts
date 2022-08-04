@@ -234,7 +234,11 @@ export function computeOrderForMultiplePercentiles(
   if (column.operationType === 'percentile') {
     const percentileColumns = [];
     for (const [key, value] of Object.entries(layer.columns)) {
-      if (value.operationType === 'percentile') {
+      if (
+        value.operationType === 'percentile' &&
+        (value as PercentileIndexPatternColumn).sourceField ===
+          (column as PercentileIndexPatternColumn).sourceField
+      ) {
         percentileColumns.push(key);
       }
     }
