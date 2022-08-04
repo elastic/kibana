@@ -114,10 +114,9 @@ const uploadPipeline = (pipelineContent: string | object) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/observability_plugin.yml'));
     }
 
-    // Skipped due to https://github.com/elastic/kibana/issues/137185
-    // if (await doAnyChangesMatch([/^x-pack\/plugins\/synthetics/])) {
-    //   pipeline.push(getPipeline('.buildkite/pipelines/pull_request/synthetics_plugin.yml'));
-    // }
+    if (await doAnyChangesMatch([/^x-pack\/plugins\/synthetics/])) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/synthetics_plugin.yml'));
+    }
 
     if (await doAnyChangesMatch([/^x-pack\/plugins\/ux/])) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ux_plugin_e2e.yml'));
@@ -125,6 +124,13 @@ const uploadPipeline = (pipelineContent: string | object) => {
 
     if (GITHUB_PR_LABELS.includes('ci:deploy-cloud')) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/deploy_cloud.yml'));
+    }
+
+    if (
+      (await doAnyChangesMatch([/.*stor(ies|y).*/])) ||
+      GITHUB_PR_LABELS.includes('ci:build-storybooks')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/storybooks.yml'));
     }
 
     if (GITHUB_PR_LABELS.includes('ci:build-webpack-bundle-analyzer')) {

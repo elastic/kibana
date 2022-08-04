@@ -8,8 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core-http-browser';
+import type { NotificationsSetup } from '@kbn/core-notifications-browser';
 import type { StatusResponse, ServiceStatus, ServiceStatusLevel } from '../../../../types/status';
-import type { NotificationsSetup } from '../../../notifications';
 import type { DataType } from '.';
 
 interface MetricMeta {

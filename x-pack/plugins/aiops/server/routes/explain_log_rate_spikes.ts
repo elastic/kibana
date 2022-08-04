@@ -7,6 +7,7 @@
 
 import { chunk } from 'lodash';
 
+import { i18n } from '@kbn/i18n';
 import { asyncForEach } from '@kbn/std';
 import type { IRouter } from '@kbn/core/server';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
@@ -20,7 +21,7 @@ import {
   addChangePointsAction,
   addChangePointsHistogramAction,
   aiopsExplainLogRateSpikesSchema,
-  errorAction,
+  addErrorAction,
   resetAction,
   updateLoadingStateAction,
   AiopsExplainLogRateSpikesApiAction,
@@ -74,6 +75,23 @@ export const defineExplainLogRateSpikesRoute = (
         logger
       );
 
+      function endWithUpdatedLoadingState() {
+        push(
+          updateLoadingStateAction({
+            ccsWarning: false,
+            loaded: 1,
+            loadingState: i18n.translate(
+              'xpack.aiops.explainLogRateSpikes.loadingState.doneMessage',
+              {
+                defaultMessage: 'Done.',
+              }
+            ),
+          })
+        );
+
+        end();
+      }
+
       // Async IIFE to run the analysis while not blocking returning `responseWithHeaders`.
       (async () => {
         push(resetAction());
@@ -81,7 +99,12 @@ export const defineExplainLogRateSpikesRoute = (
           updateLoadingStateAction({
             ccsWarning: false,
             loaded,
-            loadingState: 'Loading field candidates.',
+            loadingState: i18n.translate(
+              'xpack.aiops.explainLogRateSpikes.loadingState.loadingFieldCandidates',
+              {
+                defaultMessage: 'Loading field candidates.',
+              }
+            ),
           })
         );
 
@@ -89,26 +112,33 @@ export const defineExplainLogRateSpikesRoute = (
         try {
           fieldCandidates = await fetchFieldCandidates(client, request.body);
         } catch (e) {
-          push(errorAction(e.toString()));
+          push(addErrorAction(e.toString()));
           end();
           return;
         }
 
-        if (fieldCandidates.length > 0) {
-          loaded += LOADED_FIELD_CANDIDATES;
-        } else {
-          loaded = 1;
-        }
+        loaded += LOADED_FIELD_CANDIDATES;
 
         push(
           updateLoadingStateAction({
             ccsWarning: false,
             loaded,
-            loadingState: `Identified ${fieldCandidates.length} field candidates.`,
+            loadingState: i18n.translate(
+              'xpack.aiops.explainLogRateSpikes.loadingState.identifiedFieldCandidates',
+              {
+                defaultMessage:
+                  'Identified {fieldCandidatesCount, plural, one {# field candidate} other {# field candidates}}.',
+                values: {
+                  fieldCandidatesCount: fieldCandidates.length,
+                },
+              }
+            ),
           })
         );
 
-        if (shouldStop || fieldCandidates.length === 0) {
+        if (fieldCandidates.length === 0) {
+          endWithUpdatedLoadingState();
+        } else if (shouldStop) {
           end();
           return;
         }
@@ -124,7 +154,7 @@ export const defineExplainLogRateSpikesRoute = (
           try {
             pValues = await fetchChangePointPValues(client, request.body, fieldCandidatesChunk);
           } catch (e) {
-            push(errorAction(e.toString()));
+            push(addErrorAction(e.toString()));
             end();
             return;
           }
@@ -144,9 +174,16 @@ export const defineExplainLogRateSpikesRoute = (
             updateLoadingStateAction({
               ccsWarning: false,
               loaded,
-              loadingState: `Identified ${
-                changePoints?.length ?? 0
-              } significant field/value pairs.`,
+              loadingState: i18n.translate(
+                'xpack.aiops.explainLogRateSpikes.loadingState.identifiedFieldValuePairs',
+                {
+                  defaultMessage:
+                    'Identified {fieldValuePairsCount, plural, one {# significant field/value pair} other {# significant field/value pairs}}.',
+                  values: {
+                    fieldValuePairsCount: changePoints?.length ?? 0,
+                  },
+                }
+              ),
             })
           );
 
@@ -157,15 +194,7 @@ export const defineExplainLogRateSpikesRoute = (
         }
 
         if (changePoints?.length === 0) {
-          push(
-            updateLoadingStateAction({
-              ccsWarning: false,
-              loaded: 1,
-              loadingState: `Done.`,
-            })
-          );
-
-          end();
+          endWithUpdatedLoadingState();
           return;
         }
 
@@ -239,7 +268,12 @@ export const defineExplainLogRateSpikesRoute = (
                 updateLoadingStateAction({
                   ccsWarning: false,
                   loaded,
-                  loadingState: `Loading histogram data.`,
+                  loadingState: i18n.translate(
+                    'xpack.aiops.explainLogRateSpikes.loadingState.loadingHistogramData',
+                    {
+                      defaultMessage: 'Loading histogram data.',
+                    }
+                  ),
                 })
               );
               push(
@@ -255,7 +289,7 @@ export const defineExplainLogRateSpikesRoute = (
           });
         }
 
-        end();
+        endWithUpdatedLoadingState();
       })();
 
       return response.ok(responseWithHeaders);

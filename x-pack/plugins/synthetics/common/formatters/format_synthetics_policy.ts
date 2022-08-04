@@ -18,7 +18,8 @@ export const formatSyntheticsPolicy = (
       'monitor.project.name': string;
       'monitor.project.id': string;
     }
-  >
+  >,
+  isLegacy?: boolean
 ) => {
   const configKeys = Object.keys(config) as ConfigKey[];
 
@@ -45,6 +46,8 @@ export const formatSyntheticsPolicy = (
     if (configItem) {
       if (formatters[key]) {
         configItem.value = formatters[key]?.(config);
+      } else if (key === ConfigKey.MONITOR_SOURCE_TYPE && isLegacy) {
+        configItem.value = undefined;
       } else {
         configItem.value = config[key] === undefined || config[key] === null ? null : config[key];
       }
