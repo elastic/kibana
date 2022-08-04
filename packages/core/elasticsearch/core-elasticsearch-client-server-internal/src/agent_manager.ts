@@ -7,9 +7,10 @@
  */
 
 import { isDeepStrictEqual } from 'util';
-import { ConnectionOptions, HttpAgentOptions, UndiciAgentOptions } from '@elastic/elasticsearch';
 import { Agent as HttpAgent } from 'http';
 import { Agent as HttpsAgent } from 'https';
+import { HttpProxyAgent, HttpsProxyAgent } from 'hpagent';
+import { ConnectionOptions, HttpAgentOptions, UndiciAgentOptions } from '@elastic/elasticsearch';
 
 export type NetworkAgent = HttpAgent | HttpsAgent;
 export type AgentFactory = (connectionOpts: ConnectionOptions) => NetworkAgent;
@@ -25,7 +26,15 @@ export class AgentManager {
   // }
   private agentsMaps: Record<string, Record<string, [NetworkAgent, HttpAgentOptions]>>;
 
-  constructor() {
+  constructor(
+    private defaultAgentConfig: HttpAgentOptions = {
+      keepAlive: true,
+      keepAliveMsecs: 1000,
+      maxSockets: 256,
+      maxFreeSockets: 256,
+      scheduling: 'lifo',
+    }
+  ) {
     this.agentsMaps = {
       'http:': {},
       'https:': {},
@@ -34,36 +43,58 @@ export class AgentManager {
 
   public getAgentFactory(
     type: string,
-    agentOptions?: HttpAgentOptions | UndiciAgentOptions | AgentFactory | false,
-    forceCreate = true
+    agentOptions?: HttpAgentOptions | UndiciAgentOptions | AgentFactory | false
   ): AgentFactory {
-    const config = assertValidAgentConfig(agentOptions);
+    const validAgentConfig = assertValidAgentConfig(agentOptions);
 
-    if (isAgentFactory(config)) {
+    if (isAgentFactory(validAgentConfig)) {
       // use the user-provided factory directly
-      return config;
+      return validAgentConfig;
     }
+
+    const baseConfig = Object.assign({}, this.defaultAgentConfig, validAgentConfig);
 
     return (connectionOpts: ConnectionOptions): NetworkAgent => {
       const agentMap = this.agentsMaps[connectionOpts.url.protocol];
+
       if (!agentMap) {
         throw new Error(`Unsupported protocol: '${connectionOpts.url.protocol}'`);
       }
 
       let agentTuple = agentMap[type];
 
-      if (agentTuple && !forceCreate) {
+      if (agentTuple) {
         const [agent, initialConfig] = agentTuple;
-        if (!isDeepStrictEqual(initialConfig, config)) {
+        const currentConfig = Object.assign({}, baseConfig, {
+          proxy: connectionOpts.proxy,
+          tls: connectionOpts.tls,
+        });
+        if (!isDeepStrictEqual(initialConfig, currentConfig)) {
           throw new Error(
             `Attempted to retrieve HTTP Agent instances of the same type '${type}' using different configurations`
           );
         }
         return agent;
       } else {
-        const agent =
-          connectionOpts.url.protocol === 'https:' ? new HttpsAgent(config) : new HttpAgent(config);
-        agentTuple = [agent, config];
+        let agent;
+
+        if (connectionOpts.proxy !== undefined) {
+          const proxyConfig = Object.assign({}, baseConfig, {
+            proxy: connectionOpts.proxy,
+            tls: connectionOpts.tls,
+          });
+          agent =
+            connectionOpts.url.protocol === 'https:'
+              ? new HttpsProxyAgent(proxyConfig)
+              : new HttpProxyAgent(proxyConfig);
+          agentTuple = [agent, proxyConfig];
+        } else {
+          agent =
+            connectionOpts.url.protocol === 'https:'
+              ? new HttpsAgent(baseConfig)
+              : new HttpAgent(baseConfig);
+          agentTuple = [agent, baseConfig];
+        }
         agentMap[type] = agentTuple;
       }
 
