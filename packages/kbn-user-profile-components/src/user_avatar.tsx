@@ -1,30 +1,59 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import type { EuiAvatarProps } from '@elastic/eui';
 import { EuiAvatar, useEuiTheme } from '@elastic/eui';
-import type { FunctionComponent, HTMLAttributes } from 'react';
+import type { FunctionComponent } from 'react';
 import React from 'react';
 
-import type { UserProfileAvatarData, UserProfileUserInfoWithSecurity } from '../../common';
+import type { UserProfile, UserProfileUserInfo, UserProfileAvatarData } from './user_profile';
 import {
   getUserAvatarColor,
   getUserAvatarInitials,
   getUserDisplayName,
   USER_AVATAR_MAX_INITIALS,
-} from '../../common/model';
+} from './user_profile';
 
-export interface UserAvatarProps extends Omit<HTMLAttributes<HTMLDivElement>, 'color'> {
-  user?: Pick<UserProfileUserInfoWithSecurity, 'username' | 'full_name'>;
+/**
+ * Convenience type for a {@link UserProfile} with avatar data
+ */
+export type UserProfileWithAvatar = UserProfile<{ avatar?: UserProfileAvatarData }>;
+
+/**
+ * Props of {@link UserAvatar} component
+ */
+export interface UserAvatarProps
+  extends Omit<
+    EuiAvatarProps,
+    | 'initials'
+    | 'initialsLength'
+    | 'imageUrl'
+    | 'iconType'
+    | 'iconSize'
+    | 'iconColor'
+    | 'name'
+    | 'color'
+    | 'type'
+  > {
+  /**
+   * User to be rendered
+   */
+  user?: UserProfileUserInfo;
+
+  /**
+   * Avatar data of user to be rendered
+   */
   avatar?: UserProfileAvatarData;
-  size?: EuiAvatarProps['size'];
-  isDisabled?: EuiAvatarProps['isDisabled'];
 }
 
+/**
+ * Renders an avatar given a user profile
+ */
 export const UserAvatar: FunctionComponent<UserAvatarProps> = ({ user, avatar, ...rest }) => {
   const { euiTheme } = useEuiTheme();
 
