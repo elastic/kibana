@@ -23,9 +23,10 @@ export const Breadcrumb = ({ treeNavSelection, onSelect }: BreadcrumbDeps) => {
     (collectionType: string) => {
       const selectionCopy = { ...treeNavSelection };
       switch (collectionType) {
-        case KubernetesCollection.cluster: {
+        case KubernetesCollection.clusterId: {
           onSelect({
-            [KubernetesCollection.cluster]: treeNavSelection[KubernetesCollection.cluster],
+            [KubernetesCollection.clusterId]: treeNavSelection[KubernetesCollection.clusterId],
+            [KubernetesCollection.clusterName]: treeNavSelection[KubernetesCollection.clusterName],
           });
           break;
         }
@@ -57,13 +58,16 @@ export const Breadcrumb = ({ treeNavSelection, onSelect }: BreadcrumbDeps) => {
         {hasRightArrow && <EuiIcon css={styles.breadcrumbRightIcon} type="arrowRight" size="s" />}
         {icon}
         <EuiToolTip content={treeNavSelection[collectionType]}>
-          <EuiButtonEmpty
-            css={isBolded ? styles.breadcrumbButtonBold : styles.breadcrumbButton}
-            color="text"
-            onClick={() => onBreadCrumbClick(collectionType)}
-          >
-            {treeNavSelection[collectionType]}
-          </EuiButtonEmpty>
+        <EuiButtonEmpty
+          css={isBolded ? styles.breadcrumbButtonBold : styles.breadcrumbButton}
+          color="text"
+          onClick={() => onBreadCrumbClick(collectionType)}
+        >
+          {collectionType === KubernetesCollection.clusterId
+            ? treeNavSelection[KubernetesCollection.clusterName] ||
+              treeNavSelection[KubernetesCollection.clusterId]
+            : treeNavSelection[collectionType]}
+        </EuiButtonEmpty>
         </EuiToolTip>
       </>
     ),
@@ -76,14 +80,14 @@ export const Breadcrumb = ({ treeNavSelection, onSelect }: BreadcrumbDeps) => {
     ]
   );
 
-  if (!treeNavSelection[KubernetesCollection.cluster]) {
+  if (!treeNavSelection[KubernetesCollection.clusterId]) {
     return null;
   }
 
   return (
     <div css={styles.breadcrumb}>
       {renderBreadcrumbLink(
-        KubernetesCollection.cluster,
+        KubernetesCollection.clusterId,
         <TreeViewIcon {...KUBERNETES_COLLECTION_ICONS_PROPS.cluster} />,
         !(
           treeNavSelection[KubernetesCollection.namespace] ||

@@ -23,7 +23,8 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const waitForExecutionCount = createWaitForExecutionCount(supertest, Spaces.space1.id);
 
-  describe('bulkEdit', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/138050
+  describe.skip('bulkEdit', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());

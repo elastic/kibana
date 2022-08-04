@@ -16,6 +16,7 @@ import {
   EuiLoadingSpinner,
   EuiToolTip,
 } from '@elastic/eui';
+import { KubernetesCollection } from '../../../types';
 import {
   TREE_NAVIGATION_LOADING,
   TREE_NAVIGATION_SHOW_MORE,
@@ -103,7 +104,12 @@ export const DynamicTreeView = ({
 
   useEffect(() => {
     if (!hasSelection && !depth && data && data.pages?.[0].buckets?.[0]?.key) {
-      onSelect({}, data.pages[0].buckets[0].key, tree[depth].type);
+      onSelect(
+        {},
+        tree[depth].type,
+        data.pages[0].buckets[0].key,
+        data.pages[0].buckets[0].key_as_string
+      );
     }
   }, [data, depth, hasSelection, onSelect, tree]);
 
@@ -223,18 +229,26 @@ const DynamicTreeViewItem = ({
   const styles = useStyles(depth);
   const buttonRef = useRef<Record<string, any>>({});
 
+  const handleSelect = () => {
+    if (tree[depth].type === KubernetesCollection.clusterId) {
+      onSelect(selectionDepth, tree[depth].type, aggData.key, aggData.key_as_string);
+    } else {
+      onSelect(selectionDepth, tree[depth].type, aggData.key);
+    }
+  };
+
   const onKeyboardToggle = () => {
     if (!isLastNode) {
       onToggleExpand();
     }
-    onSelect(selectionDepth, aggData.key, tree[depth].type);
+    handleSelect();
   };
 
   const onButtonToggle = () => {
     if (!isLastNode && !isExpanded) {
       onToggleExpand();
     }
-    onSelect(selectionDepth, aggData.key, tree[depth].type);
+    handleSelect();
   };
 
   const onArrowToggle = (event: MouseEvent<SVGElement>) => {
@@ -312,7 +326,7 @@ const DynamicTreeViewItem = ({
         )}
         <TreeViewIcon {...tree[depth].iconProps} css={styles.labelIcon} />
         <EuiToolTip content={aggData.key}>
-          <span className="euTreeView__nodeLabel">{aggData.key}</span>
+        <span className="euiTreeView__nodeLabel">{aggData.key_as_string || aggData.key}</span>
         </EuiToolTip>
       </button>
       <div
@@ -326,6 +340,9 @@ const DynamicTreeViewItem = ({
             selectionDepth={{
               ...selectionDepth,
               [tree[depth].type]: aggData.key,
+              ...(tree[depth].type === KubernetesCollection.clusterId && {
+                [KubernetesCollection.clusterName]: aggData.key_as_string,
+              }),
             }}
             tree={tree}
             onSelect={onSelect}
