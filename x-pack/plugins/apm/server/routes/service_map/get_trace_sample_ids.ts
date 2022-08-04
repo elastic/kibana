@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { sortBy, take, uniq } from 'lodash';
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   SERVICE_ENVIRONMENT,
@@ -15,7 +16,6 @@ import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
   TRACE_ID,
 } from '../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../common/processor_event';
 import { SERVICE_MAP_TIMEOUT_ERROR } from '../../../common/service_map';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { Setup } from '../../lib/helpers/setup_request';

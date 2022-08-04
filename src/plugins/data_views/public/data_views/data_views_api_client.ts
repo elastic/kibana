@@ -63,7 +63,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
   /**
    * Does a user created data view exist?
    */
-  async hasUserIndexPattern(): Promise<boolean> {
+  async hasUserDataView(): Promise<boolean> {
     const response = await this._request<{ result: boolean }>(
       this._getUrl(['has_user_index_pattern'])
     );

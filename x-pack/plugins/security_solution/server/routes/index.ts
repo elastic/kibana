@@ -120,7 +120,7 @@ export const initRoutes = (
   patchRulesBulkRoute(router, ml, logger);
   deleteRulesBulkRoute(router, logger);
   performBulkActionRoute(router, ml, logger);
-  registerResolverRoutes(router, getStartServices);
+  registerResolverRoutes(router, getStartServices, config);
 
   registerRuleMonitoringRoutes(router);
 
