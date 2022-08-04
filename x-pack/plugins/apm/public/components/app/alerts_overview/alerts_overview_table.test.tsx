@@ -46,7 +46,7 @@ describe('AlertsTable', () => {
       query: {
         rangeFrom: 'now-24h',
         rangeTo: 'now',
-        environment: 'test',
+        environment: 'testing',
       },
     });
     jest.clearAllMocks();
@@ -78,7 +78,7 @@ describe('AlertsTable', () => {
                   term: { 'service.name': 'opbeans' },
                 },
                 {
-                  term: { 'service.environment': 'test' },
+                  term: { 'service.environment': 'testing' },
                 },
               ],
             },
@@ -93,8 +93,10 @@ describe('AlertsTable', () => {
   it('should call alerts table with active filter', async () => {
     const { getByTestId } = render(<AlertsOverview />, renderOptions);
 
-    const button = getByTestId('alert-status-filter-active-button');
-    fireEvent.click(button);
+    await act(async () => {
+      const inputEl = getByTestId('active');
+      inputEl.click();
+    });
 
     await waitFor(async () => {
       expect(getAlertsStateTableMock).toHaveBeenLastCalledWith(
@@ -113,7 +115,7 @@ describe('AlertsTable', () => {
                   term: { 'kibana.alert.status': 'active' },
                 },
                 {
-                  term: { 'service.environment': 'test' },
+                  term: { 'service.environment': 'testing' },
                 },
               ],
             },
@@ -128,8 +130,10 @@ describe('AlertsTable', () => {
   it('should call alerts table with recovered filter', async () => {
     const { getByTestId } = render(<AlertsOverview />, renderOptions);
 
-    const button = getByTestId('alert-status-filter-active-button');
-    fireEvent.click(button);
+    await act(async () => {
+      const inputEl = getByTestId('recovered');
+      inputEl.click();
+    });
 
     await waitFor(async () => {
       expect(getAlertsStateTableMock).toHaveBeenLastCalledWith(
@@ -148,7 +152,7 @@ describe('AlertsTable', () => {
                   term: { 'kibana.alert.status': 'recovered' },
                 },
                 {
-                  term: { 'service.environment': 'test' },
+                  term: { 'service.environment': 'testing' },
                 },
               ],
             },
