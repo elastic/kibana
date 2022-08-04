@@ -9,9 +9,119 @@ Object {
         css="[object Object]"
       >
         <span
-          color="success"
-          data-euiicon-type="heatmap"
+          data-euiicon-type="cluster"
+          style="color: rgb(84, 179, 153);"
         />
+        <span
+          class="euiToolTipAnchor"
+        >
+          <button
+            class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonEmpty__text"
+              >
+                selected cluster name
+              </span>
+            </span>
+          </button>
+        </span>
+        <span
+          class="emotion-EuiIcon"
+          data-euiicon-type="arrowRight"
+        />
+        <span
+          data-euiicon-type="namespace"
+          style="color: rgb(96, 146, 192);"
+        />
+        <span
+          class="euiToolTipAnchor"
+        >
+          <button
+            class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonEmpty__text"
+              >
+                selected namespace
+              </span>
+            </span>
+          </button>
+        </span>
+        <span
+          class="emotion-EuiIcon"
+          data-euiicon-type="arrowRight"
+        />
+        <span
+          data-euiicon-type="kubernetesPod"
+          style="color: rgb(231, 102, 76);"
+        />
+        <span
+          class="euiToolTipAnchor"
+        >
+          <button
+            class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonEmpty__text"
+              >
+                selected pod
+              </span>
+            </span>
+          </button>
+        </span>
+        <span
+          class="emotion-EuiIcon"
+          data-euiicon-type="arrowRight"
+        />
+        <span
+          data-euiicon-type="container"
+          style="color: rgb(170, 101, 86);"
+        />
+        <span
+          class="euiToolTipAnchor"
+        >
+          <button
+            class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonEmpty__text"
+              >
+                selected image
+              </span>
+            </span>
+          </button>
+        </span>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      css="[object Object]"
+    >
+      <span
+        data-euiicon-type="cluster"
+        style="color: rgb(84, 179, 153);"
+      />
+      <span
+        class="euiToolTipAnchor"
+      >
         <button
           class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
           type="button"
@@ -26,14 +136,18 @@ Object {
             </span>
           </span>
         </button>
-        <span
-          class="emotion-EuiIcon"
-          data-euiicon-type="arrowRight"
-        />
-        <span
-          color="primary"
-          data-euiicon-type="nested"
-        />
+      </span>
+      <span
+        class="emotion-EuiIcon"
+        data-euiicon-type="arrowRight"
+      />
+      <span
+        data-euiicon-type="namespace"
+        style="color: rgb(96, 146, 192);"
+      />
+      <span
+        class="euiToolTipAnchor"
+      >
         <button
           class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
           type="button"
@@ -48,14 +162,18 @@ Object {
             </span>
           </span>
         </button>
-        <span
-          class="emotion-EuiIcon"
-          data-euiicon-type="arrowRight"
-        />
-        <span
-          color="warning"
-          data-euiicon-type="package"
-        />
+      </span>
+      <span
+        class="emotion-EuiIcon"
+        data-euiicon-type="arrowRight"
+      />
+      <span
+        data-euiicon-type="kubernetesPod"
+        style="color: rgb(231, 102, 76);"
+      />
+      <span
+        class="euiToolTipAnchor"
+      >
         <button
           class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
           type="button"
@@ -70,14 +188,18 @@ Object {
             </span>
           </span>
         </button>
-        <span
-          class="emotion-EuiIcon"
-          data-euiicon-type="arrowRight"
-        />
-        <span
-          color="danger"
-          data-euiicon-type="image"
-        />
+      </span>
+      <span
+        class="emotion-EuiIcon"
+        data-euiicon-type="arrowRight"
+      />
+      <span
+        data-euiicon-type="container"
+        style="color: rgb(170, 101, 86);"
+      />
+      <span
+        class="euiToolTipAnchor"
+      >
         <button
           class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
           type="button"
@@ -92,97 +214,7 @@ Object {
             </span>
           </span>
         </button>
-      </div>
-    </div>
-  </body>,
-  "container": <div>
-    <div
-      css="[object Object]"
-    >
-      <span
-        color="success"
-        data-euiicon-type="heatmap"
-      />
-      <button
-        class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
-        type="button"
-      >
-        <span
-          class="euiButtonContent euiButtonEmpty__content"
-        >
-          <span
-            class="euiButtonEmpty__text"
-          >
-            selected cluster name
-          </span>
-        </span>
-      </button>
-      <span
-        class="emotion-EuiIcon"
-        data-euiicon-type="arrowRight"
-      />
-      <span
-        color="primary"
-        data-euiicon-type="nested"
-      />
-      <button
-        class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
-        type="button"
-      >
-        <span
-          class="euiButtonContent euiButtonEmpty__content"
-        >
-          <span
-            class="euiButtonEmpty__text"
-          >
-            selected namespace
-          </span>
-        </span>
-      </button>
-      <span
-        class="emotion-EuiIcon"
-        data-euiicon-type="arrowRight"
-      />
-      <span
-        color="warning"
-        data-euiicon-type="package"
-      />
-      <button
-        class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
-        type="button"
-      >
-        <span
-          class="euiButtonContent euiButtonEmpty__content"
-        >
-          <span
-            class="euiButtonEmpty__text"
-          >
-            selected pod
-          </span>
-        </span>
-      </button>
-      <span
-        class="emotion-EuiIcon"
-        data-euiicon-type="arrowRight"
-      />
-      <span
-        color="danger"
-        data-euiicon-type="image"
-      />
-      <button
-        class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
-        type="button"
-      >
-        <span
-          class="euiButtonContent euiButtonEmpty__content"
-        >
-          <span
-            class="euiButtonEmpty__text"
-          >
-            selected image
-          </span>
-        </span>
-      </button>
+      </span>
     </div>
   </div>,
   "debug": [Function],
@@ -248,9 +280,93 @@ Object {
         css="[object Object]"
       >
         <span
-          color="success"
-          data-euiicon-type="heatmap"
+          data-euiicon-type="cluster"
+          style="color: rgb(84, 179, 153);"
         />
+        <span
+          class="euiToolTipAnchor"
+        >
+          <button
+            class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonEmpty__text"
+              >
+                selected cluster name
+              </span>
+            </span>
+          </button>
+        </span>
+        <span
+          class="emotion-EuiIcon"
+          data-euiicon-type="arrowRight"
+        />
+        <span
+          data-euiicon-type="kubernetesNode"
+          style="color: rgb(145, 112, 184);"
+        />
+        <span
+          class="euiToolTipAnchor"
+        >
+          <button
+            class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonEmpty__text"
+              >
+                selected node
+              </span>
+            </span>
+          </button>
+        </span>
+        <span
+          class="emotion-EuiIcon"
+          data-euiicon-type="arrowRight"
+        />
+        <span
+          data-euiicon-type="container"
+          style="color: rgb(170, 101, 86);"
+        />
+        <span
+          class="euiToolTipAnchor"
+        >
+          <button
+            class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonEmpty__text"
+              >
+                selected image
+              </span>
+            </span>
+          </button>
+        </span>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      css="[object Object]"
+    >
+      <span
+        data-euiicon-type="cluster"
+        style="color: rgb(84, 179, 153);"
+      />
+      <span
+        class="euiToolTipAnchor"
+      >
         <button
           class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
           type="button"
@@ -265,14 +381,18 @@ Object {
             </span>
           </span>
         </button>
-        <span
-          class="emotion-EuiIcon"
-          data-euiicon-type="arrowRight"
-        />
-        <span
-          color="primary"
-          data-euiicon-type="node"
-        />
+      </span>
+      <span
+        class="emotion-EuiIcon"
+        data-euiicon-type="arrowRight"
+      />
+      <span
+        data-euiicon-type="kubernetesNode"
+        style="color: rgb(145, 112, 184);"
+      />
+      <span
+        class="euiToolTipAnchor"
+      >
         <button
           class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
           type="button"
@@ -287,14 +407,18 @@ Object {
             </span>
           </span>
         </button>
-        <span
-          class="emotion-EuiIcon"
-          data-euiicon-type="arrowRight"
-        />
-        <span
-          color="danger"
-          data-euiicon-type="image"
-        />
+      </span>
+      <span
+        class="emotion-EuiIcon"
+        data-euiicon-type="arrowRight"
+      />
+      <span
+        data-euiicon-type="container"
+        style="color: rgb(170, 101, 86);"
+      />
+      <span
+        class="euiToolTipAnchor"
+      >
         <button
           class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
           type="button"
@@ -309,75 +433,7 @@ Object {
             </span>
           </span>
         </button>
-      </div>
-    </div>
-  </body>,
-  "container": <div>
-    <div
-      css="[object Object]"
-    >
-      <span
-        color="success"
-        data-euiicon-type="heatmap"
-      />
-      <button
-        class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
-        type="button"
-      >
-        <span
-          class="euiButtonContent euiButtonEmpty__content"
-        >
-          <span
-            class="euiButtonEmpty__text"
-          >
-            selected cluster name
-          </span>
-        </span>
-      </button>
-      <span
-        class="emotion-EuiIcon"
-        data-euiicon-type="arrowRight"
-      />
-      <span
-        color="primary"
-        data-euiicon-type="node"
-      />
-      <button
-        class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
-        type="button"
-      >
-        <span
-          class="euiButtonContent euiButtonEmpty__content"
-        >
-          <span
-            class="euiButtonEmpty__text"
-          >
-            selected node
-          </span>
-        </span>
-      </button>
-      <span
-        class="emotion-EuiIcon"
-        data-euiicon-type="arrowRight"
-      />
-      <span
-        color="danger"
-        data-euiicon-type="image"
-      />
-      <button
-        class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
-        type="button"
-      >
-        <span
-          class="euiButtonContent euiButtonEmpty__content"
-        >
-          <span
-            class="euiButtonEmpty__text"
-          >
-            selected image
-          </span>
-        </span>
-      </button>
+      </span>
     </div>
   </div>,
   "debug": [Function],
@@ -443,9 +499,119 @@ Object {
         css="[object Object]"
       >
         <span
-          color="success"
-          data-euiicon-type="heatmap"
+          data-euiicon-type="cluster"
+          style="color: rgb(84, 179, 153);"
         />
+        <span
+          class="euiToolTipAnchor"
+        >
+          <button
+            class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonEmpty__text"
+              >
+                selected cluster id
+              </span>
+            </span>
+          </button>
+        </span>
+        <span
+          class="emotion-EuiIcon"
+          data-euiicon-type="arrowRight"
+        />
+        <span
+          data-euiicon-type="namespace"
+          style="color: rgb(96, 146, 192);"
+        />
+        <span
+          class="euiToolTipAnchor"
+        >
+          <button
+            class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonEmpty__text"
+              >
+                selected namespace
+              </span>
+            </span>
+          </button>
+        </span>
+        <span
+          class="emotion-EuiIcon"
+          data-euiicon-type="arrowRight"
+        />
+        <span
+          data-euiicon-type="kubernetesPod"
+          style="color: rgb(231, 102, 76);"
+        />
+        <span
+          class="euiToolTipAnchor"
+        >
+          <button
+            class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonEmpty__text"
+              >
+                selected pod
+              </span>
+            </span>
+          </button>
+        </span>
+        <span
+          class="emotion-EuiIcon"
+          data-euiicon-type="arrowRight"
+        />
+        <span
+          data-euiicon-type="container"
+          style="color: rgb(170, 101, 86);"
+        />
+        <span
+          class="euiToolTipAnchor"
+        >
+          <button
+            class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonEmpty__text"
+              >
+                selected image
+              </span>
+            </span>
+          </button>
+        </span>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      css="[object Object]"
+    >
+      <span
+        data-euiicon-type="cluster"
+        style="color: rgb(84, 179, 153);"
+      />
+      <span
+        class="euiToolTipAnchor"
+      >
         <button
           class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
           type="button"
@@ -460,14 +626,18 @@ Object {
             </span>
           </span>
         </button>
-        <span
-          class="emotion-EuiIcon"
-          data-euiicon-type="arrowRight"
-        />
-        <span
-          color="primary"
-          data-euiicon-type="nested"
-        />
+      </span>
+      <span
+        class="emotion-EuiIcon"
+        data-euiicon-type="arrowRight"
+      />
+      <span
+        data-euiicon-type="namespace"
+        style="color: rgb(96, 146, 192);"
+      />
+      <span
+        class="euiToolTipAnchor"
+      >
         <button
           class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
           type="button"
@@ -482,14 +652,18 @@ Object {
             </span>
           </span>
         </button>
-        <span
-          class="emotion-EuiIcon"
-          data-euiicon-type="arrowRight"
-        />
-        <span
-          color="warning"
-          data-euiicon-type="package"
-        />
+      </span>
+      <span
+        class="emotion-EuiIcon"
+        data-euiicon-type="arrowRight"
+      />
+      <span
+        data-euiicon-type="kubernetesPod"
+        style="color: rgb(231, 102, 76);"
+      />
+      <span
+        class="euiToolTipAnchor"
+      >
         <button
           class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
           type="button"
@@ -504,14 +678,18 @@ Object {
             </span>
           </span>
         </button>
-        <span
-          class="emotion-EuiIcon"
-          data-euiicon-type="arrowRight"
-        />
-        <span
-          color="danger"
-          data-euiicon-type="image"
-        />
+      </span>
+      <span
+        class="emotion-EuiIcon"
+        data-euiicon-type="arrowRight"
+      />
+      <span
+        data-euiicon-type="container"
+        style="color: rgb(170, 101, 86);"
+      />
+      <span
+        class="euiToolTipAnchor"
+      >
         <button
           class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
           type="button"
@@ -526,97 +704,7 @@ Object {
             </span>
           </span>
         </button>
-      </div>
-    </div>
-  </body>,
-  "container": <div>
-    <div
-      css="[object Object]"
-    >
-      <span
-        color="success"
-        data-euiicon-type="heatmap"
-      />
-      <button
-        class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
-        type="button"
-      >
-        <span
-          class="euiButtonContent euiButtonEmpty__content"
-        >
-          <span
-            class="euiButtonEmpty__text"
-          >
-            selected cluster id
-          </span>
-        </span>
-      </button>
-      <span
-        class="emotion-EuiIcon"
-        data-euiicon-type="arrowRight"
-      />
-      <span
-        color="primary"
-        data-euiicon-type="nested"
-      />
-      <button
-        class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
-        type="button"
-      >
-        <span
-          class="euiButtonContent euiButtonEmpty__content"
-        >
-          <span
-            class="euiButtonEmpty__text"
-          >
-            selected namespace
-          </span>
-        </span>
-      </button>
-      <span
-        class="emotion-EuiIcon"
-        data-euiicon-type="arrowRight"
-      />
-      <span
-        color="warning"
-        data-euiicon-type="package"
-      />
-      <button
-        class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
-        type="button"
-      >
-        <span
-          class="euiButtonContent euiButtonEmpty__content"
-        >
-          <span
-            class="euiButtonEmpty__text"
-          >
-            selected pod
-          </span>
-        </span>
-      </button>
-      <span
-        class="emotion-EuiIcon"
-        data-euiicon-type="arrowRight"
-      />
-      <span
-        color="danger"
-        data-euiicon-type="image"
-      />
-      <button
-        class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
-        type="button"
-      >
-        <span
-          class="euiButtonContent euiButtonEmpty__content"
-        >
-          <span
-            class="euiButtonEmpty__text"
-          >
-            selected image
-          </span>
-        </span>
-      </button>
+      </span>
     </div>
   </div>,
   "debug": [Function],
