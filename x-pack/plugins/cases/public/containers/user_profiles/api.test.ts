@@ -40,7 +40,7 @@ describe('User profiles API', () => {
       });
 
       expect(http.post).toHaveBeenCalledWith('/internal/cases/_suggest_user_profiles', {
-        body: '{"name":"elastic","size":100,"owner":["cases"]}',
+        body: '{"name":"elastic","size":10,"owner":["cases"]}',
         signal: abortCtrl.signal,
       });
     });
@@ -61,15 +61,6 @@ describe('User profiles API', () => {
       });
 
       expect(res).toEqual(userProfiles);
-    });
-
-    it('returns an empty array if the security plugin is undefined', async () => {
-      const res = await bulkGetUserProfiles({
-        security: undefined,
-        uids: userProfilesIds,
-      });
-
-      expect(res).toEqual([]);
     });
 
     it('calls http.post correctly', async () => {

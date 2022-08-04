@@ -216,11 +216,11 @@ export const getManagementFilteredLinks = async (
   plugins: StartPlugins
 ): Promise<LinkItem> => {
   try {
-    const currentUserResponse = await plugins.security?.authc.getCurrentUser();
+    const currentUserResponse = await plugins.security.authc.getCurrentUser();
     const privileges = calculateEndpointAuthz(
       licenseService,
       plugins.fleet?.authz,
-      currentUserResponse?.roles ?? []
+      currentUserResponse.roles
     );
     const hostIsolationExceptionsApiClientInstance = HostIsolationExceptionsApiClient.getInstance(
       core.http

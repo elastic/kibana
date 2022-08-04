@@ -75,7 +75,7 @@ export interface ObservabilityPublicPluginsStart {
   sharedUX: SharedUXPluginStart;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
-  security?: SecurityPluginStart;
+  security: SecurityPluginStart;
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;

@@ -34,7 +34,7 @@ export const suggestUserProfiles = async ({
 };
 
 export interface BulkGetUserProfilesArgs {
-  security?: SecurityPluginStart;
+  security: SecurityPluginStart;
   uids: string[];
 }
 
@@ -42,9 +42,5 @@ export const bulkGetUserProfiles = async ({
   security,
   uids,
 }: BulkGetUserProfilesArgs): Promise<UserProfile[]> => {
-  if (security == null) {
-    return Promise.resolve([]);
-  }
-
   return security.userProfiles.bulkGet({ uids: new Set(uids), dataPath: 'avatar' });
 };

@@ -87,7 +87,7 @@ export interface StartPlugins {
   spaces?: SpacesPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   osquery?: OsqueryPluginStart;
-  security?: SecurityPluginStart;
+  security: SecurityPluginStart;
   cloudSecurityPosture: CspClientPluginStart;
   threatIntelligence: ThreatIntelligencePluginStart;
 }

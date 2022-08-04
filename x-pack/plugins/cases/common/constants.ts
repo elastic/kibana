@@ -162,4 +162,4 @@ export const PUSH_CASES_CAPABILITY = 'push_cases' as const;
  * User profiles
  */
 
-export const DEFAULT_USER_SIZE = 100;
+export const DEFAULT_USER_SIZE = 10;
