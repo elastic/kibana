@@ -40,6 +40,7 @@ import {
   DropIllustration,
   GlobeIllustration,
   EuiIconLegend,
+  RegionMap,
 } from '..';
 
 export default {
@@ -167,6 +168,10 @@ const IconsArray: Array<{
     title: 'IconTriangle',
     Component: IconTriangle,
   },
+  {
+    title: 'RegionMap',
+    Component: RegionMap,
+  },
 ];
 
 interface RootComponentProps {
@@ -179,7 +184,7 @@ function RootComponent(props: RootComponentProps) {
       {props.icons.map((i) => (
         <EuiFlexItem grow={3}>
           <EuiEmptyPrompt
-            color={'transparent'}
+            color="subdued"
             hasBorder={true}
             hasShadow={true}
             iconType={i.Component as IconType}
