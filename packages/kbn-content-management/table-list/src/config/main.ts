@@ -8,4 +8,9 @@
 
 import { defaultConfig } from '@kbn/storybook';
 
-module.exports = defaultConfig;
+module.exports = {
+  ...defaultConfig,
+  reactOptions: {
+    strictMode: true,
+  },
+};

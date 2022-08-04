@@ -53,7 +53,7 @@ const createMockItems = (total: number) => {
 
 createMockItems(500);
 
-export const TableListView = (params: Params) => {
+export const ConnectedComponent = (params: Params) => {
   return (
     <TableListViewProvider {...getStoryServices(params, action)}>
       <Component
@@ -100,4 +100,4 @@ export const TableListView = (params: Params) => {
   );
 };
 
-TableListView.argTypes = argTypes;
+ConnectedComponent.argTypes = argTypes;
