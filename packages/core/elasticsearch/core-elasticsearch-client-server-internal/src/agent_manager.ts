@@ -16,17 +16,21 @@ export type AgentFactory = (connectionOpts: ConnectionOptions) => NetworkAgent;
 
 /** @internal **/
 export class AgentManager {
-  // holds references to agents by type, for each protocol, e.g.:
+  // keep references to agents by type, for each protocol, e.g.:
   // {
   //   'https:': {
-  //     data: agentInstance1,
-  //     monitoring: agentInstance2,
+  //     data: [dataAgentInstance, dataAgentConfig],
+  //     monitoring: [monitoringAgentInstance, monitoringAgentConfig]
   //     }
   // }
-  private agentsMaps: Record<string, Record<string, [NetworkAgent, HttpAgentOptions]>> = {
-    'http:': {},
-    'https:': {},
-  };
+  private agentsMaps: Record<string, Record<string, [NetworkAgent, HttpAgentOptions]>>;
+
+  constructor() {
+    this.agentsMaps = {
+      'http:': {},
+      'https:': {},
+    };
+  }
 
   public getAgentFactory(
     type: string,
@@ -49,7 +53,7 @@ export class AgentManager {
 
       if (agentTuple) {
         const [agent, initialConfig] = agentTuple;
-        if (!sameAgentConfiguration(initialConfig, config)) {
+        if (!isDeepStrictEqual(initialConfig, config)) {
           throw new Error(
             `Attempted to retrieve HTTP Agent instances of the same type '${type}' using different configurations`
           );
@@ -66,17 +70,6 @@ export class AgentManager {
     };
   }
 }
-
-const sameAgentConfiguration = (
-  initialConfig: HttpAgentOptions | AgentFactory,
-  newConfig: HttpAgentOptions | AgentFactory
-): boolean => {
-  if (isAgentFactory(initialConfig)) {
-    return isAgentFactory(newConfig) && initialConfig === newConfig;
-  }
-
-  return isDeepStrictEqual(initialConfig, newConfig);
-};
 
 const assertValidAgentConfig = (
   agentOptions?: HttpAgentOptions | UndiciAgentOptions | AgentFactory | false

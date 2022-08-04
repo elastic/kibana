@@ -39,8 +39,6 @@ import { isInlineScriptingEnabled } from './is_scripting_enabled';
 import { mergeConfig } from './merge_config';
 import { getClusterInfo$ } from './get_cluster_info';
 
-const DEFAULT_CLIENT_TYPE = 'data';
-
 export interface SetupDeps {
   analytics: AnalyticsServiceSetup;
   http: InternalHttpServiceSetup;
@@ -83,8 +81,7 @@ export class ElasticsearchService
           config.password !== undefined ||
           config.serviceAccountToken !== undefined,
       },
-      createClient: (type = 'preboot', clientConfig) =>
-        this.createClusterClient(type, config, clientConfig),
+      createClient: (type, clientConfig) => this.createClusterClient(type, config, clientConfig),
     };
   }
 
@@ -95,7 +92,7 @@ export class ElasticsearchService
 
     this.authHeaders = deps.http.authRequestHeaders;
     this.executionContextClient = deps.executionContext;
-    this.client = this.createClusterClient(DEFAULT_CLIENT_TYPE, config);
+    this.client = this.createClusterClient('data', config);
 
     const esNodesCompatibility$ = pollEsNodesVersion({
       internalClient: this.client.asInternalUser,
@@ -159,8 +156,7 @@ export class ElasticsearchService
 
     return {
       client: this.client!,
-      createClient: (type = DEFAULT_CLIENT_TYPE, clientConfig) =>
-        this.createClusterClient(type, config, clientConfig),
+      createClient: (type, clientConfig) => this.createClusterClient(type, config, clientConfig),
     };
   }
 
