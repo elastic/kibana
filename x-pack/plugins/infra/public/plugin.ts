@@ -103,6 +103,7 @@ export class Plugin implements InfraClientPluginClass {
                     entries: [
                       { label: 'Inventory', app: 'metrics', path: '/inventory' },
                       { label: 'Metrics Explorer', app: 'metrics', path: '/explorer' },
+                      { label: 'Hosts', app: 'metrics', path: '/hosts' },
                     ],
                   },
                 ]
@@ -190,6 +191,13 @@ export class Plugin implements InfraClientPluginClass {
             defaultMessage: 'Metrics Explorer',
           }),
           path: '/explorer',
+        },
+        {
+          id: 'metrics-hosts',
+          title: i18n.translate('xpack.infra.homePage.metricsHostsTabTitle', {
+            defaultMessage: 'Hosts',
+          }),
+          path: '/hosts',
         },
         {
           id: 'settings',
