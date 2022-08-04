@@ -216,7 +216,7 @@ The API returns the {data-source} object:
 (Optional, string) Timestamp field name, which you use for time-based {data-sources}.
 
 `sourceFilters`::
-(Optional, string[]) Array of field names you want to filter out in {kib}.
+(Optional, string[]) Array of field names you want to filter out in <<discover, **Discover**>>.
 
 `fieldAttrs`::
 (Optional, object) Map of field attributes by field name.
