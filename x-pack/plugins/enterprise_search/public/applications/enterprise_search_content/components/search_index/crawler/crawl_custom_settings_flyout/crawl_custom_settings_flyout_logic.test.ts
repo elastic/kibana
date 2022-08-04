@@ -355,12 +355,12 @@ describe('CrawlCustomSettingsFlyoutLogic', () => {
           selectedDomainUrls: ['https://www.elastic.co', 'https://swiftype.com'],
         });
         CrawlerLogic.mount();
-        jest.spyOn(CrawlerLogic.actions, 'startCrawl');
+        jest.spyOn(CrawlCustomSettingsFlyoutLogic.actions, 'startCrawl');
 
         CrawlCustomSettingsFlyoutLogic.actions.startCustomCrawl();
         await nextTick();
 
-        expect(CrawlerLogic.actions.startCrawl).toHaveBeenCalledWith({
+        expect(CrawlCustomSettingsFlyoutLogic.actions.startCrawl).toHaveBeenCalledWith({
           domain_allowlist: ['https://www.elastic.co', 'https://swiftype.com'],
           max_crawl_depth: 5,
           sitemap_discovery_disabled: false,
@@ -382,12 +382,12 @@ describe('CrawlCustomSettingsFlyoutLogic', () => {
           ],
         });
         CrawlerLogic.mount();
-        jest.spyOn(CrawlerLogic.actions, 'startCrawl');
+        jest.spyOn(CrawlCustomSettingsFlyoutLogic.actions, 'startCrawl');
 
         CrawlCustomSettingsFlyoutLogic.actions.startCustomCrawl();
         await nextTick();
 
-        expect(CrawlerLogic.actions.startCrawl).toHaveBeenCalledWith({
+        expect(CrawlCustomSettingsFlyoutLogic.actions.startCrawl).toHaveBeenCalledWith({
           domain_allowlist: ['https://www.elastic.co', 'https://swiftype.com'],
           max_crawl_depth: 5,
           seed_urls: ['https://www.elastic.co/guide', 'https://swiftype.com/documentation'],
