@@ -34,7 +34,8 @@ export class AgentManager {
 
   public getAgentFactory(
     type: string,
-    agentOptions?: HttpAgentOptions | UndiciAgentOptions | AgentFactory | false
+    agentOptions?: HttpAgentOptions | UndiciAgentOptions | AgentFactory | false,
+    forceCreate = true
   ): AgentFactory {
     const config = assertValidAgentConfig(agentOptions);
 
@@ -51,7 +52,7 @@ export class AgentManager {
 
       let agentTuple = agentMap[type];
 
-      if (agentTuple) {
+      if (agentTuple && !forceCreate) {
         const [agent, initialConfig] = agentTuple;
         if (!isDeepStrictEqual(initialConfig, config)) {
           throw new Error(
