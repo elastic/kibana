@@ -6,7 +6,6 @@
  */
 
 import { Logger } from '@kbn/core/server';
-import cuid from 'cuid';
 import mimeType from 'mime';
 import { Readable } from 'stream';
 import type { FileCompression, FileShareJSON, FileShareJSONWithToken } from '../../common/types';
@@ -245,7 +244,6 @@ export class File<M = unknown> implements IFile {
     fileClient: FileClientImpl
   ) {
     const fileMeta = await fileClient.create({
-      id: cuid(),
       metadata: {
         ...createDefaultFileAttributes(),
         name,
