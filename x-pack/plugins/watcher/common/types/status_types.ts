@@ -8,98 +8,76 @@
 import type { Moment } from 'moment';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { ACTION_STATES, WATCH_STATES } from '../constants';
+import { ACTION_STATES, WATCH_STATES, WATCH_STATE_COMMENTS } from '../constants';
 
-export interface SerializedActionStatus {
-  ack?: {
-    timestamp: string;
-    state: 'acked';
-  };
-  last_execution?: {
-    timestamp: string;
-    successful: boolean;
-  };
-  last_successful_execution?: {
-    timestamp: string;
-    successful: boolean;
-  };
+export interface ActionStatusUpstreamJson {
+  id: string;
+  actionStatusJson: estypes.WatcherActionStatus;
+  errors?: any; // TODO
+  lastCheckedRawFormat?: string; // Date e.g. '2017-03-01T20:55:49.679Z'
 }
 
-export interface SerializedWatchStatus extends estypes.WatcherActivationStatus {
-  // version: number;
-  // state: {
-  //   active: boolean;
-  //   timestamp: string;
-  // };
-  // actions: Record<string, SerializedActionStatus>;
-  last_checked?: string;
-  last_met_condition?: string;
+export interface ServerActionStatusModel {
+  id: string;
+  actionStatusJson: estypes.WatcherActionStatus;
+  errors: any; // TODO
+  lastCheckedRawFormat?: string; // Date e.g. '2017-03-01T20:55:49.679Z'
+  lastExecutionRawFormat?: string; // Date e.g. '2017-03-01T20:55:49.679Z'
+  lastExecutionSuccessful?: boolean;
+  lastExecutionReason?: string;
+  lastAcknowledged: Moment | null;
+  lastExecution: Moment | null;
+  lastThrottled: Moment | null;
+  lastSuccessfulExecution: Moment | null;
+}
+
+export interface ClientActionStatusModel {
+  id: string;
+  lastAcknowledged: Moment | null;
+  lastThrottled: Moment | null;
+  lastExecution: Moment | null;
+  lastExecutionSuccessful?: boolean;
+  lastExecutionReason?: string;
+  lastSuccessfulExecution: Moment | null;
+  state: keyof typeof ACTION_STATES;
+  isAckable: boolean;
+}
+
+interface SerializedWatchStatus extends estypes.WatcherActivationStatus {
+  // actions: WatcherActions // Record<IndexName, WatcherActionStatus>
+  // state: WatcherActivationState // { active, timestamp }
+  // version: VersionNumber
+  last_checked?: string; // Timestamp TODO: Update ES JS client types with this.
+  last_met_condition?: string; // Timestamp TODO: Update ES JS client types with this.
 }
 
 export interface WatchStatusUpstreamJson {
   id: string;
   watchStatusJson: SerializedWatchStatus;
-  state?: string; // e.g. 'execution_not_needed' or 'failed'
+  state?: estypes.WatcherExecutionStatus; // e.g. 'execution_not_needed' or 'failed'
   watchErrors?: {
-    actions?: Record<string, any>;
+    actions?: Record<string, any>; // TODO
   };
-}
-
-export interface DeserializedActionStatusModel {
-  lastExecution: number;
-  state: keyof typeof ACTION_STATES;
-  downstreamJson: any; // TODO
 }
 
 export interface ServerWatchStatusModel {
   id: string;
-  watchState?: keyof typeof WATCH_STATES;
+  watchState?: estypes.WatcherExecutionStatus; // e.g. 'execution_not_needed' or 'failed'
   watchStatusJson: SerializedWatchStatus;
   watchErrors?: WatchStatusUpstreamJson['watchErrors'];
   isActive: boolean;
   lastChecked: Moment | null;
   lastMetCondition: Moment | null;
-  actionStatuses?: DeserializedActionStatusModel[];
+  actionStatuses?: ServerActionStatusModel[];
 }
 
-// export interface WatchStatus {
-//   id: string;
-//   watchState: typeof WATCH_STATES;
-//   state: {
-//     active: boolean;
-//     timestamp: string;
-//   };
-//   actions: Record<string, ActionStatus>;
-//   version: number;
-//   last_checked?: string;
-//   last_met_condition?: string;
-// }
-
-/*
-  json.watchStatusJson should have the following structure:
-  {
-    "state": {
-      "active": true,
-      "timestamp": "2017-03-01T19:05:49.400Z"
-    },
-    "actions": {
-      "log-me-something": {
-        "ack": {
-          "timestamp": "2017-03-01T20:56:58.442Z",
-          "state": "acked"
-        },
-        "last_execution": {
-          "timestamp": "2017-03-01T20:55:49.679Z",
-          "successful": true
-        },
-        "last_successful_execution": {
-          "timestamp": "2017-03-01T20:55:49.679Z",
-          "successful": true
-        }
-      }
-    },
-    "version": 15,
-    "last_checked": "2017-03-02T14:25:31.139Z",
-    "last_met_condition": "2017-03-02T14:25:31.139Z"
-  }
-  */
+export interface ClientWatchStatusModel {
+  id: string;
+  isActive: boolean;
+  lastChecked: Moment | null;
+  lastMetCondition: Moment | null;
+  state: keyof typeof WATCH_STATES;
+  comment: keyof typeof WATCH_STATE_COMMENTS;
+  lastFired?: Moment | null;
+  actionStatuses: ClientActionStatusModel[];
+}

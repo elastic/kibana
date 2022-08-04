@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import { get, map, forEach, maxBy } from 'lodash';
 import { badRequest } from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 
-import { ACTION_STATES, WATCH_STATES, WATCH_STATE_COMMENTS } from '../../../common/constants';
 import {
   WatchStatusUpstreamJson,
   ServerWatchStatusModel,
-  DeserializedActionStatusModel,
+  ClientWatchStatusModel,
 } from '../../../common/types';
 import { getMoment } from '../../../common/lib/get_moment';
-// @ts-ignore // TODO
-import { ActionStatusModel } from '../action_status_model';
+import { buildServerActionStatusModel, buildClientActionStatusModel } from '../action_status_model';
+import { deriveState, deriveComment, deriveLastFired } from './watch_status_model_utils';
 
 // Replaces fromUpstreamJson factory method.
 export const buildServerWatchStatusModel = (
@@ -48,11 +46,11 @@ export const buildServerWatchStatusModel = (
 
   const actionStatuses = Object.keys(watchStatusJson.actions ?? {}).map((actionStatusId) => {
     const actionStatusJson = watchStatusJson.actions![actionStatusId];
-    return ActionStatusModel.fromUpstreamJson({
+    return buildServerActionStatusModel({
       id: actionStatusId,
       actionStatusJson,
       errors: watchErrors?.actions && watchErrors.actions[actionStatusId],
-      lastCheckedRawFormat: get(watchStatusJson, 'last_checked'),
+      lastCheckedRawFormat: watchStatusJson.last_checked,
     });
   });
 
@@ -69,110 +67,22 @@ export const buildServerWatchStatusModel = (
 };
 
 // Replaces downstreamJson getter method.
-export const buildClientWatchStatusModel = (serverWatchStatusModel: ServerWatchStatusModel) => {
-  const { id, isActive, lastChecked, lastMetCondition, actionStatuses } = serverWatchStatusModel;
+export const buildClientWatchStatusModel = (
+  serverWatchStatusModel: ServerWatchStatusModel
+): ClientWatchStatusModel => {
+  const { id, isActive, watchState, lastChecked, lastMetCondition, actionStatuses } =
+    serverWatchStatusModel;
+  const clientActionStatuses =
+    actionStatuses?.map((actionStatus) => buildClientActionStatusModel(actionStatus)) ?? [];
 
   return {
     id,
     isActive,
     lastChecked,
     lastMetCondition,
-    state: deriveState(serverWatchStatusModel),
-    comment: deriveComment(serverWatchStatusModel),
-    lastFired: deriveLastFired(actionStatuses),
-    actionStatuses: map(actionStatuses, (actionStatus) => actionStatus.downstreamJson),
+    state: deriveState(isActive, watchState, clientActionStatuses),
+    comment: deriveComment(isActive, clientActionStatuses),
+    lastFired: deriveLastFired(clientActionStatuses),
+    actionStatuses: clientActionStatuses,
   };
-};
-
-const deriveActionStatusTotals = (actionStatuses?: ServerWatchStatusModel['actionStatuses']) => {
-  const result: { [key: string]: number } = {};
-
-  forEach(ACTION_STATES, (state: keyof typeof ACTION_STATES) => {
-    result[state] = 0;
-  });
-
-  if (actionStatuses) {
-    actionStatuses.forEach((actionStatus: DeserializedActionStatusModel) => {
-      result[actionStatus.state] = result[actionStatus.state] + 1;
-    });
-  }
-
-  return result;
-};
-
-const deriveState = (serverWatchStatusModel: ServerWatchStatusModel) => {
-  const { isActive, watchState, actionStatuses } = serverWatchStatusModel;
-
-  if (!isActive) {
-    return WATCH_STATES.DISABLED;
-  }
-
-  if (watchState === 'failed') {
-    return WATCH_STATES.ERROR;
-  }
-
-  const totals = deriveActionStatusTotals(actionStatuses);
-
-  if (totals[ACTION_STATES.ERROR] > 0) {
-    return WATCH_STATES.ERROR;
-  }
-
-  if (totals[ACTION_STATES.CONFIG_ERROR] > 0) {
-    return WATCH_STATES.CONFIG_ERROR;
-  }
-
-  const firingTotal =
-    totals[ACTION_STATES.FIRING] +
-    totals[ACTION_STATES.ACKNOWLEDGED] +
-    totals[ACTION_STATES.THROTTLED];
-
-  if (firingTotal > 0) {
-    return WATCH_STATES.FIRING;
-  }
-
-  return WATCH_STATES.OK;
-};
-
-const deriveComment = (serverWatchStatusModel: ServerWatchStatusModel) => {
-  const { isActive, actionStatuses } = serverWatchStatusModel;
-
-  const totals = deriveActionStatusTotals(actionStatuses);
-  const totalActions = actionStatuses ? actionStatuses.length : 0;
-  let result = WATCH_STATE_COMMENTS.OK;
-
-  if (totals[ACTION_STATES.THROTTLED] > 0 && totals[ACTION_STATES.THROTTLED] < totalActions) {
-    result = WATCH_STATE_COMMENTS.PARTIALLY_THROTTLED;
-  }
-
-  if (totals[ACTION_STATES.THROTTLED] > 0 && totals[ACTION_STATES.THROTTLED] === totalActions) {
-    result = WATCH_STATE_COMMENTS.THROTTLED;
-  }
-
-  if (totals[ACTION_STATES.ACKNOWLEDGED] > 0 && totals[ACTION_STATES.ACKNOWLEDGED] < totalActions) {
-    result = WATCH_STATE_COMMENTS.PARTIALLY_ACKNOWLEDGED;
-  }
-
-  if (
-    totals[ACTION_STATES.ACKNOWLEDGED] > 0 &&
-    totals[ACTION_STATES.ACKNOWLEDGED] === totalActions
-  ) {
-    result = WATCH_STATE_COMMENTS.ACKNOWLEDGED;
-  }
-
-  if (totals[ACTION_STATES.ERROR] > 0) {
-    result = WATCH_STATE_COMMENTS.FAILING;
-  }
-
-  if (!isActive) {
-    result = WATCH_STATE_COMMENTS.OK;
-  }
-
-  return result;
-};
-
-const deriveLastFired = (actionStatuses: ServerWatchStatusModel['actionStatuses']) => {
-  const actionStatus = maxBy(actionStatuses, 'lastExecution');
-  if (actionStatus) {
-    return actionStatus.lastExecution;
-  }
 };

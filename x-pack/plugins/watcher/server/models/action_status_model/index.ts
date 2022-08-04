@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ActionStatusModel } from './action_status_model';
+export { buildServerActionStatusModel, buildClientActionStatusModel } from './action_status_model';

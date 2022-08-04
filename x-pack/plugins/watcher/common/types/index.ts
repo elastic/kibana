@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-export {
+export type {
+  ActionStatusUpstreamJson,
+  ServerActionStatusModel,
+  ClientActionStatusModel,
   WatchStatusUpstreamJson,
   ServerWatchStatusModel,
-  DeserializedActionStatusModel,
+  ClientWatchStatusModel,
 } from './status_types';
