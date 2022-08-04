@@ -13,6 +13,30 @@ import { CaseUserAvatar } from './user_avatar';
 import * as i18n from '../../common/translations';
 import { UserToolTip } from './user_tooltip';
 
+const UserAvatarWithName: React.FC<{ profile: UserProfileWithAvatar }> = ({ profile }) => {
+  return (
+    <EuiFlexGroup alignItems="center" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <CaseUserAvatar profile={profile} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup direction={'column'} gutterSize="none">
+          <EuiFlexItem>
+            <EuiText size="s" className="eui-textBreakWord">
+              {profile.user.display_name ??
+                profile.user.full_name ??
+                profile.user.email ??
+                profile.user.username ??
+                i18n.UNKNOWN}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+UserAvatarWithName.displayName = 'UserAvatarWithName';
+
 interface UserRepresentationProps {
   profile: UserProfileWithAvatar;
 }
@@ -22,21 +46,8 @@ const UserRepresentationComponent: React.FC<UserRepresentationProps> = ({ profil
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>
         <UserToolTip profile={profile}>
-          <CaseUserAvatar profile={profile} />
+          <UserAvatarWithName profile={profile} />
         </UserToolTip>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup direction={'column'} gutterSize="none">
-          <EuiFlexItem>
-            <EuiText size="s" className="eui-textBreakWord">
-              {profile.user.display_name ??
-                profile.user.full_name ??
-                profile.user.username ??
-                profile.user.email ??
-                i18n.UNKNOWN}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

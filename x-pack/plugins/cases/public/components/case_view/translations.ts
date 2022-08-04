@@ -191,3 +191,19 @@ export const EDIT_ASSIGNEES_ARIA_LABEL = i18n.translate(
 export const NO_ASSIGNEES = i18n.translate('xpack.cases.caseView.noAssignees', {
   defaultMessage: 'No users have been assigned.',
 });
+
+export const ASSIGN_A_USER = i18n.translate('xpack.cases.caseView.assignUser', {
+  defaultMessage: 'Assign a user',
+});
+
+export const SPACED_OR = i18n.translate('xpack.cases.caseView.spacedOrText', {
+  defaultMessage: ' or ',
+});
+
+export const ASSIGN_YOURSELF = i18n.translate('xpack.cases.caseView.assignYourself', {
+  defaultMessage: 'assign yourself',
+});
+
+export const EDIT_ASSIGNEES = i18n.translate('xpack.cases.caseView.editAssignees', {
+  defaultMessage: 'Edit assignees',
+});

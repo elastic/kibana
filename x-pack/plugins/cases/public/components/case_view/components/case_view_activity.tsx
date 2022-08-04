@@ -165,7 +165,7 @@ export const CaseViewActivity = ({
             assignees={caseData.assignees}
             onAssigneesChanged={onUpdateAssignees}
             isLoading={isLoading || isLoadingUserProfiles}
-            userProfiles={userProfiles ?? []}
+            userProfiles={userProfiles ?? new Map()}
           />
         </SidebarSection>
         <SeveritySidebarSelector

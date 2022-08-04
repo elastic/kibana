@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { intersectionWith } from 'lodash';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,6 +13,7 @@ import {
   EuiText,
   EuiLink,
   EuiPopover,
+  EuiToolTip,
 } from '@elastic/eui';
 import { UserProfile } from '@kbn/security-plugin/common';
 
@@ -25,7 +25,7 @@ import { UserRepresentation } from '../../user_profiles/user_representation';
 
 interface AssignUsersProps {
   assignees: CaseAssignees;
-  userProfiles: UserProfile[];
+  userProfiles: Map<string, UserProfile>;
   onAssigneesChanged: (assignees: CaseAssignees) => void;
   isLoading: boolean;
 }
@@ -39,15 +39,16 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [selectedAssignees, setSelectedAssignees] = useState<CaseAssignees>(assignees);
 
-  const selectedUsers = useMemo(
-    () =>
-      intersectionWith(
-        userProfiles,
-        assignees,
-        (userProfile, assignee) => userProfile.uid === assignee.uid
-      ),
-    [assignees, userProfiles]
-  );
+  const assigneeProfiles = useMemo(() => {
+    return assignees.reduce<UserProfile[]>((acc, assignee) => {
+      const profile = userProfiles.get(assignee.uid);
+      if (profile) {
+        acc.push(profile);
+      }
+
+      return acc;
+    }, []);
+  }, [assignees, userProfiles]);
 
   const togglePopOver = useCallback(() => {
     setIsPopoverOpen((value) => !value);
@@ -81,20 +82,22 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
           <SidebarTitle title={i18n.ASSIGNEES} />
         </EuiFlexItem>
         <EuiFlexItem data-test-subj="assignees-edit" grow={false}>
-          <EuiPopover
-            button={button}
-            isOpen={isPopoverOpen}
-            closePopover={onClosePopover}
-            anchorPosition="downRight"
-            panelStyle={{
-              minWidth: 520,
-            }}
-          >
-            <SuggestUsers onUsersChange={setSelectedAssignees} selectedUsers={selectedUsers} />
-          </EuiPopover>
+          <EuiToolTip position="left" content={i18n.EDIT_ASSIGNEES}>
+            <EuiPopover
+              button={button}
+              isOpen={isPopoverOpen}
+              closePopover={onClosePopover}
+              anchorPosition="downRight"
+              panelStyle={{
+                minWidth: 520,
+              }}
+            >
+              <SuggestUsers onUsersChange={setSelectedAssignees} selectedUsers={assigneeProfiles} />
+            </EuiPopover>
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {assignees.length === 0 ? (
+      {assigneeProfiles.length === 0 ? (
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem grow={false}>
             <EuiText size="s">
@@ -103,28 +106,18 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">
-              <EuiLink>{'Assign a user'}</EuiLink>
-              <span>{' or '}</span>
-              <EuiLink>{'assign yourself'}</EuiLink>
+              <EuiLink>{i18n.ASSIGN_A_USER}</EuiLink>
+              <span>{i18n.SPACED_OR}</span>
+              <EuiLink>{i18n.ASSIGN_YOURSELF}</EuiLink>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
         <EuiFlexGroup direction="column" gutterSize="s">
-          {assignees.map((assignee) => {
-            /**
-             * TODO: Return a Map from useBulkGetUserProfiles to avoid searching
-             * in the userProfiles array.
-             */
-            const userProfile = userProfiles.find((profile) => profile.uid === assignee.uid);
-
-            if (!userProfile) {
-              return null;
-            }
-
+          {assigneeProfiles.map((profile) => {
             return (
               <EuiFlexItem grow={false}>
-                <UserRepresentation key={userProfile.uid} profile={userProfile} />
+                <UserRepresentation key={profile.uid} profile={profile} />
               </EuiFlexItem>
             );
           })}

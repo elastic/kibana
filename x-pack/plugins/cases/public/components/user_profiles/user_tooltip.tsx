@@ -38,8 +38,8 @@ const UserFullInformation: React.FC<{ profile: UserProfileWithAvatar }> = React.
         <strong>
           {profile.user.display_name ??
             profile.user.full_name ??
-            profile.user.username ??
             profile.user.email ??
+            profile.user.username ??
             i18n.UNKNOWN}
         </strong>
       </EuiText>
@@ -60,11 +60,13 @@ const UserFullRepresentationComponent: React.FC<UserFullRepresentationProps> = (
           <EuiFlexItem>
             <UserFullInformation profile={profile} />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s" className="eui-textBreakWord">
-              {profile.user.email ?? i18n.UNKNOWN}
-            </EuiText>
-          </EuiFlexItem>
+          {displayEmail(profile) && (
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" className="eui-textBreakWord">
+                {profile.user.email ?? i18n.UNKNOWN}
+              </EuiText>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -72,6 +74,10 @@ const UserFullRepresentationComponent: React.FC<UserFullRepresentationProps> = (
 };
 
 UserFullRepresentationComponent.displayName = 'UserFullRepresentation';
+
+const displayEmail = (profile: UserProfileWithAvatar) => {
+  return (profile.user.display_name || profile.user.full_name) && profile.user.email;
+};
 
 interface UserTooltipProps {
   children: React.ReactElement;

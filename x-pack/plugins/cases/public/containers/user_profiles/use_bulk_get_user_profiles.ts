@@ -18,10 +18,18 @@ export const useBulkGetUserProfiles = ({ uids }: { uids: string[] }) => {
 
   const toasts = useToasts();
 
-  return useQuery<UserProfile[], ServerError>(
+  return useQuery<Map<string, UserProfile>, ServerError>(
     [USER_PROFILES_CACHE_KEY, USER_PROFILES_BULK_GET_CACHE_KEY, uids],
-    () => {
-      return bulkGetUserProfiles({ security, uids });
+    async () => {
+      if (uids.length <= 0) {
+        return new Map<string, UserProfile>();
+      }
+
+      const profiles = await bulkGetUserProfiles({ security, uids });
+      return profiles.reduce<Map<string, UserProfile>>((acc, profile) => {
+        acc.set(profile.uid, profile);
+        return acc;
+      }, new Map<string, UserProfile>());
     },
     {
       onError: (error: ServerError) => {
@@ -38,4 +46,4 @@ export const useBulkGetUserProfiles = ({ uids }: { uids: string[] }) => {
   );
 };
 
-export type UseBulkGetUserProfiles = UseQueryResult<UserProfile[], ServerError>;
+export type UseBulkGetUserProfiles = UseQueryResult<Map<string, UserProfile>, ServerError>;
