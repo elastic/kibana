@@ -20,11 +20,10 @@ import type {
   SignalSource,
 } from './types';
 import { createSearchAfterReturnType } from './utils';
-import type { CompleteRule, QueryRuleParams } from '../schemas/rule_schemas';
 
 interface BaseArgs {
   baseQuery: estypes.SearchRequest;
-  completeRule: CompleteRule<QueryRuleParams>;
+  groupByFields: string[];
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
 }
 
@@ -34,19 +33,19 @@ interface GetEventsByGroupArgs extends BaseArgs {
 }
 
 interface GetGroupByFieldAggregationArgs {
-  completeRule: CompleteRule<QueryRuleParams>;
+  groupByFields: string[];
   maxSignals: number;
   sort: estypes.Sort;
 }
 
 export const buildGroupByFieldAggregation = ({
-  completeRule,
+  groupByFields,
   maxSignals,
   sort,
 }: GetGroupByFieldAggregationArgs) => ({
   eventGroups: {
     terms: {
-      field: completeRule.ruleParams.alertGrouping?.groupBy[0],
+      field: groupByFields[0],
       size: maxSignals,
       min_doc_count: 1,
     },
@@ -63,7 +62,7 @@ export const buildGroupByFieldAggregation = ({
 
 const getEventsByGroup = async ({
   baseQuery,
-  completeRule,
+  groupByFields,
   services,
   maxSignals,
   sort,
@@ -73,7 +72,7 @@ const getEventsByGroup = async ({
     body: {
       ...baseQuery.body,
       track_total_hits: true,
-      aggs: buildGroupByFieldAggregation({ completeRule, maxSignals, sort }),
+      aggs: buildGroupByFieldAggregation({ groupByFields, maxSignals, sort }),
     },
   });
 };
@@ -148,10 +147,21 @@ export const groupAndBulkCreate = async ({
       });
     }
 
+    // TODO: Determine field(s) to group by
+    // Current thoughts...
+    // - analyze query for fields/wildcards
+    // - get a random sample of docs... analyze fields in the docs
+    // - use that to determine which fields to group by
+    // - low cardinality means we may want to group by that field?
+    // - also, should we sort first by severity?
+
+    // For now, group by host name
+    const groupByFields: string[] = ['host.name'];
+
     // Get aggregated results
     const eventsByGroupResponse = await getEventsByGroup({
       baseQuery,
-      completeRule: completeRule as CompleteRule<QueryRuleParams>,
+      groupByFields,
       services,
       maxSignals: tuple.maxSignals,
       sort,
