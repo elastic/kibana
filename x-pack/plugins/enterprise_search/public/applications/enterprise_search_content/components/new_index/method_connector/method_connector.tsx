@@ -15,17 +15,12 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
-  APP_SEARCH_URL,
-  ENTERPRISE_SEARCH_ELASTICSEARCH_URL,
-} from '../../../../../../common/constants';
-
 import { HttpError, Status } from '../../../../../../common/types/api';
 import { ErrorCode } from '../../../../../../common/types/error_codes';
 import { docLinks } from '../../../../shared/doc_links';
-import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 import { AddConnectorPackageApiLogic } from '../../../api/connector_package/add_connector_package_api_logic';
 
+import { CREATE_ELASTICSEARCH_INDEX_STEP, BUILD_SEARCH_EXPERIENCE_STEP } from '../method_steps';
 import { NewSearchIndexLogic } from '../new_search_index_logic';
 import { NewSearchIndexTemplate } from '../new_search_index_template';
 
@@ -133,37 +128,7 @@ export const MethodConnector: React.FC = () => {
     >
       <EuiSteps
         steps={[
-          {
-            children: (
-              <EuiText size="s">
-                <p>
-                  <FormattedMessage
-                    id="xpack.enterpriseSearch.content.newIndex.methodConnector.steps.createConnectorIndex.content"
-                    defaultMessage="Provide a unique index name and optionally set a default {languageAnalyzerDocLink} for the index. This index will hold your data source content, and is optimized with default field mappings for relevant search experiences."
-                    values={{
-                      languageAnalyzerDocLink: (
-                        <EuiLink href={docLinks.languageAnalyzers} target="_blank" external>
-                          {i18n.translate(
-                            'xpack.enterpriseSearch.content.newIndex.methodConnector.steps.createConnectorIndex.languageAnalyzerLink',
-                            { defaultMessage: 'language analyzer' }
-                          )}
-                        </EuiLink>
-                      ),
-                    }}
-                  />
-                </p>
-              </EuiText>
-            ),
-            status: 'incomplete',
-            title: i18n.translate(
-              'xpack.enterpriseSearch.content.newIndex.steps.createIndex.title',
-              {
-                defaultMessage: 'Create an Elasticsearch index',
-              }
-            ),
-
-            titleSize: 'xs',
-          },
+          CREATE_ELASTICSEARCH_INDEX_STEP,
           {
             children: (
               <EuiText size="s">
@@ -194,52 +159,7 @@ export const MethodConnector: React.FC = () => {
             ),
             titleSize: 'xs',
           },
-          {
-            children: (
-              <EuiText size="s">
-                <p>
-                  <FormattedMessage
-                    id="xpack.enterpriseSearch.content.newIndex.connector.steps.buildSearchExperience.content"
-                    defaultMessage="After building your connector, your content is ready. Build your first search experience with {elasticsearchLink}, or explore the search experience tools provided by {appSearchLink}. We recommend that you create a {searchEngineLink} for the best balance of flexible power and turnkey simplicity."
-                    values={{
-                      appSearchLink: (
-                        <EuiLinkTo to={APP_SEARCH_URL} shouldNotCreateHref>
-                          {i18n.translate(
-                            'xpack.enterpriseSearch.content.newIndex.methodConnector.steps.buildConnector.appSearchLink',
-                            { defaultMessage: 'App Search' }
-                          )}
-                        </EuiLinkTo>
-                      ),
-                      elasticsearchLink: (
-                        <EuiLinkTo to={ENTERPRISE_SEARCH_ELASTICSEARCH_URL} shouldNotCreateHref>
-                          {i18n.translate(
-                            'xpack.enterpriseSearch.content.newIndex.methodConnector.steps.buildConnector.elasticsearchLink',
-                            { defaultMessage: 'Elasticsearch' }
-                          )}
-                        </EuiLinkTo>
-                      ),
-                      searchEngineLink: (
-                        <EuiLinkTo to={`${APP_SEARCH_URL}/engines/new`} shouldNotCreateHref>
-                          {i18n.translate(
-                            'xpack.enterpriseSearch.content.newIndex.methodConnector.steps.buildConnector.searchEngineLink',
-                            { defaultMessage: 'search engine' }
-                          )}
-                        </EuiLinkTo>
-                      ),
-                    }}
-                  />
-                </p>
-              </EuiText>
-            ),
-            status: 'incomplete',
-            title: i18n.translate(
-              'xpack.enterpriseSearch.content.newIndex.steps.buildSearchExperience.title',
-              {
-                defaultMessage: 'Build a search experience',
-              }
-            ),
-            titleSize: 'xs',
-          },
+          BUILD_SEARCH_EXPERIENCE_STEP,
         ]}
       />
       {confirmModal}
