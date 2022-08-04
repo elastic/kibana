@@ -62,7 +62,6 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
         body: {
           settings: {
             number_of_shards: 1,
-            // TODO: Find out whether this is an appropriate setting
             auto_expand_replicas: '0-1',
           },
           mappings,
