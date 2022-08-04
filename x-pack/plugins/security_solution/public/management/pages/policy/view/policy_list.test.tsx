@@ -224,24 +224,23 @@ describe('When on the policy list page', () => {
         history.push('/administration/policies?page=2&pageSize=20');
       });
       await waitFor(() => {
-        expect(getPackagePolicies).toHaveBeenCalledTimes(2);
+        expect(getPackagePolicies).toHaveBeenCalled();
       });
 
       // change pageSize
-      act(() => {
-        renderResult.getByTestId('tablePaginationPopoverButton').click();
+      await act(async () => {
+        (await renderResult.getByTestId('tablePaginationPopoverButton')).click();
       });
       const pageSize10 = await renderResult.findByTestId('tablePagination-10-rows');
       act(() => {
         pageSize10.click();
       });
 
-      await waitFor(() => {
-        expect(getPackagePolicies).toHaveBeenCalledTimes(3);
-      });
-      expect(getPackagePolicies.mock.calls[2][1].query).toEqual({
-        page: 1,
-        perPage: 10,
+      expect(sendGetEndpointSpecificPackagePolicies).toHaveBeenLastCalledWith(expect.any(Object), {
+        query: {
+          page: 1,
+          perPage: 10,
+        },
       });
     });
     it('should set page to 1 if user tries to force an invalid page number', async () => {
