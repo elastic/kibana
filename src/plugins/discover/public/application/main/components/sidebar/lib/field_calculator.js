@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
+// @ts-expect-error
 import { map, sortBy, without, each, defaults, isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-function getFieldValues(hits, field) {
+function getFieldValues(hits: any, field: { name: any; }) {
   const name = field.name;
-  return map(hits, function (hit) {
+  return map(hits, function (hit: { flattened: { [x: string]: any; }; }) {
     return hit.flattened[name];
   });
 }
@@ -78,11 +79,11 @@ function getFieldValueCounts(params) {
 }
 
 // returns a count of fields in the array that are undefined or null
-function _countMissing(array) {
+function _countMissing(array: string | any[]) {
   return array.length - without(array, undefined, null).length;
 }
 
-function _groupValues(allValues, params) {
+function _groupValues(allValues: any[], params: { grouped: any; }) {
   const groups = {};
   let k;
 
@@ -104,7 +105,7 @@ function _groupValues(allValues, params) {
       k = value == null ? undefined : [value];
     }
 
-    each(k, function (key) {
+    each(k, function (key: PropertyKey) {
       if (groups.hasOwnProperty(key)) {
         groups[key].count++;
       } else {
@@ -125,3 +126,4 @@ export const fieldCalculator = {
   getFieldValues: getFieldValues,
   getFieldValueCounts: getFieldValueCounts,
 };
+
