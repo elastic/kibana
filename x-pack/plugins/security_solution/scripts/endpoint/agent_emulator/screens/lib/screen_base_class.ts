@@ -11,6 +11,7 @@ import type { WriteStream as TtyWriteStream } from 'tty';
 import { stdout, stdin } from 'node:process';
 import * as readline from 'node:readline';
 import { red, blue, green } from 'chalk';
+import { DataFormatter } from './data_formatter';
 import { HORIZONTAL_LINE } from '../../../common/constants';
 
 class RenderedScreen {
@@ -32,21 +33,22 @@ class RenderedScreen {
 export class ScreenBaseClass {
   private readonly ttyOut: TtyWriteStream = stdout;
   private readlineInstance: readline.Interface | undefined = undefined;
+  private endSession: (() => void) | undefined = undefined;
   private screenRenderInfo: RenderedScreen | undefined;
 
-  protected header(): string {
+  protected header(): string | DataFormatter {
     return HORIZONTAL_LINE;
   }
 
-  protected footer(): string {
+  protected footer(): string | DataFormatter {
     return `
 
   [Q] Quit
 ${HORIZONTAL_LINE}`;
   }
 
-  protected screen(): string {
-    throw new Error(`${this.constructor.name}.screen() not implemented!`);
+  protected body(): string | DataFormatter {
+    return '\n\n(This screen has no content)\n\n';
   }
 
   /**
@@ -121,9 +123,8 @@ ${HORIZONTAL_LINE}`;
           } catch (error) {
             this.showMessage(error.message, 'red');
 
-            resolve();
+            resolve(this.askForChoice());
 
-            this.askForChoice();
             return;
           }
 
@@ -133,16 +134,29 @@ ${HORIZONTAL_LINE}`;
     });
   }
 
-  show() {
+  show(): Promise<void> {
     const { ttyOut } = this;
-    const screenRenderInfo = new RenderedScreen(this.header() + this.screen() + this.footer());
+    const headerContent = this.header();
+    const bodyContent = this.body();
+    const footerContent = this.footer();
+
+    const screenRenderInfo = new RenderedScreen(
+      (headerContent instanceof DataFormatter ? headerContent.output : headerContent) +
+        (bodyContent instanceof DataFormatter ? bodyContent.output : bodyContent) +
+        (footerContent instanceof DataFormatter ? footerContent.output : footerContent)
+    );
     this.screenRenderInfo = screenRenderInfo;
 
     ttyOut.cursorTo(0, 0);
     ttyOut.clearScreenDown();
 
     ttyOut.write(screenRenderInfo.output);
+
     this.askForChoice();
+
+    return new Promise((resolve) => {
+      this.endSession = () => resolve();
+    });
   }
 
   hide() {
@@ -151,5 +165,10 @@ ${HORIZONTAL_LINE}`;
     ttyOut.cursorTo(0, 0);
     ttyOut.clearScreenDown();
     this.screenRenderInfo = undefined;
+
+    if (this.endSession) {
+      this.endSession();
+      this.endSession = undefined;
+    }
   }
 }
