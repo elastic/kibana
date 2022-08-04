@@ -34,70 +34,70 @@ export interface FileServiceStart {
    *
    * Once created, the file content can be uploaded. See {@link File}.
    *
-   * @param args
+   * @param args - create file arg
    */
   create<M>(args: CreateFileArgs<M>): Promise<File<M>>;
 
   /**
    * Update updatable file attributes like name and meta.
    *
-   * @param args
+   * @param args - update file args
    */
   update<M>(args: UpdateFileArgs): Promise<File<M>>;
 
   /**
    * Delete a file.
    *
-   * @param args
+   * @param args - delete file args
    */
   delete(args: DeleteFileArgs): Promise<void>;
 
   /**
    * Get a file by ID. Will throw if file cannot be found.
    *
-   * @param args
+   * @param args - get file by ID args
    */
   getById<M>(args: GetByIdArgs): Promise<File<M>>;
 
   /**
    * Find files given a set of parameters.
    *
-   * @param args
+   * @param args - find files args
    */
   find<M>(args: FindFileArgs): Promise<Array<FileJSON<M>>>;
 
   /**
    * List all files of specific file kind.
    *
-   * @param args
+   * @param args - list files args
    */
   list<M>(args: ListFilesArgs): Promise<Array<File<M>>>;
 
   /**
    * Get an instance of a share object
    *
-   * @param args
+   * @param args - get share args
    */
   getShareObject: FileShareServiceStart['get'];
 
   /**
    * List share objects
    *
-   * @param args
+   * @param args - list share objects args
    */
   listShareObjects: FileShareServiceStart['list'];
 
   /**
    * Update an instance of a share object
    *
-   * @param args
+   * @param args - update share args
    */
   updateShareObject: FileShareServiceStart['update'];
 
   /**
    * Delete a share instance
    *
-   * @param args
+   * @param args - delete share args
    */
   deleteShareObject: FileShareServiceStart['delete'];
 
@@ -109,9 +109,9 @@ export interface FileServiceStart {
   getUsageMetrics(): Promise<FilesMetrics>;
 
   /**
-   * Get a file by a shareable token.
+   * Get a file by a secret token.
    *
-   * @param token
+   * @param token - secret token
    */
   getByToken<M>(token: string): Promise<File<M>>;
 }

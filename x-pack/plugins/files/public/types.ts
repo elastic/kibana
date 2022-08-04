@@ -17,7 +17,7 @@ import type {
 } from '../common/api_routes';
 
 /**
- * @param arg - Input to the endpoint which includes body, params and query of the RESTful endpoint.
+ * @param args - Input to the endpoint which includes body, params and query of the RESTful endpoint.
  */
 type ClientMethodFrom<E extends HttpApiInterfaceEntryDefinition> = (
   args: E['inputs']['body'] & E['inputs']['params'] & E['inputs']['query']
@@ -32,43 +32,43 @@ export interface FilesClient {
    *
    * @note The file object that is created will be not have
    *
-   * @param args
+   * @param args - create file args
    */
   create: ClientMethodFrom<CreateFileKindHttpEndpoint>;
   /**
    * Delete a file object and all associated share and content objects.
    *
-   * @param args
+   * @param args - delete file args
    */
   delete: ClientMethodFrom<DeleteFileKindHttpEndpoint>;
   /**
    * Get a file object by ID.
    *
-   * @param args
+   * @param args - get file by ID args
    */
   getById: ClientMethodFrom<GetByIdFileKindHttpEndpoint>;
   /**
    * List all file objects, of a given {@link FileKind}.
    *
-   * @param args
+   * @param args - list files args
    */
   list: ClientMethodFrom<ListFileKindHttpEndpoint>;
   /**
    * Update a set of of metadata values of the file object.
    *
-   * @param args
+   * @param args - update file args
    */
   update: ClientMethodFrom<UpdateFileKindHttpEndpoint>;
   /**
    * Stream the contents of the file to Kibana server for storage.
    *
-   * @param args
+   * @param args - upload file args
    */
   upload: ClientMethodFrom<UploadFileKindHttpEndpoint>;
   /**
    * Stream a download of the file object's content.
    *
-   * @param args
+   * @param args - download file args
    */
   download: ClientMethodFrom<DownloadFileKindHttpEndpoint>;
 }
