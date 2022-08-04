@@ -69,7 +69,7 @@ export class File<M = unknown> implements IFile {
     );
   }
 
-  private hasContent(): boolean {
+  private isReady(): boolean {
     return this.status === 'READY';
   }
 
@@ -93,7 +93,7 @@ export class File<M = unknown> implements IFile {
     if (this.uploadInProgress()) {
       throw new UploadInProgressError('Upload already in progress.');
     }
-    if (this.hasContent()) {
+    if (this.isReady()) {
       throw new ContentAlreadyUploadedError('Already uploaded file content.');
     }
     this.logger.debug(`Uploading file [id = ${this.id}][name = ${this.name}].`);
@@ -119,7 +119,7 @@ export class File<M = unknown> implements IFile {
 
   public downloadContent(): Promise<Readable> {
     const { size } = this.attributes;
-    if (!this.hasContent()) {
+    if (!this.isReady()) {
       throw new NoDownloadAvailableError('This file content is not available for download.');
     }
     // We pass through this file ID to retrieve blob content.
@@ -138,7 +138,7 @@ export class File<M = unknown> implements IFile {
     });
     // Stop sharing this file
     await this.fileShareService.deleteForFile({ file: this });
-    if (this.hasContent()) {
+    if (this.isReady()) {
       await this.blobStorage.delete(this.id);
     }
     await this.internalFileService.deleteSO(this.id);
