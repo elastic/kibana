@@ -10,18 +10,18 @@ import { UserProfile } from '@kbn/security-plugin/common';
 import * as i18n from '../translations';
 import { useKibana, useToasts } from '../../common/lib/kibana';
 import { ServerError } from '../../types';
-import { USER_PROFILES_CACHE_KEY, USER_PROFILES_BULK_GET_CACHE_KEY } from '../constants';
-import { bulkGetUserProfiles } from './api';
+import { USER_PROFILES_CACHE_KEY, USER_PROFILES_GET_CURRENT_CACHE_KEY } from '../constants';
+import { getCurrentUserProfile } from './api';
 
-export const useBulkGetUserProfiles = ({ uids }: { uids: string[] }) => {
+export const useGetCurrentUserProfile = () => {
   const { security } = useKibana().services;
 
   const toasts = useToasts();
 
-  return useQuery<UserProfile[], ServerError>(
-    [USER_PROFILES_CACHE_KEY, USER_PROFILES_BULK_GET_CACHE_KEY, uids],
+  return useQuery<UserProfile, ServerError>(
+    [USER_PROFILES_CACHE_KEY, USER_PROFILES_GET_CURRENT_CACHE_KEY],
     () => {
-      return bulkGetUserProfiles({ security, uids });
+      return getCurrentUserProfile({ security });
     },
     {
       onError: (error: ServerError) => {
@@ -38,4 +38,4 @@ export const useBulkGetUserProfiles = ({ uids }: { uids: string[] }) => {
   );
 };
 
-export type UseBulkGetUserProfiles = UseQueryResult<UserProfile[], ServerError>;
+export type UseGetCurrentUserProfile = UseQueryResult<UserProfile, ServerError>;

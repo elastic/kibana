@@ -5,25 +5,48 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { UserProfilesSelectable } from '@kbn/user-profile-components';
 
+import { UserProfile } from '@kbn/security-plugin/common';
 import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 
-const SuggestUsersComponent: React.FC = () => {
+interface SuggestUsersProps {
+  selectedUsers: UserProfile[];
+  onUsersChange: (users: UserProfile[]) => void;
+}
+
+const SuggestUsersComponent: React.FC<SuggestUsersProps> = ({ selectedUsers, onUsersChange }) => {
   const { owner } = useCasesContext();
   const [searchTerm, setSearchTerm] = useState('');
-  const { data: userProfiles, isLoading } = useSuggestUserProfiles({ name: searchTerm, owner });
+  const [currentSelectedUsers, setCurrentSelectedUsers] = useState<UserProfile[]>(selectedUsers);
+
+  const onChange = useCallback(
+    (users: UserProfile[]) => {
+      setCurrentSelectedUsers(users);
+      onUsersChange(users);
+    },
+    [onUsersChange]
+  );
+
+  const { data: userProfiles, isLoading: isLoadingSuggest } = useSuggestUserProfiles({
+    name: searchTerm,
+    owner,
+  });
+  const { data: currentUserProfile, isLoading: isLoadingCurrentUser } = useGetCurrentUserProfile();
+
+  const defaultOptions = currentUserProfile ? [currentUserProfile] : [];
 
   return (
     <UserProfilesSelectable
-      onChange={() => {}}
+      onChange={onChange}
       onSearchChange={setSearchTerm}
       options={userProfiles}
-      selectedOptions={[]}
-      defaultOptions={[]}
-      isLoading={isLoading}
+      selectedOptions={currentSelectedUsers}
+      defaultOptions={defaultOptions}
+      isLoading={isLoadingSuggest || isLoadingCurrentUser}
     />
   );
 };

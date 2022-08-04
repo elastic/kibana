@@ -24,3 +24,4 @@ export const CASE_TAGS_CACHE_KEY = 'case-tags';
 export const USER_PROFILES_CACHE_KEY = 'user-profiles';
 export const USER_PROFILES_SUGGEST_CACHE_KEY = 'suggest';
 export const USER_PROFILES_BULK_GET_CACHE_KEY = 'bulk-get';
+export const USER_PROFILES_GET_CURRENT_CACHE_KEY = 'get-current';

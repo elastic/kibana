@@ -7,8 +7,9 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
+import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetConnectors } from '../../../containers/configure/use_connectors';
-import { CaseSeverity } from '../../../../common/api';
+import { CaseAssignees, CaseSeverity } from '../../../../common/api';
 import { useCaseViewNavigation } from '../../../common/navigation';
 import { UseFetchAlertData } from '../../../../common/ui/types';
 import { Case, CaseStatuses } from '../../../../common';
@@ -49,6 +50,10 @@ export const CaseViewActivity = ({
     caseData.connector.id
   );
 
+  const { data: userProfiles, isLoading: isLoadingUserProfiles } = useBulkGetUserProfiles({
+    uids: caseData.assignees.map((assignee) => assignee.uid),
+  });
+
   const onShowAlertDetails = useCallback(
     (alertId: string, index: string) => {
       if (showAlertDetails) {
@@ -87,6 +92,11 @@ export const CaseViewActivity = ({
 
   const onUpdateSeverity = useCallback(
     (newSeverity: CaseSeverity) => onUpdateField({ key: 'severity', value: newSeverity }),
+    [onUpdateField]
+  );
+
+  const onUpdateAssignees = useCallback(
+    (newAssignees: CaseAssignees) => onUpdateField({ key: 'assignees', value: newAssignees }),
     [onUpdateField]
   );
 
@@ -151,7 +161,12 @@ export const CaseViewActivity = ({
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
         <SidebarSection>
-          <AssignUsers assignees={caseData.assignees} />
+          <AssignUsers
+            assignees={caseData.assignees}
+            onAssigneesChanged={onUpdateAssignees}
+            isLoading={isLoading || isLoadingUserProfiles}
+            userProfiles={userProfiles ?? []}
+          />
         </SidebarSection>
         <SeveritySidebarSelector
           isDisabled={!permissions.update}
