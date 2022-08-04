@@ -10,8 +10,9 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { SessionViewStart } from '@kbn/session-view-plugin/public';
-import { BoolQuery } from '@kbn/es-query';
 import { EuiIconProps } from '@elastic/eui';
+import { BoolQuery } from '@kbn/es-query';
+import { EuiVarsColors } from './hooks/use_eui_theme';
 
 export interface StartPlugins {
   data: DataPublicPluginStart;
@@ -65,10 +66,14 @@ export interface TreeNavSelection {
   [KubernetesCollection.containerImage]?: string;
 }
 
+export type TreeViewIconProps = {
+  euiVarColor: keyof EuiVarsColors;
+} & EuiIconProps;
+
 export type DynamicTree = {
   key: string;
   type: KubernetesCollection;
-  iconProps: EuiIconProps;
+  iconProps: TreeViewIconProps;
   name: string;
   namePlural: string;
 };

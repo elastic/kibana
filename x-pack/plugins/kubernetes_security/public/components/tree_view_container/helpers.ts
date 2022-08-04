@@ -14,7 +14,12 @@ import {
   ORCHESTRATOR_NAMESPACE,
   ORCHESTRATOR_RESOURCE_ID,
 } from '../../../common/constants';
-import { KubernetesCollection, QueryDslQueryContainerBool, TreeNavSelection } from '../../types';
+import {
+  KubernetesCollection,
+  QueryDslQueryContainerBool,
+  TreeNavSelection,
+  TreeViewIconProps,
+} from '../../types';
 
 export const KUBERNETES_COLLECTION_FIELDS = {
   [KubernetesCollection.clusterId]: ORCHESTRATOR_CLUSTER_ID,
@@ -23,6 +28,14 @@ export const KUBERNETES_COLLECTION_FIELDS = {
   [KubernetesCollection.node]: CLOUD_INSTANCE_NAME,
   [KubernetesCollection.pod]: ORCHESTRATOR_RESOURCE_ID,
   [KubernetesCollection.containerImage]: CONTAINER_IMAGE_NAME,
+};
+
+export const KUBERNETES_COLLECTION_ICONS_PROPS: { [key: string]: TreeViewIconProps } = {
+  [KubernetesCollection.clusterId]: { type: 'cluster', euiVarColor: 'euiColorVis0' },
+  [KubernetesCollection.namespace]: { type: 'namespace', euiVarColor: 'euiColorVis1' },
+  [KubernetesCollection.node]: { type: 'kubernetesNode', euiVarColor: 'euiColorVis3' },
+  [KubernetesCollection.pod]: { type: 'kubernetesPod', euiVarColor: 'euiColorVis9' },
+  [KubernetesCollection.containerImage]: { type: 'container', euiVarColor: 'euiColorVis8' },
 };
 
 export const addTreeNavSelectionToFilterQuery = (

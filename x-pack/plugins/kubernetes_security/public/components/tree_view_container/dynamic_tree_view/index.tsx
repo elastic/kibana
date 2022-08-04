@@ -14,6 +14,7 @@ import {
   EuiBadge,
   keys,
   EuiLoadingSpinner,
+  EuiToolTip,
 } from '@elastic/eui';
 import { KubernetesCollection } from '../../../types';
 import {
@@ -24,6 +25,7 @@ import { useFetchDynamicTreeView } from './hooks';
 import { useStyles } from './styles';
 import { disableEventDefaults, focusNextElement } from './helpers';
 import { useTreeViewContext } from '../contexts';
+import { TreeViewIcon } from '../tree_view_icon';
 import type { DynamicTreeViewProps, DynamicTreeViewItemProps } from './types';
 
 const BUTTON_TEST_ID = 'kubernetesSecurity:dynamicTreeViewButton';
@@ -322,8 +324,10 @@ const DynamicTreeViewItem = ({
             onClick={onArrowToggle}
           />
         )}
-        <EuiIcon {...tree[depth].iconProps} css={styles.labelIcon} />
-        <span className="euiTreeView__nodeLabel">{aggData.key_as_string || aggData.key}</span>
+        <TreeViewIcon {...tree[depth].iconProps} css={styles.labelIcon} />
+        <EuiToolTip content={aggData.key}>
+          <span className="euiTreeView__nodeLabel">{aggData.key_as_string || aggData.key}</span>
+        </EuiToolTip>
       </button>
       <div
         onKeyDown={(event: React.KeyboardEvent) => onChildrenKeydown(event, aggData.key.toString())}

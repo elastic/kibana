@@ -7,8 +7,16 @@
 
 export const clusterResponseMock = {
   buckets: [
-    { key: 'awp-demo-gke-main', doc_count: 58645 },
-    { key: 'awp-demo-gke-test', doc_count: 23957 },
+    {
+      key: ['awp-demo-gke-main', 'awp-demo-gke-main'],
+      key_as_string: 'awp-demo-gke-main|awp-demo-gke-main',
+      doc_count: 22279,
+    },
+    {
+      key: ['awp-demo-gke-test', ''],
+      key_as_string: 'awp-demo-gke-test|',
+      doc_count: 1,
+    },
   ],
   hasNextPage: false,
 };
