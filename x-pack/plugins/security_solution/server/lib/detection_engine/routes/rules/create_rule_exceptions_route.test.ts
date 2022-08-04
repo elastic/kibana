@@ -39,7 +39,7 @@ describe('createRuleExceptionsRoute', () => {
       method: 'post',
       path: `${DETECTION_ENGINE_RULES_URL}/exceptions`,
       params: {
-        id: '1234',
+        id: '4656dc92-5832-11ea-8e2d-0242ac130003',
       },
       body: {
         items: [getMockExceptionItem()],
@@ -61,7 +61,7 @@ describe('createRuleExceptionsRoute', () => {
         method: 'post',
         path: `${DETECTION_ENGINE_RULES_URL}/exceptions`,
         params: {
-          id: '1234',
+          id: '4656dc92-5832-11ea-8e2d-0242ac130003',
         },
         body: {
           items: [getMockExceptionItem()],
@@ -74,7 +74,7 @@ describe('createRuleExceptionsRoute', () => {
           exceptionsList: [
             {
               type: 'rule_default',
-              id: '1234',
+              id: '4656dc92-5832-11ea-8e2d-0242ac130003',
               list_id: 'my_default_list',
               namespace_type: 'single',
             },
@@ -99,7 +99,7 @@ describe('createRuleExceptionsRoute', () => {
         method: 'post',
         path: `${DETECTION_ENGINE_RULES_URL}/exceptions`,
         params: {
-          id: '1234',
+          id: '4656dc92-5832-11ea-8e2d-0242ac130003',
         },
         body: {
           items: [getMockExceptionItem()],
@@ -116,7 +116,8 @@ describe('createRuleExceptionsRoute', () => {
 
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
-        message: 'Unable to add exception to rule - rule with id:"1234" not found',
+        message:
+          'Unable to add exception to rule - rule with id:"4656dc92-5832-11ea-8e2d-0242ac130003" not found',
         status_code: 500,
       });
     });

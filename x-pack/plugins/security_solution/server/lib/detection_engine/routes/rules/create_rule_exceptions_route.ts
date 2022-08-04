@@ -9,25 +9,32 @@ import * as t from 'io-ts';
 
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
+import { identity } from 'fp-ts/lib/function';
 
-import { schema } from '@kbn/config-schema';
-import { BadRequestError, transformError } from '@kbn/securitysolution-es-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
   CreateExceptionListSchema,
-  ExceptionListItemSchema,
+  CreateExceptionListSchemaDecoded,
   ExceptionListSchema,
-  createExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { exceptionListItemSchema, ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import { exactCheck, formatErrors, validate } from '@kbn/securitysolution-io-ts-utils';
+import {
+  createExceptionListSchema,
+  exceptionListItemSchema,
+  ExceptionListTypeEnum,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { formatErrors, validate } from '@kbn/securitysolution-io-ts-utils';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type {
-  CreateRuleExceptionListItemSchema,
+  CreateRuleExceptionListItemSchemaDecoded,
   CreateRuleExceptionSchemaDecoded,
+  QueryRuleByIdSchemaDecoded,
 } from '../../../../../common/detection_engine/schemas/request';
-import { createRuleExceptionsSchema } from '../../../../../common/detection_engine/schemas/request';
+import {
+  createRuleExceptionsSchema,
+  queryRuleByIdSchema,
+} from '../../../../../common/detection_engine/schemas/request';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
@@ -41,9 +48,9 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
     {
       path: `${DETECTION_ENGINE_RULES_URL}/{id}/exceptions`,
       validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
+        params: buildRouteValidation<typeof queryRuleByIdSchema, QueryRuleByIdSchemaDecoded>(
+          queryRuleByIdSchema
+        ),
         body: buildRouteValidation<
           typeof createRuleExceptionsSchema,
           CreateRuleExceptionSchemaDecoded
@@ -84,7 +91,7 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
           });
         }
 
-        let createdItems: ExceptionListItemSchema[];
+        let createdItems;
 
         const ruleDefaultLists = rule.params.exceptionsList.filter(
           (list) => list.type === ExceptionListTypeEnum.RULE_DEFAULT
@@ -165,7 +172,7 @@ export const createExceptionListItems = async ({
   items: CreateRuleExceptionListItemSchemaDecoded[];
   defaultList: ExceptionListSchema;
   listsClient: ExceptionListClient | null;
-}): Promise<ExceptionListItemSchema[]> => {
+}) => {
   return Promise.all(
     items.map((item) =>
       listsClient?.createExceptionListItem({
@@ -196,7 +203,7 @@ export const createAndAssociateDefaultExceptionList = async ({
   rulesClient: RulesClient;
   removeOldAssociation: boolean;
 }): Promise<ExceptionListSchema> => {
-  const exceptionList = {
+  const exceptionList: CreateExceptionListSchema = {
     description: `Exception list containing exceptions for rule with id: ${rule.id}`,
     meta: undefined,
     name: `Exceptions for rule - ${rule.name}`,
@@ -206,12 +213,14 @@ export const createAndAssociateDefaultExceptionList = async ({
     version: 1,
   };
 
-  const decoded = createExceptionListSchema.decode(exceptionList);
-  const checked = exactCheck(exceptionList, decoded);
-  const onLeft = (errors: t.Errors): BadRequestError | CreateExceptionListSchema => {
-    return new BadRequestError(formatErrors(errors).join());
-  };
-  const onRight = (listSchema: CreateExceptionListSchema): CreateExceptionListSchema => listSchema;
+  // The `as` defeated me. Please send help
+  // if you know what's missing here.
+  const validated = pipe(
+    createExceptionListSchema.decode(exceptionList),
+    fold((errors) => {
+      throw new Error(formatErrors(errors).join());
+    }, identity)
+  ) as CreateExceptionListSchemaDecoded;
 
   const {
     description,
@@ -222,7 +231,7 @@ export const createAndAssociateDefaultExceptionList = async ({
     tags,
     type,
     version,
-  } = pipe(checked, fold(onLeft, onRight));
+  } = validated;
 
   // create the default list
   const exceptionListAssociatedToRule = await listsClient?.createExceptionList({

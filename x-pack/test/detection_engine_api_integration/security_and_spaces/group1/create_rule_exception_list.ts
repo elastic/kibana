@@ -8,7 +8,12 @@
 import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { CreateExceptionListSchema, ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  CreateExceptionListSchema,
+  ExceptionListTypeEnum,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
+import { CreateRuleExceptionListItemSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request/create_rule_exception_schema';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   getRule,
@@ -19,9 +24,10 @@ import {
   deleteAllAlerts,
   createExceptionList,
 } from '../../utils';
-import { deleteAllExceptions, removeExceptionListItemServerGeneratedProperties } from '../../../lists_api_integration/utils';
-import { CreateRuleExceptionListItemSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/create_rule_exception_schema';
-import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
+import {
+  deleteAllExceptions,
+  removeExceptionListItemServerGeneratedProperties,
+} from '../../../lists_api_integration/utils';
 
 const getRuleExceptionItemMock = (): CreateRuleExceptionListItemSchema => ({
   description: 'Exception item for rule default exception list',
@@ -67,28 +73,31 @@ export default ({ getService }: FtrProviderContext) => {
       const udpatedRule = await getRule(supertest, log, rule.rule_id);
       const defaultList = udpatedRule.exceptions_list.find((list) => list.type === 'rule_default');
 
-      const itemsWithoutServerGeneratedValues = items.map(({ item_id: itemId, ...restOfItem }) => removeExceptionListItemServerGeneratedProperties(restOfItem));
+      const itemsWithoutServerGeneratedValues = items.map(
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        ({ item_id, ...restOfItem }) => removeExceptionListItemServerGeneratedProperties(restOfItem)
+      );
       expect(itemsWithoutServerGeneratedValues).to.eql([
         {
           comments: [],
-          created_by: "elastic",
-          description: "Exception item for rule default exception list",
+          created_by: 'elastic',
+          description: 'Exception item for rule default exception list',
           entries: [
             {
-              field: "some.not.nested.field",
-              operator: "included",
-              type: "match",
-              value: "some value",
-            }
+              field: 'some.not.nested.field',
+              operator: 'included',
+              type: 'match',
+              value: 'some value',
+            },
           ],
-          name: "Sample exception item",
+          name: 'Sample exception item',
           list_id: defaultList?.list_id,
-          namespace_type: "single",
+          namespace_type: 'single',
           os_types: [],
           tags: [],
-          type: "simple",
-          updated_by: "elastic",
-        }
+          type: 'simple',
+          updated_by: 'elastic',
+        },
       ]);
       expect(udpatedRule.exceptions_list.some((list) => list.type === 'rule_default')).to.eql(true);
     });
@@ -111,41 +120,46 @@ export default ({ getService }: FtrProviderContext) => {
         .post(`${DETECTION_ENGINE_RULES_URL}/${rule.id}/exceptions`)
         .set('kbn-xsrf', 'true')
         .send({
-          items: [getRuleExceptionItemMock()]
+          items: [getRuleExceptionItemMock()],
         })
         .expect(200);
 
       const udpatedRule = await getRule(supertest, log, rule.rule_id);
       const defaultList = udpatedRule.exceptions_list.find((list) => list.type === 'rule_default');
 
-      const itemsWithoutServerGeneratedValues = items.map(({ item_id: itemId, ...restOfItem }) => removeExceptionListItemServerGeneratedProperties(restOfItem));
-      expect(udpatedRule.exceptions_list).to.eql([{
-        id: defaultList?.id,
-        list_id: defaultList?.list_id,
-        type: 'rule_default',
-        namespace_type: 'single' 
-      }]);
+      const itemsWithoutServerGeneratedValues = items.map(
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        ({ item_id, ...restOfItem }) => removeExceptionListItemServerGeneratedProperties(restOfItem)
+      );
+      expect(udpatedRule.exceptions_list).to.eql([
+        {
+          id: defaultList?.id,
+          list_id: defaultList?.list_id,
+          type: 'rule_default',
+          namespace_type: 'single',
+        },
+      ]);
       expect(itemsWithoutServerGeneratedValues).to.eql([
         {
           comments: [],
-          created_by: "elastic",
-          description: "Exception item for rule default exception list",
+          created_by: 'elastic',
+          description: 'Exception item for rule default exception list',
           entries: [
             {
-              field: "some.not.nested.field",
-              operator: "included",
-              type: "match",
-              value: "some value",
-            }
+              field: 'some.not.nested.field',
+              operator: 'included',
+              type: 'match',
+              value: 'some value',
+            },
           ],
-          name: "Sample exception item",
+          name: 'Sample exception item',
           list_id: defaultList?.list_id,
-          namespace_type: "single",
+          namespace_type: 'single',
           os_types: [],
           tags: [],
-          type: "simple",
-          updated_by: "elastic",
-        }
+          type: 'simple',
+          updated_by: 'elastic',
+        },
       ]);
     });
 
@@ -171,10 +185,10 @@ export default ({ getService }: FtrProviderContext) => {
           },
         ],
       });
-      
+
       expect(rule.exceptions_list.some((list) => list.type === 'rule_default')).to.eql(true);
 
-      const { body: items} = await supertest
+      const { body: items } = await supertest
         .post(`${DETECTION_ENGINE_RULES_URL}/${rule.id}/exceptions`)
         .set('kbn-xsrf', 'true')
         .send({
@@ -182,32 +196,35 @@ export default ({ getService }: FtrProviderContext) => {
         })
         .expect(200);
 
-      const itemsWithoutServerGeneratedValues = items.map(({ item_id: itemId, ...restOfItem }) => removeExceptionListItemServerGeneratedProperties(restOfItem));
+      const itemsWithoutServerGeneratedValues = items.map(
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        ({ item_id, ...restOfItem }) => removeExceptionListItemServerGeneratedProperties(restOfItem)
+      );
       expect(itemsWithoutServerGeneratedValues[0]).to.eql({
         comments: [],
-        created_by: "elastic",
-        description: "Exception item for rule default exception list",
+        created_by: 'elastic',
+        description: 'Exception item for rule default exception list',
         entries: [
           {
-            field: "some.not.nested.field",
-            operator: "included",
-            type: "match",
-            value: "some value",
-          }
+            field: 'some.not.nested.field',
+            operator: 'included',
+            type: 'match',
+            value: 'some value',
+          },
         ],
-        name: "Sample exception item",
+        name: 'Sample exception item',
         list_id: defaultList.list_id,
-        namespace_type: "single",
+        namespace_type: 'single',
         os_types: [],
         tags: [],
-        type: "simple",
-        updated_by: "elastic",
+        type: 'simple',
+        updated_by: 'elastic',
       });
     });
 
     it('returns 500 if no rule is found to add exception list to', async () => {
       const { body } = await supertest
-        .post(`${DETECTION_ENGINE_RULES_URL}/123456/exceptions`)
+        .post(`${DETECTION_ENGINE_RULES_URL}/4656dc92-5832-11ea-8e2d-0242ac130003/exceptions`)
         .set('kbn-xsrf', 'true')
         .send({
           items: [getRuleExceptionItemMock()],
@@ -215,7 +232,7 @@ export default ({ getService }: FtrProviderContext) => {
         .expect(500);
 
       expect(body).to.eql({
-        message: "Unable to add exception to rule - rule with id:\"123456\" not found",
+        message: 'Unable to add exception to rule - rule with id:"4656dc92-5832-11ea-8e2d-0242ac130003" not found',
         status_code: 500,
       });
     });

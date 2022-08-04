@@ -14,6 +14,7 @@ export * from './import_rules_schema';
 export * from './patch_rules_bulk_schema';
 export * from './patch_rules_schema';
 export * from './perform_bulk_action_schema';
+export * from './query_rule_by_id_schema';
 export * from './query_rules_schema';
 export * from './query_signals_index_schema';
 export * from './rule_schemas';
