@@ -162,9 +162,7 @@ export async function initializeSources(
       defaultIndexPatternId,
       references,
     },
-    {
-      isFullEditor: true,
-    }
+    options
   );
   return {
     indexPatterns,

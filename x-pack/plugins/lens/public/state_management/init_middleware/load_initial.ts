@@ -159,7 +159,7 @@ export function loadInitial(
       });
   }
 
-  getPersisted({ initialInput, lensServices, history })
+  return getPersisted({ initialInput, lensServices, history })
     .then(
       (persisted) => {
         if (persisted) {
@@ -186,8 +186,7 @@ export function loadInitial(
           const filters = data.query.filterManager.inject(doc.state.filters, doc.references);
           // Don't overwrite any pinned filters
           data.query.filterManager.setAppFilters(filters);
-
-          initializeSources(
+          return initializeSources(
             {
               datasourceMap,
               datasourceStates: docDatasourceStates,

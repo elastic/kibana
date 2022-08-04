@@ -52,17 +52,7 @@ describe('loader', () => {
         dataViews: mockDataViewsService(),
       });
 
-      expect(cache).toEqual(sampleIndexPatterns);
-    });
-
-    it('should allow scripted, but not full text fields', async () => {
-      const cache = await loadIndexPatterns({
-        cache: {},
-        patterns: ['1', '2'],
-        dataViews: mockDataViewsService(),
-      });
-
-      expect(cache).toEqual(sampleIndexPatterns);
+      expect(Object.keys(cache)).toEqual(['1', '2']);
     });
 
     it('should apply field restrictions from typeMeta', async () => {

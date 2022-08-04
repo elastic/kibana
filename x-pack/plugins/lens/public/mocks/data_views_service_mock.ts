@@ -9,11 +9,11 @@ import type { IndexPatternServiceAPI } from '../indexpattern_service/service';
 
 export function createIndexPatternServiceMock(): IndexPatternServiceAPI {
   return {
-    loadIndexPatterns: jest.fn(),
-    loadIndexPatternRefs: jest.fn(),
-    ensureIndexPattern: jest.fn(),
-    refreshExistingFields: jest.fn(),
-    getDefaultIndex: jest.fn(),
-    updateIndexPatternsCache: jest.fn(),
+    loadIndexPatterns: jest.fn(async () => ({})),
+    loadIndexPatternRefs: jest.fn(async () => []),
+    ensureIndexPattern: jest.fn(async () => ({})),
+    refreshExistingFields: jest.fn(async () => {}),
+    getDefaultIndex: jest.fn(() => 'fake-index'),
+    updateIndexPatternsCache: jest.fn(async () => {}),
   };
 }

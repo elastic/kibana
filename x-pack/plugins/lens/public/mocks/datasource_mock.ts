@@ -37,7 +37,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     })),
     getRenderEventCounters: jest.fn((_state) => []),
     getPublicAPI: jest.fn().mockReturnValue(publicAPIMock),
-    initialize: jest.fn((_state?) => Promise.resolve()),
+    initialize: jest.fn((_state?) => {}),
     renderDataPanel: jest.fn(),
     renderLayerPanel: jest.fn(),
     getCurrentIndexPatternId: jest.fn(),

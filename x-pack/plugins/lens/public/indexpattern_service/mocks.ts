@@ -114,7 +114,6 @@ const indexPattern1 = {
     },
     documentField,
   ],
-  getFieldByName: jest.fn(),
 } as unknown as IndexPattern;
 indexPattern1.getFieldByName = getFieldByNameFactory(indexPattern1.fields);
 
