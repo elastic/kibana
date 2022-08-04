@@ -140,9 +140,10 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
       return true; // Don't do the expensive logic if we don't need it
     }
     if (isMlLoading) {
-      const selectedJobs = jobs.filter(({ id }) => machineLearningJobId.includes(id));
-      return selectedJobs.every((job) => isJobStarted(job.jobState, job.datafeedState));
+      return false;
     }
+    const selectedJobs = jobs.filter(({ id }) => machineLearningJobId.includes(id));
+    return selectedJobs.every((job) => isJobStarted(job.jobState, job.datafeedState));
   }, [jobs, machineLearningJobId, ruleType, isMlLoading]);
 
   const [queryPreviewIdSelected, setQueryPreviewRadioIdSelected] = useState(QUICK_QUERY_SELECT_ID);
