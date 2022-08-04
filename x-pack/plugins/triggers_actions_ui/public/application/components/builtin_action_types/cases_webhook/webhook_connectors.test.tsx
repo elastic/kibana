@@ -47,9 +47,7 @@ const config = {
   createIncidentMethod: 'post',
   createIncidentResponseKey: 'id',
   createIncidentUrl: 'https://coolsite.net/rest/api/2/issue',
-  getIncidentResponseCreatedDateKey: 'fields.created',
   getIncidentResponseExternalTitleKey: 'key',
-  getIncidentResponseUpdatedDateKey: 'fields.updated',
   hasAuth: true,
   headers: [{ key: 'content-type', value: 'text' }],
   viewIncidentUrl: 'https://coolsite.net/browse/{{{external.system.title}}}',
@@ -94,8 +92,6 @@ describe('CasesWebhookActionConnectorFields renders', () => {
     expect(getByTestId('createIncidentResponseKeyText')).toBeInTheDocument();
     expect(getByTestId('getIncidentUrlInput')).toBeInTheDocument();
     expect(getByTestId('getIncidentResponseExternalTitleKeyText')).toBeInTheDocument();
-    expect(getByTestId('getIncidentResponseCreatedDateKeyText')).toBeInTheDocument();
-    expect(getByTestId('getIncidentResponseUpdatedDateKeyText')).toBeInTheDocument();
     expect(getByTestId('viewIncidentUrlInput')).toBeInTheDocument();
     expect(getByTestId('webhookUpdateMethodSelect')).toBeInTheDocument();
     expect(getByTestId('updateIncidentUrlInput')).toBeInTheDocument();
@@ -343,8 +339,6 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       ['createIncidentResponseKeyText', ''],
       ['getIncidentUrlInput', 'https://missingexternalid.com'],
       ['getIncidentResponseExternalTitleKeyText', ''],
-      ['getIncidentResponseCreatedDateKeyText', ''],
-      ['getIncidentResponseUpdatedDateKeyText', ''],
       ['updateIncidentUrlInput', 'badurl.com'],
       ['createCommentUrlInput', 'badurl.com'],
     ];
