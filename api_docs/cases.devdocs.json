@@ -1411,6 +1411,8 @@
           },
           "; tags: string[]; title: string; connector: { id: string; type: ",
           "ConnectorTypes",
+          ".casesWebhook; fields: null; name: string; } | { id: string; type: ",
+          "ConnectorTypes",
           ".jira; fields: { issueType: string | null; priority: string | null; parent: string | null; } | null; name: string; } | { id: string; type: ",
           "ConnectorTypes",
           ".none; fields: null; name: string; } | { id: string; type: ",
@@ -1513,7 +1515,7 @@
         "label": "CasesFeatures",
         "description": [],
         "signature": [
-          "{ alerts?: { sync?: boolean | undefined; enabled?: boolean | undefined; } | undefined; metrics?: ",
+          "{ alerts?: { sync?: boolean | undefined; enabled?: boolean | undefined; isExperimental?: boolean | undefined; } | undefined; metrics?: ",
           "SingleCaseMetricsFeature",
           "[] | undefined; }"
         ],

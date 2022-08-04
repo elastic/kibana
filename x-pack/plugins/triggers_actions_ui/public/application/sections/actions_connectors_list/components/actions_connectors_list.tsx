@@ -105,6 +105,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
     loadActions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  const [showWarningText, setShowWarningText] = useState<boolean>(false);
 
   useEffect(() => {
     (async () => {
@@ -152,6 +153,20 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
         }))
         .sort((a, b) => a.name.localeCompare(b.name))
     : [];
+
+  function setDeleteConnectorWarning(connectors: string[]) {
+    const show = connectors.some((c) => {
+      const action = actions.find((a) => a.id === c);
+      return (action && action.referencedByCount ? action.referencedByCount : 0) > 0;
+    });
+    setShowWarningText(show);
+  }
+
+  function onDelete(items: ActionConnectorTableItem[]) {
+    const itemIds = items.map((item: any) => item.id);
+    setConnectorsToDelete(itemIds);
+    setDeleteConnectorWarning(itemIds);
+  }
 
   async function loadActions() {
     setIsLoadingActions(true);
@@ -285,11 +300,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
       render: (item: ActionConnectorTableItem) => {
         return (
           <EuiFlexGroup justifyContent="flexEnd" alignItems="flexEnd">
-            <DeleteOperation
-              canDelete={canDelete}
-              item={item}
-              onDelete={() => setConnectorsToDelete([item.id])}
-            />
+            <DeleteOperation canDelete={canDelete} item={item} onDelete={() => onDelete([item])} />
             {item.isMissingSecrets ? (
               <>
                 {actionTypesIndex && actionTypesIndex[item.actionTypeId]?.enabled ? (
@@ -392,9 +403,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
                   iconType="trash"
                   color="danger"
                   data-test-subj="bulkDelete"
-                  onClick={() => {
-                    setConnectorsToDelete(selectedItems.map((selected: any) => selected.id));
-                  }}
+                  onClick={() => onDelete(selectedItems)}
                   title={
                     canDelete
                       ? undefined
@@ -435,6 +444,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
   return (
     <section data-test-subj="actionsList">
       <DeleteModalConfirmation
+        data-test-subj="deleteConnectorsConfirmation"
         onDeleted={(deleted: string[]) => {
           if (selectedItems.length === 0 || selectedItems.length === deleted.length) {
             const updatedActions = actions.filter(
@@ -462,6 +472,17 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
         multipleTitle={i18n.translate(
           'xpack.triggersActionsUI.sections.actionsConnectorsList.multipleTitle',
           { defaultMessage: 'connectors' }
+        )}
+        showWarningText={showWarningText}
+        warningText={i18n.translate(
+          'xpack.triggersActionsUI.sections.actionsConnectorsList.warningText',
+          {
+            defaultMessage:
+              '{connectors, plural, one {This connector is} other {Some connectors are}} currently in use.',
+            values: {
+              connectors: connectorsToDelete.length,
+            },
+          }
         )}
         setIsLoadingState={(isLoading: boolean) => setIsLoadingActionTypes(isLoading)}
       />

@@ -34,6 +34,7 @@ export const mapIndexStats = (
       size_in_bytes: sizeInBytes,
     },
   };
+
   return {
     aliases,
     health: indexStats?.health,
@@ -44,10 +45,21 @@ export const mapIndexStats = (
   };
 };
 
+export const fetchIndexCounts = async (client: IScopedClusterClient, indicesNames: string[]) => {
+  // TODO: is there way to batch this? Passing multiple index names or a pattern still returns a singular count
+  const countPromises = indicesNames.map(async (indexName) => {
+    const { count } = await client.asCurrentUser.count({ index: indexName });
+    return { [indexName]: count };
+  });
+  const indexCountArray = await Promise.all(countPromises);
+  return indexCountArray.reduce((acc, current) => ({ ...acc, ...current }), {});
+};
+
 export const fetchIndices = async (
   client: IScopedClusterClient,
   indexPattern: string,
-  returnHiddenIndices: boolean
+  returnHiddenIndices: boolean,
+  includeAliases: boolean
 ): Promise<ElasticsearchIndexWithPrivileges[]> => {
   // This call retrieves alias and settings information about indices
   const expandWildcards: ExpandWildcard[] = returnHiddenIndices ? ['hidden', 'all'] : ['open'];
@@ -63,9 +75,11 @@ export const fetchIndices = async (
 
   const indexAndAliasNames = Object.keys(totalIndices).reduce((accum, indexName) => {
     accum.push(indexName);
-    const aliases = Object.keys(totalIndices[indexName].aliases!);
 
-    aliases.forEach((alias) => accum.push(alias));
+    if (includeAliases) {
+      const aliases = Object.keys(totalIndices[indexName].aliases!);
+      aliases.forEach((alias) => accum.push(alias));
+    }
     return accum;
   }, [] as string[]);
 
@@ -94,6 +108,8 @@ export const fetchIndices = async (
     ],
   });
 
+  const indexCounts = await fetchIndexCounts(client, indexAndAliasNames);
+
   return indicesNames
     .map((indexName: string) => {
       const indexData = totalIndices[indexName];
@@ -105,19 +121,23 @@ export const fetchIndices = async (
       const indicesAndAliases = [] as ElasticsearchIndexWithPrivileges[];
       indicesAndAliases.push({
         name,
+        count: indexCounts[name] ?? 0,
         alias: false,
         privileges: { read: false, manage: false, ...indexPrivileges[name] },
         ...indexData,
       });
 
-      aliases.forEach((alias) => {
-        indicesAndAliases.push({
-          name: alias,
-          alias: true,
-          privileges: { read: false, manage: false, ...indexPrivileges[name] },
-          ...indexData,
+      if (includeAliases) {
+        aliases.forEach((alias) => {
+          indicesAndAliases.push({
+            name: alias,
+            count: indexCounts[alias] ?? 0,
+            alias: true,
+            privileges: { read: false, manage: false, ...indexPrivileges[name] },
+            ...indexData,
+          });
         });
-      });
+      }
       return indicesAndAliases;
     })
     .filter(

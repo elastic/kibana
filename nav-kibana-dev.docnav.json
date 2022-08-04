@@ -153,6 +153,9 @@
       "label": "Contributors Newsletters",
       "items": [
         {
+          "id": "kibJuly2022ContributorNewsletter"
+        },
+        {
           "id": "kibJune2022ContributorNewsletter"
         },
         {
@@ -435,6 +438,14 @@
         {
           "id": "kibDevDocsOpsOverview",
           "label": "Overview"
+        },
+        {
+          "label": "Initiatives",
+          "items": [
+            {
+              "id": "kibDevDocsOpsPackages"
+            }
+          ]
         },
         {
           "label": "CI",

@@ -55,6 +55,7 @@ export interface Hits<T, U> {
 
 export interface GenericBuckets {
   key: string;
+  key_as_string?: string; // contains, for example, formatted dates
   doc_count: number;
 }
 

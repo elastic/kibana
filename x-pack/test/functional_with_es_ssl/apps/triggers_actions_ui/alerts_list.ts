@@ -612,7 +612,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('ruleStatusFilterButton');
       await testSubjects.click('ruleStatusFilterOption-enabled');
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
-      await assertRulesLength(1);
+      await assertRulesLength(2);
 
       // Select disabled
       await testSubjects.click('ruleStatusFilterOption-enabled');
@@ -624,17 +624,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('ruleStatusFilterOption-disabled');
       await testSubjects.click('ruleStatusFilterOption-snoozed');
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
-      await assertRulesLength(1);
+      await assertRulesLength(2);
 
       // Select disabled and snoozed
       await testSubjects.click('ruleStatusFilterOption-disabled');
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
-      await assertRulesLength(3);
+      await assertRulesLength(1);
 
       // Select all 4
       await testSubjects.click('ruleStatusFilterOption-enabled');
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
-      await assertRulesLength(4);
+      await assertRulesLength(0);
     });
 
     it('should filter alerts by the tag', async () => {
