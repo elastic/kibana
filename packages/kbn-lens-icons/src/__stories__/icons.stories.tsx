@@ -180,15 +180,16 @@ interface RootComponentProps {
 
 function RootComponent(props: RootComponentProps) {
   return (
-    <EuiFlexGroup direction={'row'} responsive={true} wrap={true}>
+    <EuiFlexGroup direction={'row'} responsive={false} wrap={true}>
       {props.icons.map((i) => (
-        <EuiFlexItem grow={3}>
+        <EuiFlexItem>
           <EuiEmptyPrompt
-            color="subdued"
+            style={{ minWidth: '250px' }}
             hasBorder={true}
             hasShadow={true}
             iconType={i.Component as IconType}
-            body={<code>{i.title}</code>}
+            title={<>{i.title}</>}
+            titleSize={'s'}
           />
         </EuiFlexItem>
       ))}

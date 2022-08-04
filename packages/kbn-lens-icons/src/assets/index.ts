@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import './index.scss';
+
 export { IconCircle, IconTriangle } from './annotation_icons';
 
 export { EuiIconAxisBottom } from './axis_bottom';
