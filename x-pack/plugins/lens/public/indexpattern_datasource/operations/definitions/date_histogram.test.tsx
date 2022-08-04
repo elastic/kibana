@@ -429,6 +429,7 @@ describe('date_histogram', () => {
           paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={thirdLayer.columns.col1 as DateHistogramIndexPatternColumn}
+          indexPattern={{ ...indexPattern1, timeFieldName: '@timestamp' }}
         />
       );
       instance
@@ -558,7 +559,9 @@ describe('date_histogram', () => {
           indexPattern={{ ...indexPattern1, timeFieldName: 'other_timestamp' }}
         />
       );
-      expect(instance.find(EuiSwitch).first().prop('disabled')).toBeTruthy();
+      expect(
+        instance.find('[data-test-subj="lensDropPartialIntervals"]').prop('disabled')
+      ).toBeTruthy();
     });
 
     it('should force calendar values to 1', () => {
@@ -754,12 +757,9 @@ describe('date_histogram', () => {
           currentColumn={thirdLayer.columns.col1 as DateHistogramIndexPatternColumn}
         />
       );
-      instance
-        .find(EuiSwitch)
-        .first()
-        .simulate('change', {
-          target: { checked: true },
-        });
+      instance.find('[data-test-subj="lensDropPartialIntervals"]').simulate('change', {
+        target: { checked: true },
+      });
       expect(updateLayerSpy).toHaveBeenCalled();
       const newLayer = updateLayerSpy.mock.calls[0][0](layer);
       expect(newLayer).toHaveProperty('columns.col1.params.dropPartials', true);
