@@ -12,85 +12,139 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
   RuleTypeParams,
+  SanitizedRule,
+  RuleAction,
 } from '../types';
 
-interface TransformActionParamsOptions {
+interface TransformActionParamsOptions<
+  Params extends RuleTypeParams,
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string
+> {
+  rule: SanitizedRule<Params>;
+  alert: Alert<State, Context, ActionGroupIds>;
+  action: RuleAction;
   actionsPlugin: ActionsPluginStartContract;
-  alertId: string;
-  alertType: string;
-  actionId: string;
   actionTypeId: string;
-  alertName: string;
+  kibanaBaseUrl?: string;
   spaceId: string;
-  tags?: string[];
-  alertInstanceId: string;
+  ruleType: string;
   alertActionGroup: string;
   alertActionGroupName: string;
   alertActionSubgroup?: string;
-  actionParams: RuleActionParams;
-  alertParams: RuleTypeParams;
-  state: AlertInstanceState;
-  kibanaBaseUrl?: string;
-  context: AlertInstanceContext;
-  alerts?: Alert[];
 }
 
-export function transformActionParams({
+interface TransformSummaryActionParamsOptions<
+  Params extends RuleTypeParams,
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
+> {
+  rule: SanitizedRule<Params>;
+  alerts: {
+    new: Array<Alert<State, Context, ActionGroupIds>>;
+    ongoing: Array<Alert<State, Context, ActionGroupIds>>;
+    recovered: Array<Alert<State, Context, RecoveryActionGroupId>>;
+    // old?: '';
+  };
+  action: RuleAction;
+  actionsPlugin: ActionsPluginStartContract;
+  actionTypeId: string;
+  kibanaBaseUrl?: string;
+  spaceId: string;
+  ruleType: string;
+}
+
+export function transformActionParams<
+  Params extends RuleTypeParams,
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string
+>({
+  rule,
+  alert,
+  action,
   actionsPlugin,
-  alertId,
-  alertType,
-  actionId,
   actionTypeId,
-  alertName,
-  spaceId,
-  tags,
-  alertInstanceId,
-  alertActionGroup,
-  alertActionSubgroup,
-  alertActionGroupName,
-  context,
-  actionParams,
-  state,
   kibanaBaseUrl,
-  alertParams,
-  alerts,
-}: TransformActionParamsOptions): RuleActionParams {
+  spaceId,
+  ruleType,
+  alertActionGroup,
+  alertActionGroupName,
+  alertActionSubgroup,
+}: TransformActionParamsOptions<Params, State, Context, ActionGroupIds>): RuleActionParams {
   // when the list of variables we pass in here changes,
   // the UI will need to be updated as well; see:
   // x-pack/plugins/triggers_actions_ui/public/application/lib/action_variables.ts
   const variables = {
-    alertId,
-    alertName,
-    spaceId,
-    tags,
-    alertInstanceId,
-    alertActionGroup,
-    alertActionGroupName,
-    alertActionSubgroup,
-    context,
+    context: alert.getContext(),
     date: new Date().toISOString(),
-    state,
+    state: alert.getState(),
     kibanaBaseUrl,
-    params: alertParams,
+    params: rule.params,
     rule: {
-      id: alertId,
-      name: alertName,
-      type: alertType,
+      id: rule.id,
+      name: rule.name,
+      type: ruleType,
       spaceId,
-      tags,
+      tags: rule.tags,
     },
     alert: {
-      id: alertInstanceId,
+      id: alert.getId(),
       actionGroup: alertActionGroup,
       actionGroupName: alertActionGroupName,
       actionSubgroup: alertActionSubgroup,
+    },
+  };
+  return actionsPlugin.renderActionParameterTemplates(
+    actionTypeId,
+    action.id,
+    action.params,
+    variables
+  );
+}
+
+export function transformSummarizedActionParams<
+  Params extends RuleTypeParams,
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
+>({
+  rule,
+  alerts,
+  action,
+  actionsPlugin,
+  actionTypeId,
+  kibanaBaseUrl,
+  spaceId,
+  ruleType,
+}: TransformSummaryActionParamsOptions<
+  Params,
+  State,
+  Context,
+  ActionGroupIds,
+  RecoveryActionGroupId
+>): RuleActionParams {
+  const variables = {
+    date: new Date().toISOString(),
+    kibanaBaseUrl,
+    params: rule.params,
+    rule: {
+      id: rule.id,
+      name: rule.name,
+      type: ruleType,
+      spaceId,
+      tags: rule.tags,
     },
     alerts,
   };
   return actionsPlugin.renderActionParameterTemplates(
     actionTypeId,
-    actionId,
-    actionParams,
+    action.id,
+    action.params,
     variables
   );
 }

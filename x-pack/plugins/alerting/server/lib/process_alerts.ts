@@ -17,6 +17,7 @@ interface ProcessAlertsResult<
 > {
   newAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
   activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
+  ongoingAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
   recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
 }
 
@@ -34,6 +35,7 @@ export function processAlerts<
   const currentTime = new Date().toISOString();
   const newAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {};
   const activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {};
+  const ongoingAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {};
   const recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {};
 
   for (const id in alerts) {
@@ -50,6 +52,7 @@ export function processAlerts<
           const state = newAlerts[id].getState();
           newAlerts[id].replaceState({ ...state, start: currentTime, duration: '0' });
         } else {
+          ongoingAlerts[id] = alerts[id];
           // this alert did exist in previous run
           // calculate duration to date for active alerts
           const state = originalAlerts[id].getState();
@@ -78,5 +81,5 @@ export function processAlerts<
       }
     }
   }
-  return { recoveredAlerts, newAlerts, activeAlerts };
+  return { recoveredAlerts, newAlerts, activeAlerts, ongoingAlerts };
 }

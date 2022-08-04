@@ -19,7 +19,7 @@ import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import moment from 'moment';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import { injectActionParams } from './inject_action_params';
-import { transformActionParams } from './transform_action_params';
+import { transformActionParams, transformSummarizedActionParams } from './transform_action_params';
 import { TaskRunnerContext } from './task_runner_factory';
 import { Alert, createAlertFactory } from '../alert';
 import {
@@ -628,7 +628,7 @@ export class TaskRunner<
     ruleRunMetricsStore.setTotalSearchDurationMs(searchMetrics.totalSearchDurationMs);
     ruleRunMetricsStore.setEsSearchDurationMs(searchMetrics.esSearchDurationMs);
 
-    const { newAlerts, activeAlerts, recoveredAlerts } = processAlerts<
+    const { newAlerts, ongoingAlerts, activeAlerts, recoveredAlerts } = processAlerts<
       State,
       Context,
       ActionGroupIds,
@@ -708,6 +708,33 @@ export class TaskRunner<
             );
             continue;
           }
+          const actionParams = transformSummarizedActionParams({
+            actionsPlugin: this.context.actionsPlugin,
+            rule,
+            alerts: {
+              new: Object.values(newAlerts),
+              ongoing: Object.values(ongoingAlerts),
+              recovered: Object.values(recoveredAlerts),
+            },
+            action,
+            ruleType: ruleType.id,
+            spaceId,
+            kibanaBaseUrl: this.context.kibanaBaseUrl,
+          });
+
+          actionsToTrigger.push({
+            ...action,
+            params: {
+              ...injectActionParams({
+                ruleId: rule.id,
+                spaceId,
+                actionParams,
+                actionTypeId: action.actionTypeId,
+              }),
+            },
+          });
+
+          continue;
         }
 
         for (const alert of allAlerts) {
@@ -780,22 +807,15 @@ export class TaskRunner<
 
           const actionParams = transformActionParams({
             actionsPlugin: this.context.actionsPlugin,
-            alertId: rule.id,
-            alertType: ruleType.id,
-            actionTypeId: action.actionTypeId,
-            alertName: rule.name,
+            rule,
+            alert: alert as Alert<State, Context, ActionGroupIds>,
+            action,
+            ruleType: ruleType.id,
             spaceId,
-            tags: rule.tags,
-            alertInstanceId: alert.getId(),
             alertActionGroup: actionGroup,
             alertActionGroupName: ruleTypeActionGroups.get(actionGroup)!,
             alertActionSubgroup: actionSubgroup,
-            context: alert.getContext(),
-            actionParams: action.params,
-            actionId: action.id,
-            state: alert.getState(),
             kibanaBaseUrl: this.context.kibanaBaseUrl,
-            alertParams: rule.params,
           });
 
           actionsToTrigger.push({
