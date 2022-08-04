@@ -47,7 +47,7 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <savedObjectsFinder.SavedObjectFinder
+        <savedObjectsFinder.Finder
           noItemsMessage={
             <FormattedMessage
               id="discover.topNav.openSearchPanel.noSearchesFoundDescription"
