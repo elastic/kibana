@@ -14,6 +14,15 @@ import { red, blue, green } from 'chalk';
 import { DataFormatter } from './data_formatter';
 import { HORIZONTAL_LINE } from '../../../common/constants';
 
+export interface Choice {
+  key: string;
+  title: string;
+}
+
+const CONTENT_MAX_WIDTH = HORIZONTAL_LINE.length - 1;
+const CONTENT_60_PERCENT = Math.floor(CONTENT_MAX_WIDTH * 0.6);
+const CONTENT_40_PERCENT = Math.floor(CONTENT_MAX_WIDTH * 0.4);
+
 class RenderedScreen {
   public statusPos: number = -1;
   public promptPos: number = -1;
@@ -36,15 +45,21 @@ export class ScreenBaseClass {
   private endSession: (() => void) | undefined = undefined;
   private screenRenderInfo: RenderedScreen | undefined;
 
-  protected header(): string | DataFormatter {
-    return HORIZONTAL_LINE;
+  protected header(title: string = '', subTitle: string = ''): string | DataFormatter {
+    const paddedTitle = title ? ` ${title}`.padEnd(CONTENT_60_PERCENT) : '';
+    const paddedSubTitle = subTitle ? `| ${`${subTitle} `.padStart(CONTENT_40_PERCENT)}` : '';
+
+    return title || subTitle
+      ? `${HORIZONTAL_LINE}\n${paddedTitle}${
+          subTitle ? `${paddedSubTitle}` : ''
+        }\n${HORIZONTAL_LINE}`
+      : HORIZONTAL_LINE;
   }
 
   protected footer(): string | DataFormatter {
     return `
 
-  [Q] Quit
-${HORIZONTAL_LINE}`;
+  [Q] Quit\n${HORIZONTAL_LINE}`;
   }
 
   protected body(): string | DataFormatter {
@@ -170,5 +185,9 @@ ${HORIZONTAL_LINE}`;
       this.endSession();
       this.endSession = undefined;
     }
+  }
+
+  protected throwUnknownChoiceError(choice: string): never {
+    throw new Error(`Unknown choice: ${choice}`);
   }
 }

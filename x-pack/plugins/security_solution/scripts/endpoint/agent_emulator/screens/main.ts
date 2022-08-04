@@ -5,16 +5,15 @@
  * 2.0.
  */
 
+import { LoadEndpointsScreen } from './load_endpoints';
+import { TOOL_TITLE } from '../constants';
 import { ChoiceListFormatter } from './lib/choice_list_formatter';
 import type { DataFormatter } from './lib/data_formatter';
-import { HORIZONTAL_LINE } from '../../common/constants';
 import { ScreenBaseClass } from './lib/screen_base_class';
 
 export class MainScreen extends ScreenBaseClass {
-  protected header(): string {
-    return `${HORIZONTAL_LINE}
- Endpoint Agent Emulator
-${HORIZONTAL_LINE}`;
+  protected header(title: string = '', subTitle: string = ''): string | DataFormatter {
+    return super.header(TOOL_TITLE);
   }
 
   protected body(): string | DataFormatter {
@@ -25,6 +24,14 @@ ${HORIZONTAL_LINE}`;
     switch (choice.toUpperCase().trim()) {
       // Load endpoints
       case '1':
+        const endpointLoadScreen = new LoadEndpointsScreen(() => {
+          endpointLoadScreen.hide();
+          this.show();
+        });
+
+        endpointLoadScreen.show().then(() => {
+          this.show();
+        });
         return;
 
       case 'Q':
@@ -32,6 +39,6 @@ ${HORIZONTAL_LINE}`;
         return;
     }
 
-    throw new Error(`Unknown choice: ${choice}`);
+    this.throwUnknownChoiceError(choice);
   }
 }
