@@ -233,7 +233,7 @@ export const createAndAssociateDefaultExceptionList = async ({
     version,
   } = validated;
 
-  // create the default list
+  // create the default rule list
   const exceptionListAssociatedToRule = await listsClient?.createExceptionList({
     description,
     immutable: false,
