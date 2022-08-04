@@ -23,6 +23,7 @@ export type {
   FileUnshareOptions,
   BlobStorageSettings,
   BaseFileMetadata,
+  BlobStorageSettings,
   UpdatableFileMetadata,
   FileShareJSONWithToken,
   UpdatableFileShareMetadata,

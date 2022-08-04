@@ -231,7 +231,7 @@ export type FileSavedObject<Meta = unknown> = SavedObject<FileMetadata<Meta>>;
 /**
  * The set of file metadata that can be updated.
  */
-export type UpdatableFileMetadata<Meta = unknown> = Pick<FileJSON<Meta>, 'meta' | 'alt' | 'name'>;
+export type UpdatableFileMetadata<Meta = unknown> = Pick<FileMetadata<Meta>, 'Meta' | 'Alt' | 'name'>;
 
 /**
  * The set of file metadata that can be updated on a file share instance.

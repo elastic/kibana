@@ -116,7 +116,7 @@ export class File<M = unknown> implements IFile {
       throw new NoDownloadAvailableError('This file content is not available for download.');
     }
     // We pass through this file ID to retrieve blob content.
-    return this.fileClient.downloadContent({ id: this.id, size });
+    return this.fileClient.download({ id: this.id, size });
   }
 
   public async delete(): Promise<void> {
