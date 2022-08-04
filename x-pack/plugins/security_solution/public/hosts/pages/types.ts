@@ -13,7 +13,7 @@ import type { GlobalTimeArgs } from '../../common/containers/use_global_time';
 import type { InputsModelId } from '../../common/store/inputs/constants';
 import { HOSTS_PATH } from '../../../common/constants';
 
-export const hostDetailsPagePath = `${HOSTS_PATH}/:detailName`;
+export const hostDetailsPagePath = `${HOSTS_PATH}/name/:detailName`;
 
 export type HostsTabsProps = GlobalTimeArgs & {
   filterQuery: string;

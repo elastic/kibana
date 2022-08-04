@@ -88,7 +88,9 @@ export const MlHostConditionalContainer = React.memo(() => {
             });
 
             return (
-              <Redirect to={`${HOSTS_PATH}/${hostName}/${HostsTableType.anomalies}?${reEncoded}`} />
+              <Redirect
+                to={`${HOSTS_PATH}/name/${hostName}/${HostsTableType.anomalies}?${reEncoded}`}
+              />
             );
           }
         }}

@@ -240,7 +240,7 @@ describe('Navigation Breadcrumbs', () => {
           hostsBreadcrumbs,
           {
             text: 'siem-kibana',
-            href: 'securitySolutionUI/hosts/siem-kibana',
+            href: 'securitySolutionUI/hosts/name/siem-kibana',
           },
           { text: 'Authentications', href: '' },
         ]);
@@ -458,7 +458,7 @@ describe('Navigation Breadcrumbs', () => {
           }),
           expect.objectContaining({
             text: 'siem-kibana',
-            href: 'securitySolutionUI/hosts/siem-kibana',
+            href: 'securitySolutionUI/hosts/name/siem-kibana',
             onClick: expect.any(Function),
           }),
           {
@@ -556,7 +556,7 @@ describe('Navigation Breadcrumbs', () => {
           hostsBreadcrumbs,
           {
             text: 'siem-kibana',
-            href: 'securitySolutionUI/hosts/siem-kibana',
+            href: 'securitySolutionUI/hosts/name/siem-kibana',
           },
           { text: 'Authentications', href: '' },
         ]);
@@ -787,7 +787,7 @@ describe('Navigation Breadcrumbs', () => {
           }),
           expect.objectContaining({
             text: 'siem-kibana',
-            href: 'securitySolutionUI/hosts/siem-kibana',
+            href: 'securitySolutionUI/hosts/name/siem-kibana',
             onClick: expect.any(Function),
           }),
           {
