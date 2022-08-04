@@ -5,35 +5,65 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import React from 'react';
 import { css } from '@emotion/css';
 
-import { EuiPortal, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme, transparentize, EuiButton } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-export const DropOperationSwitcher = ({
-  portalRef,
-  isVisible = false,
-}: {
-  isVisible: boolean;
-  portalRef: HTMLElement | null;
-}) =>
-  portalRef && isVisible ? (
-    <EuiPortal insert={{ sibling: portalRef, position: 'before' }}>
-      <div
-        className={css`
-          position: absolute;
-          background: #0a9dec;
-          z-index: 10;
-        `}
-      >
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <p>OR</p>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <p>AND</p>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
-    </EuiPortal>
-  ) : null;
+export const DropOperationSwitcher = ({}: {}) => {
+  const { euiTheme } = useEuiTheme();
+  const { colors, border } = euiTheme;
+
+  return (
+    <div
+      className={css`
+        background: ${transparentize(colors.warning, 0.13)};
+        border: ${border.width.thin} dashed ${border.color};
+        border-radius: ${border.radius.small};
+      `}
+    >
+      <EuiFlexGroup justifyContent="center" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            color="warning"
+            onMouseUp={() => {
+              // console.log('returnKey');
+            }}
+            isDisabled={false}
+            iconType="returnKey"
+            size="s"
+            aria-label={i18n.translate(
+              'unifiedSearch.filter.filterEditor.addOrFilterGroupButttonIcon',
+              {
+                defaultMessage: 'OR',
+              }
+            )}
+          >
+            OR
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            color="warning"
+            onMouseUp={() => {
+              // console.log('plus');
+            }}
+            isDisabled={false}
+            iconType="plus"
+            size="s"
+            aria-label={i18n.translate(
+              'unifiedSearch.filter.filterEditor.addOrFilterGroupButttonIcon',
+              {
+                defaultMessage: 'AND',
+              }
+            )}
+          >
+            AND
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
+  );
+};

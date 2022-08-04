@@ -63,7 +63,8 @@ export function FilterItem({
   color,
   index,
 }: FilterItemProps) {
-  const { dispatch, dataView, dropTarget } = useContext(FiltersEditorContextType);
+  const { dispatch, dataView, dropTarget, currentDragElement } =
+    useContext(FiltersEditorContextType);
   const conditionalOperationType = getConditionalOperationType(filter);
   const panelRef = useRef<HTMLDivElement | null>(null);
 
@@ -149,10 +150,6 @@ export function FilterItem({
 
   return (
     <div ref={panelRef}>
-      <DropOperationSwitcher
-        isVisible={Boolean(dropTarget === path && panelRef?.current)}
-        portalRef={panelRef?.current}
-      />
       {conditionalOperationType ? (
         <FilterGroup
           path={path}
@@ -172,101 +169,119 @@ export function FilterItem({
             hasInteractiveChildren={true}
           >
             {(provided) => (
-              <EuiPanel color={color} paddingSize={'none'} hasShadow={false} key={uuid()}>
-                <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
-                  <EuiFlexItem grow={false} {...provided.dragHandleProps}>
-                    <EuiIcon type="grab" size="s" />
+              <EuiFlexGroup
+                gutterSize="m"
+                responsive={false}
+                alignItems="center"
+                justifyContent="center"
+              >
+                {dropTarget === path && currentDragElement !== dropTarget ? (
+                  <EuiFlexItem grow={1}>
+                    <DropOperationSwitcher />
                   </EuiFlexItem>
+                ) : null}
+                <EuiFlexItem grow={9}>
+                  <EuiPanel color={color} paddingSize={'none'} hasShadow={false} key={uuid()}>
+                    <EuiFlexGroup
+                      gutterSize="m"
+                      responsive={false}
+                      alignItems="center"
+                      justifyContent="center"
+                    >
+                      <EuiFlexItem grow={false} {...provided.dragHandleProps}>
+                        <EuiIcon type="grab" size="s" />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={10}>
+                        <EuiFlexGroup alignItems="center">
+                          <EuiFlexItem grow={4}>
+                            <EuiFormRow fullWidth>
+                              <FieldInput
+                                field={field}
+                                dataView={dataView}
+                                onHandleField={onHandleField}
+                              />
+                            </EuiFormRow>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={2}>
+                            <EuiFormRow fullWidth>
+                              <OperatorInput
+                                field={field}
+                                operator={operator}
+                                params={params}
+                                onHandleOperator={onHandleOperator}
+                              />
+                            </EuiFormRow>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={4}>
+                            <EuiFormRow fullWidth>
+                              <ParamsEditor
+                                dataView={dataView}
+                                field={field}
+                                operator={operator}
+                                params={params}
+                                onHandleParamsChange={onHandleParamsChange}
+                                onHandleParamsUpdate={onHandleParamsUpdate}
+                                timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+                              />
+                            </EuiFormRow>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiFlexGroup responsive={false} justifyContent="center">
+                          <EuiFlexItem grow={false}>
+                            <EuiButtonIcon
+                              onClick={onOrButtonClick}
+                              isDisabled={disableOr}
+                              iconType="returnKey"
+                              size="s"
+                              aria-label={i18n.translate(
+                                'unifiedSearch.filter.filterEditor.addOrFilterGroupButttonIcon',
+                                {
+                                  defaultMessage: 'Add filter group with OR',
+                                }
+                              )}
+                            />
+                          </EuiFlexItem>
 
-                  <EuiFlexItem grow={10}>
-                    <EuiFlexGroup alignItems="center">
-                      <EuiFlexItem grow={4}>
-                        <EuiFormRow fullWidth>
-                          <FieldInput
-                            field={field}
-                            dataView={dataView}
-                            onHandleField={onHandleField}
-                          />
-                        </EuiFormRow>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={2}>
-                        <EuiFormRow fullWidth>
-                          <OperatorInput
-                            field={field}
-                            operator={operator}
-                            params={params}
-                            onHandleOperator={onHandleOperator}
-                          />
-                        </EuiFormRow>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={4}>
-                        <EuiFormRow fullWidth>
-                          <ParamsEditor
-                            dataView={dataView}
-                            field={field}
-                            operator={operator}
-                            params={params}
-                            onHandleParamsChange={onHandleParamsChange}
-                            onHandleParamsUpdate={onHandleParamsUpdate}
-                            timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-                          />
-                        </EuiFormRow>
+                          <EuiFlexItem grow={false}>
+                            <EuiButtonIcon
+                              display="base"
+                              onClick={onAddButtonClick}
+                              isDisabled={disableAnd}
+                              iconType="plus"
+                              size="s"
+                              aria-label={i18n.translate(
+                                'unifiedSearch.filter.filterEditor.addAndFilterGroupButttonIcon',
+                                {
+                                  defaultMessage: 'Add filter group with AND',
+                                }
+                              )}
+                            />
+                          </EuiFlexItem>
+
+                          <EuiFlexItem grow={false}>
+                            <EuiButtonIcon
+                              display="base"
+                              onClick={onRemoveFilter}
+                              iconType="trash"
+                              isDisabled={disableRemove}
+                              size="s"
+                              color="danger"
+                              aria-label={i18n.translate(
+                                'unifiedSearch.filter.filterEditor.deleteFilterGroupButttonIcon',
+                                {
+                                  defaultMessage: 'Delete filter group',
+                                }
+                              )}
+                            />
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
                       </EuiFlexItem>
                     </EuiFlexGroup>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup responsive={false} justifyContent="center">
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          onClick={onOrButtonClick}
-                          isDisabled={disableOr}
-                          iconType="returnKey"
-                          size="s"
-                          aria-label={i18n.translate(
-                            'unifiedSearch.filter.filterEditor.addOrFilterGroupButttonIcon',
-                            {
-                              defaultMessage: 'Add filter group with OR',
-                            }
-                          )}
-                        />
-                      </EuiFlexItem>
-
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          display="base"
-                          onClick={onAddButtonClick}
-                          isDisabled={disableAnd}
-                          iconType="plus"
-                          size="s"
-                          aria-label={i18n.translate(
-                            'unifiedSearch.filter.filterEditor.addAndFilterGroupButttonIcon',
-                            {
-                              defaultMessage: 'Add filter group with AND',
-                            }
-                          )}
-                        />
-                      </EuiFlexItem>
-
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          display="base"
-                          onClick={onRemoveFilter}
-                          iconType="trash"
-                          isDisabled={disableRemove}
-                          size="s"
-                          color="danger"
-                          aria-label={i18n.translate(
-                            'unifiedSearch.filter.filterEditor.deleteFilterGroupButttonIcon',
-                            {
-                              defaultMessage: 'Delete filter group',
-                            }
-                          )}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPanel>
+                  </EuiPanel>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             )}
           </EuiDraggable>
         </EuiDroppable>
