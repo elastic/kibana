@@ -57,7 +57,6 @@ export const SpyRouteComponent = memo<
               pathName: pathname,
               state,
               tabName,
-              search: search ?? '',
             },
           });
           setIsInitializing(false);

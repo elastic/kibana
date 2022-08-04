@@ -45,7 +45,7 @@ export type FormatUrl = (path: string, options?: Partial<FormatUrlOptions>) => s
 export const useFormatUrl = (page: SecurityPageName) => {
   const { getAppUrl } = useAppUrl();
   const tab = page in navTabs ? navTabs[page as SecurityNavKey] : undefined;
-  const search = useGetUrlSearch(tab);
+  const search = useGetUrlSearch(page, tab);
 
   const formatUrl = useCallback<FormatUrl>(
     (path: string, { absolute = false, skipSearch = false } = {}) => {

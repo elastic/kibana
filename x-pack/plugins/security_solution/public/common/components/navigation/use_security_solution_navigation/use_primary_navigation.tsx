@@ -22,7 +22,6 @@ const translatedNavTitle = i18n.translate('xpack.securitySolution.navigation.mai
 export const usePrimaryNavigation = ({
   navTabs,
   pageName,
-  tabName,
 }: PrimaryNavigationProps): KibanaPageTemplateProps['solutionNav'] => {
   const isGroupedNavigationEnabled = useIsGroupedNavigationEnabled();
   const mapLocationToTab = useCallback(
