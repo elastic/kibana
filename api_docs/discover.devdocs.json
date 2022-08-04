@@ -271,7 +271,7 @@
             "tags": [],
             "label": "indexPatternId",
             "description": [
-              "\nOptionally set index pattern ID."
+              "\nOptionally set index pattern / data view ID."
             ],
             "signature": [
               "string | undefined"
