@@ -6,6 +6,7 @@
  */
 
 import assert from 'assert';
+import { once } from 'lodash';
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { Readable, Transform } from 'stream';
@@ -46,7 +47,7 @@ export class ElasticsearchBlobStorage implements BlobStorage {
    *
    * This is only an issue for the very first time the index is being created.
    */
-  private async createIndexIfNotExists(): Promise<void> {
+  private createIndexIfNotExists = once(async (): Promise<void> => {
     const index = this.index;
     if (await this.esClient.indices.exists({ index })) {
       this.logger.debug(`${index} already exists.`);
@@ -73,7 +74,7 @@ export class ElasticsearchBlobStorage implements BlobStorage {
       }
       throw e;
     }
-  }
+  });
 
   public async upload(
     src: Readable,
