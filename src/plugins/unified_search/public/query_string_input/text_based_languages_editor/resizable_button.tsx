@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup } from '@elastic/eui';
 
 import './resizable_button.scss';
 
@@ -24,21 +23,17 @@ export function ResizableButton({
 
   return (
     <div className="unifiedTextLangEditor--resizableButtonWrapper">
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="none"
+      <div
         className="unifiedTextLangEditor--resizableButtonContainer"
       >
         <button
           data-test-subj="unifiedTextLangEditor-resize"
-          tabIndex={-1}
           className="unifiedTextLangEditor--resizableButton"
           onMouseDown={onMouseDownResizeHandler}
           onKeyDown={onKeyDownResizeHandler}
           onClick={setFocus}
-          aria-hidden="true"
         />
-      </EuiFlexGroup>
+      </div>
     </div>
   );
 }
