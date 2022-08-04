@@ -51,6 +51,7 @@ interface DocumentCountChartProps {
 }
 
 const SPEC_ID = 'document_count';
+const BADGE_WIDTH = 75;
 
 enum VIEW_MODE {
   ZOOM = 'zoom',
@@ -65,6 +66,19 @@ function getTimezone(uiSettings: IUiSettingsClient) {
   } else {
     return uiSettings.get('dateFormat:tz', 'Browser');
   }
+}
+
+function getBaselineBadgeOverflow(
+  windowParametersAsPixels: WindowParameters,
+  baselineBadgeWidth: number
+) {
+  const { baselineMin, baselineMax, deviationMin } = windowParametersAsPixels;
+
+  const baselineBrushWidth = baselineMax - baselineMin;
+  const baselineBadgeActualMax = baselineMin + baselineBadgeWidth;
+  return deviationMin < baselineBadgeActualMax
+    ? Math.max(0, baselineBadgeWidth - baselineBrushWidth)
+    : 0;
 }
 
 export const DocumentCountChart: FC<DocumentCountChartProps> = ({
@@ -241,6 +255,13 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   const isBrushVisible =
     originalWindowParameters && mlBrushMarginLeft && mlBrushWidth && mlBrushWidth > 0;
 
+  // Avoid overlap of brush badges when the brushes are quite narrow.
+  const baselineBadgeOverflow = windowParametersAsPixels
+    ? getBaselineBadgeOverflow(windowParametersAsPixels, BADGE_WIDTH)
+    : 0;
+  const baselineBadgeMarginLeft =
+    (mlBrushMarginLeft ?? 0) + (windowParametersAsPixels?.baselineMin ?? 0);
+
   return (
     <>
       {isBrushVisible && (
@@ -248,12 +269,10 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
           <div
             css={{
               position: 'absolute',
-              'margin-left': `${
-                mlBrushMarginLeft + (windowParametersAsPixels?.baselineMin ?? 0)
-              }px`,
+              'margin-left': `${baselineBadgeMarginLeft - baselineBadgeOverflow}px`,
             }}
           >
-            <EuiBadge>
+            <EuiBadge css={{ width: BADGE_WIDTH, 'text-align': 'center' }}>
               <FormattedMessage
                 id="xpack.aiops.documentCountChart.baselineBadgeContent"
                 defaultMessage="Baseline"
@@ -268,7 +287,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
               }px`,
             }}
           >
-            <EuiBadge>
+            <EuiBadge css={{ width: BADGE_WIDTH, 'text-align': 'center' }}>
               <FormattedMessage
                 id="xpack.aiops.documentCountChart.deviationBadgeContent"
                 defaultMessage="Deviation"
