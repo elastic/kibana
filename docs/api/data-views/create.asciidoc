@@ -248,7 +248,7 @@ data view API endpoints.
 =====
 
 `fieldFormats`::
-(Optional, object) Map field formats by field name.
+(Optional, object) Map of field formats by field name.
 
 `allowNoIndex`::
 (Optional, boolean) Allows the data view to exist before data is present.
