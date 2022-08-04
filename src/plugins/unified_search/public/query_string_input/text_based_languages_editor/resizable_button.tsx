@@ -23,9 +23,7 @@ export function ResizableButton({
 
   return (
     <div className="unifiedTextLangEditor--resizableButtonWrapper">
-      <div
-        className="unifiedTextLangEditor--resizableButtonContainer"
-      >
+      <div className="unifiedTextLangEditor--resizableButtonContainer">
         <button
           data-test-subj="unifiedTextLangEditor-resize"
           className="unifiedTextLangEditor--resizableButton"
