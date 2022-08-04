@@ -11,7 +11,6 @@ import {
   EuiColorPaletteDisplay,
   EuiFormRow,
   EuiFlexItem,
-  EuiFieldText,
   EuiButtonGroup,
   EuiFieldNumber,
   htmlIdGenerator,
@@ -30,6 +29,7 @@ import {
 } from '@kbn/coloring';
 import { getDataBoundsForPalette } from '@kbn/expression-metric-vis-plugin/public';
 import { css } from '@emotion/react';
+import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { isNumericFieldForDatatable } from '../../../common/expressions';
 import {
   applyPaletteParams,
@@ -40,27 +40,14 @@ import type { VisualizationDimensionEditorProps } from '../../types';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
 import { DEFAULT_MAX_COLUMNS, MetricVisualizationState } from './visualization';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
+import { InputWithDefault } from '../../shared_components/input_with_default';
 
 type Props = VisualizationDimensionEditorProps<MetricVisualizationState> & {
   paletteService: PaletteRegistry;
 };
 
 export function DimensionEditor(props: Props) {
-  const { state, setState, accessor } = props;
-
-  const setPrefix = useCallback(
-    (prefix: string) => setState({ ...state, secondaryPrefix: prefix }),
-    [setState, state]
-  );
-
-  const { inputValue: prefixInputVal, handleInputChange: handlePrefixChange } =
-    useDebouncedValue<string>(
-      {
-        onChange: setPrefix,
-        value: state.secondaryPrefix || '',
-      },
-      { allowFalsyValue: true }
-    );
+  const { state, setState, accessor, frame, layerId } = props;
 
   switch (accessor) {
     case state?.metricAccessor:
@@ -70,6 +57,9 @@ export function DimensionEditor(props: Props) {
         </div>
       );
     case state.secondaryMetricAccessor:
+      const columnName = getColumnByAccessor(accessor, frame.activeData?.[layerId].columns)?.name;
+      const defaultPrefix = columnName || '';
+
       return (
         <div data-test-subj="lnsMetricDimensionEditor_secondary_metric">
           <EuiFormRow
@@ -79,10 +69,12 @@ export function DimensionEditor(props: Props) {
               defaultMessage: 'Prefix',
             })}
           >
-            <EuiFieldText
+            <InputWithDefault
               compressed
-              value={prefixInputVal}
-              onChange={({ target: { value } }) => handlePrefixChange(value)}
+              fullWidth
+              value={state.secondaryPrefix || defaultPrefix}
+              onChange={(value: string) => setState({ ...state, secondaryPrefix: value })}
+              defaultValue={defaultPrefix}
             />
           </EuiFormRow>
         </div>

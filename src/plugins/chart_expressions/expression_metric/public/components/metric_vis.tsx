@@ -243,6 +243,7 @@ export const MetricVis = ({
       ? formatBreakdownValue(row[breakdownByColumn.id])
       : primaryMetricColumn.name;
     const subtitle = breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle;
+    const secondaryPrefix = config.metric.secondaryPrefix || secondaryMetricColumn?.name;
     return {
       value,
       valueFormatter: formatPrimaryMetric,
@@ -250,9 +251,9 @@ export const MetricVis = ({
       subtitle,
       extra: (
         <span>
-          {config.metric.secondaryPrefix}
+          {secondaryPrefix}
           {secondaryMetricColumn
-            ? `${config.metric.secondaryPrefix ? ' ' : ''}${formatSecondaryMetric!(
+            ? `${secondaryPrefix ? ' ' : ''}${formatSecondaryMetric!(
                 row[secondaryMetricColumn.id]
               )}`
             : undefined}
