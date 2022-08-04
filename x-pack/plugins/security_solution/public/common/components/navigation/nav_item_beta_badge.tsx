@@ -6,6 +6,20 @@
  */
 
 import React from 'react';
-import { EuiBetaBadge } from '@elastic/eui';
+import { EuiBetaBadge, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 
-export const NavItemBetaBadge = () => <EuiBetaBadge label={'BEBA'} size="s" />;
+export const NavItemBetaBadge = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiBetaBadge
+      label={'BEBA'}
+      size="s"
+      css={css`
+        margin-left: ${euiTheme.size.s};
+        color: ${euiTheme.colors.text};
+      `}
+    />
+  );
+};

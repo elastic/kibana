@@ -142,10 +142,10 @@ export const LandingImageCards: React.FC<LandingImagesProps> = React.memo(({ ite
           }
           title={
             <PrimaryEuiTitle size="xs">
-              <div>
+              <FlexTitle>
                 <TitleText>{title}</TitleText>
                 {isBeta && <NavItemBetaBadge />}
-              </div>
+              </FlexTitle>
             </PrimaryEuiTitle>
           }
           description={<LandingCardDescription>{description}</LandingCardDescription>}

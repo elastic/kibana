@@ -170,7 +170,6 @@ const SolutionNavPanelItems: React.FC<SolutionNavPanelItemsProps> = ({ items, on
             }}
           >
             {label}
-            {/* {isBeta && <EuiBetaBadgeStyled label={BETA} size="s" />}*/}
             {isBeta && <NavItemBetaBadge />}
           </FlexLink>
         </EuiDescriptionListTitle>
