@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FileKind } from '../../common/types';
+import cuid from 'cuid';
+import { FileKind, FileMetadata } from '../../common/types';
 import type { FileMetadataClient } from './file_metadata_client';
 import type { BlobStorageClient } from '../blob_storage_service';
 import { enforceMaxByteSizeTransform } from './stream_transforms';
@@ -18,6 +19,20 @@ export interface DeleteArgs {
    * @default true
    */
   hasContent?: boolean;
+}
+
+/**
+ * Args to create a file
+ */
+interface CreateArgs {
+  /**
+   * Unique file ID
+   */
+  id?: string;
+  /**
+   * The file's metadata
+   */
+  metadata: Omit<FileMetadata, 'FileKind'> & { FileKind?: string };
 }
 
 /**
@@ -97,8 +112,14 @@ export class FileClientImpl implements FileClient {
     return this.fileKindDescriptor.id;
   }
 
-  public create: FileMetadataClient['create'] = async (arg) => {
-    return this.metadataClient.create(arg);
+  public create = async ({ id, metadata }: CreateArgs) => {
+    return this.metadataClient.create({
+      id: id || cuid(),
+      metadata: {
+        FileKind: this.fileKind,
+        ...metadata,
+      },
+    });
   };
 
   public get: FileMetadataClient['get'] = async (arg) => {
@@ -107,6 +128,10 @@ export class FileClientImpl implements FileClient {
 
   public update: FileMetadataClient['update'] = (arg) => {
     return this.metadataClient.update(arg);
+  };
+
+  public find: FileMetadataClient['find'] = (arg) => {
+    return this.metadataClient.find(arg);
   };
 
   public async delete({ id, hasContent = true }: DeleteArgs) {
