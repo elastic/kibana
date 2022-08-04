@@ -34,6 +34,7 @@ export const mapIndexStats = (
       size_in_bytes: sizeInBytes,
     },
   };
+
   return {
     aliases,
     health: indexStats?.health,
@@ -42,6 +43,16 @@ export const mapIndexStats = (
     total,
     uuid: indexStats?.uuid,
   };
+};
+
+export const fetchIndexCounts = async (client: IScopedClusterClient, indicesNames: string[]) => {
+  // TODO: is there way to batch this? Passing multiple index names or a pattern still returns a singular count
+  const countPromises = indicesNames.map(async (indexName) => {
+    const { count } = await client.asCurrentUser.count({ index: indexName });
+    return { [indexName]: count };
+  });
+  const indexCountArray = await Promise.all(countPromises);
+  return indexCountArray.reduce((acc, current) => ({ ...acc, ...current }), {});
 };
 
 export const fetchIndices = async (
@@ -97,6 +108,8 @@ export const fetchIndices = async (
     ],
   });
 
+  const indexCounts = await fetchIndexCounts(client, indexAndAliasNames);
+
   return indicesNames
     .map((indexName: string) => {
       const indexData = totalIndices[indexName];
@@ -108,6 +121,7 @@ export const fetchIndices = async (
       const indicesAndAliases = [] as ElasticsearchIndexWithPrivileges[];
       indicesAndAliases.push({
         name,
+        count: indexCounts[name] ?? 0,
         alias: false,
         privileges: { read: false, manage: false, ...indexPrivileges[name] },
         ...indexData,
@@ -117,6 +131,7 @@ export const fetchIndices = async (
         aliases.forEach((alias) => {
           indicesAndAliases.push({
             name: alias,
+            count: indexCounts[alias] ?? 0,
             alias: true,
             privileges: { read: false, manage: false, ...indexPrivileges[name] },
             ...indexData,
