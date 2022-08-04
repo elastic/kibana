@@ -249,9 +249,6 @@ export function getIndexPatternDatasource({
         <KibanaThemeProvider theme$={core.theme.theme$}>
           <I18nProvider>
             <IndexPatternDataPanel
-              changeIndexPattern={(indexPattern) => {
-                onChangeIndexPattern(indexPattern, DATASOURCE_ID);
-              }}
               data={data}
               dataViews={dataViews}
               fieldFormats={fieldFormats}
