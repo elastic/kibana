@@ -30,7 +30,7 @@ export function ConfirmDeleteModal<T>({
 }: Props<T>) {
   let deleteButton = (
     <FormattedMessage
-      id="contentManagementTableList.listing.deleteSelectedItemsConfirmModal.confirmButtonLabel"
+      id="contentManagement.tableList.listing.deleteSelectedItemsConfirmModal.confirmButtonLabel"
       defaultMessage="Delete"
     />
   );
@@ -38,7 +38,7 @@ export function ConfirmDeleteModal<T>({
   if (isDeletingItems) {
     deleteButton = (
       <FormattedMessage
-        id="contentManagementTableList.listing.deleteSelectedItemsConfirmModal.confirmButtonLabelDeleting"
+        id="contentManagement.tableList.listing.deleteSelectedItemsConfirmModal.confirmButtonLabelDeleting"
         defaultMessage="Deleting"
       />
     );
@@ -48,7 +48,7 @@ export function ConfirmDeleteModal<T>({
     <EuiConfirmModal
       title={
         <FormattedMessage
-          id="contentManagementTableList.listing.deleteSelectedConfirmModal.title"
+          id="contentManagement.tableList.listing.deleteSelectedConfirmModal.title"
           defaultMessage="Delete {itemCount} {entityName}?"
           values={{
             itemCount: items.length,
@@ -61,7 +61,7 @@ export function ConfirmDeleteModal<T>({
       onConfirm={onConfirm}
       cancelButtonText={
         <FormattedMessage
-          id="contentManagementTableList.listing.deleteSelectedItemsConfirmModal.cancelButtonLabel"
+          id="contentManagement.tableList.listing.deleteSelectedItemsConfirmModal.cancelButtonLabel"
           defaultMessage="Cancel"
         />
       }
@@ -70,7 +70,7 @@ export function ConfirmDeleteModal<T>({
     >
       <p>
         <FormattedMessage
-          id="contentManagementTableList.listing.deleteConfirmModalDescription"
+          id="contentManagement.tableList.listing.deleteConfirmModalDescription"
           defaultMessage="You can't recover deleted {entityNamePlural}."
           values={{ entityNamePlural }}
         />

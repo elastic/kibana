@@ -23,7 +23,7 @@ export const UpdatedAtField: FC<{ dateTime?: string; DateFormatterComp?: DateFor
   if (!dateTime) {
     return (
       <EuiToolTip
-        content={i18n.translate('contentManagementTableList.updatedDateUnknownLabel', {
+        content={i18n.translate('contentManagement.tableList.updatedDateUnknownLabel', {
           defaultMessage: 'Last updated unknown',
         })}
       >

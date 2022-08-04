@@ -130,7 +130,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     tableColumns: [
       {
         field: 'attributes.title',
-        name: i18n.translate('contentManagementTableList.titleColumnName', {
+        name: i18n.translate('contentManagement.tableList.titleColumnName', {
           defaultMessage: 'Title',
         }),
         sortable: true,
@@ -147,7 +147,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
       },
       {
         field: 'attributes.description',
-        name: i18n.translate('contentManagementTableList.descriptionColumnName', {
+        name: i18n.translate('contentManagement.tableList.descriptionColumnName', {
           defaultMessage: 'Description',
         }),
       },
@@ -197,7 +197,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
       const actions: EuiTableActionsColumnType<T>['actions'] = [
         {
           name: (item) => {
-            return i18n.translate('contentManagementTableList.listing.table.editActionName', {
+            return i18n.translate('contentManagement.tableList.listing.table.editActionName', {
               defaultMessage: 'Edit {itemDescription}',
               values: {
                 itemDescription: get(item, 'attributes.title'),
@@ -205,7 +205,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
             });
           },
           description: i18n.translate(
-            'contentManagementTableList.listing.table.editActionDescription',
+            'contentManagement.tableList.listing.table.editActionDescription',
             {
               defaultMessage: 'Edit',
             }
@@ -218,7 +218,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
       ];
 
       columns.push({
-        name: i18n.translate('contentManagementTableList.listing.table.actionTitle', {
+        name: i18n.translate('contentManagement.tableList.listing.table.actionTitle', {
           defaultMessage: 'Actions',
         }),
         width: '100px',
@@ -283,7 +283,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
       notifyError({
         title: (
           <FormattedMessage
-            id="contentManagementTableList.listing.unableToDeleteDangerMessage"
+            id="contentManagement.tableList.listing.unableToDeleteDangerMessage"
             defaultMessage="Unable to delete {entityName}(s)"
             values={{ entityName }}
           />
@@ -307,7 +307,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
           fill
         >
           <FormattedMessage
-            id="contentManagementTableList.listing.createNewItemButtonLabel"
+            id="contentManagement.tableList.listing.createNewItemButtonLabel"
             defaultMessage="Create {entityName}"
             values={{ entityName }}
           />
@@ -326,7 +326,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
             <h1>
               {
                 <FormattedMessage
-                  id="contentManagementTableList.listing.noAvailableItemsMessage"
+                  id="contentManagement.tableList.listing.noAvailableItemsMessage"
                   defaultMessage="No {entityNamePlural} available."
                   values={{ entityNamePlural }}
                 />
@@ -345,7 +345,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         <EuiCallOut
           title={
             <FormattedMessage
-              id="contentManagementTableList.listing.fetchErrorTitle"
+              id="contentManagement.tableList.listing.fetchErrorTitle"
               defaultMessage="Fetching listing failed"
             />
           }
@@ -354,7 +354,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         >
           <p>
             <FormattedMessage
-              id="contentManagementTableList.listing.fetchErrorDescription"
+              id="contentManagement.tableList.listing.fetchErrorDescription"
               defaultMessage="The {entityName} listing could not be fetched: {message}."
               values={{
                 entityName,

@@ -28,7 +28,7 @@ function onInitialItemsFetch<T extends UserContentCommonSchema>(items: T[]) {
       tableColumns: [
         {
           field: 'updatedAt',
-          name: i18n.translate('contentManagementTableList.lastUpdatedColumnTitle', {
+          name: i18n.translate('contentManagement.tableList.lastUpdatedColumnTitle', {
             defaultMessage: 'Last updated',
           }),
           render: (field: string, record: { updatedAt?: string }) => (

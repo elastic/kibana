@@ -69,7 +69,7 @@ export function Table<T extends UserContentCommonSchema>({
         data-test-subj="deleteSelectedItems"
       >
         <FormattedMessage
-          id="contentManagementTableList.listing.deleteButtonMessage"
+          id="contentManagement.tableList.listing.deleteButtonMessage"
           defaultMessage="Delete {itemCount} {entityName}"
           values={{
             itemCount: selectedIds.length,
@@ -104,7 +104,7 @@ export function Table<T extends UserContentCommonSchema>({
 
   const noItemsMessage = (
     <FormattedMessage
-      id="contentManagementTableList.listing.noMatchedItemsMessage"
+      id="contentManagement.tableList.listing.noMatchedItemsMessage"
       defaultMessage="No {entityNamePlural} matched your search."
       values={{ entityNamePlural }}
     />
