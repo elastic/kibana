@@ -6,7 +6,7 @@
  */
 
 import { HORIZONTAL_LINE } from '../../common/constants';
-import { ScreenBaseClass } from './screen_base_class';
+import { ScreenBaseClass } from './lib/screen_base_class';
 
 export class MainScreen extends ScreenBaseClass {
   protected header(): string {
@@ -23,6 +23,6 @@ ${HORIZONTAL_LINE}`;
 
   protected onEnterChoice(choice: string) {
     global.console.log(`entered: ${choice}`);
-    throw new Error('unknown choice');
+    throw new Error(`unknown choice: ${choice}`);
   }
 }

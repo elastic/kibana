@@ -11,7 +11,7 @@ import type { WriteStream as TtyWriteStream } from 'tty';
 import { stdout, stdin } from 'node:process';
 import * as readline from 'node:readline';
 import { red, blue, green } from 'chalk';
-import { HORIZONTAL_LINE } from '../../common/constants';
+import { HORIZONTAL_LINE } from '../../../common/constants';
 
 class RenderedScreen {
   public statusPos: number = -1;
