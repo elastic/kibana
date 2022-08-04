@@ -17,7 +17,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FilterItem, FilterItemProps } from './filter_item';
 
-export interface Props {
+export interface FilterItemsProps {
   filters: Filter[];
   readOnly?: boolean;
   onFiltersUpdated?: (filters: Filter[]) => void;

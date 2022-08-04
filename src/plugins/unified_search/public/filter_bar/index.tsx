@@ -8,6 +8,8 @@
 
 import React from 'react';
 
+export { FilterItemsProps } from './filter_item/filter_items';
+
 const Fallback = () => <div />;
 
 const LazyFilterBar = React.lazy(() => import('./filter_bar'));
