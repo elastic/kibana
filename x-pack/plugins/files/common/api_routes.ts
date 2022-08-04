@@ -70,7 +70,6 @@ export type DownloadFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
   },
   unknown,
   unknown,
-  // Should be a readable stream
   any
 >;
 
