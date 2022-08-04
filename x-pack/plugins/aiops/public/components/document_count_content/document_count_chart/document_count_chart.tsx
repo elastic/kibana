@@ -20,10 +20,8 @@ import {
   XYChartElementEvent,
   XYBrushEvent,
 } from '@elastic/charts';
-import { EuiBadge } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { DualBrush, DualBrushAnnotation } from '@kbn/aiops-components';
 import { getSnappedWindowParameters, getWindowParameters } from '@kbn/aiops-utils';
@@ -32,6 +30,8 @@ import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
 
 import { useAiOpsKibana } from '../../../kibana_context';
+
+import { BrushBadge } from './brush_badge';
 
 export interface DocumentCountChartPoint {
   time: number | string;
@@ -51,6 +51,8 @@ interface DocumentCountChartProps {
 }
 
 const SPEC_ID = 'document_count';
+
+const BADGE_HEIGHT = 20;
 const BADGE_WIDTH = 75;
 
 enum VIEW_MODE {
@@ -253,7 +255,11 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   }, [viewMode]);
 
   const isBrushVisible =
-    originalWindowParameters && mlBrushMarginLeft && mlBrushWidth && mlBrushWidth > 0;
+    originalWindowParameters &&
+    windowParameters &&
+    mlBrushMarginLeft &&
+    mlBrushWidth &&
+    mlBrushWidth > 0;
 
   // Avoid overlap of brush badges when the brushes are quite narrow.
   const baselineBadgeOverflow = windowParametersAsPixels
@@ -266,39 +272,28 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
     <>
       {isBrushVisible && (
         <div className="aiopsHistogramBrushes">
-          <div
-            css={{
-              position: 'absolute',
-              'margin-left': `${baselineBadgeMarginLeft - baselineBadgeOverflow}px`,
-            }}
-          >
-            <EuiBadge css={{ width: BADGE_WIDTH, 'text-align': 'center' }}>
-              <FormattedMessage
-                id="xpack.aiops.documentCountChart.baselineBadgeContent"
-                defaultMessage="Baseline"
-              />
-            </EuiBadge>
+          <div css={{ height: BADGE_HEIGHT }}>
+            <BrushBadge
+              label={i18n.translate('xpack.aiops.documentCountChart.baselineBadgeLabel', {
+                defaultMessage: 'Baseline',
+              })}
+              marginLeft={baselineBadgeMarginLeft - baselineBadgeOverflow}
+              timestampFrom={windowParameters.baselineMin}
+              timestampTo={windowParameters.baselineMax}
+              width={BADGE_WIDTH}
+            />
+            <BrushBadge
+              label={i18n.translate('xpack.aiops.documentCountChart.deviationBadgeLabel', {
+                defaultMessage: 'Deviation',
+              })}
+              marginLeft={mlBrushMarginLeft + (windowParametersAsPixels?.deviationMin ?? 0)}
+              timestampFrom={windowParameters.deviationMin}
+              timestampTo={windowParameters.deviationMax}
+              width={BADGE_WIDTH}
+            />
           </div>
           <div
             css={{
-              position: 'absolute',
-              'margin-left': `${
-                mlBrushMarginLeft + (windowParametersAsPixels?.deviationMin ?? 0)
-              }px`,
-            }}
-          >
-            <EuiBadge css={{ width: BADGE_WIDTH, 'text-align': 'center' }}>
-              <FormattedMessage
-                id="xpack.aiops.documentCountChart.deviationBadgeContent"
-                defaultMessage="Deviation"
-              />
-            </EuiBadge>
-          </div>
-          <div
-            css={{
-              position: 'relative',
-              clear: 'both',
-              'padding-top': '20px',
               'margin-bottom': '-4px',
             }}
           >
