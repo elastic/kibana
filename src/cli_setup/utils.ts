@@ -18,7 +18,6 @@ import { configSchema } from '@kbn/core-elasticsearch-server-internal';
 import { ElasticsearchService } from '@kbn/interactive-setup-plugin/server/elasticsearch_service';
 import { KibanaConfigWriter } from '@kbn/interactive-setup-plugin/server/kibana_config_writer';
 import type { EnrollmentToken } from '@kbn/interactive-setup-plugin/common';
-import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 
 const noop = () => {};
 const logger: Logger = {
@@ -36,7 +35,7 @@ export const kibanaConfigWriter = new KibanaConfigWriter(getConfigPath(), getDat
 export const elasticsearch = new ElasticsearchService(logger, kibanaPackageJson.version).setup({
   connectionCheckInterval: duration(Infinity),
   elasticsearch: {
-    createClient: (type = 'data', config?: Partial<ElasticsearchClientConfig>) => {
+    createClient: (type, config) => {
       const defaults = configSchema.validate({});
       return new ClusterClient({
         config: merge(
