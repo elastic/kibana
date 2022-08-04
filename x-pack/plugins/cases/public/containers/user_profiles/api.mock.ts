@@ -16,7 +16,6 @@ export const userProfiles: UserProfile[] = [
       email: 'damaged_raccoon@elastic.co',
       full_name: 'Damaged Raccoon',
     },
-    enabled: true,
   },
   {
     uid: 'u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0',
@@ -26,7 +25,6 @@ export const userProfiles: UserProfile[] = [
       email: 'physical_dinosaur@elastic.co',
       full_name: 'Physical Dinosaur',
     },
-    enabled: true,
   },
   {
     uid: 'u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0',
@@ -36,7 +34,6 @@ export const userProfiles: UserProfile[] = [
       email: 'wet_dingo@elastic.co',
       full_name: 'Wet Dingo',
     },
-    enabled: true,
   },
 ];
 
