@@ -45,7 +45,12 @@ export function AlertsFlyout({
   }
 
   return (
-    <EuiFlyout onClose={onClose} size="s" data-test-subj="alertsFlyout">
+    <EuiFlyout
+      className="oblt__alert--flyout oblt__flyout"
+      onClose={onClose}
+      size="s"
+      data-test-subj="alertsFlyout"
+    >
       <EuiFlyoutHeader hasBorder>
         <AlertsFlyoutHeader alert={alertData} />
       </EuiFlyoutHeader>
