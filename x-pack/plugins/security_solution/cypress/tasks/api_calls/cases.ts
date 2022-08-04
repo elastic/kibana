@@ -5,32 +5,26 @@
  * 2.0.
  */
 
-import type { CasePostRequest } from '@kbn/cases-plugin/common/api/cases';
-import type { CaseConnector } from '@kbn/cases-plugin/common/api/connectors';
 import type { TestCase } from '../../objects/case';
 
-export const createCase = (newCase: TestCase) => {
-  const caseBody: CasePostRequest = {
-    description: newCase.description,
-    title: newCase.name,
-    tags: ['tag'],
-    connector: {
-      id: 'none',
-      name: 'none',
-      type: '.none',
-      fields: null,
-    } as CaseConnector,
-    settings: {
-      syncAlerts: true,
-    },
-    owner: newCase.owner,
-    assignees: [],
-  };
-
-  return cy.request({
+export const createCase = (newCase: TestCase) =>
+  cy.request({
     method: 'POST',
     url: 'api/cases',
-    body: caseBody,
+    body: {
+      description: newCase.description,
+      title: newCase.name,
+      tags: ['tag'],
+      connector: {
+        id: 'none',
+        name: 'none',
+        type: '.none',
+        fields: null,
+      },
+      settings: {
+        syncAlerts: true,
+      },
+      owner: newCase.owner,
+    },
     headers: { 'kbn-xsrf': 'cypress-creds' },
   });
-};
