@@ -279,7 +279,10 @@ export const getDateHistogramBucketAgg = ({
             getConfig,
             aggExecutionContext
           );
-          output.params.time_zone = tz;
+
+          const shouldForceTimeZone = agg.params.field?.meta?.time_zone?.includes('UTC');
+
+          output.params.time_zone = shouldForceTimeZone ? 'UTC' : tz;
         },
       },
       {
