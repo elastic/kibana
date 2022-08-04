@@ -68,7 +68,7 @@ import {
 } from './dashboard';
 import { SearchSessionsService } from './search_sessions';
 import { ObservabilityProvider } from './observability';
-import { CompareImagesProvider } from './compare_images';
+// import { CompareImagesProvider } from './compare_images';
 import { CasesServiceProvider } from './cases';
 
 // define the name and providers for services that should be
@@ -128,6 +128,6 @@ export const services = {
   reporting: ReportingFunctionalProvider,
   searchSessions: SearchSessionsService,
   observability: ObservabilityProvider,
-  compareImages: CompareImagesProvider,
+  // compareImages: CompareImagesProvider,
   cases: CasesServiceProvider,
 };
