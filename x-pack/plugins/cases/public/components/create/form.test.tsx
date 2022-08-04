@@ -39,6 +39,7 @@ const initialCaseValue: FormProps = {
   connectorId: NONE_CONNECTOR_ID,
   fields: null,
   syncAlerts: true,
+  assignees: [],
 };
 
 const casesFormProps: CreateCaseFormProps = {

@@ -31,6 +31,7 @@ describe('usePostCase', () => {
       syncAlerts: true,
     },
     owner: SECURITY_SOLUTION_OWNER,
+    assignees: [],
   };
   beforeEach(() => {
     jest.clearAllMocks();

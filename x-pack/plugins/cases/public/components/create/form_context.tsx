@@ -33,6 +33,7 @@ const initialCaseValue: FormProps = {
   fields: null,
   syncAlerts: true,
   selectedOwner: null,
+  assignees: [],
 };
 
 interface Props {
@@ -64,6 +65,7 @@ export const FormContext: React.FC<Props> = ({
         connectorId: dataConnectorId,
         fields,
         syncAlerts = isSyncAlertsEnabled,
+        assignees = [],
         ...dataWithoutConnectorId
       },
       isValid
@@ -81,6 +83,7 @@ export const FormContext: React.FC<Props> = ({
           connector: connectorToUpdate,
           settings: { syncAlerts },
           owner: selectedOwner ?? owner[0],
+          assignees,
         });
 
         // add attachments to the case
