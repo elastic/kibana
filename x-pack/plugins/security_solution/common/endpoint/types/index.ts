@@ -923,7 +923,7 @@ export interface PolicyConfig {
       alerts?: {
         [key: string]: unknown;
         rollback: {
-          remediation: {
+          self_healing: {
             enabled: boolean;
           };
         };
