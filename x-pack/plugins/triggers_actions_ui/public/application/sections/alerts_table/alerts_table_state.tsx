@@ -16,6 +16,7 @@ import {
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
   QueryDslQueryContainer,
   SortCombinations,
@@ -33,22 +34,17 @@ import {
 import { ALERTS_TABLE_CONF_ERROR_MESSAGE, ALERTS_TABLE_CONF_ERROR_TITLE } from './translations';
 import { TypeRegistry } from '../../type_registry';
 import { bulkActionsReducer } from './bulk_actions/reducer';
+import { useGetUserCasesPermissions } from './hooks/use_get_user_cases_permissions';
 
 const DefaultPagination = {
   pageSize: 10,
   pageIndex: 0,
 };
 
-interface CasePermission {
-  all: boolean;
-  read: boolean;
-}
-
 interface CaseUi {
   ui: {
     getCasesContext: () => React.FC<any>;
   };
-  permissions: CasePermission;
 }
 
 export interface AlertsTableStateProps {
@@ -60,7 +56,6 @@ export interface AlertsTableStateProps {
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   pageSize?: number;
   showExpandToDetails: boolean;
-  cases?: CaseUi;
 }
 
 interface AlertsTableStorage {
@@ -71,6 +66,7 @@ interface AlertsTableStorage {
 
 const EmptyConfiguration = {
   id: '',
+  casesFeatureId: '',
   columns: [],
   sort: [],
   externalFlyout: {
@@ -106,8 +102,8 @@ const AlertsTableState = ({
   query,
   pageSize,
   showExpandToDetails,
-  cases,
 }: AlertsTableStateProps) => {
+  const { cases } = useKibana<{ cases: CaseUi }>().services;
   const hasAlertsTableConfiguration =
     alertsTableConfigurationRegistry?.has(configurationId) ?? false;
   const alertsTableConfiguration = hasAlertsTableConfiguration
@@ -249,6 +245,7 @@ const AlertsTableState = ({
       flyoutSize,
       pageSize: pagination.pageSize,
       pageSizeOptions: [10, 20, 50, 100],
+      id,
       leadingControlColumns: [],
       showExpandToDetails,
       trailingControlColumns: [],
@@ -262,6 +259,7 @@ const AlertsTableState = ({
       columns,
       flyoutSize,
       pagination.pageSize,
+      id,
       showExpandToDetails,
       useFetchAlertsData,
       updatedAt,
@@ -269,6 +267,7 @@ const AlertsTableState = ({
   );
 
   const CasesContext = cases?.ui.getCasesContext();
+  const userCasesPermissions = useGetUserCasesPermissions(alertsTableConfiguration.casesFeatureId);
 
   return hasAlertsTableConfiguration ? (
     <>
@@ -279,7 +278,7 @@ const AlertsTableState = ({
       {alertsCount !== 0 && CasesContext && cases && (
         <CasesContext
           owner={[configurationId]}
-          permissions={cases.permissions}
+          permissions={userCasesPermissions}
           features={{ alerts: { sync: false } }}
         >
           <AlertsTableWithBulkActionsContext
