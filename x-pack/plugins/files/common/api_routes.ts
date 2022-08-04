@@ -21,6 +21,12 @@ interface Pagination {
   perPage?: number;
 }
 
+/**
+ * Abstract type definition for API route inputs and outputs.
+ *
+ * These definitions should be shared between the public and server
+ * as the single source of truth.
+ */
 export interface HttpApiInterfaceEntryDefinition<
   P = unknown,
   Q = unknown,

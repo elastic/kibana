@@ -17,6 +17,8 @@ export type {
   FileShareJSON,
   FileCompression,
   FileSavedObject,
+  FileShareOptions,
+  FileUnshareOptions,
   BlobStorageSettings,
   FileShareJSONWithToken,
   UpdatableFileAttributes,

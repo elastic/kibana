@@ -292,6 +292,31 @@ export type FileShareJSONWithToken = FileShareJSON & {
 export type UpdatableFileShareAttributes = Pick<FileSavedObjectAttributes, 'name'>;
 
 /**
+ * Arguments to pass to share a file
+ */
+export interface FileShareOptions {
+  /**
+   * Optional name for the file share, should be human-friendly.
+   */
+  name?: string;
+  /**
+   * Unix timestamp (in milliseconds) when the file share will expire.
+   *
+   * @note default is 30 days
+   */
+  validUntil?: number;
+}
+/**
+ * Arguments for unsharing a file
+ */
+export interface FileUnshareOptions {
+  /**
+   * Specify the share instance to remove
+   */
+  shareId: string;
+}
+
+/**
  * A class with set of properties and behaviors of the "smart" file object and adds
  * behaviours for interacting with files on top of the pure data.
  */
@@ -329,20 +354,9 @@ export interface File<Meta = unknown> extends FileJSON<Meta> {
    * @note This makes a file available for public download. Any agent with the
    * token will bypass normal authz and authn checks.
    *
-   * @param opts - The options for generating the token.
+   * @param opts - Share file options.
    */
-  share(opts?: {
-    /**
-     * Optional name for the file share, should be human-friendly.
-     */
-    name?: string;
-    /**
-     * Unix timestamp (in milliseconds) when the file share will expire.
-     *
-     * @note default is 30 days
-     */
-    validUntil?: number;
-  }): Promise<FileShareJSONWithToken>;
+  share(opts?: FileShareOptions): Promise<FileShareJSONWithToken>;
 
   /**
    * List all current {@link FileShareJSON} objects that have been created for
@@ -354,14 +368,9 @@ export interface File<Meta = unknown> extends FileJSON<Meta> {
    * Remove a {@link FileShareJSON} object therefore ceasing to share a file's
    * content.
    *
-   * @param opts - Args for remove the file share instance
+   * @param opts - Unshare file options
    */
-  unshare(opts: {
-    /**
-     * Specify the share instance to remove
-     */
-    shareId: string;
-  }): Promise<void>;
+  unshare(opts: FileUnshareOptions): Promise<void>;
 
   /**
    * Get a JSON representation of the file. Convenient for serialisation.
