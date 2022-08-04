@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { EuiFlexGroup } from '@elastic/eui';
 
 import './resizable_button.scss';
 
@@ -14,22 +15,30 @@ export function ResizableButton({
   onMouseDownResizeHandler,
   onKeyDownResizeHandler,
 }: {
-  onMouseDownResizeHandler: (mouseDownEvent: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
+  onMouseDownResizeHandler: (
+    mouseDownEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => void;
   onKeyDownResizeHandler: (keyDownEvernt: React.KeyboardEvent) => void;
 }) {
-  const setFocus = (e: React.MouseEvent<HTMLDivElement>) => e.currentTarget.focus();
+  const setFocus = (e: React.MouseEvent<HTMLButtonElement>) => e.currentTarget.focus();
 
   return (
-    // <div className="unifiedTextLangEditor--resizableButtonContainer">
-    <div
-      data-test-subj="unifiedTextLangEditor-resize"
-      tabIndex={-1}
-      className="unifiedTextLangEditor--resizableButton"
-      onMouseDown={onMouseDownResizeHandler}
-      onKeyDown={onKeyDownResizeHandler}
-      onClick={setFocus}
-      aria-hidden="true"
-    />
-    // </div>
+    <div className="unifiedTextLangEditor--resizableButtonWrapper">
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="none"
+        className="unifiedTextLangEditor--resizableButtonContainer"
+      >
+        <button
+          data-test-subj="unifiedTextLangEditor-resize"
+          tabIndex={-1}
+          className="unifiedTextLangEditor--resizableButton"
+          onMouseDown={onMouseDownResizeHandler}
+          onKeyDown={onKeyDownResizeHandler}
+          onClick={setFocus}
+          aria-hidden="true"
+        />
+      </EuiFlexGroup>
+    </div>
   );
 }

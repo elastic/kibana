@@ -150,14 +150,12 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const onKeyDownResizeHandler = useCallback(
     (keyDownEvent) => {
       let height = editorHeight;
-      if (keyDownEvent.keyCode === KEYCODE_ARROW_UP) {
-        height = height - 1;
-        const validatedHeight = Math.min(Math.max(height, EDITOR_MIN_HEIGHT), EDITOR_MAX_HEIGHT);
-        setEditorHeight(validatedHeight);
-      }
-
-      if (keyDownEvent.keyCode === KEYCODE_ARROW_DOWN) {
-        height = height + 1;
+      if (
+        keyDownEvent.keyCode === KEYCODE_ARROW_UP ||
+        keyDownEvent.keyCode === KEYCODE_ARROW_DOWN
+      ) {
+        const step = keyDownEvent.keyCode === KEYCODE_ARROW_UP ? -10 : 10;
+        height = height + step;
         const validatedHeight = Math.min(Math.max(height, EDITOR_MIN_HEIGHT), EDITOR_MAX_HEIGHT);
         setEditorHeight(validatedHeight);
       }

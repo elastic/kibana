@@ -1,6 +1,12 @@
 
+.unifiedTextLangEditor--resizableButtonWrapper {
+  position: relative;
+}
+
 .unifiedTextLangEditor--resizableButtonContainer {
-  text-align: center;
+  position: absolute;
+  width: 100%;
+  top: $euiSizeS;
 }
 
 .unifiedTextLangEditor--resizableButton {
@@ -35,7 +41,7 @@
   }
 
   &:after {
-    transform: translate(-50%, 1px);
+    transform: translate(-50%, 2px);
   }
 
   //Lighten the "grab" icon on :hover
