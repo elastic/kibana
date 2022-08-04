@@ -48,6 +48,4 @@ export enum API_URLS {
 
   // Project monitor public endpoint
   SYNTHETICS_MONITORS_PROJECT = '/api/synthetics/service/project/monitors',
-
-  SYNTHETICS_MONITORS_PROJECT_STREAM = '/api/synthetics/service/project/monitors/stream',
 }
