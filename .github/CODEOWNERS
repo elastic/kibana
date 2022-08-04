@@ -135,6 +135,7 @@
 /packages/kbn-apm-config-loader/ @elastic/kibana-core @vigneshshanmugam
 /src/core/types/elasticsearch @elastic/apm-ui
 /packages/elastic-apm-synthtrace/  @elastic/apm-ui
+/packages/kbn-shared-svg @elastic/apm-ui
 #CC# /src/plugins/apm_oss/ @elastic/apm-ui
 #CC# /x-pack/plugins/observability/ @elastic/apm-ui
 
@@ -243,6 +244,7 @@
 /packages/kbn-optimizer/ @elastic/kibana-operations
 /packages/kbn-plugin-discovery/ @elastic/kibana-operations
 /packages/kbn-pm/ @elastic/kibana-operations
+/packages/kbn-shared-svg/ @elastic/kibana-operations
 /packages/kbn-test/ @elastic/kibana-operations
 /packages/kbn-type-summarizer*/ @elastic/kibana-operations
 /packages/kbn-ui-shared-deps-npm/ @elastic/kibana-operations
