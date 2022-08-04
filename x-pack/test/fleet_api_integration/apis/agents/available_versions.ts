@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { REPO_ROOT as KIBANA_ROOT } from '@kbn/utils';
 import expect from '@kbn/expect';
 import fs from 'fs/promises';
 import path from 'path';
@@ -16,19 +17,19 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
 
-  const VERSIONS_FILE_PATH = 'x-pack/plugins/fleet/target/';
   const FILENAME = 'agent_versions_list.json';
+  const filePath = path.join(KIBANA_ROOT, 'x-pack/plugins/fleet/target/');
 
   const writeJson = async (versions: string[]) => {
     const json = JSON.stringify(versions);
-    await fs.writeFile(path.join(VERSIONS_FILE_PATH, FILENAME), json);
+    await fs.writeFile(path.join(filePath, FILENAME), json);
   };
   const removeVersionsFile = async () => {
     try {
-      const existingFile = await fs.readFile(path.join(VERSIONS_FILE_PATH, FILENAME));
+      const existingFile = await fs.readFile(path.join(filePath, FILENAME));
 
       if (!!existingFile) {
-        await fs.unlink(path.resolve(VERSIONS_FILE_PATH, FILENAME));
+        await fs.unlink(path.resolve(filePath, FILENAME));
       }
     } catch (error) {
       log.error('Error removing versions file');
