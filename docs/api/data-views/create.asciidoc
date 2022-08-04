@@ -28,9 +28,6 @@ experimental[] Create data views.
 `override`:: (Optional, boolean) Overrides an existing data view if a
 data view with the provided title already exists. The default is `false`.
 
-`refresh_fields`:: (Optional, boolean) Reloads data view fields after
-the data view is stored. The default is `false`.
-
 `data_view`:: (Required, object) The data view object. All fields are optional.
 
 
@@ -106,6 +103,7 @@ The API returns the data view object:
 }
 --------------------------------------------------
 
+
 [[data-views-api-path-parameters]]
 
 ==== Path Parameters
@@ -129,6 +127,16 @@ The API returns the data view object:
 `typeMeta`::
 (Optional, object) When using rollup indices, this contains the field list for the rollup-specific
 data view API endpoints.
++
+.Properties of the typeMeta objects:
+[%collapsible%open]
+=====
+`aggs`:::
+(Required, object) A map of rollup field names and the aggregation restrictions
+
+`params`:::
+(Optional, object) Parameters for retrieving rollup fields
+=====
 
 `timeFieldName`::
 (Optional, string) Timestamp field name, for time-based data views.
@@ -137,31 +145,40 @@ data view API endpoints.
 (Optional, string[]) Array of filters to hide fields in Kibana.
 
 `fieldAttrs`::
-(Optional, object) Map of field attributes by field name. See
-{kibana-ref}/data-views-fields-api-update.html[Update data view fields API].
+(Optional, object) Map of field attributes by field name.
++
+.Properties of the fieldAttrs[fieldName] objects:
+[%collapsible%open]
+=====
+`customLabel`:::
+(Optional, string) Custom label for the field.
+
+`count`:::
+(Optional, number) Popularity count for the field.
+=====
++
+For more on field attributes, see {kibana-ref}/data-views-fields-api-update.html[Update data view fields API].
 
 `runtimeFieldMap`::
-(Optional, object) Map of runtime field definitions by field name. See
-{kibana-ref}/data-views-runtime-field-api-create.html[Create runtime field API].
+(Optional, object) Map of runtime field definitions by field name.
++
+.Properties of the runtimeFieldMap[fieldName] objects:
+[%collapsible%open]
+=====
+`type`:::
+(Required, string) Mapping type of the runtime field. See {ref}/mapping-types.html[Field data types].
+
+`script`:::
+(Required, string) Script block of the runtime field.
+=====
++
+For more on runtime field definitions, see {kibana-ref}/data-views-runtime-field-api-create.html[Create runtime field API].
++
+For more on how runtime fields can be used in search, see {ref}//runtime-search-request.html[Define runtime
+fields in a search request].
 
 `fieldFormatMap`::
 (Optional, object) Map field formats by field name.
-+
-.Properties of `fieldFormatMap` objects
-[%collapsible%open]
-=====
-`[fieldName]`::
-(Optional, object) Name of the field in the data view to map the format.
-+
-.Properties of `[fieldName]`
-[%collapsible%open]
-=====
-`id`::
-(Required, string) Name of the field data type. See {ref}/mapping-types.html[Field data types].
-
-`params`::
-(Optional, object) Formatting parameters, such as the pattern by which to format numbers and dates.
-=====
 
 `allowNoIndex`::
 (Optional, boolean) Allows the data view to exist before data is present.
