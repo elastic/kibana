@@ -62,6 +62,9 @@ const FONT_WIDTH = 8;
 const EDITOR_ONE_LINER_UNUSED_SPACE = 180;
 const EDITOR_ONE_LINER_UNUSED_SPACE_WITH_ERRORS = 220;
 
+const KEYCODE_ARROW_UP = 38;
+const KEYCODE_ARROW_DOWN = 40;
+
 const languageId = (language: string) => {
   switch (language) {
     case 'sql':
@@ -125,7 +128,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   // When the editor is on full size mode, the user can resize the height of the editor.
   const onMouseDownResizeHandler = useCallback(
-    (mouseDownEvent: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    (mouseDownEvent) => {
       const startSize = editorHeight;
       const startPosition = mouseDownEvent.pageY;
 
@@ -140,6 +143,24 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
       document.body.addEventListener('mousemove', onMouseMove);
       document.body.addEventListener('mouseup', onMouseUp, { once: true });
+    },
+    [editorHeight]
+  );
+
+  const onKeyDownResizeHandler = useCallback(
+    (keyDownEvent) => {
+      let height = editorHeight;
+      if (keyDownEvent.keyCode === KEYCODE_ARROW_UP) {
+        height = height - 1;
+        const validatedHeight = Math.min(Math.max(height, EDITOR_MIN_HEIGHT), EDITOR_MAX_HEIGHT);
+        setEditorHeight(validatedHeight);
+      }
+
+      if (keyDownEvent.keyCode === KEYCODE_ARROW_DOWN) {
+        height = height + 1;
+        const validatedHeight = Math.min(Math.max(height, EDITOR_MIN_HEIGHT), EDITOR_MAX_HEIGHT);
+        setEditorHeight(validatedHeight);
+      }
     },
     [editorHeight]
   );
@@ -599,7 +620,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         <EditorFooter lines={lines} containerCSS={styles.bottomContainer} errors={editorErrors} />
       )}
       {isCodeEditorExpanded && (
-        <ResizableButton onMouseDownResizeHandler={onMouseDownResizeHandler} />
+        <ResizableButton
+          onMouseDownResizeHandler={onMouseDownResizeHandler}
+          onKeyDownResizeHandler={onKeyDownResizeHandler}
+        />
       )}
     </>
   );

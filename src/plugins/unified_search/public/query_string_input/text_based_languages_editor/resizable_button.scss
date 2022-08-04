@@ -1,4 +1,8 @@
 
+.unifiedTextLangEditor--resizableButtonContainer {
+  text-align: center;
+}
+
 .unifiedTextLangEditor--resizableButton {
   position: relative;
   flex-shrink: 0;
@@ -65,7 +69,7 @@
   &:focus:not(:disabled) {
     &:before,
     &:after {
-      width: 100%;
+      width: 100vw;
     }
 
     &:before {

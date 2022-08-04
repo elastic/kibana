@@ -12,19 +12,24 @@ import './resizable_button.scss';
 
 export function ResizableButton({
   onMouseDownResizeHandler,
+  onKeyDownResizeHandler,
 }: {
   onMouseDownResizeHandler: (mouseDownEvent: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
+  onKeyDownResizeHandler: (keyDownEvernt: React.KeyboardEvent) => void;
 }) {
   const setFocus = (e: React.MouseEvent<HTMLDivElement>) => e.currentTarget.focus();
 
   return (
+    // <div className="unifiedTextLangEditor--resizableButtonContainer">
     <div
       data-test-subj="unifiedTextLangEditor-resize"
       tabIndex={-1}
       className="unifiedTextLangEditor--resizableButton"
       onMouseDown={onMouseDownResizeHandler}
+      onKeyDown={onKeyDownResizeHandler}
       onClick={setFocus}
       aria-hidden="true"
     />
+    // </div>
   );
 }
