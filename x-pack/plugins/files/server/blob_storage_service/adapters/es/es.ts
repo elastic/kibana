@@ -23,7 +23,7 @@ import { mappings } from './mappings';
  */
 export const BLOB_STORAGE_SYSTEM_INDEX_NAME = '.kibana_blob_storage';
 
-export const MAX_BLOB_STORE_SIZE_BYTES = 50 * 1024 * 1024; // 50GiB
+export const MAX_BLOB_STORE_SIZE_BYTES = 50 * 1024 * 1024 * 1024; // 50 GiB
 
 export class ElasticsearchBlobStorage implements BlobStorage {
   constructor(
