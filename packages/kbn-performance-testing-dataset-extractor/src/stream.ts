@@ -10,6 +10,10 @@ import { Request, Stream } from './types';
 
 const getTime = (date: string) => new Date(date).getTime();
 
+/**
+ * Combines concurrent requests into the streams and returns it as Array
+ * @param requests requests array
+ */
 export const requestsToStreams = <T extends Request>(requests: T[]) => {
   const sorted = requests.sort((a, b) => getTime(a.date) - getTime(b.date));
   const streams = new Map<string, Stream<T>>();
@@ -17,23 +21,23 @@ export const requestsToStreams = <T extends Request>(requests: T[]) => {
   for (const request of sorted) {
     const startTime = getTime(request.date) * 1000;
     const endTime = getTime(request.date) * 1000 + request.duration;
-    // searching if query starts before any existing stream ended
+    // Checking if request starts before any existing stream ended
     const match = Array.from(streams.keys()).filter((key) => {
       const streamEndTimestamp = streams.get(key)?.endTime;
       return streamEndTimestamp ? startTime < streamEndTimestamp : false;
     });
     const stream = streams.get(match[0]);
     if (stream) {
-      // adding query to the existing stream
+      // Adding request to the existing stream
       stream.requests.push(request);
-      // updating the stream endTime if needed
+      // Updating the stream end time if needed
       if (endTime > stream.endTime) {
         stream.endTime = endTime;
       }
-      // saving updated stream
+      // Saving the updated stream
       streams.set(match[0], stream);
     } else {
-      // add a new stream
+      // Otherwise adding a new stream
       streams.set(request.date, {
         startTime,
         endTime,
