@@ -43,7 +43,7 @@ export interface UpdateArgs<M = unknown> {
   /**
    * The file's metadata.
    */
-  metadata: Pick<FileMetadata<M>, 'name' | 'Alt' | 'Meta'>;
+  metadata: Partial<FileMetadata<M>>;
 }
 
 export interface Pagination {

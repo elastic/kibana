@@ -66,8 +66,8 @@ export class EsIndexFilesMetadataClient<M = unknown> implements FileMetadataClie
     await this.esClient.delete({ index: this.index, id });
   }
 
-  async update({ id, metadata: { name, Alt, Meta } }: UpdateArgs<M>): Promise<FileDescriptor<M>> {
-    await this.esClient.update({ index: this.index, id, doc: { file: { name, Alt, Meta } } });
+  async update({ id, metadata }: UpdateArgs<M>): Promise<FileDescriptor<M>> {
+    await this.esClient.update({ index: this.index, id, doc: { file: metadata } });
     return this.get({ id });
   }
 

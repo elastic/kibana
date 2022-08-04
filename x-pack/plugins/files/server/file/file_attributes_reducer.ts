@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import moment from 'moment';
 import { FileMetadata, UpdatableFileMetadata } from '../../common';
 
 export type Action =
@@ -40,19 +40,31 @@ export function fileAttributesReducer(
     case 'delete':
       return { ...state, Status: 'DELETED' };
     case 'uploading':
-      return { ...state, Status: 'UPLOADING' };
+      return {
+        ...state,
+        Status: 'UPLOADING',
+        Updated: moment().toISOString(),
+      };
     case 'uploaded':
-      return { ...state, ...payload, Status: 'READY' };
+      return {
+        ...state,
+        ...payload,
+        Status: 'READY',
+        Updated: moment().toISOString()
+      };
     case 'uploadError':
-      return { ...state, Status: 'UPLOAD_ERROR' };
+      return {
+        ...state,
+        Status: 'UPLOAD_ERROR',
+        Updated: moment().toISOString()
+      };
     case 'updateFile':
-      const d = new Date();
       return {
         ...state,
         name: payload.name ?? state.name,
         Alt: payload.alt ?? state.Alt,
         Meta: payload.meta ?? state.Meta,
-        Updated: d.toISOString(),
+        Updated: moment().toISOString(),
       };
     default:
       return state;

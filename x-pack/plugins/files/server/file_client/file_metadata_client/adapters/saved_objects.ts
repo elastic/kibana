@@ -48,8 +48,8 @@ export class SavedObjectsFileMetadataClient implements FileMetadataClient {
     const result = await this.soClient.create(this.soType, metadata, { id });
     return { id: result.id, metadata: result.attributes };
   }
-  async update({ id, metadata: { name, Alt, Meta } }: UpdateArgs): Promise<FileDescriptor> {
-    const result = await this.soClient.update(this.soType, id, { name, Alt, Meta });
+  async update({ id, metadata }: UpdateArgs): Promise<FileDescriptor> {
+    const result = await this.soClient.update(this.soType, id, metadata);
     return {
       id: result.id,
       metadata: result.attributes as FileDescriptor['metadata'],
