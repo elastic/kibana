@@ -20,6 +20,7 @@ describe('fetchIndices lib function', () => {
       security: {
         hasPrivileges: jest.fn(),
       },
+      count: jest.fn().mockReturnValue({ count: 100 }),
     },
     asInternalUser: {},
   };
@@ -75,6 +76,7 @@ describe('fetchIndices lib function', () => {
       fetchIndices(mockClient as unknown as IScopedClusterClient, 'search-*', false, true)
     ).resolves.toEqual([
       {
+        count: 100,
         health: 'green',
         name: 'search-regular-index',
         status: 'open',
@@ -123,6 +125,7 @@ describe('fetchIndices lib function', () => {
       fetchIndices(mockClient as unknown as IScopedClusterClient, 'search-*', true, true)
     ).resolves.toEqual([
       {
+        count: 100,
         health: 'green',
         name: 'search-regular-index',
         status: 'open',
@@ -183,6 +186,7 @@ describe('fetchIndices lib function', () => {
       fetchIndices(mockClient as unknown as IScopedClusterClient, 'search-*', false, true)
     ).resolves.toEqual([
       {
+        count: 100,
         health: 'green',
         name: 'index-without-prefix',
         status: 'open',
@@ -200,6 +204,7 @@ describe('fetchIndices lib function', () => {
         uuid: '83a81e7e-5955-4255-b008-5d6961203f57',
       },
       {
+        count: 100,
         health: 'green',
         name: 'search-aliased',
         status: 'open',
@@ -217,6 +222,7 @@ describe('fetchIndices lib function', () => {
         uuid: '83a81e7e-5955-4255-b008-5d6961203f57',
       },
       {
+        count: 100,
         health: 'green',
         name: 'search-double-aliased',
         status: 'open',
@@ -234,6 +240,7 @@ describe('fetchIndices lib function', () => {
         uuid: '83a81e7e-5955-4255-b008-5d6961203f57',
       },
       {
+        count: 100,
         health: 'green',
         name: 'second-index',
         status: 'open',
@@ -282,6 +289,7 @@ describe('fetchIndices lib function', () => {
       fetchIndices(mockClient as unknown as IScopedClusterClient, 'search-*', false, false)
     ).resolves.toEqual([
       {
+        count: 100,
         health: 'green',
         name: 'index-without-prefix',
         status: 'open',
@@ -299,6 +307,7 @@ describe('fetchIndices lib function', () => {
         uuid: '83a81e7e-5955-4255-b008-5d6961203f57',
       },
       {
+        count: 100,
         health: 'green',
         name: 'second-index',
         status: 'open',
@@ -332,6 +341,7 @@ describe('fetchIndices lib function', () => {
       fetchIndices(mockClient as unknown as IScopedClusterClient, 'search-*', false, true)
     ).resolves.toEqual([
       {
+        count: 100,
         health: undefined,
         name: 'search-regular-index',
         status: undefined,
