@@ -35,6 +35,7 @@ const PACKAGE_TYPE_MAP: { [k in KibanaPackageType]: true } = {
   'shared-common': true,
   'shared-server': true,
   'test-helper': true,
+  'shared-scss': true,
 };
 
 export const PACKAGE_TYPES = Object.keys(PACKAGE_TYPE_MAP) as KibanaPackageType[];

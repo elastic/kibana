@@ -12,6 +12,7 @@ export type KibanaPackageType =
   | 'shared-browser'
   | 'shared-server'
   | 'shared-common'
+  | 'shared-scss'
   | 'functional-tests'
   | 'test-helper';
 
@@ -43,7 +44,7 @@ export interface SharedBrowserPackageManifest extends PackageManifestBaseFields 
 }
 
 export interface BasePackageManifest extends PackageManifestBaseFields {
-  type: 'shared-server' | 'functional-tests' | 'test-helper';
+  type: 'shared-server' | 'functional-tests' | 'test-helper' | 'shared-scss';
 }
 
 export type KibanaPackageManifest =
