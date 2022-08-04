@@ -47,6 +47,7 @@ export const useSuggestUserProfiles = ({
       });
     },
     {
+      retry: false,
       onError: (error: ServerError) => {
         if (error.name !== 'AbortError') {
           toasts.addError(
