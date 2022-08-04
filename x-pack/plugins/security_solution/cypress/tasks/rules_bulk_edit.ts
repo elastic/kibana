@@ -92,6 +92,6 @@ export const checkMachineLearningRulesCannotBeModified = (rulesCount: number) =>
 export const waitForMixedRulesBulkEditModal = (customRulesCount: number) => {
   cy.get(MODAL_CONFIRMATION_TITLE).should(
     'have.text',
-    `The action will only be applied to ${customRulesCount} Custom rules you've selected`
+    `This action will only be applied to ${customRulesCount} Custom rules you've selected`
   );
 };

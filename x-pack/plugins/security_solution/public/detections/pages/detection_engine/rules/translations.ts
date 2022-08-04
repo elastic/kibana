@@ -234,7 +234,7 @@ export const BULK_ACTION_CONFIRMATION_PARTLY_TITLE = (customRulesCount: number) 
     {
       values: { customRulesCount },
       defaultMessage:
-        "The action will only be applied to {customRulesCount, plural, =1 {# Custom rule} other {# Custom rules}} you've selected",
+        "This action will only be applied to {customRulesCount, plural, =1 {# Custom rule} other {# Custom rules}} you've selected",
     }
   );
 
