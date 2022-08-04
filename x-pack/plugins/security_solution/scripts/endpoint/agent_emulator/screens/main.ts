@@ -12,8 +12,7 @@ export class MainScreen extends ScreenBaseClass {
   protected header(): string {
     return `${HORIZONTAL_LINE}
  Endpoint Agent Emulator
-${HORIZONTAL_LINE}
-`;
+${HORIZONTAL_LINE}`;
   }
 
   protected screen(): string {
@@ -24,5 +23,6 @@ ${HORIZONTAL_LINE}
 
   protected onEnterChoice(choice: string) {
     global.console.log(`entered: ${choice}`);
+    throw new Error('unknown choice');
   }
 }
