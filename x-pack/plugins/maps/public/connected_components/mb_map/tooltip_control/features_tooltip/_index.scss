@@ -24,6 +24,7 @@
 }
 
 .mapFeatureTooltip__propertyLabel {
+  min-width: $euiSizeXL * 2.5;
   max-width: $euiSizeXL * 4;
   font-weight: $euiFontWeightSemiBold;
 }
