@@ -89,7 +89,7 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
         journeyName,
         kibanaVersion,
         scalabilitySetup,
-        streams: Array.from(kibanaStreams),
+        streams: kibanaStreams,
       },
       path.resolve(outputDir, 'server'),
       fileName,
@@ -101,7 +101,7 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
     {
       journeyName,
       kibanaVersion,
-      streams: Array.from(esStreams),
+      streams: esStreams,
     },
     path.resolve(outputDir, 'es'),
     fileName,

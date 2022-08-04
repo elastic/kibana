@@ -36,6 +36,7 @@ interface Transaction {
   name: string;
   type: string;
   duration: { us: number };
+  span_count: { started: number };
 }
 
 export interface Document {

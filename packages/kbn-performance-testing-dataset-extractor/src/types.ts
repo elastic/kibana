@@ -15,8 +15,8 @@ export interface Request {
   date: string;
   duration: number;
   http: {
-    method?: string;
-    path?: string;
+    method: string;
+    path: string;
     params?: string;
     body?: JSON | string;
   };
@@ -30,6 +30,7 @@ export interface KibanaRequest extends Omit<Request, 'http'> {
     body?: string;
     statusCode: number;
   };
+  spanCount: number;
 }
 
 export interface Stream<T extends Request> {

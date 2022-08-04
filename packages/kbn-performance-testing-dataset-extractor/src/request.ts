@@ -66,6 +66,7 @@ export const getKibanaRequests = (
           body: payload ? JSON.stringify(strToJSON(payload)) : undefined,
           statusCode: hit.http.response.status_code,
         },
+        spanCount: hit.transaction.span_count.started,
       };
     });
 
@@ -76,36 +77,29 @@ export const getKibanaRequests = (
 
 export const getESRequests = async (esClient: ESClient, requests: KibanaRequest[]) => {
   const esRequests = new Array<Request>();
-  for (const request of requests) {
-    const transactionId = request.transactionId;
-    const hits = await esClient.getSpans(transactionId);
-    const spans = hits
-      .map((hit) => hit!._source as SpanDocument)
-      .map((hit) => {
-        const query = hit?.span.db?.statement ? parseQueryStatement(hit?.span.db?.statement) : {};
-        return {
+  for (const request of requests.filter((r) => r.spanCount > 0)) {
+    const hits = await esClient.getSpans(request.transactionId);
+    for (const hit of hits.map((i) => i!._source as SpanDocument)) {
+      const query = hit?.span.db?.statement ? parseQueryStatement(hit?.span.db?.statement) : {};
+      const method = findFirstMatch(httpMethodRegExp, hit.span.name);
+      const path = findFirstMatch(httpPathRegExp, hit.span.name.replace(/\s+/g, ''));
+      // filter out requests without method, path and POST/PUT/DELETE without body
+      if (method && path && (method === 'GET' || query?.body)) {
+        esRequests.push({
           transactionId: hit.transaction.id,
           spanId: hit.span.id,
           name: hit.span.name,
           date: hit['@timestamp'],
           duration: hit.span?.duration?.us,
           http: {
-            method: findFirstMatch(httpMethodRegExp, hit.span.name),
-            path: findFirstMatch(httpPathRegExp, hit.span.name.replace(/\s+/g, '')),
+            method,
+            path,
             params: query?.params,
             body: query?.body,
           },
-        };
-      })
-      // filter out requests without method, path and POST/PUT/DELETE without body
-      .filter(
-        (hit) =>
-          hit &&
-          hit.http?.method &&
-          hit.http?.path &&
-          (hit.http?.method === 'GET' || hit.http?.body)
-      );
-    esRequests.push(...spans);
+        });
+      }
+    }
   }
 
   return esRequests;
