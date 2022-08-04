@@ -34,8 +34,26 @@ export const loadEndpointsIfNoneExist = async (
     return;
   }
 
+  return loadEndpoints(2, esClient, kbnClient, log);
+};
+
+interface LoadEndpointsProgress {
+  percent: string;
+  total: number;
+  created: number;
+}
+
+export const loadEndpoints = async (
+  count: number = 2,
+  esClient: Client,
+  kbnClient: KbnClient,
+  log?: ToolingLog,
+  onProgress?: (percentDone: LoadEndpointsProgress) => void
+): Promise<void> => {
+  // TODO: Support option for loading endpoints with alerts
+
   if (log) {
-    log.verbose(`loadEndpointsIfNoneExist(): Loading ${count} endpoints...`);
+    log.verbose(`loadEndpoints(): Loading ${count} endpoints...`);
   }
 
   if (!WAS_FLEET_SETUP_DONE) {
@@ -47,6 +65,25 @@ export const loadEndpointsIfNoneExist = async (
 
   const endpointPackage = await fetchEndpointPackageInfo(kbnClient);
   const realPolicies: Record<string, CreatePackagePolicyResponse['item']> = {};
+
+  let progress: LoadEndpointsProgress = {
+    total: count,
+    created: 0,
+    percent: '0%',
+  };
+
+  const updateProgress = () => {
+    const created = progress.created + 1;
+    progress = {
+      ...progress,
+      created,
+      percent: `${Math.ceil((created / count) * 100)}%`,
+    };
+
+    if (onProgress) {
+      onProgress(progress);
+    }
+  };
 
   await pMap(
     Array.from({ length: count }),
@@ -63,16 +100,14 @@ export const loadEndpointsIfNoneExist = async (
         enrollFleet: true,
         metadataIndex: METADATA_DATASTREAM,
         policyResponseIndex: 'metrics-endpoint.policy-default',
-      });
+      }).then(updateProgress);
     },
     {
       concurrency: 10,
     }
   );
 
-  // TODO: Support option for loading endpoints with alerts
-
   if (log) {
-    log.verbose(`loadEndpointsIfNoneExist(): ${count} endpoint(s) successfully loaded`);
+    log.verbose(`loadEndpoints(): ${count} endpoint(s) successfully loaded`);
   }
 };
