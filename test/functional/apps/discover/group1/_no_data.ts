@@ -17,13 +17,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
 
   const createDataView = async (dataViewName: string) => {
-    log.warn('*** create data view ***');
+    log.error('*** create data view ***');
     await testSubjects.setValue('createIndexPatternTitleInput', dataViewName, {
       clearWithKeyboard: true,
       typeCharByChar: true,
     });
     await testSubjects.click('saveIndexPatternButton');
-    log.warn('*** saveIndexPatternButton clicked ***');
+    log.error('*** saveIndexPatternButton clicked ***');
   };
 
   describe('discover no data', () => {
@@ -57,17 +57,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const button = await testSubjects.find('createDataViewButton');
       button.click();
-      log.warn('Create dataview button clicked');
+      log.error('Create dataview button clicked');
       await retry.waitForWithTimeout('data view editor form to be visible', 15000, async () => {
         return await (await find.byClassName('indexPatternEditor__form')).isDisplayed();
       });
 
-      log.warn('indexPatternEditor__form is displayed');
+      log.error('indexPatternEditor__form is displayed');
       const dataViewToCreate = 'logstash';
       await createDataView(dataViewToCreate);
-      log.warn('data view created');
+      log.error('data view created');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      log.warn('loading finishedx');
+      log.error('loading finishedx');
       await retry.waitForWithTimeout(
         'data view selector to include a newly created dataview',
         10000,
