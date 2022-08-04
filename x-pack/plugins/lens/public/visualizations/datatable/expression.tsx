@@ -14,12 +14,12 @@ import type { IAggType } from '@kbn/data-plugin/public';
 import { IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { trackUiCounterEvents } from '../lens_ui_telemetry';
+import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { DatatableComponent } from './components/table_basic';
 
-import type { ILensInterpreterRenderHandlers } from '../types';
-import type { FormatFactory } from '../../common';
-import type { DatatableProps } from '../../common/expressions';
+import type { ILensInterpreterRenderHandlers } from '../../types';
+import type { FormatFactory } from '../../../common';
+import type { DatatableProps } from '../../../common/expressions';
 
 export const getDatatableRenderer = (dependencies: {
   formatFactory: FormatFactory;

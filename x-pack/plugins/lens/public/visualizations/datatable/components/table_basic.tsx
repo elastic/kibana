@@ -29,12 +29,12 @@ import {
 } from '@elastic/eui';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
-import type { LensTableRowContextMenuEvent } from '../../types';
-import type { FormatFactory } from '../../../common';
-import type { LensGridDirection } from '../../../common/expressions';
-import { VisualizationContainer } from '../../visualization_container';
-import { findMinMaxByColumnId } from '../../shared_components';
-import { LensIconChartDatatable } from '../../assets/chart_datatable';
+import type { LensTableRowContextMenuEvent } from '../../../types';
+import type { FormatFactory } from '../../../../common';
+import type { LensGridDirection } from '../../../../common/expressions';
+import { VisualizationContainer } from '../../../visualization_container';
+import { findMinMaxByColumnId } from '../../../shared_components';
+import { LensIconChartDatatable } from '../../../assets/chart_datatable';
 import type {
   DataContextType,
   DatatableRenderProps,
@@ -52,7 +52,7 @@ import {
   createGridSortingConfig,
   createTransposeColumnFilterHandler,
 } from './table_actions';
-import { getOriginalId, getFinalSummaryConfiguration } from '../../../common/expressions';
+import { getOriginalId, getFinalSummaryConfiguration } from '../../../../common/expressions';
 
 export const DataContext = React.createContext<DataContextType>({});
 

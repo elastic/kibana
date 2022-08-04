@@ -18,8 +18,8 @@ import type {
   DatatableColumn,
   DatatableColumnMeta,
 } from '@kbn/expressions-plugin/common';
-import type { FormatFactory } from '../../../common';
-import type { ColumnConfig } from '../../../common/expressions';
+import type { FormatFactory } from '../../../../common';
+import type { ColumnConfig } from '../../../../common/expressions';
 
 export const createGridColumns = (
   bucketColumns: string[],

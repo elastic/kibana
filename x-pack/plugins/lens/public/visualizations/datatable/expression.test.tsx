@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { DatatableProps } from '../../common/expressions';
+import type { DatatableProps } from '../../../common/expressions';
 import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
-import type { FormatFactory } from '../../common';
-import { getDatatable } from '../../common/expressions';
+import type { FormatFactory } from '../../../common';
+import { getDatatable } from '../../../common/expressions';
 import { Datatable } from '@kbn/expressions-plugin/common';
 
 function sampleArgs() {

@@ -8,13 +8,13 @@
 import React from 'react';
 import { EuiComboBox, EuiFieldText } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { FramePublicAPI, VisualizationDimensionEditorProps } from '../../types';
+import { FramePublicAPI, VisualizationDimensionEditorProps } from '../../../types';
 import { DatatableVisualizationState } from '../visualization';
-import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
+import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { TableDimensionEditorAdditionalSection } from './dimension_editor_addtional_section';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { layerTypes } from '../../../common';
+import { layerTypes } from '../../../../common';
 
 describe('data table dimension editor additional section', () => {
   let frame: FramePublicAPI;

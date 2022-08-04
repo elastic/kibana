@@ -18,7 +18,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { CustomizablePalette, PaletteRegistry, FIXED_PROGRESSION } from '@kbn/coloring';
-import { VisualizationDimensionEditorProps } from '../../types';
+import { VisualizationDimensionEditorProps } from '../../../types';
 import { DatatableVisualizationState } from '../visualization';
 
 import {
@@ -26,11 +26,11 @@ import {
   defaultPaletteParams,
   PalettePanelContainer,
   findMinMaxByColumnId,
-} from '../../shared_components';
-import { isNumericFieldForDatatable, getOriginalId } from '../../../common/expressions';
+} from '../../../shared_components';
+import { isNumericFieldForDatatable, getOriginalId } from '../../../../common/expressions';
 
 import './dimension_editor.scss';
-import { CollapseSetting } from '../../shared_components/collapse_setting';
+import { CollapseSetting } from '../../../shared_components/collapse_setting';
 
 const idPrefix = htmlIdGenerator()();
 

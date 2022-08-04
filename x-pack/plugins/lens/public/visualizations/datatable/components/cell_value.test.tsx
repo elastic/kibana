@@ -14,7 +14,7 @@ import { Datatable } from '@kbn/expressions-plugin/public';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
-import { DatatableArgs, ColumnConfigArg } from '../../../common/expressions';
+import { DatatableArgs, ColumnConfigArg } from '../../../../common/expressions';
 import { DataContextType } from './types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 

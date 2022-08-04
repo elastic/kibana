@@ -9,10 +9,10 @@ import React, { ChangeEvent, FormEvent } from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DataTableToolbar } from './toolbar';
 import { DatatableVisualizationState } from '../visualization';
-import { FramePublicAPI, VisualizationToolbarProps } from '../../types';
+import { FramePublicAPI, VisualizationToolbarProps } from '../../../types';
 import { ToolbarButton } from '@kbn/kibana-react-plugin/public';
 import { ReactWrapper } from 'enzyme';
-import { PagingState } from '../../../common/expressions';
+import { PagingState } from '../../../../common/expressions';
 import { EuiButtonGroup, EuiRange } from '@elastic/eui';
 
 // mocking random id generator function

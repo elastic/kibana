@@ -10,17 +10,17 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { EuiFormRow, EuiFieldText, EuiText, useEuiTheme, EuiComboBox } from '@elastic/eui';
 import { PaletteRegistry } from '@kbn/coloring';
-import { VisualizationDimensionEditorProps } from '../../types';
+import { VisualizationDimensionEditorProps } from '../../../types';
 import { DatatableVisualizationState } from '../visualization';
 
-import { useDebouncedValue } from '../../shared_components';
-import type { ColumnState } from '../../../common/expressions';
+import { useDebouncedValue } from '../../../shared_components';
+import type { ColumnState } from '../../../../common/expressions';
 import {
   isNumericFieldForDatatable,
   getDefaultSummaryLabel,
   getFinalSummaryConfiguration,
   getSummaryRowOptions,
-} from '../../../common/expressions';
+} from '../../../../common/expressions';
 
 import './dimension_editor.scss';
 

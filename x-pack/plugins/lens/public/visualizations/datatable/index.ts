@@ -9,8 +9,8 @@ import type { CoreSetup } from '@kbn/core/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { EditorFrameSetup } from '../types';
-import type { FormatFactory } from '../../common';
+import type { EditorFrameSetup } from '../../types';
+import type { FormatFactory } from '../../../common';
 
 interface DatatableVisualizationPluginStartPlugins {
   data: DataPublicPluginStart;
@@ -28,7 +28,9 @@ export class DatatableVisualization {
     { expressions, formatFactory, editorFrame, charts }: DatatableVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
-      const { getDatatableRenderer, getDatatableVisualization } = await import('../async_services');
+      const { getDatatableRenderer, getDatatableVisualization } = await import(
+        '../../async_services'
+      );
       const palettes = await charts.palettes.getPalettes();
       expressions.registerRenderer(() =>
         getDatatableRenderer({

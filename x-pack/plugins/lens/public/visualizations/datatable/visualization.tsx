@@ -19,13 +19,13 @@ import type {
   Visualization,
   VisualizationSuggestion,
   DatasourceLayers,
-} from '../types';
-import { LensIconChartDatatable } from '../assets/chart_datatable';
+} from '../../types';
+import { LensIconChartDatatable } from '../../assets/chart_datatable';
 import { TableDimensionEditor } from './components/dimension_editor';
 import { TableDimensionEditorAdditionalSection } from './components/dimension_editor_addtional_section';
-import { LayerType, layerTypes } from '../../common';
-import { getDefaultSummaryLabel, PagingState } from '../../common/expressions';
-import type { ColumnState, SortingState } from '../../common/expressions';
+import { LayerType, layerTypes } from '../../../common';
+import { getDefaultSummaryLabel, PagingState } from '../../../common/expressions';
+import type { ColumnState, SortingState } from '../../../common/expressions';
 import { DataTableToolbar } from './components/toolbar';
 
 export interface DatatableVisualizationState {

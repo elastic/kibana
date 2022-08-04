@@ -10,15 +10,15 @@ import type { PaletteRegistry } from '@kbn/coloring';
 import { CustomPaletteState } from '@kbn/charts-plugin/public';
 import type { IAggType } from '@kbn/data-plugin/public';
 import type { Datatable, RenderMode } from '@kbn/expressions-plugin/common';
-import type { ILensInterpreterRenderHandlers, LensEditEvent } from '../../types';
+import type { ILensInterpreterRenderHandlers, LensEditEvent } from '../../../types';
 import {
   LENS_EDIT_SORT_ACTION,
   LENS_EDIT_RESIZE_ACTION,
   LENS_TOGGLE_ACTION,
   LENS_EDIT_PAGESIZE_ACTION,
 } from './constants';
-import type { FormatFactory } from '../../../common';
-import type { DatatableProps, LensGridDirection } from '../../../common/expressions';
+import type { FormatFactory } from '../../../../common';
+import type { DatatableProps, LensGridDirection } from '../../../../common/expressions';
 
 export interface LensSortActionData {
   columnId: string | undefined;

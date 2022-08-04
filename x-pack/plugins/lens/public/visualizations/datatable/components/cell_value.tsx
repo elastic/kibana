@@ -9,11 +9,11 @@ import React, { useContext, useEffect } from 'react';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import classNames from 'classnames';
-import type { FormatFactory } from '../../../common';
-import { getOriginalId } from '../../../common/expressions';
-import type { ColumnConfig } from '../../../common/expressions';
+import type { FormatFactory } from '../../../../common';
+import { getOriginalId } from '../../../../common/expressions';
+import type { ColumnConfig } from '../../../../common/expressions';
 import type { DataContextType } from './types';
-import { getContrastColor, getNumericValue } from '../../shared_components/coloring/utils';
+import { getContrastColor, getNumericValue } from '../../../shared_components/coloring/utils';
 
 export const createGridCell = (
   formatters: Record<string, ReturnType<FormatFactory>>,

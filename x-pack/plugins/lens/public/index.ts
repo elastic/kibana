@@ -39,7 +39,7 @@ export type {
   SharedPieLayerState,
 } from '../common/types';
 
-export type { DatatableVisualizationState } from './datatable_visualization/visualization';
+export type { DatatableVisualizationState } from './visualizations/datatable/visualization';
 export type { HeatmapVisualizationState } from './visualizations/heatmap/types';
 export type { GaugeVisualizationState } from './visualizations/gauge/constants';
 export type {

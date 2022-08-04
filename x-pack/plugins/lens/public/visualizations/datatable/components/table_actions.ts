@@ -9,8 +9,8 @@ import type { EuiDataGridSorting } from '@elastic/eui';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import type { LensResizeAction, LensSortAction, LensToggleAction } from './types';
-import type { ColumnConfig, LensGridDirection } from '../../../common/expressions';
-import { getOriginalId } from '../../../common/expressions';
+import type { ColumnConfig, LensGridDirection } from '../../../../common/expressions';
+import { getOriginalId } from '../../../../common/expressions';
 
 export const createGridResizeHandler =
   (

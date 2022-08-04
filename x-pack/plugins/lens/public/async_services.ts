@@ -14,8 +14,8 @@
  * This file causes all of them to be served in a single request.
  */
 
-export * from './datatable_visualization/datatable_visualization';
-export * from './datatable_visualization';
+export * from './visualizations/datatable/datatable_visualization';
+export * from './visualizations/datatable';
 export * from './visualizations/legacy_metric/metric_visualization';
 export * from './visualizations/legacy_metric';
 export * from './visualizations/metric/metric_visualization';

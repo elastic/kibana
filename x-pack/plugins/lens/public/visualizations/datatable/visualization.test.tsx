@@ -7,7 +7,7 @@
 
 import { Ast } from '@kbn/interpreter';
 import { buildExpression } from '@kbn/expressions-plugin/public';
-import { createMockDatasource, createMockFramePublicAPI, DatasourceMock } from '../mocks';
+import { createMockDatasource, createMockFramePublicAPI, DatasourceMock } from '../../mocks';
 import { DatatableVisualizationState, getDatatableVisualization } from './visualization';
 import {
   Operation,
@@ -15,9 +15,9 @@ import {
   FramePublicAPI,
   TableSuggestionColumn,
   VisualizationDimensionGroupConfig,
-} from '../types';
+} from '../../types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { layerTypes } from '../../common';
+import { layerTypes } from '../../../common';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 
 function mockFrame(): FramePublicAPI {
