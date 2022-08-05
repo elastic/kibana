@@ -6,4 +6,9 @@
  * Side Public License, v 1.
  */
 
-export * from './update_vscode_config_cli';
+export {
+  parseKibanaManifest,
+  readKibanaManifest,
+  validateKibanaManifest,
+} from './parse_kibana_manifest';
+export type { KibanaPackageManifest } from './kibana_manifest';

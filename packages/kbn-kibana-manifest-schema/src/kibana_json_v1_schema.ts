@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { JSONSchema } from 'json-schema-typed';
-import dedent from 'dedent';
+import { JSONSchema } from 'json-schema-typed';
+import { desc } from './desc';
 
-export const KibanaJsonSchema: JSONSchema = {
+export const MANIFEST_V1: JSONSchema = {
   type: 'object',
   required: ['id', 'version', 'owner'],
   properties: {
     id: {
-      description: dedent`
+      description: desc`
         Identifier of the plugin. Must be a string in camelCase. Part of a plugin
         public contract. Other plugins leverage it to access plugin API, navigate
         to the plugin, etc.
@@ -28,7 +28,7 @@ export const KibanaJsonSchema: JSONSchema = {
       pattern: '^(kibana|v?\\d+(\\.\\d+){0,2})$',
     },
     kibanaVersion: {
-      description: dedent`
+      description: desc`
         The version of Kibana the plugin is compatible with, defaults to the value of the version field.
       `,
       type: 'string',
@@ -50,7 +50,7 @@ export const KibanaJsonSchema: JSONSchema = {
       ],
     },
     requiredPlugins: {
-      description: dedent`
+      description: desc`
         An optional list of the other plugins that MUST BE installed and enabled for this
         plugin to function properly.
       `,
@@ -58,7 +58,7 @@ export const KibanaJsonSchema: JSONSchema = {
       items: { type: 'string' },
     },
     optionalPlugins: {
-      description: dedent`
+      description: desc`
         An optional list of the other plugins that if installed and enabled **may be**
         leveraged by this plugin for some additional functionality but otherwise are
         not required for this plugin to work properly.
@@ -67,7 +67,7 @@ export const KibanaJsonSchema: JSONSchema = {
       items: { type: 'string' },
     },
     requiredBundles: {
-      description: dedent`
+      description: desc`
         An optional list of the other plugins that if installed and enabled MAY BE leveraged
         by this plugin for some additional functionality but otherwise are not required for
         this plugin to work properly.
@@ -81,20 +81,20 @@ export const KibanaJsonSchema: JSONSchema = {
       items: { type: 'string' },
     },
     ui: {
-      description: dedent`
+      description: desc`
         Specifies whether plugin includes some client/browser specific functionality
         that should be included into client bundle via \`public/ui_plugin.js\` file.
       `,
       type: 'boolean',
     },
     server: {
-      description: dedent`
+      description: desc`
         Specifies whether plugin includes some server-side specific functionality.
       `,
       type: 'boolean',
     },
     extraPublicDirs: {
-      description: dedent`
+      description: desc`
         Specifies directory names that can be imported by other ui-plugins built
         using the same instance of the @kbn/optimizer. A temporary measure we plan
         to replace with better mechanisms for sharing static code between plugins
@@ -104,7 +104,7 @@ export const KibanaJsonSchema: JSONSchema = {
       items: { type: 'string' },
     },
     serviceFolders: {
-      description: dedent`
+      description: desc`
         Only used for the automatically generated API documentation. Specifying service
         folders will cause your plugin API reference to be broken up into sub sections.
       `,
@@ -120,7 +120,7 @@ export const KibanaJsonSchema: JSONSchema = {
           type: 'string',
         },
         githubTeam: {
-          description: dedent`
+          description: desc`
             All internal plugins should have a github team specified. GitHub teams can be
             viewed here: https://github.com/orgs/elastic/teams
           `,
@@ -129,13 +129,13 @@ export const KibanaJsonSchema: JSONSchema = {
       },
     },
     description: {
-      description: dedent`
+      description: desc`
         A brief description of what this plugin does and any capabilities it provides.
       `,
       type: 'string',
     },
     enabledOnAnonymousPages: {
-      description: dedent`
+      description: desc`
         Specifies whether this plugin - and its required dependencies - will be enabled for anonymous pages (login page, status page when
         configured, etc.) Default is false.
       `,
