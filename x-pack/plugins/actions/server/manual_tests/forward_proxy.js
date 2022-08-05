@@ -35,7 +35,6 @@ echo done - you should run all the lines above as one command
 */
 
 const fs = require('fs');
-const net = require('net');
 const path = require('path');
 const http = require('http');
 const https = require('https');
