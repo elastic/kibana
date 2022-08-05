@@ -468,7 +468,7 @@ export class DataViewsService {
    * Checks if current user has a user created index pattern ignoring fleet's server default index patterns.
    */
   async hasUserDataView(): Promise<boolean> {
-    return this.apiClient.hasUserIndexPattern();
+    return this.apiClient.hasUserDataView();
   }
 
   /**
