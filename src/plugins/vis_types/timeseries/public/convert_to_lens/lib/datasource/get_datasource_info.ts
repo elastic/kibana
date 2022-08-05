@@ -5,17 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { fetchIndexPattern, isStringTypeIndexPattern } from '../../common/index_patterns_utils';
-import type { IndexPatternValue } from '../../common/types';
-import { getDataViewsStart } from '../services';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import {
+  fetchIndexPattern,
+  isStringTypeIndexPattern,
+} from '../../../../common/index_patterns_utils';
+import type { IndexPatternValue } from '../../../../common/types';
 
 export const getDataSourceInfo = async (
   modelIndexPattern: IndexPatternValue,
   modelTimeField: string | undefined,
   isOverwritten: boolean,
-  overwrittenIndexPattern: IndexPatternValue | undefined
+  overwrittenIndexPattern: IndexPatternValue | undefined,
+  dataViews: DataViewsPublicPluginStart
 ) => {
-  const dataViews = getDataViewsStart();
   let indexPatternId =
     modelIndexPattern && !isStringTypeIndexPattern(modelIndexPattern) ? modelIndexPattern.id : '';
 
