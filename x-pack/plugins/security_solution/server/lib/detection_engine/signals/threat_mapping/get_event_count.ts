@@ -47,7 +47,7 @@ export const getEventList = async ({
     services,
     ruleExecutionLogger,
     filter,
-    pageSize: calculatedPerPage,
+    pageSize: 100,
     primaryTimestamp,
     secondaryTimestamp,
     sortOrder: 'desc',
