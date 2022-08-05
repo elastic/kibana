@@ -12,7 +12,6 @@ import { Spaces, Users } from './scenarios';
 export async function setupSpacesAndUsers(getService: FtrProviderContext['getService']) {
   const securityService = getService('security');
   const spacesService = getService('spaces');
-  const kibanaServer = getService('kibanaServer');
 
   for (const space of Spaces) {
     await spacesService.create(space);
@@ -40,7 +39,7 @@ export async function setupSpacesAndUsers(getService: FtrProviderContext['getSer
 
 export async function tearDown(getService: FtrProviderContext['getService']) {
   const securityService = getService('security');
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   for (const user of Users) {
     await securityService.user.delete(user.username);

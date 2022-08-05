@@ -14,6 +14,7 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const es: Client = getService('es');
   const supertest = getService('supertest');
+  const kibanaServer = getService('kibanaServer');
 
   const getPackagePolicyById = async (id: string) => {
     const { body } = await supertest.get(`/api/fleet/package_policies/${id}`);
