@@ -73,9 +73,6 @@ describe('test fetchAll', () => {
       documents$: new BehaviorSubject<DataDocumentsMsg>({ fetchStatus: FetchStatus.UNINITIALIZED }),
       totalHits$: new BehaviorSubject<DataTotalHitsMsg>({ fetchStatus: FetchStatus.UNINITIALIZED }),
       charts$: new BehaviorSubject<DataChartsMessage>({ fetchStatus: FetchStatus.UNINITIALIZED }),
-      availableFields$: new BehaviorSubject<DataAvailableFieldsMsg>({
-        fetchStatus: FetchStatus.UNINITIALIZED,
-      }),
     };
     deps = {
       appStateContainer: {

@@ -13,7 +13,6 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { action } from '@storybook/addon-actions';
 import { FetchStatus } from '../../../../types';
 import {
-  AvailableFields$,
   DataCharts$,
   DataDocuments$,
   DataMain$,
@@ -77,11 +76,6 @@ const documentObservables = {
     result: buildDataTableRecordList(esHits),
   }) as DataDocuments$,
 
-  availableFields$: new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    fields: [] as string[],
-  }) as AvailableFields$,
-
   totalHits$: new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
     result: Number(esHits.length),
@@ -110,12 +104,6 @@ const plainRecordObservables = {
     result: buildDataTableRecordList(esHits),
     recordRawType: RecordRawType.PLAIN,
   }) as DataDocuments$,
-
-  availableFields$: new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    fields: [] as string[],
-    recordRawType: RecordRawType.PLAIN,
-  }) as AvailableFields$,
 
   totalHits$: new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,

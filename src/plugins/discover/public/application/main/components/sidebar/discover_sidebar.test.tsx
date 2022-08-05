@@ -22,7 +22,6 @@ import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../../types';
-import { AvailableFields$ } from '../../hooks/use_saved_search';
 
 const mockGetActions = jest.fn<Promise<Array<Action<object>>>, [string, { fieldName: string }]>(
   () => Promise.resolve([])
@@ -51,10 +50,6 @@ function getCompProps(): DiscoverSidebarProps {
       fieldCounts[key] = (fieldCounts[key] || 0) + 1;
     }
   }
-  const availableFields$ = new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    fields: [] as string[],
-  }) as AvailableFields$;
 
   return {
     columns: ['extension'],
@@ -75,7 +70,6 @@ function getCompProps(): DiscoverSidebarProps {
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
     createNewDataView: jest.fn(),
     onDataViewCreated: jest.fn(),
-    availableFields$,
     useNewFieldsApi: true,
   };
 }

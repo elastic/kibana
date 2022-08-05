@@ -30,7 +30,6 @@ export interface SavedSearchData {
   documents$: DataDocuments$;
   totalHits$: DataTotalHits$;
   charts$: DataCharts$;
-  availableFields$: AvailableFields$;
 }
 
 export interface TimechartBucketInterval {
@@ -43,7 +42,6 @@ export type DataMain$ = BehaviorSubject<DataMainMsg>;
 export type DataDocuments$ = BehaviorSubject<DataDocumentsMsg>;
 export type DataTotalHits$ = BehaviorSubject<DataTotalHitsMsg>;
 export type DataCharts$ = BehaviorSubject<DataChartsMessage>;
-export type AvailableFields$ = BehaviorSubject<DataAvailableFieldsMsg>;
 
 export type DataRefetch$ = Subject<DataRefetchMsg>;
 
@@ -134,7 +132,6 @@ export const useSavedSearch = ({
   const documents$: DataDocuments$ = useBehaviorSubject(initialState) as DataDocuments$;
   const totalHits$: DataTotalHits$ = useBehaviorSubject(initialState) as DataTotalHits$;
   const charts$: DataCharts$ = useBehaviorSubject(initialState) as DataCharts$;
-  const availableFields$: AvailableFields$ = useBehaviorSubject(initialState) as AvailableFields$;
 
   const dataSubjects = useMemo(() => {
     return {
@@ -142,9 +139,8 @@ export const useSavedSearch = ({
       documents$,
       totalHits$,
       charts$,
-      availableFields$,
     };
-  }, [main$, charts$, documents$, totalHits$, availableFields$]);
+  }, [main$, charts$, documents$, totalHits$]);
 
   /**
    * The observable to trigger data fetching in UI

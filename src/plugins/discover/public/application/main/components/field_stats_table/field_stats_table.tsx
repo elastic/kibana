@@ -21,7 +21,7 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
 import type { SavedSearch } from '../../../../services/saved_searches';
 import type { GetStateReturn } from '../../services/discover_state';
-import { AvailableFields$, DataRefetch$ } from '../../hooks/use_saved_search';
+import { DataRefetch$ } from '../../hooks/use_saved_search';
 
 export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   dataView: DataView;
@@ -85,13 +85,11 @@ export interface FieldStatisticsTableProps {
    */
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   savedSearchRefetch$?: DataRefetch$;
-  availableFields$?: AvailableFields$;
   searchSessionId?: string;
 }
 
 export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
   const {
-    availableFields$,
     dataView,
     savedSearch,
     query,
@@ -130,18 +128,11 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
       }
     });
 
-    const fields = availableFields$?.subscribe(() => {
-      if (embeddable && !isErrorEmbeddable(embeddable) && !availableFields$?.getValue().error) {
-        embeddable.updateInput({ fieldsToFetch: availableFields$?.getValue().fields });
-      }
-    });
-
     return () => {
       sub?.unsubscribe();
       refetch?.unsubscribe();
-      fields?.unsubscribe();
     };
-  }, [embeddable, stateContainer, savedSearchRefetch$, availableFields$]);
+  }, [embeddable, stateContainer, savedSearchRefetch$]);
 
   useEffect(() => {
     if (embeddable && !isErrorEmbeddable(embeddable)) {
@@ -154,21 +145,11 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
         visibleFieldNames: columns,
         onAddFilter,
         sessionId: searchSessionId,
-        fieldsToFetch: availableFields$?.getValue().fields,
+        fieldsToFetch: columns,
       });
       embeddable.reload();
     }
-  }, [
-    embeddable,
-    dataView,
-    savedSearch,
-    query,
-    columns,
-    filters,
-    onAddFilter,
-    searchSessionId,
-    availableFields$,
-  ]);
+  }, [embeddable, dataView, savedSearch, query, columns, filters, onAddFilter, searchSessionId]);
 
   useEffect(() => {
     if (showPreviewByDefault && embeddable && !isErrorEmbeddable(embeddable)) {

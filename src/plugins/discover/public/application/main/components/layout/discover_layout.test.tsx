@@ -22,7 +22,6 @@ import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_
 import { GetStateReturn } from '../../services/discover_state';
 import { DiscoverLayoutProps } from './types';
 import {
-  AvailableFields$,
   DataCharts$,
   DataDocuments$,
   DataMain$,
@@ -73,11 +72,6 @@ function mountComponent(
     fetchStatus: FetchStatus.COMPLETE,
     result: esHits.map((esHit) => buildDataTableRecord(esHit, dataView)),
   }) as DataDocuments$;
-
-  const availableFields$ = new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    fields: [] as string[],
-  }) as AvailableFields$;
 
   const totalHits$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
@@ -138,7 +132,6 @@ function mountComponent(
     documents$,
     totalHits$,
     charts$,
-    availableFields$,
   };
 
   const props = {

@@ -28,10 +28,9 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
 import { AppState } from '../../services/discover_state';
-import { AvailableFields$, DataDocuments$, RecordRawType } from '../../hooks/use_saved_search';
+import { DataDocuments$, RecordRawType } from '../../hooks/use_saved_search';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
-import { FetchStatus } from '../../../types';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 
@@ -103,10 +102,6 @@ export interface DiscoverSidebarResponsiveProps {
    * Discover view mode
    */
   viewMode: VIEW_MODE;
-  /**
-   * list of available fields fetched from ES
-   */
-  availableFields$: AvailableFields$;
 }
 
 /**
@@ -181,34 +176,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   }, []);
 
   const { dataViewFieldEditor, dataViewEditor } = services;
-  const { availableFields$ } = props;
 
   const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
-
-  useEffect(
-    () => {
-      // For an external embeddable like the Field stats
-      // it is useful to know what fields are populated in the docs fetched
-      // or what fields are selected by the user
-
-      const fieldCnts = fieldCounts.current ?? {};
-
-      const availableFields = props.columns.length > 0 ? props.columns : Object.keys(fieldCnts);
-      availableFields$.next({
-        fetchStatus: FetchStatus.COMPLETE,
-        fields: availableFields,
-      });
-    },
-    // Using columns.length here instead of columns to avoid array reference changing
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      selectedDataView,
-      availableFields$,
-      fieldCounts.current,
-      documentState.result,
-      props.columns.length,
-    ]
-  );
 
   const editField = useMemo(
     () =>
