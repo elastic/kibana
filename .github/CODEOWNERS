@@ -248,6 +248,11 @@
 /packages/kbn-ui-shared-deps-npm/ @elastic/kibana-operations
 /packages/kbn-ui-shared-deps-src/ @elastic/kibana-operations
 /packages/kbn-utils/ @elastic/kibana-operations
+/packages/kbn-jsonc/ @elastic/kibana-operations
+/packages/kbn-kibana-manifest-parser/ @elastic/kibana-operations
+/packages/kbn-kibana-manifest-schema/ @elastic/kibana-operations
+/packages/kbn-managed-vscode-config/ @elastic/kibana-operations
+/packages/kbn-managed-vscode-config-cli/ @elastic/kibana-operations
 /src/cli/keystore/ @elastic/kibana-operations
 /.ci/es-snapshots/ @elastic/kibana-operations
 /.github/workflows/ @elastic/kibana-operations
