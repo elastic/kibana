@@ -374,6 +374,7 @@ class SavedObjectFinderUi extends React.Component<
         ...(taggingApi ? [taggingApi.ui.getSearchBarFilter({ useName: true })] : []),
       ],
       toolsRight: this.props.children ? <>{this.props.children}</> : undefined,
+      'data-test-subj': 'savedObjectFinderSearchInput',
     };
 
     return (
