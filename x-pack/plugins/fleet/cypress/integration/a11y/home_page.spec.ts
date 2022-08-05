@@ -19,9 +19,22 @@ import {
 } from '../../screens/fleet';
 import { AGENT_POLICY_NAME_LINK } from '../../screens/integrations'
 describe('Home page', () => {
-    before(() => {
-        navigateTo(FLEET);
-        cy.getBySel(AGENTS_QUICK_START_TAB_BUTTON, { timeout: 15000 }).should('be.visible');
+  before(() => {
+    navigateTo(FLEET);
+    cy.getBySel(AGENTS_QUICK_START_TAB_BUTTON, { timeout: 15000 }).should('be.visible');
+  });
+  describe('Agents', () => {
+    const fleetServerHost = 'https://localhost:8220';
+    describe('Quick Start', () => {
+      it('Get started with fleet', () => {
+        checkA11y({ skipFailures: false });
+      });
+      it('Install Fleet Server', () => {
+        cy.getBySel('fleetServerHostInput').getBySel('comboBoxSearchInput').type(fleetServerHost);
+        cy.getBySel(GENERATE_FLEET_SERVER_POLICY_BUTTON).click();
+        cy.getBySel(PLATFORM_TYPE_LINUX_BUTTON, { timeout: 15000 }).should('be.visible');
+        checkA11y({ skipFailures: false });
+      });
     });
     describe.skip('Agents', () => {
         const fleetServerHost = 'https://localhost:8220';
