@@ -21,6 +21,9 @@ const getDefaultOptions = (): ChoiceListFormatterOptions => {
   };
 };
 
+/**
+ * Formatter for displaying lists of choices
+ */
 export class ChoiceListFormatter extends DataFormatter {
   private readonly outputContent: string;
 

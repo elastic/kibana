@@ -5,7 +5,14 @@
  * 2.0.
  */
 
+/**
+ * Base class for screen data formatters
+ */
 export class DataFormatter {
+  /**
+   * Must be defiened by Subclasses
+   * @protected
+   */
   protected getOutput(): string {
     throw new Error(`${this.constructor.name}.getOutput() not implemented!`);
   }

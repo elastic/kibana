@@ -49,6 +49,30 @@ class RenderedScreen {
   }
 }
 
+/**
+ * Base class for creating a CLI screen.
+ *
+ * @example
+ *
+ *  // Screen definition
+ *  export class FooScreen extends ScreenBaseClass {
+ *    protected body() {
+ *      return `this is a test screen`
+ *    }
+ *
+ *    protected onEnterChoice(choice) {
+ *      if (choice.toUpperCase() === 'Q') {
+ *        this.hide();
+ *        return;
+ *      }
+ *
+ *      this.throwUnknownChoiceError(choice);
+ *    }
+ *  }
+ *
+ *  // Using the screen
+ *  await new FooScreen().show()
+ */
 export class ScreenBaseClass {
   private readonly ttyOut: TtyWriteStream = stdout;
   private readlineInstance: readline.Interface | undefined = undefined;
@@ -56,6 +80,13 @@ export class ScreenBaseClass {
   private endSession: (() => void) | undefined = undefined;
   private screenRenderInfo: RenderedScreen | undefined;
 
+  /**
+   * Provides content for the header of the screen.
+   *
+   * @param title Displayed on the left side of the header area
+   * @param subTitle Displayed to the right of the header
+   * @protected
+   */
   protected header(title: string = '', subTitle: string = ''): string | DataFormatter {
     const paddedTitle = title ? ` ${title}`.padEnd(CONTENT_60_PERCENT) : '';
     const paddedSubTitle = subTitle ? `| ${`${subTitle} `.padStart(CONTENT_40_PERCENT)}` : '';
@@ -67,6 +98,12 @@ export class ScreenBaseClass {
       : HORIZONTAL_LINE;
   }
 
+  /**
+   * Provides content for the footer of the screen
+   *
+   * @param choices Optional list of choices for display above the footer.
+   * @protected
+   */
   protected footer(choices: Choice[] = [QuitChoice]): string | DataFormatter {
     const displayChoices =
       choices && choices.length
@@ -78,6 +115,11 @@ export class ScreenBaseClass {
   ${displayChoices}${HORIZONTAL_LINE}`;
   }
 
+  /**
+   * Content for the Body area of the screen
+   *
+   * @protected
+   */
   protected body(): string | DataFormatter {
     return '\n\n(This screen has no content)\n\n';
   }
@@ -92,6 +134,19 @@ export class ScreenBaseClass {
    */
   protected onEnterChoice(choice: string) {
     throw new Error(`${this.constructor.name}.onEnterChoice() not implemented!`);
+  }
+
+  /**
+   * Throw an error indicating invalid choice was made by the user.
+   * @param choice
+   * @protected
+   */
+  protected throwUnknownChoiceError(choice: string): never {
+    throw new Error(`Unknown choice: ${choice}`);
+  }
+
+  protected getOutputContent(item: string | DataFormatter): string {
+    return item instanceof DataFormatter ? item.output : item;
   }
 
   private closeReadline() {
@@ -144,6 +199,8 @@ export class ScreenBaseClass {
       const rl = readline.createInterface({ input: stdin, output: stdout });
       this.readlineInstance = rl;
 
+      // TODO:PT experiment with using `rl.promp()` instead of `question()`
+
       rl.question(prompt ?? 'Enter choice: ', (selection) => {
         if (this.readlineInstance === rl) {
           this.clearPromptOutput();
@@ -165,7 +222,10 @@ export class ScreenBaseClass {
     });
   }
 
-  show(): Promise<void> {
+  /**
+   * Will display the screen and return a promise that is resolved once that screen is hidden
+   */
+  public show(): Promise<void> {
     const { ttyOut } = this;
     const headerContent = this.header();
     const bodyContent = this.body();
@@ -195,7 +255,10 @@ export class ScreenBaseClass {
     return this.showPromise;
   }
 
-  hide() {
+  /**
+   * Will hide the screen and fulfill the promise returned by `.show()`
+   */
+  public hide() {
     const { ttyOut } = this;
     this.closeReadline();
     ttyOut.cursorTo(0, 0);
@@ -206,13 +269,5 @@ export class ScreenBaseClass {
       this.endSession();
       this.endSession = undefined;
     }
-  }
-
-  protected throwUnknownChoiceError(choice: string): never {
-    throw new Error(`Unknown choice: ${choice}`);
-  }
-
-  protected getOutputContent(item: string | DataFormatter): string {
-    return item instanceof DataFormatter ? item.output : item;
   }
 }
