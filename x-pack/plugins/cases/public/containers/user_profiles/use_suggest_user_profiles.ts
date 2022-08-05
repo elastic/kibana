@@ -6,7 +6,7 @@
  */
 
 import { useState } from 'react';
-import { useQuery, UseQueryResult } from 'react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import useDebounce from 'react-use/lib/useDebounce';
 import { UserProfile } from '@kbn/security-plugin/common';
 import { DEFAULT_USER_SIZE } from '../../../common/constants';
