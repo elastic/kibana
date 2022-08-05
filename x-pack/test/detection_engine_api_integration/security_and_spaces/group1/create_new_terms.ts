@@ -293,8 +293,8 @@ export default ({ getService }: FtrProviderContext) => {
         ...getCreateNewTermsRulesSchemaMock('rule-1', true),
         new_terms_fields: ['host.name'],
         from: '2019-02-19T20:42:00.000Z',
-        // Set the history_window_start equal to 'from' so we should alert on all terms in the time range
-        history_window_start: '2019-02-19T20:42:00.000Z',
+        // Set the history_window_start close to 'from' so we should alert on all terms in the time range
+        history_window_start: '2019-02-19T20:41:59.000Z',
       };
 
       const createdRule = await createRule(supertest, log, rule);
@@ -344,8 +344,8 @@ export default ({ getService }: FtrProviderContext) => {
           index: ['timestamp-fallback-test', 'myfakeindex-3'],
           new_terms_fields: ['host.name'],
           from: '2020-12-16T16:00:00.000Z',
-          // Set the history_window_start equal to 'from' so we should alert on all terms in the time range
-          history_window_start: '2020-12-16T16:00:00.000Z',
+          // Set the history_window_start close to 'from' so we should alert on all terms in the time range
+          history_window_start: '2020-12-16T15:59:00.000Z',
           timestamp_override: 'event.ingested',
         };
 
@@ -368,8 +368,8 @@ export default ({ getService }: FtrProviderContext) => {
         ...getCreateNewTermsRulesSchemaMock('rule-1', true),
         new_terms_fields: ['host.name'],
         from: '2019-02-19T20:42:00.000Z',
-        // Set the history_window_start equal to 'from' so we should alert on all terms in the time range
-        history_window_start: '2019-02-19T20:42:00.000Z',
+        // Set the history_window_start close to 'from' so we should alert on all terms in the time range
+        history_window_start: '2019-02-19T20:41:59.000Z',
       };
       const createdRule = await createRuleWithExceptionEntries(supertest, log, rule, [
         [
@@ -406,8 +406,8 @@ export default ({ getService }: FtrProviderContext) => {
         ...getCreateNewTermsRulesSchemaMock('rule-1', true),
         new_terms_fields: ['process.pid'],
         from: '2018-02-19T20:42:00.000Z',
-        // Set the history_window_start equal to 'from' so we should alert on all terms in the time range
-        history_window_start: '2018-02-19T20:42:00.000Z',
+        // Set the history_window_start close to 'from' so we should alert on all terms in the time range
+        history_window_start: '2018-02-19T20:41:59.000Z',
         max_signals: maxSignals,
       };
 

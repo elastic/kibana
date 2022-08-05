@@ -363,7 +363,11 @@ export const getNewTermsRule = (): NewTermsRule => ({
   mitre: [getMitre1(), getMitre2()],
   note: '# test markdown',
   newTermsFields: ['host.name'],
-  historyWindowSize: getLookBack(),
+  historyWindowSize: {
+    interval: '51000',
+    timeType: 'Hours',
+    type: 'h',
+  },
   runsEvery: getRunsEvery(),
   lookBack: getLookBack(),
   timeline: getTimeline(),
