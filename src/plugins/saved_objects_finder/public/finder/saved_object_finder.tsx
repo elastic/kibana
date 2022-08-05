@@ -218,7 +218,6 @@ class SavedObjectFinderUi extends React.Component<
 
   public componentDidMount() {
     this.isComponentMounted = true;
-    this.fetchItems();
     this.fetchAllowedTypes();
   }
 
@@ -240,7 +239,7 @@ class SavedObjectFinderUi extends React.Component<
 
   private fetchAllowedTypes = async () => {
     const allowedTypes = await this.props.savedObjectsManagement.getAllowedTypes();
-    this.setState({ allowedTypes });
+    this.setState({ allowedTypes }, this.fetchItems);
   };
 
   // server-side paging not supported
