@@ -108,8 +108,6 @@ export interface ExternalServiceCommentResponse {
 export interface GetIncidentResponse {
   id: string;
   title: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface ExternalServiceApi {

@@ -475,7 +475,7 @@
               "\nReports a telemetry event."
             ],
             "signature": [
-              "<EventTypeData extends Record<string, unknown>>(eventType: string, eventData: EventTypeData) => void"
+              "<EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void"
             ],
             "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
             "deprecated": false,
@@ -1031,7 +1031,7 @@
             "signature": [
               "{ optIn: (optInConfig: ",
               "OptInConfig",
-              ") => void; reportEvent: <EventTypeData extends Record<string, unknown>>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+              ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
               "Observable",
               "<",
               "TelemetryCounter",
@@ -1228,7 +1228,7 @@
             "signature": [
               "{ optIn: (optInConfig: ",
               "OptInConfig",
-              ") => void; reportEvent: <EventTypeData extends Record<string, unknown>>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+              ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
               "Observable",
               "<",
               "TelemetryCounter",
@@ -1334,13 +1334,7 @@
               "{@link SavedObjectsStart}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-public.SavedObjectsStart",
-                "text": "SavedObjectsStart"
-              }
+              "SavedObjectsStart"
             ],
             "path": "src/core/public/index.ts",
             "deprecated": false
@@ -1794,7 +1788,8 @@
           "\nDefinition of the full event structure"
         ],
         "signature": [
-          "Event"
+          "Event",
+          "<Properties>"
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
@@ -1826,14 +1821,14 @@
           {
             "parentPluginId": "core",
             "id": "def-public.Event.properties",
-            "type": "Object",
+            "type": "Uncategorized",
             "tags": [],
             "label": "properties",
             "description": [
               "\nThe specific properties of the event type."
             ],
             "signature": [
-              "{ [x: string]: unknown; }"
+              "Properties"
             ],
             "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
             "deprecated": false
@@ -4165,7 +4160,7 @@
             "signature": [
               "(events: ",
               "Event",
-              "[]) => void"
+              "<Record<string, unknown>>[]) => void"
             ],
             "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
             "deprecated": false,
@@ -4181,7 +4176,7 @@
                 ],
                 "signature": [
                   "Event",
-                  "[]"
+                  "<Record<string, unknown>>[]"
                 ],
                 "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
                 "deprecated": false,
@@ -8676,6 +8671,37 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-public.SavedObjectsStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsStart",
+        "description": [],
+        "signature": [
+          "SavedObjectsStart"
+        ],
+        "path": "node_modules/@types/kbn__core-saved-objects-browser/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.SavedObjectsStart.client",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [
+              "{@link SavedObjectsClientContract}"
+            ],
+            "signature": [
+              "SavedObjectsClientContract"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-browser/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-public.SavedObjectsUpdateOptions",
         "type": "Interface",
         "tags": [],
@@ -9659,7 +9685,7 @@
         "signature": [
           "{ optIn: (optInConfig: ",
           "OptInConfig",
-          ") => void; reportEvent: <EventTypeData extends Record<string, unknown>>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+          ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
           "Observable",
           "<",
           "TelemetryCounter",
@@ -9691,7 +9717,7 @@
         "signature": [
           "{ optIn: (optInConfig: ",
           "OptInConfig",
-          ") => void; reportEvent: <EventTypeData extends Record<string, unknown>>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+          ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
           "Observable",
           "<",
           "TelemetryCounter",
@@ -10538,7 +10564,7 @@
               "\nReports a telemetry event."
             ],
             "signature": [
-              "<EventTypeData extends Record<string, unknown>>(eventType: string, eventData: EventTypeData) => void"
+              "<EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void"
             ],
             "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
             "deprecated": false,
@@ -12127,7 +12153,7 @@
             "signature": [
               "{ optIn: (optInConfig: ",
               "OptInConfig",
-              ") => void; reportEvent: <EventTypeData extends Record<string, unknown>>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+              ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
               "Observable",
               "<",
               "TelemetryCounter",
@@ -12316,7 +12342,7 @@
             "signature": [
               "{ optIn: (optInConfig: ",
               "OptInConfig",
-              ") => void; reportEvent: <EventTypeData extends Record<string, unknown>>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+              ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
               "Observable",
               "<",
               "TelemetryCounter",
@@ -12608,7 +12634,7 @@
             "signature": [
               "{ optIn: (optInConfig: ",
               "OptInConfig",
-              ") => void; reportEvent: <EventTypeData extends Record<string, unknown>>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+              ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
               "Observable",
               "<",
               "TelemetryCounter",
@@ -13955,7 +13981,8 @@
           "\nDefinition of the full event structure"
         ],
         "signature": [
-          "Event"
+          "Event",
+          "<Properties>"
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
@@ -13987,14 +14014,14 @@
           {
             "parentPluginId": "core",
             "id": "def-server.Event.properties",
-            "type": "Object",
+            "type": "Uncategorized",
             "tags": [],
             "label": "properties",
             "description": [
               "\nThe specific properties of the event type."
             ],
             "signature": [
-              "{ [x: string]: unknown; }"
+              "Properties"
             ],
             "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
             "deprecated": false
@@ -23071,7 +23098,7 @@
             "signature": [
               "(events: ",
               "Event",
-              "[]) => void"
+              "<Record<string, unknown>>[]) => void"
             ],
             "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
             "deprecated": false,
@@ -23087,7 +23114,7 @@
                 ],
                 "signature": [
                   "Event",
-                  "[]"
+                  "<Record<string, unknown>>[]"
                 ],
                 "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
                 "deprecated": false,
@@ -36270,7 +36297,7 @@
         "signature": [
           "{ optIn: (optInConfig: ",
           "OptInConfig",
-          ") => void; reportEvent: <EventTypeData extends Record<string, unknown>>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+          ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
           "Observable",
           "<",
           "TelemetryCounter",
@@ -36302,7 +36329,7 @@
         "signature": [
           "{ optIn: (optInConfig: ",
           "OptInConfig",
-          ") => void; reportEvent: <EventTypeData extends Record<string, unknown>>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+          ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
           "Observable",
           "<",
           "TelemetryCounter",
@@ -36334,7 +36361,7 @@
         "signature": [
           "{ optIn: (optInConfig: ",
           "OptInConfig",
-          ") => void; reportEvent: <EventTypeData extends Record<string, unknown>>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+          ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
           "Observable",
           "<",
           "TelemetryCounter",

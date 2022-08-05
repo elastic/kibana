@@ -140,7 +140,7 @@ export const getNoItemsMessage = (createItem: () => void) => (
   <EuiEmptyPrompt
     iconType="visualizeApp"
     title={
-      <h1 id="visualizeListingHeading">
+      <h1 id="visualizeListingHeading" data-test-subj="emptyListPrompt">
         <FormattedMessage
           id="visualizations.listing.createNew.title"
           defaultMessage="Create your first visualization"
@@ -156,12 +156,7 @@ export const getNoItemsMessage = (createItem: () => void) => (
       </p>
     }
     actions={
-      <EuiButton
-        onClick={createItem}
-        fill
-        iconType="plusInCircle"
-        data-test-subj="createVisualizationPromptButton"
-      >
+      <EuiButton onClick={createItem} fill iconType="plusInCircle" data-test-subj="newItemButton">
         <FormattedMessage
           id="visualizations.listing.createNew.createButtonLabel"
           defaultMessage="Create new visualization"
