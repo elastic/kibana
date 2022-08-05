@@ -695,23 +695,32 @@ export class SettingsPageObject extends FtrService {
     await this.clickSaveScriptedField();
   }
 
-  async addRuntimeField(
-    name: string,
-    type: string,
-    script: string,
-    doSaveField = true,
-    compositeCount = 0
-  ) {
+  async addRuntimeField(name: string, type: string, script: string, doSaveField = true) {
     await this.clickAddField();
     await this.setFieldName(name);
     await this.setFieldType(type);
     if (script) {
-      await this.setFieldScript(script, type === 'Composite');
-    }
-    if (compositeCount > 0) {
-      await this.testSubjects.find(`typeField_${compositeCount - 1}`);
+      await this.setFieldScript(script);
     }
 
+    if (doSaveField) {
+      await this.clickSaveField();
+    }
+  }
+
+  async addCompositeRuntimeField(
+    name: string,
+    script: string,
+    doSaveField = true,
+    subfieldCount = 0
+  ) {
+    await this.clickAddField();
+    await this.setFieldName(name);
+    await this.setFieldType('Composite');
+    await this.setFieldScript(script, true);
+    if (subfieldCount > 0) {
+      await this.testSubjects.find(`typeField_${subfieldCount - 1}`);
+    }
     if (doSaveField) {
       await this.clickSaveField();
     }
@@ -778,11 +787,15 @@ export class SettingsPageObject extends FtrService {
     await this.browser.pressKeys(this.browser.keys.RETURN);
   }
 
-  async setFieldScript(script: string, skipToggleRow = false) {
+  async setFieldScript(script: string) {
     this.log.debug('set script = ' + script);
-    if (!skipToggleRow) {
-      await this.toggleRow('valueRow');
-    }
+    await this.toggleRow('valueRow');
+    await this.monacoEditor.waitCodeEditorReady('valueRow');
+    await this.monacoEditor.setCodeEditorValue(script);
+  }
+
+  async setCompositeScript(script: string) {
+    this.log.debug('set composite script = ' + script);
     await this.monacoEditor.waitCodeEditorReady('scriptFieldRow');
     await this.monacoEditor.setCodeEditorValue(script);
   }

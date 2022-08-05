@@ -40,9 +40,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getFieldsTabCount(), 10);
         await log.debug('add runtime field');
-        await PageObjects.settings.addRuntimeField(
+        await PageObjects.settings.addCompositeRuntimeField(
           fieldName,
-          'Composite',
           "emit('a','hello world')",
           false,
           1
