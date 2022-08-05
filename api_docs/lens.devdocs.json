@@ -1462,7 +1462,7 @@
         "tags": [],
         "label": "DatatableVisualizationState",
         "description": [],
-        "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
+        "path": "x-pack/plugins/lens/public/visualizations/datatable/visualization.tsx",
         "deprecated": false,
         "children": [
           {
@@ -1476,7 +1476,7 @@
               "ColumnState",
               "[]"
             ],
-            "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
+            "path": "x-pack/plugins/lens/public/visualizations/datatable/visualization.tsx",
             "deprecated": false
           },
           {
@@ -1486,7 +1486,7 @@
             "tags": [],
             "label": "layerId",
             "description": [],
-            "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
+            "path": "x-pack/plugins/lens/public/visualizations/datatable/visualization.tsx",
             "deprecated": false
           },
           {
@@ -1499,7 +1499,7 @@
             "signature": [
               "\"data\" | \"referenceLine\" | \"annotations\""
             ],
-            "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
+            "path": "x-pack/plugins/lens/public/visualizations/datatable/visualization.tsx",
             "deprecated": false
           },
           {
@@ -1513,7 +1513,7 @@
               "SortingState",
               " | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
+            "path": "x-pack/plugins/lens/public/visualizations/datatable/visualization.tsx",
             "deprecated": false
           },
           {
@@ -1526,7 +1526,7 @@
             "signature": [
               "\"auto\" | \"custom\" | \"single\" | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
+            "path": "x-pack/plugins/lens/public/visualizations/datatable/visualization.tsx",
             "deprecated": false
           },
           {
@@ -1539,7 +1539,7 @@
             "signature": [
               "\"auto\" | \"custom\" | \"single\" | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
+            "path": "x-pack/plugins/lens/public/visualizations/datatable/visualization.tsx",
             "deprecated": false
           },
           {
@@ -1552,7 +1552,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
+            "path": "x-pack/plugins/lens/public/visualizations/datatable/visualization.tsx",
             "deprecated": false
           },
           {
@@ -1565,7 +1565,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
+            "path": "x-pack/plugins/lens/public/visualizations/datatable/visualization.tsx",
             "deprecated": false
           },
           {
@@ -1579,7 +1579,7 @@
               "PagingState",
               " | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
+            "path": "x-pack/plugins/lens/public/visualizations/datatable/visualization.tsx",
             "deprecated": false
           }
         ],
@@ -5525,7 +5525,7 @@
         "tags": [],
         "label": "XYAnnotationLayerConfig",
         "description": [],
-        "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+        "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -5535,7 +5535,7 @@
             "tags": [],
             "label": "layerId",
             "description": [],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -5548,7 +5548,7 @@
             "signature": [
               "\"annotations\""
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -5568,7 +5568,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -5581,7 +5581,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           }
         ],
@@ -5993,7 +5993,7 @@
         "tags": [],
         "label": "XYDataLayerConfig",
         "description": [],
-        "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+        "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -6003,7 +6003,7 @@
             "tags": [],
             "label": "layerId",
             "description": [],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6016,7 +6016,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6029,7 +6029,7 @@
             "signature": [
               "\"data\""
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6042,7 +6042,7 @@
             "signature": [
               "\"bar\" | \"line\" | \"area\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6055,7 +6055,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6068,7 +6068,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6088,7 +6088,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6101,7 +6101,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6115,7 +6115,7 @@
               "PaletteOutput",
               "<{ [key: string]: unknown; }> | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6128,7 +6128,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6148,7 +6148,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6161,7 +6161,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6174,7 +6174,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           }
         ],
@@ -6187,7 +6187,7 @@
         "tags": [],
         "label": "XYReferenceLineLayerConfig",
         "description": [],
-        "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+        "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -6197,7 +6197,7 @@
             "tags": [],
             "label": "layerId",
             "description": [],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6210,7 +6210,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6230,7 +6230,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6243,7 +6243,7 @@
             "signature": [
               "\"referenceLine\""
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           }
         ],
@@ -6314,7 +6314,7 @@
         "tags": [],
         "label": "XYState",
         "description": [],
-        "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+        "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -6327,7 +6327,7 @@
             "signature": [
               "\"bar\" | \"line\" | \"area\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6346,7 +6346,7 @@
                 "text": "LegendConfig"
               }
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6366,7 +6366,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6386,7 +6386,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6399,7 +6399,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6419,7 +6419,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6439,7 +6439,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6459,7 +6459,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6479,7 +6479,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6499,7 +6499,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6512,7 +6512,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6525,7 +6525,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6538,7 +6538,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6558,7 +6558,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6578,7 +6578,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6598,7 +6598,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6618,7 +6618,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6638,7 +6638,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6652,7 +6652,7 @@
               "LabelsOrientationConfig",
               " | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6672,7 +6672,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6685,7 +6685,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6698,7 +6698,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6711,7 +6711,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           }
         ],
@@ -6724,7 +6724,7 @@
         "tags": [],
         "label": "YConfig",
         "description": [],
-        "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+        "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -6734,7 +6734,7 @@
             "tags": [],
             "label": "forAccessor",
             "description": [],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6747,7 +6747,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6760,7 +6760,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6773,7 +6773,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6793,7 +6793,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6813,7 +6813,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6833,7 +6833,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6846,7 +6846,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           },
           {
@@ -6866,7 +6866,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false
           }
         ],
@@ -7196,7 +7196,7 @@
           "Palette",
           " | undefined; }"
         ],
-        "path": "x-pack/plugins/lens/public/heatmap_visualization/types.ts",
+        "path": "x-pack/plugins/lens/public/visualizations/heatmap/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7517,7 +7517,7 @@
         "signature": [
           "\"bar\" | \"line\" | \"area\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
         ],
-        "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+        "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7668,7 +7668,7 @@
           " | ",
           "ValidXYDataLayerConfig"
         ],
-        "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+        "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7760,7 +7760,7 @@
             "text": "XYAnnotationLayerConfig"
           }
         ],
-        "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+        "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7774,7 +7774,7 @@
         "signature": [
           "\"auto\" | \"bottom\" | \"left\" | \"right\""
         ],
-        "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+        "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },

@@ -788,6 +788,63 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-public.UserProfileSuggestParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserProfileSuggestParams",
+        "description": [
+          "\nParameters for the suggest API."
+        ],
+        "path": "x-pack/plugins/security/public/account_management/user_profile/user_profile_api_client.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-public.UserProfileSuggestParams.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nQuery string used to match name-related fields in user profiles. The following fields are treated as\nname-related: username, full_name and email."
+            ],
+            "path": "x-pack/plugins/security/public/account_management/user_profile/user_profile_api_client.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-public.UserProfileSuggestParams.size",
+            "type": "number",
+            "tags": [],
+            "label": "size",
+            "description": [
+              "\nDesired number of suggestions to return. The default value is 10."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/security/public/account_management/user_profile/user_profile_api_client.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-public.UserProfileSuggestParams.dataPath",
+            "type": "string",
+            "tags": [],
+            "label": "dataPath",
+            "description": [
+              "\nBy default, suggest API returns user information, but does not return any user data. The optional \"dataPath\"\nparameter can be used to return personal data for this user (within `kibana` namespace only)."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/security/public/account_management/user_profile/user_profile_api_client.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -934,7 +991,31 @@
             "\nA set of methods to work with Kibana user profiles."
           ],
           "signature": [
-            "{ getCurrent<D extends ",
+            "{ suggest: <D extends ",
+            {
+              "pluginId": "security",
+              "scope": "common",
+              "docId": "kibSecurityPluginApi",
+              "section": "def-common.UserProfileData",
+              "text": "UserProfileData"
+            },
+            ">(path: string, params: ",
+            {
+              "pluginId": "security",
+              "scope": "public",
+              "docId": "kibSecurityPluginApi",
+              "section": "def-public.UserProfileSuggestParams",
+              "text": "UserProfileSuggestParams"
+            },
+            ") => Promise<",
+            {
+              "pluginId": "security",
+              "scope": "common",
+              "docId": "kibSecurityPluginApi",
+              "section": "def-common.UserProfile",
+              "text": "UserProfile"
+            },
+            "<D>[]>; getCurrent: <D extends ",
             {
               "pluginId": "security",
               "scope": "common",
@@ -950,23 +1031,15 @@
               "section": "def-public.UserProfileGetCurrentParams",
               "text": "UserProfileGetCurrentParams"
             },
-            " | undefined): Promise<",
+            " | undefined) => Promise<",
             {
               "pluginId": "security",
               "scope": "common",
               "docId": "kibSecurityPluginApi",
-              "section": "def-common.UserProfileWithSecurity",
-              "text": "UserProfileWithSecurity"
+              "section": "def-common.GetUserProfileResponse",
+              "text": "GetUserProfileResponse"
             },
-            "<D, ",
-            {
-              "pluginId": "security",
-              "scope": "common",
-              "docId": "kibSecurityPluginApi",
-              "section": "def-common.UserProfileLabels",
-              "text": "UserProfileLabels"
-            },
-            "> | null>; bulkGet<D extends ",
+            "<D>>; bulkGet: <D extends ",
             {
               "pluginId": "security",
               "scope": "common",
@@ -982,7 +1055,7 @@
               "section": "def-public.UserProfileBulkGetParams",
               "text": "UserProfileBulkGetParams"
             },
-            "): Promise<",
+            ") => Promise<",
             {
               "pluginId": "security",
               "scope": "common",
@@ -2048,7 +2121,7 @@
             "tags": [],
             "label": "suggest",
             "description": [
-              "\nRetrieves a single user profile by identifier."
+              "\nSuggests multiple user profiles by search criteria."
             ],
             "signature": [
               "<D extends ",
@@ -3700,7 +3773,7 @@
         "tags": [],
         "label": "UserProfile",
         "description": [
-          "\nDescribes basic properties stored in user profile."
+          "\nIMPORTANT:\n\nThe types in this file are duplicated at\n`packages/kbn-user-profile-components/src/user_profile.ts`\n\nWhen making changes please ensure to keep both files in sync.\n\nDescribes basic properties stored in user profile."
         ],
         "signature": [
           {
@@ -3723,18 +3796,6 @@
             "label": "uid",
             "description": [
               "\nUnique ID for of the user profile."
-            ],
-            "path": "x-pack/plugins/security/common/model/user_profile.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-common.UserProfile.enabled",
-            "type": "boolean",
-            "tags": [],
-            "label": "enabled",
-            "description": [
-              "\nIndicates whether user profile is enabled or not."
             ],
             "path": "x-pack/plugins/security/common/model/user_profile.ts",
             "deprecated": false
