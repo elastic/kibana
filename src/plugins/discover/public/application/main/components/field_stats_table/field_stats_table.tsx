@@ -145,7 +145,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
         visibleFieldNames: columns,
         onAddFilter,
         sessionId: searchSessionId,
-        fieldsToFetch: columns,
+        fieldsToFetch: columns.length > 0 ? columns : undefined,
       });
       embeddable.reload();
     }
