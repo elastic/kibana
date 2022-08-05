@@ -47,7 +47,7 @@ export const getEventList = async ({
     services,
     ruleExecutionLogger,
     filter,
-    pageSize: Math.ceil(Math.min(tuple.maxSignals, calculatedPerPage)),
+    pageSize: calculatedPerPage,
     primaryTimestamp,
     secondaryTimestamp,
     sortOrder: 'desc',
