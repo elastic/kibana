@@ -14,14 +14,16 @@ const nextTick = () => new Promise((res) => process.nextTick(res));
 
 import {
   EuiEmptyPrompt,
+  EuiInMemoryTable,
+  EuiLink,
   EuiListGroup,
-  EuiListGroupItem,
   EuiLoadingSpinner,
   EuiPagination,
   EuiTablePagination,
+  Query,
 } from '@elastic/eui';
 import { IconType } from '@elastic/eui';
-import { shallow } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import React from 'react';
 import * as sinon from 'sinon';
 import { SavedObjectFinderUi as SavedObjectFinder } from './saved_object_finder';
@@ -29,6 +31,8 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/public/mocks';
 import { savedObjectsPluginMock } from '@kbn/saved-objects-plugin/public/mocks';
 import { savedObjectTaggingOssPluginMock } from '@kbn/saved-objects-tagging-oss-plugin/public/mocks';
+import { findTestSubject } from '@kbn/test-jest-helpers';
+import { SavedObjectManagementTypeInfo } from '@kbn/saved-objects-management-plugin/public';
 
 describe('SavedObjectsFinder', () => {
   const doc = {
@@ -56,13 +60,27 @@ describe('SavedObjectsFinder', () => {
   ];
 
   const savedObjectsManagement = savedObjectsManagementPluginMock.createStartContract();
-  savedObjectsManagement.parseQuery.mockImplementation(() => ({
-    queryText: '',
-    visibleTypes: [],
-    selectedTags: [],
-  }));
-  savedObjectsManagement.getAllowedTypes.mockImplementation(() => Promise.resolve([]));
+  savedObjectsManagement.parseQuery.mockImplementation(
+    (query: Query, types: SavedObjectManagementTypeInfo[]) => ({
+      queryText: query.text,
+      visibleTypes: types.map((type) => type.name),
+      selectedTags: [],
+    })
+  );
+  savedObjectsManagement.getAllowedTypes.mockImplementation(() =>
+    Promise.resolve([
+      {
+        name: 'search',
+        displayName: 'search',
+        hidden: false,
+        namespaceType: 'single',
+      },
+    ])
+  );
+
   const savedObjectsPlugin = savedObjectsPluginMock.createStartContract();
+  jest.spyOn(savedObjectsPlugin.settings, 'getListingLimit').mockImplementation(() => 10);
+
   const savedObjectsTagging = savedObjectTaggingOssPluginMock.createStart().getTaggingApi();
 
   it('should call saved object client on startup', async () => {
@@ -70,7 +88,6 @@ describe('SavedObjectsFinder', () => {
     (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
       Promise.resolve({ savedObjects: [doc] })
     );
-    core.uiSettings.get.mockImplementation(() => 10);
 
     const wrapper = shallow(
       <SavedObjectFinder
@@ -82,12 +99,14 @@ describe('SavedObjectsFinder', () => {
         savedObjectMetaData={searchMetaData}
       />
     );
-    wrapper.instance().componentDidMount!();
 
+    wrapper.instance().componentDidMount!();
+    await nextTick();
     expect(core.savedObjects.client.find).toHaveBeenCalledWith({
       type: ['search'],
       fields: ['title', 'name'],
       search: undefined,
+      hasReference: undefined,
       page: 1,
       perPage: 10,
       searchFields: ['title^3', 'description', 'name'],
@@ -100,7 +119,6 @@ describe('SavedObjectsFinder', () => {
     (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
       Promise.resolve({ savedObjects: [doc] })
     );
-    core.uiSettings.get.mockImplementation(() => 10);
 
     const wrapper = shallow(
       <SavedObjectFinder
@@ -116,8 +134,11 @@ describe('SavedObjectsFinder', () => {
     wrapper.instance().componentDidMount!();
     await nextTick();
     expect(
-      wrapper.containsMatchingElement(<EuiListGroupItem iconType="search" label="Example title" />)
-    ).toEqual(true);
+      wrapper
+        .find(EuiInMemoryTable)
+        .prop('items')
+        .map((item: any) => item.attributes)
+    ).toEqual([doc.attributes]);
   });
 
   it('should call onChoose on item click', async () => {
@@ -126,9 +147,8 @@ describe('SavedObjectsFinder', () => {
     (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
       Promise.resolve({ savedObjects: [doc] })
     );
-    core.uiSettings.get.mockImplementation(() => 10);
 
-    const wrapper = shallow(
+    const wrapper = mount(
       <SavedObjectFinder
         savedObjects={core.savedObjects}
         uiSettings={core.uiSettings}
@@ -142,21 +162,21 @@ describe('SavedObjectsFinder', () => {
 
     wrapper.instance().componentDidMount!();
     await nextTick();
-    wrapper.find(EuiListGroupItem).first().simulate('click');
+    wrapper.update();
+    findTestSubject(wrapper, 'savedObjectTitleExample-title').simulate('click');
     expect(chooseStub.calledWith('1', 'search', `${doc.attributes.title} (Search)`, doc)).toEqual(
       true
     );
   });
 
   describe('sorting', () => {
-    it('should list items ascending', async () => {
+    it('should list items by title ascending', async () => {
       const core = coreMock.createStart();
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({ savedObjects: [doc, doc2] })
       );
-      core.uiSettings.get.mockImplementation(() => 10);
 
-      const wrapper = shallow(
+      const wrapper = mount(
         <SavedObjectFinder
           savedObjects={core.savedObjects}
           uiSettings={core.uiSettings}
@@ -166,21 +186,22 @@ describe('SavedObjectsFinder', () => {
           savedObjectMetaData={searchMetaData}
         />
       );
+
       wrapper.instance().componentDidMount!();
       await nextTick();
-      const list = wrapper.find(EuiListGroup);
-      expect(list.childAt(0).key()).toBe('2');
-      expect(list.childAt(1).key()).toBe('1');
+      wrapper.update();
+      const titleLinks = wrapper.find(EuiLink);
+      expect(titleLinks.at(0).text()).toEqual(doc.attributes.title);
+      expect(titleLinks.at(1).text()).toEqual(doc2.attributes.title);
     });
 
-    it('should list items descending', async () => {
+    it('should list items by title descending', async () => {
       const core = coreMock.createStart();
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({ savedObjects: [doc, doc2] })
       );
-      core.uiSettings.get.mockImplementation(() => 10);
 
-      const wrapper = shallow(
+      const wrapper = mount(
         <SavedObjectFinder
           savedObjects={core.savedObjects}
           uiSettings={core.uiSettings}
@@ -193,10 +214,13 @@ describe('SavedObjectsFinder', () => {
 
       wrapper.instance().componentDidMount!();
       await nextTick();
-      wrapper.setState({ sortDirection: 'desc' });
-      const list = wrapper.find(EuiListGroup);
-      expect(list.childAt(0).key()).toBe('1');
-      expect(list.childAt(1).key()).toBe('2');
+      findTestSubject(
+        findTestSubject(wrapper, 'tableHeaderCell_title_1'),
+        'tableHeaderSortButton'
+      ).simulate('click');
+      const titleLinks = wrapper.find(EuiLink);
+      expect(titleLinks.at(0).text()).toEqual(doc2.attributes.title);
+      expect(titleLinks.at(1).text()).toEqual(doc.attributes.title);
     });
   });
 
@@ -205,7 +229,6 @@ describe('SavedObjectsFinder', () => {
     (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
       Promise.resolve({ savedObjects: [doc, doc2] })
     );
-    core.uiSettings.get.mockImplementation(() => 10);
 
     const wrapper = shallow(
       <SavedObjectFinder
@@ -227,9 +250,9 @@ describe('SavedObjectsFinder', () => {
 
     wrapper.instance().componentDidMount!();
     await nextTick();
-    const list = wrapper.find(EuiListGroup);
-    expect(list.childAt(0).key()).toBe('2');
-    expect(list.children().length).toBe(1);
+    const items: any[] = wrapper.find(EuiInMemoryTable).prop('items');
+    expect(items.length).toBe(1);
+    expect(items[0].attributes.title).toBe(doc2.attributes.title);
   });
 
   describe('search', () => {
@@ -238,9 +261,8 @@ describe('SavedObjectsFinder', () => {
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({ savedObjects: [doc, doc2] })
       );
-      core.uiSettings.get.mockImplementation(() => 10);
 
-      const wrapper = shallow(
+      const wrapper = mount(
         <SavedObjectFinder
           savedObjects={core.savedObjects}
           uiSettings={core.uiSettings}
@@ -250,17 +272,17 @@ describe('SavedObjectsFinder', () => {
           savedObjectMetaData={searchMetaData}
         />
       );
+
       wrapper.instance().componentDidMount!();
       await nextTick();
       wrapper
-        .find('[data-test-subj="savedObjectFinderSearchInput"]')
-        .first()
-        .simulate('change', { target: { value: 'abc' } });
-
+        .find('[data-test-subj="savedObjectFinderSearchInput"] input')
+        .simulate('keyup', { key: 'Enter', target: { value: 'abc' } });
       expect(core.savedObjects.client.find).toHaveBeenCalledWith({
         type: ['search'],
         fields: ['title', 'name'],
         search: 'abc*',
+        hasReference: undefined,
         page: 1,
         perPage: 10,
         searchFields: ['title^3', 'description', 'name'],
@@ -270,10 +292,9 @@ describe('SavedObjectsFinder', () => {
 
     it('should include additional fields in search if listed in meta data', async () => {
       const core = coreMock.createStart();
-      core.uiSettings.get.mockImplementation(() => 10);
       (core.savedObjects.client.find as jest.Mock).mockResolvedValue({ savedObjects: [] });
 
-      const wrapper = shallow(
+      const wrapper = mount(
         <SavedObjectFinder
           savedObjects={core.savedObjects}
           uiSettings={core.uiSettings}
@@ -296,17 +317,17 @@ describe('SavedObjectsFinder', () => {
           ]}
         />
       );
+
       wrapper.instance().componentDidMount!();
       await nextTick();
       wrapper
-        .find('[data-test-subj="savedObjectFinderSearchInput"]')
-        .first()
-        .simulate('change', { target: { value: 'abc' } });
-
+        .find('[data-test-subj="savedObjectFinderSearchInput"] input')
+        .simulate('keyup', { key: 'Enter', target: { value: 'abc' } });
       expect(core.savedObjects.client.find).toHaveBeenCalledWith({
         type: ['type1', 'type2'],
         fields: ['title', 'name', 'field1', 'field2', 'field3'],
         search: 'abc*',
+        hasReference: undefined,
         page: 1,
         perPage: 10,
         searchFields: ['title^3', 'description'],
@@ -319,7 +340,6 @@ describe('SavedObjectsFinder', () => {
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({ savedObjects: [doc, doc2] })
       );
-      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = shallow(
         <SavedObjectFinder
@@ -350,7 +370,6 @@ describe('SavedObjectsFinder', () => {
     (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
       Promise.resolve({ savedObjects: [doc, doc2] })
     );
-    core.uiSettings.get.mockImplementation(() => 10);
 
     const wrapper = shallow(
       <SavedObjectFinder
@@ -373,6 +392,7 @@ describe('SavedObjectsFinder', () => {
         ]}
       />
     );
+
     wrapper.instance().componentDidMount!();
 
     expect(core.savedObjects.client.find).toHaveBeenCalledWith({
@@ -407,7 +427,6 @@ describe('SavedObjectsFinder', () => {
           savedObjects: [doc, doc2, doc3],
         })
       );
-      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = shallow(
         <SavedObjectFinder
@@ -435,7 +454,6 @@ describe('SavedObjectsFinder', () => {
           savedObjects: [doc, doc2],
         })
       );
-      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = shallow(
         <SavedObjectFinder
@@ -463,7 +481,6 @@ describe('SavedObjectsFinder', () => {
           savedObjects: [doc, doc2, doc3],
         })
       );
-      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = shallow(
         <SavedObjectFinder
@@ -494,7 +511,6 @@ describe('SavedObjectsFinder', () => {
     (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
       Promise.resolve({ savedObjects: [] })
     );
-    core.uiSettings.get.mockImplementation(() => 10);
 
     const noItemsMessage = <span id="myNoItemsMessage" />;
     const wrapper = shallow(
@@ -508,6 +524,7 @@ describe('SavedObjectsFinder', () => {
         savedObjectMetaData={searchMetaData}
       />
     );
+
     wrapper.instance().componentDidMount!();
     await nextTick();
 
@@ -528,7 +545,6 @@ describe('SavedObjectsFinder', () => {
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({ savedObjects: longItemList })
       );
-      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = shallow(
         <SavedObjectFinder
@@ -553,7 +569,6 @@ describe('SavedObjectsFinder', () => {
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({ savedObjects: longItemList })
       );
-      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = shallow(
         <SavedObjectFinder
@@ -578,7 +593,6 @@ describe('SavedObjectsFinder', () => {
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({ savedObjects: longItemList })
       );
-      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = shallow(
         <SavedObjectFinder
@@ -603,7 +617,6 @@ describe('SavedObjectsFinder', () => {
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({ savedObjects: longItemList })
       );
-      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = shallow(
         <SavedObjectFinder
@@ -628,7 +641,6 @@ describe('SavedObjectsFinder', () => {
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({ savedObjects: longItemList })
       );
-      core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = shallow(
         <SavedObjectFinder
@@ -731,7 +743,6 @@ describe('SavedObjectsFinder', () => {
     (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
       Promise.resolve({ savedObjects: [doc, doc2] })
     );
-    core.uiSettings.get.mockImplementation(() => 10);
 
     const wrapper = shallow(
       <SavedObjectFinder
