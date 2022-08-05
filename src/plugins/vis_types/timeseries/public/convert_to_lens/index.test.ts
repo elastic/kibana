@@ -7,7 +7,7 @@
  */
 import type { DataView } from '@kbn/data-plugin/common';
 import type { Panel, Series } from '../../common/types';
-import { triggerTSVBtoLensConfiguration } from '.';
+import { convertTSVBtoLensConfiguration } from '.';
 
 const dataViewsMap: Record<string, DataView> = {
   test1: { id: 'test1', title: 'test1', timeFieldName: 'timeField1' } as DataView,
@@ -60,13 +60,13 @@ const model = {
   ],
 } as Panel;
 
-describe('triggerTSVBtoLensConfiguration', () => {
+describe('convertTSVBtoLensConfiguration', () => {
   test('should return null for a non timeseries chart', async () => {
     const metricModel = {
       ...model,
       type: 'metric',
     } as Panel;
-    const triggerOptions = await triggerTSVBtoLensConfiguration(metricModel);
+    const triggerOptions = await convertTSVBtoLensConfiguration(metricModel);
     expect(triggerOptions).toBeNull();
   });
 
@@ -75,7 +75,7 @@ describe('triggerTSVBtoLensConfiguration', () => {
       ...model,
       use_kibana_indexes: false,
     };
-    const triggerOptions = await triggerTSVBtoLensConfiguration(stringIndexPatternModel);
+    const triggerOptions = await convertTSVBtoLensConfiguration(stringIndexPatternModel);
     expect(triggerOptions).toBeNull();
   });
 
@@ -93,12 +93,12 @@ describe('triggerTSVBtoLensConfiguration', () => {
         },
       ],
     };
-    const triggerOptions = await triggerTSVBtoLensConfiguration(nonSupportedAggModel);
+    const triggerOptions = await convertTSVBtoLensConfiguration(nonSupportedAggModel);
     expect(triggerOptions).toBeNull();
   });
 
   test('should return options for a supported aggregation', async () => {
-    const triggerOptions = await triggerTSVBtoLensConfiguration(model);
+    const triggerOptions = await convertTSVBtoLensConfiguration(model);
     expect(triggerOptions).toStrictEqual({
       configuration: {
         extents: { yLeftExtent: { mode: 'full' }, yRightExtent: { mode: 'full' } },
@@ -152,7 +152,7 @@ describe('triggerTSVBtoLensConfiguration', () => {
         },
       ],
     };
-    const triggerOptions = await triggerTSVBtoLensConfiguration(modelWithFill);
+    const triggerOptions = await convertTSVBtoLensConfiguration(modelWithFill);
     expect(triggerOptions?.layers[0].chartType).toBe('area');
   });
 
@@ -166,7 +166,7 @@ describe('triggerTSVBtoLensConfiguration', () => {
         },
       ],
     };
-    const triggerOptions = await triggerTSVBtoLensConfiguration(modelWithFill);
+    const triggerOptions = await convertTSVBtoLensConfiguration(modelWithFill);
     expect(triggerOptions?.layers[0]?.metrics?.[0]?.params?.shift).toBe('1h');
   });
 
@@ -183,7 +183,7 @@ describe('triggerTSVBtoLensConfiguration', () => {
         },
       ],
     };
-    const triggerOptions = await triggerTSVBtoLensConfiguration(modelWithFill);
+    const triggerOptions = await convertTSVBtoLensConfiguration(modelWithFill);
     expect(triggerOptions?.layers[0]?.metrics?.[0]?.params?.kql).toBe('test');
   });
 
@@ -207,7 +207,7 @@ describe('triggerTSVBtoLensConfiguration', () => {
         },
       ],
     };
-    const triggerOptions = await triggerTSVBtoLensConfiguration(modelWithSplitFilters);
+    const triggerOptions = await convertTSVBtoLensConfiguration(modelWithSplitFilters);
     expect(triggerOptions?.layers[0]?.splitFilters).toStrictEqual([
       {
         color: 'rgba(188,0,85,1)',
@@ -240,7 +240,7 @@ describe('triggerTSVBtoLensConfiguration', () => {
         },
       ] as unknown as Series[],
     };
-    const triggerOptions = await triggerTSVBtoLensConfiguration(modelWithTerms);
+    const triggerOptions = await convertTSVBtoLensConfiguration(modelWithTerms);
     expect(triggerOptions?.layers[0]?.collapseFn).toStrictEqual('sum');
     expect(triggerOptions?.layers[0]?.termsParams).toStrictEqual({
       size: 6,
@@ -269,7 +269,7 @@ describe('triggerTSVBtoLensConfiguration', () => {
         },
       ] as unknown as Series[],
     };
-    const triggerOptions = await triggerTSVBtoLensConfiguration(modelWithTerms);
+    const triggerOptions = await convertTSVBtoLensConfiguration(modelWithTerms);
     expect(triggerOptions?.layers[0]?.termsParams).toStrictEqual({
       size: 6,
       otherBucket: false,
@@ -289,7 +289,7 @@ describe('triggerTSVBtoLensConfiguration', () => {
       ...model,
       interval: '1h',
     };
-    const triggerOptions = await triggerTSVBtoLensConfiguration(modelWithTerms);
+    const triggerOptions = await convertTSVBtoLensConfiguration(modelWithTerms);
     expect(triggerOptions?.layers[0]?.timeInterval).toBe('1h');
   });
 
@@ -298,7 +298,7 @@ describe('triggerTSVBtoLensConfiguration', () => {
       ...model,
       drop_last_bucket: 1,
     };
-    const triggerOptions = await triggerTSVBtoLensConfiguration(modelWithDropBuckets);
+    const triggerOptions = await convertTSVBtoLensConfiguration(modelWithDropBuckets);
     expect(triggerOptions?.layers[0]?.dropPartialBuckets).toBe(true);
   });
 
@@ -311,7 +311,7 @@ describe('triggerTSVBtoLensConfiguration', () => {
       show_grid: 1,
       series: [{ ...model.series[0], fill: '0.3', separate_axis: 1, axis_position: 'right' }],
     };
-    const triggerOptions = await triggerTSVBtoLensConfiguration(modelWithConfig);
+    const triggerOptions = await convertTSVBtoLensConfiguration(modelWithConfig);
     expect(triggerOptions).toStrictEqual({
       configuration: {
         extents: { yLeftExtent: { mode: 'full' }, yRightExtent: { mode: 'full' } },

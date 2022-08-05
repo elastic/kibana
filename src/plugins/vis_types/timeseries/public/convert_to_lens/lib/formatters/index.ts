@@ -5,11 +5,5 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { getDataViewsStart } from '../services';
 
-export const getFieldType = async (indexPatternId: string, fieldName: string) => {
-  const dataViews = getDataViewsStart();
-  const dataView = await dataViews.get(indexPatternId);
-  const field = await dataView.getFieldByName(fieldName);
-  return field?.type;
-};
+export { SUPPORTED_FORMATTERS } from './supported_formatters';

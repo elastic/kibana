@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Panel, Series } from '../../common/types';
+import type { Panel, Series } from '../../../../common/types';
 
 const lowerBoundShouldBeZero = (
   lowerBound: number | null,

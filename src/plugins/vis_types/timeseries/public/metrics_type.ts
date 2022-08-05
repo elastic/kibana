@@ -28,6 +28,7 @@ import { toExpressionAst } from './to_ast';
 import { getDataViewsStart } from './services';
 import type { TimeseriesVisDefaultParams, TimeseriesVisParams } from './types';
 import type { IndexPatternValue, Panel } from '../common/types';
+import { convertTSVBtoLensConfiguration } from './convert_to_lens';
 
 export const withReplacedIds = (
   vis: Vis<TimeseriesVisParams | TimeseriesVisDefaultParams>
@@ -167,14 +168,9 @@ export const metricsVisDefinition: VisTypeDefinition<
     }
     return [];
   },
-  navigateToLens: async (params?: VisParams) => {
-    const { triggerTSVBtoLensConfiguration } = await import('./trigger_action');
+  navigateToLens: async (params?: VisParams) =>
+    params ? await convertTSVBtoLensConfiguration(params as Panel) : null,
 
-    const triggerConfiguration = params
-      ? await triggerTSVBtoLensConfiguration(params as Panel)
-      : null;
-    return triggerConfiguration;
-  },
   inspectorAdapters: () => ({
     requests: new RequestAdapter(),
   }),
