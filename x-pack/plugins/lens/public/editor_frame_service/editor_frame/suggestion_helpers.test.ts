@@ -268,7 +268,8 @@ describe('suggestion helpers', () => {
       layers: [
         {
           indexPatternId: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-          timeFieldName: 'order_date',
+          xFieldName: 'order_date',
+          xMode: 'date_histogram',
           chartType: 'area',
           axisPosition: 'left',
           palette: {
@@ -347,7 +348,8 @@ describe('suggestion helpers', () => {
       layers: [
         {
           indexPatternId: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-          timeFieldName: 'order_date',
+          xFieldName: 'order_date',
+          xMode: 'date_histogram',
           chartType: 'area',
           axisPosition: 'left',
           palette: {
