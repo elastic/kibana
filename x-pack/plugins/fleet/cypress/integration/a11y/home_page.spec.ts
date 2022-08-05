@@ -13,14 +13,17 @@ import {
     PLATFORM_TYPE_LINUX_BUTTON,
     AGENTS_ADVANCED_TAB_BUTTON,
     ADVANCED_FLEET_SERVER_ADD_HOST_BUTTON,
-    ADVANCED_FLEET_SERVER_GENERATE_SERVICE_TOKEN_BUTTON
+    ADVANCED_FLEET_SERVER_GENERATE_SERVICE_TOKEN_BUTTON,
+    AGENT_POLICIES_TAB,
+    AGENT_POLICIES_CREATE_AGENT_POLICY_BUTTON
 } from '../../screens/fleet';
+import { AGENT_POLICY_NAME_LINK } from '../../screens/integrations'
 describe('Home page', () => {
     before(() => {
         navigateTo(FLEET);
         cy.getBySel(AGENTS_QUICK_START_TAB_BUTTON, { timeout: 15000 }).should('be.visible');
     });
-    describe('Agents', () => {
+    describe.skip('Agents', () => {
         const fleetServerHost = 'https://localhost:8220';
         describe('Quick Start', () => {
             it('Get started with fleet', () => {
@@ -52,4 +55,16 @@ describe('Home page', () => {
             });
         });
     });
+    describe('Agent Policies', () => {
+        before(() => {
+            cy.getBySel(AGENT_POLICIES_TAB).click();
+            cy.getBySel(AGENT_POLICIES_CREATE_AGENT_POLICY_BUTTON, { timeout: 15000 }).should('be.visible');
+        })
+        it('Agent Table', () => {
+            checkA11y({ skipFailures: false });
+        });
+        it('Create Policy Flyout', () => {
+            cy.getBySel(AGENT_POLICIES_CREATE_AGENT_POLICY_BUTTON).click();
+        });
+    })
 });

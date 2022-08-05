@@ -30,6 +30,7 @@ export const AGENTS_ADVANCED_TAB_BUTTON = 'fleetServerFlyoutTab-advanced'
 export const PLATFORM_TYPE_LINUX_BUTTON = 'platformTypeLinux';
 export const ADVANCED_FLEET_SERVER_ADD_HOST_BUTTON = 'fleetServerAddHostBtn';
 export const ADVANCED_FLEET_SERVER_GENERATE_SERVICE_TOKEN_BUTTON = 'fleetServerGenerateServiceTokenBtn';
+export const AGENT_POLICIES_CREATE_AGENT_POLICY_BUTTON = 'createAgentPolicyButton';
 
 export const AGENT_BINARY_SOURCES_TABLE = 'AgentDownloadSourcesTable';
 export const AGENT_BINARY_SOURCES_TABLE_ACTIONS = {
