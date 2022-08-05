@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { EsArchiver } from '@kbn/es-archiver';
 import { AppSearchService, IEngine } from '../../../../services/app_search_service';
 import { Browser } from '../../../../../../../test/functional/services/common';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
