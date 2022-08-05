@@ -4,23 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import "cypress-real-events/support";
+import 'cypress-real-events/support';
 import { checkA11y } from '../../support/commands';
 import { FLEET, navigateTo } from '../../tasks/navigation';
-import { GENERATE_FLEET_SERVER_POLICY_BUTTON } from '../../screens/fleet';
-describe('Home page', async () => {
+import { GENERATE_FLEET_SERVER_POLICY_BUTTON, QUICK_START_TAB_BUTTON } from '../../screens/fleet';
+describe('Home page', () => {
   before(() => {
     navigateTo(FLEET);
+    cy.getBySel(QUICK_START_TAB_BUTTON, { timeout: 15000 }).should('be.visible');
   });
-  describe('Agents', async () => {
+  describe('Agents', () => {
     const fleetServerHost = 'https://localhost:8220';
-    describe('Quick Start', async () => {
-      it('Get started with fleet', async () => {
+    describe('Quick Start', () => {
+      it('Get started with fleet', () => {
         checkA11y({ skipFailures: false });
       });
-      it('Install Fleet Server', async () => {
-          cy.getBySel('comboBoxSearchInput').clear().realClick().realType(fleetServerHost);
-          cy.getBySel(GENERATE_FLEET_SERVER_POLICY_BUTTON).click();
+      it('Install Fleet Server', () => {
+        cy.getBySel('fleetServerHostInput').getBySel('comboBoxSearchInput').type(fleetServerHost);
+        cy.getBySel(GENERATE_FLEET_SERVER_POLICY_BUTTON).click();
         checkA11y({ skipFailures: false });
       });
     });
