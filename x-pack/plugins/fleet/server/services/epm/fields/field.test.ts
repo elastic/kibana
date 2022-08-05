@@ -624,4 +624,50 @@ describe('processFields', () => {
     ];
     expect(processFields(fields)).toEqual(fieldsExpected);
   });
+
+  test('handle wildcard field', () => {
+    const wildcardFields = [
+      {
+        name: 'a.*.b',
+        type: 'keyword',
+      },
+      {
+        name: 'a.b.*',
+        type: 'scaled_float',
+      },
+    ];
+
+    expect(processFields(wildcardFields)).toMatchInlineSnapshot(`
+      [
+        {
+          "name": "a",
+          "type": "group",
+          "fields": [
+            {
+              "name": "*",
+              "type": "group",
+              "fields": [
+                {
+                  "name": "b",
+                  "type": "object",
+                  "object_type": "keyword"
+                }
+              ]
+            },
+            {
+              "name": "b",
+              "type": "group",
+              "fields": [
+                {
+                  "name": "*",
+                  "type": "object",
+                  "object_type": "scaled_float"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    `);
+  });
 });
