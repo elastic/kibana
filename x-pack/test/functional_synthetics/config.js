@@ -13,7 +13,6 @@ import { dockerImage as fleetDockerImage } from '../fleet_api_integration/config
 import { services } from './services';
 import { pageObjects } from './page_objects';
 
-
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
 export default async function ({ readConfigFile }) {
