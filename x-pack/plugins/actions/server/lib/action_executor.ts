@@ -281,7 +281,36 @@ export class ActionExecutor {
           );
         }
 
-        eventLogger.logEvent(event);
+        if (Math.random() >= 0.5) {
+          console.log('log error!');
+          event.event.outcome = 'failure';
+          event.message = `action execution failure 1: ${actionLabel}`;
+          event.error = event.error || {};
+          event.error.message = 'action execution returned unexpected result';
+          eventLogger.logEvent(event);
+          event.message = `action execution failure 2: ${actionLabel}`;
+          eventLogger.logEvent(event);
+
+          if (Math.random() >= 0.5) {
+            event.message = `action execution failure 3: ${actionLabel}`;
+            eventLogger.logEvent(event);
+            event.message = `action execution failure 4: ${actionLabel}`;
+            eventLogger.logEvent(event);
+            event.message = `action execution failure 5: ${actionLabel}`;
+            eventLogger.logEvent(event);
+            event.message = `action execution failure 6: ${actionLabel}`;
+            eventLogger.logEvent(event);
+          }
+
+          if (Math.random() >= 0.5) {
+            event.message = `action execution failure 7: ${actionLabel}`;
+            eventLogger.logEvent(event);
+            event.message = `action execution failure 8: ${actionLabel}`;
+            eventLogger.logEvent(event);
+          }
+        } else {
+          eventLogger.logEvent(event);
+        }
         const { error, ...resultWithoutError } = result;
         return resultWithoutError;
       }
