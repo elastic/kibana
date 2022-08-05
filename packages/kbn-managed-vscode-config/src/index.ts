@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { KibanaJsonSchema } from './kibana_json_schema';
+export { MANAGED_CONFIG_FILES, MANAGED_CONFIG_KEYS } from './managed_config_keys';
+export { updateVscodeConfig } from './update_vscode_config';

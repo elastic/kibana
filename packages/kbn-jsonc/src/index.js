@@ -6,5 +6,18 @@
  * Side Public License, v 1.
  */
 
-require('../src/setup_node_env/no_transpilation');
-require('@kbn/managed-vscode-config-cli');
+const { stripJsonComments } = require('./strip_json_comments');
+
+/**
+ * @param {string} jsonWithComments
+ */
+function parse(jsonWithComments) {
+  return JSON.parse(
+    stripJsonComments(jsonWithComments, {
+      whitespace: false,
+      trailingCommas: true,
+    })
+  );
+}
+
+module.exports = { parse };

@@ -548,6 +548,21 @@
             },
             {
               "id": "kibDevDocsOpsRepoSourceClassifier"
+            },
+            {
+              "id": "kibDevDocsOpsJsonc"
+            },
+            {
+              "id": "kibDevDocsOpsKibanaManifestParser"
+            },
+            {
+              "id": "kibDevDocsOpsKibanaManifestSchema"
+            },
+            {
+              "id": "kibDevDocsOpsManagedVscodeConfig"
+            },
+            {
+              "id": "kibDevDocsOpsManagedVscodeConfigCli"
             }
           ]
         }

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { KibanaJsonSchema } from '@kbn/kibana-json-schema';
+import { MANIFEST_V1, MANIFEST_V2 } from '@kbn/kibana-manifest-schema';
 
 export interface ManagedConfigKey {
   key: string;
@@ -67,10 +67,21 @@ export const MANAGED_CONFIG_KEYS: ManagedConfigKey[] = [
         fileMatch: ['kibana.json'],
         url: './.vscode/kibana-json-schema.json',
       },
+      {
+        fileMatch: ['kibana.jsonc'],
+        url: './.vscode/kibana-manifest-schema-v2.json',
+      },
     ],
   },
 ];
 
 export const MANAGED_CONFIG_FILES = [
-  { name: 'kibana-json-schema.json', content: JSON.stringify(KibanaJsonSchema, null, 2) },
+  {
+    name: 'kibana-json-schema.json',
+    content: JSON.stringify(MANIFEST_V1, null, 2),
+  },
+  {
+    name: 'kibana-manifest-schema-v2.json',
+    content: JSON.stringify(MANIFEST_V2, null, 2),
+  },
 ];

@@ -2,15 +2,17 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "kbn-kibana-json-schema"
-PKG_REQUIRE_NAME = "@kbn/kibana-json-schema"
+PKG_DIRNAME = "kbn-kibana-manifest-parser"
+PKG_REQUIRE_NAME = "@kbn/kibana-manifest-parser"
 
 SOURCE_FILES = glob(
   [
+    "src/**/*.js",
     "src/**/*.ts",
   ],
   exclude = [
     "**/*.test.*",
+    "**/*.stories.*",
   ],
 )
 
@@ -36,7 +38,6 @@ NPM_MODULE_EXTRA_FILES = [
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
-  "@npm//dedent",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -49,10 +50,9 @@ RUNTIME_DEPS = [
 #
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
-  "@npm//@types/dedent",
   "@npm//@types/node",
   "@npm//@types/jest",
-  "@npm//json-schema-typed"
+  "//packages/kbn-jsonc:npm_module_types",
 ]
 
 jsts_transpiler(
@@ -77,6 +77,7 @@ ts_project(
   deps = TYPES_DEPS,
   declaration = True,
   declaration_map = True,
+  allow_js = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",

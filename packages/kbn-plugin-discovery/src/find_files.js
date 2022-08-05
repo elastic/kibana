@@ -27,19 +27,20 @@ function safeReadDir(path) {
 }
 
 /**
- * Given an iterable of paths with optoinal "*" segments, expand the path to the
- * list of actual absolute paths, removing all "*" segments, and then return the
- * set of paths which end up pointing to actual files.
+ * Search for files named `name` in `dir`, up to `depth` levels deep. If a directory has a
+ * matching file its children are not iterated, otherwise if depth > 0 then all child
+ * directories are checked recursively with depth-1
  *
  * @param {string} dir
  * @param {number} depth
+ * @param {string} name
  * @returns {string[]}
  */
-function findKibanaJsonFiles(dir, depth) {
+function findFiles(dir, depth, name) {
   // if depth = 0 then we just need to determine if there is a kibana.json file in this directory
   // and return either that path or an empty array
   if (depth === 0) {
-    const path = Path.resolve(dir, 'kibana.json');
+    const path = Path.resolve(dir, name);
     return Fs.existsSync(path) ? [path] : [];
   }
 
@@ -51,7 +52,7 @@ function findKibanaJsonFiles(dir, depth) {
   const childDirs = [];
   for (const ent of files) {
     if (ent.isFile()) {
-      if (ent.name === 'kibana.json') {
+      if (ent.name === name) {
         return [Path.resolve(dir, ent.name)];
       }
     } else if (ent.isDirectory()) {
@@ -59,7 +60,7 @@ function findKibanaJsonFiles(dir, depth) {
     }
   }
 
-  return childDirs.flatMap((dir) => findKibanaJsonFiles(dir, depth - 1));
+  return childDirs.flatMap((dir) => findFiles(dir, depth - 1, name));
 }
 
-module.exports = { findKibanaJsonFiles };
+module.exports = { findFiles };

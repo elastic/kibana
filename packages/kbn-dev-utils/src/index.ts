@@ -25,5 +25,4 @@ export * from './plugin_list';
 export * from './streams';
 export * from './babel';
 export * from './extract';
-export * from './vscode_config';
 export * from './diff_strings';
