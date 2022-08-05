@@ -19,6 +19,8 @@ import {
   EuiButtonGroup,
   EuiText,
   useEuiTheme,
+  EuiTitle,
+  EuiTextColor,
 } from '@elastic/eui';
 import { uniq } from 'lodash';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
@@ -47,6 +49,7 @@ import {
   getFieldsByValidationState,
   isSortableByColumn,
   isPercentileRankSortable,
+  computeOrderForMultiplePercentiles,
 } from './helpers';
 import {
   DEFAULT_MAX_DOC_COUNT,
@@ -260,6 +263,14 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       if (!isPercentileRankSortable(orderColumn)) {
         orderBy = '_key';
       }
+
+      const orderByMultiplePercentiles = computeOrderForMultiplePercentiles(
+        orderColumn,
+        layer,
+        orderedColumnIds
+      );
+
+      orderBy = orderByMultiplePercentiles ?? orderBy;
     }
 
     // To get more accurate results, we set shard_size to a minimum of 1000
@@ -916,44 +927,33 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         </EuiFormRow>
         {!hasRestrictions && (
           <>
-            <EuiSpacer size="s" />
+            <EuiSpacer size="m" />
             <EuiAccordion
               id="lnsTermsAdvanced"
               arrowProps={{ color: 'primary' }}
               buttonContent={
-                <EuiText size="s" color={euiTheme.colors.primary}>
-                  {i18n.translate('xpack.lens.indexPattern.terms.advancedSettings', {
-                    defaultMessage: 'Advanced',
-                  })}
-                </EuiText>
+                <EuiTitle size="xxs">
+                  <h5>
+                    <EuiTextColor color={euiTheme.colors.primary}>
+                      {i18n.translate('xpack.lens.indexPattern.terms.advancedSettings', {
+                        defaultMessage: 'Advanced',
+                      })}
+                    </EuiTextColor>
+                  </h5>
+                </EuiTitle>
               }
               data-test-subj="indexPattern-terms-advanced"
+              className="lnsIndexPatternDimensionEditor-advancedOptions"
             >
-              <EuiSpacer size="m" />
+              <EuiSpacer size="s" />
               <EuiSwitch
-                label={i18n.translate('xpack.lens.indexPattern.terms.otherBucketDescription', {
-                  defaultMessage: 'Group other values as "Other"',
-                })}
-                compressed
-                data-test-subj="indexPattern-terms-other-bucket"
-                checked={Boolean(currentColumn.params.otherBucket)}
-                disabled={currentColumn.params.orderBy.type === 'rare'}
-                onChange={(e: EuiSwitchEvent) =>
-                  paramEditorUpdater(
-                    updateColumnParam({
-                      layer,
-                      columnId,
-                      paramName: 'otherBucket',
-                      value: e.target.checked,
-                    })
-                  )
+                label={
+                  <EuiText size="xs">
+                    {i18n.translate('xpack.lens.indexPattern.terms.missingBucketDescription', {
+                      defaultMessage: 'Include documents without the selected field',
+                    })}
+                  </EuiText>
                 }
-              />
-              <EuiSpacer size="m" />
-              <EuiSwitch
-                label={i18n.translate('xpack.lens.indexPattern.terms.missingBucketDescription', {
-                  defaultMessage: 'Include documents without this field',
-                })}
                 compressed
                 disabled={
                   !currentColumn.params.otherBucket ||
@@ -973,10 +973,34 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                   )
                 }
               />
-              <EuiSpacer size="m" />
+              <EuiSpacer size="s" />
               <EuiSwitch
                 label={
-                  <>
+                  <EuiText size="xs">
+                    {i18n.translate('xpack.lens.indexPattern.terms.otherBucketDescription', {
+                      defaultMessage: 'Group remaining values as "Other"',
+                    })}
+                  </EuiText>
+                }
+                compressed
+                data-test-subj="indexPattern-terms-other-bucket"
+                checked={Boolean(currentColumn.params.otherBucket)}
+                disabled={currentColumn.params.orderBy.type === 'rare'}
+                onChange={(e: EuiSwitchEvent) =>
+                  paramEditorUpdater(
+                    updateColumnParam({
+                      layer,
+                      columnId,
+                      paramName: 'otherBucket',
+                      value: e.target.checked,
+                    })
+                  )
+                }
+              />
+              <EuiSpacer size="s" />
+              <EuiSwitch
+                label={
+                  <EuiText size="xs">
                     {i18n.translate('xpack.lens.indexPattern.terms.accuracyModeDescription', {
                       defaultMessage: 'Enable accuracy mode',
                     })}{' '}
@@ -992,7 +1016,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                       size="s"
                       type="questionInCircle"
                     />
-                  </>
+                  </EuiText>
                 }
                 compressed
                 disabled={currentColumn.params.orderBy.type === 'rare'}
