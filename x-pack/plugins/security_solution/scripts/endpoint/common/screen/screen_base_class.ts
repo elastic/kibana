@@ -8,26 +8,14 @@
 /* eslint-disable max-classes-per-file */
 
 import type { WriteStream as TtyWriteStream } from 'tty';
-import { stdout, stdin } from 'node:process';
+import { stdin, stdout } from 'node:process';
 import * as readline from 'node:readline';
-import { red, blue, green } from 'chalk';
+import { blue, green, red } from 'chalk';
+import { QuitChoice } from './common_choices';
+import type { Choice } from './types';
 import { ChoiceListFormatter } from './choice_list_formatter';
 import { DataFormatter } from './data_formatter';
-import { HORIZONTAL_LINE } from '../../../common/constants';
-
-export interface Choice {
-  key: string;
-  title: string;
-}
-
-export const QuitChoice: Choice = {
-  key: 'Q',
-  title: 'Quit',
-} as const;
-
-export const isChoice = (item: string | object): item is Choice => {
-  return 'string' !== typeof item && 'key' in item && 'title' in item;
-};
+import { HORIZONTAL_LINE } from '../constants';
 
 const CONTENT_MAX_WIDTH = HORIZONTAL_LINE.length - 1;
 const CONTENT_60_PERCENT = Math.floor(CONTENT_MAX_WIDTH * 0.6);
@@ -199,7 +187,7 @@ export class ScreenBaseClass {
       const rl = readline.createInterface({ input: stdin, output: stdout });
       this.readlineInstance = rl;
 
-      // TODO:PT experiment with using `rl.promp()` instead of `question()`
+      // TODO:PT experiment with using `rl.prompt()` instead of `question()` and possibly only initialize `rl` once
 
       rl.question(prompt ?? 'Enter choice: ', (selection) => {
         if (this.readlineInstance === rl) {
@@ -211,7 +199,7 @@ export class ScreenBaseClass {
           } catch (error) {
             this.showMessage(error.message, 'red');
 
-            resolve(this.askForChoice());
+            resolve(this.askForChoice(prompt));
 
             return;
           }
@@ -224,8 +212,10 @@ export class ScreenBaseClass {
 
   /**
    * Will display the screen and return a promise that is resolved once that screen is hidden
+   *
+   * @param prompt
    */
-  public show(): Promise<void> {
+  public show(prompt?: string): Promise<void> {
     const { ttyOut } = this;
     const headerContent = this.header();
     const bodyContent = this.body();
@@ -243,7 +233,7 @@ export class ScreenBaseClass {
 
     ttyOut.write(screenRenderInfo.output);
 
-    this.askForChoice();
+    this.askForChoice(prompt);
 
     // `show()` can be called multiple times, so only create the `showPromise` if one is not already present
     if (!this.showPromise) {

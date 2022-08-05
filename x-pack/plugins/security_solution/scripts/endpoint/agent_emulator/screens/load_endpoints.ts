@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ScreenBaseClass } from './lib/screen_base_class';
-import type { DataFormatter } from './lib/data_formatter';
+import type { DataFormatter } from '../../common/screen';
+import { ScreenBaseClass } from '../../common/screen';
 import { TOOL_TITLE } from '../constants';
 
 export class LoadEndpointsScreen extends ScreenBaseClass {
@@ -15,7 +15,7 @@ export class LoadEndpointsScreen extends ScreenBaseClass {
   }
 
   protected body(): string | DataFormatter {
-    return '';
+    return super.body();
   }
 
   protected onEnterChoice(choice: string) {
