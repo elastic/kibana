@@ -128,8 +128,6 @@ export type {
   NavigateToAppOptions,
   NavigateToUrlOptions,
 } from './application';
-// Export implementation only until we have a concrete mock for tests. See https://github.com/elastic/kibana/pull/137448 for more info
-export { SimpleSavedObjectImpl } from '@kbn/core-saved-objects-browser-internal';
 export type {
   SavedObjectsClientContract,
   SimpleSavedObject,
