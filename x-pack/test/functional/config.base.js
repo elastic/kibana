@@ -12,8 +12,6 @@ import { pageObjects } from './page_objects';
 
 // Docker image to use for Fleet API integration tests.
 // This hash comes from the latest successful build of the Snapshot Distribution of the Package Registry, for
-// example: https://beats-ci.elastic.co/blue/organizations/jenkins/Ingest-manager%2Fpackage-storage/detail/snapshot/74/pipeline/257#step-302-log-1.
-// It should be updated any time there is a new Docker image published for the Snapshot Distribution of the Package Registry.
 export const dockerImage =
   'docker.elastic.co/package-registry/distribution:433d99a96f3289c5013ae35826877adf408eb9c9';
 
