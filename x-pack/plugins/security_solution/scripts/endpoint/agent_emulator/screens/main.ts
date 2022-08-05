@@ -7,9 +7,8 @@
 
 import { LoadEndpointsScreen } from './load_endpoints';
 import { TOOL_TITLE } from '../constants';
-import { ChoiceListFormatter } from './lib/choice_list_formatter';
-import type { DataFormatter } from './lib/data_formatter';
-import { ScreenBaseClass } from './lib/screen_base_class';
+import { ScreenBaseClass, ChoiceListFormatter } from '../../common/screen';
+import type { DataFormatter } from '../../common/screen/data_formatter';
 
 export class MainScreen extends ScreenBaseClass {
   protected header(title: string = '', subTitle: string = ''): string | DataFormatter {

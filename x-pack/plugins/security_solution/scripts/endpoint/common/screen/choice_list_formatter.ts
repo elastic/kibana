@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { isChoice } from './screen_base_class';
-import type { Choice } from './screen_base_class';
+import { isChoice } from './type_gards';
+import type { Choice } from './types';
 import { DataFormatter } from './data_formatter';
 
 type ChoiceListFormatterItems = string[] | Choice[];
