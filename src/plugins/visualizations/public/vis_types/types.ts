@@ -92,7 +92,8 @@ interface VisualizeEditorMetricContext {
 export interface VisualizeEditorLayersContext {
   indexPatternId: string;
   splitWithDateHistogram?: boolean;
-  timeFieldName?: string;
+  xFieldName?: string;
+  xMode?: string;
   chartType?: string;
   axisPosition?: string;
   termsParams?: Record<string, unknown>;
@@ -134,7 +135,18 @@ export interface NavigateToLensContext {
       yLeft: boolean;
       yRight: boolean;
     };
-    extents: {
+    tickLabelsVisibility?: {
+      x: boolean;
+      yLeft: boolean;
+      yRight: boolean;
+    };
+    axisTitlesVisibility?: {
+      x: boolean;
+      yLeft: boolean;
+      yRight: boolean;
+    };
+    valueLabels?: boolean;
+    extents?: {
       yLeftExtent: AxisExtents;
       yRightExtent: AxisExtents;
     };

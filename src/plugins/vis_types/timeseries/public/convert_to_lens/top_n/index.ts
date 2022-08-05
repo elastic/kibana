@@ -12,9 +12,8 @@ import { getDataSourceInfo } from '../lib/datasource';
 import { getSeries } from '../lib/series';
 import { getFieldsForTerms } from '../../../common/fields_utils';
 import { ConvertTsvbToLensVisualization } from '../types';
-import { convertChartType, getYExtents } from '../lib/xy';
-import { getLayerConfiguration } from '../lib/layers';
 import { isSplitWithDateHistogram } from '../lib/split_chart';
+import { getLayerConfiguration } from '../lib/layers';
 
 export const convertToLens: ConvertTsvbToLensVisualization = async (model) => {
   const layersConfiguration: { [key: string]: VisualizeEditorLayersContext } = {};
@@ -22,6 +21,13 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model) => {
   // get the active series number
   const seriesNum = model.series.filter((series) => !series.hidden).length;
   const dataViews = getDataViewsStart();
+  const hasLayersWithSplit = model.series.some((series) => series.split_mode !== 'everything');
+  const hasLayersWithoutSplit = model.series.some((series) => series.split_mode === 'everything');
+
+  // can not convert mixed series (splitted and not splitted)
+  if (hasLayersWithSplit && hasLayersWithoutSplit) {
+    return null;
+  }
 
   // handle multiple layers/series
   for (let layerIdx = 0; layerIdx < model.series.length; layerIdx++) {
@@ -30,7 +36,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model) => {
       continue;
     }
 
-    const { indexPatternId, timeField } = await getDataSourceInfo(
+    const { indexPatternId } = await getDataSourceInfo(
       model.index_pattern,
       model.time_field,
       Boolean(layer.override_index_pattern),
@@ -58,22 +64,18 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model) => {
       return null;
     }
 
-    const chartType = convertChartType(layer);
-
     layersConfiguration[layerIdx] = getLayerConfiguration(
       indexPatternId,
       layerIdx,
-      chartType,
+      'bar_horizontal',
       model,
       series,
       splitFields,
-      timeField,
-      'date_histogram',
+      undefined,
+      undefined,
       splitWithDateHistogram
     );
   }
-
-  const extents = getYExtents(model);
 
   return {
     layers: layersConfiguration,
@@ -88,11 +90,21 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model) => {
         maxLines: model.max_lines_legend ?? 1,
       },
       gridLinesVisibility: {
-        x: Boolean(model.show_grid),
-        yLeft: Boolean(model.show_grid),
-        yRight: Boolean(model.show_grid),
+        x: false,
+        yLeft: false,
+        yRight: false,
       },
-      extents,
+      tickLabelsVisibility: {
+        x: true,
+        yLeft: false,
+        yRight: false,
+      },
+      axisTitlesVisibility: {
+        x: false,
+        yLeft: false,
+        yRight: false,
+      },
+      valueLabels: true,
     },
   };
 };

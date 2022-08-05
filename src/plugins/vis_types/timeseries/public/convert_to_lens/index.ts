@@ -18,6 +18,10 @@ const getConvertFnByType = (
       const { convertToLens } = await import('./timeseries');
       return convertToLens;
     },
+    [PANEL_TYPES.TOP_N]: async () => {
+      const { convertToLens } = await import('./top_n');
+      return convertToLens;
+    },
   };
 
   return convertionFns[type]?.();

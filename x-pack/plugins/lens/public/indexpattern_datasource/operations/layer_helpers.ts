@@ -1735,7 +1735,8 @@ export function computeLayerFromContext(
 export function getSplitByTermsLayer(
   indexPattern: IndexPattern,
   splitFields: IndexPatternField[],
-  dateField: IndexPatternField | undefined,
+  xField: IndexPatternField | undefined,
+  xMode: string | undefined,
   layer: VisualizeEditorLayersContext
 ): IndexPatternLayer {
   const { termsParams, metrics, timeInterval, splitWithDateHistogram, dropPartialBuckets } = layer;
@@ -1754,18 +1755,21 @@ export function getSplitByTermsLayer(
 
   let termsLayer = insertNewColumn({
     op: splitWithDateHistogram ? 'date_histogram' : 'terms',
-    layer: insertNewColumn({
-      op: 'date_histogram',
-      layer: computedLayer,
-      columnId: generateId(),
-      field: dateField,
-      indexPattern,
-      visualizationGroups: [],
-      columnParams: {
-        interval: timeInterval,
-        dropPartials: dropPartialBuckets,
-      },
-    }),
+    layer:
+      xField && xMode
+        ? insertNewColumn({
+            op: xMode,
+            layer: computedLayer,
+            columnId: generateId(),
+            field: xField,
+            indexPattern,
+            visualizationGroups: [],
+            columnParams: {
+              interval: timeInterval,
+              dropPartials: dropPartialBuckets,
+            },
+          })
+        : computedLayer,
     columnId,
     field: baseField,
     indexPattern,
@@ -1816,7 +1820,8 @@ export function getSplitByTermsLayer(
 
 export function getSplitByFiltersLayer(
   indexPattern: IndexPattern,
-  dateField: IndexPatternField | undefined,
+  xField: IndexPatternField | undefined,
+  xMode: string | undefined,
   layer: VisualizeEditorLayersContext
 ): IndexPatternLayer {
   const { splitFilters, metrics, timeInterval, dropPartialBuckets } = layer;
@@ -1842,18 +1847,21 @@ export function getSplitByFiltersLayer(
   const columnId = generateId();
   let filtersLayer = insertNewColumn({
     op: 'filters',
-    layer: insertNewColumn({
-      op: 'date_histogram',
-      layer: computedLayer,
-      columnId: generateId(),
-      field: dateField,
-      indexPattern,
-      visualizationGroups: [],
-      columnParams: {
-        interval: timeInterval,
-        dropPartials: dropPartialBuckets,
-      },
-    }),
+    layer:
+      xField && xMode
+        ? insertNewColumn({
+            op: xMode,
+            layer: computedLayer,
+            columnId: generateId(),
+            field: xField,
+            indexPattern,
+            visualizationGroups: [],
+            columnParams: {
+              interval: timeInterval,
+              dropPartials: dropPartialBuckets,
+            },
+          })
+        : computedLayer,
     columnId,
     field: undefined,
     indexPattern,

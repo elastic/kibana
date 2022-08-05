@@ -430,7 +430,10 @@ export const getXyVisualization = ({
         yLeftExtent: context.configuration.extents?.yLeftExtent,
         legend: context.configuration.legend,
         gridlinesVisibilitySettings: context.configuration.gridLinesVisibility,
+        tickLabelsVisibilitySettings: context.configuration.tickLabelsVisibility,
+        axisTitlesVisibilitySettings: context.configuration.axisTitlesVisibility,
         valuesInLegend: true,
+        valueLabels: context.configuration.valueLabels ? 'show' : 'hide',
         layers: visualizationStateLayers,
       },
     };

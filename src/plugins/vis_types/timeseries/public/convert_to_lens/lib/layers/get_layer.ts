@@ -41,7 +41,8 @@ export const getLayerConfiguration = (
   model: Panel,
   series: VisSeries,
   splitFields: string[],
-  timeField?: string,
+  xFieldName?: string,
+  xMode?: string,
   splitWithDateHistogram?: boolean
 ): VisualizeEditorLayersContext => {
   const layer = model.series[layerIdx];
@@ -52,7 +53,8 @@ export const getLayerConfiguration = (
   const metrics = convertMetrics(layer, metricsArray, filter);
   return {
     indexPatternId,
-    timeFieldName: timeField,
+    xFieldName,
+    xMode,
     chartType,
     axisPosition: layer.separate_axis ? layer.axis_position : model.axis_position,
     ...(layer.terms_field && { splitFields }),
