@@ -21,22 +21,6 @@ const CONTENT_MAX_WIDTH = HORIZONTAL_LINE.length - 1;
 const CONTENT_60_PERCENT = Math.floor(CONTENT_MAX_WIDTH * 0.6);
 const CONTENT_40_PERCENT = Math.floor(CONTENT_MAX_WIDTH * 0.4);
 
-class RenderedScreen {
-  public statusPos: number = -1;
-  public promptPos: number = -1;
-  public statusMessage: string | undefined = undefined;
-
-  constructor(private readonly screenOutput: string) {
-    const outputBottomPos = screenOutput.split('\n').length - 1;
-    this.statusPos = outputBottomPos + 1;
-    this.promptPos = this.statusPos + 1;
-  }
-
-  public get output(): string {
-    return `${this.screenOutput}\n${this.statusMessage ?? ' '}\n`;
-  }
-}
-
 /**
  * Base class for creating a CLI screen.
  *
@@ -67,6 +51,8 @@ export class ScreenBaseClass {
   private showPromise: Promise<void> | undefined = undefined;
   private endSession: (() => void) | undefined = undefined;
   private screenRenderInfo: RenderedScreen | undefined;
+  private isPaused: boolean = false;
+  private isHidden: boolean = true;
 
   /**
    * Provides content for the header of the screen.
@@ -190,6 +176,10 @@ export class ScreenBaseClass {
       // TODO:PT experiment with using `rl.prompt()` instead of `question()` and possibly only initialize `rl` once
 
       rl.question(prompt ?? 'Enter choice: ', (selection) => {
+        if (this.isPaused || this.isHidden) {
+          return;
+        }
+
         if (this.readlineInstance === rl) {
           this.clearPromptOutput();
           this.closeReadline();
@@ -210,12 +200,21 @@ export class ScreenBaseClass {
     });
   }
 
+  private clearScreen() {
+    this.ttyOut.cursorTo(0, 0);
+    this.ttyOut.clearScreenDown();
+  }
+
   /**
-   * Will display the screen and return a promise that is resolved once that screen is hidden
+   * Renders (or re-renders) the screen. Can be called multiple times
    *
    * @param prompt
    */
-  public show(prompt?: string): Promise<void> {
+  public reRender(prompt?: string) {
+    if (this.isHidden || this.isPaused) {
+      return;
+    }
+
     const { ttyOut } = this;
     const headerContent = this.header();
     const bodyContent = this.body();
@@ -228,12 +227,33 @@ export class ScreenBaseClass {
     );
     this.screenRenderInfo = screenRenderInfo;
 
-    ttyOut.cursorTo(0, 0);
-    ttyOut.clearScreenDown();
+    this.clearScreen();
 
     ttyOut.write(screenRenderInfo.output);
 
     this.askForChoice(prompt);
+  }
+
+  /**
+   * Will display the screen and return a promise that is resolved once the screen is hidden.
+   *
+   * @param prompt
+   * @param resume
+   */
+  public show({
+    prompt,
+    resume,
+  }: Partial<{ prompt: string; resume: boolean }> = {}): Promise<void> {
+    if (resume) {
+      this.isPaused = false;
+    }
+
+    if (this.isPaused) {
+      return Promise.resolve(undefined);
+    }
+
+    this.isHidden = false;
+    this.reRender(prompt);
 
     // `show()` can be called multiple times, so only create the `showPromise` if one is not already present
     if (!this.showPromise) {
@@ -249,15 +269,37 @@ export class ScreenBaseClass {
    * Will hide the screen and fulfill the promise returned by `.show()`
    */
   public hide() {
-    const { ttyOut } = this;
     this.closeReadline();
-    ttyOut.cursorTo(0, 0);
-    ttyOut.clearScreenDown();
+    this.clearScreen();
     this.screenRenderInfo = undefined;
+    this.isHidden = true;
+    this.isPaused = false;
 
     if (this.endSession) {
       this.endSession();
+      this.showPromise = undefined;
       this.endSession = undefined;
     }
+  }
+
+  public pause() {
+    this.isPaused = true;
+    this.closeReadline();
+  }
+}
+
+class RenderedScreen {
+  public statusPos: number = -1;
+  public promptPos: number = -1;
+  public statusMessage: string | undefined = undefined;
+
+  constructor(private readonly screenOutput: string) {
+    const outputBottomPos = screenOutput.split('\n').length - 1;
+    this.statusPos = outputBottomPos + 1;
+    this.promptPos = this.statusPos + 1;
+  }
+
+  public get output(): string {
+    return `${this.screenOutput}\n${this.statusMessage ?? ' '}\n`;
   }
 }
