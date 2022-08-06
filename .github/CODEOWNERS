@@ -248,6 +248,11 @@
 /packages/kbn-ui-shared-deps-npm/ @elastic/kibana-operations
 /packages/kbn-ui-shared-deps-src/ @elastic/kibana-operations
 /packages/kbn-utils/ @elastic/kibana-operations
+/packages/kbn-jsonc/ @elastic/kibana-operations
+/packages/kbn-kibana-manifest-parser/ @elastic/kibana-operations
+/packages/kbn-kibana-manifest-schema/ @elastic/kibana-operations
+/packages/kbn-managed-vscode-config/ @elastic/kibana-operations
+/packages/kbn-managed-vscode-config-cli/ @elastic/kibana-operations
 /src/cli/keystore/ @elastic/kibana-operations
 /.ci/es-snapshots/ @elastic/kibana-operations
 /.github/workflows/ @elastic/kibana-operations
@@ -263,7 +268,6 @@
 
 # Performance testing
 /packages/kbn-performance-testing-dataset-extractor/  @elastic/kibana-performance-testing
-/packages/kbn-scalability-simulation-generator/  @elastic/kibana-performance-testing
 
 # Quality Assurance
 /src/dev/code_coverage @elastic/kibana-qa
@@ -296,7 +300,7 @@
 /packages/kbn-config/ @elastic/kibana-core
 /packages/kbn-logging/ @elastic/kibana-core
 /packages/kbn-logging-mocks/ @elastic/kibana-core
-/packages/kbn-http-tools/ @elastic/kibana-core
+/packages/kbn-server-http-tools/ @elastic/kibana-core
 /packages/kbn-es-errors/ @elastic/kibana-core
 /src/plugins/saved_objects_management/ @elastic/kibana-core
 /src/plugins/advanced_settings/ @elastic/kibana-core
@@ -337,6 +341,7 @@
 # Kibana Platform Security
 /packages/kbn-crypto/ @elastic/kibana-security
 /packages/kbn-handlebars/ @elastic/kibana-security
+/packages/kbn-user-profile-components/ @elastic/kibana-security
 /packages/core/http/core-http-server-internal/src/csp/ @elastic/kibana-security @elastic/kibana-core
 /src/plugins/interactive_setup/ @elastic/kibana-security
 /src/plugins/telemetry/server/config/telemetry_labels.ts @elastic/kibana-security
@@ -357,6 +362,7 @@
 /x-pack/test/spaces_api_integration/ @elastic/kibana-security
 /x-pack/test/saved_object_api_integration/ @elastic/kibana-security
 /examples/preboot_example/ @elastic/kibana-security @elastic/kibana-core
+/examples/user_profile_examples/ @elastic/kibana-security
 #CC# /x-pack/plugins/security/ @elastic/kibana-security
 
 # Response Ops team

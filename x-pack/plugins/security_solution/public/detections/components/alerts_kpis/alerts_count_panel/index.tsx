@@ -32,6 +32,7 @@ interface AlertsCountPanelProps {
   alignHeader?: 'center' | 'baseline' | 'stretch' | 'flexStart' | 'flexEnd';
   chartOptionsContextMenu?: (queryId: string) => React.ReactNode;
   filters?: Filter[];
+  inspectTitle: string;
   panelHeight?: number;
   query?: Query;
   setStackByField0: (stackBy: string) => void;
@@ -49,6 +50,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
     alignHeader,
     chartOptionsContextMenu,
     filters,
+    inspectTitle,
     panelHeight,
     query,
     runtimeMappings,
@@ -158,6 +160,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
           <HeaderSection
             alignHeader={alignHeader}
             id={uniqueQueryId}
+            inspectTitle={inspectTitle}
             outerDirection="row"
             title={title}
             titleSize="s"
