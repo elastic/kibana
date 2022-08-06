@@ -716,8 +716,8 @@ export class SettingsPageObject extends FtrService {
   ) {
     await this.clickAddField();
     await this.setFieldName(name);
-    await this.setFieldType('Composite');
-    await this.setFieldScript(script, true);
+    await this.setFieldTypeComposite();
+    await this.setFieldScript(script);
     if (subfieldCount > 0) {
       await this.testSubjects.find(`typeField_${subfieldCount - 1}`);
     }
@@ -784,6 +784,11 @@ export class SettingsPageObject extends FtrService {
   async setFieldType(type: string) {
     this.log.debug('set type = ' + type);
     await this.testSubjects.setValue('typeField', type);
+  }
+
+  async setFieldTypeComposite() {
+    this.log.debug('set type = Composite');
+    await this.testSubjects.setValue('typeField', 'Composite');
     await this.browser.pressKeys(this.browser.keys.RETURN);
   }
 
