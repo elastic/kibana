@@ -39,15 +39,19 @@ export const CompositeEditor = ({ value, setValue }: CompositeEditorProps) => {
       <ScriptField existingConcreteFields={existingConcreteFields} links={links} />
       <EuiSpacer size="xl" />
       <>
-        <div>
-          <EuiText size="s">
-            <FormattedMessage
-              id="indexPatternFieldEditor.editor.compositeFieldsCount"
-              defaultMessage="Generated fields"
-            />
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">
+              <FormattedMessage
+                id="indexPatternFieldEditor.editor.compositeFieldsCount"
+                defaultMessage="Generated fields"
+              />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiNotificationBadge color="subdued">{fields.length}</EuiNotificationBadge>
-          </EuiText>
-        </div>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         {Object.entries(value).map(([key, itemValue], idx) => {
           return (
             <div>
