@@ -9,6 +9,13 @@
 import _ from 'lodash';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { ControlGroupInput } from '@kbn/controls-plugin/public';
+import {
+  compareFilters,
+  isFilterPinned,
+  migrateFilter,
+  COMPARE_ALL_OPTIONS,
+  type Filter,
+} from '@kbn/es-query';
 import { DashboardSavedObject } from '../../saved_dashboards';
 import { getTagsFromSavedDashboard, migrateAppState } from '.';
 import { EmbeddablePackageState, ViewMode } from '../../services/embeddable';
@@ -110,11 +117,20 @@ export const stateToDashboardContainerInput = ({
     query,
     title,
     timeRestore,
+    filters: dashboardFilters,
   } = dashboardState;
 
   return {
     refreshConfig: timefilter.getRefreshInterval(),
-    filters: filterManager.getFilters(),
+    filters: filterManager
+      .getFilters()
+      .filter(
+        (filter) =>
+          isFilterPinned(filter) ||
+          dashboardFilters.some((dashboardFilter) =>
+            filtersAreEqual(migrateFilter(_.cloneDeep(dashboardFilter)), filter)
+          )
+      ),
     isFullScreenMode: fullScreenMode,
     id: savedDashboard.id || '',
     dashboardCapabilities,
@@ -135,6 +151,9 @@ export const stateToDashboardContainerInput = ({
     executionContext,
   };
 };
+
+const filtersAreEqual = (first: Filter, second: Filter) =>
+  compareFilters(first, second, { ...COMPARE_ALL_OPTIONS, state: false });
 
 /**
  * Converts a given dashboard state object to raw dashboard state. This is useful for sharing, and session restoration, as

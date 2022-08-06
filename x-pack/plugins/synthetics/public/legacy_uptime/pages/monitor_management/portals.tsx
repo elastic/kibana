@@ -10,3 +10,5 @@ import { createHtmlPortalNode } from 'react-reverse-portal';
 export const ActionBarPortalNode = createHtmlPortalNode();
 
 export const APIKeysPortalNode = createHtmlPortalNode();
+
+export const ManageLocationsPortalNode = createHtmlPortalNode();

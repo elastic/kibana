@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { EuiBasicTable, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiCheckbox } from '@elastic/eui';
+import { EuiBasicTable, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -75,13 +75,10 @@ export const DownloadSourceTable: React.FunctionComponent<DownloadSourceTablePro
         }),
       },
       {
-        render: (downloadSource: DownloadSource) => (
-          <EuiCheckbox
-            id={`checkbox_${downloadSource.id}`}
-            checked={downloadSource.is_default}
-            onChange={(e) => undefined}
-          />
-        ),
+        render: (downloadSource: DownloadSource) =>
+          downloadSource.is_default ? (
+            <EuiIcon type="check" data-test-subj="editDownloadSourceTable.defaultIcon" />
+          ) : null,
         width: '200px',
         name: i18n.translate('xpack.fleet.settings.downloadSourcesTable.defaultColumnTitle', {
           defaultMessage: 'Default',
@@ -136,5 +133,11 @@ export const DownloadSourceTable: React.FunctionComponent<DownloadSourceTablePro
     ];
   }, [deleteDownloadSource, getHref]);
 
-  return <EuiBasicTable columns={columns} items={downloadSources} />;
+  return (
+    <EuiBasicTable
+      columns={columns}
+      items={downloadSources}
+      data-test-subj="AgentDownloadSourcesTable"
+    />
+  );
 };

@@ -27,7 +27,8 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const esArchiver = getService('esArchiver');
 
-  describe('alerting telemetry', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/136679
+  describe.skip('alerting telemetry', () => {
     const alwaysFiringRuleId: { [key: string]: string } = {};
 
     before(async () => {

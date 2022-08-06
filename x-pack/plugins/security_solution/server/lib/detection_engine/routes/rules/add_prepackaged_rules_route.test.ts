@@ -18,8 +18,7 @@ import { addPrepackedRulesRoute, createPrepackagedRules } from './add_prepackage
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { installPrepackagedTimelines } from '../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import { legacyMigrate } from '../../rules/utils';
 

@@ -6,21 +6,31 @@
  * Side Public License, v 1.
  */
 
-import _, { cloneDeep, each, reject } from 'lodash';
-import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
-import {
-  FieldFormatsStartCommon,
+import type { DataViewBase } from '@kbn/es-query';
+import type {
   FieldFormat,
+  FieldFormatsStartCommon,
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
-import type { DataViewBase } from '@kbn/es-query';
-import { FieldAttrs, FieldAttrSet, DataViewAttributes } from '..';
-import type { RuntimeField, RuntimeFieldSpec, RuntimeType, FieldConfiguration } from '../types';
-import { DataViewField, IIndexPatternFieldList, fieldList } from '../fields';
+import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
+import _, { cloneDeep, each, reject } from 'lodash';
+import type { DataViewAttributes, FieldAttrs, FieldAttrSet } from '..';
+import type { DataViewField, IIndexPatternFieldList } from '../fields';
+import { fieldList } from '../fields';
+import type {
+  DataViewFieldMap,
+  DataViewSpec,
+  FieldConfiguration,
+  FieldFormatMap,
+  RuntimeField,
+  RuntimeFieldSpec,
+  RuntimeType,
+  SourceFilter,
+  TypeMeta,
+} from '../types';
 import { flattenHitWrapper } from './flatten_hit';
-import { DataViewSpec, TypeMeta, SourceFilter, DataViewFieldMap } from '../types';
 import { removeFieldAttrs } from './utils';
 
 interface DataViewDeps {
@@ -70,7 +80,7 @@ export class DataView implements DataViewBase {
   /**
    * Map of field formats by field name
    */
-  public fieldFormatMap: Record<string, any>;
+  public fieldFormatMap: FieldFormatMap;
   /**
    * Only used by rollup indices, used by rollup specific endpoint to load field list.
    */
@@ -90,7 +100,7 @@ export class DataView implements DataViewBase {
   /**
    * @deprecated Use `flattenHit` utility method exported from data plugin instead.
    */
-  public flattenHit: (hit: Record<string, any>, deep?: boolean) => Record<string, any>;
+  public flattenHit: (hit: Record<string, unknown[]>, deep?: boolean) => Record<string, unknown>;
   /**
    * List of meta fields by name
    */
@@ -233,7 +243,7 @@ export class DataView implements DataViewBase {
       };
     }
 
-    // Date value returned in "_source" could be in any number of formats
+    // Date value returned in "_source" could be in a number of formats
     // Use a docvalue for each date field to ensure standardized formats when working with date fields
     // dataView.flattenHit will override "_source" values when the same field is also defined in "fields"
     const docvalueFields = reject(this.fields.getByType('date'), 'scripted').map((dateField) => {
@@ -296,7 +306,7 @@ export class DataView implements DataViewBase {
       name: this.name,
     };
 
-    // Filter any undefined values from the spec
+    // Filter undefined values from the spec
     return Object.fromEntries(Object.entries(spec).filter(([, v]) => typeof v !== 'undefined'));
   }
 

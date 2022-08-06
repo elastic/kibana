@@ -14,6 +14,7 @@ import { formatPreviewRule } from '../../../pages/detection_engine/rules/create/
 import type { FieldValueThreshold } from '../threshold_input';
 import type { RulePreviewLogs } from '../../../../../common/detection_engine/schemas/request';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
+import type { AdvancedPreviewOptions } from '../../../pages/detection_engine/rules/types';
 
 interface PreviewRouteParams {
   isDisabled: boolean;
@@ -29,6 +30,9 @@ interface PreviewRouteParams {
   machineLearningJobId: string[];
   anomalyThreshold: number;
   eqlOptions: EqlOptionsSelected;
+  newTermsFields: string[];
+  historyWindowSize: string;
+  advancedOptions?: AdvancedPreviewOptions;
 }
 
 export const usePreviewRoute = ({
@@ -45,10 +49,16 @@ export const usePreviewRoute = ({
   machineLearningJobId,
   anomalyThreshold,
   eqlOptions,
+  newTermsFields,
+  historyWindowSize,
+  advancedOptions,
 }: PreviewRouteParams) => {
   const [isRequestTriggered, setIsRequestTriggered] = useState(false);
 
-  const { isLoading, response, rule, setRule } = usePreviewRule(timeFrame);
+  const { isLoading, showInvocationCountWarning, response, rule, setRule } = usePreviewRule({
+    timeframe: timeFrame,
+    advancedOptions,
+  });
   const [logs, setLogs] = useState<RulePreviewLogs[]>(response.logs ?? []);
   const [isAborted, setIsAborted] = useState<boolean>(!!response.isAborted);
   const [hasNoiseWarning, setHasNoiseWarning] = useState<boolean>(false);
@@ -86,6 +96,9 @@ export const usePreviewRoute = ({
     machineLearningJobId,
     anomalyThreshold,
     eqlOptions,
+    newTermsFields,
+    historyWindowSize,
+    advancedOptions,
   ]);
 
   useEffect(() => {
@@ -104,6 +117,9 @@ export const usePreviewRoute = ({
           machineLearningJobId,
           anomalyThreshold,
           eqlOptions,
+          newTermsFields,
+          historyWindowSize,
+          advancedOptions,
         })
       );
     }
@@ -123,6 +139,9 @@ export const usePreviewRoute = ({
     machineLearningJobId,
     anomalyThreshold,
     eqlOptions,
+    newTermsFields,
+    historyWindowSize,
+    advancedOptions,
   ]);
 
   return {
@@ -134,5 +153,6 @@ export const usePreviewRoute = ({
     previewId: response.previewId ?? '',
     logs,
     isAborted,
+    showInvocationCountWarning,
   };
 };

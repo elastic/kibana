@@ -17,7 +17,6 @@ describe('APM service template', () => {
         { agentName: 'java' },
         { agentName: 'opentelemetry/java' },
         { agentName: 'ios/swift' },
-        { agentName: 'opentelemetry/swift' },
         { agentName: 'ruby', runtimeName: 'jruby' },
         { runtimeName: 'aws_lambda' },
       ].map((input) => {

@@ -38,7 +38,8 @@ export function TimeRangeMetadataContextProvider({
   const routePath = useApmRoutePath();
 
   const isOperationView =
-    routePath === '/backends/operation' || routePath === '/backends/operations';
+    routePath === '/dependencies/operation' ||
+    routePath === '/dependencies/operations';
 
   const fetcherResult = useFetcher(
     (callApmApi) => {

@@ -6,7 +6,14 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingContent, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiLoadingContent,
+  EuiToolTip,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { useGetEndpointDetails } from '../../hooks/endpoint/use_get_endpoint_details';
 import { useGetEndpointPendingActionsSummary } from '../../hooks/endpoint/use_get_endpoint_pending_actions_summary';
@@ -25,20 +32,18 @@ export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId })
     refetchInterval: 10000,
   });
 
-  const pendingIsolationActions = useMemo<
-    Pick<Required<EndpointHostIsolationStatusProps>, 'pendingIsolate' | 'pendingUnIsolate'>
+  const pendingActionRequests = useMemo<
+    Pick<Required<EndpointHostIsolationStatusProps>, 'pendingActions'>
   >(() => {
-    if (endpointPendingActions?.data.length) {
-      const pendingActions = endpointPendingActions.data[0].pending_actions;
-
-      return {
-        pendingIsolate: pendingActions.isolate ?? 0,
-        pendingUnIsolate: pendingActions.unisolate ?? 0,
-      };
-    }
+    const pendingActions = endpointPendingActions?.data?.[0].pending_actions;
     return {
-      pendingIsolate: 0,
-      pendingUnIsolate: 0,
+      pendingActions: {
+        pendingIsolate: pendingActions?.isolate ?? 0,
+        pendingUnIsolate: pendingActions?.unisolate ?? 0,
+        pendingKillProcess: pendingActions?.['kill-process'] ?? 0,
+        pendingSuspendProcess: pendingActions?.['suspend-process'] ?? 0,
+        pendingRunningProcesses: pendingActions?.['running-processes'] ?? 0,
+      },
     };
   }, [endpointPendingActions?.data]);
 
@@ -60,13 +65,7 @@ export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId })
               anchorClassName="eui-textTruncate"
             >
               <EuiText size="s" data-test-subj="responderHeaderEndpointName">
-                <h6 className="eui-textTruncate">
-                  <FormattedMessage
-                    id="xpack.securitySolution.responder.header.endpointName"
-                    defaultMessage="ENDPOINT {name}"
-                    values={{ name: endpointDetails.metadata.host.name }}
-                  />
-                </h6>
+                <h6 className="eui-textTruncate">{endpointDetails.metadata.host.name}</h6>
               </EuiText>
             </EuiToolTip>
           </EuiFlexItem>
@@ -74,13 +73,14 @@ export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId })
             <EndpointAgentAndIsolationStatus
               status={endpointDetails.host_status}
               isIsolated={endpointDetails.metadata.Endpoint.state?.isolation}
-              {...pendingIsolationActions}
+              {...pendingActionRequests}
               data-test-subj="responderHeaderEndpointAgentIsolationStatus"
             />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
+        <EuiSpacer size="xs" />
         <EuiText color="subdued" size="s" data-test-subj="responderHeaderLastSeen">
           <FormattedMessage
             id="xpack.securitySolution.responder.header.lastSeen"

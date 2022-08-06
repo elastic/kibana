@@ -8,7 +8,7 @@
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 
 import type { PartialRule } from '@kbn/alerting-plugin/server';
-import type { RuleExecutionSummary } from '../../../../../common/detection_engine/schemas/common';
+import type { RuleExecutionSummary } from '../../../../../common/detection_engine/rule_monitoring';
 import type { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
 import { fullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
 import type { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';

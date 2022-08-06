@@ -232,11 +232,7 @@ export interface HelpProps<C> {
 export type TimeScalingMode = 'disabled' | 'mandatory' | 'optional';
 
 export interface AdvancedOption {
-  title: string;
-  optionElement?: React.ReactElement;
   dataTestSubj: string;
-  onClick: () => void;
-  showInPopover: boolean;
   inlineElement: React.ReactElement | null;
   helpPopup?: string | null;
 }
@@ -348,6 +344,10 @@ interface BaseOperationDefinitionProps<
    * autocomplete.
    */
   filterable?: boolean | { helpMessage: string };
+  /**
+   * Windowable operations can have a time window defined at the dimension level - under the hood this will be translated into a filter on the defined time field
+   */
+  windowable?: boolean;
   shiftable?: boolean;
 
   getHelpMessage?: (props: HelpProps<C>) => React.ReactNode;
@@ -415,6 +415,13 @@ interface BaseOperationDefinitionProps<
     aggs: ExpressionAstExpressionBuilder[];
     esAggsIdMap: Record<string, OriginalColumn[]>;
   };
+
+  /**
+   * Returns the maximum possible number of values for this column
+   * (e.g. with a top 5 values operation, we can be sure that there will never be
+   *    more than 5 values returned or 6 if the "Other" bucket is enabled)
+   */
+  getMaxPossibleNumValues?: (column: C) => number;
 }
 
 interface BaseBuildColumnArgs {
@@ -489,6 +496,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
       kql?: string;
       lucene?: string;
       shift?: string;
+      window?: string;
       usedInMath?: boolean;
     }
   ) => C;

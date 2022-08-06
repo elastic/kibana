@@ -25,7 +25,7 @@ const decodeRison = <T extends unknown>(query: string): T | undefined => {
   }
 };
 
-const QUERY_PARAM_KEY = 'query';
+const QUERY_PARAM_KEY = 'cspq';
 
 export const encodeQuery = (query: RisonObject): LocationDescriptorObject['search'] => {
   const risonQuery = encodeRison(query);

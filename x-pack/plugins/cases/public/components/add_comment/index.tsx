@@ -105,7 +105,8 @@ export const AddComment = React.memo(
           }
           createAttachments({
             caseId,
-            data: [{ ...data, type: CommentType.user, owner: owner[0] }],
+            caseOwner: owner[0],
+            data: [{ ...data, type: CommentType.user }],
             updateCase: onCommentPosted,
           });
           reset();
@@ -147,7 +148,7 @@ export const AddComment = React.memo(
       return (
         <span id="add-comment-permLink">
           {isLoading && showLoading && <MySpinner data-test-subj="loading-spinner" size="xl" />}
-          {permissions.all && (
+          {permissions.create && (
             <Form form={form}>
               <UseField
                 path={fieldName}

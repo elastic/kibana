@@ -15,6 +15,7 @@ import {
   AppMockRenderer,
   createAppMockRenderer,
   readCasesPermissions,
+  noPushCasesPermissions,
   TestProviders,
 } from '../../common/mock';
 import { basicCase, basicPush, caseUserActions, connectorsMock } from '../../containers/mock';
@@ -362,6 +363,16 @@ describe('EditConnector ', () => {
     });
   });
 
+  it('does not show the push button if the user does not have push permissions', async () => {
+    const defaultProps = getDefaultProps();
+
+    appMockRender = createAppMockRenderer({ permissions: noPushCasesPermissions() });
+    const result = appMockRender.render(<EditConnector {...defaultProps} />);
+    await waitFor(() => {
+      expect(result.queryByTestId('has-data-to-push-button')).toBe(null);
+    });
+  });
+
   it('does not show the edit connectors pencil if the user does not have read access to actions', async () => {
     const defaultProps = getDefaultProps();
     const props = { ...defaultProps, connectors: [] };
@@ -369,6 +380,18 @@ describe('EditConnector ', () => {
       ...appMockRender.coreStart.application.capabilities,
       actions: { save: false, show: false },
     };
+
+    const result = appMockRender.render(<EditConnector {...props} />);
+    await waitFor(() => {
+      expect(result.getByTestId('connector-edit-header')).toBeInTheDocument();
+      expect(result.queryByTestId('connector-edit')).toBe(null);
+    });
+  });
+
+  it('does not show the edit connectors pencil if the user does not have push permissions', async () => {
+    const defaultProps = getDefaultProps();
+    const props = { ...defaultProps, connectors: [] };
+    appMockRender = createAppMockRenderer({ permissions: noPushCasesPermissions() });
 
     const result = appMockRender.render(<EditConnector {...props} />);
     await waitFor(() => {

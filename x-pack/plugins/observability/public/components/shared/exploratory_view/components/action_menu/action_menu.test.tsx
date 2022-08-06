@@ -12,6 +12,7 @@ import { sampleAttribute } from '../../configurations/test_data/sample_attribute
 import * as pluginHook from '../../../../../hooks/use_plugin_context';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { ExpViewActionMenuContent } from './action_menu';
+import { noCasesPermissions as mockUseGetCasesPermissions } from '../../../../../utils/cases_permissions';
 
 jest.spyOn(pluginHook, 'usePluginContext').mockReturnValue({
   appMountParameters: {
@@ -19,7 +20,15 @@ jest.spyOn(pluginHook, 'usePluginContext').mockReturnValue({
   },
 } as any);
 
+jest.mock('../../../../../hooks/use_get_user_cases_permissions', () => ({
+  useGetUserCasesPermissions: jest.fn(() => mockUseGetCasesPermissions()),
+}));
+
 describe('Action Menu', function () {
+  afterAll(() => {
+    jest.clearAllMocks();
+  });
+
   it('should be able to click open in lens', async function () {
     const { findByText, core } = render(
       <ExpViewActionMenuContent

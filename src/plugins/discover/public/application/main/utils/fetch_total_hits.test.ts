@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { throwError as throwErrorRx, of } from 'rxjs';
-import { RequestAdapter } from '@kbn/inspector-plugin';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { savedSearchMock, savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
 import { fetchTotalHits } from './fetch_total_hits';
 import { discoverServiceMock } from '../../../__mocks__/services';

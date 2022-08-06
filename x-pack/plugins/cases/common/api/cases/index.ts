@@ -12,3 +12,5 @@ export * from './status';
 export * from './user_actions';
 export * from './constants';
 export * from './alerts';
+export * from './user_profiles';
+export * from './assignee';

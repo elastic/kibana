@@ -4,26 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  httpServerMock,
-  httpServiceMock,
-  loggingSystemMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
-import {
-  ElasticsearchClientMock,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '@kbn/core/server/elasticsearch/client/mocks';
-import type { KibanaRequest } from '@kbn/core/server';
+import { httpServerMock, httpServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import {
   benchmarksQueryParamsSchema,
   DEFAULT_BENCHMARKS_PER_PAGE,
 } from '../../../common/schemas/benchmark';
 import {
-  defineGetBenchmarksRoute,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   getCspPackagePolicies,
-  getAgentPolicies,
+  getCspAgentPolicies,
+} from '../../lib/fleet_util';
+import {
+  defineGetBenchmarksRoute,
   createBenchmarkEntry,
   addPackagePolicyCspRules,
 } from './benchmarks';
@@ -35,21 +27,7 @@ import {
 } from '@kbn/fleet-plugin/server/mocks';
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { AgentPolicy } from '@kbn/fleet-plugin/common';
-
-import { CspAppService } from '../../lib/csp_app_services';
-import { CspAppContext } from '../../plugin';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
-
-export const getMockCspContext = (mockEsClient: ElasticsearchClientMock): KibanaRequest => {
-  return {
-    core: {
-      elasticsearch: {
-        client: { asCurrentUser: mockEsClient },
-      },
-    },
-    fleet: { authz: { fleet: { all: false } } },
-  } as unknown as KibanaRequest;
-};
+import { createCspRequestHandlerContextMock } from '../../mocks';
 
 function createMockAgentPolicy(props: Partial<AgentPolicy> = {}): AgentPolicy {
   return {
@@ -69,24 +47,16 @@ function createMockAgentPolicy(props: Partial<AgentPolicy> = {}): AgentPolicy {
     ...props,
   };
 }
-describe('benchmarks API', () => {
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
+describe('benchmarks API', () => {
   beforeEach(() => {
-    logger = loggingSystemMock.createLogger();
     jest.clearAllMocks();
   });
 
   it('validate the API route path', async () => {
     const router = httpServiceMock.createRouter();
-    const cspAppContextService = new CspAppService();
 
-    const cspContext: CspAppContext = {
-      logger,
-      service: cspAppContextService,
-      security: securityMock.createSetup(),
-    };
-    defineGetBenchmarksRoute(router, cspContext);
+    defineGetBenchmarksRoute(router);
 
     const [config] = router.get.mock.calls[0];
 
@@ -95,20 +65,12 @@ describe('benchmarks API', () => {
 
   it('should accept to a user with fleet.all privilege', async () => {
     const router = httpServiceMock.createRouter();
-    const cspAppContextService = new CspAppService();
 
-    const cspContext: CspAppContext = {
-      logger,
-      service: cspAppContextService,
-      security: securityMock.createSetup(),
-    };
-    defineGetBenchmarksRoute(router, cspContext);
+    defineGetBenchmarksRoute(router);
+
     const [_, handler] = router.get.mock.calls[0];
 
-    const mockContext = {
-      fleet: { authz: { fleet: { all: true } } },
-    } as unknown as KibanaRequest;
-
+    const mockContext = createCspRequestHandlerContextMock();
     const mockResponse = httpServerMock.createResponseFactory();
     const mockRequest = httpServerMock.createKibanaRequest();
     const [context, req, res] = [mockContext, mockRequest, mockResponse];
@@ -120,19 +82,13 @@ describe('benchmarks API', () => {
 
   it('should reject to a user without fleet.all privilege', async () => {
     const router = httpServiceMock.createRouter();
-    const cspAppContextService = new CspAppService();
 
-    const cspContext: CspAppContext = {
-      logger,
-      service: cspAppContextService,
-      security: securityMock.createSetup(),
-    };
-    defineGetBenchmarksRoute(router, cspContext);
+    defineGetBenchmarksRoute(router);
+
     const [_, handler] = router.get.mock.calls[0];
 
-    const mockContext = {
-      fleet: { authz: { fleet: { all: false } } },
-    } as unknown as KibanaRequest;
+    const mockContext = createCspRequestHandlerContextMock();
+    mockContext.fleet.authz.fleet.all = false;
 
     const mockResponse = httpServerMock.createResponseFactory();
     const mockRequest = httpServerMock.createKibanaRequest();
@@ -307,7 +263,7 @@ describe('benchmarks API', () => {
         const agentPolicyService = createMockAgentPolicyService();
         const packagePolicies = [createPackagePolicyMock(), createPackagePolicyMock()];
 
-        await getAgentPolicies(mockSoClient, packagePolicies, agentPolicyService);
+        await getCspAgentPolicies(mockSoClient, packagePolicies, agentPolicyService);
 
         expect(agentPolicyService.getByIds.mock.calls[0][1]).toHaveLength(1);
       });
@@ -320,7 +276,7 @@ describe('benchmarks API', () => {
         packagePolicy2.policy_id = 'AnotherId';
         const packagePolicies = [packagePolicy1, packagePolicy2];
 
-        await getAgentPolicies(mockSoClient, packagePolicies, agentPolicyService);
+        await getCspAgentPolicies(mockSoClient, packagePolicies, agentPolicyService);
 
         expect(agentPolicyService.getByIds.mock.calls[0][1]).toHaveLength(2);
       });

@@ -30,6 +30,7 @@ interface CreateTestConfigOptions {
 
 // test.not-enabled is specifically not enabled
 const enabledActionTypes = [
+  '.cases-webhook',
   '.email',
   '.index',
   '.pagerduty',
