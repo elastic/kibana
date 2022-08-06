@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // wait for subfields to render
         await testSubjects.find(`typeField_0`);
         await new Promise((e) => setTimeout(e, 2000));
-        await PageObjects.settings.setFieldScript("emit('a',6);emit('b',10);", true);
+        await PageObjects.settings.setCompositeScript("emit('a',6);emit('b',10);");
 
         // wait for subfields to render
         await testSubjects.find(`typeField_1`);
