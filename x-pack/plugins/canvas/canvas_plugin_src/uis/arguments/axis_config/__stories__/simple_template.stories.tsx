@@ -33,9 +33,9 @@ class Interactive extends React.Component<{}, typeof defaultValues> {
 export default {
   title: 'arguments/AxisConfig',
 
-  decorators: [(story) => (
-      <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
-    )],
+  decorators: [
+    (story) => <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>,
+  ],
 };
 
 export const Simple = () => <Interactive />;
@@ -47,14 +47,14 @@ Simple.story = {
 export default {
   title: 'arguments/AxisConfig/components',
 
-  decorators: [(story) => (
-      <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
-    )],
+  decorators: [
+    (story) => <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>,
+  ],
 };
 
 export const _SimpleTemplate = () => (
-    <SimpleTemplate onValueChange={action('onValueChange')} argValue={false} />
-  );
+  <SimpleTemplate onValueChange={action('onValueChange')} argValue={false} />
+);
 
 _SimpleTemplate.story = {
   name: 'simple template',

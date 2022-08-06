@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import React from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { AgentConfiguration } from '../../../../../../common/agent_configuration/configuration_types';
@@ -28,7 +35,9 @@ export default {
       };
 
       return (
-        <ApmPluginContext.Provider value={contextMock as unknown as ApmPluginContextValue}>
+        <ApmPluginContext.Provider
+          value={contextMock as unknown as ApmPluginContextValue}
+        >
           {storyFn()}
         </ApmPluginContext.Provider>
       );
@@ -56,7 +65,10 @@ WithConfig.story = {
 
   parameters: {
     info: {
-      propTablesExclude: [AgentConfigurationCreateEdit, ApmPluginContext.Provider],
+      propTablesExclude: [
+        AgentConfigurationCreateEdit,
+        ApmPluginContext.Provider,
+      ],
       source: false,
     },
   },

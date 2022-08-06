@@ -13,7 +13,6 @@ import { default as WebpackConfig } from '../webpack.config';
 
 export type { StorybookConfig };
 
-
 // This ignore pattern excludes all of node_modules EXCEPT for `@kbn`.  This allows for
 // changes to packages to cause a refresh in Storybook.
 const IGNORE_PATTERN =

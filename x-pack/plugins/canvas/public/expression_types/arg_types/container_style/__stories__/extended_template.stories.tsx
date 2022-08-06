@@ -57,9 +57,9 @@ const getArgValue: <T extends keyof Arguments>(arg: T) => Arguments[T] = (arg) =
 export default {
   title: 'arguments/ContainerStyle',
 
-  decorators: [(story) => (
-      <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
-    )],
+  decorators: [
+    (story) => <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>,
+  ],
 };
 
 export const Extended = () => <Interactive />;
@@ -71,39 +71,39 @@ Extended.story = {
 export default {
   title: 'arguments/ContainerStyle/components',
 
-  decorators: [(story) => (
-      <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
-    )],
+  decorators: [
+    (story) => <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>,
+  ],
 };
 
 export const _AppearanceForm = () => (
-    <AppearanceForm onChange={action('onChange')} padding="4" opacity="1" overflow="visible" />
-  );
+  <AppearanceForm onChange={action('onChange')} padding="4" opacity="1" overflow="visible" />
+);
 
 _AppearanceForm.story = {
   name: 'appearance form',
 };
 
 export const _BorderForm = () => (
-    <BorderForm
-      onChange={action('onChange')}
-      colors={getDefaultWorkpad().colors}
-      value="1px dotted #000"
-      radius="1"
-    />
-  );
+  <BorderForm
+    onChange={action('onChange')}
+    colors={getDefaultWorkpad().colors}
+    value="1px dotted #000"
+    radius="1"
+  />
+);
 
 _BorderForm.story = {
   name: 'border form',
 };
 
 export const _ExtendedTemplate = () => (
-    <ExtendedTemplate
-      getArgValue={getArgValue}
-      setArgValue={action('setArgValue')}
-      workpad={getDefaultWorkpad()}
-    />
-  );
+  <ExtendedTemplate
+    getArgValue={getArgValue}
+    setArgValue={action('setArgValue')}
+    workpad={getDefaultWorkpad()}
+  />
+);
 
 _ExtendedTemplate.story = {
   name: 'extended template',

@@ -86,12 +86,12 @@ ThreeColors.story = {
   name: 'three colors',
   argTypes: {
     hasButtons: {
-      control:'boolean'
+      control: 'boolean',
     },
   },
   args: {
-    hasButtons: true
-  }
+    hasButtons: true,
+  },
 };
 
 export const SixColors = (props: { hasButtons: boolean }) => (
@@ -109,12 +109,12 @@ SixColors.story = {
   name: 'six colors',
   argTypes: {
     hasButtons: {
-      control:'boolean'
+      control: 'boolean',
     },
   },
   args: {
-    hasButtons: true
-  }
+    hasButtons: true,
+  },
 };
 
 export const SixColorsValueMissing = (props: { hasButtons: boolean }) => (
@@ -132,12 +132,12 @@ SixColorsValueMissing.story = {
   name: 'six colors, value missing',
   argTypes: {
     hasButtons: {
-      control:'boolean'
+      control: 'boolean',
     },
   },
   args: {
-    hasButtons: true
-  }
+    hasButtons: true,
+  },
 };
 
 export const _Interactive = () => <Interactive />;

@@ -48,9 +48,9 @@ class Interactive extends React.Component<{}, typeof defaultValues> {
 export default {
   title: 'arguments/AxisConfig',
 
-  decorators: [(story) => (
-      <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
-    )],
+  decorators: [
+    (story) => <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>,
+  ],
 };
 
 export const Extended = () => <Interactive />;
@@ -62,30 +62,30 @@ Extended.story = {
 export default {
   title: 'arguments/AxisConfig/components',
 
-  decorators: [(story) => (
-      <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
-    )],
+  decorators: [
+    (story) => <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>,
+  ],
 };
 
 export const ExtendedDisabled = () => (
-    <ExtendedTemplate
-      onValueChange={action('onValueChange')}
-      argValue={false}
-      typeInstance={{ name: 'yaxis' }}
-    />
-  );
+  <ExtendedTemplate
+    onValueChange={action('onValueChange')}
+    argValue={false}
+    typeInstance={{ name: 'yaxis' }}
+  />
+);
 
 ExtendedDisabled.story = {
   name: 'extended disabled',
 };
 
 export const _Extended = () => (
-    <ExtendedTemplate
-      onValueChange={action('onValueChange')}
-      argValue={defaultExpression}
-      typeInstance={{ name: 'yaxis' }}
-    />
-  );
+  <ExtendedTemplate
+    onValueChange={action('onValueChange')}
+    argValue={defaultExpression}
+    typeInstance={{ name: 'yaxis' }}
+  />
+);
 
 _Extended.story = {
   name: 'extended',

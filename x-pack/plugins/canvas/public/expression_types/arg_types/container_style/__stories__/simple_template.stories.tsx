@@ -46,9 +46,9 @@ const getArgValue: <T extends keyof Arguments>(arg: T) => Arguments[T] = (arg) =
 export default {
   title: 'arguments/ContainerStyle',
 
-  decorators: [(story) => (
-      <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
-    )],
+  decorators: [
+    (story) => <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>,
+  ],
 };
 
 export const Simple = () => <Interactive />;
@@ -60,18 +60,18 @@ Simple.story = {
 export default {
   title: 'arguments/ContainerStyle/components',
 
-  decorators: [(story) => (
-      <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
-    )],
+  decorators: [
+    (story) => <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>,
+  ],
 };
 
 export const _SimpleTemplate = () => (
-    <SimpleTemplate
-      getArgValue={getArgValue}
-      setArgValue={action('setArgValue')}
-      workpad={getDefaultWorkpad()}
-    />
-  );
+  <SimpleTemplate
+    getArgValue={getArgValue}
+    setArgValue={action('setArgValue')}
+    workpad={getDefaultWorkpad()}
+  />
+);
 
 _SimpleTemplate.story = {
   name: 'simple template',

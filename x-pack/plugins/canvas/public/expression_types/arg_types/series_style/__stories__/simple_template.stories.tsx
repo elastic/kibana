@@ -52,9 +52,9 @@ class Interactive extends React.Component<{}, { argValue: ExpressionAstExpressio
 export default {
   title: 'arguments/SeriesStyle',
 
-  decorators: [(story) => (
-      <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
-    )],
+  decorators: [
+    (story) => <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>,
+  ],
 };
 
 export const Simple = () => <Interactive />;
@@ -66,70 +66,70 @@ Simple.story = {
 export default {
   title: 'arguments/SeriesStyle/components',
 
-  decorators: [(story) => (
-      <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
-    )],
+  decorators: [
+    (story) => <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>,
+  ],
 };
 
 export const SimpleNoLabels = () => (
-    <SimpleTemplate
-      argValue={defaultExpression}
-      onValueChange={action('onValueChange')}
-      workpad={getDefaultWorkpad()}
-      resolved={{ labels: [] }}
-      typeInstance={{
-        name: 'defaultStyle',
-      }}
-    />
-  );
+  <SimpleTemplate
+    argValue={defaultExpression}
+    onValueChange={action('onValueChange')}
+    workpad={getDefaultWorkpad()}
+    resolved={{ labels: [] }}
+    typeInstance={{
+      name: 'defaultStyle',
+    }}
+  />
+);
 
 SimpleNoLabels.story = {
   name: 'simple: no labels',
 };
 
 export const SimpleDefaults = () => (
-    <SimpleTemplate
-      argValue={defaultExpression}
-      resolved={{ labels: ['label1', 'label2'] }}
-      onValueChange={action('onValueChange')}
-      workpad={getDefaultWorkpad()}
-      typeInstance={{
-        name: 'defaultStyle',
-      }}
-    />
-  );
+  <SimpleTemplate
+    argValue={defaultExpression}
+    resolved={{ labels: ['label1', 'label2'] }}
+    onValueChange={action('onValueChange')}
+    workpad={getDefaultWorkpad()}
+    typeInstance={{
+      name: 'defaultStyle',
+    }}
+  />
+);
 
 SimpleDefaults.story = {
   name: 'simple: defaults',
 };
 
 export const SimpleNoSeries = () => (
-    <SimpleTemplate
-      argValue={defaultExpression}
-      resolved={{ labels: [] }}
-      onValueChange={action('onValueChange')}
-      workpad={getDefaultWorkpad()}
-      typeInstance={{
-        name: 'unknown',
-      }}
-    />
-  );
+  <SimpleTemplate
+    argValue={defaultExpression}
+    resolved={{ labels: [] }}
+    onValueChange={action('onValueChange')}
+    workpad={getDefaultWorkpad()}
+    typeInstance={{
+      name: 'unknown',
+    }}
+  />
+);
 
 SimpleNoSeries.story = {
   name: 'simple: no series',
 };
 
 export const SimpleWithSeries = () => (
-    <SimpleTemplate
-      argValue={defaultExpression}
-      onValueChange={action('onValueChange')}
-      resolved={{ labels: ['label1', 'label2'] }}
-      workpad={getDefaultWorkpad()}
-      typeInstance={{
-        name: 'unknown',
-      }}
-    />
-  );
+  <SimpleTemplate
+    argValue={defaultExpression}
+    onValueChange={action('onValueChange')}
+    resolved={{ labels: ['label1', 'label2'] }}
+    workpad={getDefaultWorkpad()}
+    typeInstance={{
+      name: 'unknown',
+    }}
+  />
+);
 
 SimpleWithSeries.story = {
   name: 'simple: with series',
