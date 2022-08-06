@@ -13,7 +13,7 @@ export default {
   title: 'app/rum_dashboard/VisitorsRegionMap',
 };
 
-export const Tooltip = () => {
+export function Tooltip() {
   const loadFeatureProps = async () => {
     return [
       {
@@ -47,7 +47,7 @@ export const Tooltip = () => {
       ]}
     />
   );
-};
+}
 
 Tooltip.story = {
   parameters: {
